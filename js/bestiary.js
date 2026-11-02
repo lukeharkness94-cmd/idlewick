@@ -1,0 +1,89 @@
+/* Idlewick: the Bestiary as a field guide. Defeating a monster again and again teaches you more about it:
+   sighting, weak points, vitals, its full drop table, field notes and finally its legend. */
+(() => {
+const DQ = window.DQ, D = DQ.data, UI = DQ.ui, { $, $$, ico, fmt, esc } = DQ;
+const S = () => DQ.S;
+const RANKS = D.RESEARCH.ranks, KEYS = RANKS.map(r => r[0]);
+
+/* ---------- research state ---------- */
+DQ.killsOf = m => Math.floor((S().beast.kills[m.id] || 0) * (1 + (DQ.fx ? DQ.fx().study : 0)));
+DQ.researchAt = m => m.boss ? D.RESEARCH.boss : D.RESEARCH.regular;
+DQ.research = m => {
+  const k = DQ.killsOf(m), T = DQ.researchAt(m); let rank = 0; T.forEach(t => { if (k >= t) rank++; });
+  return { kills: k, rank, next: rank < T.length ? T[rank] : null, need: rank < T.length ? T[rank] - k : 0, T };
+};
+DQ.knows = (m, key) => DQ.research(m).rank >= KEYS.indexOf(key) + 1;
+DQ.weakKnown = m => m.boss || DQ.knows(m, 'weak');
+DQ.researchTotals = () => { const t = { sighted: 0, done: 0, ranks: 0, byRank: [0, 0, 0, 0, 0, 0, 0] }; D.MONLIST.forEach(m => { const r = DQ.research(m); if (r.rank >= 1) t.sighted++; if (r.rank >= 6) t.done++; t.ranks += r.rank; for (let i = 1; i <= r.rank; i++) t.byRank[i]++; }); return t; };
+
+/* ---------- every new rank pays a little, and says so (not while you are away) ---------- */
+const recordKill = DQ.recordKill;
+DQ.recordKill = (m, drops) => {
+  const before = DQ.research(m).rank; recordKill(m, drops); const after = DQ.research(m).rank;
+  for (let r = before + 1; r <= after; r++) {
+    const coins = r >= 2 ? Math.round(40 * Math.pow(D.TOWN[m.town].idx + 1, 1.35) * r) : 0;
+    if (coins) DQ.addCoins(coins, { noStat: true });
+    if (!DQ.sim.on && !DQ.forecasting) DQ.notify({ kind: 'info', key: 'research:' + m.id, icon: 'book', col: '#d8a64a', title: `Bestiary: ${m.name}`, text: `New entry: ${RANKS[r - 1][1]}. ${RANKS[r - 1][2]}.${coins ? ` +${fmt(coins)} coins.` : ''}`, action: { label: 'Open field guide', fn: () => UI.openGuide(m.id) }, sound: 'perk', ttl: 9000 });
+  }
+};
+
+/* ---------- achievements ---------- */
+const cnt = rank => () => DQ.researchTotals().byRank[rank];
+[['field_notes', 'Field Notes', 'Learn the vitals of 5 monsters.', 5, cnt(3), 400], ['naturalist', 'Naturalist', 'Learn the full drop table of 10 monsters.', 10, cnt(4), 1500],
+ ['lorekeeper', 'Lorekeeper', 'Write up the field notes of 10 monsters.', 10, cnt(5), 6000], ['legend_hunter', 'Legend Hunter', 'Uncover the legend of 5 monsters.', 5, cnt(6), 20000],
+ ['beast_master', 'Beast Master', 'Uncover the legend of every monster in the realm.', D.MONLIST.length, cnt(6), 150000]]
+  .forEach(([id, name, desc, goal, val, coins]) => D.ACH.push({ id, name, desc, goal, val, coins, ic: 'book' }));
+
+/* ---------- the monsters page, as a field guide ---------- */
+const pips = r => `<span class="rpips" aria-label="Research ${r.rank} of 6">${[1, 2, 3, 4, 5, 6].map(i => `<i class="${i <= r.rank ? 'on' : ''}"></i>`).join('')}</span>`;
+const nextLine = (m, r) => r.next == null ? 'Fully researched' : `${r.need} more defeat${r.need > 1 ? 's' : ''}: ${RANKS[r.rank][1]}`;
+const origBest = UI.V.bestiary;
+UI.V.bestiary = () => {
+  if (UI.beastTab !== 'monsters') return origBest();
+  const B = S().beast, tot = DQ.researchTotals(), stars = id => '★'.repeat(DQ.beastStars(id)) + '☆'.repeat(3 - DQ.beastStars(id));
+  const groups = D.TOWNS.map(t => `<div class="sgroup"><div class="k">${DQ.townUnlocked(t.id) ? esc(t.name) : '???'}</div><div class="beasts">${D.MONLIST.filter(m => m.town === t.id).map(m => {
+    const r = DQ.research(m), seen = r.rank >= 1;
+    return `<button class="beast ${seen ? '' : 'unk'} ${m.boss ? 'bossb' : ''}" style="--c:${m.col}" data-do="guide" data-a="${m.id}">${DQ.monSprite(m, 72, seen ? 'bob' : 'sil')}<div><b>${seen ? esc(m.name) : '???'}</b>${pips(r)}<small>${seen ? `Lv ${m.cl} · ${fmt(r.kills)} defeated · <span class="stars" data-tip="text:Slayer stars at 10, 50 and 250 defeats. Each adds 4% damage against this monster.">${stars(m.id)}</span>` : 'Defeat it to add it to the guide'}</small><small class="dim">${seen ? nextLine(m, r) : ''}</small></div></button>`;
+  }).join('')}</div></div>`).join('');
+  const ladder = RANKS.map((x, i) => `<span class="lad" data-tip="text:${esc(x[2])}"><b>${i + 1}</b>${x[1]}<small>${D.RESEARCH.regular[i]} defeat${D.RESEARCH.regular[i] > 1 ? 's' : ''}</small></span>`).join('');
+  return `<section class="panel shophead"><div><span class="k">Bestiary</span><h2>${tot.sighted} of ${D.MONLIST.length} monsters met · ${tot.done} fully researched</h2></div><div class="tabs">${[['monsters', 'Monsters'], ['pets', 'Pets']].map(([k, n]) => `<button class="tab ${UI.beastTab === k ? 'on' : ''}" data-do="beasttab" data-a="${k}">${n}</button>`).join('')}</div></section>
+    <section class="panel"><div class="phead"><h2>Field guide</h2><small>Tap a monster to read its entry</small></div>${groups}
+      <div class="ladder"><div class="k">How research works</div><p class="sm dim" style="margin:4px 0 8px">The more of a monster you defeat, the more its entry reveals. Every new entry also pays a few coins. Bosses are studied faster.</p><div class="lads">${ladder}</div></div></section>`;
+};
+
+/* ---------- one monster's entry ---------- */
+const RAR_COL = { common: '#c9c3b3', uncommon: '#5cc08a', rare: '#5f9bff', epic: '#c07aff' };
+UI.openGuide = id => {
+  const m = D.MON[id]; if (!m) return; const r = DQ.research(m), seen = r.rank >= 1, B = S().beast, T = r.T, lore = D.LORE[id] || {};
+  const lock = i => `<div class="gsec locked"><div class="gh">${ico('lock')}<b>${RANKS[i][1]}</b><small>${RANKS[i][2]}</small></div><p class="dim">Defeat it ${T[i] - r.kills} more time${T[i] - r.kills > 1 ? 's' : ''} to learn this.</p></div>`;
+  const sec = (i, body) => r.rank > i ? `<div class="gsec"><div class="gh"><b>${RANKS[i][1]}</b><small>${RANKS[i][2]}</small></div>${body}</div>` : lock(i);
+  const drops = (() => {
+    const all = DQ.knows(m, 'drops'); const rows = m.drops.slice().sort((a, b) => b[2] - a[2]).map(([item, , p]) => {
+      const found = !!B.drops[id + ':' + item], rar = D.rarityOf(p), it = D.ITEMS[item];
+      if (!all && !found) return ''; return `<div class="gdrop ${found ? 'got' : ''}"><span class="itm sm" style="--c:${it.col}">${ico(it.ic)}</span><b style="color:${RAR_COL[rar[0]]}">${esc(it.name)}</b><small>${rar[1]}${DQ.knows(m, 'legend') ? ` · about 1 in ${fmt(Math.round(1 / p))}` : ''}</small><span class="gmark">${found ? 'Found' : 'Not found yet'}</span></div>`;
+    }).join('');
+    const hidden = all ? 0 : m.drops.filter(d => !B.drops[id + ':' + d[0]]).length;
+    return `${rows}${hidden ? `<p class="dim" style="margin:6px 0 0">${hidden} more item${hidden > 1 ? 's' : ''} you have not found yet. Reach the <b>Drop table</b> entry to see them all.</p>` : ''}`;
+  })();
+  const dr = r.rank > 3 ? drops : (drops || '<p class="dim" style="margin:0">Nothing found yet.</p>');
+  const body = `<div class="ghead" style="--c:${m.col}"><div class="gsprite">${DQ.monSprite(m, 96, seen ? 'bob' : 'sil')}</div><div class="gtitle"><h3>${seen ? esc(m.name) : '???'}</h3><small>${seen ? `${m.boss ? 'Boss · ' : ''}${esc(D.TOWN[m.town].name)} · Level ${m.cl}` : 'You have not met this monster yet'}</small>
+      <div class="gprog"><span class="bar"><i style="width:${r.next == null ? 100 : Math.round((r.kills - (r.rank ? T[r.rank - 1] : 0)) / (T[r.rank] - (r.rank ? T[r.rank - 1] : 0)) * 100)}%"></i></span><small class="mono">${fmt(r.kills)} defeated · ${nextLine(m, r)}</small></div></div></div>
+    ${seen ? sec(0, `<p>Found around ${esc(D.TOWN[m.town].name)}. Level ${m.cl}${m.boss ? `, and it guards the road onward` : ''}.</p>`) : lock(0)}
+    ${sec(1, `<div class="chips">${UI.weakChips(m)}</div><p class="sm dim" style="margin:6px 0 0">Weak points take 50% more damage. Resisted types do half.</p>`)}
+    ${sec(2, `<p>Health <b class="mono">${m.hp}</b> · Hits up to <b class="mono">${m.max}</b> · Carries <b class="mono">${m.coins[1] ? `${m.coins[0]}-${m.coins[1]}` : 'no'}</b> coins</p>`)}
+    <div class="gsec ${r.rank > 3 ? '' : 'part'}"><div class="gh"><b>${RANKS[3][1]}</b><small>${RANKS[3][2]}</small></div>${dr}</div>
+    ${sec(4, `<p>${esc(lore.note || 'No notes yet.')}</p>`)}
+    ${sec(5, `<p class="legend">${esc(lore.legend || '')}</p>`)}
+    <p class="sm dim gstars">Slayer stars: <span class="stars">${'★'.repeat(DQ.beastStars(id))}${'☆'.repeat(3 - DQ.beastStars(id))}</span> (+${DQ.beastStars(id) * 4}% damage against it)</p>`;
+  DQ.modal({ title: 'Field guide', wide: true, body, actions: [{ label: 'Close' }, ...(m.town === S().town ? [{ label: 'Fight it', primary: true, fn: () => { DQ.go('combat'); DQ.startAct('fight', id); } }] : [])] });
+};
+Object.assign(UI.DO, { guide: a => UI.openGuide(a) });
+
+/* ---------- the Combat page and tooltips follow the same rules ---------- */
+const origTip = DQ.tips.mon;
+DQ.tips.mon = id => {
+  const m = D.MON[id], r = DQ.research(m); let h = origTip(id);
+  h += `<div class="dim">Research ${r.rank}/6${r.next != null ? ` · ${r.need} more defeat${r.need > 1 ? 's' : ''}: ${RANKS[r.rank][1]}` : ' · complete'}</div>`;
+  return h;
+};
+})();

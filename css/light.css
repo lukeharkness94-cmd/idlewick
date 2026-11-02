@@ -1,0 +1,108 @@
+/* Idlewick, light theme: "the cartographer's table by day".
+   Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
+   Part 1 flips the colour tokens. Part 2 gives each hard-coded dark surface a light counterpart. */
+
+:root[data-theme="light"]{
+  --ground:#efe8d6; --panel:#fbf7ec; --panel2:#f1e9d6; --line:#dacdb0; --line2:#c6b690;
+  --ink:#2a2317; --mute:#5d5440; --brass:#b07a1c; --brass-hi:#7d4e08; --brass-lo:#c9a45a;
+  --good:#1b6e3f; --bad:#c0372c; --warn:#a4690a; --town:#6fa545;
+  color-scheme:light;
+}
+:root[data-theme="light"] body[data-town=willowbrook]{--town:#6fa545}
+:root[data-theme="light"] body[data-town=saltmere]{--town:#2f9bb3}
+:root[data-theme="light"] body[data-town=ironpeak]{--town:#7d8c9a}
+:root[data-theme="light"] body[data-town=gloomfen]{--town:#7f69cc}
+:root[data-theme="light"] body[data-town=emberfall]{--town:#d3541f}
+
+/* ---------- Page, panels, top bar ---------- */
+:root[data-theme="light"] body{background-image:radial-gradient(1100px 560px at 88% -8%,color-mix(in srgb,var(--town) 20%,transparent),transparent 62%),radial-gradient(900px 520px at -6% 104%,#e9c98a66,transparent 60%)}
+:root[data-theme="light"] ::-webkit-scrollbar-thumb{background:#cdbd96}
+:root[data-theme="light"] .panel{background:linear-gradient(180deg,#fffdf6,#f8f2e3);box-shadow:inset 0 1px 0 #ffffffcc,0 10px 24px -16px #6a532099}
+:root[data-theme="light"] .hud{background:#fbf7ecf2}
+:root[data-theme="light"] .upnext{background:linear-gradient(180deg,#fffdf4,#f8f1df)}
+:root[data-theme="light"] .bar{background:#e2d8bd;box-shadow:inset 0 1px 2px #0000002a}
+:root[data-theme="light"] .card .progw,:root[data-theme="light"] .bosscard .progw{background:#e0d5b9}
+:root[data-theme="light"] .scene.fog{background:#ddd3ba}
+
+/* ---------- Buttons and controls ---------- */
+:root[data-theme="light"] .btn{background:linear-gradient(180deg,#fffcf3,#efe6d1);color:var(--ink)}
+:root[data-theme="light"] .btn.danger{border-color:#d9a199;color:#a3281d}
+:root[data-theme="light"] .btn.danger:hover{background:#fbe4e0;border-color:var(--bad)}
+:root[data-theme="light"] .btn.primary{color:#1b1405}
+:root[data-theme="light"] input[type=range]{background:#e2d8bd}
+:root[data-theme="light"] .seg{background:#e9dfc8}
+:root[data-theme="light"] .seg button.on{background:#fffcf3;color:var(--brass-hi);box-shadow:0 1px 3px #6a532044}
+:root[data-theme="light"] .tab.on{background:#fffcf3;color:var(--brass-hi)}
+:root[data-theme="light"] .stab.on{background:#fffcf3;color:var(--ink);border-color:var(--brass)}
+:root[data-theme="light"] .h-stop:hover{color:#fff}
+
+/* ---------- Cards that were painted dark ---------- */
+:root[data-theme="light"] .arena{background:linear-gradient(180deg,#efe6cf,#e4d9bd)}
+:root[data-theme="light"] .intel{background:#f3ecd9cc}
+:root[data-theme="light"] .plot{background:linear-gradient(180deg,#eff4de,#e3ebd0);border-color:#bccb9d}
+:root[data-theme="light"] .pen{background:linear-gradient(180deg,#f8f1dc,#eee3c5);border-color:#d5c698}
+:root[data-theme="light"] .portrait.pxport{background:radial-gradient(circle at 50% 30%,#d3e3ea,#a9c0cc);box-shadow:inset 0 0 0 2px #b07a1c,0 0 0 1px #0003}
+:root[data-theme="light"] .pin{background:linear-gradient(90deg,color-mix(in srgb,var(--c,#d8a64a) 16%,#fffaf0),#fffaf0)}
+:root[data-theme="light"] .pinchip{background:linear-gradient(90deg,color-mix(in srgb,var(--c,#d8a64a) 18%,#fffaf0),#fffaf0)}
+:root[data-theme="light"] .flyloot{background:#fffaf0}
+
+/* ---------- Notifications, banners, modals ---------- */
+:root[data-theme="light"] .note{background:linear-gradient(180deg,#fffdf6,#f4ecd9);box-shadow:0 14px 28px -12px #5a43149a,0 0 22px -14px var(--c)}
+:root[data-theme="light"] .lvlban{background:linear-gradient(180deg,#fffdf6,#f6efdd);box-shadow:0 0 28px -8px var(--c),0 12px 26px -12px #5a431499}
+:root[data-theme="light"] .modal{background:#2a1f0e8c}
+:root[data-theme="light"] .m-card{background:linear-gradient(180deg,#fffdf6,#f6efdd);border-color:var(--brass);box-shadow:0 30px 70px -22px #3a2a0e}
+:root[data-theme="light"] .toast.bad{border-color:#d9a199}
+
+/* ---------- Text that was pale-on-dark ---------- */
+:root[data-theme="light"] .state.active{color:#2262a8}
+:root[data-theme="light"] .toast.bad,:root[data-theme="light"] .rw.short{color:#a3281d}
+:root[data-theme="light"] .offline-note{color:#2a64a3}
+:root[data-theme="light"] .pen.happy .happytag,:root[data-theme="light"] .hearts{color:#c2456a}
+:root[data-theme="light"] .packchip.near{color:#8a5a08;border-color:#c98a1a}
+:root[data-theme="light"] .packchip.full{color:#a3281d;background:rgba(192,55,44,.1)}
+:root[data-theme="light"] .pk-ic,:root[data-theme="light"] .cmpnote.bad,:root[data-theme="light"] .cmpline .down{color:#a3281d}
+:root[data-theme="light"] .tm-c.away .tm-big{color:#7d4e08}
+:root[data-theme="light"] .tm-c.away{background:rgba(201,138,26,.12)}
+:root[data-theme="light"] .cmprow.up em,:root[data-theme="light"] .cmpline .up{color:#1f7a49}
+:root[data-theme="light"] .cmprow.down em{color:#b02e24}
+:root[data-theme="light"] .hq{background:rgba(176,122,28,.12);color:#7d4e08;border-color:#b07a1c}
+:root[data-theme="light"] .tabchip.new{color:#fff8e8}
+:root[data-theme="light"] .lvchip.you{background:rgba(176,122,28,.14)}
+:root[data-theme="light"] .packbar{background:rgba(192,55,44,.08)}
+:root[data-theme="light"] .carrot.ready{box-shadow:0 0 0 1px var(--brass),0 0 22px -10px var(--brass)}
+:root[data-theme="light"] .qline{color:#7d4e08!important}
+/* tooltips stay dark parchment in both themes: strong contrast and the same look everywhere */
+
+/* ---------- The title screen is a night scene: keep it dark whatever the theme ---------- */
+:root[data-theme="light"] #title{
+  --ground:#0d1215; --panel:#141c21; --panel2:#1b262c; --line:#28373e; --line2:#364a52;
+  --ink:#e9e4d5; --mute:#93a3a1; --brass:#d8a64a; --brass-hi:#f3d58a; --brass-lo:#8a6a2e;
+  color-scheme:dark;
+}
+:root[data-theme="light"] .rail .brand{color:var(--brass-hi)}
+:root[data-theme="light"] .hub.on{background:#fffcf3}
+@media (max-width:860px){:root[data-theme="light"] .rail{background:#fbf7ecf2}}
+
+/* ---------- Skill and accent colours used as text: darken them so they read on parchment ---------- */
+:root[data-theme="light"] :is(.skillhero .lv,.sk-lv,.lvbig b,.h-tb small b,.g-cat,.g-go,.skrow b,.skrow .mono,.msk em,.stab .mono,.stab b,.card .go,.card .ico,.tile .lv,.t-lv,.t-nm,.spell .ic,.dchip,.lootrow .rar,.h-meta span:first-child,.ev-ic,.w-ic,.n-ic,.fl){
+  color:color-mix(in srgb,var(--c,var(--mute)) 36%,#241c0e)}
+:root[data-theme="light"] .card .go{background:color-mix(in srgb,var(--c) 9%,transparent);border-color:color-mix(in srgb,var(--c) 45%,var(--line2))}
+:root[data-theme="light"] .tabchip.new{color:#1b1405}
+:root[data-theme="light"] .lvchip.easy,:root[data-theme="light"] .tag.easy{color:#17673a}
+:root[data-theme="light"] .lvchip.fair,:root[data-theme="light"] .tag.fair{color:#8f5a05}
+:root[data-theme="light"] .lvchip.hard,:root[data-theme="light"] .tag.hard{color:#b02e24}
+:root[data-theme="light"] .g-eta.ok,:root[data-theme="light"] .ok{color:#17673a}
+:root[data-theme="light"] .ti-body h2{color:var(--ink)!important}
+
+:root[data-theme="light"] .rare-teaser{background:rgba(176,122,28,.1);border-color:#b07a1c}
+:root[data-theme="light"] .hq.hb{color:#17673a;background:rgba(35,130,79,.1);border-color:#23824f}
+:root[data-theme="light"] .srow .max,:root[data-theme="light"] .cache-ic{color:#7d4e08}
+
+:root[data-theme="light"] .lad b{color:#fff8e8}:root[data-theme="light"] .legend{color:var(--ink)}:root[data-theme="light"] .gdrop.got .gmark{color:#17673a}
+:root[data-theme="light"] .lad b{color:#1b1405}
+
+:root[data-theme="light"] .tech{background:#f4ecd9}:root[data-theme="light"] .tdone{color:#17673a}:root[data-theme="light"] .techbranch .phead h2 .ic{color:color-mix(in srgb,var(--c) 55%,#241c0e)}
+:root[data-theme="light"] .dg-row .n-ic{color:color-mix(in srgb,var(--c) 40%,#241c0e)}
+:root[data-theme="light"] .dg-row{background:color-mix(in srgb,var(--c) 9%,#fffaf0)}
+:root[data-theme="light"] .belldot{color:#fff8e8;background:#8a5a08}
+:root[data-theme="light"] .bell-row .n-ic{color:color-mix(in srgb,var(--c) 40%,#241c0e)}

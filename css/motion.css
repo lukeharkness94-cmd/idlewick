@@ -1,0 +1,76 @@
+/* Idlewick motion: springs and bounces, on one set of easing tokens.
+   Everything here is cosmetic. It is switched off by the device's "reduce motion" setting and by Settings > Reduce effects (html.calm). */
+:root{
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  --spring-soft:cubic-bezier(.3,1.25,.5,1);
+  --out:cubic-bezier(.16,1,.3,1);
+}
+@supports (transition-timing-function:linear(0,1)){
+  :root{--spring:linear(0, 0.0234, 0.0862, 0.1776, 0.2877, 0.4078, 0.5304, 0.6495, 0.7604, 0.8598, 0.9455, 1.0164, 1.0723, 1.1136, 1.1415, 1.1574, 1.163, 1.1601, 1.1505, 1.1361, 1.1184, 1.099, 1.079, 1.0595, 1.0412, 1.0247, 1.0105, 0.9986, 0.9892, 0.9822, 0.9774, 0.9746, 0.9735, 0.9738, 0.9752, 0.9775, 0.9803, 0.9835, 0.9867, 0.9899, 1);--spring-soft:linear(0, 0.0352, 0.123, 0.2408, 0.3711, 0.5014, 0.623, 0.7307, 0.8218, 0.8955, 0.9526, 0.9945, 1.0234, 1.0415, 1.0511, 1.0542, 1.0528, 1.0483, 1.042, 1.035, 1.0279, 1.0212, 1.0153, 1.0102, 1.0061, 1.0029, 1.0005, 0.9989, 0.9978, 0.9973, 1)}
+}
+
+/* ---------- Press and hover: things feel springy under the finger ---------- */
+.btn,.tab,.stab,.hub,.iconb,.packchip,.seg button,.chip,.n-act,.dg-row,.pinchip,.goal,.card,.tile,.skrow,.beast,.slot,.plot,.abil,.tog,.aslot,.tech,.mapnode{
+  transition:transform .5s var(--spring),background-color .2s,border-color .2s,box-shadow .25s,color .2s,opacity .2s,filter .2s}
+/* Motion is a reaction to what you do, never to the pointer merely passing over: hover only changes colour */
+@media (hover:hover){
+  .btn:hover,.tab:hover,.stab:hover,.chip:hover,.n-act:hover,.tile:hover,.card:hover,.goal:hover,.beast:hover,.skrow:hover,.plot:hover,.tech:hover,.hub:hover,.iconb:hover,.packchip:hover,.slot:hover,button.eq:hover,.tbtn:hover,.swatch:hover,.dg-row:hover{transform:none}
+}
+.btn:active,.tab:active,.stab:active,.chip:active,.n-act:active,.iconb:active,.packchip:active,.hub:active,.seg button:active,.dg-row:active,.pinchip:active,.slot:active,.abil:active{transform:scale(.93);transition-duration:.07s}
+.card:active,.tile:active,.goal:active,.beast:active,.plot:active,.skrow:active{transform:scale(.975);transition-duration:.07s}
+.goal .g-go .ic,.pinchip>.ic:last-child,.dg-row>.ic:last-child,.hub .ic,.stab .ic{transition:transform .5s var(--spring)}
+
+
+/* switches: the knob springs across */
+.tog .sw::after{transition:transform .55s var(--spring),background .2s}
+.tog .sw{transition:background .25s,border-color .25s}
+
+/* ---------- Pages arrive with a spring, children one after another ---------- */
+@keyframes springIn{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
+.view.enter>*{animation:springIn .65s var(--spring) backwards;animation-delay:calc(var(--i,0)*50ms)}
+.view.enter .goal{animation:springIn .6s var(--spring) backwards;animation-delay:calc(var(--i,0)*45ms + 120ms)}
+
+/* the tab you just chose pops */
+@keyframes icoPop{0%{transform:scale(.55) rotate(-14deg)}100%{transform:none}}
+.stab.pop .ic,.hub.pop .ic{animation:icoPop .7s var(--spring)}
+
+/* numbers that change give a little tick (script adds .ticking) */
+.tickable{display:inline-block}
+
+/* ---------- Notifications, toasts, banners and dialogs ---------- */
+@keyframes noteSpring{from{opacity:0;transform:translateX(70px) scale(.88)}to{opacity:1;transform:none}}
+.note{animation:noteSpring .7s var(--spring) backwards}
+.note.out{animation:noteOut .3s cubic-bezier(.5,0,1,.6) forwards}
+.note.digest.bump{animation:dgbump .5s var(--spring)}
+@keyframes dgbump{30%{transform:scale(1.04)}}
+.note.digest:not(.bump) .dg-row{animation:springIn .55s var(--spring) backwards;animation-delay:calc(var(--r,0)*80ms + 120ms)}
+.note .n-ic{animation:icoPop .8s var(--spring) .15s backwards}
+.n-x{transition:transform .5s var(--spring),color .2s,background-color .2s}
+.n-x:active{transform:scale(.85)}
+@keyframes toastSpring{0%{opacity:0;transform:translate(-50%,24px) scale(.88)}9%{opacity:1;transform:translate(-50%,-4px) scale(1.04)}15%{transform:translate(-50%,0) scale(1)}88%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,10px)}}
+.toast{animation:toastSpring 2.6s both}
+@keyframes lbSpring{from{opacity:0;transform:translate(-50%,-46px) scale(.6)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+.lvlban:not(.out){animation:lbSpring .75s var(--spring) backwards}
+.lvlban .lb-ic{animation:icoPop .9s var(--spring) .1s backwards}
+@keyframes modalSpring{from{opacity:0;transform:translateY(34px) scale(.86)}to{opacity:1;transform:none}}
+.m-card{animation:modalSpring .6s var(--spring) backwards}
+.m-act .btn{animation:springIn .5s var(--spring) backwards}
+.m-act .btn:nth-child(1){animation-delay:.14s}.m-act .btn:nth-child(2){animation-delay:.2s}.m-act .btn:nth-child(3){animation-delay:.26s}
+#tip,#tip.on{animation:none;transition:none}
+
+/* ---------- Idle loops are off: nothing moves unless you did something ---------- */
+.hubdot.nudge,.tabchip.new{animation:none}
+@keyframes cardPop{0%{transform:scale(.94)}55%{transform:scale(1.035)}100%{transform:none}}
+.popnow{animation:cardPop .6s var(--spring)}
+
+/* ---------- Calm mode: no bounce for people who asked for less ---------- */
+@media (prefers-reduced-motion:reduce){
+  .view.enter>*,.view.enter .goal,.note,.m-card,.m-act .btn,.lvlban,.toast,.fig-img,.h-tic .ic,.carrot.ready .btn.primary,.tabchip.new,.popnow,.stab.pop .ic,.hub.pop .ic{animation:none!important}
+  .btn,.tab,.stab,.hub,.iconb,.card,.tile,.goal,.slot,.plot{transform:none!important}
+}
+html.calm *,html.calm *::before,html.calm *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.01ms!important}
+html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,html.calm .card,html.calm .tile,html.calm .goal,html.calm .slot,html.calm .plot{transform:none!important}
+
+/* the side menu and the tab strips never scroll sideways, whatever hovers inside them */
+#rail{overflow-x:hidden}
+.subnav{overflow-y:hidden}
