@@ -72,31 +72,27 @@ DQ.openCache = grand => {
   return { grand, out, price: o.price };
 };
 
-/* ---------- Page: a third tab on the shop ---------- */
+/* ---------- The selected rare offer uses the same controls as the shop. ---------- */
 const RAR = { rare: '#5f9bff', epic: '#c07aff', uncommon: '#5cc08a' };
-const row = (id, price, btn, sub) => { const it = D.ITEMS[id], can = S().coins >= price; return `<div class="srow ${can ? '' : 'cant'}">${UI.itm(id)}<div class="sr-t"><b>${esc(it.name)}</b><small>${sub || UI.itemSub(it)}</small></div><span class="price mono ${can ? '' : 'bad'}">${ico('coin')}${fmt(price)}</span>${btn}</div>`; };
-const specialsLine = town => { const sp = (D.TOWN_SPECIALS[town] || []).filter(have).map(i => D.ITEMS[i].name); return sp.join(', '); };
 UI.rarePage = () => {
-  const t = D.TOWN[S().town], O = DQ.rareOffers(), qty = UI.shopQty, luck = DQ.luckLeft();
-  const gear = O.gear.length ? O.gear.map(g => { const sold = DQ.rareSold(g.id), can = S().coins >= g.price; return row(g.id, g.price, sold ? '<span class="max">Owned</span>' : g.locked ? '<button class="btn sm" disabled>Locked</button>' : `<button class="btn sm ${can ? 'primary' : ''}" data-do="rarebuy" data-a="gear:${g.id}">Buy</button>`, g.trophy ? (g.locked ? `<span class="bad">Boss trophy. Defeat the boss of ${esc(D.TOWN[S().town].name)} to unlock.</span>` : 'Boss trophy. A replacement for one you never found.') : null); }).join('') : '<p class="dim">Nothing special from the smiths here.</p>';
-  const mats = O.mats.map(m => row(m.id, m.price * qty, `<button class="btn sm ${S().coins >= m.price * qty ? 'primary' : ''}" data-do="rarebuy" data-a="mat:${m.id}">Buy ×${qty}</button>`, `${esc(DQ.cap(D.ITEMS[m.id].type))} · You have ${fmt(DQ.have(m.id))}`)).join('');
-  const cache = c => `<div class="cache ${c.open ? '' : 'locked'}"><span class="cache-ic">${ico('pouch')}</span><div class="sr-t"><b>${c.name}</b><small>${c.open ? `Coins back, ${c.k === 'grand' ? '2 gems, a good chance of local gear and rare materials' : 'a gem, and a chance at local gear'}. Worth a gamble.` : `Sold in ${c.need}`}</small></div><span class="price mono">${ico('coin')}${fmt(c.price)}</span><button class="btn sm ${c.open && S().coins >= c.price ? 'primary' : ''}" ${c.open ? `data-do="rarebuy" data-a="cache:${c.k}"` : 'disabled'}>Open</button></div>`;
-  const tonic = `<div class="cache ${O.tonic.open ? '' : 'locked'}"><span class="cache-ic">${ico('bottle')}</span><div class="sr-t"><b>Fortune tonic</b><small>${O.tonic.open ? `Rare drops are 50% more likely for 30 minutes (stacks up to 2 hours). ${luck > 0 ? `<b class="ok">Active: ${DQ.fmtTime(luck)} left.</b>` : ''}` : `Sold in ${O.tonic.need}`}</small></div><span class="price mono">${ico('coin')}${fmt(O.tonic.price)}</span><button class="btn sm ${O.tonic.open && S().coins >= O.tonic.price ? 'primary' : ''}" ${O.tonic.open ? 'data-do="rarebuy" data-a="tonic:luck"' : 'disabled'}>${luck > 0 ? 'Extend' : 'Drink'}</button></div>`;
-  const elsewhere = D.TOWNS.filter(x => x.id !== S().town).map(x => { const known = DQ.townUnlocked(x.id); return `<div class="else ${known ? '' : 'locked'}"><b>${esc(x.name)}</b><small>${known ? esc(specialsLine(x.id)) || 'Local goods' : 'Reach this town to find out'}</small></div>`; }).join('');
-  return `<section class="panel shophead fancy" style="--c:${t.col}"><div><span class="k">Rare wares</span><h2>${esc(t.name)} specialists</h2><small class="dim">What the locals sell that no general store stocks. Every town has different goods.</small></div><div class="sh-coins"><span class="k">Your coins</span><b class="mono">${ico('coin')} <span data-b="coins"></span></b></div></section>
-    <section class="panel"><div class="phead"><div class="tabs">${[['buy', 'Buy'], ['rare', 'Rare wares'], ['sell', 'Sell']].map(([k, n]) => `<button class="tab ${k === 'rare' ? 'on' : ''}" data-do="shoptab" data-a="${k}">${n}</button>`).join('')}</div><div class="seg qty">${[1, 10, 100].map(q => `<button class="${qty === q ? 'on' : ''}" data-do="shopqty" data-a="${q}">×${q}</button>`).join('')}</div></div>
-      <div class="shopcat"><div class="k">Jewellery, outfits and trophies · one of each</div><div class="srows">${gear}</div></div>
-      <div class="shopcat"><div class="k">Rare materials</div><div class="srows">${mats}</div></div>
-      <div class="shopcat"><div class="k">Caches and tonics</div><div class="srows">${cache(O.caches[0])}${cache(O.caches[1])}${tonic}</div></div>
-      <div class="shopcat"><div class="k">Sold in other towns</div><div class="elsewhere">${elsewhere}</div></div></section>`;
+  const offers = DQ.rareOffers(), qty = UI.shopQty;
+  const choices = [
+    ...offers.gear.map(g => ({ ...g, key: 'gear:' + g.id, name: D.ITEMS[g.id].name, owned: DQ.rareSold(g.id), text: g.trophy ? 'A replacement boss trophy. Defeat the town boss to unlock it.' : 'Local masterwork · one of each', count: 1 })),
+    ...offers.mats.map(m => ({ ...m, key: 'mat:' + m.id, name: D.ITEMS[m.id].name, count: qty })),
+    ...offers.caches.map(c => ({ key: 'cache:' + c.k, name: c.name, price: c.price, locked: !c.open, text: c.open ? 'Contains coins, gems and a chance of local gear. Contents vary.' : 'Sold in ' + c.need, count: 1 })),
+    { key: 'tonic:luck', name: 'Fortune tonic', price: offers.tonic.price, locked: !offers.tonic.open, text: offers.tonic.open ? 'Rare drops are 50% more likely for 30 minutes. Stacks up to two hours.' : 'Sold in ' + offers.tonic.need, count: 1 }
+  ];
+  const selected = choices.find(c => c.key === UI.tab.rareChoice) || choices[0];
+  const cost = selected.price * selected.count, affordable = S().coins >= cost;
+  const disabled = selected.locked || selected.owned || !affordable;
+  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${esc(D.TOWN[S().town].name)}</small></div>${UI.shopTabs('rare')}<div class="illustrated-choices">${choices.map(c=>`<button class="illustrated-card ${c===selected?'selected':''}" data-do="rareselect" data-a="${c.key}" aria-pressed="${c===selected}"><span class="choice-art">${DQ.itemIco(D.ITEMS[c.id||(c.key.startsWith('cache:')?'treasure_chest':'potion_fortune')])}</span><b>${esc(c.name)}</b><small>${c.owned?'Owned':c.locked?'Locked':fmt(c.price)+' coins'}</small></button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>Rare item</h2></div>
+    <div class="shop-workspace"><div class="shop-purchase">${selected.id ? UI.shopPreview(selected.id) : `<h3>${esc(selected.name)}</h3>`}<div class="shop-controls"><label for="shop-quantity">Quantity<select id="shop-quantity" data-in="shop-quantity" ${selected.key.startsWith('mat:') ? '' : 'disabled'}>${[1,10,100].map(n => `<option value="${n}" ${selected.count === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
+    <div class="shop-action"><button class="btn primary" data-do="rarebuy" data-a="${selected.key}" ${disabled ? 'disabled' : ''}>${selected.owned ? 'Owned' : selected.locked ? 'Locked' : selected.key.startsWith('cache:') ? 'Open' : selected.key.startsWith('tonic:') ? 'Drink' : 'Buy'} · ${fmt(cost)} coins</button></div>
+    ${selected.text ? `<p class="sm">${esc(selected.text)}</p>` : ''}${!affordable ? `<p class="bad sm">You need ${fmt(cost - S().coins)} more coins.</p>` : ''}
+    </div><div class="shop-comparison">${selected.id ? UI.compareHtml(selected.id) : ''}</div></div></section></div>`;
 };
 const origShop = UI.V.shop;
-UI.V.shop = () => {
-  if (UI.shopTab === 'rare') return UI.rarePage();
-  const h = origShop(), O = DQ.rareOffers(), n = O.gear.filter(g => !DQ.rareSold(g.id)).length;
-  const teaser = `<button class="rare-teaser" data-do="shoptab" data-a="rare">${ico('star')}<span><b>Rare wares in ${esc(D.TOWN[S().town].name)}</b><small>${n ? `${n} rare piece${n > 1 ? 's' : ''} of gear, ` : ''}${esc(specialsLine(S().town))}, loot caches${O.tonic.open ? ' and a Fortune tonic' : ''}</small></span>${ico('arrow')}</button>`;
-  return h.replace('data-do="shoptab" data-a="sell">Sell</button>', 'data-do="shoptab" data-a="sell">Sell</button><button class="tab" data-do="shoptab" data-a="rare">Rare wares</button>').replace('<div class="shopcat">', teaser + '<div class="shopcat">');
-};
+UI.V.shop = () => UI.shopTab === 'rare' ? UI.rarePage() : origShop();
 Object.assign(UI.DO, {
   rarebuy: a => {
     const [kind, id] = a.split(':');

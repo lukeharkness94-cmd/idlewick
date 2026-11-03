@@ -18,6 +18,8 @@ DQ.fx = () => {
       if (k.startsWith('xp_')) f.xp[k.slice(3)] = (f.xp[k.slice(3)] || 0) + v; else if (k.startsWith('speed_')) f.speed[k.slice(6)] = (f.speed[k.slice(6)] || 0) + v; else f[k] += v; });
   });
   if (DQ.techFx) DQ.techFx(f);
+  if (S().projects && S().projects.well) f.regen += .1;
+  if (S().projects && S().projects.inn) f.heal += .05;
   f.dmg += f.trophy * Object.values(S().towns).filter(t => t.boss).length;
   const ap = S().pets.active && D.PET[S().pets.active];
   if (ap) {

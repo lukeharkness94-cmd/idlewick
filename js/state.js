@@ -11,6 +11,7 @@ DQ.invDirty = false;
 DQ.newState = (name = 'Adventurer', look) => {
   const xp = {}; D.SKILLS.forEach(s => xp[s.id] = 0); xp.hitpoints = D.XPF[10];
   return {
+    journey: 'boss', projects: {}, pinnedProject: null, noticeBadges: {},
     v: 2, name, look: look || { skin: D.LOOKS.skin[0], hair: D.LOOKS.hair[1], tunic: D.LOOKS.tunic[0] },
     created: Date.now(), lastSeen: Date.now(), playtime: 0, awayMs: 0, awayEff: 0, tele: { adv: {}, skill: {}, first: {}, away: [], sessions: 0 }, seenTabs: {}, lastAway: null, exportedAt: 0, snoozeBk: 0, title: null, research: { done: {}, active: [] },
     xp, coins: 25, hp: 10, inv: { bread: 5 }, bank: {}, equip: { weapon: 'bronze_sword' }, ammo: { id: null, n: 0 },
@@ -29,19 +30,64 @@ DQ.S = DQ.newState();
 const merge = (base, over) => {
   if (!over || typeof over !== 'object') return base;
   for (const k of Object.keys(over)) {
+    if (['__proto__', 'constructor', 'prototype'].includes(k)) throw new Error('Invalid save key');
     if (base[k] && typeof base[k] === 'object' && !Array.isArray(base[k]) && typeof over[k] === 'object' && over[k] !== null) merge(base[k], over[k]);
     else base[k] = over[k];
   }
   return base;
 };
+const record = value => value && typeof value === 'object' && !Array.isArray(value);
+function candidateState(o) {
+  if (!record(o) || o.v !== 2 || !record(o.xp)) throw new Error('Unsupported save');
+  const base = DQ.newState(); base.equip = {}; base.inv = {};
+  function checkShape(value, expected) {
+    if (record(expected)) {
+      if (!record(value)) throw new Error('Invalid save structure');
+      for (const key of Object.keys(value)) {
+        if (['__proto__', 'constructor', 'prototype'].includes(key)) throw new Error('Invalid save key');
+        if (key in expected && expected[key] !== null) checkShape(value[key], expected[key]);
+      }
+    } else if (Array.isArray(expected) && !Array.isArray(value)) throw new Error('Invalid save list');
+    else if (typeof expected === 'number' && (!Number.isFinite(value) || (expected >= 0 && value < 0))) throw new Error('Invalid save number');
+    else if (typeof expected === 'string' && typeof value !== 'string') throw new Error('Invalid save text');
+    else if (typeof expected === 'boolean' && typeof value !== 'boolean') throw new Error('Invalid save option');
+  }
+  checkShape(o, base);
+  for (const [values, definitions] of [[o.xp, D.SK], [o.inv || {}, D.ITEMS], [o.bank || {}, D.ITEMS]]) {
+    for (const [id, n] of Object.entries(values)) {
+      if (!(id in definitions)) throw new Error('Unknown item or skill');
+      if (!Number.isFinite(n) || n < 0) throw new Error('Invalid quantity');
+    }
+  }
+  const result = merge(base, o);
+  if (result.pinnedProject !== null && !['well', 'inn'].includes(result.pinnedProject)) throw new Error('Unknown pinned project');
+  if (!D.TOWN[result.town]) throw new Error('Unknown town');
+  if (Object.values(result.equip).some(id => id && !D.ITEMS[id])) throw new Error('Unknown equipment');
+  if (result.workers.some(w => !record(w)) || result.farm.animals.some(a => !record(a) || !D.ANIMAL[a.id])) throw new Error('Invalid worker or animal');
+  if (result.farm.plots.some(p => !record(p) || (p.crop && !D.CROP[p.crop]))) throw new Error('Invalid plot');
+  if (result.log.some(l => !record(l) || typeof l.m !== 'string')) throw new Error('Invalid log');
+  for (const key of ['queue', 'buffs', 'abilities', 'inbox']) {
+    if (result[key] !== undefined && !Array.isArray(result[key])) throw new Error('Invalid save list');
+  }
+  const validAction = a => {
+    if (!record(a)) return false;
+    const known = a.kind === 'recipe' ? D.RECIPES[a.id] : a.kind === 'fight' ? D.MON[a.id] : a.kind === 'alch' ? D.ITEMS[a.id] : D.NODE[a.kind + ':' + a.id];
+    return !!known && (!a.pace || !!D.PACE[a.pace]) && ['count', 'elapsed', 'progress', 'lvlTarget'].every(k => a[k] === undefined || (Number.isFinite(a[k]) && a[k] >= 0));
+  };
+  if (result.act && !validAction(result.act)) throw new Error('Invalid active task');
+  if (result.queue && result.queue.some(a => !validAction(a))) throw new Error('Invalid queue');
+  if (result.buffs && result.buffs.some(b => !record(b) || !Number.isFinite(b.until) || !Number.isFinite(b.mult) || b.mult <= 0)) throw new Error('Invalid buff');
+  migrate(result);
+  return result;
+}
+DQ.validateSave = candidateState;
 DQ.hasSave = () => { try { return !!localStorage.getItem(SAVE_KEY); } catch (e) { return false; } };
 DQ.load = () => {
   try {
     const raw = localStorage.getItem(SAVE_KEY); if (!raw) return false;
-    const o = JSON.parse(raw); if (!o || o.v !== 2) return false;
-    const base = DQ.newState(); base.equip = {}; base.inv = {};
-    DQ.S = merge(base, o); migrate(DQ.S); return true;
-  } catch (e) { return false; }
+    const next = candidateState(JSON.parse(raw));
+    DQ.S = next; observedSave = raw; return true;
+  } catch (e) { DQ.saveHealth = 'The saved hero could not be loaded. Keep a copy before starting again.'; return false; }
 };
 function migrate(S) {
   /* Mossbarrow was added between Willowbrook and Saltmere: keep later roads open for older saves */
@@ -49,19 +95,44 @@ function migrate(S) {
   for (let i = 0; i < last; i++) if (!S.towns[ids[i]]) S.towns[ids[i]] = { visited: false, boss: false };
   if (!Array.isArray(S.farm.plots)) S.farm.plots = [];
 }
+DQ.saveHealth = '';
+let observedSave;
+try { observedSave = localStorage.getItem(SAVE_KEY); } catch (e) {}
 DQ.save = () => {
-  try { DQ.S.lastSeen = Date.now(); localStorage.setItem(SAVE_KEY, JSON.stringify(DQ.S)); return true; } catch (e) { return false; }
+  try {
+    const current = localStorage.getItem(SAVE_KEY);
+    if (observedSave !== undefined && current !== observedSave) {
+      DQ.paused = true;
+      DQ.saveHealth = 'Another tab changed this hero. This tab is paused. Export a backup, then reload to continue the latest save.';
+      return false;
+    }
+    const next = JSON.stringify({ ...DQ.S, lastSeen: Date.now() });
+    localStorage.setItem(SAVE_KEY, next);
+    observedSave = next; DQ.S.lastSeen = JSON.parse(next).lastSeen; DQ.saveHealth = '';
+    return true;
+  } catch (e) {
+    DQ.saveHealth = 'Progress could not be saved on this device. Download a backup before closing.';
+    return false;
+  }
 };
-DQ.eraseSave = () => { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} };
+DQ.eraseSave = () => { try { localStorage.removeItem(SAVE_KEY); observedSave = null; } catch (e) {} };
 DQ.exportSave = () => btoa(unescape(encodeURIComponent(JSON.stringify(DQ.S))));
 DQ.importSave = text => {
   try {
-    const o = JSON.parse(decodeURIComponent(escape(atob(text.trim()))));
-    if (!o || o.v !== 2 || !o.xp) return false;
-    const base = DQ.newState(); base.equip = {}; base.inv = {};
-    DQ.S = merge(base, o); migrate(DQ.S); DQ.save(); return true;
+    const next = candidateState(JSON.parse(decodeURIComponent(escape(atob(text.trim())))));
+    const current = localStorage.getItem(SAVE_KEY);
+    if (observedSave !== undefined && current !== observedSave) return false;
+    const raw = JSON.stringify({ ...next, lastSeen: Date.now() });
+    localStorage.setItem(SAVE_KEY, raw);
+    observedSave = raw; DQ.S = next; DQ.S.lastSeen = JSON.parse(raw).lastSeen; DQ.saveHealth = ''; return true;
   } catch (e) { return false; }
 };
+addEventListener('storage', e => {
+  if (e.key === SAVE_KEY && e.newValue !== observedSave) {
+    DQ.paused = true;
+    DQ.saveHealth = 'Another tab changed this hero. Export a backup from this tab, then reload to continue the latest save.';
+  }
+});
 
 /* ---------- Levels ---------- */
 DQ.lvl = sk => D.lvlOf(DQ.S.xp[sk] || 0);

@@ -71,11 +71,13 @@ UI.abilityPanel = () => {
 UI.bossIntel = m => {
   const B = D.BOSSMECH[m.id]; if (!B) return '';
   const w = DQ.weakOf(m), mu = DQ.matchup(m);
-  return `<div class="intel"><div class="k">Boss intel</div><p class="sm">${B.text}</p>
+  const alternatives = Object.keys({ ...S().inv, ...S().bank }).filter(id => D.ITEMS[id].slot && D.ITEMS[id].slot !== 'ammo' && DQ.canEquip(id).ok && S().equip[D.ITEMS[id].slot] !== id);
+  const compare = alternatives.length ? `<details><summary>Compare an equipment change</summary><p class="sm">Simulate your current build and one item you own, using your current health and food. Results are estimates from separate trial fights.</p><div class="btnrow wrap">${alternatives.map(id => `<button class="btn sm" data-do="comparegear" data-a="${m.id}" data-b="${id}">${esc(D.ITEMS[id].name)}</button>`).join('')}</div></details>` : '';
+  return `<div class="intel"><div class="k">Prepare for this fight</div><p class="sm">Health ${Math.ceil(S().hp)} / ${DQ.maxHp()} · ${DQ.supplyInfo({kind:'fight'})?.label || 'No supplies'}. Auto-eat ${S().settings.autoEat ? 'on' : 'off'}.</p><div class="btnrow wrap"><button class="btn sm" data-do="go" data-a="character">Review equipment</button><button class="btn sm" data-do="go" data-a="cooking">Prepare food</button></div><p class="sm">${B.text}</p>
     ${m.id === 'hollowking' ? '' : `<div class="chips">${w.weak.map(t => dchip(t, 'weak')).join('')}${w.resist.map(t => dchip(t, 'res')).join('')}</div>`}
     <div class="sm"><b>Counters:</b> ${B.counters.join(' · ')}</div>
     <div class="match">${mu.map(([k, t]) => `<div class="${k === 'good' ? 'ok' : k === 'bad' ? 'bad' : 'dim'}">${k === 'good' ? '✓' : k === 'bad' ? '✗' : '•'} ${t}</div>`).join('')}</div>
-    <div class="btnrow"><button class="btn sm" data-do="forecast" data-a="${m.id}">${ico('clock')} Battle forecast</button><span id="fc-${m.id}" class="sm"></span></div></div>`;
+    <div class="btnrow"><button class="btn sm" data-do="forecast" data-a="${m.id}">${ico('clock')} Battle forecast</button><span id="fc-${m.id}" class="sm" aria-live="polite"></span></div>${compare}</div>`;
 };
 DQ.tips.mon = (orig => id => { const m = D.MON[id]; let h = orig ? orig(id) : ''; if (DQ.weakKnown(m)) { const w = DQ.weakOf(m); h += `<div>Weak: ${w.weak.map(t => D.DTYPES[t].name).join(', ') || 'nothing'}</div><div class="dim">Resists: ${w.resist.map(t => D.DTYPES[t].name).join(', ') || 'nothing'}</div>`; } else h += `<div class="dim">Defeat ${D.STUDY_KILLS} to learn its weaknesses.</div>`; return h; })(DQ.tips.mon);
 
@@ -99,7 +101,16 @@ Object.assign(UI.DO, {
   qclear: () => { S().queue = []; DQ.emit('queue'); },
   decide: (a, b) => DQ.resolveEvent(a, b),
   abil: a => { if (DQ.toggleAbility(a)) { DQ.sfx('equip'); UI.render(false); } },
-  forecast: a => { const el = document.getElementById('fc-' + a); if (el) el.textContent = 'Simulating…'; setTimeout(() => { const r = DQ.forecast(a); if (!el) return; if (!r || r.blocked) { el.innerHTML = '<span class="bad">Cannot fight it right now.</span>'; return; } const pct = Math.round(r.winRate * 100); el.innerHTML = `<b class="${pct >= 80 ? 'ok' : pct >= 40 ? '' : 'bad'}">${pct}% win</b> over ${r.trials} trial fights${r.wins ? ` · about ${Math.round(r.avgMs / 1000)}s · ${r.foodPerKill.toFixed(1)} food` : ''}`; }, 30); },
+  comparegear: (a, b) => {
+    const el = document.getElementById('fc-' + a); if (!el) return;
+    el.textContent = 'Comparing builds…';
+    setTimeout(() => {
+      const current = DQ.forecast(a), candidate = DQ.forecast(a, b);
+      if (!current || !candidate || current.blocked || candidate.blocked) { el.textContent = 'This build cannot start the fight. Check level, location and ammunition.'; return; }
+      el.textContent = `Current build: ${current.wins}/${current.trials} wins. With ${D.ITEMS[b].name}: ${candidate.wins}/${candidate.trials} wins. Current health and available food; equipment stays as equipped.`;
+    }, 30);
+  },
+  forecast: a => { const el = document.getElementById('fc-' + a); if (el) el.textContent = 'Simulating…'; setTimeout(() => { const r = DQ.forecast(a); if (!el) return; if (!r || r.blocked) { el.innerHTML = '<span class="bad">Cannot fight it right now.</span>'; return; } const pct = Math.round(r.winRate * 100); el.innerHTML = `<b class="${pct >= 80 ? 'ok' : pct >= 40 ? '' : 'bad'}">${pct >= 80 ? 'Favourable' : pct >= 40 ? 'Uncertain' : 'Dangerous'}</b> · ${r.wins}/${r.trials} simulated wins at your current health, with your available food${r.wins ? ` · about ${Math.round(r.avgMs / 1000)}s · ${r.foodPerKill.toFixed(1)} food` : ''}`; }, 30); },
 });
 document.addEventListener('change', e => {
   const t = e.target, k = t.dataset && t.dataset.in; if (k !== 'qrule' && k !== 'qpace') return;

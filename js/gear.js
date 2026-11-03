@@ -1,35 +1,43 @@
-/* Idlewick: gear icons, painted at 32x32 with a different design at every tier.
+/* Idlewick: gear icons, painted at 64x64 with a different design at every tier.
    A bronze sword and an astral sword no longer share a silhouette: guards, blades, crests, horns, trims and glows change as the metal improves.
    Anything without a painted icon (tools, unique drops) keeps its line icon. */
 (() => {
 const DQ = window.DQ, D = DQ.data, { esc } = DQ;
-const N = 32;
+const N = 64;
 const P = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
 const lit = (c, t) => t >= 0 ? mix(c, [255, 255, 255], t) : mix(c, [0, 0, 0], -t);
 const INK = [26, 18, 18], GOLD = [238, 198, 96], GOLDD = [170, 124, 44], WOOD = [138, 94, 52], LEATHER = [120, 78, 44];
 
 function paintr() {
-  const px = new Array(N * N).fill(null);
+  const pixels = new Array(N * N).fill(null);
+  const put = (x,y,c) => { x=Math.round(x); y=Math.round(y); if(x>=0&&y>=0&&x<N&&y<N)pixels[y*N+x]=c; };
   const o = {
-    px, set(x, y, c) { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < N && y < N) px[y * N + x] = c; },
-    get(x, y) { return x >= 0 && y >= 0 && x < N && y < N ? px[y * N + x] : null; },
-    rect(x, y, w, h, c) { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) o.set(x + i, y + j, c); },
-    disc(cx, cy, r, c) { for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) if (i * i + j * j <= r * r + r * .5) o.set(cx + i, cy + j, c); },
-    ell(cx, cy, rx, ry, c) { for (let j = -ry; j <= ry; j++) for (let i = -rx; i <= rx; i++) if (i * i / (rx * rx + .3) + j * j / (ry * ry + .3) <= 1) o.set(cx + i, cy + j, c); },
-    line(x0, y0, x1, y1, c) { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1) * 2; for (let i = 0; i <= n; i++) o.set(x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n, c); },
-    poly(pts, fn) { let y0 = 1e9, y1 = -1e9; pts.forEach(p => { y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); });
-      for (let y = Math.floor(y0); y <= y1; y++) { const xs = []; for (let i = 0; i < pts.length; i++) { const [ax, ay] = pts[i], [bx, by] = pts[(i + 1) % pts.length]; if ((ay <= y + .5 && by > y + .5) || (by <= y + .5 && ay > y + .5)) xs.push(ax + (y + .5 - ay) / (by - ay) * (bx - ax)); }
-        xs.sort((a, b) => a - b); for (let k = 0; k + 1 < xs.length; k += 2) for (let x = Math.round(xs[k]); x < Math.round(xs[k + 1]); x++) o.set(x, y, typeof fn === 'function' ? fn(x, y) : fn); } },
-    /* draw along a direction: s runs along it, w across it */
-    along(h, s0, s1, w0, w1, fn, step = .5) { for (let s = s0; s <= s1; s += step) for (let w = w0; w <= w1; w += step) { const c = fn(s, w); if (c) o.set(h[0] + (s * .7071) + (w * .7071), h[1] - (s * .7071) + (w * .7071), c); } },
-    finish() { const out = new Uint8ClampedArray(N * N * 4);
-      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { let c = px[y * N + x], i = (y * N + x) * 4;
-        if (!c) { const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => o.get(x + dx, y + dy)); if (nb) c = INK; }
-        if (c) { out[i] = c[0]; out[i + 1] = c[1]; out[i + 2] = c[2]; out[i + 3] = 255; } }
-      return out; },
-  };
-  return o;
+    px:pixels,
+    set(x,y,c) { for(let j=0;j<2;j++)for(let i=0;i<2;i++)put(x*2+i,y*2+j,c); },
+    get(x,y) { return x>=0&&y>=0&&x<32&&y<32 ? pixels[Math.round(y*2)*N+Math.round(x*2)] : null; },
+    rect(x,y,w,h,c) { for(let j=0;j<h*2;j++)for(let i=0;i<w*2;i++)put(x*2+i,y*2+j,c); },
+    disc(cx,cy,r,c) { for(let j=-r*2;j<=r*2;j++)for(let i=-r*2;i<=r*2;i++)if(i*i+j*j<=r*r*4)put(cx*2+i,cy*2+j,c); },
+    ell(cx,cy,rx,ry,c) { for(let j=-ry*2;j<=ry*2;j++)for(let i=-rx*2;i<=rx*2;i++)if(i*i/(rx*rx*4)+j*j/(ry*ry*4)<=1)put(cx*2+i,cy*2+j,c); },
+    line(x,y,xx,yy,c) { const n=Math.max(Math.abs(xx-x),Math.abs(yy-y),1)*2;for(let i=0;i<=n;i++)put((x+(xx-x)*i/n)*2,(y+(yy-y)*i/n)*2,c); },
+    poly(pts,fn) {
+      const points=pts.map(([x,y])=>[x*2,y*2]);
+      for(let y=Math.floor(Math.min(...points.map(p=>p[1])));y<=Math.max(...points.map(p=>p[1]));y++) {
+        const xs=[];for(let i=0;i<points.length;i++){const [ax,ay]=points[i],[bx,by]=points[(i+1)%points.length];if((ay<=y+.5&&by>y+.5)||(by<=y+.5&&ay>y+.5))xs.push(ax+(y+.5-ay)/(by-ay)*(bx-ax));}
+        xs.sort((a,b)=>a-b);for(let i=0;i+1<xs.length;i+=2)for(let x=Math.ceil(xs[i]);x<xs[i+1];x++)put(x,y,typeof fn==='function'?fn(x/2,y/2):fn);
+      }
+    },
+    along(h,s0,s1,w0,w1,fn,step=.25) { for(let s=s0;s<=s1;s+=step)for(let w=w0;w<=w1;w+=step){const c=fn(s,w);if(c)put((h[0]+(s+w)*.7071)*2,(h[1]+(-s+w)*.7071)*2,c);} },
+    finish() {
+      const out = new Uint8ClampedArray(N*N*4);
+      for(let y=0;y<N;y++)for(let x=0;x<N;x++) {
+        let c=pixels[y*N+x];
+        if(!c&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>x+dx>=0&&y+dy>=0&&x+dx<N&&y+dy<N&&pixels[(y+dy)*N+x+dx]))c=INK;
+        if(c){const i=(y*N+x)*4;out[i]=c[0];out[i+1]=c[1];out[i+2]=c[2];out[i+3]=255;}
+      }
+      return out;
+    }
+  };return o;
 }
 
 /* ---------- palettes ---------- */
@@ -176,7 +184,7 @@ const shield = t => {
 };
 
 /* ---------- jewellery: the item's own colour is the gem ---------- */
-const ring = id => { const o = paintr(), g = P(D.ITEMS[id].col); o.ell(16, 19, 8, 8, GOLD); o.ell(16, 19, 5, 5, null); for (let j = -5; j <= 5; j++) for (let i = -5; i <= 5; i++) if (i * i / 25 + j * j / 25 <= 1) o.px[(19 + j) * N + 16 + i] = null; o.ell(16, 19, 8, 8, null);
+const ring = id => { const o = paintr(), g = P(D.ITEMS[id].col); o.ell(16, 19, 8, 8, GOLD); o.ell(16, 19, 5, 5, null); o.ell(16, 19, 8, 8, null);
   for (let a = 0; a < 360; a += 3) for (const r of [6, 7, 8]) { const x = 16 + Math.cos(a * Math.PI / 180) * r, y = 20 + Math.sin(a * Math.PI / 180) * r; o.set(x, y, a > 200 && a < 340 ? lit(GOLD, .3) : a > 20 && a < 160 ? GOLDD : GOLD); }
   o.poly([[16, 4], [21, 8], [16, 14], [11, 8]], (x, y) => x < 16 ? lit(g, .25) : g); o.set(14, 7, [255, 255, 255]); o.line(11, 8, 21, 8, lit(g, -.3)); return o; };
 const amulet = id => { const o = paintr(), g = P(D.ITEMS[id].col); for (let a = 20; a <= 160; a += 4) { const x = 16 + Math.cos(a * Math.PI / 180) * 11, y = 2 + Math.sin(a * Math.PI / 180) * 18; o.set(x, y, GOLD); o.set(x + 1, y, GOLDD); }

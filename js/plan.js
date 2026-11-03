@@ -111,19 +111,23 @@ DQ.supplyInfo = a => {
 };
 
 /* ---------- Battle forecast: a quick dry run against a monster, then everything is put back ---------- */
-DQ.forecast = monId => {
+DQ.forecast = (monId, gearId) => {
   const snap = JSON.stringify(S()), act = DQ.act, fight = DQ.fight, hist = JSON.stringify(DQ.hist), m = D.MON[monId];
-  if (m.town !== S().town) return null;
-  DQ.forecasting = true; const res = { trials: 6, wins: 0, deaths: 0, ms: 0, eaten: 0 };
+  if (!m || m.town !== S().town) return null;
+  if (gearId && (!DQ.have(gearId) || !DQ.canEquip(gearId).ok || D.ITEMS[gearId].slot === 'ammo')) return null;
+  const awayDone = DQ.awayDone;
+  DQ.forecasting = true; const res = { trials: 24, wins: 0, deaths: 0, ms: 0, eaten: 0 };
   try {
     for (let t = 0; t < res.trials; t++) {
-      DQ.S = JSON.parse(snap); DQ.S.hp = DQ.maxHp(); DQ.S.queue = []; DQ.act = null; DQ.fight = null;
+      DQ.S = JSON.parse(snap); DQ.S.queue = [];
+      if (gearId) DQ.equipItem(gearId);
+      DQ.fxDirty(); DQ.act = null; DQ.fight = null;
       if (!DQ.startAct('fight', monId, { quiet: true })) { res.blocked = true; break; }
       const k0 = DQ.S.stats.kill; let ms = 0, eaten = 0, died = false;
       while (ms < 20 * 60000) { const sum = DQ.simulate(4000); ms += 4000; eaten += sum.eaten || 0; if (sum.died || !DQ.act) { died = !!sum.died; break; } if (DQ.S.stats.kill > k0) break; }
       if (DQ.S.stats.kill > k0) { res.wins++; res.ms += ms; res.eaten += eaten; } else res.deaths++;
     }
-  } finally { DQ.S = JSON.parse(snap); DQ.act = act; DQ.fight = fight; DQ.hist = JSON.parse(hist); DQ.forecasting = false; DQ.fxDirty(); }
+  } finally { DQ.S = JSON.parse(snap); DQ.act = act; DQ.fight = fight; DQ.hist = JSON.parse(hist); DQ.forecasting = false; DQ.awayDone = awayDone; DQ.fxDirty(); }
   res.winRate = res.wins / res.trials; res.avgMs = res.wins ? res.ms / res.wins : null; res.foodPerKill = res.wins ? res.eaten / res.wins : null;
   return res;
 };

@@ -77,104 +77,78 @@ DQ.toast = (msg, bad) => {
   $$('.toast').forEach(x => x.remove()); fxEl.appendChild(t); setTimeout(() => t.remove(), 2600);
 };
 
-/* ---------- notifications ----------
-   Three tiers keep the corner calm:
-   - now:    deaths, warnings, rare loot, finished tasks. A card of their own, at most two at a time.
-   - digest: level-ups, unlocks, quests, perks, achievements. Anything arriving close together is merged into ONE
-             "What's new" card, and a lone level-up never pops a card more than once every 45 seconds.
-   - quiet:  tips and chatter. They go to the bell in the top bar only.
-   Everything is also kept in the bell's recent list, so nothing is lost. */
-const queue = [], MAX_NOW = 2;
+/* Routine progress stays in the interface and recent activity.
+   Only interruptions and boss victories receive a corner card. */
+const queue = [], MAX_NOW = 1;
 const live = () => $$('.note', notesEl).filter(n => !n.classList.contains('out'));
-const nowLive = () => live().filter(n => !n.classList.contains('digest')).length;
+const nowLive = () => live().length;
 DQ.noteLog = []; DQ.noteMissed = 0;
-const keyOf = o => o.key || '';
-const SHOW_INFO = /^(taskdone|offline|death|stopped|unpaid|qskip|chest)$/, BST = /^(beast|research):/;
-const tierOf = o => {
-  const k = keyOf(o), kd = o.kind;
-  if (o.show || kd === 'death' || kd === 'warn' || kd === 'boss' || kd === 'loot' || SHOW_INFO.test(k)) return 'now';
-  if (kd === 'info' && !BST.test(k)) return 'quiet';
-  return 'digest';
+DQ.notificationTier = o => ['death', 'warn', 'boss'].includes(o.kind) ? 'now' : 'quiet';
+DQ.notificationPage = o => {
+  if (o.page) return o.page;
+  const k = o.key || '', D = DQ.data;
+  if (/^(q|mq:)/.test(k)) return 'quests';
+  if (k.startsWith('unlock:')) return (D.SK[k.slice(7)] || {}).page || 'skillsummary';
+  if (k.startsWith('lvl:')) return (D.SK[k.slice(4)] || {}).page || 'skillsummary';
+  if (k.startsWith('perk:')) return (D.SK[Object.keys(D.SK).find(sk => k.startsWith('perk:' + sk))] || {}).page || 'skillsummary';
+  if (k === 'adv') return 'skillsummary';
+  if (k.startsWith('ach') || k === 'mastery') return 'achievements';
+  if (/^(beast:|research:|pet:|bond$)/.test(k)) return 'bestiary';
+  if (k.startsWith('tech:')) return 'research';
+  if (k.startsWith('project:')) return 'projects';
+  if (k === 'house' || k.startsWith('furn:')) return 'house';
+  if (k.startsWith('w:') || k === 'unpaid') return 'hirelings';
+  if (k === 'overflow') return 'bank';
+  if (o.kind === 'loot') return 'character';
+  if (o.kind === 'boss') return 'combat';
+  if (o.kind === 'death') return 'combat';
+  return 'overview';
 };
-const groupOf = o => {
-  const k = keyOf(o);
-  if (k.startsWith('lvl:') || k === 'adv') return 'lvl';
-  if (/^(unlock:|plan$|mq:|tech:|mastery$|house$)/.test(k)) return 'unl';
-  if (/^(perk:|bond$|furn:)/.test(k)) return 'perk';
-  if (k.startsWith('q')) return 'qst';
-  if (k.startsWith('ach')) return 'ach';
-  if (BST.test(k)) return 'bst';
-  return 'misc';
+DQ.noticeCount = pages => {
+  const badges = DQ.S.noticeBadges || {};
+  return [...new Set(Array.isArray(pages) ? pages : [pages])].reduce((n, page) => n + Object.keys(badges[page] || {}).length, 0);
 };
-const num = t => +((String(t).match(/\d+/) || [0])[0]);
-const isWeak = o => { const k = keyOf(o); return k.startsWith('lvl:') || (k === 'adv' && num(o.title) % 5 !== 0); };
+DQ.markNoticesRead = page => {
+  if (DQ.S.noticeBadges) delete DQ.S.noticeBadges[page];
+  $$('.note', notesEl).filter(el => el.dataset.page === page).forEach(dismiss);
+};
+const badgeNote = o => {
+  const page = DQ.notificationPage(o);
+  if (DQ.ui && DQ.ui.view === page) return;
+  const badges = DQ.S.noticeBadges = DQ.S.noticeBadges || {};
+  const group = badges[page] = badges[page] || {};
+  group[o.key || o.kind || 'update'] = String(o.title || 'Update').slice(0, 120);
+  const keys = Object.keys(group);
+  if (keys.length > 20) delete group[keys[0]];
+};
 const logNote = o => { DQ.noteLog.unshift({ t: Date.now(), o, silent: false }); if (DQ.noteLog.length > 40) DQ.noteLog.pop(); };
 const markSilent = (o, count) => { const e = DQ.noteLog.find(x => x.o === o); if (e) { e.silent = true; if (count) DQ.noteMissed++; } };
 DQ.notify = o => {
   if (DQ.sim.on) { DQ.sim.notes.push(o); return; }
-  const s = DQ.S.settings; logNote(o);
+  const s = DQ.S.settings; logNote(o); badgeNote(o);
+  if (DQ.ui && DQ.ui.view === DQ.notificationPage(o)) {
+    markSilent(o, false);
+    if (DQ.notificationTier(o) === 'now') {
+      DQ.ui.pageNotice = { page: DQ.notificationPage(o), title: String(o.title || ''), text: String(o.text || '') };
+      if (DQ.ui.renderPageNotice) DQ.ui.renderPageNotice();
+    }
+    return;
+  }
   if (!s.notify && !o.force) { markSilent(o, false); return; }
-  const tier = tierOf(o);
+  const tier = DQ.notificationTier(o);
   if (tier === 'quiet') { markSilent(o, true); return; }
-  if (tier === 'digest') { addPending(o); return; }
-  if (o.key) { $$('.note[data-key="' + o.key + '"]').forEach(n => n.remove()); const i = queue.findIndex(q => q.key === o.key); if (i >= 0) queue.splice(i, 1); }
+  if (o.key) { $$('.note', notesEl).filter(n => n.dataset.key === o.key).forEach(n => n.remove()); const i = queue.findIndex(q => q.key === o.key); if (i >= 0) queue.splice(i, 1); }
   if (nowLive() >= MAX_NOW) { queue.push(o); if (queue.length > 6) queue.shift(); return; }
   showNote(o);
 };
 function pump() { while (queue.length && nowLive() < MAX_NOW) showNote(queue.shift()); }
 
-/* digest: collect for a moment, then show one card */
-let pend = [], pendT = 0, pendFirst = 0, dg = null, lastWeakAt = 0;
-function addPending(o) {
-  if (o.key) { const i = pend.findIndex(p => p.key === o.key); if (i >= 0) pend.splice(i, 1); }
-  pend.push(o); const t = performance.now(); if (!pendFirst) pendFirst = t;
-  clearTimeout(pendT); pendT = setTimeout(flush, Math.max(0, Math.min(1100, 3500 - (t - pendFirst))));
-}
-const dgLive = () => dg && dg.el && dg.el.isConnected && !dg.el.classList.contains('out') && Date.now() - dg.born < 14000;
-function flush() {
-  pendT = 0; pendFirst = 0; const items = pend; pend = []; if (!items.length) return;
-  if (dgLive()) { items.forEach(dgAdd); renderDg(true); return; }
-  if (items.every(isWeak)) { const now = Date.now(); if (now - lastWeakAt < 45000) { items.forEach(o => markSilent(o, false)); return; } lastWeakAt = now; }
-  if (items.length === 1) { showNote(items[0]); return; }
-  startDg(items);
-}
-function dgAdd(o) { if (o.key) dg.items = dg.items.filter(x => x.key !== o.key); dg.items.push(o); }
-const short = t => String(t).replace(/^Hero level (\d+)$/, 'Hero $1').replace(/ level (\d+)$/, ' $1');
 const trunc = (t, n) => { t = String(t || '').replace(/<[^>]+>/g, ''); return t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t; };
-function dgRows() {
-  const items = dg.items, by = g => items.filter(o => groupOf(o) === g), rows = [];
-  const one = o => { const a = inferActions(o); return { icon: o.icon, col: o.col, lead: o.title, detail: trunc(o.text, 78), fn: a[0] && a[0].fn }; };
-  by('unl').forEach(o => rows.push(one(o)));
-  const q = by('qst'); if (q.length === 1) rows.push(one(q[0])); else if (q.length) rows.push({ icon: 'quest', col: q[0].col, lead: `${q.length} quest updates`, detail: trunc(q.map(o => o.title).join(' · '), 78), fn: () => DQ.go('quests') });
-  by('perk').forEach(o => rows.push(one(o)));
-  const ac = by('ach'); if (ac.length === 1) rows.push(one(ac[0])); else if (ac.length) rows.push({ icon: 'trophy', col: '#f3d58a', lead: `${ac.length} achievements`, detail: trunc(ac.map(o => o.title.replace(/^Achievement: /, '')).join(' · '), 78), fn: () => DQ.go('achievements') });
-  const bs = by('bst'); if (bs.length === 1) rows.push(one(bs[0])); else if (bs.length) rows.push({ icon: 'book', col: bs[0].col, lead: `${bs.length} field guide entries`, detail: trunc(bs.map(o => o.title.replace(/^Bestiary: /, '')).join(' · '), 78), fn: () => DQ.go('bestiary') });
-  by('misc').forEach(o => rows.push(one(o)));
-  const lv = by('lvl'); if (lv.length) { const sk = lv.find(o => o.key !== 'adv'); rows.push({ icon: sk ? sk.icon : 'star', col: sk ? sk.col : '#d8a64a', lead: 'Level up', detail: trunc(lv.map(o => short(o.title)).join(' · '), 78), fn: () => DQ.go(sk ? (DQ.data.SK[keyOf(sk).slice(4)] || {}).page || 'overview' : 'overview') }); }
-  return rows;
-}
-function renderDg(merged) {
-  const rows = dgRows(), shown = rows.slice(0, 4), more = rows.length - shown.length, el = dg.el;
-  el.innerHTML = `<div class="dg-h"><b>What's new</b><button class="n-x" aria-label="Dismiss">${ico('close')}</button></div><div class="dg-rows">${shown.map((r, i) => `<button class="dg-row" data-i="${i}" style="--c:${r.col || '#d8a64a'};--r:${i}"><span class="n-ic">${ico(r.icon || 'star')}</span><span class="dg-t"><b>${r.lead}</b>${r.detail ? `<small>${esc(r.detail)}</small>` : ''}</span>${ico('chevron')}</button>`).join('')}${more > 0 ? `<button class="dg-row more" data-i="more"><span class="dg-t"><b>+${more} more</b><small>Open recent activity</small></span>${ico('chevron')}</button>` : ''}</div><i class="n-t"></i>`;
-  $('.n-x', el).onclick = () => dismiss(el);
-  $$('.dg-row', el).forEach(b => b.onclick = () => { dismiss(el); if (b.dataset.i === 'more') DQ.openBell(); else { const r = shown[+b.dataset.i]; r && r.fn && r.fn(); } });
-  const ttl = Math.max(3000, Math.min(Math.min(16000, 6500 + 1800 * shown.length), 15000 - (Date.now() - dg.born))), bar = $('.n-t', el); bar.style.animationDuration = ttl + 'ms';
-  clearTimeout(dg.timer); dg.left = ttl; const arm = () => { dg.started = performance.now(); dg.timer = setTimeout(() => dismiss(el), dg.left); bar.style.animationPlayState = 'running'; };
-  el.onmouseenter = () => { clearTimeout(dg.timer); dg.left -= performance.now() - dg.started; bar.style.animationPlayState = 'paused'; };
-  el.onmouseleave = arm; arm();
-  if (merged) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
-}
-function startDg(items) {
-  dg = { items: [], born: Date.now(), el: document.createElement('div') }; items.forEach(dgAdd);
-  dg.el.className = 'note digest'; dg.el.setAttribute('role', 'status'); dg.el.style.setProperty('--c', '#d8a64a'); notesEl.appendChild(dg.el); renderDg(false);
-  const lead = dg.items.find(o => !isWeak(o) && o.sound !== false) || dg.items.find(o => o.sound !== false); DQ.sfx((lead && lead.sound) || 'notify');
-  if (dg.items.some(o => o.burst)) setTimeout(() => dg && dg.el && DQ.burstEl($('.n-ic', dg.el), '#d8a64a', 22), 120);
-}
 /* the bell: everything recent, including what never got a card */
 const ago = t => { const s = Math.round((Date.now() - t) / 1000); return s < 60 ? 'just now' : s < 3600 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`; };
 DQ.openBell = () => {
   DQ.noteMissed = 0; const L = DQ.noteLog.slice(0, 25);
-  const body = L.length ? `<div class="bell-list">${L.map((e, i) => { const o = e.o, a = inferActions(o)[0]; return `<div class="bell-row ${e.silent ? 'quiet' : ''}" style="--c:${o.col || '#d8a64a'}"><span class="n-ic">${ico(o.icon || 'star')}</span><div class="bell-t"><b>${o.title}</b>${o.text ? `<span>${trunc(o.text, 140)}</span>` : ''}<small>${ago(e.t)}</small></div>${a ? `<button class="btn sm" data-i="${i}">${esc(a.label)}</button>` : ''}</div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing yet. Level-ups, unlocks and finds will be listed here.</p>';
+  const body = L.length ? `<div class="bell-list">${L.map((e, i) => { const o = e.o, a = inferActions(o)[0]; return `<div class="bell-row ${e.silent ? 'quiet' : ''}" style="--c:${o.col || '#d8a64a'}"><span class="n-ic">${ico(o.icon || 'star')}</span><div class="bell-t"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(trunc(o.text, 140))}</span>` : ''}<small>${ago(e.t)}</small></div>${a ? `<button class="btn sm" data-i="${i}">${esc(a.label)}</button>` : ''}</div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing yet. Level-ups, unlocks and finds will be listed here.</p>';
   DQ.modal({ title: 'Recent activity', wide: true, body, actions: [{ label: 'Close', primary: true }] });
   $$('.bell-row .btn').forEach(b => b.onclick = () => { const e = L[+b.dataset.i], a = e && inferActions(e.o)[0]; DQ.closeModal(); a && a.fn && a.fn(); });
 };
@@ -185,7 +159,7 @@ function inferActions(o) {
   const k = o.key || '', D = DQ.data, txt = (o.text || '') + ' ' + o.title;
   const skillPage = sk => D.SK[sk] ? D.SK[sk].page : 'overview';
   if (k.startsWith('lvl:') || k.startsWith('perk:')) { const sk = k.startsWith('lvl:') ? k.slice(4) : Object.keys(D.SK).find(s => k.startsWith('perk:' + s)); return [{ label: `Open ${D.SK[sk] ? D.SK[sk].name : 'skill'}`, fn: go(skillPage(sk)) }]; }
-  if (k === 'adv') return [{ label: 'See your skills', fn: go('overview') }];
+  if (k === 'adv') return [{ label: 'See your skills', fn: go('skillsummary') }];
   if (k.startsWith('ach')) return [{ label: 'View achievements', fn: go('achievements') }];
   if (k.startsWith('qd:') || k.startsWith('qr') || k.startsWith('q')) return [{ label: 'Open quests', fn: go('quests') }];
   if (k === 'death') return [{ label: 'Check gear', fn: go('character') }, { label: 'Combat page', fn: go('combat') }];
@@ -205,10 +179,11 @@ function inferActions(o) {
   return [{ label: 'Open Home', fn: go('overview') }];
 }
 function showNote(o) {
+  if (DQ.ui && DQ.ui.view === DQ.notificationPage(o)) return;
   const acts = inferActions(o);
   const el = document.createElement('div'); el.className = 'note ' + (o.kind || ''); el.style.setProperty('--c', o.col || '#d8a64a'); if (o.key) el.dataset.key = o.key;
-  el.setAttribute('role', 'status');
-  el.innerHTML = `<span class="n-ic">${ico(o.icon || 'star')}</span><div class="n-b"><b>${o.title}</b>${o.text ? `<span>${o.text}</span>` : ''}${acts.length ? `<span class="n-acts">${acts.map((a, i) => `<button class="n-act" data-i="${i}">${esc(a.label)}</button>`).join('')}</span>` : ''}</div><button class="n-x" aria-label="Dismiss">${ico('close')}</button><i class="n-t"></i>`;
+  el.setAttribute('role', 'status'); el.dataset.page = DQ.notificationPage(o);
+  el.innerHTML = `<span class="n-ic">${ico(o.icon || 'star')}</span><div class="n-b"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(o.text)}</span>` : ''}${acts.length ? `<span class="n-acts">${acts.map((a, i) => `<button class="n-act" data-i="${i}">${esc(a.label)}</button>`).join('')}</span>` : ''}</div><button class="n-x" aria-label="Dismiss">${ico('close')}</button><i class="n-t"></i>`;
   notesEl.appendChild(el);
   const ttl = o.ttl || 7500; let timer, left = ttl, started = performance.now();
   const bar = $('.n-t', el); bar.style.animationDuration = ttl + 'ms';
@@ -221,22 +196,45 @@ function showNote(o) {
   if (o.burst) setTimeout(() => DQ.burstEl($('.n-ic', el), o.col || '#d8a64a', 22), 120);
   return el;
 }
-function dismiss(el) { if (!el || el.classList.contains('out')) return; el.classList.add('out'); if (dg && dg.el === el) clearTimeout(dg.timer); setTimeout(() => { el.remove(); pump(); }, 320); }
+function dismiss(el) { if (!el || el.classList.contains('out')) return; el.classList.add('out'); setTimeout(() => { el.remove(); pump(); }, 320); }
 
 /* ---------- modal ---------- */
-let modalEl = null;
-DQ.closeModal = () => { if (modalEl) { const m = modalEl; modalEl = null; m.classList.add('out'); setTimeout(() => m.remove(), 200); } };
+let modalEl = null, modalTrigger = null;
+const inertBefore = new Map();
+DQ.closeModal = () => {
+  if (!modalEl) return;
+  modalEl.remove(); modalEl = null;
+  for (const [el, inert] of inertBefore) el.inert = inert;
+  inertBefore.clear();
+  if (modalTrigger && modalTrigger.isConnected) modalTrigger.focus();
+};
 DQ.modal = o => {
-  DQ.closeModal();
-  const m = document.createElement('div'); m.className = 'modal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
-  m.innerHTML = `<div class="m-card ${o.wide ? 'wide' : ''}"><h2>${o.title}</h2><div class="m-body">${o.body || ''}</div><div class="m-act">${(o.actions || [{ label: 'Close' }]).map((a, i) => `<button class="btn ${a.primary ? 'primary' : ''}" data-i="${i}">${esc(a.label)}</button>`).join('')}</div></div>`;
+  DQ.closeModal(); modalTrigger = document.activeElement;
+  const m = document.createElement('div'); m.className = 'modal';
+  m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+  m.setAttribute('aria-labelledby', 'active-dialog-title'); m.dataset.sticky = o.sticky ? 'true' : 'false';
+  m.innerHTML = `<div class="m-card ${o.wide ? 'wide' : ''}"><h2 id="active-dialog-title">${esc(o.title)}</h2><div class="m-body">${o.body || ''}</div><div class="m-act">${(o.actions || [{ label: 'Close' }]).map((a, i) => `<button class="btn ${a.primary ? 'primary' : ''}" data-i="${i}">${esc(a.label)}</button>`).join('')}</div></div>`;
+  for (const el of document.body.children) { inertBefore.set(el, el.inert); el.inert = true; }
   document.body.appendChild(m); modalEl = m;
-  $$('.m-act .btn', m).forEach(b => b.onclick = () => { const a = (o.actions || [{}])[+b.dataset.i]; if (a.fn && a.fn(m) === false) return; DQ.closeModal(); });
+  $$('.m-act .btn', m).forEach(b => b.onclick = () => {
+    const a = (o.actions || [{}])[+b.dataset.i];
+    if (a.fn && a.fn(m) === false) return;
+    if (modalEl === m) DQ.closeModal();
+  });
   m.addEventListener('pointerdown', e => { if (e.target === m && !o.sticky) DQ.closeModal(); });
   const f = $('.btn.primary', m) || $('.btn', m); if (f) f.focus();
   return m;
 };
-addEventListener('keydown', e => { if (e.key === 'Escape' && modalEl && !modalEl.querySelector('.sticky')) DQ.closeModal(); });
+addEventListener('keydown', e => {
+  if (!modalEl) return;
+  if (e.key === 'Escape' && modalEl.dataset.sticky !== 'true') { e.preventDefault(); DQ.closeModal(); }
+  if (e.key !== 'Tab') return;
+  const controls = [...modalEl.querySelectorAll('button, input, select, textarea, a[href], [tabindex="0"]')].filter(el => !el.disabled && el.offsetParent);
+  const first = controls[0], last = controls[controls.length - 1];
+  if (!first) { e.preventDefault(); return; }
+  if (e.shiftKey && (document.activeElement === first || !modalEl.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && (document.activeElement === last || !modalEl.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+});
 
 /* ---------- tooltips ---------- */
 DQ.tips = {};

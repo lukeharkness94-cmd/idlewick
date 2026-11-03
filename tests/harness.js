@@ -1,5 +1,5 @@
 const fs=require('fs'),vm=require('vm');
-const root='/home/user/dashboard-quest/src/js/';
+const root=require('path').join(__dirname,'../js/');
 const store={};
 const noop=()=>{};
 const el=()=>({addEventListener:noop,classList:{add:noop,remove:noop,toggle:noop,contains:()=>false},style:{},querySelector:()=>null,querySelectorAll:()=>[],appendChild:noop});

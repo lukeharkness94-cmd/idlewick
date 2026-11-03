@@ -105,7 +105,12 @@ DQ.compareItem = id => {
   }
   if (!it.slot) return null;
   const slot = it.slot, curId = slot === 'ammo' ? st.ammo.id : st.equip[slot], saved = { equip: Object.assign({}, st.equip), ammo: Object.assign({}, st.ammo) };
-  if (curId === id) return { same: true, cur: it, rows: [] };
+  const current = curId ? D.ITEMS[curId] : null;
+  const itemRows = Object.keys(BONUS_NAMES).filter(k => (it.b && it.b[k]) || (current && current.b && current.b[k])).map(k => ({
+    key: k, n: BONUS_NAMES[k], a: (current && current.b && current.b[k]) || 0, b: (it.b && it.b[k]) || 0,
+    d: ((it.b && it.b[k]) || 0) - ((current && current.b && current.b[k]) || 0)
+  }));
+  if (curId === id) return { same: true, slot, cur: it, rows: [], itemRows };
   const read = () => ({ b: Object.assign({}, DQ.bonus()), p: DQ.pstats(), style: DQ.weaponStyle(), speed: (D.WTYPES[D.weaponType()] || { speed: 2000 }).speed });
   let A, B;
   try {
@@ -124,7 +129,7 @@ DQ.compareItem = id => {
   if (slot === 'weapon' && B.style === 'ranged' && !(st.ammo.id && (st.ammo.n > 0 || DQ.have(st.ammo.id)))) need.push('Needs arrows equipped');
   if (slot === 'weapon' && B.style === 'magic' && DQ.have('rune') < 1) need.push('Needs Arcane runes');
   const can = DQ.canEquip(id);
-  return { slot, cur: curId ? D.ITEMS[curId] : null, rows, styleChange: A.style !== B.style ? [A.style, B.style] : null, need, unmet: can.ok ? '' : can.why };
+  return { slot, cur: current, rows, itemRows, styleChange: A.style !== B.style ? [A.style, B.style] : null, need, unmet: can.ok ? '' : can.why };
 };
 
 /* ---------- The playtest report: plain text, easy to paste ---------- */

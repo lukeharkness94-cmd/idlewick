@@ -15,7 +15,7 @@ DQ.addXp = (sk, base, o = {}) => {
   if (!DQ.skillUnlocked(sk)) return 0;
   const amt = o.raw ? base : base * DQ.xpMult(sk), before = DQ.lvl(sk), advB = DQ.advLvl();
   S().xp[sk] = Math.min(2e8, S().xp[sk] + amt);
-  DQ.hist[DQ.hist.length - 1][sk] = (DQ.hist[DQ.hist.length - 1][sk] || 0) + amt;
+  if (!DQ.sim.on) DQ.hist[DQ.hist.length - 1][sk] = (DQ.hist[DQ.hist.length - 1][sk] || 0) + amt;
   if (DQ.sim.on) DQ.sim.xp[sk] = (DQ.sim.xp[sk] || 0) + amt; else DQ.pulse(`[data-skill="${sk}"]`);
   const after = DQ.lvl(sk);
   if (after > before) onLevel(sk, before, after);
@@ -202,10 +202,10 @@ DQ.startAct = (kind, id, o = {}) => {
   }
   if (DQ.act) { DQ.act = null; DQ.fight = kind === 'fight' ? DQ.fight : null; }
   const pace = o.pace || S().defPace || 'steady', rule = o.rule || 'none';
-  DQ.act = { kind, id, t0: Date.now(), pace, rule, count: 0, elapsed: 0 }; DQ.act.dur = DQ.actDur(DQ.act);
+  DQ.act = { kind, id, t0: Date.now(), pace, rule, count: 0, elapsed: 0, progress: 0 }; DQ.act.dur = DQ.actDur(DQ.act);
   const sk = DQ.actSkill(DQ.act); DQ.act.lvlTarget = sk ? Math.min(99, DQ.lvl(sk) + 1) : 0;
   S().act = { kind, id, pace, rule, count: 0, elapsed: 0, lvlTarget: DQ.act.lvlTarget }; S().lastPace = pace;
-  if (!DQ.forecasting) { DQ.sfx('start'); DQ.log(DQ.actLabel() + '.'); DQ.emit('act'); } return true;
+  if (!DQ.forecasting) { S().seen.firstTask = true; DQ.sfx('start'); DQ.log(DQ.actLabel() + '.'); DQ.emit('act'); } return true;
 };
 DQ.actDur = a => {
   let d = DQ.durFor(a.kind, a.id);
@@ -213,9 +213,11 @@ DQ.actDur = a => {
   return Math.round(d / D.PACE[a.pace || 'steady'].speed * DQ.buffMult('slow'));
 };
 DQ.stopAct = (silent, why) => {
-  if (!DQ.act) return; DQ.act = null; DQ.fight = null; S().act = null;
+  if (!DQ.act) return;
+  const stopped = DQ.act, stoppedPage = stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
+  DQ.act = null; DQ.fight = null; S().act = null;
   if (why && !DQ.forecasting) setTimeout(() => { if (!DQ.act) DQ.advanceQueue(); }, 0);
-  if (!DQ.sim.on) { if (!silent) { DQ.log('You stop what you were doing.'); DQ.sfx('stop'); } if (why && (S().queue || []).length) why += ' Moving on to your next queued task.'; if (why) DQ.notify({ kind: 'warn', key: 'stopped', icon: 'info', col: '#e5b04a', title: 'Task stopped', text: why, sound: 'stop', ttl: 9000 }); }
+  if (!DQ.sim.on) { if (!silent) { DQ.log('You stop what you were doing.'); DQ.sfx('stop'); } if (why && (S().queue || []).length) why += ' Moving on to your next queued task.'; if (why) DQ.notify({ kind: 'warn', key: 'stopped', page: stoppedPage, icon: 'info', col: '#e5b04a', title: 'Task stopped', text: why, sound: 'stop', ttl: 9000 }); }
   if (!DQ.forecasting) DQ.emit('act');
 };
 
@@ -470,9 +472,15 @@ DQ.buy = (id, qty = 1) => {
   S().coins -= price; DQ.give(id, qty); S().stats.bought += qty; if (it.type === 'tool') S().stats.tools++;
   DQ.sfx('buy'); DQ.achDirty = true; DQ.emit('shop'); return true;
 };
-DQ.sell = (id, qty) => {
-  const it = D.ITEMS[id]; qty = Math.min(qty, DQ.have(id) - (DQ.isEquipped(id) ? 0 : 0)); if (qty <= 0) return;
-  DQ.take(id, qty); const c = it.val * qty; DQ.addCoins(c); S().stats.sold += qty; DQ.sfx('sell'); DQ.achDirty = true; DQ.emit('shop'); return c;
+DQ.sell = (id, qty, from) => {
+  const it = D.ITEMS[id], store = from === 'pack' ? S().inv : from === 'bank' ? S().bank : null;
+  if (!it || !Number.isFinite(qty) || qty <= 0) return;
+  qty = Math.min(Math.floor(qty), store ? store[id] || 0 : DQ.have(id));
+  if (!qty) return;
+  if (store) { store[id] -= qty; if (!store[id]) delete store[id]; DQ.invDirty = true; }
+  else DQ.take(id, qty);
+  const coins = (it.val || 0) * qty;
+  DQ.addCoins(coins); S().stats.sold += qty; DQ.sfx('sell'); DQ.achDirty = true; DQ.emit('shop'); return coins;
 };
 DQ.sellJunk = () => { let c = 0; Object.keys({ ...S().inv, ...S().bank }).forEach(id => { if (D.ITEMS[id].type === 'junk') c += DQ.sell(id, DQ.have(id)) || 0; }); return c; };
 
@@ -487,22 +495,53 @@ DQ.noteAway = (gap, eff) => {
   const t = st.tele = st.tele || { adv: {}, skill: {}, first: {}, away: [], sessions: 0 };
   t.away.push({ at: Date.now(), gap, eff }); if (t.away.length > 20) t.away.shift();
 };
-DQ.simulate = (ms, real) => {
-  const sim = DQ.sim = { on: true, xp: {}, items: {}, coins: 0, kills: 0, levels: [], notes: [], adv: null, ms, real: real || ms, advFrom: DQ.advLvl(), eaten: 0, died: false, label: DQ.act ? DQ.actLabel() : '' };
-  const hpRegen = ms2 => Math.ceil(DQ.maxHp() / 50) * (1 + DQ.fx().regen) * (ms2 / 3000);
-  DQ.advanceWorld(real || ms);
-  const a = DQ.act;
-  if (a) {
-    const n = Math.min(Math.floor(ms / a.dur), 60000); let i = 0;
-    for (; i < n && DQ.act; i++) {
-      complete();
-      if (DQ.act && DQ.act.kind !== 'fight') S().hp = Math.min(DQ.maxHp(), S().hp + hpRegen(a.dur));
+/* One elapsed-time budget drives live play, forecasts and offline catch-up. */
+DQ.advanceTime = (effectiveMs, realMs = effectiveMs, partial = 0) => {
+  let realLeft = Math.max(0, realMs), effectiveLeft = Math.max(0, effectiveMs), actions = 0;
+  let progress = DQ.act ? partial : 0;
+  while (realLeft > .001) {
+    const a = DQ.act, duration = a ? Math.max(1, DQ.actDur(a)) : Infinity;
+    const ratio = effectiveLeft / realLeft;
+    let step = Math.min(1000, realLeft);
+    if (a && ratio > 0) step = Math.min(step, Math.max(0, duration - progress) / ratio);
+    for (const buff of DQ.buffs ? DQ.buffs() : []) step = Math.min(step, buff.until - S().gameTime);
+    for (const research of S().research.active) step = Math.min(step, research.left);
+    step = Math.max(.001, step);
+    const worked = Math.min(effectiveLeft, step * ratio);
+    if (!a || a.kind !== 'fight') {
+      S().hp = Math.min(DQ.maxHp(), S().hp + Math.ceil(DQ.maxHp() / 50) * (1 + DQ.fx().regen) * worked / 3000);
     }
-    sim.actions = i; sim.stopped = !DQ.act;
-    if (DQ.act) DQ.act.t0 = Date.now() - Math.max(0, ms - n * a.dur) % a.dur;
-  } else S().hp = Math.min(DQ.maxHp(), S().hp + hpRegen(ms));
-  sim.on = false; if (!DQ.forecasting) DQ.checkAch();
-  /* Replay the more important notices once the summary is up */
+    progress += a ? worked : 0;
+    DQ.advanceWorld(step);
+    realLeft = Math.max(0, realLeft - step);
+    effectiveLeft = Math.max(0, effectiveLeft - worked);
+    if (a && DQ.act === a && progress + .001 >= duration) {
+      a.dur = duration;
+      complete(); actions++;
+      progress = 0;
+    }
+    if (DQ.act !== a) progress = 0;
+    if (DQ.act) DQ.act.dur = DQ.actDur(DQ.act);
+  }
+  if (DQ.act) {
+    DQ.act.progress = progress;
+    DQ.act.t0 = Date.now() - progress;
+    if (S().act) S().act.progress = progress;
+  }
+  return actions;
+};
+DQ.simulate = (ms, real = ms) => {
+  const sim = DQ.sim = { on: true, xp: {}, items: {}, coins: 0, kills: 0, levels: [], notes: [], adv: null, ms, real, advFrom: DQ.advLvl(), eaten: 0, died: false, label: DQ.act ? DQ.actLabel() : '' };
+  try {
+    const partial = DQ.act ? DQ.act.progress || 0 : 0;
+    /* Real absences use the same two-hour taper shown to the player. */
+    if (real > OFFLINE_FULL && ms === DQ.offlineEff(real)) {
+      sim.actions = DQ.advanceTime(OFFLINE_FULL, OFFLINE_FULL, partial);
+      sim.actions += DQ.advanceTime(ms - OFFLINE_FULL, real - OFFLINE_FULL, DQ.act ? DQ.act.progress || 0 : 0);
+    } else sim.actions = DQ.advanceTime(ms, real, partial);
+    sim.stopped = !DQ.act;
+  } finally { sim.on = false; }
+  if (!DQ.forecasting) DQ.checkAch();
   const keep = sim.notes.filter(n => ['unlock', 'quest', 'boss', 'ach', 'loot'].includes(n.kind)).slice(0, 4);
   if (!DQ.forecasting) setTimeout(() => keep.forEach((n, i) => setTimeout(() => DQ.notify(Object.assign({}, n, { burst: false })), i * 700)), 900);
   if (!DQ.forecasting) DQ.emit('act'); return sim;
@@ -526,15 +565,8 @@ DQ.tick = () => {
     const sum = DQ.simulate(eff, real); DQ.makeAwayEvents(sum, gap); if (gap > 30000) DQ.emit('welcome', sum, gap); return;
   }
   S().playtime += gap; DQ.sessMs = (DQ.sessMs || 0) + gap;
-  const a = DQ.act;
-  if (a) {
-    /* a broken duration (NaN / 0) would freeze the task forever: repair it from the base values */
-    if (!(DQ.act.dur > 0) || !isFinite(DQ.act.dur)) { DQ.act.dur = Math.max(500, DQ.durFor(DQ.act.kind, DQ.act.id) || 2000); DQ.act.t0 = now; softFail('bad duration'); }
-    let g = 0; while (DQ.act && now >= DQ.act.t0 + DQ.act.dur && g++ < 4) { DQ.act.t0 += DQ.act.dur; try { complete(); errRun = 0; } catch (e) { softFail(e); if (++errRun >= 3 && DQ.act) DQ.stopAct(true, 'Something went wrong with this task, so it was stopped.'); } }
-    if (DQ.act && now > DQ.act.t0 + DQ.act.dur * 4) DQ.act.t0 = now;
-  }
-  regenAcc += gap; DQ.advanceWorld(gap);
-  if (regenAcc >= 3000) { regenAcc = 0; if (S().hp < DQ.maxHp() && !(DQ.act && DQ.act.kind === 'fight')) S().hp = Math.min(DQ.maxHp(), S().hp + Math.ceil(DQ.maxHp() / 50 * (1 + DQ.fx().regen))); }
+  try { DQ.advanceTime(gap, gap, DQ.act ? DQ.act.progress || 0 : 0); errRun = 0; }
+  catch (e) { softFail(e); if (++errRun >= 3) DQ.stopAct(true, 'This task stopped after an error. Your hero is safe.'); }
   if ((uiAcc += gap) >= 250) { uiAcc = 0; DQ.emit('ui'); }
   if ((histAcc += gap) >= 5000) { histAcc = 0; DQ.hist.push({}); if (DQ.hist.length > 60) DQ.hist.shift(); }
   if ((achAcc += gap) >= 1500) { achAcc = 0; DQ.checkAch(); checkQuests(); }
@@ -546,7 +578,7 @@ DQ.resumeAfterLoad = () => {
     try {
       let ok = false; const k = s.kind;
       if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town; else ok = !!D.NODE[k + ':' + s.id] && D.NODE[k + ':' + s.id].town === S().town;
-      if (ok) { DQ.act = { kind: k, id: s.id, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0 }; DQ.act.dur = DQ.actDur(DQ.act); if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
+      if (ok) { DQ.act = { kind: k, id: s.id, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0, progress: s.progress || 0 }; DQ.act.dur = DQ.actDur(DQ.act); DQ.act.t0 -= DQ.act.progress; if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
     } catch (e) {}
     if (!DQ.act) S().act = null;
   }

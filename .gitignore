@@ -1,3 +1,9 @@
 node_modules/
 *.png
 .DS_Store
+__pycache__/
+*.pyc
+*.idlewick
+saves/
+.env
+.env.*

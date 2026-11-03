@@ -1,5 +1,9 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <title>Idlewick</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -8,9 +12,13 @@
 <link rel="stylesheet" href="css/light.css">
 <link rel="stylesheet" href="css/motion.css">
 
+</head>
+<body>
 <div id="app" hidden>
-  <nav class="rail" id="rail" aria-label="Sections"></nav>
-  <nav class="dock" id="skilldock" aria-label="Skills"></nav>
+  <aside class="sidebar" aria-label="Game navigation">
+    <nav class="rail" id="rail" aria-label="Sections"></nav>
+    <nav class="dock" id="skilldock" aria-label="Skills"></nav>
+  </aside>
   <main>
     <header class="panel hud" id="hud"></header>
     <div id="subnav"></div>
@@ -34,6 +42,7 @@
 <script src="js/pixel.js"></script>
 <script src="js/sprites24.js"></script>
 <script src="js/herogear.js"></script>
+<script src="js/art48.js"></script>
 <script src="js/state.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/fx.js"></script>
@@ -57,4 +66,8 @@
 <script src="js/research.js"></script>
 <script src="js/polish.js"></script>
 <script src="js/motion.js"></script>
+<script src="js/journey.js"></script>
+<script src="js/onboarding.js"></script>
 <script src="js/boot.js"></script>
+</body>
+</html>

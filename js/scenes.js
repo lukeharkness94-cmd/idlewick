@@ -224,10 +224,38 @@ S.hollow = o => {
 /* ---------- build and use ---------- */
 const cache = {};
 DQ.sceneUrl = id => {
-  if (cache[id]) return cache[id]; if (!S[id]) return null;
+  const projects = DQ.S.projects || {};
+  const stocked = DQ.S.q.first_steps && DQ.S.q.first_steps.s === 'done';
+  const kitchen = DQ.S.q.hungry_cook && DQ.S.q.hungry_cook.s === 'done';
+  const safe = DQ.S.towns[id] && DQ.S.towns[id].boss;
+  const key = id + ':' + !!projects.well + ':' + !!projects.inn + ':' + !!stocked + ':' + !!kitchen + ':' + !!safe;
+  if (cache[key]) return cache[key]; if (!S[id]) return null;
   const o = pic(); try { S[id](o); } catch (e) { console.error('scene', id, e); return null; }
+  if (safe) {
+    o.rect(347, 75, 3, 35, P('#795039')); o.rect(350, 76, 17, 12, P('#82b957'));
+    o.rect(353, 80, 9, 3, P('#eee1b0'));
+  }
+  if (id === 'willowbrook') {
+    if (stocked) {
+      o.rect(45, 104, 24, 9, P('#795039')); o.rect(49, 99, 17, 6, P('#b78a50'));
+      o.rect(49, 104, 2, 9, P('#d5b47c')); o.rect(62, 104, 2, 9, P('#d5b47c'));
+    }
+    if (kitchen) {
+      o.rect(163, 99, 13, 13, P('#a9793c')); o.rect(165, 102, 9, 2, P('#d9bd7a'));
+      o.disc(190, 62, 3, P('#d7d6c3'), .6); o.disc(192, 56, 4, P('#d7d6c3'), .35);
+    }
+    if (projects.well) {
+      o.rect(280, 95, 23, 16, P('#879697')); o.rect(283, 94, 17, 5, P('#66bdd0'));
+      o.rect(278, 77, 3, 25, P('#765239')); o.rect(302, 77, 3, 25, P('#765239'));
+      o.rect(275, 75, 33, 5, P('#a96943'));
+    }
+    if (projects.inn) {
+      o.rect(175, 69, 4, 29, P('#795039')); o.rect(161, 71, 30, 15, P('#e2ba69'));
+      o.rect(169, 76, 12, 6, P('#805139')); o.rect(180, 76, 3, 7, P('#805139'));
+    }
+  }
   const cv = document.createElement('canvas'); cv.width = SW; cv.height = SH; cv.getContext('2d').putImageData(new ImageData(o.d, SW, SH), 0, 0);
-  return (cache[id] = cv.toDataURL());
+  return (cache[key] = cv.toDataURL());
 };
 const prev = UI.scene;
 UI.scene = (id, cls = '') => { const u = DQ.sceneUrl(id); return u ? `<img class="scene pxscene ${cls}" src="${u}" alt="" draggable="false">` : prev(id, cls); };

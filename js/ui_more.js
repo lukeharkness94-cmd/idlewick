@@ -40,17 +40,6 @@ UI.B.eta = (e, sk) => {
   UI.set(e, rate > 0 ? `level ${L + 1} in about ${DQ.fmtTime(need / rate)}` : 'train it to see time to next level');
 };
 
-/* ---------- Level-up banner: a short celebration at the top of the screen ---------- */
-const bq = []; let showing = false;
-DQ.on('levelup', (sk, lvl) => { bq.push([sk, lvl]); if (!showing) nextBanner(); });
-function nextBanner() {
-  const n = bq.shift(); if (!n) { showing = false; return; } showing = true;
-  const [sk, lvl] = n, s = D.SK[sk], el = document.createElement('div'); el.className = 'lvlban'; el.style.setProperty('--c', s.col);
-  el.innerHTML = `<span class="lb-ic">${ico(sk, 'lg')}</span><span><small>Level up!</small><b>${s.name} <span class="mono">${lvl}</span></b></span>`;
-  $('#fx').appendChild(el); DQ.burstEl(el, s.col, 26);
-  setTimeout(() => { el.classList.add('out'); setTimeout(() => { el.remove(); nextBanner(); }, 350); }, bq.length ? 1300 : 2400);
-}
-
 /* ---------- Pinned quests ---------- */
 const PAGE_OF = { catch: 'fishing', chop: 'woodcutting', mine: 'mining', thieve: 'thieving', cook: 'cooking', smelt: 'smithing', smith: 'smithing', craft: 'crafting', harvest: 'farming', collect: 'farming', pet: 'farming', visit: 'map' };
 DQ.objPage = (q, o) => {
