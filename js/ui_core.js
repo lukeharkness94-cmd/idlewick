@@ -229,11 +229,7 @@ UI.V.combat = () => {
       <div class="side"><div class="splats" id="sp-foe"></div>${foe}</div></section>
     ${UI.lootPanel()}`;
   const training = `<section class="panel combat-training"><label for="training-focus">Train${UI.choiceButtons(`<select id="training-focus" data-in="training-focus" data-a="${st}">${stances.map(([value, name, skill]) => `<option value="${value}" ${cur === value ? 'selected' : ''}>${D.SK[skill] ? D.SK[skill].name : skill} · ${name}</option>`).join('')}</select>`)}</label><button class="tog ${S().settings.autoEat ? 'on' : ''}" data-do="autoeat"><span class="sw"></span>Auto-eat ${S().settings.autoEat ? 'on' : 'off'}</button><label for="eat-threshold">Eat below${UI.choiceButtons(`<select id="eat-threshold" data-in="eat-threshold">${[30,40,50,60,70].map(n=>`<option value="${n}" ${S().settings.eatAt === n ? 'selected' : ''}>${n}% health</option>`).join('')}</select>`)}</label></section>`;
-  return `<div class="combat-workspace"><div>${controls}</div><div>${battle}${training}</div></div><section data-reference="true" class="panel reference-panel" id="combat-details"><h3>Equipment, food &amp; boss preparation</h3><div class="cb"><div class="col">
-    ${clvl}
-    ${bossCard}
-  </div>
-    <div class="col">
+  return `<div class="combat-dashboard"><div class="combat-targets">${controls}</div><div class="combat-live">${battle}${training}</div>${clvl}${bossCard}
     <section class="panel"><div class="phead"><h2>Loadout</h2><small class="mono">Max hit ${ps.max}</small></div>
       <div class="loadout"><div>${ico(st === 'ranged' ? 'bow' : st === 'magic' ? 'staff' : 'sword')} <b>${esc(wname)}</b> <span class="tag">${st}</span></div>${UI.weaponLine()}
       ${st === 'ranged' ? `<div class="sm dim">Ammo: <span data-b="ammo"></span></div>` : ''}${st === 'magic' ? `<div class="sm dim">Spell: <b>${ps.spell.name}</b> · Runes: <span class="mono" data-b="runes"></span></div>` : ''}</div>
@@ -241,7 +237,7 @@ UI.V.combat = () => {
     ${UI.abilityPanel()}
     <section class="panel"><div class="phead"><h2>Food</h2><small>Click to eat</small></div><div class="chips" id="foodbox">${UI.foodChips()}</div></section>
     <section class="panel"><div class="phead"><h2>Combat skills</h2><small>What each one does</small></div><div class="tiles two">${['attack', 'strength', 'defence', 'ranged', 'hitpoints'].map((k, i) => { const d = { attack: 'Chance to hit', strength: `Hit harder · max hit ${ps.max}`, defence: `Dodge and armour · blocks ${Math.round(ps.red * 100)}%`, ranged: 'Bows: hit chance and damage', hitpoints: 'Your health' }[k]; return UI.tile(k, i).replace(/<\/button>\s*$/, `<small class="tiledesc">${d}</small></button>`); }).join('')}</div>
-      <section data-reference="true" class="howfight"><h3>How fighting works</h3><ul><li><b>Attack</b> decides whether your swing lands. <b>Strength</b> decides how much damage it does, up to your <b>max hit</b>.</li><li><b>Defence</b> and your armour make monsters miss you and take some of the sting out of what hits.</li><li>The <b>Training focus</b> you pick above decides which of these skills earns XP.</li><li>Your <b>combat level</b> combines Defence, Health and your best fighting style. The Easy / Fair / Hard tags compare a monster's level with it.</li></ul></section></section></div></div></section>`;
+      <section data-reference="true" class="howfight"><h3>How fighting works</h3><ul><li><b>Attack</b> decides whether your swing lands. <b>Strength</b> decides how much damage it does, up to your <b>max hit</b>.</li><li><b>Defence</b> and your armour make monsters miss you and take some of the sting out of what hits.</li><li>The <b>Training focus</b> you pick above decides which of these skills earns XP.</li><li>Your <b>combat level</b> combines Defence, Health and your best fighting style. The Easy / Fair / Hard tags compare a monster's level with it.</li></ul></section></section></div>`;
 };
 UI.tile = (sk, i = 0) => {
   const s = D.SK[sk], locked = !DQ.skillUnlocked(sk);

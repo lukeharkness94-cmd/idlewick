@@ -1539,21 +1539,8 @@ body[data-page="quests"] .quest.ready { animation: none; }
   #app { width:100%; max-width:none; grid-template-columns:156px minmax(0,1fr); }
 }
 @media (min-width:1800px) {
-  body { padding-inline:clamp(20px,1.5vw,48px); }
-  #app { grid-template-columns:176px minmax(0,1fr); gap:24px; }
-  .activity-workspace { grid-template-columns:minmax(420px,.8fr) minmax(0,1.4fr); gap:24px; }
-  .activity-scene { height:360px; }
-  .scene-target > img { width:288px; height:288px; }
-  .scene-yield img,.scene-yield .gico { width:96px; height:96px; }
-  .illustrated-choices { grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; }
-  .choice-art { height:152px; }
-  .choice-art .art-sprite { width:144px; height:144px; }
-  .encounter-arena { min-height:420px; }
-  .farm-workspace { grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:24px; }
-  .plots { grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); }
-  .plot .pspr { height:104px; }
-  .plot .pspr > img { width:96px; height:96px; }
-  .qgrid { grid-template-columns:repeat(auto-fit,minmax(380px,1fr)); }
+  body { padding-inline:24px; }
+  #app { grid-template-columns:176px minmax(0,1fr); gap:20px; }
 }
 @media (max-width:1100px) { .farm-workspace { grid-template-columns:minmax(0,1fr); } }
 @media (max-width:600px) {
@@ -1564,52 +1551,32 @@ body[data-page="quests"] .quest.ready { animation: none; }
   .section-picker > .choice-buttons .choice-button { flex:1 1 80px; }
 }
 
-/* Large displays gain a larger hero and useful columns, not an oversized bag. */
-@media (min-width:1400px) {
-  .character-layout { grid-template-columns:clamp(340px,22vw,520px) minmax(0,1fr); gap:20px; }
-  .paper-doll { max-width:none; grid-template-columns:72px minmax(0,1fr) 72px; grid-template-rows:repeat(4,80px); gap:10px; }
-  .paper-doll .fig-img { width:144px; max-width:100%; height:auto; }
-  .paper-doll .fig-stage::after { max-width:192px; }
-  .character-layout .slots { grid-template-columns:repeat(8,minmax(0,1fr)); gap:10px; }
-  .character-layout .slot { min-width:0; }
-  .character-layout .slot .item-art,.character-layout .slot .gico { width:48px; height:48px; }
+/* Additional width exposes more cards, while artwork keeps its normal size. */
+.combat-dashboard { display:grid; grid-template-columns:minmax(0,1fr); gap:14px; align-items:start; }
+.combat-dashboard > * { min-width:0; }
+.combat-targets,.combat-live { display:flex; flex-direction:column; gap:14px; min-width:0; }
+.combat-targets .encounter-controls { margin-bottom:0; }
+.illustrated-choices { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); }
+@media (min-width:1100px) {
+  .combat-dashboard { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
-@media (min-width:2000px) {
-  body { font-size:18px; }
-  #app { gap:28px; padding-block:20px; }
-  main,.view { gap:20px; }
-  .panel { padding:20px; }
-  .activity-stage { padding:0; }
-  .character-layout { grid-template-columns:clamp(440px,21vw,600px) minmax(0,1fr); gap:24px; }
-  .character-layout > .col { display:grid; grid-template-columns:minmax(0,1fr); gap:24px; align-items:start; }
-  .character-layout > .col:has(#detailbox:not(.empty)) { grid-template-columns:minmax(0,1fr) clamp(300px,16vw,440px); }
-  .character-layout #detailbox:not(.empty) { position:sticky; top:120px; }
-  .paper-doll { grid-template-columns:88px minmax(0,1fr) 88px; grid-template-rows:repeat(4,96px); gap:12px; }
-  .paper-doll .fig-img { width:192px; }
-  .paper-doll .fig-pet img { width:48px; height:48px; }
-  .paper-doll .eq .gico,.paper-doll .eq .item-art { width:48px; height:48px; }
-  .character-layout .bonuses { grid-template-columns:repeat(3,minmax(0,1fr)); }
-  .character-layout .slots { grid-template-columns:repeat(8,minmax(0,1fr)); gap:12px; }
-  .character-layout:not(:has(#detailbox:not(.empty))) .slots { grid-template-columns:repeat(10,minmax(0,1fr)); }
-  .character-layout .slot .n { font-size:14px; }
+@media (min-width:1600px) {
+  .combat-dashboard { grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); grid-auto-rows:8px; grid-auto-flow:row dense; }
+  .combat-live { grid-column:span 2; }
+  .view:has(> .activity-workspace) { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); align-items:start; }
+  .view > .activity-workspace { display:contents; }
+  .view > .activity-workspace > .activity-choices { grid-column:span 2; }
+  .view:has(> .activity-workspace) > :is(.skill-coach,.page-notice,.tabs) { grid-column:1 / -1; }
+  .view > .activity-workspace .activity-stage { position:static; }
+  .character-layout { grid-template-columns:320px minmax(0,1fr); }
+  .character-layout > .col { display:grid; grid-template-columns:minmax(0,1fr); gap:14px; align-items:start; }
+  .character-layout > .col:has(#detailbox:not(.empty)) { grid-template-columns:minmax(0,1fr) 320px; }
+  .character-layout #detailbox:not(.empty) { position:sticky; top:110px; }
   .character-layout #detailbox .detail .btnrow { display:flex; flex-wrap:wrap; }
   .character-layout .selbar:has(.sb-b) { display:none; }
   .character-layout > .col > .toolsp { grid-column:1 / -1; }
-  .character-layout .toolrows { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:10px; }
-  .activity-scene { height:clamp(360px,32vh,520px); }
-  .encounter-arena { min-height:clamp(420px,38vh,620px); }
-  .encounter-arena .avatar { height:300px; }
-  .encounter-arena .avatar > .art-sprite { width:288px; height:288px; }
-  .encounter-arena .avatar > .encounter-hero { width:192px; height:272px; }
-  .visual-shop { grid-template-columns:minmax(0,1.5fr) minmax(420px,.8fr); gap:24px; }
-  .illustrated-card b { font-size:16px; }
-  .illustrated-card small,.choice-state { font-size:13px; }
-}
-@media (min-width:3000px) {
-  .character-layout .slots { grid-template-columns:repeat(10,minmax(0,1fr)); }
-  .character-layout:not(:has(#detailbox:not(.empty))) .slots { grid-template-columns:repeat(14,minmax(0,1fr)); }
-  .character-layout .slot .item-art,.character-layout .slot .gico { width:64px; height:64px; }
-  .illustrated-choices { grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); }
+  .character-layout .toolrows { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; }
+  .character-layout .slots { grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); }
 }
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
@@ -6138,11 +6105,7 @@ UI.V.combat = () => {
       <div class="side"><div class="splats" id="sp-foe"></div>${foe}</div></section>
     ${UI.lootPanel()}`;
   const training = `<section class="panel combat-training"><label for="training-focus">Train${UI.choiceButtons(`<select id="training-focus" data-in="training-focus" data-a="${st}">${stances.map(([value, name, skill]) => `<option value="${value}" ${cur === value ? 'selected' : ''}>${D.SK[skill] ? D.SK[skill].name : skill} · ${name}</option>`).join('')}</select>`)}</label><button class="tog ${S().settings.autoEat ? 'on' : ''}" data-do="autoeat"><span class="sw"></span>Auto-eat ${S().settings.autoEat ? 'on' : 'off'}</button><label for="eat-threshold">Eat below${UI.choiceButtons(`<select id="eat-threshold" data-in="eat-threshold">${[30,40,50,60,70].map(n=>`<option value="${n}" ${S().settings.eatAt === n ? 'selected' : ''}>${n}% health</option>`).join('')}</select>`)}</label></section>`;
-  return `<div class="combat-workspace"><div>${controls}</div><div>${battle}${training}</div></div><section data-reference="true" class="panel reference-panel" id="combat-details"><h3>Equipment, food &amp; boss preparation</h3><div class="cb"><div class="col">
-    ${clvl}
-    ${bossCard}
-  </div>
-    <div class="col">
+  return `<div class="combat-dashboard"><div class="combat-targets">${controls}</div><div class="combat-live">${battle}${training}</div>${clvl}${bossCard}
     <section class="panel"><div class="phead"><h2>Loadout</h2><small class="mono">Max hit ${ps.max}</small></div>
       <div class="loadout"><div>${ico(st === 'ranged' ? 'bow' : st === 'magic' ? 'staff' : 'sword')} <b>${esc(wname)}</b> <span class="tag">${st}</span></div>${UI.weaponLine()}
       ${st === 'ranged' ? `<div class="sm dim">Ammo: <span data-b="ammo"></span></div>` : ''}${st === 'magic' ? `<div class="sm dim">Spell: <b>${ps.spell.name}</b> · Runes: <span class="mono" data-b="runes"></span></div>` : ''}</div>
@@ -6150,7 +6113,7 @@ UI.V.combat = () => {
     ${UI.abilityPanel()}
     <section class="panel"><div class="phead"><h2>Food</h2><small>Click to eat</small></div><div class="chips" id="foodbox">${UI.foodChips()}</div></section>
     <section class="panel"><div class="phead"><h2>Combat skills</h2><small>What each one does</small></div><div class="tiles two">${['attack', 'strength', 'defence', 'ranged', 'hitpoints'].map((k, i) => { const d = { attack: 'Chance to hit', strength: `Hit harder · max hit ${ps.max}`, defence: `Dodge and armour · blocks ${Math.round(ps.red * 100)}%`, ranged: 'Bows: hit chance and damage', hitpoints: 'Your health' }[k]; return UI.tile(k, i).replace(/<\/button>\s*$/, `<small class="tiledesc">${d}</small></button>`); }).join('')}</div>
-      <section data-reference="true" class="howfight"><h3>How fighting works</h3><ul><li><b>Attack</b> decides whether your swing lands. <b>Strength</b> decides how much damage it does, up to your <b>max hit</b>.</li><li><b>Defence</b> and your armour make monsters miss you and take some of the sting out of what hits.</li><li>The <b>Training focus</b> you pick above decides which of these skills earns XP.</li><li>Your <b>combat level</b> combines Defence, Health and your best fighting style. The Easy / Fair / Hard tags compare a monster's level with it.</li></ul></section></section></div></div></section>`;
+      <section data-reference="true" class="howfight"><h3>How fighting works</h3><ul><li><b>Attack</b> decides whether your swing lands. <b>Strength</b> decides how much damage it does, up to your <b>max hit</b>.</li><li><b>Defence</b> and your armour make monsters miss you and take some of the sting out of what hits.</li><li>The <b>Training focus</b> you pick above decides which of these skills earns XP.</li><li>Your <b>combat level</b> combines Defence, Health and your best fighting style. The Easy / Fair / Hard tags compare a monster's level with it.</li></ul></section></section></div>`;
 };
 UI.tile = (sk, i = 0) => {
   const s = D.SK[sk], locked = !DQ.skillUnlocked(sk);
@@ -8750,6 +8713,39 @@ Object.assign(UI.DO,{
   toggleguides:()=>{S().tut.hidden=!S().tut.hidden;current=null;DQ.save();UI.render(false);}
 });
 if(UI.V.settings){const settings=UI.V.settings;UI.V.settings=()=>settings()+`<section class="panel"><div class="phead"><h2>Help &amp; learning</h2></div><p>Short inline lessons introduce a skill the first time you open it. They never interrupt a running task.</p><div class="btnrow wrap"><button class="btn" data-do="toggleguides">${S().tut.hidden?'Enable':'Hide'} first-time guides</button><button class="btn" data-do="resetguides">Restart introduction &amp; skill guides</button></div></section>`;}
+})();
+
+</script>
+<script>
+/* Pack independent cards without letting one tall card hold the next row down. */
+(() => {
+  const UI = window.DQ.ui;
+  let observer, frame;
+  const arrange = () => {
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(() => {
+      const grid = document.querySelector('.combat-dashboard');
+      if (!grid) return;
+      const wide = matchMedia('(min-width:1600px)').matches;
+      const gap = parseFloat(getComputedStyle(grid).rowGap) || 14;
+      for (const card of grid.children) {
+        card.style.gridRowEnd = wide ? `span ${Math.ceil((card.offsetHeight + gap) / (8 + gap))}` : '';
+      }
+    });
+  };
+  const render = UI.render;
+  UI.render = fresh => {
+    observer?.disconnect();
+    render(fresh);
+    const grid = document.querySelector('.combat-dashboard');
+    if (grid) {
+      observer ||= new ResizeObserver(arrange);
+      observer.observe(grid);
+      for (const card of grid.children) observer.observe(card);
+      arrange();
+    }
+  };
+  addEventListener('resize', arrange);
 })();
 
 </script>

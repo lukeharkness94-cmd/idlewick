@@ -7,6 +7,7 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - Preview with `python3 scripts/preview.py`. Use `--host 0.0.0.0` only when the cloud preview needs it. Windows uses `py` instead of `python3`.
 - Preserve the illustrated task cards and large visible action target. The user explicitly rejected replacing the game with dropdown selectors. Keep the tree and logs, ore-bearing rocks, crafting output and actual enemy visible.
 - No dropdowns or collapsed disclosures anywhere. Use visible wrapping buttons, tabs and illustrated cards. Keep the layout fluid across the full viewport, including 2560 × 1440; do not restore a fixed maximum page width.
+- Extra screen width must add useful card columns, not enlarge artwork, typography or panels. Keep normal pixel-art display sizes and pack shorter cards below each other.
 - Pixel artwork is now drawn on native 48px grids; equipment uses 64px. Preserve crisp pixel rendering and detailed, recognizable silhouettes.
 - Beginner and newly unlocked skill guides are inline, dismissible and shown once. Keep routine notifications quiet and contextual. Do not add repeated popups or forced tours.
 - Preserve existing saves, town restoration, gear comparisons and selling from both inventory and bank.
