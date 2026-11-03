@@ -170,11 +170,6 @@ UI.skillHero = (sk, extra = '') => {
       <span class="bar big"><i data-b="xpbar:${sk}"></i></span><div class="sh-line mono"><span data-b="toNext:${sk}"></span><span data-b="eta:${sk}"></span></div></div>
     <div class="sk-side">${perks}</div>${extra}</section>`;
 };
-['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'cooking', 'smithing', 'crafting', 'magic'].forEach(p => {
-  const o = UI.V[p]; if (!o) return;
-  UI.V[p] = () => { const h = o(); return h.includes('locked-page') || !UI.skillGuide ? h : h + `<section data-reference="true" class="panel guidep" id="${p}-guide"><h3>About ${D.SK[p].name}</h3>${UI.skillGuide(p)}</section>`; };
-});
-
 /* ---------- Mastery ---------- */
 UI.V.mastery = () => {
   const ranks = DQ.masteryTotal(), title = DQ.heroTitle();

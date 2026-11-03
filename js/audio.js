@@ -79,6 +79,7 @@ const SFX = {
   death: () => [64, 60, 57, 52].forEach((m, i) => tone(mtof(m), .5, { v: .1, at: i * .16, type: 'triangle' })),
   travel: () => [0, 1, 2, 3, 4, 5].forEach(i => noise(.05, { type: 'lowpass', f: 500, v: .08, at: i * .22 })),
   unlock: () => { [72, 76, 79].forEach((m, i) => tone(mtof(m), .4, { v: .07, at: i * .08 })); },
+  discover: () => { tone(1047,.12,{type:'triangle',v:.075});tone(1568,.24,{type:'triangle',v:.065,at:.08});tone(2093,.38,{v:.045,at:.17}); },
 };
 /* Sounds that fire once per finished task are thinned out and varied so they never become a metronome */
 const TASK = new Set(['fish', 'wood', 'mine', 'thieve', 'sizzle', 'anvil', 'stitch', 'cast', 'bow', 'hit', 'miss']);
@@ -104,6 +105,7 @@ const MODES = {
   ironpeak: { root: 45, scale: [0, 3, 5, 7, 10] },
   gloomfen: { root: 47, scale: [0, 1, 5, 7, 8] },
   emberfall: { root: 43, scale: [0, 3, 5, 6, 10] },
+  combat: { root: 40, scale: [0, 3, 5, 7, 10], battle: true },
   title: { root: 52, scale: [0, 2, 4, 7, 9] },
 };
 let musicTimer = null, mode = MODES.title, modeId = 'title';
@@ -122,14 +124,16 @@ function musicStep() {
   musicTimer = null; if (!ctx || !S().music) return;
   const sc = mode.scale, root = mode.root, deg = rnd(0, 4);
   if (ctx.state === 'running') {
-    pad(root + sc[deg] - 12, 7); pad(root + sc[(deg + 2) % 5], 7);
-    if (Math.random() < .8) pluck(root + 12 + sc[rnd(0, 4)] + (Math.random() < .3 ? 12 : 0));
-    setTimeout(() => { if (ctx && S().music && Math.random() < .6) pluck(root + 12 + sc[rnd(0, 4)]); }, rnd(1500, 3500));
+    const dur=mode.battle?3.2:7;pad(root + sc[deg] - 12,dur);pad(root + sc[(deg + 2) % 5],dur);
+    if(mode.battle){[0,.42,.84,1.26].forEach((at,i)=>tone(mtof(root-12+(i%2)*5),.16,{at,type:'triangle',v:.045,dest:musG}));pluck(root+12+sc[(deg+1)%5]);}
+    else if (Math.random() < .8) pluck(root + 12 + sc[rnd(0, 4)] + (Math.random() < .3 ? 12 : 0));
+    setTimeout(() => { if (ctx && S().music && Math.random() < (mode.battle ? .9 : .6)) pluck(root + 12 + sc[rnd(0, 4)]); }, mode.battle ? 900 : rnd(1500,3500));
   }
-  musicTimer = setTimeout(musicStep, rnd(4200, 6200));
+  musicTimer = setTimeout(musicStep, mode.battle?rnd(2100,2900):rnd(4200,6200));
 }
-DQ.musicMode = id => { modeId = id; mode = MODES[id] || MODES.title; };
+DQ.musicMode = id => { if(modeId===id)return;modeId=id;mode=MODES[id]||MODES.title;if(musicTimer&&ctx){clearTimeout(musicTimer);musicTimer=setTimeout(musicStep,120);} };
 DQ.musicStart = () => { init(); applyVolumes(); if (!musicTimer && S().music) musicStep(); };
 DQ.musicRefresh = () => { applyVolumes(); if (S().music && !musicTimer && ctx) musicStep(); };
+DQ.on('act',()=>DQ.musicMode(DQ.act?.kind==='fight'?'combat':DQ.S.town));
 document.addEventListener('visibilitychange', () => { if (ctx) { if (document.hidden) ctx.suspend(); else ctx.resume(); } });
 })();

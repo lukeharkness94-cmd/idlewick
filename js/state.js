@@ -2,6 +2,13 @@
 (() => {
 const DQ = window.DQ, D = DQ.data, { clamp } = DQ;
 const SAVE_KEY = 'dashboard-quest-save-v2';
+// Steam desktop supplies durable, account-scoped files through a narrow bridge.
+// Browser builds retain their existing save key and localStorage behavior.
+const store = DQ.storage = window.idlewickDesktop?.storage || {
+  getItem:key=>localStorage.getItem(key),
+  setItem:(key,value)=>localStorage.setItem(key,value),
+  removeItem:key=>localStorage.removeItem(key)
+};
 const PACK_SLOTS = 40;
 DQ.PACK_SLOTS = PACK_SLOTS;
 DQ.SLOTS = ['head', 'body', 'legs', 'weapon', 'shield', 'ring', 'amulet', 'ammo'];
@@ -17,12 +24,12 @@ DQ.newState = (name = 'Adventurer', look) => {
     xp, coins: 25, hp: 10, inv: { bread: 5 }, bank: {}, equip: { weapon: 'bronze_sword' }, ammo: { id: null, n: 0 },
     town: 'willowbrook', towns: { willowbrook: { visited: true, boss: false } },
     q: {}, ach: {}, seen: {}, unlocked: {},
-    stats: { harvest: 0, collect: 0, pets: 0, furnish: 0, hired: 0, catch: 0, chop: 0, mine: 0, thieve: 0, cook: 0, burn: 0, smelt: 0, smith: 0, craft: 0, alch: 0, kill: 0, earned: 0, deaths: 0, bought: 0, sold: 0, equipped: 0, tools: 0, rare: 0 },
+    stats: { harvest: 0, collect: 0, pets: 0, furnish: 0, hired: 0, catch: 0, chop: 0, mine: 0, thieve: 0, cook: 0, burn: 0, smelt: 0, smith: 0, craft: 0, alch: 0, brew: 0, enchant: 0, kill: 0, earned: 0, deaths: 0, bought: 0, sold: 0, equipped: 0, tools: 0, rare: 0 },
     settings: { theme: 'dark', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
     style: { melee: 'aggressive', ranged: 'offense', magic: 'offense' }, spell: 'spark',
     act: null, log: [], tut: { done: {}, hidden: false },
     gameTime: 0, farm: { plots: [{ crop: null }, { crop: null }, { crop: null }], plotsBought: 3, animals: [], pensBought: 2, feed: 0, autoReplant: true, last: 'potato' },
-    pets: { owned: {}, active: null }, house: { owned: false, rooms: {}, furn: {} }, workers: [], hire: { cands: [], at: -1e9 }, beast: { kills: {}, drops: {} },
+    pets: { owned: {}, active: null }, hunt: { area: null, target: null, encounters: 0 }, enchants: {}, house: { owned: false, rooms: {}, furn: {} }, workers: [], hire: { cands: [], at: -1e9 }, beast: { kills: {}, drops: {} },
   };
 };
 DQ.S = DQ.newState();
@@ -81,10 +88,10 @@ function candidateState(o) {
   return result;
 }
 DQ.validateSave = candidateState;
-DQ.hasSave = () => { try { return !!localStorage.getItem(SAVE_KEY); } catch (e) { return false; } };
+DQ.hasSave = () => { try { return !!store.getItem(SAVE_KEY); } catch (e) { return false; } };
 DQ.load = () => {
   try {
-    const raw = localStorage.getItem(SAVE_KEY); if (!raw) return false;
+    const raw = store.getItem(SAVE_KEY); if (!raw) return false;
     const next = candidateState(JSON.parse(raw));
     DQ.S = next; observedSave = raw; return true;
   } catch (e) { DQ.saveHealth = 'The saved hero could not be loaded. Keep a copy before starting again.'; return false; }
@@ -97,17 +104,17 @@ function migrate(S) {
 }
 DQ.saveHealth = '';
 let observedSave;
-try { observedSave = localStorage.getItem(SAVE_KEY); } catch (e) {}
+try { observedSave = store.getItem(SAVE_KEY); } catch (e) {}
 DQ.save = () => {
   try {
-    const current = localStorage.getItem(SAVE_KEY);
+    const current = store.getItem(SAVE_KEY);
     if (observedSave !== undefined && current !== observedSave) {
       DQ.paused = true;
       DQ.saveHealth = 'Another tab changed this hero. This tab is paused. Export a backup, then reload to continue the latest save.';
       return false;
     }
     const next = JSON.stringify({ ...DQ.S, lastSeen: Date.now() });
-    localStorage.setItem(SAVE_KEY, next);
+    store.setItem(SAVE_KEY, next);
     observedSave = next; DQ.S.lastSeen = JSON.parse(next).lastSeen; DQ.saveHealth = '';
     return true;
   } catch (e) {
@@ -115,19 +122,21 @@ DQ.save = () => {
     return false;
   }
 };
-DQ.eraseSave = () => { try { localStorage.removeItem(SAVE_KEY); observedSave = null; } catch (e) {} };
+window.idlewickDesktop?.onBeforeClose?.(() => !DQ.started || DQ.save());
+DQ.eraseSave = () => { try { store.removeItem(SAVE_KEY); observedSave = null; } catch (e) {} };
 DQ.exportSave = () => btoa(unescape(encodeURIComponent(JSON.stringify(DQ.S))));
 DQ.importSave = text => {
   try {
     const next = candidateState(JSON.parse(decodeURIComponent(escape(atob(text.trim())))));
-    const current = localStorage.getItem(SAVE_KEY);
+    const current = store.getItem(SAVE_KEY);
     if (observedSave !== undefined && current !== observedSave) return false;
     const raw = JSON.stringify({ ...next, lastSeen: Date.now() });
-    localStorage.setItem(SAVE_KEY, raw);
+    store.setItem(SAVE_KEY, raw);
     observedSave = raw; DQ.S = next; DQ.S.lastSeen = JSON.parse(raw).lastSeen; DQ.saveHealth = ''; return true;
   } catch (e) { return false; }
 };
 addEventListener('storage', e => {
+  if (window.idlewickDesktop) return;
   if (e.key === SAVE_KEY && e.newValue !== observedSave) {
     DQ.paused = true;
     DQ.saveHealth = 'Another tab changed this hero. Export a backup from this tab, then reload to continue the latest save.';
@@ -146,8 +155,10 @@ DQ.advProgress = () => {
   return { pct: clamp((t - a) / (b - a) * 100, 0, 100), cur: t - a, next: b - a, need: b - t };
 };
 DQ.xpMult = sk => (1 + .005 * (DQ.lvl(sk) - 1)) * (1 + .0025 * (DQ.advLvl() - 1)) * (DQ.extraXp ? DQ.extraXp(sk) : 1) * (DQ.buffMult ? DQ.buffMult('xp') : 1);
-DQ.skillUnlocked = sk => { const s = D.SK[sk]; return s.quest ? !!DQ.S.unlocked[sk] : s.unlock <= DQ.advLvl(); };
-DQ.unlockHow = sk => { const s = D.SK[sk]; return s.quest ? `Complete the main quest “${s.questName}”` : `Reach Hero level ${s.unlock}`; };
+DQ.actionProgress = sk => Object.entries(D.SK[sk]?.actionReq || {}).map(([stat,need])=>({stat,need,have:DQ.S.stats[stat]||0}));
+DQ.skillUnlocked = sk => { const s=D.SK[sk]; if(!s)return false; if(s.actionReq)return !!DQ.S.unlocked[sk]||DQ.actionProgress(sk).every(r=>r.have>=r.need); return s.quest?!!DQ.S.unlocked[sk]:s.unlock<=DQ.advLvl(); };
+const actionNames={kill:'combat victories',catch:'fish caught',chop:'logs chopped',harvest:'crops harvested',craft:'items crafted',smith:'smithing actions'};
+DQ.unlockHow = sk => { const s=D.SK[sk]; if(s.actionReq)return DQ.actionProgress(sk).map(r=>`${Math.min(r.have,r.need)}/${r.need} ${actionNames[r.stat]||r.stat}`).join(' and '); return s.quest?`Complete the main quest “${s.questName}”`:`Reach Hero level ${s.unlock}`; };
 DQ.maxHp = () => DQ.lvl('hitpoints');
 DQ.combatLvl = () => {
   const L = DQ.lvl, base = .25 * (L('defence') + L('hitpoints'));

@@ -3,13 +3,14 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
-function harness() {
+function harness(desktopStorage) {
   const storage = new Map(), listeners = {}, ui = { V: {}, DO: {}, B: {}, homeSections: [], homeAfterCurrent: [], tabState: () => null, render() {}, detail() {}, selbarHtml() {} };
   let denied = false, seed = 7;
   const math = Object.create(Math);
   math.random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
   const element = () => ({ setAttribute() {}, classList: { add() {}, remove() {}, toggle() {} }, appendChild() {}, style: {}, querySelector() {}, querySelectorAll: () => [], addEventListener() {} });
   const context = vm.createContext({
+    idlewickDesktop: desktopStorage ? {storage:desktopStorage} : undefined,
     console, Math: math, Date, JSON, performance: { now: () => 0 },
     setTimeout: () => 0, setInterval: () => 0, clearTimeout() {},
     addEventListener: (name, fn) => { listeners[name] = fn; },
@@ -37,6 +38,12 @@ function harness() {
 const encode = state => Buffer.from(JSON.stringify(state)).toString('base64');
 let tests = 0;
 function test(name, run) { run(); tests++; console.log('PASS', name); }
+test('desktop save bridge preserves save semantics without silently falling back to browser storage', () => {
+  const files=new Map(),desktop={getItem:key=>files.get(key)||null,setItem:(key,value)=>files.set(key,value),removeItem:key=>files.delete(key)};
+  const {q,storage}=harness(desktop);assert.ok(q.save());assert.ok(q.hasSave());assert.equal(storage.size,0);assert.equal(files.size,1);
+  const before=q.exportSave();desktop.setItem=()=>{throw Error('disk full');};
+  assert.equal(q.save(),false);assert.equal(storage.size,0);assert.equal(q.exportSave(),before);
+});
 test('invalid import leaves live and persisted state unchanged', () => {
   const {q, storage} = harness(); q.save(); const before = q.exportSave(), persisted = [...storage.entries()];
   assert.equal(q.importSave(encode({v:2,xp:{},name:'Corrupt',farm:null})),false);
@@ -131,22 +138,50 @@ test('offline rewards do not inflate live activity rates', () => {
   const {q}=harness();q.startAct('fish','shrimp',{quiet:true});q.simulate(60000);
   assert.ok(q.S.xp.fishing>0);assert.equal(Object.keys(q.hist[0]).length,0);
 });
-test('routine progress uses badges and history instead of popups', () => {
-  const {q,load}=harness();load('fx');q.ui.view='quests';
-  for(const o of [{kind:'level',key:'lvl:mining',title:'Mining level 2'}, {kind:'unlock',key:'unlock:cooking',title:'Cooking unlocked'}, {kind:'ach',key:'ach:first',title:'First achievement'}, {kind:'loot',key:'rare:gem_sapphire',title:'Rare find'}])q.notify(o);
-  assert.equal(q.noteLog.length,4);assert.equal(q.noticeCount('mining'),1);assert.equal(q.noticeCount('cooking'),1);
-  assert.equal(q.notificationTier({kind:'level'}),'quiet');assert.equal(q.notificationTier({kind:'loot'}),'quiet');
+test('visual particle motion is independent of monitor refresh rate', () => {
+  const {q,load}=harness();load('fx');
+  const advance=hz=>{const p={x:0,y:0,vx:4,vy:-3,life:1,d:.01};for(let i=0;i<hz;i++)q.stepParticle(p,1000/hz);return p;};
+  const slow=advance(60),fast=advance(120);
+  for(const key of ['x','y','vx','vy','life'])assert.ok(Math.abs(slow[key]-fast[key])<1e-8,key);
 });
-test('same-page levels stay quiet and do not create unread counts', () => {
-  const {q,load}=harness();load('fx');q.ui.view='mining';q.notify({kind:'level',key:'lvl:mining',title:'Mining level 2'});
+test('level-up notifications include new content, farming unlocks and milestone perks', () => {
+  const {q}=harness(), notes=[];q.notify=o=>notes.push(o);
+  q.S.xp.fishing=q.data.XPF[10]-1;q.addXp('fishing',1,{raw:true});
+  const fishing=notes.find(n=>n.key==='lvl:fishing');
+  assert.equal(fishing.kind,'level');assert.match(fishing.text,/Herring/);assert.match(fishing.text,/Steady Hands/);
+  q.S.xp.attack=300000;q.S.unlocked.farming=true;q.S.xp.farming=q.data.XPF[5]-1;q.addXp('farming',1,{raw:true});
+  assert.match(notes.find(n=>n.key==='lvl:farming').text,/Grow Onion/);
+});
+test('routine progress stays in history without creating menu badges', () => {
+  const {q,load}=harness();load('fx');q.ui.view='quests';
+  for(const o of [{kind:'info',key:'beast:chicken',title:'Bestiary progress'}, {kind:'ach',key:'ach:first',title:'First achievement'}, {kind:'loot',key:'rare:gem_sapphire',title:'Rare find'}])q.notify(o);
+  assert.equal(q.noteLog.length,3);assert.equal(q.noticeCount('mining'),0);assert.equal(q.noticeCount('character'),0);
+  assert.equal(q.notificationTier({kind:'level'}),'now');assert.equal(q.notificationTier({kind:'loot'}),'quiet');
+  assert.equal(q.notificationTier({kind:'unlock'}),'now');
+});
+test('same-page routine progress stays quiet and does not create unread counts', () => {
+  const {q,load}=harness();load('fx');q.ui.view='bestiary';q.notify({kind:'info',key:'beast:chicken',title:'Bestiary progress'});
   assert.equal(q.noteLog.length,1);assert.equal(q.noticeCount('mining'),0);assert.equal(q.noteMissed,0);
 });
-test('badges deduplicate and clear only on visiting their page', () => {
+test('menu counts follow actionable state and survive visiting the page', () => {
   const {q,load}=harness();load('fx');q.ui.view='quests';
-  q.notify({kind:'level',key:'lvl:mining',title:'Mining level 2'});q.notify({kind:'level',key:'lvl:mining',title:'Mining level 3'});
-  q.notify({kind:'level',key:'lvl:fishing',title:'Fishing level 2'});
-  assert.equal(q.noticeCount(['mining','fishing']),2);
-  q.markNoticesRead('mining');assert.equal(q.noticeCount('mining'),0);assert.equal(q.noticeCount('fishing'),1);
+  const expected=()=>q.data.QUESTS.filter(x=>['new','ready'].includes(q.questState(x))).length;
+  assert.equal(q.noticeCount('quests'),expected());
+  q.markNoticesRead('quests');assert.equal(q.noticeCount('quests'),expected());
+  const quest=q.data.QUESTS.find(x=>q.questState(x)==='new');assert.ok(quest);
+  const before=q.noticeCount('quests');q.startQuest(quest.id);assert.equal(q.noticeCount('quests'),before-1);
+  q.S.q[quest.id].s='ready';assert.equal(q.noticeCount('quests'),before);
+  q.S.noticeBadges={mining:{'lvl:mining':'Old level'}};assert.equal(q.noticeCount('mining'),0);
+});
+test('project and research badges disappear when resources or slots are unavailable', () => {
+  const {q,load}=harness();load('fx');
+  q.S.coins=1e8;for(const id of Object.keys(q.data.ITEMS))q.S.bank[id]=100000;
+  assert.equal(q.noticeCount('projects'),Object.keys(q.data.PROJECTS).length);
+  q.S.coins=0;assert.equal(q.noticeCount('projects'),0);
+  q.S.coins=1e8;for(const sk of Object.keys(q.S.xp))q.S.xp[sk]=100000;
+  assert.ok(q.noticeCount('research')>0);
+  q.S.research.active=Array.from({length:q.researchSlots()},()=>({id:q.data.TECHS[0].id,left:100}));
+  assert.equal(q.noticeCount('research'),0);
 });
 test('same-page warnings become inline status and critical alerts retain priority', () => {
   const {q,load}=harness();load('fx');q.ui.view='mining';let rendered=0;q.ui.renderPageNotice=()=>rendered++;
@@ -207,6 +242,11 @@ test('zero value items can be sold and invalid quantities do not change inventor
   assert.equal(q.S.inv.burnt,4); assert.equal(q.sell('burnt',99,'pack'),0);
   assert.equal(q.S.inv.burnt,undefined); assert.equal(q.S.coins,coins);
 });
+test('an item discovery is announced once and remains quiet thereafter',()=>{
+  const {q}=harness();const sounds=[],toasts=[],notes=[];q.sfx=x=>sounds.push(x);q.toast=x=>toasts.push(x);q.notify=x=>notes.push(x);
+  q.grant('feather');q.take('feather');q.grant('feather');
+  assert.deepEqual(sounds,['discover']);assert.equal(toasts.length,1);assert.equal(notes.filter(n=>n.kind==='discovery').length,1);assert.equal(q.S.seen.items.feather,1);
+});
 test('a village project pin persists, replaces the previous pin and can be removed', () => {
   const {q}=harness(); assert.equal(q.S.pinnedProject,null);
   assert.equal(q.pinProject('well'),true); const saved=q.exportSave();
@@ -244,4 +284,25 @@ test('skill introductions describe both the activity and its progression purpose
   assert.match(q.skillLessons.woodcutting.towards,/restoring/);
   assert.match(q.skillLessons.mining.towards,/Smithing/);
 });
+
+
+test('action skills unlock from lifetime actions and enchanting consumes real gem items',()=>{
+ const {q,load}=harness();load('skill_expansion_data');q.S=q.newState();load('skill_expansion');
+ const notes=[];q.notify=n=>notes.push(n);
+ for(const sk of ['hunting','exploration','herbalism','enchanting'])assert.equal(q.skillUnlocked(sk),false);
+ q.S.stats.kill=10;q.S.stats.catch=25;q.S.stats.chop=25;q.S.stats.harvest=20;q.S.stats.craft=30;q.S.stats.smith=20;
+ q.checkActionUnlocks();
+ for(const sk of ['hunting','exploration','herbalism','enchanting']){assert.equal(q.S.unlocked[sk],true);assert.ok(notes.some(n=>n.key==='unlock:'+sk));assert.doesNotMatch(q.unlockHow(sk),/99/);}
+ q.S.inv.rune=5;q.S.inv.gem_sapphire=1;
+ assert.equal(q.enchant('bronze_sword'),true);assert.equal(q.S.enchants.bronze_sword,1);assert.equal(q.have('gem_sapphire'),0);assert.equal(q.have('rune'),0);
+ const bonus=q.bonus();assert.equal(bonus.atk,q.data.ITEMS.bronze_sword.b.atk+1);
+});
+test('combat interval improves with combat level and preserves weapon differences',()=>{
+ const {q}=harness();const sword=q.combatInterval();
+ q.S.equip.weapon='bronze_dagger';assert.ok(q.combatInterval()<sword);
+ q.S.equip.weapon='bronze_hammer';assert.ok(q.combatInterval()>sword);
+ q.S.equip.weapon='bronze_sword';for(const sk of ['attack','strength','defence','hitpoints'])q.S.xp[sk]=q.data.XPF[99];
+ assert.ok(q.combatInterval()<sword);assert.ok(q.combatInterval()>=q.data.WTYPES.sword.speed*.76);
+});
+
 console.log(tests+' regression checks passed');

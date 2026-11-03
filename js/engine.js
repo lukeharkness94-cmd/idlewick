@@ -10,6 +10,18 @@ DQ.log = (m, k = '') => { if (DQ.sim.on) return; const L = S().log; L.unshift({ 
 const townIdx = () => D.TOWN[S().town].idx;
 const itemName = id => D.ITEMS[id].name;
 
+/* Include content added by later data files, especially farming and recipes. */
+const indexUnlock = (skill, level, label) => {
+  if (!skill || level <= 1) return;
+  const levels = D.UNL[skill] = D.UNL[skill] || {}, names = levels[level] = levels[level] || [];
+  if (!names.includes(label)) names.push(label);
+};
+Object.values(D.NODE).forEach(n => indexUnlock(n.skill, n.lvl, n.name));
+Object.values(D.RECIPES).forEach(r => indexUnlock(r.skill, r.lvl, r.name));
+Object.values(D.ITEMS).filter(it => ['gear','ammo'].includes(it.type)).forEach(it => Object.entries(it.req || {}).forEach(([sk, level]) => indexUnlock(sk, level, 'Equip: ' + it.name)));
+(D.CROPS || []).forEach(c => indexUnlock('farming', c.lvl, 'Grow ' + c.name));
+(D.ANIMALS || []).forEach(a => indexUnlock('farming', a.lvl, 'Keep ' + a.name));
+
 /* ---------- Experience and levels ---------- */
 DQ.addXp = (sk, base, o = {}) => {
   if (!DQ.skillUnlocked(sk)) return 0;
@@ -24,33 +36,42 @@ DQ.addXp = (sk, base, o = {}) => {
 };
 function unlockText(sk, from, to) {
   const list = []; for (let l = from + 1; l <= to; l++) ((D.UNL[sk] || {})[l] || []).forEach(n => list.push(n));
-  return list.length ? 'New: ' + list.slice(0, 3).join(', ') + (list.length > 3 ? ` +${list.length - 3} more` : '') : '';
+  return list.length ? 'Unlocked: ' + list.join(', ') + '.' : '';
 }
 function onLevel(sk, from, to) {
   const sd = D.SK[sk];
   if (sk === 'hitpoints') S().hp += to - from;
   const perks = D.PERKS.filter(p => p.lvl > from && p.lvl <= to);
-  if (DQ.sim.on) DQ.sim.levels.push([sk, to]);
-  else {
-    DQ.log(`${sd.name} level ${to} reached.`, 'quest'); DQ.emit('levelup', sk, to);
-    const ut = unlockText(sk, from, to);
-    DQ.notify({ kind: 'level', key: 'lvl:' + sk, icon: sk, col: sd.col, title: `${sd.name} level ${to}`, text: ut || `Experience bonus is now +${Math.round((DQ.xpMult(sk) - 1) * 100)}%.`, sound: 'level', burst: true });
-    perks.forEach(p => DQ.notify({ kind: 'perk', key: 'perk:' + sk + p.lvl, icon: 'star', col: '#f3d58a', title: `Perk: ${p.name}`, text: `${sd.name} ${p.lvl}: ${p.speed ? `${Math.round(p.speed * 100)}% faster actions` : `${Math.round(p.dbl * 100)}% chance of double yield`}.`, sound: 'perk', ttl: 9000 }));
+  const details = [unlockText(sk, from, to), ...perks.map(p => `${p.name}: ${p.speed ? `${Math.round(p.speed * 100)}% faster actions` : `${Math.round(p.dbl * 100)}% chance of double yield`}.`) ].filter(Boolean);
+  const unlockedDetails = details.slice();
+  if (!details.length) {
+    const next = Object.keys(D.UNL[sk] || {}).map(Number).filter(level => level > to).sort((a,b) => a-b)[0];
+    details.push(`Experience bonus is now +${Math.round((DQ.xpMult(sk) - 1) * 100)}%.`);
+    if (next) details.push(`Next at level ${next}: ${D.UNL[sk][next].join(', ')}.`);
   }
+  if (DQ.sim.on) DQ.sim.levels.push([sk, to]);
+  else { DQ.log(`${sd.name} level ${to} reached.`, 'quest'); DQ.emit('levelup', sk, to); }
+  DQ.notify({ kind: 'level', key: 'lvl:' + sk, page: sd.page, skill: sk, from, to, unlocks: unlockedDetails, icon: sk, col: sd.col, title: `${sd.name} level ${to}!`, text: details.join(' '), action: { label: `Open ${sd.name}`, fn: () => DQ.go(sd.page) }, sound: 'level', ttl: 14000, burst: true });
   DQ.achDirty = true; checkQuests(); DQ.emit('lvl');
 }
 function onAdv(from, to) {
+  const gains = [];
   if (DQ.sim.on) DQ.sim.adv = to;
   D.SKILLS.forEach(s => {
-    if (!s.quest && s.unlock > from && s.unlock <= to) {
-      S().unlocked[s.id] = true;
+    if (!s.quest && !s.actionReq && s.unlock > from && s.unlock <= to) {
+      S().unlocked[s.id] = true; gains.push(s.name);
       DQ.notify({ kind: 'unlock', key: 'unlock:' + s.id, icon: s.id, col: s.col, title: `${s.name} unlocked`, text: s.blurb, action: { label: `Open ${s.name}`, fn: () => DQ.go(s.page) }, sound: 'unlock', ttl: 12000, burst: true });
     }
   });
+  for (const [page, level, title, icon] of [
+    ['house', D.HOUSE.adv, 'Housing', 'house'],
+    ['hirelings', D.HIRE.adv, 'Workers', 'users'],
+    ['research', D.RESEARCH_ADV, 'Research hall', 'rune']
+  ]) if (level > from && level <= to) { gains.push(title); DQ.notify({ kind: 'unlock', key: 'feature:' + page, page, icon, title: `${title} unlocked`, text: `You can now explore ${title.toLowerCase()} in World.`, action: { label: `Open ${title}`, fn: () => DQ.go(page) }, sound: 'unlock', ttl: 12000 }); }
   if (!DQ.sim.on) {
     DQ.log(`Hero level ${to} reached.`, 'quest');
-    DQ.notify({ kind: 'adv', key: 'adv', icon: 'star', col: '#d8a64a', title: `Hero level ${to}`, text: `All experience now earns +${((to - 1) * .25).toFixed(1).replace(".0", "")}% bonus.`, sound: false });
   }
+  DQ.notify({ kind: 'adv', key: 'adv', icon: 'star', col: '#d8a64a', title: `Hero level ${to}!`, text: (gains.length ? `Unlocked: ${gains.join(', ')}. ` : '') + `All experience now earns +${((to - 1) * .25).toFixed(1).replace(".0", "")}% bonus.`, sound: 'level', ttl: 14000, burst: true });
   DQ.achDirty = true; checkQuests(); DQ.emit('lvl');
 }
 DQ.addCoins = (n, o = {}) => {
@@ -58,7 +79,10 @@ DQ.addCoins = (n, o = {}) => {
   if (DQ.sim.on) DQ.sim.coins += n; else DQ.pulse('.stat.coins');
 };
 DQ.grant = (id, n = 1) => {
-  const it = D.ITEMS[id]; DQ.give(id, n);
+  const it = D.ITEMS[id], seen = S().seen.items || (S().seen.items = {});
+  if (!Object.keys(seen).length) Object.keys({ ...S().inv, ...S().bank, ...S().equip }).forEach(k => { if (D.ITEMS[k]) seen[k] = 1; });
+  const fresh = !seen[id] && DQ.have(id) === 0; DQ.give(id, n);
+  if (fresh) { seen[id] = 1; if (!DQ.sim.on && !DQ.forecasting) { DQ.sfx('discover'); DQ.toast(`New item discovered: ${it.name}`); DQ.notify({ kind: 'discovery', key: 'discovery:' + id, icon: it.ic, col: it.col, title: 'New item discovered', text: it.name, sound: false }); } }
   if (DQ.sim.on) DQ.sim.items[id] = (DQ.sim.items[id] || 0) + n;
   if (it.rare) { S().stats.rare++; DQ.notify({ kind: 'loot', key: 'rare:' + id, icon: it.ic, col: it.col, title: 'Rare find', text: `You found ${it.name}.`, sound: 'gem', burst: true, ttl: 9000 }); }
   return it;
@@ -207,9 +231,14 @@ DQ.startAct = (kind, id, o = {}) => {
   S().act = { kind, id, pace, rule, count: 0, elapsed: 0, lvlTarget: DQ.act.lvlTarget }; S().lastPace = pace;
   if (!DQ.forecasting) { S().seen.firstTask = true; DQ.sfx('start'); DQ.log(DQ.actLabel() + '.'); DQ.emit('act'); } return true;
 };
+DQ.combatInterval = () => {
+  const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword;
+  return Math.round(W.speed*(1-Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003)));
+};
+DQ.combatSpeedText = () => { const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword,ms=DQ.combatInterval(); return `${W.name}: ${(ms/1000).toFixed(2)}s per attack · ${Math.round((1-ms/W.speed)*100)}% faster from Combat level`; };
 DQ.actDur = a => {
   let d = DQ.durFor(a.kind, a.id);
-  if (a.kind === 'fight') d = D.WTYPES[D.weaponType()].speed;
+  if (a.kind === 'fight') d = DQ.combatInterval();
   return Math.round(d / D.PACE[a.pace || 'steady'].speed * DQ.buffMult('slow'));
 };
 DQ.stopAct = (silent, why) => {
@@ -227,7 +256,7 @@ function floatXp(sk, x) { DQ.floatAt(document.querySelector('.card.active') || d
 
 function gatherDone(kind, n) {
   const sk = n.skill;
-  if (!chance(DQ.riskFail(DQ.successChance(kind, n)))) return;
+  /* Gathering completes through effort rather than an accuracy roll. */
   const qty = 1 + (chance(DQ.dblChance(sk)) ? 1 : 0);
   DQ.grant(n.item, qty);
   const x = DQ.addXp(sk, n.xp); floatXp(sk, x); floatItem(n.item, qty); if (DQ.act) DQ.act.count += qty;
@@ -442,17 +471,26 @@ function kill(m) {
       DQ.achDirty = true; DQ.fxDirty(); DQ.emit('travelunlock');
     }
   }
-  f.hp = m.hp; f.round = 0;
+  if (DQ.creatureGainXp) DQ.creatureGainXp(m);
+  const next = DQ.nextEncounter && DQ.nextEncounter(m);
+  if (next) {
+    DQ.act.id = next.id; S().act.id = next.id; f.id = next.id; f.hp = next.hp;
+    if (!DQ.sim.on) { DQ.log(`You encounter ${/^[AEIOU]/.test(next.name) ? 'an' : 'a'} ${next.name.toLowerCase()}.`); DQ.emit('encounter', next); }
+  } else f.hp = m.hp;
+  f.round = 0;
 }
 
 /* ---------- Dispatch ---------- */
 function complete() {
   const a = DQ.act; if (!a) return;
+  const beforeCount = a.count;
   if (a.kind === 'recipe') recipeDone(D.RECIPES[a.id]);
   else if (a.kind === 'alch') alchDone(a.id);
   else if (a.kind === 'fight') combatRound();
   else if (a.kind === 'thieve') thieveDone(D.NODE['thieve:' + a.id]);
   else gatherDone(a.kind, D.NODE[a.kind + ':' + a.id]);
+  DQ.checkActionUnlocks?.();
+  if (!DQ.sim.on && a.kind !== 'fight') DQ.emit('workcycle', { kind: a.kind, id: a.id, quantity: a.count - beforeCount });
   if (DQ.act === a) { a.elapsed += a.dur; S().act && Object.assign(S().act, { count: a.count, elapsed: a.elapsed }); a.dur = DQ.actDur(a); DQ.checkRule(); }
 }
 
@@ -542,7 +580,19 @@ DQ.simulate = (ms, real = ms) => {
     sim.stopped = !DQ.act;
   } finally { sim.on = false; }
   if (!DQ.forecasting) DQ.checkAch();
-  const keep = sim.notes.filter(n => ['unlock', 'quest', 'boss', 'ach', 'loot'].includes(n.kind)).slice(0, 4);
+  const summaries = new Map();
+  for (const note of sim.notes.filter(n => ['level', 'adv', 'unlock', 'boss'].includes(n.kind))) {
+    let n = { ...note };
+    const key = n.key || n.title, previous = summaries.get(key);
+    if (previous && n.kind === 'level') {
+      n.from = previous.from;
+      n.unlocks = [...new Set([...(previous.unlocks || []), ...(n.unlocks || [])])];
+      n.title = `${D.SK[n.skill].name} levels ${n.from + 1}–${n.to}!`;
+      if (n.unlocks.length) n.text = n.unlocks.join(' ');
+    }
+    summaries.set(key, n);
+  }
+  const keep = [...summaries.values()];
   if (!DQ.forecasting) setTimeout(() => keep.forEach((n, i) => setTimeout(() => DQ.notify(Object.assign({}, n, { burst: false })), i * 700)), 900);
   if (!DQ.forecasting) DQ.emit('act'); return sim;
 };
@@ -578,7 +628,7 @@ DQ.resumeAfterLoad = () => {
     try {
       let ok = false; const k = s.kind;
       if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town; else ok = !!D.NODE[k + ':' + s.id] && D.NODE[k + ':' + s.id].town === S().town;
-      if (ok) { DQ.act = { kind: k, id: s.id, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0, progress: s.progress || 0 }; DQ.act.dur = DQ.actDur(DQ.act); DQ.act.t0 -= DQ.act.progress; if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
+      if (ok) { DQ.act = { kind: k, id: s.id, area: s.area || null, target: s.target || null, questTarget: !!s.questTarget, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0, progress: s.progress || 0 }; DQ.act.dur = DQ.actDur(DQ.act); DQ.act.t0 -= DQ.act.progress; if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
     } catch (e) {}
     if (!DQ.act) S().act = null;
   }

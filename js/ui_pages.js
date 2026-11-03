@@ -183,7 +183,7 @@ UI.V.settings = () => {
   const s = S().settings;
   return `<div class="setgrid"><section class="panel"><div class="phead"><h2>Audio</h2></div><div class="stack">${tog('muted', 'Mute everything', 'Shortcut: M')}${tog('sfx', 'Sound effects')}${slider('vol', 'Effects volume')}${tog('music', 'Ambient music', 'A slow, generated score that changes with each town')}${slider('musicVol', 'Music volume')}
       <div><div class="k" style="margin-bottom:6px">Task sounds</div><div class="seg">${[['off', 'Off'], ['calm', 'Calm'], ['varied', 'Varied']].map(([k, n]) => `<button class="${s.taskSounds === k ? 'on' : ''}" data-do="tasksound" data-a="${k}">${n}</button>`).join('')}</div><small class="dim">Controls how often finished tasks make a sound. Sounds are always varied so they do not repeat exactly.</small></div></div></section>
-    <section class="panel"><div class="phead"><h2>Interface</h2></div><div class="stack">${tog('notify', 'Notifications', 'Level-ups, unlocks and loot, grouped into one card. The bell keeps everything')}${tog('tips', 'Tooltips')}${tog('reduceFx', 'Reduce effects', 'Turns off click ripples, particles and bouncy animations')}
+    <section class="panel"><div class="phead"><h2>Interface</h2></div><div class="stack">${tog('notify', 'Notifications', 'Show level-ups, unlocks and important alerts. Routine finds and achievements stay in the bell.')}${tog('tips', 'Tooltips')}${tog('reduceFx', 'Reduce effects', 'Turns off click ripples, particles and bouncy animations')}
       <label class="nameedit"><span class="k">Hero name</span><input id="heroname" data-in="name" maxlength="20" value="${esc(S().name)}"></label></div></section>
     <section class="panel"><div class="phead"><h2>Gameplay</h2></div><div class="stack">${tog('autoEat', 'Eat automatically in combat', `Eats at ${s.eatAt}% health. Change it on the Combat page.`)}<p class="sm dim">You can close the game at any time. Your current task, your crops, animals and workers keep going while you are away (full speed for 2 hours, then half speed, up to 8 hours), and you get a summary when you come back.</p></div></section>
     <section class="panel"><div class="phead"><h2>Save data</h2><small class="mono">Autosaves every 10s</small></div><div class="stack"><div class="btnrow wrap"><button class="btn" data-do="export">${ico('save')}Export save</button><button class="btn" data-do="import">Import save</button><button class="btn" data-do="savenow">Save now</button></div>
@@ -222,7 +222,7 @@ const DO = {
   eatat: a => { S().settings.eatAt = +a; UI.render(false); },
   eat: a => { DQ.eat(a); UI.upd(); },
   spell: a => { S().spell = a; UI.render(false); },
-  qstart: a => { DQ.startQuest(a); if (UI.view === 'quests') { UI.questTab = 'active'; UI.tab.questSelected = a; UI.render(false); } },
+  qstart: a => { DQ.startQuest(a); if (UI.view === 'quests') UI.render(false); },
   qclaim: a => { DQ.claimQuest(a); if (UI.view === 'quests') { UI.questTab = null; UI.render(false); } },
   qtab: a => { UI.questTab = a; UI.render(false); },
   questcontinue: id => {
@@ -388,10 +388,9 @@ UI.init = () => {
   DQ.on('welcome', welcome);
   DQ.on('splat', (side, text, kind, delay) => {
     const box = $(side === 'you' ? '#sp-you' : '#sp-foe'); if (!box || document.hidden) return;
-    const el = document.createElement('div'); el.className = 'splat ' + kind; el.textContent = text; el.style.animationDelay = delay + 'ms'; box.appendChild(el); setTimeout(() => el.remove(), 1400 + delay);
-    const av = $(side === 'you' ? '#av-you' : '#av-foe'); if (av) setTimeout(() => DQ.flash(av, 'hit'), delay);
+    const el = document.createElement('div'); el.className = 'splat ' + kind; el.textContent = text; const impact = Math.max(0,(delay||0)-180) + (DQ.battleTiming?.impact||390); el.style.animationDelay = impact + 'ms'; box.appendChild(el); setTimeout(() => el.remove(), 1400 + impact);
   });
-  DQ.on('slain', () => DQ.flash($('#av-foe'), 'slain'));
+  DQ.on('slain', () => { const foe=$('#av-foe');setTimeout(()=>{if(foe?.isConnected)DQ.flash(foe,'slain');},DQ.battleTiming?.impact||390); });
   THEME(); UI.renderHud(); UI.renderRail(); UI.render(true); requestAnimationFrame(UI.frame);
 };
 })();

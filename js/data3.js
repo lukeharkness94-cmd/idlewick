@@ -44,6 +44,12 @@ D.WEAK = {
   voidknight: WR(['aether', 'crush'], ['slash', 'stab']), shade: WR(['aether', 'fire'], ['stab', 'slash', 'crush', 'pierce']), horror: WR(['fire', 'pierce'], ['aether']),
   hollowking: WR([], []),
 };
+/* Regional additions use their anatomy and habitat for learnable counters. */
+for(const [id,shape] of Object.entries(D.EXTRA_CREATURES||{})){
+ const m=D.MON[id],physical={beast:'stab',winged:'pierce',clawed:'crush',humanoid:'slash',spectral:'aether'}[shape.body];
+ const element={ironpeak:'fire',gloomfen:'fire',emberfall:'frost',saltmere:'storm',skyreach:'pierce',hollow:'aether'}[m.town];
+ D.WEAK[id]=WR([...new Set([physical,element].filter(Boolean))],shape.body==='clawed'?['slash']:m.town==='emberfall'?['fire']:m.town==='ironpeak'?['frost']:[]);
+}
 D.STUDY_KILLS = 3;   // kills needed to learn a regular creature's weaknesses
 
 /* ---------- Abilities: slot two (three from combat level 40). They trigger on their own. ---------- */

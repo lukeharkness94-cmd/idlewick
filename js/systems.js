@@ -7,7 +7,7 @@ const GT = () => S().gameTime || 0;
 /* ---------- Combined bonuses from house furniture, the active pet and trophies ---------- */
 let fxCache = null;
 DQ.fxDirty = () => { fxCache = null; };
-DQ.petLevel = id => { const p = S().pets.owned[id]; if (!p) return 0; const m = p.aff || 0; let l = 1; D.PET_LEVELS.forEach((t, i) => { if (m >= t) l = i + 1; }); return l; };
+DQ.petLevel = id => { const p = S().pets.owned[id]; if (!p) return 0; const modern=Number.isFinite(p.xp),x=modern?p.xp:(p.aff||0),levels=modern?(D.CREATURE_LEVELS||D.PET_LEVELS):D.PET_LEVELS;let l=1;levels.forEach((t,i)=>{if(x>=t)l=i+1;});return l; };
 DQ.fx = () => {
   if (fxCache) return fxCache;
   const f = { regen: 0, xpAll: 0, coin: 0, burn: 0, heal: 0, pack: 0, dr: 0, gather: 0, grow: 0, animal: 0, plots: 0, workers: 0, wspeed: 0, wage: 0, trophy: 0, dmg: 0, speedAll: 0, find: 0, dbl: 0, study: 0, xp: {}, speed: {} };
@@ -40,8 +40,8 @@ DQ.awardPet = id => {
   const p = D.PET[id], o = S().pets.owned; if (!p || o[id]) return false;
   o[id] = { aff: 0, found: Date.now() }; S().stats.pets = Object.keys(o).length;
   if (!S().pets.active) { S().pets.active = id; DQ.fxDirty(); }
-  DQ.notify({ kind: 'loot', key: 'pet:' + id, icon: 'paw', col: p.col, title: `New pet: ${p.name}!`, text: `A ${p.kind.toLowerCase()} has decided to follow you. ${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, sound: 'gem', burst: true, ttl: 14000 });
-  DQ.log(`A new pet joins you: ${p.name} the ${p.kind.toLowerCase()}!`, 'quest'); DQ.emit('pets'); DQ.achDirty = true; return true;
+  DQ.notify({ kind: 'unlock', key: 'pet:' + id, icon: 'paw', col: p.col, title: `New creature: ${p.name}!`, text: `A ${p.kind.toLowerCase()} has joined your collection. ${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, sound: 'gem', burst: true, ttl: 14000 });
+  DQ.log(`A new creature joins you: ${p.name} the ${p.kind.toLowerCase()}!`, 'quest'); DQ.emit('pets'); DQ.achDirty = true; return true;
 };
 DQ.petRoll = (type, key) => {
   for (const p of D.PETS) {
@@ -83,7 +83,7 @@ DQ.harvest = (i, o = {}) => {
   DQ.grant('crop_' + c.id, n); p.crop = null;
   if (o.by) { o.by.xp += c.hxp * .6; o.by.made['crop_' + c.id] = (o.by.made['crop_' + c.id] || 0) + n; }
   else {
-    const x = DQ.addXp('farming', c.hxp); S().stats.harvest++; DQ.qev('harvest', c.id); DQ.petRoll('harvest');
+    const x = DQ.addXp('farming', c.hxp); S().stats.harvest++; DQ.checkActionUnlocks?.(); DQ.qev('harvest', c.id); DQ.petRoll('harvest');
     DQ.floatAt(document.querySelector(`.plot[data-i="${i}"]`), `${DQ.ico('crop')}+${n} ${c.name.toLowerCase()} · +${fmt(x)} XP`, c.col); DQ.sfx('fish');
   }
   if (F.autoReplant || o.by) DQ.plant(i, c.id, { quiet: true, by: o.by });
@@ -216,8 +216,6 @@ DQ.advanceWorld = dt => {
     const d = DQ.workerDur(w); if (!d) return; w.t += dt; let g = 0;
     while (w.t >= d && g++ < 6000) { w.t -= d; workStep(w); }
   });
-  const ap = s.pets.active && s.pets.owned[s.pets.active];
-  if (ap) { const lv = DQ.petLevel(s.pets.active); ap.aff = (ap.aff || 0) + dt / 60000; if (DQ.petLevel(s.pets.active) > lv) { DQ.fxDirty(); const p = D.PET[s.pets.active]; DQ.notify({ kind: 'perk', key: 'bond', icon: 'heart', col: p.col, title: `${p.name}: bond level ${DQ.petLevel(p.id)}`, text: `Your bond grows stronger. Their bonus is now ${Math.round((1 + .25 * (DQ.petLevel(p.id) - 1)) * 100)}% as strong.`, sound: 'perk' }); } }
   if ((petAcc += dt) > 2000) { petAcc = 0; DQ.fxDirty(); }
 };
 })();

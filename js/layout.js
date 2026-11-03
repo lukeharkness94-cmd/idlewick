@@ -7,17 +7,51 @@
     frame = requestAnimationFrame(() => {
       const grid = document.querySelector('.combat-dashboard');
       if (!grid) return;
-      const wide = matchMedia('(min-width:1600px)').matches;
+      const wide = matchMedia('(min-width:1100px)').matches;
       const gap = parseFloat(getComputedStyle(grid).rowGap) || 14;
       for (const card of grid.children) {
         card.style.gridRowEnd = wide ? `span ${Math.ceil((card.offsetHeight + gap) / (8 + gap))}` : '';
       }
     });
   };
+  /* Keep related status with its action, independent of the choice list height. */
+  const organize = () => {
+    const view=document.getElementById('view');if(!view)return;
+    const workspace=view.querySelector(':scope > .activity-workspace, :scope > .farm-workspace');
+    if(workspace && !workspace.querySelector('.workspace-focus')){
+      const stage=workspace.querySelector(':scope > .activity-stage, :scope > .farm-task');
+      const choices=workspace.querySelector(':scope > .activity-choices, :scope > .farm-animals');
+      if(stage && choices){
+        const focus=document.createElement('div'),options=document.createElement('div');
+        focus.className='workspace-focus';options.className='workspace-options';
+        workspace.prepend(focus);workspace.append(options);
+        const progress=view.querySelector(':scope > [id$="-progress"]');
+        if(progress){const card=progress.querySelector('.skillhero');if(card){card.id=progress.id;focus.append(card);progress.remove();}}
+        focus.append(stage);options.append(choices);
+        const panels=[...view.querySelectorAll(':scope > .reference-panel, :scope > .guidep')];
+        if(panels.length){const references=document.createElement('div');references.className='workspace-references';options.append(references);references.append(...panels);}
+      }
+    }else if(!workspace){
+      const progress=view.querySelector(':scope > [id$="-progress"]');
+      if(progress){
+        const card=progress.querySelector('.skillhero');
+        if(card){
+          card.id=progress.id;
+          const support=document.createElement('div'),focus=document.createElement('div'),options=document.createElement('div');
+          support.className='activity-workspace support-workspace';focus.className='workspace-focus';options.className='workspace-options';
+          view.insertBefore(support,view.querySelector(':scope > .panel')||progress);support.append(focus,options);focus.append(card);progress.remove();
+          for(const panel of [...view.querySelectorAll(':scope > .panel:not(.page-notice)')])options.append(panel);
+        }
+      }
+    }
+    const live=view.querySelector('.combat-live'),controls=view.querySelector('.combat-targets > .encounter-controls');
+    if(live && controls)live.prepend(controls);
+  };
   const render = UI.render;
   UI.render = fresh => {
     observer?.disconnect();
     render(fresh);
+    organize();
     const grid = document.querySelector('.combat-dashboard');
     if (grid) {
       observer ||= new ResizeObserver(arrange);

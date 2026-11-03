@@ -6,16 +6,17 @@ const S = () => DQ.S;
 
 /* ---------- Hubs ---------- */
 const HUBS = [
-  { id: 'home', name: 'Home', ic: 'home', pages: ['overview', 'skillsummary', 'activity'] },
+  { id: 'home', name: 'Home', ic: 'home', pages: ['overview', 'activity'] },
   { id: 'quests', name: 'Quests', ic: 'quest', pages: ['quests'] },
-  { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'cooking', 'smithing', 'crafting', 'magic'] },
+  { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'magic', 'brewery', 'enchanting'] },
   { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'bestiary'] },
-  { id: 'world', name: 'World', ic: 'map', pages: ['map', 'projects'] },
-  { id: 'shop', name: 'Shop', ic: 'shop', pages: ['shop', 'bank'] },
-  { id: 'hero', name: 'Hero', ic: 'bag', pages: ['character', 'house', 'hirelings', 'research', 'mastery', 'achievements', 'settings', 'balance'] },
+  { id: 'world', name: 'World', ic: 'map', pages: ['map', 'exploration', 'projects', 'house', 'hirelings', 'research'] },
+  { id: 'shop', name: 'Shop', ic: 'shop', pages: ['shop'] },
+  { id: 'hero', name: 'Hero', ic: 'bag', pages: ['character', 'bank', 'skillsummary', 'mastery', 'achievements'] },
 ];
-const TAB = { overview: ['Home', 'home'], skillsummary: ['Skill levels', 'star'], activity: ['Activity', 'clock'], projects: ['Town projects', 'house'], combat: ['Fight', 'attack'], bestiary: ['Bestiary', 'book'], map: ['Map', 'map'], quests: ['Quests', 'quest'], shop: ['Shop', 'shop'], character: ['Inventory', 'bag'], bank: ['Bank', 'bank'], house: ['House', 'house'], hirelings: ['Workers', 'users'], achievements: ['Achievements', 'trophy'], mastery: ['Mastery', 'trophy'], research: ['Research', 'rune'], settings: ['Settings', 'gear'] };
-UI.hubOf = p => HUBS.find(h => h.pages.includes(p)) || HUBS[0];
+const UTILITIES = { id: 'settings', name: 'Settings', pages: ['settings', 'balance'] };
+const TAB = { hunting:['Hunting','paw'], exploration:['Exploration','map'], enchanting:['Enchanting','rune'], brewery: ['Herbalism', 'bottle'], overview: ['Home', 'home'], skillsummary: ['Skill levels', 'star'], activity: ['Activity', 'clock'], projects: ['Town projects', 'house'], combat: ['Fight', 'attack'], bestiary: ['Bestiary', 'book'], map: ['Map', 'map'], quests: ['Quests', 'quest'], shop: ['Shop', 'shop'], character: ['Inventory & equipment', 'bag'], bank: ['Bank', 'bank'], house: ['House', 'house'], hirelings: ['Workers', 'users'], achievements: ['Achievements', 'trophy'], mastery: ['Mastery', 'trophy'], research: ['Research', 'rune'], settings: ['Settings', 'gear'] };
+UI.hubOf = p => HUBS.find(h => h.pages.includes(p)) || (UTILITIES.pages.includes(p) ? UTILITIES : HUBS[0]);
 const lastIn = {};
 const hubDefault = h => {
   if (h.id === 'home') return 'overview';
@@ -26,32 +27,27 @@ const hubDefault = h => {
 
 UI.renderRail = () => {
   const cur = UI.hubOf(UI.view).id;
-  $('#rail').innerHTML = `<div class="brand">${ico('candle')}<b>Idlewick</b></div>` + HUBS.map(h => `<button class="hub ${h.id === cur ? 'on' : ''}" data-do="hub" data-a="${h.id}" aria-label="${h.name}">${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${h.id}"></i></button>`).join('');
+  $('#rail').innerHTML = `<div class="brand">${ico('candle')}<b>Idlewick</b></div>` + HUBS.filter(h=>h.id!=='combat').map(h => `<button class="hub ${h.id === cur ? 'on' : ''}" data-do="hub" data-a="${h.id}" aria-label="${h.name}">${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${h.id}"></i></button>`).join('');
+  $('#combatnav').innerHTML=`<button class="hub combat-entry ${cur==='combat'?'on':''}" data-do="hub" data-a="combat" aria-label="Combat">${ico('attack')}<span>Combat</span><i class="hubdot" data-b="hubdot:combat"></i></button>`;
   UI.upd();
 };
 UI.B.notice = (e, page) => {
   const n = DQ.noticeCount ? DQ.noticeCount(page) : 0;
   e.hidden = !n; UI.set(e, n > 9 ? '9+' : n);
-  e.setAttribute('aria-label', n + ' unread updates');
+  e.setAttribute('aria-label', n + ' available actions');
 };
 UI.B.hubdot = (e, h) => {
   let n = 0, live = false;
-  if (h === 'home') n = (S().inbox || []).length + (DQ.goals ? 0 : 0);
-  if (h === 'quests') { n = D.QUESTS.filter(q => DQ.questState(q) === 'ready').length; live = !n && D.QUESTS.some(q => DQ.questState(q) === 'new'); }
   if (h === 'skills' || h === 'combat') { const ap = DQ.act && DQ.actPage(); live = !!ap && HUBS.find(x => x.id === h).pages.includes(ap); }
-  n = Math.max(n, DQ.noticeCount ? DQ.noticeCount(HUBS.find(hub => hub.id === h)?.pages || []) : 0);
+  n = DQ.noticeCount ? DQ.noticeCount(HUBS.find(hub => hub.id === h)?.pages || []) : 0;
   e.className = 'hubdot' + (n ? ' num' : live ? ' live' : ''); UI.set(e, n || '');
 };
 const subnav = () => {
   const h = UI.hubOf(UI.view), el = $('#subnav'); if (!el) return;
   if (h.pages.length === 1) { el.innerHTML = ''; return; }
-  const pages = h.pages.filter(p => p !== 'balance' || S().settings.dev || UI.view === 'balance');
-  if (pages.length > 3) {
-    const name = p => D.SK[p] ? D.SK[p].name : TAB[p] ? TAB[p][0] : DQ.cap(p);
-    el.innerHTML = `<div class="subnav section-picker ${h.id}"><span>${h.name}</span>${UI.choiceButtons(`<select id="section-select" data-in="page" aria-label="${h.name} section">${pages.map(p => `<option value="${p}" ${p === UI.view ? 'selected' : ''}>${name(p)}</option>`).join('')}</select>`)}</div>`;
-    return;
-  }
-  const tabs = pages.map(p => `<button class="stab ${p === UI.view ? 'on' : ''}" data-do="go" data-a="${p}" ${p === UI.view ? 'aria-current="page"' : ''}>${ico(TAB[p][1])}<span>${TAB[p][0]}</span><span class="notice-badge" data-b="notice:${p}" hidden></span></button>`).join('');
+  const pages = h.pages.filter(p => (innerWidth<=860 || !(D.SK[p] || p === 'brewery' || p === 'exploration')) && p !== 'balance' || S().settings.dev || UI.view === 'balance');
+  if(h.id==='skills'&&innerWidth>860){el.innerHTML='';return;}
+  const tabs = pages.map(p => `<button class="stab ${p === UI.view ? 'on' : ''}" data-do="go" data-a="${p}" ${p === UI.view ? 'aria-current="page"' : ''}>${ico(TAB[p]?.[1] || D.SK[p]?.id || 'gear')}<span>${TAB[p]?.[0] || D.SK[p]?.name || DQ.cap(p)}</span><span class="notice-badge" data-b="notice:${p}" hidden></span></button>`).join('');
   el.innerHTML = `<nav class="subnav ${h.id}" aria-label="${h.name} pages">${tabs}</nav>`;
   /* centre the active tab by scrolling the tab strip sideways only, never the page */
   const bar = $('.subnav', el), on = $('.stab.on', el); if (bar && on) bar.scrollLeft = on.offsetLeft - bar.clientWidth / 2 + on.offsetWidth / 2;
@@ -70,7 +66,8 @@ UI.renderDock = () => {
   const cur = UI.view, ap = DQ.act && DQ.actPage ? DQ.actPage() : null;
   el.innerHTML = `<div class="dk-h">Skills</div>` + D.SKILLS.filter(s => s.group !== 'combat').map(s => {
     const lock = !DQ.skillUnlocked(s.id);
-    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''}" style="--c:${s.col}" data-do="go" data-a="${s.page}" data-tip="skill:${s.id}" aria-label="${s.name}">${ico(lock ? 'lock' : s.id)}<span class="dk-n">${s.name}</span>${lock ? '' : `<b class="mono" data-b="lvl:${s.id}"></b>`}${!lock && ap === s.page ? '<i class="dk-live"></i>' : ''}<span class="notice-badge" data-b="notice:${s.page}" hidden></span></button>`;
+    const lv=DQ.lvl(s.id),need=lv>=99?0:Math.max(0,D.XPF[lv+1]-(S().xp[s.id]||0));
+    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''}" style="--c:${s.col}" data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span>${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span><small data-b="toNext:${s.id}">${lv>=99?'Maximum level':`${fmt(need)} XP to level ${lv+1}`}</small>`}</span>${!lock && ap === s.page ? '<i class="dk-live"></i>' : ''}<span class="notice-badge" data-b="notice:${s.page}" hidden></span></button>`;
   }).join('');
   UI.upd();
 };
@@ -91,7 +88,7 @@ UI.renderHud = () => {
     ${UI.petBadge ? UI.petBadge() : ''}${task}
     <div class="h-stats"><div class="h-coin" data-tip="text:Coins">${ico('coin')}<b class="mono" data-b="coins"></b></div>
       <div class="hp h-hp" data-tip="text:Health"><span class="bar"><i data-b="hpbar"></i></span><small class="mono" data-b="hptxt"></small></div></div>
-    <div class="h-btns"><button class="packchip" data-do="go" data-a="character" data-tip="text:Backpack slots used. Click to open your inventory">${ico('bag')}<span class="mono" data-b="packchip"></span></button><button class="iconb" data-do="go" data-a="map" data-tip="text:${esc(D.TOWN[S().town].name)}: open the map">${ico('pin')}</button><button class="iconb bellb" data-do="bell" aria-label="Recent activity" data-tip="text:Recent activity">${ico('bell')}<i class="belldot" data-b="belldot" hidden></i></button><button class="iconb" data-do="mute" aria-label="Mute" data-tip="text:${S().settings.muted ? 'Unmute (M)' : 'Mute (M)'}">${ico(S().settings.muted ? 'mute' : 'sound')}</button></div>`;
+    <div class="h-btns"><button class="packchip" data-do="go" data-a="character" data-tip="text:Backpack slots used. Click to open your inventory">${ico('bag')}<span class="mono" data-b="packchip"></span></button><button class="iconb" data-do="go" data-a="map" data-tip="text:${esc(D.TOWN[S().town].name)}: open the map">${ico('pin')}</button><button class="iconb bellb" data-do="bell" aria-label="Recent activity" data-tip="text:Recent activity">${ico('bell')}<i class="belldot" data-b="belldot" hidden></i></button><button class="iconb" data-do="go" data-a="settings" aria-label="Settings" data-tip="text:Settings">${ico('gear')}</button><button class="iconb" data-do="mute" aria-label="Mute" data-tip="text:${S().settings.muted ? 'Unmute (M)' : 'Mute (M)'}">${ico(S().settings.muted ? 'mute' : 'sound')}</button></div>`;
   UI.upd(); UI.collectProg();
 };
 
@@ -145,7 +142,7 @@ UI.V.overview = () => {
 };
 UI.V.skillsummary = () => `<section class="panel"><div class="phead"><h2>Your skills</h2><small>Total level <b data-b="totlvl"></b></small></div><div class="skl">${D.SKILLS.map(skill => {
   const locked = !DQ.skillUnlocked(skill.id);
-  return `<button class="skrow ${locked ? 'locked' : ''}" data-do="go" data-a="${skill.page}" style="--c:${skill.col}">${ico(locked ? 'lock' : skill.id)}<span>${skill.name}</span>${locked ? `<small>${skill.quest ? 'Quest unlock' : 'Hero ' + skill.unlock}</small>` : `<b class="mono" data-b="lvl:${skill.id}"></b><span class="bar"><i data-b="xpbar:${skill.id}"></i></span>`}</button>`;
+  return `<button class="skrow ${locked ? 'locked' : ''}" data-do="go" data-a="${skill.page}" style="--c:${skill.col}">${locked ? ico('lock') : DQ.artImage('skill',skill.id,32,'skill-emblem',skill.name)}<span>${skill.name}</span>${locked ? `<small>${esc(DQ.unlockHow(skill.id))}</small>` : `<b class="mono" data-b="lvl:${skill.id}"></b><span class="bar"><i data-b="xpbar:${skill.id}"></i></span>`}</button>`;
 }).join('')}</div></section>`;
 UI.V.activity = () => `${UI.inboxPanel()}<section class="panel"><div class="phead"><h2>Activity</h2><small class="mono" id="xph"></small></div><div id="chart"></div><ul class="log" id="loglist"></ul></section>`;
 let gAcc = 0;

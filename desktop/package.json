@@ -1,0 +1,66 @@
+{
+  "name": "idlewick-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Idlewick desktop runtime for Steam on Windows and macOS",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "start:steam": "electron . --steam",
+    "dist:win": "electron-builder --win dir --x64",
+    "dist:mac": "electron-builder --mac dir --universal",
+    "test": "node ../tests/desktop-storage.cjs"
+  },
+  "dependencies": {
+    "steamworks.js": "0.4.0"
+  },
+  "devDependencies": {
+    "electron": "45.2.1",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "com.idlewick.game",
+    "productName": "Idlewick",
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/steamworks.js/dist/**/*"
+    ],
+    "beforePack": "./before-pack.cjs",
+    "directories": {
+      "output": "../release"
+    },
+    "files": [
+      "*.cjs",
+      "steam-config.json",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../Play Idlewick.html",
+        "to": "game/Play Idlewick.html"
+      }
+    ],
+    "win": {
+      "target": "dir",
+      "artifactName": "Idlewick-Windows-${arch}",
+      "extraFiles": [
+        {
+          "from": "node_modules/steamworks.js/dist/win64/steam_api64.dll",
+          "to": "steam_api64.dll"
+        }
+      ]
+    },
+    "mac": {
+      "target": "dir",
+      "category": "public.app-category.games",
+      "hardenedRuntime": true,
+      "singleArchFiles": "**/steamworks.js/dist/**",
+      "extraFiles": [
+        {
+          "from": "node_modules/steamworks.js/dist/osx/libsteam_api.dylib",
+          "to": "MacOS/libsteam_api.dylib"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,47 @@
+/* Skills earned through play, their pages, and the always-visible unlock roadmap. */
+(() => {
+const DQ=window.DQ,D=DQ.data,UI=DQ.ui,{esc,fmt,ico}=DQ,S=()=>DQ.S;
+const labels={kill:'combat victories',catch:'fish caught',chop:'logs chopped',harvest:'crops harvested',craft:'items crafted',smith:'smithing actions'};
+const destinations={kill:'combat',catch:'fishing',chop:'woodcutting',harvest:'farming',craft:'crafting',smith:'smithing'};
+DQ.checkActionUnlocks=()=>{
+  for(const sk of D.SKILLS.filter(x=>x.actionReq)){
+    if(S().unlocked[sk.id]||!DQ.actionProgress(sk.id).every(r=>r.have>=r.need))continue;
+    S().unlocked[sk.id]=true; DQ.sfx('unlock');
+    DQ.notify({kind:'unlock',key:'unlock:'+sk.id,icon:sk.id,col:sk.col,title:`${sk.name} unlocked!`,text:sk.blurb,action:{label:`Open ${sk.name}`,fn:()=>DQ.go(sk.page)},sound:false,ttl:14000,burst:true});
+    DQ.emit('lvl'); DQ.save();
+  }
+};
+DQ.combatInterval=()=>{
+  const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword;
+  const mastery=Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003);
+  return Math.round(W.speed*(1-mastery));
+};
+DQ.combatSpeedText=()=>{const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword,ms=DQ.combatInterval();return `${W.name}: ${(ms/1000).toFixed(2)}s per attack · ${Math.round((1-ms/W.speed)*100)}% faster from Combat level`;};
+
+const oldNext=DQ.nextEncounter;
+DQ.nextEncounter=m=>{DQ.checkActionUnlocks();if(DQ.skillUnlocked('hunting'))DQ.addXp('hunting',Math.max(3,Math.round(m.cl*1.4)));return oldNext(m);};
+const oldKill=DQ.recordKill;
+DQ.recordKill=(m,drops)=>{const first=!(S().beast.kills[m.id]||0);oldKill(m,drops);if(first&&DQ.skillUnlocked('exploration'))DQ.addXp('exploration',Math.max(5,m.cl*2));};
+const oldTravel=DQ.travel;
+DQ.travel=id=>{const first=!(S().towns[id]?.visited);const out=oldTravel(id);if(first&&S().town===id&&DQ.skillUnlocked('exploration'))DQ.addXp('exploration',30);return out;};
+const oldBrew=DQ.brew;
+DQ.brew=id=>{if(!DQ.skillUnlocked('herbalism'))return DQ.toast(`Herbalism is locked. ${DQ.unlockHow('herbalism')}.`,true);const ok=oldBrew(id);if(ok){S().stats.brew++;DQ.addXp('herbalism',12);DQ.emit('lvl');}return ok;};
+
+UI.B.unlockcount=(e,sk,stat)=>{const r=DQ.actionProgress(sk).find(r=>r.stat===stat);if(r)UI.set(e,`${Math.min(r.have,r.need)}/${r.need}`);};
+UI.B.unlockbar=(e,sk,stat)=>{const r=DQ.actionProgress(sk).find(r=>r.stat===stat);if(r)e.style.width=Math.min(100,r.have/r.need*100)+'%';};
+const reqHtml=sk=>DQ.actionProgress(sk.id).map(r=>{const pct=Math.min(100,r.have/r.need*100);return `<button class="unlock-step" data-do="go" data-a="${destinations[r.stat]||'skillsummary'}"><span><b data-b="unlockcount:${sk.id}:${r.stat}">${Math.min(r.have,r.need)}/${r.need}</b> ${labels[r.stat]||r.stat}</span><span class="bar"><i data-b="unlockbar:${sk.id}:${r.stat}" style="width:${pct}%"></i></span><small>Go to ${D.SK[destinations[r.stat]]?.name||'Combat'} ${ico('arrow')}</small></button>`}).join('');
+UI.unlocksAheadPanel=()=>{const locked=D.SKILLS.filter(s=>s.actionReq&&!DQ.skillUnlocked(s.id));return `<section class="panel unlock-roadmap"><div class="phead"><div><span class="k">Progression</span><h2>${locked.length?'Unlocks ahead':'Action skills discovered'}</h2></div><button class="btn sm" data-do="go" data-a="skillsummary">All skills</button></div>${locked.length?`<p class="hint">These skills are always visible. Complete their requirements in any order.</p><div class="unlock-grid">${locked.map(sk=>`<article style="--c:${sk.col}"><div class="unlock-title">${ico('lock')}<span><b>${esc(sk.name)}</b><small>${esc(sk.blurb)}</small></span></div>${reqHtml(sk)}</article>`).join('')}</div>`:'<p>Every action-earned skill is unlocked. Their next levels remain visible in the Skills menu.</p>'}</section>`;};
+UI.homeSections.push(UI.unlocksAheadPanel);
+
+const hero=sk=>UI.skillHero?UI.skillHero(sk):`<section class="panel"><h2>${D.SK[sk].name}</h2></section>`;
+UI.V.hunting=()=>`${hero('hunting')}${UI.areaPanel(S().town)}`;
+UI.V.exploration=()=>`${hero('exploration')}<section class="panel"><div class="phead"><h2>Realm discoveries</h2><small>${D.TOWNS.filter(t=>S().towns[t.id]?.visited).length}/${D.TOWNS.length} towns visited</small></div><p>Visit new towns and discover creatures to earn Exploration XP.</p><div class="area-grid">${D.TOWNS.map(t=>`<article class="area-card ${S().towns[t.id]?.visited?'selected':''}"><b>${S().towns[t.id]?.visited?esc(t.name):'Uncharted region'}</b><small>${S().towns[t.id]?.visited?'Visited':'Open its road by defeating the previous town boss'}</small></article>`).join('')}</div><div class="btnrow"><button class="btn primary" data-do="go" data-a="map">Open world map</button><button class="btn" data-do="go" data-a="combat">Find creatures</button></div></section>`;
+const gems=['gem_sapphire','gem_emerald','gem_ruby','gem_diamond','gem_diamond'];
+DQ.enchant=id=>{const rank=S().enchants[id]||0,need=gems[rank];if(!DQ.skillUnlocked('enchanting')||rank>=5)return false;if(!Object.values(S().equip).includes(id))return DQ.toast('Equip the item first',true);if(DQ.have('rune')<5*(rank+1)||!DQ.have(need))return DQ.toast(`Requires ${5*(rank+1)} runes and 1 ${D.ITEMS[need]?.name||need}`,true);DQ.take('rune',5*(rank+1));DQ.take(need,1);S().enchants[id]=rank+1;S().stats.enchant++;DQ.addXp('enchanting',20*(rank+1));DQ.sfx('unlock');DQ.toast(`${D.ITEMS[id].name} is now enchantment +${rank+1}`);DQ.emit('lvl');return true;};
+const baseBonus=DQ.bonus;
+DQ.bonus=()=>{const out=baseBonus();for(const [slot,id] of Object.entries(S().equip)){if(slot==='ammo')continue;const rank=S().enchants[id]||0,b=D.ITEMS[id]?.b||{};for(const k of Object.keys(b))out[k]+=rank;}return out;};
+UI.V.enchanting=()=>`${hero('enchanting')}<section class="panel"><div class="phead"><h2>Enchant equipped gear</h2><small>Maximum +5</small></div><p class="hint">Each rank adds +1 to every combat bonus already present on that item.</p><div class="ench-list">${Object.entries(S().equip).filter(([slot,id])=>slot!=='ammo'&&D.ITEMS[id]).map(([slot,id])=>{const r=S().enchants[id]||0,need=gems[r];return `<div class="ench-row">${DQ.itemIco(D.ITEMS[id])}<span><b>${esc(D.ITEMS[id].name)} +${r}</b><small>${r>=5?'Fully enchanted':`${5*(r+1)} runes + 1 ${D.ITEMS[need]?.name||need}`}</small></span><button class="btn ${r<5?'primary':''}" data-do="enchant" data-a="${id}" ${r>=5?'disabled':''}>${r>=5?'Complete':'Enchant'}</button></div>`}).join('')||'<p>Equip an item to enchant it.</p>'}</div></section>`;
+Object.assign(UI.DO,{enchant:id=>{if(DQ.enchant(id))UI.render(false);}});
+const brewery=UI.V.brewery;
+UI.V.brewery=()=>DQ.skillUnlocked('herbalism')?`${hero('herbalism')}${brewery()}`:UI.lockedPage('herbalism');
+})();

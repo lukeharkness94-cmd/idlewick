@@ -7,3 +7,7 @@ __pycache__/
 saves/
 .env
 .env.*
+
+release/
+desktop/dist/
+steam_appid.txt

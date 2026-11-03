@@ -24,14 +24,14 @@ DQ.sfx = name => {
 };
 
 /* ---------- Save safety: rolling backups and files ---------- */
-const readBk = () => { try { return JSON.parse(localStorage.getItem(BK_KEY)) || []; } catch (e) { return []; } };
+const readBk = () => { try { return JSON.parse(DQ.storage.getItem(BK_KEY)) || []; } catch (e) { return []; } };
 DQ.backup = reason => {
   try {
     if (!DQ.S || !DQ.S.xp) return false;
     const L = readBk(); L.unshift({ t: Date.now(), reason: reason || 'auto', hero: DQ.advLvl(), name: DQ.S.name, data: JSON.stringify(DQ.S) });
     while (L.length > 3) L.pop();
-    localStorage.setItem(BK_KEY, JSON.stringify(L)); return true;
-  } catch (e) { try { const L = readBk().slice(0, 1); localStorage.setItem(BK_KEY, JSON.stringify(L)); } catch (e2) {} return false; }
+    DQ.storage.setItem(BK_KEY, JSON.stringify(L)); return true;
+  } catch (e) { try { const L = readBk().slice(0, 1); DQ.storage.setItem(BK_KEY, JSON.stringify(L)); } catch (e2) {} return false; }
 };
 DQ.backups = () => readBk().map(b => ({ t: b.t, reason: b.reason, hero: b.hero, name: b.name }));
 DQ.restoreBackup = i => {
