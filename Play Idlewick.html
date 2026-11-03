@@ -1563,6 +1563,54 @@ body[data-page="quests"] .quest.ready { animation: none; }
   .section-picker > span { flex-basis:100%; }
   .section-picker > .choice-buttons .choice-button { flex:1 1 80px; }
 }
+
+/* Large displays gain a larger hero and useful columns, not an oversized bag. */
+@media (min-width:1400px) {
+  .character-layout { grid-template-columns:clamp(340px,22vw,520px) minmax(0,1fr); gap:20px; }
+  .paper-doll { max-width:none; grid-template-columns:72px minmax(0,1fr) 72px; grid-template-rows:repeat(4,80px); gap:10px; }
+  .paper-doll .fig-img { width:144px; max-width:100%; height:auto; }
+  .paper-doll .fig-stage::after { max-width:192px; }
+  .character-layout .slots { grid-template-columns:repeat(8,minmax(0,1fr)); gap:10px; }
+  .character-layout .slot { min-width:0; }
+  .character-layout .slot .item-art,.character-layout .slot .gico { width:48px; height:48px; }
+}
+@media (min-width:2000px) {
+  body { font-size:18px; }
+  #app { gap:28px; padding-block:20px; }
+  main,.view { gap:20px; }
+  .panel { padding:20px; }
+  .activity-stage { padding:0; }
+  .character-layout { grid-template-columns:clamp(440px,21vw,600px) minmax(0,1fr); gap:24px; }
+  .character-layout > .col { display:grid; grid-template-columns:minmax(0,1fr); gap:24px; align-items:start; }
+  .character-layout > .col:has(#detailbox:not(.empty)) { grid-template-columns:minmax(0,1fr) clamp(300px,16vw,440px); }
+  .character-layout #detailbox:not(.empty) { position:sticky; top:120px; }
+  .paper-doll { grid-template-columns:88px minmax(0,1fr) 88px; grid-template-rows:repeat(4,96px); gap:12px; }
+  .paper-doll .fig-img { width:192px; }
+  .paper-doll .fig-pet img { width:48px; height:48px; }
+  .paper-doll .eq .gico,.paper-doll .eq .item-art { width:48px; height:48px; }
+  .character-layout .bonuses { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .character-layout .slots { grid-template-columns:repeat(8,minmax(0,1fr)); gap:12px; }
+  .character-layout:not(:has(#detailbox:not(.empty))) .slots { grid-template-columns:repeat(10,minmax(0,1fr)); }
+  .character-layout .slot .n { font-size:14px; }
+  .character-layout #detailbox .detail .btnrow { display:flex; flex-wrap:wrap; }
+  .character-layout .selbar:has(.sb-b) { display:none; }
+  .character-layout > .col > .toolsp { grid-column:1 / -1; }
+  .character-layout .toolrows { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:10px; }
+  .activity-scene { height:clamp(360px,32vh,520px); }
+  .encounter-arena { min-height:clamp(420px,38vh,620px); }
+  .encounter-arena .avatar { height:300px; }
+  .encounter-arena .avatar > .art-sprite { width:288px; height:288px; }
+  .encounter-arena .avatar > .encounter-hero { width:192px; height:272px; }
+  .visual-shop { grid-template-columns:minmax(0,1.5fr) minmax(420px,.8fr); gap:24px; }
+  .illustrated-card b { font-size:16px; }
+  .illustrated-card small,.choice-state { font-size:13px; }
+}
+@media (min-width:3000px) {
+  .character-layout .slots { grid-template-columns:repeat(10,minmax(0,1fr)); }
+  .character-layout:not(:has(#detailbox:not(.empty))) .slots { grid-template-columns:repeat(14,minmax(0,1fr)); }
+  .character-layout .slot .item-art,.character-layout .slot .gico { width:64px; height:64px; }
+  .illustrated-choices { grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); }
+}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
