@@ -48,7 +48,7 @@ const subnav = () => {
   const pages = h.pages.filter(p => p !== 'balance' || S().settings.dev || UI.view === 'balance');
   if (pages.length > 3) {
     const name = p => D.SK[p] ? D.SK[p].name : TAB[p] ? TAB[p][0] : DQ.cap(p);
-    el.innerHTML = `<label class="subnav section-picker ${h.id}" for="section-select"><span>${h.name}</span><select id="section-select" data-in="page" aria-label="${h.name} section">${pages.map(p => `<option value="${p}" ${p === UI.view ? 'selected' : ''}>${name(p)}</option>`).join('')}</select></label>`;
+    el.innerHTML = `<div class="subnav section-picker ${h.id}"><span>${h.name}</span>${UI.choiceButtons(`<select id="section-select" data-in="page" aria-label="${h.name} section">${pages.map(p => `<option value="${p}" ${p === UI.view ? 'selected' : ''}>${name(p)}</option>`).join('')}</select>`)}</div>`;
     return;
   }
   const tabs = pages.map(p => `<button class="stab ${p === UI.view ? 'on' : ''}" data-do="go" data-a="${p}" ${p === UI.view ? 'aria-current="page"' : ''}>${ico(TAB[p][1])}<span>${TAB[p][0]}</span><span class="notice-badge" data-b="notice:${p}" hidden></span></button>`).join('');
@@ -139,9 +139,9 @@ UI.V.overview = () => {
   return `${welcome}${UI.homeSections.map(render => render()).join('')}
     ${decisions ? `<button class="btn sm" data-do="go" data-a="activity">${decisions} away decision${decisions === 1 ? '' : 's'} waiting · View activity</button>` : ''}
     ${UI.homeNotices()}
-    <details class="panel upnext"><summary>Explore other suggestions</summary>
+    <section data-reference="true" class="panel upnext"><h3>Explore other suggestions</h3>
       <div id="goalbox">${UI.homeGoals()}</div>
-    </details>`;
+    </section>`;
 };
 UI.V.skillsummary = () => `<section class="panel"><div class="phead"><h2>Your skills</h2><small>Total level <b data-b="totlvl"></b></small></div><div class="skl">${D.SKILLS.map(skill => {
   const locked = !DQ.skillUnlocked(skill.id);
@@ -160,7 +160,7 @@ const syncGoal = (a, b) => {
   }
 };
 UI.refreshGoals = () => {
-  const box = $('#goalbox'); if (!box || !box.closest('details').open || box.matches(':hover') || box.contains(document.activeElement) && document.activeElement.matches(':focus-visible')) return;
+  const box = $('#goalbox'); if (!box || box.matches(':hover') || box.contains(document.activeElement) && document.activeElement.matches(':focus-visible')) return;
   const all = DQ.goals(), shown = UI.tab.goals === 'all' ? all : all.slice(0, 4);
   const ids = shown.map(g => g.id).join('|'), have = $$('.goal', box).map(e => e.dataset.gid).join('|');
   const tpl = document.createElement('div'); tpl.innerHTML = UI.homeGoals();

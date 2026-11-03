@@ -6,6 +6,21 @@ const UI = DQ.ui = { view: 'overview', tab: {}, V: {}, after: {}, sel: null, res
 const set = (e, v) => { v = String(v); if (e.textContent !== v) e.textContent = v; };
 const itm = (id, n) => { const it = D.ITEMS[id]; return `<span class="itm ${it.rare ? 'rare' : ''}" style="--c:${it.col}" data-tip="item:${id}">${DQ.itemIco(it)}${n ? `<b class="mono">${fmtK(n)}</b>` : ''}</span>`; };
 UI.itm = itm; UI.set = set;
+/* Render existing choice definitions as visible buttons, never native dropdowns.
+   The select is parsed in an inert template only; it never enters the page. */
+UI.choiceButtons = html => {
+  const template = document.createElement('template'); template.innerHTML = html;
+  const source = template.content.querySelector('select');
+  const kind = source.dataset.in;
+  const labels = { page: 'Pages', 'training-focus': 'Training focus', 'eat-threshold': 'Eat below', 'combat-spell': 'Combat spell', qrule: 'Stop rule', qpace: 'Pace', itemfilter: 'Item category' };
+  const label = source.getAttribute('aria-label') || labels[kind] || DQ.cap(kind.replace(/-/g, ' '));
+  const attrs = [...source.attributes].filter(a => a.name.startsWith('data-')).map(a => `${a.name}="${esc(a.value)}"`).join(' ');
+  return `<span class="choice-buttons" role="group" aria-label="${esc(label)}" ${source.id ? `id="${esc(source.id)}"` : ''}>${[...source.options].map(option => {
+    const id = option.value, item = D.ITEMS[id];
+    const art = item ? DQ.itemIco(item) : kind === 'pet-choice' ? DQ.artImage('creature', id, 40, '', '') : '';
+    return `<button type="button" class="choice-button ${option.selected ? 'on' : ''}" data-do="choose" ${attrs} data-b="${esc(id)}" value="${esc(id)}" aria-pressed="${option.selected}" ${source.disabled || option.disabled ? 'disabled' : ''}>${art}<span>${esc(option.textContent)}</span></button>`;
+  }).join('')}</span>`;
+};
 UI.statNames = { atk: 'Atk', str: 'Str', def: 'Def', rng: 'Rng', rngStr: 'Rng Str', mag: 'Mag' };
 UI.statLine = b => Object.entries(b || {}).filter(([, v]) => v).map(([k, v]) => `${UI.statNames[k] || k} ${v}`).join(' · ');
 UI.rewards = r => [...Object.entries(r.xp || {}).map(([k, v]) => `<span class="rw" style="--c:${D.SK[k].col}">${ico(k)}${fmt(v)} XP</span>`), r.coins ? `<span class="rw" style="--c:#f3d58a">${ico('coin')}${fmt(r.coins)} coins</span>` : '', ...Object.entries(r.items || {}).map(([k, v]) => `<span class="rw" style="--c:${D.ITEMS[k].col}">${ico(D.ITEMS[k].ic)}${v > 1 ? v + '× ' : ''}${D.ITEMS[k].name}</span>`)].join('');
@@ -152,7 +167,7 @@ UI.V.gather = sk => {
     caption:`Level ${n.lvl} · ${(DQ.durFor(kind,n.id)/1000).toFixed(1)}s`,
     info:`<p>${(n.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor(kind,n.id)/1000).toFixed(1)}s per attempt · ${Math.round(DQ.successChance(kind,n)*100)}% success</p><p>${n.item?`<b class="mono" data-b="count:${n.item}"></b> ${esc(D.ITEMS[n.item].name.toLowerCase())} held`:`${n.cmin}–${n.cmax} coins · ${n.dmg} damage if caught`}</p>`}));
   const elsewhere=D.TOWNS.filter(t=>t.id!==S().town&&D.NODES[kind].some(n=>n.town===t.id)).map(t=>`<div class="elsewhere"><b>${esc(t.name)}</b><span>${DQ.townUnlocked(t.id)?D.NODES[kind].filter(n=>n.town===t.id).map(n=>n.name).join(', '):'Discover this town to unlock more'}</span></div>`).join('');
-  return UI.taskPanel(sk,D.SK[sk].name,kind,choices,{fish:'Fish',wood:'Chop',mine:'Mine',thieve:'Pickpocket'}[kind])+`<details class="panel reference-panel" id="${sk}-progress"><summary>Skill progress &amp; tools</summary>${UI.skillHero(sk,UI.toolLine(sk))}</details><details class="panel reference-panel" id="${sk}-elsewhere"><summary>Discover more in other towns</summary>${elsewhere}</details>`;
+  return UI.taskPanel(sk,D.SK[sk].name,kind,choices,{fish:'Fish',wood:'Chop',mine:'Mine',thieve:'Pickpocket'}[kind])+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress &amp; tools</h3>${UI.skillHero(sk,UI.toolLine(sk))}</section><section data-reference="true" class="panel reference-panel" id="${sk}-elsewhere"><h3>Discover more in other towns</h3>${elsewhere}</section>`;
 };
 
 /* ---------- Recipe pages ---------- */
@@ -161,7 +176,7 @@ UI.V.recipes = sk => {
   UI.taskToolbar[sk]=`<div class="recipe-categories">${tabs.map(t=>`<button class="chip ${t===tab?'on':''}" data-do="tab" data-a="${sk}" data-b="${t}">${t}</button>`).join('')}<button class="chip ${only?'on':''}" data-do="readyonly" data-a="${sk}">Ready to make</button></div>`;
   const choices=list.map(r=>{const outId=Object.keys(r.out)[0],it=D.ITEMS[outId];return {id:r.id,name:r.name,artKind:'item',artId:outId,visible:r.tab===tab&&(!only||DQ.canMake(r)),locked:DQ.lvl(sk)<r.lvl,blocked:DQ.lvl(sk)<r.lvl||!DQ.canMake(r),reason:DQ.lvl(sk)<r.lvl?`Requires ${D.SK[sk].name} ${r.lvl}`:'Gather the missing ingredients first.',caption:`Level ${r.lvl} · ${UI.statLine(it.b)||`${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`}`,
     info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}</p><div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>`<span class="ingredient ${DQ.have(id)>=n?'':'bad'}">${DQ.itemIco(D.ITEMS[id])}<span>${esc(D.ITEMS[id].name)} <b data-b="count:${id}"></b> / ${n}</span></span>`).join('')}</div>`};});
-  return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'?'Make':'Craft')+`<details class="panel reference-panel" id="${sk}-progress"><summary>Skill progress</summary>${UI.skillHero(sk)}</details>`;
+  return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'?'Make':'Craft')+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress</h3>${UI.skillHero(sk)}</section>`;
 };
 
 /* ---------- Magic page ---------- */
@@ -174,9 +189,9 @@ UI.V.magic = () => {
     body = !alchemy ? `<section class="panel"><p>Alchemy opens at Magic ${D.ALCH[0].lvl}. Equip a staff and fight to train Magic.</p><button class="btn" data-do="go" data-a="combat">Combat</button></section>` : choices.length ? UI.taskPanel('magic', 'Alchemy', 'alch', choices, 'Cast') : '<section class="panel"><p>You have nothing worth transmuting right now.</p></section>';
   } else {
     const spell = D.SPELLS.find(sp => sp.id === S().spell) || D.SPELLS[0];
-    body = `<section class="panel"><div class="phead"><h2>Combat magic</h2><small>Magic level ${level}</small></div><div class="task-controls"><label for="combat-spell">Spell<select id="combat-spell" data-in="combat-spell">${D.SPELLS.map(sp => `<option value="${sp.id}" ${sp === spell ? 'selected' : ''} ${level < sp.lvl ? 'disabled' : ''}>${sp.name} · Level ${sp.lvl}</option>`).join('')}</select></label><button class="btn primary" data-do="go" data-a="combat">Combat</button></div><p class="sm">Max hit ${spell.max} · ${spell.runes} runes per cast. Spells are cast automatically with a staff.</p></section>`;
+    body = `<section class="panel"><div class="phead"><h2>Combat magic</h2><small>Magic level ${level}</small></div><div class="task-controls"><label for="combat-spell">Spell${UI.choiceButtons(`<select id="combat-spell" data-in="combat-spell">${D.SPELLS.map(sp => `<option value="${sp.id}" ${sp === spell ? 'selected' : ''} ${level < sp.lvl ? 'disabled' : ''}>${sp.name} · Level ${sp.lvl}</option>`).join('')}</select>`)}</label><button class="btn primary" data-do="go" data-a="combat">Combat</button></div><p class="sm">Max hit ${spell.max} · ${spell.runes} runes per cast. Spells are cast automatically with a staff.</p></section>`;
   }
-  return `<div class="tabs magic-tabs">${['Alchemy', 'Spellbook'].map(t => `<button class="tab ${t === tab ? 'on' : ''}" data-do="tab" data-a="magic" data-b="${t}">${t}</button>`).join('')}</div>${body}<details class="panel reference-panel" id="magic-progress"><summary>Skill progress</summary>${UI.skillHero('magic')}</details>`;
+  return `<div class="tabs magic-tabs">${['Alchemy', 'Spellbook'].map(t => `<button class="tab ${t === tab ? 'on' : ''}" data-do="tab" data-a="magic" data-b="${t}">${t}</button>`).join('')}</div>${body}<section data-reference="true" class="panel reference-panel" id="magic-progress"><h3>Skill progress</h3>${UI.skillHero('magic')}</section>`;
 };
 
 /* ---------- Combat page ---------- */
@@ -213,8 +228,8 @@ UI.V.combat = () => {
       <div class="mid"><span class="vs">vs</span><span class="bar prog" style="--c:var(--brass)"><i data-prog="@"></i></span></div>
       <div class="side"><div class="splats" id="sp-foe"></div>${foe}</div></section>
     ${UI.lootPanel()}`;
-  const training = `<section class="panel combat-training"><label for="training-focus">Train<select id="training-focus" data-in="training-focus" data-a="${st}">${stances.map(([value, name, skill]) => `<option value="${value}" ${cur === value ? 'selected' : ''}>${D.SK[skill] ? D.SK[skill].name : skill} · ${name}</option>`).join('')}</select></label><button class="tog ${S().settings.autoEat ? 'on' : ''}" data-do="autoeat"><span class="sw"></span>Auto-eat ${S().settings.autoEat ? 'on' : 'off'}</button><label for="eat-threshold">Eat below<select id="eat-threshold" data-in="eat-threshold">${[30,40,50,60,70].map(n=>`<option value="${n}" ${S().settings.eatAt === n ? 'selected' : ''}>${n}% health</option>`).join('')}</select></label></section>`;
-  return `<div class="combat-workspace"><div>${controls}</div><div>${battle}${training}</div></div><details class="panel reference-panel" id="combat-details"><summary>Equipment, food &amp; boss preparation</summary><div class="cb"><div class="col">
+  const training = `<section class="panel combat-training"><label for="training-focus">Train${UI.choiceButtons(`<select id="training-focus" data-in="training-focus" data-a="${st}">${stances.map(([value, name, skill]) => `<option value="${value}" ${cur === value ? 'selected' : ''}>${D.SK[skill] ? D.SK[skill].name : skill} · ${name}</option>`).join('')}</select>`)}</label><button class="tog ${S().settings.autoEat ? 'on' : ''}" data-do="autoeat"><span class="sw"></span>Auto-eat ${S().settings.autoEat ? 'on' : 'off'}</button><label for="eat-threshold">Eat below${UI.choiceButtons(`<select id="eat-threshold" data-in="eat-threshold">${[30,40,50,60,70].map(n=>`<option value="${n}" ${S().settings.eatAt === n ? 'selected' : ''}>${n}% health</option>`).join('')}</select>`)}</label></section>`;
+  return `<div class="combat-workspace"><div>${controls}</div><div>${battle}${training}</div></div><section data-reference="true" class="panel reference-panel" id="combat-details"><h3>Equipment, food &amp; boss preparation</h3><div class="cb"><div class="col">
     ${clvl}
     ${bossCard}
   </div>
@@ -226,7 +241,7 @@ UI.V.combat = () => {
     ${UI.abilityPanel()}
     <section class="panel"><div class="phead"><h2>Food</h2><small>Click to eat</small></div><div class="chips" id="foodbox">${UI.foodChips()}</div></section>
     <section class="panel"><div class="phead"><h2>Combat skills</h2><small>What each one does</small></div><div class="tiles two">${['attack', 'strength', 'defence', 'ranged', 'hitpoints'].map((k, i) => { const d = { attack: 'Chance to hit', strength: `Hit harder · max hit ${ps.max}`, defence: `Dodge and armour · blocks ${Math.round(ps.red * 100)}%`, ranged: 'Bows: hit chance and damage', hitpoints: 'Your health' }[k]; return UI.tile(k, i).replace(/<\/button>\s*$/, `<small class="tiledesc">${d}</small></button>`); }).join('')}</div>
-      <details class="howfight"><summary>How fighting works</summary><ul><li><b>Attack</b> decides whether your swing lands. <b>Strength</b> decides how much damage it does, up to your <b>max hit</b>.</li><li><b>Defence</b> and your armour make monsters miss you and take some of the sting out of what hits.</li><li>The <b>Training focus</b> you pick above decides which of these skills earns XP.</li><li>Your <b>combat level</b> combines Defence, Health and your best fighting style. The Easy / Fair / Hard tags compare a monster's level with it.</li></ul></details></section></div></div></details>`;
+      <section data-reference="true" class="howfight"><h3>How fighting works</h3><ul><li><b>Attack</b> decides whether your swing lands. <b>Strength</b> decides how much damage it does, up to your <b>max hit</b>.</li><li><b>Defence</b> and your armour make monsters miss you and take some of the sting out of what hits.</li><li>The <b>Training focus</b> you pick above decides which of these skills earns XP.</li><li>Your <b>combat level</b> combines Defence, Health and your best fighting style. The Easy / Fair / Hard tags compare a monster's level with it.</li></ul></section></section></div></div></section>`;
 };
 UI.tile = (sk, i = 0) => {
   const s = D.SK[sk], locked = !DQ.skillUnlocked(sk);

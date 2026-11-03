@@ -1511,6 +1511,58 @@ body[data-page="quests"] .quest.ready { animation: none; }
 @media (max-width:860px) { .visual-shop { grid-template-columns:minmax(0,1fr); } .visual-shop .shop-task { position:static; grid-row:1; } }
 @media (min-width:701px) { .activity-stage { position:sticky; top:110px; } }
 @media (max-width:700px) { .activity-stage,.encounter-controls,.shop-task { scroll-margin-top:185px; } }
+
+/* Choices stay on the page; no menus to open or disclosures to expand. */
+.choice-buttons { display:flex; flex-wrap:wrap; gap:7px; min-width:0; max-width:100%; }
+.choice-button { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-width:0; min-height:40px; padding:7px 12px; border:1px solid var(--line2); border-radius:8px; background:var(--panel2); color:var(--ink); font-size:14px; line-height:1.25; text-align:left; }
+.choice-button span { overflow-wrap:anywhere; }
+.choice-button .ic,.choice-button .gico,.choice-button .art-sprite,.choice-button .item-art { width:32px; height:32px; object-fit:contain; flex:none; }
+.choice-button:hover:not(:disabled) { border-color:var(--brass); }
+.choice-button.on { border-color:var(--brass); color:var(--brass-hi); background:color-mix(in srgb,var(--brass) 13%,var(--panel2)); box-shadow:inset 0 0 0 1px var(--brass); }
+.choice-button:disabled { opacity:.5; cursor:not-allowed; }
+[data-reference] > h3 { font-size:15px; margin-bottom:10px; }
+[data-reference]:not(.panel) { margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
+.section-picker { flex-wrap:wrap; }
+.section-picker > .choice-buttons { flex:1; }
+.section-picker > .choice-buttons .choice-button { flex:0 1 auto; }
+.combat-training { align-items:start; }
+.combat-training > label { flex-basis:240px; }
+.qctl { display:grid; gap:10px; }
+.qctl .choice-button { font-size:12px; min-height:32px; padding:5px 8px; }
+.visual-shop .shop-controls > label { width:auto; }
+.filtbar,.bank-filters { grid-template-columns:minmax(0,1fr) minmax(140px,220px); }
+.farm-workspace { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:16px; align-items:start; }
+.farm-workspace > section { min-width:0; }
+.farm-animals .pens { margin-top:16px; }
+.farm-animals .srows { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr)); gap:8px; }
+@media (min-width:861px) {
+  #app { width:100%; max-width:none; grid-template-columns:156px minmax(0,1fr); }
+}
+@media (min-width:1800px) {
+  body { padding-inline:clamp(20px,1.5vw,48px); }
+  #app { grid-template-columns:176px minmax(0,1fr); gap:24px; }
+  .activity-workspace { grid-template-columns:minmax(420px,.8fr) minmax(0,1.4fr); gap:24px; }
+  .activity-scene { height:360px; }
+  .scene-target > img { width:288px; height:288px; }
+  .scene-yield img,.scene-yield .gico { width:96px; height:96px; }
+  .illustrated-choices { grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; }
+  .choice-art { height:152px; }
+  .choice-art .art-sprite { width:144px; height:144px; }
+  .encounter-arena { min-height:420px; }
+  .farm-workspace { grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:24px; }
+  .plots { grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); }
+  .plot .pspr { height:104px; }
+  .plot .pspr > img { width:96px; height:96px; }
+  .qgrid { grid-template-columns:repeat(auto-fit,minmax(380px,1fr)); }
+}
+@media (max-width:1100px) { .farm-workspace { grid-template-columns:minmax(0,1fr); } }
+@media (max-width:600px) {
+  .choice-button { min-height:40px; padding:7px 9px; font-size:12px; flex:1 1 auto; }
+  .filtbar,.bank-filters { grid-template-columns:minmax(0,1fr); }
+  .filtbar .search,.bank-filters .search { max-width:none; }
+  .section-picker > span { flex-basis:100%; }
+  .section-picker > .choice-buttons .choice-button { flex:1 1 80px; }
+}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -5815,6 +5867,21 @@ const UI = DQ.ui = { view: 'overview', tab: {}, V: {}, after: {}, sel: null, res
 const set = (e, v) => { v = String(v); if (e.textContent !== v) e.textContent = v; };
 const itm = (id, n) => { const it = D.ITEMS[id]; return `<span class="itm ${it.rare ? 'rare' : ''}" style="--c:${it.col}" data-tip="item:${id}">${DQ.itemIco(it)}${n ? `<b class="mono">${fmtK(n)}</b>` : ''}</span>`; };
 UI.itm = itm; UI.set = set;
+/* Render existing choice definitions as visible buttons, never native dropdowns.
+   The select is parsed in an inert template only; it never enters the page. */
+UI.choiceButtons = html => {
+  const template = document.createElement('template'); template.innerHTML = html;
+  const source = template.content.querySelector('select');
+  const kind = source.dataset.in;
+  const labels = { page: 'Pages', 'training-focus': 'Training focus', 'eat-threshold': 'Eat below', 'combat-spell': 'Combat spell', qrule: 'Stop rule', qpace: 'Pace', itemfilter: 'Item category' };
+  const label = source.getAttribute('aria-label') || labels[kind] || DQ.cap(kind.replace(/-/g, ' '));
+  const attrs = [...source.attributes].filter(a => a.name.startsWith('data-')).map(a => `${a.name}="${esc(a.value)}"`).join(' ');
+  return `<span class="choice-buttons" role="group" aria-label="${esc(label)}" ${source.id ? `id="${esc(source.id)}"` : ''}>${[...source.options].map(option => {
+    const id = option.value, item = D.ITEMS[id];
+    const art = item ? DQ.itemIco(item) : kind === 'pet-choice' ? DQ.artImage('creature', id, 40, '', '') : '';
+    return `<button type="button" class="choice-button ${option.selected ? 'on' : ''}" data-do="choose" ${attrs} data-b="${esc(id)}" value="${esc(id)}" aria-pressed="${option.selected}" ${source.disabled || option.disabled ? 'disabled' : ''}>${art}<span>${esc(option.textContent)}</span></button>`;
+  }).join('')}</span>`;
+};
 UI.statNames = { atk: 'Atk', str: 'Str', def: 'Def', rng: 'Rng', rngStr: 'Rng Str', mag: 'Mag' };
 UI.statLine = b => Object.entries(b || {}).filter(([, v]) => v).map(([k, v]) => `${UI.statNames[k] || k} ${v}`).join(' · ');
 UI.rewards = r => [...Object.entries(r.xp || {}).map(([k, v]) => `<span class="rw" style="--c:${D.SK[k].col}">${ico(k)}${fmt(v)} XP</span>`), r.coins ? `<span class="rw" style="--c:#f3d58a">${ico('coin')}${fmt(r.coins)} coins</span>` : '', ...Object.entries(r.items || {}).map(([k, v]) => `<span class="rw" style="--c:${D.ITEMS[k].col}">${ico(D.ITEMS[k].ic)}${v > 1 ? v + '× ' : ''}${D.ITEMS[k].name}</span>`)].join('');
@@ -5961,7 +6028,7 @@ UI.V.gather = sk => {
     caption:`Level ${n.lvl} · ${(DQ.durFor(kind,n.id)/1000).toFixed(1)}s`,
     info:`<p>${(n.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor(kind,n.id)/1000).toFixed(1)}s per attempt · ${Math.round(DQ.successChance(kind,n)*100)}% success</p><p>${n.item?`<b class="mono" data-b="count:${n.item}"></b> ${esc(D.ITEMS[n.item].name.toLowerCase())} held`:`${n.cmin}–${n.cmax} coins · ${n.dmg} damage if caught`}</p>`}));
   const elsewhere=D.TOWNS.filter(t=>t.id!==S().town&&D.NODES[kind].some(n=>n.town===t.id)).map(t=>`<div class="elsewhere"><b>${esc(t.name)}</b><span>${DQ.townUnlocked(t.id)?D.NODES[kind].filter(n=>n.town===t.id).map(n=>n.name).join(', '):'Discover this town to unlock more'}</span></div>`).join('');
-  return UI.taskPanel(sk,D.SK[sk].name,kind,choices,{fish:'Fish',wood:'Chop',mine:'Mine',thieve:'Pickpocket'}[kind])+`<details class="panel reference-panel" id="${sk}-progress"><summary>Skill progress &amp; tools</summary>${UI.skillHero(sk,UI.toolLine(sk))}</details><details class="panel reference-panel" id="${sk}-elsewhere"><summary>Discover more in other towns</summary>${elsewhere}</details>`;
+  return UI.taskPanel(sk,D.SK[sk].name,kind,choices,{fish:'Fish',wood:'Chop',mine:'Mine',thieve:'Pickpocket'}[kind])+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress &amp; tools</h3>${UI.skillHero(sk,UI.toolLine(sk))}</section><section data-reference="true" class="panel reference-panel" id="${sk}-elsewhere"><h3>Discover more in other towns</h3>${elsewhere}</section>`;
 };
 
 /* ---------- Recipe pages ---------- */
@@ -5970,7 +6037,7 @@ UI.V.recipes = sk => {
   UI.taskToolbar[sk]=`<div class="recipe-categories">${tabs.map(t=>`<button class="chip ${t===tab?'on':''}" data-do="tab" data-a="${sk}" data-b="${t}">${t}</button>`).join('')}<button class="chip ${only?'on':''}" data-do="readyonly" data-a="${sk}">Ready to make</button></div>`;
   const choices=list.map(r=>{const outId=Object.keys(r.out)[0],it=D.ITEMS[outId];return {id:r.id,name:r.name,artKind:'item',artId:outId,visible:r.tab===tab&&(!only||DQ.canMake(r)),locked:DQ.lvl(sk)<r.lvl,blocked:DQ.lvl(sk)<r.lvl||!DQ.canMake(r),reason:DQ.lvl(sk)<r.lvl?`Requires ${D.SK[sk].name} ${r.lvl}`:'Gather the missing ingredients first.',caption:`Level ${r.lvl} · ${UI.statLine(it.b)||`${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`}`,
     info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}</p><div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>`<span class="ingredient ${DQ.have(id)>=n?'':'bad'}">${DQ.itemIco(D.ITEMS[id])}<span>${esc(D.ITEMS[id].name)} <b data-b="count:${id}"></b> / ${n}</span></span>`).join('')}</div>`};});
-  return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'?'Make':'Craft')+`<details class="panel reference-panel" id="${sk}-progress"><summary>Skill progress</summary>${UI.skillHero(sk)}</details>`;
+  return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'?'Make':'Craft')+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress</h3>${UI.skillHero(sk)}</section>`;
 };
 
 /* ---------- Magic page ---------- */
@@ -5983,9 +6050,9 @@ UI.V.magic = () => {
     body = !alchemy ? `<section class="panel"><p>Alchemy opens at Magic ${D.ALCH[0].lvl}. Equip a staff and fight to train Magic.</p><button class="btn" data-do="go" data-a="combat">Combat</button></section>` : choices.length ? UI.taskPanel('magic', 'Alchemy', 'alch', choices, 'Cast') : '<section class="panel"><p>You have nothing worth transmuting right now.</p></section>';
   } else {
     const spell = D.SPELLS.find(sp => sp.id === S().spell) || D.SPELLS[0];
-    body = `<section class="panel"><div class="phead"><h2>Combat magic</h2><small>Magic level ${level}</small></div><div class="task-controls"><label for="combat-spell">Spell<select id="combat-spell" data-in="combat-spell">${D.SPELLS.map(sp => `<option value="${sp.id}" ${sp === spell ? 'selected' : ''} ${level < sp.lvl ? 'disabled' : ''}>${sp.name} · Level ${sp.lvl}</option>`).join('')}</select></label><button class="btn primary" data-do="go" data-a="combat">Combat</button></div><p class="sm">Max hit ${spell.max} · ${spell.runes} runes per cast. Spells are cast automatically with a staff.</p></section>`;
+    body = `<section class="panel"><div class="phead"><h2>Combat magic</h2><small>Magic level ${level}</small></div><div class="task-controls"><label for="combat-spell">Spell${UI.choiceButtons(`<select id="combat-spell" data-in="combat-spell">${D.SPELLS.map(sp => `<option value="${sp.id}" ${sp === spell ? 'selected' : ''} ${level < sp.lvl ? 'disabled' : ''}>${sp.name} · Level ${sp.lvl}</option>`).join('')}</select>`)}</label><button class="btn primary" data-do="go" data-a="combat">Combat</button></div><p class="sm">Max hit ${spell.max} · ${spell.runes} runes per cast. Spells are cast automatically with a staff.</p></section>`;
   }
-  return `<div class="tabs magic-tabs">${['Alchemy', 'Spellbook'].map(t => `<button class="tab ${t === tab ? 'on' : ''}" data-do="tab" data-a="magic" data-b="${t}">${t}</button>`).join('')}</div>${body}<details class="panel reference-panel" id="magic-progress"><summary>Skill progress</summary>${UI.skillHero('magic')}</details>`;
+  return `<div class="tabs magic-tabs">${['Alchemy', 'Spellbook'].map(t => `<button class="tab ${t === tab ? 'on' : ''}" data-do="tab" data-a="magic" data-b="${t}">${t}</button>`).join('')}</div>${body}<section data-reference="true" class="panel reference-panel" id="magic-progress"><h3>Skill progress</h3>${UI.skillHero('magic')}</section>`;
 };
 
 /* ---------- Combat page ---------- */
@@ -6022,8 +6089,8 @@ UI.V.combat = () => {
       <div class="mid"><span class="vs">vs</span><span class="bar prog" style="--c:var(--brass)"><i data-prog="@"></i></span></div>
       <div class="side"><div class="splats" id="sp-foe"></div>${foe}</div></section>
     ${UI.lootPanel()}`;
-  const training = `<section class="panel combat-training"><label for="training-focus">Train<select id="training-focus" data-in="training-focus" data-a="${st}">${stances.map(([value, name, skill]) => `<option value="${value}" ${cur === value ? 'selected' : ''}>${D.SK[skill] ? D.SK[skill].name : skill} · ${name}</option>`).join('')}</select></label><button class="tog ${S().settings.autoEat ? 'on' : ''}" data-do="autoeat"><span class="sw"></span>Auto-eat ${S().settings.autoEat ? 'on' : 'off'}</button><label for="eat-threshold">Eat below<select id="eat-threshold" data-in="eat-threshold">${[30,40,50,60,70].map(n=>`<option value="${n}" ${S().settings.eatAt === n ? 'selected' : ''}>${n}% health</option>`).join('')}</select></label></section>`;
-  return `<div class="combat-workspace"><div>${controls}</div><div>${battle}${training}</div></div><details class="panel reference-panel" id="combat-details"><summary>Equipment, food &amp; boss preparation</summary><div class="cb"><div class="col">
+  const training = `<section class="panel combat-training"><label for="training-focus">Train${UI.choiceButtons(`<select id="training-focus" data-in="training-focus" data-a="${st}">${stances.map(([value, name, skill]) => `<option value="${value}" ${cur === value ? 'selected' : ''}>${D.SK[skill] ? D.SK[skill].name : skill} · ${name}</option>`).join('')}</select>`)}</label><button class="tog ${S().settings.autoEat ? 'on' : ''}" data-do="autoeat"><span class="sw"></span>Auto-eat ${S().settings.autoEat ? 'on' : 'off'}</button><label for="eat-threshold">Eat below${UI.choiceButtons(`<select id="eat-threshold" data-in="eat-threshold">${[30,40,50,60,70].map(n=>`<option value="${n}" ${S().settings.eatAt === n ? 'selected' : ''}>${n}% health</option>`).join('')}</select>`)}</label></section>`;
+  return `<div class="combat-workspace"><div>${controls}</div><div>${battle}${training}</div></div><section data-reference="true" class="panel reference-panel" id="combat-details"><h3>Equipment, food &amp; boss preparation</h3><div class="cb"><div class="col">
     ${clvl}
     ${bossCard}
   </div>
@@ -6035,7 +6102,7 @@ UI.V.combat = () => {
     ${UI.abilityPanel()}
     <section class="panel"><div class="phead"><h2>Food</h2><small>Click to eat</small></div><div class="chips" id="foodbox">${UI.foodChips()}</div></section>
     <section class="panel"><div class="phead"><h2>Combat skills</h2><small>What each one does</small></div><div class="tiles two">${['attack', 'strength', 'defence', 'ranged', 'hitpoints'].map((k, i) => { const d = { attack: 'Chance to hit', strength: `Hit harder · max hit ${ps.max}`, defence: `Dodge and armour · blocks ${Math.round(ps.red * 100)}%`, ranged: 'Bows: hit chance and damage', hitpoints: 'Your health' }[k]; return UI.tile(k, i).replace(/<\/button>\s*$/, `<small class="tiledesc">${d}</small></button>`); }).join('')}</div>
-      <details class="howfight"><summary>How fighting works</summary><ul><li><b>Attack</b> decides whether your swing lands. <b>Strength</b> decides how much damage it does, up to your <b>max hit</b>.</li><li><b>Defence</b> and your armour make monsters miss you and take some of the sting out of what hits.</li><li>The <b>Training focus</b> you pick above decides which of these skills earns XP.</li><li>Your <b>combat level</b> combines Defence, Health and your best fighting style. The Easy / Fair / Hard tags compare a monster's level with it.</li></ul></details></section></div></div></details>`;
+      <section data-reference="true" class="howfight"><h3>How fighting works</h3><ul><li><b>Attack</b> decides whether your swing lands. <b>Strength</b> decides how much damage it does, up to your <b>max hit</b>.</li><li><b>Defence</b> and your armour make monsters miss you and take some of the sting out of what hits.</li><li>The <b>Training focus</b> you pick above decides which of these skills earns XP.</li><li>Your <b>combat level</b> combines Defence, Health and your best fighting style. The Easy / Fair / Hard tags compare a monster's level with it.</li></ul></section></section></div></div></section>`;
 };
 UI.tile = (sk, i = 0) => {
   const s = D.SK[sk], locked = !DQ.skillUnlocked(sk);
@@ -6086,7 +6153,7 @@ const catOf = it => it.type === 'tool' ? 'tool' : it.type === 'ammo' ? 'weapon' 
 /* "Crafting items" is a lens, not a box: anything that some recipe uses, wherever it also sits (ores, logs, bars, fish, crops …) */
 const inCat = (id, f) => f === 'all' || (f === 'craft' ? ING.has(id) : catOf(D.ITEMS[id]) === f);
 const byCat = (a, b) => CAT_ORDER.indexOf(catOf(D.ITEMS[a])) - CAT_ORDER.indexOf(catOf(D.ITEMS[b])) || D.ITEMS[a].name.localeCompare(D.ITEMS[b].name);
-UI.catTabs = (store, cur, act) => `<select id="${act}-select" data-in="itemfilter" data-a="${act}" aria-label="${act === 'packfilter' ? 'Backpack' : 'Bank'} category">${Object.entries(CAT).filter(([k]) => k === 'all' || k === cur || Object.keys(store).some(id => inCat(id, k))).map(([k, n]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${n} (${k === 'all' ? Object.keys(store).length : Object.keys(store).filter(id => inCat(id, k)).length})</option>`).join('')}</select>`;
+UI.catTabs = (store, cur, act) => `${UI.choiceButtons(`<select id="${act}-select" data-in="itemfilter" data-a="${act}" aria-label="${act === 'packfilter' ? 'Backpack' : 'Bank'} category">${Object.entries(CAT).filter(([k]) => k === 'all' || k === cur || Object.keys(store).some(id => inCat(id, k))).map(([k, n]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${n} (${k === 'all' ? Object.keys(store).length : Object.keys(store).filter(id => inCat(id, k)).length})</option>`).join('')}</select>`)}`;
 
 /* ---------- Map ---------- */
 const MAP_LAND = 'M40 330C50 210 170 130 320 110C470 90 590 56 760 70C900 82 950 190 944 300C938 404 884 462 760 452C640 470 520 430 400 450C280 480 140 470 80 420C52 394 40 362 40 330Z';
@@ -6121,7 +6188,7 @@ UI.V.map = () => {
   const sel = UI.mapSel = UI.mapSel || S().town, t = D.TOWN[sel], open = DQ.townUnlocked(t.id), here = S().town === sel, boss = D.MON[t.boss], done = S().towns[sel] && S().towns[sel].boss;
   const prev = D.TOWNS[t.idx - 1], counts = [['fishing', 'fish', 'fishing spot'], ['woodcutting', 'wood', 'tree type'], ['mining', 'mine', 'ore'], ['thieving', 'thieve', 'target']].map(([sk, k, w]) => { const n = D.NODES[k].filter(x => x.town === sel).length; return n ? `<span class="rw" style="--c:${D.SK[sk].col}">${ico(sk)}${n} ${w}${n > 1 ? 's' : ''}</span>` : ''; }).join('');
   const mons = D.MONLIST.filter(m => m.town === sel && !m.boss), qn = D.QUESTS.filter(q => q.town === sel);
-  return `<section class="panel travel-controls"><div class="phead"><h2>World</h2><small>Currently ${D.TOWN[S().town].name}</small></div><div class="task-controls"><label for="travel-town">Destination<select id="travel-town" data-in="travel-town">${D.TOWNS.map(town => `<option value="${town.id}" ${town.id === sel ? 'selected' : ''} ${DQ.townUnlocked(town.id) ? '' : 'disabled'}>${town.name}${DQ.townUnlocked(town.id) ? '' : ' · Locked'}</option>`).join('')}</select></label><button class="btn primary" data-do="${here ? 'go' : 'travel'}" data-a="${here ? 'combat' : sel}" ${open ? '' : 'disabled'}>${here ? 'Explore combat' : 'Travel'}</button></div></section><div class="mapw"><section class="panel mappanel fancy">${UI.mapSVG(sel)}<div class="maplegend"><span><i class="lg c"></i> You are here</span><span>Click a town for details</span></div></section>
+  return `<section class="panel travel-controls"><div class="phead"><h2>World</h2><small>Currently ${D.TOWN[S().town].name}</small></div><div class="task-controls"><label for="travel-town">Destination${UI.choiceButtons(`<select id="travel-town" data-in="travel-town">${D.TOWNS.map(town => `<option value="${town.id}" ${town.id === sel ? 'selected' : ''} ${DQ.townUnlocked(town.id) ? '' : 'disabled'}>${town.name}${DQ.townUnlocked(town.id) ? '' : ' · Locked'}</option>`).join('')}</select>`)}</label><button class="btn primary" data-do="${here ? 'go' : 'travel'}" data-a="${here ? 'combat' : sel}" ${open ? '' : 'disabled'}>${here ? 'Explore combat' : 'Travel'}</button></div></section><div class="mapw"><section class="panel mappanel fancy">${UI.mapSVG(sel)}<div class="maplegend"><span><i class="lg c"></i> You are here</span><span>Click a town for details</span></div></section>
     <section class="panel towninfo" style="--c:${t.col}">${open ? UI.scene(t.id) : `<div class="scene fog">${ico('lock')}</div>`}
       <div class="ti-body"><span class="k">${here ? 'Current location' : open ? 'Open road' : 'Locked'}</span><h2>${open ? t.name : 'Unknown lands'}</h2><p class="dim">${open ? t.tag : 'The road is closed.'}</p>
       ${open ? `<p>${t.blurb}</p><div class="rws">${counts}<span class="rw" style="--c:#8a9bff">${ico('attack')}Monsters Lv ${mons[0].cl}-${mons[mons.length - 1].cl}</span><span class="rw" style="--c:#d8a64a">${ico('shop')}Shop</span><span class="rw" style="--c:#d8a64a">${ico('quest')}${qn.length} quests</span></div>
@@ -6163,11 +6230,11 @@ UI.V.shop = () => {
   const cost = it ? (buying ? it.buy * count : it.val * Math.min(count, owned)) : 0;
   const disabled = !it || (buying && (S().coins < cost || (tool && owned)));
   return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span><b>${esc(D.ITEMS[item].name)}</b><small>${fmt(buying?D.ITEMS[item].buy:D.ITEMS[item].val)} coins each${buying?'':' · '+DQ.have(item)+' held'}</small></button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
-    ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}<div class="shop-controls"><label for="shop-quantity">Quantity<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
+    ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
       <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} ${disabled ? 'disabled' : ''}>${tool && owned && buying ? 'Already owned' : buying ? 'Buy' : 'Sell'} · ${fmt(cost)} coins</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all · ${fmt(it.val * owned)}</button>` : ''}</div>
       ${buying && S().coins < cost ? `<p class="bad">You need ${fmt(cost - S().coins)} more coins.</p>` : ''}
       </div><div class="shop-comparison">${UI.compareHtml ? UI.compareHtml(id) : ''}</div></div>` : '<p>Nothing to sell. Gather resources or visit your bank.</p>'}
-    <details class="shop-help"><summary>About this shop</summary><p>Tools work automatically. Equipment must be equipped from Inventory after buying. Selling draws from your backpack first, then the bank. Equipped items are kept.</p></details></section></div>`;
+    <section data-reference="true" class="shop-help"><h3>About this shop</h3><p>Tools work automatically. Equipment must be equipped from Inventory after buying. Selling draws from your backpack first, then the bank. Equipped items are kept.</p></section></section></div>`;
 };
 
 /* ---------- Quests ---------- */
@@ -6178,7 +6245,7 @@ UI.V.quests = () => {
   const list = D.QUESTS.filter(groups[tab]).sort((a, b) => (b.main ? 1 : 0) - (a.main ? 1 : 0) || (st(a) === 'ready' ? -1 : 0) - (st(b) === 'ready' ? -1 : 0) || a.adv - b.adv);
   const selected = list.find(q => q.id === UI.tab.questSelected) || list[0];
   UI.tab.questSelected = selected && selected.id;
-  const cards = selected ? [selected].map((q, i) => {
+  const cards = list.length ? list.map((q, i) => {
     const s = st(q), p = S().q[q.id], t = D.TOWN[q.town];
     const objs = q.obj.map((o, j) => { const pr = DQ.objProg(q, p, j), ok = pr >= o.n; return `<div class="obj ${ok ? 'ok' : ''}"><span>${ok ? ico('check') : ''}${o.label}</span><span class="mono" ${p ? `data-b="qtxt:${q.id}:${j}"` : ''}>${p ? '' : `0 / ${fmt(o.n)}`}</span><span class="bar"><i ${p ? `data-b="qbar:${q.id}:${j}"` : ''}></i></span></div>`; }).join('');
     const prevQ = q.req ? D.QM[q.req] : null;
@@ -6186,12 +6253,12 @@ UI.V.quests = () => {
     const req = s === 'locked' && q.main ? `<div class="reqs">${blk.map(b => `<div class="bad">✗ ${b}</div>`).join('')}</div>` : s === 'locked' ? `<div class="reqs bad">${DQ.advLvl() < q.adv ? `Hero level ${q.adv} <span class="mono">(you: ${DQ.advLvl()})</span>` : ''}${prevQ && !(S().q[q.req] && S().q[q.req].s === 'done') ? ` Finish “${prevQ.name}” first` : ''}</div>` : '';
     const sk = q.main && D.SK[q.unlocks];
     return `<section class="panel quest ${s} ${q.main ? 'main' : ''}" style="--i:${i};${sk ? `--c:${sk.col}` : ''}" id="q-${q.id}">${sk ? `<span class="mq-ribbon">${ico('star')} Main quest · Unlocks ${sk.name}</span>` : ''}<div class="phead" style="margin:0"><div><h2>${q.name}</h2><small>${q.giver} · ${t.name}</small></div><span class="state ${s}">${{ new: 'Available', locked: 'Locked', active: 'In progress', ready: 'Ready', done: 'Complete' }[s]}</span></div>
-      ${DQ.questImpact && DQ.questImpact(q.id) ? `<p class="quest-impact">Town change · ${esc(DQ.questImpact(q.id))}</p>` : ''}${req}<div class="quest-actions">${s === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>` : s === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Claim reward</button>` : s === 'active' ? `<button class="btn primary" data-do="questcontinue" data-a="${q.id}">Continue quest</button>` : ''}</div>${s === 'locked' ? '' : objs}<details class="quest-story" id="quest-story-${q.id}"><summary>Story &amp; rewards</summary><p class="blurb">${q.blurb}</p><div class="rewards"><span class="k">Rewards</span><div class="rws">${sk ? `<span class="rw unlockrw" style="--c:${sk.col}">${ico(q.unlocks)}Learn ${sk.name}</span>` : ''}${UI.rewards(q.reward)}</div></div>
-      </details></section>`;
+      ${DQ.questImpact && DQ.questImpact(q.id) ? `<p class="quest-impact">Town change · ${esc(DQ.questImpact(q.id))}</p>` : ''}${req}<div class="quest-actions">${s === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>` : s === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Claim reward</button>` : s === 'active' ? `<button class="btn primary" data-do="questcontinue" data-a="${q.id}">Continue quest</button>` : ''}</div>${s === 'locked' ? '' : objs}<section data-reference="true" class="quest-story" id="quest-story-${q.id}"><h3>Story &amp; rewards</h3><p class="blurb">${q.blurb}</p><div class="rewards"><span class="k">Rewards</span><div class="rws">${sk ? `<span class="rw unlockrw" style="--c:${sk.col}">${ico(q.unlocks)}Learn ${sk.name}</span>` : ''}${UI.rewards(q.reward)}</div></div>
+      </section></section>`;
   }).join('') : '';
   const done = D.QUESTS.filter(groups.done).length;
   return `<section class="panel shophead"><div><span class="k">Quest log</span><h2>${done} of ${D.QUESTS.length} complete</h2></div><div class="tabs">${Object.entries(names).map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="qtab" data-a="${k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</div></section>
-    ${list.length ? `<label class="panel quest-picker" for="quest-select">Quest<select id="quest-select" data-in="quest-choice">${list.map(q => `<option value="${q.id}" ${q === selected ? 'selected' : ''}>${esc(q.name)}${st(q) === 'ready' ? ' · Reward ready' : ''}</option>`).join('')}</select></label><div class="qgrid">${cards}</div>` : `<section class="panel"><p class="dim" style="margin:0">${{ active: 'No active quests. Check the Available tab.', available: 'Nothing new right now. Level up or travel to find more.', upcoming: 'No upcoming quests in the towns you have opened.', done: 'You have not finished any quests yet.' }[tab]}</p></section>`}`;
+    ${list.length ? `<div class="qgrid">${cards}</div>` : `<section class="panel"><p class="dim" style="margin:0">${{ active: 'No active quests. Check the Available tab.', available: 'Nothing new right now. Level up or travel to find more.', upcoming: 'No upcoming quests in the towns you have opened.', done: 'You have not finished any quests yet.' }[tab]}</p></section>`}`;
 };
 
 /* ---------- Character ---------- */
@@ -6205,11 +6272,8 @@ const equipCell = slot => {
 UI.packSorted = () => Object.keys(S().inv).sort(byCat);
 UI.packFilter = 'all'; UI.packQ = '';
 UI.packVisible = () => UI.packSorted().filter(id => inCat(id, UI.packFilter) && D.ITEMS[id].name.toLowerCase().includes(UI.packQ.toLowerCase()));
-UI.inventoryPicker = from => {
-  const store = from === 'bank' ? S().bank : S().inv, ids = Object.keys(store).sort(byCat);
-  if (!ids.length) return '';
-  return `<label class="inventory-picker" for="${from}-item-select">Item<select id="${from}-item-select" data-in="inventory-item" data-a="${from}"><option value="">Choose an item</option>${ids.map(id => `<option value="${id}" ${UI.sel === id && UI.selFrom === from ? 'selected' : ''}>${esc(D.ITEMS[id].name)} ×${fmt(store[id])}</option>`).join('')}</select></label>`;
-};
+/* Item cards already provide the complete visible inventory selector. */
+UI.inventoryPicker = () => '';
 UI.packGrid = () => {
   const ids = UI.packVisible();
   if (!ids.length) return `<p class="dim" style="grid-column:1/-1;margin:6px 0">${Object.keys(S().inv).length ? 'Nothing in your backpack matches. Try another filter, or look in the bank.' : 'Your backpack is empty.'}</p>`;
@@ -6230,11 +6294,11 @@ UI.V.character = () => {
   const s = S(), b = DQ.bonus(), ps = DQ.pstats(), marks = DQ.heroMarks();
   return `<div class="tabs character-mobile-tabs"><button class="tab ${UI.tab.characterPanel === 'equipment' ? '' : 'on'}" data-do="tab" data-a="characterPanel" data-b="pack">Backpack</button><button class="tab ${UI.tab.characterPanel === 'equipment' ? 'on' : ''}" data-do="tab" data-a="characterPanel" data-b="equipment">Equipment</button></div><div class="chargrid character-layout ${UI.tab.characterPanel === 'equipment' ? 'show-equipment' : ''}"><section class="panel paper"><div class="phead"><h2>Equipment</h2><small class="mono">Hero ${DQ.advLvl()} · Combat ${DQ.combatLvl()}</small></div>
       <div class="doll paper-doll" role="group" aria-label="Equipment around your hero"><div class="dollc">${UI.heroFigure()}</div>${SLOT_LAYOUT.map(sl => `<div class="ds ds-${sl}">${equipCell(sl)}</div>`).join('')}</div>
-      <details class="equipment-stats" id="equipment-stats"><summary id="equipment-stats-toggle">Combat stats <span class="mono">Max hit ${ps.max}</span></summary>
+      <section data-reference="true" class="equipment-stats" id="equipment-stats"><h3 id="equipment-stats-toggle">Combat stats <span class="mono">Max hit ${ps.max}</span></h3>
         <div class="bonuses">${[['Attack', b.atk, 'attack'], ['Strength', b.str, 'strength'], ['Defence', b.def, 'defence'], ['Ranged', b.rng, 'ranged'], ['Arrows', b.rngStr, 'ranged'], ['Magic', b.mag, 'magic']].map(([n, v, sk]) => `<div style="--c:${D.SK[sk].col}">${ico(sk)}<span>${n}</span><b class="mono">+${v}</b></div>`).join('')}</div>
         <div class="statlist"><div><span>Fighting style</span><b>${DQ.cap(ps.style)}</b></div><div><span>Damage reduction</span><b class="mono">${Math.round(ps.red * 100)}%</b></div><div><span>Total level</span><b class="mono" data-b="totlvl"></b></div></div>
-      </details>
-      <details class="equipment-appearance" id="equipment-appearance"><summary id="equipment-appearance-toggle">Appearance &amp; sharing</summary>${marks.length ? `<div class="fig-marks">${marks.map(mark => `<span class="fig-mark" data-tip="text:${esc(mark.sub)}">${ico(mark.ic)}${esc(mark.t)}</span>`).join('')}</div>` : ''}<p class="hint">Gear changes how your hero looks. Skill capes appear at levels 30, 60 and 99. Medals appear at Hero levels 10, 25, 50 and 75.</p><button class="btn sm" data-do="share">${ico('star')}Share hero</button></details></section>
+      </section>
+      <section data-reference="true" class="equipment-appearance" id="equipment-appearance"><h3 id="equipment-appearance-toggle">Appearance &amp; sharing</h3>${marks.length ? `<div class="fig-marks">${marks.map(mark => `<span class="fig-mark" data-tip="text:${esc(mark.sub)}">${ico(mark.ic)}${esc(mark.t)}</span>`).join('')}</div>` : ''}<p class="hint">Gear changes how your hero looks. Skill capes appear at levels 30, 60 and 99. Medals appear at Hero levels 10, 25, 50 and 75.</p><button class="btn sm" data-do="share">${ico('star')}Share hero</button></section></section>
     <div class="col"><section class="panel"><div class="phead"><h2>Backpack</h2><span><small class="mono" data-b="packn"></small> <button class="btn sm" data-do="go" data-a="bank">${ico('bank')}Bank (${Object.keys(S().bank).length})</button> <button class="btn sm" data-do="depositall">Bank all</button></span></div><div class="filtbar"><div class="tabs">${UI.catTabs(s.inv, UI.packFilter, 'packfilter')}</div><input id="packq" class="search" data-in="packq" placeholder="Search backpack" value="${esc(UI.packQ)}" aria-label="Search backpack"></div>${UI.inventoryPicker('pack')}<div class="slots" id="packgrid">${UI.packGrid()}</div><p class="hint">The backpack holds ${DQ.packMax()} kinds of item. When it is full, new kinds go straight to your <b>bank</b>. A storage chest in your house adds more space.</p></section>
     <section class="panel" id="detailbox">${UI.detail(UI.sel, UI.selFrom)}</section></div></div>`;
 };
@@ -6349,6 +6413,11 @@ const DO = {
   newgame: () => DQ.modal({ title: 'Erase everything?', body: '<p>This permanently deletes your hero, items and progress and returns you to the title screen. Export your save first if you might want it back.</p>', actions: [{ label: 'Erase and restart', primary: true, fn: () => { DQ.act = null; DQ.eraseSave(); DQ.paused = true; location.reload(); } }, { label: 'Keep playing' }] }),
 };
 UI.DO = DO;
+DO.choose = (a, b, button) => {
+  const group = button.closest('.choice-buttons');
+  group.querySelectorAll('button').forEach(el => { el.classList.toggle('on', el === button); el.setAttribute('aria-pressed', String(el === button)); });
+  button.dispatchEvent(new Event('change', { bubbles: true }));
+};
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-do]'); if (!t || t.disabled) return;
   if (t.classList.contains('card')) DQ.flash(t, 'bump');
@@ -6415,7 +6484,6 @@ UI.render = fresh => {
   if (DQ.markNoticesRead) DQ.markNoticesRead(UI.view);
   const focus = document.activeElement, focusKey = focus && focus.dataset ? { do: focus.dataset.do, a: focus.dataset.a, b: focus.dataset.b } : null;
   const focusId = focus && focus.closest('#view') ? focus.id : null;
-  const openDetails = fresh ? [] : $$('#view details[id][open]').map(el => el.id);
   const y = scrollY; DQ.hideTip && DQ.hideTip();
   const id = UI.view; let html;
   try {
@@ -6425,7 +6493,6 @@ UI.render = fresh => {
     else html = UI.V[id]();
   } catch (e) { console.error(e); html = `<section class="panel"><h2>Something went wrong</h2><p class="dim">This page could not be drawn. Your progress is safe.</p></section>`; }
   const v = $('#view'); v.innerHTML = html; UI.renderPageNotice(); if (fresh) { v.classList.add('enter'); clearTimeout(UI._et); UI._et = setTimeout(() => v.classList.remove('enter'), 800); }
-  openDetails.forEach(id => { const detail = document.getElementById(id); if (detail) detail.open = true; });
   [...v.children].forEach((el, i) => el.style.setProperty('--i', i));
   UI.collectProg(); UI.renderLog(); UI.upd(); if (id === 'activity') UI.chart();
   $$('.nav').forEach(n => n.classList.toggle('on', n.dataset.a === id));
@@ -6521,7 +6588,7 @@ UI.V.farming = () => {
   const nextPlot = D.PLOT_PRICES[F.plotsBought];
 
   const pens = Array.from({ length: F.pensBought }, (_, i) => {
-    const an = F.animals[i]; if (!an) return `<div class="pen emptypen"><span>${ico('barn')}</span><b>Empty pen</b><small>Buy an animal below</small></div>`;
+    const an = F.animals[i]; if (!an) return `<div class="pen emptypen"><span>${ico('barn')}</span><b>Empty pen</b><small>Buy an animal from the market</small></div>`;
     const A = D.ANIMAL[an.id], pr = D.ITEMS[A.prod];
     return `<div class="pen" data-i="${i}" data-b="pen:${i}" style="--c:${A.col}"><button class="pspr" data-do="petanimal" data-a="${i}" data-tip="text:Pet ${esc(an.name)}: makes them work 25% faster for 3 minutes">${DQ.animalSprite(A, 64, 'bob')}</button>
       <div class="pen-t"><b>${esc(an.name)}</b><small>${A.name} · makes ${pr.name.toLowerCase()} every ${left(DQ.animalPeriod(an))}</small><span class="bar pbar"><i></i></span><small><span class="pst mono"></span> ${pr.name.toLowerCase()} ready <span class="tag hungrytag">Hungry</span><span class="tag happytag">Happy</span></small></div>
@@ -6529,16 +6596,13 @@ UI.V.farming = () => {
   }).join('');
   const nextPen = D.PEN_PRICES[F.pensBought], mossOpen = DQ.townUnlocked('mossbarrow');
   const market = D.ANIMALS.map(a => { const lock = DQ.lvl('farming') < a.lvl; return `<div class="srow ${lock || S().coins < a.price ? 'cant' : ''}"><span class="mini">${DQ.animalSprite(a, 40)}</span><div class="sr-t"><b>${a.name}</b><small>Makes ${D.ITEMS[a.prod].name.toLowerCase()} (${fmt(D.ITEMS[a.prod].val)} coins) · <span class="${lock ? 'bad' : 'ok'}">Farming ${a.lvl}</span></small></div><span class="price mono">${ico('coin')}${fmt(a.price)}</span><button class="btn sm ${lock ? '' : 'primary'}" data-do="buyanimal" data-a="${a.id}" ${lock ? 'disabled' : ''}>Buy</button></div>`; }).join('');
-  const barn = UI.tab.farmView === 'barn';
-  return `<section class="panel farm-task"><div class="phead"><h2>Farming</h2><small>Level <b data-b="lvl:farming"></b></small></div>
-    <div class="tabs"><button class="tab ${barn ? '' : 'on'}" data-do="tab" data-a="farmView" data-b="fields">Fields</button><button class="tab ${barn ? 'on' : ''}" data-do="tab" data-a="farmView" data-b="barn">Animals</button></div>
-    ${barn ? `<div class="btnrow wrap farm-actions"><button class="btn primary" data-do="collectall">Collect all produce</button><button class="btn" data-do="filltrough">Fill feed trough</button><button class="btn" data-do="makefeed">Make feed</button></div><p>Trough <b class="mono" data-b="trough"></b> feed · ${fmtK(DQ.have('feed'))} feed in storage</p>
-      <details id="livestock-market"><summary>Buy animals</summary>${mossOpen ? `<div class="srows">${market}</div>` : '<p>Defeat Grubnash to reach the livestock trader in Mossbarrow.</p>'}</details><div class="pens">${pens}${nextPen !== undefined ? `<button class="pen buypen" data-do="buypen">Build a pen · ${fmt(nextPen)} coins</button>` : ''}</div>`
-      : `<div class="seed-choices" role="group" aria-label="Choose a seed">${D.CROPS.filter(c=>DQ.have('seed_'+c.id)).map(c=>`<button class="seed-choice ${UI.seed===c.id?'on':''}" data-do="seed" data-a="${c.id}" aria-pressed="${UI.seed===c.id}" ${DQ.lvl('farming')<c.lvl?'disabled':''}>${DQ.itemIco(D.ITEMS['seed_'+c.id])}<span>${c.name}<small>${DQ.have('seed_'+c.id)} seeds · Level ${c.lvl}</small></span></button>`).join('')}</div>
+  return `<div class="farm-workspace"><section class="panel farm-task"><div class="phead"><h2>Fields</h2><small>Farming level <b data-b="lvl:farming"></b></small></div>
+    <div class="seed-choices" role="group" aria-label="Choose a seed">${D.CROPS.filter(c=>DQ.have('seed_'+c.id)).map(c=>`<button class="seed-choice ${UI.seed===c.id?'on':''}" data-do="seed" data-a="${c.id}" aria-pressed="${UI.seed===c.id}" ${DQ.lvl('farming')<c.lvl?'disabled':''}>${DQ.itemIco(D.ITEMS['seed_'+c.id])}<span>${c.name}<small>${DQ.have('seed_'+c.id)} seeds · Level ${c.lvl}</small></span></button>`).join('')}</div>
         <div class="btnrow wrap farm-actions"><button class="btn primary" data-do="harvestall">Harvest ripe crops</button><button class="btn" data-do="plantall" ${UI.seed ? '' : 'disabled'}>Plant empty plots</button></div>${UI.seed ? `<p>Grows in ${left(DQ.growDur(D.CROP[UI.seed]))}. Crops keep growing while you are away.</p>` : '<p>No seeds available. Buy seeds in the shop.</p>'}
         <div class="plots">${plots}${nextPlot !== undefined ? `<button class="plot buyplot" data-do="buyplot"><span>${ico('crop')}</span><b>Buy a plot</b><small>${fmt(nextPlot)} coins</small></button>` : ''}</div>
-        <details id="farm-settings"><summary>Planting settings</summary><button class="tog ${F.autoReplant ? 'on' : ''}" data-do="autoreplant"><span class="sw"></span>Replant after harvest</button></details>`}</section>
-    <details class="panel reference-panel" id="farming-progress"><summary>Skill progress &amp; tools</summary>${UI.skillHero('farming', UI.toolLine('farming'))}</details>`;
+        <section data-reference="true" id="farm-settings"><h3>Planting settings</h3><button class="tog ${F.autoReplant ? 'on' : ''}" data-do="autoreplant"><span class="sw"></span>Replant after harvest</button></section></section><section class="panel farm-animals"><div class="phead"><h2>Animals</h2></div><div class="btnrow wrap farm-actions"><button class="btn primary" data-do="collectall">Collect all produce</button><button class="btn" data-do="filltrough">Fill feed trough</button><button class="btn" data-do="makefeed">Make feed</button></div><p>Trough <b class="mono" data-b="trough"></b> feed · ${fmtK(DQ.have('feed'))} feed in storage</p>
+      <section data-reference="true" id="livestock-market"><h3>Buy animals</h3>${mossOpen ? `<div class="srows">${market}</div>` : '<p>Defeat Grubnash to reach the livestock trader in Mossbarrow.</p>'}</section><div class="pens">${pens}${nextPen !== undefined ? `<button class="pen buypen" data-do="buypen">Build a pen · ${fmt(nextPen)} coins</button>` : ''}</div></section></div>
+    <section data-reference="true" class="panel reference-panel" id="farming-progress"><h3>Skill progress &amp; tools</h3>${UI.skillHero('farming', UI.toolLine('farming'))}</section>`;
 };
 
 /* ---------- House ---------- */
@@ -6556,13 +6620,13 @@ UI.V.house = () => {
   const rooms = [selectedRoom].map((r, i) => {
     const built = H.rooms[r.id];
     if (!built) return `<section class="panel room locked" style="--i:${i}"><div class="phead" style="margin:0"><h2>${r.name}</h2><span class="state">Not built</span></div><p class="blurb">${r.blurb}</p><div class="rws">${r.furn.map(fu => `<span class="rw" style="--c:#8fa09e">${ico(fu.ic)}${fu.name}</span>`).join('')}</div><button class="btn ${S().coins >= r.price ? 'primary' : ''}" data-do="buildroom" data-a="${r.id}">Build for ${fmt(r.price)} coins</button></section>`;
-    return `<section class="panel room" style="--i:${i}"><label class="page-picker" for="house-furniture">Furniture<select id="house-furniture" data-in="house-furniture">${r.furn.map(fu => `<option value="${fu.id}" ${fu === selectedFurniture ? 'selected' : ''}>${fu.name}</option>`).join('')}</select></label>${[selectedFurniture].map(fu => {
+    return `<section class="panel room" style="--i:${i}"><label class="page-picker" for="house-furniture">Furniture${UI.choiceButtons(`<select id="house-furniture" data-in="house-furniture">${r.furn.map(fu => `<option value="${fu.id}" ${fu === selectedFurniture ? 'selected' : ''}>${fu.name}</option>`).join('')}</select>`)}</label>${[selectedFurniture].map(fu => {
       const t = H.furn[fu.id] || 0, vals = Object.values(fu.fx)[0], nextCost = fu.costs[t];
       return `<div class="furn"><div class="fu-h"><span class="fu-ic">${ico(fu.ic)}</span><div><b>${fu.name}</b><small>${t ? fu.label(vals[t - 1]) : 'Not placed yet'}</small></div><span class="pips">${[1, 2, 3].map(n => `<i class="${t >= n ? 'on' : ''}"></i>`).join('')}</span></div>
         ${t < 3 ? `<div class="fu-next"><button class="btn sm ${DQ.canAfford(nextCost) ? 'primary' : ''}" data-do="furnish" data-a="${fu.id}" ${DQ.canAfford(nextCost) ? '' : 'disabled'}>${t ? 'Upgrade' : 'Build'}</button><small>${t ? 'Upgrade' : 'Place'}: ${fu.label(vals[t])}</small><div class="rws">${costChips(nextCost)}</div></div>` : '<small class="ok">Fully upgraded</small>'}</div>`;
     }).join('')}</section>`;
   }).join('');
-  return `<section class="panel"><div class="phead"><h2>Your home</h2></div><label class="page-picker" for="house-room">Room<select id="house-room" data-in="house-room">${D.ROOMS.map(r => `<option value="${r.id}" ${r === selectedRoom ? 'selected' : ''}>${r.name}${H.rooms[r.id] ? '' : ' · Not built'}</option>`).join('')}</select></label></section><div class="qgrid">${rooms}</div><details class="panel" id="house-bonuses"><summary>Home bonuses &amp; appearance</summary><div class="rws">${sum}</div>${houseArt()}</details>`;
+  return `<section class="panel"><div class="phead"><h2>Your home</h2></div><label class="page-picker" for="house-room">Room${UI.choiceButtons(`<select id="house-room" data-in="house-room">${D.ROOMS.map(r => `<option value="${r.id}" ${r === selectedRoom ? 'selected' : ''}>${r.name}${H.rooms[r.id] ? '' : ' · Not built'}</option>`).join('')}</select>`)}</label></section><div class="qgrid">${rooms}</div><section data-reference="true" class="panel" id="house-bonuses"><h3>Home bonuses &amp; appearance</h3><div class="rws">${sum}</div>${houseArt()}</section>`;
 };
 
 /* ---------- Hirelings ---------- */
@@ -6578,7 +6642,7 @@ UI.V.hirelings = () => {
     const status = w.unpaid ? '<span class="bad">Unpaid, not working</span>' : w.skill === 'farming' ? (w.task ? 'Tending your farm' : 'Waiting for orders') : node ? `Working: ${node.name} (${D.TOWN[node.town].name})` : 'Idle, pick a job below';
     return `<section class="panel worker" data-b="wk:${w.id}" style="--c:${sk.col}"><div class="wk-h"><span class="w-ic">${ico(w.skill)}</span><div><b>${esc(w.name)}</b><small>${sk.name} hand · level <span class="wlv mono">${L}</span> · ${tr[0]}: ${tr[3]}</small></div><button class="linkbtn" data-do="dismiss" data-a="${w.id}">Dismiss</button></div>
       <span class="bar pbar"><i></i></span><small class="dim">${status} · wage ${DQ.workerWage(w).toFixed(1)} coins/min</small>
-      ${w.skill === 'farming' ? `<div class="btnrow"><button class="btn sm ${w.task ? '' : 'primary'}" data-do="assign" data-a="${w.id}" data-b="${w.task ? '' : 'farm'}">${w.task ? 'Stop tending' : 'Start tending the farm'}</button></div><small class="dim">Harvests and replants ripe crops and collects from your animals.</small>` : `<label class="page-picker" for="worker-task">Job<select id="worker-task" data-in="worker-task" data-a="${w.id}"><option value="" ${w.task ? '' : 'selected'}>Rest</option>${opts}</select></label>`}
+      ${w.skill === 'farming' ? `<div class="btnrow"><button class="btn sm ${w.task ? '' : 'primary'}" data-do="assign" data-a="${w.id}" data-b="${w.task ? '' : 'farm'}">${w.task ? 'Stop tending' : 'Start tending the farm'}</button></div><small class="dim">Harvests and replants ripe crops and collects from your animals.</small>` : `<label class="page-picker" for="worker-task">Job${UI.choiceButtons(`<select id="worker-task" data-in="worker-task" data-a="${w.id}"><option value="" ${w.task ? '' : 'selected'}>Rest</option>${opts}</select>`)}</label>`}
       ${made ? `<div class="rws"><span class="k">Sent to bank</span>${made}</div>` : ''}</section>`;
   }).join('');
   const selectedCandidate = Math.min(UI.tab.hireChoice || 0, S().hire.cands.length - 1);
@@ -6590,8 +6654,8 @@ UI.V.hirelings = () => {
   const hiring = UI.tab.workersView === 'hire' || !ws.length;
   return `<section class="panel shophead"><div><span class="k">Workers</span><h2>${ws.length} of ${slots} bed${slots > 1 ? 's' : ''} filled</h2><small class="dim">Items go to your bank · wages paid per minute</small></div></section>
     <div class="tabs worker-mobile-tabs"><button class="tab ${hiring ? '' : 'on'}" data-do="tab" data-a="workersView" data-b="team">Your team</button><button class="tab ${hiring ? 'on' : ''}" data-do="tab" data-a="workersView" data-b="hire">Hire</button></div>
-    <div class="worker-panels"><div class="worker-team ${hiring ? 'mobile-hide' : ''}">${mine ? `<label class="panel page-picker" for="worker-choice">Worker<select id="worker-choice" data-in="worker-choice">${ws.map(w=>`<option value="${w.id}" ${w === selectedWorker ? 'selected' : ''}>${esc(w.name)} · ${D.SK[w.skill].name}</option>`).join('')}</select></label>${mine}` : '<section class="panel">Your team is empty. Hire a worker to get started.</section>'}</div>
-    <section class="panel worker-board ${hiring ? '' : 'mobile-hide'}"><div class="phead"><h2>Hiring board</h2><span class="btnrow"><small class="mono" data-b="hirewait"></small><button class="btn sm" data-do="refreshboard">${free ? 'Refresh (free)' : 'Refresh · 100'}</button></span></div><label class="page-picker" for="hire-choice">Candidate<select id="hire-choice" data-in="hire-choice">${S().hire.cands.map((c,i)=>`<option value="${i}" ${i === selectedCandidate ? 'selected' : ''}>${esc(c.name)} · ${D.SK[c.skill].name}</option>`).join('')}</select></label><div class="cands">${cands}</div></section></div>`;
+    <div class="worker-panels"><div class="worker-team ${hiring ? 'mobile-hide' : ''}">${mine ? `<label class="panel page-picker" for="worker-choice">Worker${UI.choiceButtons(`<select id="worker-choice" data-in="worker-choice">${ws.map(w=>`<option value="${w.id}" ${w === selectedWorker ? 'selected' : ''}>${esc(w.name)} · ${D.SK[w.skill].name}</option>`).join('')}</select>`)}</label>${mine}` : '<section class="panel">Your team is empty. Hire a worker to get started.</section>'}</div>
+    <section class="panel worker-board ${hiring ? '' : 'mobile-hide'}"><div class="phead"><h2>Hiring board</h2><span class="btnrow"><small class="mono" data-b="hirewait"></small><button class="btn sm" data-do="refreshboard">${free ? 'Refresh (free)' : 'Refresh · 100'}</button></span></div><label class="page-picker" for="hire-choice">Candidate${UI.choiceButtons(`<select id="hire-choice" data-in="hire-choice">${S().hire.cands.map((c,i)=>`<option value="${i}" ${i === selectedCandidate ? 'selected' : ''}>${esc(c.name)} · ${D.SK[c.skill].name}</option>`).join('')}</select>`)}</label><div class="cands">${cands}</div></section></div>`;
 };
 
 /* ---------- Bestiary and pets ---------- */
@@ -6609,7 +6673,7 @@ UI.V.bestiary = () => {
   } else {
     const act = S().pets.active;
     const chosenPet = D.PET[UI.tab.petChoice] || D.PET[act] || D.PETS[0];
-    body = `<label class="page-picker" for="pet-choice">Pet<select id="pet-choice" data-in="pet-choice">${D.PETS.map(p => `<option value="${p.id}" ${p === chosenPet ? 'selected' : ''}>${S().pets.owned[p.id] ? p.name : p.kind}</option>`).join('')}</select></label><div class="pets">${[chosenPet].map(p => {
+    body = `<label class="page-picker" for="pet-choice">Pet${UI.choiceButtons(`<select id="pet-choice" data-in="pet-choice">${D.PETS.map(p => `<option value="${p.id}" ${p === chosenPet ? 'selected' : ''}>${S().pets.owned[p.id] ? p.name : p.kind}</option>`).join('')}</select>`)}</label><div class="pets">${[chosenPet].map(p => {
       const own = S().pets.owned[p.id], lv = DQ.petLevel(p.id), s = p.src;
       const hint = s.type === 'shop' ? `Sold in ${D.TOWN[s.town].name} for ${fmt(s.price)} coins` : s.type === 'boss' ? `Sometimes follows you home after defeating ${D.MON[s.mon].name}` : s.type === 'harvest' ? 'Hides among ripe crops' : `Found while ${D.SK[s.skill].name.toLowerCase() === 'thieving' ? 'thieving' : 'training ' + D.SK[s.skill].name}`;
       const shopBtn = !own && s.type === 'shop' && DQ.townUnlocked(s.town) ? `<button class="btn sm ${S().coins >= s.price ? 'primary' : ''}" data-do="buypet" data-a="${p.id}">Adopt · ${fmt(s.price)}</button>` : '';
@@ -6702,8 +6766,8 @@ UI.planHtml = () => {
       ${sup ? `<div class="sm ${sup.n ? '' : 'bad'}">${ico('bag')} Supplies: ${sup.label}${sup.ms ? ` (about ${DQ.fmtTime(sup.ms)})` : ''}</div>` : ''}</div>`
     : `<p class="dim">Nothing is running. Queue a task with the <b>+</b> button on any card, or just click a card to start it.</p>`;
   const rows = Q.map((t, i) => `<div class="qitem"><span class="qn mono">${i + 1}</span><div class="qbody"><b>${DQ.actLabel(t)}</b>
-      <div class="qctl"><select data-in="qrule" data-i="${i}" aria-label="Stop rule">${D.STOP_RULES.filter(r => r[0] !== 'none').map(([k, n]) => `<option value="${k}" ${t.rule === k ? 'selected' : ''}>${n}</option>`).join('')}</select>
-      <select data-in="qpace" data-i="${i}" aria-label="Pace">${Object.entries(D.PACE).map(([k, p]) => `<option value="${k}" ${t.pace === k ? 'selected' : ''}>${p.name}</option>`).join('')}</select></div></div>
+      <div class="qctl">${UI.choiceButtons(`<select data-in="qrule" data-i="${i}" aria-label="Stop rule">${D.STOP_RULES.filter(r => r[0] !== 'none').map(([k, n]) => `<option value="${k}" ${t.rule === k ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}
+      ${UI.choiceButtons(`<select data-in="qpace" data-i="${i}" aria-label="Pace">${Object.entries(D.PACE).map(([k, p]) => `<option value="${k}" ${t.pace === k ? 'selected' : ''}>${p.name}</option>`).join('')}</select>`)}</div></div>
       <div class="qbtns"><button class="iconb sm" data-do="qup" data-a="${i}" aria-label="Move up" ${i ? '' : 'disabled'}>${ico('chevron', 'up')}</button><button class="iconb sm" data-do="qdel" data-a="${i}" aria-label="Remove">${ico('close')}</button></div></div>`).join('');
   return `${cur}<div class="plan-q"><div class="phead" style="margin:14px 0 8px"><h3>Queue <small class="mono">${Q.length} / ${slots}</small></h3>${Q.length ? '<button class="linkbtn" data-do="qclear">Clear</button>' : ''}</div>
     ${rows || '<p class="sm dim" style="margin:0">Empty. When the current task finishes or runs out of supplies, the next one starts by itself, even while you are away.</p>'}
@@ -6758,7 +6822,7 @@ UI.bossIntel = m => {
   const B = D.BOSSMECH[m.id]; if (!B) return '';
   const w = DQ.weakOf(m), mu = DQ.matchup(m);
   const alternatives = Object.keys({ ...S().inv, ...S().bank }).filter(id => D.ITEMS[id].slot && D.ITEMS[id].slot !== 'ammo' && DQ.canEquip(id).ok && S().equip[D.ITEMS[id].slot] !== id);
-  const compare = alternatives.length ? `<details><summary>Compare an equipment change</summary><p class="sm">Simulate your current build and one item you own, using your current health and food. Results are estimates from separate trial fights.</p><div class="btnrow wrap">${alternatives.map(id => `<button class="btn sm" data-do="comparegear" data-a="${m.id}" data-b="${id}">${esc(D.ITEMS[id].name)}</button>`).join('')}</div></details>` : '';
+  const compare = alternatives.length ? `<section data-reference="true"><h3>Compare an equipment change</h3><p class="sm">Simulate your current build and one item you own, using your current health and food. Results are estimates from separate trial fights.</p><div class="btnrow wrap">${alternatives.map(id => `<button class="btn sm" data-do="comparegear" data-a="${m.id}" data-b="${id}">${esc(D.ITEMS[id].name)}</button>`).join('')}</div></section>` : '';
   return `<div class="intel"><div class="k">Prepare for this fight</div><p class="sm">Health ${Math.ceil(S().hp)} / ${DQ.maxHp()} · ${DQ.supplyInfo({kind:'fight'})?.label || 'No supplies'}. Auto-eat ${S().settings.autoEat ? 'on' : 'off'}.</p><div class="btnrow wrap"><button class="btn sm" data-do="go" data-a="character">Review equipment</button><button class="btn sm" data-do="go" data-a="cooking">Prepare food</button></div><p class="sm">${B.text}</p>
     ${m.id === 'hollowking' ? '' : `<div class="chips">${w.weak.map(t => dchip(t, 'weak')).join('')}${w.resist.map(t => dchip(t, 'res')).join('')}</div>`}
     <div class="sm"><b>Counters:</b> ${B.counters.join(' · ')}</div>
@@ -7390,7 +7454,7 @@ const subnav = () => {
   const pages = h.pages.filter(p => p !== 'balance' || S().settings.dev || UI.view === 'balance');
   if (pages.length > 3) {
     const name = p => D.SK[p] ? D.SK[p].name : TAB[p] ? TAB[p][0] : DQ.cap(p);
-    el.innerHTML = `<label class="subnav section-picker ${h.id}" for="section-select"><span>${h.name}</span><select id="section-select" data-in="page" aria-label="${h.name} section">${pages.map(p => `<option value="${p}" ${p === UI.view ? 'selected' : ''}>${name(p)}</option>`).join('')}</select></label>`;
+    el.innerHTML = `<div class="subnav section-picker ${h.id}"><span>${h.name}</span>${UI.choiceButtons(`<select id="section-select" data-in="page" aria-label="${h.name} section">${pages.map(p => `<option value="${p}" ${p === UI.view ? 'selected' : ''}>${name(p)}</option>`).join('')}</select>`)}</div>`;
     return;
   }
   const tabs = pages.map(p => `<button class="stab ${p === UI.view ? 'on' : ''}" data-do="go" data-a="${p}" ${p === UI.view ? 'aria-current="page"' : ''}>${ico(TAB[p][1])}<span>${TAB[p][0]}</span><span class="notice-badge" data-b="notice:${p}" hidden></span></button>`).join('');
@@ -7481,9 +7545,9 @@ UI.V.overview = () => {
   return `${welcome}${UI.homeSections.map(render => render()).join('')}
     ${decisions ? `<button class="btn sm" data-do="go" data-a="activity">${decisions} away decision${decisions === 1 ? '' : 's'} waiting · View activity</button>` : ''}
     ${UI.homeNotices()}
-    <details class="panel upnext"><summary>Explore other suggestions</summary>
+    <section data-reference="true" class="panel upnext"><h3>Explore other suggestions</h3>
       <div id="goalbox">${UI.homeGoals()}</div>
-    </details>`;
+    </section>`;
 };
 UI.V.skillsummary = () => `<section class="panel"><div class="phead"><h2>Your skills</h2><small>Total level <b data-b="totlvl"></b></small></div><div class="skl">${D.SKILLS.map(skill => {
   const locked = !DQ.skillUnlocked(skill.id);
@@ -7502,7 +7566,7 @@ const syncGoal = (a, b) => {
   }
 };
 UI.refreshGoals = () => {
-  const box = $('#goalbox'); if (!box || !box.closest('details').open || box.matches(':hover') || box.contains(document.activeElement) && document.activeElement.matches(':focus-visible')) return;
+  const box = $('#goalbox'); if (!box || box.matches(':hover') || box.contains(document.activeElement) && document.activeElement.matches(':focus-visible')) return;
   const all = DQ.goals(), shown = UI.tab.goals === 'all' ? all : all.slice(0, 4);
   const ids = shown.map(g => g.id).join('|'), have = $$('.goal', box).map(e => e.dataset.gid).join('|');
   const tpl = document.createElement('div'); tpl.innerHTML = UI.homeGoals();
@@ -7707,7 +7771,7 @@ UI.skillHero = (sk, extra = '') => {
 };
 ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'cooking', 'smithing', 'crafting', 'magic'].forEach(p => {
   const o = UI.V[p]; if (!o) return;
-  UI.V[p] = () => { const h = o(); return h.includes('locked-page') || !UI.skillGuide ? h : h + `<details class="panel guidep" id="${p}-guide"><summary>About ${D.SK[p].name}</summary>${UI.skillGuide(p)}</details>`; };
+  UI.V[p] = () => { const h = o(); return h.includes('locked-page') || !UI.skillGuide ? h : h + `<section data-reference="true" class="panel guidep" id="${p}-guide"><h3>About ${D.SK[p].name}</h3>${UI.skillGuide(p)}</section>`; };
 });
 
 /* ---------- Mastery ---------- */
@@ -7715,14 +7779,14 @@ UI.V.mastery = () => {
   const ranks = DQ.masteryTotal(), title = DQ.heroTitle();
   const skills = D.SKILLS.filter(s => DQ.skillUnlocked(s.id));
   const selected = skills.find(s => s.id === UI.tab.masterySkill) || skills[0];
-  const picker = `<label class="page-picker" for="mastery-skill">Skill<select id="mastery-skill" data-in="mastery-skill">${skills.map(s => `<option value="${s.id}" ${s === selected ? 'selected' : ''}>${s.name} · Level ${DQ.lvl(s.id)}</option>`).join('')}</select></label>`;
+  const picker = `<label class="page-picker" for="mastery-skill">Skill${UI.choiceButtons(`<select id="mastery-skill" data-in="mastery-skill">${skills.map(s => `<option value="${s.id}" ${s === selected ? 'selected' : ''}>${s.name} · Level ${DQ.lvl(s.id)}</option>`).join('')}</select>`)}</label>`;
   const rows = (selected ? [selected] : []).map(s => {
     const L = DQ.lvl(s.id), r = DQ.masteryRank(s.id), xp = S().xp[s.id] || 0;
     if (L < 99) { const pct = Math.min(1, xp / D.XPF[99]); return `<div class="msk locked" style="--c:${s.col}"><span class="ic">${ico(s.id)}</span><div class="mb"><b>${s.name}</b><small>Level ${L}. Mastery begins at 99.</small><span class="bar"><i style="width:${(pct * 100).toFixed(1)}%"></i></span></div><span class="mr mono">${(pct * 100).toFixed(0)}%</span></div>`; }
     const into = DQ.masteryXp(s.id) - r * DQ.masteryStep(), pct = r >= 10 ? 1 : into / DQ.masteryStep(), on = S().title === s.id;
     return `<div class="msk ${r ? 'got' : ''}" style="--c:${s.col}"><span class="ic">${ico(s.id)}</span><div class="mb"><b>${s.name}${r ? ` <em>${D.MASTERY_TITLES[r - 1]}</em>` : ''}</b><small>${r >= 10 ? 'Fully mastered.' : `${fmt(Math.ceil(DQ.masteryStep() - into))} xp to rank ${r + 1}`}</small><span class="bar"><i style="width:${(pct * 100).toFixed(1)}%"></i></span></div><span class="mr mono">Rank ${r}/10</span>${r ? `<button class="btn sm ${on ? 'primary' : ''}" data-do="wear" data-a="${on ? '' : s.id}">${on ? 'Wearing title' : 'Wear title'}</button>` : ''}</div>`;
   }).join('');
-  return `<section class="panel"><div class="phead"><h2>Mastery</h2><small>${ranks} ranks earned</small></div>${picker}<div class="mlist">${rows}</div>${title ? `<p>Wearing ${esc(title)}</p>` : ''}<details id="mastery-help"><summary>How mastery works</summary><p>Keep training after level 99 to earn ranks and titles. Each rank adds 1% coins. There are 10 ranks per skill.</p></details></section>`;
+  return `<section class="panel"><div class="phead"><h2>Mastery</h2><small>${ranks} ranks earned</small></div>${picker}<div class="mlist">${rows}</div>${title ? `<p>Wearing ${esc(title)}</p>` : ''}<section data-reference="true" id="mastery-help"><h3>How mastery works</h3><p>Keep training after level 99 to earn ranks and titles. Each rank adds 1% coins. There are 10 ranks per skill.</p></section></section>`;
 };
 Object.assign(UI.DO, { wear: a => { DQ.setTitle(a || null); DQ.sfx('tab'); UI.render(false); } });
 DQ.on('title', () => UI.renderHud());
@@ -7736,7 +7800,7 @@ UI.toolsPanel = () => {
       <small>${D.SK[sk].name}${open ? ` ${DQ.lvl(sk)}` : ' (locked)'} · ${t ? `${pct}% faster` : 'normal speed'}</small><span class="pips" aria-label="Tier ${t} of 5">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= t ? 'on' : ''}"></i>`).join('')}</span></div>
       ${next ? `<button class="btn sm" data-do="go" data-a="shop" data-tip="text:${esc(next.name)}: ${fmt(next.buy)} coins. Opens the shop.">Upgrade ${DQ.fmtK ? DQ.fmtK(next.buy) : fmt(next.buy)}</button>` : '<span class="max">Best</span>'}</div>`;
   }).join('');
-  return `<details class="panel toolsp" id="inventory-tools"><summary>Gathering tools</summary><p class="hint">Your best owned tool is used automatically.</p><div class="toolrows">${rows}</div></details>`;
+  return `<section data-reference="true" class="panel toolsp" id="inventory-tools"><h3>Gathering tools</h3><p class="hint">Your best owned tool is used automatically.</p><div class="toolrows">${rows}</div></section>`;
 };
 const origChar = UI.V.character;
 UI.V.character = () => { const h = origChar().replace('<div class="slots" id="packgrid">', '<div class="selbar" id="selbar"></div><div class="slots" id="packgrid">'), tail = '</section></div></div>', i = h.lastIndexOf(tail); return i < 0 ? h : h.slice(0, i + 10) + UI.toolsPanel() + h.slice(i + 10); };
@@ -7753,7 +7817,7 @@ UI.compareHtml = id => {
   return `<div class="cmp slot-comparison"><div class="k">${esc(DQ.SLOT_NAMES[c.slot])} · equipped ${c.cur ? esc(c.cur.name) : 'nothing'}</div>
     <table><thead><tr><th>Stat</th><th>Equipped</th><th>This item</th><th>Change</th></tr></thead><tbody>${c.itemRows.map(r => `<tr class="${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}"><th>${UI.statNames[r.key]}</th><td>${r.a}</td><td>${r.b}</td><td>${r.d ? sg(r.d) : '—'}</td></tr>`).join('')}</tbody></table>
     ${c.styleChange ? `<p class="sm">Style ${c.styleChange[0]} → ${c.styleChange[1]}</p>` : ''}
-    ${combat.length ? `<details><summary>Combat impact</summary>${combat.map(r => `<div class="cmprow"><span>${r.n}</span><b>${r.delta ? '' : r.a + ' → ' + r.b}</b><em>${sg(r.d)}${r.unit || ''}</em></div>`).join('')}</details>` : ''}
+    ${combat.length ? `<section data-reference="true"><h3>Combat impact</h3>${combat.map(r => `<div class="cmprow"><span>${r.n}</span><b>${r.delta ? '' : r.a + ' → ' + r.b}</b><em>${sg(r.d)}${r.unit || ''}</em></div>`).join('')}</section>` : ''}
     ${c.need.map(n => `<p class="bad sm">${esc(n)}</p>`).join('')}${c.unmet ? `<p class="bad sm">${esc(c.unmet)}</p>` : ''}</div>`;
 };
 UI.compareLine = id => {
@@ -7829,7 +7893,7 @@ UI.after.settings = () => {
   const names = panels.map(panel => panel.querySelector('h2').textContent);
   const selected = names.includes(UI.tab.settingsPanel) ? UI.tab.settingsPanel : names[0];
   panels.forEach((panel, i) => { panel.hidden = names[i] !== selected; });
-  view.insertAdjacentHTML('afterbegin', `<label class="panel page-picker" for="settings-category">Settings<select id="settings-category" data-in="settings-category">${names.map(name => `<option value="${esc(name)}" ${name === selected ? 'selected' : ''}>${esc(name)}</option>`).join('')}</select></label>`);
+  view.insertAdjacentHTML('afterbegin', `<label class="panel page-picker" for="settings-category">Settings${UI.choiceButtons(`<select id="settings-category" data-in="settings-category">${names.map(name => `<option value="${esc(name)}" ${name === selected ? 'selected' : ''}>${esc(name)}</option>`).join('')}</select>`)}</label>`);
 };
 })();
 
@@ -7923,7 +7987,7 @@ UI.rarePage = () => {
   const cost = selected.price * selected.count, affordable = S().coins >= cost;
   const disabled = selected.locked || selected.owned || !affordable;
   return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${esc(D.TOWN[S().town].name)}</small></div>${UI.shopTabs('rare')}<div class="illustrated-choices">${choices.map(c=>`<button class="illustrated-card ${c===selected?'selected':''}" data-do="rareselect" data-a="${c.key}" aria-pressed="${c===selected}"><span class="choice-art">${DQ.itemIco(D.ITEMS[c.id||(c.key.startsWith('cache:')?'treasure_chest':'potion_fortune')])}</span><b>${esc(c.name)}</b><small>${c.owned?'Owned':c.locked?'Locked':fmt(c.price)+' coins'}</small></button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>Rare item</h2></div>
-    <div class="shop-workspace"><div class="shop-purchase">${selected.id ? UI.shopPreview(selected.id) : `<h3>${esc(selected.name)}</h3>`}<div class="shop-controls"><label for="shop-quantity">Quantity<select id="shop-quantity" data-in="shop-quantity" ${selected.key.startsWith('mat:') ? '' : 'disabled'}>${[1,10,100].map(n => `<option value="${n}" ${selected.count === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
+    <div class="shop-workspace"><div class="shop-purchase">${selected.id ? UI.shopPreview(selected.id) : `<h3>${esc(selected.name)}</h3>`}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${selected.key.startsWith('mat:') ? '' : 'disabled'}>${[1,10,100].map(n => `<option value="${n}" ${selected.count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
     <div class="shop-action"><button class="btn primary" data-do="rarebuy" data-a="${selected.key}" ${disabled ? 'disabled' : ''}>${selected.owned ? 'Owned' : selected.locked ? 'Locked' : selected.key.startsWith('cache:') ? 'Open' : selected.key.startsWith('tonic:') ? 'Drink' : 'Buy'} · ${fmt(cost)} coins</button></div>
     ${selected.text ? `<p class="sm">${esc(selected.text)}</p>` : ''}${!affordable ? `<p class="bad sm">You need ${fmt(cost - S().coins)} more coins.</p>` : ''}
     </div><div class="shop-comparison">${selected.id ? UI.compareHtml(selected.id) : ''}</div></div></section></div>`;
@@ -8181,11 +8245,11 @@ UI.V.research = () => {
 
   const unlocked = D.POTION_RECIPES.filter(DQ.canBrew);
   const selectedPotion = unlocked.find(r => r.id === UI.tab.potionChoice) || unlocked[0];
-  const brewery = `<section class="panel brewery"><div class="phead"><h2>${ico('bottle')} Brewery</h2><small>${unlocked.length ? 'Brew potions, then drink them from your backpack' : 'Research Herbalism to open it'}</small></div>${unlocked.length ? `<label class="page-picker" for="potion-choice">Potion<select id="potion-choice" data-in="potion-choice">${unlocked.map(r=>`<option value="${r.id}" ${r === selectedPotion ? 'selected' : ''}>${esc(D.ITEMS[r.id].name)}</option>`).join('')}</select></label><div class="srows">${[selectedPotion].map(r => { const it = D.ITEMS[r.id], ok = S().coins >= r.coins && Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n); return `<div class="srow ${ok ? '' : 'cant'}">${UI.itm(r.id, DQ.have(r.id))}<div class="sr-t"><b>${esc(it.name)}</b><small>${esc(it.drink.text)}</small><span class="rws">${costChips(Object.assign({ coins: r.coins }, r.in))}</span></div><span class="btnrow"><button class="btn sm ${ok ? 'primary' : ''}" data-do="brew" data-a="${r.id}" ${ok ? '' : 'disabled'}>Brew</button>${DQ.have(r.id) ? `<button class="btn sm" data-do="drink" data-a="${r.id}">Drink (${DQ.have(r.id)})</button>` : ''}</span></div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing to brew yet.</p>'}</section>`;
+  const brewery = `<section class="panel brewery"><div class="phead"><h2>${ico('bottle')} Brewery</h2><small>${unlocked.length ? 'Brew potions, then drink them from your backpack' : 'Research Herbalism to open it'}</small></div>${unlocked.length ? `<label class="page-picker" for="potion-choice">Potion${UI.choiceButtons(`<select id="potion-choice" data-in="potion-choice">${unlocked.map(r=>`<option value="${r.id}" ${r === selectedPotion ? 'selected' : ''}>${esc(D.ITEMS[r.id].name)}</option>`).join('')}</select>`)}</label><div class="srows">${[selectedPotion].map(r => { const it = D.ITEMS[r.id], ok = S().coins >= r.coins && Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n); return `<div class="srow ${ok ? '' : 'cant'}">${UI.itm(r.id, DQ.have(r.id))}<div class="sr-t"><b>${esc(it.name)}</b><small>${esc(it.drink.text)}</small><span class="rws">${costChips(Object.assign({ coins: r.coins }, r.in))}</span></div><span class="btnrow"><button class="btn sm ${ok ? 'primary' : ''}" data-do="brew" data-a="${r.id}" ${ok ? '' : 'disabled'}>Brew</button>${DQ.have(r.id) ? `<button class="btn sm" data-do="drink" data-a="${r.id}">Drink (${DQ.have(r.id)})</button>` : ''}</span></div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing to brew yet.</p>'}</section>`;
   const selected = D.TECH[UI.tab.researchChoice] || D.TECHS.find(t => !DQ.techReason(t) && DQ.techCanAfford(t)) || D.TECHS[0];
   const potions = UI.tab.researchView === 'potions';
   return `<section class="panel"><div class="phead"><h2>Research</h2><small>${done} / ${D.TECHS.length} complete</small></div><div class="tabs"><button class="tab ${potions ? '' : 'on'}" data-do="tab" data-a="researchView" data-b="projects">Projects</button><button class="tab ${potions ? 'on' : ''}" data-do="tab" data-a="researchView" data-b="potions">Potions</button></div>
-    ${potions ? brewery : `<label class="page-picker" for="research-choice">Project<select id="research-choice" data-in="research-choice">${D.TECHS.map(t => `<option value="${t.id}" ${t === selected ? 'selected' : ''}>${BR[t.br][0]} · ${t.name}${DQ.techDone(t.id) ? ' · Done' : ''}</option>`).join('')}</select></label>${techCard(selected)}<details id="active-research"><summary>Active research · ${A.length} / ${slots} slots</summary><div class="aslots">${activeRows}</div></details>`}</section>`;
+    ${potions ? brewery : `<label class="page-picker" for="research-choice">Project${UI.choiceButtons(`<select id="research-choice" data-in="research-choice">${D.TECHS.map(t => `<option value="${t.id}" ${t === selected ? 'selected' : ''}>${BR[t.br][0]} · ${t.name}${DQ.techDone(t.id) ? ' · Done' : ''}</option>`).join('')}</select>`)}</label>${techCard(selected)}<section data-reference="true" id="active-research"><h3>Active research · ${A.length} / ${slots} slots</h3><div class="aslots">${activeRows}</div></section>`}</section>`;
 };
 Object.assign(UI.DO, { rstart: a => { if (DQ.startResearch(a)) { UI.tab.researchChoice = a; UI.render(false); } }, brew: a => { if (DQ.brew(a)) UI.render(false); }, drink: a => { DQ.drink(a); UI.renderHud(); UI.render(false); } });
 DQ.on('research', () => { if (UI.view === 'research') UI.refresh && UI.refresh(); });
@@ -8329,8 +8393,8 @@ const awayCard = () => {
   const a = S().lastAway; if (!a || a.gone || Date.now() - a.at > 12 * 3600e3) return '';
   const chips = [...a.xp.map(([k, v]) => `<span class="rw" style="--c:${D.SK[k].col}">${ico(k)}${fmt(v)} XP</span>`), a.coins ? `<span class="rw" style="--c:#f3d58a">${ico('coin')}${fmt(a.coins)}</span>` : '', a.kills ? `<span class="rw" style="--c:#e0564f">${ico('attack')}${fmt(a.kills)} defeated</span>` : '', ...a.items.map(([id, n]) => D.ITEMS[id] ? `<span class="rw" style="--c:${D.ITEMS[id].col}">${ico(D.ITEMS[id].ic)}${fmt(n)}× ${esc(D.ITEMS[id].name)}</span>` : '')].join('');
   const extra = [a.levels ? `${a.levels} level-up${a.levels > 1 ? 's' : ''}` : '', a.research.length ? `research finished: ${a.research.map(esc).join(', ')}` : '', a.stopped ? 'your task stopped early' : '', a.died ? 'you were defeated' : ''].filter(Boolean).join(' · ');
-  return `<details class="panel awaycard"><summary>Your last time away · ${DQ.fmtTime(a.gap)}</summary><div class="phead"><div><span class="k">While you were away</span><h2>${DQ.fmtTime(a.gap)} away, counted as ${DQ.fmtTime(a.eff)}</h2></div><button class="btn sm" data-do="awaydismiss">Dismiss</button></div>
-    <div class="rws">${chips || '<span class="dim sm">Nothing happened. Start a task before you leave and it keeps going.</span>'}</div>${extra ? `<p class="sm dim" style="margin:8px 0 0">${extra}</p>` : ''}</details>`;
+  return `<section data-reference="true" class="panel awaycard"><h3>Your last time away · ${DQ.fmtTime(a.gap)}</h3><div class="phead"><div><span class="k">While you were away</span><h2>${DQ.fmtTime(a.gap)} away, counted as ${DQ.fmtTime(a.eff)}</h2></div><button class="btn sm" data-do="awaydismiss">Dismiss</button></div>
+    <div class="rws">${chips || '<span class="dim sm">Nothing happened. Start a task before you leave and it keeps going.</span>'}</div>${extra ? `<p class="sm dim" style="margin:8px 0 0">${extra}</p>` : ''}</section>`;
 };
 
 /* ---------- Backup reminder: one calm line, only for heroes worth keeping ---------- */
@@ -8517,15 +8581,15 @@ UI.B.projectaction = (el, id) => UI.set(el, S().projects[id] ? 'View village' : 
 UI.journeyPanel = () => {
   const next = DQ.journeyNext();
   return `<section class="panel journey"><div class="phead"><div><span class="k">Your destination</span><h2>${esc(destinations[S().journey] || destinations.boss)}</h2></div></div>
-    <details class="destination-picker"><summary>Change destination</summary><div class="destination-choices" aria-label="Choose your destination">${Object.entries(destinations).map(([id, label]) => `<button class="chip ${S().journey === id ? 'on' : ''}" aria-pressed="${S().journey === id}" data-do="destination" data-a="${id}">${esc(label)}</button>`).join('')}</div></details>
+    <section data-reference="true" class="destination-picker"><h3>Change destination</h3><div class="destination-choices" aria-label="Choose your destination">${Object.entries(destinations).map(([id, label]) => `<button class="chip ${S().journey === id ? 'on' : ''}" aria-pressed="${S().journey === id}" data-do="destination" data-a="${id}">${esc(label)}</button>`).join('')}</div></section>
     <p>${esc(next.detail)}</p><div class="btnrow wrap">${actionHtml(next)}${D.PROJECTS[S().journey] ? pinButton(S().journey) : '<button class="btn" data-do="go" data-a="quests">Quest log</button>'}</div>
-    <details><summary>How the journey works</summary><p>Your destination stays selected while you explore. The next step follows your supplies, quest progress and unlocks. Tasks run at full speed for two hours away, then half speed up to eight hours. An eight-hour absence gives five hours of task work.</p></details></section>`;
+    <section data-reference="true"><h3>How the journey works</h3><p>Your destination stays selected while you explore. The next step follows your supplies, quest progress and unlocks. Tasks run at full speed for two hours away, then half speed up to eight hours. An eight-hour absence gives five hours of task work.</p></section></section>`;
 };
 UI.projectsPanel = () => {
   const id = D.PROJECTS[UI.tab.projectChoice] ? UI.tab.projectChoice : 'well', project = D.PROJECTS[id];
   const done = S().projects[id], canFinish = !done && S().town === 'willowbrook' && DQ.canAfford(project.cost);
   const changes = ['first_steps', 'hungry_cook'].filter(q => S().q[q] && S().q[q].s === 'done');
-  return `<div class="town-project-workspace"><section class="panel"><div class="phead"><h2>Town projects</h2>${pinButton(id)}</div><label class="page-picker" for="town-project">Project<select id="town-project" data-in="town-project">${Object.entries(D.PROJECTS).map(([key, p]) => `<option value="${key}" ${key === id ? 'selected' : ''}>${esc(p.name)}${S().projects[key] ? ' · Complete' : ''}</option>`).join('')}</select></label>
+  return `<div class="town-project-workspace"><section class="panel"><div class="phead"><h2>Town projects</h2>${pinButton(id)}</div><label class="page-picker" for="town-project">Project${UI.choiceButtons(`<select id="town-project" data-in="town-project">${Object.entries(D.PROJECTS).map(([key, p]) => `<option value="${key}" ${key === id ? 'selected' : ''}>${esc(p.name)}${S().projects[key] ? ' · Complete' : ''}</option>`).join('')}</select>`)}</label>
     ${done ? '<p class="ok">Completed · permanent benefit active</p>' : `<div class="btnrow"><button class="btn primary" data-do="${canFinish ? 'projectfinish' : 'destination'}" data-a="${id}">${canFinish ? 'Complete project' : 'Work on this project'}</button></div>`}
     <h3>${esc(project.name)}</h3><p>${esc(done ? project.story : project.reward)}</p>${done ? '' : `<div class="rws">${Object.entries(project.cost).map(([item, n]) => { const held = item === 'coins' ? S().coins : DQ.have(item); return `<span class="${held >= n ? 'ok' : 'bad'}">${fmt(held)} / ${n} ${item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase()}</span>`; }).join('')}</div>`}</section>
     <section class="panel town-projects"><div class="phead"><h2>A living Willowbrook</h2></div>${UI.scene('willowbrook')}${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}${Object.entries(D.PROJECTS).filter(([key])=>S().projects[key]).map(([,p])=>`<p class="village-change">✓ ${esc(p.story)}</p>`).join('')}<p class="sm dim">Completed quests and projects change the village.</p></section></div>`;
@@ -8618,7 +8682,7 @@ DQ.lessonForPage=page=>{
 };
 DQ.acknowledgeLesson=id=>{DQ.initGuides();if(!lessons[id])return false;S().tut.done['lesson:'+id]=true;DQ.save();return true;};
 const intro=()=>`<section class="panel first-play-guide"><div class="first-play-art">${DQ.monSprite(D.MON.chicken,96)}</div><div><span class="k">A short introduction</span><h2>Welcome to Willowbrook</h2><p>Gather supplies, turn them into useful things, and help your village grow. Pick one task at a time; it keeps working while you explore or close the game.</p><div class="first-play-path"><span>Gather</span> → <span>Make &amp; equip</span> → <span>Fight &amp; restore</span></div><div class="btnrow wrap"><button class="btn primary" data-do="introstart">${S().q.first_steps?.s==='done'?'Explore activities':'Start First Steps'}</button><button class="btn sm" data-do="introskip">Skip introduction</button></div></div></section>`;
-const coachHtml=l=>`<aside class="skill-coach" aria-label="First-time ${esc(l.title)} guide"><span class="coach-art">${DQ.artImage(l.art[0],l.art[1],64,'',l.title)}</span><div><b>${esc(l.title)} · getting started</b><p>${esc(l.text)}</p><p><strong>Leads to:</strong> ${esc(l.towards)}</p><details><summary>A useful first goal</summary><p>${esc(l.goal)}</p></details></div><button class="btn sm" data-do="lessonclose" data-a="${l.id}">Got it</button></aside>`;
+const coachHtml=l=>`<aside class="skill-coach" aria-label="First-time ${esc(l.title)} guide"><span class="coach-art">${DQ.artImage(l.art[0],l.art[1],64,'',l.title)}</span><div><b>${esc(l.title)} · getting started</b><p>${esc(l.text)}</p><p><strong>Leads to:</strong> ${esc(l.towards)}</p><section data-reference="true"><h3>A useful first goal</h3><p>${esc(l.goal)}</p></section></div><button class="btn sm" data-do="lessonclose" data-a="${l.id}">Got it</button></aside>`;
 let current=null,lastPage=null,lastState=null;
 const render=UI.render;
 UI.render=fresh=>{

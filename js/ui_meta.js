@@ -172,7 +172,7 @@ UI.skillHero = (sk, extra = '') => {
 };
 ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'cooking', 'smithing', 'crafting', 'magic'].forEach(p => {
   const o = UI.V[p]; if (!o) return;
-  UI.V[p] = () => { const h = o(); return h.includes('locked-page') || !UI.skillGuide ? h : h + `<details class="panel guidep" id="${p}-guide"><summary>About ${D.SK[p].name}</summary>${UI.skillGuide(p)}</details>`; };
+  UI.V[p] = () => { const h = o(); return h.includes('locked-page') || !UI.skillGuide ? h : h + `<section data-reference="true" class="panel guidep" id="${p}-guide"><h3>About ${D.SK[p].name}</h3>${UI.skillGuide(p)}</section>`; };
 });
 
 /* ---------- Mastery ---------- */
@@ -180,14 +180,14 @@ UI.V.mastery = () => {
   const ranks = DQ.masteryTotal(), title = DQ.heroTitle();
   const skills = D.SKILLS.filter(s => DQ.skillUnlocked(s.id));
   const selected = skills.find(s => s.id === UI.tab.masterySkill) || skills[0];
-  const picker = `<label class="page-picker" for="mastery-skill">Skill<select id="mastery-skill" data-in="mastery-skill">${skills.map(s => `<option value="${s.id}" ${s === selected ? 'selected' : ''}>${s.name} · Level ${DQ.lvl(s.id)}</option>`).join('')}</select></label>`;
+  const picker = `<label class="page-picker" for="mastery-skill">Skill${UI.choiceButtons(`<select id="mastery-skill" data-in="mastery-skill">${skills.map(s => `<option value="${s.id}" ${s === selected ? 'selected' : ''}>${s.name} · Level ${DQ.lvl(s.id)}</option>`).join('')}</select>`)}</label>`;
   const rows = (selected ? [selected] : []).map(s => {
     const L = DQ.lvl(s.id), r = DQ.masteryRank(s.id), xp = S().xp[s.id] || 0;
     if (L < 99) { const pct = Math.min(1, xp / D.XPF[99]); return `<div class="msk locked" style="--c:${s.col}"><span class="ic">${ico(s.id)}</span><div class="mb"><b>${s.name}</b><small>Level ${L}. Mastery begins at 99.</small><span class="bar"><i style="width:${(pct * 100).toFixed(1)}%"></i></span></div><span class="mr mono">${(pct * 100).toFixed(0)}%</span></div>`; }
     const into = DQ.masteryXp(s.id) - r * DQ.masteryStep(), pct = r >= 10 ? 1 : into / DQ.masteryStep(), on = S().title === s.id;
     return `<div class="msk ${r ? 'got' : ''}" style="--c:${s.col}"><span class="ic">${ico(s.id)}</span><div class="mb"><b>${s.name}${r ? ` <em>${D.MASTERY_TITLES[r - 1]}</em>` : ''}</b><small>${r >= 10 ? 'Fully mastered.' : `${fmt(Math.ceil(DQ.masteryStep() - into))} xp to rank ${r + 1}`}</small><span class="bar"><i style="width:${(pct * 100).toFixed(1)}%"></i></span></div><span class="mr mono">Rank ${r}/10</span>${r ? `<button class="btn sm ${on ? 'primary' : ''}" data-do="wear" data-a="${on ? '' : s.id}">${on ? 'Wearing title' : 'Wear title'}</button>` : ''}</div>`;
   }).join('');
-  return `<section class="panel"><div class="phead"><h2>Mastery</h2><small>${ranks} ranks earned</small></div>${picker}<div class="mlist">${rows}</div>${title ? `<p>Wearing ${esc(title)}</p>` : ''}<details id="mastery-help"><summary>How mastery works</summary><p>Keep training after level 99 to earn ranks and titles. Each rank adds 1% coins. There are 10 ranks per skill.</p></details></section>`;
+  return `<section class="panel"><div class="phead"><h2>Mastery</h2><small>${ranks} ranks earned</small></div>${picker}<div class="mlist">${rows}</div>${title ? `<p>Wearing ${esc(title)}</p>` : ''}<section data-reference="true" id="mastery-help"><h3>How mastery works</h3><p>Keep training after level 99 to earn ranks and titles. Each rank adds 1% coins. There are 10 ranks per skill.</p></section></section>`;
 };
 Object.assign(UI.DO, { wear: a => { DQ.setTitle(a || null); DQ.sfx('tab'); UI.render(false); } });
 DQ.on('title', () => UI.renderHud());
@@ -201,7 +201,7 @@ UI.toolsPanel = () => {
       <small>${D.SK[sk].name}${open ? ` ${DQ.lvl(sk)}` : ' (locked)'} · ${t ? `${pct}% faster` : 'normal speed'}</small><span class="pips" aria-label="Tier ${t} of 5">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= t ? 'on' : ''}"></i>`).join('')}</span></div>
       ${next ? `<button class="btn sm" data-do="go" data-a="shop" data-tip="text:${esc(next.name)}: ${fmt(next.buy)} coins. Opens the shop.">Upgrade ${DQ.fmtK ? DQ.fmtK(next.buy) : fmt(next.buy)}</button>` : '<span class="max">Best</span>'}</div>`;
   }).join('');
-  return `<details class="panel toolsp" id="inventory-tools"><summary>Gathering tools</summary><p class="hint">Your best owned tool is used automatically.</p><div class="toolrows">${rows}</div></details>`;
+  return `<section data-reference="true" class="panel toolsp" id="inventory-tools"><h3>Gathering tools</h3><p class="hint">Your best owned tool is used automatically.</p><div class="toolrows">${rows}</div></section>`;
 };
 const origChar = UI.V.character;
 UI.V.character = () => { const h = origChar().replace('<div class="slots" id="packgrid">', '<div class="selbar" id="selbar"></div><div class="slots" id="packgrid">'), tail = '</section></div></div>', i = h.lastIndexOf(tail); return i < 0 ? h : h.slice(0, i + 10) + UI.toolsPanel() + h.slice(i + 10); };
@@ -218,7 +218,7 @@ UI.compareHtml = id => {
   return `<div class="cmp slot-comparison"><div class="k">${esc(DQ.SLOT_NAMES[c.slot])} · equipped ${c.cur ? esc(c.cur.name) : 'nothing'}</div>
     <table><thead><tr><th>Stat</th><th>Equipped</th><th>This item</th><th>Change</th></tr></thead><tbody>${c.itemRows.map(r => `<tr class="${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}"><th>${UI.statNames[r.key]}</th><td>${r.a}</td><td>${r.b}</td><td>${r.d ? sg(r.d) : '—'}</td></tr>`).join('')}</tbody></table>
     ${c.styleChange ? `<p class="sm">Style ${c.styleChange[0]} → ${c.styleChange[1]}</p>` : ''}
-    ${combat.length ? `<details><summary>Combat impact</summary>${combat.map(r => `<div class="cmprow"><span>${r.n}</span><b>${r.delta ? '' : r.a + ' → ' + r.b}</b><em>${sg(r.d)}${r.unit || ''}</em></div>`).join('')}</details>` : ''}
+    ${combat.length ? `<section data-reference="true"><h3>Combat impact</h3>${combat.map(r => `<div class="cmprow"><span>${r.n}</span><b>${r.delta ? '' : r.a + ' → ' + r.b}</b><em>${sg(r.d)}${r.unit || ''}</em></div>`).join('')}</section>` : ''}
     ${c.need.map(n => `<p class="bad sm">${esc(n)}</p>`).join('')}${c.unmet ? `<p class="bad sm">${esc(c.unmet)}</p>` : ''}</div>`;
 };
 UI.compareLine = id => {
@@ -294,6 +294,6 @@ UI.after.settings = () => {
   const names = panels.map(panel => panel.querySelector('h2').textContent);
   const selected = names.includes(UI.tab.settingsPanel) ? UI.tab.settingsPanel : names[0];
   panels.forEach((panel, i) => { panel.hidden = names[i] !== selected; });
-  view.insertAdjacentHTML('afterbegin', `<label class="panel page-picker" for="settings-category">Settings<select id="settings-category" data-in="settings-category">${names.map(name => `<option value="${esc(name)}" ${name === selected ? 'selected' : ''}>${esc(name)}</option>`).join('')}</select></label>`);
+  view.insertAdjacentHTML('afterbegin', `<label class="panel page-picker" for="settings-category">Settings${UI.choiceButtons(`<select id="settings-category" data-in="settings-category">${names.map(name => `<option value="${esc(name)}" ${name === selected ? 'selected' : ''}>${esc(name)}</option>`).join('')}</select>`)}</label>`);
 };
 })();

@@ -10,7 +10,7 @@ const catOf = it => it.type === 'tool' ? 'tool' : it.type === 'ammo' ? 'weapon' 
 /* "Crafting items" is a lens, not a box: anything that some recipe uses, wherever it also sits (ores, logs, bars, fish, crops …) */
 const inCat = (id, f) => f === 'all' || (f === 'craft' ? ING.has(id) : catOf(D.ITEMS[id]) === f);
 const byCat = (a, b) => CAT_ORDER.indexOf(catOf(D.ITEMS[a])) - CAT_ORDER.indexOf(catOf(D.ITEMS[b])) || D.ITEMS[a].name.localeCompare(D.ITEMS[b].name);
-UI.catTabs = (store, cur, act) => `<select id="${act}-select" data-in="itemfilter" data-a="${act}" aria-label="${act === 'packfilter' ? 'Backpack' : 'Bank'} category">${Object.entries(CAT).filter(([k]) => k === 'all' || k === cur || Object.keys(store).some(id => inCat(id, k))).map(([k, n]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${n} (${k === 'all' ? Object.keys(store).length : Object.keys(store).filter(id => inCat(id, k)).length})</option>`).join('')}</select>`;
+UI.catTabs = (store, cur, act) => `${UI.choiceButtons(`<select id="${act}-select" data-in="itemfilter" data-a="${act}" aria-label="${act === 'packfilter' ? 'Backpack' : 'Bank'} category">${Object.entries(CAT).filter(([k]) => k === 'all' || k === cur || Object.keys(store).some(id => inCat(id, k))).map(([k, n]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${n} (${k === 'all' ? Object.keys(store).length : Object.keys(store).filter(id => inCat(id, k)).length})</option>`).join('')}</select>`)}`;
 
 /* ---------- Map ---------- */
 const MAP_LAND = 'M40 330C50 210 170 130 320 110C470 90 590 56 760 70C900 82 950 190 944 300C938 404 884 462 760 452C640 470 520 430 400 450C280 480 140 470 80 420C52 394 40 362 40 330Z';
@@ -45,7 +45,7 @@ UI.V.map = () => {
   const sel = UI.mapSel = UI.mapSel || S().town, t = D.TOWN[sel], open = DQ.townUnlocked(t.id), here = S().town === sel, boss = D.MON[t.boss], done = S().towns[sel] && S().towns[sel].boss;
   const prev = D.TOWNS[t.idx - 1], counts = [['fishing', 'fish', 'fishing spot'], ['woodcutting', 'wood', 'tree type'], ['mining', 'mine', 'ore'], ['thieving', 'thieve', 'target']].map(([sk, k, w]) => { const n = D.NODES[k].filter(x => x.town === sel).length; return n ? `<span class="rw" style="--c:${D.SK[sk].col}">${ico(sk)}${n} ${w}${n > 1 ? 's' : ''}</span>` : ''; }).join('');
   const mons = D.MONLIST.filter(m => m.town === sel && !m.boss), qn = D.QUESTS.filter(q => q.town === sel);
-  return `<section class="panel travel-controls"><div class="phead"><h2>World</h2><small>Currently ${D.TOWN[S().town].name}</small></div><div class="task-controls"><label for="travel-town">Destination<select id="travel-town" data-in="travel-town">${D.TOWNS.map(town => `<option value="${town.id}" ${town.id === sel ? 'selected' : ''} ${DQ.townUnlocked(town.id) ? '' : 'disabled'}>${town.name}${DQ.townUnlocked(town.id) ? '' : ' · Locked'}</option>`).join('')}</select></label><button class="btn primary" data-do="${here ? 'go' : 'travel'}" data-a="${here ? 'combat' : sel}" ${open ? '' : 'disabled'}>${here ? 'Explore combat' : 'Travel'}</button></div></section><div class="mapw"><section class="panel mappanel fancy">${UI.mapSVG(sel)}<div class="maplegend"><span><i class="lg c"></i> You are here</span><span>Click a town for details</span></div></section>
+  return `<section class="panel travel-controls"><div class="phead"><h2>World</h2><small>Currently ${D.TOWN[S().town].name}</small></div><div class="task-controls"><label for="travel-town">Destination${UI.choiceButtons(`<select id="travel-town" data-in="travel-town">${D.TOWNS.map(town => `<option value="${town.id}" ${town.id === sel ? 'selected' : ''} ${DQ.townUnlocked(town.id) ? '' : 'disabled'}>${town.name}${DQ.townUnlocked(town.id) ? '' : ' · Locked'}</option>`).join('')}</select>`)}</label><button class="btn primary" data-do="${here ? 'go' : 'travel'}" data-a="${here ? 'combat' : sel}" ${open ? '' : 'disabled'}>${here ? 'Explore combat' : 'Travel'}</button></div></section><div class="mapw"><section class="panel mappanel fancy">${UI.mapSVG(sel)}<div class="maplegend"><span><i class="lg c"></i> You are here</span><span>Click a town for details</span></div></section>
     <section class="panel towninfo" style="--c:${t.col}">${open ? UI.scene(t.id) : `<div class="scene fog">${ico('lock')}</div>`}
       <div class="ti-body"><span class="k">${here ? 'Current location' : open ? 'Open road' : 'Locked'}</span><h2>${open ? t.name : 'Unknown lands'}</h2><p class="dim">${open ? t.tag : 'The road is closed.'}</p>
       ${open ? `<p>${t.blurb}</p><div class="rws">${counts}<span class="rw" style="--c:#8a9bff">${ico('attack')}Monsters Lv ${mons[0].cl}-${mons[mons.length - 1].cl}</span><span class="rw" style="--c:#d8a64a">${ico('shop')}Shop</span><span class="rw" style="--c:#d8a64a">${ico('quest')}${qn.length} quests</span></div>
@@ -87,11 +87,11 @@ UI.V.shop = () => {
   const cost = it ? (buying ? it.buy * count : it.val * Math.min(count, owned)) : 0;
   const disabled = !it || (buying && (S().coins < cost || (tool && owned)));
   return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span><b>${esc(D.ITEMS[item].name)}</b><small>${fmt(buying?D.ITEMS[item].buy:D.ITEMS[item].val)} coins each${buying?'':' · '+DQ.have(item)+' held'}</small></button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
-    ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}<div class="shop-controls"><label for="shop-quantity">Quantity<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div>
+    ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
       <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} ${disabled ? 'disabled' : ''}>${tool && owned && buying ? 'Already owned' : buying ? 'Buy' : 'Sell'} · ${fmt(cost)} coins</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all · ${fmt(it.val * owned)}</button>` : ''}</div>
       ${buying && S().coins < cost ? `<p class="bad">You need ${fmt(cost - S().coins)} more coins.</p>` : ''}
       </div><div class="shop-comparison">${UI.compareHtml ? UI.compareHtml(id) : ''}</div></div>` : '<p>Nothing to sell. Gather resources or visit your bank.</p>'}
-    <details class="shop-help"><summary>About this shop</summary><p>Tools work automatically. Equipment must be equipped from Inventory after buying. Selling draws from your backpack first, then the bank. Equipped items are kept.</p></details></section></div>`;
+    <section data-reference="true" class="shop-help"><h3>About this shop</h3><p>Tools work automatically. Equipment must be equipped from Inventory after buying. Selling draws from your backpack first, then the bank. Equipped items are kept.</p></section></section></div>`;
 };
 
 /* ---------- Quests ---------- */
@@ -102,7 +102,7 @@ UI.V.quests = () => {
   const list = D.QUESTS.filter(groups[tab]).sort((a, b) => (b.main ? 1 : 0) - (a.main ? 1 : 0) || (st(a) === 'ready' ? -1 : 0) - (st(b) === 'ready' ? -1 : 0) || a.adv - b.adv);
   const selected = list.find(q => q.id === UI.tab.questSelected) || list[0];
   UI.tab.questSelected = selected && selected.id;
-  const cards = selected ? [selected].map((q, i) => {
+  const cards = list.length ? list.map((q, i) => {
     const s = st(q), p = S().q[q.id], t = D.TOWN[q.town];
     const objs = q.obj.map((o, j) => { const pr = DQ.objProg(q, p, j), ok = pr >= o.n; return `<div class="obj ${ok ? 'ok' : ''}"><span>${ok ? ico('check') : ''}${o.label}</span><span class="mono" ${p ? `data-b="qtxt:${q.id}:${j}"` : ''}>${p ? '' : `0 / ${fmt(o.n)}`}</span><span class="bar"><i ${p ? `data-b="qbar:${q.id}:${j}"` : ''}></i></span></div>`; }).join('');
     const prevQ = q.req ? D.QM[q.req] : null;
@@ -110,12 +110,12 @@ UI.V.quests = () => {
     const req = s === 'locked' && q.main ? `<div class="reqs">${blk.map(b => `<div class="bad">✗ ${b}</div>`).join('')}</div>` : s === 'locked' ? `<div class="reqs bad">${DQ.advLvl() < q.adv ? `Hero level ${q.adv} <span class="mono">(you: ${DQ.advLvl()})</span>` : ''}${prevQ && !(S().q[q.req] && S().q[q.req].s === 'done') ? ` Finish “${prevQ.name}” first` : ''}</div>` : '';
     const sk = q.main && D.SK[q.unlocks];
     return `<section class="panel quest ${s} ${q.main ? 'main' : ''}" style="--i:${i};${sk ? `--c:${sk.col}` : ''}" id="q-${q.id}">${sk ? `<span class="mq-ribbon">${ico('star')} Main quest · Unlocks ${sk.name}</span>` : ''}<div class="phead" style="margin:0"><div><h2>${q.name}</h2><small>${q.giver} · ${t.name}</small></div><span class="state ${s}">${{ new: 'Available', locked: 'Locked', active: 'In progress', ready: 'Ready', done: 'Complete' }[s]}</span></div>
-      ${DQ.questImpact && DQ.questImpact(q.id) ? `<p class="quest-impact">Town change · ${esc(DQ.questImpact(q.id))}</p>` : ''}${req}<div class="quest-actions">${s === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>` : s === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Claim reward</button>` : s === 'active' ? `<button class="btn primary" data-do="questcontinue" data-a="${q.id}">Continue quest</button>` : ''}</div>${s === 'locked' ? '' : objs}<details class="quest-story" id="quest-story-${q.id}"><summary>Story &amp; rewards</summary><p class="blurb">${q.blurb}</p><div class="rewards"><span class="k">Rewards</span><div class="rws">${sk ? `<span class="rw unlockrw" style="--c:${sk.col}">${ico(q.unlocks)}Learn ${sk.name}</span>` : ''}${UI.rewards(q.reward)}</div></div>
-      </details></section>`;
+      ${DQ.questImpact && DQ.questImpact(q.id) ? `<p class="quest-impact">Town change · ${esc(DQ.questImpact(q.id))}</p>` : ''}${req}<div class="quest-actions">${s === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>` : s === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Claim reward</button>` : s === 'active' ? `<button class="btn primary" data-do="questcontinue" data-a="${q.id}">Continue quest</button>` : ''}</div>${s === 'locked' ? '' : objs}<section data-reference="true" class="quest-story" id="quest-story-${q.id}"><h3>Story &amp; rewards</h3><p class="blurb">${q.blurb}</p><div class="rewards"><span class="k">Rewards</span><div class="rws">${sk ? `<span class="rw unlockrw" style="--c:${sk.col}">${ico(q.unlocks)}Learn ${sk.name}</span>` : ''}${UI.rewards(q.reward)}</div></div>
+      </section></section>`;
   }).join('') : '';
   const done = D.QUESTS.filter(groups.done).length;
   return `<section class="panel shophead"><div><span class="k">Quest log</span><h2>${done} of ${D.QUESTS.length} complete</h2></div><div class="tabs">${Object.entries(names).map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="qtab" data-a="${k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</div></section>
-    ${list.length ? `<label class="panel quest-picker" for="quest-select">Quest<select id="quest-select" data-in="quest-choice">${list.map(q => `<option value="${q.id}" ${q === selected ? 'selected' : ''}>${esc(q.name)}${st(q) === 'ready' ? ' · Reward ready' : ''}</option>`).join('')}</select></label><div class="qgrid">${cards}</div>` : `<section class="panel"><p class="dim" style="margin:0">${{ active: 'No active quests. Check the Available tab.', available: 'Nothing new right now. Level up or travel to find more.', upcoming: 'No upcoming quests in the towns you have opened.', done: 'You have not finished any quests yet.' }[tab]}</p></section>`}`;
+    ${list.length ? `<div class="qgrid">${cards}</div>` : `<section class="panel"><p class="dim" style="margin:0">${{ active: 'No active quests. Check the Available tab.', available: 'Nothing new right now. Level up or travel to find more.', upcoming: 'No upcoming quests in the towns you have opened.', done: 'You have not finished any quests yet.' }[tab]}</p></section>`}`;
 };
 
 /* ---------- Character ---------- */
@@ -129,11 +129,8 @@ const equipCell = slot => {
 UI.packSorted = () => Object.keys(S().inv).sort(byCat);
 UI.packFilter = 'all'; UI.packQ = '';
 UI.packVisible = () => UI.packSorted().filter(id => inCat(id, UI.packFilter) && D.ITEMS[id].name.toLowerCase().includes(UI.packQ.toLowerCase()));
-UI.inventoryPicker = from => {
-  const store = from === 'bank' ? S().bank : S().inv, ids = Object.keys(store).sort(byCat);
-  if (!ids.length) return '';
-  return `<label class="inventory-picker" for="${from}-item-select">Item<select id="${from}-item-select" data-in="inventory-item" data-a="${from}"><option value="">Choose an item</option>${ids.map(id => `<option value="${id}" ${UI.sel === id && UI.selFrom === from ? 'selected' : ''}>${esc(D.ITEMS[id].name)} ×${fmt(store[id])}</option>`).join('')}</select></label>`;
-};
+/* Item cards already provide the complete visible inventory selector. */
+UI.inventoryPicker = () => '';
 UI.packGrid = () => {
   const ids = UI.packVisible();
   if (!ids.length) return `<p class="dim" style="grid-column:1/-1;margin:6px 0">${Object.keys(S().inv).length ? 'Nothing in your backpack matches. Try another filter, or look in the bank.' : 'Your backpack is empty.'}</p>`;
@@ -154,11 +151,11 @@ UI.V.character = () => {
   const s = S(), b = DQ.bonus(), ps = DQ.pstats(), marks = DQ.heroMarks();
   return `<div class="tabs character-mobile-tabs"><button class="tab ${UI.tab.characterPanel === 'equipment' ? '' : 'on'}" data-do="tab" data-a="characterPanel" data-b="pack">Backpack</button><button class="tab ${UI.tab.characterPanel === 'equipment' ? 'on' : ''}" data-do="tab" data-a="characterPanel" data-b="equipment">Equipment</button></div><div class="chargrid character-layout ${UI.tab.characterPanel === 'equipment' ? 'show-equipment' : ''}"><section class="panel paper"><div class="phead"><h2>Equipment</h2><small class="mono">Hero ${DQ.advLvl()} · Combat ${DQ.combatLvl()}</small></div>
       <div class="doll paper-doll" role="group" aria-label="Equipment around your hero"><div class="dollc">${UI.heroFigure()}</div>${SLOT_LAYOUT.map(sl => `<div class="ds ds-${sl}">${equipCell(sl)}</div>`).join('')}</div>
-      <details class="equipment-stats" id="equipment-stats"><summary id="equipment-stats-toggle">Combat stats <span class="mono">Max hit ${ps.max}</span></summary>
+      <section data-reference="true" class="equipment-stats" id="equipment-stats"><h3 id="equipment-stats-toggle">Combat stats <span class="mono">Max hit ${ps.max}</span></h3>
         <div class="bonuses">${[['Attack', b.atk, 'attack'], ['Strength', b.str, 'strength'], ['Defence', b.def, 'defence'], ['Ranged', b.rng, 'ranged'], ['Arrows', b.rngStr, 'ranged'], ['Magic', b.mag, 'magic']].map(([n, v, sk]) => `<div style="--c:${D.SK[sk].col}">${ico(sk)}<span>${n}</span><b class="mono">+${v}</b></div>`).join('')}</div>
         <div class="statlist"><div><span>Fighting style</span><b>${DQ.cap(ps.style)}</b></div><div><span>Damage reduction</span><b class="mono">${Math.round(ps.red * 100)}%</b></div><div><span>Total level</span><b class="mono" data-b="totlvl"></b></div></div>
-      </details>
-      <details class="equipment-appearance" id="equipment-appearance"><summary id="equipment-appearance-toggle">Appearance &amp; sharing</summary>${marks.length ? `<div class="fig-marks">${marks.map(mark => `<span class="fig-mark" data-tip="text:${esc(mark.sub)}">${ico(mark.ic)}${esc(mark.t)}</span>`).join('')}</div>` : ''}<p class="hint">Gear changes how your hero looks. Skill capes appear at levels 30, 60 and 99. Medals appear at Hero levels 10, 25, 50 and 75.</p><button class="btn sm" data-do="share">${ico('star')}Share hero</button></details></section>
+      </section>
+      <section data-reference="true" class="equipment-appearance" id="equipment-appearance"><h3 id="equipment-appearance-toggle">Appearance &amp; sharing</h3>${marks.length ? `<div class="fig-marks">${marks.map(mark => `<span class="fig-mark" data-tip="text:${esc(mark.sub)}">${ico(mark.ic)}${esc(mark.t)}</span>`).join('')}</div>` : ''}<p class="hint">Gear changes how your hero looks. Skill capes appear at levels 30, 60 and 99. Medals appear at Hero levels 10, 25, 50 and 75.</p><button class="btn sm" data-do="share">${ico('star')}Share hero</button></section></section>
     <div class="col"><section class="panel"><div class="phead"><h2>Backpack</h2><span><small class="mono" data-b="packn"></small> <button class="btn sm" data-do="go" data-a="bank">${ico('bank')}Bank (${Object.keys(S().bank).length})</button> <button class="btn sm" data-do="depositall">Bank all</button></span></div><div class="filtbar"><div class="tabs">${UI.catTabs(s.inv, UI.packFilter, 'packfilter')}</div><input id="packq" class="search" data-in="packq" placeholder="Search backpack" value="${esc(UI.packQ)}" aria-label="Search backpack"></div>${UI.inventoryPicker('pack')}<div class="slots" id="packgrid">${UI.packGrid()}</div><p class="hint">The backpack holds ${DQ.packMax()} kinds of item. When it is full, new kinds go straight to your <b>bank</b>. A storage chest in your house adds more space.</p></section>
     <section class="panel" id="detailbox">${UI.detail(UI.sel, UI.selFrom)}</section></div></div>`;
 };
@@ -273,6 +270,11 @@ const DO = {
   newgame: () => DQ.modal({ title: 'Erase everything?', body: '<p>This permanently deletes your hero, items and progress and returns you to the title screen. Export your save first if you might want it back.</p>', actions: [{ label: 'Erase and restart', primary: true, fn: () => { DQ.act = null; DQ.eraseSave(); DQ.paused = true; location.reload(); } }, { label: 'Keep playing' }] }),
 };
 UI.DO = DO;
+DO.choose = (a, b, button) => {
+  const group = button.closest('.choice-buttons');
+  group.querySelectorAll('button').forEach(el => { el.classList.toggle('on', el === button); el.setAttribute('aria-pressed', String(el === button)); });
+  button.dispatchEvent(new Event('change', { bubbles: true }));
+};
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-do]'); if (!t || t.disabled) return;
   if (t.classList.contains('card')) DQ.flash(t, 'bump');
@@ -339,7 +341,6 @@ UI.render = fresh => {
   if (DQ.markNoticesRead) DQ.markNoticesRead(UI.view);
   const focus = document.activeElement, focusKey = focus && focus.dataset ? { do: focus.dataset.do, a: focus.dataset.a, b: focus.dataset.b } : null;
   const focusId = focus && focus.closest('#view') ? focus.id : null;
-  const openDetails = fresh ? [] : $$('#view details[id][open]').map(el => el.id);
   const y = scrollY; DQ.hideTip && DQ.hideTip();
   const id = UI.view; let html;
   try {
@@ -349,7 +350,6 @@ UI.render = fresh => {
     else html = UI.V[id]();
   } catch (e) { console.error(e); html = `<section class="panel"><h2>Something went wrong</h2><p class="dim">This page could not be drawn. Your progress is safe.</p></section>`; }
   const v = $('#view'); v.innerHTML = html; UI.renderPageNotice(); if (fresh) { v.classList.add('enter'); clearTimeout(UI._et); UI._et = setTimeout(() => v.classList.remove('enter'), 800); }
-  openDetails.forEach(id => { const detail = document.getElementById(id); if (detail) detail.open = true; });
   [...v.children].forEach((el, i) => el.style.setProperty('--i', i));
   UI.collectProg(); UI.renderLog(); UI.upd(); if (id === 'activity') UI.chart();
   $$('.nav').forEach(n => n.classList.toggle('on', n.dataset.a === id));

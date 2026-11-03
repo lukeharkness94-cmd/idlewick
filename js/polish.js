@@ -111,8 +111,8 @@ const awayCard = () => {
   const a = S().lastAway; if (!a || a.gone || Date.now() - a.at > 12 * 3600e3) return '';
   const chips = [...a.xp.map(([k, v]) => `<span class="rw" style="--c:${D.SK[k].col}">${ico(k)}${fmt(v)} XP</span>`), a.coins ? `<span class="rw" style="--c:#f3d58a">${ico('coin')}${fmt(a.coins)}</span>` : '', a.kills ? `<span class="rw" style="--c:#e0564f">${ico('attack')}${fmt(a.kills)} defeated</span>` : '', ...a.items.map(([id, n]) => D.ITEMS[id] ? `<span class="rw" style="--c:${D.ITEMS[id].col}">${ico(D.ITEMS[id].ic)}${fmt(n)}× ${esc(D.ITEMS[id].name)}</span>` : '')].join('');
   const extra = [a.levels ? `${a.levels} level-up${a.levels > 1 ? 's' : ''}` : '', a.research.length ? `research finished: ${a.research.map(esc).join(', ')}` : '', a.stopped ? 'your task stopped early' : '', a.died ? 'you were defeated' : ''].filter(Boolean).join(' · ');
-  return `<details class="panel awaycard"><summary>Your last time away · ${DQ.fmtTime(a.gap)}</summary><div class="phead"><div><span class="k">While you were away</span><h2>${DQ.fmtTime(a.gap)} away, counted as ${DQ.fmtTime(a.eff)}</h2></div><button class="btn sm" data-do="awaydismiss">Dismiss</button></div>
-    <div class="rws">${chips || '<span class="dim sm">Nothing happened. Start a task before you leave and it keeps going.</span>'}</div>${extra ? `<p class="sm dim" style="margin:8px 0 0">${extra}</p>` : ''}</details>`;
+  return `<section data-reference="true" class="panel awaycard"><h3>Your last time away · ${DQ.fmtTime(a.gap)}</h3><div class="phead"><div><span class="k">While you were away</span><h2>${DQ.fmtTime(a.gap)} away, counted as ${DQ.fmtTime(a.eff)}</h2></div><button class="btn sm" data-do="awaydismiss">Dismiss</button></div>
+    <div class="rws">${chips || '<span class="dim sm">Nothing happened. Start a task before you leave and it keeps going.</span>'}</div>${extra ? `<p class="sm dim" style="margin:8px 0 0">${extra}</p>` : ''}</section>`;
 };
 
 /* ---------- Backup reminder: one calm line, only for heroes worth keeping ---------- */
