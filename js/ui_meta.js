@@ -231,7 +231,7 @@ UI.detail = (id, from) => {
   let h = origDetail(id, from); const ok = id && DQ.have(id), c = ok ? UI.compareHtml(id) : '';
   if (c) h = h.replace('<div class="btnrow wrap">', c + '<div class="btnrow wrap">');
   if (ok && D.ITEMS[id].flavour) h = h.replace('<div class="btnrow wrap">', `<p class="flavour">${esc(D.ITEMS[id].flavour)}</p><div class="btnrow wrap">`);
-  if (ok) { h = h.replace('<div class="detail">', `<div class="detail"><button class="dt-x iconb sm" data-do="desel" aria-label="Close">${ico('close')}</button>`); if (D.ITEMS[id].slot) h = h.replace(/<\/div>$/, '<small class="dim dt-tip">Tip: double-click (or double-tap) an item to equip it.</small></div>'); }
+  if (ok) { h = h.replace('<div class="detail">', `<div class="detail"><button class="dt-x iconb sm" data-do="desel" aria-label="Close">${ico('close')}</button>`); if (D.ITEMS[id].slot && !DQ.canEquip(id).equipped) h = h.replace(/<\/div>$/, '<small class="dim dt-tip">Tip: double-click (or double-tap) an item to equip it.</small></div>'); }
   return h;
 };
 const origTip = DQ.tips.item;
@@ -246,7 +246,7 @@ UI.selbarHtml = (id, from) => {
   const it = D.ITEMS[id], bank = from === 'bank', n = bank ? (S().bank[id] || 0) : (S().inv[id] || 0), can = it.slot ? DQ.canEquip(id) : null;
   const line = it.slot ? `<span>${UI.statLine(it.b)}</span>${UI.compareLine(id)}` : it.heal ? `<span class="dim">Heals ${it.heal} health</span>` : `<span class="dim">${esc(DQ.cap(it.type))}</span>`;
   const b = [];
-  if (it.slot) b.push(`<button class="btn sm ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
+  if (it.slot) b.push(can.equipped ? '<span class="spare-explanation">Already equipped · spare copy</span>' : `<button class="btn sm ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
   if (it.heal) b.push(`<button class="btn sm primary" data-do="eat" data-a="${id}">Eat</button>`);
   b.push(bank ? `<button class="btn sm" data-do="withdraw" data-a="${id}" data-b="${n > 1 ? 'all' : 1}">${n > 1 ? 'Take all' : 'Take'}</button>` : `<button class="btn sm" data-do="deposit" data-a="${id}" data-b="all">Bank</button>`);
   b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell ${UI.money(it.val || 0)}</button>`);

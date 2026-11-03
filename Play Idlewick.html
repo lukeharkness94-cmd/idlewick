@@ -1588,6 +1588,9 @@ body[data-page="quests"] .quest.ready { animation: none; }
 .shop-action .btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; }
 .btn.primary .money { color:inherit; }
 .bad .money { color:inherit; }
+
+.spare-tag { position:absolute; bottom:3px; left:3px; right:3px; padding:1px 3px; border-radius:3px; background:var(--panel2); color:var(--mute); font-size:10px; line-height:1.1; text-align:center; }
+.spare-explanation { flex-basis:100%; color:var(--mute); font-size:13px; }
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -4163,6 +4166,7 @@ DQ.withdraw = (id, n) => {
 /* ---------- Equipment ---------- */
 DQ.canEquip = id => {
   const it = D.ITEMS[id]; if (!it || !it.slot) return { ok: false, why: 'Cannot be worn' };
+  if (it.slot !== 'ammo' && DQ.S.equip[it.slot] === id) return { ok: false, equipped: true, why: 'Already equipped. This is a spare copy.' };
   for (const [sk, l] of Object.entries(it.req || {})) {
     if (!DQ.skillUnlocked(sk)) return { ok: false, why: `${D.SK[sk].name} is locked. ${DQ.unlockHow(sk)}.` };
     if (DQ.lvl(sk) < l) return { ok: false, why: `Requires ${D.SK[sk].name} ${l}` };
@@ -6299,13 +6303,13 @@ UI.inventoryPicker = () => '';
 UI.packGrid = () => {
   const ids = UI.packVisible();
   if (!ids.length) return `<p class="dim" style="grid-column:1/-1;margin:6px 0">${Object.keys(S().inv).length ? 'Nothing in your backpack matches. Try another filter, or look in the bank.' : 'Your backpack is empty.'}</p>`;
-  return ids.map(id => `<button class="slot ${UI.sel === id && UI.selFrom === 'pack' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="pack" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().inv[id]} in backpack">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().inv[id])}</span></button>`).join('');
+  return ids.map(id => { const spare = D.ITEMS[id].slot !== 'ammo' && S().equip[D.ITEMS[id].slot] === id; return `<button class="slot ${UI.sel === id && UI.selFrom === 'pack' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="pack" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().inv[id]} ${spare ? 'spare copies' : 'in backpack'}">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().inv[id])}</span>${spare ? '<span class="spare-tag">Spare</span>' : ''}</button>`; }).join('');
 };
 UI.detail = (id, from) => {
   if (!id || !DQ.have(id)) return `<p class="dim" style="margin:0">Select an item to see what you can do with it.</p>`;
   const it = D.ITEMS[id], n = from === 'bank' ? (S().bank[id] || 0) : (S().inv[id] || 0), can = it.slot ? DQ.canEquip(id) : null;
   const btns = [];
-  if (it.slot) btns.push(`<button class="btn ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
+  if (it.slot) btns.push(can.equipped ? '<span class="spare-explanation">Already equipped · this is a spare copy</span>' : `<button class="btn ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
   if (it.heal) btns.push(`<button class="btn" data-do="eat" data-a="${id}">Eat (+${it.heal})</button>`);
   if (from === 'bank') btns.push(`<button class="btn" data-do="withdraw" data-a="${id}" data-b="1">Take 1</button>${n > 1 ? `<button class="btn" data-do="withdraw" data-a="${id}" data-b="10">Take 10</button><button class="btn" data-do="withdraw" data-a="${id}" data-b="all">Take all</button>` : ''}`);
   else btns.push(`<button class="btn" data-do="deposit" data-a="${id}" data-b="all">Bank</button>`);
@@ -7852,7 +7856,7 @@ UI.detail = (id, from) => {
   let h = origDetail(id, from); const ok = id && DQ.have(id), c = ok ? UI.compareHtml(id) : '';
   if (c) h = h.replace('<div class="btnrow wrap">', c + '<div class="btnrow wrap">');
   if (ok && D.ITEMS[id].flavour) h = h.replace('<div class="btnrow wrap">', `<p class="flavour">${esc(D.ITEMS[id].flavour)}</p><div class="btnrow wrap">`);
-  if (ok) { h = h.replace('<div class="detail">', `<div class="detail"><button class="dt-x iconb sm" data-do="desel" aria-label="Close">${ico('close')}</button>`); if (D.ITEMS[id].slot) h = h.replace(/<\/div>$/, '<small class="dim dt-tip">Tip: double-click (or double-tap) an item to equip it.</small></div>'); }
+  if (ok) { h = h.replace('<div class="detail">', `<div class="detail"><button class="dt-x iconb sm" data-do="desel" aria-label="Close">${ico('close')}</button>`); if (D.ITEMS[id].slot && !DQ.canEquip(id).equipped) h = h.replace(/<\/div>$/, '<small class="dim dt-tip">Tip: double-click (or double-tap) an item to equip it.</small></div>'); }
   return h;
 };
 const origTip = DQ.tips.item;
@@ -7867,7 +7871,7 @@ UI.selbarHtml = (id, from) => {
   const it = D.ITEMS[id], bank = from === 'bank', n = bank ? (S().bank[id] || 0) : (S().inv[id] || 0), can = it.slot ? DQ.canEquip(id) : null;
   const line = it.slot ? `<span>${UI.statLine(it.b)}</span>${UI.compareLine(id)}` : it.heal ? `<span class="dim">Heals ${it.heal} health</span>` : `<span class="dim">${esc(DQ.cap(it.type))}</span>`;
   const b = [];
-  if (it.slot) b.push(`<button class="btn sm ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
+  if (it.slot) b.push(can.equipped ? '<span class="spare-explanation">Already equipped · spare copy</span>' : `<button class="btn sm ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
   if (it.heal) b.push(`<button class="btn sm primary" data-do="eat" data-a="${id}">Eat</button>`);
   b.push(bank ? `<button class="btn sm" data-do="withdraw" data-a="${id}" data-b="${n > 1 ? 'all' : 1}">${n > 1 ? 'Take all' : 'Take'}</button>` : `<button class="btn sm" data-do="deposit" data-a="${id}" data-b="all">Bank</button>`);
   b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell ${UI.money(it.val || 0)}</button>`);

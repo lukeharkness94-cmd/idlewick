@@ -18,6 +18,8 @@ Town restoration matters. Willowbrook has a well and an inn with material costs,
 
 Gear shows its actual stats (e.g. Def 4, Rng 2) and differences from the equipped item in the same slot. Inventory and bank items have Sell and Sell all; source-limited sales preserve banked and equipped copies. Equipment sits around a compact full-body hero.
 
+The equipped copy is stored separately from inventory. Equipping consumes exactly one copy, swapping returns the previous item, and unequipping returns the worn item. Extra copies matching worn gear carry a "Spare" badge in the backpack. Already-worn non-ammo items cannot be redundantly equipped again; their extra copies remain available for banking and selling. Regression coverage includes these transitions (33 checks total).
+
 Shop prices use `UI.money(amount)`: a small visible coin and formatted amount, with an accessible currency label. Do not restore "8 coins each" prose on cards. Buy/sell totals show quantity and the coin amount; rare offers and inventory selling use the same visual treatment. Locked/owned rare cards retain their visible prices.
 
 ## Run and verify

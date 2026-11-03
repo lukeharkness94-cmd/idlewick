@@ -185,6 +185,7 @@ DQ.withdraw = (id, n) => {
 /* ---------- Equipment ---------- */
 DQ.canEquip = id => {
   const it = D.ITEMS[id]; if (!it || !it.slot) return { ok: false, why: 'Cannot be worn' };
+  if (it.slot !== 'ammo' && DQ.S.equip[it.slot] === id) return { ok: false, equipped: true, why: 'Already equipped. This is a spare copy.' };
   for (const [sk, l] of Object.entries(it.req || {})) {
     if (!DQ.skillUnlocked(sk)) return { ok: false, why: `${D.SK[sk].name} is locked. ${DQ.unlockHow(sk)}.` };
     if (DQ.lvl(sk) < l) return { ok: false, why: `Requires ${D.SK[sk].name} ${l}` };

@@ -134,13 +134,13 @@ UI.inventoryPicker = () => '';
 UI.packGrid = () => {
   const ids = UI.packVisible();
   if (!ids.length) return `<p class="dim" style="grid-column:1/-1;margin:6px 0">${Object.keys(S().inv).length ? 'Nothing in your backpack matches. Try another filter, or look in the bank.' : 'Your backpack is empty.'}</p>`;
-  return ids.map(id => `<button class="slot ${UI.sel === id && UI.selFrom === 'pack' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="pack" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().inv[id]} in backpack">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().inv[id])}</span></button>`).join('');
+  return ids.map(id => { const spare = D.ITEMS[id].slot !== 'ammo' && S().equip[D.ITEMS[id].slot] === id; return `<button class="slot ${UI.sel === id && UI.selFrom === 'pack' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="pack" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().inv[id]} ${spare ? 'spare copies' : 'in backpack'}">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().inv[id])}</span>${spare ? '<span class="spare-tag">Spare</span>' : ''}</button>`; }).join('');
 };
 UI.detail = (id, from) => {
   if (!id || !DQ.have(id)) return `<p class="dim" style="margin:0">Select an item to see what you can do with it.</p>`;
   const it = D.ITEMS[id], n = from === 'bank' ? (S().bank[id] || 0) : (S().inv[id] || 0), can = it.slot ? DQ.canEquip(id) : null;
   const btns = [];
-  if (it.slot) btns.push(`<button class="btn ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
+  if (it.slot) btns.push(can.equipped ? '<span class="spare-explanation">Already equipped · this is a spare copy</span>' : `<button class="btn ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
   if (it.heal) btns.push(`<button class="btn" data-do="eat" data-a="${id}">Eat (+${it.heal})</button>`);
   if (from === 'bank') btns.push(`<button class="btn" data-do="withdraw" data-a="${id}" data-b="1">Take 1</button>${n > 1 ? `<button class="btn" data-do="withdraw" data-a="${id}" data-b="10">Take 10</button><button class="btn" data-do="withdraw" data-a="${id}" data-b="all">Take all</button>` : ''}`);
   else btns.push(`<button class="btn" data-do="deposit" data-a="${id}" data-b="all">Bank</button>`);

@@ -154,6 +154,28 @@ test('same-page warnings become inline status and critical alerts retain priorit
   assert.equal(rendered,1);assert.equal(q.ui.pageNotice.text,'Missing supplies');assert.equal(q.noteMissed,0);
   for(const kind of ['death','warn','boss'])assert.equal(q.notificationTier({kind}),'now');
 });
+test('equipping the only copy removes it from the backpack and unequipping returns it', () => {
+  const {q}=harness(); q.S.inv={bronze_body:1}; delete q.S.equip.body;
+  assert.equal(q.equipItem('bronze_body').ok,true);
+  assert.equal(q.S.equip.body,'bronze_body');
+  assert.equal(q.S.inv.bronze_body,undefined); assert.equal(q.have('bronze_body'),0);
+  assert.equal(q.unequip('body'),true); assert.equal(q.S.inv.bronze_body,1);
+  assert.equal(q.S.equip.body,undefined);
+});
+test('equipping consumes one copy and preserves genuinely spare copies', () => {
+  const {q}=harness(); q.S.inv={bronze_body:3}; delete q.S.equip.body;
+  assert.equal(q.equipItem('bronze_body').ok,true);
+  assert.equal(q.S.inv.bronze_body,2); assert.equal(q.S.equip.body,'bronze_body');
+  const before=q.exportSave();
+  assert.equal(q.canEquip('bronze_body').equipped,true);
+  assert.equal(q.equipItem('bronze_body').ok,false); assert.equal(q.exportSave(),before);
+});
+test('swapping equipment returns the previous item and consumes the new item', () => {
+  const {q}=harness(); q.S.inv={bronze_body:1}; q.S.equip.body='leather_vest';
+  assert.equal(q.equipItem('bronze_body').ok,true);
+  assert.equal(q.S.inv.bronze_body,undefined); assert.equal(q.S.inv.leather_vest,1);
+  assert.equal(q.S.equip.body,'bronze_body');
+});
 test('gear comparison uses the equipped item in the same slot and shows losses', () => {
   const {q}=harness(); q.S.equip.body='iron_body'; q.S.equip.head='bronze_helm';
   const before=q.exportSave(), comparison=q.compareItem('leather_vest');
