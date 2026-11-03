@@ -1163,14 +1163,6 @@ button:focus-visible, summary:focus-visible, input:focus-visible, select:focus-v
   .sidebar .hub > .ic { width: 20px; height: 20px; }
   .sidebar .hub > span { font-size: 13px; }
   .sidebar .dock { gap: 3px; }
-  .sidebar .dk-h { text-align: left; padding: 0 10px 5px; }
-  .sidebar .dk { display: grid; grid-template-columns: 18px minmax(0,1fr) auto; gap: 7px; min-height: 32px; padding: 5px 8px; border-radius: 7px; }
-  .sidebar .dk > .ic { width: 18px; height: 18px; }
-  .sidebar .dk .dk-n { font-size: 12px; text-align: left; padding: 0; }
-  .sidebar .dk b { font-size: 12px; }
-  .sidebar .dk:has(.notice-badge:not([hidden])) b { margin-right: 18px; }
-  .sidebar .dk-live { display: none; }
-  .sidebar .dk:has(.dk-live) { border-left: 3px solid var(--good); }
 }
 @media (max-width: 860px) {
   .sidebar { display: contents; }
@@ -1649,17 +1641,6 @@ body[data-page="quests"] .quest.ready { animation: none; }
   body{padding-bottom:88px}
   #app{grid-template-columns:286px minmax(0,1fr);gap:22px}
   .sidebar{position:sticky;top:12px;align-self:start;display:block;max-height:calc(100dvh - 112px);overflow:visible}
-  .sidebar .dock{position:static;display:flex;max-height:calc(100dvh - 112px);overflow-y:auto;gap:7px;padding:0 5px 8px 0}
-  .sidebar .dk-h{position:sticky;top:0;z-index:2;padding:9px 12px;text-align:left;background:var(--ground);font:700 17px var(--f-ui);letter-spacing:.08em;color:var(--brass-hi)}
-  .sidebar .dk{display:flex;align-items:center;gap:12px;min-height:76px;padding:10px 12px;border-radius:9px}
-  .sidebar .dk>.skill-emblem{width:44px;height:44px}
-  .sidebar .dk>.ic{width:34px;height:34px;flex:none}
-  .sidebar .dk-info{gap:5px}
-  .sidebar .dk .dk-n{font:700 18px/1.1 var(--f-ui);color:var(--ink)}
-  .sidebar .dk .dk-top b{font:700 17px var(--f-mono)}
-  .sidebar .dk small{font:13px/1.25 var(--f-body);color:var(--mute)}
-  .sidebar .dk .bar{height:7px}
-  .sidebar .dk.locked{min-height:80px;opacity:.78}
   .sidebar .rail{position:fixed;z-index:120;left:0;right:0;bottom:0;top:auto;display:flex;flex-direction:row;justify-content:center;align-items:stretch;gap:5px;width:100%;max-height:none;overflow:visible;padding:9px max(18px,env(safe-area-inset-left)) calc(9px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--ground) 94%,transparent);border-top:1px solid var(--line2);box-shadow:0 -10px 32px #0007;backdrop-filter:blur(12px)}
   .sidebar .rail .brand,.sidebar .rail .hub[data-a="skills"]{display:none}
   .sidebar .rail .hub{display:flex;flex-direction:row;justify-content:center;align-items:center;gap:10px;flex:0 1 160px;min-height:54px;padding:8px 18px;border:1px solid transparent;border-radius:7px;font:700 17px var(--f-ui);color:var(--mute)}
@@ -1672,37 +1653,23 @@ body[data-page="quests"] .quest.ready { animation: none; }
 @media (min-width:1800px){#app{grid-template-columns:306px minmax(0,1fr)}}
 /* Skill and skill-level notices stay compact and never cover play. */
 .note.unlock,.note.level{min-height:0;padding:12px 12px 14px;border-width:1px}.note.unlock .n-ic,.note.level .n-ic{width:40px;height:40px}.note.unlock .n-ic .ic,.note.level .n-ic .ic{width:24px;height:24px}.note.unlock .n-b>b,.note.level .n-b>b{font:700 17px var(--f-ui)}.note.unlock .n-b>span:not(.n-acts),.note.level .n-b>span:not(.n-acts){font-size:13.5px}.note.unlock .n-act,.note.level .n-act{min-height:28px;font-size:12.5px}
-/* Skill rows own their layout explicitly; older compact-dock rules must not
-   turn a horizontal row back into a column or squeeze its text. */
+/* Skill rows use their content height; short windows scroll the list. */
 @media(min-width:861px){
- .sidebar .dock .dk{display:grid;grid-template-columns:44px minmax(0,1fr);grid-template-rows:auto;flex-direction:row;align-items:center;justify-items:stretch;height:auto;min-height:84px;flex-shrink:0;overflow:visible}
- .sidebar .dock .dk>.skill-emblem,.sidebar .dock .dk>.ic{grid-column:1;grid-row:1;align-self:center;justify-self:center}
- .sidebar .dock .dk>.dk-info{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:stretch;min-width:0;width:100%;gap:5px}
- .sidebar .dock .dk .dk-top{display:flex;align-items:baseline;justify-content:space-between;width:100%;gap:8px}
- .sidebar .dock .dk .dk-n{white-space:normal;overflow:visible;text-overflow:clip;max-width:none;padding:0;font:700 18px/1.2 var(--f-body);color:var(--ink)}
- .sidebar .dock .dk small{display:block;white-space:normal;overflow-wrap:anywhere;font:14px/1.3 var(--f-body);color:var(--ink);opacity:.8}
- .sidebar .dock .dk.locked{opacity:1}
- .sidebar .dock .dk .bar{display:block;width:100%;height:7px;flex:none}
-}
-/* All thirteen skills fit the available desktop height without scrolling. */
-@media(min-width:861px){
- .sidebar .dock{height:calc(100dvh - 112px);max-height:none;overflow:visible;display:grid;grid-template-rows:26px repeat(13,minmax(0,1fr));gap:3px;padding:0}
- .sidebar .dock .dk{min-height:0;height:100%;padding:3px 10px;grid-template-columns:40px minmax(0,1fr);gap:10px;overflow:hidden}
- .sidebar .dock .dk>.skill-emblem{width:40px;height:40px}
- .sidebar .dock .dk .dk-info{gap:3px}
- .sidebar .dock .dk .dk-n{font-size:18px}
- .sidebar .dock .dk small{font-size:12px;line-height:1.1}
- .sidebar .dock .dk .dk-top>.ic{width:18px;height:18px;flex:none;color:var(--brass)}
- .sidebar .dock .dk .bar{height:5px}
- .sidebar .dock .dk-h{padding:3px 10px;font-size:16px}
-}
-/* A narrow skill rail gives the activity back its horizontal space. */
-@media(min-width:861px){
- #app{grid-template-columns:216px minmax(0,1fr);gap:16px}
- .sidebar .dock .dk{grid-template-columns:34px minmax(0,1fr);gap:8px;padding-inline:8px}
- .sidebar .dock .dk>.skill-emblem{width:34px;height:34px}
- .sidebar .dock .dk .dk-n{font-size:17px}
- .sidebar .dock .dk small{font-size:12px}
+ #app{grid-template-columns:232px minmax(0,1fr);gap:18px}
+ .sidebar{display:flex;flex-direction:column;gap:0;max-height:calc(100dvh - 112px);overflow:visible}
+ .sidebar .dock{position:static;display:flex;flex-direction:column;align-items:stretch;flex:0 1 auto;height:auto;max-height:calc(100dvh - 168px);grid-template-rows:none;overflow-x:hidden;overflow-y:auto;gap:4px;padding:0 4px 4px 0;scrollbar-width:thin;scroll-padding-top:28px}
+ .sidebar .dock .dk-h{position:sticky;top:0;z-index:2;flex:none;margin:0;padding:4px 10px 8px;text-align:left;background:var(--ground);font:700 14px/20px var(--f-body);letter-spacing:.08em;color:var(--brass-hi)}
+ .sidebar .dock .dk{display:grid;grid-template-columns:32px minmax(0,1fr);grid-template-rows:auto;align-items:center;justify-items:stretch;flex:none;width:100%;height:auto;min-height:56px;padding:6px 10px;gap:10px;border-radius:7px;overflow:visible}
+ .sidebar .dock .dk>.skill-emblem,.sidebar .dock .dk>.ic{grid-column:1;grid-row:1;width:32px;height:32px;align-self:center;justify-self:center}
+ .sidebar .dock .dk>.dk-info{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:stretch;gap:3px;min-width:0;width:100%}
+ .sidebar .dock .dk .dk-top{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;line-height:20px}
+ .sidebar .dock .dk .dk-n{max-width:none;padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:600 16px/20px var(--f-body);color:var(--ink)}
+ .sidebar .dock .dk .dk-top b{flex:none;font:600 13px/20px var(--f-mono)}
+ .sidebar .dock .dk small{display:block;font:11px/13px var(--f-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--mute);opacity:1}
+ .sidebar .dock .dk .bar{display:block;flex:none;width:100%;height:4px;margin:0}
+ .sidebar .dock .dk.locked{min-height:44px;padding:6px 10px;opacity:.8}
+ .sidebar .dock .dk.locked>.skill-emblem{width:28px;height:28px}
+ .sidebar .dock .dk .dk-top>.ic{width:15px;height:15px;flex:none;color:var(--mute)}
 }
 /* Repeated cards share a height across every row of their catalogue. */
 .illustrated-choices,.area-grid,.goals,.beasts,.pets,.achgrid,.unlock-grid{grid-auto-rows:1fr;align-items:stretch}
@@ -1720,29 +1687,14 @@ body[data-page="quests"] .quest.ready { animation: none; }
 .page-help{display:flex;justify-content:flex-end;margin-top:12px}.skill-coach{border:1px solid var(--brass);border-radius:9px;background:var(--panel2);padding:14px;align-items:center}.skill-coach p{margin:5px 0;line-height:1.4}.skill-coach .coach-art{flex:none}.skill-coach .lesson-goal{color:var(--ink)}
 .guide-total{margin:16px 0;height:9px;--c:var(--good)}.guide-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px}.guide-cards .beast{min-height:150px;grid-template-columns:72px minmax(0,1fr);height:100%;color:var(--ink)}.guide-cards .beast>span{display:flex;flex-direction:column;gap:5px}.guide-cards .beast small{font-size:13px;line-height:1.3;color:var(--mute)}.guide-cards .beast.complete{border-color:var(--good)}.research-stamps{display:flex;gap:5px;color:var(--mute)}.research-stamps i{font-style:normal}.research-stamps .on{color:var(--brass-hi)}.battle-facts{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}.battle-advice{display:grid;gap:5px;margin:10px 0;font-size:15px}.battle-brief .phead{margin-bottom:8px}
 @media(min-width:861px){.subnav.skills{display:none}.workspace-focus>.skillhero{display:none}}
-@media(max-height:800px) and (min-width:861px){.sidebar .dock .dk .dk-n{font-size:16px}.sidebar .dock .dk small{font-size:11px}.sidebar .dock .dk>.skill-emblem{width:30px;height:30px}}
-@media(max-height:800px) and (min-width:861px){
- .sidebar .dock .dk{padding-block:1px;grid-template-rows:minmax(0,1fr)}
- .sidebar .dock .dk .dk-info{gap:1px}
- .sidebar .dock .dk .dk-top,.sidebar .dock .dk .dk-n,.sidebar .dock .dk .dk-top b{line-height:18px}
- .sidebar .dock .dk small{line-height:12px;white-space:nowrap}
- .sidebar .dock .dk .bar{height:3px}
-}
+
+
 @media(min-width:861px){.sidebar{z-index:130}}
 .techgrid{grid-auto-rows:1fr;align-items:stretch}
-/* Combat sits directly above a compact skills list. Rows never stretch to
-   fill a tall monitor, and shrink together on shorter desktop screens. */
+/* Combat and the skills list share the same horizontal inset. */
 #combatnav{margin-bottom:8px}
 #combatnav .combat-entry{position:relative;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;width:100%;min-height:40px;padding:6px 10px;color:var(--ink);background:var(--panel2);border:1px solid var(--brass-lo);border-radius:7px;font:700 18px var(--f-body)}
 #combatnav .combat-entry>.ic{width:26px;height:26px;color:var(--brass-hi)}
 #combatnav .combat-entry.on{border-color:var(--brass);box-shadow:inset 3px 0 var(--brass);background:color-mix(in srgb,var(--brass) 14%,var(--panel2))}
-@media(min-width:861px){
- .sidebar .dock{height:min(626px,calc(100dvh - 164px));gap:2px;grid-template-rows:24px repeat(13,minmax(0,1fr))}
- .sidebar .dock .dk{padding:1px 7px;gap:7px;grid-template-columns:32px minmax(0,1fr);border-radius:6px}
- .sidebar .dock .dk>.skill-emblem{width:32px;height:32px}
- .sidebar .dock .dk .dk-info{gap:1px}
- .sidebar .dock .dk .dk-top,.sidebar .dock .dk .dk-n,.sidebar .dock .dk .dk-top b{line-height:18px}
- .sidebar .dock .dk small{line-height:12px;white-space:nowrap}
- .sidebar .dock .dk .bar{height:3px}
-}
+
 @media(max-width:860px){#combatnav{width:150px}}
