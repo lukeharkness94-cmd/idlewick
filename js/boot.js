@@ -6,9 +6,11 @@ DQ.started = false;
 function fireflies(cv) {
   const cx = cv.getContext('2d'); let w, h; const fit = () => { w = cv.width = innerWidth; h = cv.height = innerHeight; }; fit(); addEventListener('resize', fit);
   const fl = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), r: .6 + Math.random() * 1.8, p: Math.random() * 6, s: .02 + Math.random() * .05 }));
+  let lastFrame=performance.now();
   const loop = t => {
-    if (!cv.isConnected) return; cx.clearRect(0, 0, w, h);
-    for (const f of fl) { f.x += Math.sin(t / 2400 + f.p) * .0004; f.y -= f.s * .0006; if (f.y < -.02) { f.y = 1.02; f.x = Math.random(); } const a = .35 + .65 * Math.abs(Math.sin(t / 900 + f.p)); cx.fillStyle = `rgba(243,213,138,${a * .85})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r, 0, 6.3); cx.fill(); cx.fillStyle = `rgba(243,213,138,${a * .12})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r * 6, 0, 6.3); cx.fill(); }
+    if (!cv.isConnected) return;
+    const frames=Math.max(0,Math.min(3,(t-lastFrame)/(1000/60)));lastFrame=t; cx.clearRect(0, 0, w, h);
+    for (const f of fl) { f.x += Math.sin(t / 2400 + f.p) * .0004 * frames; f.y -= f.s * .0006 * frames; if (f.y < -.02) { f.y = 1.02; f.x = Math.random(); } const a = .35 + .65 * Math.abs(Math.sin(t / 900 + f.p)); cx.fillStyle = `rgba(243,213,138,${a * .85})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r, 0, 6.3); cx.fill(); cx.fillStyle = `rgba(243,213,138,${a * .12})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r * 6, 0, 6.3); cx.fill(); }
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
@@ -52,7 +54,7 @@ function start(isNew) {
   const S = DQ.S, away = Date.now() - S.lastSeen;
   DQ.firstRun = isNew; DQ.started = true;
   $('#title').classList.add('out'); setTimeout(() => { $('#title').hidden = true; $('#title').classList.remove('out'); $('#title').innerHTML = ''; }, 600);
-  $('#app').hidden = false; DQ.musicMode(S.town); DQ.musicStart(); DQ.audioApply();
+  $('#app').hidden = false; DQ.musicMode(DQ.act?.kind === 'fight' ? 'combat' : S.town); DQ.musicStart(); DQ.audioApply();
   D.SKILLS.forEach(s => { if (DQ.skillUnlocked(s.id)) S.unlocked[s.id] = true; });
   DQ.resumeAfterLoad(); DQ.ui.init();
   const h = location.hash.slice(1); if (h && (DQ.ui.V[h] || D.SK[h]) && !isNew) { DQ.ui.view = h; DQ.ui.render(true); }

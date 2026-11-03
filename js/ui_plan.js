@@ -59,7 +59,7 @@ UI.weakChips = m => {
 UI.weaponLine = () => {
   const wt = D.weaponType(), W = D.WTYPES[wt], dt = DQ.myDtype();
   const spells = wt === 'staff' ? `<div class="chips spellpick">${D.SPELLS.filter(sp => DQ.lvl('magic') >= sp.lvl).map(sp => { const el = D.DTYPES[D.SPELL_EL[sp.id]]; return `<button class="chip ${S().spell === sp.id ? 'on' : ''}" style="--c:${el.col}" data-do="spell" data-a="${sp.id}">${ico(el.ic)}${sp.name}<small>${el.name}</small></button>`; }).join('')}</div>` : '';
-  return `<div class="wline"><span class="tag">${W.name}</span> ${dt ? dchip(dt, '') : ''} <small class="mono">${(W.speed / 1000).toFixed(1)}s per attack</small></div><small class="dim">${W.note}.${wt === 'staff' ? ' Pick the element for your spells:' : ' Change weapons on the Inventory page.'}</small>${spells}`;
+  return `<div class="wline"><span class="tag">${W.name}</span> ${dt ? dchip(dt, '') : ''} <small class="mono">${(DQ.combatInterval() / 1000).toFixed(2)}s per attack</small></div><small class="dim">${W.note}.${wt === 'staff' ? ' Pick the element for your spells:' : ' Change weapons on the Inventory page.'}</small>${spells}`;
 };
 UI.abilityPanel = () => {
   const on = S().abilities || [], slots = DQ.abilSlots();

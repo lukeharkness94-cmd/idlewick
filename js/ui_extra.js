@@ -115,7 +115,7 @@ UI.V.hirelings = () => {
     <section class="panel worker-board ${hiring ? '' : 'mobile-hide'}"><div class="phead"><h2>Hiring board</h2><span class="btnrow"><small class="mono" data-b="hirewait"></small><button class="btn sm" data-do="refreshboard">${free ? 'Refresh (free)' : 'Refresh · 100'}</button></span></div><label class="page-picker" for="hire-choice">Candidate${UI.choiceButtons(`<select id="hire-choice" data-in="hire-choice">${S().hire.cands.map((c,i)=>`<option value="${i}" ${i === selectedCandidate ? 'selected' : ''}>${esc(c.name)} · ${D.SK[c.skill].name}</option>`).join('')}</select>`)}</label><div class="cands">${cands}</div></section></div>`;
 };
 
-/* ---------- Bestiary and pets ---------- */
+/* ---------- Bestiary and creatures ---------- */
 UI.V.bestiary = () => {
   const tab = UI.beastTab, B = S().beast;
   let body;
@@ -128,17 +128,18 @@ UI.V.bestiary = () => {
     }).join('')}</div></div>`).join('');
     body = `<p class="hint" style="margin-top:0">Stars at 10, 50 and 250 defeats. Each star adds 4% damage against that monster.</p>${body}`;
   } else {
-    const act = S().pets.active;
-    const chosenPet = D.PET[UI.tab.petChoice] || D.PET[act] || D.PETS[0];
-    body = `<label class="page-picker" for="pet-choice">Pet${UI.choiceButtons(`<select id="pet-choice" data-in="pet-choice">${D.PETS.map(p => `<option value="${p.id}" ${p === chosenPet ? 'selected' : ''}>${S().pets.owned[p.id] ? p.name : p.kind}</option>`).join('')}</select>`)}</label><div class="pets">${[chosenPet].map(p => {
+    const act = S().pets.active, collection=DQ.collectiblePets?DQ.collectiblePets():D.PETS;
+    const chosenPet = collection.find(p=>p.id===UI.tab.petChoice) || collection.find(p=>p.id===act) || collection[0];
+    body = `<label class="page-picker" for="pet-choice">Creature${UI.choiceButtons(`<select id="pet-choice" data-in="pet-choice">${collection.map(p => `<option value="${p.id}" ${p === chosenPet ? 'selected' : ''}>${S().pets.owned[p.id] ? p.name : p.kind}</option>`).join('')}</select>`)}</label><div class="pets">${[chosenPet].map(p => {
       const own = S().pets.owned[p.id], lv = DQ.petLevel(p.id), s = p.src;
-      const hint = s.type === 'shop' ? `Sold in ${D.TOWN[s.town].name} for ${fmt(s.price)} coins` : s.type === 'boss' ? `Sometimes follows you home after defeating ${D.MON[s.mon].name}` : s.type === 'harvest' ? 'Hides among ripe crops' : `Found while ${D.SK[s.skill].name.toLowerCase() === 'thieving' ? 'thieving' : 'training ' + D.SK[s.skill].name}`;
+      const hint = s.type === 'hunt' ? `Can join you while hunting ${D.MON[s.mon].name}` : s.type === 'shop' ? `Found in ${D.TOWN[s.town].name} for ${fmt(s.price)} coins` : s.type === 'boss' ? `Sometimes joins you after defeating ${D.MON[s.mon].name}` : s.type === 'harvest' ? 'Hides among ripe crops' : `Found while ${D.SK[s.skill].name.toLowerCase() === 'thieving' ? 'thieving' : 'training ' + D.SK[s.skill].name}`;
       const shopBtn = !own && s.type === 'shop' && DQ.townUnlocked(s.town) ? `<button class="btn sm ${S().coins >= s.price ? 'primary' : ''}" data-do="buypet" data-a="${p.id}">Adopt · ${fmt(s.price)}</button>` : '';
-      return `<div class="petc ${own ? '' : 'unk'} ${act === p.id ? 'on' : ''}" style="--c:${p.col}">${DQ.petSprite(p, 64, own ? 'bob' : 'sil')}<b>${own ? p.name : '???'}</b><small>${own ? p.kind : hint}</small>${own ? `<small class="ok">${p.text}</small><span class="hearts" data-tip="text:Bond grows the longer they follow you. Each level makes their bonus 25% stronger.">${'♥'.repeat(lv)}${'♡'.repeat(5 - lv)}</span>${act === p.id ? '<span class="tag">Following you</span>' : `<button class="btn sm" data-do="setpet" data-a="${p.id}">Bring along</button>`}` : shopBtn}</div>`;
+      const abilities=own&&DQ.creatureAbilities?DQ.creatureAbilities(p.id).map(a=>`<span class="creature-ability ${a.open?'open':'locked'}"><b>Lv ${a.lv} · ${a.name}</b><small>${a.open?a.text:'Locked'}</small></span>`).join(''):'';
+      return `<div class="petc ${own ? '' : 'unk'} ${act === p.id ? 'on' : ''}" style="--c:${p.col}">${DQ.petSprite(p, 64, own ? 'bob' : 'sil')}<b>${own ? p.name : '???'}</b><small>${own ? `${p.kind} · Level ${lv}` : hint}</small>${own ? `<small class="ok">${p.text}</small><div class="creature-abilities">${abilities}</div>${act === p.id ? '<span class="tag">Active companion</span>' : `<button class="btn sm" data-do="setpet" data-a="${p.id}">Bring along</button>`}` : shopBtn}</div>`;
     }).join('')}</div>`;
   }
-  const known = D.MONLIST.filter(m => B.kills[m.id]).length, pets = Object.keys(S().pets.owned).length;
-  return `<section class="panel shophead"><div><span class="k">Bestiary</span><h2>${known} of ${D.MONLIST.length} monsters · ${pets} of ${D.PETS.length} pets</h2></div><div class="tabs">${[['monsters', 'Monsters'], ['pets', 'Pets']].map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="beasttab" data-a="${k}">${n}</button>`).join('')}</div></section><section class="panel">${body}</section>`;
+  const collection=DQ.collectiblePets?DQ.collectiblePets():D.PETS, known=D.MONLIST.filter(m=>B.kills[m.id]).length, pets=collection.filter(p=>S().pets.owned[p.id]).length;
+  return `<section class="panel shophead"><div><span class="k">Bestiary</span><h2>${known} of ${D.MONLIST.length} monsters · ${pets} of ${collection.length} companions</h2></div><div class="tabs">${[['monsters', 'Field guide'], ['pets', 'Creatures']].map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="beasttab" data-a="${k}">${n}</button>`).join('')}</div></section><section class="panel">${body}</section>`;
 };
 
 /* ---------- Actions ---------- */
@@ -175,18 +176,18 @@ DQ.on('act', () => {
 
 /* ---------- Combat loot: session log, flying loot and loot-table tooltips ---------- */
 DQ.lootLog = []; DQ.lootSum = { kills: 0, coins: 0, items: 0 };
-const lootRow = e => { const it = D.ITEMS[e.id], where = e.coins ? 'Coins' : e.where || 'Backpack'; return `<div class="lootrow" style="--c:${e.rar[2]}" ${e.coins ? '' : `data-do="showitem" data-a="${e.id}" data-tip="text:Open it in your ${where.toLowerCase()}"`}><span class="itm sm" style="--c:${it.col}" data-tip="item:${e.id}">${ico(it.ic)}</span><span class="ln">${e.coins ? `${it.name} <b class="mono">${fmt(e.n)} coins</b>` : `${e.n > 1 ? `<b class="mono">${fmtK(e.n)}×</b> ` : ''}${it.name}`}</span><span class="rar">${e.rar[1]}<small class="where ${where === 'Bank' ? 'bank' : ''}">${where === 'Bank' ? '→ Bank (backpack full)' : where === 'Coins' ? '' : '→ ' + where}</small></span></div>`; };
+const lootRow = e => { const it = D.ITEMS[e.id], where = e.coins ? 'Coins' : e.where || 'Backpack'; return `<div class="lootrow" style="--c:${e.rar[2]}" ${e.coins ? '' : `data-do="showitem" data-a="${e.id}" data-tip="text:Open it in your ${where.toLowerCase()}"`}><span class="itm sm" style="--c:${it.col}" data-tip="item:${e.id}">${DQ.itemIco(it)}</span><span class="ln">${e.coins ? `${it.name} <b class="mono">${fmt(e.n)} coins</b>` : `${e.n > 1 ? `<b class="mono">${fmtK(e.n)}×</b> ` : ''}${it.name}`}</span><span class="rar">${e.rar[1]}<small class="where ${where === 'Bank' ? 'bank' : ''}">${where === 'Bank' ? '→ Bank (backpack full)' : where === 'Coins' ? '' : '→ ' + where}</small></span></div>`; };
 UI.lootPanel = () => `<section class="panel lootp"><div class="phead"><h2>Loot</h2><small class="mono" id="lootsum">${DQ.lootSum.kills} defeated · ${fmt(DQ.lootSum.coins)} coins · ${DQ.lootSum.items} items this session</small></div><div class="lootlist" id="lootbox">${DQ.lootLog.length ? DQ.lootLog.slice(0, 8).map(lootRow).join('') : '<p class="dim sm" style="margin:0">Defeat monsters for coins and a chance at gear, gems, seeds, coin pouches and rare treasure chests. Hover a monster to see what it can drop.</p>'}</div></section>`;
 DQ.on('loot', (m, drops, c) => {
   DQ.lootSum.kills++; DQ.lootSum.coins += c + drops.filter(d => d.coins).reduce((a, d) => a + d.n, 0); DQ.lootSum.items += drops.filter(d => !d.coins).length;
-  drops.forEach(d => { if (!d.coins) d.where = DQ.S.inv[d.id] ? 'Backpack' : DQ.S.bank[d.id] ? 'Bank' : 'Equipped'; DQ.lootLog.unshift(d); }); DQ.lootLog.length = Math.min(DQ.lootLog.length, 30);
+  drops.forEach(d => { if (!d.coins) d.where = DQ.S.inv[d.id] ? 'Backpack' : DQ.S.bank[d.id] ? 'Bank' : 'Equipped'; const last=DQ.lootLog[0]; if(last && last.id===d.id && last.where===d.where && last.coins===d.coins && last.rar[0]===d.rar[0]) last.n+=d.n; else DQ.lootLog.unshift({...d}); }); DQ.lootLog.length = Math.min(DQ.lootLog.length, 30);
   const box = $('#lootbox'), sum = $('#lootsum'); if (sum) sum.textContent = `${DQ.lootSum.kills} defeated · ${fmt(DQ.lootSum.coins)} coins · ${DQ.lootSum.items} items this session`;
   if (!box || !drops.length) return;
   box.innerHTML = DQ.lootLog.slice(0, 8).map(lootRow).join(''); [...box.children].slice(0, drops.length).forEach(r => r.classList.add('fresh'));
   const from = $('#av-foe'); if (!from || S().settings.reduceFx || document.hidden) return;
   const a = from.getBoundingClientRect(), b = box.getBoundingClientRect(), fx = $('#fx');
   drops.slice(0, 4).forEach((d, i) => {
-    const it = D.ITEMS[d.id], el = document.createElement('div'); el.className = 'flyloot'; el.style.setProperty('--c', d.rar[2]); el.innerHTML = `<span style="color:${it.col}">${ico(it.ic)}</span>`;
+    const it = D.ITEMS[d.id], el = document.createElement('div'); el.className = 'flyloot'; el.style.setProperty('--c', d.rar[2]); el.innerHTML = DQ.itemIco(it);
     el.style.left = (a.left + a.width / 2) + 'px'; el.style.top = (a.top + a.height / 2) + 'px'; fx.appendChild(el);
     const dx = b.left + 30 - (a.left + a.width / 2), dy = b.top + 20 - (a.top + a.height / 2), up = -60 - Math.random() * 40, sx = (Math.random() - .5) * 80;
     el.animate([{ transform: 'translate(-50%,-50%) scale(.4)', opacity: 0 }, { transform: `translate(calc(-50% + ${sx}px),calc(-50% + ${up}px)) scale(1.3)`, opacity: 1, offset: .35 }, { transform: `translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(.7)`, opacity: .9 }], { duration: 900, delay: i * 120, easing: 'cubic-bezier(.3,.7,.4,1)', fill: 'both' }).onfinish = () => el.remove();

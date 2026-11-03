@@ -127,7 +127,7 @@ const techCard = t => {
 };
 UI.B.rbar = (e, id) => { const a = R().active.find(x => x.id === id), t = D.TECH[id]; if (a) { const w = (100 - a.left / (t.mins * MIN) * 100).toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; } };
 UI.B.rleft = (e, id) => { const a = R().active.find(x => x.id === id); UI.set(e, a ? `${DQ.fmtTime(Math.max(0, a.left))} left` : ''); };
-UI.V.research = () => {
+const researchPage = (potions = false) => {
   const slots = DQ.researchSlots(), A = R().active;
   const activeRows = Array.from({ length: slots }, (_, i) => { const a = A[i]; if (!a) return `<div class="aslot empty"><span class="k">Slot ${i + 1}</span><b>Free</b><small>Choose a project below. It keeps running while you are away.</small></div>`; const t = D.TECH[a.id]; return `<div class="aslot" style="--c:${BR[t.br][1]}"><span class="k">Slot ${i + 1}</span><b>${esc(t.name)}</b><span class="tbar"><span class="bar"><i data-b="rbar:${t.id}"></i></span><small class="mono" data-b="rleft:${t.id}"></small></span><small>${esc(t.desc)}</small></div>`; }).join('');
   const done = D.TECHS.filter(t => DQ.techDone(t.id)).length;
@@ -136,12 +136,15 @@ UI.V.research = () => {
   const selectedPotion = unlocked.find(r => r.id === UI.tab.potionChoice) || unlocked[0];
   const brewery = `<section class="panel brewery"><div class="phead"><h2>${ico('bottle')} Brewery</h2><small>${unlocked.length ? 'Brew potions, then drink them from your backpack' : 'Research Herbalism to open it'}</small></div>${unlocked.length ? `<label class="page-picker" for="potion-choice">Potion${UI.choiceButtons(`<select id="potion-choice" data-in="potion-choice">${unlocked.map(r=>`<option value="${r.id}" ${r === selectedPotion ? 'selected' : ''}>${esc(D.ITEMS[r.id].name)}</option>`).join('')}</select>`)}</label><div class="srows">${[selectedPotion].map(r => { const it = D.ITEMS[r.id], ok = S().coins >= r.coins && Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n); return `<div class="srow ${ok ? '' : 'cant'}">${UI.itm(r.id, DQ.have(r.id))}<div class="sr-t"><b>${esc(it.name)}</b><small>${esc(it.drink.text)}</small><span class="rws">${costChips(Object.assign({ coins: r.coins }, r.in))}</span></div><span class="btnrow"><button class="btn sm ${ok ? 'primary' : ''}" data-do="brew" data-a="${r.id}" ${ok ? '' : 'disabled'}>Brew</button>${DQ.have(r.id) ? `<button class="btn sm" data-do="drink" data-a="${r.id}">Drink (${DQ.have(r.id)})</button>` : ''}</span></div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing to brew yet.</p>'}</section>`;
   const selected = D.TECH[UI.tab.researchChoice] || D.TECHS.find(t => !DQ.techReason(t) && DQ.techCanAfford(t)) || D.TECHS[0];
-  const potions = UI.tab.researchView === 'potions';
-  return `<section class="panel"><div class="phead"><h2>Research</h2><small>${done} / ${D.TECHS.length} complete</small></div><div class="tabs"><button class="tab ${potions ? '' : 'on'}" data-do="tab" data-a="researchView" data-b="projects">Projects</button><button class="tab ${potions ? 'on' : ''}" data-do="tab" data-a="researchView" data-b="potions">Potions</button></div>
-    ${potions ? brewery : `<label class="page-picker" for="research-choice">Project${UI.choiceButtons(`<select id="research-choice" data-in="research-choice">${D.TECHS.map(t => `<option value="${t.id}" ${t === selected ? 'selected' : ''}>${BR[t.br][0]} · ${t.name}${DQ.techDone(t.id) ? ' · Done' : ''}</option>`).join('')}</select>`)}</label>${techCard(selected)}<section data-reference="true" id="active-research"><h3>Active research · ${A.length} / ${slots} slots</h3><div class="aslots">${activeRows}</div></section>`}</section>`;
+  if (potions) return brewery;
+  return `<section class="panel"><div class="phead"><h2>Research</h2><small>${done} / ${D.TECHS.length} complete</small></div>
+    <section data-reference="true" id="active-research"><h3>Active research · ${A.length} / ${slots} slots</h3><div class="aslots">${activeRows}</div></section>
+    <label class="page-picker" for="research-choice">Project${UI.choiceButtons(`<select id="research-choice" data-in="research-choice">${D.TECHS.map(t => `<option value="${t.id}" ${t === selected ? 'selected' : ''}>${BR[t.br][0]} · ${t.name}${DQ.techDone(t.id) ? ' · Done' : ''}</option>`).join('')}</select>`)}</label>${techCard(selected)}</section>`;
 };
+UI.V.research = () => researchPage();
+UI.V.brewery = () => researchPage(true);
 Object.assign(UI.DO, { rstart: a => { if (DQ.startResearch(a)) { UI.tab.researchChoice = a; UI.render(false); } }, brew: a => { if (DQ.brew(a)) UI.render(false); }, drink: a => { DQ.drink(a); UI.renderHud(); UI.render(false); } });
-DQ.on('research', () => { if (UI.view === 'research') UI.refresh && UI.refresh(); });
+DQ.on('research', () => { if (['research', 'brewery'].includes(UI.view)) UI.refresh && UI.refresh(); });
 
 /* locked until the Research hall opens, with a preview */
 const rpage = UI.V.research;

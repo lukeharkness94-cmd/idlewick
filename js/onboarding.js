@@ -12,9 +12,21 @@ const lessons={
   smithing:{title:'Smithing',text:'Start with the Bars category to smelt ore. Then choose Weapons or Armour to use those bars.',towards:'Copper + tin → bronze bars → equipment for tougher enemies.',goal:'Smelt a bronze bar, then make a weapon or armour piece and compare it in Inventory.',art:['item','bar_bronze']},
   crafting:{title:'Crafting',text:'Choose a category and an illustrated recipe. Materials come from gathering, monsters and your farm.',towards:'Hides, logs and gems → ranged gear, bows, staves and jewellery.',goal:'Use cowhide for leather gear, or logs for your first bow.',art:['item','leather_vest']},
   magic:{title:'Magic',text:'Equip a staff to cast spells during combat. Alchemy turns spare items into coins; both use Arcane runes.',towards:'Runes and staves → elemental attacks and stronger combat options; Alchemy → coins.',goal:'Check your runes before casting, and choose a spell suited to the enemy.',art:['item','rune']},
-  combat:{title:'Combat',text:'Select an illustrated opponent and press Fight. The battle shows the actual enemy, your hero and both health bars.',towards:'Fights → combat skills, loot and quests → bosses that open the road to new towns.',goal:'Start with chickens. Choose which skill to train and keep auto-eat on with food available.',art:['creature','chicken']},
+  combat:{title:'Combat',text:'Choose a hunting area and begin an expedition. Creatures appear at the listed rates; quest targets can be tracked directly.',towards:'Encounters → combat skills, creature discoveries, companions and loot → bosses that open new towns.',goal:'Explore the Meadow Path. Bring food, choose a training focus, and watch for a creature that might join you.',art:['creature','chicken']},
   ranged:{title:'Ranged combat',text:'Bows use equipped arrows. Ranged accuracy and arrow strength work together; both appear in gear comparisons.',towards:'Crafted bows + arrows → safer preparation for enemies weak to ranged attacks.',goal:'Equip a bow and arrows in Inventory, then choose an easy opponent.',art:['item','bow_normal']}
 };
+Object.assign(lessons,{
+ hunting:{title:'Hunting',text:'Choose an area and track its creatures through expeditions.',towards:'Victories → Hunting XP, field knowledge and signature companion encounters.',goal:'Explore the Meadow Path and study the creatures you meet.',art:['skill','hunting']},
+ exploration:{title:'Exploration',text:'Visit new regions and discover creatures to earn Exploration XP.',towards:'New towns and creature discoveries → a more complete realm guide.',goal:'Open the map and work toward the next town road.',art:['skill','exploration']},
+ herbalism:{title:'Herbalism',text:'Brew remedies and potions from plants and other ingredients.',towards:'Harvests → potions → healing and timed boosts.',goal:'Research a remedy, then brew your first potion.',art:['skill','herbalism']},
+ enchanting:{title:'Enchanting',text:'Use runes and gems to strengthen equipped gear.',towards:'Enchantment ranks → stronger existing combat bonuses.',goal:'Equip an item and collect the materials for its first enchantment.',art:['skill','enchanting']}
+});
+Object.assign(lessons,{
+ house:{towards:'Furniture gives lasting bonuses to your whole adventure.',title:'Your home',text:'Buy a home, then add rooms and furniture for permanent bonuses.',goal:'Save the purchase price, then start with a storage chest for backpack space.',art:['skill','woodcutting']},
+ hirelings:{towards:'Worker materials support crafting and village restoration.',title:'Workers',text:'Hire a worker, choose their job and keep coins available for wages.',goal:'Hire one worker whose materials you need. Their work continues while you are away.',art:['skill','farming']},
+ research:{towards:'Projects unlock permanent bonuses and potion recipes.',title:'Research',text:'Spend supplies on a project to gain permanent benefits and new potion recipes.',goal:'Choose an affordable project and start it in a free research slot.',art:['item','rune']},
+ bestiary:{towards:'Research reveals counters, loot and creature legends.',title:'Your field guide',text:'Every victory reveals more: weaknesses, drops, field notes and legends.',goal:'Complete one creature entry. Select its card to see the next research target.',art:['creature','lanternmoth']}
+});
 DQ.skillLessons=lessons;
 DQ.initGuides=()=>{
   const t=S().tut||(S().tut={done:{},hidden:false});t.done=t.done||{};
@@ -28,25 +40,27 @@ DQ.initGuides=()=>{
   t.version=1;
 };
 DQ.lessonForPage=page=>{
-  DQ.initGuides();if(S().tut.hidden)return null;
-  const skill=page==='combat'&&DQ.weaponStyle()==='ranged'?'ranged':page;
+  DQ.initGuides();
+  const skill=page==='combat'&&DQ.weaponStyle()==='ranged'?'ranged':page==='brewery'?'herbalism':page;
   if(!lessons[skill]||S().tut.done['lesson:'+skill])return null;
+  if(S().tut.hidden&&!S().seen['tutorial:'+skill])return null;
   if(D.SK[skill]&&!DQ.skillUnlocked(skill))return null;
+  if(skill==='house'&&DQ.advLvl()<D.HOUSE.adv||skill==='hirelings'&&DQ.advLvl()<D.HIRE.adv||skill==='research'&&DQ.advLvl()<D.RESEARCH_ADV)return null;
   return {id:skill,...lessons[skill]};
 };
-DQ.acknowledgeLesson=id=>{DQ.initGuides();if(!lessons[id])return false;S().tut.done['lesson:'+id]=true;DQ.save();return true;};
+DQ.acknowledgeLesson=id=>{DQ.initGuides();if(!lessons[id])return false;S().tut.done['lesson:'+id]=true;delete S().seen['tutorial:'+id];DQ.save();return true;};
 const intro=()=>`<section class="panel first-play-guide"><div class="first-play-art">${DQ.monSprite(D.MON.chicken,96)}</div><div><span class="k">A short introduction</span><h2>Welcome to Willowbrook</h2><p>Gather supplies, turn them into useful things, and help your village grow. Pick one task at a time; it keeps working while you explore or close the game.</p><div class="first-play-path"><span>Gather</span> → <span>Make &amp; equip</span> → <span>Fight &amp; restore</span></div><div class="btnrow wrap"><button class="btn primary" data-do="introstart">${S().q.first_steps?.s==='done'?'Explore activities':'Start First Steps'}</button><button class="btn sm" data-do="introskip">Skip introduction</button></div></div></section>`;
-const coachHtml=l=>`<aside class="skill-coach" aria-label="First-time ${esc(l.title)} guide"><span class="coach-art">${DQ.artImage(l.art[0],l.art[1],64,'',l.title)}</span><div><b>${esc(l.title)} · getting started</b><p>${esc(l.text)}</p><p><strong>Leads to:</strong> ${esc(l.towards)}</p><section data-reference="true"><h3>A useful first goal</h3><p>${esc(l.goal)}</p></section></div><button class="btn sm" data-do="lessonclose" data-a="${l.id}">Got it</button></aside>`;
+const coachHtml=l=>`<aside class="skill-coach" aria-label="First-time ${esc(l.title)} guide"><span class="coach-art">${DQ.artImage(l.art[0],l.art[1],64,'',l.title)}</span><div><b>${esc(l.title)} · getting started</b><p>${esc(l.text)}</p><p class="lesson-goal"><strong>Try this:</strong> ${esc(l.goal)}</p></div><button class="btn sm" data-do="lessonclose" data-a="${l.id}">Got it</button></aside>`;
 let current=null,lastPage=null,lastState=null;
 const render=UI.render;
 UI.render=fresh=>{
   DQ.initGuides();
   if(lastPage!==UI.view||lastState!==S()){current=null;lastPage=UI.view;lastState=S();}
-  if(!current){const l=DQ.lessonForPage(UI.view);if(l){current=l;DQ.acknowledgeLesson(l.id);}}
+  if(!current){const l=DQ.lessonForPage(UI.view);if(l){current=l;}}
   render(fresh);
   const view=document.getElementById('view');if(!view)return;
   if(UI.view==='overview'&&!S().tut.hidden&&!S().tut.done.intro)view.insertAdjacentHTML('afterbegin',intro());
-  if(current&&!S().tut.hidden)view.insertAdjacentHTML('afterbegin',coachHtml(current));
+  if(current)view.insertAdjacentHTML('afterbegin',coachHtml(current));
 };
 Object.assign(UI.DO,{
   lessonclose:id=>{DQ.acknowledgeLesson(id);current=null;UI.render(false);},

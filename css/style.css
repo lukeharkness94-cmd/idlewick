@@ -7,6 +7,7 @@
   --f-display:'Alegreya SC',Georgia,'Times New Roman',serif;
   --f-body:'Alegreya Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
   --f-mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --f-ui:'Pixelify Sans','Alegreya Sans',system-ui,sans-serif;
   color-scheme:dark;
 }
 body[data-town=willowbrook]{--town:#82b957} body[data-town=saltmere]{--town:#4fb3c8} body[data-town=ironpeak]{--town:#a7b4c0} body[data-town=gloomfen]{--town:#9b87e0} body[data-town=emberfall]{--town:#e8703a}
@@ -14,7 +15,7 @@ body[data-town=willowbrook]{--town:#82b957} body[data-town=saltmere]{--town:#4fb
 html,body{height:100%}
 body{margin:0;background-color:var(--ground);
   background-image:radial-gradient(1100px 560px at 88% -8%,color-mix(in srgb,var(--town) 16%,transparent),transparent 62%),radial-gradient(900px 520px at -6% 104%,#3b2b1455,transparent 60%);
-  background-attachment:fixed;color:var(--ink);font:400 16px/1.4 var(--f-body);-webkit-font-smoothing:antialiased;
+  background-attachment:fixed;color:var(--ink);font:400 17px/1.45 var(--f-body);-webkit-font-smoothing:antialiased;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));transition:background-image .6s}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--ground)}
 button,input,textarea,select{font:inherit;color:inherit}
@@ -93,7 +94,7 @@ main{min-width:0;display:flex;flex-direction:column;gap:14px}
 .bar>i{display:block;height:100%;width:0;border-radius:99px;background:var(--c,var(--brass));transition:width .5s cubic-bezier(.2,.8,.2,1)}
 .bar.prog>i{transition:none}
 
-.btn{border:1px solid var(--line2);background:linear-gradient(180deg,#223038,#1b262c);color:var(--ink);padding:7px 15px;border-radius:9px;font-weight:700;font-size:15px;transition:transform .12s,border-color .2s,filter .2s;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn{border:1px solid var(--line2);background:linear-gradient(180deg,#223038,#1b262c);color:var(--ink);padding:8px 16px;border-radius:9px;font-family:var(--f-ui);font-weight:600;font-size:16px;transition:transform .12s,border-color .2s,filter .2s;display:inline-flex;align-items:center;gap:8px;justify-content:center}
 .btn:hover{border-color:var(--brass)}.btn:active{transform:scale(.95)}
 .btn.primary{background:linear-gradient(180deg,#e8bb62,#c8943a);color:#1b1405;border-color:#f0cf86;text-shadow:0 1px 0 #ffffff40}
 .btn.primary:hover{filter:brightness(1.1)}
@@ -365,7 +366,7 @@ kbd{font:600 12.5px var(--f-mono);padding:2px 8px;border-radius:6px;background:v
 .m-card.wide{width:min(640px,100%)}.m-body{margin:10px 0 14px}.m-act{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 
 /* Title screen */
-#title{position:fixed;inset:0;z-index:200;overflow:hidden;display:grid;place-items:center;transition:opacity .6s}
+#title{color:var(--ink);font-family:var(--f-body);position:fixed;inset:0;z-index:200;overflow:hidden;display:grid;place-items:center;transition:opacity .6s}
 #title.out{opacity:0;pointer-events:none}
 .title-sky{position:absolute;inset:0;background:radial-gradient(900px 500px at 50% 110%,#5a3a1a66,transparent 70%),linear-gradient(180deg,#070d12,#10222b 60%,#1a2c2e)}
 #tcv{position:absolute;inset:0;width:100%;height:100%}
@@ -385,7 +386,8 @@ kbd{font:600 12.5px var(--f-mono);padding:2px 8px;border-radius:6px;background:v
 .create{display:grid;grid-template-columns:auto 1fr;gap:16px 20px;padding:20px;background:#141c21ee;border:1px solid var(--brass-lo);border-radius:14px;width:min(520px,100%);backdrop-filter:blur(6px)}
 .cr-port .portrait{width:130px;height:130px}
 .cr-form{display:flex;flex-direction:column;gap:12px;min-width:0}.cr-form label{display:flex;flex-direction:column;gap:4px}
-.cr-form input{background:var(--ground);border:1px solid var(--line2);border-radius:9px;padding:8px 12px;font-size:18px}.cr-form input:focus{outline:none;border-color:var(--brass)}
+.cr-form input{color:var(--ink);background:var(--ground);border:1px solid var(--line2);border-radius:9px;padding:8px 12px;font-size:18px}.cr-form input::placeholder{color:var(--mute);opacity:1}
+.cr-form input:focus{outline:none;border-color:var(--brass)}
 .sws{display:flex;gap:7px;margin-top:5px;flex-wrap:wrap}
 .swatch{width:28px;height:28px;border-radius:50%;border:2px solid #0008;box-shadow:0 0 0 1px var(--line2);transition:transform .12s}
 .swatch:hover{transform:scale(1.12)}.swatch.on{box-shadow:0 0 0 2px var(--brass)}
@@ -544,9 +546,9 @@ svg.pxmap{image-rendering:pixelated;background:#123440}
 .pxmap .ml{font:600 21px 'Pixelify Sans',sans-serif;fill:#f6edd2;stroke:#1c1410;stroke-width:4px;paint-order:stroke;stroke-linejoin:miter}
 .pxmap .ms{font:500 14px 'Pixelify Sans',sans-serif;fill:#e8d8a8;stroke:#1c1410;stroke-width:3px;paint-order:stroke}
 .pxmap .mt.locked .ml{fill:#9aa3ad}
-.pxmap .selbr{animation:blink 1s steps(2) infinite}
-.pxmap .curbar{animation:blink 1.4s steps(2) infinite}
-.bobsvg{animation:bob 1.6s steps(3) infinite}
+.pxmap .selbr{animation:blink 1s ease-in-out infinite}
+.pxmap .curbar{animation:blink 1.4s ease-in-out infinite}
+.bobsvg{animation:bob 1.6s ease-in-out infinite}
 @keyframes blink{50%{opacity:.35}}
 /* Plans, queue, decisions, builds */
 
@@ -1364,10 +1366,10 @@ body[data-page="quests"] .quest.ready { animation: none; }
 .ingredient .art-sprite,.ingredient .gico { width:32px; height:32px; }
 .item-art { width:32px; height:32px; object-fit:contain; vertical-align:middle; }
 .slot .item-art,.itm .item-art,.sb-ic .item-art { width:32px; height:32px; }
-.action-tool { position:absolute; left:22%; bottom:45px; color:#fae1a0; filter:drop-shadow(2px 3px 0 #26382b); transform-origin:80% 90%; animation:work-tool 1.2s steps(5) infinite; }
+.action-tool { position:absolute; left:22%; bottom:45px; color:#fae1a0; filter:drop-shadow(2px 3px 0 #26382b); transform-origin:80% 90%; animation:work-tool 1.2s ease-in-out infinite; }
 .action-tool .ic { width:36px; height:36px; }
 @keyframes work-tool { 0%,70%,100% {transform:rotate(-20deg)} 35% {transform:rotate(50deg) translate(6px,3px)} }
-.activity-stage.working .scene-target { animation:target-work 1.2s steps(3) infinite; }
+.activity-stage.working .scene-target { animation:target-work 1.2s ease-in-out infinite; }
 @keyframes target-work { 0%,45%,100%{transform:translateX(0)} 35%{transform:translateX(2px)} }
 .encounter-controls { margin-bottom:14px; }
 .combat-workspace { grid-template-columns:minmax(0,1fr) minmax(320px,1.1fr); }
@@ -1415,6 +1417,15 @@ body[data-page="quests"] .quest.ready { animation: none; }
 .first-play-path { margin:10px 0 14px; color:var(--brass); font-size:14px; }
 .first-play-art { flex:none; }
 @media (max-width:600px) { .coach-art { display:none; } .skill-coach { gap:8px; } .skill-coach p { font-size:12px; } .first-play-art { display:none; } }
+
+/* Hunting expeditions and creature collection */
+.area-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.area-card{border:1px solid var(--line2);border-radius:10px;padding:12px;background:var(--panel2);box-shadow:inset 0 1px color-mix(in srgb,var(--ink) 7%,transparent)}.area-card.selected{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 18%,transparent)}.area-head,.encounter-list>div,.quest-hunt{display:flex;align-items:center;gap:10px}.area-head{justify-content:space-between;margin-bottom:10px}.area-head small,.encounter-list small,.quest-hunt small{display:block;color:var(--mute)}.encounter-list{display:grid;gap:7px}.encounter-list>div{padding:6px;border-radius:7px;background:color-mix(in srgb,var(--panel) 70%,transparent)}.encounter-list img{width:48px;height:48px;flex:none}.quest-hunt{margin:10px 0 14px;padding:10px;border:1px solid var(--brass);border-radius:9px;background:color-mix(in srgb,var(--brass) 9%,var(--panel2))}.quest-hunt>span{flex:1}.creature-abilities{display:grid;gap:4px;width:100%}.creature-ability{display:flex;justify-content:space-between;gap:8px;padding:5px 7px;border:1px solid var(--line2);border-radius:6px}.creature-ability.open{border-color:color-mix(in srgb,var(--good) 55%,var(--line2))}.creature-ability.locked{opacity:.55}
+
+/* Deliberate, full-screen skill reveal */
+.skill-unlock{position:relative;min-height:430px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;isolation:isolate}.skill-unlock>*:not(.unlock-rays){position:relative;z-index:2}.skill-unlock h2{font-size:42px;margin:10px 0 4px;color:var(--ink)}.skill-unlock p{max-width:520px;font-size:17px;color:var(--mute)}.unlock-emblem{width:154px;height:154px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,var(--panel) 38%,color-mix(in srgb,var(--c) 34%,transparent) 40%,transparent 70%);filter:drop-shadow(0 10px 18px color-mix(in srgb,var(--c) 35%,transparent))}.unlock-emblem img{width:128px;height:128px;image-rendering:pixelated}.unlock-ribbon{padding:6px 22px;margin-top:10px;background:var(--cream);color:#241b13;font-family:var(--f-display);font-size:20px;font-weight:700;clip-path:polygon(4% 0,96% 3%,100% 45%,96% 100%,4% 96%,0 55%)}.unlock-rays{position:absolute;z-index:0;width:520px;height:520px;border-radius:50%;background:repeating-conic-gradient(from 8deg,color-mix(in srgb,var(--c) 66%,transparent) 0 9deg,transparent 9deg 23deg);opacity:.7;animation:unlock-spin 22s linear infinite}.unlock-rays:after{content:"";position:absolute;inset:25%;border-radius:50%;background:color-mix(in srgb,var(--c) 22%,var(--panel));box-shadow:0 0 70px 40px color-mix(in srgb,var(--c) 24%,transparent)}@keyframes unlock-spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){.quest-hunt{align-items:flex-start;flex-wrap:wrap}.quest-hunt .btn{width:100%}.skill-unlock{min-height:330px}.skill-unlock h2{font-size:32px}.unlock-rays{width:400px;height:400px}}
+@media(prefers-reduced-motion:reduce){.unlock-rays{animation:none}}
+.level-reveal{position:relative;min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;isolation:isolate}.level-reveal>*:not(.level-rings){position:relative;z-index:2}.level-reveal h2{font-size:40px;margin:8px 0 4px}.level-reveal h2 b{color:var(--c);font-size:1.25em}.level-reveal p{max-width:620px;font-size:18px;color:var(--mute)}.level-emblem{width:138px;height:138px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,var(--panel) 42%,color-mix(in srgb,var(--c) 32%,transparent) 44%,transparent 72%);filter:drop-shadow(0 10px 20px color-mix(in srgb,var(--c) 35%,transparent))}.level-emblem img{width:112px;height:112px;image-rendering:pixelated}.level-star .ic{width:88px;height:88px;color:var(--c)}.level-rings{position:absolute;width:370px;height:370px;border-radius:50%;border:3px solid color-mix(in srgb,var(--c) 38%,transparent);box-shadow:0 0 0 28px color-mix(in srgb,var(--c) 8%,transparent),0 0 0 62px color-mix(in srgb,var(--c) 6%,transparent);animation:unlock-spin 18s linear infinite}@media(max-width:600px){.level-reveal{min-height:300px}.level-reveal h2{font-size:30px}.level-reveal p{font-size:16px}.level-rings{width:300px;height:300px}}@media(prefers-reduced-motion:reduce){.level-rings{animation:none}}
 .h-tic > .art-sprite,.h-tic > .item-art,.h-tic > .gico { width:40px; height:40px; object-fit:contain; }
 @media (max-width:600px) { .hud .h-tic > img { width:28px; height:28px; } }
 .visual-shop { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(280px,.9fr); gap:16px; align-items:start; }
@@ -1513,3 +1524,223 @@ body[data-page="quests"] .quest.ready { animation: none; }
 .shop-action .btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; }
 .btn.primary .money { color:inherit; }
 .bad .money { color:inherit; }
+
+/* Every section stays visible as navigation grows. */
+.subnav:not(.section-picker) { display:flex; flex-wrap:wrap; overflow:visible; }
+.subnav:not(.section-picker) .stab { flex:0 1 auto; white-space:normal; }
+.subnav.skills .stab { flex-direction:row; }
+.subnav.skills .stab span { white-space:normal; overflow:visible; }
+
+/* Small brass fittings and bevels bring the controls back into the RPG. */
+:root { --button-top:color-mix(in srgb,var(--panel2) 87%,var(--brass)); --button-edge:color-mix(in srgb,var(--line2) 72%,var(--brass)); --button-shadow:#0005; }
+.btn,.choice-button,.stab,.tab,.seed-choice {
+  border-radius:5px; border:1px solid var(--button-edge);
+  background:linear-gradient(180deg,var(--button-top),var(--panel2));
+  box-shadow:inset 0 1px 0 #fff2,inset 0 -2px 0 #0002,0 2px 0 var(--button-shadow);
+  transition:border-color .15s,background .15s,box-shadow .15s,transform .1s;
+}
+.btn:hover:not(:disabled),.choice-button:hover:not(:disabled),.stab:hover,.tab:hover,.seed-choice:hover {
+  border-color:var(--brass); box-shadow:inset 0 1px 0 #fff3,inset 0 -2px 0 #0002,0 2px 0 var(--button-shadow),0 0 8px color-mix(in srgb,var(--brass) 12%,transparent);
+}
+.btn.primary {
+  border-color:var(--brass-hi); color:#241a0a;
+  background:linear-gradient(180deg,#f0d18b,#d4a24e 65%,#ba883c);
+  box-shadow:inset 0 1px 0 #fff8,inset 0 -2px 0 #875f34,0 2px 0 var(--button-shadow);
+}
+.choice-button.on,.stab.on,.tab.on,.seed-choice.on {
+  color:var(--brass-hi); border-color:var(--brass);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--brass) 22%,var(--panel2)),var(--panel2));
+  box-shadow:inset 3px 0 0 var(--brass),inset 0 1px 0 #fff2,inset 0 -2px 0 color-mix(in srgb,var(--brass) 35%,transparent),0 2px 0 var(--button-shadow);
+}
+.btn:active:not(:disabled),.choice-button:active:not(:disabled),.stab:active,.tab:active,.seed-choice:active {
+  transform:translateY(1px); box-shadow:inset 0 2px 3px #0003;
+}
+.btn:focus-visible,.choice-button:focus-visible,.stab:focus-visible,.tab:focus-visible,.seed-choice:focus-visible,.iconb:focus-visible {
+  outline:2px solid var(--brass-hi); outline-offset:3px;
+}
+.btn:disabled,.choice-button:disabled { box-shadow:none; }
+.iconb { border:1px solid var(--line2); border-radius:5px; box-shadow:inset 0 1px 0 #fff1; }
+.hub.on { border-radius:5px; box-shadow:inset 3px 0 0 var(--brass),inset 0 0 0 1px var(--line2); }
+.skill-emblem { flex:none; image-rendering:pixelated; object-fit:contain; }
+.dk .skill-emblem { width:24px; height:24px; }
+.skrow .skill-emblem { width:32px; height:32px; }
+@media (prefers-reduced-motion:reduce) {
+  .btn,.choice-button,.stab,.tab,.seed-choice { transition:none; }
+  .btn:active:not(:disabled),.choice-button:active:not(:disabled),.stab:active,.tab:active,.seed-choice:active { transform:none; }
+}
+/* Skills also contains levels, mastery and the brewery, beyond the quick dock. */
+.rail .hub[data-a="skills"] { display:flex; }
+/* Offline gains can contain several unlocks; keep the whole card reachable. */
+.note .n-b { max-height:min(60vh,440px); overflow-y:auto; overscroll-behavior:contain; padding-right:3px; }
+
+/* Status lives with the action; a long catalogue never pushes it down the page. */
+.view:has(> .activity-workspace) { display:flex; flex-direction:column; }
+.view > .activity-workspace,.view > .farm-workspace { display:grid; grid-template-columns:minmax(280px,380px) minmax(0,1fr); gap:16px; align-items:start; }
+.workspace-focus,.workspace-options { display:flex; flex-direction:column; gap:14px; min-width:0; }
+.workspace-focus > *, .workspace-options > * { min-width:0; margin:0; }
+.skillhero.compact { grid-template-columns:44px minmax(0,1fr); align-items:start; }
+.skillhero.compact .sk-side { grid-column:1/-1; }
+.skillhero.compact .perks { display:flex; flex-wrap:wrap; gap:6px; }
+.skillhero.compact .sh-line { justify-content:flex-start; gap:5px 12px; }
+.skillhero.compact .sk-top { gap:5px 10px; }
+.skillhero.compact .sk-top h2 { font-size:18px; }
+.workspace-focus .activity-stage { position:static; }
+.encounter-arena { background-repeat:no-repeat; }
+.combat-live > .encounter-controls { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 12px; }
+.combat-live > .encounter-controls > .phead { margin:0; }
+.combat-live > .encounter-controls .activity-actions { grid-column:2; grid-row:1; margin:0; }
+.combat-live > .encounter-controls .task-primary { min-width:125px; }
+.combat-live > .encounter-controls .task-summary { grid-column:1/-1; margin-top:0; }
+.combat-live > .encounter-controls .task-summary p { margin-bottom:0; }
+.combat-dashboard .lootp .lootlist { max-height:180px; }
+.lootrow .itm > img { width:24px; height:24px; image-rendering:pixelated; }
+
+/* Slightly roomier desktop scale for high-resolution displays. Artwork stays at
+   its native pixel dimensions; text and interaction targets do the growing. */
+@media (min-width:861px){
+  body{font-size:18px}
+  h1{font-size:32px}h2{font-size:23px}h3{font-size:19px}
+  small{font-size:13.5px}.sm{font-size:15px}.hint{font-size:15px}
+  .panel{padding:18px}.phead{margin-bottom:14px}
+  .nav{font-family:var(--f-ui);font-size:18px;padding:9px 13px;min-height:44px}
+  .btn{font-size:17px;min-height:44px;padding:8px 17px}.btn.sm{font-size:16px;min-height:36px;padding:5px 12px}
+  .tab{font-family:var(--f-ui);font-size:17px;min-height:38px;padding:6px 15px}
+  .chip{font-size:16px;min-height:40px;padding:7px 13px}
+  .choice-button{font-family:var(--f-ui);font-size:16px;min-height:46px;padding:8px 13px}
+  .iconb{width:38px;height:38px}
+  .illustrated-card b{font-size:16px}.illustrated-card small,.choice-state{font-size:13px}
+  .dk{padding:8px 3px 7px}.dk .dk-n{font-family:var(--f-ui);font-size:14px}.dk b{font-size:15px}.dk-h{font-size:13px}
+  .encounter-arena .nm{font-size:15px}
+  .skill-coach b{font-size:16px}.skill-coach p{font-size:15px}
+}
+@media (min-width:861px){#app{grid-template-columns:230px minmax(0,1fr);gap:24px}}
+@media (max-width:860px){.sidebar{display:block;position:static;max-height:none;overflow:visible}#app{grid-template-columns:minmax(0,1fr)}}
+
+/* RPG voice for interactive labels; long prose keeps the more readable body face. */
+:is(.brand,.nav,.btn,.tab,.stab,.chip,.choice-button,.choice-state,.dk,.tag,.state,.lvchip,.tabchip){font-family:var(--f-ui)}
+@media(min-width:1100px) {
+ .combat-dashboard { grid-auto-rows:8px; grid-auto-flow:row dense; }
+}
+@media(min-width:1600px) {
+ .combat-targets { grid-column:span 2; }
+}
+@media(max-width:900px) {
+ .view > .activity-workspace,.view > .farm-workspace { grid-template-columns:minmax(0,1fr); }
+}
+/* The status bar's `big` class must not inherit the icon badge's fixed width. */
+.skillhero.compact .sk-main > .bar { width:100%; min-width:0; border:0; height:9px; }
+.illustrated-card.locked { opacity:1; }
+.illustrated-card.locked .choice-art { opacity:.5; }
+.illustrated-card.locked :is(b,small,.choice-state) { color:var(--mute); }
+.workspace-references { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr)); gap:14px; align-items:start; }
+.workspace-references > .panel { margin:0; min-width:0; }
+.battle-rig::before { content:""; position:absolute; left:20%; bottom:0; width:60%; height:8px; border-radius:50%; background:#304c4340; z-index:-1; }
+/* Compact navigation with larger controls and useful progression. */
+@media (min-width:861px){#app{grid-template-columns:200px minmax(0,1fr);gap:18px}.hub{min-height:46px;font-size:16px}.brand{font-size:17px}.dk{display:flex;align-items:center;gap:8px;min-height:58px;padding:7px 9px;text-align:left}.dk .skill-emblem{width:28px;height:28px}.dk-info{display:flex;min-width:0;flex:1;flex-direction:column;gap:3px}.dk-top{display:flex;justify-content:space-between;gap:6px;align-items:center}.dk .dk-n{font-size:15px}.dk small{font:11px var(--f-mono);color:var(--mute);white-space:normal;line-height:1.15}.dk .bar{width:100%;height:5px}.dk.locked{min-height:64px}.dk.locked small{color:var(--mute)} }
+.unlock-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.unlock-grid>article{border:1px solid color-mix(in srgb,var(--c) 55%,var(--line2));background:var(--panel2);border-radius:8px;padding:12px}.unlock-title{display:flex;gap:9px;align-items:flex-start;margin-bottom:10px}.unlock-title>span{display:flex;flex-direction:column}.unlock-title small{color:var(--mute)}.unlock-step{display:grid;grid-template-columns:1fr auto;gap:4px 10px;width:100%;padding:7px 0;color:var(--ink);text-align:left;border:0;border-top:1px solid var(--line);background:none}.unlock-step .bar{grid-column:1}.unlock-step small{grid-column:2;grid-row:1/3;align-self:center;color:var(--brass-hi)}.ench-list{display:grid;gap:8px}.ench-row{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line2);border-radius:7px;background:var(--panel2)}.ench-row>span{display:flex;flex:1;flex-direction:column}.ench-row img{width:42px;height:42px}.combat-speed{margin-top:7px;padding:7px 9px;border-left:3px solid var(--brass);background:color-mix(in srgb,var(--brass) 8%,transparent);font-family:var(--f-mono);font-size:13px}
+/* A new skill rises from the bottom and leaves the game visible. */
+.note.unlock{min-height:112px;padding:17px 18px 18px;border-width:2px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 16%,#1d2a31),#151e23);animation:skillNoteIn .42s cubic-bezier(.18,.9,.3,1.08) backwards}.note.unlock .n-ic{width:58px;height:58px}.note.unlock .n-ic .ic{width:34px;height:34px}.note.unlock .n-b>b{font:700 21px var(--f-ui);color:var(--ink)}.note.unlock .n-b>span:not(.n-acts){font-size:15px}.note.unlock .n-act{min-height:34px;font-size:14px}@keyframes skillNoteIn{from{opacity:0;transform:translateY(70px) scale(.96)}to{opacity:1;transform:none}}
+@media(min-width:700px){#notes{width:min(440px,calc(100vw - 32px))}}
+/* Desktop navigation: the left is exclusively for large, readable skills.
+   All primary destinations live in a persistent bottom bar. */
+@media (min-width:861px){
+  body{padding-bottom:88px}
+  #app{grid-template-columns:286px minmax(0,1fr);gap:22px}
+  .sidebar{position:sticky;top:12px;align-self:start;display:block;max-height:calc(100dvh - 112px);overflow:visible}
+  .sidebar .dock{position:static;display:flex;max-height:calc(100dvh - 112px);overflow-y:auto;gap:7px;padding:0 5px 8px 0}
+  .sidebar .dk-h{position:sticky;top:0;z-index:2;padding:9px 12px;text-align:left;background:var(--ground);font:700 17px var(--f-ui);letter-spacing:.08em;color:var(--brass-hi)}
+  .sidebar .dk{display:flex;align-items:center;gap:12px;min-height:76px;padding:10px 12px;border-radius:9px}
+  .sidebar .dk>.skill-emblem{width:44px;height:44px}
+  .sidebar .dk>.ic{width:34px;height:34px;flex:none}
+  .sidebar .dk-info{gap:5px}
+  .sidebar .dk .dk-n{font:700 18px/1.1 var(--f-ui);color:var(--ink)}
+  .sidebar .dk .dk-top b{font:700 17px var(--f-mono)}
+  .sidebar .dk small{font:13px/1.25 var(--f-body);color:var(--mute)}
+  .sidebar .dk .bar{height:7px}
+  .sidebar .dk.locked{min-height:80px;opacity:.78}
+  .sidebar .rail{position:fixed;z-index:120;left:0;right:0;bottom:0;top:auto;display:flex;flex-direction:row;justify-content:center;align-items:stretch;gap:5px;width:100%;max-height:none;overflow:visible;padding:9px max(18px,env(safe-area-inset-left)) calc(9px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--ground) 94%,transparent);border-top:1px solid var(--line2);box-shadow:0 -10px 32px #0007;backdrop-filter:blur(12px)}
+  .sidebar .rail .brand,.sidebar .rail .hub[data-a="skills"]{display:none}
+  .sidebar .rail .hub{display:flex;flex-direction:row;justify-content:center;align-items:center;gap:10px;flex:0 1 160px;min-height:54px;padding:8px 18px;border:1px solid transparent;border-radius:7px;font:700 17px var(--f-ui);color:var(--mute)}
+  .sidebar .rail .hub>.ic{width:27px;height:27px}
+  .sidebar .rail .hub>span{font-size:17px;white-space:nowrap}
+  .sidebar .rail .hub.on{color:var(--ink);border-color:var(--brass);background:color-mix(in srgb,var(--brass) 13%,var(--panel2));box-shadow:inset 0 3px 0 var(--brass)}
+  .sidebar .rail .hubdot{right:7px;top:6px}
+  #notes{bottom:calc(90px + env(safe-area-inset-bottom,0px))}
+}
+@media (min-width:1800px){#app{grid-template-columns:306px minmax(0,1fr)}}
+/* Skill and skill-level notices stay compact and never cover play. */
+.note.unlock,.note.level{min-height:0;padding:12px 12px 14px;border-width:1px}.note.unlock .n-ic,.note.level .n-ic{width:40px;height:40px}.note.unlock .n-ic .ic,.note.level .n-ic .ic{width:24px;height:24px}.note.unlock .n-b>b,.note.level .n-b>b{font:700 17px var(--f-ui)}.note.unlock .n-b>span:not(.n-acts),.note.level .n-b>span:not(.n-acts){font-size:13.5px}.note.unlock .n-act,.note.level .n-act{min-height:28px;font-size:12.5px}
+/* Skill rows own their layout explicitly; older compact-dock rules must not
+   turn a horizontal row back into a column or squeeze its text. */
+@media(min-width:861px){
+ .sidebar .dock .dk{display:grid;grid-template-columns:44px minmax(0,1fr);grid-template-rows:auto;flex-direction:row;align-items:center;justify-items:stretch;height:auto;min-height:84px;flex-shrink:0;overflow:visible}
+ .sidebar .dock .dk>.skill-emblem,.sidebar .dock .dk>.ic{grid-column:1;grid-row:1;align-self:center;justify-self:center}
+ .sidebar .dock .dk>.dk-info{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:stretch;min-width:0;width:100%;gap:5px}
+ .sidebar .dock .dk .dk-top{display:flex;align-items:baseline;justify-content:space-between;width:100%;gap:8px}
+ .sidebar .dock .dk .dk-n{white-space:normal;overflow:visible;text-overflow:clip;max-width:none;padding:0;font:700 18px/1.2 var(--f-body);color:var(--ink)}
+ .sidebar .dock .dk small{display:block;white-space:normal;overflow-wrap:anywhere;font:14px/1.3 var(--f-body);color:var(--ink);opacity:.8}
+ .sidebar .dock .dk.locked{opacity:1}
+ .sidebar .dock .dk .bar{display:block;width:100%;height:7px;flex:none}
+}
+/* All thirteen skills fit the available desktop height without scrolling. */
+@media(min-width:861px){
+ .sidebar .dock{height:calc(100dvh - 112px);max-height:none;overflow:visible;display:grid;grid-template-rows:26px repeat(13,minmax(0,1fr));gap:3px;padding:0}
+ .sidebar .dock .dk{min-height:0;height:100%;padding:3px 10px;grid-template-columns:40px minmax(0,1fr);gap:10px;overflow:hidden}
+ .sidebar .dock .dk>.skill-emblem{width:40px;height:40px}
+ .sidebar .dock .dk .dk-info{gap:3px}
+ .sidebar .dock .dk .dk-n{font-size:18px}
+ .sidebar .dock .dk small{font-size:12px;line-height:1.1}
+ .sidebar .dock .dk .dk-top>.ic{width:18px;height:18px;flex:none;color:var(--brass)}
+ .sidebar .dock .dk .bar{height:5px}
+ .sidebar .dock .dk-h{padding:3px 10px;font-size:16px}
+}
+/* A narrow skill rail gives the activity back its horizontal space. */
+@media(min-width:861px){
+ #app{grid-template-columns:216px minmax(0,1fr);gap:16px}
+ .sidebar .dock .dk{grid-template-columns:34px minmax(0,1fr);gap:8px;padding-inline:8px}
+ .sidebar .dock .dk>.skill-emblem{width:34px;height:34px}
+ .sidebar .dock .dk .dk-n{font-size:17px}
+ .sidebar .dock .dk small{font-size:12px}
+}
+/* Repeated cards share a height across every row of their catalogue. */
+.illustrated-choices,.area-grid,.goals,.beasts,.pets,.achgrid,.unlock-grid{grid-auto-rows:1fr;align-items:stretch}
+.illustrated-card{height:224px;justify-content:flex-start;overflow:hidden}
+.illustrated-card .choice-art{height:112px;min-height:112px;display:grid;place-items:center;width:100%}
+.illustrated-card .choice-art img{max-width:100%;max-height:108px;width:auto;height:auto;object-fit:contain}
+.illustrated-card>b{display:flex;align-items:center;justify-content:center;min-height:38px}
+.illustrated-card>.choice-state{margin-top:auto}
+.area-grid>.area-card,.goals>.goal,.beasts>.beast,.pets>.petc,.achgrid>.ach,.unlock-grid>article{height:100%;box-sizing:border-box}
+.area-grid>.area-card{display:flex;flex-direction:column}
+.area-grid>.area-card .encounter-list{flex:1}
+.tech{height:100%;box-sizing:border-box}.tech .tf{margin-top:auto}
+@media(max-width:600px){.illustrated-card{height:208px}.illustrated-card .choice-art{height:96px;min-height:96px}.illustrated-card .choice-art img{max-height:92px}}
+/* Consistent page rhythm and short, on-demand help. */
+.page-help{display:flex;justify-content:flex-end;margin-top:12px}.skill-coach{border:1px solid var(--brass);border-radius:9px;background:var(--panel2);padding:14px;align-items:center}.skill-coach p{margin:5px 0;line-height:1.4}.skill-coach .coach-art{flex:none}.skill-coach .lesson-goal{color:var(--ink)}
+.guide-total{margin:16px 0;height:9px;--c:var(--good)}.guide-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:12px}.guide-cards .beast{min-height:150px;grid-template-columns:72px minmax(0,1fr);height:100%;color:var(--ink)}.guide-cards .beast>span{display:flex;flex-direction:column;gap:5px}.guide-cards .beast small{font-size:13px;line-height:1.3;color:var(--mute)}.guide-cards .beast.complete{border-color:var(--good)}.research-stamps{display:flex;gap:5px;color:var(--mute)}.research-stamps i{font-style:normal}.research-stamps .on{color:var(--brass-hi)}.battle-facts{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}.battle-advice{display:grid;gap:5px;margin:10px 0;font-size:15px}.battle-brief .phead{margin-bottom:8px}
+@media(min-width:861px){.subnav.skills{display:none}.workspace-focus>.skillhero{display:none}}
+@media(max-height:800px) and (min-width:861px){.sidebar .dock .dk .dk-n{font-size:16px}.sidebar .dock .dk small{font-size:11px}.sidebar .dock .dk>.skill-emblem{width:30px;height:30px}}
+@media(max-height:800px) and (min-width:861px){
+ .sidebar .dock .dk{padding-block:1px;grid-template-rows:minmax(0,1fr)}
+ .sidebar .dock .dk .dk-info{gap:1px}
+ .sidebar .dock .dk .dk-top,.sidebar .dock .dk .dk-n,.sidebar .dock .dk .dk-top b{line-height:18px}
+ .sidebar .dock .dk small{line-height:12px;white-space:nowrap}
+ .sidebar .dock .dk .bar{height:3px}
+}
+@media(min-width:861px){.sidebar{z-index:130}}
+.techgrid{grid-auto-rows:1fr;align-items:stretch}
+/* Combat sits directly above a compact skills list. Rows never stretch to
+   fill a tall monitor, and shrink together on shorter desktop screens. */
+#combatnav{margin-bottom:8px}
+#combatnav .combat-entry{position:relative;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;width:100%;min-height:40px;padding:6px 10px;color:var(--ink);background:var(--panel2);border:1px solid var(--brass-lo);border-radius:7px;font:700 18px var(--f-body)}
+#combatnav .combat-entry>.ic{width:26px;height:26px;color:var(--brass-hi)}
+#combatnav .combat-entry.on{border-color:var(--brass);box-shadow:inset 3px 0 var(--brass);background:color-mix(in srgb,var(--brass) 14%,var(--panel2))}
+@media(min-width:861px){
+ .sidebar .dock{height:min(626px,calc(100dvh - 164px));gap:2px;grid-template-rows:24px repeat(13,minmax(0,1fr))}
+ .sidebar .dock .dk{padding:1px 7px;gap:7px;grid-template-columns:32px minmax(0,1fr);border-radius:6px}
+ .sidebar .dock .dk>.skill-emblem{width:32px;height:32px}
+ .sidebar .dock .dk .dk-info{gap:1px}
+ .sidebar .dock .dk .dk-top,.sidebar .dock .dk .dk-n,.sidebar .dock .dk .dk-top b{line-height:18px}
+ .sidebar .dock .dk small{line-height:12px;white-space:nowrap}
+ .sidebar .dock .dk .bar{height:3px}
+}
+@media(max-width:860px){#combatnav{width:150px}}

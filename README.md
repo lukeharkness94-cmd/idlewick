@@ -1,6 +1,6 @@
 # Idlewick
 
-A cosy idle RPG about gathering, crafting, fighting and restoring a village. Plain HTML, CSS and JavaScript. The game itself has no package dependencies or build requirement.
+A cosy idle RPG about gathering, crafting, fighting and restoring a village. Plain HTML, CSS and JavaScript. The browser game has no runtime package dependencies. The Steam desktop target uses Electron for Windows and macOS, with durable account-scoped saves and Steam Auto-Cloud configuration described in [desktop/STEAM.md](desktop/STEAM.md).
 
 ## Play
 
@@ -45,4 +45,8 @@ On Windows, replace `python3` with `py`. The optional pixel-art rendering check,
 
 ## Move your hero between devices
 
-Game progress is stored in the browser, separately from the code. In the game, use **Hero → Settings → Save data → Download backup file** on the old device, then **Load from file** on the new one. Save files should stay private and are excluded from Git.
+Game progress is stored in the browser, separately from the code. In the game, use **Settings (the HUD gear button) → Save data → Download backup file** on the old device, then **Load from file** on the new one. Save files should stay private and are excluded from Git.
+
+## Desktop and Steam
+
+See [desktop/STEAM.md](desktop/STEAM.md) for Windows/macOS builds, Steam account isolation, save paths and the Steamworks Cloud rules. Run `node tests/desktop-storage.cjs` for file-storage checks. The real Steam App ID is intentionally unset; native builds and cross-device Cloud sync still need release configuration and target-platform validation.

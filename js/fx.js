@@ -3,7 +3,7 @@
 const DQ = window.DQ, { $, $$, ico, esc } = DQ;
 const reduceOS = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const calm = () => reduceOS || DQ.S.settings.reduceFx;
-let fxEl, cv, cx, parts = [], running = false, notesEl;
+let fxEl, cv, cx, parts = [], running = false, notesEl, particleTime=0;
 
 DQ.fxInit = () => {
   fxEl = $('#fx'); cv = $('#confetti'); cx = cv.getContext('2d'); notesEl = $('#notes');
@@ -60,13 +60,21 @@ DQ.burstAt = (x, y, col, n = 30) => {
     const a = Math.random() * 6.283, v = 1.5 + Math.random() * 5;
     parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 2.5, life: 1, d: .012 + Math.random() * .014, s: 2.5 + Math.random() * 3.5, c: Math.random() < .6 ? col : '#f3d58a' });
   }
-  if (!running) { running = true; requestAnimationFrame(loop); }
+  if (!running) { running = true; particleTime=performance.now(); requestAnimationFrame(loop); }
 };
 DQ.burstEl = (el, col, n) => { if (!el) return; const r = el.getBoundingClientRect(); DQ.burstAt(r.left + r.width / 2, r.top + r.height / 2, col, n); };
-function loop() {
+/* Exact time-based integration keeps the same motion at 60, 120 or 144 Hz. */
+DQ.stepParticle = (p, ms) => {
+  const frames=ms/(1000/60), rate=-Math.log(.985), drag=Math.exp(-rate*frames);
+  p.x+=p.vx*(1-drag)/rate;p.vx*=drag;
+  p.y+=p.vy*frames+.08*frames*frames;p.vy+=.16*frames;p.life-=p.d*frames;
+};
+function loop(now) {
+  const dt=Math.max(0,Math.min(100,now-particleTime));particleTime=now;
+  if(document.hidden||calm()){parts=[];running=false;cx.clearRect(0,0,innerWidth,innerHeight);return;}
   cx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); cx.clearRect(0, 0, innerWidth, innerHeight);
   parts = parts.filter(p => p.life > 0);
-  for (const p of parts) { p.vy += .16; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.life -= p.d; cx.globalAlpha = Math.max(0, p.life); cx.fillStyle = p.c; cx.fillRect(p.x, p.y, p.s, p.s * .6); }
+  for (const p of parts) { DQ.stepParticle(p,dt); cx.globalAlpha = Math.max(0, p.life); cx.fillStyle = p.c; cx.fillRect(p.x, p.y, p.s, p.s * .6); }
   if (parts.length) requestAnimationFrame(loop); else { running = false; cx.clearRect(0, 0, innerWidth, innerHeight); }
 }
 
@@ -78,12 +86,12 @@ DQ.toast = (msg, bad) => {
 };
 
 /* Routine progress stays in the interface and recent activity.
-   Only interruptions and boss victories receive a corner card. */
+   Unlocks, interruptions and boss victories receive a corner card. */
 const queue = [], MAX_NOW = 1;
 const live = () => $$('.note', notesEl).filter(n => !n.classList.contains('out'));
 const nowLive = () => live().length;
 DQ.noteLog = []; DQ.noteMissed = 0;
-DQ.notificationTier = o => ['death', 'warn', 'boss'].includes(o.kind) ? 'now' : 'quiet';
+DQ.notificationTier = o => ['level', 'adv', 'unlock', 'death', 'warn', 'boss'].includes(o.kind) || /^(qr:|qo:|qnew$)/.test(o.key || '') ? 'now' : 'quiet';
 DQ.notificationPage = o => {
   if (o.page) return o.page;
   const k = o.key || '', D = DQ.data;
@@ -100,33 +108,61 @@ DQ.notificationPage = o => {
   if (k.startsWith('w:') || k === 'unpaid') return 'hirelings';
   if (k === 'overflow') return 'bank';
   if (o.kind === 'loot') return 'character';
+  if (o.kind === 'discovery') return 'character';
   if (o.kind === 'boss') return 'combat';
   if (o.kind === 'death') return 'combat';
   return 'overview';
 };
-DQ.noticeCount = pages => {
-  const badges = DQ.S.noticeBadges || {};
-  return [...new Set(Array.isArray(pages) ? pages : [pages])].reduce((n, page) => n + Object.keys(badges[page] || {}).length, 0);
+/* Menu counts describe current decisions, never unread history. */
+DQ.actionCount = page => {
+  const s = DQ.S, D = DQ.data;
+  if (page === 'activity') return (s.inbox || []).length;
+  if (page === 'quests') return D.QUESTS.filter(q => ['new', 'ready'].includes(DQ.questState(q))).length;
+  if (page === 'projects') return s.town === 'willowbrook' ? Object.entries(D.PROJECTS || {}).filter(([id, p]) => !s.projects[id] && DQ.canAfford(p.cost)).length : 0;
+  if (page === 'farming' && DQ.skillUnlocked('farming')) return s.farm.plots.filter(DQ.plotRipe).length + s.farm.animals.filter(a => a.stored > 0).length;
+  if (page === 'research' && DQ.advLvl() >= D.RESEARCH_ADV && DQ.researchSlots) {
+    const free = DQ.researchSlots() - (s.research?.active || []).length;
+    return Math.max(0, Math.min(free, D.TECHS.filter(t => !DQ.techReason(t) && DQ.techCanAfford(t)).length));
+  }
+  return 0;
 };
+DQ.noticeCount = pages => [...new Set(Array.isArray(pages) ? pages : [pages])].reduce((n, page) => n + DQ.actionCount(page), 0);
 DQ.markNoticesRead = page => {
+  // Discard legacy unread badges; actions remain visible until resolved.
   if (DQ.S.noticeBadges) delete DQ.S.noticeBadges[page];
-  $$('.note', notesEl).filter(el => el.dataset.page === page).forEach(dismiss);
-};
-const badgeNote = o => {
-  const page = DQ.notificationPage(o);
-  if (DQ.ui && DQ.ui.view === page) return;
-  const badges = DQ.S.noticeBadges = DQ.S.noticeBadges || {};
-  const group = badges[page] = badges[page] || {};
-  group[o.key || o.kind || 'update'] = String(o.title || 'Update').slice(0, 120);
-  const keys = Object.keys(group);
-  if (keys.length > 20) delete group[keys[0]];
+  $$('.note', notesEl).filter(el => el.dataset.page === page && !['unlock','level','adv'].includes(el.dataset.kind)).forEach(dismiss);
 };
 const logNote = o => { DQ.noteLog.unshift({ t: Date.now(), o, silent: false }); if (DQ.noteLog.length > 40) DQ.noteLog.pop(); };
 const markSilent = (o, count) => { const e = DQ.noteLog.find(x => x.o === o); if (e) { e.silent = true; if (count) DQ.noteMissed++; } };
+const showSkillUnlock=o=>false; /* Skill unlocks use the prominent bottom card; they never cover play. */
+const levelQueue=[];let levelRetry=0;
+const pumpLevel=()=>{clearTimeout(levelRetry);if(!levelQueue.length)return;if(modalEl){levelRetry=setTimeout(pumpLevel,300);return;}showLevelReveal(levelQueue.shift());};
+const showLevelReveal=o=>{
+  if(modalEl){levelQueue.push(o);pumpLevel();return true;}
+  const sk=o.skill&&DQ.data.SK[o.skill],hero=o.kind==='adv',name=hero?'Hero':(sk?.name||'Skill'),level=o.to||String(o.title||'').match(/\d+/)?.[0]||'';
+  const art=hero?`<span class="level-star">${ico('star')}</span>`:DQ.artImage('skill',o.skill,112,'',name);
+  DQ.modal({title:`${name} level up`,wide:true,sticky:true,body:`<div class="level-reveal" style="--c:${o.col||'#d8a64a'}"><div class="level-rings" aria-hidden="true"></div><div class="level-emblem">${art}</div><span class="unlock-ribbon">Level up</span><h2>${esc(name)} <b>${esc(level)}</b></h2><p>${esc(o.text||'Your training has paid off.')}</p></div>`,actions:[{label:'Continue',primary:true,fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
+  DQ.sfx(o.sound||'level');setTimeout(()=>DQ.burstEl(document.querySelector('.level-emblem'),o.col||'#d8a64a',38),100);return true;
+};
 DQ.notify = o => {
   if (DQ.sim.on) { DQ.sim.notes.push(o); return; }
-  const s = DQ.S.settings; logNote(o); badgeNote(o);
-  if (DQ.ui && DQ.ui.view === DQ.notificationPage(o)) {
+  if (o.kind === 'level') {
+    const previous = queue.find(n => n.key === o.key) || $$('.note', notesEl).find(n => n.dataset.key === o.key)?._notification;
+    if (previous?.kind === 'level' && Number.isFinite(previous.from) && previous.to <= o.to) {
+      o = { ...o, from: previous.from, unlocks: [...new Set([...(previous.unlocks || []), ...(o.unlocks || [])])] };
+      o.title = `${DQ.data.SK[o.skill]?.name || 'Skill'} levels ${o.from + 1}–${o.to}!`;
+      if (o.unlocks.length) o.text = o.unlocks.join(' ');
+    }
+  }
+  const s = DQ.S.settings; logNote(o);
+  if(o.kind==='unlock'){
+    const id=(o.key||'').startsWith('unlock:')?o.key.slice(7):(o.key||'').startsWith('feature:')?o.key.slice(8):null;
+    if(id){DQ.S.seen['tutorial:'+id]=true;if(DQ.S.tut?.done)delete DQ.S.tut.done['lesson:'+id];}
+  }
+  if(o.kind==='unlock'&&(o.key||'').startsWith('unlock:')&&showSkillUnlock(o))return;
+  /* Skill levels use compact bottom cards; only the overall Hero level takes over. */
+  if(o.kind==='adv'&&showLevelReveal(o))return;
+  if (DQ.ui && DQ.ui.view === DQ.notificationPage(o) && !['unlock','level','adv'].includes(o.kind)) {
     markSilent(o, false);
     if (DQ.notificationTier(o) === 'now') {
       DQ.ui.pageNotice = { page: DQ.notificationPage(o), title: String(o.title || ''), text: String(o.text || '') };
@@ -134,21 +170,21 @@ DQ.notify = o => {
     }
     return;
   }
-  if (!s.notify && !o.force) { markSilent(o, false); return; }
+  if (!s.notify && !o.force && o.kind!=='unlock') { markSilent(o, false); return; }
   const tier = DQ.notificationTier(o);
   if (tier === 'quiet') { markSilent(o, true); return; }
   if (o.key) { $$('.note', notesEl).filter(n => n.dataset.key === o.key).forEach(n => n.remove()); const i = queue.findIndex(q => q.key === o.key); if (i >= 0) queue.splice(i, 1); }
-  if (nowLive() >= MAX_NOW) { queue.push(o); if (queue.length > 6) queue.shift(); return; }
+  if (document.hidden || nowLive() >= MAX_NOW) { queue.push(o); return; }
   showNote(o);
 };
-function pump() { while (queue.length && nowLive() < MAX_NOW) showNote(queue.shift()); }
+function pump() { if (document.hidden) return; while (queue.length && nowLive() < MAX_NOW) showNote(queue.shift()); }
 
 const trunc = (t, n) => { t = String(t || '').replace(/<[^>]+>/g, ''); return t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t; };
-/* the bell: everything recent, including what never got a card */
+/* The bell keeps routine information; actionable alerts appear in context. */
 const ago = t => { const s = Math.round((Date.now() - t) / 1000); return s < 60 ? 'just now' : s < 3600 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`; };
 DQ.openBell = () => {
-  DQ.noteMissed = 0; const L = DQ.noteLog.slice(0, 25);
-  const body = L.length ? `<div class="bell-list">${L.map((e, i) => { const o = e.o, a = inferActions(o)[0]; return `<div class="bell-row ${e.silent ? 'quiet' : ''}" style="--c:${o.col || '#d8a64a'}"><span class="n-ic">${ico(o.icon || 'star')}</span><div class="bell-t"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(trunc(o.text, 140))}</span>` : ''}<small>${ago(e.t)}</small></div>${a ? `<button class="btn sm" data-i="${i}">${esc(a.label)}</button>` : ''}</div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing yet. Level-ups, unlocks and finds will be listed here.</p>';
+  DQ.noteMissed = 0; const L = DQ.noteLog.filter(e => DQ.notificationTier(e.o) === 'quiet').slice(0, 25);
+  const body = L.length ? `<div class="bell-list">${L.map((e, i) => { const o = e.o, a = inferActions(o)[0]; return `<div class="bell-row ${e.silent ? 'quiet' : ''}" style="--c:${o.col || '#d8a64a'}"><span class="n-ic">${ico(o.icon || 'star')}</span><div class="bell-t"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(trunc(o.text, 140))}</span>` : ''}<small>${ago(e.t)}</small></div>${a ? `<button class="btn sm" data-i="${i}">${esc(a.label)}</button>` : ''}</div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing yet. Routine progress and finds will be listed here.</p>';
   DQ.modal({ title: 'Recent activity', wide: true, body, actions: [{ label: 'Close', primary: true }] });
   $$('.bell-row .btn').forEach(b => b.onclick = () => { const e = L[+b.dataset.i], a = e && inferActions(e.o)[0]; DQ.closeModal(); a && a.fn && a.fn(); });
 };
@@ -158,6 +194,7 @@ function inferActions(o) {
   if (o.actions) return o.actions; if (o.action) return [o.action];
   const k = o.key || '', D = DQ.data, txt = (o.text || '') + ' ' + o.title;
   const skillPage = sk => D.SK[sk] ? D.SK[sk].page : 'overview';
+  if (k.startsWith('unlock:')) return [{ label: `Open ${D.SK[k.slice(7)]?.name || 'skill'}`, fn: go(skillPage(k.slice(7))) }];
   if (k.startsWith('lvl:') || k.startsWith('perk:')) { const sk = k.startsWith('lvl:') ? k.slice(4) : Object.keys(D.SK).find(s => k.startsWith('perk:' + s)); return [{ label: `Open ${D.SK[sk] ? D.SK[sk].name : 'skill'}`, fn: go(skillPage(sk)) }]; }
   if (k === 'adv') return [{ label: 'See your skills', fn: go('skillsummary') }];
   if (k.startsWith('ach')) return [{ label: 'View achievements', fn: go('achievements') }];
@@ -169,7 +206,7 @@ function inferActions(o) {
     if (/material|transmute/i.test(txt)) return [{ label: 'Open bank', fn: go('bank') }, { label: 'Shop', fn: go('shop') }];
     return [{ label: 'Open plan', fn: () => DQ.ui.openPlan() }];
   }
-  if (k.startsWith('rare:') || k.startsWith('drop:') || k === 'chest' || k.startsWith('pet:')) { const id = k.split(':')[1], it = id && D.ITEMS[id]; if (!it) return [{ label: 'Open inventory', fn: go('character') }]; return [{ label: it.slot ? 'See it and equip' : 'See it', fn: () => DQ.ui.showItem(id) }]; }
+  if (k.startsWith('rare:') || k.startsWith('drop:') || k.startsWith('discovery:') || k === 'chest' || k.startsWith('pet:')) { const id = k.split(':')[1], it = id && D.ITEMS[id]; if (!it) return [{ label: 'Open inventory', fn: go('character') }]; return [{ label: it.slot ? 'See it and equip' : 'See it', fn: () => DQ.ui.showItem(id) }]; }
   if (k === 'overflow') return [{ label: 'Open bank', fn: go('bank') }, { label: 'Backpack', fn: go('character') }];
   if (k === 'taskdone' || k === 'qnext' || k === 'qskip' || k === 'offline') return [{ label: 'Open plan', fn: () => DQ.ui.openPlan() }];
   if (k.startsWith('beast:') || k === 'bond') return [{ label: 'Open bestiary', fn: go('bestiary', () => { DQ.ui.beastTab = k === 'bond' ? 'pets' : 'monsters'; }) }];
@@ -179,23 +216,29 @@ function inferActions(o) {
   return [{ label: 'Open Home', fn: go('overview') }];
 }
 function showNote(o) {
-  if (DQ.ui && DQ.ui.view === DQ.notificationPage(o)) return;
+  if (DQ.ui && DQ.ui.view === DQ.notificationPage(o) && !['unlock','level','adv'].includes(o.kind)) return;
   const acts = inferActions(o);
   const el = document.createElement('div'); el.className = 'note ' + (o.kind || ''); el.style.setProperty('--c', o.col || '#d8a64a'); if (o.key) el.dataset.key = o.key;
-  el.setAttribute('role', 'status'); el.dataset.page = DQ.notificationPage(o);
+  el.setAttribute('role', 'status'); el.dataset.page = DQ.notificationPage(o); el.dataset.kind = o.kind || ''; el._notification = o;
   el.innerHTML = `<span class="n-ic">${ico(o.icon || 'star')}</span><div class="n-b"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(o.text)}</span>` : ''}${acts.length ? `<span class="n-acts">${acts.map((a, i) => `<button class="n-act" data-i="${i}">${esc(a.label)}</button>`).join('')}</span>` : ''}</div><button class="n-x" aria-label="Dismiss">${ico('close')}</button><i class="n-t"></i>`;
   notesEl.appendChild(el);
   const ttl = o.ttl || 7500; let timer, left = ttl, started = performance.now();
-  const bar = $('.n-t', el); bar.style.animationDuration = ttl + 'ms';
-  const arm = () => { started = performance.now(); timer = setTimeout(() => dismiss(el), left); bar.style.animationPlayState = 'running'; };
-  el.addEventListener('mouseenter', () => { clearTimeout(timer); left -= performance.now() - started; bar.style.animationPlayState = 'paused'; });
-  el.addEventListener('mouseleave', arm); arm();
+  const bar = $('.n-t', el); bar.style.animationDuration = ttl + 'ms'; bar.style.animationPlayState = 'paused';
+  const arm = () => { if (timer || document.hidden || el.contains(document.activeElement) || el.matches(':hover')) return; started = performance.now(); timer = setTimeout(() => dismiss(el), left); bar.style.animationPlayState = 'running'; };
+  const pause = () => { if (timer) { clearTimeout(timer); timer = null; left = Math.max(0, left - (performance.now() - started)); } bar.style.animationPlayState = 'paused'; };
+  el._pauseNote = pause; el._resumeNote = arm;
+  el.addEventListener('mouseenter', pause); el.addEventListener('mouseleave', arm);
+  el.addEventListener('focusin', pause); el.addEventListener('focusout', () => setTimeout(arm, 0)); arm();
   $('.n-x', el).onclick = () => dismiss(el);
   $$('.n-act', el).forEach(b => b.onclick = () => { dismiss(el); acts[+b.dataset.i].fn(); });
   if (o.sound !== false) DQ.sfx(o.sound || 'notify');
   if (o.burst) setTimeout(() => DQ.burstEl($('.n-ic', el), o.col || '#d8a64a', 22), 120);
   return el;
 }
+document.addEventListener('visibilitychange', () => {
+  live().forEach(el => document.hidden ? el._pauseNote?.() : el._resumeNote?.());
+  if (!document.hidden) pump();
+});
 function dismiss(el) { if (!el || el.classList.contains('out')) return; el.classList.add('out'); setTimeout(() => { el.remove(); pump(); }, 320); }
 
 /* ---------- modal ---------- */
