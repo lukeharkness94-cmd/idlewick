@@ -1503,3 +1503,13 @@ body[data-page="quests"] .quest.ready { animation: none; }
   .character-layout .toolrows { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; }
   .character-layout .slots { grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); }
 }
+
+/* Currency is a visual price, with its unit still announced by screen readers. */
+.money { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; vertical-align:middle; color:var(--brass-hi); font:600 14px var(--f-mono); }
+.money-icon { display:inline-flex; align-items:center; flex:none; }
+.money-icon .ic { width:16px; height:16px; vertical-align:middle; }
+.stock-price { display:flex; justify-content:center; width:100%; margin-top:auto; padding-top:4px; }
+.shop-stock .stock-price .money { font-size:15px; }
+.shop-action .btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; }
+.btn.primary .money { color:inherit; }
+.bad .money { color:inherit; }

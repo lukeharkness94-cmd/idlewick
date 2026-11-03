@@ -249,8 +249,8 @@ UI.selbarHtml = (id, from) => {
   if (it.slot) b.push(`<button class="btn sm ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
   if (it.heal) b.push(`<button class="btn sm primary" data-do="eat" data-a="${id}">Eat</button>`);
   b.push(bank ? `<button class="btn sm" data-do="withdraw" data-a="${id}" data-b="${n > 1 ? 'all' : 1}">${n > 1 ? 'Take all' : 'Take'}</button>` : `<button class="btn sm" data-do="deposit" data-a="${id}" data-b="all">Bank</button>`);
-  b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell (${fmt(it.val || 0)} coins)</button>`);
-  if (n > 1) b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all (${fmt((it.val || 0) * n)} coins)</button>`);
+  b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell ${UI.money(it.val || 0)}</button>`);
+  if (n > 1) b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all ${UI.money((it.val || 0) * n)}</button>`);
   return `<span class="sb-ic" style="--c:${it.col}">${DQ.itemIco(it)}</span><span class="sb-n"><b style="color:${it.col}">${esc(it.name)}</b> <small class="mono dim">x${fmt(n)}</small><span class="sb-l">${line}</span></span><span class="sb-b">${b.join('')}</span>`;
 };
 const syncSheet = () => {

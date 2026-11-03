@@ -1578,6 +1578,16 @@ body[data-page="quests"] .quest.ready { animation: none; }
   .character-layout .toolrows { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; }
   .character-layout .slots { grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); }
 }
+
+/* Currency is a visual price, with its unit still announced by screen readers. */
+.money { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; vertical-align:middle; color:var(--brass-hi); font:600 14px var(--f-mono); }
+.money-icon { display:inline-flex; align-items:center; flex:none; }
+.money-icon .ic { width:16px; height:16px; vertical-align:middle; }
+.stock-price { display:flex; justify-content:center; width:100%; margin-top:auto; padding-top:4px; }
+.shop-stock .stock-price .money { font-size:15px; }
+.shop-action .btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; }
+.btn.primary .money { color:inherit; }
+.bad .money { color:inherit; }
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -5882,6 +5892,7 @@ const UI = DQ.ui = { view: 'overview', tab: {}, V: {}, after: {}, sel: null, res
 const set = (e, v) => { v = String(v); if (e.textContent !== v) e.textContent = v; };
 const itm = (id, n) => { const it = D.ITEMS[id]; return `<span class="itm ${it.rare ? 'rare' : ''}" style="--c:${it.col}" data-tip="item:${id}">${DQ.itemIco(it)}${n ? `<b class="mono">${fmtK(n)}</b>` : ''}</span>`; };
 UI.itm = itm; UI.set = set;
+UI.money = amount => `<span class="money" role="img" aria-label="${fmt(amount)} coins"><span class="money-icon" aria-hidden="true">${ico('coin')}</span><span aria-hidden="true">${fmt(amount)}</span></span>`;
 /* Render existing choice definitions as visible buttons, never native dropdowns.
    The select is parsed in an inert template only; it never enters the page. */
 UI.choiceButtons = html => {
@@ -6240,10 +6251,10 @@ UI.V.shop = () => {
   const owned = it ? DQ.have(id) : 0, tool = it && it.type === 'tool', count = tool ? 1 : qty;
   const cost = it ? (buying ? it.buy * count : it.val * Math.min(count, owned)) : 0;
   const disabled = !it || (buying && (S().coins < cost || (tool && owned)));
-  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span><b>${esc(D.ITEMS[item].name)}</b><small>${fmt(buying?D.ITEMS[item].buy:D.ITEMS[item].val)} coins each${buying?'':' · '+DQ.have(item)+' held'}</small></button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
+  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span><b>${esc(D.ITEMS[item].name)}</b><span class="stock-price">${UI.money(buying?D.ITEMS[item].buy:D.ITEMS[item].val)}</span>${buying?'':'<small>'+DQ.have(item)+' held</small>'}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
     ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
-      <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} ${disabled ? 'disabled' : ''}>${tool && owned && buying ? 'Already owned' : buying ? 'Buy' : 'Sell'} · ${fmt(cost)} coins</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all · ${fmt(it.val * owned)}</button>` : ''}</div>
-      ${buying && S().coins < cost ? `<p class="bad">You need ${fmt(cost - S().coins)} more coins.</p>` : ''}
+      <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} ${disabled ? 'disabled' : ''}>${tool && owned && buying ? 'Already owned' : (buying ? 'Buy' : 'Sell')+' ×'+(buying?count:Math.min(count,owned))} ${tool && owned && buying ? '' : UI.money(cost)}</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all ${UI.money(it.val * owned)}</button>` : ''}</div>
+      ${buying && S().coins < cost ? `<p class="bad">Need ${UI.money(cost - S().coins)} more.</p>` : ''}
       </div><div class="shop-comparison">${UI.compareHtml ? UI.compareHtml(id) : ''}</div></div>` : '<p>Nothing to sell. Gather resources or visit your bank.</p>'}
     <section data-reference="true" class="shop-help"><h3>About this shop</h3><p>Tools work automatically. Equipment must be equipped from Inventory after buying. Selling draws from your backpack first, then the bank. Equipped items are kept.</p></section></section></div>`;
 };
@@ -6298,7 +6309,7 @@ UI.detail = (id, from) => {
   if (it.heal) btns.push(`<button class="btn" data-do="eat" data-a="${id}">Eat (+${it.heal})</button>`);
   if (from === 'bank') btns.push(`<button class="btn" data-do="withdraw" data-a="${id}" data-b="1">Take 1</button>${n > 1 ? `<button class="btn" data-do="withdraw" data-a="${id}" data-b="10">Take 10</button><button class="btn" data-do="withdraw" data-a="${id}" data-b="all">Take all</button>` : ''}`);
   else btns.push(`<button class="btn" data-do="deposit" data-a="${id}" data-b="all">Bank</button>`);
-  btns.push(`<button class="btn" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell 1 (${fmt(it.val)})</button>${n > 1 ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all (${fmt(it.val * n)})</button>` : ''}`);
+  btns.push(`<button class="btn" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell 1 ${UI.money(it.val)}</button>${n > 1 ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all ${UI.money(it.val * n)}</button>` : ''}`);
   return `<div class="detail"><div class="dt-h">${itm(id)}<div><b style="color:${it.col}">${esc(it.name)}</b><small>${fmt(n)} in ${from === 'bank' ? 'bank' : 'pack'}</small></div></div><p class="sm">${UI.itemSub(it) || (it.type === 'junk' ? 'Junk. Good only for selling.' : DQ.cap(it.type))}</p><div class="btnrow wrap">${btns.join('')}</div></div>`;
 };
 UI.V.character = () => {
@@ -7859,8 +7870,8 @@ UI.selbarHtml = (id, from) => {
   if (it.slot) b.push(`<button class="btn sm ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
   if (it.heal) b.push(`<button class="btn sm primary" data-do="eat" data-a="${id}">Eat</button>`);
   b.push(bank ? `<button class="btn sm" data-do="withdraw" data-a="${id}" data-b="${n > 1 ? 'all' : 1}">${n > 1 ? 'Take all' : 'Take'}</button>` : `<button class="btn sm" data-do="deposit" data-a="${id}" data-b="all">Bank</button>`);
-  b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell (${fmt(it.val || 0)} coins)</button>`);
-  if (n > 1) b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all (${fmt((it.val || 0) * n)} coins)</button>`);
+  b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell ${UI.money(it.val || 0)}</button>`);
+  if (n > 1) b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all ${UI.money((it.val || 0) * n)}</button>`);
   return `<span class="sb-ic" style="--c:${it.col}">${DQ.itemIco(it)}</span><span class="sb-n"><b style="color:${it.col}">${esc(it.name)}</b> <small class="mono dim">x${fmt(n)}</small><span class="sb-l">${line}</span></span><span class="sb-b">${b.join('')}</span>`;
 };
 const syncSheet = () => {
@@ -7997,10 +8008,10 @@ UI.rarePage = () => {
   const selected = choices.find(c => c.key === UI.tab.rareChoice) || choices[0];
   const cost = selected.price * selected.count, affordable = S().coins >= cost;
   const disabled = selected.locked || selected.owned || !affordable;
-  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${esc(D.TOWN[S().town].name)}</small></div>${UI.shopTabs('rare')}<div class="illustrated-choices">${choices.map(c=>`<button class="illustrated-card ${c===selected?'selected':''}" data-do="rareselect" data-a="${c.key}" aria-pressed="${c===selected}"><span class="choice-art">${DQ.itemIco(D.ITEMS[c.id||(c.key.startsWith('cache:')?'treasure_chest':'potion_fortune')])}</span><b>${esc(c.name)}</b><small>${c.owned?'Owned':c.locked?'Locked':fmt(c.price)+' coins'}</small></button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>Rare item</h2></div>
+  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${esc(D.TOWN[S().town].name)}</small></div>${UI.shopTabs('rare')}<div class="illustrated-choices">${choices.map(c=>`<button class="illustrated-card ${c===selected?'selected':''}" data-do="rareselect" data-a="${c.key}" aria-pressed="${c===selected}"><span class="choice-art">${DQ.itemIco(D.ITEMS[c.id||(c.key.startsWith('cache:')?'treasure_chest':'potion_fortune')])}</span><b>${esc(c.name)}</b><span class="stock-price">${UI.money(c.price)}</span>${c.owned||c.locked?'<small>'+(c.owned?'Owned':'Locked')+'</small>':''}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>Rare item</h2></div>
     <div class="shop-workspace"><div class="shop-purchase">${selected.id ? UI.shopPreview(selected.id) : `<h3>${esc(selected.name)}</h3>`}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${selected.key.startsWith('mat:') ? '' : 'disabled'}>${[1,10,100].map(n => `<option value="${n}" ${selected.count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
-    <div class="shop-action"><button class="btn primary" data-do="rarebuy" data-a="${selected.key}" ${disabled ? 'disabled' : ''}>${selected.owned ? 'Owned' : selected.locked ? 'Locked' : selected.key.startsWith('cache:') ? 'Open' : selected.key.startsWith('tonic:') ? 'Drink' : 'Buy'} · ${fmt(cost)} coins</button></div>
-    ${selected.text ? `<p class="sm">${esc(selected.text)}</p>` : ''}${!affordable ? `<p class="bad sm">You need ${fmt(cost - S().coins)} more coins.</p>` : ''}
+    <div class="shop-action"><button class="btn primary" data-do="rarebuy" data-a="${selected.key}" ${disabled ? 'disabled' : ''}>${selected.owned ? 'Owned' : selected.locked ? 'Locked' : selected.key.startsWith('cache:') ? 'Open' : selected.key.startsWith('tonic:') ? 'Drink' : 'Buy'}${selected.key.startsWith('mat:')?' ×'+selected.count:''} ${UI.money(cost)}</button></div>
+    ${selected.text ? `<p class="sm">${esc(selected.text)}</p>` : ''}${!affordable ? `<p class="bad sm">Need ${UI.money(cost - S().coins)} more.</p>` : ''}
     </div><div class="shop-comparison">${selected.id ? UI.compareHtml(selected.id) : ''}</div></div></section></div>`;
 };
 const origShop = UI.V.shop;

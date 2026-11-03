@@ -6,6 +6,7 @@ const UI = DQ.ui = { view: 'overview', tab: {}, V: {}, after: {}, sel: null, res
 const set = (e, v) => { v = String(v); if (e.textContent !== v) e.textContent = v; };
 const itm = (id, n) => { const it = D.ITEMS[id]; return `<span class="itm ${it.rare ? 'rare' : ''}" style="--c:${it.col}" data-tip="item:${id}">${DQ.itemIco(it)}${n ? `<b class="mono">${fmtK(n)}</b>` : ''}</span>`; };
 UI.itm = itm; UI.set = set;
+UI.money = amount => `<span class="money" role="img" aria-label="${fmt(amount)} coins"><span class="money-icon" aria-hidden="true">${ico('coin')}</span><span aria-hidden="true">${fmt(amount)}</span></span>`;
 /* Render existing choice definitions as visible buttons, never native dropdowns.
    The select is parsed in an inert template only; it never enters the page. */
 UI.choiceButtons = html => {
