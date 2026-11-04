@@ -10887,11 +10887,14 @@ function figure(look,work=false){
  const c=document.createElement('canvas');c.width=384;c.height=576;const x=c.getContext('2d'),eq={...o.eq};if(work){delete eq.weapon;delete eq.shield;}
  if(o.cape&&!work){const cape=Q.paintedCanvas('equipment',22);if(cape)x.drawImage(tinted(cape,o.cape.col),77,105,230,375);}
  const body=document.createElement('canvas');body.width=384;body.height=576;const b=body.getContext('2d');b.drawImage(hero,0,0,384,576);
- const im=b.getImageData(0,0,384,576),shirt=rgb(eq.body?D.ITEMS[eq.body].col:o.tunic),skin=rgb(o.skin),hair=rgb(o.hair);
+ /* Worn, not stacked: under armour the tunic becomes a dark padded layer, trousers under greaves likewise, and a helmet hides the hair. */
+ const under=(hex,dark,t)=>{const a=rgb(hex);return a.map((v,i)=>Math.round(v*(1-t)+dark[i]*t));};
+ const im=b.getImageData(0,0,384,576),shirt=eq.body?under(D.ITEMS[eq.body].col,[46,40,36],.68):rgb(o.tunic),skin=rgb(o.skin),hair=rgb(o.hair),legsUnder=eq.legs?under(D.ITEMS[eq.legs].col,[42,36,32],.7):null,fullHelm=!!eq.head&&Q.paintedGearIndex(eq.head)===10; /* only full metal helms cover the hair; the coif and hoods keep it until fitted art exists */
  for(let y=0;y<576;y++)for(let xx=0;xx<384;xx++){const i=(y*384+xx)*4;if(!im.data[i+3])continue;const r=im.data[i],g=im.data[i+1],bl=im.data[i+2];let colour=null,base=1;
   if(y>115&&y<325&&bl>r*1.08&&bl>g*.98){colour=shirt;base=125;}
-  else if(y<71&&xx>130&&xx<250&&r>g*1.1&&r<150){colour=hair;base=96;}
+  else if(y<71&&xx>130&&xx<250&&r>g*1.1&&r<150){if(fullHelm){im.data[i+3]=0;continue;}colour=hair;base=96;}
   else if(((y>45&&y<112&&xx>144&&xx<237)||(y>185&&y<342&&(xx<132||xx>250)))&&r>g*1.12&&g>bl*1.12){colour=skin;base=180;}
+  else if(legsUnder&&y>=322&&y<=500&&xx>105&&xx<280&&r>g*1.2&&g>bl*1.1){colour=legsUnder;base=110;}
   if(colour){const lum=(r*.3+g*.5+bl*.2)/base;for(let k=0;k<3;k++)im.data[i+k]=Math.min(255,colour[k]*lum);}
  }
  b.putImageData(im,0,0);x.drawImage(body,0,0);
