@@ -38,7 +38,8 @@ function fitBody(x,L){x.drawImage(L.c,93,104,198,226);}
 /* legs: the painted stance is wider than the hero's, so columns are remapped piecewise to bring each leg over the hero's */
 function fitLegs(x,L){const k=[[0,102],[.452,184],[.541,196],[1,281]],top=300,h=274;
  for(let dx=102;dx<281;dx++){let i=0;while(i<k.length-2&&dx>=k[i+1][1])i++;const [s0,d0]=k[i],[s1,d1]=k[i+1],sx=(s0+(dx+.5-d0)/(d1-d0)*(s1-s0))*L.w;x.drawImage(L.c,Math.min(L.w-1,Math.max(0,sx)),0,1,L.h,dx,top,1,h);}}
-function figure(look,work=false){
+function figure(look,work=false){try{return compose(look,work);}catch(e){return null;}} /* a browser that blocks pixel reads keeps the earlier hero art */
+function compose(look,work){
  if(!loaded)return null;const o=Q.heroLook(look||Q.S.look),fit={},eq0=o.eq||{};for(const slot of ['legs','body','head'])if(eq0[slot]&&layer(slot,eq0[slot]))fit[slot]=layer(slot,eq0[slot]);const key=JSON.stringify([o,work,Object.keys(fit)]);if(heroCache.has(key))return heroCache.get(key);
  const c=document.createElement('canvas');c.width=384;c.height=576;const x=c.getContext('2d'),eq={...o.eq};if(work){delete eq.weapon;delete eq.shield;}
  if(o.cape&&!work){const cape=Q.paintedCanvas('equipment',22);if(cape)x.drawImage(tinted(cape,o.cape.col),77,105,230,375);}
