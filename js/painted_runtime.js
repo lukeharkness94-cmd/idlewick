@@ -79,6 +79,8 @@ UI.portrait=(size=48,cls='')=>`<span class="portrait painted-portrait ${cls}" st
 Q.battleHero=()=>loaded?`<span class="battle-rig hero-rig painted-hero encounter-hero rig-${Q.weaponStyle()}" role="img" aria-label="Your equipped hero"><span class="rig-torso"><img src="${Q.heroFigureUrl(Q.S.look)}" alt="" draggable="false"></span></span>`:oldBattle();
 Q.battleFoe=m=>Q.paintedRef('creature',m.id)?`<span class="battle-rig foe-rig painted-foe" role="img" aria-label="${Q.esc(m.name)} ready for battle" data-creature="${m.id}" data-body="${D.EXTRA_CREATURES[m.id]?.body||'beast'}"><span class="foe-torso">${Q.artImage('creature',m.id,192,'',m.name)}</span></span>`:oldFoe(m);
 Q.poseBattle=(avatar,style,phase,animate)=>{const root=avatar?.querySelector('.painted-hero');if(!root)return oldPose(avatar,style,phase,animate);if(Q.S.settings.reduceFx)return true;const attack=phase==='attack',direction=attack?1:-1;animate(root,[{transform:'translateX(0) rotate(0)'},{transform:`translateX(${-direction*5}px) rotate(${-direction*3}deg)`,offset:.25},{transform:`translateX(${direction*13}px) rotate(${direction*4}deg)`,offset:.54},{transform:'translateX(0) rotate(0)'}],{duration:attack?Q.battleTiming.duration:340,easing:'ease-in-out'});return true;};
+/* locked or undiscovered characters are drawn as silhouettes and never named in their alt text */
+const silArt=Q.artImage;Q.artImage=(kind,id,size=96,cls='',alt='')=>/\bsil\b/.test(cls)?silArt(kind,id,size,cls,'Unknown'):silArt(kind,id,size,cls,alt);
 const source='assets/painted/hero-atlas.png';
 const ready=new Promise(resolve=>{hero.onload=()=>{loaded=true;resolve();};hero.onerror=resolve;hero.src=source;});
 Promise.all([ready,Q.paintedReady]).then(()=>{if(Q.started){UI.renderHud();UI.render(false);}});
