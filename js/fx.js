@@ -137,10 +137,22 @@ const markSilent = (o, count) => { const e = DQ.noteLog.find(x => x.o === o); if
 const showSkillUnlock=o=>false; /* Skill unlocks use the prominent bottom card; they never cover play. */
 const levelQueue=[];let levelRetry=0;
 const pumpLevel=()=>{clearTimeout(levelRetry);if(!levelQueue.length)return;if(modalEl){levelRetry=setTimeout(pumpLevel,300);return;}showLevelReveal(levelQueue.shift());};
+/* the painted star, re-centred on its own centre of mass (its source crop carries stray edge pixels that pull it off-centre) */
+let starUrl=null;
+const centredStar=()=>{
+  if(!starUrl){const raw=DQ.completionCrop&&DQ.completionCrop('utility-icons','star');if(!raw)return '';
+    try{const W=raw.width,H=raw.height,a=raw.getContext('2d').getImageData(0,0,W,H).data;let n=0,sx=0,sy=0;
+      for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(a[(y*W+x)*4+3]>128){n++;sx+=x;sy+=y;}
+      const cx=sx/n,cy=sy/n;let R=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(a[(y*W+x)*4+3]>128){const d=Math.hypot(x-cx,y-cy);if(d>R&&d<Math.min(W,H)*.62)R=d;}
+      const S=256,c=document.createElement('canvas');c.width=c.height=S;const k=(S/2*.94)/R,x=c.getContext('2d');x.imageSmoothingQuality='high';
+      /* only the star itself: clip to its radius so stray edge pixels never show */
+      x.beginPath();x.arc(S/2,S/2,S/2,0,Math.PI*2);x.clip();x.drawImage(raw,S/2-cx*k,S/2-cy*k,W*k,H*k);starUrl=c.toDataURL();}catch(e){return '';}}
+  return `<img class="lr-star-img" src="${starUrl}" width="104" height="104" alt="" draggable="false">`;
+};
 const showLevelReveal=o=>{
   if(modalEl){levelQueue.push(o);pumpLevel();return true;}
   const sk=o.skill&&DQ.data.SK[o.skill],hero=o.kind==='adv',name=hero?'Hero':(sk?.name||'Skill'),level=o.to||String(o.title||'').match(/\d+/)?.[0]||'';
-  const art=hero?`<span class="level-star">${ico('star')}</span>`:DQ.artImage('skill',o.skill,112,'',name);
+  const art=hero?`<span class="level-star">${centredStar()||ico('star')}</span>`:DQ.artImage('skill',o.skill,112,'',name);
   DQ.modal({title:`${name} level up`,wide:true,sticky:true,body:`<div class="level-reveal lr-v2" style="--c:${o.col||'#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><span class="lr-ripple" aria-hidden="true"></span><span class="lr-ripple r2" aria-hidden="true"></span><span class="lr-ripple r3" aria-hidden="true"></span><span class="lr-rays" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><span class="lr-ribbon">Level up</span><h2>${esc(name)} <b>${esc(level)}</b></h2><p>${esc(o.text||'Your training has paid off.')}</p></div>`,actions:[{label:'Continue',primary:true,fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
   DQ.sfx(o.sound||'level');setTimeout(()=>DQ.burstEl(document.querySelector('.level-emblem'),o.col||'#d8a64a',38),100);return true;
 };

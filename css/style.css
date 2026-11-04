@@ -1882,3 +1882,7 @@ h3 { font-size:17px; }
 @media(max-width:600px){.lr-v2 .lr-stage{width:180px;height:180px}.lr-v2 .level-emblem{width:112px;height:112px}.lr-v2 .lr-glow{width:170px;height:170px}.lr-v2 .lr-ripple{width:112px;height:112px}.lr-v2 .lr-rays{width:190px;height:190px}.lr-v2 .level-star .ic{width:70px!important;height:70px!important}}
 @media(prefers-reduced-motion:reduce){.lr-v2 *,.lr-v2{animation:none!important}.lr-v2 .lr-ripple{opacity:.25}}
 .calm .lr-v2 *{animation:none!important}.calm .lr-v2 .lr-ripple{opacity:.25}
+.lr-v2 .level-star .lr-star-img{width:104px!important;height:104px!important;animation:lr-shine 2.8s ease-in-out 1s infinite}
+.lr-v2 .level-star .ic{animation:lr-shine 2.8s ease-in-out 1s infinite}
+@keyframes lr-shine{0%,100%{transform:scale(1);filter:brightness(1) drop-shadow(0 0 0 transparent)}50%{transform:scale(1.06);filter:brightness(1.12) drop-shadow(0 0 10px color-mix(in srgb,var(--c) 60%,transparent))}}
+@media(max-width:600px){.lr-v2 .level-star .lr-star-img{width:84px!important;height:84px!important}}
