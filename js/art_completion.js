@@ -31,6 +31,16 @@ const crop = (sheet, id, size) => {
   const url = c.toDataURL('image/png'); cache.set(key, url); if (cache.size > 600) cache.delete(cache.keys().next().value);
   return url;
 };
+/* the exact source rectangle at full resolution (for the fitted hero layers); null until its sheet has loaded */
+const rawCache = new Map();
+Q.completionCrop = (sheet, id) => {
+  const key = sheet + ':' + id; if (rawCache.has(key)) return rawCache.get(key);
+  load(sheet); if (!ready[sheet]) return null;
+  const r = M[sheet].e[id]; if (!r) return null;
+  const c = document.createElement('canvas'); c.width = r[2]; c.height = r[3];
+  c.getContext('2d').drawImage(imgs[sheet], r[0], r[1], r[2], r[3], 0, 0, r[2], r[3]);
+  rawCache.set(key, c); return c;
+};
 const img = (url, size, cls, alt) => `<img class="painted-image ${cls || ''}" src="${url}" width="${size}" height="${size}" alt="${Q.esc(alt || '')}" draggable="false">`;
 
 /* ---------- which game ids each sheet covers ---------- */

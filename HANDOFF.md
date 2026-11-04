@@ -213,3 +213,10 @@ Approved roadmap stages are implemented in order. Research/Scholarship lives in 
 - New regression for a pre-update save (no new fields, legacy regional project) loading with defaults and playing two offline hours. Keyboard pass: route buttons, first-animal button, empty pens and discovery cards are reachable with visible focus rings. ui-current's effect-cleanup check now waits up to 2.5 s rather than sampling once at 1 s.
 - `docs/playtest-plan.md`: profiles, observations, questions and signals for human playtests.
 - Final validation: 61 regressions, desktop storage, JavaScript syntax, ui-current (all widths, both themes; three consecutive passes) and the 600-case ui-audit. The claude.ai published page was not updated (no release was authorised).
+
+## Fitted hero armour (Codex next delivery, integrated)
+
+- `js/painted_runtime.js` draws Codex's `hero-leg-layers`, `hero-body-layers` and `hero-head-layers` onto the hero's own pose, in that order. Metal sets map to bands (bronze/iron, steel/mithril, adamant/runite, astral) and keep their own colour through a light tint; every coif uses `head-leather`. Robes, leather bodies/legs, the Hollow Crown and Grubnash's war-helm keep the earlier painted equipment pieces.
+- Each layer is trimmed to its alpha bounds once. Helmets measure their own brim row and face opening, so the opening is centred on the face with the brim just above the eyes (the dome is lightly squashed vertically if needed to stay on the canvas). Legs are remapped column by column because the painted stance is wider than the hero's. Hands are redrawn in front of the body layer.
+- Under a fitted helmet the hair outside the face becomes a dark lining (no old face patch). Under fitted legs the trousers become a dark padded layer down to the boots. Layer readiness is part of the hero cache key, so the figure upgrades as the sheets load and falls back to the earlier pieces until then.
+- `js/art_completion.js` exposes `DQ.completionCrop(sheet, id)` (full-resolution source rectangle). `scripts/build-art-delivery.py` now exports per-entry `target`s as `t` and keeps existing WebP files byte-for-byte unless `--force` is passed.

@@ -50,3 +50,7 @@ Claude's compositor work still needs to suppress underlying hair/clothes where a
 - `python3 scripts/package-game.py`: rebuilt the standalone game.
 
 Optional `ART_PACK_PREVIEW` and `ART_NEXT_PREVIEW` output directories produce crop contact sheets and before/after town renders for inspection. Headless canvas tests do not replace browser/interactive playtesting; no new browser UI verification or fitted-hero validation is claimed.
+
+## Integration status (Claude Code)
+
+The fitted hero layers are now enabled in `js/painted_runtime.js` for all metal sets and every coif; see HANDOFF.md, "Fitted hero armour". The delivery-map builder exports per-entry targets and no longer re-encodes existing WebP files unless `--force` is given.
