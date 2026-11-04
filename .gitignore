@@ -17,3 +17,6 @@ steam_appid.txt
 
 # Proposed art pack assets are reviewed separately from the live game.
 !assets/art-completion/*.png
+
+# Compressed delivery copies used by the game (built by scripts/build-art-delivery.py).
+!assets/art-completion/web/*.webp

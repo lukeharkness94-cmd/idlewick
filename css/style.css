@@ -1798,3 +1798,9 @@ h3 { font-size:17px; }
 @media (max-width:600px){.adv-row{grid-template-columns:1fr auto}.adv-row .bar{grid-column:1/-1;order:3}}
 :root[data-theme="light"] .disc-card{background:color-mix(in srgb,#3a7ea8 7%,#fffaf0);border-color:color-mix(in srgb,#3a7ea8 35%,var(--line))}
 :root[data-theme="light"] .disc-ic .ic{color:#2a6a98}
+
+/* ---------- Painted completion art ---------- */
+.painted-image{object-fit:contain;image-rendering:auto}
+.fu-ic .furn-art{width:40px;height:40px}
+.cottage-art{width:min(320px,100%);height:auto;display:block;margin:0 auto}
+.w-ic .worker-art{width:44px;height:44px;border-radius:50%;object-fit:cover}
