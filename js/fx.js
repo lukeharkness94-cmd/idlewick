@@ -91,7 +91,7 @@ const queue = [], MAX_NOW = 1;
 const live = () => $$('.note', notesEl).filter(n => !n.classList.contains('out'));
 const nowLive = () => live().length;
 DQ.noteLog = []; DQ.noteMissed = 0;
-DQ.notificationTier = o => ['level', 'adv', 'unlock', 'death', 'warn', 'boss'].includes(o.kind) || /^(qr:|qo:|qnew$)/.test(o.key || '') ? 'now' : 'quiet';
+DQ.notificationTier = o => ['level', 'adv', 'unlock', 'death', 'warn', 'boss'].includes(o.kind) || /^(qr:|qo:|qnew$|project:)/.test(o.key || '') ? 'now' : 'quiet';
 DQ.notificationPage = o => {
   if (o.page) return o.page;
   const k = o.key || '', D = DQ.data;
@@ -217,6 +217,7 @@ function inferActions(o) {
   return [{ label: 'Open Home', fn: go('overview') }];
 }
 function showNote(o) {
+  if (!notesEl) return; /* no notification area yet (before start-up, or headless tests) */
   if (DQ.ui && DQ.ui.view === DQ.notificationPage(o) && !['unlock','level','adv'].includes(o.kind)) return;
   const acts = inferActions(o);
   const el = document.createElement('div'); el.className = 'note ' + (o.kind || ''); el.style.setProperty('--c', o.col || '#d8a64a'); if (o.key) el.dataset.key = o.key;

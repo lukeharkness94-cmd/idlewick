@@ -6,20 +6,43 @@ const S = () => DQ.S;
 DQ.questImpact = id => ({ first_steps: 'Restock Willowbrook’s timber supply.', hungry_cook: 'Bring Mabel’s kitchen back to life.' }[id] || '');
 D.PROJECTS = {
   well: { town: 'willowbrook', name: 'Restore the village well', cost: { log_normal: 20, coins: 25 }, reward: 'Resting health recovery is 10% faster.', story: 'Fresh water flows through Willowbrook again.' },
-  inn: { town: 'willowbrook', name: 'Reopen the village inn', cost: { log_normal: 10, shrimp: 12, coins: 50 }, reward: 'Food restores 5% more health.', story: 'The inn sign is back up. Mabel has a kitchen full of guests.' }
+  inn: { town: 'willowbrook', name: 'Reopen the village inn', cost: { log_normal: 10, shrimp: 12, coins: 50 }, reward: 'Food restores 5% more health.', story: 'The inn sign is back up. Mabel has a kitchen full of guests.' },
+  forge: { town: 'willowbrook', name: 'Rekindle the village forge', cost: { bar_bronze: 10, log_oak: 15, coins: 300 }, reward: 'Smithing is 5% faster.', story: 'Smoke curls from the forge chimney and the anvil rings across the green.', fx: { speed_smithing: .05 } },
+  garden: { town: 'willowbrook', name: 'Plant the village gardens', cost: { crop_potato: 15, crop_onion: 10, coins: 200 }, reward: 'Crops grow 5% faster.', story: 'Neat rows of vegetables and a riot of flowers fill the old common.', fx: { grow: .05 } },
+  library: { town: 'willowbrook', name: 'Reopen the reading room', cost: { log_oak: 25, feather: 20, coins: 800 }, reward: '+2% XP to every skill.', story: 'Lamps burn late in the reading room, and the shelves are full again.', fx: { xpAll: .02 } },
+  watchtower: { town: 'willowbrook', name: 'Raise the watchtower', cost: { log_oak: 40, bar_iron: 8, coins: 1500 }, reward: 'Monsters deal 2% less damage.', story: 'A sturdy watchtower stands over the road, a lantern burning at the top.', fx: { dr: .02 } }
 };
+/* A villager's reaction when a project is finished. Short, warm and in their own voice. */
+D.PROJECT_VOICES = {
+  well: ['Elder Wren', 'Cold, clear water. I had forgotten the sound of the bucket.'],
+  inn: ['Mabel the Cook', 'Sit, eat. The first bowl is always on the house for whoever fixed my sign.'],
+  forge: ['Old Brannoc', 'Hear that? The anvil sings again. Bring me ore whenever you like.'],
+  garden: ['Granny Bramble', 'Onions in rows, potatoes in hills. The bees will find us by morning.'],
+  library: ['Archivist Pell', 'Every shelf dusted. Every book a little less lonely.'],
+  watchtower: ['Captain Hale', 'From up here you can see the goblins coming. Mostly they turn round.'],
+  market: ['A Mossbarrow trader', 'A roof over the stalls! Prices are friendlier when nobody is wet.'],
+  jetty: ['A Saltmere dockhand', 'Boats tie up properly now. The gulls are furious.'],
+  hearth: ['An Ironpeak miner', 'Warm hands, steady picks. We owe you a pint and a pickaxe.'],
+  lanterns: ['A Gloomfen guide', 'Follow the lights and you will not follow the wisps.'],
+  cistern: ['A fireguard of Emberfall', 'Cool water at last. The courtyard steams like a kettle.'],
+  bridge: ['A Skyreach monk', 'The pilgrims cross singing. Some of them even in tune.'],
+  refuge: ['A weary traveller', 'Four walls and a fire, here of all places. Thank you.']
+};
+/* Regional projects use that region's own materials and give a distinct benefit. Every regional project also keeps the
+   original +2% resting recovery, so players who finished one before this change keep exactly what they had. */
 const regionalProjects = [
- ['mossbarrow','market','Repair the market shelter','The market stalls are sheltered and traders can return.',150,30],
- ['saltmere','jetty','Rebuild the fishing jetty','Fishing boats can unload safely at the repaired jetty.',500,50],
- ['ironpeak','hearth','Relight the communal hearth','The hold has a warm refuge for returning miners.',1200,70],
- ['gloomfen','lanterns','Restore the marsh lanterns','Lanterns mark a safe path through the marsh.',2500,90],
- ['emberfall','cistern','Repair the cooling cistern','Fresh water reaches the citadel courtyards again.',5000,110],
- ['skyreach','bridge','Repair the monastery bridge','Pilgrims can cross between the monastery peaks.',9000,130],
- ['hollow','refuge','Rebuild the travellers’ refuge','A welcoming refuge stands among the fallen kingdom’s ruins.',15000,150]
+ ['mossbarrow','market','Repair the market shelter','The market stalls are sheltered and traders can return.',{coins:150,log_normal:30,crop_potato:15},{coin:.03},'+3% coins from every source.'],
+ ['saltmere','jetty','Rebuild the fishing jetty','Fishing boats can unload safely at the repaired jetty.',{coins:500,log_oak:40,raw_sardine:25},{speed_fishing:.05},'Fishing is 5% faster.'],
+ ['ironpeak','hearth','Relight the communal hearth','The hold has a warm refuge for returning miners.',{coins:1200,log_willow:30,ore_coal:25},{speed_mining:.05},'Mining is 5% faster.'],
+ ['gloomfen','lanterns','Restore the marsh lanterns','Lanterns mark a safe path through the marsh.',{coins:2500,log_maple:30,bar_iron:15},{dr:.03},'Monsters deal 3% less damage.'],
+ ['emberfall','cistern','Repair the cooling cistern','Fresh water reaches the citadel courtyards again.',{coins:5000,log_yew:30,bar_steel:15},{heal:.05},'Food restores 5% more health.'],
+ ['skyreach','bridge','Repair the monastery bridge','Pilgrims can cross between the monastery peaks.',{coins:9000,log_magic:25,bar_mithril:12},{gather:.03},'Gathering is 3% faster.'],
+ ['hollow','refuge','Rebuild the travellers’ refuge','A welcoming refuge stands among the fallen kingdom’s ruins.',{coins:15000,log_elder:25,bar_adamant:12},{xpAll:.03},'+3% XP to every skill.']
 ];
-for(const [town,id,name,story,coins,logs] of regionalProjects)D.PROJECTS[id]={town,name,story,cost:{coins,log_normal:logs},reward:'Resting health recovery is 2% faster.',fx:{regen:.02}};
+for(const [town,id,name,story,cost,fx,reward] of regionalProjects)D.PROJECTS[id]={town,name,story,cost,reward:reward+' Resting health recovery is 2% faster.',fx:Object.assign({regen:.02},fx)};
 DQ.projectsForTown = town => Object.entries(D.PROJECTS).filter(([,p])=>p.town===town);
-const destinations = { boss: 'Defeat Grubnash', house: 'Build my first home', well: D.PROJECTS.well.name, inn: D.PROJECTS.inn.name };
+const destinations = { boss: 'Defeat Grubnash', house: 'Build my first home', well: D.PROJECTS.well.name, inn: D.PROJECTS.inn.name, village: 'Restore Willowbrook' };
+const nextVillageProject = () => DQ.projectsForTown('willowbrook').map(([id]) => id).find(id => !S().projects[id]);
 DQ.pinProject = id => {
   if (!D.PROJECTS[id]) return false;
   S().pinnedProject = S().pinnedProject === id ? null : id;
@@ -28,6 +51,7 @@ DQ.pinProject = id => {
 const step = (title, detail, action, a, b) => ({ title, detail, action, a, b });
 const task = (title, detail, kind, id) => step(title, detail, 'journeytask', kind, id);
 DQ.journeyNext = (id = S().journey || 'boss') => {
+  if (id === 'village') { const v = nextVillageProject(); return v ? DQ.journeyNext(v) : step('Willowbrook is restored', 'Every village project is complete. Its benefits are permanent.', 'go', 'projects'); }
   if (D.PROJECTS[id]) {
     const project = D.PROJECTS[id];
     if (S().projects[id]) return step('Project complete', project.story + ' ' + project.reward, 'go', 'map');
@@ -37,7 +61,17 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
       if (!DQ.have('raw_shrimp')) return task('Catch shrimp for the inn', 'The inn needs 12 cooked shrimp. Gather raw shrimp first.', 'fish', 'shrimp');
       return task('Cook for the inn', fmt(DQ.have('shrimp')) + ' / 12 cooked shrimp ready. Some attempts may burn.', 'recipe', 'cook_shrimp');
     }
-    if (DQ.have('log_normal') < project.cost.log_normal) return task('Gather timber', fmt(DQ.have('log_normal')) + ' / ' + project.cost.log_normal + ' logs ready.', 'wood', 'normal');
+    /* the first missing material, routed to where it comes from */
+    const missing = Object.entries(project.cost).find(([item, n]) => item !== 'coins' && DQ.have(item) < n);
+    if (missing) {
+      const [item, n] = missing, it = D.ITEMS[item], src = DQ.sourceOf ? DQ.sourceOf(item) : null, detail = fmt(DQ.have(item)) + ' / ' + n + ' ' + it.name.toLowerCase() + ' ready for ' + project.name.toLowerCase() + '.';
+      if (item === 'log_normal') return task('Gather timber', fmt(DQ.have(item)) + ' / ' + n + ' logs ready.', 'wood', 'normal');
+      if (src && src.skill && !DQ.skillUnlocked(src.skill)) return step('Unlock ' + D.SK[src.skill].name, it.name + ' comes from ' + D.SK[src.skill].name + '. ' + DQ.unlockHow(src.skill) + '.', 'go', src.page);
+      const verb = { fish: 'Catch', wood: 'Chop', mine: 'Mine', thieve: 'Steal', recipe: 'Make', fight: 'Hunt for' }[src && src.kind];
+      if (verb) return task(verb + ' ' + it.name.toLowerCase(), detail, src.kind, src.id);
+      if (src) return step('Get ' + it.name.toLowerCase(), detail, 'route', item);
+      return step('Find ' + it.name.toLowerCase(), detail, 'go', 'character');
+    }
     if (S().coins < project.cost.coins) return step('Raise the project funds', fmt(S().coins) + ' / ' + project.cost.coins + ' coins. Sell spare resources or claim quest rewards.', 'go', 'character');
     return step('Complete the project', project.reward + ' Materials are consumed once.', 'projectfinish', id);
   }
@@ -79,7 +113,9 @@ DQ.finishProject = id => {
   Object.entries(project.cost).forEach(([item, n]) => item === 'coins' ? S().coins -= n : DQ.take(item, n));
   S().projects[id] = true; DQ.fxDirty();
   DQ.log(project.story, 'good');
-  DQ.notify({ kind: 'quest', page: 'projects', key: 'project:' + id, title: project.name, text: project.story + ' ' + project.reward, icon: 'house', sound: 'quest' });
+  const voice = D.PROJECT_VOICES[id];
+  DQ.notify({ kind: 'quest', page: 'projects', key: 'project:' + id, title: project.name, text: project.story + ' ' + project.reward + (voice ? ` ${voice[0]}: “${voice[1]}”` : ''), icon: 'house', sound: 'quest' });
+  DQ.emit('project', id);
   DQ.save(); return true;
 };
 const actionHtml = next => `<button class="btn primary" data-do="${next.action}" data-a="${next.a || ''}" data-b="${next.b || ''}">${esc(next.title)}</button>`;
@@ -92,7 +128,7 @@ UI.projectPinHtml = () => {
 };
 UI.B.projectneed = (el, id, item) => {
   const required = D.PROJECTS[id].cost[item], held = item === 'coins' ? S().coins : DQ.have(item);
-  const label = item === 'coins' ? 'coins' : item === 'log_normal' ? 'logs' : 'shrimp';
+  const label = item === 'coins' ? 'coins' : item === 'log_normal' ? 'logs' : item === 'shrimp' ? 'shrimp' : D.ITEMS[item].name.toLowerCase();
   UI.set(el, `${Math.min(held, required)}/${required} ${label}`); el.classList.toggle('ok', held >= required);
 };
 UI.B.projectaction = (el, id) => UI.set(el, S().projects[id] ? 'View village' : DQ.journeyNext(id).title);
@@ -111,7 +147,7 @@ UI.projectsPanel = () => {
   return `<div class="town-project-workspace"><section class="panel"><div class="phead"><h2>${esc(D.TOWN[town].name)} · projects</h2>${pinButton(id)}</div><label class="page-picker" for="town-project">Project${UI.choiceButtons(`<select id="town-project" data-in="town-project">${entries.map(([key, p]) => `<option value="${key}" ${key === id ? 'selected' : ''}>${esc(p.name)}${S().projects[key] ? ' · Complete' : ''}</option>`).join('')}</select>`)}</label>
     ${done ? '<p class="ok">Completed · permanent benefit active</p>' : `<div class="btnrow"><button class="btn primary" data-do="${canFinish ? 'projectfinish' : 'projectnext'}" data-a="${id}">${canFinish ? 'Complete project' : 'Work on this project'}</button></div>`}
     <h3>${esc(project.name)}</h3><p>${esc(done ? project.story : project.reward)}</p>${done ? '' : `<div class="rws">${Object.entries(project.cost).map(([item, n]) => { const held = item === 'coins' ? S().coins : DQ.have(item); return `<span class="${held >= n ? 'ok' : 'bad'}">${fmt(held)} / ${n} ${item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase()}</span>${held < n && item !== 'coins' && UI.routeChip ? UI.routeChip(item) : ''}`; }).join('')}</div>`}</section>
-    <section class="panel town-projects"><div class="phead"><h2>A living ${esc(D.TOWN[town].name)}</h2></div>${UI.scene(town)}${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}${entries.filter(([key])=>S().projects[key]).map(([,p])=>`<p class="village-change">✓ ${esc(p.story)}</p>`).join('')}<p class="sm dim">Completed quests and projects change the village.</p></section></div>`;
+    <section class="panel town-projects"><div class="phead"><h2>A living ${esc(D.TOWN[town].name)}</h2></div>${UI.scene(town)}${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}${entries.filter(([key])=>S().projects[key]).map(([key,p])=>`<p class="village-change">✓ ${esc(p.story)}${D.PROJECT_VOICES[key]?`<span class="villager-line"><b>${esc(D.PROJECT_VOICES[key][0])}:</b> “${esc(D.PROJECT_VOICES[key][1])}”</span>`:''}</p>`).join('')}<p class="sm dim">Completed quests and projects change the village.</p></section></div>`;
 };
 UI.homeSections.unshift(UI.journeyPanel); /* the one primary objective leads Home */
 UI.V.projects = () => UI.projectsPanel();
@@ -129,7 +165,7 @@ Object.assign(UI.DO, {
     const next = DQ.journeyNext(id); UI.DO[next.action](next.a, next.b);
   },
   destination: id => { if (!destinations[id]) return; S().journey = id; DQ.save(); if (UI.view === 'overview') UI.render(false); else DQ.go('overview'); },
-  journeytask: (kind, id) => { DQ.closeModal(); if (DQ.startAct(kind, id, { quiet: true })) DQ.go(DQ.actPage()); },
+  journeytask: (kind, id) => { DQ.closeModal(); if (DQ.startAct(kind, id, { quiet: true })) DQ.go(DQ.actPage()); else { const page = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving', fight: 'combat' }[kind] || (kind === 'recipe' && D.RECIPES[id] ? D.SK[D.RECIPES[id].skill].page : null); if (page) { if (UI.taskChoice) UI.taskChoice[page] = id; DQ.go(page); } } },
   journeytravel: id => { DQ.closeModal(); DQ.travel(id); DQ.go('overview'); },
   projectfinish: id => { if (DQ.finishProject(id)) UI.render(false); },
   safetyexport: () => DQ.downloadSave(),

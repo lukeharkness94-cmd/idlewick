@@ -1861,6 +1861,7 @@ h3 { font-size:17px; }
 .returnbar{display:flex;align-items:center;gap:6px;margin:0 0 10px}
 .returnbar .btn .ic{transform:rotate(180deg)}
 .returnbar .n-x{position:static}
+.villager-line{display:block;margin-top:3px;font-style:italic;color:var(--mute)}.villager-line b{font-style:normal;color:var(--ink)}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -5433,7 +5434,7 @@ const queue = [], MAX_NOW = 1;
 const live = () => $$('.note', notesEl).filter(n => !n.classList.contains('out'));
 const nowLive = () => live().length;
 DQ.noteLog = []; DQ.noteMissed = 0;
-DQ.notificationTier = o => ['level', 'adv', 'unlock', 'death', 'warn', 'boss'].includes(o.kind) || /^(qr:|qo:|qnew$)/.test(o.key || '') ? 'now' : 'quiet';
+DQ.notificationTier = o => ['level', 'adv', 'unlock', 'death', 'warn', 'boss'].includes(o.kind) || /^(qr:|qo:|qnew$|project:)/.test(o.key || '') ? 'now' : 'quiet';
 DQ.notificationPage = o => {
   if (o.page) return o.page;
   const k = o.key || '', D = DQ.data;
@@ -5559,6 +5560,7 @@ function inferActions(o) {
   return [{ label: 'Open Home', fn: go('overview') }];
 }
 function showNote(o) {
+  if (!notesEl) return; /* no notification area yet (before start-up, or headless tests) */
   if (DQ.ui && DQ.ui.view === DQ.notificationPage(o) && !['unlock','level','adv'].includes(o.kind)) return;
   const acts = inferActions(o);
   const el = document.createElement('div'); el.className = 'note ' + (o.kind || ''); el.style.setProperty('--c', o.col || '#d8a64a'); if (o.key) el.dataset.key = o.key;
@@ -6320,7 +6322,9 @@ DQ.fx = () => {
   if (DQ.techFx) DQ.techFx(f);
   if (S().projects && S().projects.well) f.regen += .1;
   if (S().projects && S().projects.inn) f.heal += .05;
-  for(const [id,p] of Object.entries(D.PROJECTS||{}))if(S().projects[id]&&p.fx)for(const [key,value] of Object.entries(p.fx))f[key]+=value;
+  for(const [id,p] of Object.entries(D.PROJECTS||{}))if(S().projects[id]&&p.fx)for(const [key,value] of Object.entries(p.fx)){
+    if(key.startsWith('speed_'))f.speed[key.slice(6)]=(f.speed[key.slice(6)]||0)+value; else if(key.startsWith('xp_'))f.xp[key.slice(3)]=(f.xp[key.slice(3)]||0)+value; else f[key]=(f[key]||0)+value;
+  }
   f.dmg += f.trophy * Object.values(S().towns).filter(t => t.boss).length;
   const ap = S().pets.active && D.PET[S().pets.active];
   if (ap) {
@@ -8584,7 +8588,8 @@ DQ.sceneUrl = id => {
   const stocked = DQ.S.q.first_steps && DQ.S.q.first_steps.s === 'done';
   const kitchen = DQ.S.q.hungry_cook && DQ.S.q.hungry_cook.s === 'done';
   const safe = DQ.S.towns[id] && DQ.S.towns[id].boss;
-  const key = id + ':' + !!projects.well + ':' + !!projects.inn + ':' + !!stocked + ':' + !!kitchen + ':' + !!safe;
+  const done = Object.keys(DQ.data.PROJECTS || {}).filter(k => DQ.data.PROJECTS[k].town === id && projects[k]).sort().join(',');
+  const key = id + ':' + done + ':' + !!stocked + ':' + !!kitchen + ':' + !!safe;
   if (cache[key]) return cache[key]; if (!S[id]) return null;
   const o = pic(); try { S[id](o); } catch (e) { console.error('scene', id, e); return null; }
   if (safe) {
@@ -8609,6 +8614,42 @@ DQ.sceneUrl = id => {
       o.rect(175, 69, 4, 29, P('#795039')); o.rect(161, 71, 30, 15, P('#e2ba69'));
       o.rect(169, 76, 12, 6, P('#805139')); o.rect(180, 76, 3, 7, P('#805139'));
     }
+    if (projects.watchtower) {   /* timber tower in the gap behind the fence, lantern lit */
+      const x = 140; o.rect(x, 52, 2, 52, P('#6a4528')); o.rect(x + 12, 52, 2, 52, P('#5a3a22'));
+      for (let y = 60; y < 100; y += 10) { o.line(x, y, x + 13, y + 9, P('#7a5230')); o.line(x + 13, y, x, y + 9, P('#6a4528')); }
+      o.rect(x - 3, 46, 20, 7, P('#8a6038')); o.rect(x - 3, 46, 20, 1, P('#b08050')); o.poly([[x - 5, 46], [x + 7, 34], [x + 19, 46]], P('#8a3f30'));
+      o.rect(x + 5, 48, 4, 3, P('#ffe08a')); o.glow(x + 7, 49, 9, [255, 224, 138], .45);
+    }
+    if (projects.library) {      /* stone reading room with warm windows */
+      const x = 196, y = 84; o.rect(x, y, 30, 19, P('#a69f92')); for (let i = 0; i < 30; i += 5) o.rect(x + i, y, 1, 19, P('#8f887c'));
+      o.rect(x, y + 6, 30, 1, P('#8f887c')); o.rect(x, y + 12, 30, 1, P('#8f887c'));
+      o.poly([[x - 2, y + 1], [x + 15, y - 11], [x + 32, y + 1]], P('#4f5f72')); o.line(x - 2, y + 1, x + 15, y - 11, P('#6f8296'));
+      o.rect(x + 4, y + 5, 5, 6, P('#ffd98a')); o.rect(x + 21, y + 5, 5, 6, P('#ffd98a')); o.rect(x + 12, y + 9, 6, 10, P('#5a3a22'));
+      o.rect(x + 11, y - 3, 8, 3, P('#e8d8b0')); o.rect(x + 13, y - 2, 4, 1, P('#7a5230'));
+    }
+    if (projects.forge) {        /* smithy between the stream and the well, glowing hearth and smoke */
+      const x = 250, y = 88; o.rect(x, y, 22, 15, P('#7a6a5a')); o.rect(x, y, 22, 2, P('#5a4a3e'));
+      o.poly([[x - 2, y + 1], [x + 11, y - 7], [x + 24, y + 1]], P('#5a4a3e')); o.rect(x + 16, y - 10, 4, 8, P('#6a5a4e'));
+      o.rect(x + 3, y + 5, 8, 10, P('#2a1a12')); o.rect(x + 4, y + 9, 6, 5, P('#ff8a3a')); o.rect(x + 5, y + 11, 4, 2, P('#ffd060')); o.glow(x + 7, y + 11, 10, [255, 150, 70], .45);
+      o.rect(x + 13, y + 10, 7, 2, P('#3a3a42')); o.rect(x + 15, y + 12, 3, 3, P('#3a3a42'));
+      for (let i = 0; i < 4; i++) o.disc(x + 18 + i, y - 13 - i * 4, 2 + i * .4, [200, 200, 200], .45 - i * .08);
+    }
+    if (projects.garden) {       /* vegetable beds and flowers on the common */
+      for (let r = 0; r < 3; r++) { const y = 114 + r * 5; o.rect(80, y, 66, 3, P('#6a4528')); for (let x = 82; x < 144; x += 4) { o.set(x, y - 1, P(r === 1 ? '#e8c060' : '#5aa040')); o.set(x + 1, y - 2, P('#78c050')); if (r === 2 && x % 8 === 2) o.set(x, y - 2, P('#ff8aa0')); } }
+      o.rect(78, 112, 1, 16, P('#7a5230')); o.rect(147, 112, 1, 16, P('#7a5230'));
+    }
+  } else if (done) {
+    /* a restored regional town: bunting across the scene and one sign of the finished project */
+    const tint = { mossbarrow: '#d8b050', saltmere: '#4fb3c8', ironpeak: '#c8d0d8', gloomfen: '#c8ff8a', emberfall: '#ff8a3a', skyreach: '#f0c040', hollow: '#c07aff' }[id] || '#d8a64a';
+    for (let x = 12; x < 150; x++) { const y = 18 + Math.round(Math.sin((x - 12) / 138 * Math.PI) * 9); o.set(x, y, P('#5a4a3e')); if ((x - 12) % 10 === 0) o.poly([[x, y], [x + 6, y], [x + 3, y + 6]], P((x / 10) % 2 ? tint : '#f4efe4')); }
+    const bx = 14, by = 112;
+    if (projects.market) { o.rect(bx, by, 26, 10, P('#8a6038')); for (let i = 0; i < 26; i += 4) o.rect(bx + i, by - 6, 4, 6, P(i % 8 ? '#f4efe4' : '#c84a3a')); o.rect(bx + 3, by + 2, 5, 3, P('#e8c060')); o.rect(bx + 12, by + 2, 5, 3, P('#78c050')); }
+    if (projects.jetty) { o.rect(bx, by + 2, 12, 9, P('#8a6038')); o.rect(bx + 13, by + 4, 10, 7, P('#7a5230')); o.disc(bx + 30, by + 8, 3, P('#c8a060')); o.rect(bx, by + 2, 12, 1, P('#b08050')); }
+    if (projects.hearth) { o.rect(bx + 4, by + 4, 14, 6, P('#5a5a62')); o.rect(bx + 7, by, 8, 4, P('#ff8a3a')); o.rect(bx + 9, by - 3, 4, 3, P('#ffd060')); o.glow(bx + 11, by + 1, 12, [255, 150, 70], .45); }
+    if (projects.lanterns) for (let k = 0; k < 3; k++) { const x = bx + k * 14; o.rect(x, by - 10, 1, 20, P('#3a3046')); o.rect(x - 2, by - 13, 5, 4, P('#e8ffb0')); o.glow(x, by - 11, 8, [220, 255, 170], .5); }
+    if (projects.cistern) { o.ell(bx + 13, by + 6, 12, 5, P('#7a6a5a')); o.ell(bx + 13, by + 5, 9, 3, P('#5ab0d0')); o.set(bx + 10, by + 4, P('#d8f0f8')); }
+    if (projects.bridge) for (let k = 0; k < 5; k++) o.rect(bx + k * 6, by - 4, 4, 6, P(['#d84a3a', '#f0c040', '#4fb3c8', '#f4efe4', '#78c050'][k]));
+    if (projects.refuge) { o.poly([[bx, by + 10], [bx + 14, by - 6], [bx + 28, by + 10]], P('#5a4880')); o.rect(bx + 11, by + 2, 6, 8, P('#ffd98a')); o.glow(bx + 14, by + 5, 10, [255, 217, 138], .4); }
   }
   const cv = document.createElement('canvas'); cv.width = SW; cv.height = SH; cv.getContext('2d').putImageData(new ImageData(o.d, SW, SH), 0, 0);
   return (cache[key] = cv.toDataURL());
@@ -9972,20 +10013,43 @@ const S = () => DQ.S;
 DQ.questImpact = id => ({ first_steps: 'Restock Willowbrook’s timber supply.', hungry_cook: 'Bring Mabel’s kitchen back to life.' }[id] || '');
 D.PROJECTS = {
   well: { town: 'willowbrook', name: 'Restore the village well', cost: { log_normal: 20, coins: 25 }, reward: 'Resting health recovery is 10% faster.', story: 'Fresh water flows through Willowbrook again.' },
-  inn: { town: 'willowbrook', name: 'Reopen the village inn', cost: { log_normal: 10, shrimp: 12, coins: 50 }, reward: 'Food restores 5% more health.', story: 'The inn sign is back up. Mabel has a kitchen full of guests.' }
+  inn: { town: 'willowbrook', name: 'Reopen the village inn', cost: { log_normal: 10, shrimp: 12, coins: 50 }, reward: 'Food restores 5% more health.', story: 'The inn sign is back up. Mabel has a kitchen full of guests.' },
+  forge: { town: 'willowbrook', name: 'Rekindle the village forge', cost: { bar_bronze: 10, log_oak: 15, coins: 300 }, reward: 'Smithing is 5% faster.', story: 'Smoke curls from the forge chimney and the anvil rings across the green.', fx: { speed_smithing: .05 } },
+  garden: { town: 'willowbrook', name: 'Plant the village gardens', cost: { crop_potato: 15, crop_onion: 10, coins: 200 }, reward: 'Crops grow 5% faster.', story: 'Neat rows of vegetables and a riot of flowers fill the old common.', fx: { grow: .05 } },
+  library: { town: 'willowbrook', name: 'Reopen the reading room', cost: { log_oak: 25, feather: 20, coins: 800 }, reward: '+2% XP to every skill.', story: 'Lamps burn late in the reading room, and the shelves are full again.', fx: { xpAll: .02 } },
+  watchtower: { town: 'willowbrook', name: 'Raise the watchtower', cost: { log_oak: 40, bar_iron: 8, coins: 1500 }, reward: 'Monsters deal 2% less damage.', story: 'A sturdy watchtower stands over the road, a lantern burning at the top.', fx: { dr: .02 } }
 };
+/* A villager's reaction when a project is finished. Short, warm and in their own voice. */
+D.PROJECT_VOICES = {
+  well: ['Elder Wren', 'Cold, clear water. I had forgotten the sound of the bucket.'],
+  inn: ['Mabel the Cook', 'Sit, eat. The first bowl is always on the house for whoever fixed my sign.'],
+  forge: ['Old Brannoc', 'Hear that? The anvil sings again. Bring me ore whenever you like.'],
+  garden: ['Granny Bramble', 'Onions in rows, potatoes in hills. The bees will find us by morning.'],
+  library: ['Archivist Pell', 'Every shelf dusted. Every book a little less lonely.'],
+  watchtower: ['Captain Hale', 'From up here you can see the goblins coming. Mostly they turn round.'],
+  market: ['A Mossbarrow trader', 'A roof over the stalls! Prices are friendlier when nobody is wet.'],
+  jetty: ['A Saltmere dockhand', 'Boats tie up properly now. The gulls are furious.'],
+  hearth: ['An Ironpeak miner', 'Warm hands, steady picks. We owe you a pint and a pickaxe.'],
+  lanterns: ['A Gloomfen guide', 'Follow the lights and you will not follow the wisps.'],
+  cistern: ['A fireguard of Emberfall', 'Cool water at last. The courtyard steams like a kettle.'],
+  bridge: ['A Skyreach monk', 'The pilgrims cross singing. Some of them even in tune.'],
+  refuge: ['A weary traveller', 'Four walls and a fire, here of all places. Thank you.']
+};
+/* Regional projects use that region's own materials and give a distinct benefit. Every regional project also keeps the
+   original +2% resting recovery, so players who finished one before this change keep exactly what they had. */
 const regionalProjects = [
- ['mossbarrow','market','Repair the market shelter','The market stalls are sheltered and traders can return.',150,30],
- ['saltmere','jetty','Rebuild the fishing jetty','Fishing boats can unload safely at the repaired jetty.',500,50],
- ['ironpeak','hearth','Relight the communal hearth','The hold has a warm refuge for returning miners.',1200,70],
- ['gloomfen','lanterns','Restore the marsh lanterns','Lanterns mark a safe path through the marsh.',2500,90],
- ['emberfall','cistern','Repair the cooling cistern','Fresh water reaches the citadel courtyards again.',5000,110],
- ['skyreach','bridge','Repair the monastery bridge','Pilgrims can cross between the monastery peaks.',9000,130],
- ['hollow','refuge','Rebuild the travellers’ refuge','A welcoming refuge stands among the fallen kingdom’s ruins.',15000,150]
+ ['mossbarrow','market','Repair the market shelter','The market stalls are sheltered and traders can return.',{coins:150,log_normal:30,crop_potato:15},{coin:.03},'+3% coins from every source.'],
+ ['saltmere','jetty','Rebuild the fishing jetty','Fishing boats can unload safely at the repaired jetty.',{coins:500,log_oak:40,raw_sardine:25},{speed_fishing:.05},'Fishing is 5% faster.'],
+ ['ironpeak','hearth','Relight the communal hearth','The hold has a warm refuge for returning miners.',{coins:1200,log_willow:30,ore_coal:25},{speed_mining:.05},'Mining is 5% faster.'],
+ ['gloomfen','lanterns','Restore the marsh lanterns','Lanterns mark a safe path through the marsh.',{coins:2500,log_maple:30,bar_iron:15},{dr:.03},'Monsters deal 3% less damage.'],
+ ['emberfall','cistern','Repair the cooling cistern','Fresh water reaches the citadel courtyards again.',{coins:5000,log_yew:30,bar_steel:15},{heal:.05},'Food restores 5% more health.'],
+ ['skyreach','bridge','Repair the monastery bridge','Pilgrims can cross between the monastery peaks.',{coins:9000,log_magic:25,bar_mithril:12},{gather:.03},'Gathering is 3% faster.'],
+ ['hollow','refuge','Rebuild the travellers’ refuge','A welcoming refuge stands among the fallen kingdom’s ruins.',{coins:15000,log_elder:25,bar_adamant:12},{xpAll:.03},'+3% XP to every skill.']
 ];
-for(const [town,id,name,story,coins,logs] of regionalProjects)D.PROJECTS[id]={town,name,story,cost:{coins,log_normal:logs},reward:'Resting health recovery is 2% faster.',fx:{regen:.02}};
+for(const [town,id,name,story,cost,fx,reward] of regionalProjects)D.PROJECTS[id]={town,name,story,cost,reward:reward+' Resting health recovery is 2% faster.',fx:Object.assign({regen:.02},fx)};
 DQ.projectsForTown = town => Object.entries(D.PROJECTS).filter(([,p])=>p.town===town);
-const destinations = { boss: 'Defeat Grubnash', house: 'Build my first home', well: D.PROJECTS.well.name, inn: D.PROJECTS.inn.name };
+const destinations = { boss: 'Defeat Grubnash', house: 'Build my first home', well: D.PROJECTS.well.name, inn: D.PROJECTS.inn.name, village: 'Restore Willowbrook' };
+const nextVillageProject = () => DQ.projectsForTown('willowbrook').map(([id]) => id).find(id => !S().projects[id]);
 DQ.pinProject = id => {
   if (!D.PROJECTS[id]) return false;
   S().pinnedProject = S().pinnedProject === id ? null : id;
@@ -9994,6 +10058,7 @@ DQ.pinProject = id => {
 const step = (title, detail, action, a, b) => ({ title, detail, action, a, b });
 const task = (title, detail, kind, id) => step(title, detail, 'journeytask', kind, id);
 DQ.journeyNext = (id = S().journey || 'boss') => {
+  if (id === 'village') { const v = nextVillageProject(); return v ? DQ.journeyNext(v) : step('Willowbrook is restored', 'Every village project is complete. Its benefits are permanent.', 'go', 'projects'); }
   if (D.PROJECTS[id]) {
     const project = D.PROJECTS[id];
     if (S().projects[id]) return step('Project complete', project.story + ' ' + project.reward, 'go', 'map');
@@ -10003,7 +10068,17 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
       if (!DQ.have('raw_shrimp')) return task('Catch shrimp for the inn', 'The inn needs 12 cooked shrimp. Gather raw shrimp first.', 'fish', 'shrimp');
       return task('Cook for the inn', fmt(DQ.have('shrimp')) + ' / 12 cooked shrimp ready. Some attempts may burn.', 'recipe', 'cook_shrimp');
     }
-    if (DQ.have('log_normal') < project.cost.log_normal) return task('Gather timber', fmt(DQ.have('log_normal')) + ' / ' + project.cost.log_normal + ' logs ready.', 'wood', 'normal');
+    /* the first missing material, routed to where it comes from */
+    const missing = Object.entries(project.cost).find(([item, n]) => item !== 'coins' && DQ.have(item) < n);
+    if (missing) {
+      const [item, n] = missing, it = D.ITEMS[item], src = DQ.sourceOf ? DQ.sourceOf(item) : null, detail = fmt(DQ.have(item)) + ' / ' + n + ' ' + it.name.toLowerCase() + ' ready for ' + project.name.toLowerCase() + '.';
+      if (item === 'log_normal') return task('Gather timber', fmt(DQ.have(item)) + ' / ' + n + ' logs ready.', 'wood', 'normal');
+      if (src && src.skill && !DQ.skillUnlocked(src.skill)) return step('Unlock ' + D.SK[src.skill].name, it.name + ' comes from ' + D.SK[src.skill].name + '. ' + DQ.unlockHow(src.skill) + '.', 'go', src.page);
+      const verb = { fish: 'Catch', wood: 'Chop', mine: 'Mine', thieve: 'Steal', recipe: 'Make', fight: 'Hunt for' }[src && src.kind];
+      if (verb) return task(verb + ' ' + it.name.toLowerCase(), detail, src.kind, src.id);
+      if (src) return step('Get ' + it.name.toLowerCase(), detail, 'route', item);
+      return step('Find ' + it.name.toLowerCase(), detail, 'go', 'character');
+    }
     if (S().coins < project.cost.coins) return step('Raise the project funds', fmt(S().coins) + ' / ' + project.cost.coins + ' coins. Sell spare resources or claim quest rewards.', 'go', 'character');
     return step('Complete the project', project.reward + ' Materials are consumed once.', 'projectfinish', id);
   }
@@ -10045,7 +10120,9 @@ DQ.finishProject = id => {
   Object.entries(project.cost).forEach(([item, n]) => item === 'coins' ? S().coins -= n : DQ.take(item, n));
   S().projects[id] = true; DQ.fxDirty();
   DQ.log(project.story, 'good');
-  DQ.notify({ kind: 'quest', page: 'projects', key: 'project:' + id, title: project.name, text: project.story + ' ' + project.reward, icon: 'house', sound: 'quest' });
+  const voice = D.PROJECT_VOICES[id];
+  DQ.notify({ kind: 'quest', page: 'projects', key: 'project:' + id, title: project.name, text: project.story + ' ' + project.reward + (voice ? ` ${voice[0]}: “${voice[1]}”` : ''), icon: 'house', sound: 'quest' });
+  DQ.emit('project', id);
   DQ.save(); return true;
 };
 const actionHtml = next => `<button class="btn primary" data-do="${next.action}" data-a="${next.a || ''}" data-b="${next.b || ''}">${esc(next.title)}</button>`;
@@ -10058,7 +10135,7 @@ UI.projectPinHtml = () => {
 };
 UI.B.projectneed = (el, id, item) => {
   const required = D.PROJECTS[id].cost[item], held = item === 'coins' ? S().coins : DQ.have(item);
-  const label = item === 'coins' ? 'coins' : item === 'log_normal' ? 'logs' : 'shrimp';
+  const label = item === 'coins' ? 'coins' : item === 'log_normal' ? 'logs' : item === 'shrimp' ? 'shrimp' : D.ITEMS[item].name.toLowerCase();
   UI.set(el, `${Math.min(held, required)}/${required} ${label}`); el.classList.toggle('ok', held >= required);
 };
 UI.B.projectaction = (el, id) => UI.set(el, S().projects[id] ? 'View village' : DQ.journeyNext(id).title);
@@ -10077,7 +10154,7 @@ UI.projectsPanel = () => {
   return `<div class="town-project-workspace"><section class="panel"><div class="phead"><h2>${esc(D.TOWN[town].name)} · projects</h2>${pinButton(id)}</div><label class="page-picker" for="town-project">Project${UI.choiceButtons(`<select id="town-project" data-in="town-project">${entries.map(([key, p]) => `<option value="${key}" ${key === id ? 'selected' : ''}>${esc(p.name)}${S().projects[key] ? ' · Complete' : ''}</option>`).join('')}</select>`)}</label>
     ${done ? '<p class="ok">Completed · permanent benefit active</p>' : `<div class="btnrow"><button class="btn primary" data-do="${canFinish ? 'projectfinish' : 'projectnext'}" data-a="${id}">${canFinish ? 'Complete project' : 'Work on this project'}</button></div>`}
     <h3>${esc(project.name)}</h3><p>${esc(done ? project.story : project.reward)}</p>${done ? '' : `<div class="rws">${Object.entries(project.cost).map(([item, n]) => { const held = item === 'coins' ? S().coins : DQ.have(item); return `<span class="${held >= n ? 'ok' : 'bad'}">${fmt(held)} / ${n} ${item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase()}</span>${held < n && item !== 'coins' && UI.routeChip ? UI.routeChip(item) : ''}`; }).join('')}</div>`}</section>
-    <section class="panel town-projects"><div class="phead"><h2>A living ${esc(D.TOWN[town].name)}</h2></div>${UI.scene(town)}${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}${entries.filter(([key])=>S().projects[key]).map(([,p])=>`<p class="village-change">✓ ${esc(p.story)}</p>`).join('')}<p class="sm dim">Completed quests and projects change the village.</p></section></div>`;
+    <section class="panel town-projects"><div class="phead"><h2>A living ${esc(D.TOWN[town].name)}</h2></div>${UI.scene(town)}${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}${entries.filter(([key])=>S().projects[key]).map(([key,p])=>`<p class="village-change">✓ ${esc(p.story)}${D.PROJECT_VOICES[key]?`<span class="villager-line"><b>${esc(D.PROJECT_VOICES[key][0])}:</b> “${esc(D.PROJECT_VOICES[key][1])}”</span>`:''}</p>`).join('')}<p class="sm dim">Completed quests and projects change the village.</p></section></div>`;
 };
 UI.homeSections.unshift(UI.journeyPanel); /* the one primary objective leads Home */
 UI.V.projects = () => UI.projectsPanel();
@@ -10095,7 +10172,7 @@ Object.assign(UI.DO, {
     const next = DQ.journeyNext(id); UI.DO[next.action](next.a, next.b);
   },
   destination: id => { if (!destinations[id]) return; S().journey = id; DQ.save(); if (UI.view === 'overview') UI.render(false); else DQ.go('overview'); },
-  journeytask: (kind, id) => { DQ.closeModal(); if (DQ.startAct(kind, id, { quiet: true })) DQ.go(DQ.actPage()); },
+  journeytask: (kind, id) => { DQ.closeModal(); if (DQ.startAct(kind, id, { quiet: true })) DQ.go(DQ.actPage()); else { const page = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving', fight: 'combat' }[kind] || (kind === 'recipe' && D.RECIPES[id] ? D.SK[D.RECIPES[id].skill].page : null); if (page) { if (UI.taskChoice) UI.taskChoice[page] = id; DQ.go(page); } } },
   journeytravel: id => { DQ.closeModal(); DQ.travel(id); DQ.go('overview'); },
   projectfinish: id => { if (DQ.finishProject(id)) UI.render(false); },
   safetyexport: () => DQ.downloadSave(),

@@ -349,7 +349,7 @@ test('battle forecasts emit no live UI events, including equipment comparisons',
  q.emit('act');assert.deepEqual(events,['act'],'Live events must resume after the forecast');
 });
 test('regional projects follow the current town and grant their benefit only once',()=>{
- const {q,load}=harness();load('fx');q.S.coins=100000;q.S.inv.log_normal=1000;
+ const {q,load}=harness();load('fx');q.S.coins=100000;q.S.inv.log_normal=1000;q.S.inv.crop_potato=50;
  assert.equal(q.finishProject('market'),false);q.S.town='mossbarrow';assert.equal(q.noticeCount('projects'),1);
  const coins=q.S.coins,regen=q.fx().regen;assert.equal(q.finishProject('market'),true);assert.equal(q.S.coins,coins-150);assert.ok(Math.abs(q.fx().regen-regen-.02)<1e-9);
  assert.equal(q.finishProject('market'),false);assert.equal(q.noticeCount('projects'),0);
@@ -401,5 +401,24 @@ test('boss preparation follows the battle forecast and caches it',()=>{
  S.journey='boss';const a=q.bossForecast('grubnash'),b=q.bossForecast('grubnash');assert.ok(a&&a===b,'second call uses the cache');
  const next=q.journeyNext();assert.ok(a.winRate>=.75?next.title==='Challenge Grubnash':/food|stronger|provisions/i.test(next.title),next.title);
  q.forecasting=true;assert.equal(q.bossForecast('grubnash'),null,'never nests inside another forecast');q.forecasting=false;
+});
+test('restoration: new Willowbrook projects, regional materials, villager voices and legacy bonuses',()=>{
+ const {q,load}=harness();load('fx');load('routes');const S=q.S,D=q.data;S.coins=1e6;
+ const wb=q.projectsForTown('willowbrook').map(([id])=>id);for(const id of ['well','inn','forge','garden','library','watchtower'])assert.ok(wb.includes(id),id);
+ for(const [id,p] of Object.entries(D.PROJECTS)){assert.ok(D.PROJECT_VOICES[id],'voice for '+id);for(const item of Object.keys(p.cost))assert.ok(item==='coins'||D.ITEMS[item],id+' cost item '+item);}
+ // a skill-specific bonus applies once and never produces NaN
+ S.inv.bar_bronze=10;S.inv.log_oak=15;const before=q.fx().speed.smithing||0;assert.equal(q.finishProject('forge'),true);
+ assert.ok(Math.abs((q.fx().speed.smithing||0)-before-.05)<1e-9);assert.ok(Object.values(q.fx()).every(v=>typeof v==='object'||Number.isFinite(v)));
+ // a save that finished a regional project before this update keeps +2% regen and gains the new reward
+ const regen0=q.fx().regen,coin0=q.fx().coin;S.projects.jetty=true;q.fxDirty();
+ assert.ok(Math.abs(q.fx().regen-regen0-.02)<1e-9);assert.ok(Math.abs((q.fx().speed.fishing||0)-.05)<1e-9);assert.equal(q.fx().coin,coin0);
+ const save=q.exportSave();assert.equal(q.importSave(save),true);assert.equal(q.S.projects.forge,true);assert.equal(q.S.projects.jetty,true);
+});
+test('the Restore Willowbrook destination follows the next unfinished project and routes missing materials',()=>{
+ const {q,load}=harness();load('routes');const S=q.S;S.journey='village';S.projects.well=true;S.projects.inn=true;
+ const step=q.journeyNext('village');assert.ok(/smithing|bronze/i.test(step.title+step.detail),step.title);
+ S.unlocked.smithing=true;S.xp.smithing=q.data.XPF[5];S.xp.fishing=q.data.XPF[40];const s2=q.journeyNext('forge');assert.equal(s2.action,'journeytask');assert.equal(s2.a,'recipe');
+ for(const id of Object.keys(q.data.PROJECTS))if(q.data.PROJECTS[id].town==='willowbrook')S.projects[id]=true;
+ assert.equal(q.journeyNext('village').title,'Willowbrook is restored');
 });
 console.log(tests+' regression checks passed');

@@ -20,7 +20,9 @@ DQ.fx = () => {
   if (DQ.techFx) DQ.techFx(f);
   if (S().projects && S().projects.well) f.regen += .1;
   if (S().projects && S().projects.inn) f.heal += .05;
-  for(const [id,p] of Object.entries(D.PROJECTS||{}))if(S().projects[id]&&p.fx)for(const [key,value] of Object.entries(p.fx))f[key]+=value;
+  for(const [id,p] of Object.entries(D.PROJECTS||{}))if(S().projects[id]&&p.fx)for(const [key,value] of Object.entries(p.fx)){
+    if(key.startsWith('speed_'))f.speed[key.slice(6)]=(f.speed[key.slice(6)]||0)+value; else if(key.startsWith('xp_'))f.xp[key.slice(3)]=(f.xp[key.slice(3)]||0)+value; else f[key]=(f[key]||0)+value;
+  }
   f.dmg += f.trophy * Object.values(S().towns).filter(t => t.boss).length;
   const ap = S().pets.active && D.PET[S().pets.active];
   if (ap) {

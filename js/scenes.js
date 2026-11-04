@@ -228,7 +228,8 @@ DQ.sceneUrl = id => {
   const stocked = DQ.S.q.first_steps && DQ.S.q.first_steps.s === 'done';
   const kitchen = DQ.S.q.hungry_cook && DQ.S.q.hungry_cook.s === 'done';
   const safe = DQ.S.towns[id] && DQ.S.towns[id].boss;
-  const key = id + ':' + !!projects.well + ':' + !!projects.inn + ':' + !!stocked + ':' + !!kitchen + ':' + !!safe;
+  const done = Object.keys(DQ.data.PROJECTS || {}).filter(k => DQ.data.PROJECTS[k].town === id && projects[k]).sort().join(',');
+  const key = id + ':' + done + ':' + !!stocked + ':' + !!kitchen + ':' + !!safe;
   if (cache[key]) return cache[key]; if (!S[id]) return null;
   const o = pic(); try { S[id](o); } catch (e) { console.error('scene', id, e); return null; }
   if (safe) {
@@ -253,6 +254,42 @@ DQ.sceneUrl = id => {
       o.rect(175, 69, 4, 29, P('#795039')); o.rect(161, 71, 30, 15, P('#e2ba69'));
       o.rect(169, 76, 12, 6, P('#805139')); o.rect(180, 76, 3, 7, P('#805139'));
     }
+    if (projects.watchtower) {   /* timber tower in the gap behind the fence, lantern lit */
+      const x = 140; o.rect(x, 52, 2, 52, P('#6a4528')); o.rect(x + 12, 52, 2, 52, P('#5a3a22'));
+      for (let y = 60; y < 100; y += 10) { o.line(x, y, x + 13, y + 9, P('#7a5230')); o.line(x + 13, y, x, y + 9, P('#6a4528')); }
+      o.rect(x - 3, 46, 20, 7, P('#8a6038')); o.rect(x - 3, 46, 20, 1, P('#b08050')); o.poly([[x - 5, 46], [x + 7, 34], [x + 19, 46]], P('#8a3f30'));
+      o.rect(x + 5, 48, 4, 3, P('#ffe08a')); o.glow(x + 7, 49, 9, [255, 224, 138], .45);
+    }
+    if (projects.library) {      /* stone reading room with warm windows */
+      const x = 196, y = 84; o.rect(x, y, 30, 19, P('#a69f92')); for (let i = 0; i < 30; i += 5) o.rect(x + i, y, 1, 19, P('#8f887c'));
+      o.rect(x, y + 6, 30, 1, P('#8f887c')); o.rect(x, y + 12, 30, 1, P('#8f887c'));
+      o.poly([[x - 2, y + 1], [x + 15, y - 11], [x + 32, y + 1]], P('#4f5f72')); o.line(x - 2, y + 1, x + 15, y - 11, P('#6f8296'));
+      o.rect(x + 4, y + 5, 5, 6, P('#ffd98a')); o.rect(x + 21, y + 5, 5, 6, P('#ffd98a')); o.rect(x + 12, y + 9, 6, 10, P('#5a3a22'));
+      o.rect(x + 11, y - 3, 8, 3, P('#e8d8b0')); o.rect(x + 13, y - 2, 4, 1, P('#7a5230'));
+    }
+    if (projects.forge) {        /* smithy between the stream and the well, glowing hearth and smoke */
+      const x = 250, y = 88; o.rect(x, y, 22, 15, P('#7a6a5a')); o.rect(x, y, 22, 2, P('#5a4a3e'));
+      o.poly([[x - 2, y + 1], [x + 11, y - 7], [x + 24, y + 1]], P('#5a4a3e')); o.rect(x + 16, y - 10, 4, 8, P('#6a5a4e'));
+      o.rect(x + 3, y + 5, 8, 10, P('#2a1a12')); o.rect(x + 4, y + 9, 6, 5, P('#ff8a3a')); o.rect(x + 5, y + 11, 4, 2, P('#ffd060')); o.glow(x + 7, y + 11, 10, [255, 150, 70], .45);
+      o.rect(x + 13, y + 10, 7, 2, P('#3a3a42')); o.rect(x + 15, y + 12, 3, 3, P('#3a3a42'));
+      for (let i = 0; i < 4; i++) o.disc(x + 18 + i, y - 13 - i * 4, 2 + i * .4, [200, 200, 200], .45 - i * .08);
+    }
+    if (projects.garden) {       /* vegetable beds and flowers on the common */
+      for (let r = 0; r < 3; r++) { const y = 114 + r * 5; o.rect(80, y, 66, 3, P('#6a4528')); for (let x = 82; x < 144; x += 4) { o.set(x, y - 1, P(r === 1 ? '#e8c060' : '#5aa040')); o.set(x + 1, y - 2, P('#78c050')); if (r === 2 && x % 8 === 2) o.set(x, y - 2, P('#ff8aa0')); } }
+      o.rect(78, 112, 1, 16, P('#7a5230')); o.rect(147, 112, 1, 16, P('#7a5230'));
+    }
+  } else if (done) {
+    /* a restored regional town: bunting across the scene and one sign of the finished project */
+    const tint = { mossbarrow: '#d8b050', saltmere: '#4fb3c8', ironpeak: '#c8d0d8', gloomfen: '#c8ff8a', emberfall: '#ff8a3a', skyreach: '#f0c040', hollow: '#c07aff' }[id] || '#d8a64a';
+    for (let x = 12; x < 150; x++) { const y = 18 + Math.round(Math.sin((x - 12) / 138 * Math.PI) * 9); o.set(x, y, P('#5a4a3e')); if ((x - 12) % 10 === 0) o.poly([[x, y], [x + 6, y], [x + 3, y + 6]], P((x / 10) % 2 ? tint : '#f4efe4')); }
+    const bx = 14, by = 112;
+    if (projects.market) { o.rect(bx, by, 26, 10, P('#8a6038')); for (let i = 0; i < 26; i += 4) o.rect(bx + i, by - 6, 4, 6, P(i % 8 ? '#f4efe4' : '#c84a3a')); o.rect(bx + 3, by + 2, 5, 3, P('#e8c060')); o.rect(bx + 12, by + 2, 5, 3, P('#78c050')); }
+    if (projects.jetty) { o.rect(bx, by + 2, 12, 9, P('#8a6038')); o.rect(bx + 13, by + 4, 10, 7, P('#7a5230')); o.disc(bx + 30, by + 8, 3, P('#c8a060')); o.rect(bx, by + 2, 12, 1, P('#b08050')); }
+    if (projects.hearth) { o.rect(bx + 4, by + 4, 14, 6, P('#5a5a62')); o.rect(bx + 7, by, 8, 4, P('#ff8a3a')); o.rect(bx + 9, by - 3, 4, 3, P('#ffd060')); o.glow(bx + 11, by + 1, 12, [255, 150, 70], .45); }
+    if (projects.lanterns) for (let k = 0; k < 3; k++) { const x = bx + k * 14; o.rect(x, by - 10, 1, 20, P('#3a3046')); o.rect(x - 2, by - 13, 5, 4, P('#e8ffb0')); o.glow(x, by - 11, 8, [220, 255, 170], .5); }
+    if (projects.cistern) { o.ell(bx + 13, by + 6, 12, 5, P('#7a6a5a')); o.ell(bx + 13, by + 5, 9, 3, P('#5ab0d0')); o.set(bx + 10, by + 4, P('#d8f0f8')); }
+    if (projects.bridge) for (let k = 0; k < 5; k++) o.rect(bx + k * 6, by - 4, 4, 6, P(['#d84a3a', '#f0c040', '#4fb3c8', '#f4efe4', '#78c050'][k]));
+    if (projects.refuge) { o.poly([[bx, by + 10], [bx + 14, by - 6], [bx + 28, by + 10]], P('#5a4880')); o.rect(bx + 11, by + 2, 6, 8, P('#ffd98a')); o.glow(bx + 14, by + 5, 10, [255, 217, 138], .4); }
   }
   const cv = document.createElement('canvas'); cv.width = SW; cv.height = SH; cv.getContext('2d').putImageData(new ImageData(o.d, SW, SH), 0, 0);
   return (cache[key] = cv.toDataURL());

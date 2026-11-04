@@ -1786,3 +1786,4 @@ h3 { font-size:17px; }
 .returnbar{display:flex;align-items:center;gap:6px;margin:0 0 10px}
 .returnbar .btn .ic{transform:rotate(180deg)}
 .returnbar .n-x{position:static}
+.villager-line{display:block;margin-top:3px;font-style:italic;color:var(--mute)}.villager-line b{font-style:normal;color:var(--ink)}

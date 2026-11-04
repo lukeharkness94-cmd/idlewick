@@ -177,3 +177,10 @@ Approved roadmap stages are implemented in order. Research/Scholarship lives in 
 - Boss preparation follows the cached battle forecast (`DQ.bossForecast`): at 75%+ wins it says challenge; otherwise it asks for food sized to the forecast's food-per-kill, or a little more strength. The old fixed "five health bars" target is gone.
 - `js/routes.js`: `DQ.sourceOf(item)` finds the earliest source (gathering node, crop, animal, recipe, shop, creature drop). `UI.routeChip(item)` appears beside missing recipe ingredients, town project costs and Scholarship costs; it opens the page with the right card selected. A "Back to …" bar returns to where you were; hub navigation clears it. Locked skills open their explanation page.
 - Validation: 54 regressions, ui-current and the 600-case ui-audit.
+
+### Stage 3: Willowbrook and regional restoration
+- Willowbrook gains four projects after the well and inn: forge (Smithing 5% faster), gardens (crops 5% faster), reading room (+2% XP) and watchtower (monsters deal 2% less damage). Each adds a visible prop to the Willowbrook scene; the scene cache key now includes every finished project for that town.
+- Regional projects use their region's materials (crops, fish, ore, logs and bars) and each grants a distinct benefit. All seven still include the original +2% resting recovery, so saves that finished one earlier keep exactly what they had and gain the new effect. Restored regional towns show bunting and one project-specific prop.
+- `D.PROJECT_VOICES`: a one-line villager reaction appears in the completion card and the "A living …" panel. Project completions are now visible cards (`project:` keys use the `now` tier).
+- A "Restore Willowbrook" destination follows the next unfinished village project. Project steps route the first missing material to its source (or explain the locked skill). Journey tasks that cannot start open the activity page instead of doing nothing.
+- Project benefits support `speed_<skill>` and `xp_<skill>` keys. Validation: 56 regressions, ui-current and the 600-case ui-audit.
