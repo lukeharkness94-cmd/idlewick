@@ -5,6 +5,8 @@ const S = () => DQ.S, set = UI.set;
 Object.assign(UI, { seed: null, beastTab: 'monsters' });
 const GT = () => S().gameTime || 0;
 const left = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`; };
+const plotArt = (p, st) => { const c = p.crop && D.CROP[p.crop]; return c ? DQ.plantSprite(Math.max(0, st), c.col, 64) : DQ.plantSprite(0, '#000', 64); };
+const plotLabel = (p, st) => { const c = p.crop && D.CROP[p.crop]; return !c ? 'Empty plot: plant a seed' : st === 3 ? `${c.name}: ready to harvest` : `${c.name}: growing, ${Math.floor(DQ.plotPct(p) * 100)}%`; };
 const stageOf = p => !p.crop ? -1 : DQ.plotRipe(p) ? 3 : DQ.plotPct(p) < .08 ? 0 : DQ.plotPct(p) < .45 ? 1 : 2;
 const costChips = cost => Object.entries(cost).map(([k, n]) => k === 'coins' ? `<span class="rw ${S().coins >= n ? '' : 'short'}" style="--c:#f3d58a">${ico('coin')}${fmt(n)}</span>` : `<span class="rw ${DQ.have(k) >= n ? '' : 'short'}" style="--c:${D.ITEMS[k].col}" data-tip="item:${k}">${ico(D.ITEMS[k].ic)}${fmtK(DQ.have(k))}/${n} ${D.ITEMS[k].name.toLowerCase()}</span>`).join('');
 
@@ -12,7 +14,14 @@ const costChips = cost => Object.entries(cost).map(([k, n]) => k === 'coins' ? `
 Object.assign(UI.B, {
   plot: (e, a) => {
     const p = S().farm.plots[a]; if (!p) return; const st = stageOf(p), c = p.crop && D.CROP[p.crop];
-    if (e._st !== st) { e._st = st; e.classList.toggle('ripe', st === 3); const img = $('img.px', e); if (img && c) img.src = DQ.pxUrl('plant' + st, { o: c.col }); }
+    /* live growth: re-render through the shared plant renderer (painted or fallback) whenever the crop or its stage changes */
+    const key = (p.crop || '') + ':' + st + ':' + (DQ.artCompletionReady && DQ.artCompletionReady('farm-growth') ? 1 : 0);
+    if (e._st !== key) {
+      e._st = key; e.classList.toggle('ripe', st === 3); e.classList.toggle('empty', !c);
+      const spr = $('.pspr', e); if (spr) spr.innerHTML = plotArt(p, st);
+      const name = $('b', e); if (name) set(name, c ? c.name : 'Empty plot');
+      e.setAttribute('aria-label', plotLabel(p, st));
+    }
     const bar = $('.pbar i', e); if (bar) bar.style.width = (DQ.plotPct(p) * 100) + '%';
     const t = $('.ptime', e); if (t) set(t, !c ? 'Empty' : st === 3 ? 'Ready to harvest' : left(p.at + p.dur - GT()));
   },
@@ -38,8 +47,8 @@ UI.V.farming = () => {
   if (!UI.seed || !DQ.have('seed_' + UI.seed)) UI.seed = (seedIds.find(c => c.id === F.next) || seedIds.find(c => c.id === F.last) || seedIds[0] || {}).id || null;
   const plots = F.plots.map((p, i) => {
     const c = p.crop && D.CROP[p.crop], st = stageOf(p);
-    return `<button class="plot ${c ? '' : 'empty'} ${st === 3 ? 'ripe' : ''}" data-i="${i}" data-b="plot:${i}" data-do="plot" data-a="${i}" style="--c:${c ? c.col : '#7a5230'}">
-      <span class="pspr">${c ? DQ.plantSprite(Math.max(0, st), c.col, 64) : DQ.plantSprite(0, '#000', 64)}</span>
+    return `<button class="plot ${c ? '' : 'empty'} ${st === 3 ? 'ripe' : ''}" data-i="${i}" data-b="plot:${i}" data-do="plot" data-a="${i}" aria-label="${esc(plotLabel(p, st))}" style="--c:${c ? c.col : '#7a5230'}">
+      <span class="pspr">${plotArt(p, st)}</span>
       <b>${c ? c.name : 'Empty plot'}</b><small class="ptime mono"></small><span class="bar pbar"><i></i></span></button>`;
   }).join('');
   const nextPlot = D.PLOT_PRICES[F.plotsBought];

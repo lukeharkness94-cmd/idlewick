@@ -67,9 +67,11 @@ Q.artImage = (kind, id, size = 96, cls = '', alt = '') => {
 const entryAnywhere = id => { for (const s of Object.keys(M)) if (M[s].e[id]) return s; return null; };
 const plant0 = Q.plantSprite;
 Q.plantSprite = (stage, col, size = 96, cls = '') => {
-  const c0 = D.CROPS.find(c => c.col === col), id = !c0 ? null : stage >= 3 ? c0.id + '-mature' : stage === 0 ? 'soil' : c0.id + '-stage' + stage;
+  /* an empty plot (no matching crop) shows freshly turned soil */
+  const c0 = D.CROPS.find(c => c.col === col), id = !c0 ? (stage === 0 ? 'soil' : null) : stage >= 3 ? c0.id + '-mature' : stage === 0 ? 'soil' : c0.id + '-stage' + stage;
   const sheet = id && entryAnywhere(id), url = sheet && crop(sheet, id, 192);
-  return url ? img(url, size, cls, c0.name + (stage >= 3 ? ' ready to harvest' : ' growing')) : plant0(stage, col, size, cls);
+  const alt = !c0 ? 'Empty soil' : c0.name + (stage >= 3 ? ' ready to harvest' : stage === 0 ? ' just sown' : ' growing');
+  return url ? img(url, size, cls, alt) : plant0(stage, col, size, cls);
 };
 const animal0 = Q.animalSprite;
 Q.animalSprite = (a, size = 96, cls = '') => { const url = a && a.id === 'bees' && crop('mining-targets', 'beehive', 192); return url ? img(url, size, cls, a.name) : animal0(a, size, cls); };
