@@ -1,7 +1,7 @@
 /* All-page experience audit. Uses a fresh isolated browser profile. */
 const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs');
 (async()=>{
- const b=await chromium.launch({headless:true,args:['--no-sandbox'],executablePath:'/usr/bin/chromium'});
+ const b=await chromium.launch({headless:true,args:['--no-sandbox'],...(fs.existsSync('/usr/bin/chromium')?{executablePath:'/usr/bin/chromium'}:{})});
  try{
  const p=await b.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));
  await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/');await p.locator('#t-new').click();await p.locator('#crname').fill('Audit');await p.locator('#cr-go').click();

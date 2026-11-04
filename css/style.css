@@ -1770,3 +1770,11 @@ h3 { font-size:17px; }
  .sidebar .rail .hub>.ic { width:24px; height:24px; }
 }
 @media(min-width:861px) and (max-width:1500px){.h-meta{display:none}.h-task{min-width:260px}.h-name{max-width:170px}}
+
+/* ---------- Farming: first animal guidance and a gentle spotlight on the market row ---------- */
+.first-animal{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--brass) 55%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--brass) 8%,var(--panel2))}
+.first-animal>div{flex:1;min-width:180px;display:flex;flex-direction:column;gap:2px}.first-animal small{color:var(--mute)}
+.pen.emptypen{cursor:pointer;text-align:left;font:inherit;color:inherit}
+.srow.spotlight{animation:spotlight 1.8s ease-out}
+@keyframes spotlight{0%,35%{box-shadow:0 0 0 2px var(--brass),0 0 18px -4px var(--brass)}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){.srow.spotlight{animation:none;box-shadow:0 0 0 2px var(--brass)}}

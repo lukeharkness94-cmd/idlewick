@@ -154,4 +154,15 @@ setInterval(() => {
     health.querySelector('#save-reload').onclick = () => location.reload();
   }
 }, 500);
+
+/* Starting a task First Steps asks for accepts it, so a new hero's first catches and logs always count. */
+const startAct0 = DQ.startAct;
+DQ.startAct = (kind, id, o = {}) => {
+  const r = startAct0(kind, id, o);
+  const first = D.QM.first_steps;
+  if (r && !DQ.forecasting && !(DQ.sim && DQ.sim.on) && first && DQ.questState(first) === 'new' && first.obj.some(ob => ({ fish: 'catch', wood: 'chop' })[kind] === ob.ev && (ob.key === id || ob.key === '*'))) {
+    DQ.startQuest('first_steps'); DQ.toast && DQ.toast('First Steps accepted: your catch now counts toward it');
+  }
+  return r;
+};
 })();

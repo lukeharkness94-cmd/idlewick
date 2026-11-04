@@ -364,4 +364,24 @@ test('exploration summaries use town-specific saved discoveries and quest progre
 test('forecast-time save attempts cannot persist trial progression',()=>{
  const {q,storage}=harness();q.save();const before=[...storage.entries()];q.forecasting=true;q.S.coins+=99999;assert.equal(q.save(),false);assert.deepEqual([...storage.entries()],before);
 });
+test('auto-replant plants the chosen seed, falls back to the harvested crop, and the choice survives a save',()=>{
+ const {q}=harness();const S=q.S,D=q.data,crops=()=>[...S.farm.plots.map(p=>p.crop)];S.unlocked.farming=true;S.xp.farming=D.XPF[20];S.inv.seed_potato=6;S.inv.seed_onion=3;S.farm.autoReplant=true;
+ assert.equal(q.plantAll('potato'),3);S.farm.next='onion';S.farm.plots.forEach(p=>p.at-=1e12);q.harvestAll();
+ assert.deepEqual(crops(),['onion','onion','onion'],'the chosen seed is replanted');
+ assert.equal(q.have('seed_onion'),0);S.farm.plots.forEach(p=>p.crop=null);S.inv.seed_potato=6;q.plantAll('potato');S.farm.plots.forEach(p=>p.at-=1e12);q.harvestAll();
+ assert.deepEqual(crops(),['potato','potato','potato'],'with no chosen seeds left, each plot replants what it grew');
+ const save=q.exportSave();assert.equal(q.importSave(save),true);assert.equal(q.S.farm.next,'onion');
+});
+test('without a chosen seed, auto-replant keeps the harvested crop and older saves gain the field safely',()=>{
+ const {q}=harness();const S=q.S,D=q.data;S.unlocked.farming=true;S.xp.farming=D.XPF[5];S.inv.seed_potato=6;delete S.farm.next;
+ const save=q.exportSave();assert.equal(q.importSave(save),true);assert.equal(q.S.farm.next,null);
+ q.S.unlocked.farming=true;q.S.xp.farming=D.XPF[20];q.S.inv.seed_potato=6;q.plantAll('potato');q.S.farm.plots.forEach(p=>p.at-=1e12);q.harvestAll();
+ assert.ok([...q.S.farm.plots].every(p=>p.crop==='potato'));
+});
+test('starting a First Steps task accepts the quest so the first catches count, once',()=>{
+ const {q}=harness();assert.equal(q.questState(q.data.QM.first_steps),'new');
+ q.startAct('fish','shrimp',{quiet:true});assert.equal(q.questState(q.data.QM.first_steps),'active');
+ q.stopAct(true);q.startAct('wood','normal',{quiet:true});assert.equal(q.questState(q.data.QM.first_steps),'active');
+ const {q:q2}=harness();q2.forecasting=true;q2.startAct('fish','shrimp',{quiet:true});q2.forecasting=false;assert.equal(q2.questState(q2.data.QM.first_steps),'new','forecasts never accept quests');
+});
 console.log(tests+' regression checks passed');

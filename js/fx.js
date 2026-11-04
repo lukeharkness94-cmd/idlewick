@@ -174,10 +174,11 @@ DQ.notify = o => {
   const tier = DQ.notificationTier(o);
   if (tier === 'quiet') { markSilent(o, true); return; }
   if (o.key) { $$('.note', notesEl).filter(n => n.dataset.key === o.key).forEach(n => n.remove()); const i = queue.findIndex(q => q.key === o.key); if (i >= 0) queue.splice(i, 1); }
-  if (document.hidden || nowLive() >= MAX_NOW) { queue.push(o); return; }
+  if (document.hidden || DQ.holdNotes || nowLive() >= MAX_NOW) { queue.push(o); return; }
   showNote(o);
 };
-function pump() { if (document.hidden) return; while (queue.length && nowLive() < MAX_NOW) showNote(queue.shift()); }
+/* Cards wait behind the welcome-back summary, then follow it one at a time. */
+function pump() { if (document.hidden || DQ.holdNotes) return; while (queue.length && nowLive() < MAX_NOW) showNote(queue.shift()); }
 
 const trunc = (t, n) => { t = String(t || '').replace(/<[^>]+>/g, ''); return t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t; };
 /* The bell keeps routine information; actionable alerts appear in context. */
@@ -250,6 +251,7 @@ DQ.closeModal = () => {
   for (const [el, inert] of inertBefore) el.inert = inert;
   inertBefore.clear();
   if (modalTrigger && modalTrigger.isConnected) modalTrigger.focus();
+  if (DQ.holdNotes) { DQ.holdNotes = false; setTimeout(pump, 250); }
 };
 DQ.modal = o => {
   DQ.closeModal(); modalTrigger = document.activeElement;

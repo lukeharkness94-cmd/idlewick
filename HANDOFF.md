@@ -63,7 +63,7 @@ Every skill and Hero level now uses a blocking `level-reveal` modal with its emb
 - Core checks: `node tests/regression.cjs` (no npm dependencies).
 - Optional art check: `node tests/art-smoke.cjs` with `@napi-rs/canvas` installed. Set `ART_PREVIEW` to a PNG output path for a contact sheet.
 - Rebuild: `python3 scripts/package-game.py`. Do not hand-edit the generated HTML.
-- Historical Playwright experiments in tests/ predate this UI, include obsolete selectors and absolute paths, and are not the current regression suite.
+- Current browser suites: `node tests/ui-current.cjs` and `node tests/ui-audit.cjs` (Playwright; start the preview first, or set `IDLEWICK_URL`). Both use the system Chromium when present, otherwise Playwright's bundled browser. The old historical experiments were removed from tests/.
 
 ## Architecture
 
@@ -159,3 +159,15 @@ Validation:49 core regressions, desktop storage checks, JavaScript syntax and di
 ## Branch consolidation — latest instruction
 
 `main` is now the sole branch. Both remote branches had identical history at da7e54e (zero unique commits on either side), so no merge was necessary. The redundant `work` branch was removed at the user’s request. This supersedes earlier references to maintaining or pushing both branches. Continue from `main` only.
+
+
+## 2026-11-04 Claude Code: Living World update (in progress)
+
+Approved roadmap stages are implemented in order. Research/Scholarship lives in the **Skills** hub (this supersedes the older note placing it under World).
+
+### Stage 1: confirmed bugs and farming
+- Auto-replant now plants the player's chosen seed (`farm.next`, saved; older saves default to null) when seeds and level allow, otherwise the harvested crop as before. Workers keep their own crop. Choosing a seed persists across reloads.
+- Pens render above the animal market. With no animals, a "Your pens are empty" card offers "Find a hen", which scrolls to and spotlights the Hen row and focuses Buy (never buys). Empty pens are buttons to the same route. Locked seeds say "Needs Farming N".
+- Starting a task that First Steps asks for accepts First Steps automatically (never during forecasts or offline simulation), so a new hero's first catches and logs count.
+- Cards are held behind the welcome-back summary (`DQ.holdNotes`) and follow it after Continue. Level reveals are unchanged.
+- Repaired stale browser tests after the Scholarship and painted-model changes; removed obsolete historical scripts. Validation: 52 regressions, desktop storage, ui-current (all widths, both themes) and the 600-case ui-audit pass.

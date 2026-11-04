@@ -35,7 +35,7 @@ Object.assign(UI.B, {
 UI.V.farming = () => {
   const F = S().farm; DQ.syncPlots();
   const seedIds = D.CROPS.filter(c => DQ.have('seed_' + c.id));
-  if (!UI.seed || !DQ.have('seed_' + UI.seed)) UI.seed = (seedIds.find(c => c.id === F.last) || seedIds[0] || {}).id || null;
+  if (!UI.seed || !DQ.have('seed_' + UI.seed)) UI.seed = (seedIds.find(c => c.id === F.next) || seedIds.find(c => c.id === F.last) || seedIds[0] || {}).id || null;
   const plots = F.plots.map((p, i) => {
     const c = p.crop && D.CROP[p.crop], st = stageOf(p);
     return `<button class="plot ${c ? '' : 'empty'} ${st === 3 ? 'ripe' : ''}" data-i="${i}" data-b="plot:${i}" data-do="plot" data-a="${i}" style="--c:${c ? c.col : '#7a5230'}">
@@ -45,20 +45,21 @@ UI.V.farming = () => {
   const nextPlot = D.PLOT_PRICES[F.plotsBought];
 
   const pens = Array.from({ length: F.pensBought }, (_, i) => {
-    const an = F.animals[i]; if (!an) return `<div class="pen emptypen"><span>${ico('barn')}</span><b>Empty pen</b><small>Buy an animal from the market</small></div>`;
+    const an = F.animals[i]; if (!an) return `<button class="pen emptypen" data-do="farmmarket" data-a="hen"><span>${ico('barn')}</span><b>Empty pen</b><small>${DQ.townUnlocked('mossbarrow') ? 'Buy an animal below' : 'The livestock trader is in Mossbarrow'}</small></button>`;
     const A = D.ANIMAL[an.id], pr = D.ITEMS[A.prod];
     return `<div class="pen" data-i="${i}" data-b="pen:${i}" style="--c:${A.col}"><button class="pspr" data-do="petanimal" data-a="${i}" data-tip="text:Pet ${esc(an.name)}: makes them work 25% faster for 3 minutes">${DQ.animalSprite(A, 64, 'bob')}</button>
       <div class="pen-t"><b>${esc(an.name)}</b><small>${A.name} · makes ${pr.name.toLowerCase()} every ${left(DQ.animalPeriod(an))}</small><span class="bar pbar"><i></i></span><small><span class="pst mono"></span> ${pr.name.toLowerCase()} ready <span class="tag hungrytag">Hungry</span><span class="tag happytag">Happy</span></small></div>
       <button class="btn sm" data-do="collect" data-a="${i}">Collect</button></div>`;
   }).join('');
   const nextPen = D.PEN_PRICES[F.pensBought], mossOpen = DQ.townUnlocked('mossbarrow');
-  const market = D.ANIMALS.map(a => { const lock = DQ.lvl('farming') < a.lvl; return `<div class="srow ${lock || S().coins < a.price ? 'cant' : ''}"><span class="mini">${DQ.animalSprite(a, 40)}</span><div class="sr-t"><b>${a.name}</b><small>Makes ${D.ITEMS[a.prod].name.toLowerCase()} (${fmt(D.ITEMS[a.prod].val)} coins) · <span class="${lock ? 'bad' : 'ok'}">Farming ${a.lvl}</span></small></div><span class="price mono">${ico('coin')}${fmt(a.price)}</span><button class="btn sm ${lock ? '' : 'primary'}" data-do="buyanimal" data-a="${a.id}" ${lock ? 'disabled' : ''}>Buy</button></div>`; }).join('');
+  const market = D.ANIMALS.map(a => { const lock = DQ.lvl('farming') < a.lvl; return `<div class="srow ${lock || S().coins < a.price ? 'cant' : ''}" id="buy-${a.id}"><span class="mini">${DQ.animalSprite(a, 40)}</span><div class="sr-t"><b>${a.name}</b><small>Makes ${D.ITEMS[a.prod].name.toLowerCase()} (${fmt(D.ITEMS[a.prod].val)} coins) · <span class="${lock ? 'bad' : 'ok'}">Farming ${a.lvl}</span></small></div><span class="price mono">${ico('coin')}${fmt(a.price)}</span><button class="btn sm ${lock ? '' : 'primary'}" data-do="buyanimal" data-a="${a.id}" ${lock ? 'disabled' : ''}>Buy</button></div>`; }).join('');
   return `<div class="farm-workspace"><section class="panel farm-task"><div class="phead"><h2>Fields</h2><small>Farming level <b data-b="lvl:farming"></b></small></div>
-    <div class="seed-choices" role="group" aria-label="Choose a seed">${D.CROPS.filter(c=>DQ.have('seed_'+c.id)).map(c=>`<button class="seed-choice ${UI.seed===c.id?'on':''}" data-do="seed" data-a="${c.id}" aria-pressed="${UI.seed===c.id}" ${DQ.lvl('farming')<c.lvl?'disabled':''}>${DQ.itemIco(D.ITEMS['seed_'+c.id])}<span>${c.name}<small>${DQ.have('seed_'+c.id)} seeds · Level ${c.lvl}</small></span></button>`).join('')}</div>
+    <div class="seed-choices" role="group" aria-label="Choose a seed">${D.CROPS.filter(c=>DQ.have('seed_'+c.id)).map(c=>`<button class="seed-choice ${UI.seed===c.id?'on':''}" data-do="seed" data-a="${c.id}" aria-pressed="${UI.seed===c.id}" ${DQ.lvl('farming')<c.lvl?'disabled':''}>${DQ.itemIco(D.ITEMS['seed_'+c.id])}<span>${c.name}<small>${DQ.have('seed_'+c.id)} seeds · ${DQ.lvl('farming')<c.lvl?`Needs Farming ${c.lvl}`:`Level ${c.lvl}`}</small></span></button>`).join('')}</div>
         <div class="btnrow wrap farm-actions"><button class="btn primary" data-do="harvestall">Harvest ripe crops</button><button class="btn" data-do="plantall" ${UI.seed ? '' : 'disabled'}>Plant empty plots</button></div>${UI.seed ? `<p>Grows in ${left(DQ.growDur(D.CROP[UI.seed]))}. Crops keep growing while you are away.</p>` : '<p>No seeds available. Buy seeds in the shop.</p>'}
         <div class="plots">${plots}${nextPlot !== undefined ? `<button class="plot buyplot" data-do="buyplot"><span>${ico('crop')}</span><b>Buy a plot</b><small>${fmt(nextPlot)} coins</small></button>` : ''}</div>
         <section data-reference="true" id="farm-settings"><h3>Planting settings</h3><button class="tog ${F.autoReplant ? 'on' : ''}" data-do="autoreplant"><span class="sw"></span>Replant after harvest</button></section></section><section class="panel farm-animals"><div class="phead"><h2>Animals</h2></div><div class="btnrow wrap farm-actions"><button class="btn primary" data-do="collectall">Collect all produce</button><button class="btn" data-do="filltrough">Fill feed trough</button><button class="btn" data-do="makefeed">Make feed</button></div><p>Trough <b class="mono" data-b="trough"></b> feed · ${fmtK(DQ.have('feed'))} feed in storage</p>
-      <section data-reference="true" id="livestock-market"><h3>Buy animals</h3>${mossOpen ? `<div class="srows">${market}</div>` : '<p>Defeat Grubnash to reach the livestock trader in Mossbarrow.</p>'}</section><div class="pens">${pens}${nextPen !== undefined ? `<button class="pen buypen" data-do="buypen">Build a pen · ${fmt(nextPen)} coins</button>` : ''}</div></section></div>
+      ${!F.animals.some(Boolean) ? `<div class="first-animal" role="note"><span class="fa-art">${DQ.animalSprite(D.ANIMAL.hen, 48)}</span><div><b>Your pens are empty</b><small>${mossOpen ? `A hen is the easiest start: ${fmt(D.ANIMAL.hen.price)} coins, and she lays eggs while you do other things.` : 'Defeat Grubnash and travel to Mossbarrow to meet the livestock trader.'}</small></div>${mossOpen ? `<button class="btn sm primary" data-do="farmmarket" data-a="hen">Find a hen</button>` : ''}</div>` : ''}<div class="pens">${pens}${nextPen !== undefined ? `<button class="pen buypen" data-do="buypen">Build a pen · ${fmt(nextPen)} coins</button>` : ''}</div>
+      <section data-reference="true" id="livestock-market"><h3>Buy animals</h3>${mossOpen ? `<div class="srows">${market}</div>` : '<p>Defeat Grubnash to reach the livestock trader in Mossbarrow.</p>'}</section></section></div>
     <section data-reference="true" class="panel reference-panel" id="farming-progress"><h3>Skill progress &amp; tools</h3>${UI.skillHero('farming', UI.toolLine('farming'))}</section>`;
 };
 
@@ -145,7 +146,8 @@ UI.V.bestiary = () => {
 /* ---------- Actions ---------- */
 const R = () => UI.render(false);
 Object.assign(UI.DO, {
-  seed: a => { UI.seed = a; DQ.sfx('tab'); R(); },
+  seed: a => { UI.seed = a; if (D.CROP[a]) S().farm.next = a; DQ.sfx('tab'); R(); },
+  farmmarket: a => { if (!DQ.townUnlocked('mossbarrow')) return DQ.toast('The livestock trader is in Mossbarrow, past Grubnash', true); const row = document.getElementById('buy-' + (a || 'hen')) || document.getElementById('livestock-market'); if (!row) return; row.scrollIntoView({ behavior: S().settings.reduceFx ? 'auto' : 'smooth', block: 'center' }); row.classList.remove('spotlight'); void row.offsetWidth; row.classList.add('spotlight'); const b = row.querySelector('button:not([disabled])'); if (b) b.focus({ preventScroll: true }); },
   openquest: a => { const st = DQ.questState(D.QM[a]); UI.questTab = st === 'new' ? 'available' : st === 'done' ? 'done' : st === 'locked' ? 'upcoming' : 'active'; UI.tab.questSelected = a; if (UI.view === 'quests') UI.render(false); else DQ.go('quests'); },
   plot: a => { const p = S().farm.plots[a]; if (DQ.plotRipe(p)) DQ.harvest(+a); else if (!p.crop) { if (!UI.seed) return DQ.toast('Pick a seed to plant first. The shop sells them.', true); DQ.plant(+a, UI.seed); } else DQ.toast(`${D.CROP[p.crop].name} is still growing`); },
   plantall: () => { if (!UI.seed) return DQ.toast('Pick a seed to plant first', true); if (!DQ.plantAll(UI.seed)) DQ.toast('No empty plots, or no seeds left'); },

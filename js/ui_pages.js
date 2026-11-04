@@ -203,6 +203,7 @@ function welcome(sum, gap) {
     ${xp.length ? `<div class="rws">${xp.map(([k, v]) => `<span class="rw" style="--c:${D.SK[k].col}">${ico(k)}${fmt(v)} XP</span>`).join('')}${sum.coins ? `<span class="rw" style="--c:#f3d58a">${ico('coin')}${fmt(sum.coins)} coins</span>` : ''}${sum.kills ? `<span class="rw" style="--c:#e0564f">${ico('attack')}${fmt(sum.kills)} defeated</span>` : ''}</div>` : '<p class="dim">Nothing happened while you were away. Start a task before you leave and it will keep going.</p>'}
     ${items.length ? `<div class="k" style="margin:12px 0 6px">Gained</div><div class="rws">${items.map(([id, n]) => `<span class="rw" style="--c:${D.ITEMS[id].col}">${ico(D.ITEMS[id].ic)}${fmt(n)}× ${D.ITEMS[id].name}</span>`).join('')}</div>` : ''}
     ${sum.levels.length ? `<div class="k" style="margin:12px 0 6px">Level-ups</div><div class="rws">${Object.entries(sum.levels.reduce((a, [k, l]) => (a[k] = l, a), {})).map(([k, l]) => `<span class="rw" style="--c:${D.SK[k].col}">${ico(k)}${D.SK[k].name} ${l}</span>`).join('')}</div>` : ''}`;
+  DQ.holdNotes = true;
   DQ.modal({ title: 'Welcome back', wide: true, body: body + UI.returnExtras(sum), actions: [{ label: 'Continue', primary: true }] });
 }
 

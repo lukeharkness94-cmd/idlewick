@@ -87,7 +87,9 @@ DQ.harvest = (i, o = {}) => {
     const x = DQ.addXp('farming', c.hxp); S().stats.harvest++; DQ.checkActionUnlocks?.(); DQ.qev('harvest', c.id); DQ.petRoll('harvest');
     DQ.floatAt(document.querySelector(`.plot[data-i="${i}"]`), `${DQ.ico('crop')}+${n} ${c.name.toLowerCase()} · +${fmt(x)} XP`, c.col); DQ.sfx('fish');
   }
-  if (F.autoReplant || o.by) DQ.plant(i, c.id, { quiet: true, by: o.by });
+  /* Your chosen seed is replanted when you have one; otherwise the harvested crop, as before. Workers keep their own crop. */
+  const next = !o.by && F.next && D.CROP[F.next] && DQ.have('seed_' + F.next) && DQ.lvl('farming') >= D.CROP[F.next].lvl ? F.next : c.id;
+  if (F.autoReplant || o.by) DQ.plant(i, next, { quiet: true, by: o.by });
   DQ.emit('farm'); return true;
 };
 DQ.harvestAll = () => { let n = 0; S().farm.plots.forEach((p, i) => { if (DQ.harvest(i)) n++; }); if (!n) DQ.toast('Nothing is ready to harvest yet'); };

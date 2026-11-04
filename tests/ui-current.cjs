@@ -39,7 +39,7 @@ const fs=require('node:fs');
    DQ.fxDirty();DQ.ui.renderHud();DQ.ui.renderRail();
    document.querySelectorAll('.note').forEach(el=>el.remove());
   });
-  const hubs={overview:'home',activity:'home',shop:'shop',map:'world',projects:'world',achievements:'hero',bestiary:'combat',skillsummary:'hero',mastery:'hero',brewery:'skills',bank:'hero',house:'world',hirelings:'world',research:'world',settings:'settings',fishing:'skills',woodcutting:'skills',character:'hero',quests:'quests',combat:'combat',mining:'skills',thieving:'skills',cooking:'skills',smithing:'skills',crafting:'skills',magic:'skills',farming:'skills',hunting:'skills',enchanting:'skills',exploration:'world'};
+  const hubs={overview:'home',activity:'home',shop:'shop',map:'world',projects:'world',achievements:'hero',bestiary:'combat',skillsummary:'hero',mastery:'hero',brewery:'skills',bank:'hero',house:'world',hirelings:'world',research:'skills',settings:'settings',fishing:'skills',woodcutting:'skills',character:'hero',quests:'quests',combat:'combat',mining:'skills',thieving:'skills',cooking:'skills',smithing:'skills',crafting:'skills',magic:'skills',farming:'skills',hunting:'skills',enchanting:'skills',exploration:'world'};
   for(const width of [390,1440,1920,2560,3440])for(const theme of ['dark','light']){
    await page.setViewportSize({width,height:1000});
    await page.evaluate(theme=>{DQ.S.settings.theme=theme;DQ.applyTheme();},theme);
@@ -85,11 +85,12 @@ const fs=require('node:fs');
    assert.ok(await page.evaluate(id=>['active','ready'].includes(DQ.questState(DQ.data.QM[id])),id));
   }
   await page.evaluate(()=>{DQ.go('research');});
-  assert.ok(await page.evaluate(()=>document.querySelector('#active-research').compareDocumentPosition(document.querySelector('#research-choice'))&Node.DOCUMENT_POSITION_FOLLOWING));
+  assert.ok(await page.evaluate(()=>document.querySelector('#active-research').compareDocumentPosition(document.querySelector('.scholarship-grid'))&Node.DOCUMENT_POSITION_FOLLOWING));
   assert.ok(await page.evaluate(()=>DQ.data.MONLIST.every(m=>{
    const template=document.createElement('template');template.innerHTML=DQ.battleFoe(m);
-   return template.content.querySelectorAll('.battle-bone').length>=3;
-  })),'every enemy has articulated battle parts');
+   /* painted creatures animate as whole models; the remaining pixel creatures use articulated parts */
+   return template.content.querySelectorAll('.battle-bone').length>=3||!!template.content.querySelector('.painted-foe .painted-sprite,.painted-foe img');
+  })),'every enemy has a battle-ready model');
   await page.evaluate(()=>DQ.go('combat'));
   assert.ok(await page.locator('.area-card').count()>=2,'combat offers town areas');
   assert.ok((await page.locator('.hunt-areas').innerText()).includes('Common'),'areas expose encounter rarity');
@@ -102,7 +103,7 @@ const fs=require('node:fs');
    const sprites=Object.values(DQ.data.ITEMS).map(it=>DQ.gearIconUrl(it.id)||DQ.artUrl('item',it.id));
    return new Set(sprites).size===sprites.length;
   }),true);
-  await page.evaluate(()=>{DQ.S.settings.notify=true;DQ.go('mining');DQ.notify({kind:'unlock',key:'unlock:mining',title:'Mining unlocked',text:'Try mining',page:'mining',sound:false});});
+  await page.evaluate(()=>{document.querySelectorAll('#notes .note').forEach(n=>n.remove());DQ.S.settings.notify=true;DQ.go('mining');DQ.notify({kind:'unlock',key:'unlock:mining',title:'Mining unlocked',text:'Try mining',page:'mining',sound:false});});
   assert.equal(await page.locator('#notes .note.unlock').count(),1);
   assert.ok((await page.locator('#notes .note.unlock').innerText()).includes('Mining'));
   assert.equal(await page.locator('.modal').count(),0);
@@ -131,13 +132,17 @@ const fs=require('node:fs');
   await page.evaluate(()=>{DQ.go('combat');DQ.startAct('fight','chicken',{quiet:true});DQ.ui.render(false);});
   await page.waitForTimeout(300);await page.evaluate(()=>DQ.splat('foe',2,'hit',0));
   await page.waitForTimeout(260);assert.ok(await page.locator('.combat-slash').count());
-  assert.ok(await page.locator('#av-you .rig-arm-right').count());
-  assert.ok(await page.locator('#av-foe .foe-wing-front').count());
+  /* painted models move as a whole; remaining pixel models move their joints */
+  assert.ok(await page.locator('#av-you .rig-arm-right, #av-you .painted-hero').count());
+  assert.ok(await page.locator('#av-foe .foe-wing-front, #av-foe .painted-foe').count());
+  await page.evaluate(()=>DQ.splat('foe',2,'hit',0));await page.waitForTimeout(40);
   assert.ok(await page.evaluate(()=>{
-   const bone=document.querySelector('#av-you .rig-arm-right'),animation=bone.getAnimations()[0];
+   /* the scripted attack swing, not the gentle CSS idle bob */
+   const bone=document.querySelector('#av-you .rig-arm-right')||document.querySelector('#av-you .painted-hero'),all=bone?bone.getAnimations():[],animation=all.find(a=>!(typeof CSSAnimation!=='undefined'&&a instanceof CSSAnimation))||all[0];
    if(!animation)return false;
    animation.pause();const poses=new Set();
-   for(let frame=0;frame<80;frame++){animation.currentTime=frame*1000/120;poses.add(getComputedStyle(bone).transform);}
+   const span=Math.min(1000*80/120,Number(animation.effect.getTiming().duration)||666);
+   for(let frame=0;frame<80;frame++){animation.currentTime=frame*span/80;poses.add(getComputedStyle(bone).transform);}
    animation.play();return poses.size>70;
   }),'attack poses interpolate at 120 samples per second');
   await page.waitForTimeout(900);
