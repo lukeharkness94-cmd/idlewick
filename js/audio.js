@@ -155,7 +155,9 @@ const AMB = {
   skyreach: { bed: ['highpass', 2200, .02], events: [['chime', 6, 14], ['bird', 9, 18]] },
   hollow: { bed: ['lowpass', 300, .04], drone: true, events: [['whisper', 8, 16]] }
 };
-let ambTown = null, ambNodes = [], ambTimers = [], ambLoop = null;
+let ambTown = null, ambNodes = [], ambLoop = null;
+/* ambience timers forget themselves once they fire, so a long session never accumulates thousands of stale ids */
+const ambTimers = new Set(), later = (fn, ms) => { const id = setTimeout(() => { ambTimers.delete(id); fn(); }, ms); ambTimers.add(id); };
 const ambTone = (f, dur, o = {}) => tone(f, dur, Object.assign({ dest: ambG }, o));
 const AMB_EVENT = {
   bird: () => { const b = 2200 + Math.random() * 1400, n = 2 + Math.floor(Math.random() * 3); for (let i = 0; i < n; i++) ambTone(b * (1 + Math.random() * .12), .09, { v: .05, at: i * .13, to: b * (1.25 + Math.random() * .2) }); },
@@ -168,7 +170,7 @@ const AMB_EVENT = {
   whisper: () => { if (!ctx) return; const t = ctx.currentTime, src = ctx.createBufferSource(), n = ctx.sampleRate * 2, b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); for (let k = 0; k < n; k++) d[k] = Math.random() * 2 - 1; src.buffer = b; const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 900; f.Q.value = 6; const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.035, t + .8); g.gain.linearRampToValueAtTime(0, t + 2); src.connect(f); f.connect(g); g.connect(ambG); src.start(t); src.stop(t + 2.1); }
 };
 function stopAmbience(fade = 1.5) {
-  ambTimers.forEach(clearTimeout); ambTimers = [];
+  ambTimers.forEach(clearTimeout); ambTimers.clear();
   if (!ctx) { ambNodes = []; return; }
   const t = ctx.currentTime; ambNodes.forEach(n => { try { if (n.gain) n.gain.setTargetAtTime(0, t, fade / 3); if (n.stop) n.stop(t + fade + .2); } catch (e) {} }); ambNodes = [];
 }
@@ -180,13 +182,15 @@ function startAmbience(town) {
   const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; const f = ctx.createBiquadFilter(); f.type = A.bed[0]; f.frequency.value = A.bed[1]; f.Q.value = A.whistle ? 8 : .7;
   const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.setTargetAtTime(A.bed[2], t, 1.2); src.connect(f); f.connect(g); g.connect(ambG); src.start(t);
   ambNodes.push(src, g);
-  const breathe = () => { if (ambTown !== town || !ctx) return; const tt = ctx.currentTime, level = A.bed[2] * (A.swell ? (.35 + .65 * (.5 + .5 * Math.sin(tt / A.swell * Math.PI * 2))) : (.7 + Math.random() * .5)); g.gain.setTargetAtTime(level, tt, A.swell ? .6 : 1.4); if (A.whistle) f.frequency.setTargetAtTime(1000 + Math.random() * 900, tt, 1.5); ambTimers.push(setTimeout(breathe, 1500)); };
+  const breathe = () => { if (ambTown !== town || !ctx) return; const tt = ctx.currentTime, level = A.bed[2] * (A.swell ? (.35 + .65 * (.5 + .5 * Math.sin(tt / A.swell * Math.PI * 2))) : (.7 + Math.random() * .5)); g.gain.setTargetAtTime(level, tt, A.swell ? .6 : 1.4); if (A.whistle) f.frequency.setTargetAtTime(1000 + Math.random() * 900, tt, 1.5); later(breathe, 1500); };
   breathe();
   if (A.drone) { [55, 55.4].forEach(fr => { const o = ctx.createOscillator(), og = ctx.createGain(); o.type = 'sine'; o.frequency.value = fr; og.gain.setValueAtTime(0, t); og.gain.setTargetAtTime(.025, t, 2); o.connect(og); og.connect(ambG); o.start(t); ambNodes.push(o, og); }); }
   /* details: each on its own loose timer so nothing repeats on a beat */
-  A.events.forEach(([name, lo, hi]) => { const next = () => { if (ambTown !== town) return; if (ctx.state === 'running' && S().ambience !== false && !(DQ.act && DQ.act.kind === 'fight')) try { AMB_EVENT[name](); } catch (e) {} ambTimers.push(setTimeout(next, (lo + Math.random() * (hi - lo)) * 1000)); }; ambTimers.push(setTimeout(next, (lo + Math.random() * (hi - lo)) * 1000)); });
+  A.events.forEach(([name, lo, hi]) => { const next = () => { if (ambTown !== town) return; if (ctx.state === 'running' && S().ambience !== false && !(DQ.act && DQ.act.kind === 'fight')) try { AMB_EVENT[name](); } catch (e) {} later(next, (lo + Math.random() * (hi - lo)) * 1000); }; later(next, (lo + Math.random() * (hi - lo)) * 1000); });
 }
 /* follows the current town (crossfading on travel) and the ambience setting */
+/* read-only counters for long-session checks */
+DQ.audioStats = () => ({ ambienceTimers: ambTimers.size, ambienceNodes: ambNodes.length, town: ambTown, state: ctx ? ctx.state : 'none' });
 DQ.ambienceRefresh = () => {
   if (!ctx) return; applyVolumes();
   const want = S().ambience === false ? null : (DQ.S.town || 'willowbrook');
