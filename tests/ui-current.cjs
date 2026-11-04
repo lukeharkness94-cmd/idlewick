@@ -128,7 +128,8 @@ const fs=require('node:fs');
   await page.waitForTimeout(300);
   await page.evaluate(()=>DQ.emit('workcycle',{kind:'wood',id:'normal',quantity:1}));
   assert.ok(await page.locator('.work-result').count());
-  await page.waitForTimeout(1000);assert.equal(await page.locator('.scene-effect').count(),0);
+  /* effects remove themselves when their animation finishes; allow for a busy machine, but never leave one behind */
+  await page.waitForFunction(()=>!document.querySelector('.scene-effect'),null,{timeout:2500});assert.equal(await page.locator('.scene-effect').count(),0);
   await page.evaluate(()=>{DQ.go('combat');DQ.startAct('fight','chicken',{quiet:true});DQ.ui.render(false);});
   await page.waitForTimeout(300);await page.evaluate(()=>DQ.splat('foe',2,'hit',0));
   await page.waitForTimeout(260);assert.ok(await page.locator('.combat-slash').count());

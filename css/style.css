@@ -1804,3 +1804,7 @@ h3 { font-size:17px; }
 .fu-ic .furn-art{width:40px;height:40px}
 .cottage-art{width:min(320px,100%);height:auto;display:block;margin:0 auto}
 .w-ic .worker-art{width:44px;height:44px;border-radius:50%;object-fit:cover}
+/* a restored town glows warmly for a moment */
+.just-restored{animation:restoredGlow 2.4s ease-out}
+@keyframes restoredGlow{0%{filter:brightness(1)}25%{filter:brightness(1.18) saturate(1.15);box-shadow:0 0 0 2px var(--brass),0 0 28px -4px var(--brass)}100%{filter:none;box-shadow:none}}
+@media (prefers-reduced-motion:reduce){.just-restored{animation:none}}

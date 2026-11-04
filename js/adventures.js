@@ -155,6 +155,9 @@ UI.discoveriesPanel = () => {
 };
 const explore0 = UI.V.exploration;
 if (explore0) UI.V.exploration = () => explore0() + UI.discoveriesPanel();
+/* discoveries can happen before Exploration unlocks, so its locked page lists them too */
+const locked0 = UI.lockedPage;
+if (locked0) UI.lockedPage = id => locked0(id) + (id === 'exploration' && Object.keys(D.DISCOVERIES).some(DQ.discovered) ? UI.discoveriesPanel() : '');
 
 /* the field guide counts as studying a creature */
 const guide0 = UI.openGuide;

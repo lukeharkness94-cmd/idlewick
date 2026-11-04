@@ -455,4 +455,15 @@ test('an adventure chains quests across skills and ends in a village relic proje
  assert.ok(q.projectsForTown('willowbrook').some(([id])=>id==='bell'),'a displayed relic stays listed');
  const {q:q2,load:l2}=harness();l2('adventures');assert.ok(!q2.projectsForTown('willowbrook').some(([id])=>id==='bell'),'hidden without the artefact');
 });
+test('a save from before this update loads with safe defaults, keeps its progress and plays on',()=>{
+ const {q,load}=harness();load('routes');load('adventures');load('feel');const D=q.data;
+ const old=q.newState();delete old.farm.next;delete old.disc;delete old.settings.masterVol;delete old.settings.ambience;delete old.settings.ambVol;
+ old.projects={well:true,market:true};old.towns.mossbarrow={visited:true,boss:false};old.coins=777;old.xp.fishing=D.XPF[20];old.q.first_steps={s:'done',p:[5,5]};old.inv={raw_shrimp:12};
+ const save=Buffer.from(JSON.stringify(old)).toString('base64');assert.equal(q.importSave(save),true);const S=q.S;
+ assert.equal(S.farm.next,null);assert.deepEqual({...S.disc},{});assert.equal(S.settings.masterVol,1);assert.equal(S.settings.ambience,true);
+ assert.equal(S.coins,777);assert.equal(S.inv.raw_shrimp,12);assert.equal(S.projects.market,true);assert.equal(q.questState(D.QM.first_steps),'done');
+ assert.ok(q.fx().regen>=.12&&q.fx().coin>=.03,'legacy +2% recovery and the new market reward both apply');
+ assert.equal(q.questHidden(D.QM.am_map),true);assert.ok(q.journeyNext());
+ q.startAct('fish','shrimp',{quiet:true});const sum=q.simulate(2*3600000);assert.ok(sum&&Object.keys(sum.xp).length,'offline progress runs');assert.ok(Number.isFinite(S.coins));
+});
 console.log(tests+' regression checks passed');

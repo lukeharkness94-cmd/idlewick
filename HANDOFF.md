@@ -203,3 +203,13 @@ Approved roadmap stages are implemented in order. Research/Scholarship lives in 
 - Later sheets are picked up automatically: item-id entries, `restoration*` sheets (with optional `place`), `soil`/`<crop>-stage1/2` growth stages. `docs/art-completion/NEXT-BRIEF.md` lists what is still missing: pieces for the newer Willowbrook projects and relic displays (until then the painted landscape shows no change for those), the six relic items, growth stages, a woodcutting worker, fitted hero equipment layers and an optional painted world map.
 - Hero compositing (`painted_runtime.js`): under body armour the tunic becomes a dark padded layer, trousers under leg armour likewise, and full metal helmets hide the hair. The leather coif keeps the hair until fitted art exists.
 - Standalone build is about 42 MB and reaches the title in about 3.3 s headless.
+
+### Stage 7: economy evidence
+- `scripts/sim-economy.cjs` and `docs/economy-evidence.md`. Codex's tuning leaves about 40% of the earlier coin supply; early prices are reached quickly and about 3.4M coins of long-term sinks remain. No rebalance was made.
+
+### Stage 8: game feel, QA and playtesting
+- `js/feel.js`: equipping an upgrade floats "+N max hit · +N defence" from the hero; finishing a project bursts particles from its card and briefly warms the town scene. Both are off in forecasts, offline replay and reduced motion.
+- Discoveries appear on the Exploration page even while that skill is locked.
+- New regression for a pre-update save (no new fields, legacy regional project) loading with defaults and playing two offline hours. Keyboard pass: route buttons, first-animal button, empty pens and discovery cards are reachable with visible focus rings. ui-current's effect-cleanup check now waits up to 2.5 s rather than sampling once at 1 s.
+- `docs/playtest-plan.md`: profiles, observations, questions and signals for human playtests.
+- Final validation: 61 regressions, desktop storage, JavaScript syntax, ui-current (all widths, both themes; three consecutive passes) and the 600-case ui-audit. The claude.ai published page was not updated (no release was authorised).
