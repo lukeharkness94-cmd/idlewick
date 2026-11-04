@@ -184,3 +184,10 @@ Approved roadmap stages are implemented in order. Research/Scholarship lives in 
 - `D.PROJECT_VOICES`: a one-line villager reaction appears in the completion card and the "A living …" panel. Project completions are now visible cards (`project:` keys use the `now` tier).
 - A "Restore Willowbrook" destination follows the next unfinished village project. Project steps route the first missing material to its source (or explain the locked skill). Journey tasks that cannot start open the activity page instead of doing nothing.
 - Project benefits support `speed_<skill>` and `xp_<skill>` keys. Validation: 56 regressions, ui-current and the 600-case ui-audit.
+
+### Stage 4: adventures and rare discoveries
+- `js/adventures.js`. Five once-per-save discoveries (`D.DISCOVERIES`) roll in `DQ.qev` while gathering or fighting in a specific region, with a per-action rate and a pity count that guarantees them. They never roll in forecasts; during offline simulation they are recorded (`disc[id].away`) and listed in the welcome-back summary instead of alerting.
+- Three adventures (The Miller's Map, The Lantern Under Ironpeak, The Fallen Star) are ordinary chained quests with `secret` (hidden from the quest log until their discovery) and `adventure`/`stage` tags. They cross gathering, cooking, smithing, crafting, farming, combat and a new `guide` objective that fires when the player reads a creature's field-guide entry.
+- Each finale grants an artefact (`type: 'relic'`, unsellable). Holding it reveals a Willowbrook relic project (bell, lamps, star) that consumes it, adds a scene prop, a villager line and a small benefit. Relic projects stay hidden without the artefact.
+- One discovery offers a choice (the lost traveller), and one is a lore find with a one-time reward. Discoveries are revisited on the Exploration page ("Discoveries", with adventure chapter progress) and never spoil unfound secrets.
+- Save field `disc` (older saves default to `{}`). Validation: 60 regressions, ui-current and the 600-case ui-audit.

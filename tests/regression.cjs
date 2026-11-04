@@ -421,4 +421,38 @@ test('the Restore Willowbrook destination follows the next unfinished project an
  for(const id of Object.keys(q.data.PROJECTS))if(q.data.PROJECTS[id].town==='willowbrook')S.projects[id]=true;
  assert.equal(q.journeyNext('village').title,'Willowbrook is restored');
 });
+test('discoveries are rare, once only, hidden until found, and never fire in forecasts',()=>{
+ const {q,load}=harness();load('routes');load('adventures');const S=q.S,D=q.data;
+ const first=D.QM.am_map;assert.equal(q.questState(first),'locked');assert.equal(q.questHidden(first),true);
+ S.xp.woodcutting=D.XPF[20];S.town='willowbrook';
+ q.forecasting=true;q.qev('chop','oak',5000);q.forecasting=false;assert.equal(q.discovered('weathered_map'),false,'forecasts never discover');
+ q.qev('chop','oak',D.DISCOVERIES.weathered_map.pity);assert.equal(q.discovered('weathered_map'),true,'the pity counter guarantees it');
+ assert.equal(q.have('weathered_map'),1);assert.equal(q.questState(first),'new');assert.equal(q.questHidden(first),false);
+ assert.equal(q.makeDiscovery('weathered_map'),false);q.qev('chop','oak',5000);assert.equal(q.have('weathered_map'),1,'never granted twice');
+ const save=q.exportSave();assert.equal(q.importSave(save),true);assert.equal(q.discovered('weathered_map'),true);
+});
+test('discoveries made while away are recorded for the welcome summary without live alerts',()=>{
+ const {q,load}=harness();load('adventures');const S=q.S,D=q.data;S.town='gloomfen';S.towns.gloomfen={visited:true,boss:false};
+ const coins=S.coins,live=q.sim;q.sim={on:true,xp:{},items:{},coins:0,kills:0,levels:[],notes:[],eaten:0,died:false};q.qev('kill','zombie',D.DISCOVERIES.forgotten_shrine.pity);q.sim=live;
+ assert.equal(q.discovered('forgotten_shrine'),true);assert.equal(S.disc.forgotten_shrine.away,true);assert.deepEqual([...q.awayFinds],['forgotten_shrine']);
+ assert.ok(S.coins>=coins+800,'the shrine reward is paid');const after=S.coins;q.makeDiscovery('forgotten_shrine');assert.equal(S.coins,after,'only once');
+});
+test('the lost traveller choice needs real meals and pays out once',()=>{
+ const {q,load}=harness();load('adventures');const S=q.S;q.makeDiscovery('lost_traveller');
+ S.inv={};assert.equal(q.chooseDiscovery('lost_traveller','share'),false,'cannot share without meals');
+ S.inv.shrimp=7;const xp=S.xp.fishing;assert.equal(q.chooseDiscovery('lost_traveller','share'),true);assert.equal(q.have('shrimp'),2);
+ assert.ok(S.xp.fishing>xp);assert.equal(q.chooseDiscovery('lost_traveller','directions'),false,'one choice only');
+});
+test('an adventure chains quests across skills and ends in a village relic project',()=>{
+ const {q,load}=harness();load('routes');load('adventures');const S=q.S,D=q.data;S.coins=10000;
+ q.makeDiscovery('weathered_map');q.startQuest('am_map');S.inv.shrimp=8;q.qev('chop','oak',15);
+ assert.equal(q.questState(D.QM.am_map),'ready');q.claimQuest('am_map');assert.equal(q.questState(D.QM.am_map),'done');
+ assert.equal(q.questState(D.QM.am_mill),'locked','needs Mossbarrow');S.towns.mossbarrow={visited:true,boss:false};assert.equal(q.questState(D.QM.am_mill),'new');
+ q.startQuest('am_mill');q.qev('guide','scarecrow');q.qev('kill','scarecrow',8);q.claimQuest('am_mill');
+ q.startQuest('am_box');q.qev('smelt','bar_bronze',5);q.qev('harvest','potato',5);q.claimQuest('am_box');
+ assert.equal(q.have('millers_bell'),1);assert.ok(q.projectsForTown('willowbrook').some(([id])=>id==='bell'),'relic project appears with its artefact');
+ const coin=q.fx().coin;S.town='willowbrook';assert.equal(q.finishProject('bell'),true);assert.equal(q.have('millers_bell'),0);assert.ok(Math.abs(q.fx().coin-coin-.03)<1e-9);
+ assert.ok(q.projectsForTown('willowbrook').some(([id])=>id==='bell'),'a displayed relic stays listed');
+ const {q:q2,load:l2}=harness();l2('adventures');assert.ok(!q2.projectsForTown('willowbrook').some(([id])=>id==='bell'),'hidden without the artefact');
+});
 console.log(tests+' regression checks passed');

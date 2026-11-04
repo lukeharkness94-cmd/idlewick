@@ -278,6 +278,18 @@ DQ.sceneUrl = id => {
       for (let r = 0; r < 3; r++) { const y = 114 + r * 5; o.rect(80, y, 66, 3, P('#6a4528')); for (let x = 82; x < 144; x += 4) { o.set(x, y - 1, P(r === 1 ? '#e8c060' : '#5aa040')); o.set(x + 1, y - 2, P('#78c050')); if (r === 2 && x % 8 === 2) o.set(x, y - 2, P('#ff8aa0')); } }
       o.rect(78, 112, 1, 16, P('#7a5230')); o.rect(147, 112, 1, 16, P('#7a5230'));
     }
+    if (projects.bell) {         /* the Miller's Bell on a frame on the green */
+      const x = 318, y = 104; o.rect(x, y, 2, 20, P('#6a4528')); o.rect(x + 16, y, 2, 20, P('#6a4528')); o.rect(x - 1, y - 2, 20, 3, P('#8a6038'));
+      o.poly([[x + 5, y + 1], [x + 13, y + 1], [x + 15, y + 11], [x + 3, y + 11]], P('#d8b050')); o.rect(x + 4, y + 2, 2, 8, P('#f0d890')); o.rect(x + 8, y + 11, 2, 2, P('#8a6a2a'));
+    }
+    if (projects.lamps) for (const x of [158, 236]) {   /* lamps along the path, lit by the lamplighter's lens */
+      o.rect(x, 96, 2, 22, P('#3a3a42')); o.rect(x - 2, 92, 6, 5, P('#3a3a42')); o.rect(x - 1, 93, 4, 3, P('#ffe08a')); o.glow(x + 1, 94, 10, [255, 224, 138], .45);
+    }
+    if (projects.star) {         /* the Star-heart glowing above the well */
+      const x = 292, y = 60; o.rect(x, y, 1, 16, P('#5a4a3e'));
+      o.glow(x, y - 4, 16, [226, 212, 255], .55); o.poly([[x, y - 11], [x + 3, y - 5], [x + 9, y - 4], [x + 4, y], [x + 6, y + 6], [x, y + 3], [x - 6, y + 6], [x - 4, y], [x - 9, y - 4], [x - 3, y - 5]], P('#f4eeff'));
+      o.disc(x, y - 3, 2, P('#ffffff'));
+    }
   } else if (done) {
     /* a restored regional town: bunting across the scene and one sign of the finished project */
     const tint = { mossbarrow: '#d8b050', saltmere: '#4fb3c8', ironpeak: '#c8d0d8', gloomfen: '#c8ff8a', emberfall: '#ff8a3a', skyreach: '#f0c040', hollow: '#c07aff' }[id] || '#d8a64a';

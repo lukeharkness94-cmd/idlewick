@@ -98,7 +98,7 @@ UI.V.shop = () => {
 
 /* ---------- Quests ---------- */
 UI.V.quests = () => {
-  const st = q => DQ.questState(q), groups = { active: q => ['active', 'ready'].includes(st(q)), available: q => st(q) === 'new', upcoming: q => st(q) === 'locked' && (DQ.townUnlocked(q.town) || q.main), done: q => st(q) === 'done' };
+  const st = q => DQ.questState(q), groups = { active: q => ['active', 'ready'].includes(st(q)), available: q => st(q) === 'new', upcoming: q => st(q) === 'locked' && !(DQ.questHidden && DQ.questHidden(q)) && (DQ.townUnlocked(q.town) || q.main), done: q => st(q) === 'done' };
   const names = { active: 'Active', available: 'Available', upcoming: 'Upcoming', done: 'Completed' };
   const tab = UI.questTab = groups[UI.questTab] ? UI.questTab : D.QUESTS.some(groups.active) ? 'active' : 'available';
   const list = D.QUESTS.filter(groups[tab]).sort((a, b) => (b.main ? 1 : 0) - (a.main ? 1 : 0) || (st(a) === 'ready' ? -1 : 0) - (st(b) === 'ready' ? -1 : 0) || a.adv - b.adv);
