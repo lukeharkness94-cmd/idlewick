@@ -36,6 +36,10 @@ const B = UI.B = {
   bonus: (e, a) => set(e, `+${Math.round((DQ.xpMult(a) - 1) * 100)}% XP`),
   coins: e => set(e, fmt(S().coins)),
   combat: e => set(e, DQ.combatLvl()),
+  combatbar: e => { const w = DQ.combatProgress().pct.toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; },
+  combatnext: e => { const c = DQ.combatProgress(); set(e, c.best ? `${Math.floor(c.pct)}% to ${c.next}` : 'Max'); },
+  combatroute: e => { const c = DQ.combatProgress(); set(e, c.best ? `${fmt(c.best.xp)} ${D.SK[c.best.skill].name} XP reaches combat ${c.next}` : 'Combat level maxed'); },
+  combatboost: e => { const b = DQ.combatCatchUp(); set(e, b > 0 ? `Catch-up: +${Math.round(b * 100)}% combat XP while you trail your Hero level` : ''); e.hidden = !(b > 0); },
   adv: e => set(e, DQ.advLvl()),
   totlvl: e => set(e, DQ.totalLvl()),
   advbar: e => { const w = DQ.advProgress().pct.toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; },
@@ -229,6 +233,7 @@ UI.V.combat = () => {
   const Lv = DQ.lvl, melee = .325 * (Lv('attack') + Lv('strength')), rng = .325 * Math.floor(1.5 * Lv('ranged')), mag = .325 * Math.floor(1.5 * Lv('magic')), best = Math.max(melee, rng, mag);
   const bestName = best === melee ? 'Melee' : best === rng ? 'Ranged' : 'Magic';
   const clvl = `<section class="panel clvl slim"><div class="cl-num" data-tip="text:Combat level is made from Defence, Health and your best fighting style. Train any of them to raise it. Monsters are tagged against it."><span class="k">Your combat level</span><b class="mono" data-b="combat"></b></div>
+    <div class="cl-prog"><div class="cl-prog-top"><b>Next level</b><small class="mono" data-b="combatnext"></small></div><span class="bar"><i data-b="combatbar"></i></span><small data-b="combatroute"></small><small class="cl-boost" data-b="combatboost"></small></div>
     <div class="cl-b"><div class="cl-parts"><span>${ico('defence')}Defence <b class="mono">${Lv('defence')}</b></span><span>${ico('hitpoints')}Health <b class="mono">${Lv('hitpoints')}</b></span><span>${ico(bestName === 'Melee' ? 'attack' : bestName === 'Ranged' ? 'ranged' : 'magic')}${bestName === 'Melee' ? `Attack <b class="mono">${Lv('attack')}</b> + Strength <b class="mono">${Lv('strength')}</b>` : `${bestName} <b class="mono">${Lv(bestName.toLowerCase())}</b>`}</span></div></div>
     <div class="cl-key"><span class="lvchip easy">Easy</span><span class="lvchip fair">Fair</span><span class="lvchip hard">Hard</span></div></section>`;
   const choices = mons.map(m => ({ id: m.id, name: m.name, artKind: 'creature', caption: `Level ${m.cl}${m.boss ? ' · Boss' : ''}`, blocked: !!m.boss && DQ.combatLvl() < m.boss.req, locked: !!m.boss && DQ.combatLvl() < m.boss.req, reason: m.boss ? `Combat level ${m.boss.req} required` : '', info: `<p>Level ${m.cl} · ${m.hp} health${m.boss ? ' · Boss' : ''}. Food available restores ${fmt(DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0))} health.</p>` }));

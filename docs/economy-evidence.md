@@ -35,3 +35,17 @@ rooms 0.09M, pens 0.09M, projects 0.04M, animals 0.03M (plus gear purchases up t
 - Watch in human playtests: whether the first two hours make shop choices feel trivial, and whether Hero 46 to 65
   (about 8 to 24+ hours here) feels thin. The Ironpeak adventure and later restoration projects now sit in that band.
 - Hero pace: Hero 13 at 30 minutes, 26 at 2 hours, 46 at 8 hours, 61 at 24 hours of steady gathering.
+
+## Combat catch-up (Nov 2026)
+
+Playtest note: Hero level rose much faster than combat level, so the first boss (Grubnash, combat 10) took a long time after the quick opening quests, and there was no visible progress towards the next combat level.
+
+- Combat level now shows a progress bar and the cheapest single-skill route ("N Strength XP reaches combat X") in the Combat menu entry and on the combat page (`DQ.combatProgress`).
+- While combat level trails Hero level, combat skills earn +15% XP per level behind, up to +200% (`DQ.combatCatchUp`, applied in `DQ.xpMult`). Gathering, crafting and the economy are unaffected; the bonus disappears once combat catches up.
+
+Fresh-character simulation, fighting the best available Willowbrook target with food (minutes of fighting to reach combat 10):
+
+| Player | Before | After |
+| --- | --- | --- |
+| Fights from the start | 82 | 66 |
+| Gathered to Hero 10 first | 81 | 45 |

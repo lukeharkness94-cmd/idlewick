@@ -28,7 +28,7 @@ const hubDefault = h => {
 UI.renderRail = () => {
   const cur = UI.hubOf(UI.view).id;
   $('#rail').innerHTML = `<div class="brand">${ico('candle')}<b>Idlewick</b></div>` + HUBS.filter(h=>h.id!=='combat').map(h => `<button class="hub ${h.id === cur ? 'on' : ''}" data-do="hub" data-a="${h.id}" aria-label="${h.name}">${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${h.id}"></i></button>`).join('');
-  $('#combatnav').innerHTML=`<button class="hub combat-entry ${cur==='combat'?'on':''}" data-do="hub" data-a="combat" aria-label="Combat">${ico('attack')}<span>Combat</span><b class="combat-menu-level mono" data-b="combat">${DQ.combatLvl()}</b><i class="hubdot" data-b="hubdot:combat"></i></button>`;
+  $('#combatnav').innerHTML=`<button class="hub combat-entry ${cur==='combat'?'on':''}" data-do="hub" data-a="combat" aria-label="Combat">${ico('attack')}<span>Combat</span><b class="combat-menu-level mono" data-b="combat">${DQ.combatLvl()}</b><i class="hubdot" data-b="hubdot:combat"></i><span class="combat-menu-bar bar" data-tip="text:Progress to the next combat level"><i data-b="combatbar" style="width:${DQ.combatProgress().pct.toFixed(1)}%"></i></span></button>`;
   UI.upd();
 };
 UI.B.notice = (e, page) => {

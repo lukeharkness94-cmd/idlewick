@@ -466,4 +466,15 @@ test('a save from before this update loads with safe defaults, keeps its progres
  assert.equal(q.questHidden(D.QM.am_map),true);assert.ok(q.journeyNext());
  q.startAct('fish','shrimp',{quiet:true});const sum=q.simulate(2*3600000);assert.ok(sum&&Object.keys(sum.xp).length,'offline progress runs');assert.ok(Number.isFinite(S.coins));
 });
+test('combat level shows its progress and catches up when it trails the Hero level',()=>{
+  const {q}=harness(),S=q.S,D=q.data;
+  const c0=q.combatProgress();assert.equal(c0.lvl,q.combatLvl());assert.equal(c0.next,c0.lvl+1);assert.ok(c0.pct>=0&&c0.pct<100);assert.ok(c0.best&&c0.best.xp>0,'a cheapest route to the next combat level');
+  /* following the suggested route really raises the combat level */
+  S.xp[c0.best.skill]+=c0.best.xp;assert.equal(q.combatLvl(),c0.next);
+  /* no bonus while combat keeps pace; +15% per level behind, capped */
+  const base=q.xpMult('strength');assert.equal(q.combatCatchUp(),0);
+  S.xp.fishing=D.XPF[40];S.xp.woodcutting=D.XPF[40];const behind=q.advLvl()-q.combatLvl();assert.ok(behind>0);
+  assert.equal(q.combatCatchUp(),Math.min(2,.15*behind));assert.ok(q.xpMult('strength')>base*1.5,'combat skills learn faster while behind');
+  const fish=q.xpMult('fishing');assert.ok(Math.abs(fish-(1+.005*(q.lvl('fishing')-1))*(1+.0025*(q.advLvl()-1)))<1e-9,'gathering skills are unaffected');
+});
 console.log(tests+' regression checks passed');

@@ -1964,6 +1964,14 @@ h3 { font-size:17px; }
 /* painted art never distorts: sprites keep their set size in flex rows, images keep their proportions */
 .painted-sprite{flex:none!important;background-repeat:no-repeat}
 img.painted-image,img.painted-portrait,.painted-portrait img,.rig-torso img,.foe-torso img{object-fit:contain}
+/* combat level progress: in the menu entry and on the combat page */
+#combatnav .combat-entry{flex-wrap:wrap;row-gap:4px}
+#combatnav .combat-menu-bar{flex:1 0 100%;height:4px;margin:0;--c:var(--brass)}
+#combatnav .combat-menu-bar i{background:var(--brass)}
+.clvl .cl-prog{display:flex;flex-direction:column;gap:4px;min-width:180px;flex:1}
+.clvl .cl-prog-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.clvl .cl-prog .bar{height:8px}.clvl .cl-prog .bar i{background:var(--brass)}
+.clvl .cl-prog small{color:var(--mute)}.clvl .cl-boost{color:var(--good)!important}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -5214,7 +5222,8 @@ DQ.advProgress = () => {
   const a = D.advReq(l), b = D.advReq(l + 1);
   return { pct: clamp((t - a) / (b - a) * 100, 0, 100), cur: t - a, next: b - a, need: b - t };
 };
-DQ.xpMult = sk => (1 + .005 * (DQ.lvl(sk) - 1)) * (1 + .0025 * (DQ.advLvl() - 1)) * (DQ.extraXp ? DQ.extraXp(sk) : 1) * (DQ.buffMult ? DQ.buffMult('xp') : 1);
+const COMBAT_SKILLS = new Set(['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic']);
+DQ.xpMult = sk => (1 + .005 * (DQ.lvl(sk) - 1)) * (1 + .0025 * (DQ.advLvl() - 1)) * (COMBAT_SKILLS.has(sk) ? 1 + DQ.combatCatchUp() : 1) * (DQ.extraXp ? DQ.extraXp(sk) : 1) * (DQ.buffMult ? DQ.buffMult('xp') : 1);
 DQ.actionProgress = sk => Object.entries(D.SK[sk]?.actionReq || {}).map(([stat,need])=>({stat,need,have:DQ.S.stats[stat]||0}));
 DQ.skillUnlocked = sk => { const s=D.SK[sk]; if(!s)return false; if(s.actionReq)return !!DQ.S.unlocked[sk]||DQ.actionProgress(sk).every(r=>r.have>=r.need); return s.quest?!!DQ.S.unlocked[sk]:s.unlock<=DQ.advLvl(); };
 const actionNames={kill:'combat victories',catch:'fish caught',chop:'logs chopped',harvest:'crops harvested',craft:'items crafted',smith:'smithing actions'};
@@ -5225,6 +5234,17 @@ DQ.combatLvl = () => {
   const m = .325 * (L('attack') + L('strength')), r = .325 * Math.floor(1.5 * L('ranged')), g = .325 * Math.floor(1.5 * L('magic'));
   return Math.floor(base + Math.max(m, r, g));
 };
+/* Progress towards the next combat level: the formula evaluated with fractional skill levels, plus the cheapest single-skill route. */
+const combatFrom = L => { const base = .25 * (L.defence + L.hitpoints); return base + Math.max(.325 * (L.attack + L.strength), .325 * Math.floor(1.5 * L.ranged), .325 * Math.floor(1.5 * L.magic)); };
+DQ.combatProgress = () => {
+  const ids = ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'], L = {}, F = {};
+  ids.forEach(k => { L[k] = DQ.lvl(k); F[k] = L[k] + (L[k] >= 99 ? 0 : DQ.pctNext(k) / 100); });
+  const lvl = DQ.combatLvl(), next = lvl + 1, cont = Math.max(lvl, combatFrom(F)), pct = lvl >= 126 ? 100 : Math.min(99, Math.max(0, (cont - lvl) * 100));
+  const routes = ids.filter(k => DQ.skillUnlocked(k)).map(k => { const T = { ...L }; while (T[k] < 99 && Math.floor(combatFrom(T)) < next) T[k]++; return Math.floor(combatFrom(T)) >= next ? { skill: k, xp: Math.max(0, D.XPF[T[k]] - DQ.S.xp[k]) } : null; }).filter(Boolean).sort((a, b) => a.xp - b.xp);
+  return { lvl, next, pct, best: routes[0] || null, routes };
+};
+/* Catch-up: while your combat level trails your Hero level, combat skills learn faster (+15% per level behind, up to +200%). */
+DQ.combatCatchUp = () => Math.min(2, .15 * Math.max(0, DQ.advLvl() - DQ.combatLvl()));
 DQ.pctNext = sk => { const l = DQ.lvl(sk); if (l >= 99) return 100; const a = D.XPF[l], b = D.XPF[l + 1]; return clamp((DQ.S.xp[sk] - a) / (b - a) * 100, 0, 100); };
 
 /* ---------- Items ---------- */
@@ -7193,6 +7213,10 @@ const B = UI.B = {
   bonus: (e, a) => set(e, `+${Math.round((DQ.xpMult(a) - 1) * 100)}% XP`),
   coins: e => set(e, fmt(S().coins)),
   combat: e => set(e, DQ.combatLvl()),
+  combatbar: e => { const w = DQ.combatProgress().pct.toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; },
+  combatnext: e => { const c = DQ.combatProgress(); set(e, c.best ? `${Math.floor(c.pct)}% to ${c.next}` : 'Max'); },
+  combatroute: e => { const c = DQ.combatProgress(); set(e, c.best ? `${fmt(c.best.xp)} ${D.SK[c.best.skill].name} XP reaches combat ${c.next}` : 'Combat level maxed'); },
+  combatboost: e => { const b = DQ.combatCatchUp(); set(e, b > 0 ? `Catch-up: +${Math.round(b * 100)}% combat XP while you trail your Hero level` : ''); e.hidden = !(b > 0); },
   adv: e => set(e, DQ.advLvl()),
   totlvl: e => set(e, DQ.totalLvl()),
   advbar: e => { const w = DQ.advProgress().pct.toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; },
@@ -7386,6 +7410,7 @@ UI.V.combat = () => {
   const Lv = DQ.lvl, melee = .325 * (Lv('attack') + Lv('strength')), rng = .325 * Math.floor(1.5 * Lv('ranged')), mag = .325 * Math.floor(1.5 * Lv('magic')), best = Math.max(melee, rng, mag);
   const bestName = best === melee ? 'Melee' : best === rng ? 'Ranged' : 'Magic';
   const clvl = `<section class="panel clvl slim"><div class="cl-num" data-tip="text:Combat level is made from Defence, Health and your best fighting style. Train any of them to raise it. Monsters are tagged against it."><span class="k">Your combat level</span><b class="mono" data-b="combat"></b></div>
+    <div class="cl-prog"><div class="cl-prog-top"><b>Next level</b><small class="mono" data-b="combatnext"></small></div><span class="bar"><i data-b="combatbar"></i></span><small data-b="combatroute"></small><small class="cl-boost" data-b="combatboost"></small></div>
     <div class="cl-b"><div class="cl-parts"><span>${ico('defence')}Defence <b class="mono">${Lv('defence')}</b></span><span>${ico('hitpoints')}Health <b class="mono">${Lv('hitpoints')}</b></span><span>${ico(bestName === 'Melee' ? 'attack' : bestName === 'Ranged' ? 'ranged' : 'magic')}${bestName === 'Melee' ? `Attack <b class="mono">${Lv('attack')}</b> + Strength <b class="mono">${Lv('strength')}</b>` : `${bestName} <b class="mono">${Lv(bestName.toLowerCase())}</b>`}</span></div></div>
     <div class="cl-key"><span class="lvchip easy">Easy</span><span class="lvchip fair">Fair</span><span class="lvchip hard">Hard</span></div></section>`;
   const choices = mons.map(m => ({ id: m.id, name: m.name, artKind: 'creature', caption: `Level ${m.cl}${m.boss ? ' · Boss' : ''}`, blocked: !!m.boss && DQ.combatLvl() < m.boss.req, locked: !!m.boss && DQ.combatLvl() < m.boss.req, reason: m.boss ? `Combat level ${m.boss.req} required` : '', info: `<p>Level ${m.cl} · ${m.hp} health${m.boss ? ' · Boss' : ''}. Food available restores ${fmt(DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0))} health.</p>` }));
@@ -8879,7 +8904,7 @@ const hubDefault = h => {
 UI.renderRail = () => {
   const cur = UI.hubOf(UI.view).id;
   $('#rail').innerHTML = `<div class="brand">${ico('candle')}<b>Idlewick</b></div>` + HUBS.filter(h=>h.id!=='combat').map(h => `<button class="hub ${h.id === cur ? 'on' : ''}" data-do="hub" data-a="${h.id}" aria-label="${h.name}">${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${h.id}"></i></button>`).join('');
-  $('#combatnav').innerHTML=`<button class="hub combat-entry ${cur==='combat'?'on':''}" data-do="hub" data-a="combat" aria-label="Combat">${ico('attack')}<span>Combat</span><b class="combat-menu-level mono" data-b="combat">${DQ.combatLvl()}</b><i class="hubdot" data-b="hubdot:combat"></i></button>`;
+  $('#combatnav').innerHTML=`<button class="hub combat-entry ${cur==='combat'?'on':''}" data-do="hub" data-a="combat" aria-label="Combat">${ico('attack')}<span>Combat</span><b class="combat-menu-level mono" data-b="combat">${DQ.combatLvl()}</b><i class="hubdot" data-b="hubdot:combat"></i><span class="combat-menu-bar bar" data-tip="text:Progress to the next combat level"><i data-b="combatbar" style="width:${DQ.combatProgress().pct.toFixed(1)}%"></i></span></button>`;
   UI.upd();
 };
 UI.B.notice = (e, page) => {

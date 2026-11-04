@@ -158,7 +158,8 @@ DQ.advProgress = () => {
   const a = D.advReq(l), b = D.advReq(l + 1);
   return { pct: clamp((t - a) / (b - a) * 100, 0, 100), cur: t - a, next: b - a, need: b - t };
 };
-DQ.xpMult = sk => (1 + .005 * (DQ.lvl(sk) - 1)) * (1 + .0025 * (DQ.advLvl() - 1)) * (DQ.extraXp ? DQ.extraXp(sk) : 1) * (DQ.buffMult ? DQ.buffMult('xp') : 1);
+const COMBAT_SKILLS = new Set(['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic']);
+DQ.xpMult = sk => (1 + .005 * (DQ.lvl(sk) - 1)) * (1 + .0025 * (DQ.advLvl() - 1)) * (COMBAT_SKILLS.has(sk) ? 1 + DQ.combatCatchUp() : 1) * (DQ.extraXp ? DQ.extraXp(sk) : 1) * (DQ.buffMult ? DQ.buffMult('xp') : 1);
 DQ.actionProgress = sk => Object.entries(D.SK[sk]?.actionReq || {}).map(([stat,need])=>({stat,need,have:DQ.S.stats[stat]||0}));
 DQ.skillUnlocked = sk => { const s=D.SK[sk]; if(!s)return false; if(s.actionReq)return !!DQ.S.unlocked[sk]||DQ.actionProgress(sk).every(r=>r.have>=r.need); return s.quest?!!DQ.S.unlocked[sk]:s.unlock<=DQ.advLvl(); };
 const actionNames={kill:'combat victories',catch:'fish caught',chop:'logs chopped',harvest:'crops harvested',craft:'items crafted',smith:'smithing actions'};
@@ -169,6 +170,17 @@ DQ.combatLvl = () => {
   const m = .325 * (L('attack') + L('strength')), r = .325 * Math.floor(1.5 * L('ranged')), g = .325 * Math.floor(1.5 * L('magic'));
   return Math.floor(base + Math.max(m, r, g));
 };
+/* Progress towards the next combat level: the formula evaluated with fractional skill levels, plus the cheapest single-skill route. */
+const combatFrom = L => { const base = .25 * (L.defence + L.hitpoints); return base + Math.max(.325 * (L.attack + L.strength), .325 * Math.floor(1.5 * L.ranged), .325 * Math.floor(1.5 * L.magic)); };
+DQ.combatProgress = () => {
+  const ids = ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'], L = {}, F = {};
+  ids.forEach(k => { L[k] = DQ.lvl(k); F[k] = L[k] + (L[k] >= 99 ? 0 : DQ.pctNext(k) / 100); });
+  const lvl = DQ.combatLvl(), next = lvl + 1, cont = Math.max(lvl, combatFrom(F)), pct = lvl >= 126 ? 100 : Math.min(99, Math.max(0, (cont - lvl) * 100));
+  const routes = ids.filter(k => DQ.skillUnlocked(k)).map(k => { const T = { ...L }; while (T[k] < 99 && Math.floor(combatFrom(T)) < next) T[k]++; return Math.floor(combatFrom(T)) >= next ? { skill: k, xp: Math.max(0, D.XPF[T[k]] - DQ.S.xp[k]) } : null; }).filter(Boolean).sort((a, b) => a.xp - b.xp);
+  return { lvl, next, pct, best: routes[0] || null, routes };
+};
+/* Catch-up: while your combat level trails your Hero level, combat skills learn faster (+15% per level behind, up to +200%). */
+DQ.combatCatchUp = () => Math.min(2, .15 * Math.max(0, DQ.advLvl() - DQ.combatLvl()));
 DQ.pctNext = sk => { const l = DQ.lvl(sk); if (l >= 99) return 100; const a = D.XPF[l], b = D.XPF[l + 1]; return clamp((DQ.S.xp[sk] - a) / (b - a) * 100, 0, 100); };
 
 /* ---------- Items ---------- */
