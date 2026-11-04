@@ -114,7 +114,7 @@ DQ.finishProject = id => {
   S().projects[id] = true; DQ.fxDirty();
   DQ.log(project.story, 'good');
   const voice = D.PROJECT_VOICES[id];
-  DQ.notify({ kind: 'quest', page: 'projects', key: 'project:' + id, title: project.name, text: project.story + ' ' + project.reward + (voice ? ` ${voice[0]}: “${voice[1]}”` : ''), icon: 'house', sound: 'quest' });
+  DQ.notify({ kind: 'quest', page: 'projects', key: 'project:' + id, title: project.name, text: project.story + ' ' + project.reward + (voice ? ` ${voice[0]}: “${voice[1]}”` : ''), icon: 'house', sound: 'restore' });
   DQ.emit('project', id);
   DQ.save(); return true;
 };

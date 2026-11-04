@@ -25,7 +25,7 @@ DQ.newState = (name = 'Adventurer', look) => {
     town: 'willowbrook', towns: { willowbrook: { visited: true, boss: false } },
     q: {}, ach: {}, seen: {}, unlocked: {},
     stats: { harvest: 0, collect: 0, pets: 0, furnish: 0, hired: 0, catch: 0, chop: 0, mine: 0, thieve: 0, cook: 0, burn: 0, smelt: 0, smith: 0, craft: 0, alch: 0, brew: 0, enchant: 0, kill: 0, earned: 0, deaths: 0, bought: 0, sold: 0, equipped: 0, tools: 0, rare: 0 },
-    settings: { theme: 'dark', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
+    settings: { masterVol: 1, ambience: true, ambVol: .45, theme: 'dark', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
     style: { melee: 'aggressive', ranged: 'offense', magic: 'offense' }, spell: 'spark',
     act: null, log: [], tut: { done: {}, hidden: false },
     gameTime: 0, farm: { plots: [{ crop: null }, { crop: null }, { crop: null }], plotsBought: 3, animals: [], pensBought: 2, feed: 0, autoReplant: true, last: 'potato', next: null },

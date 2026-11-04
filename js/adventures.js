@@ -163,4 +163,10 @@ if (guide0) UI.openGuide = id => { const r = guide0(id); if (!DQ.forecasting) DQ
 /* found while away: listed in the welcome-back summary */
 const extras0 = UI.returnExtras;
 UI.returnExtras = sum => { const h = extras0 ? extras0(sum) : ''; const f = (DQ.awayFinds || []).splice(0); return h + (f.length ? `<div class="k" style="margin:14px 0 6px">Discovered while you were away</div><div class="btnrow wrap">${f.map(id => `<button class="btn sm" data-do="discovery" data-a="${id}">${DQ.ico('star')} ${esc(D.DISCOVERIES[id].name)}</button>`).join('')}</div>` : ''); };
+
+/* milestone flourishes: an adventure's last chapter, and the first arrival in a region */
+const claim0 = DQ.claimQuest;
+DQ.claimQuest = id => { const q = D.QM[id], before = q && DQ.questState(q); const r = claim0(id); if (q && q.adventure && q.stage === ADVENTURES[q.adventure].stages && before === 'ready' && DQ.questState(q) === 'done') setTimeout(() => DQ.sfx('adventure'), 400); return r; };
+const travel0 = DQ.travel;
+if (travel0) DQ.travel = id => { const first = !(S().towns[id] && S().towns[id].visited); const r = travel0(id); if (first && S().town === id) DQ.sfx('region'); return r; };
 })();

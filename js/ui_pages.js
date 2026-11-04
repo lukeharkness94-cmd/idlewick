@@ -183,7 +183,7 @@ const tog = (k, label, sub) => `<button class="tog ${S().settings[k] ? 'on' : ''
 const slider = (k, label) => `<label class="slide"><span>${label}</span><input type="range" min="0" max="100" value="${Math.round(S().settings[k] * 100)}" data-in="${k}" aria-label="${label}"><b class="mono">${Math.round(S().settings[k] * 100)}%</b></label>`;
 UI.V.settings = () => {
   const s = S().settings;
-  return `<div class="setgrid"><section class="panel"><div class="phead"><h2>Audio</h2></div><div class="stack">${tog('muted', 'Mute everything', 'Shortcut: M')}${tog('sfx', 'Sound effects')}${slider('vol', 'Effects volume')}${tog('music', 'Ambient music', 'A slow, generated score that changes with each town')}${slider('musicVol', 'Music volume')}
+  return `<div class="setgrid"><section class="panel"><div class="phead"><h2>Audio</h2></div><div class="stack">${tog('muted', 'Mute everything', 'Shortcut: M')}${slider('masterVol', 'Master volume')}${tog('sfx', 'Sound effects')}${slider('vol', 'Effects volume')}${tog('music', 'Ambient music', 'A slow, generated score that changes with each town')}${slider('musicVol', 'Music volume')}${tog('ambience', 'Nature ambience', 'Wind, birds, water and fire for each region')}${slider('ambVol', 'Ambience volume')}
       <div><div class="k" style="margin-bottom:6px">Task sounds</div><div class="seg">${[['off', 'Off'], ['calm', 'Calm'], ['varied', 'Varied']].map(([k, n]) => `<button class="${s.taskSounds === k ? 'on' : ''}" data-do="tasksound" data-a="${k}">${n}</button>`).join('')}</div><small class="dim">Controls how often finished tasks make a sound. Sounds are always varied so they do not repeat exactly.</small></div></div></section>
     <section class="panel"><div class="phead"><h2>Interface</h2></div><div class="stack">${tog('notify', 'Notifications', 'Show level-ups, unlocks and important alerts. Routine finds and achievements stay in the bell.')}${tog('tips', 'Tooltips')}${tog('reduceFx', 'Reduce effects', 'Turns off click ripples, particles and bouncy animations')}
       <label class="nameedit"><span class="k">Hero name</span><input id="heroname" data-in="name" maxlength="20" value="${esc(S().name)}"></label></div></section>
@@ -287,7 +287,7 @@ document.addEventListener('click', e => {
 document.addEventListener('keydown', e => { const t = e.target.closest && e.target.closest('[data-do][tabindex]'); if (t && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); t.dispatchEvent(new MouseEvent('click', { bubbles: true })); } });
 document.addEventListener('input', e => {
   const t = e.target, k = t.dataset && t.dataset.in; if (!k) return;
-  if (k === 'vol' || k === 'musicVol') { S().settings[k] = t.value / 100; DQ.audioInit(); DQ.audioApply(); t.nextElementSibling.textContent = t.value + '%'; if (k === 'vol') DQ.sfx('coin'); }
+  if (k === 'vol' || k === 'musicVol' || k === 'masterVol' || k === 'ambVol') { S().settings[k] = t.value / 100; DQ.audioInit(); DQ.audioApply(); t.nextElementSibling.textContent = t.value + '%'; if (k === 'vol') DQ.sfx('coin'); }
   else if (k === 'packq') { UI.packQ = t.value; const g = $('#packgrid'); if (g) g.innerHTML = UI.packGrid(); }
   else if (k === 'bankq') { UI.bankQ = t.value; const g = $('#bankgrid'); if (g) g.innerHTML = UI.bankGrid(); }
   else if (k === 'name') { S().name = t.value.trim().slice(0, 20) || 'Adventurer'; UI.renderHud(); }

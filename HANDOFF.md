@@ -191,3 +191,8 @@ Approved roadmap stages are implemented in order. Research/Scholarship lives in 
 - Each finale grants an artefact (`type: 'relic'`, unsellable). Holding it reveals a Willowbrook relic project (bell, lamps, star) that consumes it, adds a scene prop, a villager line and a small benefit. Relic projects stay hidden without the artefact.
 - One discovery offers a choice (the lost traveller), and one is a lore find with a one-time reward. Discoveries are revisited on the Exploration page ("Discoveries", with adventure chapter progress) and never spoil unfound secrets.
 - Save field `disc` (older saves default to `{}`). Validation: 60 regressions, ui-current and the 600-case ui-audit.
+
+### Stage 5: audio
+- Master volume, plus a separate nature-ambience bus with its own toggle and volume (settings `masterVol`, `ambience`, `ambVol`; older saves gain defaults). Ambience dips during fights.
+- Procedural ambience per region (no audio files, so no licensing): a slowly breathing filtered-noise bed plus loose-timed details (birdsong, crickets, waves and gulls, whistling wind and drips, frogs, fire crackle, chimes, a low drone and whispers). It crossfades when the town changes and pauses with the tab.
+- Warmer event sounds (soft bell partials with a little reverb) for level, quest and equip, and new flourishes: `restore` (project completion), `region` (first arrival in a town), `adventure` (final chapter) and `collection`. A cap stops more than five ordinary sounds starting within 400ms; milestones always play. Offline replay stays silent.
