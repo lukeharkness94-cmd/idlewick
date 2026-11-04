@@ -161,7 +161,34 @@ if (locked0) UI.lockedPage = id => locked0(id) + (id === 'exploration' && Object
 
 /* the field guide counts as studying a creature */
 const guide0 = UI.openGuide;
-if (guide0) UI.openGuide = id => { const r = guide0(id); if (!DQ.forecasting) DQ.qev('guide', id); return r; };
+/* Studying for an adventure means something: the quest-giver's notes reveal the creature's weak points (display only, derived
+   from the quest's own progress, so nothing new is saved), and the guide says which weapon to bring. */
+const studyQuest = id => D.QUESTS.find(q => q.adventure && q.obj.some(o => o.ev === 'guide' && o.key === id) && S().q[q.id]);
+const studied = id => { const q = studyQuest(id); if (!q) return false; const st = S().q[q.id], i = q.obj.findIndex(o => o.ev === 'guide' && o.key === id); return st.s === 'done' || st.s === 'ready' || (st.p && st.p[i] >= 1); };
+const weak0 = DQ.weakKnown;
+if (weak0) DQ.weakKnown = m => weak0(m) || (!!m && studied(m.id));
+const WEAPON = { stab: 'a dagger', slash: 'a sword', crush: 'a warhammer', pierce: 'a bow and arrows', fire: 'a fire spell', frost: 'a frost spell', storm: 'a storm spell', aether: 'an aether spell' };
+const studyNote = id => {
+  const q = studyQuest(id), m = D.MON[id]; if (!q || !m || !studied(id) || !DQ.weakOf || !UI.weakChips) return '';
+  const w = DQ.weakOf(m), bring = w.weak.map(t => WEAPON[t]).filter(Boolean);
+  return `<div class="gsec study-note" style="--c:${m.col}"><div class="gh"><b>${esc(q.giver)}’s notes</b><small>${esc(q.name)}</small></div><div class="chips">${UI.weakChips(m)}</div><p>${bring.length ? `Bring ${esc(bring.join(' or '))}: weak points take 50% more damage.` : 'It has no obvious weakness. Bring your strongest gear and plenty of food.'}</p></div>`;
+};
+if (guide0) UI.openGuide = id => {
+  const r = guide0(id); if (DQ.forecasting) return r;
+  DQ.qev('guide', id);
+  const note = studyNote(id), head = note && document.querySelector('.modal .ghead');
+  if (head && !document.querySelector('.modal .study-note')) head.insertAdjacentHTML('afterend', note);
+  return r;
+};
+/* "Continue quest" on a study objective opens the guide itself; a relic hand-in goes to the quest to claim it */
+const objPage0 = DQ.objPage;
+if (objPage0) DQ.objPage = (q, o) => o.ev === 'guide' ? 'bestiary' : o.ev === 'deliver' && D.ITEMS[o.key] && D.ITEMS[o.key].type === 'relic' ? 'quests' : objPage0(q, o);
+const cont0 = UI.DO.questcontinue;
+if (cont0) UI.DO.questcontinue = id => {
+  const q = D.QM[id], st = S().q[id], o = q && q.obj.find((o, j) => DQ.objProg(q, st, j) < o.n);
+  if (o && o.ev === 'guide' && UI.openGuide) return UI.openGuide(o.key);
+  return cont0(id);
+};
 
 /* found while away: listed in the welcome-back summary */
 const extras0 = UI.returnExtras;

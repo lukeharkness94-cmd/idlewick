@@ -227,7 +227,7 @@ const DO = {
   eatat: a => { S().settings.eatAt = +a; UI.render(false); },
   eat: a => { DQ.eat(a); UI.upd(); },
   spell: a => { S().spell = a; UI.render(false); },
-  qstart: a => { DQ.startQuest(a); if (UI.view === 'quests') UI.render(false); },
+  qstart: a => { DQ.startQuest(a); if (UI.view === 'quests') { if (S().q[a]) { UI.questTab = 'active'; UI.tab.questSelected = a; } UI.render(false); } },
   qclaim: a => { DQ.claimQuest(a); if (UI.view === 'quests') { UI.questTab = null; UI.render(false); } },
   qtab: a => { UI.questTab = a; UI.render(false); },
   questcontinue: id => {
