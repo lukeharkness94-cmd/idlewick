@@ -53,7 +53,7 @@ Q.completionItemSheet = id => ITEM[id] || null;
 
 /* items everywhere (backpack, bank, shop, recipes, rewards) */
 const itemIco0 = Q.itemIco;
-Q.itemIco = it => { const sheet = it && ITEM[it.id], url = sheet && crop(sheet, it.id, 96); return url ? img(url, 48, 'item-art', it.name) : itemIco0(it); };
+Q.itemIco = it => { const sheet = it && ITEM[it.id], url = sheet && crop(sheet, it.id, 192); return url ? img(url, 48, 'item-art', it.name) : itemIco0(it); };
 /* larger item art, mining rocks and the beehive */
 const art0 = Q.artImage;
 Q.artImage = (kind, id, size = 96, cls = '', alt = '') => {

@@ -1825,3 +1825,8 @@ h3 { font-size:17px; }
 /* silhouettes for locked or undiscovered characters, painted or pixel */
 .sil,img.sil,img.px.sil,.painted-image.sil,.painted-sprite.sil{filter:brightness(0) opacity(.55)!important}
 :root:not([data-theme="light"]) .sil,:root:not([data-theme="light"]) img.sil{filter:brightness(0) drop-shadow(0 0 1px rgba(233,228,213,.45)) opacity(.8)!important}
+/* shop: every item at one modest size (tools, gear, food and seeds alike), from sources at twice that resolution */
+.visual-shop .illustrated-card .choice-art{height:84px;min-height:84px}
+.visual-shop .illustrated-card .choice-art > .item-art,.visual-shop .illustrated-card .choice-art > img,.visual-shop .illustrated-card .choice-art > .painted-sprite{width:72px!important;height:72px!important;max-width:72px;max-height:72px;object-fit:contain}
+.visual-shop .shop-task .item-art,.visual-shop .shop-task .painted-image,.visual-shop .shop-task .painted-sprite{width:80px!important;height:80px!important;object-fit:contain}
+.visual-shop .illustrated-card{height:auto;min-height:172px;gap:6px}
