@@ -141,7 +141,7 @@ const showLevelReveal=o=>{
   if(modalEl){levelQueue.push(o);pumpLevel();return true;}
   const sk=o.skill&&DQ.data.SK[o.skill],hero=o.kind==='adv',name=hero?'Hero':(sk?.name||'Skill'),level=o.to||String(o.title||'').match(/\d+/)?.[0]||'';
   const art=hero?`<span class="level-star">${ico('star')}</span>`:DQ.artImage('skill',o.skill,112,'',name);
-  DQ.modal({title:`${name} level up`,wide:true,sticky:true,body:`<div class="level-reveal" style="--c:${o.col||'#d8a64a'}"><div class="level-rings" aria-hidden="true"></div><div class="level-emblem">${art}</div><span class="unlock-ribbon">Level up</span><h2>${esc(name)} <b>${esc(level)}</b></h2><p>${esc(o.text||'Your training has paid off.')}</p></div>`,actions:[{label:'Continue',primary:true,fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
+  DQ.modal({title:`${name} level up`,wide:true,sticky:true,body:`<div class="level-reveal lr-v2" style="--c:${o.col||'#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><span class="lr-ripple" aria-hidden="true"></span><span class="lr-ripple r2" aria-hidden="true"></span><span class="lr-ripple r3" aria-hidden="true"></span><span class="lr-rays" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><span class="lr-ribbon">Level up</span><h2>${esc(name)} <b>${esc(level)}</b></h2><p>${esc(o.text||'Your training has paid off.')}</p></div>`,actions:[{label:'Continue',primary:true,fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
   DQ.sfx(o.sound||'level');setTimeout(()=>DQ.burstEl(document.querySelector('.level-emblem'),o.col||'#d8a64a',38),100);return true;
 };
 DQ.notify = o => {

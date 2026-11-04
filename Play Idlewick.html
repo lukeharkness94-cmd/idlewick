@@ -1921,6 +1921,42 @@ h3 { font-size:17px; }
 .encounter-list{gap:4px!important}.encounter-list>div{padding:4px 8px!important;min-height:0!important}
 .encounter-list>div img,.encounter-list>div .painted-sprite{width:40px!important;height:40px!important}
 .area-grid,.area-grid>.area-card{grid-auto-rows:auto}.area-card{padding:10px}
+/* level-up reveal: emblem pops in, rings ripple out from it, ribbon and title rise in after */
+.lr-v2{min-height:0;padding:18px 0 8px;overflow:visible}
+.lr-v2 .lr-stage{position:relative;width:220px;height:220px;display:grid;place-items:center;margin-bottom:6px}
+.lr-v2 .lr-stage>*{grid-area:1/1}
+.lr-v2 .level-emblem{position:relative;z-index:3;width:132px;height:132px;margin:0;display:grid;place-items:center;border-radius:50%;
+  background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--c) 22%,var(--panel)) 0,var(--panel) 62%);
+  border:2px solid color-mix(in srgb,var(--c) 70%,transparent);
+  box-shadow:0 0 0 6px color-mix(in srgb,var(--c) 14%,transparent),0 12px 30px -8px color-mix(in srgb,var(--c) 55%,transparent);filter:none;
+  animation:lr-pop .9s cubic-bezier(.2,1.4,.4,1) both}
+.lr-v2 .level-emblem>*{display:block;margin:0}
+.lr-v2 .level-emblem img,.lr-v2 .level-emblem .painted-sprite{width:96px;height:96px;image-rendering:auto}
+.lr-v2 .level-star{display:grid;place-items:center;width:100%;height:100%;line-height:0}
+.lr-v2 .level-star .ic{width:100px!important;height:100px!important;vertical-align:0;margin:0;animation:lr-twinkle 2.8s ease-in-out 1s infinite}
+.lr-v2 .lr-glow{width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--c) 45%,transparent),transparent 68%);animation:lr-breathe 3.2s ease-in-out .6s infinite both}
+.lr-v2 .lr-ripple{width:132px;height:132px;border-radius:50%;border:2px solid color-mix(in srgb,var(--c) 70%,transparent);opacity:0;animation:lr-ripple 2.4s cubic-bezier(.2,.6,.3,1) .35s infinite}
+.lr-v2 .lr-ripple.r2{animation-delay:1.15s}.lr-v2 .lr-ripple.r3{animation-delay:1.95s}
+.lr-v2 .lr-rays{width:230px;height:230px;border-radius:50%;opacity:.55;
+  background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--c) 30%,transparent) 0 6deg,transparent 6deg 24deg);
+  -webkit-mask:radial-gradient(circle,transparent 34%,#000 46%,transparent 70%);mask:radial-gradient(circle,transparent 34%,#000 46%,transparent 70%);
+  animation:lr-rays-in .8s ease-out .2s both,unlock-spin 24s linear infinite}
+.lr-v2 .lr-ribbon{display:inline-block;padding:5px 16px;border-radius:999px;font:700 12px/1.2 var(--font-ui,inherit);letter-spacing:.16em;text-transform:uppercase;
+  color:#2a1d08;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 70%,#fff3d6),var(--c));box-shadow:0 2px 8px -2px color-mix(in srgb,var(--c) 60%,transparent);
+  animation:lr-rise .6s cubic-bezier(.2,.9,.3,1.2) .45s both}
+.lr-v2 h2{margin:12px 0 4px;animation:lr-rise .6s cubic-bezier(.2,.9,.3,1.2) .6s both}
+.lr-v2 h2 b{display:inline-block;animation:lr-num 1s cubic-bezier(.2,1.5,.4,1) .75s both}
+.lr-v2 p{margin:4px auto 0;animation:lr-rise .6s ease-out .85s both}
+@keyframes lr-pop{0%{transform:scale(.3) rotate(-25deg);opacity:0}60%{transform:scale(1.12) rotate(4deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+@keyframes lr-ripple{0%{transform:scale(1);opacity:.75}100%{transform:scale(1.75);opacity:0}}
+@keyframes lr-breathe{0%,100%{transform:scale(.92);opacity:.7}50%{transform:scale(1.06);opacity:1}}
+@keyframes lr-rays-in{from{opacity:0;transform:scale(.6)}to{opacity:.55;transform:scale(1)}}
+@keyframes lr-rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes lr-num{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.18);opacity:1}100%{transform:scale(1)}}
+@keyframes lr-twinkle{0%,100%{transform:rotate(0) scale(1)}50%{transform:rotate(8deg) scale(1.05)}}
+@media(max-width:600px){.lr-v2 .lr-stage{width:180px;height:180px}.lr-v2 .level-emblem{width:112px;height:112px}.lr-v2 .lr-glow{width:170px;height:170px}.lr-v2 .lr-ripple{width:112px;height:112px}.lr-v2 .lr-rays{width:190px;height:190px}.lr-v2 .level-star .ic{width:70px!important;height:70px!important}}
+@media(prefers-reduced-motion:reduce){.lr-v2 *,.lr-v2{animation:none!important}.lr-v2 .lr-ripple{opacity:.25}}
+.calm .lr-v2 *{animation:none!important}.calm .lr-v2 .lr-ripple{opacity:.25}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -5606,7 +5642,7 @@ const showLevelReveal=o=>{
   if(modalEl){levelQueue.push(o);pumpLevel();return true;}
   const sk=o.skill&&DQ.data.SK[o.skill],hero=o.kind==='adv',name=hero?'Hero':(sk?.name||'Skill'),level=o.to||String(o.title||'').match(/\d+/)?.[0]||'';
   const art=hero?`<span class="level-star">${ico('star')}</span>`:DQ.artImage('skill',o.skill,112,'',name);
-  DQ.modal({title:`${name} level up`,wide:true,sticky:true,body:`<div class="level-reveal" style="--c:${o.col||'#d8a64a'}"><div class="level-rings" aria-hidden="true"></div><div class="level-emblem">${art}</div><span class="unlock-ribbon">Level up</span><h2>${esc(name)} <b>${esc(level)}</b></h2><p>${esc(o.text||'Your training has paid off.')}</p></div>`,actions:[{label:'Continue',primary:true,fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
+  DQ.modal({title:`${name} level up`,wide:true,sticky:true,body:`<div class="level-reveal lr-v2" style="--c:${o.col||'#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><span class="lr-ripple" aria-hidden="true"></span><span class="lr-ripple r2" aria-hidden="true"></span><span class="lr-ripple r3" aria-hidden="true"></span><span class="lr-rays" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><span class="lr-ribbon">Level up</span><h2>${esc(name)} <b>${esc(level)}</b></h2><p>${esc(o.text||'Your training has paid off.')}</p></div>`,actions:[{label:'Continue',primary:true,fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
   DQ.sfx(o.sound||'level');setTimeout(()=>DQ.burstEl(document.querySelector('.level-emblem'),o.col||'#d8a64a',38),100);return true;
 };
 DQ.notify = o => {
