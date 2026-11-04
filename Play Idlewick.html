@@ -1883,6 +1883,14 @@ h3 { font-size:17px; }
 .just-restored{animation:restoredGlow 2.4s ease-out}
 @keyframes restoredGlow{0%{filter:brightness(1)}25%{filter:brightness(1.18) saturate(1.15);box-shadow:0 0 0 2px var(--brass),0 0 28px -4px var(--brass)}100%{filter:none;box-shadow:none}}
 @media (prefers-reduced-motion:reduce){.just-restored{animation:none}}
+/* field guide: what each entry needs, and the clickable foe that opens it */
+.gladder{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px;padding:0}
+.gladder li{display:flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);font-size:13px}
+.gladder li small{color:var(--dim)}.gladder li .ic{width:16px;height:16px;vertical-align:middle}
+.gladder li.on{border-color:color-mix(in srgb,var(--brass) 55%,var(--line))}.gladder li.on small{color:var(--brass)}
+.gladder li:not(.on){opacity:.8}
+.encounter-arena #av-foe.foe-guide,#av-foe.foe-guide{cursor:pointer}
+#av-foe.foe-guide:focus-visible{outline:2px solid var(--brass);outline-offset:4px;border-radius:12px}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -4885,7 +4893,7 @@ Q.artImage=(kind,id,size=96,cls='',alt='')=>{const ref=Q.paintedRef(kind,id);ret
 const oldItem=Q.itemIco;Q.itemIco=it=>it&&Q.paintedRef('item',it.id)?Q.artImage('item',it.id,48,'item-art',it.name):oldItem(it);
 const oldGear=Q.gearIco;Q.gearIco=(id,cls='')=>Q.paintedGearIndex(id)>=0?Q.artImage('item',id,48,'gico '+cls,D.ITEMS[id].name):oldGear(id,cls);
 const style=document.createElement('style');
-style.textContent=':root{'+Object.entries(sheets).map(([name,s])=>`--atlas-${name}:url('${s.url}');`).join('')+'}'+Object.keys(Q.ICONS).map(id=>{const ref=Q.paintedRef('icon',id);if(!ref)return '';const s=sheets[ref.name],i=ref.index;return `.pxi-${id}{background-image:var(--atlas-${ref.name})!important;background-size:${s.cols*100}% ${s.rows*100}%!important;background-position:${i%s.cols*100/(s.cols-1)}% ${Math.floor(i/s.cols)*100/(s.rows-1)}%!important;image-rendering:auto!important}`;}).join('');document.head.appendChild(style);
+style.textContent=':root{'+Object.entries(sheets).map(([name,s])=>`--atlas-${name}:url('${s.url}');`).join('')+'}'+Object.keys(Q.ICONS).map(id=>{const ref=Q.paintedRef('icon',id);if(!ref)return '';const s=sheets[ref.name],i=ref.index;return `.pxi-${id}{background-image:var(--atlas-${ref.name})!important;background-size:${s.cols*100}% ${s.rows*100}%!important;background-position:${i%s.cols*100/(s.cols-1)}% ${Math.floor(i/s.cols)*100/(s.rows-1)}%!important;image-rendering:auto!important;background-color:transparent!important;background-repeat:no-repeat!important;-webkit-mask:none!important;mask:none!important;border:0!important;box-shadow:none!important}`;}).join('');document.head.appendChild(style);
 const images={},cache=new Map();
 Q.paintedCanvas=(name,index)=>{
  const key=name+':'+index;if(cache.has(key))return cache.get(key);const s=sheets[name],im=images[name];if(!im?.complete||!im.naturalWidth)return null;
@@ -7276,7 +7284,7 @@ UI.V.combat = () => {
   const town = S().town, mons = D.MONLIST.filter(m => m.town === town), boss = mons.find(m => m.boss);
   const f = DQ.act && DQ.act.kind === 'fight' ? D.MON[DQ.act.id] : null, st = DQ.weaponStyle(), ps = DQ.pstats(), sty = S().style;
   const preview = f || mons.find(m=>m.id===UI.taskChoice.combat) || mons[0];
-  const foe = preview ? `<div class="avatar ${preview.boss ? 'boss' : ''}" id="av-foe" style="--c:${preview.col}">${DQ.battleFoe ? DQ.battleFoe(preview) : DQ.monSprite(preview,192)}</div><div class="nm">${esc(preview.name)} <span class="lvchip ${preview.cl - DQ.combatLvl() <= 3 ? 'easy' : preview.cl - DQ.combatLvl() <= 14 ? 'fair' : 'hard'}">Lv ${preview.cl}</span></div><span class="bar hpb"><i ${f?'data-b="fhp"':'style="width:100%"'}></i></span><small class="mono" ${f?'data-b="fhptxt"':''}>${preview.hp} / ${preview.hp} health</small>`
+  const foe = preview ? `<div class="avatar foe-guide ${preview.boss ? 'boss' : ''}" id="av-foe" style="--c:${preview.col}" data-do="guide" data-a="${preview.id}" role="button" tabindex="0" aria-label="${esc(preview.name)}: open its field guide" data-tip="text:${esc(preview.name)} · open its field guide">${DQ.battleFoe ? DQ.battleFoe(preview) : DQ.monSprite(preview,192)}</div><div class="nm">${esc(preview.name)} <span class="lvchip ${preview.cl - DQ.combatLvl() <= 3 ? 'easy' : preview.cl - DQ.combatLvl() <= 14 ? 'fair' : 'hard'}">Lv ${preview.cl}</span></div><span class="bar hpb"><i ${f?'data-b="fhp"':'style="width:100%"'}></i></span><small class="mono" ${f?'data-b="fhptxt"':''}>${preview.hp} / ${preview.hp} health</small>`
     : `<div class="avatar idle" id="av-foe" style="--c:#4a5a5e">?</div><div class="empty-foe">Choose a target to start fighting.</div>`;
   const stances = st === 'melee' ? [['accurate', 'Accurate', 'attack'], ['aggressive', 'Aggressive', 'strength'], ['defensive', 'Defensive', 'defence']] : [['offense', 'Offensive', st === 'ranged' ? 'ranged' : 'magic'], ['defensive', 'Defensive', st === 'ranged' ? 'ranged + defence' : 'magic + defence']];
   const cur = sty[st];
@@ -9426,11 +9434,12 @@ UI.openGuide = id => {
       if (!all && !found) return ''; return `<div class="gdrop ${found ? 'got' : ''}"><span class="itm sm" style="--c:${it.col}">${ico(it.ic)}</span><b style="color:${RAR_COL[rar[0]]}">${esc(it.name)}</b><small>${rar[1]}${DQ.knows(m, 'legend') ? ` · about 1 in ${fmt(Math.round(1 / p))}` : ''}</small><span class="gmark">${found ? 'Found' : 'Not found yet'}</span></div>`;
     }).join('');
     const hidden = all ? 0 : m.drops.filter(d => !B.drops[id + ':' + d[0]]).length;
-    return `${rows}${hidden ? `<p class="dim" style="margin:6px 0 0">${hidden} more item${hidden > 1 ? 's' : ''} you have not found yet. Reach the <b>Drop table</b> entry to see them all.</p>` : ''}`;
+    return `${rows}${hidden ? `<p class="dim" style="margin:6px 0 0">${hidden} more item${hidden > 1 ? 's' : ''} you have not found yet. Reach the <b>Drop table</b> entry${r.rank <= 3 ? ` (${fmt(T[3] - r.kills)} more defeat${T[3] - r.kills > 1 ? 's' : ''})` : ''} to see them all.</p>` : ''}`;
   })();
   const dr = r.rank > 3 ? drops : (drops || '<p class="dim" style="margin:0">Nothing found yet.</p>');
   const body = `<div class="ghead" style="--c:${m.col}"><div class="gsprite">${DQ.monSprite(m, 96, seen ? 'bob' : 'sil')}</div><div class="gtitle"><h3>${seen ? esc(m.name) : '???'}</h3><small>${seen ? `${m.boss ? 'Boss · ' : ''}${esc(D.TOWN[m.town].name)} · Level ${m.cl}` : 'You have not met this monster yet'}</small>
       <div class="gprog"><span class="bar"><i style="width:${r.next == null ? 100 : Math.round((r.kills - (r.rank ? T[r.rank - 1] : 0)) / (T[r.rank] - (r.rank ? T[r.rank - 1] : 0)) * 100)}%"></i></span><small class="mono">${fmt(r.kills)} defeated · ${nextLine(m, r)}</small></div></div></div>
+    <ol class="gladder" aria-label="What each entry needs">${RANKS.map((x, i) => { const left = T[i] - r.kills; return `<li class="${left <= 0 ? 'on' : ''}">${ico(left <= 0 ? 'check' : 'lock')}<b>${x[1]}</b><small>${left <= 0 ? 'Unlocked' : `${fmt(left)} more defeat${left > 1 ? 's' : ''}`}</small></li>`; }).join('')}</ol>
     ${seen ? sec(0, `<p>Found around ${esc(D.TOWN[m.town].name)}. Level ${m.cl}${m.boss ? `, and it guards the road onward` : ''}.</p>`) : lock(0)}
     ${sec(1, `<div class="chips">${UI.weakChips(m)}</div><p class="sm dim" style="margin:6px 0 0">Weak points take 50% more damage. Resisted types do half.</p>`)}
     ${sec(2, `<p>Health <b class="mono">${m.hp}</b> · Hits up to <b class="mono">${m.max}</b> · Carries <b class="mono">${m.coins[1] ? `${m.coins[0]}-${m.coins[1]}` : 'no'}</b> coins</p>`)}

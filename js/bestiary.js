@@ -63,11 +63,12 @@ UI.openGuide = id => {
       if (!all && !found) return ''; return `<div class="gdrop ${found ? 'got' : ''}"><span class="itm sm" style="--c:${it.col}">${ico(it.ic)}</span><b style="color:${RAR_COL[rar[0]]}">${esc(it.name)}</b><small>${rar[1]}${DQ.knows(m, 'legend') ? ` · about 1 in ${fmt(Math.round(1 / p))}` : ''}</small><span class="gmark">${found ? 'Found' : 'Not found yet'}</span></div>`;
     }).join('');
     const hidden = all ? 0 : m.drops.filter(d => !B.drops[id + ':' + d[0]]).length;
-    return `${rows}${hidden ? `<p class="dim" style="margin:6px 0 0">${hidden} more item${hidden > 1 ? 's' : ''} you have not found yet. Reach the <b>Drop table</b> entry to see them all.</p>` : ''}`;
+    return `${rows}${hidden ? `<p class="dim" style="margin:6px 0 0">${hidden} more item${hidden > 1 ? 's' : ''} you have not found yet. Reach the <b>Drop table</b> entry${r.rank <= 3 ? ` (${fmt(T[3] - r.kills)} more defeat${T[3] - r.kills > 1 ? 's' : ''})` : ''} to see them all.</p>` : ''}`;
   })();
   const dr = r.rank > 3 ? drops : (drops || '<p class="dim" style="margin:0">Nothing found yet.</p>');
   const body = `<div class="ghead" style="--c:${m.col}"><div class="gsprite">${DQ.monSprite(m, 96, seen ? 'bob' : 'sil')}</div><div class="gtitle"><h3>${seen ? esc(m.name) : '???'}</h3><small>${seen ? `${m.boss ? 'Boss · ' : ''}${esc(D.TOWN[m.town].name)} · Level ${m.cl}` : 'You have not met this monster yet'}</small>
       <div class="gprog"><span class="bar"><i style="width:${r.next == null ? 100 : Math.round((r.kills - (r.rank ? T[r.rank - 1] : 0)) / (T[r.rank] - (r.rank ? T[r.rank - 1] : 0)) * 100)}%"></i></span><small class="mono">${fmt(r.kills)} defeated · ${nextLine(m, r)}</small></div></div></div>
+    <ol class="gladder" aria-label="What each entry needs">${RANKS.map((x, i) => { const left = T[i] - r.kills; return `<li class="${left <= 0 ? 'on' : ''}">${ico(left <= 0 ? 'check' : 'lock')}<b>${x[1]}</b><small>${left <= 0 ? 'Unlocked' : `${fmt(left)} more defeat${left > 1 ? 's' : ''}`}</small></li>`; }).join('')}</ol>
     ${seen ? sec(0, `<p>Found around ${esc(D.TOWN[m.town].name)}. Level ${m.cl}${m.boss ? `, and it guards the road onward` : ''}.</p>`) : lock(0)}
     ${sec(1, `<div class="chips">${UI.weakChips(m)}</div><p class="sm dim" style="margin:6px 0 0">Weak points take 50% more damage. Resisted types do half.</p>`)}
     ${sec(2, `<p>Health <b class="mono">${m.hp}</b> · Hits up to <b class="mono">${m.max}</b> · Carries <b class="mono">${m.coins[1] ? `${m.coins[0]}-${m.coins[1]}` : 'no'}</b> coins</p>`)}

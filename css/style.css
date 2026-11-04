@@ -1808,3 +1808,11 @@ h3 { font-size:17px; }
 .just-restored{animation:restoredGlow 2.4s ease-out}
 @keyframes restoredGlow{0%{filter:brightness(1)}25%{filter:brightness(1.18) saturate(1.15);box-shadow:0 0 0 2px var(--brass),0 0 28px -4px var(--brass)}100%{filter:none;box-shadow:none}}
 @media (prefers-reduced-motion:reduce){.just-restored{animation:none}}
+/* field guide: what each entry needs, and the clickable foe that opens it */
+.gladder{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px;padding:0}
+.gladder li{display:flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);font-size:13px}
+.gladder li small{color:var(--dim)}.gladder li .ic{width:16px;height:16px;vertical-align:middle}
+.gladder li.on{border-color:color-mix(in srgb,var(--brass) 55%,var(--line))}.gladder li.on small{color:var(--brass)}
+.gladder li:not(.on){opacity:.8}
+.encounter-arena #av-foe.foe-guide,#av-foe.foe-guide{cursor:pointer}
+#av-foe.foe-guide:focus-visible{outline:2px solid var(--brass);outline-offset:4px;border-radius:12px}
