@@ -38,6 +38,20 @@ function harness(desktopStorage) {
 const encode = state => Buffer.from(JSON.stringify(state)).toString('base64');
 let tests = 0;
 function test(name, run) { run(); tests++; console.log('PASS', name); }
+test('gather catalogue exposes future regions while keeping their actions gated', () => {
+  const {q,load}=harness();
+  q.ico=()=>'';q.itemIco=()=>'';q.artImage=()=>'';
+  load('ui_core');q.ui.skillHero=()=>'';q.ui.toolLine=()=>'';
+  const before=JSON.stringify(q.S);
+  let html=q.ui.V.gather('fishing');
+  for(const fish of q.data.NODES.fish)assert.ok(html.includes(`data-do="taskselect" data-a="fish" data-b="${fish.id}"`),fish.name+' must be inspectable');
+  q.ui.taskChoice.fishing='voideel';html=q.ui.V.gather('fishing');
+  assert.match(html,/data-do="act" data-a="fish" data-b="voideel" disabled/);
+  assert.match(html,/Requires Fishing 95/);assert.match(html,/to open The Hollow Crown/);
+  assert.equal(JSON.stringify(q.S),before,'Previewing must not change progression');
+  q.ui.taskChoice.fishing='shrimp';html=q.ui.V.gather('fishing');
+  assert.doesNotMatch(html,/data-do="act" data-a="fish" data-b="shrimp" disabled/);
+});
 test('desktop save bridge preserves save semantics without silently falling back to browser storage', () => {
   const files=new Map(),desktop={getItem:key=>files.get(key)||null,setItem:(key,value)=>files.set(key,value),removeItem:key=>files.delete(key)};
   const {q,storage}=harness(desktop);assert.ok(q.save());assert.ok(q.hasSave());assert.equal(storage.size,0);assert.equal(files.size,1);

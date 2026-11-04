@@ -11,3 +11,6 @@ saves/
 release/
 desktop/dist/
 steam_appid.txt
+
+# Game artwork is source, unlike screenshots and test captures.
+!assets/painted/*.png

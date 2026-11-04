@@ -122,3 +122,12 @@ Merge verification: all 40 core regressions, desktop storage checks, artwork che
 ## Menu spacing correction (supersedes height-compression rules)
 
 The left menu uses a 232px column, consistent 6px × 10px row padding, 32px skill icons and natural row heights. Removed the overlapping fixed-height grid and 1px-padding rules. Rows never stretch to fill a tall screen or squeeze their text to fit a shorter one. At shorter desktop heights, the skill list scrolls within the space above bottom navigation; all 13 skills remain reachable. This intentionally supersedes the older requirement to force every row on-screen without scrolling. Browser checks at 1440 × 720/900, 1920 × 1080 and 2560 × 1440 found no clipped row contents or navigation overlap, and the bottom skill was successfully selected in a short window.
+
+
+## 2026-11-04 catalogue and painted-art pass
+
+Gathering now exposes every region's resources in level order, with level/location labels and inspectable locked choices. Start and queue remain gated; View town opens the selected location on the map. Removed the duplicate elsewhere listing. Shared activity choices are compact 100px cards with fixed-size art. Fixed the inherited align-items:start that was shrink-wrapping the activity workspace on wide screens. Mid-size desktops put a horizontal action panel above the full-width catalogue.
+
+User superseded the pixel-art direction with natural painted models. The first converted sets are all 15 fish (including raw inventory icons) and all nine trees. Generated transparent atlases are in assets/painted; art_painted.js overrides those assets only. Heroes, enemies, equipment, cooked fish, and landscapes still use existing art, so this is not a completed whole-game art conversion. Packaging embeds atlas PNGs into the standalone HTML. Do not replace distinct cooked-item art with raw fish illustrations.
+
+Validation: 41 core regressions including all-region visibility and locked preview gating. Isolated browser save tested for fishing start/stop, locked fish preview, responsive catalogue columns at 390/1024/1440/2560, and painted art in both themes. Personal save untouched.

@@ -210,6 +210,7 @@ UI.refresh = refresh;
 const DO = {
   achall: () => { UI.achAll = true; UI.render(false); },
   noop: () => {}, go: a => DQ.go(a),
+  taskmap: town => { UI.mapSel = town; DQ.go('map'); },
   taskselect: (kind, id, el) => { UI.taskChoice[el.dataset.page] = id; UI.render(false); if (innerWidth <= 700) document.querySelector(kind === 'fight' ? '.encounter-controls' : '.activity-stage')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); },
   act: (a, b) => { DQ.startAct(a, b); },
   stop: () => DQ.stopAct(),

@@ -22,8 +22,16 @@ def stylesheet(match):
     return '<style>' + css + '</style>'
 
 html = re.sub(r'<link rel="stylesheet" href="([^"]+)">', stylesheet, html)
+def script(match):
+    source = (root / match[1]).read_text()
+    def image_url(image):
+        data = base64.b64encode((root / image[0]).read_bytes()).decode()
+        return 'data:image/png;base64,' + data
+    source = re.sub(r'assets/painted/[a-z-]+\.png', image_url, source)
+    return '<script>\n' + source + '\n</script>'
+
 html = re.sub(r'<script src="([^"]+)"></script>',
-              lambda m: '<script>\n' + (root / m[1]).read_text() + '\n</script>', html)
+              script, html)
 args.output.parent.mkdir(parents=True, exist_ok=True)
 args.output.write_text(html)
 print(args.output.resolve())
