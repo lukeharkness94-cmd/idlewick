@@ -49,7 +49,7 @@ function compose(look,work){
  const handPx=[],im=b.getImageData(0,0,384,576),shirt=eq.body?under(D.ITEMS[eq.body].col,[46,40,36],.68):rgb(o.tunic),skin=rgb(o.skin),hair=rgb(o.hair),legsUnder=eq.legs?under(D.ITEMS[eq.legs].col,[42,36,32],.7):null,fullHelm=!fit.head&&!!eq.head&&Q.paintedGearIndex(eq.head)===10,lining=[38,33,30]; /* a fitted helmet or hood turns the hair into its dark lining; old full helms hide it; other hoods keep it */
  for(let y=0;y<576;y++)for(let xx=0;xx<384;xx++){const i=(y*384+xx)*4;if(!im.data[i+3])continue;const r=im.data[i],g=im.data[i+1],bl=im.data[i+2];let colour=null,base=1;
   if(y>115&&y<325&&bl>r*1.08&&bl>g*.98){colour=shirt;base=125;}
-  else if(y<71&&xx>130&&xx<250&&r>g*1.1&&r<150){if(fullHelm){im.data[i+3]=0;continue;}colour=fit.head&&!(xx>158&&xx<224&&y>40)?lining:hair;base=96;}
+  else if(y<71&&xx>130&&xx<250&&r>g*1.1&&r<150&&!(xx>158&&xx<224&&y>=46)){if(fullHelm){im.data[i+3]=0;continue;}colour=fit.head&&!(xx>158&&xx<224&&y>40)?lining:hair;base=96;} /* brows and eyes (inside the face, below the fringe) are shaded as skin, never painted in the hair colour */
   else if(((y>45&&y<140&&xx>144&&xx<237)||(y>185&&y<342&&(xx<132||xx>250)))&&r>g*1.12&&g>bl*1.12){colour=skin;base=180;}
   else if(legsUnder&&y>=322&&y<=(fit.legs?572:500)&&xx>105&&xx<280&&r>g*1.2&&g>bl*1.1){colour=legsUnder;base=110;}
   if(colour){const lum=(r*.3+g*.5+bl*.2)/base;for(let k=0;k<3;k++)im.data[i+k]=Math.min(255,colour[k]*lum);}
