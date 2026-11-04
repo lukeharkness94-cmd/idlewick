@@ -171,3 +171,9 @@ Approved roadmap stages are implemented in order. Research/Scholarship lives in 
 - Starting a task that First Steps asks for accepts First Steps automatically (never during forecasts or offline simulation), so a new hero's first catches and logs count.
 - Cards are held behind the welcome-back summary (`DQ.holdNotes`) and follow it after Continue. Level reveals are unchanged.
 - Repaired stale browser tests after the Scholarship and painted-model changes; removed obsolete historical scripts. Validation: 52 regressions, desktop storage, ui-current (all widths, both themes) and the 600-case ui-audit pass.
+
+### Stage 2: one clear objective and contextual routes
+- Home leads with the journey destination (the single primary objective), then the two nearest action-skill unlocks (the full list stays in All skills), then other suggestions. The plain welcome line only appears when the intro card is hidden.
+- Boss preparation follows the cached battle forecast (`DQ.bossForecast`): at 75%+ wins it says challenge; otherwise it asks for food sized to the forecast's food-per-kill, or a little more strength. The old fixed "five health bars" target is gone.
+- `js/routes.js`: `DQ.sourceOf(item)` finds the earliest source (gathering node, crop, animal, recipe, shop, creature drop). `UI.routeChip(item)` appears beside missing recipe ingredients, town project costs and Scholarship costs; it opens the page with the right card selected. A "Back to …" bar returns to where you were; hub navigation clears it. Locked skills open their explanation page.
+- Validation: 54 regressions, ui-current and the 600-case ui-audit.

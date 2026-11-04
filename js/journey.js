@@ -52,7 +52,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (S().towns.willowbrook.boss) return step('The road is open', 'Grubnash is defeated. Visit Mossbarrow or choose your next destination.', 'go', 'map');
   if (S().town !== 'willowbrook') return step('Return to Willowbrook', 'Grubnash awaits outside the village.', 'journeytravel', 'willowbrook');
   const first = D.QM.first_steps, firstState = DQ.questState(first);
-  if (firstState === 'new') return step('Meet Elder Wren', 'Accept First Steps before gathering so your catches and logs count toward the quest.', 'qstart', first.id);
+  if (firstState === 'new') return step('Meet Elder Wren', 'Accept First Steps, or simply start fishing or chopping: the quest is accepted for you and your work counts.', 'qstart', first.id);
   if (firstState === 'ready') return step('Claim First Steps', 'Collect your XP and coins from Elder Wren.', 'qclaim', first.id);
   if (firstState === 'active') {
     const p = S().q[first.id], index = first.obj.findIndex((o, i) => DQ.objProg(first, p, i) < o.n);
@@ -60,13 +60,18 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   }
   if (bossQuest && DQ.questState(bossQuest) === 'new') return step('Accept the Grubnash quest', 'Make your boss victory count toward the village quest and its rewards.', 'qstart', bossQuest.id);
   if (!DQ.skillUnlocked('cooking')) return task('Unlock Cooking at Hero 3', 'Prepare a food supply before taking on stronger opponents.', 'fish', 'shrimp');
-  const food = DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0);
-  if (food < DQ.maxHp() * 5) {
-    if (!DQ.have('raw_shrimp')) return task('Gather a food reserve', 'Aim for food worth at least five full health bars. This is a preparation target, not a win guarantee.', 'fish', 'shrimp');
-    return task('Cook your provisions', 'Food currently restores ' + fmt(food) + ' total health. Target ' + fmt(DQ.maxHp() * 5) + ' before the boss.', 'recipe', 'cook_shrimp');
+  const food = DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0), req = D.MON.grubnash.boss.req;
+  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Attack, Strength and Defence using the combat training focus.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
+  /* Ready by level: let the battle forecast decide what, if anything, is missing. */
+  const f = DQ.bossForecast ? DQ.bossForecast('grubnash') : null;
+  if (f && f.winRate >= .75) return step('Challenge Grubnash', `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current gear and food.`, 'go', 'combat');
+  const needFood = f && f.foodPerKill != null ? Math.ceil(f.foodPerKill * 1.5) : DQ.maxHp() * 2;
+  if (food < needFood) {
+    const msg = `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins. ` : ''}Food restores ${fmt(food)} health; about ${fmt(needFood)} would carry you through.`;
+    if (!DQ.have('raw_shrimp')) return task('Gather food for the fight', msg, 'fish', 'shrimp');
+    return task('Cook your provisions', msg, 'recipe', 'cook_shrimp');
   }
-  if (DQ.combatLvl() < D.MON.grubnash.boss.req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / 10. Train Attack, Strength and Defence using the combat training focus.', 'fight', 'chicken');
-  return step('Review your boss preparation', 'You meet the combat requirement. Check equipment, auto-eat and the battle forecast before challenging Grubnash.', 'go', 'combat');
+  return task('Grow a little stronger', `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins. ` : ''}Food is fine; a few more combat levels or better gear will tip the odds. Check the forecast on the Combat page.`, 'fight', 'chicken');
 };
 DQ.finishProject = id => {
   const project = D.PROJECTS[id];
@@ -105,10 +110,10 @@ UI.projectsPanel = () => {
   const changes = (town==='willowbrook'?['first_steps', 'hungry_cook']:[]).filter(q => S().q[q] && S().q[q].s === 'done');
   return `<div class="town-project-workspace"><section class="panel"><div class="phead"><h2>${esc(D.TOWN[town].name)} · projects</h2>${pinButton(id)}</div><label class="page-picker" for="town-project">Project${UI.choiceButtons(`<select id="town-project" data-in="town-project">${entries.map(([key, p]) => `<option value="${key}" ${key === id ? 'selected' : ''}>${esc(p.name)}${S().projects[key] ? ' · Complete' : ''}</option>`).join('')}</select>`)}</label>
     ${done ? '<p class="ok">Completed · permanent benefit active</p>' : `<div class="btnrow"><button class="btn primary" data-do="${canFinish ? 'projectfinish' : 'projectnext'}" data-a="${id}">${canFinish ? 'Complete project' : 'Work on this project'}</button></div>`}
-    <h3>${esc(project.name)}</h3><p>${esc(done ? project.story : project.reward)}</p>${done ? '' : `<div class="rws">${Object.entries(project.cost).map(([item, n]) => { const held = item === 'coins' ? S().coins : DQ.have(item); return `<span class="${held >= n ? 'ok' : 'bad'}">${fmt(held)} / ${n} ${item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase()}</span>`; }).join('')}</div>`}</section>
+    <h3>${esc(project.name)}</h3><p>${esc(done ? project.story : project.reward)}</p>${done ? '' : `<div class="rws">${Object.entries(project.cost).map(([item, n]) => { const held = item === 'coins' ? S().coins : DQ.have(item); return `<span class="${held >= n ? 'ok' : 'bad'}">${fmt(held)} / ${n} ${item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase()}</span>${held < n && item !== 'coins' && UI.routeChip ? UI.routeChip(item) : ''}`; }).join('')}</div>`}</section>
     <section class="panel town-projects"><div class="phead"><h2>A living ${esc(D.TOWN[town].name)}</h2></div>${UI.scene(town)}${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}${entries.filter(([key])=>S().projects[key]).map(([,p])=>`<p class="village-change">✓ ${esc(p.story)}</p>`).join('')}<p class="sm dim">Completed quests and projects change the village.</p></section></div>`;
 };
-UI.homeSections.push(UI.journeyPanel);
+UI.homeSections.unshift(UI.journeyPanel); /* the one primary objective leads Home */
 UI.V.projects = () => UI.projectsPanel();
 UI.returnPlan = sum => {
   const next = DQ.journeyNext();
@@ -164,5 +169,18 @@ DQ.startAct = (kind, id, o = {}) => {
     DQ.startQuest('first_steps'); DQ.toast && DQ.toast('First Steps accepted: your catch now counts toward it');
   }
   return r;
+};
+
+/* One cached forecast per meaningful change (combat level, gear, food, town), so Home stays fast. */
+const fcCache = { key: '', at: 0, res: null };
+DQ.bossForecast = id => {
+  const m = D.MON[id]; if (!m || m.town !== S().town || DQ.forecasting || !DQ.forecast) return null;
+  const food = DQ.foods().reduce((n, f) => n + DQ.have(f) * D.ITEMS[f].heal, 0);
+  const key = JSON.stringify([id, DQ.combatLvl(), S().equip, Math.round(food / 20), DQ.maxHp(), S().town]);
+  if (fcCache.key === key && fcCache.res) return fcCache.res;
+  if (fcCache.key !== key && Date.now() - fcCache.at < 1500 && fcCache.res) return fcCache.res;
+  fcCache.key = key; fcCache.at = Date.now();
+  try { fcCache.res = DQ.forecast(id); } catch (e) { fcCache.res = null; }
+  return fcCache.res;
 };
 })();

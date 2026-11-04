@@ -1778,3 +1778,11 @@ h3 { font-size:17px; }
 .srow.spotlight{animation:spotlight 1.8s ease-out}
 @keyframes spotlight{0%,35%{box-shadow:0 0 0 2px var(--brass),0 0 18px -4px var(--brass)}100%{box-shadow:0 0 0 0 transparent}}
 @media (prefers-reduced-motion:reduce){.srow.spotlight{animation:none;box-shadow:0 0 0 2px var(--brass)}}
+
+/* ---------- Contextual routes and the way back ---------- */
+.route-chip{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:2px 9px;border-radius:999px;border:1px solid color-mix(in srgb,var(--brass) 55%,var(--line));background:color-mix(in srgb,var(--brass) 12%,var(--panel2));color:var(--ink);font-size:13px;line-height:1.5;vertical-align:middle}
+.route-chip .ic{width:13px;height:13px}
+.route-chip:hover,.route-chip:focus-visible{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 24%,var(--panel2))}
+.returnbar{display:flex;align-items:center;gap:6px;margin:0 0 10px}
+.returnbar .btn .ic{transform:rotate(180deg)}
+.returnbar .n-x{position:static}

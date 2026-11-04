@@ -121,7 +121,7 @@ DQ.brew = id => {
 };
 
 /* ---------- the Research page ---------- */
-const costChips = c => Object.entries(c).map(([k, n]) => { const ok = k === 'coins' ? S().coins >= n : DQ.have(k) >= n; return k === 'coins' ? `<span class="rw ${ok ? '' : 'short'}" style="--c:#f3d58a">${ico('coin')}${fmt(n)}</span>` : `<span class="rw ${ok ? '' : 'short'}" style="--c:${D.ITEMS[k].col}">${ico(D.ITEMS[k].ic)}${n}× ${esc(D.ITEMS[k].name)}</span>`; }).join('');
+const costChips = c => Object.entries(c).map(([k, n]) => { const ok = k === 'coins' ? S().coins >= n : DQ.have(k) >= n; return k === 'coins' ? `<span class="rw ${ok ? '' : 'short'}" style="--c:#f3d58a">${ico('coin')}${fmt(n)}</span>` : `<span class="rw ${ok ? '' : 'short'}" style="--c:${D.ITEMS[k].col}">${ico(D.ITEMS[k].ic)}${n}× ${esc(D.ITEMS[k].name)}</span>${ok || !UI.routeChip ? '' : UI.routeChip(k)}`; }).join('');
 const dur = m => m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ' ' + m % 60 + 'm' : ''}` : `${m}m`;
 const techCard = t => {
   const why = DQ.techReason(t), br = BR[t.br], act = R().active.find(a => a.id === t.id);

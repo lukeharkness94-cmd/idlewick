@@ -130,7 +130,7 @@ UI.homeGoals = () => {
 UI.homeSections = [];
 UI.homeNotices = () => '';
 UI.V.overview = () => {
-  const welcome = !S().seen.firstTask && !DQ.act && DQ.totalXp() === 0
+  const welcome = !S().seen.firstTask && !DQ.act && DQ.totalXp() === 0 && (S().tut?.hidden || S().tut?.done?.intro)
     ? '<p class="home-welcome">Welcome to Idlewick. Follow your next step below. Once started, tasks carry on while you are away.</p>' : '';
   const decisions = (S().inbox || []).length;
   return `${welcome}${UI.homeSections.map(render => render()).join('')}

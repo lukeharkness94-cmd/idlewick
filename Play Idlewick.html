@@ -1853,6 +1853,14 @@ h3 { font-size:17px; }
 .srow.spotlight{animation:spotlight 1.8s ease-out}
 @keyframes spotlight{0%,35%{box-shadow:0 0 0 2px var(--brass),0 0 18px -4px var(--brass)}100%{box-shadow:0 0 0 0 transparent}}
 @media (prefers-reduced-motion:reduce){.srow.spotlight{animation:none;box-shadow:0 0 0 2px var(--brass)}}
+
+/* ---------- Contextual routes and the way back ---------- */
+.route-chip{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:2px 9px;border-radius:999px;border:1px solid color-mix(in srgb,var(--brass) 55%,var(--line));background:color-mix(in srgb,var(--brass) 12%,var(--panel2));color:var(--ink);font-size:13px;line-height:1.5;vertical-align:middle}
+.route-chip .ic{width:13px;height:13px}
+.route-chip:hover,.route-chip:focus-visible{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 24%,var(--panel2))}
+.returnbar{display:flex;align-items:center;gap:6px;margin:0 0 10px}
+.returnbar .btn .ic{transform:rotate(180deg)}
+.returnbar .n-x{position:static}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -7152,7 +7160,7 @@ UI.V.recipes = sk => {
   const list=D.RLIST[sk],tabs=[...new Set(list.map(r=>r.tab))],tab=UI.tab[sk]=tabs.includes(UI.tab[sk])?UI.tab[sk]:tabs[0],only=UI.tab[sk+'ready'];
   UI.taskToolbar[sk]=`<div class="recipe-categories">${tabs.map(t=>`<button class="chip ${t===tab?'on':''}" data-do="tab" data-a="${sk}" data-b="${t}">${t}</button>`).join('')}<button class="chip ${only?'on':''}" data-do="readyonly" data-a="${sk}">Ready to make</button></div>`;
   const choices=list.map(r=>{const outId=Object.keys(r.out)[0],it=D.ITEMS[outId];return {id:r.id,name:r.name,artKind:'item',artId:outId,visible:r.tab===tab&&(!only||DQ.canMake(r)),locked:DQ.lvl(sk)<r.lvl,blocked:DQ.lvl(sk)<r.lvl||!DQ.canMake(r),reason:DQ.lvl(sk)<r.lvl?`Requires ${D.SK[sk].name} ${r.lvl}`:'Gather the missing ingredients first.',caption:`Level ${r.lvl} · ${UI.statLine(it.b)||`${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`}`,
-    info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}</p><div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>`<span class="ingredient ${DQ.have(id)>=n?'':'bad'}">${DQ.itemIco(D.ITEMS[id])}<span>${esc(D.ITEMS[id].name)} <b data-b="count:${id}"></b> / ${n}</span></span>`).join('')}</div>`};});
+    info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}</p><div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>`<span class="ingredient ${DQ.have(id)>=n?'':'bad'}">${DQ.itemIco(D.ITEMS[id])}<span>${esc(D.ITEMS[id].name)} <b data-b="count:${id}"></b> / ${n}</span>${DQ.have(id)>=n||!UI.routeChip?'':UI.routeChip(id)}</span>`).join('')}</div>`};});
   return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'?'Make':'Craft')+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress</h3>${UI.skillHero(sk)}</section>`;
 };
 
@@ -8743,7 +8751,7 @@ UI.homeGoals = () => {
 UI.homeSections = [];
 UI.homeNotices = () => '';
 UI.V.overview = () => {
-  const welcome = !S().seen.firstTask && !DQ.act && DQ.totalXp() === 0
+  const welcome = !S().seen.firstTask && !DQ.act && DQ.totalXp() === 0 && (S().tut?.hidden || S().tut?.done?.intro)
     ? '<p class="home-welcome">Welcome to Idlewick. Follow your next step below. Once started, tasks carry on while you are away.</p>' : '';
   const decisions = (S().inbox || []).length;
   return `${welcome}${UI.homeSections.map(render => render()).join('')}
@@ -9431,7 +9439,7 @@ DQ.brew = id => {
 };
 
 /* ---------- the Research page ---------- */
-const costChips = c => Object.entries(c).map(([k, n]) => { const ok = k === 'coins' ? S().coins >= n : DQ.have(k) >= n; return k === 'coins' ? `<span class="rw ${ok ? '' : 'short'}" style="--c:#f3d58a">${ico('coin')}${fmt(n)}</span>` : `<span class="rw ${ok ? '' : 'short'}" style="--c:${D.ITEMS[k].col}">${ico(D.ITEMS[k].ic)}${n}× ${esc(D.ITEMS[k].name)}</span>`; }).join('');
+const costChips = c => Object.entries(c).map(([k, n]) => { const ok = k === 'coins' ? S().coins >= n : DQ.have(k) >= n; return k === 'coins' ? `<span class="rw ${ok ? '' : 'short'}" style="--c:#f3d58a">${ico('coin')}${fmt(n)}</span>` : `<span class="rw ${ok ? '' : 'short'}" style="--c:${D.ITEMS[k].col}">${ico(D.ITEMS[k].ic)}${n}× ${esc(D.ITEMS[k].name)}</span>${ok || !UI.routeChip ? '' : UI.routeChip(k)}`; }).join('');
 const dur = m => m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ' ' + m % 60 + 'm' : ''}` : `${m}m`;
 const techCard = t => {
   const why = DQ.techReason(t), br = BR[t.br], act = R().active.find(a => a.id === t.id);
@@ -9516,7 +9524,7 @@ DQ.brew=id=>{if(!DQ.skillUnlocked('herbalism'))return DQ.toast(`Herbalism is loc
 UI.B.unlockcount=(e,sk,stat)=>{const r=DQ.actionProgress(sk).find(r=>r.stat===stat);if(r)UI.set(e,`${Math.min(r.have,r.need)}/${r.need}`);};
 UI.B.unlockbar=(e,sk,stat)=>{const r=DQ.actionProgress(sk).find(r=>r.stat===stat);if(r)e.style.width=Math.min(100,r.have/r.need*100)+'%';};
 const reqHtml=sk=>DQ.actionProgress(sk.id).map(r=>{const pct=Math.min(100,r.have/r.need*100);return `<button class="unlock-step" data-do="go" data-a="${destinations[r.stat]||'skillsummary'}"><span><b data-b="unlockcount:${sk.id}:${r.stat}">${Math.min(r.have,r.need)}/${r.need}</b> ${labels[r.stat]||r.stat}</span><span class="bar"><i data-b="unlockbar:${sk.id}:${r.stat}" style="width:${pct}%"></i></span><small>Go to ${D.SK[destinations[r.stat]]?.name||'Combat'} ${ico('arrow')}</small></button>`}).join('');
-UI.unlocksAheadPanel=()=>{const locked=D.SKILLS.filter(s=>s.actionReq&&!DQ.skillUnlocked(s.id));return `<section class="panel unlock-roadmap"><div class="phead"><div><span class="k">Progression</span><h2>${locked.length?'Unlocks ahead':'Action skills discovered'}</h2></div><button class="btn sm" data-do="go" data-a="skillsummary">All skills</button></div>${locked.length?`<p class="hint">These skills are always visible. Complete their requirements in any order.</p><div class="unlock-grid">${locked.map(sk=>`<article style="--c:${sk.col}"><div class="unlock-title">${ico('lock')}<span><b>${esc(sk.name)}</b><small>${esc(sk.blurb)}</small></span></div>${reqHtml(sk)}</article>`).join('')}</div>`:'<p>Every action-earned skill is unlocked. Their next levels remain visible in the Skills menu.</p>'}</section>`;};
+UI.unlocksAheadPanel=()=>{const near=sk=>{const r=DQ.actionProgress(sk.id);return r.reduce((a,x)=>a+Math.min(1,x.have/x.need),0)/Math.max(1,r.length);},all=D.SKILLS.filter(s=>s.actionReq&&!DQ.skillUnlocked(s.id)).sort((a,b)=>near(b)-near(a)),locked=UI.view==='overview'?all.slice(0,2):all,more=all.length-locked.length;return `<section class="panel unlock-roadmap"><div class="phead"><div><span class="k">Progression</span><h2>${locked.length?'Unlocks ahead':'Action skills discovered'}</h2></div><button class="btn sm" data-do="go" data-a="skillsummary">All skills</button></div>${locked.length?`<p class="hint">${more?`Your two nearest. ${more} more in All skills.`:'Complete their requirements in any order.'}</p><div class="unlock-grid">${locked.map(sk=>`<article style="--c:${sk.col}"><div class="unlock-title">${ico('lock')}<span><b>${esc(sk.name)}</b><small>${esc(sk.blurb)}</small></span></div>${reqHtml(sk)}</article>`).join('')}</div>`:'<p>Every action-earned skill is unlocked. Their next levels remain visible in the Skills menu.</p>'}</section>`;};
 UI.homeSections.push(UI.unlocksAheadPanel);
 
 const hero=sk=>UI.skillHero?UI.skillHero(sk):`<section class="panel"><h2>${D.SK[sk].name}</h2></section>`;
@@ -10010,7 +10018,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (S().towns.willowbrook.boss) return step('The road is open', 'Grubnash is defeated. Visit Mossbarrow or choose your next destination.', 'go', 'map');
   if (S().town !== 'willowbrook') return step('Return to Willowbrook', 'Grubnash awaits outside the village.', 'journeytravel', 'willowbrook');
   const first = D.QM.first_steps, firstState = DQ.questState(first);
-  if (firstState === 'new') return step('Meet Elder Wren', 'Accept First Steps before gathering so your catches and logs count toward the quest.', 'qstart', first.id);
+  if (firstState === 'new') return step('Meet Elder Wren', 'Accept First Steps, or simply start fishing or chopping: the quest is accepted for you and your work counts.', 'qstart', first.id);
   if (firstState === 'ready') return step('Claim First Steps', 'Collect your XP and coins from Elder Wren.', 'qclaim', first.id);
   if (firstState === 'active') {
     const p = S().q[first.id], index = first.obj.findIndex((o, i) => DQ.objProg(first, p, i) < o.n);
@@ -10018,13 +10026,18 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   }
   if (bossQuest && DQ.questState(bossQuest) === 'new') return step('Accept the Grubnash quest', 'Make your boss victory count toward the village quest and its rewards.', 'qstart', bossQuest.id);
   if (!DQ.skillUnlocked('cooking')) return task('Unlock Cooking at Hero 3', 'Prepare a food supply before taking on stronger opponents.', 'fish', 'shrimp');
-  const food = DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0);
-  if (food < DQ.maxHp() * 5) {
-    if (!DQ.have('raw_shrimp')) return task('Gather a food reserve', 'Aim for food worth at least five full health bars. This is a preparation target, not a win guarantee.', 'fish', 'shrimp');
-    return task('Cook your provisions', 'Food currently restores ' + fmt(food) + ' total health. Target ' + fmt(DQ.maxHp() * 5) + ' before the boss.', 'recipe', 'cook_shrimp');
+  const food = DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0), req = D.MON.grubnash.boss.req;
+  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Attack, Strength and Defence using the combat training focus.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
+  /* Ready by level: let the battle forecast decide what, if anything, is missing. */
+  const f = DQ.bossForecast ? DQ.bossForecast('grubnash') : null;
+  if (f && f.winRate >= .75) return step('Challenge Grubnash', `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current gear and food.`, 'go', 'combat');
+  const needFood = f && f.foodPerKill != null ? Math.ceil(f.foodPerKill * 1.5) : DQ.maxHp() * 2;
+  if (food < needFood) {
+    const msg = `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins. ` : ''}Food restores ${fmt(food)} health; about ${fmt(needFood)} would carry you through.`;
+    if (!DQ.have('raw_shrimp')) return task('Gather food for the fight', msg, 'fish', 'shrimp');
+    return task('Cook your provisions', msg, 'recipe', 'cook_shrimp');
   }
-  if (DQ.combatLvl() < D.MON.grubnash.boss.req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / 10. Train Attack, Strength and Defence using the combat training focus.', 'fight', 'chicken');
-  return step('Review your boss preparation', 'You meet the combat requirement. Check equipment, auto-eat and the battle forecast before challenging Grubnash.', 'go', 'combat');
+  return task('Grow a little stronger', `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins. ` : ''}Food is fine; a few more combat levels or better gear will tip the odds. Check the forecast on the Combat page.`, 'fight', 'chicken');
 };
 DQ.finishProject = id => {
   const project = D.PROJECTS[id];
@@ -10063,10 +10076,10 @@ UI.projectsPanel = () => {
   const changes = (town==='willowbrook'?['first_steps', 'hungry_cook']:[]).filter(q => S().q[q] && S().q[q].s === 'done');
   return `<div class="town-project-workspace"><section class="panel"><div class="phead"><h2>${esc(D.TOWN[town].name)} · projects</h2>${pinButton(id)}</div><label class="page-picker" for="town-project">Project${UI.choiceButtons(`<select id="town-project" data-in="town-project">${entries.map(([key, p]) => `<option value="${key}" ${key === id ? 'selected' : ''}>${esc(p.name)}${S().projects[key] ? ' · Complete' : ''}</option>`).join('')}</select>`)}</label>
     ${done ? '<p class="ok">Completed · permanent benefit active</p>' : `<div class="btnrow"><button class="btn primary" data-do="${canFinish ? 'projectfinish' : 'projectnext'}" data-a="${id}">${canFinish ? 'Complete project' : 'Work on this project'}</button></div>`}
-    <h3>${esc(project.name)}</h3><p>${esc(done ? project.story : project.reward)}</p>${done ? '' : `<div class="rws">${Object.entries(project.cost).map(([item, n]) => { const held = item === 'coins' ? S().coins : DQ.have(item); return `<span class="${held >= n ? 'ok' : 'bad'}">${fmt(held)} / ${n} ${item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase()}</span>`; }).join('')}</div>`}</section>
+    <h3>${esc(project.name)}</h3><p>${esc(done ? project.story : project.reward)}</p>${done ? '' : `<div class="rws">${Object.entries(project.cost).map(([item, n]) => { const held = item === 'coins' ? S().coins : DQ.have(item); return `<span class="${held >= n ? 'ok' : 'bad'}">${fmt(held)} / ${n} ${item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase()}</span>${held < n && item !== 'coins' && UI.routeChip ? UI.routeChip(item) : ''}`; }).join('')}</div>`}</section>
     <section class="panel town-projects"><div class="phead"><h2>A living ${esc(D.TOWN[town].name)}</h2></div>${UI.scene(town)}${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}${entries.filter(([key])=>S().projects[key]).map(([,p])=>`<p class="village-change">✓ ${esc(p.story)}</p>`).join('')}<p class="sm dim">Completed quests and projects change the village.</p></section></div>`;
 };
-UI.homeSections.push(UI.journeyPanel);
+UI.homeSections.unshift(UI.journeyPanel); /* the one primary objective leads Home */
 UI.V.projects = () => UI.projectsPanel();
 UI.returnPlan = sum => {
   const next = DQ.journeyNext();
@@ -10123,6 +10136,86 @@ DQ.startAct = (kind, id, o = {}) => {
   }
   return r;
 };
+
+/* One cached forecast per meaningful change (combat level, gear, food, town), so Home stays fast. */
+const fcCache = { key: '', at: 0, res: null };
+DQ.bossForecast = id => {
+  const m = D.MON[id]; if (!m || m.town !== S().town || DQ.forecasting || !DQ.forecast) return null;
+  const food = DQ.foods().reduce((n, f) => n + DQ.have(f) * D.ITEMS[f].heal, 0);
+  const key = JSON.stringify([id, DQ.combatLvl(), S().equip, Math.round(food / 20), DQ.maxHp(), S().town]);
+  if (fcCache.key === key && fcCache.res) return fcCache.res;
+  if (fcCache.key !== key && Date.now() - fcCache.at < 1500 && fcCache.res) return fcCache.res;
+  fcCache.key = key; fcCache.at = Date.now();
+  try { fcCache.res = DQ.forecast(id); } catch (e) { fcCache.res = null; }
+  return fcCache.res;
+};
+})();
+
+</script>
+<script>
+/* Idlewick: contextual routes. When something you need is missing, a small button takes you to where it comes from
+   (the fishing spot, tree, rock, recipe, field, creature or shop), with the right card already selected. A slim
+   "Back to …" bar returns you to where you were. Routes respect unlocks: a locked skill opens its explanation page. */
+(() => {
+const DQ = window.DQ, D = DQ.data, UI = DQ.ui, { $, esc, ico } = DQ;
+const S = () => DQ.S;
+const PAGE = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' };
+const VERB = { fish: 'Fish', wood: 'Chop', mine: 'Mine', thieve: 'Steal', recipe: 'Make', farm: 'Grow', animal: 'Raise', fight: 'Hunt', shop: 'Buy' };
+
+/* Where an item comes from, cheapest/earliest source first. Null when it has no single obvious source. */
+DQ.sourceOf = id => {
+  const it = D.ITEMS[id]; if (!it) return null;
+  for (const kind of ['fish', 'wood', 'mine', 'thieve']) {
+    const nodes = (D.NODES[kind] || []).filter(n => n.item === id).sort((a, b) => a.lvl - b.lvl);
+    if (nodes.length) { const n = nodes.find(x => x.town === S().town) || nodes[0]; return { kind, id: n.id, page: PAGE[kind], skill: n.skill, lvl: n.lvl, town: n.town, name: n.name }; }
+  }
+  if (id.startsWith('crop_')) return { kind: 'farm', page: 'farming', skill: 'farming', name: it.name };
+  const animal = (D.ANIMALS || []).find(a => a.prod === id); if (animal) return { kind: 'animal', page: 'farming', skill: 'farming', name: animal.name };
+  const recipe = Object.values(D.RECIPES || {}).filter(r => r.out && r.out[id]).sort((a, b) => a.lvl - b.lvl)[0];
+  if (recipe) return { kind: 'recipe', id: recipe.id, page: D.SK[recipe.skill].page, skill: recipe.skill, lvl: recipe.lvl, name: recipe.name };
+  const shops = Object.entries(D.SHOPS || {}).filter(([, list]) => list.includes(id)).map(([town]) => town);
+  if (shops.length) return { kind: 'shop', page: 'shop', town: shops.includes(S().town) ? S().town : shops[0], name: 'Shop' };
+  const mon = D.MONLIST.filter(m => !m.boss && (m.drops || []).some(d => d[0] === id)).sort((a, b) => a.cl - b.cl)[0];
+  if (mon) return { kind: 'fight', id: mon.id, page: 'combat', town: mon.town, name: mon.name };
+  return null;
+};
+const where = src => {
+  const town = src.town && src.town !== S().town ? ` in ${D.TOWN[src.town].name}` : '';
+  const lvl = src.skill && src.lvl > 1 ? ` (${D.SK[src.skill].name} ${src.lvl})` : '';
+  return `${src.name}${lvl}${town}`;
+};
+/* a compact button beside anything you are short of */
+UI.routeChip = id => {
+  const src = DQ.sourceOf(id); if (!src) return '';
+  const locked = src.skill && !DQ.skillUnlocked(src.skill);
+  return `<button class="route-chip" data-do="route" data-a="${id}" data-tip="text:${esc((locked ? 'Locked: ' : 'Get it from ') + where(src))}" aria-label="${esc(`${VERB[src.kind]} ${D.ITEMS[id].name}: ${where(src)}`)}">${esc(VERB[src.kind])} ${ico('arrow')}</button>`;
+};
+
+/* follow a route, remembering where you came from */
+const titleOf = page => (D.SK[page] && D.SK[page].name) || ({ overview: 'Home', projects: 'Town projects', research: 'Scholarship', character: 'Inventory', quests: 'Quests', combat: 'Combat', brewery: 'Brewery', enchanting: 'Enchanting', shop: 'Shop', map: 'Map' })[page] || 'previous page';
+UI.returnTo = null;
+const go = page => { DQ.go(page); };
+Object.assign(UI.DO, {
+  route: id => {
+    const src = DQ.sourceOf(id); if (!src) return;
+    if (UI.view !== src.page) UI.returnTo = { page: UI.view, label: titleOf(UI.view) };
+    if (src.kind === 'shop' && src.town !== S().town) DQ.toast(`${D.ITEMS[id].name} is sold in ${D.TOWN[src.town].name}`);
+    if (src.id && ['fish', 'wood', 'mine', 'thieve', 'recipe', 'fight'].includes(src.kind)) UI.taskChoice[src.page] = src.id;
+    go(src.page);
+  },
+  routeback: () => { const r = UI.returnTo; UI.returnTo = null; if (r) go(r.page); else UI.render(false); },
+  routeclose: () => { UI.returnTo = null; UI.render(false); }
+});
+const render0 = UI.render;
+UI.render = fresh => {
+  render0(fresh);
+  const r = UI.returnTo; if (!r) return;
+  if (r.page === UI.view) { UI.returnTo = null; return; }
+  const view = $('#view'); if (!view || view.querySelector('.returnbar')) return;
+  view.insertAdjacentHTML('afterbegin', `<div class="returnbar" role="navigation" aria-label="Return"><button class="btn sm" data-do="routeback">${ico('arrow')}<span>Back to ${esc(r.label)}</span></button><button class="n-x" data-do="routeclose" aria-label="Dismiss">${ico('close')}</button></div>`);
+};
+/* moving through the main menus is a fresh start, not a detour */
+const hub0 = UI.DO.hub; if (hub0) UI.DO.hub = (...a) => { UI.returnTo = null; return hub0(...a); };
 })();
 
 </script>

@@ -384,4 +384,22 @@ test('starting a First Steps task accepts the quest so the first catches count, 
  q.stopAct(true);q.startAct('wood','normal',{quiet:true});assert.equal(q.questState(q.data.QM.first_steps),'active');
  const {q:q2}=harness();q2.forecasting=true;q2.startAct('fish','shrimp',{quiet:true});q2.forecasting=false;assert.equal(q2.questState(q2.data.QM.first_steps),'new','forecasts never accept quests');
 });
+test('contextual routes find where each kind of item comes from',()=>{
+ const {q,load}=harness();q.ui.taskChoice={};load('routes');
+ const src=id=>{const r=q.sourceOf(id);return r&&r.kind+':'+(r.id||r.page);};
+ assert.equal(src('raw_shrimp'),'fish:shrimp');assert.equal(src('log_oak'),'wood:oak');assert.equal(src('ore_copper'),'mine:copper');
+ assert.equal(src('crop_potato'),'farm:farming');assert.equal(src('seed_potato'),'shop:shop');
+ assert.match(src('bar_bronze'),/^recipe:/);assert.equal(q.sourceOf('bar_bronze').page,'smithing');
+ assert.equal(q.sourceOf('no_such_item'),null);
+ const visited=[];q.go=p=>{visited.push(p);q.ui.view=p;};q.ui.view='projects';q.ui.DO.route('log_oak');
+ assert.deepEqual([...visited],['woodcutting']);assert.equal(q.ui.taskChoice.woodcutting,'oak');assert.equal(q.ui.returnTo.page,'projects');
+});
+test('boss preparation follows the battle forecast and caches it',()=>{
+ const {q}=harness();const S=q.S,D=q.data;S.q.first_steps={s:'done',p:[5,5]};
+ for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[30];S.unlocked.cooking=true;S.xp.cooking=D.XPF[10];S.hp=q.maxHp();S.inv.bread=40;
+ const boss=D.QUESTS.find(x=>x.obj.some(o=>o.ev==='boss'&&o.key==='grubnash'));if(boss)S.q[boss.id]={s:'active',p:boss.obj.map(()=>0)};
+ S.journey='boss';const a=q.bossForecast('grubnash'),b=q.bossForecast('grubnash');assert.ok(a&&a===b,'second call uses the cache');
+ const next=q.journeyNext();assert.ok(a.winRate>=.75?next.title==='Challenge Grubnash':/food|stronger|provisions/i.test(next.title),next.title);
+ q.forecasting=true;assert.equal(q.bossForecast('grubnash'),null,'never nests inside another forecast');q.forecasting=false;
+});
 console.log(tests+' regression checks passed');
