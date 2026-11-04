@@ -1,5 +1,7 @@
 # Idlewick Art Completion Pack
 
+**Latest:** the original pack is now integrated by Claude. See [NEXT-DELIVERY.md](NEXT-DELIVERY.md) for the 52 next-brief additions and their integration status. The original proposal notes below are historical.
+
 Proposed art for approval, based on main at `67a5999923a45192899e9454873e94443a4c3c41`. No game scripts, saves, layouts or live asset mappings change in this PR. The user's request for an approval branch takes precedence over the older main-only workflow in AGENTS.md.
 
 Open [review.html](review.html) locally after cloning the branch. It provides category buttons, light/dark backgrounds and 64/128/256 px views. GitHub displays HTML source rather than running the page; the PNG atlases can be viewed directly there.

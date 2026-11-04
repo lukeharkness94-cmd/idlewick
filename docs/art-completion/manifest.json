@@ -1,7 +1,7 @@
 {
   "title": "Idlewick Art Completion Pack",
   "baseCommit": "67a5999923a45192899e9454873e94443a4c3c41",
-  "status": "proposed assets, not enabled in game",
+  "status": "Original pack integrated; next-brief additions proposed on art/idlewick-next-pieces",
   "sets": [
     {
       "id": "food",
@@ -2472,6 +2472,808 @@
       "width": 1536,
       "height": 1024,
       "sha256": "0d1ad43b94f7e01c402f2890af1f3a669cd3d6edadb819e716d4f35809344cb5"
+    },
+    {
+      "id": "restoration-willowbrook",
+      "cols": 4,
+      "rows": 3,
+      "entries": [
+        {
+          "id": "forge-before",
+          "subject": "small cold boarded village smithy with chimney",
+          "place": {
+            "x": 0.25,
+            "base": 0.69,
+            "h": 0.29
+          },
+          "rect": [
+            0,
+            0,
+            362,
+            362
+          ]
+        },
+        {
+          "id": "forge-after",
+          "subject": "same smithy repaired, glowing forge, anvil and thin smoke",
+          "place": {
+            "x": 0.25,
+            "base": 0.69,
+            "h": 0.29
+          },
+          "rect": [
+            362,
+            0,
+            362,
+            362
+          ]
+        },
+        {
+          "id": "garden-before",
+          "subject": "weed patch and broken edging",
+          "place": {
+            "x": 0.76,
+            "base": 0.92,
+            "h": 0.19
+          },
+          "rect": [
+            724,
+            0,
+            362,
+            362
+          ]
+        },
+        {
+          "id": "garden-after",
+          "subject": "same patch, tidy vegetable beds and flowers",
+          "place": {
+            "x": 0.76,
+            "base": 0.92,
+            "h": 0.19
+          },
+          "rect": [
+            1086,
+            0,
+            362,
+            362
+          ]
+        },
+        {
+          "id": "library-before",
+          "subject": "small stone reading room shuttered and dark",
+          "place": {
+            "x": 0.75,
+            "base": 0.66,
+            "h": 0.27
+          },
+          "rect": [
+            0,
+            362,
+            362,
+            362
+          ]
+        },
+        {
+          "id": "library-after",
+          "subject": "same stone reading room repaired with warmly lit windows and blank sign",
+          "place": {
+            "x": 0.75,
+            "base": 0.66,
+            "h": 0.27
+          },
+          "rect": [
+            362,
+            362,
+            362,
+            362
+          ]
+        },
+        {
+          "id": "watchtower-before",
+          "subject": "leaning half-built timber watchtower frame",
+          "place": {
+            "x": 0.87,
+            "base": 0.53,
+            "h": 0.34
+          },
+          "rect": [
+            724,
+            362,
+            362,
+            362
+          ]
+        },
+        {
+          "id": "watchtower-after",
+          "subject": "same timber tower completed, sturdy, with lantern",
+          "place": {
+            "x": 0.87,
+            "base": 0.53,
+            "h": 0.34
+          },
+          "rect": [
+            1086,
+            362,
+            362,
+            362
+          ]
+        },
+        {
+          "id": "bell-after",
+          "subject": "bronze harvest bell on simple timber frame on the green",
+          "place": {
+            "x": 0.36,
+            "base": 0.67,
+            "h": 0.19
+          },
+          "rect": [
+            0,
+            724,
+            362,
+            362
+          ]
+        },
+        {
+          "id": "lamps-after",
+          "subject": "two iron lamp posts with warm crystal lenses",
+          "place": {
+            "x": 0.64,
+            "base": 0.68,
+            "h": 0.21
+          },
+          "rect": [
+            362,
+            724,
+            362,
+            362
+          ]
+        },
+        {
+          "id": "star-after",
+          "subject": "softly glowing warm star-shaped heart on slender pole",
+          "place": {
+            "x": 0.52,
+            "base": 0.65,
+            "h": 0.15
+          },
+          "rect": [
+            724,
+            724,
+            362,
+            362
+          ]
+        }
+      ],
+      "transparent": true,
+      "file": "assets/art-completion/restoration-willowbrook.png",
+      "prompt": "Use case: stylized-concept. Idlewick game art, matching the existing natural gouache-painted collection: warm earthy pigment, visible brush texture, worn irregular edges, understated character, soft daylight from upper left. No text, letters, watermark, pixel art, glossy 3D, plastic, cartoon smiles or background haze. Genuine transparent alpha around every isolated subject. Keep generous clear gutters and 12 percent margin inside every cell; no subjects or shadows crossing cell boundaries. Create one 4-column by 3-row atlas with square cells. Strict row-major order: 1. small cold boarded village smithy with chimney; 2. same smithy repaired, glowing forge, anvil and thin smoke; 3. weed patch and broken edging; 4. same patch, tidy vegetable beds and flowers; 5. small stone reading room shuttered and dark; 6. same stone reading room repaired with warmly lit windows and blank sign; 7. leaning half-built timber watchtower frame; 8. same timber tower completed, sturdy, with lantern; 9. bronze harvest bell on simple timber frame on the green; 10. two iron lamp posts with warm crystal lenses; 11. softly glowing warm star-shaped heart on slender pole. Remaining cells blank transparent. Before/after pairs use identical viewpoint, footprint and anchor. Buildings are small side-view three-quarter scene props without large grass islands.",
+      "revisionPrompt": "Remove only the white background and all grid lines from this atlas, replacing them with genuine fully transparent alpha. Preserve every painted subject exactly, including its position, size, colours, order, shadows immediately beneath the object, and canvas aspect ratio. No white paper, no checkerboard, no grid strokes, no haze. Do not rearrange or redraw the subjects. Keep blank cells entirely transparent. This must be a PNG with actual transparency for overlaying on a game scene.",
+      "width": 1448,
+      "height": 1086,
+      "sha256": "46b6f1349ee5cee8274236aeff6d0a164b56bb89194e432b6e14f757d4f451d0",
+      "cellAspect": 1,
+      "generation": {
+        "method": "built-in imagegen",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "id": "relics",
+      "cols": 3,
+      "rows": 2,
+      "entries": [
+        {
+          "id": "weathered_map",
+          "subject": "bark-stained folded parchment map, faint nonletter route marks",
+          "rect": [
+            0,
+            0,
+            512,
+            512
+          ]
+        },
+        {
+          "id": "rusted_lantern",
+          "subject": "old tarnished brass miner's lantern",
+          "rect": [
+            512,
+            0,
+            512,
+            512
+          ]
+        },
+        {
+          "id": "star_shard",
+          "subject": "a splinter of cool starlight",
+          "rect": [
+            1024,
+            0,
+            512,
+            512
+          ]
+        },
+        {
+          "id": "millers_bell",
+          "subject": "bronze harvest handbell",
+          "rect": [
+            0,
+            512,
+            512,
+            512
+          ]
+        },
+        {
+          "id": "lamplighter_lens",
+          "subject": "clear crystal lens in a brass frame",
+          "rect": [
+            512,
+            512,
+            512,
+            512
+          ]
+        },
+        {
+          "id": "star_heart",
+          "subject": "warm softly glowing star heart",
+          "rect": [
+            1024,
+            512,
+            512,
+            512
+          ]
+        }
+      ],
+      "transparent": true,
+      "file": "assets/art-completion/relics.png",
+      "prompt": "Use case: stylized-concept. Idlewick game art, matching the existing natural gouache-painted collection: warm earthy pigment, visible brush texture, worn irregular edges, understated character, soft daylight from upper left. No text, letters, watermark, pixel art, glossy 3D, plastic, cartoon smiles or background haze. Genuine transparent alpha around every isolated subject. Keep generous clear gutters and 12 percent margin inside every cell; no subjects or shadows crossing cell boundaries. Create one 3-column by 2-row atlas with square cells. Strict row-major order: 1. bark-stained folded parchment map, faint nonletter route marks; 2. old tarnished brass miner's lantern; 3. a splinter of cool starlight; 4. bronze harvest handbell; 5. clear crystal lens in a brass frame; 6. warm softly glowing star heart. Remaining cells blank transparent. ",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "44579cd611f26bafcfd80e5ce463394a4c67e070bab3c45957cc41065f6f3f7d",
+      "cellAspect": 1,
+      "generation": {
+        "method": "built-in imagegen",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "id": "farm-growth",
+      "cols": 5,
+      "rows": 5,
+      "entries": [
+        {
+          "id": "soil",
+          "subject": "freshly sown low oval soil plot with furrows",
+          "rect": [
+            0,
+            0,
+            249,
+            253
+          ]
+        },
+        {
+          "id": "potato-stage1",
+          "subject": "potato tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit",
+          "rect": [
+            249,
+            0,
+            248,
+            253
+          ]
+        },
+        {
+          "id": "potato-stage2",
+          "subject": "potato young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers",
+          "rect": [
+            497,
+            0,
+            249,
+            253
+          ]
+        },
+        {
+          "id": "onion-stage1",
+          "subject": "onion tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit",
+          "rect": [
+            746,
+            0,
+            248,
+            253
+          ]
+        },
+        {
+          "id": "onion-stage2",
+          "subject": "onion young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers",
+          "rect": [
+            994,
+            0,
+            249,
+            253
+          ]
+        },
+        {
+          "id": "cabbage-stage1",
+          "subject": "cabbage tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit",
+          "rect": [
+            0,
+            253,
+            249,
+            253
+          ]
+        },
+        {
+          "id": "cabbage-stage2",
+          "subject": "cabbage young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers",
+          "rect": [
+            249,
+            253,
+            248,
+            253
+          ]
+        },
+        {
+          "id": "wheat-stage1",
+          "subject": "wheat tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit",
+          "rect": [
+            497,
+            253,
+            249,
+            253
+          ]
+        },
+        {
+          "id": "wheat-stage2",
+          "subject": "wheat young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers",
+          "rect": [
+            746,
+            253,
+            248,
+            253
+          ]
+        },
+        {
+          "id": "strawberry-stage1",
+          "subject": "strawberry tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit",
+          "rect": [
+            994,
+            253,
+            249,
+            253
+          ]
+        },
+        {
+          "id": "strawberry-stage2",
+          "subject": "strawberry young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers",
+          "rect": [
+            0,
+            506,
+            249,
+            254
+          ]
+        },
+        {
+          "id": "pumpkin-stage1",
+          "subject": "pumpkin tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit",
+          "rect": [
+            249,
+            506,
+            248,
+            254
+          ]
+        },
+        {
+          "id": "pumpkin-stage2",
+          "subject": "pumpkin young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers",
+          "rect": [
+            497,
+            506,
+            249,
+            254
+          ]
+        },
+        {
+          "id": "goldleaf-stage1",
+          "subject": "goldleaf tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit",
+          "rect": [
+            746,
+            506,
+            248,
+            254
+          ]
+        },
+        {
+          "id": "goldleaf-stage2",
+          "subject": "goldleaf young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers",
+          "rect": [
+            994,
+            506,
+            249,
+            254
+          ]
+        },
+        {
+          "id": "sunbloom-stage1",
+          "subject": "sunbloom tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit",
+          "rect": [
+            0,
+            760,
+            249,
+            253
+          ]
+        },
+        {
+          "id": "sunbloom-stage2",
+          "subject": "sunbloom young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers",
+          "rect": [
+            249,
+            760,
+            248,
+            253
+          ]
+        },
+        {
+          "id": "moonmelon-stage1",
+          "subject": "moonmelon tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit",
+          "rect": [
+            497,
+            760,
+            249,
+            253
+          ]
+        },
+        {
+          "id": "moonmelon-stage2",
+          "subject": "moonmelon young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers",
+          "rect": [
+            746,
+            760,
+            248,
+            253
+          ]
+        },
+        {
+          "id": "starfruit-stage1",
+          "subject": "starfruit tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit",
+          "rect": [
+            994,
+            760,
+            249,
+            253
+          ]
+        },
+        {
+          "id": "starfruit-stage2",
+          "subject": "starfruit young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers",
+          "rect": [
+            0,
+            1013,
+            249,
+            253
+          ]
+        }
+      ],
+      "transparent": true,
+      "file": "assets/art-completion/farm-growth.png",
+      "prompt": "Use case: stylized-concept. Idlewick game art, matching the existing natural gouache-painted collection: warm earthy pigment, visible brush texture, worn irregular edges, understated character, soft daylight from upper left. No text, letters, watermark, pixel art, glossy 3D, plastic, cartoon smiles or background haze. Genuine transparent alpha around every isolated subject. Keep generous clear gutters and 12 percent margin inside every cell; no subjects or shadows crossing cell boundaries. Create one 5-column by 5-row atlas with square cells. Strict row-major order: 1. freshly sown low oval soil plot with furrows; 2. potato tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit; 3. potato young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers; 4. onion tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit; 5. onion young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers; 6. cabbage tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit; 7. cabbage young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers; 8. wheat tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit; 9. wheat young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers; 10. strawberry tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit; 11. strawberry young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers; 12. pumpkin tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit; 13. pumpkin young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers; 14. goldleaf tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit; 15. goldleaf young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers; 16. sunbloom tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit; 17. sunbloom young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers; 18. moonmelon tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit; 19. moonmelon young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers; 20. starfruit tiny sprout in low oval soil mound, two or three small leaves, no flowers or fruit; 21. starfruit young plant in identical soil mound, larger recognizable species foliage, no ripe fruit or developed flowers. Remaining cells blank transparent. Consistent slightly elevated three-quarter viewpoint and same soil scale throughout, plants grow in height between stages. Goldleaf has ochre leaves, sunbloom sunflower-like leaves, moonmelon blue-green vine leaves, starfruit purple-tinged leaves.",
+      "revisionPrompt": "Remove only the white background and all grid lines from this atlas, replacing them with genuine fully transparent alpha. Preserve every painted subject exactly, including its position, size, colours, order, shadows immediately beneath the object, and canvas aspect ratio. No white paper, no checkerboard, no grid strokes, no haze. Do not rearrange or redraw the subjects. Keep blank cells entirely transparent. This must be a PNG with actual transparency for overlaying on a game scene.",
+      "width": 1243,
+      "height": 1266,
+      "sha256": "d8433d51ddce9420ab9faa9f268b1ba755a17c55cebdf763445e3954f6316e99",
+      "cellAspect": 0.9818325434439179,
+      "generation": {
+        "method": "built-in imagegen",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "id": "workers",
+      "cols": 1,
+      "rows": 1,
+      "entries": [
+        {
+          "id": "woodcutting-worker",
+          "subject": "weathered middle-aged woodcutter portrait, waist up, three-quarter facing right, asymmetrical face with broad nose and a small scar, neutral closed mouth, russet work shirt and worn canvas vest, wood-handled axe held safely at shoulder, no smiling",
+          "rect": [
+            0,
+            0,
+            1254,
+            1254
+          ]
+        }
+      ],
+      "transparent": true,
+      "file": "assets/art-completion/workers.png",
+      "prompt": "Use case: stylized-concept. Idlewick game art, matching the existing natural gouache-painted collection: warm earthy pigment, visible brush texture, worn irregular edges, understated character, soft daylight from upper left. No text, letters, watermark, pixel art, glossy 3D, plastic, cartoon smiles or background haze. Genuine transparent alpha around every isolated subject. Keep generous clear gutters and 12 percent margin inside every cell; no subjects or shadows crossing cell boundaries. Create one 1-column by 1-row atlas with square cells. Strict row-major order: 1. weathered middle-aged woodcutter portrait, waist up, three-quarter facing right, asymmetrical face with broad nose and a small scar, neutral closed mouth, russet work shirt and worn canvas vest, wood-handled axe held safely at shoulder, no smiling. Remaining cells blank transparent. ",
+      "width": 1254,
+      "height": 1254,
+      "sha256": "a50921ad62a84654c1efaa5749ff0ac98fcded54b17a320ea73017712d5d2059",
+      "cellAspect": 1,
+      "generation": {
+        "method": "built-in imagegen",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "id": "hero-head-layers",
+      "cols": 3,
+      "rows": 2,
+      "target": [
+        139,
+        12,
+        108,
+        105
+      ],
+      "entries": [
+        {
+          "id": "head-bronze-iron",
+          "subject": "simple hammered iron with aged bronze rivets and rounded construction open-face helmet, full crown and sides hide all hair; broad clear open face aperture in lower central region, no visor bar over eyes, no nose guard, NO face, skin, hair or dark fill in the face hole",
+          "target": [
+            139,
+            12,
+            108,
+            105
+          ],
+          "rect": [
+            0,
+            0,
+            418,
+            626
+          ]
+        },
+        {
+          "id": "head-steel-mithril",
+          "subject": "cool steel with restrained blue undertone, articulated overlapping plates and angular shoulder profile open-face helmet, full crown and sides hide all hair; broad clear open face aperture in lower central region, no visor bar over eyes, no nose guard, NO face, skin, hair or dark fill in the face hole",
+          "target": [
+            139,
+            12,
+            108,
+            105
+          ],
+          "rect": [
+            418,
+            0,
+            418,
+            626
+          ]
+        },
+        {
+          "id": "head-adamant-rune",
+          "subject": "dark green-grey layered metal with thick sculpted ridges and tall angular collar open-face helmet, full crown and sides hide all hair; broad clear open face aperture in lower central region, no visor bar over eyes, no nose guard, NO face, skin, hair or dark fill in the face hole",
+          "target": [
+            139,
+            12,
+            108,
+            105
+          ],
+          "rect": [
+            836,
+            0,
+            418,
+            626
+          ]
+        },
+        {
+          "id": "head-astral",
+          "subject": "pale silver with muted lavender inlay, fine split fluting and graceful pointed contours, no excessive glow open-face helmet, full crown and sides hide all hair; broad clear open face aperture in lower central region, no visor bar over eyes, no nose guard, NO face, skin, hair or dark fill in the face hole",
+          "target": [
+            139,
+            12,
+            108,
+            105
+          ],
+          "rect": [
+            0,
+            626,
+            418,
+            628
+          ]
+        },
+        {
+          "id": "head-leather",
+          "subject": "worn chestnut leather coif as a fitted hood, enclosing all hair and ears, broad open face aperture, no face or skin and no dark fill inside",
+          "target": [
+            139,
+            12,
+            108,
+            105
+          ],
+          "rect": [
+            418,
+            626,
+            418,
+            628
+          ]
+        }
+      ],
+      "transparent": true,
+      "file": "assets/art-completion/hero-head-layers.png",
+      "runtime": "reserved for fitted-layer compositor integration",
+      "prompt": "Use case: stylized-concept. Production Idlewick fitted costume overlays, natural muted gouache paint, worn materials, fine brushwork, no glossy 3D, no pixel art, no text, no people or mannequin. True transparent alpha everywhere outside the clothing and inside openings. Strict square-cell atlas with 15 percent transparent gutters. Front view, bilateral relaxed posture, slight natural asymmetry. These are wearable clothing layers, not inventory objects in perspective. One atlas 3 columns by 2 rows, each clothing layer centered and fully visible in its own cell. Row-major entries: 1. simple hammered iron with aged bronze rivets and rounded construction open-face helmet, full crown and sides hide all hair; broad clear open face aperture in lower central region, no visor bar over eyes, no nose guard, NO face, skin, hair or dark fill in the face hole; 2. cool steel with restrained blue undertone, articulated overlapping plates and angular shoulder profile open-face helmet, full crown and sides hide all hair; broad clear open face aperture in lower central region, no visor bar over eyes, no nose guard, NO face, skin, hair or dark fill in the face hole; 3. dark green-grey layered metal with thick sculpted ridges and tall angular collar open-face helmet, full crown and sides hide all hair; broad clear open face aperture in lower central region, no visor bar over eyes, no nose guard, NO face, skin, hair or dark fill in the face hole; 4. pale silver with muted lavender inlay, fine split fluting and graceful pointed contours, no excessive glow open-face helmet, full crown and sides hide all hair; broad clear open face aperture in lower central region, no visor bar over eyes, no nose guard, NO face, skin, hair or dark fill in the face hole; 5. worn chestnut leather coif as a fitted hood, enclosing all hair and ears, broad open face aperture, no face or skin and no dark fill inside. Any unused cell fully transparent. All variants have identical outer alignment to overlay the same slim adult hero. Every piece has real transparent holes, never a painted black interior.",
+      "width": 1254,
+      "height": 1254,
+      "sha256": "934fe87a95551e3173fb4765604a178ae7ab3486c3e7d0c3b67c9747d1ca904d",
+      "cellAspect": 0.6666666666666666,
+      "generation": {
+        "method": "built-in imagegen",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "id": "hero-body-layers",
+      "cols": 2,
+      "rows": 2,
+      "target": [
+        100,
+        105,
+        184,
+        222
+      ],
+      "entries": [
+        {
+          "id": "body-bronze-iron",
+          "subject": "simple hammered iron with aged bronze rivets and rounded construction torso armour including fitted collar, short upper-arm sleeves to elbows and waist skirt; relaxed arms angled slightly outward, clear empty neck opening and open sleeve ends, no hands, no head, no legs",
+          "target": [
+            100,
+            105,
+            184,
+            222
+          ],
+          "rect": [
+            0,
+            0,
+            627,
+            627
+          ]
+        },
+        {
+          "id": "body-steel-mithril",
+          "subject": "cool steel with restrained blue undertone, articulated overlapping plates and angular shoulder profile torso armour including fitted collar, short upper-arm sleeves to elbows and waist skirt; relaxed arms angled slightly outward, clear empty neck opening and open sleeve ends, no hands, no head, no legs",
+          "target": [
+            100,
+            105,
+            184,
+            222
+          ],
+          "rect": [
+            627,
+            0,
+            627,
+            627
+          ]
+        },
+        {
+          "id": "body-adamant-rune",
+          "subject": "dark green-grey layered metal with thick sculpted ridges and tall angular collar torso armour including fitted collar, short upper-arm sleeves to elbows and waist skirt; relaxed arms angled slightly outward, clear empty neck opening and open sleeve ends, no hands, no head, no legs",
+          "target": [
+            100,
+            105,
+            184,
+            222
+          ],
+          "rect": [
+            0,
+            627,
+            627,
+            627
+          ]
+        },
+        {
+          "id": "body-astral",
+          "subject": "pale silver with muted lavender inlay, fine split fluting and graceful pointed contours, no excessive glow torso armour including fitted collar, short upper-arm sleeves to elbows and waist skirt; relaxed arms angled slightly outward, clear empty neck opening and open sleeve ends, no hands, no head, no legs",
+          "target": [
+            100,
+            105,
+            184,
+            222
+          ],
+          "rect": [
+            627,
+            627,
+            627,
+            627
+          ]
+        }
+      ],
+      "transparent": true,
+      "file": "assets/art-completion/hero-body-layers.png",
+      "runtime": "reserved for fitted-layer compositor integration",
+      "prompt": "Use case: stylized-concept. Production Idlewick fitted costume overlays, natural muted gouache paint, worn materials, fine brushwork, no glossy 3D, no pixel art, no text, no people or mannequin. True transparent alpha everywhere outside the clothing and inside openings. Strict square-cell atlas with 15 percent transparent gutters. Front view, bilateral relaxed posture, slight natural asymmetry. These are wearable clothing layers, not inventory objects in perspective. One atlas 2 columns by 2 rows, each clothing layer centered and fully visible in its own cell. Row-major entries: 1. simple hammered iron with aged bronze rivets and rounded construction torso armour including fitted collar, short upper-arm sleeves to elbows and waist skirt; relaxed arms angled slightly outward, clear empty neck opening and open sleeve ends, no hands, no head, no legs; 2. cool steel with restrained blue undertone, articulated overlapping plates and angular shoulder profile torso armour including fitted collar, short upper-arm sleeves to elbows and waist skirt; relaxed arms angled slightly outward, clear empty neck opening and open sleeve ends, no hands, no head, no legs; 3. dark green-grey layered metal with thick sculpted ridges and tall angular collar torso armour including fitted collar, short upper-arm sleeves to elbows and waist skirt; relaxed arms angled slightly outward, clear empty neck opening and open sleeve ends, no hands, no head, no legs; 4. pale silver with muted lavender inlay, fine split fluting and graceful pointed contours, no excessive glow torso armour including fitted collar, short upper-arm sleeves to elbows and waist skirt; relaxed arms angled slightly outward, clear empty neck opening and open sleeve ends, no hands, no head, no legs. Any unused cell fully transparent. All variants have identical outer alignment to overlay the same slim adult hero. Every piece has real transparent holes, never a painted black interior.",
+      "width": 1254,
+      "height": 1254,
+      "sha256": "de452cab6e1c2be32f05d310ef8af4cb920cc42b793fa20489981706598d6cbb",
+      "cellAspect": 1,
+      "generation": {
+        "method": "built-in imagegen",
+        "date": "2026-11-04"
+      }
+    },
+    {
+      "id": "hero-leg-layers",
+      "cols": 2,
+      "rows": 2,
+      "target": [
+        105,
+        302,
+        174,
+        250
+      ],
+      "entries": [
+        {
+          "id": "legs-bronze-iron",
+          "subject": "simple hammered iron with aged bronze rivets and rounded construction fitted pair of leg armour with hip covering, articulated knees, greaves and integrated armoured boots; relaxed legs slightly apart and toes angled outward, empty transparent gap between legs, no torso",
+          "target": [
+            105,
+            302,
+            174,
+            250
+          ],
+          "rect": [
+            0,
+            0,
+            627,
+            627
+          ]
+        },
+        {
+          "id": "legs-steel-mithril",
+          "subject": "cool steel with restrained blue undertone, articulated overlapping plates and angular shoulder profile fitted pair of leg armour with hip covering, articulated knees, greaves and integrated armoured boots; relaxed legs slightly apart and toes angled outward, empty transparent gap between legs, no torso",
+          "target": [
+            105,
+            302,
+            174,
+            250
+          ],
+          "rect": [
+            627,
+            0,
+            627,
+            627
+          ]
+        },
+        {
+          "id": "legs-adamant-rune",
+          "subject": "dark green-grey layered metal with thick sculpted ridges and tall angular collar fitted pair of leg armour with hip covering, articulated knees, greaves and integrated armoured boots; relaxed legs slightly apart and toes angled outward, empty transparent gap between legs, no torso",
+          "target": [
+            105,
+            302,
+            174,
+            250
+          ],
+          "rect": [
+            0,
+            627,
+            627,
+            627
+          ]
+        },
+        {
+          "id": "legs-astral",
+          "subject": "pale silver with muted lavender inlay, fine split fluting and graceful pointed contours, no excessive glow fitted pair of leg armour with hip covering, articulated knees, greaves and integrated armoured boots; relaxed legs slightly apart and toes angled outward, empty transparent gap between legs, no torso",
+          "target": [
+            105,
+            302,
+            174,
+            250
+          ],
+          "rect": [
+            627,
+            627,
+            627,
+            627
+          ]
+        }
+      ],
+      "transparent": true,
+      "file": "assets/art-completion/hero-leg-layers.png",
+      "runtime": "reserved for fitted-layer compositor integration",
+      "prompt": "Use case: stylized-concept. Production Idlewick fitted costume overlays, natural muted gouache paint, worn materials, fine brushwork, no glossy 3D, no pixel art, no text, no people or mannequin. True transparent alpha everywhere outside the clothing and inside openings. Strict square-cell atlas with 15 percent transparent gutters. Front view, bilateral relaxed posture, slight natural asymmetry. These are wearable clothing layers, not inventory objects in perspective. One atlas 2 columns by 2 rows, each clothing layer centered and fully visible in its own cell. Row-major entries: 1. simple hammered iron with aged bronze rivets and rounded construction fitted pair of leg armour with hip covering, articulated knees, greaves and integrated armoured boots; relaxed legs slightly apart and toes angled outward, empty transparent gap between legs, no torso; 2. cool steel with restrained blue undertone, articulated overlapping plates and angular shoulder profile fitted pair of leg armour with hip covering, articulated knees, greaves and integrated armoured boots; relaxed legs slightly apart and toes angled outward, empty transparent gap between legs, no torso; 3. dark green-grey layered metal with thick sculpted ridges and tall angular collar fitted pair of leg armour with hip covering, articulated knees, greaves and integrated armoured boots; relaxed legs slightly apart and toes angled outward, empty transparent gap between legs, no torso; 4. pale silver with muted lavender inlay, fine split fluting and graceful pointed contours, no excessive glow fitted pair of leg armour with hip covering, articulated knees, greaves and integrated armoured boots; relaxed legs slightly apart and toes angled outward, empty transparent gap between legs, no torso. Any unused cell fully transparent. All variants have identical outer alignment to overlay the same slim adult hero. Every piece has real transparent holes, never a painted black interior.",
+      "width": 1254,
+      "height": 1254,
+      "sha256": "d8704da0cc07df08148f81a621f05fcd0ee8f47877be9e1e522e26f1ed0bd414",
+      "cellAspect": 1,
+      "generation": {
+        "method": "built-in imagegen",
+        "date": "2026-11-04"
+      }
     }
   ],
   "generation": {

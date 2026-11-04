@@ -14,7 +14,7 @@ const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs/art-completion/ma
   assert.equal(im.width,s.width);assert.equal(im.height,s.height);
   assert(s.entries.length<=s.cols*s.rows);assert.equal(new Set(s.entries.map(e=>e.id)).size,s.entries.length);
   const cellW=im.width/s.cols,cellH=im.height/s.rows;
-  assert(Math.abs(cellW/cellH-(s.transparent?1:3))<0.06,s.id+' cell aspect');
+  assert(Math.abs(cellW/cellH-(s.cellAspect||(s.transparent?1:3)))<0.06,s.id+' cell aspect');
   const preview=createCanvas(s.cols*160,s.rows*190),p=preview.getContext('2d');
   for(let i=0;i<s.entries.length;i++){
    const [x,y,rw,rh]=s.entries[i].rect;
@@ -31,5 +31,5 @@ const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs/art-completion/ma
   if(process.env.ART_PACK_PREVIEW){fs.mkdirSync(process.env.ART_PACK_PREVIEW,{recursive:true});fs.writeFileSync(path.join(process.env.ART_PACK_PREVIEW,s.id+'.png'),preview.toBuffer('image/png'));}
   total+=s.entries.length;console.log('PASS',s.id,s.entries.length);
  }
- assert.equal(total,233);assert.equal(names.size,10);console.log('PASS 233 assets: decode, checksum, grid, identity and alpha checks');
+ assert.equal(total,285);assert.equal(names.size,17);console.log('PASS 285 assets: decode, checksum, grid, identity and alpha checks');
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -66,7 +66,7 @@ Q.animalSprite = (a, size = 96, cls = '') => { const url = a && a.id === 'bees' 
 /* house and workers */
 Q.furnIco = (id, ic) => { const url = FURN[id] && crop('furnishings', id, 96); return url ? img(url, 40, 'furn-art', id) : Q.ico(ic); };
 Q.cottageArt = () => { const url = crop('furnishings', 'cottage', 384); return url ? `<img class="painted-image cottage-art" src="${url}" alt="A cottage on the hill" draggable="false">` : ''; };
-Q.workerArt = skill => { const id = skill + '-worker', url = FURN[id] && crop('furnishings', id, 128); return url ? img(url, 44, 'worker-art', skill + ' worker') : ''; };
+Q.workerArt = skill => { const id = skill + '-worker', sheet = entryAnywhere(id), url = sheet && crop(sheet, id, 128); return url ? img(url, 44, 'worker-art', skill + ' worker') : ''; };
 
 /* ---------- utility icons replace the remaining line icons (including distinct combat skills) ---------- */
 function installIcons() {
