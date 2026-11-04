@@ -1905,6 +1905,22 @@ h3 { font-size:17px; }
 .visual-shop .illustrated-card .choice-art > .item-art,.visual-shop .illustrated-card .choice-art > img,.visual-shop .illustrated-card .choice-art > .painted-sprite{width:72px!important;height:72px!important;max-width:72px;max-height:72px;object-fit:contain}
 .visual-shop .shop-task .item-art,.visual-shop .shop-task .painted-image,.visual-shop .shop-task .painted-sprite{width:80px!important;height:80px!important;object-fit:contain}
 .visual-shop .illustrated-card{height:auto;min-height:172px;gap:6px}
+/* tighter cards across the board: content-sized height, smaller art well, less padding */
+.illustrated-card{height:auto;min-height:0;padding:8px 8px 9px;gap:4px}
+.illustrated-card .choice-art{height:88px;min-height:88px}
+.illustrated-card .choice-art img{max-height:84px}
+.illustrated-card .choice-art > .painted-sprite{width:80px;height:80px}
+.illustrated-choices{gap:8px}
+@media(max-width:600px){.illustrated-card .choice-art{height:76px;min-height:76px}.illustrated-card .choice-art img{max-height:72px}}
+.visual-shop .illustrated-card{min-height:0}
+.visual-shop .illustrated-card .choice-art{height:78px;min-height:78px}
+.guide-cards .beast{min-height:0;padding:8px 10px}
+.beast{padding:8px 10px}
+.petc{padding:10px 8px}
+.illustrated-choices,.beasts,.guide-cards{grid-auto-rows:auto}
+.encounter-list{gap:4px!important}.encounter-list>div{padding:4px 8px!important;min-height:0!important}
+.encounter-list>div img,.encounter-list>div .painted-sprite{width:40px!important;height:40px!important}
+.area-grid,.area-grid>.area-card{grid-auto-rows:auto}.area-card{padding:10px}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
