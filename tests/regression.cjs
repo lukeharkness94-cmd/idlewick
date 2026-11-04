@@ -190,7 +190,7 @@ test('menu counts follow actionable state and survive visiting the page', () => 
 test('project and research badges disappear when resources or slots are unavailable', () => {
   const {q,load}=harness();load('fx');
   q.S.coins=1e8;for(const id of Object.keys(q.data.ITEMS))q.S.bank[id]=100000;
-  assert.equal(q.noticeCount('projects'),Object.keys(q.data.PROJECTS).length);
+  assert.equal(q.noticeCount('projects'),q.projectsForTown(q.S.town).length);
   q.S.coins=0;assert.equal(q.noticeCount('projects'),0);
   q.S.coins=1e8;for(const sk of Object.keys(q.S.xp))q.S.xp[sk]=100000;
   assert.ok(q.noticeCount('research')>0);
@@ -342,4 +342,26 @@ test('reward tuning covers every town and 32-hour absences keep the existing cap
  for(const m of q.data.MONLIST)assert.ok(m.coins.every(n=>Number.isFinite(n)&&n>=0));
 });
 
+test('battle forecasts emit no live UI events, including equipment comparisons',()=>{
+ const {q}=harness();q.S.xp.attack=q.data.XPF[40];q.S.xp.strength=q.data.XPF[40];q.S.hp=q.maxHp();q.S.inv.iron_sword=1;q.S.inv.bread=50;
+ const events=[];for(const event of ['act','quests','lvl','travelunlock','encounter','log','shop','equip'])q.on(event,()=>events.push(event));
+ q.forecast('grubnash');q.forecast('grubnash','iron_sword');assert.deepEqual(events,[]);
+ q.emit('act');assert.deepEqual(events,['act'],'Live events must resume after the forecast');
+});
+test('regional projects follow the current town and grant their benefit only once',()=>{
+ const {q,load}=harness();load('fx');q.S.coins=100000;q.S.inv.log_normal=1000;
+ assert.equal(q.finishProject('market'),false);q.S.town='mossbarrow';assert.equal(q.noticeCount('projects'),1);
+ const coins=q.S.coins,regen=q.fx().regen;assert.equal(q.finishProject('market'),true);assert.equal(q.S.coins,coins-150);assert.ok(Math.abs(q.fx().regen-regen-.02)<1e-9);
+ assert.equal(q.finishProject('market'),false);assert.equal(q.noticeCount('projects'),0);
+ assert.equal(q.journeyNext('well').a,'willowbrook');
+ for(const town of q.data.TOWNS)assert.ok(q.projectsForTown(town.id).length>0);
+ const save=q.exportSave();assert.equal(q.importSave(save),true);assert.equal(q.S.projects.market,true);
+});
+test('exploration summaries use town-specific saved discoveries and quest progress',()=>{
+ const {q,load}=harness();load('skill_expansion_data');load('skill_expansion');q.S.beast.kills.chicken=1;q.S.q.first_steps={s:'done'};
+ const willow=q.explorationSummary('willowbrook'),moss=q.explorationSummary('mossbarrow');assert.equal(willow.found.length,1);assert.equal(moss.found.length,0);assert.ok(willow.completed.some(q=>q.id==='first_steps'));assert.equal(moss.completed.length,0);
+});
+test('forecast-time save attempts cannot persist trial progression',()=>{
+ const {q,storage}=harness();q.save();const before=[...storage.entries()];q.forecasting=true;q.S.coins+=99999;assert.equal(q.save(),false);assert.deepEqual([...storage.entries()],before);
+});
 console.log(tests+' regression checks passed');

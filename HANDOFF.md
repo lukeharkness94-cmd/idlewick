@@ -142,3 +142,16 @@ Economy tuning is prospective: gathering cash roughly30% baseline, mining gem ch
 
 Validation:45 core regressions, including Scholarship migration/repeatability/tier gates and32h cap. Browser testing uses isolated8766 save, never personal8765.
 Browser checks also passed for painted equipment/companions, live combat, Scholarship start, light/dark themes and390/1440/2560 widths. No console errors; desktop storage and all JavaScript syntax checks pass. Proof: outputs/Idlewick-painted-update.png in the surrounding workspace.
+
+## 2026-11-04 final feedback pass — handoff to Claude Code
+
+- Encounter events refresh the HUD as well as the arena. Combat level uses the live combat binder in the left entry.
+- Forecasts suppress live events and save writes; their inline results survive combat rerenders. Equipment comparisons use the same retained result. Trial state is still restored by plan.js.
+- Scholarship start was verified in-browser; active cards now explicitly say Studying and count down. Disabled starts explain missing supplies or busy slots.
+- Exploration shows saved creature discoveries, area discovery counts, completed quest counts and boss state per town. Discovery means first victory, not merely encountering a creature. No retroactive invented exploration history.
+- Town projects select the current town. Existing well/inn save IDs and effects retained. Seven later towns each have a distinct restoration project with a small permanent +2% resting recovery bonus, paid once. Pinning, local action counts, progress and completion stories work for regional projects. Scene uses the correct town; regional restorations currently update the story/effect, not bespoke scenery artwork.
+- Travel animation now completes safely if the map is removed during navigation.
+- Left rail208px (was232), natural52px skill rows,28px icons,15px labels; card headings/buttons tightened. Secondary HUD rates hide below1500px to keep the active target readable.
+- ResizeObserver measures actual bottom-menu height and reserves it inside #app plus24px. Tested bottom actions above navigation at390px and desktop; wide2560 adds columns.
+
+Validation:49 core regressions, desktop storage checks, JavaScript syntax and diff whitespace checks. Isolated8766 browser save verified changing encounter/HUD agreement, forecast result/comparison persistence, Scholarship start/countdown, Mossbarrow travel/project completion, Exploration, desktop/mobile bottom clearance, light/dark themes,390/1280/1440/2560 widths. Personal8765 save untouched. Rebuild standalone via python3 scripts/package-game.py. Generated build is committed; preview server auto-rebuilds. Source and handoff are ready to continue in another coding tool.

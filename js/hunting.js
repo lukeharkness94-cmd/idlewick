@@ -78,5 +78,5 @@ Object.assign(UI.DO,{
  huntarea:id=>{if(DQ.act?.kind==='fight'&&DQ.act.area===id)DQ.stopAct();else DQ.startHunt(id);UI.render(false);},
  huntquest:id=>{const a=DQ.areaForMonster(id);if(a)DQ.startHunt(a.id,id,true);UI.render(false);}
 });
-DQ.on('encounter',()=>{if(UI.view==='combat')UI.render(false);});
+DQ.on('encounter',()=>{UI.renderHud();if(UI.view==='combat')UI.render(false);});
 })();

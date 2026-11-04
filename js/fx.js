@@ -118,7 +118,7 @@ DQ.actionCount = page => {
   const s = DQ.S, D = DQ.data;
   if (page === 'activity') return (s.inbox || []).length;
   if (page === 'quests') return D.QUESTS.filter(q => ['new', 'ready'].includes(DQ.questState(q))).length;
-  if (page === 'projects') return s.town === 'willowbrook' ? Object.entries(D.PROJECTS || {}).filter(([id, p]) => !s.projects[id] && DQ.canAfford(p.cost)).length : 0;
+  if (page === 'projects') return Object.entries(D.PROJECTS || {}).filter(([id, p]) => p.town === s.town && !s.projects[id] && DQ.canAfford(p.cost)).length;
   if (page === 'farming' && DQ.skillUnlocked('farming')) return s.farm.plots.filter(DQ.plotRipe).length + s.farm.animals.filter(a => a.stored > 0).length;
   if (page === 'research' && DQ.advLvl() >= D.RESEARCH_ADV && DQ.researchSlots) {
     const free = DQ.researchSlots() - (s.research?.active || []).length;

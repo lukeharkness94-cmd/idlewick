@@ -62,7 +62,9 @@ UI.travelAnim = to => {
   const pin = $('#hero-pin'); if (!pin || DQ.S.settings.reduceFx) return DQ.travel(to);
   UI.traveling = true; DQ.sfx('travel'); let k = 0, t0 = performance.now(); const per = 650;
   const go = () => {
-    const [si, rev] = path[k], p = $('#seg' + si), len = p.getTotalLength(), f = clamp((performance.now() - t0) / per, 0, 1), e = f * f * (3 - 2 * f), pt = p.getPointAtLength((rev ? 1 - e : e) * len);
+    const [si, rev] = path[k], p = $('#seg' + si);
+    if (!p || !pin.isConnected) { UI.traveling = false; DQ.travel(to); return; }
+    const len = p.getTotalLength(), f = clamp((performance.now() - t0) / per, 0, 1), e = f * f * (3 - 2 * f), pt = p.getPointAtLength((rev ? 1 - e : e) * len);
     pin.setAttribute('transform', `translate(${pt.x} ${pt.y - 40 - Math.sin(f * Math.PI) * 10})`);
     if (f >= 1) { k++; t0 = performance.now(); }
     if (k < path.length) requestAnimationFrame(go); else { UI.traveling = false; DQ.travel(to); }

@@ -109,6 +109,7 @@ DQ.saveHealth = '';
 let observedSave;
 try { observedSave = store.getItem(SAVE_KEY); } catch (e) {}
 DQ.save = () => {
+  if (DQ.forecasting) return false; // Trial progression must never reach the real save.
   try {
     const current = store.getItem(SAVE_KEY);
     if (observedSave !== undefined && current !== observedSave) {

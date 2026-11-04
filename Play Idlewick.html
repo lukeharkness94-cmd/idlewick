@@ -1730,15 +1730,15 @@ body[data-page="quests"] .quest.ready { animation: none; }
 .note.unlock,.note.level{min-height:0;padding:12px 12px 14px;border-width:1px}.note.unlock .n-ic,.note.level .n-ic{width:40px;height:40px}.note.unlock .n-ic .ic,.note.level .n-ic .ic{width:24px;height:24px}.note.unlock .n-b>b,.note.level .n-b>b{font:700 17px var(--f-ui)}.note.unlock .n-b>span:not(.n-acts),.note.level .n-b>span:not(.n-acts){font-size:13.5px}.note.unlock .n-act,.note.level .n-act{min-height:28px;font-size:12.5px}
 /* Skill rows use their content height; short windows scroll the list. */
 @media(min-width:861px){
- #app{grid-template-columns:232px minmax(0,1fr);gap:18px}
+ #app{grid-template-columns:208px minmax(0,1fr);gap:14px}
  .sidebar{display:flex;flex-direction:column;gap:0;max-height:calc(100dvh - 112px);overflow:visible}
  .sidebar .dock{position:static;display:flex;flex-direction:column;align-items:stretch;flex:0 1 auto;height:auto;max-height:calc(100dvh - 168px);grid-template-rows:none;overflow-x:hidden;overflow-y:auto;gap:4px;padding:0 4px 4px 0;scrollbar-width:thin;scroll-padding-top:28px}
  .sidebar .dock .dk-h{position:sticky;top:0;z-index:2;flex:none;margin:0;padding:4px 10px 8px;text-align:left;background:var(--ground);font:700 14px/20px var(--f-body);letter-spacing:.08em;color:var(--brass-hi)}
- .sidebar .dock .dk{display:grid;grid-template-columns:32px minmax(0,1fr);grid-template-rows:auto;align-items:center;justify-items:stretch;flex:none;width:100%;height:auto;min-height:56px;padding:6px 10px;gap:10px;border-radius:7px;overflow:visible}
- .sidebar .dock .dk>.skill-emblem,.sidebar .dock .dk>.ic{grid-column:1;grid-row:1;width:32px;height:32px;align-self:center;justify-self:center}
+ .sidebar .dock .dk{display:grid;grid-template-columns:28px minmax(0,1fr);grid-template-rows:auto;align-items:center;justify-items:stretch;flex:none;width:100%;height:auto;min-height:52px;padding:6px 9px;gap:8px;border-radius:7px;overflow:visible}
+ .sidebar .dock .dk>.skill-emblem,.sidebar .dock .dk>.ic{grid-column:1;grid-row:1;width:28px;height:28px;align-self:center;justify-self:center}
  .sidebar .dock .dk>.dk-info{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:stretch;gap:3px;min-width:0;width:100%}
  .sidebar .dock .dk .dk-top{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;line-height:20px}
- .sidebar .dock .dk .dk-n{max-width:none;padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:600 16px/20px var(--f-body);color:var(--ink)}
+ .sidebar .dock .dk .dk-n{max-width:none;padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:600 15px/19px var(--f-body);color:var(--ink)}
  .sidebar .dock .dk .dk-top b{flex:none;font:600 13px/20px var(--f-mono)}
  .sidebar .dock .dk small{display:block;font:11px/13px var(--f-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--mute);opacity:1}
  .sidebar .dock .dk .bar{display:block;flex:none;width:100%;height:4px;margin:0}
@@ -1823,6 +1823,28 @@ body[data-page="quests"] .quest.ready { animation: none; }
 .activity-choices .illustrated-card .choice-art .painted-image { width:58px;height:58px; }
 .gico.painted-sprite { width:48px;height:48px; }
 @media(max-width:600px){.painted-hero {width:108px!important;height:162px!important}.painted-foe {width:144px!important;height:144px!important}.painted-foe .painted-sprite {width:144px!important;height:144px!important}}
+
+.combat-entry .combat-menu-level { margin-left:auto; font-size:13px; color:var(--ink); }
+
+/* Reserve actual fixed navigation height, including wrapping and safe-area padding. */
+#app { padding-bottom:var(--bottom-navigation-space,110px); }
+html { scroll-padding-bottom:var(--bottom-navigation-space,110px); }
+#view button { scroll-margin-bottom:var(--bottom-navigation-space,110px); }
+.discovery-creatures { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+.discovery-entry { display:flex; flex-direction:column; align-items:center; width:82px; text-align:center; }
+
+/* Compact, readable controls; extra width is for content columns. */
+.panel { padding:16px; }
+.phead { margin-bottom:10px; }
+h2 { font-size:20px; }
+h3 { font-size:17px; }
+.btn { font-size:15px; padding:7px 13px; min-height:34px; }
+@media(min-width:861px){
+ .sidebar .rail .hub { min-height:46px; padding:7px 14px; font-size:16px; }
+ .sidebar .rail .hub>span { font-size:16px; }
+ .sidebar .rail .hub>.ic { width:24px; height:24px; }
+}
+@media(min-width:861px) and (max-width:1500px){.h-meta{display:none}.h-task{min-width:260px}.h-name{max-width:170px}}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -2174,7 +2196,8 @@ DQ.weighted = list => { let t = list.reduce((a, x) => a + x[1], 0), r = Math.ran
 /* tiny event bus */
 const subs = {};
 DQ.on = (ev, fn) => { (subs[ev] = subs[ev] || []).push(fn); };
-DQ.emit = (ev, ...a) => { (subs[ev] || []).forEach(f => f(...a)); };
+// Trial fights must not redraw the live UI or notify gameplay listeners.
+DQ.emit = (ev, ...a) => { if (DQ.forecasting) return; (subs[ev] || []).forEach(f => f(...a)); };
 
 /* ---------- Icons (24x24 stroke glyphs) ---------- */
 const ICONS = {
@@ -5023,6 +5046,7 @@ DQ.saveHealth = '';
 let observedSave;
 try { observedSave = store.getItem(SAVE_KEY); } catch (e) {}
 DQ.save = () => {
+  if (DQ.forecasting) return false; // Trial progression must never reach the real save.
   try {
     const current = store.getItem(SAVE_KEY);
     if (observedSave !== undefined && current !== observedSave) {
@@ -5420,7 +5444,7 @@ DQ.actionCount = page => {
   const s = DQ.S, D = DQ.data;
   if (page === 'activity') return (s.inbox || []).length;
   if (page === 'quests') return D.QUESTS.filter(q => ['new', 'ready'].includes(DQ.questState(q))).length;
-  if (page === 'projects') return s.town === 'willowbrook' ? Object.entries(D.PROJECTS || {}).filter(([id, p]) => !s.projects[id] && DQ.canAfford(p.cost)).length : 0;
+  if (page === 'projects') return Object.entries(D.PROJECTS || {}).filter(([id, p]) => p.town === s.town && !s.projects[id] && DQ.canAfford(p.cost)).length;
   if (page === 'farming' && DQ.skillUnlocked('farming')) return s.farm.plots.filter(DQ.plotRipe).length + s.farm.animals.filter(a => a.stored > 0).length;
   if (page === 'research' && DQ.advLvl() >= D.RESEARCH_ADV && DQ.researchSlots) {
     const free = DQ.researchSlots() - (s.research?.active || []).length;
@@ -6278,6 +6302,7 @@ DQ.fx = () => {
   if (DQ.techFx) DQ.techFx(f);
   if (S().projects && S().projects.well) f.regen += .1;
   if (S().projects && S().projects.inn) f.heal += .05;
+  for(const [id,p] of Object.entries(D.PROJECTS||{}))if(S().projects[id]&&p.fx)for(const [key,value] of Object.entries(p.fx))f[key]+=value;
   f.dmg += f.trophy * Object.values(S().towns).filter(t => t.boss).length;
   const ap = S().pets.active && D.PET[S().pets.active];
   if (ap) {
@@ -7279,7 +7304,9 @@ UI.travelAnim = to => {
   const pin = $('#hero-pin'); if (!pin || DQ.S.settings.reduceFx) return DQ.travel(to);
   UI.traveling = true; DQ.sfx('travel'); let k = 0, t0 = performance.now(); const per = 650;
   const go = () => {
-    const [si, rev] = path[k], p = $('#seg' + si), len = p.getTotalLength(), f = clamp((performance.now() - t0) / per, 0, 1), e = f * f * (3 - 2 * f), pt = p.getPointAtLength((rev ? 1 - e : e) * len);
+    const [si, rev] = path[k], p = $('#seg' + si);
+    if (!p || !pin.isConnected) { UI.traveling = false; DQ.travel(to); return; }
+    const len = p.getTotalLength(), f = clamp((performance.now() - t0) / per, 0, 1), e = f * f * (3 - 2 * f), pt = p.getPointAtLength((rev ? 1 - e : e) * len);
     pin.setAttribute('transform', `translate(${pt.x} ${pt.y - 40 - Math.sin(f * Math.PI) * 10})`);
     if (f >= 1) { k++; t0 = performance.now(); }
     if (k < path.length) requestAnimationFrame(go); else { UI.traveling = false; DQ.travel(to); }
@@ -7695,7 +7722,7 @@ Object.assign(UI.DO,{
  huntarea:id=>{if(DQ.act?.kind==='fight'&&DQ.act.area===id)DQ.stopAct();else DQ.startHunt(id);UI.render(false);},
  huntquest:id=>{const a=DQ.areaForMonster(id);if(a)DQ.startHunt(a.id,id,true);UI.render(false);}
 });
-DQ.on('encounter',()=>{if(UI.view==='combat')UI.render(false);});
+DQ.on('encounter',()=>{UI.renderHud();if(UI.view==='combat')UI.render(false);});
 })();
 
 </script>
@@ -7978,6 +8005,12 @@ UI.abilityPanel = () => {
     return `<button class="abil ${sel ? 'on' : ''} ${unl ? '' : 'locked'} ${sel && !active ? 'idle' : ''}" data-do="abil" data-a="${a.id}" data-tip="text:${esc(a.name)}: ${esc(a.text)}">${ico(unl ? a.ic : 'lock')}<span><b>${a.name}</b><small>${why || (a.style ? DQ.cap(a.style) : 'Any style')}</small></span></button>`;
   }).join('')}</div><p class="hint">Abilities trigger on their own. Slot the ones that counter what you are fighting. A third slot opens at combat level 40.</p></section>`;
 };
+UI.forecastResults = {};
+const showForecast = (id, text) => {
+  UI.forecastResults[id] = text;
+  const el = document.getElementById('fc-' + id);
+  if (el) el.textContent = text;
+};
 UI.bossIntel = m => {
   const B = D.BOSSMECH[m.id]; if (!B) return '';
   const w = DQ.weakOf(m), mu = DQ.matchup(m);
@@ -7987,7 +8020,7 @@ UI.bossIntel = m => {
     ${m.id === 'hollowking' ? '' : `<div class="chips">${w.weak.map(t => dchip(t, 'weak')).join('')}${w.resist.map(t => dchip(t, 'res')).join('')}</div>`}
     <div class="sm"><b>Counters:</b> ${B.counters.join(' · ')}</div>
     <div class="match">${mu.map(([k, t]) => `<div class="${k === 'good' ? 'ok' : k === 'bad' ? 'bad' : 'dim'}">${k === 'good' ? '✓' : k === 'bad' ? '✗' : '•'} ${t}</div>`).join('')}</div>
-    <div class="btnrow"><button class="btn sm" data-do="forecast" data-a="${m.id}">${ico('clock')} Battle forecast</button><span id="fc-${m.id}" class="sm" aria-live="polite"></span></div>${compare}</div>`;
+    <div class="btnrow"><button class="btn sm" data-do="forecast" data-a="${m.id}">${ico('clock')} Battle forecast</button><span id="fc-${m.id}" class="sm" aria-live="polite">${esc(UI.forecastResults[m.id] || '')}</span></div>${compare}</div>`;
 };
 DQ.tips.mon = (orig => id => { const m = D.MON[id]; let h = orig ? orig(id) : ''; if (DQ.weakKnown(m)) { const w = DQ.weakOf(m); h += `<div>Weak: ${w.weak.map(t => D.DTYPES[t].name).join(', ') || 'nothing'}</div><div class="dim">Resists: ${w.resist.map(t => D.DTYPES[t].name).join(', ') || 'nothing'}</div>`; } else h += `<div class="dim">Defeat ${D.STUDY_KILLS} to learn its weaknesses.</div>`; return h; })(DQ.tips.mon);
 
@@ -8013,14 +8046,22 @@ Object.assign(UI.DO, {
   abil: a => { if (DQ.toggleAbility(a)) { DQ.sfx('equip'); UI.render(false); } },
   comparegear: (a, b) => {
     const el = document.getElementById('fc-' + a); if (!el) return;
-    el.textContent = 'Comparing builds…';
+    showForecast(a, 'Comparing builds…');
     setTimeout(() => {
       const current = DQ.forecast(a), candidate = DQ.forecast(a, b);
-      if (!current || !candidate || current.blocked || candidate.blocked) { el.textContent = 'This build cannot start the fight. Check level, location and ammunition.'; return; }
-      el.textContent = `Current build: ${current.wins}/${current.trials} wins. With ${D.ITEMS[b].name}: ${candidate.wins}/${candidate.trials} wins. Current health and available food; equipment stays as equipped.`;
+      if (!current || !candidate || current.blocked || candidate.blocked) { showForecast(a, 'This build cannot start the fight. Check level, location and ammunition.'); return; }
+      showForecast(a, `Current build: ${current.wins}/${current.trials} wins. With ${D.ITEMS[b].name}: ${candidate.wins}/${candidate.trials} wins. Current health and available food; equipment stays as equipped.`);
     }, 30);
   },
-  forecast: a => { const el = document.getElementById('fc-' + a); if (el) el.textContent = 'Simulating…'; setTimeout(() => { const r = DQ.forecast(a); if (!el) return; if (!r || r.blocked) { el.innerHTML = '<span class="bad">Cannot fight it right now.</span>'; return; } const pct = Math.round(r.winRate * 100); el.innerHTML = `<b class="${pct >= 80 ? 'ok' : pct >= 40 ? '' : 'bad'}">${pct >= 80 ? 'Favourable' : pct >= 40 ? 'Uncertain' : 'Dangerous'}</b> · ${r.wins}/${r.trials} simulated wins at your current health, with your available food${r.wins ? ` · about ${Math.round(r.avgMs / 1000)}s · ${r.foodPerKill.toFixed(1)} food` : ''}`; }, 30); },
+  forecast: a => {
+    showForecast(a, 'Simulating…');
+    setTimeout(() => {
+      const r = DQ.forecast(a);
+      if (!r || r.blocked) return showForecast(a, 'Cannot fight it right now. Check level, location and ammunition.');
+      const pct = Math.round(r.winRate * 100);
+      showForecast(a, `${pct >= 80 ? 'Favourable' : pct >= 40 ? 'Uncertain' : 'Dangerous'} · ${r.wins}/${r.trials} simulated wins at your current health, with your available food${r.wins ? ` · about ${Math.round(r.avgMs / 1000)}s · ${r.foodPerKill.toFixed(1)} food` : ''}`);
+    }, 30);
+  },
 });
 document.addEventListener('change', e => {
   const t = e.target, k = t.dataset && t.dataset.in; if (k !== 'qrule' && k !== 'qpace') return;
@@ -8585,7 +8626,7 @@ const hubDefault = h => {
 UI.renderRail = () => {
   const cur = UI.hubOf(UI.view).id;
   $('#rail').innerHTML = `<div class="brand">${ico('candle')}<b>Idlewick</b></div>` + HUBS.filter(h=>h.id!=='combat').map(h => `<button class="hub ${h.id === cur ? 'on' : ''}" data-do="hub" data-a="${h.id}" aria-label="${h.name}">${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${h.id}"></i></button>`).join('');
-  $('#combatnav').innerHTML=`<button class="hub combat-entry ${cur==='combat'?'on':''}" data-do="hub" data-a="combat" aria-label="Combat">${ico('attack')}<span>Combat</span><i class="hubdot" data-b="hubdot:combat"></i></button>`;
+  $('#combatnav').innerHTML=`<button class="hub combat-entry ${cur==='combat'?'on':''}" data-do="hub" data-a="combat" aria-label="Combat">${ico('attack')}<span>Combat</span><b class="combat-menu-level mono" data-b="combat">${DQ.combatLvl()}</b><i class="hubdot" data-b="hubdot:combat"></i></button>`;
   UI.upd();
 };
 UI.B.notice = (e, page) => {
@@ -9380,8 +9421,8 @@ const dur = m => m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ' ' + m % 60 + 'm' 
 const techCard = t => {
   const why = DQ.techReason(t), br = BR[t.br], act = R().active.find(a => a.id === t.id);
   const state = why === 'done' ? 'done' : why === 'active' ? 'active' : why ? 'locked' : 'open';
-  const foot = state === 'done' ? `<span class="tdone">${ico('check')} Researched</span>` : state === 'active' ? `<span class="tbar"><span class="bar"><i data-b="rbar:${t.id}"></i></span><small class="mono" data-b="rleft:${t.id}"></small></span>` : state === 'locked' ? `<span class="tlock">${ico('lock')} ${esc(why)}</span>` : `<button class="btn sm ${DQ.techCanAfford(t) && R().active.length < DQ.researchSlots() ? 'primary' : ''}" data-do="rstart" data-a="${t.id}" ${DQ.techCanAfford(t) && R().active.length < DQ.researchSlots() ? '' : 'disabled'}>Start · ${dur(t.mins)}</button>`;
-  return `<div class="tech ${state}" style="--c:${br[1]}"><div class="th"><b>${esc(t.name)}</b><small>${['', 'Tier I', 'Tier II', 'Tier III', 'Tier IV'][t.tier]}</small></div><p>${esc(t.desc)}</p><small class="study-reward">+${fmt(Math.round(DQ.researchXp(t)*DQ.xpMult('research')))} Scholarship XP · Level ${D.SCHOLAR_TIER[t.tier]}</small>${state === 'done' || state === 'active' ? '' : `<div class="rws">${costChips(t.cost)}</div>`}<div class="tf">${foot}</div></div>`;
+  const foot = state === 'done' ? `<span class="tdone">${ico('check')} Researched</span>` : state === 'active' ? `<span class="tbar"><b>Studying</b><span class="bar"><i data-b="rbar:${t.id}"></i></span><small class="mono" data-b="rleft:${t.id}"></small></span>` : state === 'locked' ? `<span class="tlock">${ico('lock')} ${esc(why)}</span>` : `<button class="btn sm ${DQ.techCanAfford(t) && R().active.length < DQ.researchSlots() ? 'primary' : ''}" data-do="rstart" data-a="${t.id}" ${DQ.techCanAfford(t) && R().active.length < DQ.researchSlots() ? '' : 'disabled'}>Start · ${dur(t.mins)}</button>`;
+  return `<div class="tech ${state}" style="--c:${br[1]}"><div class="th"><b>${esc(t.name)}</b><small>${['', 'Tier I', 'Tier II', 'Tier III', 'Tier IV'][t.tier]}</small></div><p>${esc(t.desc)}</p><small class="study-reward">+${fmt(Math.round(DQ.researchXp(t)*DQ.xpMult('research')))} Scholarship XP · Level ${D.SCHOLAR_TIER[t.tier]}</small>${state === 'done' || state === 'active' ? '' : `<div class="rws">${costChips(t.cost)}</div>`}<div class="tf">${foot}</div>${state==='open'&&!DQ.techCanAfford(t)?'<small class="bad">More coins or materials needed</small>':state==='open'&&R().active.length>=DQ.researchSlots()?'<small>All study slots are busy</small>':''}</div>`;
 };
 UI.B.rbar = (e, id) => { const a = R().active.find(x => x.id === id), t = D.TECH[id]; if (a) { const w = (100 - a.left / (t.mins * MIN) * 100).toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; } };
 UI.B.rleft = (e, id) => { const a = R().active.find(x => x.id === id); UI.set(e, a ? `${DQ.fmtTime(Math.max(0, a.left))} left` : ''); };
@@ -9465,7 +9506,15 @@ UI.homeSections.push(UI.unlocksAheadPanel);
 
 const hero=sk=>UI.skillHero?UI.skillHero(sk):`<section class="panel"><h2>${D.SK[sk].name}</h2></section>`;
 UI.V.hunting=()=>`${hero('hunting')}${UI.areaPanel(S().town)}`;
-UI.V.exploration=()=>`${hero('exploration')}<section class="panel"><div class="phead"><h2>Realm discoveries</h2><small>${D.TOWNS.filter(t=>S().towns[t.id]?.visited).length}/${D.TOWNS.length} towns visited</small></div><p>Visit new towns and discover creatures to earn Exploration XP.</p><div class="area-grid">${D.TOWNS.map(t=>`<article class="area-card ${S().towns[t.id]?.visited?'selected':''}"><b>${S().towns[t.id]?.visited?esc(t.name):'Uncharted region'}</b><small>${S().towns[t.id]?.visited?'Visited':'Open its road by defeating the previous town boss'}</small></article>`).join('')}</div><div class="btnrow"><button class="btn primary" data-do="go" data-a="map">Open world map</button><button class="btn" data-do="go" data-a="combat">Find creatures</button></div></section>`;
+DQ.explorationSummary=town=>{
+ const creatures=D.MONLIST.filter(m=>m.town===town),found=creatures.filter(m=>(S().beast.kills[m.id]||0)>0);
+ const quests=D.QUESTS.filter(q=>q.town===town),completed=quests.filter(q=>S().q[q.id]?.s==='done');
+ return {creatures,found,quests,completed,visited:!!S().towns[town]?.visited,boss:!!S().towns[town]?.boss};
+};
+UI.V.exploration=()=>`${hero('exploration')}<section class="panel"><div class="phead"><h2>Realm discoveries</h2><small>${D.TOWNS.filter(t=>S().towns[t.id]?.visited).length}/${D.TOWNS.length} towns visited</small></div><p>Discoveries are recorded from your first victory against each creature. Visit towns and discover creatures to earn Exploration XP.</p><div class="area-grid">${D.TOWNS.map(t=>{
+ const r=DQ.explorationSummary(t.id);
+ return `<article class="area-card ${r.visited?'selected':''}"><h3>${esc(t.name)}</h3><small>${r.visited?'Visited':'Not visited'} · ${r.boss?'Boss defeated':'Boss undefeated'}</small><p>${r.found.length}/${r.creatures.length} creatures discovered · ${r.completed.length}/${r.quests.length} quests completed</p><div class="bar"><i style="width:${r.found.length/r.creatures.length*100}%"></i></div><div class="discovery-creatures">${r.creatures.map(m=>`<span class="discovery-entry">${DQ.monSprite(m,40,r.found.includes(m)?'':'sil')}<small>${r.found.includes(m)?esc(m.name):'Undiscovered'}</small></span>`).join('')}</div>${(D.AREAS?.[t.id]||[]).map(a=>`<p class="sm">${esc(a.name)} · ${a.monsters.filter(m=>(S().beast.kills[m.id]||0)>0).length}/${a.monsters.length} creatures discovered</p>`).join('')}</article>`;
+ }).join('')}</div><div class="btnrow"><button class="btn primary" data-do="go" data-a="map">Open world map</button><button class="btn" data-do="go" data-a="combat">Find creatures</button></div></section>`;
 const gems=['gem_sapphire','gem_emerald','gem_ruby','gem_diamond','gem_diamond'];
 DQ.enchant=id=>{const rank=S().enchants[id]||0,need=gems[rank];if(!DQ.skillUnlocked('enchanting')||rank>=5)return false;if(!Object.values(S().equip).includes(id))return DQ.toast('Equip the item first',true);if(DQ.have('rune')<5*(rank+1)||!DQ.have(need))return DQ.toast(`Requires ${5*(rank+1)} runes and 1 ${D.ITEMS[need]?.name||need}`,true);DQ.take('rune',5*(rank+1));DQ.take(need,1);S().enchants[id]=rank+1;S().stats.enchant++;DQ.addXp('enchanting',20*(rank+1));DQ.sfx('unlock');DQ.toast(`${D.ITEMS[id].name} is now enchantment +${rank+1}`);DQ.emit('lvl');return true;};
 const baseBonus=DQ.bonus;
@@ -9899,9 +9948,20 @@ const { esc, fmt, ico } = DQ;
 const S = () => DQ.S;
 DQ.questImpact = id => ({ first_steps: 'Restock Willowbrook’s timber supply.', hungry_cook: 'Bring Mabel’s kitchen back to life.' }[id] || '');
 D.PROJECTS = {
-  well: { name: 'Restore the village well', cost: { log_normal: 20, coins: 25 }, reward: 'Resting health recovery is 10% faster.', story: 'Fresh water flows through Willowbrook again.' },
-  inn: { name: 'Reopen the village inn', cost: { log_normal: 10, shrimp: 12, coins: 50 }, reward: 'Food restores 5% more health.', story: 'The inn sign is back up. Mabel has a kitchen full of guests.' }
+  well: { town: 'willowbrook', name: 'Restore the village well', cost: { log_normal: 20, coins: 25 }, reward: 'Resting health recovery is 10% faster.', story: 'Fresh water flows through Willowbrook again.' },
+  inn: { town: 'willowbrook', name: 'Reopen the village inn', cost: { log_normal: 10, shrimp: 12, coins: 50 }, reward: 'Food restores 5% more health.', story: 'The inn sign is back up. Mabel has a kitchen full of guests.' }
 };
+const regionalProjects = [
+ ['mossbarrow','market','Repair the market shelter','The market stalls are sheltered and traders can return.',150,30],
+ ['saltmere','jetty','Rebuild the fishing jetty','Fishing boats can unload safely at the repaired jetty.',500,50],
+ ['ironpeak','hearth','Relight the communal hearth','The hold has a warm refuge for returning miners.',1200,70],
+ ['gloomfen','lanterns','Restore the marsh lanterns','Lanterns mark a safe path through the marsh.',2500,90],
+ ['emberfall','cistern','Repair the cooling cistern','Fresh water reaches the citadel courtyards again.',5000,110],
+ ['skyreach','bridge','Repair the monastery bridge','Pilgrims can cross between the monastery peaks.',9000,130],
+ ['hollow','refuge','Rebuild the travellers’ refuge','A welcoming refuge stands among the fallen kingdom’s ruins.',15000,150]
+];
+for(const [town,id,name,story,coins,logs] of regionalProjects)D.PROJECTS[id]={town,name,story,cost:{coins,log_normal:logs},reward:'Resting health recovery is 2% faster.',fx:{regen:.02}};
+DQ.projectsForTown = town => Object.entries(D.PROJECTS).filter(([,p])=>p.town===town);
 const destinations = { boss: 'Defeat Grubnash', house: 'Build my first home', well: D.PROJECTS.well.name, inn: D.PROJECTS.inn.name };
 DQ.pinProject = id => {
   if (!D.PROJECTS[id]) return false;
@@ -9914,7 +9974,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (D.PROJECTS[id]) {
     const project = D.PROJECTS[id];
     if (S().projects[id]) return step('Project complete', project.story + ' ' + project.reward, 'go', 'map');
-    if (S().town !== 'willowbrook') return step('Return to Willowbrook', 'Your neighbours are ready to help.', 'journeytravel', 'willowbrook');
+    if (S().town !== project.town) return step('Return to '+D.TOWN[project.town].name, 'Your neighbours are ready to help.', 'journeytravel', project.town);
     if (id === 'inn' && DQ.have('shrimp') < 12) {
       if (!DQ.skillUnlocked('cooking')) return task('Unlock Cooking at Hero 3', 'Catch shrimp to earn Hero XP. Cooking opens at Hero level 3.', 'fish', 'shrimp');
       if (!DQ.have('raw_shrimp')) return task('Catch shrimp for the inn', 'The inn needs 12 cooked shrimp. Gather raw shrimp first.', 'fish', 'shrimp');
@@ -9953,7 +10013,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
 };
 DQ.finishProject = id => {
   const project = D.PROJECTS[id];
-  if (!project || S().projects[id] || S().town !== 'willowbrook' || !DQ.canAfford(project.cost)) return false;
+  if (!project || S().projects[id] || S().town !== project.town || !DQ.canAfford(project.cost)) return false;
   Object.entries(project.cost).forEach(([item, n]) => item === 'coins' ? S().coins -= n : DQ.take(item, n));
   S().projects[id] = true; DQ.fxDirty();
   DQ.log(project.story, 'good');
@@ -9964,9 +10024,9 @@ const actionHtml = next => `<button class="btn primary" data-do="${next.action}"
 const pinButton = id => `<button class="btn sm" data-do="pinproject" data-a="${id}" aria-pressed="${S().pinnedProject === id}">${ico('pin')}${S().pinnedProject === id ? 'Unpin project' : 'Pin project'}</button>`;
 UI.projectPinHtml = () => {
   const id = S().pinnedProject, project = D.PROJECTS[id];
-  if (!project || (UI.view === 'projects' && (UI.tab.projectChoice || 'well') === id) || (UI.view === 'overview' && S().journey === id)) return '';
+  if (!project || (UI.view === 'projects' && project.town === S().town && (UI.tab.projectChoice || DQ.projectsForTown(S().town)[0]?.[0]) === id) || (UI.view === 'overview' && S().journey === id)) return '';
   const done = S().projects[id];
-  return `<div class="project-pin" role="group" aria-label="Pinned village project"><button class="project-pin-open" data-do="openproject" data-a="${id}">${ico('pin')}<span><b>${id === 'well' ? 'Village well' : 'Village inn'}</b><small>${done ? '✓ Restored · benefit active' : Object.keys(project.cost).map(item=>`<span data-b="projectneed:${id}:${item}"></span>`).join(' · ')}</small></span></button><button class="btn sm project-pin-next" data-do="projectnext" data-a="${id}" data-b="projectaction:${id}"></button><button class="iconb sm" data-do="pinproject" data-a="${id}" aria-label="Unpin village project">${ico('close')}</button></div>`;
+  return `<div class="project-pin" role="group" aria-label="Pinned village project"><button class="project-pin-open" data-do="openproject" data-a="${id}">${ico('pin')}<span><b>${esc(project.name)}</b><small>${done ? '✓ Restored · benefit active' : Object.keys(project.cost).map(item=>`<span data-b="projectneed:${id}:${item}"></span>`).join(' · ')}</small></span></button><button class="btn sm project-pin-next" data-do="projectnext" data-a="${id}" data-b="projectaction:${id}"></button><button class="iconb sm" data-do="pinproject" data-a="${id}" aria-label="Unpin village project">${ico('close')}</button></div>`;
 };
 UI.B.projectneed = (el, id, item) => {
   const required = D.PROJECTS[id].cost[item], held = item === 'coins' ? S().coins : DQ.have(item);
@@ -9982,13 +10042,14 @@ UI.journeyPanel = () => {
     <section data-reference="true"><h3>How the journey works</h3><p>Your destination stays selected while you explore. The next step follows your supplies, quest progress and unlocks. Tasks run at full speed for two hours away, then half speed up to eight hours. An eight-hour absence gives five hours of task work.</p></section></section>`;
 };
 UI.projectsPanel = () => {
-  const id = D.PROJECTS[UI.tab.projectChoice] ? UI.tab.projectChoice : 'well', project = D.PROJECTS[id];
-  const done = S().projects[id], canFinish = !done && S().town === 'willowbrook' && DQ.canAfford(project.cost);
-  const changes = ['first_steps', 'hungry_cook'].filter(q => S().q[q] && S().q[q].s === 'done');
-  return `<div class="town-project-workspace"><section class="panel"><div class="phead"><h2>Town projects</h2>${pinButton(id)}</div><label class="page-picker" for="town-project">Project${UI.choiceButtons(`<select id="town-project" data-in="town-project">${Object.entries(D.PROJECTS).map(([key, p]) => `<option value="${key}" ${key === id ? 'selected' : ''}>${esc(p.name)}${S().projects[key] ? ' · Complete' : ''}</option>`).join('')}</select>`)}</label>
-    ${done ? '<p class="ok">Completed · permanent benefit active</p>' : `<div class="btnrow"><button class="btn primary" data-do="${canFinish ? 'projectfinish' : 'destination'}" data-a="${id}">${canFinish ? 'Complete project' : 'Work on this project'}</button></div>`}
+  const town=S().town, entries=DQ.projectsForTown(town);
+  const id=entries.some(([key])=>key===UI.tab.projectChoice)?UI.tab.projectChoice:entries[0][0],project=D.PROJECTS[id];
+  const done = S().projects[id], canFinish = !done && S().town === project.town && DQ.canAfford(project.cost);
+  const changes = (town==='willowbrook'?['first_steps', 'hungry_cook']:[]).filter(q => S().q[q] && S().q[q].s === 'done');
+  return `<div class="town-project-workspace"><section class="panel"><div class="phead"><h2>${esc(D.TOWN[town].name)} · projects</h2>${pinButton(id)}</div><label class="page-picker" for="town-project">Project${UI.choiceButtons(`<select id="town-project" data-in="town-project">${entries.map(([key, p]) => `<option value="${key}" ${key === id ? 'selected' : ''}>${esc(p.name)}${S().projects[key] ? ' · Complete' : ''}</option>`).join('')}</select>`)}</label>
+    ${done ? '<p class="ok">Completed · permanent benefit active</p>' : `<div class="btnrow"><button class="btn primary" data-do="${canFinish ? 'projectfinish' : 'projectnext'}" data-a="${id}">${canFinish ? 'Complete project' : 'Work on this project'}</button></div>`}
     <h3>${esc(project.name)}</h3><p>${esc(done ? project.story : project.reward)}</p>${done ? '' : `<div class="rws">${Object.entries(project.cost).map(([item, n]) => { const held = item === 'coins' ? S().coins : DQ.have(item); return `<span class="${held >= n ? 'ok' : 'bad'}">${fmt(held)} / ${n} ${item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase()}</span>`; }).join('')}</div>`}</section>
-    <section class="panel town-projects"><div class="phead"><h2>A living Willowbrook</h2></div>${UI.scene('willowbrook')}${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}${Object.entries(D.PROJECTS).filter(([key])=>S().projects[key]).map(([,p])=>`<p class="village-change">✓ ${esc(p.story)}</p>`).join('')}<p class="sm dim">Completed quests and projects change the village.</p></section></div>`;
+    <section class="panel town-projects"><div class="phead"><h2>A living ${esc(D.TOWN[town].name)}</h2></div>${UI.scene(town)}${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}${entries.filter(([key])=>S().projects[key]).map(([,p])=>`<p class="village-change">✓ ${esc(p.story)}</p>`).join('')}<p class="sm dim">Completed quests and projects change the village.</p></section></div>`;
 };
 UI.homeSections.push(UI.journeyPanel);
 UI.V.projects = () => UI.projectsPanel();
@@ -9999,7 +10060,7 @@ UI.returnPlan = sum => {
 };
 Object.assign(UI.DO, {
   pinproject: id => { if (DQ.pinProject(id)) UI.render(false); },
-  openproject: id => { UI.tab.projectChoice = id; if (UI.view === 'projects') UI.render(false); else DQ.go('projects'); },
+  openproject: id => { const p=D.PROJECTS[id];if(!p)return;if(p.town!==S().town){const next=DQ.journeyNext(id);return UI.DO[next.action](next.a,next.b);} UI.tab.projectChoice = id; if (UI.view === 'projects') UI.render(false); else DQ.go('projects'); },
   projectnext: id => {
     if (!D.PROJECTS[id]) return;
     if (S().projects[id]) return UI.DO.openproject(id);
@@ -10178,7 +10239,10 @@ if(UI.V.settings){const settings=UI.V.settings;UI.V.settings=()=>settings()+`<se
       arrange();
     }
   };
-  addEventListener('resize', arrange);
+  const rail=document.getElementById('rail');
+  const reserveNavigation=()=>{if(!rail)return;const fixed=getComputedStyle(rail).position==='fixed';document.documentElement.style.setProperty('--bottom-navigation-space',fixed?Math.ceil(rail.getBoundingClientRect().height)+24+'px':'24px');};
+  if(rail){new ResizeObserver(reserveNavigation).observe(rail);reserveNavigation();}
+  addEventListener('resize',()=>{arrange();reserveNavigation();});
 })();
 
 </script>

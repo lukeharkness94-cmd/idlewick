@@ -1655,15 +1655,15 @@ body[data-page="quests"] .quest.ready { animation: none; }
 .note.unlock,.note.level{min-height:0;padding:12px 12px 14px;border-width:1px}.note.unlock .n-ic,.note.level .n-ic{width:40px;height:40px}.note.unlock .n-ic .ic,.note.level .n-ic .ic{width:24px;height:24px}.note.unlock .n-b>b,.note.level .n-b>b{font:700 17px var(--f-ui)}.note.unlock .n-b>span:not(.n-acts),.note.level .n-b>span:not(.n-acts){font-size:13.5px}.note.unlock .n-act,.note.level .n-act{min-height:28px;font-size:12.5px}
 /* Skill rows use their content height; short windows scroll the list. */
 @media(min-width:861px){
- #app{grid-template-columns:232px minmax(0,1fr);gap:18px}
+ #app{grid-template-columns:208px minmax(0,1fr);gap:14px}
  .sidebar{display:flex;flex-direction:column;gap:0;max-height:calc(100dvh - 112px);overflow:visible}
  .sidebar .dock{position:static;display:flex;flex-direction:column;align-items:stretch;flex:0 1 auto;height:auto;max-height:calc(100dvh - 168px);grid-template-rows:none;overflow-x:hidden;overflow-y:auto;gap:4px;padding:0 4px 4px 0;scrollbar-width:thin;scroll-padding-top:28px}
  .sidebar .dock .dk-h{position:sticky;top:0;z-index:2;flex:none;margin:0;padding:4px 10px 8px;text-align:left;background:var(--ground);font:700 14px/20px var(--f-body);letter-spacing:.08em;color:var(--brass-hi)}
- .sidebar .dock .dk{display:grid;grid-template-columns:32px minmax(0,1fr);grid-template-rows:auto;align-items:center;justify-items:stretch;flex:none;width:100%;height:auto;min-height:56px;padding:6px 10px;gap:10px;border-radius:7px;overflow:visible}
- .sidebar .dock .dk>.skill-emblem,.sidebar .dock .dk>.ic{grid-column:1;grid-row:1;width:32px;height:32px;align-self:center;justify-self:center}
+ .sidebar .dock .dk{display:grid;grid-template-columns:28px minmax(0,1fr);grid-template-rows:auto;align-items:center;justify-items:stretch;flex:none;width:100%;height:auto;min-height:52px;padding:6px 9px;gap:8px;border-radius:7px;overflow:visible}
+ .sidebar .dock .dk>.skill-emblem,.sidebar .dock .dk>.ic{grid-column:1;grid-row:1;width:28px;height:28px;align-self:center;justify-self:center}
  .sidebar .dock .dk>.dk-info{grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:stretch;gap:3px;min-width:0;width:100%}
  .sidebar .dock .dk .dk-top{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;line-height:20px}
- .sidebar .dock .dk .dk-n{max-width:none;padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:600 16px/20px var(--f-body);color:var(--ink)}
+ .sidebar .dock .dk .dk-n{max-width:none;padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:600 15px/19px var(--f-body);color:var(--ink)}
  .sidebar .dock .dk .dk-top b{flex:none;font:600 13px/20px var(--f-mono)}
  .sidebar .dock .dk small{display:block;font:11px/13px var(--f-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--mute);opacity:1}
  .sidebar .dock .dk .bar{display:block;flex:none;width:100%;height:4px;margin:0}
@@ -1748,3 +1748,25 @@ body[data-page="quests"] .quest.ready { animation: none; }
 .activity-choices .illustrated-card .choice-art .painted-image { width:58px;height:58px; }
 .gico.painted-sprite { width:48px;height:48px; }
 @media(max-width:600px){.painted-hero {width:108px!important;height:162px!important}.painted-foe {width:144px!important;height:144px!important}.painted-foe .painted-sprite {width:144px!important;height:144px!important}}
+
+.combat-entry .combat-menu-level { margin-left:auto; font-size:13px; color:var(--ink); }
+
+/* Reserve actual fixed navigation height, including wrapping and safe-area padding. */
+#app { padding-bottom:var(--bottom-navigation-space,110px); }
+html { scroll-padding-bottom:var(--bottom-navigation-space,110px); }
+#view button { scroll-margin-bottom:var(--bottom-navigation-space,110px); }
+.discovery-creatures { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+.discovery-entry { display:flex; flex-direction:column; align-items:center; width:82px; text-align:center; }
+
+/* Compact, readable controls; extra width is for content columns. */
+.panel { padding:16px; }
+.phead { margin-bottom:10px; }
+h2 { font-size:20px; }
+h3 { font-size:17px; }
+.btn { font-size:15px; padding:7px 13px; min-height:34px; }
+@media(min-width:861px){
+ .sidebar .rail .hub { min-height:46px; padding:7px 14px; font-size:16px; }
+ .sidebar .rail .hub>span { font-size:16px; }
+ .sidebar .rail .hub>.ic { width:24px; height:24px; }
+}
+@media(min-width:861px) and (max-width:1500px){.h-meta{display:none}.h-task{min-width:260px}.h-name{max-width:170px}}

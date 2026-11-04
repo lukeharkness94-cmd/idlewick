@@ -5,9 +5,20 @@ const { esc, fmt, ico } = DQ;
 const S = () => DQ.S;
 DQ.questImpact = id => ({ first_steps: 'Restock Willowbrook’s timber supply.', hungry_cook: 'Bring Mabel’s kitchen back to life.' }[id] || '');
 D.PROJECTS = {
-  well: { name: 'Restore the village well', cost: { log_normal: 20, coins: 25 }, reward: 'Resting health recovery is 10% faster.', story: 'Fresh water flows through Willowbrook again.' },
-  inn: { name: 'Reopen the village inn', cost: { log_normal: 10, shrimp: 12, coins: 50 }, reward: 'Food restores 5% more health.', story: 'The inn sign is back up. Mabel has a kitchen full of guests.' }
+  well: { town: 'willowbrook', name: 'Restore the village well', cost: { log_normal: 20, coins: 25 }, reward: 'Resting health recovery is 10% faster.', story: 'Fresh water flows through Willowbrook again.' },
+  inn: { town: 'willowbrook', name: 'Reopen the village inn', cost: { log_normal: 10, shrimp: 12, coins: 50 }, reward: 'Food restores 5% more health.', story: 'The inn sign is back up. Mabel has a kitchen full of guests.' }
 };
+const regionalProjects = [
+ ['mossbarrow','market','Repair the market shelter','The market stalls are sheltered and traders can return.',150,30],
+ ['saltmere','jetty','Rebuild the fishing jetty','Fishing boats can unload safely at the repaired jetty.',500,50],
+ ['ironpeak','hearth','Relight the communal hearth','The hold has a warm refuge for returning miners.',1200,70],
+ ['gloomfen','lanterns','Restore the marsh lanterns','Lanterns mark a safe path through the marsh.',2500,90],
+ ['emberfall','cistern','Repair the cooling cistern','Fresh water reaches the citadel courtyards again.',5000,110],
+ ['skyreach','bridge','Repair the monastery bridge','Pilgrims can cross between the monastery peaks.',9000,130],
+ ['hollow','refuge','Rebuild the travellers’ refuge','A welcoming refuge stands among the fallen kingdom’s ruins.',15000,150]
+];
+for(const [town,id,name,story,coins,logs] of regionalProjects)D.PROJECTS[id]={town,name,story,cost:{coins,log_normal:logs},reward:'Resting health recovery is 2% faster.',fx:{regen:.02}};
+DQ.projectsForTown = town => Object.entries(D.PROJECTS).filter(([,p])=>p.town===town);
 const destinations = { boss: 'Defeat Grubnash', house: 'Build my first home', well: D.PROJECTS.well.name, inn: D.PROJECTS.inn.name };
 DQ.pinProject = id => {
   if (!D.PROJECTS[id]) return false;
@@ -20,7 +31,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (D.PROJECTS[id]) {
     const project = D.PROJECTS[id];
     if (S().projects[id]) return step('Project complete', project.story + ' ' + project.reward, 'go', 'map');
-    if (S().town !== 'willowbrook') return step('Return to Willowbrook', 'Your neighbours are ready to help.', 'journeytravel', 'willowbrook');
+    if (S().town !== project.town) return step('Return to '+D.TOWN[project.town].name, 'Your neighbours are ready to help.', 'journeytravel', project.town);
     if (id === 'inn' && DQ.have('shrimp') < 12) {
       if (!DQ.skillUnlocked('cooking')) return task('Unlock Cooking at Hero 3', 'Catch shrimp to earn Hero XP. Cooking opens at Hero level 3.', 'fish', 'shrimp');
       if (!DQ.have('raw_shrimp')) return task('Catch shrimp for the inn', 'The inn needs 12 cooked shrimp. Gather raw shrimp first.', 'fish', 'shrimp');
@@ -59,7 +70,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
 };
 DQ.finishProject = id => {
   const project = D.PROJECTS[id];
-  if (!project || S().projects[id] || S().town !== 'willowbrook' || !DQ.canAfford(project.cost)) return false;
+  if (!project || S().projects[id] || S().town !== project.town || !DQ.canAfford(project.cost)) return false;
   Object.entries(project.cost).forEach(([item, n]) => item === 'coins' ? S().coins -= n : DQ.take(item, n));
   S().projects[id] = true; DQ.fxDirty();
   DQ.log(project.story, 'good');
@@ -70,9 +81,9 @@ const actionHtml = next => `<button class="btn primary" data-do="${next.action}"
 const pinButton = id => `<button class="btn sm" data-do="pinproject" data-a="${id}" aria-pressed="${S().pinnedProject === id}">${ico('pin')}${S().pinnedProject === id ? 'Unpin project' : 'Pin project'}</button>`;
 UI.projectPinHtml = () => {
   const id = S().pinnedProject, project = D.PROJECTS[id];
-  if (!project || (UI.view === 'projects' && (UI.tab.projectChoice || 'well') === id) || (UI.view === 'overview' && S().journey === id)) return '';
+  if (!project || (UI.view === 'projects' && project.town === S().town && (UI.tab.projectChoice || DQ.projectsForTown(S().town)[0]?.[0]) === id) || (UI.view === 'overview' && S().journey === id)) return '';
   const done = S().projects[id];
-  return `<div class="project-pin" role="group" aria-label="Pinned village project"><button class="project-pin-open" data-do="openproject" data-a="${id}">${ico('pin')}<span><b>${id === 'well' ? 'Village well' : 'Village inn'}</b><small>${done ? '✓ Restored · benefit active' : Object.keys(project.cost).map(item=>`<span data-b="projectneed:${id}:${item}"></span>`).join(' · ')}</small></span></button><button class="btn sm project-pin-next" data-do="projectnext" data-a="${id}" data-b="projectaction:${id}"></button><button class="iconb sm" data-do="pinproject" data-a="${id}" aria-label="Unpin village project">${ico('close')}</button></div>`;
+  return `<div class="project-pin" role="group" aria-label="Pinned village project"><button class="project-pin-open" data-do="openproject" data-a="${id}">${ico('pin')}<span><b>${esc(project.name)}</b><small>${done ? '✓ Restored · benefit active' : Object.keys(project.cost).map(item=>`<span data-b="projectneed:${id}:${item}"></span>`).join(' · ')}</small></span></button><button class="btn sm project-pin-next" data-do="projectnext" data-a="${id}" data-b="projectaction:${id}"></button><button class="iconb sm" data-do="pinproject" data-a="${id}" aria-label="Unpin village project">${ico('close')}</button></div>`;
 };
 UI.B.projectneed = (el, id, item) => {
   const required = D.PROJECTS[id].cost[item], held = item === 'coins' ? S().coins : DQ.have(item);
@@ -88,13 +99,14 @@ UI.journeyPanel = () => {
     <section data-reference="true"><h3>How the journey works</h3><p>Your destination stays selected while you explore. The next step follows your supplies, quest progress and unlocks. Tasks run at full speed for two hours away, then half speed up to eight hours. An eight-hour absence gives five hours of task work.</p></section></section>`;
 };
 UI.projectsPanel = () => {
-  const id = D.PROJECTS[UI.tab.projectChoice] ? UI.tab.projectChoice : 'well', project = D.PROJECTS[id];
-  const done = S().projects[id], canFinish = !done && S().town === 'willowbrook' && DQ.canAfford(project.cost);
-  const changes = ['first_steps', 'hungry_cook'].filter(q => S().q[q] && S().q[q].s === 'done');
-  return `<div class="town-project-workspace"><section class="panel"><div class="phead"><h2>Town projects</h2>${pinButton(id)}</div><label class="page-picker" for="town-project">Project${UI.choiceButtons(`<select id="town-project" data-in="town-project">${Object.entries(D.PROJECTS).map(([key, p]) => `<option value="${key}" ${key === id ? 'selected' : ''}>${esc(p.name)}${S().projects[key] ? ' · Complete' : ''}</option>`).join('')}</select>`)}</label>
-    ${done ? '<p class="ok">Completed · permanent benefit active</p>' : `<div class="btnrow"><button class="btn primary" data-do="${canFinish ? 'projectfinish' : 'destination'}" data-a="${id}">${canFinish ? 'Complete project' : 'Work on this project'}</button></div>`}
+  const town=S().town, entries=DQ.projectsForTown(town);
+  const id=entries.some(([key])=>key===UI.tab.projectChoice)?UI.tab.projectChoice:entries[0][0],project=D.PROJECTS[id];
+  const done = S().projects[id], canFinish = !done && S().town === project.town && DQ.canAfford(project.cost);
+  const changes = (town==='willowbrook'?['first_steps', 'hungry_cook']:[]).filter(q => S().q[q] && S().q[q].s === 'done');
+  return `<div class="town-project-workspace"><section class="panel"><div class="phead"><h2>${esc(D.TOWN[town].name)} · projects</h2>${pinButton(id)}</div><label class="page-picker" for="town-project">Project${UI.choiceButtons(`<select id="town-project" data-in="town-project">${entries.map(([key, p]) => `<option value="${key}" ${key === id ? 'selected' : ''}>${esc(p.name)}${S().projects[key] ? ' · Complete' : ''}</option>`).join('')}</select>`)}</label>
+    ${done ? '<p class="ok">Completed · permanent benefit active</p>' : `<div class="btnrow"><button class="btn primary" data-do="${canFinish ? 'projectfinish' : 'projectnext'}" data-a="${id}">${canFinish ? 'Complete project' : 'Work on this project'}</button></div>`}
     <h3>${esc(project.name)}</h3><p>${esc(done ? project.story : project.reward)}</p>${done ? '' : `<div class="rws">${Object.entries(project.cost).map(([item, n]) => { const held = item === 'coins' ? S().coins : DQ.have(item); return `<span class="${held >= n ? 'ok' : 'bad'}">${fmt(held)} / ${n} ${item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase()}</span>`; }).join('')}</div>`}</section>
-    <section class="panel town-projects"><div class="phead"><h2>A living Willowbrook</h2></div>${UI.scene('willowbrook')}${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}${Object.entries(D.PROJECTS).filter(([key])=>S().projects[key]).map(([,p])=>`<p class="village-change">✓ ${esc(p.story)}</p>`).join('')}<p class="sm dim">Completed quests and projects change the village.</p></section></div>`;
+    <section class="panel town-projects"><div class="phead"><h2>A living ${esc(D.TOWN[town].name)}</h2></div>${UI.scene(town)}${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}${entries.filter(([key])=>S().projects[key]).map(([,p])=>`<p class="village-change">✓ ${esc(p.story)}</p>`).join('')}<p class="sm dim">Completed quests and projects change the village.</p></section></div>`;
 };
 UI.homeSections.push(UI.journeyPanel);
 UI.V.projects = () => UI.projectsPanel();
@@ -105,7 +117,7 @@ UI.returnPlan = sum => {
 };
 Object.assign(UI.DO, {
   pinproject: id => { if (DQ.pinProject(id)) UI.render(false); },
-  openproject: id => { UI.tab.projectChoice = id; if (UI.view === 'projects') UI.render(false); else DQ.go('projects'); },
+  openproject: id => { const p=D.PROJECTS[id];if(!p)return;if(p.town!==S().town){const next=DQ.journeyNext(id);return UI.DO[next.action](next.a,next.b);} UI.tab.projectChoice = id; if (UI.view === 'projects') UI.render(false); else DQ.go('projects'); },
   projectnext: id => {
     if (!D.PROJECTS[id]) return;
     if (S().projects[id]) return UI.DO.openproject(id);

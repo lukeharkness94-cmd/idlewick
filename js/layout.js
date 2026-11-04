@@ -60,5 +60,8 @@
       arrange();
     }
   };
-  addEventListener('resize', arrange);
+  const rail=document.getElementById('rail');
+  const reserveNavigation=()=>{if(!rail)return;const fixed=getComputedStyle(rail).position==='fixed';document.documentElement.style.setProperty('--bottom-navigation-space',fixed?Math.ceil(rail.getBoundingClientRect().height)+24+'px':'24px');};
+  if(rail){new ResizeObserver(reserveNavigation).observe(rail);reserveNavigation();}
+  addEventListener('resize',()=>{arrange();reserveNavigation();});
 })();

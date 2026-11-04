@@ -68,6 +68,12 @@ UI.abilityPanel = () => {
     return `<button class="abil ${sel ? 'on' : ''} ${unl ? '' : 'locked'} ${sel && !active ? 'idle' : ''}" data-do="abil" data-a="${a.id}" data-tip="text:${esc(a.name)}: ${esc(a.text)}">${ico(unl ? a.ic : 'lock')}<span><b>${a.name}</b><small>${why || (a.style ? DQ.cap(a.style) : 'Any style')}</small></span></button>`;
   }).join('')}</div><p class="hint">Abilities trigger on their own. Slot the ones that counter what you are fighting. A third slot opens at combat level 40.</p></section>`;
 };
+UI.forecastResults = {};
+const showForecast = (id, text) => {
+  UI.forecastResults[id] = text;
+  const el = document.getElementById('fc-' + id);
+  if (el) el.textContent = text;
+};
 UI.bossIntel = m => {
   const B = D.BOSSMECH[m.id]; if (!B) return '';
   const w = DQ.weakOf(m), mu = DQ.matchup(m);
@@ -77,7 +83,7 @@ UI.bossIntel = m => {
     ${m.id === 'hollowking' ? '' : `<div class="chips">${w.weak.map(t => dchip(t, 'weak')).join('')}${w.resist.map(t => dchip(t, 'res')).join('')}</div>`}
     <div class="sm"><b>Counters:</b> ${B.counters.join(' · ')}</div>
     <div class="match">${mu.map(([k, t]) => `<div class="${k === 'good' ? 'ok' : k === 'bad' ? 'bad' : 'dim'}">${k === 'good' ? '✓' : k === 'bad' ? '✗' : '•'} ${t}</div>`).join('')}</div>
-    <div class="btnrow"><button class="btn sm" data-do="forecast" data-a="${m.id}">${ico('clock')} Battle forecast</button><span id="fc-${m.id}" class="sm" aria-live="polite"></span></div>${compare}</div>`;
+    <div class="btnrow"><button class="btn sm" data-do="forecast" data-a="${m.id}">${ico('clock')} Battle forecast</button><span id="fc-${m.id}" class="sm" aria-live="polite">${esc(UI.forecastResults[m.id] || '')}</span></div>${compare}</div>`;
 };
 DQ.tips.mon = (orig => id => { const m = D.MON[id]; let h = orig ? orig(id) : ''; if (DQ.weakKnown(m)) { const w = DQ.weakOf(m); h += `<div>Weak: ${w.weak.map(t => D.DTYPES[t].name).join(', ') || 'nothing'}</div><div class="dim">Resists: ${w.resist.map(t => D.DTYPES[t].name).join(', ') || 'nothing'}</div>`; } else h += `<div class="dim">Defeat ${D.STUDY_KILLS} to learn its weaknesses.</div>`; return h; })(DQ.tips.mon);
 
@@ -103,14 +109,22 @@ Object.assign(UI.DO, {
   abil: a => { if (DQ.toggleAbility(a)) { DQ.sfx('equip'); UI.render(false); } },
   comparegear: (a, b) => {
     const el = document.getElementById('fc-' + a); if (!el) return;
-    el.textContent = 'Comparing builds…';
+    showForecast(a, 'Comparing builds…');
     setTimeout(() => {
       const current = DQ.forecast(a), candidate = DQ.forecast(a, b);
-      if (!current || !candidate || current.blocked || candidate.blocked) { el.textContent = 'This build cannot start the fight. Check level, location and ammunition.'; return; }
-      el.textContent = `Current build: ${current.wins}/${current.trials} wins. With ${D.ITEMS[b].name}: ${candidate.wins}/${candidate.trials} wins. Current health and available food; equipment stays as equipped.`;
+      if (!current || !candidate || current.blocked || candidate.blocked) { showForecast(a, 'This build cannot start the fight. Check level, location and ammunition.'); return; }
+      showForecast(a, `Current build: ${current.wins}/${current.trials} wins. With ${D.ITEMS[b].name}: ${candidate.wins}/${candidate.trials} wins. Current health and available food; equipment stays as equipped.`);
     }, 30);
   },
-  forecast: a => { const el = document.getElementById('fc-' + a); if (el) el.textContent = 'Simulating…'; setTimeout(() => { const r = DQ.forecast(a); if (!el) return; if (!r || r.blocked) { el.innerHTML = '<span class="bad">Cannot fight it right now.</span>'; return; } const pct = Math.round(r.winRate * 100); el.innerHTML = `<b class="${pct >= 80 ? 'ok' : pct >= 40 ? '' : 'bad'}">${pct >= 80 ? 'Favourable' : pct >= 40 ? 'Uncertain' : 'Dangerous'}</b> · ${r.wins}/${r.trials} simulated wins at your current health, with your available food${r.wins ? ` · about ${Math.round(r.avgMs / 1000)}s · ${r.foodPerKill.toFixed(1)} food` : ''}`; }, 30); },
+  forecast: a => {
+    showForecast(a, 'Simulating…');
+    setTimeout(() => {
+      const r = DQ.forecast(a);
+      if (!r || r.blocked) return showForecast(a, 'Cannot fight it right now. Check level, location and ammunition.');
+      const pct = Math.round(r.winRate * 100);
+      showForecast(a, `${pct >= 80 ? 'Favourable' : pct >= 40 ? 'Uncertain' : 'Dangerous'} · ${r.wins}/${r.trials} simulated wins at your current health, with your available food${r.wins ? ` · about ${Math.round(r.avgMs / 1000)}s · ${r.foodPerKill.toFixed(1)} food` : ''}`);
+    }, 30);
+  },
 });
 document.addEventListener('change', e => {
   const t = e.target, k = t.dataset && t.dataset.in; if (k !== 'qrule' && k !== 'qpace') return;
