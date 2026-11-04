@@ -1961,6 +1961,9 @@ h3 { font-size:17px; }
 .lr-v2 .level-star .ic{animation:lr-shine 2.8s ease-in-out 1s infinite}
 @keyframes lr-shine{0%,100%{transform:scale(1);filter:brightness(1) drop-shadow(0 0 0 transparent)}50%{transform:scale(1.06);filter:brightness(1.12) drop-shadow(0 0 10px color-mix(in srgb,var(--c) 60%,transparent))}}
 @media(max-width:600px){.lr-v2 .level-star .lr-star-img{width:84px!important;height:84px!important}}
+/* painted art never distorts: sprites keep their set size in flex rows, images keep their proportions */
+.painted-sprite{flex:none!important;background-repeat:no-repeat}
+img.painted-image,img.painted-portrait,.painted-portrait img,.rig-torso img,.foe-torso img{object-fit:contain}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
