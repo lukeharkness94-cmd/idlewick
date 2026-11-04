@@ -2,6 +2,8 @@
 
 Read HANDOFF.md for current product decisions and architecture before changing the game.
 
+- `main` is the sole working and delivery branch. The redundant `work` branch was removed after verifying identical history. Pull from and push to `main`; do not recreate `work`.
+
 - The source is index.html, js/ and css/. Play Idlewick.html is generated; rebuild it with `python3 scripts/package-game.py` after changes.
 - Run `node tests/regression.cjs` for engine, persistence, notifications, project pins and onboarding. The test uses only Node built-ins.
 - Preview with `python3 scripts/preview.py`. Use `--host 0.0.0.0` only when the cloud preview needs it. Windows uses `py` instead of `python3`.

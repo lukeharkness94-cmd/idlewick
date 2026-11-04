@@ -155,3 +155,7 @@ Browser checks also passed for painted equipment/companions, live combat, Schola
 - ResizeObserver measures actual bottom-menu height and reserves it inside #app plus24px. Tested bottom actions above navigation at390px and desktop; wide2560 adds columns.
 
 Validation:49 core regressions, desktop storage checks, JavaScript syntax and diff whitespace checks. Isolated8766 browser save verified changing encounter/HUD agreement, forecast result/comparison persistence, Scholarship start/countdown, Mossbarrow travel/project completion, Exploration, desktop/mobile bottom clearance, light/dark themes,390/1280/1440/2560 widths. Personal8765 save untouched. Rebuild standalone via python3 scripts/package-game.py. Generated build is committed; preview server auto-rebuilds. Source and handoff are ready to continue in another coding tool.
+
+## Branch consolidation — latest instruction
+
+`main` is now the sole branch. Both remote branches had identical history at da7e54e (zero unique commits on either side), so no merge was necessary. The redundant `work` branch was removed at the user’s request. This supersedes earlier references to maintaining or pushing both branches. Continue from `main` only.
