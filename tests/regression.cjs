@@ -547,4 +547,14 @@ test('a legacy save that sold a quest relic loads with it restored, and the rest
   assert.ok(q.projectsForTown('willowbrook').some(([id])=>id==='bell'),'the bell project is visible again');
   const again=q.exportSave();q.S=q.newState();assert.equal(q.importSave(again),true);assert.equal(q.have('star_shard'),1,'import does not duplicate');assert.equal(q.have('millers_bell'),1);
 });
+test('Emberfall has a discovery: the ashen anvil is found by mining there and its choice spends one ember core once',()=>{
+  const {q,load}=harness();load('routes');load('adventures');const S=q.S,D=q.data;
+  assert.equal(D.DISCOVERIES.ashen_anvil.place,'emberfall');
+  S.town='emberfall';S.towns.emberfall={visited:true,boss:false};for(let i=0;i<900&&!q.discovered('ashen_anvil');i++)q.qev('mine','runite');
+  assert.ok(q.discovered('ashen_anvil'),'found within its pity limit while mining in Emberfall');
+  S.town='willowbrook';assert.equal(q.chooseDiscovery('ashen_anvil','quench'),false,'needs an ember core');
+  S.unlocked.smithing=true;S.inv.ember_core=2;const xp=S.xp.smithing;assert.equal(q.chooseDiscovery('ashen_anvil','quench'),true);
+  assert.equal(S.inv.ember_core,1,'exactly one core spent');assert.ok(S.xp.smithing>xp);
+  assert.equal(q.chooseDiscovery('ashen_anvil','citadel'),false,'the choice is made once');assert.equal(S.inv.ember_core,1);
+});
 console.log(tests+' regression checks passed');

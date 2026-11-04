@@ -26,6 +26,11 @@ D.DISCOVERIES = {
   rusted_lantern: { name: 'A lantern in the ore', place: 'ironpeak', text: 'Your pick rings on brass. Buried in the seam is a miner’s lantern, its glass still whole, stamped with a lamplighter’s mark.', when: (ev) => ev === 'mine' && T() === 'ironpeak', rate: 1 / 600, pity: 1500, item: 'rusted_lantern', quest: 'al_lantern' },
   star_shard: { name: 'A shard of starlight', place: 'skyreach', text: 'Something cold and bright falls past you and lands in the grass: a splinter of starlight, humming faintly.', when: (ev) => ['kill', 'catch'].includes(ev) && T() === 'skyreach', rate: 1 / 400, pity: 900, item: 'star_shard', quest: 'af_star' },
   forgotten_shrine: { name: 'The forgotten shrine', place: 'gloomfen', text: 'Behind a curtain of reeds stands a shrine nobody has tended for a century. You clear the moss from its stone, and the marsh seems to breathe easier.', when: (ev) => ev === 'kill' && T() === 'gloomfen', rate: 1 / 300, pity: 400, reward: { coins: 800, xp: { hitpoints: 1500 } } },
+  ashen_anvil: { name: 'The ashen anvil', place: 'emberfall', text: 'Your pick strikes iron under a drift of warm ash: a dwarven anvil, older than the citadel, its face still glowing faintly. The runes on its horn ask to be fed fire.', when: (ev) => ev === 'mine' && T() === 'emberfall', rate: 1 / 400, pity: 800,
+    choices: [
+      { id: 'quench', label: 'Quench it with an ember core', needItem: 'ember_core', text: 'The core sinks into the iron with a sigh. For a moment the anvil rings by itself, and you understand the old smiths a little better.', reward: { xp: { smithing: 6000, mining: 2000 } } },
+      { id: 'citadel', label: 'Leave it to the citadel smiths', text: 'Magmasmith Kael’s apprentices haul it away on rollers and pay you handsomely for the find.', reward: { coins: 1500 } }
+    ] },
   lost_traveller: { name: 'A lost traveller', place: 'saltmere', text: 'A soaked traveller is sitting on the jetty, hopelessly lost and very hungry.', when: (ev) => ev === 'catch' && T() === 'saltmere', rate: 1 / 700, pity: 1500,
     choices: [
       { id: 'share', label: 'Share five cooked meals', need: 5, text: 'They eat, warm up and press a fisher’s secret on you before setting off.', reward: { xp: { fishing: 1500, cooking: 600 }, coins: 300 } },
@@ -120,6 +125,7 @@ DQ.qev = (ev, key, n = 1) => {
 DQ.chooseDiscovery = (id, choice) => {
   const d = D.DISCOVERIES[id], rec = disc()[id]; if (!d || !rec || rec.choice || !d.choices) return false;
   const c = d.choices.find(x => x.id === choice); if (!c) return false;
+  if (c.needItem) { if (DQ.have(c.needItem) < 1) { DQ.toast(`You need ${D.ITEMS[c.needItem].name.toLowerCase()} for that`, true); return false; } DQ.take(c.needItem, 1); }
   if (c.need) {
     const foods = DQ.foods().filter(f => DQ.have(f) > 0).sort((a, b) => DQ.have(b) - DQ.have(a));
     if (foods.reduce((n, f) => n + DQ.have(f), 0) < c.need) { DQ.toast(`You need ${c.need} cooked meals to share`, true); return false; }
@@ -138,7 +144,7 @@ UI.openDiscovery = id => {
     ${d.reward ? `<p class="dim">Found: ${esc(DQ.rewardText(d.reward).join(' · '))}</p>` : ''}
     ${q ? `<p class="dim">Adventure: <b>${esc(ADVENTURES[q.adventure].name)}</b>. ${st === 'new' ? `Speak to ${esc(q.giver)} in ${esc(D.TOWN[q.town].name)} to begin.` : st === 'locked' ? esc(DQ.questBlockers(q).join(' · ')) : 'Underway in your quest log.'}</p>` : ''}</div>`;
   const actions = [];
-  if (d.choices && !rec.choice) d.choices.forEach((c, i) => actions.push({ label: c.label, primary: i === 0, fn: () => { if (!DQ.chooseDiscovery(id, c.id)) return false; UI.openDiscovery(id); return false; } }));
+  if (d.choices && !rec.choice) d.choices.forEach((c, i) => actions.push({ label: c.needItem ? `${c.label} (${DQ.have(c.needItem)} held)` : c.label, primary: i === 0, fn: () => { if (!DQ.chooseDiscovery(id, c.id)) return false; UI.openDiscovery(id); return false; } }));
   if (q && st === 'new') actions.push({ label: 'Begin the adventure', primary: true, fn: () => { DQ.startQuest(q.id); UI.questTab = 'active'; DQ.go('quests'); } });
   else if (q) actions.push({ label: 'Open quest log', fn: () => { UI.questTab = st === 'done' ? 'done' : 'active'; DQ.go('quests'); } });
   actions.push({ label: 'Close' });
