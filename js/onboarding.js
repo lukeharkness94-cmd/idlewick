@@ -24,7 +24,7 @@ Object.assign(lessons,{
 Object.assign(lessons,{
  house:{towards:'Furniture gives lasting bonuses to your whole adventure.',title:'Your home',text:'Buy a home, then add rooms and furniture for permanent bonuses.',goal:'Save the purchase price, then start with a storage chest for backpack space.',art:['skill','woodcutting']},
  hirelings:{towards:'Worker materials support crafting and village restoration.',title:'Workers',text:'Hire a worker, choose their job and keep coins available for wages.',goal:'Hire one worker whose materials you need. Their work continues while you are away.',art:['skill','farming']},
- research:{towards:'Projects unlock permanent bonuses and potion recipes.',title:'Research',text:'Spend supplies on a project to gain permanent benefits and new potion recipes.',goal:'Choose an affordable project and start it in a free research slot.',art:['item','rune']},
+ research:{towards:'Projects unlock permanent bonuses and potion recipes.',title:'Scholarship',text:'Complete research projects to earn Scholarship XP, open higher study tiers and gain permanent benefits. Existing discoveries keep their bonuses.',goal:'Choose an affordable project and start it in a free research slot.',art:['item','rune']},
  bestiary:{towards:'Research reveals counters, loot and creature legends.',title:'Your field guide',text:'Every victory reveals more: weaknesses, drops, field notes and legends.',goal:'Complete one creature entry. Select its card to see the next research target.',art:['creature','lanternmoth']}
 });
 DQ.skillLessons=lessons;

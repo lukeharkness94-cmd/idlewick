@@ -1099,7 +1099,7 @@ button:focus-visible, summary:focus-visible, input:focus-visible, select:focus-v
 .notice-badge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 10px; background: var(--brass); color: var(--ground); font: 700 11px var(--f-mono); flex-shrink: 0; }
 .notice-badge[hidden] { display: none; }
 .dk { position: relative; }
-.dk .notice-badge { position: absolute; top: 4px; right: 4px; }
+.dk .notice-badge { position: absolute; top: 28px; left: 28px; right: auto; min-width: 15px; height: 15px; padding: 0 3px; font-size: 10px; }
 .page-notice { border-left: 3px solid var(--warn); }
 
 /* Equipment stays beside the hero rather than growing with the backpack. */
@@ -1726,3 +1726,25 @@ body[data-page="quests"] .quest.ready { animation: none; }
   .task-panel .activity-stage .scene-target { transform:none; }
   .task-panel .activity-stage .scene-target > :is(img,.painted-sprite) { width:150px!important; height:150px!important; }
 }
+.scholarship-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(255px,100%),1fr)); gap:12px; width:100%; }
+.scholarship-grid .tech { min-width:0; display:flex; flex-direction:column; gap:8px; }
+.scholarship-grid .tf { margin-top:auto; }
+.study-reward { color:var(--mute); font-size:12px; }
+/* Illustrated field-journal interface: quiet surfaces and readable type. */
+:root { --f-ui:'Alegreya Sans',system-ui,sans-serif; }
+.ml { font-family:var(--f-display); }
+.painted-image,.painted-portrait img,.fig-img,.scene-worker img { image-rendering:auto!important; object-fit:contain; }
+.painted-portrait { display:inline-flex; overflow:hidden; border-radius:50%; background:var(--panel2); border:1px solid var(--line2); }
+.painted-portrait img { width:100%;height:100%; }
+.painted-hero { width:144px!important;height:216px!important;transform-origin:50% 90%; }
+.painted-hero .rig-torso,.painted-hero img { display:block;width:100%;height:100%;object-fit:contain;image-rendering:auto; }
+.painted-foe { width:192px!important;height:192px!important;transform-origin:50% 85%; }
+.painted-foe .foe-torso { display:block;width:100%;height:100%; }
+.painted-foe .painted-sprite { image-rendering:auto; }
+.dk,.hub,.btn,.chip,.tab { letter-spacing:0; }
+.dk { background:color-mix(in srgb,var(--panel) 76%,transparent); }
+.dk.on { box-shadow:inset 3px 0 var(--c); }
+.panel { box-shadow:0 3px 12px #0000000b; }
+.activity-choices .illustrated-card .choice-art .painted-image { width:58px;height:58px; }
+.gico.painted-sprite { width:48px;height:48px; }
+@media(max-width:600px){.painted-hero {width:108px!important;height:162px!important}.painted-foe {width:144px!important;height:144px!important}.painted-foe .painted-sprite {width:144px!important;height:144px!important}}

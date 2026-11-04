@@ -27,6 +27,7 @@ D.SKILLS = [
   { id: 'smithing',    name: 'Smithing',    col: '#e8703a', group: 'artisan', page: 'smithing',    unlock: 12, quest: 'mq_smithing',  blurb: 'Smelt ore into bars and hammer them into weapons and armour.' },
   { id: 'crafting',    name: 'Crafting',    col: '#d98ad1', group: 'artisan', page: 'crafting',    unlock: 15, quest: 'mq_crafting', blurb: 'Sew leather, cut jewellery, carve bows and staves.' },
   { id: 'magic',       name: 'Magic',       col: '#7d89f5', group: 'artisan', page: 'magic',       unlock: 28, quest: 'mq_magic', blurb: 'Cast spells in battle and turn clutter into coins with alchemy.' },
+  { id:'research', name:'Scholarship', col:'#b79862', group:'artisan', page:'research', unlock:16, blurb:'Study practical discoveries to earn Scholarship XP and permanent improvements.' },
   { id: 'attack',      name: 'Attack',      col: '#df5b4a', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Hit more often with melee weapons.' },
   { id: 'strength',    name: 'Strength',    col: '#3fb88f', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Hit harder with melee weapons.' },
   { id: 'defence',     name: 'Defence',     col: '#5f93df', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Avoid blows and wear heavier armour.' },

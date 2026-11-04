@@ -67,6 +67,9 @@ function candidateState(o) {
     }
   }
   const result = merge(base, o);
+  if (!Object.prototype.hasOwnProperty.call(o.xp,'research') && DQ.researchXp) {
+    result.xp.research = Object.keys(result.research.done).reduce((sum,id)=>sum+(result.research.done[id]&&D.TECH[id]?DQ.researchXp(D.TECH[id]):0),0);
+  }
   if (result.pinnedProject !== null && !['well', 'inn'].includes(result.pinnedProject)) throw new Error('Unknown pinned project');
   if (!D.TOWN[result.town]) throw new Error('Unknown town');
   if (Object.values(result.equip).some(id => id && !D.ITEMS[id])) throw new Error('Unknown equipment');

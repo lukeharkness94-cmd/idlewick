@@ -65,8 +65,7 @@ function onAdv(from, to) {
   });
   for (const [page, level, title, icon] of [
     ['house', D.HOUSE.adv, 'Housing', 'house'],
-    ['hirelings', D.HIRE.adv, 'Workers', 'users'],
-    ['research', D.RESEARCH_ADV, 'Research hall', 'rune']
+    ['hirelings', D.HIRE.adv, 'Workers', 'users']
   ]) if (level > from && level <= to) { gains.push(title); DQ.notify({ kind: 'unlock', key: 'feature:' + page, page, icon, title: `${title} unlocked`, text: `You can now explore ${title.toLowerCase()} in World.`, action: { label: `Open ${title}`, fn: () => DQ.go(page) }, sound: 'unlock', ttl: 12000 }); }
   if (!DQ.sim.on) {
     DQ.log(`Hero level ${to} reached.`, 'quest');
@@ -250,7 +249,7 @@ DQ.stopAct = (silent, why) => {
   if (!DQ.forecasting) DQ.emit('act');
 };
 
-const extraCoins = () => [1, 3, 8, 20, 50][townIdx()];
+const extraCoins = () => D.ECONOMY.gatherCoinScale * (D.ECONOMY.gatherTownScale[townIdx()] || 1);
 function floatItem(id, n) { const it = D.ITEMS[id]; DQ.floatAt(document.querySelector('.card.active .own') || document.querySelector('.card.active') || document.querySelector('.nowp'), `${DQ.ico(it.ic)}+${n} ${it.name.toLowerCase()}`, it.col); }
 function floatXp(sk, x) { DQ.floatAt(document.querySelector('.card.active') || document.querySelector('.arena') || document.querySelector('.nowp'), `${DQ.ico(sk)}+${fmt(x)} XP`, D.SK[sk].col); }
 
@@ -263,16 +262,16 @@ function gatherDone(kind, n) {
   const ev = { fish: 'catch', wood: 'chop', mine: 'mine' }[kind]; S().stats[ev] += qty; DQ.qev(ev, n.id, qty);
   DQ.sfx(kind); DQ.petRoll('skill', sk); const k = extraCoins() * DQ.coinMult();
   if (kind === 'fish') {
-    if (chance(.018 * (1 + DQ.fx().find))) { const c = rnd(8, 25) * k; DQ.addCoins(c); DQ.floatAt(document.querySelector('.card.active'), `${ico('pouch')}+${c} coins`, '#f3d58a'); DQ.log(`You fish up a sodden coin pouch (${c} coins).`, 'good'); DQ.sfx('coin'); }
-    if (chance(.0025 * (1 + DQ.fx().find))) { const c = rnd(120, 260) * k; DQ.addCoins(c); DQ.grant(DQ.weighted(D.GEM_WEIGHTS)); S().stats.rare++; DQ.log(`You haul up a sunken chest! ${c} coins and a gem.`, 'good'); DQ.notify({ kind: 'loot', key: 'chest', icon: 'pouch', col: '#f3d58a', title: 'Sunken chest', text: `You found ${c} coins and a gem.`, sound: 'gem', burst: true }); }
+    if (chance(D.ECONOMY.fishPouchChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(8, 25) * k)); DQ.addCoins(c); DQ.floatAt(document.querySelector('.card.active'), `${ico('pouch')}+${c} coins`, '#f3d58a'); DQ.log(`You fish up a sodden coin pouch (${c} coins).`, 'good'); DQ.sfx('coin'); }
+    if (chance(D.ECONOMY.fishChestChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(120, 260) * k)); DQ.addCoins(c); DQ.grant(DQ.weighted(D.GEM_WEIGHTS)); S().stats.rare++; DQ.log(`You haul up a sunken chest! ${c} coins and a gem.`, 'good'); DQ.notify({ kind: 'loot', key: 'chest', icon: 'pouch', col: '#f3d58a', title: 'Sunken chest', text: `You found ${c} coins and a gem.`, sound: 'gem', burst: true }); }
   } else if (kind === 'wood') {
-    if (chance(.015 * (1 + DQ.fx().find))) {
-      if (chance(.5)) { const c = rnd(15, 45) * k; DQ.addCoins(c); DQ.log(`A bird's nest holds ${c} coins.`, 'good'); DQ.floatAt(document.querySelector('.card.active'), `${ico('nest')}+${c} coins`, '#f3d58a'); DQ.sfx('coin'); }
+    if (chance(D.ECONOMY.woodNestChance * (1 + DQ.fx().find))) {
+      if (chance(.5)) { const c = Math.max(1, Math.round(rnd(15, 45) * k)); DQ.addCoins(c); DQ.log(`A bird's nest holds ${c} coins.`, 'good'); DQ.floatAt(document.querySelector('.card.active'), `${ico('nest')}+${c} coins`, '#f3d58a'); DQ.sfx('coin'); }
       else { const g = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g); DQ.log(`A bird's nest holds a ${itemName(g).toLowerCase()}.`, 'good'); DQ.sfx('gem'); }
     }
   } else if (kind === 'mine') {
-    if (chance(.04 * (1 + DQ.fx().find))) { const g = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g); DQ.log(`You find an uncut ${itemName(g).toLowerCase()}!`, 'good'); DQ.floatAt(document.querySelector('.card.active .own'), `${ico('gem')}${itemName(g)}`, D.ITEMS[g].col); DQ.sfx('gem'); }
-    if (chance(.008 * (1 + DQ.fx().find))) { const c = rnd(10, 30) * k; DQ.addCoins(c); DQ.log(`You unearth old coins (${c}).`, 'good'); }
+    if (chance(D.ECONOMY.mineGemChance * (1 + DQ.fx().find))) { const g = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g); DQ.log(`You find an uncut ${itemName(g).toLowerCase()}!`, 'good'); DQ.floatAt(document.querySelector('.card.active .own'), `${ico('gem')}${itemName(g)}`, D.ITEMS[g].col); DQ.sfx('gem'); }
+    if (chance(D.ECONOMY.mineCoinChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(10, 30) * k)); DQ.addCoins(c); DQ.log(`You unearth old coins (${c}).`, 'good'); }
   }
 }
 function thieveDone(n) {

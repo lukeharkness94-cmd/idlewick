@@ -8,14 +8,14 @@ const S = () => DQ.S;
 const HUBS = [
   { id: 'home', name: 'Home', ic: 'home', pages: ['overview', 'activity'] },
   { id: 'quests', name: 'Quests', ic: 'quest', pages: ['quests'] },
-  { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'magic', 'brewery', 'enchanting'] },
+  { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'magic', 'brewery', 'enchanting', 'research'] },
   { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'bestiary'] },
-  { id: 'world', name: 'World', ic: 'map', pages: ['map', 'exploration', 'projects', 'house', 'hirelings', 'research'] },
+  { id: 'world', name: 'World', ic: 'map', pages: ['map', 'exploration', 'projects', 'house', 'hirelings'] },
   { id: 'shop', name: 'Shop', ic: 'shop', pages: ['shop'] },
   { id: 'hero', name: 'Hero', ic: 'bag', pages: ['character', 'bank', 'skillsummary', 'mastery', 'achievements'] },
 ];
 const UTILITIES = { id: 'settings', name: 'Settings', pages: ['settings', 'balance'] };
-const TAB = { hunting:['Hunting','paw'], exploration:['Exploration','map'], enchanting:['Enchanting','rune'], brewery: ['Herbalism', 'bottle'], overview: ['Home', 'home'], skillsummary: ['Skill levels', 'star'], activity: ['Activity', 'clock'], projects: ['Town projects', 'house'], combat: ['Fight', 'attack'], bestiary: ['Bestiary', 'book'], map: ['Map', 'map'], quests: ['Quests', 'quest'], shop: ['Shop', 'shop'], character: ['Inventory & equipment', 'bag'], bank: ['Bank', 'bank'], house: ['House', 'house'], hirelings: ['Workers', 'users'], achievements: ['Achievements', 'trophy'], mastery: ['Mastery', 'trophy'], research: ['Research', 'rune'], settings: ['Settings', 'gear'] };
+const TAB = { hunting:['Hunting','paw'], exploration:['Exploration','map'], enchanting:['Enchanting','rune'], brewery: ['Herbalism', 'bottle'], overview: ['Home', 'home'], skillsummary: ['Skill levels', 'star'], activity: ['Activity', 'clock'], projects: ['Town projects', 'house'], combat: ['Fight', 'attack'], bestiary: ['Bestiary', 'book'], map: ['Map', 'map'], quests: ['Quests', 'quest'], shop: ['Shop', 'shop'], character: ['Inventory & equipment', 'bag'], bank: ['Bank', 'bank'], house: ['House', 'house'], hirelings: ['Workers', 'users'], achievements: ['Achievements', 'trophy'], mastery: ['Mastery', 'trophy'], research: ['Scholarship', 'book'], settings: ['Settings', 'gear'] };
 UI.hubOf = p => HUBS.find(h => h.pages.includes(p)) || (UTILITIES.pages.includes(p) ? UTILITIES : HUBS[0]);
 const lastIn = {};
 const hubDefault = h => {

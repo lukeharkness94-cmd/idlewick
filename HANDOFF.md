@@ -131,3 +131,14 @@ Gathering now exposes every region's resources in level order, with level/locati
 User superseded the pixel-art direction with natural painted models. The first converted sets are all 15 fish (including raw inventory icons) and all nine trees. Generated transparent atlases are in assets/painted; art_painted.js overrides those assets only. Heroes, enemies, equipment, cooked fish, and landscapes still use existing art, so this is not a completed whole-game art conversion. Packaging embeds atlas PNGs into the standalone HTML. Do not replace distinct cooked-item art with raw fish illustrations.
 
 Validation: 41 core regressions including all-region visibility and locked preview gating. Isolated browser save tested for fishing start/stop, locked fish preview, responsive catalogue columns at 390/1024/1440/2560, and painted art in both themes. Personal save untouched.
+
+## 2026-11-04 painted models, Scholarship and economy
+
+Painted models now cover 69 combat creatures, the companion collection, farm animals, thieving targets, five tiers of gathering tools, equipment classes, navigation icons and the hero. Hero face is deliberately weathered/asymmetrical; pets have natural resting mouths. art_painted.js selects atlases; painted_runtime.js composites equipped gear and saved appearance colours and provides smooth whole-model battle motion. Landscapes and remaining material/utility icons retain prior art. Preserve transparent PNGs and embedded-build blob URL conversion (large data URLs exceed CSS variable token limits).
+
+Research is now Scholarship, id/page research retained for saves. Unlock at Hero16, tiers at Scholarship1/10/20/30, second slot at Scholarship20 or legacy Hero40. Projects give XP once; repeatable Field notes bridge gaps. Legacy completed projects receive base XP once only when xp.research is absent. Existing benefits, active projects and purses are retained.
+
+Economy tuning is prospective: gathering cash roughly30% baseline, mining gem chance0.4% (formerly4%), monster cash35%/boss20%, thieving30%, quest65% except first_steps, achievement35%, most sale values50%. Purchase prices and existing coin balances remain unchanged. Offline cap remains8h real/5h effective even after32h absence. All eight towns now have finite gathering coin multipliers. Central tuning lives in economy.js after data3.
+
+Validation:45 core regressions, including Scholarship migration/repeatability/tier gates and32h cap. Browser testing uses isolated8766 save, never personal8765.
+Browser checks also passed for painted equipment/companions, live combat, Scholarship start, light/dark themes and390/1440/2560 widths. No console errors; desktop storage and all JavaScript syntax checks pass. Proof: outputs/Idlewick-painted-update.png in the surrounding workspace.

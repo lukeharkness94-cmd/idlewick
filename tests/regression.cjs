@@ -26,7 +26,7 @@ function harness(desktopStorage) {
   });
   context.window = context;
   const load = name => vm.runInContext(fs.readFileSync(path.join(__dirname, '../js', name + '.js'), 'utf8'), context, { filename: name });
-  ['util', 'data', 'data2', 'data3', 'state', 'audio'].forEach(load);
+  ['util', 'data', 'data2', 'data3', 'economy', 'state', 'audio'].forEach(load);
   const q = context.DQ;
   q.notify = q.pulse = q.floatAt = q.flash = q.burstAt = q.burstEl = q.toast = q.go = () => {};
   ['engine', 'systems', 'plan', 'meta'].forEach(load);
@@ -317,6 +317,29 @@ test('combat interval improves with combat level and preserves weapon difference
  q.S.equip.weapon='bronze_hammer';assert.ok(q.combatInterval()>sword);
  q.S.equip.weapon='bronze_sword';for(const sk of ['attack','strength','defence','hitpoints'])q.S.xp[sk]=q.data.XPF[99];
  assert.ok(q.combatInterval()<sword);assert.ok(q.combatInterval()>=q.data.WTYPES.sword.speed*.76);
+});
+
+test('Scholarship credits legacy discoveries once and preserves existing coins',()=>{
+ const {q}=harness();const old=JSON.parse(JSON.stringify(q.S));delete old.xp.research;old.research.done.sharper1=1;old.coins=40000;
+ assert.equal(q.importSave(encode(old)),true);const xp=q.researchXp(q.data.TECH.sharper1);assert.equal(q.S.xp.research,xp);assert.equal(q.S.coins,40000);
+ assert.equal(q.importSave(q.exportSave()),true);assert.equal(q.S.xp.research,xp);
+});
+test('Scholarship projects award XP once and field notes can repeat',()=>{
+ const {q}=harness();q.S.xp.fishing=q.data.XPF[70];q.S.coins=1000;q.S.inv.feather=10;
+ assert.equal(q.startResearch('field_notes'),true);assert.equal(q.S.coins,975);assert.equal(q.have('feather'),8);
+ q.researchTick(300000);const xp=q.S.xp.research;assert.ok(xp>0);assert.equal(q.techDone('field_notes'),false);
+ q.researchTick(300000);assert.equal(q.S.xp.research,xp);assert.equal(q.startResearch('field_notes'),true);q.researchTick(300000);assert.ok(q.S.xp.research>xp);
+});
+test('Scholarship gates tiers by skill level and retains legacy second slots',()=>{
+ const {q}=harness();q.S.xp.fishing=q.data.XPF[70];const t=q.data.TECHS.find(t=>t.tier===2);
+ assert.match(q.techReason(t),/Scholarship 10/);q.S.xp.research=q.data.XPF[10];for(const id of t.req)q.S.research.done[id]=1;assert.equal(q.techReason(t),'');
+ assert.equal(q.researchSlots(),2);q.S.xp.fishing=0;q.S.xp.research=q.data.XPF[20];assert.equal(q.researchSlots(),2);
+});
+test('reward tuning covers every town and 32-hour absences keep the existing cap',()=>{
+ const {q}=harness();assert.equal(q.offlineEff(32*3600000),5*3600000);
+ assert.equal(q.data.ECONOMY.gatherTownScale.length,q.data.TOWNS.length);
+ assert.ok(q.data.ECONOMY.gatherTownScale.every(Number.isFinite));assert.equal(q.data.ECONOMY.mineGemChance,.004);
+ for(const m of q.data.MONLIST)assert.ok(m.coins.every(n=>Number.isFinite(n)&&n>=0));
 });
 
 console.log(tests+' regression checks passed');
