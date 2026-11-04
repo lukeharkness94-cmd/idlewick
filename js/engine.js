@@ -509,9 +509,13 @@ DQ.buy = (id, qty = 1) => {
   S().coins -= price; DQ.give(id, qty); S().stats.bought += qty; if (it.type === 'tool') S().stats.tools++;
   DQ.sfx('buy'); DQ.achDirty = true; DQ.emit('shop'); return true;
 };
+/* Keepsakes (adventure relics and anything marked keepsake) belong to a story and can never be sold, from any screen. */
+DQ.sellable = id => { const it = D.ITEMS[id]; return !!it && it.type !== 'relic' && !it.keepsake; };
+DQ.KEEPSAKE_NOTE = 'Keepsake: part of an adventure, so it cannot be sold. It stays safe in your pack or bank.';
 DQ.sell = (id, qty, from) => {
   const it = D.ITEMS[id], store = from === 'pack' ? S().inv : from === 'bank' ? S().bank : null;
   if (!it || !Number.isFinite(qty) || qty <= 0) return;
+  if (!DQ.sellable(id)) { if (DQ.toast) DQ.toast(`${it.name} is a keepsake and cannot be sold`, true); return; }
   qty = Math.min(Math.floor(qty), store ? store[id] || 0 : DQ.have(id));
   if (!qty) return;
   if (store) { store[id] -= qty; if (!store[id]) delete store[id]; DQ.invDirty = true; }
@@ -519,7 +523,7 @@ DQ.sell = (id, qty, from) => {
   const coins = (it.val || 0) * qty;
   DQ.addCoins(coins); S().stats.sold += qty; DQ.sfx('sell'); DQ.achDirty = true; DQ.emit('shop'); return coins;
 };
-DQ.sellJunk = () => { let c = 0; Object.keys({ ...S().inv, ...S().bank }).forEach(id => { if (D.ITEMS[id].type === 'junk') c += DQ.sell(id, DQ.have(id)) || 0; }); return c; };
+DQ.sellJunk = () => { let c = 0; Object.keys({ ...S().inv, ...S().bank }).forEach(id => { if (D.ITEMS[id] && D.ITEMS[id].type === 'junk' && DQ.sellable(id)) c += DQ.sell(id, DQ.have(id)) || 0; }); return c; };
 
 /* ---------- Offline and catch-up simulation ---------- */
 /* Time away: full speed for the first two hours, half speed after that, capped at 8 hours */

@@ -1897,3 +1897,7 @@ img.painted-image,img.painted-portrait,.painted-portrait img,.rig-torso img,.foe
 .clvl .cl-prog-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .clvl .cl-prog .bar{height:8px}.clvl .cl-prog .bar i{background:var(--brass)}
 .clvl .cl-prog small{color:var(--mute)}.clvl .cl-boost{color:var(--good)!important}
+/* keepsakes: a calm explanation in place of a Sell button */
+.keepsake-note{display:inline-flex;align-items:center;gap:6px;color:var(--brass-hi);font-size:12.5px;margin:4px 0 0}
+.keepsake-note .ic{width:14px;height:14px}
+p.keepsake-note{flex-basis:100%;color:var(--mute)}

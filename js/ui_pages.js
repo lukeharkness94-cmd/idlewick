@@ -73,7 +73,7 @@ UI.travelAnim = to => {
 };
 
 /* ---------- Shop ---------- */
-UI.itemSub = it => { const b = UI.statLine(it.b), r = Object.entries(it.req || {}).map(([sk, l]) => `<span class="${DQ.skillUnlocked(sk) && DQ.lvl(sk) >= l ? 'ok' : 'bad'}">${D.SK[sk].name} ${l}</span>`).join(' '); return [it.heal ? `Heals ${it.heal}` : '', it.type === 'tool' ? `${Math.round(D.TOOL_SPEED[it.tier] * 100)}% faster ${D.SK[it.toolSkill].name.toLowerCase()}` : '', b, r].filter(Boolean).join(' · '); };
+UI.itemSub = it => { const b = UI.statLine(it.b), r = Object.entries(it.req || {}).map(([sk, l]) => `<span class="${DQ.skillUnlocked(sk) && DQ.lvl(sk) >= l ? 'ok' : 'bad'}">${D.SK[sk].name} ${l}</span>`).join(' '); return [it.type === 'relic' ? `${esc(it.desc || '')} Keepsake: it cannot be sold.` : '', it.heal ? `Heals ${it.heal}` : '', it.type === 'tool' ? `${Math.round(D.TOOL_SPEED[it.tier] * 100)}% faster ${D.SK[it.toolSkill].name.toLowerCase()}` : '', b, r].filter(Boolean).join(' · '); };
 UI.shopSelected = {};
 UI.shopTabs = tab => `<div class="tabs">${[['buy','Buy'], ['rare','Rare wares'], ['sell','Sell']].map(([value, label]) => `<button class="tab ${tab === value ? 'on' : ''}" data-do="shoptab" data-a="${value}">${label}</button>`).join('')}</div>`;
 UI.shopPreview = id => {
@@ -82,7 +82,7 @@ UI.shopPreview = id => {
 };
 UI.V.shop = () => {
   const tab = UI.shopTab, buying = tab === 'buy', qty = UI.shopQty;
-  const ids = buying ? D.SHOPS[S().town] : Object.keys({ ...S().inv, ...S().bank });
+  const ids = buying ? D.SHOPS[S().town] : Object.keys({ ...S().inv, ...S().bank }).filter(DQ.sellable);
   const id = ids.includes(UI.shopSelected[tab]) ? UI.shopSelected[tab] : ids[0], it = id && D.ITEMS[id];
   UI.shopSelected[tab] = id;
   const owned = it ? DQ.have(id) : 0, tool = it && it.type === 'tool', count = tool ? 1 : qty;
@@ -146,7 +146,8 @@ UI.detail = (id, from) => {
   if (it.heal) btns.push(`<button class="btn" data-do="eat" data-a="${id}">Eat (+${it.heal})</button>`);
   if (from === 'bank') btns.push(`<button class="btn" data-do="withdraw" data-a="${id}" data-b="1">Take 1</button>${n > 1 ? `<button class="btn" data-do="withdraw" data-a="${id}" data-b="10">Take 10</button><button class="btn" data-do="withdraw" data-a="${id}" data-b="all">Take all</button>` : ''}`);
   else btns.push(`<button class="btn" data-do="deposit" data-a="${id}" data-b="all">Bank</button>`);
-  btns.push(`<button class="btn" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell 1 ${UI.money(it.val)}</button>${n > 1 ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all ${UI.money(it.val * n)}</button>` : ''}`);
+  if (!DQ.sellable(id)) btns.push(`<p class="keepsake-note">${ico('lock')} ${esc(DQ.KEEPSAKE_NOTE)}</p>`);
+  else btns.push(`<button class="btn" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell 1 ${UI.money(it.val)}</button>${n > 1 ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all ${UI.money(it.val * n)}</button>` : ''}`);
   return `<div class="detail"><div class="dt-h">${itm(id)}<div><b style="color:${it.col}">${esc(it.name)}</b><small>${fmt(n)} in ${from === 'bank' ? 'bank' : 'pack'}</small></div></div><p class="sm">${UI.itemSub(it) || (it.type === 'junk' ? 'Junk. Good only for selling.' : DQ.cap(it.type))}</p><div class="btnrow wrap">${btns.join('')}</div></div>`;
 };
 UI.V.character = () => {

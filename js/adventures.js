@@ -172,4 +172,32 @@ const claim0 = DQ.claimQuest;
 DQ.claimQuest = id => { const q = D.QM[id], before = q && DQ.questState(q); const r = claim0(id); if (q && q.adventure && q.stage === ADVENTURES[q.adventure].stages && before === 'ready' && DQ.questState(q) === 'done') setTimeout(() => DQ.sfx('adventure'), 400); return r; };
 const travel0 = DQ.travel;
 if (travel0) DQ.travel = id => { const first = !(S().towns[id] && S().towns[id].visited); const r = travel0(id); if (first && S().town === id) DQ.sfx('region'); return r; };
+
+/* ---------- Keepsake recovery ----------
+   Relics can no longer be sold, but saves from before that rule may have lost one. Each relic is restored (one copy) only when
+   it was legitimately earned and has not yet been used by its quest or project; nothing is duplicated and no reward repeats. */
+const done = id => S().q[id] && S().q[id].s === 'done';
+DQ.RELIC_LIFECYCLE = {
+  weathered_map: () => DQ.discovered('weathered_map'),
+  rusted_lantern: () => DQ.discovered('rusted_lantern'),
+  star_shard: () => DQ.discovered('star_shard') && !done('af_home'),
+  millers_bell: () => done('am_box') && !S().projects.bell,
+  lamplighter_lens: () => done('al_rest') && !S().projects.lamps,
+  star_heart: () => done('af_home') && !S().projects.star
+};
+DQ.recoverRelics = () => {
+  const back = [];
+  for (const [id, owed] of Object.entries(DQ.RELIC_LIFECYCLE)) if (D.ITEMS[id] && owed() && DQ.have(id) < 1) { DQ.give(id, 1); back.push(id); }
+  if (back.length) {
+    const names = back.map(id => D.ITEMS[id].name).join(', ');
+    DQ.log(`Recovered keepsake${back.length > 1 ? 's' : ''}: ${names}.`, 'quest');
+    DQ.recoveredRelics = back;
+  }
+  return back;
+};
+/* run after every successful load or import, then tell the player once the game is on screen */
+const tellRecovered = () => { const back = DQ.recoveredRelics; if (!back || !back.length) return; DQ.recoveredRelics = null;
+  const go = () => DQ.notify({ kind: 'info', key: 'relics:recovered', icon: 'bag', col: '#d8b050', title: 'Keepsakes recovered', text: `${back.map(id => D.ITEMS[id].name).join(', ')} ${back.length > 1 ? 'are' : 'is'} back in your pack. Keepsakes can no longer be sold.` });
+  if (DQ.started) go(); else setTimeout(() => DQ.started && go(), 2500); };
+for (const name of ['load', 'importSave']) { const f0 = DQ[name]; if (f0) DQ[name] = (...a) => { const ok = f0(...a); if (ok && DQ.S) { DQ.recoverRelics(); tellRecovered(); } return ok; }; }
 })();

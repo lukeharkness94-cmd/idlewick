@@ -146,7 +146,7 @@ const EVENTS = {
 DQ.makeAwayEvents = (sum, away) => {
   if (away < 20 * 60000) return;
   const top = Object.entries(sum.items || {}).filter(([id]) => D.ITEMS[id].val > 0).sort((a, b) => D.ITEMS[b[0]].val * b[1] - D.ITEMS[a[0]].val * a[1])[0];
-  const ctx = { topItem: top && D.ITEMS[top[0]].val * top[1] >= 40 ? top[0] : null, pushed: (S().lastPace === 'push'), died: sum.died };
+  const ctx = { topItem: top && DQ.sellable(top[0]) && D.ITEMS[top[0]].val * top[1] >= 40 ? top[0] : null, pushed: (S().lastPace === 'push'), died: sum.died };
   const n = Math.min(3, Math.max(1, Math.floor(away / (40 * 60000)))), pool = Object.entries(EVENTS).filter(([, e]) => e.ok(ctx)), out = [];
   if (ctx.pushed && EVENTS.injury.ok(ctx) && chance(.6)) { out.push('injury'); }
   while (out.length < n && pool.length) { const k = DQ.weighted(pool.filter(([k]) => !out.includes(k)).map(([k, e]) => [k, e.w])); if (!k || out.includes(k)) break; out.push(k); }

@@ -503,4 +503,48 @@ test('a save rejected by the old well/inn-only pin rule loads, and an unknown pi
     else if(ok)assert.equal(q.S.pinnedProject,null,'malformed pin never survives');
   }
 });
+test('keepsake relics cannot be sold from any path, ordinary zero-value items still can',()=>{
+  const {q,load}=harness();load('routes');load('adventures');const S=q.S,D=q.data;
+  const relics=Object.keys(D.ITEMS).filter(id=>D.ITEMS[id].type==='relic');assert.equal(relics.length,6);
+  for(const id of relics){
+    S.inv[id]=1;S.bank[id]=1;const coins=S.coins;
+    for(const from of ['pack','bank',undefined])assert.equal(q.sell(id,1,from),undefined,id+' refused from '+from);
+    assert.equal(S.inv[id],1);assert.equal(S.bank[id],1);assert.equal(S.coins,coins);assert.equal(q.sellable(id),false);
+    delete S.inv[id];delete S.bank[id];
+  }
+  S.inv.burnt=3;S.inv.feather=4;q.sellJunk();assert.ok(!S.inv.burnt,'junk (zero value) still sells in bulk');
+  assert.equal(q.sell('feather',2,'pack'),2*D.ITEMS.feather.val);assert.equal(S.inv.feather,2);
+});
+test('each relic is recovered once if lost before the keepsake rule, never after its quest or project used it',()=>{
+  const {q,load}=harness();load('routes');load('adventures');const S=q.S;
+  const lose=id=>{delete S.inv[id];delete S.bank[id];};
+  /* discovery keepsakes */
+  for(const d of ['weathered_map','rusted_lantern','star_shard']){
+    assert.deepEqual([...q.recoverRelics()],[],'nothing owed before the discovery');
+    q.makeDiscovery(d);assert.equal(q.have(d),1);lose(d);
+    assert.deepEqual([...q.recoverRelics()],[d]);assert.equal(q.have(d),1);
+    assert.deepEqual([...q.recoverRelics()],[],'no duplicate on a second pass');assert.equal(q.have(d),1);
+  }
+  /* the star shard is consumed by its final delivery and is not owed afterwards */
+  S.q.af_home={s:'done',p:[0,0]};lose('star_shard');S.inv.star_heart=1;
+  assert.ok(!q.recoverRelics().includes('star_shard'));assert.equal(q.have('star_shard'),0);
+  /* finale relics: owed after their quest, until their project displays them */
+  for(const [quest,relic,project] of [['am_box','millers_bell','bell'],['al_rest','lamplighter_lens','lamps'],['af_home','star_heart','star']]){
+    S.q[quest]={s:'done',p:[0,0]};lose(relic);
+    assert.deepEqual([...q.recoverRelics()],[relic],relic+' restored after an accidental loss');
+    assert.equal(q.have(relic),1);const xp=JSON.stringify(S.xp),coins=S.coins;
+    assert.deepEqual([...q.recoverRelics()],[]);assert.equal(JSON.stringify(S.xp),xp,'no quest reward repeats');assert.equal(S.coins,coins);
+    S.town='willowbrook';S.coins+=1e6;assert.equal(q.finishProject(project),true,project+' can be completed with the recovered relic');
+    assert.equal(q.have(relic),0,'the project consumes it');assert.deepEqual([...q.recoverRelics()],[],'not owed once displayed');
+  }
+});
+test('a legacy save that sold a quest relic loads with it restored, and the restoration can still be finished',()=>{
+  const {q,load,storage}=harness();load('routes');load('adventures');const S=q.S;
+  S.disc.star_shard={at:1,town:'skyreach'};S.q.af_star={s:'done',p:[15,8]};S.q.af_fall={s:'done',p:[1,15,6]};S.q.af_home={s:'active',p:[10,0]};
+  S.q.am_box={s:'done',p:[5,5]};
+  storage.set('dashboard-quest-save-v2',JSON.stringify(S));q.S=q.newState();
+  assert.equal(q.load(),true);assert.equal(q.have('star_shard'),1,'final delivery possible again');assert.equal(q.have('millers_bell'),1);
+  assert.ok(q.projectsForTown('willowbrook').some(([id])=>id==='bell'),'the bell project is visible again');
+  const again=q.exportSave();q.S=q.newState();assert.equal(q.importSave(again),true);assert.equal(q.have('star_shard'),1,'import does not duplicate');assert.equal(q.have('millers_bell'),1);
+});
 console.log(tests+' regression checks passed');
