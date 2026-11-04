@@ -269,11 +269,13 @@ test('a village project pin persists, replaces the previous pin and can be remov
   assert.equal(q.importSave(saved),true); assert.equal(q.S.pinnedProject,'well');
   assert.equal(q.pinProject('missing'),false); assert.equal(q.S.pinnedProject,'well');
 });
-test('legacy saves gain the project pin field and invalid pins are rejected atomically', () => {
+test('legacy saves gain the project pin field and an unknown pin is cleared without rejecting the hero', () => {
   const {q}=harness(); const legacy=q.newState(); delete legacy.pinnedProject;
   assert.equal(q.importSave(encode(legacy)),true); assert.equal(q.S.pinnedProject,null);
-  const before=q.exportSave(), invalid=q.newState(); invalid.pinnedProject='missing';
-  assert.equal(q.importSave(encode(invalid)),false); assert.equal(q.exportSave(),before);
+  const invalid=q.newState(); invalid.pinnedProject='missing'; invalid.coins=321;
+  assert.equal(q.importSave(encode(invalid)),true); assert.equal(q.S.pinnedProject,null); assert.equal(q.S.coins,321);
+  const broken=q.newState(); broken.pinnedProject={nested:true};
+  assert.equal(q.importSave(encode(broken)),true,'a malformed pin is cleared too'); assert.equal(q.S.pinnedProject,null);
 });
 test('new players receive one persistent lesson per unlocked skill', () => {
   const {q}=harness(); assert.equal(q.lessonForPage('woodcutting').id,'woodcutting');
@@ -476,5 +478,29 @@ test('combat level shows its progress and catches up when it trails the Hero lev
   S.xp.fishing=D.XPF[40];S.xp.woodcutting=D.XPF[40];const behind=q.advLvl()-q.combatLvl();assert.ok(behind>0);
   assert.equal(q.combatCatchUp(),Math.min(2,.15*behind));assert.ok(q.xpMult('strength')>base*1.5,'combat skills learn faster while behind');
   const fish=q.xpMult('fishing');assert.ok(Math.abs(fish-(1+.005*(q.lvl('fishing')-1))*(1+.0025*(q.advLvl()-1)))<1e-9,'gathering skills are unaffected');
+});
+test('every pinnable project survives save, reload, export and import (browser and desktop storage)',()=>{
+  for(const desktop of [false,true]){
+    const files=new Map(),bridge=desktop?{getItem:k=>files.get(k)||null,setItem:(k,v)=>files.set(k,v),removeItem:k=>files.delete(k)}:undefined;
+    const {q,load}=harness(bridge);load('routes');load('adventures');const D=q.data,ids=Object.keys(D.PROJECTS);
+    assert.ok(ids.length>=16&&['forge','garden','library','watchtower','bell','lamps','star'].every(id=>ids.includes(id)),'village, regional and relic projects are all defined');
+    for(const id of ids){
+      q.S.pinnedProject=null;assert.equal(q.pinProject(id),true);assert.equal(q.S.pinnedProject,id);
+      q.S.xp.fishing=1234;assert.ok(q.save(),id+' saves');
+      q.S=q.newState();assert.equal(q.load(),true,id+' pin reloads');assert.equal(q.S.pinnedProject,id);assert.equal(q.S.xp.fishing,1234,'progress kept');
+      const code=q.exportSave();q.S=q.newState();assert.equal(q.importSave(code),true,id+' pin imports');assert.equal(q.S.pinnedProject,id);
+    }
+  }
+});
+test('a save rejected by the old well/inn-only pin rule loads, and an unknown pin is cleared without losing the hero',()=>{
+  const {q,storage}=harness();const S=q.S;S.xp.woodcutting=5000;S.coins=777;S.pinnedProject='forge';
+  storage.set('dashboard-quest-save-v2',JSON.stringify(S));q.S=q.newState();
+  assert.equal(q.load(),true);assert.equal(q.S.pinnedProject,'forge');assert.equal(q.S.coins,777);
+  for(const bad of ['obsolete_project',42,{x:1},'__proto__']){
+    const o=JSON.parse(JSON.stringify(S));o.pinnedProject=bad;storage.set('dashboard-quest-save-v2',JSON.stringify(o));q.S=q.newState();
+    let ok;try{ok=q.load();}catch(e){ok=false;}
+    if(typeof bad==='string'&&bad!=='__proto__'){assert.equal(ok,true,'obsolete pin does not reject the hero');assert.equal(q.S.pinnedProject,null);assert.equal(q.S.xp.woodcutting,5000);}
+    else if(ok)assert.equal(q.S.pinnedProject,null,'malformed pin never survives');
+  }
 });
 console.log(tests+' regression checks passed');

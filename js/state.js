@@ -70,7 +70,9 @@ function candidateState(o) {
   if (!Object.prototype.hasOwnProperty.call(o.xp,'research') && DQ.researchXp) {
     result.xp.research = Object.keys(result.research.done).reduce((sum,id)=>sum+(result.research.done[id]&&D.TECH[id]?DQ.researchXp(D.TECH[id]):0),0);
   }
-  if (result.pinnedProject !== null && !['well', 'inn'].includes(result.pinnedProject)) throw new Error('Unknown pinned project');
+  /* A pin is only a display preference: any defined project (village, regional or relic) is kept; an unknown or obsolete
+     one is cleared rather than rejecting an otherwise valid hero. Saves rejected by the old well/inn-only rule now load. */
+  if (result.pinnedProject !== null && !(typeof result.pinnedProject === 'string' && Object.prototype.hasOwnProperty.call(D.PROJECTS || {}, result.pinnedProject))) result.pinnedProject = null;
   if (!D.TOWN[result.town]) throw new Error('Unknown town');
   if (Object.values(result.equip).some(id => id && !D.ITEMS[id])) throw new Error('Unknown equipment');
   if (result.workers.some(w => !record(w)) || result.farm.animals.some(a => !record(a) || !D.ANIMAL[a.id])) throw new Error('Invalid worker or animal');
