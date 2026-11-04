@@ -557,4 +557,10 @@ test('Emberfall has a discovery: the ashen anvil is found by mining there and it
   assert.equal(S.inv.ember_core,1,'exactly one core spent');assert.ok(S.xp.smithing>xp);
   assert.equal(q.chooseDiscovery('ashen_anvil','citadel'),false,'the choice is made once');assert.equal(S.inv.ember_core,1);
 });
+test('every recipe, gathering spot and item requirement is reachable within the level cap',()=>{
+  const {q,load}=harness();load('routes');load('adventures');const D=q.data,cap=D.XPF.length-1;
+  assert.deepEqual(Object.values(D.RECIPES).filter(r=>r.lvl>cap).map(r=>r.id),[]);
+  assert.deepEqual(Object.values(D.NODES).flat().filter(n=>n.lvl>cap).map(n=>n.id),[]);
+  assert.deepEqual(Object.values(D.ITEMS).filter(it=>it.req&&Object.values(it.req).some(v=>v>cap)).map(it=>it.id),[]);
+});
 console.log(tests+' regression checks passed');

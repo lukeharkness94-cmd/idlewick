@@ -228,7 +228,7 @@ TIERS.forEach((t, i) => PIECES.forEach(([slot, key, label, bars, off, f]) => {
   else b.def = Math.round(P * { head: .35, shield: .55, legs: .6, body: .9 }[slot]);
   const id = `${t.id}_${key}`, val = Math.round(t.base * f);
   mk(id, { name: `${t.name} ${label}`, ic: PIECE_IC[key] || PIECE_IC[slot], wtype: slot === 'weapon' ? key : undefined, col: t.col, val, type: 'gear', slot, style: slot === 'weapon' ? 'melee' : undefined, req: { [slot === 'weapon' ? 'attack' : 'defence']: t.equip }, b, tier: i });
-  addR({ id: 'smith_' + id, skill: 'smithing', tab: slot === 'weapon' ? 'Weapons' : 'Armour', name: `${t.name} ${label}`, lvl: t.bar + off, xp: Math.round(bars * 12.5 * (1 + i * .25)), t: 3000, in: { ['bar_' + t.id]: bars }, out: { [id]: 1 }, ev: 'smith' });
+  addR({ id: 'smith_' + id, skill: 'smithing', tab: slot === 'weapon' ? 'Weapons' : 'Armour', name: `${t.name} ${label}`, lvl: Math.min(99, t.bar + off), /* skills cap at 99: the astral platebody (bar 90 + 10) was uncraftable */ xp: Math.round(bars * 12.5 * (1 + i * .25)), t: 3000, in: { ['bar_' + t.id]: bars }, out: { [id]: 1 }, ev: 'smith' });
 }));
 
 /* Gear: leather (ranged armour) */
