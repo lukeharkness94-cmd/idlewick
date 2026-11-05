@@ -24,7 +24,7 @@ const FISH = {
   voideel: { len: 15, dep: 2.4, body: '#5a3a9a', belly: '#9a7ad8', tail: 'eel', glow: '#c8a8ff' }
 };
 function fish(s, sp, ox, oy, cooked) {
-  const body = rp(cooked ? mix(sp.body, '#8a4a20', .55) : sp.body), belly = rp(cooked ? mix(sp.belly, '#c88a4a', .5) : sp.belly), fin = rp(cooked ? '#7a4a2a' : mix(sp.body, '#3a2448', .25));
+  const body = rp(cooked ? mix(sp.body, '#c87a30', .62) : sp.body), belly = rp(cooked ? mix(sp.belly, '#f0c070', .55) : sp.belly), fin = rp(cooked ? '#9a5a2a' : mix(sp.body, '#3a2448', .25));
   const L = sp.len, H = sp.dep, x0 = ox + (15 - L) / 2 + 1, cy = oy + 8, x1 = x0 + L;
   if (sp.tail === 'eel') { for (let i = 0; i <= L; i++) { const y = cy + Math.round(Math.sin(i / 2.2) * 1.6); s.dot(x0 + i, y, body); s.dot(x0 + i, y + 1, i % 3 ? body : belly); } s.fix(x1, cy, EYE); for (let i = 2; i < L; i += 4) s.fix(x0 + i, cy + Math.round(Math.sin(i / 2.2) * 1.6), sp.glow); return; }
   s.ell(x0 + L * .55, cy, L * .5, H / 2 + (sp.wide ? .5 : 0), body); s.ell(x0 + L * .55, cy + H * .28, L * .4, H * .22, belly);
@@ -39,25 +39,27 @@ function fish(s, sp, ox, oy, cooked) {
   if (sp.fin === 'tall') s.poly([[x0 + L * .45, cy - H / 2], [x0 + L * .55, cy - H / 2 - 3], [x0 + L * .65, cy - H / 2]], fin);
   else if (sp.sail) s.poly([[x0 + L * .3, cy - H / 2], [x0 + L * .45, cy - H / 2 - 3], [x0 + L * .7, cy - H / 2]], fin);
   else s.poly([[x0 + L * .4, cy - H / 2], [x0 + L * .5, cy - H / 2 - 1.5], [x0 + L * .62, cy - H / 2]], fin);
-  if (sp.finlets) for (let i = 0; i < 3; i++) s.fix(x0 + 3 + i * 2, cy - H / 2, sp.finlets);
+  if (!cooked) if (sp.finlets) for (let i = 0; i < 3; i++) s.fix(x0 + 3 + i * 2, cy - H / 2, sp.finlets);
   if (sp.bill) s.line(x1, cy - 1, x1 + 4, cy - 1, rp('#3f5a74'));
   if (sp.snout) { s.dot(x1, cy, body); s.dot(x1 + 1, cy, body); }
   if (sp.wings) { s.poly([[x0 + L * .5, cy], [x0 + L * .25, cy - 5], [x0 + L * .7, cy - 1]], rp('#cdeeff')); }
   if (sp.lure) { s.line(x1 - 3, cy - H / 2, x1 - 1, cy - H / 2 - 3, rp('#5a4a2a')); s.fix(x1, cy - H / 2 - 3, '#fff6a0'); }
-  if (sp.marks === 'spots') for (let i = 0; i < 4; i++) s.fix(x0 + 3 + i * 2.6, cy - 1 + (i % 2), cooked ? body.lo : mix(sp.belly, '#ffffff', .2));
-  if (sp.marks === 'dots') for (let i = 0; i < 3; i++) s.fix(x0 + 5 + i * 2, cy - 1, body.out);
-  if (sp.marks === 'mottle') for (let i = 0; i < 4; i++) s.fix(x0 + 3 + i * 2.5, cy - 1 + (i % 2) * 2, body.lo);
-  if (sp.marks === 'scales') for (let i = 0; i < 4; i++) { s.fix(x0 + 4 + i * 2, cy - 1, body.lo); s.fix(x0 + 5 + i * 2, cy + 1, body.lo); }
+  if (!cooked) if (sp.marks === 'spots') for (let i = 0; i < 4; i++) s.fix(x0 + 3 + i * 2.6, cy - 1 + (i % 2), cooked ? body.lo : mix(sp.belly, '#ffffff', .2));
+  if (!cooked) if (sp.marks === 'dots') for (let i = 0; i < 3; i++) s.fix(x0 + 5 + i * 2, cy - 1, body.out);
+  if (!cooked) if (sp.marks === 'mottle') for (let i = 0; i < 4; i++) s.fix(x0 + 3 + i * 2.5, cy - 1 + (i % 2) * 2, body.lo);
+  if (!cooked) if (sp.marks === 'scales') for (let i = 0; i < 4; i++) { s.fix(x0 + 4 + i * 2, cy - 1, body.lo); s.fix(x0 + 5 + i * 2, cy + 1, body.lo); }
   if (sp.stripe && !cooked) s.line(x0 + 3, cy, x1 - 3, cy, null, sp.stripe);
   s.fix(x1 - 2, cy - 1, EYE); if (!cooked) s.fix(x1 - 2, cy - 2, WHITE);
   if (sp.hook) s.fix(x1, cy + 1, body.out);
   if (sp.teeth) { s.fix(x1 - 1, cy + 1, WHITE); s.fix(x1, cy, WHITE); }
   if (sp.barbel) s.fix(x1, cy + 2, fin.lo);
-  if (cooked) { s.line(x0 + 4, cy - 1, x0 + 6, cy + 1, null, body.out); s.line(x0 + 8, cy - 1, x0 + 10, cy + 1, null, body.out); }
+  if (cooked) for (const gx of [x0 + L * .35, x0 + L * .6]) s.line(Math.round(gx), cy - 1, Math.round(gx) + 1, cy + 1, null, mix(body.lo, '#3a2010', .55)); /* two neat grill marks */
 }
 function shrimp(s, cooked) { const b = rp(cooked ? '#f07a4a' : '#f0a47c'); for (let i = 0; i < 9; i++) { const a = Math.PI * (.15 + i / 11), x = 8 + Math.cos(a) * 5, y = 8 - Math.sin(a) * 4; s.ell(x, y + 1, 1.6 - i * .05, 1.4, b); } s.poly([[2, 10], [0, 12], [3, 12]], b); s.line(13, 6, 15, 2, null, b.lo); s.line(12, 6, 14, 1, null, b.lo); s.fix(12, 6, EYE); for (let i = 0; i < 3; i++) s.fix(6 + i * 2, 11, b.lo); }
 function lobster(s, cooked) { const b = rp(cooked ? '#e04a2a' : '#b8483a'); s.ell(8, 10, 2.4, 4.4, b); s.ell(8, 4.5, 2, 2, b); s.ell(4, 3, 2, 1.6, b); s.ell(12, 3, 2, 1.6, b); s.line(6, 5, 4, 4, b); s.line(10, 5, 12, 4, b); s.poly([[6, 14], [10, 14], [8, 16]], b); for (const y of [9, 11, 13]) s.line(6, y, 10, y, null, b.lo); s.fix(7, 4, EYE); s.fix(9, 4, EYE); s.line(7, 2, 5, 0, null, b.lo); s.line(9, 2, 11, 0, null, b.lo); }
-const plate = s => { s.ell(8, 12, 7, 2.6, rp('#e8e2d4')); s.ell(8, 11.6, 5.4, 1.6, rp('#f6f2ea')); };
+/* cooked food is served with a lemon wedge and a herb sprig (raw fish never have them) */
+const garnish = s => { const l = ramp('#f2d64a', { gl: .8 }); s.ell(11, 13, 2.4, 1.4, l); s.fix(11, 13, '#fff6c0'); s.fix(10, 13, '#fff6c0'); s.fix(13, 12, '#5aa84a'); s.fix(14, 12, '#5aa84a'); };
+const plate = s => { s.ell(8, 13, 7, 1.8, rp('#e8e2d4')); s.ell(8, 12.7, 5, 1, rp('#f6f2ea')); }; /* a slim oval, never a slab */
 
 /* ---------- wood: nine logs with their own bark, grain and character ---------- */
 const WOOD = {
@@ -268,7 +270,7 @@ function itemSprite(id) {
   const it = D.ITEMS[id]; if (!it) return null;
   const s = Spr(16, 16), col = it.col || '#999999';
   if (id.startsWith('raw_') && (FISH[id.slice(4)] || id === 'raw_shrimp' || id === 'raw_lobster')) { const k = id.slice(4); if (k === 'shrimp') shrimp(s); else if (k === 'lobster') lobster(s); else fish(s, FISH[k], 0, 0); return s; }
-  if (it.type === 'food' && (FISH[id] || id === 'shrimp' || id === 'lobster')) { plate(s); if (id === 'shrimp') shrimp(s, true); else if (id === 'lobster') lobster(s, true); else fish(s, FISH[id], 0, -2, true); return s; }
+  if (it.type === 'food' && (FISH[id] || id === 'shrimp' || id === 'lobster')) { if (id === 'shrimp') shrimp(s, true); else if (id === 'lobster') lobster(s, true); else fish(s, FISH[id], 0, -1, true); garnish(s); return s; }
   if (id === 'burnt') { plate(s); fish(s, { len: 11, dep: 3.4, body: '#3a322e', belly: '#5a4a3e', tail: 'fork' }, 0, -2, false); return s; }
   if (FOOD[id]) { FOOD[id](s); return s; }
   if (PRODUCE[id]) { PRODUCE[id](s); return s; }
