@@ -1955,3 +1955,24 @@ img.pxscene[src^="blob:"],img.pxscene[src*="art-completion"]{image-rendering:aut
 @media (min-width:900px){.combat-dashboard>.combat-live,.combat-dashboard>.combat-side{grid-column:auto!important}}
 @media (min-width:1800px){.combat-dashboard{grid-template-columns:minmax(0,1fr) minmax(0,1.7fr)!important}.combat-dashboard>.combat-side{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
 @media (min-width:861px){#rail{padding-top:4px!important;padding-bottom:4px!important}#rail .hub{min-height:38px;padding-top:4px;padding-bottom:4px}}
+
+/* ---------- Pixel art: crisp at whole-number scales ---------- */
+img.pxa{image-rendering:pixelated;image-rendering:crisp-edges;-ms-interpolation-mode:nearest-neighbor}
+.pxs-row{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end}
+.pxs-fig{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.pxs-fig figcaption{font-size:13px;color:var(--ink)}.pxs-fig figcaption small{display:block;color:var(--mute);font-size:11px}
+/* sprite frames swap on a stepped timeline (pixel art never tweens between frames); motion and particles stay continuous */
+.pxs-anim{position:relative;display:inline-block;width:96px;height:128px}
+.pxs-anim img{position:absolute;inset:0;opacity:0}
+.pxs-anim.idle img:nth-child(1){opacity:1}.pxs-anim.idle img:nth-child(2){animation:pxs-bob 1.6s steps(1) infinite;opacity:0}
+@keyframes pxs-bob{0%,49%{opacity:0}50%,100%{opacity:1;transform:translateY(4px)}}
+.pxs-anim.work img{animation:pxs-frame3 .9s steps(1) infinite}
+.pxs-anim.work img:nth-child(2){animation-delay:-.6s}.pxs-anim.work img:nth-child(3){animation-delay:-.3s}
+@keyframes pxs-frame3{0%,33.2%{opacity:1}33.3%,100%{opacity:0}}
+.pxs-fight{display:flex;align-items:flex-end;gap:28px;padding:4px 10px}
+.pxs-fight .hero{animation:pxs-lunge 1.6s ease-in-out infinite}
+.pxs-fight .foe{animation:pxs-hit 1.6s ease-in-out infinite}
+@keyframes pxs-lunge{0%,30%,100%{transform:translateX(0)}42%{transform:translateX(18px)}55%{transform:translateX(0)}}
+@keyframes pxs-hit{0%,40%,100%{transform:translateX(0);filter:none}44%{transform:translateX(6px);filter:brightness(2.2) saturate(0)}52%{transform:translateX(2px);filter:none}}
+@media (prefers-reduced-motion:reduce){.pxs-anim img,.pxs-fight img{animation:none!important}.pxs-anim img:first-child{opacity:1}}
+html.calm .pxs-anim img,html.calm .pxs-fight img{animation:none!important}
