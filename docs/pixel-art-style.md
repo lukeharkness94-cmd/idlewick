@@ -2,7 +2,7 @@
 
 All artwork in Idlewick is original pixel art drawn in code by `js/pixelart.js`. No image files, no generated or traced imagery, no sprite packs. This guide is the contract every sprite follows; the in-game showcase (Settings → Art showcase, page `showcase`) is its living reference.
 
-Status: the prototype set passed an **internal** quality review (described below). It has not been approved by the project owner.
+Status: **approved by the project owner** (November 2026) after reviewing the full rebuild and the showcase. The prototype set first passed the internal quality review described below.
 
 ## Canvas sizes and display
 
@@ -65,7 +65,7 @@ Reviewed at 100% zoom on desktop (1440) and phone (390), in both themes:
 5. Proportions: hero 24 × 32 against 32 × 32 creatures. Pass.
 6. Detail density: comparable across sprites; the scene's hand-placed flowers and tufts match the sprites. Pass.
 7. UI integration: the showcase sits in the normal page and panels in both themes. Pass.
-8. Warm, characterful aesthetic. Judged pass internally; needs the owner's eye.
+8. Warm, characterful aesthetic. Judged pass internally, then approved by the owner.
 
 Fixed during the review: face-covering helmet, dotted bow, stiff wolf legs, noisy carp scales (then a new carp shape), floating trees (contact shadows), stray hair pixels.
 
