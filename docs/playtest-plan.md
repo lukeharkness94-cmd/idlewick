@@ -36,3 +36,17 @@ Compare against `docs/economy-evidence.md` (a steady gatherer reaches Hero 26 in
 - Ambience volume defaults and whether any region's soundscape becomes irritating over an hour.
 - The leather coif and other headgear until fitted equipment art arrives.
 - Willowbrook projects added in this update show no painted change on the landscape until their art exists.
+
+## Session script for the reliability build (prepared, not yet run)
+
+No human sessions have been run for this build. These are the things a scripted run cannot judge; ask testers to think aloud and note the time at each step.
+
+1. **First ten minutes, fresh hero.** Note the time to the first task, the first quest claim, the first purchase or upgrade, the first fight and the first restoration. Mark every moment they hesitate, open a page and back out, or close a notification without reading it.
+2. **Pin and reload.** Pin a village project other than the well or inn, close the game, reopen and press Continue. (Earlier builds refused to load such saves.)
+3. **A keepsake.** Give a tester a save holding the Star shard or the Miller's Bell and ask them to tidy their inventory. Do they understand why it has no Sell button?
+4. **Farming at a glance.** Plant a crop and leave the Farming page open. Ask them when it will be ready and whether the picture matches.
+5. **An adventure chapter.** From a save at The Bramble Mill, ask them to continue the quest without help. Does Continue take them where they expect? Do the quest-giver's notes change which weapon they pick?
+6. **Combat pacing.** From a save at Hero 10 and combat about 5, ask whether the catch-up bonus is noticeable and whether Grubnash feels close.
+7. **Listening (needs a person).** Ten minutes in two regions with ambience on. Is anything repetitive, too loud or fatiguing? Check the master, music, effects and ambience sliders one at a time, and mute.
+
+Record answers against the 1 to 5 questions above. Do not merge scripted-run timings with human results.
