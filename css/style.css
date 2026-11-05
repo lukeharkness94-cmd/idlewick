@@ -1906,3 +1906,5 @@ p.keepsake-note{flex-basis:100%;color:var(--mute)}
 .study-note .gh b{color:var(--brass-hi)}
 /* painted landscapes (delivered as blob URLs) are never pixelated; only the old pixel scenes are */
 img.pxscene[src^="blob:"],img.pxscene[src*="art-completion"]{image-rendering:auto}
+.shop-later{display:flex;gap:6px;align-items:baseline;margin:6px 0 0;color:var(--mute);font-size:13px}.shop-later .ic{width:14px;height:14px;align-self:center}
+.style-note{display:flex;gap:8px;align-items:flex-start;margin:10px 0 0;font-size:13px;color:var(--mute);line-height:1.45}.style-note .ic{width:15px;height:15px;flex:none;margin-top:2px}

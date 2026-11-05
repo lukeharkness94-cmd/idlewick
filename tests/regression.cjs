@@ -476,7 +476,13 @@ test('combat level shows its progress and catches up when it trails the Hero lev
   /* no bonus while combat keeps pace; +15% per level behind, capped */
   const base=q.xpMult('strength');assert.equal(q.combatCatchUp(),0);
   S.xp.fishing=D.XPF[40];S.xp.woodcutting=D.XPF[40];const behind=q.advLvl()-q.combatLvl();assert.ok(behind>0);
-  assert.equal(q.combatCatchUp(),Math.min(2,.15*behind));assert.ok(q.xpMult('strength')>base*1.5,'combat skills learn faster while behind');
+  assert.ok(Math.abs(q.combatCatchUp()-Math.min(2,.15*(q.advLvl()-q.combatExact())))<1e-9);
+  /* the chip's permanent bonus never includes catch-up, and no percentage shown for progress exceeds 100 */
+  assert.ok(q.xpBonusBase('strength')<q.xpMult('strength'));assert.ok(Math.abs(q.xpBonusBase('fishing')-q.xpMult('fishing'))<1e-12);
+  for(const sk of ['attack','strength','defence','hitpoints']){const p=q.pctNext(sk);assert.ok(p>=0&&p<=100);}
+  const cp=q.combatProgress();assert.ok(cp.pct>=0&&cp.pct<100);
+  /* catch-up eases off smoothly: a little combat XP lowers it a little, never in a jump */
+  const before=q.combatCatchUp();S.xp.strength+=50;const after=q.combatCatchUp();assert.ok(after<=before&&before-after<.05);assert.ok(q.xpMult('strength')>base*1.5,'combat skills learn faster while behind');
   const fish=q.xpMult('fishing');assert.ok(Math.abs(fish-(1+.005*(q.lvl('fishing')-1))*(1+.0025*(q.advLvl()-1)))<1e-9,'gathering skills are unaffected');
 });
 test('every pinnable project survives save, reload, export and import (browser and desktop storage)',()=>{
@@ -562,5 +568,27 @@ test('every recipe, gathering spot and item requirement is reachable within the 
   assert.deepEqual(Object.values(D.RECIPES).filter(r=>r.lvl>cap).map(r=>r.id),[]);
   assert.deepEqual(Object.values(D.NODES).flat().filter(n=>n.lvl>cap).map(n=>n.id),[]);
   assert.deepEqual(Object.values(D.ITEMS).filter(it=>it.req&&Object.values(it.req).some(v=>v>cap)).map(it=>it.id),[]);
+});
+test('progression gates are sensible: basic leather, the Ranged quest, shop stock and unlock chains',()=>{
+  const {q,load}=harness();load('routes');load('adventures');const S=q.S,D=q.data;
+  /* basic leather is wearable without Ranged; finer hides still need it */
+  S.inv.leather_vest=1;assert.equal(q.skillUnlocked('ranged'),false);assert.equal(q.equipItem('leather_vest').ok,true,'leather body wearable at Defence 1');
+  S.inv.frost_vest=1;assert.equal(q.equipItem('frost_vest').ok,false);
+  /* the Ranged quest needs only Mossbarrow and Hero 18, not an unrelated side quest */
+  S.towns.mossbarrow={visited:true,boss:false};S.towns.willowbrook.boss=true;while(q.advLvl()<18)S.xp.fishing+=2000;
+  assert.equal(q.questState(D.QM.mq_ranged),'new','A Hunter’s Bow is available at Hero 18 in Mossbarrow');
+  /* gear for a skill you cannot use is not sold, with a clear reason */
+  const coins=S.coins=5000;assert.equal(q.lockedSkillFor('staff_normal'),'magic');q.buy('staff_normal');assert.equal(S.coins,coins);assert.ok(!S.inv.staff_normal);
+  assert.match(q.skillTeacher('magic'),/Archivist Merrow in Saltmere/);
+  /* bows and staves never drop before their skill is learned */
+  S.town='willowbrook';S.xp.attack=S.xp.strength=S.xp.defence=S.xp.hitpoints=D.XPF[40];S.inv.bread=5000;const kills=S.stats.kill;
+  q.startAct('fight','goblin',{quiet:true});q.simulate(6*3600000);assert.ok(S.stats.kill-kills>2000,'thousands of goblins fought');
+  assert.ok(!q.have('staff_normal')&&!q.have('bow_normal'),'no bows or staves drop before Ranged or Magic is learned');
+  /* every skill-teaching quest is reachable: its requirement chain never needs the skill it teaches, and every link exists */
+  for(const mq of D.QUESTS.filter(x=>x.main)){const seen=new Set();let cur=mq;
+    while(cur&&cur.req){assert.ok(D.QM[cur.req],mq.id+' requires a missing quest '+cur.req);assert.ok(!seen.has(cur.req),mq.id+' has a circular requirement');seen.add(cur.req);cur=D.QM[cur.req];
+      assert.ok(!cur.main||cur.unlocks!==mq.unlocks);}
+    for(const o of mq.obj){if(o.ev==='kill'||o.ev==='boss')assert.ok(D.MON[o.key],mq.id+' targets a real creature');if(o.ev==='deliver')assert.ok(D.ITEMS[o.key],mq.id+' delivers a real item');}
+  }
 });
 console.log(tests+' regression checks passed');

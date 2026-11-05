@@ -82,7 +82,9 @@ UI.shopPreview = id => {
 };
 UI.V.shop = () => {
   const tab = UI.shopTab, buying = tab === 'buy', qty = UI.shopQty;
-  const ids = buying ? D.SHOPS[S().town] : Object.keys({ ...S().inv, ...S().bank }).filter(DQ.sellable);
+  const stock = buying ? D.SHOPS[S().town] : [], held = stock.filter(id => DQ.lockedSkillFor(id));
+  const ids = buying ? stock.filter(id => !DQ.lockedSkillFor(id)) : Object.keys({ ...S().inv, ...S().bank }).filter(DQ.sellable);
+  const later = [...new Set(held.map(DQ.lockedSkillFor))].map(sk => `<p class="shop-later">${ico('lock')} <b>${D.SK[sk].name}</b> gear is sold here once you learn ${D.SK[sk].name}. ${esc(DQ.skillTeacher(sk))}.</p>`).join('');
   const id = ids.includes(UI.shopSelected[tab]) ? UI.shopSelected[tab] : ids[0], it = id && D.ITEMS[id];
   UI.shopSelected[tab] = id;
   const owned = it ? DQ.have(id) : 0, tool = it && it.type === 'tool', count = tool ? 1 : qty;
@@ -93,7 +95,7 @@ UI.V.shop = () => {
       <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} ${disabled ? 'disabled' : ''}>${tool && owned && buying ? 'Already owned' : (buying ? 'Buy' : 'Sell')+' ×'+(buying?count:Math.min(count,owned))} ${tool && owned && buying ? '' : UI.money(cost)}</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all ${UI.money(it.val * owned)}</button>` : ''}</div>
       ${buying && S().coins < cost ? `<p class="bad">Need ${UI.money(cost - S().coins)} more.</p>` : ''}
       </div><div class="shop-comparison">${UI.compareHtml ? UI.compareHtml(id) : ''}</div></div>` : '<p>Nothing to sell. Gather resources or visit your bank.</p>'}
-    <section data-reference="true" class="shop-help"><h3>About this shop</h3><p>Tools work automatically. Equipment must be equipped from Inventory after buying. Selling draws from your backpack first, then the bank. Equipped items are kept.</p></section></section></div>`;
+    ${later}<section data-reference="true" class="shop-help"><h3>About this shop</h3><p>Tools work automatically. Equipment must be equipped from Inventory after buying. Selling draws from your backpack first, then the bank. Equipped items are kept.</p></section></section></div>`;
 };
 
 /* ---------- Quests ---------- */

@@ -33,7 +33,7 @@ const B = UI.B = {
   toNext: (e, a) => set(e, DQ.lvl(a) >= 99 ? 'Maxed' : `${fmt(D.XPF[DQ.lvl(a) + 1] - S().xp[a])} XP to ${DQ.lvl(a) + 1}`),
   xpbar: (e, a) => { const w = DQ.pctNext(a).toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; },
   xpline: (e, a) => set(e, `${fmt(S().xp[a])} XP`),
-  bonus: (e, a) => set(e, `+${Math.round((DQ.xpMult(a) - 1) * 100)}% XP`),
+  bonus: (e, a) => { const c = ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].includes(a) ? DQ.combatCatchUp() : 0; set(e, `+${Math.round((DQ.xpBonusBase(a) - 1) * 100)}% XP${c > 0 ? ` · catch-up +${Math.round(c * 100)}%` : ''}`); },
   coins: e => set(e, fmt(S().coins)),
   combat: e => set(e, DQ.combatLvl()),
   combatbar: e => { const w = DQ.combatProgress().pct.toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; },
@@ -115,7 +115,7 @@ DQ.tips.item = id => {
 DQ.tips.skill = sk => {
   const s = D.SK[sk], l = DQ.lvl(sk); if (!DQ.skillUnlocked(sk)) return `<b>${s.name}</b><div class="bad">${DQ.unlockHow(sk)} to learn it.</div>${s.quest ? `<div class="dim">${D.QM[s.quest].giver}, ${D.TOWN[D.QM[s.quest].town].name}</div>` : ''}`;
   const perks = D.GATHER_SKILLS.includes(sk) ? D.PERKS.map(p => `<div class="${l >= p.lvl ? 'ok' : 'dim'}">${l >= p.lvl ? '✓' : '○'} ${p.lvl}: ${p.name} (${p.speed ? Math.round(p.speed * 100) + '% faster' : Math.round(p.dbl * 100) + '% double yield'})</div>`).join('') : '';
-  return `<b style="color:${s.col}">${s.name} ${l}</b><div>${fmt(S().xp[sk])} XP · +${Math.round((DQ.xpMult(sk) - 1) * 100)}% XP bonus</div><div class="dim">Each skill level adds +0.5% XP, each Hero level +0.25%.</div>${perks}`;
+  return `<b style="color:${s.col}">${s.name} ${l}</b><div>${fmt(S().xp[sk])} XP · +${Math.round((DQ.xpBonusBase(sk) - 1) * 100)}% XP bonus${['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].includes(sk) && DQ.combatCatchUp() > 0 ? ` · combat catch-up +${Math.round(DQ.combatCatchUp() * 100)}% while your combat level trails your Hero level` : ''}</div><div class="dim">Each skill level adds +0.5% XP, each Hero level +0.25%.</div>${perks}`;
 };
 
 /* ---------- Page chrome ---------- */

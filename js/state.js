@@ -182,7 +182,11 @@ DQ.combatProgress = () => {
   return { lvl, next, pct, best: routes[0] || null, routes };
 };
 /* Catch-up: while your combat level trails your Hero level, combat skills learn faster (+15% per level behind, up to +200%). */
-DQ.combatCatchUp = () => Math.min(2, .15 * Math.max(0, DQ.advLvl() - DQ.combatLvl()));
+/* fractional combat level (skills' progress counted), so the catch-up bonus eases off smoothly instead of in steps */
+DQ.combatExact = () => { const L = {}; ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].forEach(k => { L[k] = DQ.lvl(k) + (DQ.lvl(k) >= 99 ? 0 : DQ.pctNext(k) / 100); }); return combatFrom(L); };
+DQ.combatCatchUp = () => Math.min(2, .15 * Math.max(0, DQ.advLvl() - DQ.combatExact()));
+/* the permanent XP bonus (skill and Hero levels, buffs), shown on skill chips; catch-up is shown on its own */
+DQ.xpBonusBase = sk => DQ.xpMult(sk) / (COMBAT_SKILLS.has(sk) ? 1 + DQ.combatCatchUp() : 1);
 DQ.pctNext = sk => { const l = DQ.lvl(sk); if (l >= 99) return 100; const a = D.XPF[l], b = D.XPF[l + 1]; return clamp((DQ.S.xp[sk] - a) / (b - a) * 100, 0, 100); };
 
 /* ---------- Items ---------- */

@@ -241,7 +241,7 @@ const LEATHER = [
 const LPIECES = [['head', 'coif', 'coif', 2, 0, .35, 'helm'], ['legs', 'chaps', 'chaps', 3, 3, .6, 'legs'], ['body', 'vest', 'body', 4, 6, .9, 'body']];
 LEATHER.forEach((t, i) => LPIECES.forEach(([slot, key, label, n, off, f, ic]) => {
   const id = `${t.id}_${key}`;
-  mk(id, { name: `${t.name} ${label}`, ic, col: t.col, val: Math.round(t.base * (f + .4)), type: 'gear', slot, req: { ranged: t.equip }, b: { def: Math.round(t.P * f * .8), rng: Math.round(t.P * f * .45) }, tier: i, lth: 1 });
+  mk(id, { name: `${t.name} ${label}`, ic, col: t.col, val: Math.round(t.base * (f + .4)), type: 'gear', slot, req: i === 0 ? { defence: 1 } : { ranged: t.equip }, b: { def: Math.round(t.P * f * .8), rng: Math.round(t.P * f * .45) }, tier: i, lth: 1 }); /* basic leather is everyone's first armour; finer hides need Ranged */
   addR({ id: 'craft_' + id, skill: 'crafting', tab: 'Leather', name: `${t.name} ${label}`, lvl: t.craft + off, xp: t.xp * n, t: 2600, in: { [t.hide]: n }, out: { [id]: 1 }, ev: 'craft' });
 }));
 
@@ -489,7 +489,7 @@ D.QUESTS.unshift(
     'Hettie has sewn every coat in Mossbarrow for fifty years, but her hands have stiffened. Bring her the makings of one last lesson and she will teach you to sew leather, string bows and set gems, so the village is not left in rags.',
     [{ ev: 'deliver', key: 'cowhide', n: 8, label: 'Bring 8 cowhides to practise on' }, { ev: 'deliver', key: 'feather', n: 20, label: 'Bring 20 feathers for her quills' }, { ev: 'chop', key: 'birch', n: 10, label: 'Chop 10 birch logs for her frames' }],
     { xp: { crafting: 150 }, coins: 150, items: { cowhide: 6 } }),
-  MQ('mq_ranged', 'ranged', 'mossbarrow', 'A Hunter’s Bow', 'Hunter Wynn', 18, 'boar_hunt',
+  MQ('mq_ranged', 'ranged', 'mossbarrow', 'A Hunter’s Bow', 'Hunter Wynn', 18, null,
     'Wynn will not take you after Old Tusk with only a sword. “A hunter strikes from a distance,” he says. Help him carve your first bow and fletch your first arrows, and he will teach you to shoot.',
     [{ ev: 'deliver', key: 'log_birch', n: 10, label: 'Bring 10 birch logs for the bow stave' }, { ev: 'deliver', key: 'feather', n: 40, label: 'Bring 40 feathers to fletch arrows' }, { ev: 'kill', key: 'boar', n: 6, label: 'Track down 6 wild boars as practice' }],
     { xp: { ranged: 150 }, items: { bow_normal: 1, arrow_bronze: 150 } }),

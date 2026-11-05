@@ -440,12 +440,14 @@ function kill(m) {
   let extraCoins = 0;
   for (const [id, [a, b], p] of m.drops) {
     const guaranteed = first && m.boss.first === id;
+    /* weapons and armour for a skill you have not learned yet (bows before Ranged, staves before Magic) do not drop */
+    if (!guaranteed && D.ITEMS[id] && (D.ITEMS[id].type === 'gear' || D.ITEMS[id].type === 'ammo') && DQ.lockedSkillFor(id)) continue;
     if (!(guaranteed || chance(Math.min(1, p * DQ.buffMult('luck'))))) continue;
     const n = rnd(a, b), rar = D.rarityOf(guaranteed ? 0 : p); got.push(id);
     if (id === 'coin_pouch') { const cc = Math.round(rnd(m.coins[0] + 5, m.coins[1] * 3 + 10) * DQ.coinMult()); extraCoins += cc; drops.push({ id, n: cc, rar, coins: true }); loot.push(`a pouch of ${fmt(cc)} coins`); continue; }
     if (id === 'treasure_chest') {
       const cc = Math.round((rnd(m.coins[1] * 5, m.coins[1] * 12) + 50) * DQ.coinMult()); extraCoins += cc; const gem = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(gem); S().stats.rare++;
-      const gl = D.TOWN_GEAR[m.town] || [], gi = gl.length && chance(.35) ? DQ.pick(gl) : null; if (gi) DQ.grant(gi);
+      const gl = (D.TOWN_GEAR[m.town] || []).filter(g => !DQ.lockedSkillFor(g)), gi = gl.length && chance(.35) ? DQ.pick(gl) : null; if (gi) DQ.grant(gi);
       drops.push({ id, n: cc, rar, coins: true }, { id: gem, n: 1, rar: D.RARITY[2] }); if (gi) drops.push({ id: gi, n: 1, rar: D.RARITY[3] });
       loot.push(`a treasure chest (${fmt(cc)} coins, ${itemName(gem).toLowerCase()}${gi ? ', ' + itemName(gi).toLowerCase() : ''})`);
       DQ.notify({ kind: 'loot', key: 'chest', icon: 'pouch', col: '#ffb84a', title: 'Treasure chest!', text: `${fmt(cc)} coins, a ${itemName(gem).toLowerCase()}${gi ? ' and ' + itemName(gi) : ''}.`, sound: 'gem', burst: true });
@@ -502,8 +504,13 @@ DQ.travel = id => {
 };
 
 /* ---------- Shop ---------- */
+/* gear for a skill you have not learned yet (Ranged, Magic) is not sold until you can use it */
+DQ.lockedSkillFor = id => { const it = D.ITEMS[id]; return it && it.req ? Object.keys(it.req).find(k => D.SK[k] && !DQ.skillUnlocked(k)) || null : null; };
+DQ.skillTeacher = sk => { const s = D.SK[sk]; if (!s) return ''; const q = s.quest && D.QM[s.quest];
+  return q ? `${q.giver} in ${D.TOWN[q.town].name} teaches it (“${q.name}”, from Hero ${q.adv})` : s.actionReq ? DQ.unlockHow(sk) : `It unlocks at Hero level ${s.unlock}`; };
 DQ.buy = (id, qty = 1) => {
   const it = D.ITEMS[id]; let price = it.buy * qty;
+  const lock = DQ.lockedSkillFor(id); if (lock) return DQ.toast(`Learn ${D.SK[lock].name} first. ${DQ.skillTeacher(lock)}.`, true);
   if (it.type === 'tool') { if (DQ.have(id)) return DQ.toast('You already own that', true); qty = 1; price = it.buy; }
   if (S().coins < price) return DQ.toast('Not enough coins', true);
   S().coins -= price; DQ.give(id, qty); S().stats.bought += qty; if (it.type === 'tool') S().stats.tools++;
