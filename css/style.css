@@ -1908,3 +1908,50 @@ p.keepsake-note{flex-basis:100%;color:var(--mute)}
 img.pxscene[src^="blob:"],img.pxscene[src*="art-completion"]{image-rendering:auto}
 .shop-later{display:flex;gap:6px;align-items:baseline;margin:6px 0 0;color:var(--mute);font-size:13px}.shop-later .ic{width:14px;height:14px;align-self:center}
 .style-note{display:flex;gap:8px;align-items:flex-start;margin:10px 0 0;font-size:13px;color:var(--mute);line-height:1.45}.style-note .ic{width:15px;height:15px;flex:none;margin-top:2px}
+/* "Ready to make" is a filter switch, visibly separate from the category tabs */
+.recipe-categories{align-items:center}
+.filter-sep{width:1px;align-self:stretch;min-height:24px;background:var(--line);margin:0 4px}
+.filter-toggle{display:inline-flex;align-items:center;gap:8px;padding:5px 10px 5px 6px;border-radius:999px;border:1px dashed var(--line2);background:transparent;color:var(--mute);font:inherit;font-size:13px;cursor:pointer}
+.filter-toggle b{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.filter-toggle .ft-track{position:relative;width:28px;height:16px;border-radius:999px;background:var(--line);transition:background .2s}
+.filter-toggle .ft-knob{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--panel);box-shadow:0 1px 2px #0005;transition:transform .2s}
+.filter-toggle.on{border-style:solid;border-color:var(--good);color:var(--ink)}
+.filter-toggle.on b{color:var(--good)}
+.filter-toggle.on .ft-track{background:var(--good)}
+.filter-toggle.on .ft-knob{transform:translateX(12px)}
+.filter-toggle:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.filter-toggle .ft-track,.filter-toggle .ft-knob{transition:none}}
+.illustrated-card.spotlight{animation:spotlight 2.4s ease-out}
+@media (prefers-reduced-motion:reduce){.illustrated-card.spotlight{animation:none;box-shadow:0 0 0 2px var(--brass)}}
+/* travel: where you are, and a clear way to go */
+.travel-controls .here-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--brass) 14%,var(--panel2));color:var(--ink)}
+.travel-controls .here-chip .ic{width:16px;height:16px}
+.travel-help{margin:2px 0 8px;font-size:13px}
+.towninfo .travel-go{margin:8px 0 4px}
+.item-uses{margin:6px 0 4px;font-size:13px;color:var(--mute);line-height:1.45}
+.tip .uses,.uses{margin-top:4px;color:var(--mute);font-size:12px}
+
+/* ---------- Density at 100% zoom (playtest: the game read best at ~75% zoom) ----------
+   Not a blanket 25% shrink: body text and controls step down a size, panel padding and gaps tighten, the HUD and
+   bottom bar get shorter. Artwork, the 208px rail and touch targets on phones keep their sizes. */
+@media (min-width:861px){
+  body{font-size:15px;line-height:1.42}
+  .panel{padding:12px 14px}
+  .panel h2,.phead h2{font-size:17px}
+  .phead{margin-bottom:8px}
+  main,#view{gap:10px}
+  .btn{font-size:14px;padding:4px 11px;min-height:32px}
+  .btn.sm{font-size:13px}
+  #hud.panel,.hud{padding:6px 12px}
+  .illustrated-choices{gap:7px}
+  .illustrated-card b{font-size:14px}
+  .tab,.stab,.hub{font-size:14px}
+  .lesson,.tut,.skill-lesson{padding:10px 14px}
+}
+/* combat page: two stable columns that keep their reading order at any width or zoom */
+.combat-dashboard{grid-auto-rows:auto!important;grid-auto-flow:row!important}
+@media (min-width:900px){.combat-dashboard{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)!important}}
+.combat-dashboard>.combat-live,.combat-dashboard>.combat-side{display:flex;flex-direction:column;gap:10px;min-width:0}
+@media (min-width:900px){.combat-dashboard>.combat-live,.combat-dashboard>.combat-side{grid-column:auto!important}}
+@media (min-width:1800px){.combat-dashboard{grid-template-columns:minmax(0,1fr) minmax(0,1.7fr)!important}.combat-dashboard>.combat-side{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}}
+@media (min-width:861px){#rail{padding-top:4px!important;padding-bottom:4px!important}#rail .hub{min-height:38px;padding-top:4px;padding-bottom:4px}}

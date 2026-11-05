@@ -61,4 +61,35 @@ UI.render = fresh => {
 };
 /* moving through the main menus is a fresh start, not a detour */
 const hub0 = UI.DO.hub; if (hub0) UI.DO.hub = (...a) => { UI.returnTo = null; return hub0(...a); };
+
+/* ---------- What a material is for ----------
+   Built from the real recipes, village projects and quests, so it never goes stale. Shown in the item detail panel,
+   the backpack selection bar and tooltips (not on the inventory cards themselves), with one route to a recipe that uses it. */
+const usesCache = new Map();
+const TAB_USE = { Bars: 'bars', Weapons: 'weapons', Armour: 'armour', Leather: 'leather armour', Bows: 'bows', Staves: 'staves', Arrows: 'ammunition', Jewellery: 'jewellery', Potions: 'potions' };
+DQ.itemUses = id => {
+  if (usesCache.has(id)) return usesCache.get(id);
+  const out = [], recipes = Object.values(D.RECIPES || {}).filter(r => r.in && r.in[id]).sort((a, b) => a.lvl - b.lvl);
+  const bySkill = {};
+  recipes.forEach(r => { const k = D.SK[r.skill] ? D.SK[r.skill].name : r.skill; (bySkill[k] = bySkill[k] || new Set()).add(TAB_USE[r.tab] || (r.skill === 'cooking' ? 'meals' : (r.tab || '').toLowerCase())); });
+  Object.entries(bySkill).forEach(([k, set]) => out.push(`${k} (${[...set].filter(Boolean).slice(0, 3).join(', ')})`));
+  if ((D.CROPS || []).some(c => 'seed_' + c.id === id)) out.push('Farming (planting)');
+  const it = D.ITEMS[id]; if (it && it.heal) out.push(`Eating (heals ${it.heal})`);
+  if (id === 'rune') out.push('Magic (spell runes)');
+  const proj = Object.values(D.PROJECTS || {}).filter(p => p.cost && p.cost[id]); if (proj.length) out.push(`Restoration (${proj.slice(0, 2).map(p => p.name.toLowerCase()).join(', ')})`);
+  const quests = (D.QUESTS || []).filter(q => q.obj.some(o => o.ev === 'deliver' && o.key === id)); if (quests.length) out.push(`Quests (${quests.length})`);
+  const r = { list: out, recipe: recipes.find(r => DQ.skillUnlocked(r.skill)) || recipes[0] || null };
+  usesCache.set(id, r); return r;
+};
+const usesLine = id => { const u = DQ.itemUses(id); return u.list.length ? `Used for: ${u.list.join(' · ')}` : ''; };
+const tip0 = DQ.tips.item;
+DQ.tips.item = id => { const h = tip0(id), line = usesLine(id); return h && line ? h + `<div class="uses">${esc(line)}</div>` : h; };
+const detail1 = UI.detail;
+UI.detail = (id, from) => {
+  const h = detail1(id, from), it = id && D.ITEMS[id]; if (!it || it.slot) return h;
+  const u = DQ.itemUses(id), line = usesLine(id); if (!line) return h;
+  const r = u.recipe, go = r ? `<button class="btn sm" data-do="userecipe" data-a="${r.id}">${ico('arrow')} ${esc(D.SK[r.skill].name)}: ${esc(r.name)}</button>` : '';
+  return h.replace(/<\/div>\s*$/, `<p class="item-uses">${esc(line)}</p>${go}</div>`);
+};
+UI.DO.userecipe = id => { const r = D.RECIPES[id]; if (!r) return; UI.returnTo = { page: UI.view, label: titleOf(UI.view) }; UI.focusTask ? UI.focusTask(D.SK[r.skill].page, r.id, r.tab, r.skill) : go(D.SK[r.skill].page); };
 })();

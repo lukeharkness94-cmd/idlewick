@@ -7,11 +7,14 @@
     frame = requestAnimationFrame(() => {
       const grid = document.querySelector('.combat-dashboard');
       if (!grid) return;
-      const wide = matchMedia('(min-width:1100px)').matches;
-      const gap = parseFloat(getComputedStyle(grid).rowGap) || 14;
-      for (const card of grid.children) {
-        card.style.gridRowEnd = wide ? `span ${Math.ceil((card.offsetHeight + gap) / (8 + gap))}` : '';
+      /* Two stable columns instead of height-based packing: the fight (live) on the left, everything else stacked in
+         reading order on the right. Cards no longer jump between positions when the window is resized or zoomed. */
+      if (!grid.querySelector(':scope > .combat-side')) {
+        const side = document.createElement('div'); side.className = 'combat-side';
+        for (const card of [...grid.children]) if (!card.classList.contains('combat-live')) side.append(card);
+        grid.append(side);
       }
+      for (const card of grid.querySelectorAll(':scope > *')) card.style.gridRowEnd = '';
     });
   };
   /* Keep related status with its action, independent of the choice list height. */

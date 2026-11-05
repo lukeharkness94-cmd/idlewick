@@ -38,6 +38,14 @@ function unlockText(sk, from, to) {
   const list = []; for (let l = from + 1; l <= to; l++) ((D.UNL[sk] || {})[l] || []).forEach(n => list.push(n));
   return list.length ? 'Unlocked: ' + list.join(', ') + '.' : '';
 }
+/* a level-up note opens what it unlocked: the new recipe in its own category, or the new gathering spot, highlighted */
+function levelAction(sk, from, to) {
+  const sd = D.SK[sk], recipe = (D.RLIST[sk] || []).filter(r => r.lvl > from && r.lvl <= to).sort((a, b) => b.lvl - a.lvl)[0];
+  const node = !recipe && Object.values(D.NODES || {}).flat().filter(n => n.skill === sk && n.lvl > from && n.lvl <= to && n.town === S().town).sort((a, b) => b.lvl - a.lvl)[0];
+  const target = recipe || node;
+  if (target && DQ.ui && DQ.ui.focusTask) return { label: `Open ${target.name}`, fn: () => DQ.ui.focusTask(sd.page, target.id, recipe ? recipe.tab : null, sk) };
+  return { label: `Open ${sd.name}`, fn: () => DQ.go(sd.page) };
+}
 function onLevel(sk, from, to) {
   const sd = D.SK[sk];
   if (sk === 'hitpoints') S().hp += to - from;
@@ -46,12 +54,12 @@ function onLevel(sk, from, to) {
   const unlockedDetails = details.slice();
   if (!details.length) {
     const next = Object.keys(D.UNL[sk] || {}).map(Number).filter(level => level > to).sort((a,b) => a-b)[0];
-    details.push(`Experience bonus is now +${Math.round((DQ.xpMult(sk) - 1) * 100)}%.`);
+    details.push(`Experience bonus is now +${Math.round(((DQ.xpBonusBase ? DQ.xpBonusBase(sk) : DQ.xpMult(sk)) - 1) * 100)}%.`);
     if (next) details.push(`Next at level ${next}: ${D.UNL[sk][next].join(', ')}.`);
   }
   if (DQ.sim.on) DQ.sim.levels.push([sk, to]);
   else { DQ.log(`${sd.name} level ${to} reached.`, 'quest'); DQ.emit('levelup', sk, to); }
-  DQ.notify({ kind: 'level', key: 'lvl:' + sk, page: sd.page, skill: sk, from, to, unlocks: unlockedDetails, icon: sk, col: sd.col, title: `${sd.name} level ${to}!`, text: details.join(' '), action: { label: `Open ${sd.name}`, fn: () => DQ.go(sd.page) }, sound: 'level', ttl: 14000, burst: true });
+  DQ.notify({ kind: 'level', key: 'lvl:' + sk, page: sd.page, skill: sk, from, to, unlocks: unlockedDetails, icon: sk, col: sd.col, title: `${sd.name} level ${to}!`, text: details.join(' '), action: levelAction(sk, from, to), sound: 'level', ttl: 14000, burst: true });
   DQ.achDirty = true; checkQuests(); DQ.emit('lvl');
 }
 function onAdv(from, to) {

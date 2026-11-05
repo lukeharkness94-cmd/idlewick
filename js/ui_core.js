@@ -183,10 +183,18 @@ UI.V.gather = sk => {
   return UI.taskPanel(sk,D.SK[sk].name,kind,choices,{fish:'Fish',wood:'Chop',mine:'Mine',thieve:'Pickpocket'}[kind])+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress &amp; tools</h3>${UI.skillHero(sk,UI.toolLine(sk))}</section>`;
 };
 
+/* open a page with one card chosen, in its category, scrolled into view and briefly highlighted */
+UI.focusTask = (page, id, tab, sk) => {
+  if (tab) { UI.tab[sk || page] = tab; UI.tab[(sk || page) + 'ready'] = false; }
+  UI.taskChoice[page] = id; UI.spot = { id, until: Date.now() + 2600 }; DQ.go(page);
+  setTimeout(() => { const el = document.querySelector(`.illustrated-card[data-b="${id}"]`); if (!el) return;
+    el.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); el.focus({ preventScroll: true }); }, 80);
+};
+
 /* ---------- Recipe pages ---------- */
 UI.V.recipes = sk => {
   const list=D.RLIST[sk],tabs=[...new Set(list.map(r=>r.tab))],tab=UI.tab[sk]=tabs.includes(UI.tab[sk])?UI.tab[sk]:tabs[0],only=UI.tab[sk+'ready'];
-  UI.taskToolbar[sk]=`<div class="recipe-categories">${tabs.map(t=>`<button class="chip ${t===tab?'on':''}" data-do="tab" data-a="${sk}" data-b="${t}">${t}</button>`).join('')}<button class="chip ${only?'on':''}" data-do="readyonly" data-a="${sk}">Ready to make</button></div>`;
+  UI.taskToolbar[sk]=`<div class="recipe-categories">${tabs.map(t=>`<button class="chip ${t===tab?'on':''}" data-do="tab" data-a="${sk}" data-b="${t}">${t}</button>`).join('')}<span class="filter-sep" aria-hidden="true"></span><button class="filter-toggle ${only?'on':''}" role="switch" aria-checked="${only?'true':'false'}" data-do="readyonly" data-a="${sk}" data-tip="text:Show only recipes you have the level and ingredients for"><span class="ft-track" aria-hidden="true"><span class="ft-knob"></span></span><span>Ready to make</span><b>${only?'On':'Off'}</b></button></div>`;
   const choices=list.map(r=>{const outId=Object.keys(r.out)[0],it=D.ITEMS[outId];return {id:r.id,name:r.name,artKind:'item',artId:outId,visible:r.tab===tab&&(!only||DQ.canMake(r)),locked:DQ.lvl(sk)<r.lvl,blocked:DQ.lvl(sk)<r.lvl||!DQ.canMake(r),reason:DQ.lvl(sk)<r.lvl?`Requires ${D.SK[sk].name} ${r.lvl}`:'Gather the missing ingredients first.',caption:`Level ${r.lvl} · ${UI.statLine(it.b)||`${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`}`,
     info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}</p><div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>`<span class="ingredient ${DQ.have(id)>=n?'':'bad'}">${DQ.itemIco(D.ITEMS[id])}<span>${esc(D.ITEMS[id].name)} <b data-b="count:${id}"></b> / ${n}</span>${DQ.have(id)>=n||!UI.routeChip?'':UI.routeChip(id)}</span>`).join('')}</div>`};});
   return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'?'Make':'Craft')+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress</h3>${UI.skillHero(sk)}</section>`;

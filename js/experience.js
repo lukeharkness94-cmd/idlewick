@@ -32,6 +32,8 @@ UI.V.combat=()=>{
 const render=UI.render;
 UI.render=fresh=>{
  render(fresh);
+ /* a focused card (from a level-up note) keeps its highlight across re-renders until it has played */
+ const sp=UI.spot;if(sp){if(Date.now()>sp.until)UI.spot=null;else{const el=document.querySelector(`.illustrated-card[data-b="${sp.id}"]`);if(el)el.classList.add('spotlight');}}
  const view=document.getElementById('view');if(!view)return;
  const skill=D.SKILLS.find(s=>s.page===UI.view);
  if(UI.view==='combat'){view.querySelector('.howfight')?.remove();}
