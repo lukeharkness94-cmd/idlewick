@@ -33,16 +33,7 @@ function treeSprite(id) {
 }
 
 /* ================= Rocks (32 x 32): one formation per ore ================= */
-function rockSprite(id) {
-  const [col, style] = (A.ORE || {})[id] || ['#999999', 'flecks'], m = rp(col), s = Spr(32, 32);
-  if (style === 'coal') { [[10, 22, 7, 5], [20, 21, 7, 6], [15, 15, 6, 5]].forEach(([x, y, a, b]) => s.ell(x, y, a, b, rp('#3a3438'))); [[8, 20], [19, 18], [14, 13], [22, 23]].forEach(([x, y]) => s.fix(x, y, '#8a8a94')); return s; }
-  s.poly([[3, 28], [5, 15], [12, 7], [22, 8], [28, 17], [29, 28]], R.stone); s.poly([[3, 28], [29, 28], [27, 30], [5, 30]], R.stoneDark); s.line(10, 26, 16, 12, null, R.stone.lo); s.line(20, 27, 24, 16, null, R.stone.lo);
-  if (style === 'seam' || style === 'nugget') { s.line(7, 22, 25, 12, m); s.line(7, 23, 24, 15, m); s.line(9, 25, 22, 19, m); [[12, 18], [19, 14]].forEach(([x, y]) => s.fix(x, y, m.gl)); }
-  else if (style === 'crystal') [[9, 20, 7], [15, 17, 10], [21, 19, 8], [25, 22, 5]].forEach(([x, y, h]) => { s.poly([[x - 2, y + 4], [x, y + 4 - h], [x + 2, y + 4]], m); s.fix(x, y + 3 - h, m.gl); s.line(x, y + 4 - h, x, y + 3, null, m.lo); });
-  else [[9, 13], [16, 11], [22, 15], [11, 21], [18, 20], [24, 23], [14, 25]].forEach(([x, y]) => { s.dot(x, y, m); s.dot(x + 1, y, m); s.fix(x, y, m.hi); });
-  if (style === 'rust') [[13, 23], [20, 25]].forEach(([x, y]) => s.fix(x, y, '#8a4a2a'));
-  return s;
-}
+function rockSprite(id) { const s = Spr(32, 32); A.drawOre(s, id, 2); return s; }
 
 /* ================= Restoration pieces (32 x 32): broken and restored ================= */
 function piece(kind, done) {

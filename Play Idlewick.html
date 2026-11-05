@@ -5442,20 +5442,40 @@ function logSprite(s, w) {
 }
 
 /* ---------- ore: rock formations and seams per metal ---------- */
+/* each ore has its own rock, its own colour and its own way of showing: telling them apart never relies on colour alone */
 const ORE = {
-  copper: ['#d0763d', 'seam'], tin: ['#c8d0d4', 'flecks'], iron: ['#b0603a', 'rust'], coal: ['#2e2a2c', 'coal'], gold: ['#f0c75a', 'nugget'],
-  mithril: ['#6c7fe0', 'seam'], adamant: ['#4fbf7a', 'crystal'], runite: ['#46c8d8', 'crystal'], silver: ['#e6ecf0', 'flecks'], astralite: ['#e2d4ff', 'crystal'], voidstone: ['#7a4ad0', 'crystal']
+  copper:    { col: '#e8782e', rock: '#7e6c5e', style: 'veins', extra: '#4fc8a8' },   /* thick orange veins with green patina */
+  tin:       { col: '#e2e6ea', rock: '#9a8466', style: 'nodules' },                  /* pale round nodules in sandy rock */
+  iron:      { col: '#b4422c', rock: '#5c5856', style: 'streaks' },                  /* deep rust streaks in dark rock */
+  coal:      { col: '#2e2a2c', rock: '#3a3438', style: 'coal' },
+  gold:      { col: '#f6cc4a', rock: '#7a6a5e', style: 'nugget' },
+  silver:    { col: '#f6faff', rock: '#4c5870', style: 'branch' },                   /* bright branching threads in blue slate */
+  mithril:   { col: '#3c62f0', rock: '#808696', style: 'blobs', extra: '#ffffff' },  /* royal-blue pools with white sparks */
+  adamant:   { col: '#2cc464', rock: '#56665a', style: 'crystal' },                  /* green crystal spikes */
+  runite:    { col: '#18d6ee', rock: '#3e4e5c', style: 'cluster', extra: '#e8ffff' },/* glowing cyan crystal cluster */
+  astralite: { col: '#efe2ff', rock: '#2c2848', style: 'stars', extra: '#b89aff' },  /* starlight in night-dark rock */
+  voidstone: { col: '#a83cff', rock: '#1c1824', style: 'shards', extra: '#ff6ad8' }  /* violet shards in black rock */
 };
-function oreSprite(s, kind) {
-  const [c, style] = ORE[kind] || ['#999', 'flecks'], m = rp(c);
-  if (style === 'coal') { [[5, 10, 3.5, 3], [10, 9, 3, 3.4], [8, 6, 2.6, 2.4]].forEach(([x, y, a, b]) => s.ell(x, y, a, b, rp('#3a3438'))); [[4, 9], [9, 8], [8, 5]].forEach(([x, y]) => s.fix(x, y, '#8a8a94')); return; }
-  if (style === 'nugget') { s.poly([[3, 12], [5, 7], [9, 5], [13, 8], [12, 13], [6, 14]], m); [[6, 8], [7, 8], [10, 9]].forEach(([x, y]) => s.fix(x, y, m.gl)); s.fix(9, 12, m.lo); return; }
-  s.poly([[2, 13], [3, 7], [7, 3], [12, 4], [14, 10], [11, 14]], R.stone); s.line(5, 12, 9, 6, null, R.stone.lo);
-  if (style === 'seam') { s.line(4, 10, 12, 6, m); s.line(4, 11, 11, 8, m); s.fix(7, 8, m.gl); }
-  else if (style === 'flecks' || style === 'rust') [[5, 6], [9, 5], [11, 9], [6, 10], [9, 11]].forEach(([x, y]) => { s.dot(x, y, m); s.fix(x, y, m.hi); });
-  else if (style === 'crystal') { [[6, 9, 4], [9, 7, 6], [12, 9, 4]].forEach(([x, y, h]) => { s.poly([[x - 1, y + 2], [x, y + 2 - h], [x + 1, y + 2]], m); s.fix(x, y + 1 - h, m.gl); }); }
-  if (style === 'rust') s.fix(8, 12, '#8a4a2a');
+/* one drawer for the 16 px item and the 32 px mining rock (k = 1 or 2) */
+function drawOre(s, kind, k = 1) {
+  const o = ORE[kind] || { col: '#999999', rock: '#8a8580', style: 'nodules' }, m = ramp(o.col, { gl: .8 }), rock = rp(o.rock), X = v => Math.round(v * k);
+  if (o.style === 'coal') { [[5, 10, 3.5, 3], [10, 9, 3, 3.4], [8, 6, 2.6, 2.4]].forEach(([x, y, a, b]) => s.ell(X(x), X(y), a * k, b * k, rp('#3a3438'))); [[4, 9], [9, 8], [8, 5]].forEach(([x, y]) => s.fix(X(x), X(y), '#9a9aa6')); return; }
+  if (o.style === 'nugget') { s.poly([[3, 12], [5, 7], [9, 5], [13, 8], [12, 13], [6, 14]].map(([x, y]) => [X(x), X(y)]), m); [[6, 8], [7, 8], [10, 9]].forEach(([x, y]) => s.fix(X(x), X(y), m.gl)); s.fix(X(9), X(12), m.lo); return; }
+  s.poly([[2, 14], [3, 7], [7, 3], [12, 4], [14, 10], [12, 14]].map(([x, y]) => [X(x), X(y)]), rock); s.line(X(5), X(13), X(8), X(7), null, rock.lo);
+  const dot = (x, y, r = 1, c = m) => s.ell(X(x), X(y), r * k * (k > 1 ? .7 : 1), r * k * (k > 1 ? .7 : 1), c); /* bolder at icon size */
+  switch (o.style) {
+    case 'veins': for (const [a, b, c2, d] of [[3, 11, 12, 6], [4, 12, 11, 9]]) { s.line(X(a), X(b), X(c2), X(d), m); s.line(X(a), X(b) + 1, X(c2), X(d) + 1, m); } s.fix(X(7), X(8), m.gl); [[10, 11], [5, 6], [12, 9]].forEach(([x, y]) => s.fix(X(x), X(y), o.extra)); break;
+    case 'nodules': (k > 1 ? [[5, 7], [9, 6], [11, 10], [6, 11], [8, 9]] : [[6, 7], [10, 8], [7, 11]]).forEach(([x, y]) => { dot(x, y, k > 1 ? 1.4 : 1.6); s.fix(X(x) - 1, X(y) - 1, '#ffffff'); }); break;
+    case 'streaks': for (const [a, b, c2, d] of [[4, 6, 7, 12], [8, 5, 10, 11], [11, 6, 12, 10]]) { s.line(X(a), X(b), X(c2), X(d), m); s.line(X(a) + 1, X(b), X(c2) + 1, X(d), m); } break;
+    case 'branch': s.line(X(4), X(12), X(9), X(7), m); s.line(X(9), X(7), X(12), X(5), m); s.line(X(9), X(7), X(12), X(10), m); s.line(X(6), X(10), X(5), X(6), m); [[12, 5], [9, 7], [5, 6]].forEach(([x, y]) => s.fix(X(x), X(y), '#ffffff')); break;
+    case 'blobs': (k > 1 ? [[6, 7, 1.8], [10, 10, 2], [8, 12, 1.2], [11, 6, 1.2]] : [[6, 7, 1.8], [10, 10, 2]]).forEach(([x, y, r]) => dot(x, y, r)); [[6, 6], [10, 9]].forEach(([x, y]) => s.fix(X(x), X(y), o.extra)); break;
+    case 'crystal': [[6, 9, 4], [9, 7, 6], [12, 9, 4]].forEach(([x, y, h]) => { s.poly([[X(x - 1), X(y + 2)], [X(x), X(y + 2 - h)], [X(x + 1), X(y + 2)]], m); s.fix(X(x), X(y + 2 - h), m.gl); }); break;
+    case 'cluster': [[8, 8, 6, 0], [5, 10, 4, -1], [11, 10, 4, 1], [8, 11, 3, 0]].forEach(([x, y, h, lean]) => { s.poly([[X(x - 1), X(y + 2)], [X(x + lean), X(y + 2 - h)], [X(x + 1), X(y + 2)]], m); s.fix(X(x + lean), X(y + 2 - h), o.extra); }); dot(8, 11, 1, ramp(o.extra)); break;
+    case 'stars': [[6, 7], [10, 6], [9, 11], [5, 11], [12, 9]].forEach(([x, y], i) => { const c = i % 2 ? o.extra : o.col; s.fix(X(x), X(y), c); if (k > 1 || i < 2) { s.fix(X(x) - 1, X(y), c); s.fix(X(x) + 1, X(y), c); s.fix(X(x), X(y) - 1, c); s.fix(X(x), X(y) + 1, c); } s.fix(X(x), X(y), '#ffffff'); }); break;
+    case 'shards': [[6, 10, 5, -1], [9, 8, 7, 1], [12, 11, 4, 0]].forEach(([x, y, h, lean]) => { s.poly([[X(x - 1), X(y + 2)], [X(x + lean), X(y + 2 - h)], [X(x + 1), X(y + 2)]], m); s.fix(X(x + lean), X(y + 2 - h), o.extra); s.line(X(x), X(y + 1), X(x), X(y + 2 - h / 2), null, '#2a1030'); }); break;
+  }
 }
+function oreSprite(s, kind) { drawOre(s, kind, 1); }
 
 /* ---------- gems: distinct cuts ---------- */
 function gemSprite(s, id) {
@@ -5648,7 +5668,7 @@ function itemSprite(id) {
 /* larger node art for fishing spots (32 x 16), reusing the species definitions */
 function fishLarge(id) { const s = Spr(32, 16); if (id === 'shrimp') { const t = Spr(16, 16); shrimp(t); s.stamp(t, 8, 0); return s; } if (id === 'lobster') { const t = Spr(16, 16); lobster(t); s.stamp(t, 8, 0); return s; }
   const sp = FISH[id]; if (!sp) return null; const big = Object.assign({}, sp, { len: Math.min(28, sp.len * 1.9), dep: sp.dep * 1.6 }); fish(s, big, 8, 0); return s; }
-Object.assign(A, { itemSprite, plantStage, fishLarge, FISH, WOOD, ORE, TIER_OF,
+Object.assign(A, { itemSprite, plantStage, fishLarge, drawOre, FISH, WOOD, ORE, TIER_OF,
   itemUrl: id => A.url('item:' + id, () => itemSprite(id)),
   plantUrl: (stage, crop) => A.url('plant:' + stage + ':' + crop, () => plantStage(stage, crop)) });
 })();
@@ -6209,16 +6229,7 @@ function treeSprite(id) {
 }
 
 /* ================= Rocks (32 x 32): one formation per ore ================= */
-function rockSprite(id) {
-  const [col, style] = (A.ORE || {})[id] || ['#999999', 'flecks'], m = rp(col), s = Spr(32, 32);
-  if (style === 'coal') { [[10, 22, 7, 5], [20, 21, 7, 6], [15, 15, 6, 5]].forEach(([x, y, a, b]) => s.ell(x, y, a, b, rp('#3a3438'))); [[8, 20], [19, 18], [14, 13], [22, 23]].forEach(([x, y]) => s.fix(x, y, '#8a8a94')); return s; }
-  s.poly([[3, 28], [5, 15], [12, 7], [22, 8], [28, 17], [29, 28]], R.stone); s.poly([[3, 28], [29, 28], [27, 30], [5, 30]], R.stoneDark); s.line(10, 26, 16, 12, null, R.stone.lo); s.line(20, 27, 24, 16, null, R.stone.lo);
-  if (style === 'seam' || style === 'nugget') { s.line(7, 22, 25, 12, m); s.line(7, 23, 24, 15, m); s.line(9, 25, 22, 19, m); [[12, 18], [19, 14]].forEach(([x, y]) => s.fix(x, y, m.gl)); }
-  else if (style === 'crystal') [[9, 20, 7], [15, 17, 10], [21, 19, 8], [25, 22, 5]].forEach(([x, y, h]) => { s.poly([[x - 2, y + 4], [x, y + 4 - h], [x + 2, y + 4]], m); s.fix(x, y + 3 - h, m.gl); s.line(x, y + 4 - h, x, y + 3, null, m.lo); });
-  else [[9, 13], [16, 11], [22, 15], [11, 21], [18, 20], [24, 23], [14, 25]].forEach(([x, y]) => { s.dot(x, y, m); s.dot(x + 1, y, m); s.fix(x, y, m.hi); });
-  if (style === 'rust') [[13, 23], [20, 25]].forEach(([x, y]) => s.fix(x, y, '#8a4a2a'));
-  return s;
-}
+function rockSprite(id) { const s = Spr(32, 32); A.drawOre(s, id, 2); return s; }
 
 /* ================= Restoration pieces (32 x 32): broken and restored ================= */
 function piece(kind, done) {
