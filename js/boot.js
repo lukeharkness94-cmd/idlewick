@@ -35,12 +35,14 @@ function showTitle() {
 }
 
 function create() {
-  const look = { skin: D.LOOKS.skin[0], hair: D.LOOKS.hair[1], tunic: D.LOOKS.tunic[0] }, keep = DQ.S.settings;
+  const look = { skin: D.LOOKS.skin[0], hair: D.LOOKS.hair[1], tunic: D.LOOKS.tunic[0], face: 'bright' }, keep = DQ.S.settings;
   const previous = DQ.S;
   DQ.S = DQ.newState('', look); DQ.S.settings = keep; DQ.applyTheme();
+  /* faces: three distinct pixel designs, shown as small portraits */
+  const faceRow = () => DQ.HERO_FACES && DQ.pixelArt ? `<div><span class="k">Face</span><div class="sws faces">${DQ.HERO_FACES.map(f => `<button class="swatch face-swatch ${look.face === f ? 'on' : ''}" data-k="face" data-c="${f}" aria-label="Face: ${f}"><img class="pxa" src="${DQ.heroBustUrl(Object.assign({}, look, { face: f }))}" width="32" height="32" alt=""></button>`).join('')}</div></div>` : '';
   const sw = (k) => D.LOOKS[k].map((c, i) => `<button class="swatch ${look[k] === c ? 'on' : ''}" data-k="${k}" data-c="${c}" style="background:${c}" aria-label="${k} ${i + 1}"></button>`).join('');
   $('#tmenu').innerHTML = `<div class="create"><div class="cr-port" id="crp">${DQ.ui.portrait(130)}</div><div class="cr-form"><label><span class="k">Hero name</span><input id="crname" maxlength="20" placeholder="Adventurer" autocomplete="off"></label>
-    <div><span class="k">Skin</span><div class="sws">${sw('skin')}</div></div><div><span class="k">Hair</span><div class="sws">${sw('hair')}</div></div><div><span class="k">Tunic</span><div class="sws">${sw('tunic')}</div></div></div>
+    <div><span class="k">Skin</span><div class="sws">${sw('skin')}</div></div><div><span class="k">Hair</span><div class="sws">${sw('hair')}</div></div><div><span class="k">Tunic</span><div class="sws">${sw('tunic')}</div></div>${faceRow()}</div>
     <div class="cr-act"><button class="tbtn" id="cr-back"><span>Back</span></button><button class="tbtn primary" id="cr-go"><span>Begin adventure</span></button></div></div>`;
   $('#crname').focus();
   $('#tmenu').onclick = e => { const b = e.target.closest('.swatch'); if (!b) return; look[b.dataset.k] = b.dataset.c; DQ.S.look = look; DQ.sfx('click'); $$(`.swatch[data-k="${b.dataset.k}"]`).forEach(x => x.classList.toggle('on', x === b)); $('#crp').innerHTML = DQ.ui.portrait(130); };

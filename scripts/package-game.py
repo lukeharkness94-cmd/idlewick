@@ -24,10 +24,7 @@ def stylesheet(match):
 html = re.sub(r'<link rel="stylesheet" href="([^"]+)">', stylesheet, html)
 def script(match):
     source = (root / match[1]).read_text()
-    def image_url(image):
-        data = base64.b64encode((root / image[0]).read_bytes()).decode()
-        return 'data:image/' + ('webp' if image[0].endswith('.webp') else 'png') + ';base64,' + data
-    source = re.sub(r'assets/(?:painted/[a-z-]+\.png|art-completion/web/[a-z-]+\.webp)', image_url, source)
+    # all artwork is drawn in code (js/pixelart.js and friends); there are no image files to embed
     return '<script>\n' + source + '\n</script>'
 
 html = re.sub(r'<script src="([^"]+)"></script>',

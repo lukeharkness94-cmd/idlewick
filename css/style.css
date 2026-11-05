@@ -1976,3 +1976,19 @@ img.pxa{image-rendering:pixelated;image-rendering:crisp-edges;-ms-interpolation-
 @keyframes pxs-hit{0%,40%,100%{transform:translateX(0);filter:none}44%{transform:translateX(6px);filter:brightness(2.2) saturate(0)}52%{transform:translateX(2px);filter:none}}
 @media (prefers-reduced-motion:reduce){.pxs-anim img,.pxs-fight img{animation:none!important}.pxs-anim img:first-child{opacity:1}}
 html.calm .pxs-anim img,html.calm .pxs-fight img{animation:none!important}
+/* every pixel sprite stays crisp, whatever older rules say about smooth images */
+img.pxa,.pxa img{image-rendering:pixelated!important;object-fit:contain}
+.px-hero img,.px-foe img{image-rendering:pixelated!important}
+.px-portrait{display:inline-grid;place-items:center;overflow:hidden;border-radius:50%;background:color-mix(in srgb,var(--brass) 14%,var(--panel2))}
+/* all game imagery is pixel art now: never smooth it */
+img,canvas,.fig-img,.scene-worker img,.rig-torso img,.foe-torso img,.scene,.pxscene{image-rendering:pixelated!important}
+/* town scenes show whole (their restoration pieces stand near the bottom edge) */
+img.pxscene{width:100%;height:auto!important;aspect-ratio:160/90;object-fit:contain}
+.towninfo img.pxscene{height:auto!important}
+.pxs-fig{max-width:100%}.pxs-fig img{max-width:100%;height:auto}
+.face-swatch{width:40px!important;height:40px!important;padding:2px;display:inline-grid;place-items:center;background:var(--panel2)!important}
+.face-swatch img{width:32px;height:32px}
+/* the title footer never covers the creation controls on short screens */
+#title .ver,.ver{pointer-events:none}
+@media (max-height:900px),(max-width:600px){#title{overflow-y:auto}#title .create{margin-bottom:56px}.face-swatch{width:36px!important;height:36px!important}.face-swatch img{width:28px;height:28px}}
+.shop-later{display:block}.shop-later .ic{display:inline-block;vertical-align:-2px;margin-right:4px}

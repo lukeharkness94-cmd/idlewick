@@ -11,7 +11,6 @@ let chromium;try{({chromium}=require('playwright'));}catch(e){console.log('SKIP 
   await page.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/');
   await page.locator('#t-new').click();await page.locator('#crname').fill('Grower');await page.locator('#cr-go').click();await page.waitForTimeout(600);await page.keyboard.press('Escape');
   await page.evaluate(()=>{DQ.closeModal&&DQ.closeModal();const S=DQ.S;while(DQ.advLvl()<10)S.xp.fishing+=3000;S.xp.farming=Math.max(S.xp.farming,DQ.data.XPF[10]);S.inv.seed_onion=3;DQ.ui.seed='onion';S.farm.next='onion';DQ.go('farming');});
-  await page.waitForFunction(()=>DQ.artCompletionReady('farm-growth'),null,{timeout:15000}).catch(()=>{});
   assert.equal(await page.evaluate(()=>DQ.plant(0,'onion')),true);
   const read=()=>page.evaluate(()=>{const e=document.querySelector('.plot[data-a="0"]'),i=e.querySelector('.pspr img');return {label:e.getAttribute('aria-label'),alt:i&&i.alt,src:i&&i.src,time:e.querySelector('.ptime').textContent,ripe:e.classList.contains('ripe'),harvestable:DQ.plotRipe(DQ.S.farm.plots[0])};});
   const at=f=>page.evaluate(f=>{const P=DQ.S.farm.plots[0];P.at=(DQ.S.gameTime||0)-P.dur*f;},f);

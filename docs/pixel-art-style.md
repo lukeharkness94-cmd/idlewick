@@ -68,3 +68,15 @@ Reviewed at 100% zoom on desktop (1440) and phone (390), in both themes:
 8. Warm, characterful aesthetic. Judged pass internally; needs the owner's eye.
 
 Fixed during the review: face-covering helmet, dotted bow, stiff wolf legs, noisy carp scales (then a new carp shape), floating trees (contact shadows), stray hair pixels.
+
+## Coverage (full rebuild)
+
+Every id the game can request resolves to a finished design (`DQ.pixelArt.coverage()` is empty; `node tests/art-pixel.cjs` enforces it):
+
+- About 300 items: 15 fish raw and cooked on a plate, 9 logs, 11 ores, 8 bars, 5 gems, hides and bones, food and produce, 5 potion bottle shapes, seeds and 10 crops, tools in 5 tiers, daggers, swords, warhammers, bows and staves, helms, coifs, hoods, crowns, plate, leather and robe armour, shields, rings, amulets, arrows, containers and the 6 relics. No two are pixel-identical.
+- About 105 creatures: the 37 monsters, 32 regional wildlife creatures, 17 companions, 14 townsfolk and thieving targets, and 6 farm animals, built from 11 anatomies.
+- 9 tree species, 11 rock formations, 15 fishing-spot fish, 10 crops × 4 growth stages.
+- 8 town scenes, each with its restoration projects in broken and restored states (16 projects).
+- 21 furniture pieces, the cottage, 3 worker portraits, about 30 skill and menu icons, and the hero with 3 faces, 4 skins, 5 hair colours, 6 tunics and every equipment type.
+
+Removed: the painted atlases (`assets/painted`), the completion pack (`assets/art-completion`, PNG and WebP), their loaders (`art_painted.js`, `painted_runtime.js`, `art_completion.js`, `art_completion_map.js`), the delivery script, manifests, briefs and image tests. The standalone build no longer embeds any image.

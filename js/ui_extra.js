@@ -15,7 +15,7 @@ Object.assign(UI.B, {
   plot: (e, a) => {
     const p = S().farm.plots[a]; if (!p) return; const st = stageOf(p), c = p.crop && D.CROP[p.crop];
     /* live growth: re-render through the shared plant renderer (painted or fallback) whenever the crop or its stage changes */
-    const key = (p.crop || '') + ':' + st + ':' + (DQ.artCompletionReady && DQ.artCompletionReady('farm-growth') ? 1 : 0);
+    const key = (p.crop || '') + ':' + st;
     if (e._st !== key) {
       e._st = key; e.classList.toggle('ripe', st === 3); e.classList.toggle('empty', !c);
       const spr = $('.pspr', e); if (spr) spr.innerHTML = plotArt(p, st);

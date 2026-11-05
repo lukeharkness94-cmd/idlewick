@@ -140,7 +140,7 @@ const pumpLevel=()=>{clearTimeout(levelRetry);if(!levelQueue.length)return;if(mo
 /* the painted star, re-centred on its own centre of mass (its source crop carries stray edge pixels that pull it off-centre) */
 let starUrl=null;
 const centredStar=()=>{
-  if(!starUrl){const raw=DQ.completionCrop&&DQ.completionCrop('utility-icons','star');if(!raw)return '';
+  if(!starUrl&&DQ.pixelArt){starUrl=DQ.pixelArt.iconUrl('star');}if(starUrl)return `<img class="lr-star-img pxa" src="${starUrl}" width="96" height="96" alt="" draggable="false">`;if(!starUrl){const raw=null;if(!raw)return '';
     try{const W=raw.width,H=raw.height,a=raw.getContext('2d').getImageData(0,0,W,H).data;let n=0,sx=0,sy=0;
       for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(a[(y*W+x)*4+3]>128){n++;sx+=x;sy+=y;}
       const cx=sx/n,cy=sy/n;let R=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(a[(y*W+x)*4+3]>128){const d=Math.hypot(x-cx,y-cy);if(d>R&&d<Math.min(W,H)*.62)R=d;}

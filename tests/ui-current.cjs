@@ -88,8 +88,8 @@ const fs=require('node:fs');
   assert.ok(await page.evaluate(()=>document.querySelector('#active-research').compareDocumentPosition(document.querySelector('.scholarship-grid'))&Node.DOCUMENT_POSITION_FOLLOWING));
   assert.ok(await page.evaluate(()=>DQ.data.MONLIST.every(m=>{
    const template=document.createElement('template');template.innerHTML=DQ.battleFoe(m);
-   /* painted creatures animate as whole models; the remaining pixel creatures use articulated parts */
-   return template.content.querySelectorAll('.battle-bone').length>=3||!!template.content.querySelector('.painted-foe .painted-sprite,.painted-foe img');
+   /* every creature is a code-drawn pixel sprite that moves as a whole */
+   return !!template.content.querySelector('.px-foe img.pxa[src^="data:image/png"]');
   })),'every enemy has a battle-ready model');
   await page.evaluate(()=>DQ.go('combat'));
   assert.ok(await page.locator('.area-card').count()>=2,'combat offers town areas');
@@ -133,13 +133,13 @@ const fs=require('node:fs');
   await page.evaluate(()=>{DQ.go('combat');DQ.startAct('fight','chicken',{quiet:true});DQ.ui.render(false);});
   await page.waitForTimeout(300);await page.evaluate(()=>DQ.splat('foe',2,'hit',0));
   await page.waitForTimeout(260);assert.ok(await page.locator('.combat-slash').count());
-  /* painted models move as a whole; remaining pixel models move their joints */
-  assert.ok(await page.locator('#av-you .rig-arm-right, #av-you .painted-hero').count());
-  assert.ok(await page.locator('#av-foe .foe-wing-front, #av-foe .painted-foe').count());
+  /* pixel sprites move as a whole */
+  assert.ok(await page.locator('#av-you .px-hero').count());
+  assert.ok(await page.locator('#av-foe .px-foe').count());
   await page.evaluate(()=>DQ.splat('foe',2,'hit',0));await page.waitForTimeout(40);
   assert.ok(await page.evaluate(()=>{
    /* the scripted attack swing, not the gentle CSS idle bob */
-   const bone=document.querySelector('#av-you .rig-arm-right')||document.querySelector('#av-you .painted-hero'),all=bone?bone.getAnimations():[],animation=all.find(a=>!(typeof CSSAnimation!=='undefined'&&a instanceof CSSAnimation))||all[0];
+   const bone=document.querySelector('#av-you .px-hero'),all=bone?bone.getAnimations():[],animation=all.find(a=>!(typeof CSSAnimation!=='undefined'&&a instanceof CSSAnimation))||all[0];
    if(!animation)return false;
    animation.pause();const poses=new Set();
    const span=Math.min(1000*80/120,Number(animation.effect.getTiming().duration)||666);
