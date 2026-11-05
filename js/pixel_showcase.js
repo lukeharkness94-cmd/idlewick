@@ -26,5 +26,5 @@ UI.V.showcase = () => {
 /* a link from Settings */
 const settings0 = UI.V.settings;
 /* its own category in the Settings picker */
-if (settings0) UI.V.settings = () => settings0().replace(/<\/div>\s*$/, `<section class="panel"><div class="phead"><h2>Art showcase</h2></div><p class="dim">The pixel-art style guide in action: the hero, creatures, items and village at their real sizes.</p><button class="btn" data-do="go" data-a="showcase">Open the art showcase</button></section></div>`);
+if (settings0) UI.V.settings = () => settings0() + `<section class="panel"><div class="phead"><h2>Art showcase</h2></div><p class="dim">The pixel-art style guide in action: the hero, creatures, items and village at their real sizes.</p><button class="btn" data-do="go" data-a="showcase">Open the art showcase</button></section>`;
 })();
