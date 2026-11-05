@@ -20,3 +20,4 @@ steam_appid.txt
 
 # Compressed delivery copies used by the game (built by scripts/build-art-delivery.py).
 !assets/art-completion/web/*.webp
+art-review/

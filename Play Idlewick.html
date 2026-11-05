@@ -5931,6 +5931,241 @@ const ANIMAL = {
   hen: () => A.sprites.chicken(), cow: SPECS.cow, sheep: Q({ fur: '#3a3434', wool: true, ears: 'floppy', short: true }), pig: PET_SPECS.pudding,
   goat: Q({ fur: '#e8e0d0', horns: true, ears: 'floppy', tail: 'thin', snout: false }), bees: hive
 };
+/* ================= More anatomies, so no two families share a body ================= */
+/* hulking brute: wide shoulders, knuckles near the ground, a small head set low */
+function brute(o) { const s = Spr(32, 32), sk = rp(o.skin), c = rp(o.cloth || mix(o.skin, '#3a2448', .4));
+  s.ell(16, 15, 10, 7, sk); s.ell(16, 11, 4, 3.6, sk); s.rect(11, 20, 10, 6, c); s.rect(11, 26, 4, 4, sk); s.rect(18, 26, 4, 4, sk);
+  s.rect(4, 13, 5, 13, sk); s.rect(23, 13, 5, 13, sk); s.ell(6, 27, 3, 2.4, sk); s.ell(26, 27, 3, 2.4, sk); s.line(9, 16, 23, 16, null, sk.lo);
+  eye(s, 14, 11, o.glow || EYE, !o.glow); eye(s, 18, 11, o.glow || EYE, !o.glow); s.fix(15, 14, '#f4ecd8'); s.fix(18, 14, '#f4ecd8'); s.line(14, 13, 18, 13, null, sk.out);
+  if (o.ice) [[8, 9], [16, 5], [24, 9], [12, 7], [20, 7]].forEach(([x, y]) => s.poly([[x - 1, y + 3], [x, y - 1], [x + 1, y + 3]], ramp('#e8f6ff', { gl: .9 })));
+  if (o.moss) [[10, 10], [22, 11], [16, 8]].forEach(([x, y]) => s.fix(x, y, '#6a9a4a'));
+  if (o.club) { s.line(27, 26, 30, 12, R.wood); s.line(28, 26, 31, 12, R.wood); s.ell(30, 11, 2, 2.4, R.woodLight); }
+  return s; }
+/* stocky: short, wide, braided beard */
+function stout(o) { const s = Spr(32, 32), sk = rp(o.skin), c = rp(o.cloth), b = rp(o.beard || '#c06a3a');
+  s.rect(10, 15, 12, 10, c); s.rect(7, 16, 3, 7, c); s.rect(22, 16, 3, 7, c); s.rect(7, 23, 3, 2, sk); s.rect(22, 23, 3, 2, sk);
+  s.rect(11, 25, 4, 4, rp('#4a3a2a')); s.rect(17, 25, 4, 4, rp('#4a3a2a')); s.rect(10, 29, 5, 2, rp('#3a2a20')); s.rect(17, 29, 5, 2, rp('#3a2a20'));
+  s.ell(16, 11, 5, 4.4, sk); for (let y = 12; y <= 20; y++) s.line(12 + (y - 12) * .3, y, 20 - (y - 12) * .3, y, b); s.fix(14, 19, R.gold.base); s.fix(18, 19, R.gold.base);
+  eye(s, 14, 10); eye(s, 18, 10); s.rect(15, 12, 2, 1, sk.lo);
+  const m = ramp(o.helm || '#9aa3ad', { gl: .72 }); s.ell(16, 7, 5.6, 3.6, m); s.rect(10, 8, 12, 2, m); if (o.horns) { const h = rp('#efe2c4'); s.poly([[11, 7], [6, 1], [9, 3]], h); s.poly([[21, 7], [26, 1], [23, 3]], h); }
+  if (o.axe) { s.line(26, 26, 26, 10, R.wood); s.poly([[26, 10], [31, 7], [31, 15], [26, 13]], ramp('#b8c0c8', { gl: .75 })); }
+  return s; }
+/* lanky puppet or stalker: tall, thin, long jointed limbs */
+function lanky(o) { const s = Spr(32, 32), b = rp(o.col), d = rp(mix(o.col, '#3a2448', .35));
+  s.rect(14, 10, 4, 10, b); s.ell(16, 6, 3, 3.4, b); s.line(14, 11, 8, 17, d); s.line(8, 17, 6, 23, d); s.line(18, 11, 24, 17, d); s.line(24, 17, 26, 23, d);
+  s.line(15, 20, 12, 25, d); s.line(12, 25, 12, 31, d); s.line(17, 20, 20, 25, d); s.line(20, 25, 20, 31, d);
+  [[8, 17], [24, 17], [12, 25], [20, 25]].forEach(([x, y]) => s.ell(x, y, 1.2, 1.2, rp(mix(o.col, '#ffffff', .3))));
+  eye(s, 15, 6, o.glow || EYE, !o.glow); eye(s, 17, 6, o.glow || EYE, !o.glow);
+  if (o.strings) for (const x of [8, 16, 24]) s.line(x, 0, x, x === 16 ? 2 : 16, null, '#d8d4c8');
+  if (o.reeds) { for (const x of [11, 21]) s.line(x, 4, x + (x < 16 ? -2 : 2), 0, rp('#8a9a5a')); s.rect(13, 12, 6, 6, rp('#6a7a44')); }
+  return s; }
+/* hunched husk: bent forward, long arms, back ridge */
+function hunch(o) { const s = Spr(32, 32), b = rp(o.col), d = rp(mix(o.col, '#1a1424', .4));
+  s.ell(15, 16, 8, 6, b); s.ell(22, 14, 4, 3.6, b); for (let x = 9; x < 21; x += 3) s.poly([[x, 11], [x + 1, 8], [x + 2, 11]], d);
+  s.line(20, 18, 24, 27, b); s.line(21, 18, 25, 27, b); s.line(10, 19, 8, 27, b); s.line(11, 19, 9, 27, b); s.rect(12, 21, 3, 8, d); s.rect(17, 21, 3, 8, d);
+  eye(s, 23, 13, o.glow || '#e0d0ff', false); eye(s, 25, 13, o.glow || '#e0d0ff', false); s.line(23, 16, 26, 16, null, d.base);
+  if (o.echo) for (let i = 0; i < 3; i++) for (let a = -1; a <= 1; a++) s.fix(29 + i, 14 + a * (i + 1), '#c8b8e8');
+  return s; }
+/* floating robe: no legs, a hood and a long tapering hem */
+function floater(o) { const s = Spr(32, 32), c = rp(o.cloth), sk = rp(o.skin || '#d8b898');
+  s.poly([[12, 10], [20, 10], [24, 26], [20, 24], [16, 28], [12, 24], [8, 26]], c); s.rect(8, 13, 3, 7, c); s.rect(21, 13, 3, 7, c); s.rect(8, 20, 3, 2, sk); s.rect(21, 20, 3, 2, sk);
+  s.ell(16, 7, 4, 4.2, sk); if (o.hood) s.poly([[16, 0], [22, 6], [21, 11], [11, 11], [10, 6]], rp(o.hood)); for (let y = 4; y <= 9; y++) for (let x = 13; x <= 19; x++) if (((x - 16) ** 2) / 9 + ((y - 7) ** 2) / 7 < 1) s.dot(x, y, sk);
+  eye(s, 14, 7); eye(s, 18, 7); if (o.beard) for (let y = 9; y <= 13; y++) s.line(14, y, 18, y, rp(o.beard));
+  if (o.halo) for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8; s.fix(16 + Math.cos(a) * 6, 1 + Math.sin(a) * 1.4, '#fff0a0'); }
+  if (o.threads) for (const x of [10, 14, 18, 22]) s.line(x, 26, x + (x % 4 ? 1 : -1), 31, null, '#c8b0c8');
+  if (o.staff) { s.line(25, 30, 25, 6, R.wood); s.ell(25, 5, 1.6, 1.6, ramp(o.staff, { gl: .85 })); }
+  if (o.kite) { s.poly([[27, 2], [31, 6], [27, 11], [23, 6]], rp('#e0c060')); s.line(27, 11, 24, 18, null, '#d8d4c8'); }
+  s.ell(16, 30, 5, 1, rp('#00000020'));
+  return s; }
+/* knight: full plate with a visored helm, pauldrons and a tabard */
+function knight(o) { const s = Spr(32, 32), m = ramp(o.metal, { gl: .7 }), t = rp(o.tabard || '#5a2a2a');
+  s.rect(12, 23, 3, 6, m); s.rect(17, 23, 3, 6, m); s.rect(11, 29, 4, 2, m); s.rect(17, 29, 4, 2, m);
+  s.poly([[10, 12], [22, 12], [21, 24], [11, 24]], m); s.poly([[13, 14], [19, 14], [19, 25], [16, 27], [13, 25]], t); s.ell(9, 13, 3, 2.4, m); s.ell(23, 13, 3, 2.4, m); s.rect(7, 14, 3, 8, m); s.rect(22, 14, 3, 8, m);
+  s.ell(16, 7, 4.6, 5, m); s.rect(13, 7, 7, 1, rp('#120e18')); s.fix(15, 7, o.glow || '#ff8a3a'); s.fix(18, 7, o.glow || '#ff8a3a'); s.line(16, 2, 16, 6, null, m.gl);
+  if (o.plume) s.poly([[16, 2], [20, -1], [22, 3], [18, 3]], rp(o.plume));
+  if (o.crown) { const g = ramp(o.crown, { gl: .85 }); s.poly([[11, 3], [11, 0], [13, 2], [16, -1], [19, 2], [21, 0], [21, 3]], g); }
+  if (o.embers) [[10, 20], [22, 18], [14, 4], [19, 26]].forEach(([x, y]) => s.fix(x, y, '#ffb04a'));
+  if (o.cape) s.poly([[9, 12], [23, 12], [26, 30], [6, 30]], rp(o.cape));
+  s.line(25, 24, 25, 9, ramp(o.blade || '#cdd5dc', { gl: .8 })); s.line(26, 24, 26, 9, ramp(o.blade || '#cdd5dc', { gl: .8 })); s.rect(23, 23, 5, 1, R.gold);
+  return s; }
+/* insects and arachnids */
+function beetle(o) { const s = Spr(32, 32), sh = ramp(o.col, { gl: .72 }), d = rp(mix(o.col, '#1a1424', .5));
+  for (const [x, y, dx] of [[10, 18, -4], [10, 22, -5], [11, 26, -4], [22, 18, 4], [22, 22, 5], [21, 26, 4]]) { s.line(x, y, x + dx, y + 2, d); s.line(x + dx, y + 2, x + dx, y + 5, d); }
+  s.ell(16, 21, 8, 7, sh); s.line(16, 14, 16, 28, null, sh.lo); s.ell(16, 12, 4, 3, d); if (o.horn) s.poly([[15, 10], [16, 3], [18, 10]], sh);
+  eye(s, 14, 12, o.glow || '#fff070', false); eye(s, 18, 12, o.glow || '#fff070', false);
+  if (o.glowy) [[12, 18], [20, 18], [13, 24], [19, 24]].forEach(([x, y]) => s.fix(x, y, o.glowy));
+  return s; }
+function spider(o) { const s = Spr(32, 32), b = rp(o.col), d = rp(mix(o.col, '#1a1424', .45));
+  if (o.web) for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; s.line(16, 8, 16 + Math.cos(a) * 14, 8 + Math.sin(a) * 7, null, '#e8dcc8'); }
+  for (const [y, k] of [[17, 1], [19, 2], [21, 2], [23, 1]]) { s.line(13, y, 13 - 6 * k / 2 - 3, y - 4, d); s.line(13 - 6 * k / 2 - 3, y - 4, 13 - 6 * k / 2 - 5, y + 5, d); s.line(19, y, 19 + 6 * k / 2 + 3, y - 4, d); s.line(19 + 6 * k / 2 + 3, y - 4, 19 + 6 * k / 2 + 5, y + 5, d); }
+  s.ell(16, 24, 6, 5, b); s.ell(16, 17, 4, 3.4, b); for (const [x, y] of [[14, 16], [18, 16], [15, 15], [17, 15]]) s.fix(x, y, o.glow || '#ff6a3a');
+  if (o.mark) s.poly([[16, 21], [18, 24], [16, 27], [14, 24]], rp(o.mark));
+  return s; }
+function scorpion(o) { const s = Spr(32, 32), b = ramp(o.col, { gl: .7 }), d = rp(mix(o.col, '#1a1424', .45));
+  s.ell(14, 22, 7, 4, b); for (const x of [10, 13, 16]) { s.line(x, 25, x - 2, 29, d); s.line(x + 2, 25, x + 4, 29, d); }
+  for (let i = 0; i < 6; i++) s.ell(20 + i * 1.4, 19 - i * 2.4, 1.8, 1.8, b); s.poly([[27, 4], [30, 6], [27, 7]], rp(o.sting || '#fff070'));
+  s.line(8, 21, 4, 17, d); s.ell(3, 15, 2.4, 2, b); s.line(10, 21, 7, 13, d); s.ell(6, 11, 2.4, 2, b); eye(s, 9, 20, '#fff070', false);
+  if (o.storm) { s.line(28, 8, 26, 12, null, '#fff2a0'); s.line(26, 12, 29, 14, null, '#fff2a0'); }
+  return s; }
+function isopod(o) { const s = Spr(32, 32), b = ramp(o.col, { gl: .8 });
+  for (let i = 0; i < 6; i++) { s.ell(8 + i * 3.2, 20 - Math.sin(i / 5 * Math.PI) * 3, 3, 4 - Math.abs(i - 2.5) * .3, b); s.line(8 + i * 3.2, 24, 7 + i * 3.2, 27, rp(mix(o.col, '#1a1424', .4))); }
+  s.line(25, 17, 30, 12, null, b.lo); s.line(25, 18, 31, 16, null, b.lo); eye(s, 25, 18);
+  if (o.glass) [[10, 16], [16, 14], [22, 16]].forEach(([x, y]) => s.fix(x, y, '#ffffff'));
+  return s; }
+function newt(o) { const s = Spr(32, 32), b = rp(o.col), belly = rp(mix(o.col, '#f0e0a0', .45));
+  s.ell(15, 21, 8, 3.6, b); s.ell(24, 19, 4.4, 3.4, b); s.poly([[7, 21], [1, 25], [2, 22]], b); s.ell(15, 23, 6, 1.4, belly);
+  for (const x of [9, 19]) { s.line(x, 23, x - 2, 27, b); s.line(x + 2, 23, x + 4, 27, b); }
+  s.poly([[10, 18], [13, 13], [18, 18]], rp(o.fin || mix(o.col, '#e0a050', .4))); s.line(25, 21, 29, 21, null, b.out); s.fix(28, 22, '#f4ecd8'); s.fix(26, 22, '#f4ecd8'); eye(s, 25, 17);
+  return s; }
+function stonepile(o) { const s = Spr(32, 32);
+  [[16, 24, 9, 5], [14, 16, 7, 4.6], [17, 9, 5, 4]].forEach(([x, y, a, b2], i) => s.ell(x, y, a, b2, i % 2 ? R.stoneDark : R.stone));
+  for (const x of [8, 12, 20, 24]) s.line(x, 27, x + (x < 16 ? -2 : 2), 31, R.stoneDark);
+  s.fix(14, 15, o.glow || '#ffb04a'); s.fix(18, 15, o.glow || '#ffb04a'); s.line(13, 18, 19, 18, null, '#2a1c1f'); s.fix(15, 19, '#e8e0d0'); s.fix(17, 19, '#e8e0d0');
+  return s; }
+function mushroom(o) { const s = Spr(32, 32), cap = rp(o.col), stem = rp('#efe2c4');
+  s.rect(12, 16, 8, 12, stem); s.rect(9, 18, 3, 6, stem); s.rect(20, 18, 3, 6, stem); s.rect(12, 28, 3, 2, stem); s.rect(17, 28, 3, 2, stem);
+  s.ell(16, 11, 11, 6, cap); s.rect(5, 12, 22, 3, cap); [[10, 8], [16, 6], [21, 9], [13, 11], [19, 12]].forEach(([x, y]) => s.ell(x, y, 1.4, 1.2, rp('#f8f0e0')));
+  eye(s, 14, 19); eye(s, 18, 19); s.line(15, 22, 17, 22, null, stem.out);
+  return s; }
+function treant(o) { const s = Spr(32, 32), bark = rp(o.col || '#6a5236'), leaf = rp(o.leaf || '#5f8a3a');
+  s.rect(11, 10, 10, 15, bark); s.line(11, 13, 4, 6, bark); s.line(12, 14, 5, 7, bark); s.line(21, 13, 28, 6, bark); s.line(20, 14, 27, 7, bark);
+  for (const x of [9, 13, 19, 23]) s.line(x + 3, 25, x, 31, bark); s.ell(16, 6, 8, 5, leaf); s.ell(5, 5, 3, 2.6, leaf); s.ell(27, 5, 3, 2.6, leaf);
+  s.fix(14, 15, o.glow || '#c8f070'); s.fix(18, 15, o.glow || '#c8f070'); s.line(14, 19, 18, 19, null, bark.out); s.line(13, 21, 13, 24, null, bark.lo);
+  return s; }
+function plankgolem(o) { const s = Spr(32, 32), w = rp(o.col || '#8a6a4a'), d = rp('#5a4030');
+  s.rect(10, 9, 12, 14, w); for (let y = 11; y < 23; y += 3) s.line(10, y, 21, y, null, w.lo); s.ell(16, 6, 4.6, 4, w); s.rect(5, 10, 5, 10, d); s.rect(22, 10, 5, 10, d);
+  s.rect(11, 23, 4, 7, d); s.rect(17, 23, 4, 7, d); [[12, 12], [19, 17], [14, 20]].forEach(([x, y]) => s.fix(x, y, '#c8c8c8'));
+  s.ell(23, 22, 2.4, 2.4, rp('#9aa3ad')); s.fix(14, 6, '#80e0ff'); s.fix(18, 6, '#80e0ff');
+  if (o.barnacles) [[11, 10], [20, 14], [7, 18]].forEach(([x, y]) => { s.fix(x, y, '#e8e4d8'); s.fix(x + 1, y, '#b8b4a8'); });
+  return s; }
+/* spirits */
+function wisp(o) { const s = Spr(32, 32), g = ramp(o.col, { gl: .85 }), c = rp(mix(o.col, '#ffffff', .5));
+  s.poly([[16, 3], [23, 14], [22, 22], [16, 26], [10, 22], [9, 14]], g); s.ell(16, 19, 4.4, 4.4, c); s.fix(14, 18, '#2a1c1f'); s.fix(18, 18, '#2a1c1f');
+  [[8, 8], [24, 6], [26, 20], [6, 22]].forEach(([x, y]) => s.fix(x, y, c.base));
+  if (o.lantern) { s.rect(14, 26, 4, 4, R.gold); s.rect(15, 27, 2, 2, ramp('#fff2a0')); for (const x of [11, 21]) s.line(x, 22, x - 1, 30, R.leafCrop); }
+  return s; }
+function serpent(o) { const s = Spr(32, 32), b = ramp(o.col, { gl: .8 });
+  for (let i = 0; i < 22; i++) { const t = i / 21, x = 6 + t * 18 + Math.sin(t * 9) * 4, y = 27 - t * 18; s.ell(x, y, 2.6 - t, 2.6 - t, b); }
+  s.ell(25, 7, 3.4, 2.6, b); s.fix(26, 6, '#2a1c1f'); s.line(28, 8, 31, 9, null, '#e06a8a');
+  for (let i = 0; i < 4; i++) s.fix(8 + i * 5, 22 - i * 4, '#ffffff');
+  return s; }
+function veil(o) { const s = Spr(32, 32), v = ramp(o.col, { gl: .6 }), d = rp(mix(o.col, '#1a1424', .5));
+  s.poly([[16, 2], [22, 8], [25, 30], [20, 26], [16, 31], [12, 26], [7, 30], [10, 8]], v); s.ell(16, 9, 4, 4.4, d); s.fix(14, 9, '#ffb04a'); s.fix(18, 9, '#ffb04a');
+  for (const x of [11, 16, 21]) s.line(x, 14, x, 28, null, v.lo); if (o.ash) [[6, 6], [27, 10], [25, 22], [5, 18]].forEach(([x, y]) => s.fix(x, y, '#8a8080'));
+  return s; }
+function orb(o) { const s = Spr(32, 32), b = ramp(o.col, { gl: .85 });
+  s.ell(16, 16, 7, 7, b); s.ell(14, 13, 2, 2, rp('#ffffff')); for (let i = 0; i < 30; i++) { const a = i * Math.PI / 15; s.fix(16 + Math.cos(a) * 13, 16 + Math.sin(a) * 4, i % 3 ? '#d8d0f0' : '#ffffff'); }
+  [[6, 6], [27, 26], [26, 5]].forEach(([x, y]) => s.ell(x, y, 1.4, 1.4, b)); s.fix(16, 17, '#2a1c3a'); s.fix(14, 17, '#2a1c3a'); s.fix(18, 17, '#2a1c3a');
+  return s; }
+function shadow(o) { const s = Spr(32, 32), d = rp(o.col);
+  s.ell(16, 10, 5, 5.4, d); s.poly([[10, 13], [22, 13], [26, 30], [20, 25], [16, 31], [12, 25], [6, 30]], d); s.line(10, 16, 4, 24, d); s.line(22, 16, 28, 24, d);
+  for (const [x, y] of [[4, 24], [3, 26], [28, 24], [29, 26]]) s.dot(x, y, d); s.rect(13, 9, 2, 1, rp(o.eyes || '#c8a8ff')); s.rect(18, 9, 2, 1, rp(o.eyes || '#c8a8ff'));
+  [[7, 6], [25, 4], [27, 14]].forEach(([x, y]) => s.fix(x, y, d.hi));
+  return s; }
+function jelly(o) { const s = Spr(32, 32), b = ramp(o.col, { gl: .75 });
+  s.ell(16, 11, 9, 6, b); s.rect(7, 11, 19, 3, b); for (const x of [9, 13, 17, 21, 24]) for (let i = 0; i < 13; i++) s.dot(x + Math.round(Math.sin(i / 2 + x) * 1.2), 14 + i, b);
+  s.fix(13, 9, '#2a1c1f'); s.fix(19, 9, '#2a1c1f'); s.ell(12, 7, 1.6, 1, rp('#ffffff')); if (o.bell) { s.poly([[13, 15], [19, 15], [20, 20], [12, 20]], R.gold); s.fix(16, 21, R.gold.lo); }
+  return s; }
+/* beasts with their own build */
+function deer(o) { const s = Spr(32, 32), f = rp(o.fur), d = rp(mix(o.fur, '#3a2448', .35));
+  s.ell(14, 16, 8, 4, f); for (const x of [8, 11, 17, 20]) { s.rect(x, 19, 2, 6, x % 2 ? d : f); s.rect(x, 25, 2, 5, d); }
+  s.poly([[19, 14], [22, 6], [25, 7], [23, 15]], f); s.ell(25, 6, 3, 2.4, f); s.poly([[26, 6], [30, 7], [29, 9], [26, 8]], f); s.fix(29, 7, '#2a1c1f'); eye(s, 25, 5);
+  const a = rp(o.antler || '#cde8d8'); s.line(24, 4, 21, -1, a); s.line(22, 1, 19, 1, a); s.line(26, 4, 28, -1, a); s.line(27, 1, 30, 1, a); s.poly([[6, 15], [4, 12], [7, 13]], rp('#f4f0e8'));
+  if (o.glassy) [[10, 14], [15, 13], [19, 15]].forEach(([x, y]) => s.fix(x, y, '#ffffff')); if (o.bell) s.ell(22, 12, 1.6, 1.6, R.gold);
+  return s; }
+function armoured(o) { const s = Spr(32, 32), f = rp(o.fur), p = ramp(o.plate || mix(o.fur, '#ffffff', .25), { gl: .7 });
+  s.ell(15, 20, 11, 6, f); for (let i = 0; i < 5; i++) s.ell(8 + i * 3.6, 16, 3, 4, p); s.rect(6, 23, 4, 6, f); s.rect(20, 23, 4, 6, f); s.ell(26, 20, 4, 3.4, f); s.poly([[3, 20], [0, 24], [4, 23]], f);
+  eye(s, 27, 19); s.fix(30, 21, '#2a1c1f'); if (o.glassy) [[9, 13], [16, 12], [22, 14]].forEach(([x, y]) => s.fix(x, y, '#ffffff'));
+  if (o.spikes) for (let i = 0; i < 5; i++) s.poly([[7 + i * 3.6, 13], [8 + i * 3.6, 9], [9 + i * 3.6, 13]], p);
+  return s; }
+function toad(o) { const s = Spr(32, 32), b = rp(o.col), belly = rp(mix(o.col, '#f0e0a0', .45));
+  s.ell(16, 21, 10, 7, b); s.ell(16, 24, 7, 3, belly); s.ell(10, 14, 3, 2.8, b); s.ell(22, 14, 3, 2.8, b); eye(s, 10, 13); eye(s, 22, 13); s.line(9, 19, 23, 19, null, b.out);
+  s.poly([[5, 26], [1, 30], [9, 29]], b); s.poly([[27, 26], [31, 30], [23, 29]], b); [[12, 22], [19, 20], [21, 24]].forEach(([x, y]) => s.fix(x, y, b.lo));
+  if (o.candle) { s.rect(15, 8, 3, 7, rp('#efe2c4')); s.fix(16, 7, '#ffd060'); s.fix(16, 6, '#fff2a0'); s.line(15, 15, 18, 15, null, '#d8c8a0'); }
+  return s; }
+function hedgehog(o) { const s = Spr(32, 32), sp = rp(o.col), face = rp('#d8b890');
+  s.ell(15, 21, 10, 6.4, sp); for (let i = 0; i < 9; i++) { const a = Math.PI * (1.05 + i * .1); s.poly([[15 + Math.cos(a) * 8, 21 + Math.sin(a) * 5], [15 + Math.cos(a) * 13, 21 + Math.sin(a) * 9], [15 + Math.cos(a + .08) * 8, 21 + Math.sin(a + .08) * 5]], sp); }
+  s.ell(24, 23, 4, 3.4, face); s.fix(28, 23, '#2a1c1f'); eye(s, 24, 22); s.rect(10, 27, 3, 2, face); s.rect(19, 27, 3, 2, face);
+  if (o.thorns) [[8, 15], [14, 12], [20, 14]].forEach(([x, y]) => s.fix(x, y, '#e48aa8'));
+  return s; }
+function hare(o) { const s = Spr(32, 32), f = rp(o.fur), b = rp(mix(o.fur, '#ffffff', .4));
+  s.ell(14, 22, 7, 6, f); s.ell(14, 24, 4, 3, b); s.ell(19, 14, 4, 3.6, f); s.rect(16, 3, 2, 9, f); s.rect(20, 2, 2, 10, f); s.fix(17, 5, mix(o.fur, '#f0a0a0', .5)); s.fix(21, 4, mix(o.fur, '#f0a0a0', .5));
+  s.ell(7, 24, 2.4, 2.4, rp('#f4f0e8')); s.rect(16, 27, 5, 2, f); eye(s, 20, 13); s.fix(23, 15, '#e07a7a');
+  if (o.berries) [[12, 30], [16, 30]].forEach(([x, y]) => s.fix(x, y, '#5a2a6a'));
+  return s; }
+function fox(o) { const s = Spr(32, 32), f = rp(o.fur), w = rp('#f4ecd8');
+  s.poly([[7, 19], [1, 11], [3, 9], [9, 15]], f); s.poly([[1, 11], [0, 8], [3, 9]], w);
+  s.ell(14, 19, 7, 3.6, f); s.ell(14, 21, 4, 1.6, w); for (const x of [9, 12, 17, 20]) s.rect(x, 21, 2, 7, x % 2 ? rp('#3a2a24') : f);
+  s.ell(22, 14, 3.6, 3.2, f); s.poly([[24, 14], [30, 16], [24, 17]], f); s.poly([[20, 11], [20, 6], [22, 10]], f); s.poly([[23, 10], [25, 6], [25, 11]], f); s.fix(30, 16, '#2a1c1f'); eye(s, 23, 13); s.ell(23, 16, 2, 1, w);
+  if (o.thimble) s.rect(20, 7, 4, 3, R.gold);
+  return s; }
+function moth(o) { const s = Spr(32, 32), w = rp(o.col), d = rp(mix(o.col, '#3a2448', .35));
+  s.ell(9, 13, 7, 6, w); s.ell(23, 13, 7, 6, w); s.ell(10, 22, 5, 4, d); s.ell(22, 22, 5, 4, d); s.ell(9, 13, 2.4, 2.4, rp(o.eyespot || '#f0d060')); s.ell(23, 13, 2.4, 2.4, rp(o.eyespot || '#f0d060'));
+  s.rect(15, 9, 2, 16, rp('#5a4a3a')); s.line(15, 9, 12, 3, null, '#5a4a3a'); s.line(16, 9, 19, 3, null, '#5a4a3a'); s.fix(15, 10, '#2a1c1f'); s.fix(16, 10, '#2a1c1f');
+  if (o.lamp) { s.ell(16, 26, 2.4, 2.4, ramp('#ffd060', { gl: .9 })); s.fix(16, 25, '#fffbe0'); }
+  return s; }
+function kite(o) { const s = Spr(32, 32), c = ramp(o.col, { gl: .85 });
+  s.poly([[16, 2], [28, 13], [16, 24], [4, 13]], c); s.line(16, 2, 16, 24, null, c.hi); s.line(4, 13, 28, 13, null, c.lo); s.poly([[12, 8], [16, 4], [20, 8], [16, 12]], rp(mix(o.col, '#ffffff', .4)));
+  for (let i = 0; i < 6; i++) s.fix(16 + Math.sin(i) * 2, 25 + i, ['#ff8a8a', '#ffe08a', '#8affb0', '#8ac8ff', '#c08aff', '#ffffff'][i]); s.fix(13, 11, '#2a1c1f'); s.fix(19, 11, '#2a1c1f');
+  return s; }
+function cauldron() { const s = Spr(32, 32), m = R.iron;
+  s.ell(16, 21, 10, 7, m); s.rect(6, 15, 20, 3, m); s.ell(16, 15, 9, 2.4, ramp('#7ad07a', { gl: .9 })); [[12, 12], [18, 10], [15, 8]].forEach(([x, y]) => s.ell(x, y, 1.6, 1.6, ramp('#9ae09a')));
+  s.rect(9, 27, 3, 3, m); s.rect(20, 27, 3, 3, m); s.poly([[11, 31], [16, 26], [21, 31]], ramp('#ff8a3a', { gl: .85 }));
+  return s; }
+function fishstall() { const s = Spr(32, 32);
+  s.rect(4, 16, 24, 12, R.wood); for (let x = 3; x < 29; x += 4) s.rect(x, 6, 4, 6, (x / 4) % 2 ? rp('#3f6fd6') : rp('#f4ecd8')); s.rect(5, 12, 2, 6, R.wood); s.rect(25, 12, 2, 6, R.wood);
+  s.rect(6, 15, 20, 2, rp('#e8f0f4')); for (const [x, c] of [[8, '#9fb2c8'], [14, '#d09a48'], [20, '#ef8a6e']]) { s.ell(x + 2, 15, 3, 1.2, rp(c)); s.fix(x + 4, 15, '#2a1c1f'); }
+  return s; }
+const guard = () => knight({ metal: '#9aa3ad', tabard: '#3f5f94', plume: '#c8483c', glow: '#2a1c1f' });
+
+/* ---------- reassign the families that repeated ---------- */
+Object.assign(SPECS, {
+  rat: () => rodent({ col: '#8a7e70' }),
+  troll: () => brute({ skin: '#8a9a78', cloth: '#5a4a3a', moss: true, club: true }),
+  frostmaw: () => brute({ skin: '#bfe0f0', cloth: '#5a6a8a', ice: true, glow: '#7ae8ff', club: true }),
+  raider: () => stout({ skin: '#e0a880', cloth: '#7a6a4a', beard: '#c08a3a', helm: '#8a8a8a', horns: true, axe: true }),
+  wraith: () => floater({ cloth: '#6a5aa0', skin: '#c8c0e8', hood: '#3a2e5a' }),
+  shade: () => shadow({ col: '#3a2e54', eyes: '#c8a8ff' }),
+  emberlord: () => knight({ metal: '#7a5a4a', tabard: '#a03a2a', glow: '#ff8a3a', embers: true, blade: '#ff8a4a' }),
+  voidknight: () => knight({ metal: '#4a3a6a', tabard: '#2a1e3a', glow: '#c8a8ff', blade: '#8a5ad8', cape: '#2a1e3a' }),
+  hollowking: () => knight({ metal: '#5a4a7a', tabard: '#3a2a5a', glow: '#e0d0ff', crown: '#b08aff', blade: '#b08aff', cape: '#6a3a8a' }),
+  golem: () => golem({ col: '#c8c0a8', moss: true }),
+  bogsnapper: Q({ fur: '#5f8a4a', shell: '#4a6a3a' }),
+  rilljaw: () => newt({ col: '#4f9c91', fin: '#e0a050' }),
+  tideglass: () => isopod({ col: '#5da8a8', glass: true }),
+  cairnmimic: () => stonepile({}),
+  cinderloom: () => spider({ col: '#a8482a', web: true, glow: '#ffb04a', mark: '#ffb04a' }),
+  furnacemite: () => beetle({ col: '#e09545', horn: true, glowy: '#fff070' }),
+  thunderloom: () => scorpion({ col: '#5a8aa0', storm: true }),
+  tattercap: () => mushroom({ col: '#a56f91' }),
+  rootbound: () => treant({ col: '#6a5a36', leaf: '#788754' }),
+  wreckling: () => plankgolem({ col: '#9a765b', barnacles: true }),
+  kelplantern: () => wisp({ col: '#5c9d78', lantern: true }),
+  snowcoil: () => serpent({ col: '#b2d7d9' }),
+  murkbell: () => jelly({ col: '#718b6b', bell: true }),
+  ashveil: () => veil({ col: '#a36055', ash: true }),
+  paleorbit: () => orb({ col: '#a6a0bd' }),
+  echohusk: () => hunch({ col: '#625779', echo: true }),
+  reedstalker: () => lanky({ col: '#718b56', reeds: true, glow: '#e0f070' }),
+  siltmarionette: () => lanky({ col: '#87768f', strings: true, glow: '#e8e0f0' }),
+  galehermit: () => floater({ cloth: '#a5a28d', skin: '#d8b898', hood: '#8a8870', beard: '#e8e8e8', kite: true }),
+  threadsaint: () => floater({ cloth: '#8a728b', skin: '#c8b8c0', halo: true, threads: true }),
+  mossglass: () => deer({ fur: '#77a98a', antler: '#cde8d8', glassy: true }),
+  chimehorn: () => deer({ fur: '#9cb7bd', antler: '#e6c86a', bell: true }),
+  brineback: () => armoured({ fur: '#5a7a88', plate: '#9ab0b8' }),
+  glassback: () => armoured({ fur: '#a0604a', plate: '#e8d0c0', glassy: true, spikes: true }),
+  candletoad: () => toad({ col: '#997b55', candle: true }),
+  brambleback: () => hedgehog({ col: '#5f7a44', thorns: true }),
+  bellhare: () => hare({ fur: '#806a9b', berries: true }),
+  thimblefox: () => fox({ fur: '#c78354', thimble: true }),
+  lanternmoth: () => moth({ col: '#d6b85f', eyespot: '#8a5a2a', lamp: true }),
+  prismkite: () => kite({ col: '#b7a8d8' })
+});
+Object.assign(PET_SPECS, {
+  cinder: () => wisp({ col: '#e07a4a' }), bogwisp: () => wisp({ col: '#8fbf7a' }), hollowling: () => orb({ col: '#b08aff' }),
+  frostling: () => stout({ skin: '#cfe6f2', cloth: '#7a9ab8', beard: '#e8f6ff', helm: '#e8f6ff' }), whiskers: () => fox({ fur: '#8a8a94' }), toast: B({ plum: '#f0d878', wing: '#e0b850', beak: '#e88838', small: true, crest: '#e86a3a' })
+});
+Object.assign(FOLK, { witch: () => cauldron(), armoury: () => guard(), merchant: () => fishstall(), dwarf: () => stout({ skin: '#e0a880', cloth: '#6a5a8a', beard: '#c06a3a', helm: '#e0b040', axe: true }) });
 const creatureSprite = id => { const f = SPECS[id] || PET_SPECS[id] || FOLK[id] || ANIMAL[id]; return f ? f() : null; };
 Object.assign(A, { humanoid, creatureSprite, CREATURE_SPECS: SPECS, PET_SPECS, FOLK, ANIMAL,
   creatureUrl: id => A.url('creature:' + id, () => creatureSprite(id)),
