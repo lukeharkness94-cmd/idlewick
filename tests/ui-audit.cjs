@@ -27,9 +27,9 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
  await p.evaluate(()=>DQ.go('combat'));await p.waitForTimeout(900);await p.screenshot({path:'/tmp/idlewick-audit-combat.png'});
  // Real unlock path and a persistent first-use lesson.
  await p.evaluate(()=>{DQ.S=DQ.newState('Unlock');DQ.S.settings.muted=true;DQ.S.settings.notify=false;DQ.S.stats.chop=20;DQ.S.inv.wooden_trap=3;for(const k of ['attack','strength','defence','hitpoints'])DQ.S.xp[k]=DQ.data.XPF[10];DQ.checkActionUnlocks();DQ.closeModal();DQ.go('hunting');});
- assert.equal(await p.locator('.skill-coach').count(),1);assert.match(await p.locator('.skill-coach').innerText(),/Try this/);
- await p.evaluate(()=>{DQ.go('overview');DQ.go('hunting');});assert.equal(await p.locator('.skill-coach').count(),1);
- await p.locator('[data-do="lessonclose"]').click();await p.evaluate(()=>{DQ.go('overview');DQ.go('hunting');});assert.equal(await p.locator('.skill-coach').count(),0);
+ assert.equal(await p.locator('.modal .skill-coach').count(),1,'the quick guide is a pop-up');assert.match(await p.locator('.modal .skill-coach').innerText(),/Try this/);
+ assert.equal(await p.locator('#view .skill-coach').count(),0,'not inline at the top of the page');
+ await p.locator('.modal .m-act .btn.primary').click();await p.evaluate(()=>{DQ.go('overview');DQ.go('hunting');});await p.waitForTimeout(200);assert.equal(await p.locator('.skill-coach').count(),0,'shown once');
  assert.deepEqual(errors,[]);console.log(`PASS ${count} page/state/theme/viewport combinations; sidebar fit, unlocks and persistent tutorials.`);
  }finally{await b.close();}
 })().catch(e=>{console.error(e);process.exit(1)});

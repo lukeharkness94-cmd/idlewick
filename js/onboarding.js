@@ -50,7 +50,7 @@ DQ.lessonForPage=page=>{
 };
 DQ.acknowledgeLesson=id=>{DQ.initGuides();if(!lessons[id])return false;S().tut.done['lesson:'+id]=true;delete S().seen['tutorial:'+id];DQ.save();return true;};
 const intro=()=>`<section class="panel first-play-guide"><div class="first-play-art">${DQ.monSprite(D.MON.chicken,96)}</div><div><span class="k">A short introduction</span><h2>Welcome to Willowbrook</h2><p>Gather supplies, turn them into useful things, and help your village grow. Pick one task at a time; it keeps working while you explore or close the game.</p><div class="first-play-path"><span>Gather</span> → <span>Make &amp; equip</span> → <span>Fight &amp; restore</span></div><div class="btnrow wrap"><button class="btn primary" data-do="introstart">${S().q.first_steps?.s==='done'?'Explore activities':'Start First Steps'}</button><button class="btn sm" data-do="introskip">Skip introduction</button></div></div></section>`;
-const coachHtml=l=>`<aside class="skill-coach" aria-label="First-time ${esc(l.title)} guide"><span class="coach-art">${DQ.artImage(l.art[0],l.art[1],64,'',l.title)}</span><div><b>${esc(l.title)} · getting started</b><p>${esc(l.text)}</p><p class="lesson-goal"><strong>Try this:</strong> ${esc(l.goal)}</p></div><button class="btn sm" data-do="lessonclose" data-a="${l.id}">Got it</button></aside>`;
+const coachHtml=l=>`<div class="skill-coach pop" aria-label="First-time ${esc(l.title)} guide"><span class="coach-art">${DQ.artImage(l.art[0],l.art[1],96,'',l.title)}</span><div><p>${esc(l.text)}</p>${l.towards?`<p class="lesson-towards">${esc(l.towards)}</p>`:''}<p class="lesson-goal"><strong>Try this:</strong> ${esc(l.goal)}</p></div></div>`;
 let current=null,lastPage=null,lastState=null;
 const render=UI.render;
 UI.render=fresh=>{
@@ -61,7 +61,10 @@ UI.render=fresh=>{
   const view=document.getElementById('view');if(!view)return;
   /* the introduction now lives in Home's Next step card (one clear action); the panel stays for anyone who restarts the guides */
   if(UI.view==='overview'&&!S().tut.hidden&&!S().tut.done.intro&&S().tut.restarted)view.insertAdjacentHTML('afterbegin',intro());
-  if(current)view.insertAdjacentHTML('afterbegin',coachHtml(current));
+  /* the skill's quick guide is a pop-up the first time you open its page (Nov 2026). It counts as seen however it is
+     closed, waits while another dialog is open, and never repeats: a guide, not a forced tour. */
+  if(current&&!document.querySelector('.modal')&&!(DQ.sim&&DQ.sim.on)){const l=current;current=null;DQ.acknowledgeLesson(l.id);
+    DQ.modal({title:`${l.title}: getting started`,body:coachHtml(l),actions:[{label:'Got it',primary:true}]});}
 };
 Object.assign(UI.DO,{
   lessonclose:id=>{DQ.acknowledgeLesson(id);current=null;UI.render(false);},

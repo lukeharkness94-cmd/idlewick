@@ -2312,3 +2312,9 @@ p{font-size:inherit}
 #detailbox .tt-pic{display:grid;place-items:center;width:32px;height:32px}#detailbox .tt-pic :is(img,.ic,.gico){width:32px!important;height:32px!important}
 #detailbox .tt-l small{display:block;color:var(--mute);font-size:12.5px}#detailbox .tt-list li.ok{color:var(--good)}
 #tip .tt-list li:not(:has(b)){grid-template-columns:32px 1fr}
+/* skill quick guide as a pop-up */
+.skill-coach.pop{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;border:0;background:none;padding:0;margin:0}
+.skill-coach.pop .coach-art{display:grid;place-items:center;width:96px;height:96px;border-radius:12px;background:var(--panel2)}
+.skill-coach.pop p{margin:0 0 8px}.skill-coach.pop .lesson-towards{color:var(--mute);font-size:15px}
+@media (max-width:520px){.skill-coach.pop{grid-template-columns:1fr}.skill-coach.pop .coach-art{margin:0 auto}}
+.modal .skill-coach.pop p,.modal .skill-coach.pop .lesson-goal{font-size:16px!important;line-height:1.45}.modal .skill-coach.pop .lesson-towards{font-size:15px!important}
