@@ -101,19 +101,19 @@ DQ.sourcesOf = id => {
   for (const kind of ['fish', 'wood', 'mine', 'thieve']) for (const n of (D.NODES[kind] || []).filter(n => n.item === id)) {
     const sk = D.SK[n.skill], lock = !DQ.skillUnlocked(n.skill) ? ` (learn ${sk.name} first)` : DQ.lvl(n.skill) < n.lvl ? ` (you are ${DQ.lvl(n.skill)})` : '';
     const where = DQ.nodeRegional(n) ? `only in ${DQ.townUnlocked(n.town) ? D.TOWN[n.town].name : 'a later region'}` : DQ.nodeDiscovered(n) ? 'from any town' : DQ.townUnlocked(n.town) ? `found in ${D.TOWN[n.town].name}, then from any town` : 'found in a later region';
-    out.push(`${{ fish: 'Catch', wood: 'Chop', mine: 'Mine', thieve: 'Steal' }[kind]}: ${sk.name} ${n.lvl}${lock}, ${where}`);
+    out.push({ pic: DQ.artImage('skill', n.skill, 32, '', ''), text: `${{ fish: 'Catch', wood: 'Chop', mine: 'Mine', thieve: 'Steal' }[kind]}: ${sk.name} ${n.lvl}${lock}`, note: where, ok: DQ.skillUnlocked(n.skill) && DQ.lvl(n.skill) >= n.lvl });
   }
   for (const r of Object.values(D.RECIPES).filter(r => r.out && r.out[id]).sort((a, b) => a.lvl - b.lvl).slice(0, 2)) {
     const ing = Object.entries(r.in).map(([k, n]) => `${DQ.fmt(Math.min(DQ.have(k), n))}/${n} ${D.ITEMS[k] ? D.ITEMS[k].name.toLowerCase() : k}`).join(', ');
-    out.push(`Make: ${D.SK[r.skill].name} ${r.lvl}${!DQ.skillUnlocked(r.skill) ? ' (not learned yet)' : DQ.lvl(r.skill) < r.lvl ? ` (you are ${DQ.lvl(r.skill)})` : ''} · ${ing}`);
+    out.push({ pic: DQ.artImage('skill', r.skill, 32, '', ''), text: `Make: ${D.SK[r.skill].name} ${r.lvl}${!DQ.skillUnlocked(r.skill) ? ' (not learned yet)' : DQ.lvl(r.skill) < r.lvl ? ` (you are ${DQ.lvl(r.skill)})` : ''}`, note: ing, ok: DQ.skillUnlocked(r.skill) && DQ.lvl(r.skill) >= r.lvl && DQ.canMake && DQ.canMake(r) });
   }
   const shops = Object.entries(D.SHOPS || {}).filter(([t, l]) => l.includes(id) && DQ.townUnlocked(t)).map(([t]) => D.TOWN[t].name);
-  if (shops.length) out.push(`Buy: ${shops.slice(0, 3).join(', ')}${shops.length > 3 ? '…' : ''}`);
+  if (shops.length) out.push({ pic: DQ.ico('shop'), text: 'Buy in the shop', note: `${shops.slice(0, 3).join(', ')}${shops.length > 3 ? '…' : ''}`, ok: shops.includes(D.TOWN[S().town].name) });
   const mons = D.MONLIST.filter(m => (m.drops || []).some(d => d[0] === id)), met = mons.filter(m => (S().beast.kills[m.id] || 0) > 0);
-  if (met.length) out.push(`Dropped by ${met.slice(0, 3).map(m => m.name).join(', ')}${mons.length > met.length ? ' and creatures you have not met' : ''}`);
-  else if (mons.length && !it.unique) out.push(`Dropped by a creature${DQ.townUnlocked(mons[0].town) ? ` around ${D.TOWN[mons[0].town].name}` : ' further down the road'}`);
+  if (met.length) out.push({ pic: DQ.monSprite(met[0], 32), text: `Dropped by ${met.slice(0, 2).map(m => m.name).join(', ')}`, note: mons.length > met.length ? 'and creatures you have not met' : '' });
+  else if (mons.length && !it.unique) out.push({ pic: DQ.ico('paw'), text: 'Dropped by a creature', note: DQ.townUnlocked(mons[0].town) ? `around ${D.TOWN[mons[0].town].name}` : 'further down the road' });
   const qs = D.QUESTS.filter(q => !q.secret && q.reward && q.reward.items && q.reward.items[id] && DQ.questState(q) !== 'done');
-  if (qs.length) out.push(`Quest reward: ${qs.slice(0, 2).map(q => q.name).join(', ')}`);
+  if (qs.length) out.push({ pic: DQ.ico('quest'), text: 'Quest reward', note: qs.slice(0, 2).map(q => q.name).join(', ') });
   return out;
 };
 DQ.purposeOf = id => { const it = D.ITEMS[id]; if (!it) return ''; if (it.charm) { const n = it.charm.skill === 'research' ? 'Scholarship' : D.SK[it.charm.skill] ? D.SK[it.charm.skill].name : it.charm.skill; return it.charm.speed ? `While worn: ${n} is ${Math.round(it.charm.speed * 100)}% faster.` : `While worn: +${Math.round(it.charm.xp * 100)}% ${n} XP.`; } return it.sub || ''; };
@@ -121,7 +121,7 @@ const tipInfo0 = DQ.tips.item;
 DQ.tips.item = id => {
   const h = tipInfo0(id); if (!h) return h;
   const p = DQ.purposeOf(id), src = DQ.sourcesOf(id);
-  const add = `${p && !h.includes(esc(p)) ? `<div class="ok item-purpose">${esc(p)}</div>` : ''}${src.length ? `<div class="item-sources"><b>How to get it</b>${src.map(x => `<span>${esc(x)}</span>`).join('')}</div>` : ''}`;
+  const add = `${p && !h.includes(esc(p)) ? `<div class="ok item-purpose">${esc(p)}</div>` : ''}${src.length ? `<div class="tt-k">How to get it</div><ul class="tt-list">${src.map(x => `<li class="${x.ok ? 'ok' : ''}"><span class="tt-pic">${x.pic}</span><span class="tt-l">${esc(x.text)}${x.note ? `<small>${esc(x.note)}</small>` : ''}</span></li>`).join('')}</ul>` : ''}`;
   return add ? h.replace(/<\/div>\s*$/, add + '</div>') : h;
 };
 })();

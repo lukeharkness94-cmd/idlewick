@@ -2293,3 +2293,22 @@ p{font-size:inherit}
 .iconb{padding:0!important}
 #t-mute.tmute{width:44px;height:44px;border-radius:12px}
 #t-mute.tmute>.ic{margin:0}
+/* rich tooltips: a picture per line, one requirement per line, a tick when met */
+#tip .tt-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}#tip .tt-head img{width:32px;height:32px}
+#tip .tt-head b{display:block;font:700 16px var(--f-display)}#tip .tt-head small{color:#c8bea6;font-size:12.5px}
+#tip .tt-k{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#d8b66b;margin:6px 0 4px}
+#tip .tt-list{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+#tip .tt-list li{display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:8px;font-size:14px;line-height:1.25}
+#tip .tt-pic{display:grid;place-items:center;width:24px;height:24px}#tip .tt-pic :is(img,.ic,.gico){width:16px!important;height:16px!important}
+#tip .tt-l small{display:block;color:#a39a85;font-size:12px}
+#tip .tt-list li.ok{color:#9fd8a8}#tip .tt-list li b{font-size:13px;white-space:nowrap}#tip .tt-list li b .ic{width:14px!important;height:14px!important}
+#tip .tt-xp{display:flex;flex-direction:column;gap:3px}#tip .tt-xp .bar{height:6px}#tip .tt-xp small{color:#c8bea6;font-size:12.5px}
+#tip:has(.tt-list){max-width:330px}
+#tip .tt-list li{grid-template-columns:32px 1fr auto}
+#tip .tt-pic{width:32px;height:32px}#tip .tt-pic :is(img,.ic,.gico){width:32px!important;height:32px!important}
+#detailbox .tt-k{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--brass-hi);margin:8px 0 4px}
+#detailbox .tt-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+#detailbox .tt-list li{display:grid;grid-template-columns:32px 1fr;align-items:center;gap:8px;font-size:14.5px!important;line-height:1.3}
+#detailbox .tt-pic{display:grid;place-items:center;width:32px;height:32px}#detailbox .tt-pic :is(img,.ic,.gico){width:32px!important;height:32px!important}
+#detailbox .tt-l small{display:block;color:var(--mute);font-size:12.5px}#detailbox .tt-list li.ok{color:var(--good)}
+#tip .tt-list li:not(:has(b)){grid-template-columns:32px 1fr}

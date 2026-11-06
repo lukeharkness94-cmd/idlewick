@@ -32,7 +32,7 @@ UI.skillHero = (sk, extra = '') => {
   return h.slice(0, i) + `<div class="sh-level"><span class="lvbig"><span class="k">Level</span><b class="mono" data-b="lvl:${sk}"></b></span><div class="lvbar"><span class="bar big"><i data-b="xpbar:${sk}"></i></span><div class="sh-line mono"><span data-b="toNext:${sk}"></span><span data-b="eta:${sk}"></span></div></div></div>` + guideHtml(sk) + h.slice(i);
 };
 const origTip = DQ.tips.skill;
-DQ.tips.skill = sk => { const g = D.SKILL_GUIDE[sk]; return origTip(sk) + (g ? `<div class="dim" style="margin-top:4px">${g[0]}</div>` : ''); };
+DQ.tips.skill = sk => { const g = D.SKILL_GUIDE[sk]; return (DQ.tips.rail ? DQ.tips.rail(sk) : origTip(sk)) + (g ? `<div class="dim" style="margin-top:6px">${g[0]}</div>` : ''); };
 UI.B.eta = (e, sk) => {
   const rate = DQ.hist.slice(-12).reduce((a, b) => a + (b[sk] || 0), 0) / (Math.min(12, DQ.hist.length) * 5000);
   const L = DQ.lvl(sk); if (L >= 99) return UI.set(e, '');
