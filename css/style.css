@@ -2049,3 +2049,56 @@ img.pxscene{width:100%;height:auto!important;aspect-ratio:160/90;object-fit:cont
 small .ic.pxi,p .ic.pxi,li .ic.pxi,label .ic.pxi,.rw .ic.pxi,.chip .ic.pxi,.btn.sm .ic.pxi,.dk-top .ic.pxi,.packchip .ic.pxi,.tag .ic.pxi,.dchip .ic.pxi,.k .ic.pxi,.mono .ic.pxi,.sb-hint .ic.pxi,.unique-fx .ic.pxi,.cmprow .ic.pxi,.lvchip .ic.pxi,.splat .ic.pxi,.float .ic.pxi,.n-ic .ic.pxi,.g-eta .ic.pxi,.hint .ic.pxi,.ok .ic.pxi,.bad .ic.pxi,td .ic.pxi,th .ic.pxi,h3 .ic.pxi{width:16px!important;height:16px!important}
 #skilldock .skill-emblem{width:32px!important;height:32px!important}
 @media (max-width:600px){.h-btns .iconb .ic.pxi,.h-btns .packchip .ic.pxi{width:16px!important;height:16px!important}}
+/* ---------- nice little touches (js/touches.js) ---------- */
+.tod-tint{position:absolute;inset:0;pointer-events:none;z-index:3;transition:background 2s}
+body[data-tod="dawn"] .tod-tint{background:linear-gradient(#ffb08a30,#ffd8a018 60%,transparent)}
+body[data-tod="dusk"] .tod-tint{background:linear-gradient(#ff8a5a38,#7a4a8a30)}
+body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)}
+/* weather */
+.weather{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+.weather i{position:absolute;left:var(--x);top:-10%;display:block;animation:wx-fall var(--d) linear var(--t) infinite}
+.w-rain i{width:1px;height:10px;background:#cfe6ff99;animation-duration:calc(var(--d) * .25)}
+.w-snow i{width:3px;height:3px;background:#fff;box-shadow:0 0 0 1px #ffffff40}
+.w-pollen i{width:2px;height:2px;background:#fff6b0cc;animation-name:wx-drift}
+.w-leaves i{width:4px;height:3px;background:#c8803a;animation-name:wx-drift}
+.w-embers i{width:2px;height:2px;background:#ffb04a;top:auto;bottom:-5%;animation-name:wx-rise}
+.w-motes i{width:2px;height:2px;background:#c0a0ff;top:auto;bottom:-5%;animation-name:wx-rise}
+.w-wind i{width:18px;height:1px;background:#ffffff70;left:-20%;top:var(--x);animation-name:wx-wind}
+.w-mist i{width:40%;height:22%;background:radial-gradient(#d0e0d840,transparent 70%);top:55%;animation-name:wx-mist;animation-duration:calc(var(--d) * 4)}
+@keyframes wx-fall{to{transform:translate(-12px,130%) ;top:110%}}
+@keyframes wx-drift{0%{top:-5%;transform:translateX(0)}50%{transform:translateX(16px)}100%{top:105%;transform:translateX(-8px)}}
+@keyframes wx-rise{0%{bottom:-5%;opacity:0}20%{opacity:1}100%{bottom:105%;opacity:0;transform:translateX(10px)}}
+@keyframes wx-wind{to{left:120%}}
+@keyframes wx-mist{0%,100%{transform:translateX(-10%)}50%{transform:translateX(40%)}}
+/* villagers, your weapon and your companion in the work scene (3x like the hero; companion 2x) */
+.scene-folk{position:absolute;bottom:12px;z-index:1;animation:folk-idle 3.2s ease-in-out infinite}
+.scene-folk.f0{right:6%}.scene-folk.f1{right:22%;animation-delay:-1.4s}
+.scene-folk img{image-rendering:pixelated}
+@keyframes folk-idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.scene-gear{position:absolute;left:calc(8% + 70px);bottom:14px;z-index:1;transform:rotate(-24deg);transform-origin:bottom center}
+.scene-pet{position:absolute;left:calc(8% - 10px);bottom:12px;z-index:2}
+.scene-pet.hop{animation:pet-hop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pet-hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-14px)}}
+/* a fresh unique glows in the pack */
+.slot[data-fresh]{animation:fresh-glow 1.6s ease-in-out infinite}
+@keyframes fresh-glow{0%,100%{box-shadow:0 0 0 1px #e0b048,0 0 6px #e0b04860}50%{box-shadow:0 0 0 2px #ffe08a,0 0 16px #e0b048b0}}
+/* boss tells */
+#av-foe.tell::before{content:"!";position:absolute;top:6px;left:50%;transform:translateX(-50%);font:700 26px var(--f-body);color:#ffd060;text-shadow:0 2px 0 #000a;animation:tell-pulse .7s ease-in-out infinite;z-index:4}
+#av-foe{position:relative}
+@keyframes tell-pulse{0%,100%{opacity:.6;transform:translate(-50%,0) scale(1)}50%{opacity:1;transform:translate(-50%,-3px) scale(1.15)}}
+.encounter-arena.shake{animation:arena-shake .38s linear}
+@keyframes arena-shake{0%,100%{transform:translate(0)}20%{transform:translate(-4px,2px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,1px)}80%{transform:translate(2px,-1px)}}
+/* door note and the night-time home */
+.door-note{margin-top:14px;padding:12px 16px;background:#f3e6c4;color:#3a2a1a;border-radius:4px;transform:rotate(-1deg);box-shadow:0 4px 10px #0006;font-style:italic;max-width:420px}
+.door-note p{margin:0 0 4px}.door-note small{color:#6a4a2a}
+.night-home{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;background:linear-gradient(#0e1838,#182448);border-color:#2a3a6a}
+.night-home p{margin:4px 0 0;color:#d8dcf0}.night-home .k{color:#9ab0ff}
+.nh-art{position:relative;display:block}.nh-art img{width:96px!important;height:80px!important}
+.nh-glow{position:absolute;inset:30% 30% 20% 30%;background:radial-gradient(#ffd060a0,transparent 70%);animation:tell-pulse 3s ease-in-out infinite}
+.nh-fire .ic{width:32px;height:32px}
+.t-last{display:block;color:var(--brass);margin-top:2px}
+/* calm and reduced motion: everything still */
+.calm .weather,.calm .scene-folk,.calm .scene-pet.hop,.calm .slot[data-fresh],.calm #av-foe.tell::before,.calm .encounter-arena.shake,.calm .nh-glow{animation:none!important}
+.calm .weather{display:none}
+@media (prefers-reduced-motion:reduce){.weather{display:none}.scene-folk,.scene-pet.hop,.slot[data-fresh],#av-foe.tell::before,.encounter-arena.shake,.nh-glow{animation:none!important}}
+.scene-pet.floats{bottom:70px;animation:folk-idle 2.4s ease-in-out infinite}

@@ -2124,6 +2124,59 @@ img.pxscene{width:100%;height:auto!important;aspect-ratio:160/90;object-fit:cont
 small .ic.pxi,p .ic.pxi,li .ic.pxi,label .ic.pxi,.rw .ic.pxi,.chip .ic.pxi,.btn.sm .ic.pxi,.dk-top .ic.pxi,.packchip .ic.pxi,.tag .ic.pxi,.dchip .ic.pxi,.k .ic.pxi,.mono .ic.pxi,.sb-hint .ic.pxi,.unique-fx .ic.pxi,.cmprow .ic.pxi,.lvchip .ic.pxi,.splat .ic.pxi,.float .ic.pxi,.n-ic .ic.pxi,.g-eta .ic.pxi,.hint .ic.pxi,.ok .ic.pxi,.bad .ic.pxi,td .ic.pxi,th .ic.pxi,h3 .ic.pxi{width:16px!important;height:16px!important}
 #skilldock .skill-emblem{width:32px!important;height:32px!important}
 @media (max-width:600px){.h-btns .iconb .ic.pxi,.h-btns .packchip .ic.pxi{width:16px!important;height:16px!important}}
+/* ---------- nice little touches (js/touches.js) ---------- */
+.tod-tint{position:absolute;inset:0;pointer-events:none;z-index:3;transition:background 2s}
+body[data-tod="dawn"] .tod-tint{background:linear-gradient(#ffb08a30,#ffd8a018 60%,transparent)}
+body[data-tod="dusk"] .tod-tint{background:linear-gradient(#ff8a5a38,#7a4a8a30)}
+body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)}
+/* weather */
+.weather{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+.weather i{position:absolute;left:var(--x);top:-10%;display:block;animation:wx-fall var(--d) linear var(--t) infinite}
+.w-rain i{width:1px;height:10px;background:#cfe6ff99;animation-duration:calc(var(--d) * .25)}
+.w-snow i{width:3px;height:3px;background:#fff;box-shadow:0 0 0 1px #ffffff40}
+.w-pollen i{width:2px;height:2px;background:#fff6b0cc;animation-name:wx-drift}
+.w-leaves i{width:4px;height:3px;background:#c8803a;animation-name:wx-drift}
+.w-embers i{width:2px;height:2px;background:#ffb04a;top:auto;bottom:-5%;animation-name:wx-rise}
+.w-motes i{width:2px;height:2px;background:#c0a0ff;top:auto;bottom:-5%;animation-name:wx-rise}
+.w-wind i{width:18px;height:1px;background:#ffffff70;left:-20%;top:var(--x);animation-name:wx-wind}
+.w-mist i{width:40%;height:22%;background:radial-gradient(#d0e0d840,transparent 70%);top:55%;animation-name:wx-mist;animation-duration:calc(var(--d) * 4)}
+@keyframes wx-fall{to{transform:translate(-12px,130%) ;top:110%}}
+@keyframes wx-drift{0%{top:-5%;transform:translateX(0)}50%{transform:translateX(16px)}100%{top:105%;transform:translateX(-8px)}}
+@keyframes wx-rise{0%{bottom:-5%;opacity:0}20%{opacity:1}100%{bottom:105%;opacity:0;transform:translateX(10px)}}
+@keyframes wx-wind{to{left:120%}}
+@keyframes wx-mist{0%,100%{transform:translateX(-10%)}50%{transform:translateX(40%)}}
+/* villagers, your weapon and your companion in the work scene (3x like the hero; companion 2x) */
+.scene-folk{position:absolute;bottom:12px;z-index:1;animation:folk-idle 3.2s ease-in-out infinite}
+.scene-folk.f0{right:6%}.scene-folk.f1{right:22%;animation-delay:-1.4s}
+.scene-folk img{image-rendering:pixelated}
+@keyframes folk-idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.scene-gear{position:absolute;left:calc(8% + 70px);bottom:14px;z-index:1;transform:rotate(-24deg);transform-origin:bottom center}
+.scene-pet{position:absolute;left:calc(8% - 10px);bottom:12px;z-index:2}
+.scene-pet.hop{animation:pet-hop .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pet-hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-14px)}}
+/* a fresh unique glows in the pack */
+.slot[data-fresh]{animation:fresh-glow 1.6s ease-in-out infinite}
+@keyframes fresh-glow{0%,100%{box-shadow:0 0 0 1px #e0b048,0 0 6px #e0b04860}50%{box-shadow:0 0 0 2px #ffe08a,0 0 16px #e0b048b0}}
+/* boss tells */
+#av-foe.tell::before{content:"!";position:absolute;top:6px;left:50%;transform:translateX(-50%);font:700 26px var(--f-body);color:#ffd060;text-shadow:0 2px 0 #000a;animation:tell-pulse .7s ease-in-out infinite;z-index:4}
+#av-foe{position:relative}
+@keyframes tell-pulse{0%,100%{opacity:.6;transform:translate(-50%,0) scale(1)}50%{opacity:1;transform:translate(-50%,-3px) scale(1.15)}}
+.encounter-arena.shake{animation:arena-shake .38s linear}
+@keyframes arena-shake{0%,100%{transform:translate(0)}20%{transform:translate(-4px,2px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,1px)}80%{transform:translate(2px,-1px)}}
+/* door note and the night-time home */
+.door-note{margin-top:14px;padding:12px 16px;background:#f3e6c4;color:#3a2a1a;border-radius:4px;transform:rotate(-1deg);box-shadow:0 4px 10px #0006;font-style:italic;max-width:420px}
+.door-note p{margin:0 0 4px}.door-note small{color:#6a4a2a}
+.night-home{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;background:linear-gradient(#0e1838,#182448);border-color:#2a3a6a}
+.night-home p{margin:4px 0 0;color:#d8dcf0}.night-home .k{color:#9ab0ff}
+.nh-art{position:relative;display:block}.nh-art img{width:96px!important;height:80px!important}
+.nh-glow{position:absolute;inset:30% 30% 20% 30%;background:radial-gradient(#ffd060a0,transparent 70%);animation:tell-pulse 3s ease-in-out infinite}
+.nh-fire .ic{width:32px;height:32px}
+.t-last{display:block;color:var(--brass);margin-top:2px}
+/* calm and reduced motion: everything still */
+.calm .weather,.calm .scene-folk,.calm .scene-pet.hop,.calm .slot[data-fresh],.calm #av-foe.tell::before,.calm .encounter-arena.shake,.calm .nh-glow{animation:none!important}
+.calm .weather{display:none}
+@media (prefers-reduced-motion:reduce){.weather{display:none}.scene-folk,.scene-pet.hop,.slot[data-fresh],#av-foe.tell::before,.encounter-arena.shake,.nh-glow{animation:none!important}}
+.scene-pet.floats{bottom:70px;animation:folk-idle 2.4s ease-in-out infinite}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -6981,6 +7034,8 @@ const SFX = {
   death: () => [64, 60, 57, 52].forEach((m, i) => tone(mtof(m), .5, { v: .1, at: i * .16, type: 'triangle' })),
   travel: () => [0, 1, 2, 3, 4, 5].forEach(i => noise(.05, { type: 'lowpass', f: 500, v: .08, at: i * .22 })),
   unlock: () => { [72, 76, 79].forEach((m, i) => tone(mtof(m), .4, { v: .07, at: i * .08 })); },
+  /* a unique find: a bright rising shimmer with a bell on top, unlike ordinary loot */
+  unique: () => { [0, 4, 7, 11, 14].forEach((d, i) => tone(mtof(76 + d), .5, { v: .06, at: i * .06, type: 'triangle', wet: true })); bell(mtof(100), .6, .05); },
   restore: () => { [60, 64, 67].forEach((m, i) => tone(mtof(m), 1.4, { type: 'triangle', v: .05, at: i * .02, a: .25, wet: true })); [72, 76, 79, 84].forEach((m, i) => bell(mtof(m), .25 + i * .14, .05)); },
   region: () => { [55, 62, 67].forEach((m, i) => tone(mtof(m), 1.8, { type: 'triangle', v: .055, at: i * .18, a: .35, wet: true })); bell(mtof(79), .7, .05); },
   adventure: () => { [60, 64, 67, 72, 76, 79].forEach((m, i) => tone(mtof(m), .9, { type: 'triangle', v: .07, at: i * .1, wet: true })); bell(mtof(84), .7, .07); bell(mtof(91), .85, .04); },
@@ -7611,7 +7666,7 @@ DQ.claimQuest = id => {
   Object.entries(r.xp || {}).forEach(([k, v]) => DQ.addXp(k, v, { raw: true }));
   DQ.addCoins(r.coins || 0); Object.entries(r.items || {}).forEach(([k, v]) => DQ.grant(k, v));
   DQ.log(`Quest complete: ${q.name}.`, 'quest');
-  DQ.notify({ kind: 'quest', key: 'qd:' + id, icon: 'quest', col: '#f3d58a', title: `Quest complete: ${q.name}`, thanks: !!q.thanks, text: (q.thanks ? `${q.giver}: “${q.thanks}” ` : '') + 'Rewards: ' + DQ.rewardText(r, q).join(' · '), sound: 'quest', burst: true, ttl: 10000 });
+  DQ.notify({ kind: 'quest', key: 'qd:' + id, icon: 'quest', col: '#f3d58a', title: `Quest complete: ${q.name}`, thanks: !!q.thanks, text: (q.thanks ? `${q.giver}: “${q.thanks}” ` : '') + (DQ.titleNod ? DQ.titleNod(q) : '') + 'Rewards: ' + DQ.rewardText(r, q).join(' · '), sound: 'quest', burst: true, ttl: 10000 });
   DQ.achDirty = true; checkQuests(); DQ.emit('quests');
 };
 
@@ -7917,7 +7972,8 @@ function monsterAttack(f, m, ps, sty) {
   S().hp -= taken; DQ.splat('you', special ? taken + '!' : taken, taken ? 'hit' : 'miss', 900);
   if (S().hp <= 0 && U.laststand && !f.last) { f.last = 1; S().hp = 1; DQ.splat('you', 'Last stand!', 'miss', 1000); }
   if (taken) setTimeout(() => DQ.sfx('hurt'), 900);
-  if (special && !DQ.sim.on) DQ.log(`${m.name} unleashes ${sp.name}!`, 'bad');
+  if (special && !DQ.sim.on) { DQ.log(`${m.name} unleashes ${sp.name}!`, 'bad'); DQ.emit('bossSpecial', m); }
+  if (!DQ.sim.on && m.boss && m.boss.special) DQ.emit('bossTell', m, (f.ma + 1) % m.boss.special.every === 0);
   if (S().hp <= 0) { die(); return 'dead'; }
   if (f.hp <= 0) { kill(m); return 'dead'; }
   if (A('second') && !f.sw && S().hp < DQ.maxHp() * .3) { f.sw = 1; const h = Math.round(DQ.maxHp() * .3); S().hp += h; DQ.floatAt(document.querySelector('.hud .hp'), `Second wind +${h}`, '#5cc08a'); }
@@ -7939,7 +7995,7 @@ function kill(m) {
     if (uniq && !guaranteed && !found[id]) { const P = S().upity = S().upity || {}; P[id] = (P[id] || 0) + 1; pity = P[id] >= Math.ceil(2.5 / p); }
     if (!(guaranteed || pity || chance(Math.min(1, p * DQ.buffMult('luck') * (DQ.uniqueFx().fortune ? 1.25 : 1))))) continue;
     if (uniq) { const firstCopy = !found[id]; found[id] = 1; if (S().upity) delete S().upity[id];
-      if (firstCopy && !DQ.forecasting) { DQ.notify({ kind: 'unlock', key: 'unique:' + id, icon: D.ITEMS[id].ic, col: D.ITEMS[id].col, title: `Unique find: ${D.ITEMS[id].name}`, text: `${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, sound: 'gem', burst: true, ttl: 14000 }); if (DQ.journal) DQ.journal('loot', `${m.name} dropped ${D.ITEMS[id].name}. ${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, D.ITEMS[id].ic); } }
+      if (firstCopy && !DQ.forecasting) { DQ.notify({ kind: 'unlock', key: 'unique:' + id, icon: D.ITEMS[id].ic, col: D.ITEMS[id].col, title: `Unique find: ${D.ITEMS[id].name}`, text: `${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, sound: 'unique', burst: true, ttl: 14000 }); S().freshUnique = id; if (DQ.journal) DQ.journal('loot', `${m.name} dropped ${D.ITEMS[id].name}. ${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, D.ITEMS[id].ic); } }
     const n = rnd(a, b), rar = D.rarityOf(guaranteed ? 0 : p); got.push(id);
     if (id === 'coin_pouch') { const cc = Math.round(rnd(m.coins[0] + 5, m.coins[1] * 3 + 10) * DQ.coinMult() * (DQ.trick && DQ.trick('comb') ? 1.5 : 1)); extraCoins += cc; drops.push({ id, n: cc, rar, coins: true }); loot.push(`a pouch of ${fmt(cc)} coins`); continue; }
     if (id === 'treasure_chest') {
@@ -10722,6 +10778,8 @@ UI.render = fresh => {
 };
 
 /* ---------- The skills menu: a second menu, always in reach, so the things people open most are one click away ---------- */
+/* what the next level of a skill opens, for the left-menu tooltip */
+UI.nextUnlock = sk => { const L = DQ.lvl(sk), u = D.UNL && D.UNL[sk]; if (!u) return null; const lvl = Object.keys(u).map(Number).filter(l => l > L).sort((a, b) => a - b)[0]; return lvl ? { lvl, what: [].concat(u[lvl]).join(', ') } : null; };
 UI.renderDock = () => {
   const el = $('#skilldock'); if (!el) return;
   const cur = UI.view, ap = DQ.act && DQ.actPage ? DQ.actPage() : null;
@@ -10729,7 +10787,7 @@ UI.renderDock = () => {
     const lock = !DQ.skillUnlocked(s.id);
     const lv=DQ.lvl(s.id),need=lv>=99?0:Math.max(0,D.XPF[lv+1]-(S().xp[s.id]||0));
     const pop = UI.levelPop[s.id], popping = pop && Date.now() - pop < 1600;
-    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span>${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span><small data-b="toNext:${s.id}">${lv>=99?'Maximum level':`${fmt(need)} XP to level ${lv+1}`}</small>`}</span>${!lock && ap === s.page ? '<i class="dk-live"></i>' : ''}<span class="notice-badge" data-b="notice:${s.page}" hidden></span></button>`;
+    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" ${lock ? '' : (() => { const nx = UI.nextUnlock(s.id); return nx ? `data-tip="text:Next: level ${nx.lvl} → ${esc(nx.what)}"` : ''; })()} data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span>${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span><small data-b="toNext:${s.id}">${lv>=99?'Maximum level':`${fmt(need)} XP to level ${lv+1}`}</small>`}</span>${!lock && ap === s.page ? '<i class="dk-live"></i>' : ''}<span class="notice-badge" data-b="notice:${s.page}" hidden></span></button>`;
   }).join('');
   UI.upd();
 };
@@ -13137,6 +13195,123 @@ DQ.actDur = a => { const d = dur0(a); return a && a.kind !== 'fight' && (a.count
 
 </script>
 <script>
+/* Idlewick: nice little touches. Small, quiet details layered onto the existing scenes and systems, never new menus
+   or notifications: villagers return to restored places, the light follows your clock, each region has its weather,
+   your weapon and companion keep you company while you work, the journal keeps small memories, villagers leave notes
+   and nod at your title, unique finds sparkle, and boss specials are telegraphed. Motion is CSS (time-based) and is
+   switched off by Reduce effects and reduced-motion settings. Loaded after journal.js, before pixel_runtime.js. */
+(() => {
+const DQ = window.DQ, D = DQ.data, UI = DQ.ui, { esc, ico, fmt } = DQ;
+const S = () => DQ.S;
+const hash = str => { let h = 2166136261; for (const c of String(str)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) / 4294967296; };
+const dayKey = () => new Date().toDateString();
+
+/* ---------- 2. time of day, from the player's own clock ---------- */
+DQ.timeOfDay = (h = new Date().getHours()) => h >= 5 && h < 8 ? 'dawn' : h >= 8 && h < 18 ? 'day' : h >= 18 && h < 21 ? 'dusk' : 'night';
+const syncTod = () => { if (document.body && document.body.dataset) document.body.dataset.tod = DQ.timeOfDay(); };
+syncTod(); setInterval(syncTod, 5 * 60000);
+
+/* ---------- 3. weather by region ---------- */
+const WEATHER = { willowbrook: 'pollen', mossbarrow: 'leaves', saltmere: 'rain', ironpeak: 'snow', gloomfen: 'mist', emberfall: 'embers', skyreach: 'wind', hollow: 'motes' };
+const weatherHtml = town => {
+  const w = WEATHER[town]; if (!w) return '';
+  const n = w === 'mist' ? 5 : w === 'rain' ? 22 : 14;
+  return `<span class="weather w-${w}" aria-hidden="true">${Array.from({ length: n }, (_, i) => { const r = hash(town + i), r2 = hash(i + town + 'b'); return `<i style="--x:${Math.round(r * 100)}%;--d:${(2 + r2 * 4).toFixed(2)}s;--t:-${(r * 6).toFixed(2)}s;--s:${(.6 + r2 * .8).toFixed(2)}"></i>`; }).join('')}</span>`;
+};
+
+/* ---------- 1. villagers return to restored places ---------- */
+const TOWNSFOLK = { willowbrook: ['villager', 'farmer'], mossbarrow: ['farmhand', 'villager'], saltmere: ['dockhand', 'merchant'], ironpeak: ['dwarf', 'dockhand'], gloomfen: ['witch', 'villager'], emberfall: ['fireguard', 'dwarf'], skyreach: ['monk', 'villager'], hollow: ['monk', 'fireguard'] };
+const villagersHtml = town => {
+  const restored = Object.entries(D.PROJECTS || {}).filter(([id, p]) => p.town === town && S().projects[id]).length; if (!restored) return '';
+  const folk = (TOWNSFOLK[town] || ['villager']).slice(0, Math.min(2, restored)).filter(id => DQ.pixelArt && DQ.pixelArt.hasCreature(id));
+  return folk.map((id, i) => `<span class="scene-folk f${i}" aria-hidden="true">${DQ.artImage('creature', id, 96, '', '')}</span>`).join('');
+};
+
+/* ---------- 4 + 5. your weapon rests beside you; your companion keeps you company ---------- */
+const gearHtml = () => { const w = S().equip.weapon && D.ITEMS[S().equip.weapon]; return w ? `<span class="scene-gear" aria-hidden="true" title="${esc(w.name)}">${DQ.itemIco(w)}</span>` : ''; };
+const petHtml = () => { const p = S().pets.active && D.PET[S().pets.active]; return p ? `<span class="scene-pet ${['fish', 'ghost', 'bird'].includes(p.spr) ? 'floats' : ''}" aria-hidden="true">${DQ.petSprite(p, 64)}</span>` : ''; };
+const trick0 = DQ.trickNote;
+if (trick0) DQ.trickNote = (text, where) => { trick0(text, where); const pet = !(DQ.sim && DQ.sim.on) && !DQ.forecasting && document.querySelector('.scene-pet'); if (pet) { pet.classList.remove('hop'); void pet.offsetWidth; pet.classList.add('hop'); } };
+
+/* layered onto every render: work scenes and the arena */
+const render0 = UI.render;
+UI.render = fresh => {
+  render0(fresh);
+  const town = S().town, scene = document.querySelector('.activity-scene');
+  if (scene && !scene.querySelector('.weather')) {
+    scene.insertAdjacentHTML('beforeend', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town) + (scene.classList.contains('fish') ? '' : villagersHtml(town)) + (scene.querySelector('.scene-worker') ? gearHtml() + petHtml() : ''));
+  }
+  const arena = document.querySelector('.encounter-arena');
+  if (arena && !arena.querySelector('.weather')) arena.insertAdjacentHTML('afterbegin', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town));
+  /* 7. a fresh unique glows in the pack until you have looked at it */
+  if (S().freshUnique && UI.view === 'character') { const id = S().freshUnique; setTimeout(() => { if (S().freshUnique === id && UI.view === 'character') S().freshUnique = null; }, 4000); }
+  /* 11. a cosy home at night */
+  if (UI.view === 'overview' && DQ.timeOfDay() === 'night' && !document.querySelector('.night-home')) {
+    const view = document.getElementById('view'); if (view) view.insertAdjacentHTML('afterbegin', nightHtml());
+  }
+};
+const pack0 = UI.packGrid;
+if (pack0) UI.packGrid = () => { const h = pack0(), id = S().freshUnique; return id ? h.replace(`data-a="${id}" data-b="pack"`, `data-a="${id}" data-b="pack" data-fresh="1"`) : h; };
+
+/* ---------- 11. the night-time home ---------- */
+const nightHtml = () => {
+  const owned = S().house && S().house.owned, act = DQ.act ? DQ.actLabel().toLowerCase() : '';
+  return `<section class="panel night-home" aria-label="Night">${owned && DQ.cottageArt ? `<span class="nh-art">${DQ.cottageArt()}<i class="nh-glow"></i></span>` : `<span class="nh-art nh-fire">${ico('fire')}</span>`}<div><span class="k">Night in ${esc(D.TOWN[S().town].name)}</span><p>${owned ? `The cottage windows glow. ${esc(S().name)} rests by the fire` : `${esc(S().name)} warms their hands at the inn’s hearth`}${act ? `, while the night shift carries on ${esc(act)}` : ''}.</p></div></section>`;
+};
+
+/* ---------- 8. boss tells: a warning beat before the special, a nudge when it lands ---------- */
+DQ.on('bossTell', (m, next) => { const foe = document.getElementById('av-foe'); if (!foe) return; foe.classList.toggle('tell', !!next); });
+DQ.on('bossSpecial', () => {
+  const arena = document.querySelector('.encounter-arena'); if (!arena || S().settings.reduceFx) return;
+  arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake'); setTimeout(() => arena.classList.remove('shake'), 420);
+});
+
+/* ---------- 9. villagers notice your title (once each) ---------- */
+DQ.titleNod = q => {
+  const t = DQ.heroTitle && DQ.heroTitle(); if (!t || !q || !q.giver) return '';
+  const nods = S().nods = S().nods || {}; if (nods[q.giver]) return ''; nods[q.giver] = t;
+  return `${q.giver} looks again at you. “${t}? Word travels.” `;
+};
+
+/* ---------- 10. a note left on the door ---------- */
+const NOTES = {
+  willowbrook: [['Mabel', 'Saved you a pie. It is on the sill. Do not tell Orrin.'], ['Elder Wren', 'The well is running sweet today. Thought you would like to know.'], ['Sergeant Orrin', 'Goblins quiet. Too quiet. Come by when you can.']],
+  mossbarrow: [['Granny Bramble', 'The hens have been laying double since you left. Coincidence, I am sure.'], ['Granny Bramble', 'Your boots were muddy on my step. I cleaned them. You are welcome, dear.']],
+  saltmere: [['Harbourmaster Ilsa', 'A gull stole my lunch and I thought of you. No idea why.'], ['Harbourmaster Ilsa', 'Tide charts for the week are pinned by the door. Mind the spring tide.']],
+  ironpeak: [['Captain Hrod', 'Snow on the pass again. Bring a scarf.'], ['Foreman Dunmore', 'Found a nice seam of copper. Saved you a bucket.']],
+  gloomfen: [['Gravewarden Lysa', 'The dead stayed put all night. Small mercies.']],
+  emberfall: [['Magmasmith Kael', 'Forge is warm if you want to dry your socks.']],
+  skyreach: [['Abbot Seren', 'The bells rang on their own at dawn. A good sign.']],
+  hollow: [['The Last Herald', 'Even here, someone waits for you to come back.']]
+};
+const extras0 = UI.returnExtras;
+UI.returnExtras = sum => {
+  const h = extras0 ? extras0(sum) : '', gap = (sum && sum.real) || 0, list = NOTES[S().town] || NOTES.willowbrook;
+  if (gap < 4 * 3600e3 || hash(dayKey() + S().name) > .45) return h;
+  const [who, text] = list[Math.floor(hash(dayKey() + 'note') * list.length)];
+  return h + `<div class="door-note" role="note"><p>${esc(text)}</p><small>— ${esc(who)}</small></div>`;
+};
+
+/* ---------- 6. small memories in the journal ---------- */
+const mem = key => { const M = S().memories = S().memories || {}; if (M[key]) return false; M[key] = 1; return true; };
+const kill0 = DQ.recordKill;
+DQ.recordKill = (m, drops) => {
+  kill0(m, drops); if (DQ.forecasting || !DQ.journal) return;
+  const k = S().beast.kills[m.id] || 0;
+  if ((k === 100 || k === 1000) && mem(`kills:${m.id}:${k}`)) DQ.journal('memory', `Your ${fmt(k)}th ${m.name.toLowerCase()}. ${k === 1000 ? 'They tell stories about you now.' : 'You could do it in your sleep.'}`, 'skull');
+};
+const qev0 = DQ.qev;
+DQ.qev = (ev, key, n) => {
+  qev0(ev, key, n); if (DQ.forecasting || !DQ.journal) return;
+  if (ev === 'catch') { const node = D.NODE && D.NODE['fish:' + key]; if (node && node.lvl >= 20 && mem('fish:' + key)) DQ.journal('memory', `Landed your first ${node.name.toLowerCase()}.`, 'fish'); }
+};
+DQ.on('welcome', (sum, gap) => { if (gap >= 8 * 3600e3 && DQ.journal && mem('away8')) DQ.journal('memory', 'The longest you have been away: eight hours or more. The village kept your seat warm.', 'moon'); });
+const notify0 = DQ.notify;
+DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ.journal('memory', 'Knocked out for the first time. You woke by the campfire, a little wiser.', 'heart'); return notify0(o); };
+})();
+
+</script>
+<script>
 /* Idlewick: the pixel-art runtime. Installed last, it routes every art request in the game to the code-drawn sprites
    in pixelart.js, pixel_items.js, pixel_creatures.js and pixel_world.js. There are no image files and no fallback to
    painted art: DQ.pixelArt.coverage() lists any id without a finished design (it is empty). */
@@ -13314,7 +13489,7 @@ function titleHtml(has) {
   return `<div class="title-sky"></div><canvas id="tcv"></canvas>
     <svg class="title-hills" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><path d="M0 220q150-90 320-40t330-30 330 20 220-30v160H0z" fill="#0f1a1e"/><path d="M0 260q200-60 400-20t420-10 380 10v60H0z" fill="#0a1114"/><g fill="#070c0e"><path d="M120 280v-70l16-20 16 20v70z"/><path d="M180 280v-50l14-16 14 16v50z"/><path d="M880 280v-90l20-24 20 24v90z"/><path d="M940 280v-60l16-18 16 18v60z"/></g><g fill="#f3d58a"><rect x="130" y="224" width="5" height="8"/><rect x="900" y="206" width="5" height="9"/><rect x="950" y="236" width="5" height="8"/></g></svg>
     <div class="title-in"><div class="logo">${ico('candle')}<h1>Idlewick</h1><p>A cosy idle adventure. Light the wick, and keep the realm ticking.</p></div>
-    ${DQ.saveHealth ? `<p role="alert">${esc(DQ.saveHealth)}</p>` : ''}<div class="tmenu" id="tmenu">${has ? `<button class="tbtn primary" id="t-cont"><span>Continue</span><small>${esc(S.name)} · Hero ${DQ.advLvl()} · ${D.TOWN[S.town] ? D.TOWN[S.town].name : ''} · ${DQ.fmtTime(S.playtime)} played</small></button>` : ''}<button class="tbtn ${has ? '' : 'primary'}" id="t-new"><span>New game</span></button></div></div>
+    ${DQ.saveHealth ? `<p role="alert">${esc(DQ.saveHealth)}</p>` : ''}<div class="tmenu" id="tmenu">${has ? `<button class="tbtn primary" id="t-cont"><span>Continue</span><small>${esc(S.name)} · Hero ${DQ.advLvl()} · ${DQ.fmtTime(S.playtime)} played</small>${(() => { let a = ''; try { a = S.act ? DQ.actLabel(S.act) : ''; } catch (e) { a = ''; } const t = D.TOWN[S.town] ? D.TOWN[S.town].name : ''; return `<small class="t-last">${a ? `Last time: ${esc(a.charAt(0).toLowerCase() + a.slice(1))} in ${esc(t)}` : `Resting in ${esc(t)}`}</small>`; })()}</button>` : ''}<button class="tbtn ${has ? '' : 'primary'}" id="t-new"><span>New game</span></button></div></div>
     <button class="iconb tmute" id="t-mute" aria-label="Mute">${ico('sound')}</button><small class="ver">Version 0.4 · Close the game any time: your hero keeps working while you are away</small>`;
 }
 

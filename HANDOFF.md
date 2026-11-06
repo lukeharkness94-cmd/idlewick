@@ -253,3 +253,16 @@ Read `docs/experience-assessment.md` first: the prioritised findings, the before
 - **Adventure journal** (`js/journal.js`, Home → Journal): one line each for boss victories, story quests, decisions, discoveries, unique finds, new skills, Hero milestones, restorations, first arrivals and time away, grouped by day. Saved in `S().journal` (capped at 200). Older saves get one "story so far" entry. It listens to existing systems and never notifies.
 - **Bosses**: for bosses only, a weakness gives ×1.3 (×1.6 with Focus) and a resistance 70% (ordinary monsters unchanged). Old Tusk, Barnacle, Frostmaw, Morwenna, Pyrrhax, Zephyrion and the Hollow King were retuned so a fully prepared hero (field-guide counter, its abilities, 15 food) wins about 75–95% at the requirement; plain melee is a long shot from Frostmaw on. Evidence: `COUNTER=1 node scripts/sim-bosses.cjs`.
 - **Presentation**: skill unlocks use the full reveal dialog (owner request); the Hero level-up star is its own 32 × 32 design at 3×; work scenes draw every target at the hero's 3× scale; obvious tooltips and "how it works" boxes were removed (owner request).
+
+## Nice little touches (Nov 2026, Claude Code) — `js/touches.js`
+
+Quiet details layered onto existing scenes; no new menus or notifications. Motion is CSS (time-based) and is off with Reduce effects and reduced motion.
+- **Work scenes**: up to two townsfolk appear once a town has restored projects (land scenes only); your equipped weapon leans beside the hero; your active companion sits beside you (fish, ghosts and birds float) and hops when its trick fires. Armour already showed on the working hero.
+- **Time of day** follows the player's clock (`DQ.timeOfDay`, `body[data-tod]`, a `.tod-tint` layer) in work scenes and the arena. **Weather** by region (pollen, leaves, rain, snow, mist, embers, wind, motes).
+- **Journal memories**: 100th and 1000th defeat of a creature, first catch of each fish from level 20, first 8-hour absence, first knockout (`S().memories`).
+- **Unique finds**: their own chime (`unique` in audio.js) and a glow on the item in the pack until viewed (`S().freshUnique`).
+- **Boss tells**: a pulsing "!" over the boss before its special (`bossTell` event) and a short arena shake when it lands (`bossSpecial`).
+- **Title nod**: the first time each quest-giver sees a worn title, they mention it on the quest-complete card (`DQ.titleNod`, `S().nods`).
+- **Door notes**: after 4+ hours away, sometimes (seeded by day) a short note from a local villager in the welcome-back summary.
+- **Night home**: at night, Home opens with the lit cottage (or the inn's hearth) and what the night shift is doing.
+- **Left menu** tooltips name each skill's next unlock (`UI.nextUnlock`); the title screen's Continue says what you were last doing.

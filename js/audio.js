@@ -85,6 +85,8 @@ const SFX = {
   death: () => [64, 60, 57, 52].forEach((m, i) => tone(mtof(m), .5, { v: .1, at: i * .16, type: 'triangle' })),
   travel: () => [0, 1, 2, 3, 4, 5].forEach(i => noise(.05, { type: 'lowpass', f: 500, v: .08, at: i * .22 })),
   unlock: () => { [72, 76, 79].forEach((m, i) => tone(mtof(m), .4, { v: .07, at: i * .08 })); },
+  /* a unique find: a bright rising shimmer with a bell on top, unlike ordinary loot */
+  unique: () => { [0, 4, 7, 11, 14].forEach((d, i) => tone(mtof(76 + d), .5, { v: .06, at: i * .06, type: 'triangle', wet: true })); bell(mtof(100), .6, .05); },
   restore: () => { [60, 64, 67].forEach((m, i) => tone(mtof(m), 1.4, { type: 'triangle', v: .05, at: i * .02, a: .25, wet: true })); [72, 76, 79, 84].forEach((m, i) => bell(mtof(m), .25 + i * .14, .05)); },
   region: () => { [55, 62, 67].forEach((m, i) => tone(mtof(m), 1.8, { type: 'triangle', v: .055, at: i * .18, a: .35, wet: true })); bell(mtof(79), .7, .05); },
   adventure: () => { [60, 64, 67, 72, 76, 79].forEach((m, i) => tone(mtof(m), .9, { type: 'triangle', v: .07, at: i * .1, wet: true })); bell(mtof(84), .7, .07); bell(mtof(91), .85, .04); },

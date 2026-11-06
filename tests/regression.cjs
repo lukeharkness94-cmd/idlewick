@@ -495,6 +495,14 @@ test('adventure journal: records the moments that matter, backfills older saves,
  q.journal('rest','same');q.journal('rest','same');assert.equal(S.journal.length,n+1);
  for(let i=0;i<260;i++)q.journal('rest','entry '+i);assert.ok(S.journal.length<=200);
 });
+test('nice touches: clock-based time of day, one title nod per villager, quiet memories, occasional door notes',()=>{
+ const {q,load}=harness();load('adventures');load('lore');load('bestiary');load('journal');load('companions');load('touches');const S=q.S,D=q.data;
+ assert.equal(q.timeOfDay(6),'dawn');assert.equal(q.timeOfDay(12),'day');assert.equal(q.timeOfDay(19),'dusk');assert.equal(q.timeOfDay(23),'night');
+ S.beast.kills.goblin=250;q.setTitle('beast:goblin');assert.match(q.titleNod(D.QM.first_steps),/Goblin Slayer/);assert.equal(q.titleNod(D.QM.first_steps),'','only once per villager');
+ S.journal=[];S.beast.kills.rat=99;q.recordKill(D.MON.rat,[]);assert.ok(S.journal.some(e=>e.kind==='memory'&&/100th giant rat/.test(e.text)));
+ const n=S.journal.length;q.recordKill(D.MON.rat,[]);assert.equal(S.journal.length,n,'a memory is written once');
+ const short=q.ui.returnExtras({real:3600e3,items:{}});assert.ok(!/door-note/.test(short),'no note after a short absence');
+});
 test('restoration: new Willowbrook projects, regional materials, villager voices and legacy bonuses',()=>{
  const {q,load}=harness();load('fx');load('routes');const S=q.S,D=q.data;S.coins=1e6;
  const wb=q.projectsForTown('willowbrook').map(([id])=>id);for(const id of ['well','inn','forge','garden','library','watchtower'])assert.ok(wb.includes(id),id);
