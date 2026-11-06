@@ -17,7 +17,7 @@ Status: **approved by the project owner** (November 2026) after reviewing the fu
 | Buildings | 48 × 40 | 3× |
 | Town scenes | 160 × 90 | the largest whole number that fits |
 
-Sprites are only ever scaled by whole numbers, with `image-rendering: pixelated` (the `pxa` class). Never resample, blur or draw a sprite at a fractional scale.
+Sprites are only ever scaled by whole numbers, with `image-rendering: pixelated` (the `pxa` class). Never resample, blur or draw a sprite at a fractional scale. `pixel_runtime.js` enforces this at runtime: after every page change it snaps each sprite and icon to the nearest whole multiple of its native size (large scenes round down). Icons are 16 px beside text and 32 px in menus, buttons and the top bar.
 
 ## Light and colour
 

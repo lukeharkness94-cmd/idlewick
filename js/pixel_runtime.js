@@ -89,4 +89,30 @@ A.coverage = () => {
   for (const c of D.CROPS) for (let st = 0; st <= 3; st++) if (!A.plantStage(st, c.id)) miss.push('plant:' + c.id + ':' + st);
   return miss;
 };
+
+/* ---------- whole-number scales everywhere ----------
+   CSS sizes boxes for layout; a pixel sprite inside must still be drawn at an exact multiple of its own size, or its
+   pixels smear (1.5x) or vanish (0.94x) and it reads as low-res. After any change to the page, each sprite is snapped
+   to the nearest whole multiple of its native size (large scenes round down so they never overflow), and kept from
+   being squeezed by flex layouts. Reads first, then writes, once per frame. */
+const NAT_ICON = 16;
+const snapAll = root => {
+  const els = [...(root || document).querySelectorAll('img.pxa, i.ic.pxi')], plan = [];
+  for (const el of els) {
+    const nat = el.tagName === 'IMG' ? el.naturalWidth : NAT_ICON, natH = el.tagName === 'IMG' ? el.naturalHeight : NAT_ICON;
+    if (!nat) { if (el.tagName === 'IMG' && !el.dataset.snapWait) { el.dataset.snapWait = 1; el.addEventListener('load', () => queue(), { once: true }); } continue; }
+    const w = el.offsetWidth; if (!w) continue;
+    const ratio = w / nat, k = nat >= 64 ? Math.max(1, Math.floor(ratio + .001)) : Math.max(1, Math.round(ratio - .01));
+    const want = nat * k; if (Math.abs(w - want) < .5 && el.dataset.snapped) continue;
+    plan.push([el, want, natH * k]);
+  }
+  for (const [el, w, h] of plan) { el.style.setProperty('width', w + 'px', 'important'); el.style.setProperty('height', h + 'px', 'important'); el.style.setProperty('flex-shrink', '0'); el.style.setProperty('max-width', 'none', 'important'); el.style.setProperty('max-height', 'none', 'important'); el.dataset.snapped = 1; }
+};
+let pending = 0; const queue = () => { if (pending) return; pending = requestAnimationFrame(() => { pending = 0; snapAll(document); }); };
+if (typeof MutationObserver === 'function' && typeof document !== 'undefined' && document.documentElement) {
+  const start = () => { new MutationObserver(queue).observe(document.body, { childList: true, subtree: true }); queue(); };
+  if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+  addEventListener('resize', () => { document.querySelectorAll('[data-snapped]').forEach(el => { el.style.removeProperty('width'); el.style.removeProperty('height'); delete el.dataset.snapped; }); queue(); });
+}
+Q.snapPixels = snapAll;
 })();

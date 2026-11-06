@@ -2043,3 +2043,9 @@ img.pxscene{width:100%;height:auto!important;aspect-ratio:160/90;object-fit:cont
 .slot{position:relative}
 .gear-cmp{position:absolute;top:3px;right:5px;font-size:13px;line-height:1;font-weight:700;text-shadow:0 1px 0 #0008;pointer-events:none}
 .gear-cmp.up{color:#5cc08a}.gear-cmp.down{color:#e2574c}.gear-cmp.unique{color:#e0b048}
+/* Pixel icons only ever at whole-number scales (16 px sprites): 32 px in menus, buttons and the top bar, 16 px beside text.
+   A fractional size (24 px = 1.5x, 15 px = 0.94x) smears or drops pixels and reads as low-res. */
+.ic.pxi{width:32px!important;height:32px!important}
+small .ic.pxi,p .ic.pxi,li .ic.pxi,label .ic.pxi,.rw .ic.pxi,.chip .ic.pxi,.btn.sm .ic.pxi,.dk-top .ic.pxi,.packchip .ic.pxi,.tag .ic.pxi,.dchip .ic.pxi,.k .ic.pxi,.mono .ic.pxi,.sb-hint .ic.pxi,.unique-fx .ic.pxi,.cmprow .ic.pxi,.lvchip .ic.pxi,.splat .ic.pxi,.float .ic.pxi,.n-ic .ic.pxi,.g-eta .ic.pxi,.hint .ic.pxi,.ok .ic.pxi,.bad .ic.pxi,td .ic.pxi,th .ic.pxi,h3 .ic.pxi{width:16px!important;height:16px!important}
+#skilldock .skill-emblem{width:32px!important;height:32px!important}
+@media (max-width:600px){.h-btns .iconb .ic.pxi,.h-btns .packchip .ic.pxi{width:16px!important;height:16px!important}}
