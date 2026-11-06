@@ -427,6 +427,18 @@ test('slayer goals: titles and boss trophies are earned at their milestones and 
  const back=q.validateSave(JSON.parse(JSON.stringify(S)));assert.equal(JSON.stringify(back.house.wall),'["grubnash"]');
  const old=JSON.parse(JSON.stringify(S));delete old.house.wall;assert.ok(Array.isArray(q.validateSave(old).house.wall),'older saves get an empty wall');
 });
+test('companion tricks: halved passives, tricks fire through the real engine, forecasts stay pure',()=>{
+ const {q,load}=harness();load('lore');load('bestiary');load('companions');const S=q.S,D=q.data;
+ assert.equal(D.PET.gobbo.bonus.dmg,.015,'passive halved');assert.match(D.PET.gobbo.text,/Heckle/);assert.equal(Object.keys(D.TRICKS).length,17);
+ const own=id=>{S.pets.owned[id]={aff:0,found:1};q.setPet(id);};
+ own('bubbles');assert.ok(q.trick('school'));assert.ok(!q.trick('heckle'));
+ const catchN=()=>{S.inv={};q.startAct('fish','shrimp',{quiet:true});q.simulate(30*60000);return q.have('raw_shrimp');};
+ const withTrick=catchN();q.setPet(null);const without=catchN();assert.ok(withTrick>without,`school spotter adds catches (${withTrick} vs ${without})`);
+ own('stormchick');const a={kind:'fish',id:'shrimp',pace:'steady',count:0},b={...a,count:10};assert.ok(q.actDur(a)<q.actDur(b),'tailwind speeds the first ten actions');
+ own('toast');q.fxDirty();const g1=q.fx().grow;q.fx();assert.equal(q.fx().grow,g1,'fx trick applied once per recompute');q.setPet(null);q.fxDirty();assert.ok(q.fx().grow<g1);
+ own('bogwisp');S.beast.kills.goblin=1;const r=q.research(D.MON.goblin);q.setPet(null);assert.equal(r.rank,q.research(D.MON.goblin).rank+1,'wisp reveals one stage early');
+ for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[20];own('gobbo');S.hp=q.maxHp();const before=JSON.stringify(S);q.forecast('goblin');assert.equal(JSON.stringify(S),before,'forecast with a trick leaves the save untouched');
+});
 test('restoration: new Willowbrook projects, regional materials, villager voices and legacy bonuses',()=>{
  const {q,load}=harness();load('fx');load('routes');const S=q.S,D=q.data;S.coins=1e6;
  const wb=q.projectsForTown('willowbrook').map(([id])=>id);for(const id of ['well','inn','forge','garden','library','watchtower'])assert.ok(wb.includes(id),id);

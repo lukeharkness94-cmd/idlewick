@@ -268,17 +268,22 @@ function gatherDone(kind, n) {
   DQ.grant(n.item, qty);
   const x = DQ.addXp(sk, n.xp); floatXp(sk, x); floatItem(n.item, qty); if (DQ.act) DQ.act.count += qty;
   const ev = { fish: 'catch', wood: 'chop', mine: 'mine' }[kind]; S().stats[ev] += qty; DQ.qev(ev, n.id, qty);
+  /* companion tricks (js/companions.js) */
+  const T = k => DQ.trick && DQ.trick(k);
+  if (T('fetch') && chance(1 / 40)) { DQ.grant(n.item, 1); DQ.trickNote(`fetched ${itemName(n.item).toLowerCase()}!`); }
+  if (kind === 'fish' && T('school') && chance(1 / 12)) { DQ.grant(n.item, 1); DQ.trickNote('spotted a school! +1'); }
+  if (T('echo') && chance(1 / 20)) { DQ.grant(n.item, qty); DQ.trickNote('echo! +' + qty); }
   DQ.sfx(kind); DQ.petRoll('skill', sk); const k = extraCoins() * DQ.coinMult();
   if (kind === 'fish') {
-    if (chance(D.ECONOMY.fishPouchChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(8, 25) * k)); DQ.addCoins(c); DQ.floatAt(document.querySelector('.card.active'), `${ico('pouch')}+${c} coins`, '#f3d58a'); DQ.log(`You fish up a sodden coin pouch (${c} coins).`, 'good'); DQ.sfx('coin'); }
+    if (chance(D.ECONOMY.fishPouchChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(8, 25) * k * (T('comb') ? 1.5 : 1))); DQ.addCoins(c); DQ.floatAt(document.querySelector('.card.active'), `${ico('pouch')}+${c} coins`, '#f3d58a'); DQ.log(`You fish up a sodden coin pouch (${c} coins).`, 'good'); DQ.sfx('coin'); }
     if (chance(D.ECONOMY.fishChestChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(120, 260) * k)); DQ.addCoins(c); DQ.grant(DQ.weighted(D.GEM_WEIGHTS)); S().stats.rare++; DQ.log(`You haul up a sunken chest! ${c} coins and a gem.`, 'good'); DQ.notify({ kind: 'loot', key: 'chest', icon: 'pouch', col: '#f3d58a', title: 'Sunken chest', text: `You found ${c} coins and a gem.`, sound: 'gem', burst: true }); }
   } else if (kind === 'wood') {
-    if (chance(D.ECONOMY.woodNestChance * (1 + DQ.fx().find))) {
+    if (chance(D.ECONOMY.woodNestChance * (1 + DQ.fx().find) * (T('nuts') ? 2 : 1))) {
       if (chance(.5)) { const c = Math.max(1, Math.round(rnd(15, 45) * k)); DQ.addCoins(c); DQ.log(`A bird's nest holds ${c} coins.`, 'good'); DQ.floatAt(document.querySelector('.card.active'), `${ico('nest')}+${c} coins`, '#f3d58a'); DQ.sfx('coin'); }
       else { const g = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g); DQ.log(`A bird's nest holds a ${itemName(g).toLowerCase()}.`, 'good'); DQ.sfx('gem'); }
     }
   } else if (kind === 'mine') {
-    if (chance(D.ECONOMY.mineGemChance * (1 + DQ.fx().find))) { const g = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g); DQ.log(`You find an uncut ${itemName(g).toLowerCase()}!`, 'good'); DQ.floatAt(document.querySelector('.card.active .own'), `${ico('gem')}${itemName(g)}`, D.ITEMS[g].col); DQ.sfx('gem'); }
+    if (chance(D.ECONOMY.mineGemChance * (1 + DQ.fx().find) * (T('seam') ? 2 : 1))) { const g = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g); DQ.log(`You find an uncut ${itemName(g).toLowerCase()}!`, 'good'); DQ.floatAt(document.querySelector('.card.active .own'), `${ico('gem')}${itemName(g)}`, D.ITEMS[g].col); DQ.sfx('gem'); }
     if (chance(D.ECONOMY.mineCoinChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(10, 30) * k)); DQ.addCoins(c); DQ.log(`You unearth old coins (${c}).`, 'good'); }
   }
 }
@@ -288,8 +293,10 @@ function thieveDone(n) {
     const x = DQ.addXp('thieving', n.xp); floatXp('thieving', x);
     DQ.floatAt(document.querySelector('.card.active .own') || document.querySelector('.card.active'), `${ico('coin')}+${c} coins`, '#f3d58a');
     S().stats.thieve++; DQ.qev('thieve', n.id); DQ.sfx('thieve');
+    if (DQ.trick && DQ.trick('echo') && chance(1 / 20)) { DQ.addCoins(c); DQ.trickNote(`echo! +${c} coins`); }
     if (n.loot && chance(n.loot[1])) { DQ.grant(n.loot[0]); DQ.log(`You also lift ${itemName(n.loot[0]).toLowerCase()}.`, 'good'); }
   } else {
+    if (DQ.trick && DQ.trick('paws') && (S().gameTime || 0) - (S().pets.paws ?? -1e12) >= 60000) { S().pets.paws = S().gameTime || 0; DQ.trickNote('covered for you!'); return; }
     const d = Math.max(1, Math.round(rnd(1, n.dmg) * DQ.pace().risk)); S().hp -= d; DQ.sfx('hurt');
     DQ.log(`You are caught! (${d} damage)`, 'bad'); DQ.floatAt(document.querySelector('.hud .hp'), `-${d} health`, '#e2574c');
     if (S().hp <= 0) return die(); autoEat();
@@ -300,10 +307,13 @@ function recipeDone(r) {
   Object.entries(r.in).forEach(([k, n]) => DQ.take(k, n));
   const outId = Object.keys(r.out)[0];
   if (DQ.act) DQ.act.count++;
-  if (r.burn && chance(Math.min(.9, DQ.burnChance(r) * DQ.pace().risk))) { DQ.grant('burnt'); S().stats.burn++; DQ.floatAt(document.querySelector('.card.active'), 'Burnt!', '#e2574c'); DQ.sfx('hurt'); }
+  const taster = DQ.trick && DQ.trick('taster');
+  if (r.burn && !(taster && DQ.act && DQ.act.count === 1) && chance(Math.min(.9, DQ.burnChance(r) * DQ.pace().risk * (taster ? .75 : 1)))) { DQ.grant('burnt'); S().stats.burn++; DQ.floatAt(document.querySelector('.card.active'), 'Burnt!', '#e2574c'); DQ.sfx('hurt'); }
   else {
     const dbl = chance(DQ.dblChance(r.skill)) ? 2 : 1;
     Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n * dbl));
+    if (DQ.trick && DQ.trick('bellows') && r.skill === 'smithing' && r.tab === 'Bars' && chance(.1)) { Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); DQ.trickNote('an extra bar!'); }
+    if (DQ.trick && DQ.trick('echo') && chance(1 / 20)) { Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); DQ.trickNote('echo! a free one'); }
     const x = DQ.addXp(r.skill, r.xp); floatXp(r.skill, x); floatItem(outId, r.out[outId] * dbl);
     S().stats[r.ev] += 1; DQ.qev(r.ev, outId, 1); DQ.petRoll('skill', r.skill); DQ.sfx({ cooking: 'sizzle', smithing: 'anvil', crafting: 'stitch' }[r.skill]);
   }
@@ -400,6 +410,8 @@ function combatRound() {
     if (dealt && A('pin')) f.pinned = 2;
   }
   f.hp -= dealt; DQ.splat('foe', dealt, dealt ? 'hit ' + tag : 'miss', 0);
+  if (DQ.trick && DQ.trick('charge') && f.round === 1) { const c = Math.max(1, Math.round(ps.max * W.dmg * .5)); f.hp -= c; DQ.splat('foe', c, 'hit power', 250); }
+  if (DQ.trick && DQ.trick('ember') && f.pa % 6 === 0) { const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(1, Math.round(ps.max * .5))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 320); }
   DQ.sfx(sty === 'ranged' ? 'bow' : sty === 'magic' ? 'cast' : dealt ? 'hit' : 'miss');
   if (dealt) {
     let first = null;
@@ -417,6 +429,7 @@ function monsterAttack(f, m, ps, sty) {
   const special = m.boss && m.boss.special && f.ma % m.boss.special.every === 0, sp = special && m.boss.special;
   if (special && A('bash') && f.ma - (f.lastBash || -99) >= 8) { f.lastBash = f.ma; DQ.splat('you', 'Bash!', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your shield bash interrupts ${sp.name}!`, 'good'); return; }
   if (special && A('ward') && f.ma - (f.lastWard || -99) >= 6) { f.lastWard = f.ma; DQ.splat('you', 'Ward', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your ward absorbs ${sp.name}.`, 'good'); return; }
+  if (DQ.trick && DQ.trick('heckle') && !f.heckled && f.ma >= 2) { f.heckled = 1; DQ.splat('you', 'Oi!', 'miss', 600); if (!DQ.sim.on) DQ.trickNote('heckled it into missing!', document.getElementById('av-foe')); return; }
   let acc = hitChance((m.att + 8) * (64 + m.att), ps.defRoll); if (f.pinned > 0) { acc *= .75; f.pinned--; }
   let taken = 0;
   if (special || Math.random() < acc) {
@@ -426,6 +439,7 @@ function monsterAttack(f, m, ps, sty) {
       if (m.id === 'oldtusk' && sty === 'ranged') taken *= .5;
       if (m.id === 'pyrrhax' && f.lastEl === 'frost') taken *= .5;
       if (A('brace')) taken *= .5;
+      if (DQ.trick && DQ.trick('cold')) taken *= .8;
       if (m.id === 'frostmaw') f.frozen = 1;
       if (m.id === 'morwenna') f.hex = 4;
     } else if (A('kite')) taken *= .7;
@@ -452,7 +466,7 @@ function kill(m) {
     if (!guaranteed && D.ITEMS[id] && (D.ITEMS[id].type === 'gear' || D.ITEMS[id].type === 'ammo') && DQ.lockedSkillFor(id)) continue;
     if (!(guaranteed || chance(Math.min(1, p * DQ.buffMult('luck'))))) continue;
     const n = rnd(a, b), rar = D.rarityOf(guaranteed ? 0 : p); got.push(id);
-    if (id === 'coin_pouch') { const cc = Math.round(rnd(m.coins[0] + 5, m.coins[1] * 3 + 10) * DQ.coinMult()); extraCoins += cc; drops.push({ id, n: cc, rar, coins: true }); loot.push(`a pouch of ${fmt(cc)} coins`); continue; }
+    if (id === 'coin_pouch') { const cc = Math.round(rnd(m.coins[0] + 5, m.coins[1] * 3 + 10) * DQ.coinMult() * (DQ.trick && DQ.trick('comb') ? 1.5 : 1)); extraCoins += cc; drops.push({ id, n: cc, rar, coins: true }); loot.push(`a pouch of ${fmt(cc)} coins`); continue; }
     if (id === 'treasure_chest') {
       const cc = Math.round((rnd(m.coins[1] * 5, m.coins[1] * 12) + 50) * DQ.coinMult()); extraCoins += cc; const gem = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(gem); S().stats.rare++;
       const gl = (D.TOWN_GEAR[m.town] || []).filter(g => !DQ.lockedSkillFor(g)), gi = gl.length && chance(.35) ? DQ.pick(gl) : null; if (gi) DQ.grant(gi);

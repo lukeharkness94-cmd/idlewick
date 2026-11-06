@@ -1,4 +1,4 @@
-# Companion effects: design for approval (not built)
+# Companion effects: design for approval (built on the `companion-tricks` branch, not on main)
 
 **Now:** you have one active companion at a time. Each gives a small passive bonus (+2% to +8% to XP, coins, damage, damage taken or speed), and many companions share the same kind of bonus, so they feel interchangeable.
 
@@ -21,11 +21,11 @@
 | Frostling (ice troll pup) | Frostmaw | +5% damage | **Cold shoulder**: boss specials hit 20% softer. | monsterAttack (special) |
 | Bogwisp (marsh light) | Morwenna | +5% XP | **Will-o'-wisp**: reveals one unknown bestiary entry stage early for each creature. | research ranks |
 | Wyrmling (baby wyrm) | Pyrrhax | +7% damage, 3% less taken | **Ember breath**: every 6th attack adds a small fire hit (good against frost-weak foes). | combatRound |
-| Stormchick (roc hatchling) | Zephyrion | Every task 5% faster | **Tailwind**: travel and the first minute of each task are 25% faster. | actDur |
+| Stormchick (roc hatchling) | Zephyrion | Every task 5% faster | **Tailwind**: the first 10 actions of each non-combat task are 25% faster. | actDur |
 | Hollowling (crowned shade) | Hollow King | +8% XP and coins | **Echo**: 1 in 20 task completions repeats itself for free. | task completion |
 
 The eight signature wild companions from Hunting would keep their current simple bonuses for now. They could get tricks in a second pass.
 
-**Rules:** tricks never trigger during forecasts. Offline, they are applied the same way as live play but stay quiet (no floating text). Each companion card shows its trick in one sentence. No companion trick depends on a timer you have to watch.
+**Rules:** tricks apply in live play, offline catch-up and battle forecasts alike, so forecasts stay honest. Only live play shows their floating text. Each companion card shows its trick in one sentence. No companion trick depends on a timer you have to watch.
 
 **What I need from you:** approve the list as it stands, or mark any rows to change or drop. Then I'll build it, retest with the simulators, and report the before and after.
