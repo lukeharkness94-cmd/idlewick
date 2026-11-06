@@ -1,4 +1,4 @@
-# Companion effects: design for approval (built on the `companion-tricks` branch, not on main)
+# Companion effects (approved and built, Nov 2026)
 
 **Now:** you have one active companion at a time. Each gives a small passive bonus (+2% to +8% to XP, coins, damage, damage taken or speed), and many companions share the same kind of bonus, so they feel interchangeable.
 
@@ -28,4 +28,4 @@ The eight signature wild companions from Hunting would keep their current simple
 
 **Rules:** tricks apply in live play, offline catch-up and battle forecasts alike, so forecasts stay honest. Only live play shows their floating text. Each companion card shows its trick in one sentence. No companion trick depends on a timer you have to watch.
 
-**What I need from you:** approve the list as it stands, or mark any rows to change or drop. Then I'll build it, retest with the simulators, and report the before and after.
+**Status:** approved by the owner as listed and built in `js/companions.js`, with hooks in `js/engine.js`. Simulated: an hour of fishing with Bubbles gives about 8% more shrimp and about 3% less Fishing XP than the old passive. Gobbo, Tusky and Frostling show no measurable change at the first boss, where prepared players already win about 100%.
