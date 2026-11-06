@@ -104,3 +104,66 @@ The simulated hero stands at each boss's requirement and follows the field guide
 | Hollow King | Elder staff, Aether Blast | 67% | 13.3 | 79% |
 
 **Reading:** with plain melee the later bosses look like walls (0–46%). With the field guide's counter they are near-certain wins. The design intent (bosses as counter checks) works, but the gap is very wide. One caveat: this assumes the player has trained the counter style as far as their melee, which a melee-only player will not have done.
+
+
+## Review response (from build 438b1e1, provisional 7.5/10)
+
+No newer commits existed beyond two cosmetic ones (badd31b, 37c0acf) when this pass began. None of the numbers below come from players; they come from the real page in a browser or the deterministic simulators.
+
+### Confirmed problems and their causes
+1. **Gale (Storm feather) did nothing.** `skill_expansion.js` loads after `engine.js` and redefined `DQ.combatInterval` without the Gale multiplier. The earlier regression passed because its harness never loaded that file. Fixed by keeping one definition in `engine.js`. `tests/ui-effects.cjs` now drives the real page in the shipped script order, and it fails when the old override is restored ("Gale: 1520ms → 1520ms").
+2. **An audit of every unique effect and companion trick** in live play, offline catch-up and forecasts, plus removal, swaps and save/reload. 19 effects (18 exercised in fights, plus Gale's interval) and 16 of 17 tricks are exercised in the browser. Night study was checked by reading the code only (it scales research progress inside `DQ.researchTick`). Gale was the only effect that never applied. Five descriptions understated or hid their numbers (Venom, Ember arrows, Twin cut, Frostbite, Riposte), and four companion texts were vague or inaccurate (Fetch, Night study, Heckle; Early riser was already right). Each now states its magnitude, frequency and condition. Effects now show when they happen: green "+N" splats for healing, poison ticks, Twin cut and Arc labels, thorns and riposte numbers, and "Stunned" over the enemy.
+3. **Boss advice described the old multipliers** ("+50%", "half damage") after bosses moved to ×1.3 / 70%. All guidance (field guide, matchup lines, preparation steps, study notes, the Elemental Focus description) now reads from one table, `D.TYPE_RULES`, which the engine also uses.
+4. **Preparation advice had blind spots.**
+   - It never suggested a bow against a pierce weakness (it read a weapon-type field that bows lack).
+   - It could recommend a bow without arrows, or a spell without enough runes.
+   - It only knew about raw shrimp.
+   - It never mentioned ability slots, which turned out to matter more than anything else (below).
+5. **The earlier "plain melee 0%" evidence was misleading:** those runs slotted no abilities at all.
+
+### Boss preparation: is it a real choice? (`COMPARE=1 PARTS=1 node scripts/sim-bosses.cjs`)
+The simulator now loads the same gameplay systems as the page (field guide, enchantments, adventures, companion tricks). Each row is 96 forecast fights at the boss's requirement, with region gear.
+
+| Boss | No abilities | General (abilities, 15 food) | +25 food | +Might/Haste | +3 enchants | Counter | All alternatives | +5 levels |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Frostmaw | 0% | 25% | 86% | 78% | 41% | 94% | 100% | 68% |
+| Morwenna | 0% | 59% | 90% | 88% | 64% | 88% | 100% | 83% |
+| Pyrrhax | 0% | 27% | 81% | 64% | 34% | 98% | 100% | 59% |
+| Zephyrion | 0% | 26% | 79% | 67% | 41% | 85% | 100% | 49% |
+| Hollow King | 14% | 100% | 100% | 100% | 100% | 89% | 100% | 100% |
+
+Preparation costs, from the game's own numbers:
+- **Counter:** train a second style to the requirement level from scratch (372k XP at Frostmaw, 27M at Zephyrion), plus the gear.
+- **Potions:** 270 coins of Might and Haste, but Herbalism needs Scholarship research first.
+- **+3 enchants:** two each of sapphires, emeralds and rubies, plus runes.
+- **More food:** ten more cooked fish.
+- **+5 levels:** 0.97M XP (Frostmaw) to 68M XP (Zephyrion).
+
+Reading:
+- **No style is mandatory.** A melee player who slots their abilities and brings more food wins about 80–90%. The counter's advantage is efficiency: fewer supplies per win.
+- **Abilities were the trap:** with none slotted, the later bosses are unwinnable. The preparation advice now raises empty slots, abilities that don't work with the current weapon, and specials nothing answers.
+- **Failure now teaches:** a boss defeat names the most useful change.
+- **Early bosses** (Old Tusk, Barnacle) are won by every level-appropriate build; the counter only saves food.
+- **The final boss is the easiest of the late bosses** for a melee player in region (astral) gear, and the magic counter is weaker than melee there. This points to late-game magic falling behind (see proposals).
+
+### Proposals awaiting approval (not implemented)
+1. **Hollow King retune.** Candidates (general / magic counter / all alternatives): today 100% / 89% / 100%; health 560 & max 38 → 77% / 33% / 100%; health 620 & max 40 → 63% / 5% / 100%. Because magic collapses at these values, I recommend looking at proposal 2 first.
+2. **Late magic investigation.** Elder staff plus Aether Blast at Magic 92 trails astral melee badly. This needs a style-parity check before any boss retune.
+3. **Stacking every preparation guarantees victory** (100% for every boss). Accept it, since preparing is the point, or ask for a small tax (for example, potion durations that cover one fight rather than twenty minutes).
+4. **Healing draught as an emergency drink in combat** (auto-drunk below about 25% health, after food runs out). Today it is manual only, which makes Herbalism's first potion weak.
+5. **Bestiary understanding objectives** (one per entry, optional, each with a fair alternative):
+   - **Regular creatures:** "Defeat it 10 times using its weak point" or "reach 50 defeats". Reward: the Field notes research stage early, paying the existing per-stage coins.
+   - **Bosses:** "Answer its special 5 times (Brace, Shield Bash, Arcane Ward or Frostling)" or "defeat it 3 times". Reward: the Legend stage early and a gold rim on its trophy.
+   - **Avoided:** full-health and no-food conditions (punitive and easy to miss).
+   - **Tracking:** two counters per creature in `S().beast` (save-compatible).
+
+### What changed for the player
+- **Home:** one "Next step" card with what to do, why (Elder Wren's broken well), how you'll know it's done ("0/5 shrimp and 0/5 logs") and a sentence on stopping. The destination sits below as smaller buttons. The separate welcome panel is gone, and "Explore other suggestions" waits until First Steps is done.
+- **Herbalism:** a three-step first-goals panel (research, Healing draught with materials and where to get them, then Potion of Might and when it's worth it).
+- **Enchanting:** each worn item shows what the next rank adds, its share of the item's bonus, materials held, and the best first item.
+- **Advice:** owned potions, a ready enchantment or a brewable Might are offered only for a boss you're likely to lose to.
+
+### Remaining weak stretches
+- Herbalism's first useful potion is still a long way off (Scholarship at Hero 16, then Tier II research).
+- Hero 46+ (late Ironpeak) is still thin, and late magic may be underpowered.
+- Companion tricks are small (Gobbo's heckle barely moves a boss fight). That's by design for now.

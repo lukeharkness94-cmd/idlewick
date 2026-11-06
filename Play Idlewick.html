@@ -324,7 +324,7 @@ textarea{width:100%;background:var(--ground);border:1px solid var(--line2);borde
 .side .nm{font-weight:700}
 .splats{position:absolute;left:0;right:0;top:14px;height:70px;pointer-events:none;z-index:3}
 .splat{position:absolute;left:50%;top:0;width:34px;height:34px;margin-left:-17px;border-radius:50%;display:grid;place-items:center;font:700 14px var(--f-mono);color:#fff;animation:splat 1.1s cubic-bezier(.2,.7,.3,1) forwards;opacity:0}
-.splat.hit{background:var(--bad)}.splat.miss{background:#3a8bd0}
+.splat.hit{background:var(--bad)}.splat.miss{background:#3a8bd0}.splat.heal{background:#3f9a5c}.splat.poison{background:#6a9a2a}
 .mid{display:flex;flex-direction:column;align-items:center;gap:8px;width:84px}
 .mid .vs{font:700 18px var(--f-display);color:var(--mute)}.mid .bar{width:100%}
 .empty-foe{color:var(--mute);font-size:15px;max-width:160px}
@@ -2177,6 +2177,20 @@ body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)
 .calm .weather{display:none}
 @media (prefers-reduced-motion:reduce){.weather{display:none}.scene-folk,.scene-pet.hop,.slot[data-fresh],#av-foe.tell::before,.encounter-arena.shake,.nh-glow{animation:none!important}}
 .scene-pet.floats{bottom:70px;animation:folk-idle 2.4s ease-in-out infinite}
+/* Herbalism first goals, Enchanting recommendation */
+.herb-path{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.herb-path li{display:flex;flex-direction:column;gap:3px}.herb-path li small{color:var(--dim)}
+.herb-path li.done b{color:var(--good,#5cc08a)}.herb-path li.now b{color:var(--brass)}
+.herb-path .rws{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.rw.short{opacity:.7;border-style:dashed}
+.ench-row.recommended{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 8%,transparent)}
+/* Home: one clear next step; destination lower */
+.journey h2{font-size:22px}
+.journey-why{margin:6px 0}.journey-done{margin:4px 0 10px;color:var(--good,#5cc08a);display:flex;gap:6px;align-items:center}
+.journey-pause{margin:10px 0 0;color:var(--dim);font-size:14px}
+.journey .destination-picker{margin-top:14px;padding-top:10px;border-top:1px solid var(--line)}
+.journey .destination-picker .k{display:block;margin-bottom:6px}
+.journey .destination-choices .chip.sm{font-size:13px;padding:4px 10px}
+.herb-path li .btn{align-self:flex-start}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -3027,10 +3041,10 @@ const U = (key, name, text) => ({ key, name, text });
 Object.entries({
   chief_helm: U('roar', 'Battle roar', 'The first enemy attack of every fight misses.'),
   tusk_charm: U('hide', 'Thick hide', 'Normal enemy attacks deal 15% less damage.'),
-  barnacle_cutlass: U('riposte', 'Riposte', 'When you are hit, 20% chance to strike straight back.'),
-  frostmaw_pendant: U('slow', 'Frostbite', 'Enemies attack 15% more slowly.'),
+  barnacle_cutlass: U('riposte', 'Riposte', 'When you are hit, 20% chance to strike straight back for up to your max hit.'),
+  frostmaw_pendant: U('slow', 'Frostbite', 'Enemies wait 15% longer between attacks.'),
   witch_staff: U('curse', 'Bog hex', 'Each spell that lands weakens the enemy: 5% softer hits per stack, up to 15%.'),
-  emberfang_bow: U('ember', 'Ember arrows', 'Every shot adds a burst of fire damage, strong against fire-weak foes.'),
+  emberfang_bow: U('ember', 'Ember arrows', 'Every shot adds fire damage of up to a quarter of your max hit; more against fire-weak foes, less against fire-resistant ones.'),
   storm_feather: U('swift', 'Gale', 'You attack 10% faster.'),
   hollow_crown: U('sovereign', 'Crown of sorrow', 'Heal 8% of the damage you deal; boss specials hit 20% softer.')
 }).forEach(([id, u]) => { if (ITEMS[id]) ITEMS[id].unique = u; });
@@ -3038,8 +3052,8 @@ const uq = (id, o) => mk(id, Object.assign({ type: 'gear', rare: 1 }, o));
 uq('leechfang', { name: 'Leechfang', ic: 'dagger', col: '#9a3a4a', val: 400, slot: 'weapon', wtype: 'dagger', style: 'melee', req: { attack: 12 }, b: { atk: 10, str: 5 }, unique: U('lifesteal', 'Leech', 'Heal 20% of the damage you deal.'), flavour: 'The wolves of Mossbarrow carry it off from careless travellers. It never quite stops being warm.' });
 uq('wyrdwood_bow', { name: 'Wyrdwood longbow', ic: 'bow', col: '#6a8a4a', val: 450, slot: 'weapon', style: 'ranged', req: { ranged: 18 }, b: { rng: 11 }, unique: U('marked', "Hunter's mark", 'The first three shots of every fight always hit, for 50% more damage.'), flavour: 'Cut from a tree the scarecrows guard. It hums when it finds its mark.' });
 uq('thornback_buckler', { name: 'Thornback buckler', ic: 'shield', col: '#c87a5a', val: 500, slot: 'shield', req: { defence: 15 }, b: { def: 7 }, unique: U('thorns', 'Thorns', 'Enemies take 35% of the damage they deal to you.'), flavour: 'A rock crab shell, spines and all, strapped to a board.' });
-uq('vipers_kiss', { name: "Viper's kiss", ic: 'sword', col: '#5aa86a', val: 900, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 20 }, b: { atk: 13, str: 10 }, unique: U('poison', 'Venom', 'Hits poison the enemy (up to 3 stacks); poison bites each time it attacks.'), flavour: 'A coast-road bandit’s favourite. The groove along the blade is not decoration.' });
-uq('gale_sabre', { name: 'Gale sabre', ic: 'sword', col: '#8fd0e0', val: 1400, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 28 }, b: { atk: 20, str: 16 }, unique: U('twin', 'Twin cut', '20% chance to strike twice.'), flavour: 'Pirates swear it was forged in a storm. It is certainly light enough.' });
+uq('vipers_kiss', { name: "Viper's kiss", ic: 'sword', col: '#5aa86a', val: 900, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 20 }, b: { atk: 13, str: 10 }, unique: U('poison', 'Venom', 'Each hit adds a poison stack (up to 3). Whenever the enemy attacks, each stack deals 12% of your max hit.'), flavour: 'A coast-road bandit’s favourite. The groove along the blade is not decoration.' });
+uq('gale_sabre', { name: 'Gale sabre', ic: 'sword', col: '#8fd0e0', val: 1400, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 28 }, b: { atk: 20, str: 16 }, unique: U('twin', 'Twin cut', 'Each hit has a 20% chance to strike again for a full second hit.'), flavour: 'Pirates swear it was forged in a storm. It is certainly light enough.' });
 uq('wardens_greathelm', { name: "Warden's greathelm", ic: 'helm', col: '#7a8aa0', val: 1500, slot: 'head', req: { defence: 25 }, b: { def: 9 }, unique: U('bulwark', 'Bulwark', 'Boss special attacks hit 35% softer.'), flavour: 'Saltmere’s harbour wardens wore these on the sea wall. This one was given, not found.' });
 uq('smugglers_knot', { name: "Smuggler's knot", ic: 'ring', col: '#b89a5a', val: 1500, slot: 'ring', b: {}, unique: U('fortune', "Smuggler's luck", '+25% chance of item drops and +5% coins. No combat stats.'), flavour: 'A ring of tarred rope. Mother Silt’s people will know you by it.' });
 uq('thunderclap_maul', { name: 'Thunderclap maul', ic: 'hammer', col: '#c8b860', val: 4000, slot: 'weapon', wtype: 'hammer', style: 'melee', req: { attack: 40 }, b: { atk: 24, str: 38 }, unique: U('stun', 'Thunderclap', 'Hits have a 12% chance to stun: the enemy loses its next attack.'), flavour: 'Trolls use it to crack ice. It cracks most things.' });
@@ -3414,6 +3428,9 @@ D.STUDY_KILLS = 3;   // kills needed to learn a regular creature's weaknesses
 
 /* ---------- Abilities: slot two (three from combat level 40). They trigger on their own. ---------- */
 const AB = (id, name, ic, skill, lvl, style, text, extra) => Object.assign({ id, name, ic, skill, lvl, style, text }, extra || {});
+/* Damage-type rules, one table for the engine and every piece of advice (plan.js DQ.typeMult / DQ.typeRuleText).
+   Bosses are counter checks, not locks: weaknesses help and resistances hurt, but less than on ordinary creatures. */
+D.TYPE_RULES = { normal: { weak: 1.5, focus: 2, resist: .5 }, boss: { weak: 1.3, focus: 1.6, resist: .7 } };
 D.ABIL = [
   AB('power', 'Power Strike', 'strength', 'strength', 8, 'melee', 'Every 4th attack hits for double damage.'),
   AB('bash', 'Shield Bash', 'shield', 'defence', 12, 'melee', 'Interrupts a boss special attack. Needs a shield. Ready every 8 attacks.', { needShield: true }),
@@ -3423,7 +3440,7 @@ D.ABIL = [
   AB('aimed', 'Aimed Shot', 'ranged', 'ranged', 5, 'ranged', 'Every 3rd shot always hits for 1.5x damage.'),
   AB('pin', 'Pin Down', 'arrow_ammo', 'ranged', 25, 'ranged', 'Hits pin the monster: 25% less accurate for 2 attacks, and flying monsters are grounded.'),
   AB('kite', 'Keep Distance', 'bow', 'ranged', 40, 'ranged', 'Enemy normal attacks deal 30% less damage.'),
-  AB('focus', 'Elemental Focus', 'magic', 'magic', 10, 'magic', 'Weaknesses take 2x damage instead of 1.5x.'),
+  AB('focus', 'Elemental Focus', 'magic', 'magic', 10, 'magic', `Spells that hit a weakness deal ${D.TYPE_RULES.normal.focus}x instead of ${D.TYPE_RULES.normal.weak}x (against bosses ${D.TYPE_RULES.boss.focus}x instead of ${D.TYPE_RULES.boss.weak}x).`),
   AB('ward', 'Arcane Ward', 'ring_logo', 'magic', 30, 'magic', 'Absorbs a boss special attack. Ready every 6 attacks.'),
 ];
 D.AB = Object.fromEntries(D.ABIL.map(a => [a.id, a]));
@@ -7745,7 +7762,7 @@ DQ.combatInterval = () => {
   const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword;
   return Math.round(W.speed*(1-Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003))*(DQ.uniqueFx&&DQ.uniqueFx().swift?.9:1));
 };
-DQ.combatSpeedText = () => { const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword,ms=DQ.combatInterval(); return `${W.name}: ${(ms/1000).toFixed(2)}s per attack · ${Math.round((1-ms/W.speed)*100)}% faster from Combat level`; };
+DQ.combatSpeedText = () => { const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword,ms=DQ.combatInterval(),lv=Math.round(Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003)*100),gale=DQ.uniqueFx&&DQ.uniqueFx().swift; return `${W.name}: ${(ms/1000).toFixed(2)}s per attack · ${lv}% faster from Combat level${gale?' · 10% faster from Gale':''}`; };
 DQ.actDur = a => {
   let d = DQ.durFor(a.kind, a.id);
   if (a.kind === 'fight') d = DQ.combatInterval();
@@ -7773,20 +7790,20 @@ function gatherDone(kind, n) {
   const ev = { fish: 'catch', wood: 'chop', mine: 'mine' }[kind]; S().stats[ev] += qty; DQ.qev(ev, n.id, qty);
   /* companion tricks (js/companions.js) */
   const T = k => DQ.trick && DQ.trick(k);
-  if (T('fetch') && chance(1 / 40)) { DQ.grant(n.item, 1); DQ.trickNote(`fetched ${itemName(n.item).toLowerCase()}!`); }
-  if (kind === 'fish' && T('school') && chance(1 / 12)) { DQ.grant(n.item, 1); DQ.trickNote('spotted a school! +1'); }
-  if (T('echo') && chance(1 / 20)) { DQ.grant(n.item, qty); DQ.trickNote('echo! +' + qty); }
+  if (T('fetch') && chance(1 / 40)) { fxHit('fetch'); DQ.grant(n.item, 1); DQ.trickNote(`fetched ${itemName(n.item).toLowerCase()}!`); }
+  if (kind === 'fish' && T('school') && chance(1 / 12)) { fxHit('school'); DQ.grant(n.item, 1); DQ.trickNote('spotted a school! +1'); }
+  if (T('echo') && chance(1 / 20)) { fxHit('echo'); DQ.grant(n.item, qty); DQ.trickNote('echo! +' + qty); }
   DQ.sfx(kind); DQ.petRoll('skill', sk); const k = extraCoins() * DQ.coinMult();
   if (kind === 'fish') {
-    if (chance(D.ECONOMY.fishPouchChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(8, 25) * k * (T('comb') ? 1.5 : 1))); DQ.addCoins(c); DQ.floatAt(document.querySelector('.card.active'), `${ico('pouch')}+${c} coins`, '#f3d58a'); DQ.log(`You fish up a sodden coin pouch (${c} coins).`, 'good'); DQ.sfx('coin'); }
+    if (chance(D.ECONOMY.fishPouchChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(8, 25) * k * (T('comb') ? 1.5 : 1))); if (T('comb')) fxHit('comb'); DQ.addCoins(c); DQ.floatAt(document.querySelector('.card.active'), `${ico('pouch')}+${c} coins`, '#f3d58a'); DQ.log(`You fish up a sodden coin pouch (${c} coins).`, 'good'); DQ.sfx('coin'); }
     if (chance(D.ECONOMY.fishChestChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(120, 260) * k)); DQ.addCoins(c); DQ.grant(DQ.weighted(D.GEM_WEIGHTS)); S().stats.rare++; DQ.log(`You haul up a sunken chest! ${c} coins and a gem.`, 'good'); DQ.notify({ kind: 'loot', key: 'chest', icon: 'pouch', col: '#f3d58a', title: 'Sunken chest', text: `You found ${c} coins and a gem.`, sound: 'gem', burst: true }); }
   } else if (kind === 'wood') {
-    if (chance(D.ECONOMY.woodNestChance * (1 + DQ.fx().find) * (T('nuts') ? 2 : 1))) {
+    if (chance(D.ECONOMY.woodNestChance * (1 + DQ.fx().find) * (T('nuts') ? 2 : 1))) { if (T('nuts')) fxHit('nuts');
       if (chance(.5)) { const c = Math.max(1, Math.round(rnd(15, 45) * k)); DQ.addCoins(c); DQ.log(`A bird's nest holds ${c} coins.`, 'good'); DQ.floatAt(document.querySelector('.card.active'), `${ico('nest')}+${c} coins`, '#f3d58a'); DQ.sfx('coin'); }
       else { const g = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g); DQ.log(`A bird's nest holds a ${itemName(g).toLowerCase()}.`, 'good'); DQ.sfx('gem'); }
     }
   } else if (kind === 'mine') {
-    if (chance(D.ECONOMY.mineGemChance * (1 + DQ.fx().find) * (T('seam') ? 2 : 1))) { const g = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g); DQ.log(`You find an uncut ${itemName(g).toLowerCase()}!`, 'good'); DQ.floatAt(document.querySelector('.card.active .own'), `${ico('gem')}${itemName(g)}`, D.ITEMS[g].col); DQ.sfx('gem'); }
+    if (chance(D.ECONOMY.mineGemChance * (1 + DQ.fx().find) * (T('seam') ? 2 : 1))) { if (T('seam')) fxHit('seam'); const g = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g); DQ.log(`You find an uncut ${itemName(g).toLowerCase()}!`, 'good'); DQ.floatAt(document.querySelector('.card.active .own'), `${ico('gem')}${itemName(g)}`, D.ITEMS[g].col); DQ.sfx('gem'); }
     if (chance(D.ECONOMY.mineCoinChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(10, 30) * k)); DQ.addCoins(c); DQ.log(`You unearth old coins (${c}).`, 'good'); }
   }
 }
@@ -7796,10 +7813,10 @@ function thieveDone(n) {
     const x = DQ.addXp('thieving', n.xp); floatXp('thieving', x);
     DQ.floatAt(document.querySelector('.card.active .own') || document.querySelector('.card.active'), `${ico('coin')}+${c} coins`, '#f3d58a');
     S().stats.thieve++; DQ.qev('thieve', n.id); DQ.sfx('thieve');
-    if (DQ.trick && DQ.trick('echo') && chance(1 / 20)) { DQ.addCoins(c); DQ.trickNote(`echo! +${c} coins`); }
+    if (DQ.trick && DQ.trick('echo') && chance(1 / 20)) { fxHit('echo'); DQ.addCoins(c); DQ.trickNote(`echo! +${c} coins`); }
     if (n.loot && chance(n.loot[1])) { DQ.grant(n.loot[0]); DQ.log(`You also lift ${itemName(n.loot[0]).toLowerCase()}.`, 'good'); }
   } else {
-    if (DQ.trick && DQ.trick('paws') && (S().gameTime || 0) - (S().pets.paws ?? -1e12) >= 60000) { S().pets.paws = S().gameTime || 0; DQ.trickNote('covered for you!'); return; }
+    if (DQ.trick && DQ.trick('paws') && (S().gameTime || 0) - (S().pets.paws ?? -1e12) >= 60000) { S().pets.paws = S().gameTime || 0; fxHit('paws'); DQ.trickNote('covered for you!'); return; }
     const d = Math.max(1, Math.round(rnd(1, n.dmg) * DQ.pace().risk)); S().hp -= d; DQ.sfx('hurt');
     DQ.log(`You are caught! (${d} damage)`, 'bad'); DQ.floatAt(document.querySelector('.hud .hp'), `-${d} health`, '#e2574c');
     if (S().hp <= 0) return die(); autoEat();
@@ -7810,13 +7827,13 @@ function recipeDone(r) {
   Object.entries(r.in).forEach(([k, n]) => DQ.take(k, n));
   const outId = Object.keys(r.out)[0];
   if (DQ.act) DQ.act.count++;
-  const taster = DQ.trick && DQ.trick('taster');
+  const taster = DQ.trick && DQ.trick('taster'); if (taster && r.burn && DQ.act && DQ.act.count === 1) fxHit('taster');
   if (r.burn && !(taster && DQ.act && DQ.act.count === 1) && chance(Math.min(.9, DQ.burnChance(r) * DQ.pace().risk * (taster ? .75 : 1)))) { DQ.grant('burnt'); S().stats.burn++; DQ.floatAt(document.querySelector('.card.active'), 'Burnt!', '#e2574c'); DQ.sfx('hurt'); }
   else {
     const dbl = chance(DQ.dblChance(r.skill)) ? 2 : 1;
     Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n * dbl));
-    if (DQ.trick && DQ.trick('bellows') && r.skill === 'smithing' && r.tab === 'Bars' && chance(.1)) { Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); DQ.trickNote('an extra bar!'); }
-    if (DQ.trick && DQ.trick('echo') && chance(1 / 20)) { Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); DQ.trickNote('echo! a free one'); }
+    if (DQ.trick && DQ.trick('bellows') && r.skill === 'smithing' && r.tab === 'Bars' && chance(.1)) { fxHit('bellows'); Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); DQ.trickNote('an extra bar!'); }
+    if (DQ.trick && DQ.trick('echo') && chance(1 / 20)) { fxHit('echo'); Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); DQ.trickNote('echo! a free one'); }
     const x = DQ.addXp(r.skill, r.xp); floatXp(r.skill, x); floatItem(outId, r.out[outId] * dbl);
     S().stats[r.ev] += 1; DQ.qev(r.ev, outId, 1); DQ.petRoll('skill', r.skill); DQ.sfx({ cooking: 'sizzle', smithing: 'anvil', crafting: 'stitch' }[r.skill]);
   }
@@ -7835,6 +7852,10 @@ function alchDone(id) {
 DQ.isEquipped = id => Object.values(S().equip).includes(id);
 
 /* ---------- Combat ---------- */
+/* every unique effect and companion trick counts its triggers here (transient, never saved): tests prove each one
+   fires in live play, offline catch-up and forecasts, and the arena shows the moment it happens */
+const fxHit = (k, n = 1) => { const H = DQ.effectHits = DQ.effectHits || {}; H[k] = (H[k] || 0) + n; };
+DQ.fxHit = fxHit;
 const pickSpell = () => {
   const sp = D.SPELLS.find(s => s.id === S().spell);
   const ok = s => s && DQ.lvl('magic') >= s.lvl && DQ.have('rune') >= s.runes;
@@ -7884,7 +7905,7 @@ function die() {
 DQ.splat = (side, text, kind, delay) => { if (!DQ.sim.on) DQ.emit('splat', side, text, kind, delay); };
 
 function combatRound() {
-  const f = DQ.fight, m = D.MON[f.id], ps = DQ.pstats(), A = DQ.ability, U = DQ.uniqueFx(); f.round++; f.pa = (f.pa || 0) + 1;
+  const f = DQ.fight, m = D.MON[f.id], ps = DQ.pstats(), A = DQ.ability, U = DQ.uniqueFx(); DQ.lastFoe = f.id; f.round++; f.pa = (f.pa || 0) + 1;
   const sty = ps.style, W = D.WTYPES[D.weaponType()], mhp = m.hp;
   if (sty === 'ranged') {
     if (S().ammo.n <= 0 && S().ammo.id && DQ.have(S().ammo.id)) { const n = Math.min(DQ.have(S().ammo.id), 500); DQ.take(S().ammo.id, n); S().ammo.n += n; }
@@ -7905,28 +7926,28 @@ function combatRound() {
     const weak = wr.weak.includes(dtype), resist = wr.resist.includes(dtype) && !(grounded && D.PHYSICAL.includes(dtype));
     /* bosses are counter checks, not locks: a weakness helps a lot and a resistance hurts, but less than on ordinary
        monsters, so preparation matters without guaranteeing the fight (scripts/sim-bosses.cjs COUNTER=1) */
-    let mult = weak ? (m.boss ? (A('focus') ? 1.6 : 1.3) : (A('focus') ? 2 : 1.5)) : resist ? (m.boss ? .7 : .5) : 1; tag = weak ? 'weak' : resist ? 'resist' : '';
+    let mult = weak ? DQ.typeMult(m, 'weak') : resist ? DQ.typeMult(m, 'resist') : 1; tag = weak ? 'weak' : resist ? 'resist' : '';
     let acc = ps.acc * W.acc * (weak ? 1.1 : 1), max = ps.max * W.dmg * mult * (1 + DQ.beastBonus(m.id)), sure = false;
     if (A('aimed') && f.pa % 3 === 0) { sure = true; max *= 1.5; }
     if (A('power') && f.pa % 4 === 0) { max *= 2; tag = 'power'; }
     if (A('execute') && f.hp < mhp * .3) max *= 1.5;
     /* unique gear (data.js unique.key) */
-    if (U.marked && f.pa <= 3) { sure = true; max *= 1.5; }
-    if (U.fury) max *= 1 + .35 * (1 - clamp(S().hp / DQ.maxHp(), 0, 1));
+    if (U.marked && f.pa <= 3) { sure = true; max *= 1.5; fxHit('marked'); }
+    if (U.fury) { max *= 1 + .35 * (1 - clamp(S().hp / DQ.maxHp(), 0, 1)); if (S().hp < DQ.maxHp()) fxHit('fury'); }
     const mDef = (m.def + 8) * (64 + m.def);
     if (sure || Math.random() < hitChance(acc, mDef)) dealt = rnd(1, Math.max(1, Math.round(max)));
     if (dealt && A('pin')) f.pinned = 2;
-    if (dealt && U.twin && chance(.2)) { dealt += rnd(1, Math.max(1, Math.round(max))); tag += ' twin'; }
-    if (dealt && U.arc && sty === 'magic' && chance(.2)) dealt += Math.max(1, Math.round(dealt * .5));
-    if (dealt && U.stun && chance(.12)) f.stun = 1;
-    if (dealt && U.poison) f.poison = Math.min(3, (f.poison || 0) + 1);
-    if (dealt && U.curse && sty === 'magic') f.curse = Math.min(3, (f.curse || 0) + 1);
+    if (dealt && U.twin && chance(.2)) { dealt += rnd(1, Math.max(1, Math.round(max))); tag += ' twin'; fxHit('twin'); DQ.splat('foe', 'Twin cut', 'hit', 180); }
+    if (dealt && U.arc && sty === 'magic' && chance(.2)) { dealt += Math.max(1, Math.round(dealt * .5)); fxHit('arc'); DQ.splat('foe', 'Arc', 'hit', 180); }
+    if (dealt && U.stun && chance(.12)) { f.stun = 1; fxHit('stun'); }
+    if (dealt && U.poison) { f.poison = Math.min(3, (f.poison || 0) + 1); fxHit('poison'); }
+    if (dealt && U.curse && sty === 'magic') { f.curse = Math.min(3, (f.curse || 0) + 1); fxHit('curse'); }
   }
   f.hp -= dealt; DQ.splat('foe', dealt, dealt ? 'hit ' + tag : 'miss', 0);
-  if (dealt && (U.lifesteal || U.sovereign)) S().hp = Math.min(DQ.maxHp(), S().hp + Math.max(1, Math.round(dealt * (U.lifesteal ? .2 : .08))));
-  if (U.ember && sty === 'ranged') { const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(2, Math.round(ps.max * .25))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 300); }
-  if (DQ.trick && DQ.trick('charge') && f.round === 1) { const c = Math.max(1, Math.round(ps.max * W.dmg * .5)); f.hp -= c; DQ.splat('foe', c, 'hit power', 250); }
-  if (DQ.trick && DQ.trick('ember') && f.pa % 6 === 0) { const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(1, Math.round(ps.max * .5))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 320); }
+  if (dealt && (U.lifesteal || U.sovereign)) { const before = S().hp; S().hp = Math.min(DQ.maxHp(), S().hp + Math.max(1, Math.round(dealt * (U.lifesteal ? .2 : .08)))); const h = Math.round(S().hp - before); if (h > 0) { fxHit(U.lifesteal ? 'lifesteal' : 'sovereign'); DQ.splat('you', '+' + h, 'heal', 300); } }
+  if (U.ember && sty === 'ranged') { const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(2, Math.round(ps.max * .25))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 300); fxHit('ember'); }
+  if (DQ.trick && DQ.trick('charge') && f.round === 1) { fxHit('charge'); const c = Math.max(1, Math.round(ps.max * W.dmg * .5)); f.hp -= c; DQ.splat('foe', c, 'hit power', 250); }
+  if (DQ.trick && DQ.trick('ember') && f.pa % 6 === 0) { fxHit('trickember'); const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(1, Math.round(ps.max * .5))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 320); }
   DQ.sfx(sty === 'ranged' ? 'bow' : sty === 'magic' ? 'cast' : dealt ? 'hit' : 'miss');
   if (dealt) {
     let first = null;
@@ -7937,18 +7958,18 @@ function combatRound() {
   if (f.hp <= 0) return kill(m);
   /* the monster attacks on its own clock: faster weapons get more swings in between */
   f.mt = (f.mt || 0) + (DQ.act ? DQ.act.dur * D.PACE[DQ.act.pace || 'steady'].speed : 2000);
-  const clock = U.slow ? 2300 : 2000;
+  const clock = U.slow ? 2300 : 2000; if (U.slow) fxHit('slow');
   while (f.mt >= clock && DQ.fight) { f.mt -= clock; if (monsterAttack(f, m, ps, sty) === 'dead') return; }
 }
 function monsterAttack(f, m, ps, sty) {
   const A = DQ.ability, U = DQ.uniqueFx(); f.ma = (f.ma || 0) + 1;
-  if (f.poison) { const pd = f.poison * Math.max(1, Math.round(ps.max * .12)); f.hp -= pd; DQ.splat('foe', pd, 'hit weak', 300); if (f.hp <= 0) { kill(m); return 'dead'; } }
-  if (f.stun) { f.stun = 0; DQ.splat('you', 'Stunned', 'miss', 600); return; }
-  if (U.roar && !f.roared) { f.roared = 1; DQ.splat('you', 'Roar!', 'miss', 600); return; }
+  if (f.poison) { const pd = f.poison * Math.max(1, Math.round(ps.max * .12)); f.hp -= pd; DQ.splat('foe', pd, 'hit poison', 300); fxHit('poisontick'); if (f.hp <= 0) { kill(m); return 'dead'; } }
+  if (f.stun) { f.stun = 0; DQ.splat('foe', 'Stunned', 'miss', 600); return; }
+  if (U.roar && !f.roared) { f.roared = 1; fxHit('roar'); DQ.splat('you', 'Roar!', 'miss', 600); return; }
   const special = m.boss && m.boss.special && f.ma % m.boss.special.every === 0, sp = special && m.boss.special;
   if (special && A('bash') && f.ma - (f.lastBash || -99) >= 8) { f.lastBash = f.ma; DQ.splat('you', 'Bash!', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your shield bash interrupts ${sp.name}!`, 'good'); return; }
   if (special && A('ward') && f.ma - (f.lastWard || -99) >= 6) { f.lastWard = f.ma; DQ.splat('you', 'Ward', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your ward absorbs ${sp.name}.`, 'good'); return; }
-  if (DQ.trick && DQ.trick('heckle') && !f.heckled && f.ma >= 2) { f.heckled = 1; DQ.splat('you', 'Oi!', 'miss', 600); if (!DQ.sim.on) DQ.trickNote('heckled it into missing!', document.getElementById('av-foe')); return; }
+  if (DQ.trick && DQ.trick('heckle') && !f.heckled && f.ma >= 2) { f.heckled = 1; fxHit('heckle'); DQ.splat('you', 'Oi!', 'miss', 600); if (!DQ.sim.on) DQ.trickNote('heckled it into missing!', document.getElementById('av-foe')); return; }
   let acc = hitChance((m.att + 8) * (64 + m.att), ps.defRoll); if (f.pinned > 0) { acc *= .75; f.pinned--; }
   let taken = 0;
   if (special || Math.random() < acc) {
@@ -7958,19 +7979,19 @@ function monsterAttack(f, m, ps, sty) {
       if (m.id === 'oldtusk' && sty === 'ranged') taken *= .5;
       if (m.id === 'pyrrhax' && f.lastEl === 'frost') taken *= .5;
       if (A('brace')) taken *= .5;
-      if (U.bulwark) taken *= .65; else if (U.sovereign) taken *= .8;
-      if (DQ.trick && DQ.trick('cold')) taken *= .8;
+      if (U.bulwark) { taken *= .65; fxHit('bulwark'); } else if (U.sovereign) { taken *= .8; fxHit('sovereign'); }
+      if (DQ.trick && DQ.trick('cold')) { taken *= .8; fxHit('cold'); }
       if (m.id === 'frostmaw') f.frozen = 1;
       if (m.id === 'morwenna') f.hex = 4;
-    } else { if (A('kite')) taken *= .7; if (U.hide) taken *= .85; }
-    if (f.curse) taken *= 1 - .05 * f.curse;
+    } else { if (A('kite')) taken *= .7; if (U.hide) { taken *= .85; fxHit('hide'); } }
+    if (f.curse) { taken *= 1 - .05 * f.curse; fxHit('cursed'); }
     taken = Math.max(1, Math.round(taken * (1 - ps.red) * ({ careful: .85, steady: 1, push: 1.25 }[(DQ.act && DQ.act.pace) || 'steady'])));
   }
   if (f.hex > 0) { f.hex--; taken += Math.max(1, Math.round(m.max * .25)); }
-  if (taken && U.thorns) f.hp -= Math.max(1, Math.round(taken * .35));
-  if (taken && U.riposte && chance(.2)) { const r = rnd(1, Math.max(1, ps.max)); f.hp -= r; DQ.splat('foe', r, 'hit', 700); }
+  if (taken && U.thorns) { const t = Math.max(1, Math.round(taken * .35)); f.hp -= t; fxHit('thorns'); DQ.splat('foe', t, 'hit', 650); }
+  if (taken && U.riposte && chance(.2)) { const r = rnd(1, Math.max(1, ps.max)); f.hp -= r; fxHit('riposte'); DQ.splat('foe', r, 'hit', 700); }
   S().hp -= taken; DQ.splat('you', special ? taken + '!' : taken, taken ? 'hit' : 'miss', 900);
-  if (S().hp <= 0 && U.laststand && !f.last) { f.last = 1; S().hp = 1; DQ.splat('you', 'Last stand!', 'miss', 1000); }
+  if (S().hp <= 0 && U.laststand && !f.last) { f.last = 1; S().hp = 1; fxHit('laststand'); DQ.splat('you', 'Last stand!', 'miss', 1000); }
   if (taken) setTimeout(() => DQ.sfx('hurt'), 900);
   if (special && !DQ.sim.on) { DQ.log(`${m.name} unleashes ${sp.name}!`, 'bad'); DQ.emit('bossSpecial', m); }
   if (!DQ.sim.on && m.boss && m.boss.special) DQ.emit('bossTell', m, (f.ma + 1) % m.boss.special.every === 0);
@@ -7985,6 +8006,7 @@ function kill(m) {
   const c = Math.round(rnd(m.coins[0], m.coins[1]) * DQ.coinMult()); DQ.addCoins(c);
   const loot = c ? [`${fmt(c)} coins`] : [], got = [], drops = [];
   const first = m.boss && !(S().towns[m.town] && S().towns[m.town].boss);
+  if (DQ.uniqueFx().fortune) fxHit('fortune');
   let extraCoins = 0;
   for (const [id, [a, b], p] of m.drops) {
     const guaranteed = first && m.boss.first === id;
@@ -7997,7 +8019,7 @@ function kill(m) {
     if (uniq) { const firstCopy = !found[id]; found[id] = 1; if (S().upity) delete S().upity[id];
       if (firstCopy && !DQ.forecasting) { DQ.notify({ kind: 'unlock', key: 'unique:' + id, icon: D.ITEMS[id].ic, col: D.ITEMS[id].col, title: `Unique find: ${D.ITEMS[id].name}`, text: `${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, sound: 'unique', burst: true, ttl: 14000 }); S().freshUnique = id; if (DQ.journal) DQ.journal('loot', `${m.name} dropped ${D.ITEMS[id].name}. ${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, D.ITEMS[id].ic); } }
     const n = rnd(a, b), rar = D.rarityOf(guaranteed ? 0 : p); got.push(id);
-    if (id === 'coin_pouch') { const cc = Math.round(rnd(m.coins[0] + 5, m.coins[1] * 3 + 10) * DQ.coinMult() * (DQ.trick && DQ.trick('comb') ? 1.5 : 1)); extraCoins += cc; drops.push({ id, n: cc, rar, coins: true }); loot.push(`a pouch of ${fmt(cc)} coins`); continue; }
+    if (id === 'coin_pouch') { const cc = Math.round(rnd(m.coins[0] + 5, m.coins[1] * 3 + 10) * DQ.coinMult() * (DQ.trick && DQ.trick('comb') ? 1.5 : 1)); if (DQ.trick && DQ.trick('comb')) fxHit('comb'); extraCoins += cc; drops.push({ id, n: cc, rar, coins: true }); loot.push(`a pouch of ${fmt(cc)} coins`); continue; }
     if (id === 'treasure_chest') {
       const cc = Math.round((rnd(m.coins[1] * 5, m.coins[1] * 12) + 50) * DQ.coinMult()); extraCoins += cc; const gem = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(gem); S().stats.rare++;
       const gl = (D.TOWN_GEAR[m.town] || []).filter(g => !DQ.lockedSkillFor(g)), gi = gl.length && chance(.35) ? DQ.pick(gl) : null; if (gi) DQ.grant(gi);
@@ -8472,12 +8494,16 @@ DQ.weakOf = (m, f) => {
   return D.WEAK[m.id] || { weak: [], resist: [] };
 };
 DQ.myDtype = () => { const wt = D.weaponType(); if (wt === 'staff') { const sp = D.SPELLS.find(s => s.id === S().spell) || D.SPELLS[0]; return D.SPELL_EL[sp.id]; } return D.WTYPES[wt].dtype; };
+/* the shared damage-type rule (data3.js D.TYPE_RULES): what the engine applies and what every hint says */
+DQ.typeMult = (m, kind) => { const R = D.TYPE_RULES[m && m.boss ? 'boss' : 'normal']; return kind === 'resist' ? R.resist : DQ.ability && DQ.ability('focus') ? R.focus : R.weak; };
+const pctUp = x => `+${Math.round((x - 1) * 100)}%`;
+DQ.typeRuleText = m => { const R = D.TYPE_RULES[m && m.boss ? 'boss' : 'normal']; return `Weak points take ${pctUp(R.weak)} damage (${pctUp(R.focus)} for spells with Elemental Focus); resisted types deal ${Math.round(R.resist * 100)}%.${m && m.boss ? ' Bosses shrug off weaknesses and resistances more than ordinary creatures.' : ''}`; };
 /* How your current build matches up against a monster: used by the boss intel panel */
 DQ.matchup = m => {
   const dt = DQ.myDtype(), wr = DQ.weakOf(m), out = [];
   if (m.id === 'hollowking') out.push(['info', 'His weakness changes with each phase. No single weapon is best for the whole fight.']);
-  else if (wr.weak.includes(dt)) out.push(['good', `Your ${D.DTYPES[dt].name.toLowerCase()} damage hits its weakness (1.5x).`]);
-  else if (wr.resist.includes(dt)) out.push(['bad', `It resists your ${D.DTYPES[dt].name.toLowerCase()} damage (half damage).`]);
+  else if (wr.weak.includes(dt)) out.push(['good', `Your ${D.DTYPES[dt].name.toLowerCase()} damage hits its weakness (${pctUp(DQ.typeMult(m, 'weak'))}).`]);
+  else if (wr.resist.includes(dt)) out.push(['bad', `It resists your ${D.DTYPES[dt].name.toLowerCase()} damage (you deal ${Math.round(DQ.typeMult(m, 'resist') * 100)}%).`]);
   else out.push(['info', `Your ${D.DTYPES[dt].name.toLowerCase()} damage is neutral against it.`]);
   if (m.boss) {
     const mech = D.BOSSMECH[m.id] && D.BOSSMECH[m.id].mech, st = DQ.weaponStyle();
@@ -8580,6 +8606,17 @@ DQ.prepAdvice = (monId, fc) => {
   const owned = id => DQ.have(id) || (S().bank && S().bank[id]);
   if (hp < max * .9) { const per = Math.ceil(max / 50) * (1 + DQ.fx().regen), secs = Math.ceil((max - hp) / per * 3); out.push({ key: 'rest', title: 'Rest to full health first', text: `Health ${hp} / ${max}. You recover about ${secs}s outside combat, for example while fishing or cooking.`, action: 'go', a: 'fishing' }); }
   const stock = (D.SHOPS[town] || []).filter(id => !DQ.lockedSkillFor(id)), buys = [], who = (m.boss && m.boss.short) || m.name;
+  /* abilities: an empty slot, or a boss special nothing in your slots answers, or a slotted ability your weapon cannot use */
+  { const L = S().abilities || [], slots = DQ.abilSlots(), style = DQ.weaponStyle();
+    const usable = a => DQ.abilUnlocked(a) && (!a.style || a.style === style) && (!a.needShield || S().equip.shield);
+    const pref = m.boss && m.boss.special ? ['brace', 'bash', 'ward', 'second', 'power', 'aimed', 'focus', 'pin', 'execute', 'kite'] : ['power', 'aimed', 'focus', 'second', 'execute', 'pin', 'kite', 'brace', 'bash', 'ward'];
+    const best = pref.map(id => D.AB[id]).filter(a => a && usable(a) && !L.includes(a.id));
+    const idle = L.map(id => D.AB[id]).filter(a => a && !DQ.ability(a.id));
+    const answers = L.some(id => ['brace', 'bash', 'ward'].includes(id) && DQ.ability(id));
+    if (idle.length) out.push({ key: 'abil', title: `${idle[0].name} does nothing with this weapon`, text: `${idle[0].style ? `It needs a ${idle[0].style} weapon.` : 'It needs a shield.'}${best[0] ? ` Swap in ${best[0].name}: ${best[0].text}` : ''}`, action: 'go', a: 'combat' });
+    else if (L.length < slots && best[0]) out.push({ key: 'abil', title: `Slot ${best[0].name}`, text: `${L.length} of ${slots} ability slots used. ${best[0].text}`, action: 'go', a: 'combat' });
+    else if (m.boss && m.boss.special && !answers && best[0] && ['brace', 'bash', 'ward'].includes(best[0].id)) out.push({ key: 'abil', title: `Swap in ${best[0].name}`, text: `Nothing in your slots answers ${m.boss.special.name}. ${best[0].text}`, action: 'go', a: 'combat' });
+  }
   for (const slot of ['body', 'legs', 'head', 'shield']) {
     if (S().equip[slot]) continue;
     if (slot === 'shield' && S().equip.weapon && D.ITEMS[S().equip.weapon].two) continue;
@@ -8598,7 +8635,11 @@ DQ.prepAdvice = (monId, fc) => {
   if (DQ.weakKnown(m)) {
     const weak = DQ.weakOf(m).weak, mine = DQ.myDtype();
     if (weak.length && !weak.includes(mine)) {
-      const fits = id => { const it = D.ITEMS[id]; return it && it.slot === 'weapon' && it.wtype && D.WTYPES[it.wtype] && weak.includes(D.WTYPES[it.wtype].dtype) && DQ.canEquip(id).ok; };
+      /* a weapon's damage type: bows pierce; melee weapons use their weapon type; staves are handled as spells below */
+      const dtypeOf = it => it.style === 'ranged' ? 'pierce' : it.wtype && D.WTYPES[it.wtype] && it.style !== 'magic' ? D.WTYPES[it.wtype].dtype : null;
+      const fits = id => { const it = D.ITEMS[id]; return it && it.slot === 'weapon' && weak.includes(dtypeOf(it)) && DQ.canEquip(id).ok; };
+      /* a bow is only useful with arrows: say so, and where they come from */
+      const arrowsFor = id => { if (D.ITEMS[id].style !== 'ranged') return ''; const hasArrows = (S().ammo.id && S().ammo.n > 0) || Object.keys({ ...S().inv, ...(S().bank || {}) }).some(a => owned(a) && D.ITEMS[a] && D.ITEMS[a].slot === 'ammo' && DQ.canEquip(a).ok); if (hasArrows) return ''; const ar = stock.filter(a => D.ITEMS[a].slot === 'ammo' && DQ.canEquip(a).ok).pop(); return ar ? ` You also need arrows: the shop sells ${D.ITEMS[ar].name.toLowerCase()} (${fmt(D.ITEMS[ar].buy)} coins each).` : ' You also need arrows (Crafting or a shop).'; };
       const have = Object.keys({ ...S().inv, ...(S().bank || {}) }).find(id => owned(id) && fits(id)), shop = stock.find(fits);
       const name = D.DTYPES[weak[0]] ? D.DTYPES[weak[0]].name.toLowerCase() : weak[0];
       /* elemental weaknesses are met with a spell: say which one, and what is missing (staff, runes or Magic level) */
@@ -8607,19 +8648,35 @@ DQ.prepAdvice = (monId, fc) => {
         const el = D.DTYPES[D.SPELL_EL[sp.id]].name.toLowerCase(), staff = Object.keys({ ...S().inv, ...(S().bank || {}) }).find(id => owned(id) && D.ITEMS[id] && D.ITEMS[id].wtype === 'staff' && DQ.canEquip(id).ok);
         spellFix = DQ.lvl('magic') < sp.lvl ? { key: 'weak', title: `Train Magic to ${sp.lvl} for ${sp.name}`, text: `${who} is weak to ${el}. Magic ${DQ.lvl('magic')} / ${sp.lvl}.`, action: 'go', a: 'magic' }
           : !staff ? { key: 'weak', title: `Get a staff to cast ${sp.name}`, text: `${who} is weak to ${el}, and you know ${sp.name}. A staff from the shop lets you cast it.`, action: 'go', a: 'shop' }
-          : { key: 'weak', title: `Equip your ${D.ITEMS[staff].name.toLowerCase()} and cast ${sp.name}`, text: `${who} is weak to ${el}. You have ${fmt(DQ.have('rune'))} runes (${sp.runes} per cast).`, action: 'go', a: 'character' };
+          : { key: 'weak', title: `Equip your ${D.ITEMS[staff].name.toLowerCase()} and cast ${sp.name}`, text: `${who} is weak to ${el}. ${DQ.have('rune') >= sp.runes * 30 ? `You have ${fmt(DQ.have('rune'))} runes (${sp.runes} per cast).` : `You have ${fmt(DQ.have('rune'))} runes; a long fight can use ${fmt(sp.runes * 30)} or more (${sp.runes} per cast). The shop sells Arcane runes.`}`, action: 'go', a: DQ.have('rune') >= sp.runes * 30 ? 'character' : 'shop' };
       }
-      if (have) out.push({ key: 'weak', title: `Switch to your ${D.ITEMS[have].name.toLowerCase()}`, text: `${who} is weak to ${name}: about half as much damage again per hit.`, action: 'go', a: 'character' });
+      if (have) out.push({ key: 'weak', title: `Switch to your ${D.ITEMS[have].name.toLowerCase()}`, text: `${who} is weak to ${name}: ${pctUp(DQ.typeMult(m, 'weak'))} damage per hit.${arrowsFor(have)}`, action: 'go', a: 'character' });
       else if (spellFix) out.push(spellFix);
-      else if (shop) out.push({ key: 'weak', title: coins >= D.ITEMS[shop].buy ? `Buy the ${D.ITEMS[shop].name.toLowerCase()} (${fmt(D.ITEMS[shop].buy)} coins)` : `Save for the ${D.ITEMS[shop].name.toLowerCase()}`, text: `${who} is weak to ${name}. ${coins >= D.ITEMS[shop].buy ? 'The shop here sells one.' : `${fmt(coins)} / ${fmt(D.ITEMS[shop].buy)} coins.`}`, action: 'go', a: 'shop', afford: coins >= D.ITEMS[shop].buy });
+      else if (!shop && weak.includes('pierce') && !DQ.skillUnlocked('ranged')) out.push({ key: 'weak', info: true, title: `${who} is weak to arrows`, text: `Ranged is not learned yet. ${DQ.skillTeacher ? DQ.skillTeacher('ranged') : ''}.` });
+      else if (shop) out.push({ key: 'weak', title: coins >= D.ITEMS[shop].buy ? `Buy the ${D.ITEMS[shop].name.toLowerCase()} (${fmt(D.ITEMS[shop].buy)} coins)` : `Save for the ${D.ITEMS[shop].name.toLowerCase()}`, text: `${who} is weak to ${name}. ${coins >= D.ITEMS[shop].buy ? 'The shop here sells one.' : `${fmt(coins)} / ${fmt(D.ITEMS[shop].buy)} coins.`}`, action: 'go', a: 'shop', afford: coins >= D.ITEMS[shop].buy }); if (out.length && out[out.length - 1].key === 'weak' && shop) out[out.length - 1].text += arrowsFor(shop);
     }
   }
   const heal = DQ.foods().reduce((t, id) => t + D.ITEMS[id].heal * DQ.have(id), 0);
   const need = fc && fc.foodPerKill != null && fc.wins ? Math.ceil(fc.foodPerKill * 1.5) * 3 : Math.round(max * (m.boss ? 2.5 : 1));
-  if (heal < need) out.push({ key: 'food', title: heal ? 'Bring more food' : 'Bring food', text: `Your food restores ${fmt(heal)} health; aim for about ${fmt(need)}.${DQ.have('raw_shrimp') && DQ.skillUnlocked('cooking') ? ' You have raw shrimp to cook.' : ''}`, action: 'go', a: DQ.have('raw_shrimp') && DQ.skillUnlocked('cooking') ? 'cooking' : 'fishing' });
+  const rawFish = (D.FISH_IDS || []).map(id => 'raw_' + id).find(r => DQ.have(r) && D.RECIPES['cook_' + r.slice(4)] && DQ.skillUnlocked('cooking') && DQ.lvl('cooking') >= D.RECIPES['cook_' + r.slice(4)].lvl);
+  if (heal < need) out.push({ key: 'food', title: heal ? 'Bring more food' : 'Bring food', text: `Your food restores ${fmt(heal)} health; aim for about ${fmt(need)}.${rawFish ? ` You have ${fmt(DQ.have(rawFish))} ${D.ITEMS[rawFish].name.toLowerCase()} to cook.` : ''}`, action: 'go', a: rawFish ? 'cooking' : 'fishing' });
+  /* potions and enchantments: offered only for a boss you are likely to struggle with (or have no forecast for yet) */
+  const struggling = m.boss && (!fc || fc.winRate < .8);
+  if (struggling) {
+    const active = t => DQ.buffs().some(b => b.type === t);
+    if (DQ.have('potion_might') && !active('weak')) out.push({ key: 'potion', title: 'Drink a Potion of Might before the fight', text: 'You hit 15% harder for 20 minutes. You have ' + DQ.have('potion_might') + '.', action: 'go', a: 'character' });
+    else if (!DQ.have('potion_might') && DQ.skillUnlocked('herbalism') && DQ.techDone && DQ.techDone('warbrew')) { const r = D.POTION_RECIPES.find(x => x.id === 'potion_might'), ok = Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n) && S().coins >= r.coins; out.push({ key: 'potion', title: ok ? 'Brew a Potion of Might' : 'Gather for a Potion of Might', text: `+15% damage for 20 minutes. ${Object.entries(r.in).map(([k, n]) => `${DQ.have(k)}/${n} ${D.ITEMS[k].name.toLowerCase()}`).join(', ')}, ${fmt(r.coins)} coins.`, action: 'go', a: 'brewery' }); }
+    if (DQ.have('potion_haste') && !active('slow')) out.push({ key: 'potion', title: 'Drink a Potion of Haste', text: 'You attack 15% faster for 20 minutes. You have ' + DQ.have('potion_haste') + '.', action: 'go', a: 'character' });
+    if (DQ.skillUnlocked('enchanting') && DQ.enchantPlan) { const e = DQ.enchantPlan().find(p => p.ready); if (e) out.push({ key: 'enchant', title: `Enchant your ${e.it.name.toLowerCase()}`, text: `+1 to each of its bonuses (about +${Math.round(e.gain * 100)}% of its bonus) for ${e.runes} runes and a ${D.ITEMS[e.need].name.toLowerCase()} you already hold.`, action: 'go', a: 'enchanting' }); }
+  }
+  if (S().hp < max * .9 && DQ.have('potion_heal')) { const r = out.find(x => x.key === 'rest'); if (r) r.text += ` Or drink a Healing draught for 40% at once (you have ${DQ.have('potion_heal')}).`; }
   if (m.boss && DQ.combatLvl() < m.boss.req) out.unshift({ key: 'level', title: `Reach combat ${m.boss.req}`, text: `Combat ${DQ.combatLvl()} / ${m.boss.req}.`, action: 'go', a: 'combat' });
   return out;
 };
+
+/* a defeat names the most useful change for next time, from the same advice as the boss card */
+const notifyPrep0 = DQ.notify;
+DQ.notify = o => { if (o && o.kind === 'death' && DQ.lastFoe && !DQ.forecasting) { const m = D.MON[DQ.lastFoe], tip = m && DQ.prepAdvice(m.id).find(x => x.key !== 'rest'); if (tip) o = Object.assign({}, o, { text: `${m.name} won this time. Most useful change: ${tip.title.charAt(0).toLowerCase() + tip.title.slice(1)}.` }); } return notifyPrep0(o); };
 
 /* ---------- Away events: things that happened while you were gone, each with a choice ---------- */
 const tIdx = () => D.TOWN[S().town].idx;
@@ -10850,15 +10907,16 @@ UI.homeGoals = () => {
 UI.homeSections = [];
 UI.homeNotices = () => '';
 UI.V.overview = () => {
-  const welcome = !S().seen.firstTask && !DQ.act && DQ.totalXp() === 0 && (S().tut?.hidden || S().tut?.done?.intro)
-    ? '<p class="home-welcome">Welcome to Idlewick. Follow your next step below. Once started, tasks carry on while you are away.</p>' : '';
+  const welcome = '';
+  /* other suggestions wait until the first quest is done, so the opening has one clear action */
+  const opening = S().q.first_steps?.s !== 'done';
   const decisions = (S().inbox || []).length;
   return `${welcome}${UI.homeSections.map(render => render()).join('')}
     ${decisions ? `<button class="btn sm" data-do="go" data-a="activity">${decisions} away decision${decisions === 1 ? '' : 's'} waiting · View activity</button>` : ''}
     ${UI.homeNotices()}
-    <section data-reference="true" class="panel upnext"><h3>Explore other suggestions</h3>
+    ${opening ? '' : `<section data-reference="true" class="panel upnext"><h3>Explore other suggestions</h3>
       <div id="goalbox">${UI.homeGoals()}</div>
-    </section>`;
+    </section>`}`;
 };
 UI.V.skillsummary = () => `<section class="panel"><div class="phead"><h2>Your skills</h2><small>Total level <b data-b="totlvl"></b></small></div><div class="skl">${D.SKILLS.map(skill => {
   const locked = !DQ.skillUnlocked(skill.id);
@@ -11407,7 +11465,7 @@ UI.openGuide = id => {
       <div class="gprog"><span class="bar"><i style="width:${r.next == null ? 100 : Math.round((r.kills - (r.rank ? T[r.rank - 1] : 0)) / (T[r.rank] - (r.rank ? T[r.rank - 1] : 0)) * 100)}%"></i></span><small class="mono">${fmt(r.kills)} defeated · ${nextLine(m, r)}</small></div></div></div>
     <ol class="gladder" aria-label="What each entry needs">${RANKS.map((x, i) => { const left = T[i] - r.kills; return `<li class="${left <= 0 ? 'on' : ''}">${ico(left <= 0 ? 'check' : 'lock')}<b>${x[1]}</b><small>${left <= 0 ? 'Unlocked' : `${fmt(left)} more defeat${left > 1 ? 's' : ''}`}</small></li>`; }).join('')}</ol>
     ${seen ? sec(0, `<p>Found around ${esc(D.TOWN[m.town].name)}. Level ${m.cl}${m.boss ? `, and it guards the road onward` : ''}.</p>`) : lock(0)}
-    ${sec(1, `<div class="chips">${UI.weakChips(m)}</div><p class="sm dim" style="margin:6px 0 0">Weak points take 50% more damage. Resisted types do half.</p>`)}
+    ${sec(1, `<div class="chips">${UI.weakChips(m)}</div><p class="sm dim" style="margin:6px 0 0">${esc(DQ.typeRuleText(m))}</p>`)}
     ${sec(2, `<p>Health <b class="mono">${m.hp}</b> · Hits up to <b class="mono">${m.max}</b> · Carries <b class="mono">${m.coins[1] ? `${m.coins[0]}-${m.coins[1]}` : 'no'}</b> coins</p>`)}
     <div class="gsec ${r.rank > 3 ? '' : 'part'}"><div class="gh"><b>${RANKS[3][1]}</b><small>${RANKS[3][2]}</small></div>${dr}</div>
     ${sec(4, `<p>${esc(lore.note || 'No notes yet.')}</p>`)}
@@ -11671,12 +11729,7 @@ DQ.checkActionUnlocks=()=>{
     DQ.emit('lvl'); DQ.save();
   }
 };
-DQ.combatInterval=()=>{
-  const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword;
-  const mastery=Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003);
-  return Math.round(W.speed*(1-mastery));
-};
-DQ.combatSpeedText=()=>{const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword,ms=DQ.combatInterval();return `${W.name}: ${(ms/1000).toFixed(2)}s per attack · ${Math.round((1-ms/W.speed)*100)}% faster from Combat level`;};
+/* combat speed lives in engine.js (DQ.combatInterval / DQ.combatSpeedText); a copy here used to override it and drop the Gale effect */
 
 const oldNext=DQ.nextEncounter;
 DQ.nextEncounter=m=>{DQ.checkActionUnlocks();if(DQ.skillUnlocked('hunting'))DQ.addXp('hunting',Math.max(3,Math.round(m.cl*1.4)));return oldNext(m);};
@@ -11708,10 +11761,25 @@ const gems=['gem_sapphire','gem_emerald','gem_ruby','gem_diamond','gem_diamond']
 DQ.enchant=id=>{const rank=S().enchants[id]||0,need=gems[rank];if(!DQ.skillUnlocked('enchanting')||rank>=5)return false;if(!Object.values(S().equip).includes(id))return DQ.toast('Equip the item first',true);if(DQ.have('rune')<5*(rank+1)||!DQ.have(need))return DQ.toast(`Requires ${5*(rank+1)} runes and 1 ${D.ITEMS[need]?.name||need}`,true);DQ.take('rune',5*(rank+1));DQ.take(need,1);S().enchants[id]=rank+1;S().stats.enchant++;DQ.addXp('enchanting',20*(rank+1));DQ.sfx('unlock');DQ.toast(`${D.ITEMS[id].name} is now enchantment +${rank+1}`);DQ.emit('lvl');return true;};
 const baseBonus=DQ.bonus;
 DQ.bonus=()=>{const out=baseBonus();for(const [slot,id] of Object.entries(S().equip)){if(slot==='ammo')continue;const rank=S().enchants[id]||0,b=D.ITEMS[id]?.b||{};for(const k of Object.keys(b))out[k]+=rank;}return out;};
-UI.V.enchanting=()=>`${hero('enchanting')}<section class="panel"><div class="phead"><h2>Enchant equipped gear</h2><small>Maximum +5</small></div><p class="hint">Each rank adds +1 to every combat bonus already present on that item.</p><div class="ench-list">${Object.entries(S().equip).filter(([slot,id])=>slot!=='ammo'&&D.ITEMS[id]).map(([slot,id])=>{const r=S().enchants[id]||0,need=gems[r];return `<div class="ench-row">${DQ.itemIco(D.ITEMS[id])}<span><b>${esc(D.ITEMS[id].name)} +${r}</b><small>${r>=5?'Fully enchanted':`${5*(r+1)} runes + 1 ${D.ITEMS[need]?.name||need}`}</small></span><button class="btn ${r<5?'primary':''}" data-do="enchant" data-a="${id}" ${r>=5?'disabled':''}>${r>=5?'Complete':'Enchant'}</button></div>`}).join('')||'<p>Equip an item to enchant it.</p>'}</div></section>`;
+/* Enchanting: what the next rank adds to each worn item, what it costs, where the materials come from, and which item
+   gains most from a first enchantment (the biggest share of its own bonus, weapon first on a tie). */
+DQ.enchantPlan=()=>Object.entries(S().equip).filter(([slot,id])=>slot!=='ammo'&&D.ITEMS[id]&&Object.keys(D.ITEMS[id].b||{}).length).map(([slot,id])=>{const it=D.ITEMS[id],r=S().enchants[id]||0,b=it.b||{},keys=Object.keys(b),total=keys.reduce((n,k)=>n+Math.abs(b[k]),0)+keys.length*r,need=gems[r],runes=5*(r+1);return {slot,id,it,rank:r,keys,gain:total?keys.length/total:0,need,runes,ready:r<5&&DQ.have('rune')>=runes&&DQ.have(need)>0};}).sort((a,b)=>b.gain-a.gain||(a.slot==='weapon'?-1:b.slot==='weapon'?1:0));
+UI.V.enchanting=()=>{const plan=DQ.enchantPlan(),best=plan.find(p=>p.rank<5),names=UI.statNames||{};
+ return `${hero('enchanting')}<section class="panel"><div class="phead"><h2>Enchant equipped gear</h2><small>Up to +5 per item</small></div><p class="hint">Each rank adds +1 to every bonus the item already has: a big share on early gear, a small one on top-tier gear. Costs Arcane runes (shop) and a gem (mining, nests, chests).</p><div class="ench-list">${plan.map(p=>{const pct=Math.round(p.gain*100);return `<div class="ench-row ${p===best?'recommended':''}">${DQ.itemIco(p.it)}<span><b>${esc(p.it.name)} +${p.rank}</b>${p===best?' <span class="tag">Best first</span>':''}<small>${p.rank>=5?'Fully enchanted':`Next: ${p.keys.map(k=>`+1 ${names[k]||k}`).join(', ')} (about +${pct}% of its bonus) · ${p.runes} runes (${DQ.have('rune')} held) + 1 ${esc(D.ITEMS[p.need]?.name||p.need)} (${DQ.have(p.need)} held)`}</small></span>${p.rank<5&&!DQ.have(p.need)&&UI.routeChip?UI.routeChip(p.need):''}<button class="btn ${p.ready?'primary':''}" data-do="enchant" data-a="${p.id}" ${p.rank>=5||!p.ready?'disabled':''}>${p.rank>=5?'Complete':'Enchant'}</button></div>`;}).join('')||'<p>Equip a weapon or armour to enchant it.</p>'}</div></section>`;};
 Object.assign(UI.DO,{enchant:id=>{if(DQ.enchant(id))UI.render(false);}});
 const brewery=UI.V.brewery;
-UI.V.brewery=()=>DQ.skillUnlocked('herbalism')?`${hero('herbalism')}${brewery()}`:UI.lockedPage('herbalism');
+/* Herbalism: a short path to the first useful potion, shown until Potion of Might is brewable */
+const herbGoals=()=>{const done=id=>DQ.techDone&&DQ.techDone(id),R=D.POTION_RECIPES.find(r=>r.id==='potion_heal'),M=D.POTION_RECIPES.find(r=>r.id==='potion_might');
+ if(done('warbrew'))return '';
+ const mats=r=>Object.entries(r.in).map(([k,n])=>`<span class="rw ${DQ.have(k)>=n?'':'short'}">${DQ.ico(D.ITEMS[k].ic)}${DQ.have(k)}/${n} ${esc(D.ITEMS[k].name)}</span>${DQ.have(k)<n&&UI.routeChip?UI.routeChip(k):''}`).join('')+`<span class="rw">${DQ.ico('coin')}${r.coins}</span>`;
+ const step=(on,doneNow,title,body,btn)=>`<li class="${doneNow?'done':on?'now':''}"><b>${doneNow?'✓ ':''}${title}</b><small>${body}</small>${on&&!doneNow&&btn?btn:''}</li>`;
+ const r1=done('herbalism'),scholar=DQ.advLvl()>=D.RESEARCH_ADV;
+ return `<section class="panel herb-goals"><div class="phead"><h2>First goals</h2><small>Herbalism</small></div><ol class="herb-path">
+  ${step(true,r1,'Research Herbalism',scholar?'In Scholarship: 900 coins and 10 onions.':`Scholarship opens at Hero ${D.RESEARCH_ADV}.`,scholar?'<button class="btn sm" data-do="go" data-a="research">Open Scholarship</button>':'')}
+  ${step(r1,DQ.have('potion_heal')>0,'Brew a Healing draught',`Drink it to restore 40% of your health at once: before a boss instead of resting, or between hard fights. <span class="rws">${mats(R)}</span>`)}
+  ${step(r1,false,'Next: War Brewing → Potion of Might','+15% damage for 20 minutes. Worth brewing for a boss you keep losing to, not for everyday fights. Research it in Scholarship (Tier II).')}
+ </ol></section>`;};
+UI.V.brewery=()=>DQ.skillUnlocked('herbalism')?`${hero('herbalism')}${herbGoals()}${brewery()}`:UI.lockedPage('herbalism');
 })();
 
 </script>
@@ -12226,11 +12294,11 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (S().towns.willowbrook.boss) return step('The road is open', 'Grubnash is defeated. Visit Mossbarrow or choose your next destination.', 'go', 'map');
   if (S().town !== 'willowbrook') return step('Return to Willowbrook', 'Grubnash awaits outside the village.', 'journeytravel', 'willowbrook');
   const first = D.QM.first_steps, firstState = DQ.questState(first);
-  if (firstState === 'new') return step('Meet Elder Wren', 'Accept First Steps, or simply start fishing or chopping: the quest is accepted for you and your work counts.', 'qstart', first.id);
+  if (firstState === 'new') return step('Meet Elder Wren', 'Goblins have broken Willowbrook’s well. Elder Wren’s first job for you: a little food and a little timber.', 'qstart', first.id);
   if (firstState === 'ready') return step('Claim First Steps', 'Collect your XP and coins from Elder Wren. Her broken well is waiting on timber, and Grubnash on you.', 'qclaim', first.id);
   if (firstState === 'active') {
     const p = S().q[first.id], index = first.obj.findIndex((o, i) => DQ.objProg(first, p, i) < o.n);
-    if (index >= 0) return index === 0 ? task('Catch five shrimp', 'Your first quest prepares food and earns Hero XP.', 'fish', 'shrimp') : task('Chop five logs', 'Gather timber to complete First Steps.', 'wood', 'normal');
+    if (index >= 0) return index === 0 ? task('Catch five shrimp', 'Food first: shrimp keep you on your feet when the goblins come. Five, plus five logs for Elder Wren’s broken well, completes First Steps.', 'fish', 'shrimp') : task('Chop five logs', 'Elder Wren needs timber to mend the well’s winch. Five logs finishes First Steps.', 'wood', 'normal');
   }
   if (bossQuest && DQ.questState(bossQuest) === 'new') return step('Accept the Grubnash quest', 'Make your boss victory count toward the village quest and its rewards.', 'qstart', bossQuest.id);
   if (!DQ.skillUnlocked('cooking')) return task('Unlock Cooking at Hero 3', 'Prepare a food supply before taking on stronger opponents.', 'fish', 'shrimp');
@@ -12275,11 +12343,24 @@ UI.B.projectneed = (el, id, item) => {
   UI.set(el, `${Math.min(held, required)}/${required} ${label}`); el.classList.toggle('ok', held >= required);
 };
 UI.B.projectaction = (el, id) => UI.set(el, S().projects[id] ? 'View village' : DQ.journeyNext(id).title);
+/* How you will know the next step is done, and when it is a good moment to stop: shown under the one action that leads Home */
+DQ.journeyDoneWhen = next => {
+  const q = D.QM.first_steps, st = S().q[q.id];
+  if (st && st.s === 'active') return `Done when you have ${q.obj.map((o, i) => `${Math.min(DQ.objProg(q, st, i), o.n)}/${o.n} ${o.label.replace(/^(Catch|Chop) \d+ /, '')}`).join(' and ')}. Then claim it from ${q.giver}.`;
+  if (st === undefined || (st && st.s === 'new') || DQ.questState(q) === 'new') if (next.action === 'qstart' && next.a === q.id) return `First Steps asks for ${q.obj.map(o => o.label.replace(/^(Catch|Chop) /, '').toLowerCase()).join(' and ')}.`;
+  if (next.action === 'qclaim') return 'Done when you claim the reward.';
+  const req = D.MON.grubnash.boss.req;
+  if (/^Train for Grubnash/.test(next.title) && DQ.combatLvl() < req) return `Done when your combat level reaches ${req} (now ${DQ.combatLvl()}).`;
+  return '';
+};
+const fresh = () => DQ.advLvl() < 5 && !(S().towns.willowbrook && S().towns.willowbrook.boss);
 UI.journeyPanel = () => {
-  const next = DQ.journeyNext();
-  return `<section class="panel journey"><div class="phead"><div><span class="k">Your destination</span><h2>${esc(destinations[S().journey] || destinations.boss)}</h2></div></div>
-    <section data-reference="true" class="destination-picker"><h3>Change destination</h3><div class="destination-choices" aria-label="Choose your destination">${Object.entries(destinations).map(([id, label]) => `<button class="chip ${S().journey === id ? 'on' : ''}" aria-pressed="${S().journey === id}" data-do="destination" data-a="${id}">${esc(label)}</button>`).join('')}</div></section>
-    <p>${esc(next.detail)}</p><div class="btnrow wrap">${actionHtml(next)}${D.PROJECTS[S().journey] ? pinButton(S().journey) : '<button class="btn" data-do="go" data-a="quests">Quest log</button>'}</div></section>`;
+  const next = DQ.journeyNext(), done = DQ.journeyDoneWhen(next), firstTime = !S().seen.firstTask && DQ.totalXp() === 0;
+  return `<section class="panel journey"><div class="phead"><div><span class="k">Next step</span><h2>${esc(next.title)}</h2></div></div>
+    <p class="journey-why">${esc(next.detail)}</p>${done ? `<p class="journey-done">${ico('check')} ${esc(done)}</p>` : ''}
+    <div class="btnrow wrap">${(() => { const running = next.action === 'journeytask' && DQ.act && DQ.act.kind === next.a && DQ.act.id === next.b; return next.action === 'journeytask' ? `<button class="btn primary" data-do="journeytask" data-a="${next.a}" data-b="${next.b || ''}">${running ? 'Open the task' : 'Start'}</button>` : actionHtml(next); })()}${D.PROJECTS[S().journey] ? pinButton(S().journey) : ''}</div>
+    ${fresh() ? `<p class="journey-pause">${firstTime ? 'Pick one task at a time. It keeps working while you explore other pages or close the game, so any moment is a fine place to stop.' : 'A good place to pause: whenever a quest is claimed. Your task keeps working while you are away.'}</p>` : ''}
+    <div class="destination-picker"><span class="k">Your destination: ${esc(destinations[S().journey] || destinations.boss)}</span><div class="destination-choices" aria-label="Choose your destination">${Object.entries(destinations).map(([id, label]) => `<button class="chip sm ${S().journey === id ? 'on' : ''}" aria-pressed="${S().journey === id}" data-do="destination" data-a="${id}">${esc(label)}</button>`).join('')}</div></div></section>`;
 };
 UI.projectsPanel = () => {
   const town=S().town, entries=DQ.projectsForTown(town);
@@ -12766,7 +12847,7 @@ const WEAPON = { stab: 'a dagger', slash: 'a sword', crush: 'a warhammer', pierc
 const studyNote = id => {
   const q = studyQuest(id), m = D.MON[id]; if (!q || !m || !studied(id) || !DQ.weakOf || !UI.weakChips) return '';
   const w = DQ.weakOf(m), bring = w.weak.map(t => WEAPON[t]).filter(Boolean);
-  return `<div class="gsec study-note" style="--c:${m.col}"><div class="gh"><b>${esc(q.giver)}’s notes</b><small>${esc(q.name)}</small></div><div class="chips">${UI.weakChips(m)}</div><p>${bring.length ? `Bring ${esc(bring.join(' or '))}: weak points take 50% more damage.` : 'It has no obvious weakness. Bring your strongest gear and plenty of food.'}</p></div>`;
+  return `<div class="gsec study-note" style="--c:${m.col}"><div class="gh"><b>${esc(q.giver)}’s notes</b><small>${esc(q.name)}</small></div><div class="chips">${UI.weakChips(m)}</div><p>${bring.length ? `Bring ${esc(bring.join(' or '))}: weak points take +${Math.round((DQ.typeMult(m, 'weak') - 1) * 100)}% damage.` : 'It has no obvious weakness. Bring your strongest gear and plenty of food.'}</p></div>`;
 };
 if (guide0) UI.openGuide = id => {
   const r = guide0(id); if (DQ.forecasting) return r;
@@ -12919,14 +13000,15 @@ UI.render=fresh=>{
   if(!current){const l=DQ.lessonForPage(UI.view);if(l){current=l;}}
   render(fresh);
   const view=document.getElementById('view');if(!view)return;
-  if(UI.view==='overview'&&!S().tut.hidden&&!S().tut.done.intro)view.insertAdjacentHTML('afterbegin',intro());
+  /* the introduction now lives in Home's Next step card (one clear action); the panel stays for anyone who restarts the guides */
+  if(UI.view==='overview'&&!S().tut.hidden&&!S().tut.done.intro&&S().tut.restarted)view.insertAdjacentHTML('afterbegin',intro());
   if(current)view.insertAdjacentHTML('afterbegin',coachHtml(current));
 };
 Object.assign(UI.DO,{
   lessonclose:id=>{DQ.acknowledgeLesson(id);current=null;UI.render(false);},
   introskip:()=>{S().tut.done.intro=true;DQ.save();UI.render(false);},
   introstart:()=>{S().tut.done.intro=true;DQ.save();if(DQ.questState(D.QM.first_steps)==='new')DQ.startQuest('first_steps');DQ.go('fishing');},
-  resetguides:()=>{S().tut={done:{},hidden:false,version:1};current=null;DQ.save();DQ.go('overview');UI.render(false);},
+  resetguides:()=>{S().tut={done:{},hidden:false,version:1,restarted:true};current=null;DQ.save();DQ.go('overview');UI.render(false);},
   toggleguides:()=>{S().tut.hidden=!S().tut.hidden;current=null;DQ.save();UI.render(false);}
 });
 if(UI.V.settings){const settings=UI.V.settings;UI.V.settings=()=>settings()+`<section class="panel"><div class="phead"><h2>Help &amp; learning</h2></div><p>Short inline lessons introduce a skill the first time you open it. They never interrupt a running task.</p><div class="btnrow wrap"><button class="btn" data-do="toggleguides">${S().tut.hidden?'Enable':'Hide'} first-time guides</button><button class="btn" data-do="resetguides">Restart introduction &amp; skill guides</button></div></section>`;}
@@ -13030,7 +13112,8 @@ Object.assign(UI.DO,{guidetown:id=>{UI.tab.guideTown=id;UI.render(false);},guide
 const combat=UI.V.combat;
 UI.V.combat=()=>{
  const html=combat(),m=D.MON[Q.fight?.id]||D.MONLIST.find(m=>m.town===S().town&&!m.boss),known=Q.weakKnown(m);
- const counters=known?Q.weakOf(m).weak.map(t=>`${D.DTYPES[t].name}: ${ {stab:'dagger',slash:'sword',crush:'warhammer',pierce:'bow and arrows',fire:'fire spell',frost:'frost spell',storm:'storm spell',aether:'aether spell'}[t]}`).join(' · '):'';
+ const needs=t=>t==='pierce'?'ranged':['fire','frost','storm','aether'].includes(t)?'magic':null;
+ const counters=known?Q.weakOf(m).weak.map(t=>{const sk=needs(t),locked=sk&&!Q.skillUnlocked(sk);return `${D.DTYPES[t].name}: ${ {stab:'dagger',slash:'sword',crush:'warhammer',pierce:'bow and arrows',fire:'fire spell',frost:'frost spell',storm:'storm spell',aether:'aether spell'}[t]}${locked?` (${D.SK[sk].name} not learned yet)`:''}`;}).join(' · '):'';
  const tips=known?Q.matchup(m).slice(0,2).map(([kind,line])=>`<span class="${kind==='good'?'ok':kind==='bad'?'bad':'dim'}">${esc(line)}</span>`).join(''):`<span>Defeat this creature to reveal its strengths and weaknesses in the field guide.</span>`;
  const intel=`<section class="panel battle-brief"><div class="phead"><h3>${esc(m.name)} · preparation</h3><button class="btn sm" data-do="guide" data-a="${m.id}">Field guide</button></div><div class="battle-facts"><span>Enemy max hit <b>${m.max}</b></span><span>Your max hit <b>${Q.pstats().max}</b></span><span>Attack every <b>${(Q.actDur({kind:'fight',pace:Q.act?.kind==='fight'?Q.act.pace:'steady'})/1000).toFixed(2)}s</b></span></div><div class="battle-advice">${counters?`<span class="ok">Try ${esc(counters)}</span>`:''}${tips}</div><div class="btnrow"><button class="btn sm" data-do="go" data-a="character">Equipment</button><button class="btn sm" data-do="go" data-a="cooking">Prepare food</button></div></section>`;
  /* Ranged and Magic are combat styles, each trained by its own skill: say how a locked one is learned */
@@ -13143,16 +13226,16 @@ UI.DO.journalmore = () => { UI.journalShown += 60; UI.render(false); };
 (() => {
 const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S;
 D.TRICKS = {
-  biscuit: { key: 'fetch', name: 'Fetch', text: 'now and then brings back an extra resource while you gather' },
+  biscuit: { key: 'fetch', name: 'Fetch', text: '1 in 40 gathering actions brings back an extra resource' },
   toast: { key: 'riser', name: 'Early riser', text: 'crops ripen 10% sooner' },
   bubbles: { key: 'school', name: 'School spotter', text: '1 in 12 catches is doubled' },
   acorn: { key: 'nuts', name: 'Nut stash', text: "bird's nests are twice as common" },
   nugget: { key: 'seam', name: 'Seam sense', text: 'gems from mining are twice as common' },
   whiskers: { key: 'paws', name: 'Light paws', text: 'the first failed pickpocket each minute does no damage' },
   cinder: { key: 'bellows', name: 'Bellows', text: '1 in 10 smelts makes a second bar' },
-  quill: { key: 'night', name: 'Night study', text: 'research finishes 10% sooner' },
+  quill: { key: 'night', name: 'Night study', text: 'research progresses 10% faster' },
   pudding: { key: 'taster', name: 'Taster', text: 'never burns the first dish of a cooking session, and burns are 25% rarer' },
-  gobbo: { key: 'heckle', name: 'Heckle', text: 'once per fight, makes the enemy miss an attack' },
+  gobbo: { key: 'heckle', name: 'Heckle', text: 'once per fight, makes the enemy lose its second attack' },
   tusky: { key: 'charge', name: 'Charge', text: 'opens every fight with a free hit for half your max hit' },
   bill: { key: 'comb', name: 'Beachcomber', text: 'coin pouches from fishing and fighting are 50% larger' },
   frostling: { key: 'cold', name: 'Cold shoulder', text: 'boss special attacks hit 20% softer' },

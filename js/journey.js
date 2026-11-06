@@ -94,11 +94,11 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (S().towns.willowbrook.boss) return step('The road is open', 'Grubnash is defeated. Visit Mossbarrow or choose your next destination.', 'go', 'map');
   if (S().town !== 'willowbrook') return step('Return to Willowbrook', 'Grubnash awaits outside the village.', 'journeytravel', 'willowbrook');
   const first = D.QM.first_steps, firstState = DQ.questState(first);
-  if (firstState === 'new') return step('Meet Elder Wren', 'Accept First Steps, or simply start fishing or chopping: the quest is accepted for you and your work counts.', 'qstart', first.id);
+  if (firstState === 'new') return step('Meet Elder Wren', 'Goblins have broken Willowbrook’s well. Elder Wren’s first job for you: a little food and a little timber.', 'qstart', first.id);
   if (firstState === 'ready') return step('Claim First Steps', 'Collect your XP and coins from Elder Wren. Her broken well is waiting on timber, and Grubnash on you.', 'qclaim', first.id);
   if (firstState === 'active') {
     const p = S().q[first.id], index = first.obj.findIndex((o, i) => DQ.objProg(first, p, i) < o.n);
-    if (index >= 0) return index === 0 ? task('Catch five shrimp', 'Your first quest prepares food and earns Hero XP.', 'fish', 'shrimp') : task('Chop five logs', 'Gather timber to complete First Steps.', 'wood', 'normal');
+    if (index >= 0) return index === 0 ? task('Catch five shrimp', 'Food first: shrimp keep you on your feet when the goblins come. Five, plus five logs for Elder Wren’s broken well, completes First Steps.', 'fish', 'shrimp') : task('Chop five logs', 'Elder Wren needs timber to mend the well’s winch. Five logs finishes First Steps.', 'wood', 'normal');
   }
   if (bossQuest && DQ.questState(bossQuest) === 'new') return step('Accept the Grubnash quest', 'Make your boss victory count toward the village quest and its rewards.', 'qstart', bossQuest.id);
   if (!DQ.skillUnlocked('cooking')) return task('Unlock Cooking at Hero 3', 'Prepare a food supply before taking on stronger opponents.', 'fish', 'shrimp');
@@ -143,11 +143,24 @@ UI.B.projectneed = (el, id, item) => {
   UI.set(el, `${Math.min(held, required)}/${required} ${label}`); el.classList.toggle('ok', held >= required);
 };
 UI.B.projectaction = (el, id) => UI.set(el, S().projects[id] ? 'View village' : DQ.journeyNext(id).title);
+/* How you will know the next step is done, and when it is a good moment to stop: shown under the one action that leads Home */
+DQ.journeyDoneWhen = next => {
+  const q = D.QM.first_steps, st = S().q[q.id];
+  if (st && st.s === 'active') return `Done when you have ${q.obj.map((o, i) => `${Math.min(DQ.objProg(q, st, i), o.n)}/${o.n} ${o.label.replace(/^(Catch|Chop) \d+ /, '')}`).join(' and ')}. Then claim it from ${q.giver}.`;
+  if (st === undefined || (st && st.s === 'new') || DQ.questState(q) === 'new') if (next.action === 'qstart' && next.a === q.id) return `First Steps asks for ${q.obj.map(o => o.label.replace(/^(Catch|Chop) /, '').toLowerCase()).join(' and ')}.`;
+  if (next.action === 'qclaim') return 'Done when you claim the reward.';
+  const req = D.MON.grubnash.boss.req;
+  if (/^Train for Grubnash/.test(next.title) && DQ.combatLvl() < req) return `Done when your combat level reaches ${req} (now ${DQ.combatLvl()}).`;
+  return '';
+};
+const fresh = () => DQ.advLvl() < 5 && !(S().towns.willowbrook && S().towns.willowbrook.boss);
 UI.journeyPanel = () => {
-  const next = DQ.journeyNext();
-  return `<section class="panel journey"><div class="phead"><div><span class="k">Your destination</span><h2>${esc(destinations[S().journey] || destinations.boss)}</h2></div></div>
-    <section data-reference="true" class="destination-picker"><h3>Change destination</h3><div class="destination-choices" aria-label="Choose your destination">${Object.entries(destinations).map(([id, label]) => `<button class="chip ${S().journey === id ? 'on' : ''}" aria-pressed="${S().journey === id}" data-do="destination" data-a="${id}">${esc(label)}</button>`).join('')}</div></section>
-    <p>${esc(next.detail)}</p><div class="btnrow wrap">${actionHtml(next)}${D.PROJECTS[S().journey] ? pinButton(S().journey) : '<button class="btn" data-do="go" data-a="quests">Quest log</button>'}</div></section>`;
+  const next = DQ.journeyNext(), done = DQ.journeyDoneWhen(next), firstTime = !S().seen.firstTask && DQ.totalXp() === 0;
+  return `<section class="panel journey"><div class="phead"><div><span class="k">Next step</span><h2>${esc(next.title)}</h2></div></div>
+    <p class="journey-why">${esc(next.detail)}</p>${done ? `<p class="journey-done">${ico('check')} ${esc(done)}</p>` : ''}
+    <div class="btnrow wrap">${(() => { const running = next.action === 'journeytask' && DQ.act && DQ.act.kind === next.a && DQ.act.id === next.b; return next.action === 'journeytask' ? `<button class="btn primary" data-do="journeytask" data-a="${next.a}" data-b="${next.b || ''}">${running ? 'Open the task' : 'Start'}</button>` : actionHtml(next); })()}${D.PROJECTS[S().journey] ? pinButton(S().journey) : ''}</div>
+    ${fresh() ? `<p class="journey-pause">${firstTime ? 'Pick one task at a time. It keeps working while you explore other pages or close the game, so any moment is a fine place to stop.' : 'A good place to pause: whenever a quest is claimed. Your task keeps working while you are away.'}</p>` : ''}
+    <div class="destination-picker"><span class="k">Your destination: ${esc(destinations[S().journey] || destinations.boss)}</span><div class="destination-choices" aria-label="Choose your destination">${Object.entries(destinations).map(([id, label]) => `<button class="chip sm ${S().journey === id ? 'on' : ''}" aria-pressed="${S().journey === id}" data-do="destination" data-a="${id}">${esc(label)}</button>`).join('')}</div></div></section>`;
 };
 UI.projectsPanel = () => {
   const town=S().town, entries=DQ.projectsForTown(town);

@@ -503,6 +503,53 @@ test('nice touches: clock-based time of day, one title nod per villager, quiet m
  const n=S.journal.length;q.recordKill(D.MON.rat,[]);assert.equal(S.journal.length,n,'a memory is written once');
  const short=q.ui.returnExtras({real:3600e3,items:{}});assert.ok(!/door-note/.test(short),'no note after a short absence');
 });
+test('combat guidance is derived from the shared damage-type rule and the real save',()=>{
+ const {q}=harness();const S=q.S,D=q.data,R=D.TYPE_RULES;
+ /* text matches the multipliers the engine applies */
+ assert.equal(q.typeMult(D.MON.oldtusk,'weak'),R.boss.weak);assert.equal(q.typeMult(D.MON.boar,'weak'),R.normal.weak);
+ assert.match(q.typeRuleText(D.MON.oldtusk),new RegExp(`\\+${Math.round((R.boss.weak-1)*100)}%.*${Math.round(R.boss.resist*100)}%`));
+ assert.match(q.typeRuleText(D.MON.boar),new RegExp(`\\+${Math.round((R.normal.weak-1)*100)}%.*${Math.round(R.normal.resist*100)}%`));
+ assert.match(D.AB.focus.text,new RegExp(`${R.boss.focus}x`));
+ /* Old Tusk is weak to pierce: with Ranged locked, no bow is suggested as usable, only how it is learned */
+ S.town='mossbarrow';S.towns.mossbarrow={visited:true,boss:false};S.coins=1e5;for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[20];S.hp=q.maxHp();
+ let adv=q.prepAdvice('oldtusk');let w=adv.find(x=>x.key==='weak');assert.ok(w&&w.info&&/Ranged is not learned/.test(w.text),JSON.stringify(w));
+ /* Ranged learned and a bow owned but no arrows: switch, and the advice names the missing arrows */
+ S.unlocked.ranged=true;S.xp.ranged=D.XPF[20];S.inv.bow_oak=1;adv=q.prepAdvice('oldtusk');w=adv.find(x=>x.key==='weak');
+ assert.match(w.title,/Switch to your oak shortbow/i);assert.match(w.text,/arrows/);
+ S.inv.arrow_iron=100;adv=q.prepAdvice('oldtusk');assert.doesNotMatch(adv.find(x=>x.key==='weak').text,/also need arrows/);
+ /* never suggests buying armour the player already owns */
+ S.inv.iron_body=1;adv=q.prepAdvice('oldtusk');assert.ok(adv.some(x=>x.key==='equip:body'));assert.ok(!(adv.find(x=>x.key==='buy')||{items:[]}).items.includes('iron_body'));
+ /* food: names the raw fish actually held */
+ S.unlocked.cooking=true;S.xp.cooking=D.XPF[30];S.inv.raw_trout=12;adv=q.prepAdvice('oldtusk');assert.match(adv.find(x=>x.key==='food').text,/12 raw trout/);
+});
+test('preparation advice covers ability slots and boss specials',()=>{
+ const {q}=harness();const S=q.S,D=q.data;
+ S.town='ironpeak';S.towns.ironpeak={visited:true,boss:false};for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[44];S.hp=q.maxHp();S.inv.rune_sword=1;q.equipItem('rune_sword');S.abilities=[];
+ let a=q.prepAdvice('frostmaw').find(x=>x.key==='abil');assert.ok(a&&/^Slot (Brace|Shield Bash)/.test(a.title),'empty slots: suggests answering the special first');
+ S.abilities=['aimed'];a=q.prepAdvice('frostmaw').find(x=>x.key==='abil');assert.match(a.title,/Aimed Shot does nothing/);
+ S.abilities=['power','second','execute'];a=q.prepAdvice('frostmaw').find(x=>x.key==='abil');assert.ok(a&&/Swap in (Brace|Shield Bash)/.test(a.title),'full slots that ignore the special: suggests a swap');
+ S.abilities=['brace','power','second'];assert.ok(!q.prepAdvice('frostmaw').some(x=>x.key==='abil'),'nothing to say when the special is answered');
+});
+test('Herbalism and Enchanting: a named first goal, honest materials, and advice only when it helps',()=>{
+ const {q,load}=harness();load('skill_expansion_data');load('lore');load('hunting');load('bestiary');load('skill_expansion');const S=q.S,D=q.data;
+ for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[44];S.stats.craft=30;S.stats.smith=20;q.checkActionUnlocks&&q.checkActionUnlocks();S.unlocked.enchanting=true;S.xp.enchanting=D.XPF[10];
+ S.inv.bronze_sword=1;S.inv.steel_body=1;q.equipItem('bronze_sword');q.equipItem('steel_body');
+ const plan=q.enchantPlan();assert.equal(plan[0].id,'bronze_sword','the item that gains the biggest share comes first');assert.ok(plan[0].gain>plan[1].gain);
+ assert.equal(plan[0].ready,false,'not ready without runes and a gem');S.inv.rune=20;S.inv.gem_sapphire=1;assert.equal(q.enchantPlan()[0].ready,true);
+ /* advice: only for a boss you are likely to struggle with */
+ S.town='ironpeak';S.towns.ironpeak={visited:true,boss:false};S.hp=q.maxHp();S.inv.potion_might=1;
+ assert.ok(q.prepAdvice('frostmaw',{winRate:.4,wins:10,foodPerKill:5}).some(x=>x.key==='potion'),'Might offered when struggling');
+ assert.ok(!q.prepAdvice('frostmaw',{winRate:.95,wins:23,foodPerKill:2}).some(x=>x.key==='potion'||x.key==='enchant'),'not pushed when already favoured');
+assert.ok(q.prepAdvice('frostmaw',{winRate:.4,wins:10,foodPerKill:5}).some(x=>x.key==='enchant'),'a ready enchantment is offered');
+ assert.ok(!q.prepAdvice('troll').some(x=>x.key==='potion'),'not for ordinary creatures');
+});
+test('Home leads with one next step that says how you will know it is done',()=>{
+ const {q}=harness();const S=q.S,D=q.data;
+ let next=q.journeyNext();assert.equal(next.action,'qstart');assert.match(q.journeyDoneWhen(next),/5 shrimp and 5 logs/);assert.doesNotMatch(q.journeyDoneWhen(next),/combat level/);
+ q.startQuest('first_steps');S.q.first_steps.p=[3,0];next=q.journeyNext();assert.match(q.journeyDoneWhen(next),/3\/5 shrimp and 0\/5 logs/);
+ S.q.first_steps={s:'done',p:[5,5]};S.unlocked.cooking=true;S.xp.cooking=D.XPF[3];const boss=D.QUESTS.find(x=>x.obj.some(o=>o.ev==='boss'));S.q[boss.id]={s:'active',p:[0]};
+ next=q.journeyNext();if(/^Train for Grubnash/.test(next.title))assert.match(q.journeyDoneWhen(next),/combat level reaches 8/);
+});
 test('restoration: new Willowbrook projects, regional materials, villager voices and legacy bonuses',()=>{
  const {q,load}=harness();load('fx');load('routes');const S=q.S,D=q.data;S.coins=1e6;
  const wb=q.projectsForTown('willowbrook').map(([id])=>id);for(const id of ['well','inn','forge','garden','library','watchtower'])assert.ok(wb.includes(id),id);

@@ -11,12 +11,7 @@ DQ.checkActionUnlocks=()=>{
     DQ.emit('lvl'); DQ.save();
   }
 };
-DQ.combatInterval=()=>{
-  const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword;
-  const mastery=Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003);
-  return Math.round(W.speed*(1-mastery));
-};
-DQ.combatSpeedText=()=>{const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword,ms=DQ.combatInterval();return `${W.name}: ${(ms/1000).toFixed(2)}s per attack · ${Math.round((1-ms/W.speed)*100)}% faster from Combat level`;};
+/* combat speed lives in engine.js (DQ.combatInterval / DQ.combatSpeedText); a copy here used to override it and drop the Gale effect */
 
 const oldNext=DQ.nextEncounter;
 DQ.nextEncounter=m=>{DQ.checkActionUnlocks();if(DQ.skillUnlocked('hunting'))DQ.addXp('hunting',Math.max(3,Math.round(m.cl*1.4)));return oldNext(m);};
@@ -48,8 +43,23 @@ const gems=['gem_sapphire','gem_emerald','gem_ruby','gem_diamond','gem_diamond']
 DQ.enchant=id=>{const rank=S().enchants[id]||0,need=gems[rank];if(!DQ.skillUnlocked('enchanting')||rank>=5)return false;if(!Object.values(S().equip).includes(id))return DQ.toast('Equip the item first',true);if(DQ.have('rune')<5*(rank+1)||!DQ.have(need))return DQ.toast(`Requires ${5*(rank+1)} runes and 1 ${D.ITEMS[need]?.name||need}`,true);DQ.take('rune',5*(rank+1));DQ.take(need,1);S().enchants[id]=rank+1;S().stats.enchant++;DQ.addXp('enchanting',20*(rank+1));DQ.sfx('unlock');DQ.toast(`${D.ITEMS[id].name} is now enchantment +${rank+1}`);DQ.emit('lvl');return true;};
 const baseBonus=DQ.bonus;
 DQ.bonus=()=>{const out=baseBonus();for(const [slot,id] of Object.entries(S().equip)){if(slot==='ammo')continue;const rank=S().enchants[id]||0,b=D.ITEMS[id]?.b||{};for(const k of Object.keys(b))out[k]+=rank;}return out;};
-UI.V.enchanting=()=>`${hero('enchanting')}<section class="panel"><div class="phead"><h2>Enchant equipped gear</h2><small>Maximum +5</small></div><p class="hint">Each rank adds +1 to every combat bonus already present on that item.</p><div class="ench-list">${Object.entries(S().equip).filter(([slot,id])=>slot!=='ammo'&&D.ITEMS[id]).map(([slot,id])=>{const r=S().enchants[id]||0,need=gems[r];return `<div class="ench-row">${DQ.itemIco(D.ITEMS[id])}<span><b>${esc(D.ITEMS[id].name)} +${r}</b><small>${r>=5?'Fully enchanted':`${5*(r+1)} runes + 1 ${D.ITEMS[need]?.name||need}`}</small></span><button class="btn ${r<5?'primary':''}" data-do="enchant" data-a="${id}" ${r>=5?'disabled':''}>${r>=5?'Complete':'Enchant'}</button></div>`}).join('')||'<p>Equip an item to enchant it.</p>'}</div></section>`;
+/* Enchanting: what the next rank adds to each worn item, what it costs, where the materials come from, and which item
+   gains most from a first enchantment (the biggest share of its own bonus, weapon first on a tie). */
+DQ.enchantPlan=()=>Object.entries(S().equip).filter(([slot,id])=>slot!=='ammo'&&D.ITEMS[id]&&Object.keys(D.ITEMS[id].b||{}).length).map(([slot,id])=>{const it=D.ITEMS[id],r=S().enchants[id]||0,b=it.b||{},keys=Object.keys(b),total=keys.reduce((n,k)=>n+Math.abs(b[k]),0)+keys.length*r,need=gems[r],runes=5*(r+1);return {slot,id,it,rank:r,keys,gain:total?keys.length/total:0,need,runes,ready:r<5&&DQ.have('rune')>=runes&&DQ.have(need)>0};}).sort((a,b)=>b.gain-a.gain||(a.slot==='weapon'?-1:b.slot==='weapon'?1:0));
+UI.V.enchanting=()=>{const plan=DQ.enchantPlan(),best=plan.find(p=>p.rank<5),names=UI.statNames||{};
+ return `${hero('enchanting')}<section class="panel"><div class="phead"><h2>Enchant equipped gear</h2><small>Up to +5 per item</small></div><p class="hint">Each rank adds +1 to every bonus the item already has: a big share on early gear, a small one on top-tier gear. Costs Arcane runes (shop) and a gem (mining, nests, chests).</p><div class="ench-list">${plan.map(p=>{const pct=Math.round(p.gain*100);return `<div class="ench-row ${p===best?'recommended':''}">${DQ.itemIco(p.it)}<span><b>${esc(p.it.name)} +${p.rank}</b>${p===best?' <span class="tag">Best first</span>':''}<small>${p.rank>=5?'Fully enchanted':`Next: ${p.keys.map(k=>`+1 ${names[k]||k}`).join(', ')} (about +${pct}% of its bonus) · ${p.runes} runes (${DQ.have('rune')} held) + 1 ${esc(D.ITEMS[p.need]?.name||p.need)} (${DQ.have(p.need)} held)`}</small></span>${p.rank<5&&!DQ.have(p.need)&&UI.routeChip?UI.routeChip(p.need):''}<button class="btn ${p.ready?'primary':''}" data-do="enchant" data-a="${p.id}" ${p.rank>=5||!p.ready?'disabled':''}>${p.rank>=5?'Complete':'Enchant'}</button></div>`;}).join('')||'<p>Equip a weapon or armour to enchant it.</p>'}</div></section>`;};
 Object.assign(UI.DO,{enchant:id=>{if(DQ.enchant(id))UI.render(false);}});
 const brewery=UI.V.brewery;
-UI.V.brewery=()=>DQ.skillUnlocked('herbalism')?`${hero('herbalism')}${brewery()}`:UI.lockedPage('herbalism');
+/* Herbalism: a short path to the first useful potion, shown until Potion of Might is brewable */
+const herbGoals=()=>{const done=id=>DQ.techDone&&DQ.techDone(id),R=D.POTION_RECIPES.find(r=>r.id==='potion_heal'),M=D.POTION_RECIPES.find(r=>r.id==='potion_might');
+ if(done('warbrew'))return '';
+ const mats=r=>Object.entries(r.in).map(([k,n])=>`<span class="rw ${DQ.have(k)>=n?'':'short'}">${DQ.ico(D.ITEMS[k].ic)}${DQ.have(k)}/${n} ${esc(D.ITEMS[k].name)}</span>${DQ.have(k)<n&&UI.routeChip?UI.routeChip(k):''}`).join('')+`<span class="rw">${DQ.ico('coin')}${r.coins}</span>`;
+ const step=(on,doneNow,title,body,btn)=>`<li class="${doneNow?'done':on?'now':''}"><b>${doneNow?'✓ ':''}${title}</b><small>${body}</small>${on&&!doneNow&&btn?btn:''}</li>`;
+ const r1=done('herbalism'),scholar=DQ.advLvl()>=D.RESEARCH_ADV;
+ return `<section class="panel herb-goals"><div class="phead"><h2>First goals</h2><small>Herbalism</small></div><ol class="herb-path">
+  ${step(true,r1,'Research Herbalism',scholar?'In Scholarship: 900 coins and 10 onions.':`Scholarship opens at Hero ${D.RESEARCH_ADV}.`,scholar?'<button class="btn sm" data-do="go" data-a="research">Open Scholarship</button>':'')}
+  ${step(r1,DQ.have('potion_heal')>0,'Brew a Healing draught',`Drink it to restore 40% of your health at once: before a boss instead of resting, or between hard fights. <span class="rws">${mats(R)}</span>`)}
+  ${step(r1,false,'Next: War Brewing → Potion of Might','+15% damage for 20 minutes. Worth brewing for a boss you keep losing to, not for everyday fights. Research it in Scholarship (Tier II).')}
+ </ol></section>`;};
+UI.V.brewery=()=>DQ.skillUnlocked('herbalism')?`${hero('herbalism')}${herbGoals()}${brewery()}`:UI.lockedPage('herbalism');
 })();

@@ -282,7 +282,7 @@ const WEAPON = { stab: 'a dagger', slash: 'a sword', crush: 'a warhammer', pierc
 const studyNote = id => {
   const q = studyQuest(id), m = D.MON[id]; if (!q || !m || !studied(id) || !DQ.weakOf || !UI.weakChips) return '';
   const w = DQ.weakOf(m), bring = w.weak.map(t => WEAPON[t]).filter(Boolean);
-  return `<div class="gsec study-note" style="--c:${m.col}"><div class="gh"><b>${esc(q.giver)}’s notes</b><small>${esc(q.name)}</small></div><div class="chips">${UI.weakChips(m)}</div><p>${bring.length ? `Bring ${esc(bring.join(' or '))}: weak points take 50% more damage.` : 'It has no obvious weakness. Bring your strongest gear and plenty of food.'}</p></div>`;
+  return `<div class="gsec study-note" style="--c:${m.col}"><div class="gh"><b>${esc(q.giver)}’s notes</b><small>${esc(q.name)}</small></div><div class="chips">${UI.weakChips(m)}</div><p>${bring.length ? `Bring ${esc(bring.join(' or '))}: weak points take +${Math.round((DQ.typeMult(m, 'weak') - 1) * 100)}% damage.` : 'It has no obvious weakness. Bring your strongest gear and plenty of food.'}</p></div>`;
 };
 if (guide0) UI.openGuide = id => {
   const r = guide0(id); if (DQ.forecasting) return r;

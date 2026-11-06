@@ -146,15 +146,16 @@ UI.homeGoals = () => {
 UI.homeSections = [];
 UI.homeNotices = () => '';
 UI.V.overview = () => {
-  const welcome = !S().seen.firstTask && !DQ.act && DQ.totalXp() === 0 && (S().tut?.hidden || S().tut?.done?.intro)
-    ? '<p class="home-welcome">Welcome to Idlewick. Follow your next step below. Once started, tasks carry on while you are away.</p>' : '';
+  const welcome = '';
+  /* other suggestions wait until the first quest is done, so the opening has one clear action */
+  const opening = S().q.first_steps?.s !== 'done';
   const decisions = (S().inbox || []).length;
   return `${welcome}${UI.homeSections.map(render => render()).join('')}
     ${decisions ? `<button class="btn sm" data-do="go" data-a="activity">${decisions} away decision${decisions === 1 ? '' : 's'} waiting · View activity</button>` : ''}
     ${UI.homeNotices()}
-    <section data-reference="true" class="panel upnext"><h3>Explore other suggestions</h3>
+    ${opening ? '' : `<section data-reference="true" class="panel upnext"><h3>Explore other suggestions</h3>
       <div id="goalbox">${UI.homeGoals()}</div>
-    </section>`;
+    </section>`}`;
 };
 UI.V.skillsummary = () => `<section class="panel"><div class="phead"><h2>Your skills</h2><small>Total level <b data-b="totlvl"></b></small></div><div class="skl">${D.SKILLS.map(skill => {
   const locked = !DQ.skillUnlocked(skill.id);

@@ -78,3 +78,16 @@ Unanswered until people play: whether 21 minutes feels short or long to each gro
 - **The Silent Bells**: from a Hero 18 save, do players follow the story without help? Do they hesitate over the ledger, and does the consequence feel worth it?
 - **Journal**: after a session, does it read like their own story? Is anything missing or noisy?
 - **Bosses**: with the field guide's advice, does a boss feel tense but fair? Without it, do they understand why they lost?
+
+## Questions for this build (prepared, not yet run)
+
+Ask both enthusiasts and sceptics after a session, then "why?":
+1. Did the first objective feel obvious? (Watch whether they read the "Done when" line.)
+2. Could you explain why you prepared the way you did for a boss?
+3. Did the equipment effects feel trustworthy? Did you see them happen?
+4. Did the different ways to beat a boss (counter, more food, potions) make sense?
+5. When did completing the bestiary start to feel repetitive?
+6. After unlocking Herbalism or Enchanting, did you know one worthwhile thing to make?
+7. Would you come back tomorrow without being asked?
+
+Unverified without people: whether the Next step card is read or skipped; whether "Most useful change" after a defeat changes behaviour; whether players find ability slots without the advice.

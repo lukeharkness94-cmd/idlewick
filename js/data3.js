@@ -54,6 +54,9 @@ D.STUDY_KILLS = 3;   // kills needed to learn a regular creature's weaknesses
 
 /* ---------- Abilities: slot two (three from combat level 40). They trigger on their own. ---------- */
 const AB = (id, name, ic, skill, lvl, style, text, extra) => Object.assign({ id, name, ic, skill, lvl, style, text }, extra || {});
+/* Damage-type rules, one table for the engine and every piece of advice (plan.js DQ.typeMult / DQ.typeRuleText).
+   Bosses are counter checks, not locks: weaknesses help and resistances hurt, but less than on ordinary creatures. */
+D.TYPE_RULES = { normal: { weak: 1.5, focus: 2, resist: .5 }, boss: { weak: 1.3, focus: 1.6, resist: .7 } };
 D.ABIL = [
   AB('power', 'Power Strike', 'strength', 'strength', 8, 'melee', 'Every 4th attack hits for double damage.'),
   AB('bash', 'Shield Bash', 'shield', 'defence', 12, 'melee', 'Interrupts a boss special attack. Needs a shield. Ready every 8 attacks.', { needShield: true }),
@@ -63,7 +66,7 @@ D.ABIL = [
   AB('aimed', 'Aimed Shot', 'ranged', 'ranged', 5, 'ranged', 'Every 3rd shot always hits for 1.5x damage.'),
   AB('pin', 'Pin Down', 'arrow_ammo', 'ranged', 25, 'ranged', 'Hits pin the monster: 25% less accurate for 2 attacks, and flying monsters are grounded.'),
   AB('kite', 'Keep Distance', 'bow', 'ranged', 40, 'ranged', 'Enemy normal attacks deal 30% less damage.'),
-  AB('focus', 'Elemental Focus', 'magic', 'magic', 10, 'magic', 'Weaknesses take 2x damage instead of 1.5x.'),
+  AB('focus', 'Elemental Focus', 'magic', 'magic', 10, 'magic', `Spells that hit a weakness deal ${D.TYPE_RULES.normal.focus}x instead of ${D.TYPE_RULES.normal.weak}x (against bosses ${D.TYPE_RULES.boss.focus}x instead of ${D.TYPE_RULES.boss.weak}x).`),
   AB('ward', 'Arcane Ward', 'ring_logo', 'magic', 30, 'magic', 'Absorbs a boss special attack. Ready every 6 attacks.'),
 ];
 D.AB = Object.fromEntries(D.ABIL.map(a => [a.id, a]));

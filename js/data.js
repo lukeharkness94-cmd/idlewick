@@ -397,10 +397,10 @@ const U = (key, name, text) => ({ key, name, text });
 Object.entries({
   chief_helm: U('roar', 'Battle roar', 'The first enemy attack of every fight misses.'),
   tusk_charm: U('hide', 'Thick hide', 'Normal enemy attacks deal 15% less damage.'),
-  barnacle_cutlass: U('riposte', 'Riposte', 'When you are hit, 20% chance to strike straight back.'),
-  frostmaw_pendant: U('slow', 'Frostbite', 'Enemies attack 15% more slowly.'),
+  barnacle_cutlass: U('riposte', 'Riposte', 'When you are hit, 20% chance to strike straight back for up to your max hit.'),
+  frostmaw_pendant: U('slow', 'Frostbite', 'Enemies wait 15% longer between attacks.'),
   witch_staff: U('curse', 'Bog hex', 'Each spell that lands weakens the enemy: 5% softer hits per stack, up to 15%.'),
-  emberfang_bow: U('ember', 'Ember arrows', 'Every shot adds a burst of fire damage, strong against fire-weak foes.'),
+  emberfang_bow: U('ember', 'Ember arrows', 'Every shot adds fire damage of up to a quarter of your max hit; more against fire-weak foes, less against fire-resistant ones.'),
   storm_feather: U('swift', 'Gale', 'You attack 10% faster.'),
   hollow_crown: U('sovereign', 'Crown of sorrow', 'Heal 8% of the damage you deal; boss specials hit 20% softer.')
 }).forEach(([id, u]) => { if (ITEMS[id]) ITEMS[id].unique = u; });
@@ -408,8 +408,8 @@ const uq = (id, o) => mk(id, Object.assign({ type: 'gear', rare: 1 }, o));
 uq('leechfang', { name: 'Leechfang', ic: 'dagger', col: '#9a3a4a', val: 400, slot: 'weapon', wtype: 'dagger', style: 'melee', req: { attack: 12 }, b: { atk: 10, str: 5 }, unique: U('lifesteal', 'Leech', 'Heal 20% of the damage you deal.'), flavour: 'The wolves of Mossbarrow carry it off from careless travellers. It never quite stops being warm.' });
 uq('wyrdwood_bow', { name: 'Wyrdwood longbow', ic: 'bow', col: '#6a8a4a', val: 450, slot: 'weapon', style: 'ranged', req: { ranged: 18 }, b: { rng: 11 }, unique: U('marked', "Hunter's mark", 'The first three shots of every fight always hit, for 50% more damage.'), flavour: 'Cut from a tree the scarecrows guard. It hums when it finds its mark.' });
 uq('thornback_buckler', { name: 'Thornback buckler', ic: 'shield', col: '#c87a5a', val: 500, slot: 'shield', req: { defence: 15 }, b: { def: 7 }, unique: U('thorns', 'Thorns', 'Enemies take 35% of the damage they deal to you.'), flavour: 'A rock crab shell, spines and all, strapped to a board.' });
-uq('vipers_kiss', { name: "Viper's kiss", ic: 'sword', col: '#5aa86a', val: 900, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 20 }, b: { atk: 13, str: 10 }, unique: U('poison', 'Venom', 'Hits poison the enemy (up to 3 stacks); poison bites each time it attacks.'), flavour: 'A coast-road bandit’s favourite. The groove along the blade is not decoration.' });
-uq('gale_sabre', { name: 'Gale sabre', ic: 'sword', col: '#8fd0e0', val: 1400, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 28 }, b: { atk: 20, str: 16 }, unique: U('twin', 'Twin cut', '20% chance to strike twice.'), flavour: 'Pirates swear it was forged in a storm. It is certainly light enough.' });
+uq('vipers_kiss', { name: "Viper's kiss", ic: 'sword', col: '#5aa86a', val: 900, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 20 }, b: { atk: 13, str: 10 }, unique: U('poison', 'Venom', 'Each hit adds a poison stack (up to 3). Whenever the enemy attacks, each stack deals 12% of your max hit.'), flavour: 'A coast-road bandit’s favourite. The groove along the blade is not decoration.' });
+uq('gale_sabre', { name: 'Gale sabre', ic: 'sword', col: '#8fd0e0', val: 1400, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 28 }, b: { atk: 20, str: 16 }, unique: U('twin', 'Twin cut', 'Each hit has a 20% chance to strike again for a full second hit.'), flavour: 'Pirates swear it was forged in a storm. It is certainly light enough.' });
 uq('wardens_greathelm', { name: "Warden's greathelm", ic: 'helm', col: '#7a8aa0', val: 1500, slot: 'head', req: { defence: 25 }, b: { def: 9 }, unique: U('bulwark', 'Bulwark', 'Boss special attacks hit 35% softer.'), flavour: 'Saltmere’s harbour wardens wore these on the sea wall. This one was given, not found.' });
 uq('smugglers_knot', { name: "Smuggler's knot", ic: 'ring', col: '#b89a5a', val: 1500, slot: 'ring', b: {}, unique: U('fortune', "Smuggler's luck", '+25% chance of item drops and +5% coins. No combat stats.'), flavour: 'A ring of tarred rope. Mother Silt’s people will know you by it.' });
 uq('thunderclap_maul', { name: 'Thunderclap maul', ic: 'hammer', col: '#c8b860', val: 4000, slot: 'weapon', wtype: 'hammer', style: 'melee', req: { attack: 40 }, b: { atk: 24, str: 38 }, unique: U('stun', 'Thunderclap', 'Hits have a 12% chance to stun: the enemy loses its next attack.'), flavour: 'Trolls use it to crack ice. It cracks most things.' });

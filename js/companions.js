@@ -5,16 +5,16 @@
 (() => {
 const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S;
 D.TRICKS = {
-  biscuit: { key: 'fetch', name: 'Fetch', text: 'now and then brings back an extra resource while you gather' },
+  biscuit: { key: 'fetch', name: 'Fetch', text: '1 in 40 gathering actions brings back an extra resource' },
   toast: { key: 'riser', name: 'Early riser', text: 'crops ripen 10% sooner' },
   bubbles: { key: 'school', name: 'School spotter', text: '1 in 12 catches is doubled' },
   acorn: { key: 'nuts', name: 'Nut stash', text: "bird's nests are twice as common" },
   nugget: { key: 'seam', name: 'Seam sense', text: 'gems from mining are twice as common' },
   whiskers: { key: 'paws', name: 'Light paws', text: 'the first failed pickpocket each minute does no damage' },
   cinder: { key: 'bellows', name: 'Bellows', text: '1 in 10 smelts makes a second bar' },
-  quill: { key: 'night', name: 'Night study', text: 'research finishes 10% sooner' },
+  quill: { key: 'night', name: 'Night study', text: 'research progresses 10% faster' },
   pudding: { key: 'taster', name: 'Taster', text: 'never burns the first dish of a cooking session, and burns are 25% rarer' },
-  gobbo: { key: 'heckle', name: 'Heckle', text: 'once per fight, makes the enemy miss an attack' },
+  gobbo: { key: 'heckle', name: 'Heckle', text: 'once per fight, makes the enemy lose its second attack' },
   tusky: { key: 'charge', name: 'Charge', text: 'opens every fight with a free hit for half your max hit' },
   bill: { key: 'comb', name: 'Beachcomber', text: 'coin pouches from fishing and fighting are 50% larger' },
   frostling: { key: 'cold', name: 'Cold shoulder', text: 'boss special attacks hit 20% softer' },

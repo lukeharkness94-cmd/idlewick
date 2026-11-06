@@ -70,7 +70,7 @@ UI.openGuide = id => {
       <div class="gprog"><span class="bar"><i style="width:${r.next == null ? 100 : Math.round((r.kills - (r.rank ? T[r.rank - 1] : 0)) / (T[r.rank] - (r.rank ? T[r.rank - 1] : 0)) * 100)}%"></i></span><small class="mono">${fmt(r.kills)} defeated · ${nextLine(m, r)}</small></div></div></div>
     <ol class="gladder" aria-label="What each entry needs">${RANKS.map((x, i) => { const left = T[i] - r.kills; return `<li class="${left <= 0 ? 'on' : ''}">${ico(left <= 0 ? 'check' : 'lock')}<b>${x[1]}</b><small>${left <= 0 ? 'Unlocked' : `${fmt(left)} more defeat${left > 1 ? 's' : ''}`}</small></li>`; }).join('')}</ol>
     ${seen ? sec(0, `<p>Found around ${esc(D.TOWN[m.town].name)}. Level ${m.cl}${m.boss ? `, and it guards the road onward` : ''}.</p>`) : lock(0)}
-    ${sec(1, `<div class="chips">${UI.weakChips(m)}</div><p class="sm dim" style="margin:6px 0 0">Weak points take 50% more damage. Resisted types do half.</p>`)}
+    ${sec(1, `<div class="chips">${UI.weakChips(m)}</div><p class="sm dim" style="margin:6px 0 0">${esc(DQ.typeRuleText(m))}</p>`)}
     ${sec(2, `<p>Health <b class="mono">${m.hp}</b> · Hits up to <b class="mono">${m.max}</b> · Carries <b class="mono">${m.coins[1] ? `${m.coins[0]}-${m.coins[1]}` : 'no'}</b> coins</p>`)}
     <div class="gsec ${r.rank > 3 ? '' : 'part'}"><div class="gh"><b>${RANKS[3][1]}</b><small>${RANKS[3][2]}</small></div>${dr}</div>
     ${sec(4, `<p>${esc(lore.note || 'No notes yet.')}</p>`)}

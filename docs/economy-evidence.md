@@ -78,3 +78,7 @@ The economy simulator does not model combat, so its coin table is unchanged by t
 | Hollow King (max 32) | 92% | 91% | 0% |
 
 Before: 100% for every boss with counters, and up to 0% without them. Old Tusk stays generous by design (his charge is halved against arrows, and Ranged unlocks at his gate). Single runs vary by about ±10%.
+
+## Preparation choices (Nov 2026 review)
+
+`COMPARE=1 PARTS=1 node scripts/sim-bosses.cjs` compares, for each boss at its requirement: no abilities, a general build, each preparation on its own, the field-guide counter, all alternative preparations together, and +5 levels. The results table and reading are in `docs/experience-assessment.md` (Review response). The earlier "plain melee 0%" column used no abilities and should not be read as "melee cannot win".

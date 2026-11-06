@@ -266,3 +266,16 @@ Quiet details layered onto existing scenes; no new menus or notifications. Motio
 - **Door notes**: after 4+ hours away, sometimes (seeded by day) a short note from a local villager in the welcome-back summary.
 - **Night home**: at night, Home opens with the lit cottage (or the inn's hearth) and what the night shift is doing.
 - **Left menu** tooltips name each skill's next unlock (`UI.nextUnlock`); the title screen's Continue says what you were last doing.
+
+
+## Review response pass (Nov 2026, Claude Code) — from 438b1e1
+
+Full write-up: `docs/experience-assessment.md` → "Review response".
+- **Fixed**: Gale did nothing (a late duplicate `DQ.combatInterval` in skill_expansion.js); one definition now lives in engine.js. Every unique effect and companion trick counts its triggers in `DQ.effectHits` (transient). `tests/ui-effects.cjs` proves each fires in live play, offline catch-up and forecasts, stops when removed, and survives save and reload, in the real page.
+- **One damage-type rule**: `D.TYPE_RULES` (data3.js) feeds the engine (`DQ.typeMult`) and all guidance (`DQ.typeRuleText`). Never hard-code "+50%" or "half" again.
+- **Preparation advice**: covers bows (pierce), arrows, runes, any raw fish, ability slots and specials, owned potions, brewable Might and ready enchantments (bosses only, and only when the forecast says you are struggling). A boss defeat names the most useful change (`DQ.lastFoe`, plan.js notify wrapper).
+- **Herbalism / Enchanting**: first-goals panel on the Brewery; `DQ.enchantPlan()` ranks worn items by the share a rank adds.
+- **Home**: the Next step card (`DQ.journeyDoneWhen`), destination below; the onboarding intro panel only returns if the guides are restarted.
+- **Simulator**: sim-bosses loads lore, hunting, bestiary, skill_expansion, adventures and companions; `COMPARE=1` (and `PARTS=1`) runs the preparation comparison.
+- **Awaiting approval**: Hollow King retune, a late-magic parity check, stacking-to-guarantee, Healing draught auto-drink, bestiary understanding objectives.
+- **New tests**: `tests/ui-effects.cjs`, `tests/ui-journeys.cjs` (both need a preview server).

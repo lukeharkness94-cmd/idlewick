@@ -32,12 +32,16 @@ DQ.weakOf = (m, f) => {
   return D.WEAK[m.id] || { weak: [], resist: [] };
 };
 DQ.myDtype = () => { const wt = D.weaponType(); if (wt === 'staff') { const sp = D.SPELLS.find(s => s.id === S().spell) || D.SPELLS[0]; return D.SPELL_EL[sp.id]; } return D.WTYPES[wt].dtype; };
+/* the shared damage-type rule (data3.js D.TYPE_RULES): what the engine applies and what every hint says */
+DQ.typeMult = (m, kind) => { const R = D.TYPE_RULES[m && m.boss ? 'boss' : 'normal']; return kind === 'resist' ? R.resist : DQ.ability && DQ.ability('focus') ? R.focus : R.weak; };
+const pctUp = x => `+${Math.round((x - 1) * 100)}%`;
+DQ.typeRuleText = m => { const R = D.TYPE_RULES[m && m.boss ? 'boss' : 'normal']; return `Weak points take ${pctUp(R.weak)} damage (${pctUp(R.focus)} for spells with Elemental Focus); resisted types deal ${Math.round(R.resist * 100)}%.${m && m.boss ? ' Bosses shrug off weaknesses and resistances more than ordinary creatures.' : ''}`; };
 /* How your current build matches up against a monster: used by the boss intel panel */
 DQ.matchup = m => {
   const dt = DQ.myDtype(), wr = DQ.weakOf(m), out = [];
   if (m.id === 'hollowking') out.push(['info', 'His weakness changes with each phase. No single weapon is best for the whole fight.']);
-  else if (wr.weak.includes(dt)) out.push(['good', `Your ${D.DTYPES[dt].name.toLowerCase()} damage hits its weakness (1.5x).`]);
-  else if (wr.resist.includes(dt)) out.push(['bad', `It resists your ${D.DTYPES[dt].name.toLowerCase()} damage (half damage).`]);
+  else if (wr.weak.includes(dt)) out.push(['good', `Your ${D.DTYPES[dt].name.toLowerCase()} damage hits its weakness (${pctUp(DQ.typeMult(m, 'weak'))}).`]);
+  else if (wr.resist.includes(dt)) out.push(['bad', `It resists your ${D.DTYPES[dt].name.toLowerCase()} damage (you deal ${Math.round(DQ.typeMult(m, 'resist') * 100)}%).`]);
   else out.push(['info', `Your ${D.DTYPES[dt].name.toLowerCase()} damage is neutral against it.`]);
   if (m.boss) {
     const mech = D.BOSSMECH[m.id] && D.BOSSMECH[m.id].mech, st = DQ.weaponStyle();
@@ -140,6 +144,17 @@ DQ.prepAdvice = (monId, fc) => {
   const owned = id => DQ.have(id) || (S().bank && S().bank[id]);
   if (hp < max * .9) { const per = Math.ceil(max / 50) * (1 + DQ.fx().regen), secs = Math.ceil((max - hp) / per * 3); out.push({ key: 'rest', title: 'Rest to full health first', text: `Health ${hp} / ${max}. You recover about ${secs}s outside combat, for example while fishing or cooking.`, action: 'go', a: 'fishing' }); }
   const stock = (D.SHOPS[town] || []).filter(id => !DQ.lockedSkillFor(id)), buys = [], who = (m.boss && m.boss.short) || m.name;
+  /* abilities: an empty slot, or a boss special nothing in your slots answers, or a slotted ability your weapon cannot use */
+  { const L = S().abilities || [], slots = DQ.abilSlots(), style = DQ.weaponStyle();
+    const usable = a => DQ.abilUnlocked(a) && (!a.style || a.style === style) && (!a.needShield || S().equip.shield);
+    const pref = m.boss && m.boss.special ? ['brace', 'bash', 'ward', 'second', 'power', 'aimed', 'focus', 'pin', 'execute', 'kite'] : ['power', 'aimed', 'focus', 'second', 'execute', 'pin', 'kite', 'brace', 'bash', 'ward'];
+    const best = pref.map(id => D.AB[id]).filter(a => a && usable(a) && !L.includes(a.id));
+    const idle = L.map(id => D.AB[id]).filter(a => a && !DQ.ability(a.id));
+    const answers = L.some(id => ['brace', 'bash', 'ward'].includes(id) && DQ.ability(id));
+    if (idle.length) out.push({ key: 'abil', title: `${idle[0].name} does nothing with this weapon`, text: `${idle[0].style ? `It needs a ${idle[0].style} weapon.` : 'It needs a shield.'}${best[0] ? ` Swap in ${best[0].name}: ${best[0].text}` : ''}`, action: 'go', a: 'combat' });
+    else if (L.length < slots && best[0]) out.push({ key: 'abil', title: `Slot ${best[0].name}`, text: `${L.length} of ${slots} ability slots used. ${best[0].text}`, action: 'go', a: 'combat' });
+    else if (m.boss && m.boss.special && !answers && best[0] && ['brace', 'bash', 'ward'].includes(best[0].id)) out.push({ key: 'abil', title: `Swap in ${best[0].name}`, text: `Nothing in your slots answers ${m.boss.special.name}. ${best[0].text}`, action: 'go', a: 'combat' });
+  }
   for (const slot of ['body', 'legs', 'head', 'shield']) {
     if (S().equip[slot]) continue;
     if (slot === 'shield' && S().equip.weapon && D.ITEMS[S().equip.weapon].two) continue;
@@ -158,7 +173,11 @@ DQ.prepAdvice = (monId, fc) => {
   if (DQ.weakKnown(m)) {
     const weak = DQ.weakOf(m).weak, mine = DQ.myDtype();
     if (weak.length && !weak.includes(mine)) {
-      const fits = id => { const it = D.ITEMS[id]; return it && it.slot === 'weapon' && it.wtype && D.WTYPES[it.wtype] && weak.includes(D.WTYPES[it.wtype].dtype) && DQ.canEquip(id).ok; };
+      /* a weapon's damage type: bows pierce; melee weapons use their weapon type; staves are handled as spells below */
+      const dtypeOf = it => it.style === 'ranged' ? 'pierce' : it.wtype && D.WTYPES[it.wtype] && it.style !== 'magic' ? D.WTYPES[it.wtype].dtype : null;
+      const fits = id => { const it = D.ITEMS[id]; return it && it.slot === 'weapon' && weak.includes(dtypeOf(it)) && DQ.canEquip(id).ok; };
+      /* a bow is only useful with arrows: say so, and where they come from */
+      const arrowsFor = id => { if (D.ITEMS[id].style !== 'ranged') return ''; const hasArrows = (S().ammo.id && S().ammo.n > 0) || Object.keys({ ...S().inv, ...(S().bank || {}) }).some(a => owned(a) && D.ITEMS[a] && D.ITEMS[a].slot === 'ammo' && DQ.canEquip(a).ok); if (hasArrows) return ''; const ar = stock.filter(a => D.ITEMS[a].slot === 'ammo' && DQ.canEquip(a).ok).pop(); return ar ? ` You also need arrows: the shop sells ${D.ITEMS[ar].name.toLowerCase()} (${fmt(D.ITEMS[ar].buy)} coins each).` : ' You also need arrows (Crafting or a shop).'; };
       const have = Object.keys({ ...S().inv, ...(S().bank || {}) }).find(id => owned(id) && fits(id)), shop = stock.find(fits);
       const name = D.DTYPES[weak[0]] ? D.DTYPES[weak[0]].name.toLowerCase() : weak[0];
       /* elemental weaknesses are met with a spell: say which one, and what is missing (staff, runes or Magic level) */
@@ -167,19 +186,35 @@ DQ.prepAdvice = (monId, fc) => {
         const el = D.DTYPES[D.SPELL_EL[sp.id]].name.toLowerCase(), staff = Object.keys({ ...S().inv, ...(S().bank || {}) }).find(id => owned(id) && D.ITEMS[id] && D.ITEMS[id].wtype === 'staff' && DQ.canEquip(id).ok);
         spellFix = DQ.lvl('magic') < sp.lvl ? { key: 'weak', title: `Train Magic to ${sp.lvl} for ${sp.name}`, text: `${who} is weak to ${el}. Magic ${DQ.lvl('magic')} / ${sp.lvl}.`, action: 'go', a: 'magic' }
           : !staff ? { key: 'weak', title: `Get a staff to cast ${sp.name}`, text: `${who} is weak to ${el}, and you know ${sp.name}. A staff from the shop lets you cast it.`, action: 'go', a: 'shop' }
-          : { key: 'weak', title: `Equip your ${D.ITEMS[staff].name.toLowerCase()} and cast ${sp.name}`, text: `${who} is weak to ${el}. You have ${fmt(DQ.have('rune'))} runes (${sp.runes} per cast).`, action: 'go', a: 'character' };
+          : { key: 'weak', title: `Equip your ${D.ITEMS[staff].name.toLowerCase()} and cast ${sp.name}`, text: `${who} is weak to ${el}. ${DQ.have('rune') >= sp.runes * 30 ? `You have ${fmt(DQ.have('rune'))} runes (${sp.runes} per cast).` : `You have ${fmt(DQ.have('rune'))} runes; a long fight can use ${fmt(sp.runes * 30)} or more (${sp.runes} per cast). The shop sells Arcane runes.`}`, action: 'go', a: DQ.have('rune') >= sp.runes * 30 ? 'character' : 'shop' };
       }
-      if (have) out.push({ key: 'weak', title: `Switch to your ${D.ITEMS[have].name.toLowerCase()}`, text: `${who} is weak to ${name}: about half as much damage again per hit.`, action: 'go', a: 'character' });
+      if (have) out.push({ key: 'weak', title: `Switch to your ${D.ITEMS[have].name.toLowerCase()}`, text: `${who} is weak to ${name}: ${pctUp(DQ.typeMult(m, 'weak'))} damage per hit.${arrowsFor(have)}`, action: 'go', a: 'character' });
       else if (spellFix) out.push(spellFix);
-      else if (shop) out.push({ key: 'weak', title: coins >= D.ITEMS[shop].buy ? `Buy the ${D.ITEMS[shop].name.toLowerCase()} (${fmt(D.ITEMS[shop].buy)} coins)` : `Save for the ${D.ITEMS[shop].name.toLowerCase()}`, text: `${who} is weak to ${name}. ${coins >= D.ITEMS[shop].buy ? 'The shop here sells one.' : `${fmt(coins)} / ${fmt(D.ITEMS[shop].buy)} coins.`}`, action: 'go', a: 'shop', afford: coins >= D.ITEMS[shop].buy });
+      else if (!shop && weak.includes('pierce') && !DQ.skillUnlocked('ranged')) out.push({ key: 'weak', info: true, title: `${who} is weak to arrows`, text: `Ranged is not learned yet. ${DQ.skillTeacher ? DQ.skillTeacher('ranged') : ''}.` });
+      else if (shop) out.push({ key: 'weak', title: coins >= D.ITEMS[shop].buy ? `Buy the ${D.ITEMS[shop].name.toLowerCase()} (${fmt(D.ITEMS[shop].buy)} coins)` : `Save for the ${D.ITEMS[shop].name.toLowerCase()}`, text: `${who} is weak to ${name}. ${coins >= D.ITEMS[shop].buy ? 'The shop here sells one.' : `${fmt(coins)} / ${fmt(D.ITEMS[shop].buy)} coins.`}`, action: 'go', a: 'shop', afford: coins >= D.ITEMS[shop].buy }); if (out.length && out[out.length - 1].key === 'weak' && shop) out[out.length - 1].text += arrowsFor(shop);
     }
   }
   const heal = DQ.foods().reduce((t, id) => t + D.ITEMS[id].heal * DQ.have(id), 0);
   const need = fc && fc.foodPerKill != null && fc.wins ? Math.ceil(fc.foodPerKill * 1.5) * 3 : Math.round(max * (m.boss ? 2.5 : 1));
-  if (heal < need) out.push({ key: 'food', title: heal ? 'Bring more food' : 'Bring food', text: `Your food restores ${fmt(heal)} health; aim for about ${fmt(need)}.${DQ.have('raw_shrimp') && DQ.skillUnlocked('cooking') ? ' You have raw shrimp to cook.' : ''}`, action: 'go', a: DQ.have('raw_shrimp') && DQ.skillUnlocked('cooking') ? 'cooking' : 'fishing' });
+  const rawFish = (D.FISH_IDS || []).map(id => 'raw_' + id).find(r => DQ.have(r) && D.RECIPES['cook_' + r.slice(4)] && DQ.skillUnlocked('cooking') && DQ.lvl('cooking') >= D.RECIPES['cook_' + r.slice(4)].lvl);
+  if (heal < need) out.push({ key: 'food', title: heal ? 'Bring more food' : 'Bring food', text: `Your food restores ${fmt(heal)} health; aim for about ${fmt(need)}.${rawFish ? ` You have ${fmt(DQ.have(rawFish))} ${D.ITEMS[rawFish].name.toLowerCase()} to cook.` : ''}`, action: 'go', a: rawFish ? 'cooking' : 'fishing' });
+  /* potions and enchantments: offered only for a boss you are likely to struggle with (or have no forecast for yet) */
+  const struggling = m.boss && (!fc || fc.winRate < .8);
+  if (struggling) {
+    const active = t => DQ.buffs().some(b => b.type === t);
+    if (DQ.have('potion_might') && !active('weak')) out.push({ key: 'potion', title: 'Drink a Potion of Might before the fight', text: 'You hit 15% harder for 20 minutes. You have ' + DQ.have('potion_might') + '.', action: 'go', a: 'character' });
+    else if (!DQ.have('potion_might') && DQ.skillUnlocked('herbalism') && DQ.techDone && DQ.techDone('warbrew')) { const r = D.POTION_RECIPES.find(x => x.id === 'potion_might'), ok = Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n) && S().coins >= r.coins; out.push({ key: 'potion', title: ok ? 'Brew a Potion of Might' : 'Gather for a Potion of Might', text: `+15% damage for 20 minutes. ${Object.entries(r.in).map(([k, n]) => `${DQ.have(k)}/${n} ${D.ITEMS[k].name.toLowerCase()}`).join(', ')}, ${fmt(r.coins)} coins.`, action: 'go', a: 'brewery' }); }
+    if (DQ.have('potion_haste') && !active('slow')) out.push({ key: 'potion', title: 'Drink a Potion of Haste', text: 'You attack 15% faster for 20 minutes. You have ' + DQ.have('potion_haste') + '.', action: 'go', a: 'character' });
+    if (DQ.skillUnlocked('enchanting') && DQ.enchantPlan) { const e = DQ.enchantPlan().find(p => p.ready); if (e) out.push({ key: 'enchant', title: `Enchant your ${e.it.name.toLowerCase()}`, text: `+1 to each of its bonuses (about +${Math.round(e.gain * 100)}% of its bonus) for ${e.runes} runes and a ${D.ITEMS[e.need].name.toLowerCase()} you already hold.`, action: 'go', a: 'enchanting' }); }
+  }
+  if (S().hp < max * .9 && DQ.have('potion_heal')) { const r = out.find(x => x.key === 'rest'); if (r) r.text += ` Or drink a Healing draught for 40% at once (you have ${DQ.have('potion_heal')}).`; }
   if (m.boss && DQ.combatLvl() < m.boss.req) out.unshift({ key: 'level', title: `Reach combat ${m.boss.req}`, text: `Combat ${DQ.combatLvl()} / ${m.boss.req}.`, action: 'go', a: 'combat' });
   return out;
 };
+
+/* a defeat names the most useful change for next time, from the same advice as the boss card */
+const notifyPrep0 = DQ.notify;
+DQ.notify = o => { if (o && o.kind === 'death' && DQ.lastFoe && !DQ.forecasting) { const m = D.MON[DQ.lastFoe], tip = m && DQ.prepAdvice(m.id).find(x => x.key !== 'rest'); if (tip) o = Object.assign({}, o, { text: `${m.name} won this time. Most useful change: ${tip.title.charAt(0).toLowerCase() + tip.title.slice(1)}.` }); } return notifyPrep0(o); };
 
 /* ---------- Away events: things that happened while you were gone, each with a choice ---------- */
 const tIdx = () => D.TOWN[S().town].idx;

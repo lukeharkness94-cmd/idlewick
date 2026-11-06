@@ -59,14 +59,15 @@ UI.render=fresh=>{
   if(!current){const l=DQ.lessonForPage(UI.view);if(l){current=l;}}
   render(fresh);
   const view=document.getElementById('view');if(!view)return;
-  if(UI.view==='overview'&&!S().tut.hidden&&!S().tut.done.intro)view.insertAdjacentHTML('afterbegin',intro());
+  /* the introduction now lives in Home's Next step card (one clear action); the panel stays for anyone who restarts the guides */
+  if(UI.view==='overview'&&!S().tut.hidden&&!S().tut.done.intro&&S().tut.restarted)view.insertAdjacentHTML('afterbegin',intro());
   if(current)view.insertAdjacentHTML('afterbegin',coachHtml(current));
 };
 Object.assign(UI.DO,{
   lessonclose:id=>{DQ.acknowledgeLesson(id);current=null;UI.render(false);},
   introskip:()=>{S().tut.done.intro=true;DQ.save();UI.render(false);},
   introstart:()=>{S().tut.done.intro=true;DQ.save();if(DQ.questState(D.QM.first_steps)==='new')DQ.startQuest('first_steps');DQ.go('fishing');},
-  resetguides:()=>{S().tut={done:{},hidden:false,version:1};current=null;DQ.save();DQ.go('overview');UI.render(false);},
+  resetguides:()=>{S().tut={done:{},hidden:false,version:1,restarted:true};current=null;DQ.save();DQ.go('overview');UI.render(false);},
   toggleguides:()=>{S().tut.hidden=!S().tut.hidden;current=null;DQ.save();UI.render(false);}
 });
 if(UI.V.settings){const settings=UI.V.settings;UI.V.settings=()=>settings()+`<section class="panel"><div class="phead"><h2>Help &amp; learning</h2></div><p>Short inline lessons introduce a skill the first time you open it. They never interrupt a running task.</p><div class="btnrow wrap"><button class="btn" data-do="toggleguides">${S().tut.hidden?'Enable':'Hide'} first-time guides</button><button class="btn" data-do="resetguides">Restart introduction &amp; skill guides</button></div></section>`;}

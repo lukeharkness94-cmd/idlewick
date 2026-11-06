@@ -19,6 +19,8 @@ const q = ctx.DQ; q.notify = q.pulse = q.floatAt = q.flash = q.burstAt = q.burst
 ['engine', 'systems', 'plan', 'meta'].forEach(load);
 q.ui = { V: {}, DO: {}, B: {}, homeSections: [], render() {}, tabState: () => null }; q.tips = { item: () => '' }; q.goals = () => [];
 ['research', 'journey'].forEach(load);
+/* the same gameplay systems the shipped page composes on top: field guide, enchantments, adventures, companion tricks */
+for (const n of ['lore', 'hunting', 'bestiary', 'skill_expansion', 'adventures', 'companions']) { try { load(n); } catch (e) { console.error('sim-bosses: could not load ' + n + ': ' + e.message); process.exit(1); } }
 const D = q.data;
 const cookLvl = id => { const r = Object.values(D.RECIPES).find(r => r.out && r.out[id]); return r ? r.lvl : 1; };
 const run = (boss, extra, useCounter) => {
@@ -67,6 +69,57 @@ const counter = boss => {
 if (process.env.BOSS) Object.assign(D.MON.grubnash, JSON.parse(process.env.BOSS));
 /* BOSSES='{"oldtusk":{"max":8}}' overrides any boss's stats for tuning experiments */
 if (process.env.BOSSES) for (const [id, o] of Object.entries(JSON.parse(process.env.BOSSES))) { if (o.mult) { D.MON[id].boss.special.mult = o.mult; delete o.mult; } if (o.every) { D.MON[id].boss.special.every = o.every; delete o.every; } Object.assign(D.MON[id], o); }
+/* COMPARE=1: is preparation a real choice? For each boss, four builds at the requirement (96 forecast fights each):
+   general  - region melee gear, the melee abilities you would have, 15 food
+   counter  - the field guide's recommendation (see counter())
+   alt      - general, plus what a melee player can prepare without a new style: Potion of Might and Haste, +3 enchantments
+              on weapon and body armour, a defensive unique (Warden's greathelm once The Silent Bells is possible), the
+              Gobbo companion's heckle, and 25 food
+   over     - general at +5 levels in every melee skill
+   Preparation cost is estimated from the game's own numbers: XP to train, shop prices, gems, food. */
+const xpRate = (boss, setup, sk) => { q.S = q.newState(); const S = q.S; S.settings.notify = false; setup(S); q.fxDirty(); const reg = D.MONLIST.filter(m => m.town === boss.town && !m.boss).sort((a, b) => b.cl - a.cl)[0]; S.town = boss.town; D.TOWNS.slice(0, D.TOWN[boss.town].idx + 1).forEach(t => { S.towns[t.id] = { visited: true, boss: t.id !== boss.town }; }); S.inv.shark = 500; S.hp = q.maxHp(); const x0 = S.xp[sk]; if (!q.startAct('fight', reg.id, { quiet: true })) return 0; q.simulate(20 * 60000); return (S.xp[sk] - x0) * 3; };
+const compare = boss => {
+  const rows = [], base = run(boss, 0, false);
+  const L = q.lvl('attack');
+  const lv0 = Math.max(10, base.L), general = (S2, extraLv = 0) => { for (const k of ['attack', 'strength', 'defence', 'hitpoints']) S2.xp[k] = D.XPF[Math.min(99, lv0 + extraLv)] || 0; };
+  const res = (label, setupFn, costText) => {
+    q.S = q.newState(); const S = q.S; S.settings.notify = false; q.fxDirty(); setupFn(S);
+    S.hp = q.maxHp(); q.fxDirty(); const fs4 = [0, 1, 2, 3].map(() => q.forecast(boss.id)); const w = fs4.reduce((n, x) => n + (x ? x.wins : 0), 0), e = fs4.reduce((n, x) => n + (x ? x.eaten : 0), 0);
+    rows.push(`    ${label.padEnd(9)} win ${String(Math.round(w / 96 * 100)).padStart(3)}%  food/win ${w ? (e / w).toFixed(1) : '-'}  | ${costText}`);
+  };
+  const town = S => { S.town = boss.town; D.TOWNS.slice(0, D.TOWN[boss.town].idx + 1).forEach(t => { S.towns[t.id] = { visited: true, boss: t.id !== boss.town }; }); };
+  const gearUp = (S, extraIds = []) => {
+    const gear = (D.TOWN_GEAR[boss.town] || []).concat(D.TOWN_GEAR[D.TOWNS[Math.max(0, D.TOWN[boss.town].idx - 1)].id] || []), slots = {};
+    for (const id of gear) { const it = D.ITEMS[id]; if (!it || /bow_|staff_|_dagger/.test(id)) continue; S.inv[id] = 1; if (!q.canEquip(id).ok) { delete S.inv[id]; continue; } const sc = (it.b.atk || 0) + (it.b.str || 0) + (it.b.def || 0); if (!slots[it.slot] || sc > slots[it.slot][1]) slots[it.slot] = [id, sc]; }
+    Object.values(slots).forEach(([id]) => q.equipItem(id)); for (const id of extraIds) { S.inv[id] = 1; q.equipItem(id); }
+    S.abilities = ['power', 'brace', 'bash', 'second'].filter(a => q.abilUnlocked(D.AB[a])).slice(0, q.abilSlots());
+  };
+  const foodFor = (S, n) => { const ck = id => { const r = Object.values(D.RECIPES).find(r => r.out && r.out[id]); return r ? r.lvl : 1; }; const f = D.FISH_IDS.filter(id => ck(id) <= lv0).sort((a, b) => D.ITEMS[b].heal - D.ITEMS[a].heal)[0] || 'shrimp'; S.inv[f] = n; return f; };
+  res('general', S => { general(S); town(S); gearUp(S); foodFor(S, 15); }, 'region gear and 15 food: no extra preparation');
+  /* the counter (reuses the simulator's own counter loadout at the same level) */
+  { const c = run(boss, 0, true); rows.push(`    ${'counter'.padEnd(9)} win ${String(c.win).padStart(3)}%  food/win ${c.fpk}  | ${c.how}; train the style to ${lv0} (${Math.round(D.XPF[lv0] / 1000)}k XP from scratch)`); }
+  const helm = D.TOWN[boss.town].idx >= 2 ? ['wardens_greathelm'] : [];
+  res('alt', S => { general(S); town(S); S.unlocked.enchanting = true; S.xp.enchanting = D.XPF[40]; gearUp(S, helm); foodFor(S, 25);
+    for (const id of [S.equip.weapon, S.equip.body].filter(Boolean)) S.enchants[id] = 3;
+    S.gameTime = S.gameTime || 0; S.buffs = [{ type: 'weak', mult: 1.15, until: S.gameTime + 20 * 60000, name: 'Might' }, { type: 'slow', mult: .85, until: S.gameTime + 20 * 60000, name: 'Haste' }];
+    S.pets.owned.gobbo = { aff: 0, found: 1 }; S.pets.active = 'gobbo'; },
+    `Might + Haste (${D.ITEMS.potion_might.val + D.ITEMS.potion_haste.val} coins of potions), +3 enchants (2 sapphires, 2 emeralds, 2 rubies), ${helm.length ? "Warden's greathelm (The Silent Bells), " : ''}Gobbo, 25 food`);
+  if (process.env.PARTS) {
+    res('+potions', S => { general(S); town(S); gearUp(S); foodFor(S, 15); S.gameTime = S.gameTime || 0; S.buffs = [{ type: 'weak', mult: 1.15, until: S.gameTime + 20 * 60000, name: 'Might' }, { type: 'slow', mult: .85, until: S.gameTime + 20 * 60000, name: 'Haste' }]; }, 'Might + Haste only');
+    res('+enchant', S => { general(S); town(S); S.unlocked.enchanting = true; S.xp.enchanting = D.XPF[40]; gearUp(S); foodFor(S, 15); for (const id of [S.equip.weapon, S.equip.body].filter(Boolean)) S.enchants[id] = 3; }, '+3 enchants only');
+    if (helm.length) res('+helm', S => { general(S); town(S); gearUp(S, helm); foodFor(S, 15); }, "Warden's greathelm only");
+    res('+food', S => { general(S); town(S); gearUp(S); foodFor(S, 25); }, '25 food only');
+    res('+gobbo', S => { general(S); town(S); gearUp(S); foodFor(S, 15); S.pets.owned.gobbo = { aff: 0, found: 1 }; S.pets.active = 'gobbo'; }, 'Gobbo only');
+    res('noabil', S => { general(S); town(S); gearUp(S); foodFor(S, 15); S.abilities = []; }, 'general without any abilities (the old "plain melee")');
+  }
+  res('over', S => { general(S, 5); town(S); gearUp(S); foodFor(S, 15); }, `+5 levels in 4 skills (${Math.round(4 * ((D.XPF[Math.min(99, lv0 + 5)] || 0) - (D.XPF[lv0] || 0)) / 1000)}k XP)`);
+  return rows.join('\n');
+};
+if (process.env.COMPARE) {
+  console.log('Preparation choices at each boss requirement (96 forecast fights per row):');
+  for (const b of D.MONLIST.filter(m => m.boss && (!process.env.ONLY || process.env.ONLY.split(',').includes(m.id)))) { console.log(`  ${b.id} (combat ${b.boss.req})`); console.log(compare(b)); }
+  process.exit(0);
+}
 if (process.env.COUNTER) {
   console.log('Counter loadouts (field-guide advice), at the requirement and +3 levels:');
   for (const b of D.MONLIST.filter(m => m.boss && (!process.env.ONLY || process.env.ONLY.split(',').includes(m.id)))) { const a = run(b, 0, true), c = run(b, 3, true), p = run(b, 0, false); console.log(`  ${b.id.padEnd(12)} combat ${String(a.combat).padEnd(4)} ${a.how.padEnd(44)} win ${String(a.win).padStart(3)}%  food/kill ${String(a.fpk).padEnd(5)} +3: ${String(c.win).padStart(3)}%  | plain melee ${p.win}%  (hp ${b.hp}, max ${b.max})`); }
