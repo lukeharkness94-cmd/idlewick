@@ -62,3 +62,19 @@ Fresh-character simulation, fighting the best available Willowbrook target with 
 | Armour + warhammer (his weakness) + 15 shrimp | 25% | 92% |
 
 The economy simulator does not model combat, so its coin table is unchanged by this tuning.
+
+## Boss retune with counters (Nov 2026)
+
+`COUNTER=1 node scripts/sim-bosses.cjs` (96 forecast fights per row; the hero follows the field guide with region gear, slots that style's abilities and carries 15 food; counter skill at the melee level). Bosses only: weakness ×1.3 (×1.6 with Focus), resistance 70%.
+
+| Boss | Prepared, at requirement | Prepared, +3 levels | Plain melee |
+| --- | --- | --- | --- |
+| Old Tusk (hp 60) | 100% | 100% | 49% |
+| Barnacle (max 7) | 84% | 97% | 80% |
+| Frostmaw (hp 185, max 15) | 94% | 99% | 0% |
+| Morwenna (hp 186, max 18) | 85% | 98% | 0% |
+| Pyrrhax (hp 440, max 25) | 93% | 99% | 0% |
+| Zephyrion (hp 380, max 39) | 85% | 100% | 0% |
+| Hollow King (max 32) | 92% | 91% | 0% |
+
+Before: 100% for every boss with counters, and up to 0% without them. Old Tusk stays generous by design (his charge is halved against arrows, and Ranged unlocks at his gate). Single runs vary by about ±10%.

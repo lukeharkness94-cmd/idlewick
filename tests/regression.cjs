@@ -445,6 +445,56 @@ test('combat progress bar starts empty for a new hero and measures later levels 
  S.xp.attack=D.XPF[2];const mid=q.combatProgress().pct;assert.ok(mid>0&&mid<100,'fills as you train');
  S.xp.attack=D.XPF[3];S.xp.strength=D.XPF[2];assert.equal(q.combatLvl(),4);assert.equal(Math.round(q.combatProgress().pct),38,'combat 4.375 shows 38%: measured from level 4 itself');
 });
+test('unique gear: effects are real, first copies have a bad-luck guarantee, stats stay modest',()=>{
+ const {q}=harness();const S=q.S,D=q.data;
+ const uniques=Object.values(D.ITEMS).filter(it=>it.unique);assert.ok(uniques.length>=19,'11 new uniques plus 8 boss trophies with effects');
+ const fresh=uniques.filter(it=>!['chief_helm','tusk_charm','barnacle_cutlass','frostmaw_pendant','witch_staff','emberfang_bow','storm_feather','hollow_crown'].includes(it.id));assert.ok(fresh.length>=10&&fresh.length<=15);
+ assert.ok(D.ITEMS.vipers_kiss.b.atk<D.ITEMS.steel_sword.b.atk,'a unique is not simply a bigger number');
+ for(const it of fresh.filter(x=>!['wardens_greathelm','smugglers_knot'].includes(x.id)))assert.ok(D.MONLIST.some(m=>m.drops.some(d=>d[0]===it.id)),'drop source for '+it.id);
+ /* lifesteal: a fight with Leechfang ends with more health than with an iron dagger */
+ for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[14];S.town='mossbarrow';S.towns.mossbarrow={visited:true,boss:false};S.settings.autoEat=false;
+ const hpAfter=id=>{S.equip.weapon=id;S.hp=q.maxHp()-6;q.fxDirty();q.startAct('fight','boar',{quiet:true});q.simulate(60000);q.stopAct(true);return S.hp;};
+ let a=0,b=0;for(let i=0;i<6;i++){a+=hpAfter('leechfang');b+=hpAfter('iron_dagger');}assert.ok(a>b,`lifesteal heals in combat (${a} vs ${b})`);
+ /* swift and fortune */
+ S.equip.weapon='bronze_sword';const base=q.combatInterval();S.equip.ring='storm_feather';assert.ok(q.combatInterval()<base,'Gale: faster attacks');
+ S.equip.ring='smugglers_knot';q.fxDirty();assert.ok(q.coinMult()>1.04,"Smuggler's luck: +5% coins");delete S.equip.ring;
+ /* bad-luck guarantee: the first Leechfang drops by 2.5x the expected defeats */
+ S.equip.weapon='iron_sword';S.hp=q.maxHp();S.inv.trout=500;S.settings.autoEat=true;q.fxDirty();q.startAct('fight','wolf',{quiet:true});
+ let n=0;while(!q.have('leechfang')&&n<400){q.simulate(60000);n++;}assert.ok(q.have('leechfang')>=1,'pity guarantees the first copy');assert.ok(S.uniqFound.leechfang&&(S.beast.kills.wolf||0)<=Math.ceil(2.5*150),'within the guarantee');
+});
+test('The Silent Bells: a six-chapter midgame story whose decision and earlier choices change what comes later',()=>{
+ const {q,load}=harness();load('adventures');const S=q.S,D=q.data;
+ const ch=D.QUESTS.filter(x=>x.adventure==='bells').sort((a,b)=>a.stage-b.stage);assert.equal(ch.length,6);
+ assert.ok(ch[0].adv===18&&ch[5].adv<=30,'spans Hero 18-28');assert.ok(ch.every((x,i)=>!i||x.req===ch[i-1].id),'chained');
+ const finish=id=>{S.q[id]={s:'ready',p:D.QM[id].obj.map(o=>o.n)};};
+ /* earlier choices echo */
+ S.disc.lost_traveller={choice:'share'};assert.match(D.QM.bl_road.blurb,/fed my niece/);assert.equal(D.QM.bl_road.reward.coins,1200);
+ S.disc.goblin_satchel={choice:'buckle'};assert.match(D.QM.bl_orrin.blurb,/buckle/);
+ /* the ledger decision */
+ for(const id of ['bl_silence','bl_road']){finish(id);q.claimQuest(id);}
+ finish('bl_ledger');q.claimQuest('bl_ledger','silt');assert.equal(q.choiceOf('bl_ledger'),'silt');assert.equal(S.q.bl_ledger.s,'done');
+ assert.equal(D.QM.bl_tide.giver,'Mother Silt');assert.ok(D.QM.bl_tide.reward.items.smugglers_knot,'Silt path rewards the knot');
+ S.choices.bl_ledger='ilsa';assert.equal(D.QM.bl_tide.giver,'Harbourmaster Ilsa');assert.ok(D.QM.bl_tide.reward.items.wardens_greathelm);
+ /* a programmatic claim without a choice still resolves (first option), never blocks */
+ const {q:q2,load:l2}=harness();l2('adventures');q2.S.q.bl_ledger={s:'ready',p:[25,10]};q2.claimQuest('bl_ledger');assert.equal(q2.choiceOf('bl_ledger'),'ilsa');
+ /* late storytelling remembers the bells */
+ for(const id of ['bl_orrin','bl_tide','bl_ring'])S.q[id]={s:'done',p:[]};assert.match(D.QM.crownfall.thanks,/Mossbarrow/);
+ S.disc.ashen_anvil={choice:'quench'};assert.ok(D.QM.wyrm_slayer.reward.items.ember_core===3);
+});
+test('adventure journal: records the moments that matter, backfills older saves, stays capped and quiet',()=>{
+ const {q,load}=harness();load('adventures');load('journal');const S=q.S,D=q.data;
+ /* an older save with progress gets one opening entry */
+ delete S.journal;S.q.first_steps={s:'done',p:[5,5]};S.towns.willowbrook.boss=true;q.journalBackfill();
+ assert.equal(S.journal.length,1);assert.match(S.journal[0].text,/story so far.*Grubnash/i);
+ /* events */
+ q.notify({kind:'boss',key:'boss:grubnash',title:'Grubnash is defeated',text:'The road to Mossbarrow is open.'});
+ q.makeDiscovery('goblin_satchel');q.chooseDiscovery('goblin_satchel','buckle');
+ const kinds=S.journal.map(e=>e.kind);for(const k of ['boss','find','choice'])assert.ok(kinds.includes(k),k);
+ /* forecasts never write; duplicates collapse; the cap holds */
+ const n=S.journal.length;q.forecasting=true;q.journal('boss','x');q.forecasting=false;assert.equal(S.journal.length,n);
+ q.journal('rest','same');q.journal('rest','same');assert.equal(S.journal.length,n+1);
+ for(let i=0;i<260;i++)q.journal('rest','entry '+i);assert.ok(S.journal.length<=200);
+});
 test('restoration: new Willowbrook projects, regional materials, villager voices and legacy bonuses',()=>{
  const {q,load}=harness();load('fx');load('routes');const S=q.S,D=q.data;S.coins=1e6;
  const wb=q.projectsForTown('willowbrook').map(([id])=>id);for(const id of ['well','inn','forge','garden','library','watchtower'])assert.ok(wb.includes(id),id);

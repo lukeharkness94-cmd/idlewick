@@ -3,7 +3,7 @@
 const Q=window.DQ,D=Q.data,UI=Q.ui,{esc,ico}=Q,S=()=>Q.S;
 UI.DO.pagehelp=()=>{
  const sk=D.SKILLS.find(s=>s.page===UI.view),lesson=Q.skillLessons[sk?.id||UI.view];
- const body=lesson?`<p>${esc(lesson.text)}</p>${lesson.towards?`<p>${esc(lesson.towards)}</p>`:''}<p><b>Try this:</b> ${esc(lesson.goal)}</p>`:UI.skillGuide?.(sk?.id)||'<p>Choose an illustrated card, check its requirements, then use the highlighted action.</p>';
+ const body=lesson?`<p>${esc(lesson.text)}</p>${lesson.towards?`<p>${esc(lesson.towards)}</p>`:''}<p><b>Try this:</b> ${esc(lesson.goal)}</p>`:UI.skillGuide?.(sk?.id)||'';
  Q.modal({title:`${sk?.name||lesson?.title||Q.cap(UI.view)} help`,body,actions:[{label:'Got it',primary:true}]});
 };
 const oldBest=UI.V.bestiary;

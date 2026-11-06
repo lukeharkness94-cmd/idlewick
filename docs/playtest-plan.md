@@ -71,3 +71,10 @@ Questions for both, after the 1 to 5 set above:
 4. What would make you open it again tomorrow, if anything?
 
 Unanswered until people play: whether 21 minutes feels short or long to each group; whether the satchel and thanks lines read as charming or as filler; whether sceptics read preparation steps at all; whether enthusiasts want the full Hero reveal back for every level.
+
+## Deeper RPG pass (prepared, not yet run)
+
+- **Uniques**: do players notice a unique drop, read the effect and make a real choice (e.g. Viper's kiss against a steel sword)? Do the ▲/▼ marks help or mislead?
+- **The Silent Bells**: from a Hero 18 save, do players follow the story without help? Do they hesitate over the ledger, and does the consequence feel worth it?
+- **Journal**: after a session, does it read like their own story? Is anything missing or noisy?
+- **Bosses**: with the field guide's advice, does a boss feel tense but fair? Without it, do they understand why they lost?

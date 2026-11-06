@@ -34,8 +34,9 @@ const run = (boss, extra, useCounter) => {
   for (const id of gear) { const it = D.ITEMS[id]; if (!it || new RegExp(process.env.SKIP || "bow_|staff_|_dagger").test(id)) continue; S.inv[id] = (S.inv[id] || 0) + 1; if (!q.canEquip(id).ok) { delete S.inv[id]; continue; } const sc = (it.atk || 0) + (it.str || 0) + (it.def || 0); if (!slots[it.slot] || sc > slots[it.slot][1]) slots[it.slot] = [id, sc]; }
   Object.values(slots).forEach(([id]) => q.equipItem(id));
   const food = D.FISH_IDS.filter(id => cookLvl(id) <= L).sort((a, b) => D.ITEMS[b].heal - D.ITEMS[a].heal)[0] || 'shrimp';
-  S.inv[food] = 15; const how = useCounter ? counter(boss) : 'melee'; S.abilities = (S.abilities || []).filter(a => q.abilUnlocked(D.AB[a])).slice(0, q.abilSlots()); S.hp = q.maxHp(); q.fxDirty();
-  const f = q.forecast(boss.id);
+  S.inv[food] = 15; const how = useCounter ? counter(boss) : 'melee'; if (process.env.NOABIL) S.abilities = []; S.abilities = (S.abilities || []).filter(a => q.abilUnlocked(D.AB[a])).slice(0, q.abilSlots()); S.hp = q.maxHp(); q.fxDirty();
+  const fs4 = [0, 1, 2, 3].map(() => q.forecast(boss.id)), f = fs4[0] && { trials: 96, wins: fs4.reduce((n, x) => n + x.wins, 0), ms: fs4.reduce((n, x) => n + x.ms, 0), eaten: fs4.reduce((n, x) => n + x.eaten, 0) };
+  if (f) { f.winRate = f.wins / f.trials; f.avgMs = f.wins ? f.ms / f.wins : null; f.foodPerKill = f.wins ? f.eaten / f.wins : null; }
   if (process.env.ADVICE === boss.id && !extra) { q.S.hp = Math.ceil(q.maxHp() * .6); console.log(JSON.stringify(q.prepAdvice(boss.id, f).map(x => x.title + ' — ' + x.text), null, 1)); q.S.hp = q.maxHp(); }
   return { how, combat: q.combatLvl(), L, hp: q.maxHp(), food, heal: D.ITEMS[food].heal, win: f ? Math.round(f.wins / f.trials * 100) : null, fpk: f && f.foodPerKill != null ? f.foodPerKill.toFixed(1) : '-', t: f && f.avgMs ? Math.round(f.avgMs / 1000) + 's' : '-', gear: Object.values(slots).map(x => x[0]).join(' ') };
 };
@@ -45,7 +46,7 @@ const run = (boss, extra, useCounter) => {
 const counter = boss => {
   const S = q.S, w = D.WEAK[boss.id] || { weak: [] }, tier = D.TOWN[boss.town].idx;
   const el = w.weak.find(t => Object.values(D.SPELL_EL).includes(t)) || (boss.id === 'hollowking' ? 'aether' : null);
-  const L = q.lvl('attack'), C = Math.min(99, Math.round(L * 1.33));
+  const L = q.lvl('attack'), C = Math.min(99, Math.round(L * (+process.env.CSCALE || 1)));
   const region = new Set([...(D.TOWN_GEAR[boss.town] || []), ...(D.TOWN_GEAR[D.TOWNS[Math.max(0, tier - 1)].id] || []), ...['arrow_bronze', 'arrow_iron', 'arrow_steel', 'arrow_mithril', 'arrow_adamant', 'arrow_rune', 'arrow_astral'].slice(0, tier + 1)]);
   const pick = re => Object.keys(D.ITEMS).filter(id => re.test(id) && region.has(id)).map(id => { S.inv[id] = 1; const ok = q.canEquip(id).ok; delete S.inv[id]; return ok ? id : null; }).filter(Boolean).pop();
   if (el && !w.weak.includes('pierce') || boss.id === 'hollowking') {
@@ -64,9 +65,11 @@ const counter = boss => {
   return `melee, ${wpn || S.equip.weapon}`;
 };
 if (process.env.BOSS) Object.assign(D.MON.grubnash, JSON.parse(process.env.BOSS));
+/* BOSSES='{"oldtusk":{"max":8}}' overrides any boss's stats for tuning experiments */
+if (process.env.BOSSES) for (const [id, o] of Object.entries(JSON.parse(process.env.BOSSES))) { if (o.mult) { D.MON[id].boss.special.mult = o.mult; delete o.mult; } if (o.every) { D.MON[id].boss.special.every = o.every; delete o.every; } Object.assign(D.MON[id], o); }
 if (process.env.COUNTER) {
   console.log('Counter loadouts (field-guide advice), at the requirement and +3 levels:');
-  for (const b of D.MONLIST.filter(m => m.boss)) { const a = run(b, 0, true), c = run(b, 3, true); console.log(`  ${b.id.padEnd(12)} combat ${String(a.combat).padEnd(4)} ${a.how.padEnd(44)} win ${String(a.win).padStart(3)}%  food/kill ${String(a.fpk).padEnd(5)} +3: ${c.win}%`); }
+  for (const b of D.MONLIST.filter(m => m.boss && (!process.env.ONLY || process.env.ONLY.split(',').includes(m.id)))) { const a = run(b, 0, true), c = run(b, 3, true), p = run(b, 0, false); console.log(`  ${b.id.padEnd(12)} combat ${String(a.combat).padEnd(4)} ${a.how.padEnd(44)} win ${String(a.win).padStart(3)}%  food/kill ${String(a.fpk).padEnd(5)} +3: ${String(c.win).padStart(3)}%  | plain melee ${p.win}%  (hp ${b.hp}, max ${b.max})`); }
   process.exit(0);
 }
 console.log('boss          req  combat lv  hp  food (heal)          win%  food/kill  time   +3 levels');

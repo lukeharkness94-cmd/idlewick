@@ -327,40 +327,41 @@ mon('chicken', 'Chicken', 'willowbrook', 1, 3, 1, 1, 1, [0, 3], '#e8d8a0', [['fe
 mon('rat', 'Giant rat', 'willowbrook', 3, 5, 1, 2, 2, [0, 2], '#a6998a', []);
 mon('goblin', 'Goblin', 'willowbrook', 5, 7, 2, 3, 2, [3, 14], '#6fb35e', [['rune', [1, 3], .08]]);
 mon('cow', 'Cow', 'willowbrook', 8, 10, 2, 3, 4, [0, 5], '#d6c2a4', [['cowhide', [1, 1], 1]]);
+/* Bosses 2-8 retuned Nov 2026 with field-guide counters (scripts/sim-bosses.cjs COUNTER=1): fully prepared ~75-95% at the requirement. */
 /* First boss, tuned Nov 2026 (scripts/sim-opening.cjs): a beginner reaches combat 8 in ~21 minutes; prepared (bronze armour, ~15 cooked fish) wins about two times in three. */
 mon('grubnash', 'Grubnash the Goblin Chief', 'willowbrook', 12, 32, 4, 7, 6, [80, 160], '#8fbf6a', [['cowhide', [2, 3], .5], ['chief_helm', [1, 1], .12]], { req: 8, first: 'chief_helm', special: { every: 4, mult: 1.8, name: 'War cry' }, short: 'Grubnash' });
 mon('boar', 'Wild boar', 'mossbarrow', 10, 14, 3, 9, 8, [2, 10], '#9a6a4a', [['boar_tusk', [1, 1], .5]]);
 mon('wolf', 'Grey wolf', 'mossbarrow', 13, 18, 3, 12, 10, [0, 4], '#9aa0a8', [['wolf_pelt', [1, 1], .7]]);
 mon('scarecrow', 'Haunted scarecrow', 'mossbarrow', 16, 22, 4, 14, 14, [5, 20], '#d9b860', [['seed_wheat', [1, 3], .25], ['seed_pumpkin', [1, 1], .05]]);
-mon('oldtusk', 'Old Tusk the Boar King', 'mossbarrow', 26, 70, 6, 18, 16, [150, 300], '#b07a4a', [['boar_tusk', [2, 4], 1], ['tusk_charm', [1, 1], .12]], { req: 18, first: 'tusk_charm', special: { every: 4, mult: 1.6, name: 'Trampling charge' }, short: 'Old Tusk' });
+mon('oldtusk', 'Old Tusk the Boar King', 'mossbarrow', 26, 96, 6, 18, 16, [150, 300], '#b07a4a', [['boar_tusk', [2, 4], 1], ['tusk_charm', [1, 1], .12]], { req: 18, first: 'tusk_charm', special: { every: 4, mult: 1.6, name: 'Trampling charge' }, short: 'Old Tusk' });
 mon('crab', 'Rock crab', 'saltmere', 12, 18, 3, 9, 14, [0, 8], '#d9825a', [['gem_sapphire', [1, 1], .03]]);
 mon('bandit', 'Bandit', 'saltmere', 18, 26, 5, 16, 14, [14, 40], '#b08a6a', [['rune', [2, 5], .15], ['gem_sapphire', [1, 1], .03]]);
 mon('smuggler', 'Smuggler', 'saltmere', 22, 32, 6, 20, 18, [20, 60], '#8aa0b0', [['rune', [2, 6], .15], ['feather', [3, 8], .3]]);
 mon('pirate', 'Pirate', 'saltmere', 28, 42, 8, 26, 24, [35, 95], '#c46a4a', [['gem_emerald', [1, 1], .03], ['old_bone', [1, 1], .3]]);
-mon('barnacle', 'Captain Barnacle', 'saltmere', 36, 100, 9, 28, 26, [250, 500], '#6fc7d8', [['gem_emerald', [1, 2], .5], ['barnacle_cutlass', [1, 1], .12]], { req: 25, first: 'barnacle_cutlass', special: { every: 4, mult: 1.7, name: 'Cannon volley' }, short: 'Barnacle' });
+mon('barnacle', 'Captain Barnacle', 'saltmere', 36, 100, 10, 28, 26, [250, 500], '#6fc7d8', [['gem_emerald', [1, 2], .5], ['barnacle_cutlass', [1, 1], .12]], { req: 25, first: 'barnacle_cutlass', special: { every: 4, mult: 1.7, name: 'Cannon volley' }, short: 'Barnacle' });
 mon('bat', 'Cave bat', 'ironpeak', 30, 30, 5, 25, 18, [10, 30], '#7a6a8a', []);
 mon('icewolf', 'Ice wolf', 'ironpeak', 38, 42, 8, 36, 32, [0, 10], '#bfe0f0', [['frost_pelt', [1, 1], .8]]);
 mon('raider', 'Dwarf raider', 'ironpeak', 42, 50, 9, 40, 40, [60, 150], '#c0a070', [['ore_coal', [2, 5], .3], ['gem_ruby', [1, 1], .03]]);
 mon('troll', 'Mountain troll', 'ironpeak', 48, 70, 12, 46, 44, [80, 200], '#8a9a78', [['troll_bone', [1, 1], .7], ['gem_ruby', [1, 1], .04]]);
-mon('frostmaw', 'Frostmaw the Ice Troll', 'ironpeak', 56, 150, 14, 46, 42, [600, 1100], '#bfe6ff', [['frost_pelt', [3, 5], 1], ['frostmaw_pendant', [1, 1], .1]], { req: 45, first: 'frostmaw_pendant', special: { every: 4, mult: 1.8, name: 'Glacier slam' }, short: 'Frostmaw' });
+mon('frostmaw', 'Frostmaw the Ice Troll', 'ironpeak', 56, 298, 21, 46, 42, [600, 1100], '#bfe6ff', [['frost_pelt', [3, 5], 1], ['frostmaw_pendant', [1, 1], .1]], { req: 45, first: 'frostmaw_pendant', special: { every: 4, mult: 1.8, name: 'Glacier slam' }, short: 'Frostmaw' });
 mon('zombie', 'Bog zombie', 'gloomfen', 52, 80, 12, 50, 40, [60, 150], '#7a9a6a', [['old_bone', [1, 1], .8]]);
 mon('skeleton', 'Marsh skeleton', 'gloomfen', 56, 90, 14, 56, 54, [70, 170], '#cfd6d4', [['old_bone', [1, 2], .9], ['gem_ruby', [1, 1], .04]]);
 mon('bogsnapper', 'Bogsnapper', 'gloomfen', 62, 110, 16, 62, 60, [0, 30], '#5f8a4a', [['bogscale', [1, 1], .8]]);
 mon('wraith', 'Fen wraith', 'gloomfen', 68, 120, 18, 70, 62, [150, 320], '#9b87e0', [['rune', [6, 14], .4], ['gem_diamond', [1, 1], .02]]);
-mon('morwenna', 'Morwenna the Bog Witch', 'gloomfen', 76, 230, 19, 62, 58, [1500, 2600], '#b79cff', [['bogscale', [3, 6], 1], ['gem_diamond', [1, 2], .5], ['witch_staff', [1, 1], .1]], { req: 65, first: 'witch_staff', special: { every: 4, mult: 1.8, name: 'Hex' }, short: 'Morwenna' });
+mon('morwenna', 'Morwenna the Bog Witch', 'gloomfen', 76, 300, 25, 62, 58, [1500, 2600], '#b79cff', [['bogscale', [3, 6], 1], ['gem_diamond', [1, 2], .5], ['witch_staff', [1, 1], .1]], { req: 65, first: 'witch_staff', special: { every: 4, mult: 1.8, name: 'Hex' }, short: 'Morwenna' });
 mon('imp', 'Fire imp', 'emberfall', 64, 90, 15, 62, 56, [80, 200], '#ff8a4a', [['rune', [4, 10], .35]]);
 mon('hound', 'Lava hound', 'emberfall', 72, 130, 20, 72, 66, [120, 300], '#e0573f', [['ember_core', [1, 1], .03]]);
 mon('drake', 'Ember drake', 'emberfall', 80, 170, 25, 82, 78, [200, 480], '#58c27e', [['drakehide', [1, 1], .85], ['gem_diamond', [1, 1], .04]]);
 mon('emberlord', 'Cinder knight', 'emberfall', 86, 220, 30, 88, 84, [300, 650], '#c88a5a', [['ember_core', [1, 1], .06], ['gem_diamond', [1, 1], .05]]);
-mon('pyrrhax', 'Pyrrhax the Ember Wyrm', 'emberfall', 98, 420, 32, 82, 78, [6000, 9000], '#ff6a3a', [['wyrm_scale', [1, 1], 1], ['ember_core', [2, 4], 1], ['emberfang_bow', [1, 1], .1]], { req: 85, first: 'emberfang_bow', special: { every: 4, mult: 1.7, name: 'Wyrmfire' }, short: 'Pyrrhax' });
+mon('pyrrhax', 'Pyrrhax the Ember Wyrm', 'emberfall', 98, 709, 35, 82, 78, [6000, 9000], '#ff6a3a', [['wyrm_scale', [1, 1], 1], ['ember_core', [2, 4], 1], ['emberfang_bow', [1, 1], .1]], { req: 85, first: 'emberfang_bow', special: { every: 4, mult: 1.7, name: 'Wyrmfire' }, short: 'Pyrrhax' });
 mon('hawk', 'Storm hawk', 'skyreach', 88, 200, 28, 90, 80, [300, 700], '#9fd8ff', [['feather', [10, 30], .8], ['gem_diamond', [1, 1], .05]]);
 mon('golem', 'Sky golem', 'skyreach', 94, 260, 32, 96, 100, [400, 900], '#c8c0a8', [['ore_astralite', [1, 2], .3]]);
 mon('wyvern', 'Cloud wyvern', 'skyreach', 100, 300, 36, 100, 95, [500, 1100], '#e2d4ff', [['drakehide', [1, 2], .6], ['ember_core', [1, 1], .08]]);
-mon('zephyrion', 'Zephyrion the Storm Roc', 'skyreach', 110, 520, 36, 92, 88, [10000, 15000], '#bfe8ff', [['ore_astralite', [3, 6], 1], ['storm_feather', [1, 1], .1]], { req: 95, first: 'storm_feather', special: { every: 4, mult: 1.6, name: 'Thunder dive' }, short: 'Zephyrion' });
+mon('zephyrion', 'Zephyrion the Storm Roc', 'skyreach', 110, 613, 54, 92, 88, [10000, 15000], '#bfe8ff', [['ore_astralite', [3, 6], 1], ['storm_feather', [1, 1], .1]], { req: 95, first: 'storm_feather', special: { every: 4, mult: 1.6, name: 'Thunder dive' }, short: 'Zephyrion' });
 mon('voidknight', 'Void knight', 'hollow', 104, 320, 38, 104, 104, [700, 1500], '#6a4aa8', [['ore_voidstone', [1, 1], .3]]);
 mon('shade', 'Hollow shade', 'hollow', 108, 340, 40, 110, 100, [800, 1700], '#3a2a5a', [['rune', [20, 40], .5]]);
 mon('horror', 'Abyssal horror', 'hollow', 112, 380, 42, 112, 108, [1000, 2000], '#8a3a6a', [['gem_diamond', [1, 2], .2], ['wyrm_scale', [1, 1], .03]]);
-mon('hollowking', 'The Hollow King', 'hollow', 126, 700, 42, 104, 100, [25000, 40000], '#b08aff', [['ore_voidstone', [3, 6], 1], ['hollow_crown', [1, 1], .1]], { req: 105, first: 'hollow_crown', special: { every: 4, mult: 1.6, name: 'Crown of sorrow' }, short: 'The Hollow King' });
+mon('hollowking', 'The Hollow King', 'hollow', 126, 700, 44, 104, 100, [25000, 40000], '#b08aff', [['ore_voidstone', [3, 6], 1], ['hollow_crown', [1, 1], .1]], { req: 105, first: 'hollow_crown', special: { every: 4, mult: 1.6, name: 'Crown of sorrow' }, short: 'The Hollow King' });
 
 /* ---------- Combat loot: every monster also rolls on its town's loot table ---------- */
 mk('coin_pouch', { name: 'Coin pouch', ic: 'pouch', col: '#f3d58a', val: 0, type: 'container' });
@@ -387,6 +388,38 @@ Object.entries(TOWN_LOOT).forEach(([town, L]) => {
     else { add('coin_pouch', [1, 1], .05); add('treasure_chest', [1, 1], .004); gear.forEach(id => add(id, [1, 1], .006 / L.gear.length)); L.extra.forEach(([id, n, p]) => add(id, n, p)); }
   });
 });
+
+/* ---------- Unique gear (Nov 2026): a signature effect instead of bigger numbers ----------
+   Each unique carries `unique: { key, name, text }`; the combat engine reads the keys of equipped items (DQ.uniqueFx).
+   New uniques have modest stats for their level, so wearing one is a choice, not an automatic upgrade. They drop rarely
+   from one regional monster, with a bad-luck guarantee on the first copy (engine.js kill). Boss trophies gain effects too. */
+const U = (key, name, text) => ({ key, name, text });
+Object.entries({
+  chief_helm: U('roar', 'Battle roar', 'The first enemy attack of every fight misses.'),
+  tusk_charm: U('hide', 'Thick hide', 'Normal enemy attacks deal 15% less damage.'),
+  barnacle_cutlass: U('riposte', 'Riposte', 'When you are hit, 20% chance to strike straight back.'),
+  frostmaw_pendant: U('slow', 'Frostbite', 'Enemies attack 15% more slowly.'),
+  witch_staff: U('curse', 'Bog hex', 'Each spell that lands weakens the enemy: 5% softer hits per stack, up to 15%.'),
+  emberfang_bow: U('ember', 'Ember arrows', 'Every shot adds a burst of fire damage, strong against fire-weak foes.'),
+  storm_feather: U('swift', 'Gale', 'You attack 10% faster.'),
+  hollow_crown: U('sovereign', 'Crown of sorrow', 'Heal 8% of the damage you deal; boss specials hit 20% softer.')
+}).forEach(([id, u]) => { if (ITEMS[id]) ITEMS[id].unique = u; });
+const uq = (id, o) => mk(id, Object.assign({ type: 'gear', rare: 1 }, o));
+uq('leechfang', { name: 'Leechfang', ic: 'dagger', col: '#9a3a4a', val: 400, slot: 'weapon', wtype: 'dagger', style: 'melee', req: { attack: 12 }, b: { atk: 10, str: 5 }, unique: U('lifesteal', 'Leech', 'Heal 20% of the damage you deal.'), flavour: 'The wolves of Mossbarrow carry it off from careless travellers. It never quite stops being warm.' });
+uq('wyrdwood_bow', { name: 'Wyrdwood longbow', ic: 'bow', col: '#6a8a4a', val: 450, slot: 'weapon', style: 'ranged', req: { ranged: 18 }, b: { rng: 11 }, unique: U('marked', "Hunter's mark", 'The first three shots of every fight always hit, for 50% more damage.'), flavour: 'Cut from a tree the scarecrows guard. It hums when it finds its mark.' });
+uq('thornback_buckler', { name: 'Thornback buckler', ic: 'shield', col: '#c87a5a', val: 500, slot: 'shield', req: { defence: 15 }, b: { def: 7 }, unique: U('thorns', 'Thorns', 'Enemies take 35% of the damage they deal to you.'), flavour: 'A rock crab shell, spines and all, strapped to a board.' });
+uq('vipers_kiss', { name: "Viper's kiss", ic: 'sword', col: '#5aa86a', val: 900, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 20 }, b: { atk: 13, str: 10 }, unique: U('poison', 'Venom', 'Hits poison the enemy (up to 3 stacks); poison bites each time it attacks.'), flavour: 'A coast-road bandit’s favourite. The groove along the blade is not decoration.' });
+uq('gale_sabre', { name: 'Gale sabre', ic: 'sword', col: '#8fd0e0', val: 1400, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 28 }, b: { atk: 20, str: 16 }, unique: U('twin', 'Twin cut', '20% chance to strike twice.'), flavour: 'Pirates swear it was forged in a storm. It is certainly light enough.' });
+uq('wardens_greathelm', { name: "Warden's greathelm", ic: 'helm', col: '#7a8aa0', val: 1500, slot: 'head', req: { defence: 25 }, b: { def: 9 }, unique: U('bulwark', 'Bulwark', 'Boss special attacks hit 35% softer.'), flavour: 'Saltmere’s harbour wardens wore these on the sea wall. This one was given, not found.' });
+uq('smugglers_knot', { name: "Smuggler's knot", ic: 'ring', col: '#b89a5a', val: 1500, slot: 'ring', b: {}, unique: U('fortune', "Smuggler's luck", '+25% chance of item drops and +5% coins. No combat stats.'), flavour: 'A ring of tarred rope. Mother Silt’s people will know you by it.' });
+uq('thunderclap_maul', { name: 'Thunderclap maul', ic: 'hammer', col: '#c8b860', val: 4000, slot: 'weapon', wtype: 'hammer', style: 'melee', req: { attack: 40 }, b: { atk: 24, str: 38 }, unique: U('stun', 'Thunderclap', 'Hits have a 12% chance to stun: the enemy loses its next attack.'), flavour: 'Trolls use it to crack ice. It cracks most things.' });
+uq('stormcaller_staff', { name: 'Stormcaller staff', ic: 'staff', col: '#9ab8ff', val: 3500, slot: 'weapon', style: 'magic', req: { magic: 40 }, b: { mag: 25 }, unique: U('arc', 'Arc', '20% chance for a spell to arc and hit again for half damage.'), flavour: 'Raiders stole it from a weather-witch. The weather has not forgiven them.' });
+uq('berserkers_torc', { name: "Berserker's torc", ic: 'amulet', col: '#c86a3a', val: 6000, slot: 'amulet', b: { str: 6 }, unique: U('fury', 'Fury', 'Deal up to 35% more damage the lower your health.'), flavour: 'Pulled from the fen with its owner still attached. He did not want to let go.' });
+uq('salamander_coat', { name: 'Salamander coat', ic: 'body', col: '#e0703a', val: 20000, slot: 'body', req: { defence: 70 }, b: { def: 40 }, lth: 1, unique: U('laststand', 'Last stand', 'Once per fight, a blow that would defeat you leaves you at 1 health instead.'), flavour: 'Drake leather that remembers being on fire, and refuses to do it again.' });
+/* rare drops from one regional monster each (first copy guaranteed after about 2.5x the expected number of defeats) */
+[['wolf', 'leechfang', 1 / 150], ['scarecrow', 'wyrdwood_bow', 1 / 150], ['crab', 'thornback_buckler', 1 / 160], ['bandit', 'vipers_kiss', 1 / 180], ['pirate', 'gale_sabre', 1 / 200],
+ ['troll', 'thunderclap_maul', 1 / 220], ['raider', 'stormcaller_staff', 1 / 220], ['zombie', 'berserkers_torc', 1 / 250], ['drake', 'salamander_coat', 1 / 260]]
+  .forEach(([mon, id, p]) => { if (D.MON[mon]) D.MON[mon].drops.push([id, [1, 1], p]); });
 
 /* ---------- Shops ---------- */
 const metal = (...ts) => ts.flatMap(i => PIECES.map(p => `${TIERS[i].id}_${p[1]}`));

@@ -221,6 +221,19 @@ function trophySprite(id) {
   s.fix(4, 4, '#ffd9a0'); s.fix(36, 4, '#ffd9a0');
   return s;
 }
+/* the Hero level-up star: its own 32 x 32 design (shown at 3x), faceted like a cut jewel, not the 16 px menu icon enlarged */
+function bigStar() {
+  const s = Spr(32, 32), light = ramp('#f0c048', { gl: .85 });
+  const P = []; for (let i = 0; i < 10; i++) { const r = i % 2 ? 6.4 : 15, a = -Math.PI / 2 + i * Math.PI / 5; P.push([16 + Math.cos(a) * r, 16.8 + Math.sin(a) * r]); }
+  s.poly(P, light);
+  /* facet ridges from the centre to each inner corner, and a bright ridge up each point's lit side */
+  for (let i = 1; i < 10; i += 2) s.line(16, 16.8, P[i][0], P[i][1], null, '#b07a28');
+  for (let i = 0; i < 10; i += 2) s.line(16, 16.8, (P[i][0] * 3 + 16) / 4, (P[i][1] * 3 + 16.8) / 4, null, i === 0 || i === 8 ? '#fff0b8' : '#d9a640');
+  s.ell(16, 16.6, 1.6, 1.6, ramp('#fff2c0', { gl: .95 }));
+  for (const [x, y] of [[15, 5], [15, 6], [16, 16]]) s.fix(x, y, '#fffaf0');
+  return s;
+}
+A.bigStarUrl = () => A.url('bigstar', bigStar);
 Object.assign(A, { trophySprite, trophyUrl: id => A.url('trophy:' + id, () => trophySprite(id)) });
 Object.assign(A, { workerSprite, treeSprite, rockSprite, piece, sceneFor, furnSprite, iconSprite, TREE, TOWN, ICON, ICON_ALIAS,
   treeUrl: id => A.url('tree:' + id, () => treeSprite(id)), rockUrl: id => A.url('rock:' + id, () => rockSprite(id)),

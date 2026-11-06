@@ -69,8 +69,8 @@ DQ.creatureGainXp=m=>{const id=S().pets.active,o=id&&S().pets.owned[id],p=id&&D.
 UI.areaPanel=town=>{
   const active=DQ.act?.kind==='fight'&&DQ.act.area,qt=questTarget(),areas=D.AREAS[town]||[];
   return `<section class="panel activity-choices hunt-areas"><div class="phead"><div><span class="k">Hunting</span><h2>Choose an area</h2></div><small>${esc(D.TOWN[town].name)}</small></div>
-    <p class="hint">Each area has its own encounter rates. An expedition continues through new encounters until you retreat.</p>
-    ${qt?`<div class="quest-hunt">${DQ.artImage('creature',qt,48,'',D.MON[qt].name)}<span><b>Quest target: ${esc(D.MON[qt].name)}</b><small>Track this creature directly so quest progress stays under your control.</small></span><button class="btn primary" data-do="huntquest" data-a="${qt}">Track target</button></div>`:''}
+    
+    ${qt?`<div class="quest-hunt">${DQ.artImage('creature',qt,48,'',D.MON[qt].name)}<span><b>Quest target: ${esc(D.MON[qt].name)}</b></span><button class="btn primary" data-do="huntquest" data-a="${qt}">Track target</button></div>`:''}
     <div class="area-grid">${areas.map(a=>{const odds=DQ.encounterOdds(a),on=active===a.id;return `<article class="area-card ${on?'selected':''}"><div class="area-head"><div><b>${esc(a.name)}</b><small>Level ${Math.min(...odds.map(x=>x.monster.cl))}–${Math.max(...odds.map(x=>x.monster.cl))}</small></div><button class="btn ${on?'':'primary'}" data-do="huntarea" data-a="${a.id}">${on?'Retreat':'Explore'}</button></div><div class="encounter-list">${odds.map(x=>`<div>${DQ.monSprite(x.monster,48,(S().beast.kills[x.id]||0)?'':'sil')}<span><b>${(S().beast.kills[x.id]||0)?esc(x.monster.name):'Unknown creature'}</b><small>${x.pct>=45?'Common':x.pct>=20?'Uncommon':'Rare'} · ${x.pct}%</small></span></div>`).join('')}</div></article>`}).join('')}</div>
     <section data-reference="true"><h3>Hunting and creature collecting</h3><p>Hunt any enemy for field research. Each region has one signature wild companion to bond with.</p></section></section>`;
 };

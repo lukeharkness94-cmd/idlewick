@@ -240,7 +240,7 @@ DQ.startAct = (kind, id, o = {}) => {
 };
 DQ.combatInterval = () => {
   const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword;
-  return Math.round(W.speed*(1-Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003)));
+  return Math.round(W.speed*(1-Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003))*(DQ.uniqueFx&&DQ.uniqueFx().swift?.9:1));
 };
 DQ.combatSpeedText = () => { const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword,ms=DQ.combatInterval(); return `${W.name}: ${(ms/1000).toFixed(2)}s per attack · ${Math.round((1-ms/W.speed)*100)}% faster from Combat level`; };
 DQ.actDur = a => {
@@ -381,7 +381,7 @@ function die() {
 DQ.splat = (side, text, kind, delay) => { if (!DQ.sim.on) DQ.emit('splat', side, text, kind, delay); };
 
 function combatRound() {
-  const f = DQ.fight, m = D.MON[f.id], ps = DQ.pstats(), A = DQ.ability; f.round++; f.pa = (f.pa || 0) + 1;
+  const f = DQ.fight, m = D.MON[f.id], ps = DQ.pstats(), A = DQ.ability, U = DQ.uniqueFx(); f.round++; f.pa = (f.pa || 0) + 1;
   const sty = ps.style, W = D.WTYPES[D.weaponType()], mhp = m.hp;
   if (sty === 'ranged') {
     if (S().ammo.n <= 0 && S().ammo.id && DQ.have(S().ammo.id)) { const n = Math.min(DQ.have(S().ammo.id), 500); DQ.take(S().ammo.id, n); S().ammo.n += n; }
@@ -400,16 +400,28 @@ function combatRound() {
     f.frozen = 0;
     const wr = DQ.weakOf(m, f), grounded = m.id === 'zephyrion' && f.pinned > 0;
     const weak = wr.weak.includes(dtype), resist = wr.resist.includes(dtype) && !(grounded && D.PHYSICAL.includes(dtype));
-    let mult = weak ? (A('focus') ? 2 : 1.5) : resist ? .5 : 1; tag = weak ? 'weak' : resist ? 'resist' : '';
+    /* bosses are counter checks, not locks: a weakness helps a lot and a resistance hurts, but less than on ordinary
+       monsters, so preparation matters without guaranteeing the fight (scripts/sim-bosses.cjs COUNTER=1) */
+    let mult = weak ? (m.boss ? (A('focus') ? 1.6 : 1.3) : (A('focus') ? 2 : 1.5)) : resist ? (m.boss ? .7 : .5) : 1; tag = weak ? 'weak' : resist ? 'resist' : '';
     let acc = ps.acc * W.acc * (weak ? 1.1 : 1), max = ps.max * W.dmg * mult * (1 + DQ.beastBonus(m.id)), sure = false;
     if (A('aimed') && f.pa % 3 === 0) { sure = true; max *= 1.5; }
     if (A('power') && f.pa % 4 === 0) { max *= 2; tag = 'power'; }
     if (A('execute') && f.hp < mhp * .3) max *= 1.5;
+    /* unique gear (data.js unique.key) */
+    if (U.marked && f.pa <= 3) { sure = true; max *= 1.5; }
+    if (U.fury) max *= 1 + .35 * (1 - clamp(S().hp / DQ.maxHp(), 0, 1));
     const mDef = (m.def + 8) * (64 + m.def);
     if (sure || Math.random() < hitChance(acc, mDef)) dealt = rnd(1, Math.max(1, Math.round(max)));
     if (dealt && A('pin')) f.pinned = 2;
+    if (dealt && U.twin && chance(.2)) { dealt += rnd(1, Math.max(1, Math.round(max))); tag += ' twin'; }
+    if (dealt && U.arc && sty === 'magic' && chance(.2)) dealt += Math.max(1, Math.round(dealt * .5));
+    if (dealt && U.stun && chance(.12)) f.stun = 1;
+    if (dealt && U.poison) f.poison = Math.min(3, (f.poison || 0) + 1);
+    if (dealt && U.curse && sty === 'magic') f.curse = Math.min(3, (f.curse || 0) + 1);
   }
   f.hp -= dealt; DQ.splat('foe', dealt, dealt ? 'hit ' + tag : 'miss', 0);
+  if (dealt && (U.lifesteal || U.sovereign)) S().hp = Math.min(DQ.maxHp(), S().hp + Math.max(1, Math.round(dealt * (U.lifesteal ? .2 : .08))));
+  if (U.ember && sty === 'ranged') { const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(2, Math.round(ps.max * .25))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 300); }
   if (DQ.trick && DQ.trick('charge') && f.round === 1) { const c = Math.max(1, Math.round(ps.max * W.dmg * .5)); f.hp -= c; DQ.splat('foe', c, 'hit power', 250); }
   if (DQ.trick && DQ.trick('ember') && f.pa % 6 === 0) { const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(1, Math.round(ps.max * .5))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 320); }
   DQ.sfx(sty === 'ranged' ? 'bow' : sty === 'magic' ? 'cast' : dealt ? 'hit' : 'miss');
@@ -422,10 +434,14 @@ function combatRound() {
   if (f.hp <= 0) return kill(m);
   /* the monster attacks on its own clock: faster weapons get more swings in between */
   f.mt = (f.mt || 0) + (DQ.act ? DQ.act.dur * D.PACE[DQ.act.pace || 'steady'].speed : 2000);
-  while (f.mt >= 2000 && DQ.fight) { f.mt -= 2000; if (monsterAttack(f, m, ps, sty) === 'dead') return; }
+  const clock = U.slow ? 2300 : 2000;
+  while (f.mt >= clock && DQ.fight) { f.mt -= clock; if (monsterAttack(f, m, ps, sty) === 'dead') return; }
 }
 function monsterAttack(f, m, ps, sty) {
-  const A = DQ.ability; f.ma = (f.ma || 0) + 1;
+  const A = DQ.ability, U = DQ.uniqueFx(); f.ma = (f.ma || 0) + 1;
+  if (f.poison) { const pd = f.poison * Math.max(1, Math.round(ps.max * .12)); f.hp -= pd; DQ.splat('foe', pd, 'hit weak', 300); if (f.hp <= 0) { kill(m); return 'dead'; } }
+  if (f.stun) { f.stun = 0; DQ.splat('you', 'Stunned', 'miss', 600); return; }
+  if (U.roar && !f.roared) { f.roared = 1; DQ.splat('you', 'Roar!', 'miss', 600); return; }
   const special = m.boss && m.boss.special && f.ma % m.boss.special.every === 0, sp = special && m.boss.special;
   if (special && A('bash') && f.ma - (f.lastBash || -99) >= 8) { f.lastBash = f.ma; DQ.splat('you', 'Bash!', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your shield bash interrupts ${sp.name}!`, 'good'); return; }
   if (special && A('ward') && f.ma - (f.lastWard || -99) >= 6) { f.lastWard = f.ma; DQ.splat('you', 'Ward', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your ward absorbs ${sp.name}.`, 'good'); return; }
@@ -439,17 +455,23 @@ function monsterAttack(f, m, ps, sty) {
       if (m.id === 'oldtusk' && sty === 'ranged') taken *= .5;
       if (m.id === 'pyrrhax' && f.lastEl === 'frost') taken *= .5;
       if (A('brace')) taken *= .5;
+      if (U.bulwark) taken *= .65; else if (U.sovereign) taken *= .8;
       if (DQ.trick && DQ.trick('cold')) taken *= .8;
       if (m.id === 'frostmaw') f.frozen = 1;
       if (m.id === 'morwenna') f.hex = 4;
-    } else if (A('kite')) taken *= .7;
+    } else { if (A('kite')) taken *= .7; if (U.hide) taken *= .85; }
+    if (f.curse) taken *= 1 - .05 * f.curse;
     taken = Math.max(1, Math.round(taken * (1 - ps.red) * ({ careful: .85, steady: 1, push: 1.25 }[(DQ.act && DQ.act.pace) || 'steady'])));
   }
   if (f.hex > 0) { f.hex--; taken += Math.max(1, Math.round(m.max * .25)); }
+  if (taken && U.thorns) f.hp -= Math.max(1, Math.round(taken * .35));
+  if (taken && U.riposte && chance(.2)) { const r = rnd(1, Math.max(1, ps.max)); f.hp -= r; DQ.splat('foe', r, 'hit', 700); }
   S().hp -= taken; DQ.splat('you', special ? taken + '!' : taken, taken ? 'hit' : 'miss', 900);
+  if (S().hp <= 0 && U.laststand && !f.last) { f.last = 1; S().hp = 1; DQ.splat('you', 'Last stand!', 'miss', 1000); }
   if (taken) setTimeout(() => DQ.sfx('hurt'), 900);
   if (special && !DQ.sim.on) DQ.log(`${m.name} unleashes ${sp.name}!`, 'bad');
   if (S().hp <= 0) { die(); return 'dead'; }
+  if (f.hp <= 0) { kill(m); return 'dead'; }
   if (A('second') && !f.sw && S().hp < DQ.maxHp() * .3) { f.sw = 1; const h = Math.round(DQ.maxHp() * .3); S().hp += h; DQ.floatAt(document.querySelector('.hud .hp'), `Second wind +${h}`, '#5cc08a'); }
   autoEat();
   if (DQ.act && DQ.act.pace === 'careful' && S().hp < DQ.maxHp() * .35 && !DQ.foods().length) { DQ.stopAct(false, 'You retreated at low health with no food left (Careful pace).'); return 'dead'; }
@@ -464,7 +486,12 @@ function kill(m) {
     const guaranteed = first && m.boss.first === id;
     /* weapons and armour for a skill you have not learned yet (bows before Ranged, staves before Magic) do not drop */
     if (!guaranteed && D.ITEMS[id] && (D.ITEMS[id].type === 'gear' || D.ITEMS[id].type === 'ammo') && DQ.lockedSkillFor(id)) continue;
-    if (!(guaranteed || chance(Math.min(1, p * DQ.buffMult('luck'))))) continue;
+    const uniq = !m.boss && D.ITEMS[id] && D.ITEMS[id].unique, found = S().uniqFound = S().uniqFound || {};
+    let pity = false;
+    if (uniq && !guaranteed && !found[id]) { const P = S().upity = S().upity || {}; P[id] = (P[id] || 0) + 1; pity = P[id] >= Math.ceil(2.5 / p); }
+    if (!(guaranteed || pity || chance(Math.min(1, p * DQ.buffMult('luck') * (DQ.uniqueFx().fortune ? 1.25 : 1))))) continue;
+    if (uniq) { const firstCopy = !found[id]; found[id] = 1; if (S().upity) delete S().upity[id];
+      if (firstCopy && !DQ.forecasting) { DQ.notify({ kind: 'unlock', key: 'unique:' + id, icon: D.ITEMS[id].ic, col: D.ITEMS[id].col, title: `Unique find: ${D.ITEMS[id].name}`, text: `${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, sound: 'gem', burst: true, ttl: 14000 }); if (DQ.journal) DQ.journal('loot', `${m.name} dropped ${D.ITEMS[id].name}. ${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, D.ITEMS[id].ic); } }
     const n = rnd(a, b), rar = D.rarityOf(guaranteed ? 0 : p); got.push(id);
     if (id === 'coin_pouch') { const cc = Math.round(rnd(m.coins[0] + 5, m.coins[1] * 3 + 10) * DQ.coinMult() * (DQ.trick && DQ.trick('comb') ? 1.5 : 1)); extraCoins += cc; drops.push({ id, n: cc, rar, coins: true }); loot.push(`a pouch of ${fmt(cc)} coins`); continue; }
     if (id === 'treasure_chest') {

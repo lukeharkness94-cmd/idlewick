@@ -104,9 +104,10 @@ const fs=require('node:fs');
    return new Set(sprites).size===sprites.length;
   }),true);
   await page.evaluate(()=>{document.querySelectorAll('#notes .note').forEach(n=>n.remove());DQ.S.settings.notify=true;DQ.go('mining');DQ.notify({kind:'unlock',key:'unlock:mining',title:'Mining unlocked',text:'Try mining',page:'mining',sound:false});});
-  assert.equal(await page.locator('#notes .note.unlock').count(),1);
-  assert.ok((await page.locator('#notes .note.unlock').innerText()).includes('Mining'));
-  assert.equal(await page.locator('.modal').count(),0);
+  /* a new skill is a big moment: it gets the full reveal dialog (owner request, Nov 2026) */
+  assert.equal(await page.locator('.modal .lr-unlock').count(),1);
+  assert.ok((await page.locator('.modal').innerText()).includes('Mining'));
+  await page.evaluate(()=>DQ.closeModal());
   await page.evaluate(()=>{DQ.notify({kind:'ach',key:'ach:quiet',title:'Routine achievement',sound:false});DQ.openBell();});
   assert.ok((await page.locator('.modal').innerText()).includes('Routine achievement'));
   assert.ok(!(await page.locator('.modal').innerText()).includes('Mining unlocked'));

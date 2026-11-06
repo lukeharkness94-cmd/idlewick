@@ -264,6 +264,20 @@ const RELIC = {
   star_heart: s => { const c = ramp('#e2d4ff', { gl: .9 }); const pts = []; for (let i = 0; i < 10; i++) { const r = i % 2 ? 3 : 7, a = -Math.PI / 2 + i * Math.PI / 5; pts.push([8 + Math.cos(a) * r, 8.5 + Math.sin(a) * r]); } s.poly(pts, c); s.ell(8, 8.5, 2, 2, ramp('#ffb0e0')); s.fix(8, 8, '#ffffff'); }
 };
 
+/* ---------- unique gear: each with its own silhouette (data.js `unique`) ---------- */
+const UNIQUE = {
+  leechfang: s => { const bone = rp('#e8dcc8'); s.poly([[13, 2], [11, 4], [7, 9], [5, 11], [6, 12], [9, 9], [12, 6]], bone); s.line(12, 3, 7, 9, null, '#9a3a4a'); s.rect(3, 11, 3, 2, rp('#5a3a2a')); s.line(2, 14, 4, 12, rp('#9a3a4a')); s.fix(13, 2, '#fffaf0'); s.fix(4, 13, '#c8483c'); },
+  wyrdwood_bow: s => { bowSprite(s, '#6a8a4a', null); const leaf = rp('#7ac85a'); for (const [x, y] of [[4, 4], [11, 12], [8, 7]]) { s.dot(x, y, leaf); s.dot(x + 1, y, leaf); s.dot(x, y + 1, leaf); } s.fix(9, 7, '#d8ff9a'); },
+  thornback_buckler: s => { const sh = rp('#c87a5a'); s.ell(8, 8.5, 5.5, 5.5, sh); s.ell(8, 8.5, 2.4, 2.4, rp('#8a4a3a')); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; s.dot(Math.round(8 + Math.cos(a) * 7), Math.round(8.5 + Math.sin(a) * 7), rp('#e8c8a8')); } s.fix(6, 6, '#ffe0c8'); },
+  vipers_kiss: s => { const g = metalOf('#7ac88a'); for (let i = 0; i <= 9; i++) { const x = 4 + i, y = 12 - i, w = (i % 3 === 1) ? 1 : 0; s.dot(x + w, y, g); s.dot(x + w + 1, y, g); } s.line(3, 10, 6, 13, rp('#3a6a3a')); s.rect(2, 13, 2, 2, rp('#5a3a2a')); s.fix(14, 2, '#eaffea'); s.fix(4, 9, '#c8e040'); s.fix(6, 14, '#c8e040'); },
+  gale_sabre: s => { const m = metalOf('#9ad8e8'); for (let i = 0; i <= 10; i++) { const t = i / 10, x = Math.round(4 + 9 * t), y = Math.round(12 - 10 * t + Math.sin(t * Math.PI) * 2); s.dot(x, y, m); s.dot(x, y + 1, m); } s.poly([[2, 11], [5, 10], [6, 13], [3, 14]], R.gold); s.rect(1, 13, 2, 2, rp('#4a3a5a')); s.fix(13, 2, '#ffffff'); },
+  wardens_greathelm: s => { const m = metalOf('#7a8aa0'); s.poly([[4, 4], [12, 4], [13, 14], [3, 14]], m); s.ell(8, 4.5, 4, 2.5, m); s.rect(5, 8, 6, 1, rp('#1f2430')); s.line(8, 9, 8, 13, null, '#3a4458'); s.rect(7, 0, 2, 3, rp('#3f6fd6')); s.fix(5, 5, m.gl); },
+  smugglers_knot: s => { const a = rp('#b89a5a'), b = rp('#6a5236'); for (let i = 0; i < 20; i++) { const t = i / 20 * Math.PI * 2; s.dot(Math.round(8 + Math.cos(t) * 5), Math.round(9 + Math.sin(t) * 5), i % 2 ? a : b); } s.ell(8, 3.5, 2, 1.6, a); s.dot(6, 2, b); s.dot(10, 2, b); s.fix(7, 3, '#f0d8a0'); },
+  thunderclap_maul: s => { const m = metalOf('#b8b0a0'); s.line(3, 15, 10, 6, R.wood); s.line(4, 15, 11, 6, R.wood); s.poly([[6, 1], [14, 4], [12, 10], [4, 7]], m); for (const [x, y] of [[9, 3], [8, 5], [10, 5], [9, 7]]) s.fix(x, y, '#ffe050'); s.fix(6, 2, m.gl); },
+  stormcaller_staff: s => { staffSprite(s, '#6a5a8a', '#9ab8ff'); s.line(14, 1, 15, 3, null, '#fff6a0'); s.line(15, 3, 13, 5, null, '#fff6a0'); s.fix(9, 1, '#fff6a0'); s.fix(10, 0, '#fff6a0'); },
+  berserkers_torc: s => { const g = metalOf('#c8803a'); for (let i = 0; i <= 16; i++) { const t = Math.PI * (.15 + i / 16 * 1.7), x = Math.round(8 + Math.cos(t + Math.PI / 2) * 5.5), y = Math.round(7 + Math.sin(t + Math.PI / 2) * 5.5); s.dot(x, y, g); s.dot(x, y + 1, g); } s.ell(5, 2.5, 1.6, 1.6, rp('#c86a3a')); s.ell(11, 2.5, 1.6, 1.6, rp('#c86a3a')); s.fix(5, 2, '#ff3030'); s.fix(11, 2, '#ff3030'); },
+  salamander_coat: s => { vest(s, '#e0703a'); for (let y = 6; y <= 12; y += 2) for (let x = 5 + (y % 4 ? 1 : 0); x <= 11; x += 2) s.fix(x, y, '#ffb04a'); s.rect(7, 4, 2, 10, rp('#7a3a1a')); }
+};
 /* ---------- the dispatcher: one finished design per item id ---------- */
 const TIER_OF = id => ['bronze', 'iron', 'steel', 'mithril', 'adamant', 'rune', 'astral'].find(t => id.startsWith(t + '_'));
 function itemSprite(id) {
@@ -275,6 +289,7 @@ function itemSprite(id) {
   if (FOOD[id]) { FOOD[id](s); return s; }
   if (PRODUCE[id]) { PRODUCE[id](s); return s; }
   if (RELIC[id]) { RELIC[id](s); return s; }
+  if (UNIQUE[id]) { UNIQUE[id](s); return s; }
   if (id.startsWith('log_')) { logSprite(s, WOOD[id.slice(4)] || WOOD.normal); return s; }
   if (id.startsWith('ore_')) { oreSprite(s, id.slice(4)); return s; }
   if (id.startsWith('bar_')) { barSprite(s, col); return s; }

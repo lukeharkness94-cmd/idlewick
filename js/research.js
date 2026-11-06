@@ -133,7 +133,7 @@ UI.B.rbar = (e, id) => { const a = R().active.find(x => x.id === id), t = D.TECH
 UI.B.rleft = (e, id) => { const a = R().active.find(x => x.id === id); UI.set(e, a ? `${DQ.fmtTime(Math.max(0, a.left))} left` : ''); };
 const researchPage = (potions = false) => {
   const slots = DQ.researchSlots(), A = R().active;
-  const activeRows = Array.from({ length: slots }, (_, i) => { const a = A[i]; if (!a) return `<div class="aslot empty"><span class="k">Slot ${i + 1}</span><b>Free</b><small>Choose a project below. It keeps running while you are away.</small></div>`; const t = D.TECH[a.id]; return `<div class="aslot" style="--c:${BR[t.br][1]}"><span class="k">Slot ${i + 1}</span><b>${esc(t.name)}</b><span class="tbar"><span class="bar"><i data-b="rbar:${t.id}"></i></span><small class="mono" data-b="rleft:${t.id}"></small></span><small>${esc(t.desc)}</small></div>`; }).join('');
+  const activeRows = Array.from({ length: slots }, (_, i) => { const a = A[i]; if (!a) return `<div class="aslot empty"><span class="k">Slot ${i + 1}</span><b>Free</b><small>Research keeps running while you are away.</small></div>`; const t = D.TECH[a.id]; return `<div class="aslot" style="--c:${BR[t.br][1]}"><span class="k">Slot ${i + 1}</span><b>${esc(t.name)}</b><span class="tbar"><span class="bar"><i data-b="rbar:${t.id}"></i></span><small class="mono" data-b="rleft:${t.id}"></small></span><small>${esc(t.desc)}</small></div>`; }).join('');
   const done = D.TECHS.filter(t => DQ.techDone(t.id)).length;
 
   const unlocked = D.POTION_RECIPES.filter(DQ.canBrew);

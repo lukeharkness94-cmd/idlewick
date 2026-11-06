@@ -77,6 +77,104 @@ D.ADVENTURES = ADVENTURES;
     [{ ev: 'smith', key: '*', n: 10, label: 'Smith 10 pieces for a worthy setting' }, { ev: 'deliver', key: 'star_shard', n: 1, label: 'Return the star shard to its heart' }], { xp: { smithing: 6000, crafting: 4000 }, coins: 8000, items: { star_heart: 1 } }, 'star', 3)
 ].forEach(q => { D.QUESTS.push(q); D.QM[q.id] = q; });
 
+/* ---------- The Silent Bells (Hero 18–28): the midgame story ----------
+   Not a secret: it begins in Mossbarrow at Hero 18 and crosses to Saltmere. Recurring faces (Granny Bramble from the
+   Miller's Map, Harbourmaster Ilsa, Sergeant Orrin from Willowbrook), one mystery (who is buying up the realm's bells?)
+   and one lasting decision (the smugglers' ledger) that changes later dialogue, a quest-giver and the reward. It also
+   remembers earlier choices: the goblin satchel, the lost traveller, and whether you finished the Miller's Map. */
+ADVENTURES.bells = { name: 'The Silent Bells', stages: 6 };
+const B = (id, town, name, giver, adv, req, blurb, obj, reward, stage, extra) => Object.assign({ id, town, name, giver, adv, req, blurb, obj, reward, adventure: 'bells', stage }, extra || {});
+[
+  B('bl_silence', 'mossbarrow', 'The Silent Bells', 'Granny Bramble', 18, null, '',
+    [{ ev: 'kill', key: 'wolf', n: 10, label: 'Drive off 10 wolves stirred up on the night of the theft' }, { ev: 'chop', key: 'oak', n: 20, label: 'Chop 20 oak logs for a temporary bell frame' }],
+    { xp: { attack: 1500, woodcutting: 800 }, coins: 600 }, 1),
+  B('bl_road', 'saltmere', 'Salt on the Boots', 'Harbourmaster Ilsa', 20, 'bl_silence', '',
+    [{ ev: 'guide', key: 'bandit', n: 1, label: 'Study the coast-road bandits in your field guide' }, { ev: 'kill', key: 'bandit', n: 12, label: 'Clear 12 bandits from the coast road' }],
+    { xp: { strength: 2000, defence: 1000 }, coins: 900 }, 2),
+  B('bl_ledger', 'saltmere', "Mother Silt's Ledger", 'Harbourmaster Ilsa', 22, 'bl_road', 'Every cove smuggler answers to Mother Silt, and Mother Silt writes everything down. Her ledger travels with whichever smuggler she trusts that week. Blend in with the fishers at the coves and find out who that is.',
+    [{ ev: 'catch', key: '*', n: 25, label: 'Fish 25 catches at the coves while you watch' }, { ev: 'kill', key: 'smuggler', n: 10, label: 'Take the ledger from the smugglers (10 defeated)' }],
+    { xp: { attack: 2000, fishing: 1200 }, coins: 1200 }, 3, {
+      choices: [
+        { id: 'ilsa', label: 'Hand the ledger to Harbourmaster Ilsa', text: 'Ilsa reads it by lamplight, jaw tight. “Names, dates, ships. Enough to hang half the coast.” The harbour wardens will move at dawn.' },
+        { id: 'silt', label: 'Return it to Mother Silt, for a favour', text: 'Mother Silt weighs the ledger in one hand and you in the other. “Honest thieves are rare. I owe you, and I pay my debts.” She ties a knot of tarred rope around your finger.' }
+      ] }),
+  B('bl_orrin', 'saltmere', 'An Old Friend in Port', 'Sergeant Orrin', 24, 'bl_ledger', '',
+    [{ ev: 'kill', key: 'pirate', n: 8, label: 'Defeat 8 pirates crewing the bell ship' }, { ev: 'cook', key: '*', n: 20, label: 'Cook 20 meals for the night watch' }, { ev: 'smith', key: '*', n: 10, label: 'Mend the harbour chain (smith 10 pieces)' }],
+    { xp: { attack: 3000, strength: 3000 }, coins: 1500 }, 4),
+  B('bl_tide', 'saltmere', 'The Bells Below the Tide', 'Harbourmaster Ilsa', 26, 'bl_orrin', '',
+    [{ ev: 'boss', key: 'barnacle', n: 1, label: 'Defeat Captain Barnacle and open his hold' }],
+    { xp: { attack: 4000, strength: 4000, defence: 4000 }, coins: 2500 }, 5),
+  B('bl_ring', 'mossbarrow', 'Ring It Home', 'Granny Bramble', 28, 'bl_tide', 'The chapel bell is back on a cart, the right way round this time. Mossbarrow wants a proper bell-raising: garlands from the fields and a new rope fit for the old bell.',
+    [{ ev: 'harvest', key: '*', n: 10, label: 'Bring in 10 harvests for the garlands' }, { ev: 'craft', key: '*', n: 5, label: 'Craft 5 items for a new bell rope and fittings' }],
+    { xp: { crafting: 2500, farming: 2000 }, coins: 2500 }, 6)
+].forEach(q => { D.QUESTS.push(q); D.QM[q.id] = q; });
+
+/* ---------- Lasting choices ----------
+   A quest with `choices` asks for a decision when it is claimed; discoveries keep theirs. DQ.choiceOf reads either, so
+   later text, quest-givers and rewards can depend on what you chose. Saved in S().choices (older saves simply have none). */
+DQ.choiceOf = key => (S().choices && S().choices[key]) || (disc()[key] && disc()[key].choice) || null;
+const said = (key, map, fallback) => map[DQ.choiceOf(key)] ?? fallback;
+const qdone = id => DQ.questState && D.QM[id] && DQ.questState(D.QM[id]) === 'done';
+const vary = (id, props) => { const q = D.QM[id]; if (!q) return; for (const [k, get] of Object.entries(props)) Object.defineProperty(q, k, { get, configurable: true, enumerable: true }); };
+vary('bl_silence', {
+  blurb: () => `${qdone('am_box') ? '“First the miller, now the chapel bell.” ' : ''}Granny Bramble points at the empty bell-tower. Mossbarrow’s bell vanished in the night, and so did the miller’s bell at Willowbrook years ago. Boot prints in the mud smell of brine, and the wolves were stirred up to cover the noise. Calm the woods, then help raise a frame so the chapel has somewhere to hang a bell again.`,
+  thanks: () => 'The prints go west, to the sea. Ask Harbourmaster Ilsa in Saltmere; nothing heavy leaves that harbour without her seeing it.'
+});
+vary('bl_road', {
+  blurb: () => `${DQ.choiceOf('lost_traveller') === 'share' ? '“You fed my niece on the jetty when she was lost. She has not stopped talking about you.” ' : DQ.choiceOf('lost_traveller') === 'directions' ? '“You pointed my niece home along the coast road. Thank you for that.” ' : ''}Harbourmaster Ilsa has seen your bell: wrapped in sailcloth on a cart bound for the smugglers’ coves. The coast road is thick with bandits paid to look the other way. Learn how they fight, then thin them out.`,
+  thanks: () => 'The cart reached the coves. Someone is paying very well for old bells, and Mother Silt keeps the accounts.',
+  reward: () => DQ.choiceOf('lost_traveller') === 'share' ? { xp: { strength: 2000, defence: 1000 }, coins: 1200 } : { xp: { strength: 2000, defence: 1000 }, coins: 900 }
+});
+vary('bl_ledger', { thanks: () => '' });
+vary('bl_orrin', {
+  blurb: () => `Sergeant Orrin has come all the way from Willowbrook. “What was left of Grubnash’s goblins sold themselves to pirates as deckhands, and those pirates crew the ship carrying your bell.” ${said('goblin_satchel', { orrin: 'He grins. “You brought me Grubnash’s orders once. I trust your eye.”', buckle: 'He raises an eyebrow. “Last time you sold the evidence for a buckle. Let us do better.”' }, '')} ${said('bl_ledger', { ilsa: 'Ilsa’s wardens have a cutter ready. Feed the night watch, mend the harbour chain, and board them.', silt: 'Mother Silt’s people have whispered where the pirates anchor. Feed the night watch, mend the harbour chain, and board them.' }, '')}`.replace(/\s+/g, ' ').trim(),
+  thanks: () => `${said('goblin_satchel', { orrin: '“Just like the hill fort.” ', buckle: '“Better than a buckle.” ' }, '')}The pirates talked: the bells went into Captain Barnacle’s hold, and the captain is not giving them back.`
+});
+vary('bl_tide', {
+  giver: () => DQ.choiceOf('bl_ledger') === 'silt' ? 'Mother Silt' : 'Harbourmaster Ilsa',
+  blurb: () => DQ.choiceOf('bl_ledger') === 'silt'
+    ? 'Mother Silt meets you on the wreck-strewn shore. “Barnacle stole from me too. He sits on a hold full of bells, every bell this coast has lost. Sink his pride, and the bells are yours to take home. Keep the knot on; my people will be watching your back.”'
+    : 'Harbourmaster Ilsa has the harbour wardens on the sea wall. “Barnacle’s hold is full of bells, every one this coast has lost. With Silt’s ledger we can finally touch him. Bring him down, and the wardens will see each bell home.”',
+  reward: () => ({ xp: { attack: 4000, strength: 4000, defence: 4000 }, coins: 2500, items: { [DQ.choiceOf('bl_ledger') === 'silt' ? 'smugglers_knot' : 'wardens_greathelm']: 1 } }),
+  thanks: () => DQ.choiceOf('bl_ledger') === 'silt' ? 'Silt runs a hand over the bells. “Take Mossbarrow’s home. The rest I will sell back to the towns that lost them, at a fair price. Mostly fair.”' : 'Ilsa hands you a warden’s greathelm. “You stood on the wall with us today. Wear it on the next one.”'
+});
+vary('bl_ring', {
+  thanks: () => `The bell rings over Mossbarrow and every dog in the valley joins in. Granny Bramble wipes her eyes. “One last thing, dear. The ledger’s final page names the buyer: a pale stranger in Ironpeak who paid in voidstone and signed with a crown that has no face.”${DQ.choiceOf('bl_ledger') === 'silt' ? ' “Mother Silt sent word she would like a word about him, when you are passing.”' : ' “Ilsa has sent the page to the captain at Ironpeak.”'}`
+});
+/* earlier choices echo later */
+vary('chiefs_end', {
+  blurb: () => `Grubnash leads the goblins from a hill fort. End it. You need combat level 8 to face him.${DQ.choiceOf('goblin_satchel') === 'orrin' ? ' Orrin taps the note you brought him: “He telegraphs the war cry. Watch for the stamp.”' : ''}`
+});
+const lateThanks = {
+  frostmaw_hunt: () => `The pass is open. ${qdone('bl_ring') ? 'Hrod shows you a crate of stolen bells from Frostmaw’s den, packed for someone further up the mountain. Someone who pays in voidstone.' : 'Hrod says the troll was guarding something deeper in the ice.'}`,
+  witchs_bane: () => `The dead lie still. ${qdone('bl_ring') ? 'In Morwenna’s hut, a letter in the same hand as the ledger’s last page: “Bells and lights, all of them. The crown must have silence.”' : 'Lysa finds a letter sealed with a faceless crown.'}`,
+  wyrm_slayer: () => `Pyrrhax is ash. ${DQ.choiceOf('ashen_anvil') === 'quench' ? 'The anvil you woke rings once, all by itself, as the wyrm falls.' : DQ.choiceOf('ashen_anvil') === 'citadel' ? 'Magmasmith Kael’s apprentices hammer a banner from the wyrm’s scales, with your name on it.' : 'The citadel bells ring for the first time in a year.'}`,
+  storm_breaker: () => 'The sky bridges hold again. Abbot Seren says the storms were only ever fleeing something: a silence spreading from the Hollow Crown.',
+  crownfall: () => `The Hollow King is gone, and the faceless crown with him. ${qdone('bl_ring') ? 'Somewhere far behind you, Mossbarrow’s bell is ringing, and every bell he bought rings with it.' : 'Light comes back to the drowned throne.'}`
+};
+for (const [id, f] of Object.entries(lateThanks)) vary(id, { thanks: f });
+/* the anvil remembers: Kael pays the citadel path, the quenched anvil forges cores */
+vary('wyrm_slayer', { reward: (() => { const base = D.QM.wyrm_slayer && JSON.parse(JSON.stringify(D.QM.wyrm_slayer.reward || {})); return () => { const r = JSON.parse(JSON.stringify(base || {})); if (DQ.choiceOf('ashen_anvil') === 'quench') r.items = Object.assign({}, r.items, { ember_core: 3 }); else if (DQ.choiceOf('ashen_anvil') === 'citadel') r.coins = (r.coins || 0) + 15000; return r; }; })() });
+/* claiming a quest that asks for a decision */
+const claimDecide0 = DQ.claimQuest;
+DQ.claimQuest = (id, choice) => {
+  const q = D.QM[id];
+  if (q && q.choices && !DQ.choiceOf(id) && DQ.questState(q) === 'ready') {
+    let pick = q.choices.find(c => c.id === choice);
+    if (!pick && DQ.started && !(DQ.sim && DQ.sim.on) && UI.openQuestChoice) { UI.openQuestChoice(id); return; }
+    pick = pick || q.choices[0];
+    S().choices = S().choices || {}; S().choices[id] = pick.id;
+    if (DQ.journal) DQ.journal('choice', `${q.name}: you chose to ${pick.label.replace(/^./, m => m.toLowerCase())}.`, 'flag');
+    q._lastChoiceText = pick.text;
+  }
+  return claimDecide0(id);
+};
+UI.openQuestChoice = id => {
+  const q = D.QM[id];
+  DQ.modal({ title: q.name, wide: true, body: `<div class="quest-choice"><p>${esc(q.blurb)}</p><p class="k">A decision that will be remembered</p></div>`,
+    actions: [...q.choices.map((c, i) => ({ label: c.label, primary: i === 0, fn: () => { DQ.closeModal(); DQ.claimQuest(id, c.id); DQ.modal({ title: q.name, body: `<p>${esc(c.text)}</p>`, actions: [{ label: 'Continue', primary: true }] }); return false; } })), { label: 'Not yet' }] });
+};
+
 /* secret quests stay hidden until their discovery is made */
 const unlocked0 = DQ.questUnlocked;
 DQ.questUnlocked = q => (!q.secret || DQ.discovered(q.secret)) && unlocked0(q);
@@ -209,7 +307,7 @@ UI.returnExtras = sum => { const h = extras0 ? extras0(sum) : ''; const f = (DQ.
 
 /* milestone flourishes: an adventure's last chapter, and the first arrival in a region */
 const claim0 = DQ.claimQuest;
-DQ.claimQuest = id => { const q = D.QM[id], before = q && DQ.questState(q); const r = claim0(id); if (q && q.adventure && q.stage === ADVENTURES[q.adventure].stages && before === 'ready' && DQ.questState(q) === 'done') setTimeout(() => DQ.sfx('adventure'), 400); return r; };
+DQ.claimQuest = (id, ...rest) => { const q = D.QM[id], before = q && DQ.questState(q); const r = claim0(id, ...rest); if (q && q.adventure && q.stage === ADVENTURES[q.adventure].stages && before === 'ready' && DQ.questState(q) === 'done') setTimeout(() => DQ.sfx('adventure'), 400); return r; };
 const travel0 = DQ.travel;
 if (travel0) DQ.travel = id => { const first = !(S().towns[id] && S().towns[id].visited); const r = travel0(id); if (first && S().town === id) DQ.sfx('region'); return r; };
 

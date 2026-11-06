@@ -134,13 +134,22 @@ DQ.markNoticesRead = page => {
 };
 const logNote = o => { DQ.noteLog.unshift({ t: Date.now(), o, silent: false }); if (DQ.noteLog.length > 40) DQ.noteLog.pop(); };
 const markSilent = (o, count) => { const e = DQ.noteLog.find(x => x.o === o); if (e) { e.silent = true; if (count) DQ.noteMissed++; } };
-const showSkillUnlock=o=>false; /* Skill unlocks use the prominent bottom card; they never cover play. */
+/* A new skill is a big moment: it gets the same full reveal as a level-up (queued behind any open dialog), with what
+   the skill does and a button straight to it. */
+const showSkillUnlock=o=>{
+  if(modalEl){levelQueue.push(Object.assign({__unlock:true},o));pumpLevel();return true;}
+  const id=(o.key||'').slice(7),sk=DQ.data.SK[id];if(!sk)return false;
+  const art=DQ.artImage('skill',id,96,'',sk.name)||ico(id);
+  const open=o.action&&o.action.fn?o.action.fn:()=>DQ.go(sk.page);
+  DQ.modal({title:`${sk.name} unlocked`,wide:true,sticky:true,body:`<div class="level-reveal lr-v2 lr-unlock" style="--c:${o.col||sk.col||'#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><span class="lr-ripple" aria-hidden="true"></span><span class="lr-ripple r2" aria-hidden="true"></span><span class="lr-ripple r3" aria-hidden="true"></span><span class="lr-rays" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><span class="lr-ribbon">New skill</span><h2>${esc(sk.name)}</h2><p>${esc(String(o.text||'').replace(/<[^>]+>/g,'').trim()||sk.blurb||'')}</p></div>`,actions:[{label:`Open ${sk.name}`,primary:true,fn:()=>{DQ.closeModal();open();setTimeout(pumpLevel,180);}},{label:'Later',fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
+  DQ.sfx('unlock');setTimeout(()=>DQ.burstEl(document.querySelector('.level-emblem'),o.col||sk.col||'#d8a64a',44),100);return true;
+};
 const levelQueue=[];let levelRetry=0;
-const pumpLevel=()=>{clearTimeout(levelRetry);if(!levelQueue.length)return;if(modalEl){levelRetry=setTimeout(pumpLevel,300);return;}showLevelReveal(levelQueue.shift());};
+const pumpLevel=()=>{clearTimeout(levelRetry);if(!levelQueue.length)return;if(modalEl){levelRetry=setTimeout(pumpLevel,300);return;}const n=levelQueue.shift();if(n.__unlock)showSkillUnlock(n);else showLevelReveal(n);};
 /* the painted star, re-centred on its own centre of mass (its source crop carries stray edge pixels that pull it off-centre) */
 let starUrl=null;
 const centredStar=()=>{
-  if(!starUrl&&DQ.pixelArt){starUrl=DQ.pixelArt.iconUrl('star');}if(starUrl)return `<img class="lr-star-img pxa" src="${starUrl}" width="96" height="96" alt="" draggable="false">`;if(!starUrl){const raw=null;if(!raw)return '';
+  if(!starUrl&&DQ.pixelArt){starUrl=DQ.pixelArt.bigStarUrl?DQ.pixelArt.bigStarUrl():DQ.pixelArt.iconUrl('star');}if(starUrl)return `<img class="lr-star-img pxa" src="${starUrl}" width="96" height="96" alt="" draggable="false">`;if(!starUrl){const raw=null;if(!raw)return '';
     try{const W=raw.width,H=raw.height,a=raw.getContext('2d').getImageData(0,0,W,H).data;let n=0,sx=0,sy=0;
       for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(a[(y*W+x)*4+3]>128){n++;sx+=x;sy+=y;}
       const cx=sx/n,cy=sy/n;let R=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(a[(y*W+x)*4+3]>128){const d=Math.hypot(x-cx,y-cy);if(d>R&&d<Math.min(W,H)*.62)R=d;}

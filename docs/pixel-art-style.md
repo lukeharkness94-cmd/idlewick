@@ -79,4 +79,6 @@ Every id the game can request resolves to a finished design (`DQ.pixelArt.covera
 - 8 town scenes, each with its restoration projects in broken and restored states (16 projects).
 - 21 furniture pieces, the cottage, 3 worker portraits, about 30 skill and menu icons, and the hero with 3 faces, 4 skins, 5 hair colours, 6 tunics and every equipment type.
 
+- Unique gear (11 items, each its own silhouette), boss trophies (the boss mounted on an oak plaque, 40 × 44), all 83 interface icons as pixel art, and the Hero level-up star (32 × 32, shown at 3×). Work scenes draw every target at the hero's 3× scale.
+
 Removed: the painted atlases (`assets/painted`), the completion pack (`assets/art-completion`, PNG and WebP), their loaders (`art_painted.js`, `painted_runtime.js`, `art_completion.js`, `art_completion_map.js`), the delivery script, manifests, briefs and image tests. The standalone build no longer embeds any image.

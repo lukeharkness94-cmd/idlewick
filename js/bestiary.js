@@ -47,8 +47,8 @@ UI.V.bestiary = () => {
   }).join('')}</div></div>`).join('');
   const ladder = RANKS.map((x, i) => `<span class="lad" data-tip="text:${esc(x[2])}"><b>${i + 1}</b>${x[1]}<small>${D.RESEARCH.regular[i]} defeat${D.RESEARCH.regular[i] > 1 ? 's' : ''}</small></span>`).join('');
   return `<section class="panel shophead"><div><span class="k">Bestiary</span><h2>${tot.sighted} of ${D.MONLIST.length} monsters met · ${tot.done} fully researched</h2></div><div class="tabs">${[['monsters', 'Field guide'], ['pets', 'Creatures']].map(([k, n]) => `<button class="tab ${UI.beastTab === k ? 'on' : ''}" data-do="beasttab" data-a="${k}">${n}</button>`).join('')}</div></section>
-    <section class="panel"><div class="phead"><h2>Field guide</h2><small>Tap a monster to read its entry</small></div>${groups}
-      <div class="ladder"><div class="k">How research works</div><p class="sm dim" style="margin:4px 0 8px">The more of a monster you defeat, the more its entry reveals. Every new entry also pays a few coins. Bosses are studied faster.</p><div class="lads">${ladder}</div></div></section>`;
+    <section class="panel"><div class="phead"><h2>Field guide</h2></div>${groups}
+      <div class="ladder"><div class="k">How research works</div><p class="sm dim" style="margin:4px 0 8px">Each new entry pays a few coins. Bosses are studied faster.</p><div class="lads">${ladder}</div></div></section>`;
 };
 
 /* ---------- one monster's entry ---------- */

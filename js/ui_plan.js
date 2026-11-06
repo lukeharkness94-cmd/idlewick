@@ -66,7 +66,7 @@ UI.abilityPanel = () => {
   return `<section class="panel"><div class="phead"><h2>Abilities</h2><small class="mono">${on.length} / ${slots} slots</small></div><div class="abils">${D.ABIL.map(a => {
     const unl = DQ.abilUnlocked(a), sel = on.includes(a.id), active = DQ.ability(a.id), why = !unl ? `${D.SK[a.skill].name} ${a.lvl}` : sel && !active ? (a.needShield && !S().equip.shield ? 'needs a shield' : `${a.style} only`) : '';
     return `<button class="abil ${sel ? 'on' : ''} ${unl ? '' : 'locked'} ${sel && !active ? 'idle' : ''}" data-do="abil" data-a="${a.id}" data-tip="text:${esc(a.name)}: ${esc(a.text)}">${ico(unl ? a.ic : 'lock')}<span><b>${a.name}</b><small>${why || (a.style ? DQ.cap(a.style) : 'Any style')}</small></span></button>`;
-  }).join('')}</div><p class="hint">Abilities trigger on their own. Slot the ones that counter what you are fighting. A third slot opens at combat level 40.</p></section>`;
+  }).join('')}</div><p class="hint">A third slot opens at combat level 40.</p></section>`;
 };
 UI.forecastResults = {};
 const showForecast = (id, text) => {
@@ -91,7 +91,7 @@ UI.bossIntel = m => {
   const B = D.BOSSMECH[m.id]; if (!B) return '';
   const w = DQ.weakOf(m), mu = DQ.matchup(m);
   const alternatives = Object.keys({ ...S().inv, ...S().bank }).filter(id => D.ITEMS[id].slot && D.ITEMS[id].slot !== 'ammo' && DQ.canEquip(id).ok && S().equip[D.ITEMS[id].slot] !== id);
-  const compare = alternatives.length ? `<section data-reference="true"><h3>Compare an equipment change</h3><p class="sm">Simulate your current build and one item you own, using your current health and food. Results are estimates from separate trial fights.</p><div class="btnrow wrap">${alternatives.map(id => `<button class="btn sm" data-do="comparegear" data-a="${m.id}" data-b="${id}">${esc(D.ITEMS[id].name)}</button>`).join('')}</div></section>` : '';
+  const compare = alternatives.length ? `<section data-reference="true"><h3>Compare an equipment change</h3><p class="sm">Simulated with your current health and food.</p><div class="btnrow wrap">${alternatives.map(id => `<button class="btn sm" data-do="comparegear" data-a="${m.id}" data-b="${id}">${esc(D.ITEMS[id].name)}</button>`).join('')}</div></section>` : '';
   return `<div class="intel"><div class="k">Prepare for this fight</div><p class="sm">Health ${Math.ceil(S().hp)} / ${DQ.maxHp()} · ${DQ.supplyInfo({kind:'fight'})?.label || 'No supplies'}. Auto-eat ${S().settings.autoEat ? 'on' : 'off'}.</p>${UI.prepSteps(m)}<p class="sm">${B.text}</p>${UI.specialLine(m)}
     ${m.id === 'hollowking' ? '' : `<div class="chips">${w.weak.map(t => dchip(t, 'weak')).join('')}${w.resist.map(t => dchip(t, 'res')).join('')}</div>`}
     <div class="sm"><b>Counters:</b> ${B.counters.join(' · ')}</div>

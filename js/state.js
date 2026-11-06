@@ -249,6 +249,8 @@ DQ.unequip = slot => {
   const id = S.equip[slot]; if (!id) return false;
   delete S.equip[slot]; DQ.give(id, 1); DQ.invDirty = true; return true;
 };
+/* keys of the unique effects on equipped gear (data.js `unique`) */
+DQ.uniqueFx = () => { const o = {}; for (const [slot, id] of Object.entries(DQ.S.equip || {})) { const u = slot !== 'ammo' && D.ITEMS[id] && D.ITEMS[id].unique; if (u) o[u.key] = true; } return o; };
 DQ.bonus = () => {
   const out = { atk: 0, str: 0, def: 0, rng: 0, rngStr: 0, mag: 0 };
   const add = id => { const b = D.ITEMS[id] && D.ITEMS[id].b; if (b) for (const k in b) out[k] += b[k]; };

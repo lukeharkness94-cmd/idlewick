@@ -226,18 +226,29 @@ UI.detail = (id, from) => {
   let h = origDetail(id, from); const ok = id && DQ.have(id), c = ok ? UI.compareHtml(id) : '';
   if (c) h = h.replace('<div class="btnrow wrap">', c + '<div class="btnrow wrap">');
   if (ok && D.ITEMS[id].flavour) h = h.replace('<div class="btnrow wrap">', `<p class="flavour">${esc(D.ITEMS[id].flavour)}</p><div class="btnrow wrap">`);
-  if (ok) { h = h.replace('<div class="detail">', `<div class="detail"><button class="dt-x iconb sm" data-do="desel" aria-label="Close">${ico('close')}</button>`); if (D.ITEMS[id].slot && !DQ.canEquip(id).equipped) h = h.replace(/<\/div>$/, '<small class="dim dt-tip">Tip: double-click (or double-tap) an item to equip it.</small></div>'); }
+  if (ok) { h = h.replace('<div class="detail">', `<div class="detail"><button class="dt-x iconb sm" data-do="desel" aria-label="Close">${ico('close')}</button>`);  }
   return h;
 };
 const origTip = DQ.tips.item;
-DQ.tips.item = id => { const h = origTip(id), it = D.ITEMS[id]; if (!h || !it || !(it.slot || it.type === 'tool') || S().equip[it.slot] === id) return h; const c = (UI.compareLine(id) || '') + (it.slot && DQ.have(id) && DQ.canEquip(id).ok ? '<div class="dim">Double-click to equip</div>' : ''); return c ? h.replace('<div class="dim">Worth', c + '<div class="dim">Worth') : h; };
+DQ.tips.item = id => { const h = origTip(id), it = D.ITEMS[id]; if (!h || !it || !(it.slot || it.type === 'tool') || S().equip[it.slot] === id) return h; const c = (UI.compareLine(id) || '') + ''; return c ? h.replace('<div class="dim">Worth', c + '<div class="dim">Worth') : h; };
 const tipBase = DQ.tips.item;
 DQ.tips.item = id => { const h = tipBase(id), f = D.ITEMS[id] && D.ITEMS[id].flavour; return f && h ? h.replace('<div class="dim">Worth', `<div class="flav">${esc(f)}</div><div class="dim">Worth`) : h; };
+/* unique effects: named in tooltips, and compared side by side when choosing gear */
+UI.uniqueLine = (it, cls = '') => it && it.unique ? `<div class="unique-fx ${cls}">${ico('star')}<b>${esc(it.unique.name)}</b> <span>${esc(it.unique.text)}</span></div>` : '';
+const tipUnique = DQ.tips.item;
+DQ.tips.item = id => { const h = tipUnique(id), it = D.ITEMS[id]; return h && it && it.unique ? h.replace('<div class="dim">Worth', `${UI.uniqueLine(it)}<div class="dim">Worth`) : h; };
+const cmpUnique = UI.compareHtml;
+UI.compareHtml = id => {
+  const h = cmpUnique(id), it = D.ITEMS[id]; if (!h || !it || !it.slot) return h;
+  const cur = D.ITEMS[S().equip[it.slot]]; if (!(it.unique || (cur && cur.unique)) || S().equip[it.slot] === id) return h;
+  const rows = `<div class="unique-compare"><div class="k">Effects</div><div><small>Equipped</small>${cur && cur.unique ? UI.uniqueLine(cur) : '<span class="dim">No special effect</span>'}</div><div><small>This item</small>${it.unique ? UI.uniqueLine(it) : '<span class="dim">No special effect</span>'}</div></div>`;
+  return h.replace(/<\/div>$/, rows + '</div>');
+};
 
 
 /* ---------- Picking an item: double-click or double-tap equips, and the details stay in reach ---------- */
 UI.selbarHtml = (id, from) => {
-  if (!id || !DQ.have(id)) return `<span class="sb-hint dim">${ico('info')} Select an item to equip, use, sell or bank.</span>`;
+  if (!id || !DQ.have(id)) return `<span class="sb-hint dim"></span>`;
   const it = D.ITEMS[id], bank = from === 'bank', n = bank ? (S().bank[id] || 0) : (S().inv[id] || 0), can = it.slot ? DQ.canEquip(id) : null;
   const line = it.slot ? `<span>${UI.statLine(it.b)}</span>${UI.compareLine(id)}` : it.heal ? `<span class="dim">Heals ${it.heal} health</span>` : `<span class="dim">${esc(DQ.cap(it.type))}</span>`;
   const b = [];
