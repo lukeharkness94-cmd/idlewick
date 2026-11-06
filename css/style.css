@@ -2018,3 +2018,12 @@ img.pxscene{width:100%;height:auto!important;aspect-ratio:160/90;object-fit:cont
 .trophy{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px;border:1px solid var(--line);border-radius:10px;text-align:center}
 .trophy.hung{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 10%,transparent)}
 .trophy small{color:var(--dim)}
+/* Skill level-up in the left menu: a light sweep across the row and a bounce of the level number */
+.dk.lvl-pop,#combatnav .combat-entry.lvl-pop{position:relative;overflow:hidden;animation:lvlRowGlow 1.6s ease-out var(--pop-delay,0ms) both}
+.dk.lvl-pop::after,#combatnav .combat-entry.lvl-pop::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 30%,color-mix(in srgb,var(--c) 55%,#fff6c0) 50%,transparent 70%);transform:translateX(-120%);animation:lvlSweep 1s ease-out var(--pop-delay,0ms) both}
+.dk.lvl-pop [data-b^="lvl:"],#combatnav .combat-entry.lvl-pop .combat-menu-level{display:inline-block;animation:lvlBounce .7s cubic-bezier(.3,1.6,.5,1) calc(var(--pop-delay,0ms) + .15s) both}
+@keyframes lvlSweep{to{transform:translateX(120%)}}
+@keyframes lvlRowGlow{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 70%,transparent);border-color:var(--c)}100%{box-shadow:0 0 0 10px transparent}}
+@keyframes lvlBounce{0%{transform:scale(1)}40%{transform:scale(1.6);color:var(--c)}100%{transform:scale(1)}}
+.calm .dk.lvl-pop,.calm .dk.lvl-pop::after,.calm .dk.lvl-pop [data-b^="lvl:"],.calm #combatnav .combat-entry.lvl-pop,.calm #combatnav .combat-entry.lvl-pop::after,.calm #combatnav .combat-entry.lvl-pop .combat-menu-level{animation:none!important}
+@media (prefers-reduced-motion:reduce){.dk.lvl-pop,.dk.lvl-pop::after,.dk.lvl-pop [data-b^="lvl:"],#combatnav .combat-entry.lvl-pop,#combatnav .combat-entry.lvl-pop::after,#combatnav .combat-entry.lvl-pop .combat-menu-level{animation:none!important}}

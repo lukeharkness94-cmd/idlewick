@@ -25,10 +25,23 @@ const hubDefault = h => {
   return h.pages[0];
 };
 
+/* A skill row in the left menu celebrates its level-up: a light sweep and a bounce of the level number (CSS, on the
+   browser's own timeline). Re-renders during the animation resume it where it was instead of restarting it. */
+UI.levelPop = {};
+let lastCombat = null;
+DQ.on && DQ.on('levelup', sk => {
+  const now = Date.now(); UI.levelPop[sk] = now;
+  const c = DQ.combatLvl(); if (lastCombat != null && c > lastCombat) UI.levelPop.combat = now; lastCombat = c;
+  const row = document.querySelector(`#skilldock .dk[data-a="${D.SK[sk] ? D.SK[sk].page : sk}"]`);
+  if (row) { row.classList.remove('lvl-pop'); void row.offsetWidth; row.style.setProperty('--pop-delay', '0ms'); row.classList.add('lvl-pop'); }
+  if (UI.levelPop.combat === now) { const e = document.querySelector('#combatnav .combat-entry'); if (e) { e.classList.remove('lvl-pop'); void e.offsetWidth; e.style.setProperty('--pop-delay', '0ms'); e.classList.add('lvl-pop'); } }
+});
 UI.renderRail = () => {
+  if (lastCombat == null && DQ.S) lastCombat = DQ.combatLvl();
   const cur = UI.hubOf(UI.view).id;
   $('#rail').innerHTML = `<div class="brand">${ico('candle')}<b>Idlewick</b></div>` + HUBS.filter(h=>h.id!=='combat').map(h => `<button class="hub ${h.id === cur ? 'on' : ''}" data-do="hub" data-a="${h.id}" aria-label="${h.name}">${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${h.id}"></i></button>`).join('');
-  $('#combatnav').innerHTML=`<button class="hub combat-entry ${cur==='combat'?'on':''}" data-do="hub" data-a="combat" aria-label="Combat">${ico('attack')}<span>Combat</span><b class="combat-menu-level mono" data-b="combat">${DQ.combatLvl()}</b><i class="hubdot" data-b="hubdot:combat"></i><span class="combat-menu-bar bar" data-tip="text:Progress to the next combat level"><i data-b="combatbar" style="width:${DQ.combatProgress().pct.toFixed(1)}%"></i></span></button>`;
+  const cpop=UI.levelPop.combat,cpopping=cpop&&Date.now()-cpop<1600;
+  $('#combatnav').innerHTML=`<button class="hub combat-entry ${cur==='combat'?'on':''} ${cpopping?'lvl-pop':''}" ${cpopping?`style="--c:var(--brass);--pop-delay:-${Date.now()-cpop}ms"`:''} data-do="hub" data-a="combat" aria-label="Combat">${ico('attack')}<span>Combat</span><b class="combat-menu-level mono" data-b="combat">${DQ.combatLvl()}</b><i class="hubdot" data-b="hubdot:combat"></i><span class="combat-menu-bar bar" data-tip="text:Progress to the next combat level"><i data-b="combatbar" style="width:${DQ.combatProgress().pct.toFixed(1)}%"></i></span></button>`;
   UI.upd();
 };
 UI.B.notice = (e, page) => {
@@ -67,7 +80,8 @@ UI.renderDock = () => {
   el.innerHTML = `<div class="dk-h">Skills</div>` + D.SKILLS.filter(s => s.group !== 'combat').map(s => {
     const lock = !DQ.skillUnlocked(s.id);
     const lv=DQ.lvl(s.id),need=lv>=99?0:Math.max(0,D.XPF[lv+1]-(S().xp[s.id]||0));
-    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''}" style="--c:${s.col}" data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span>${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span><small data-b="toNext:${s.id}">${lv>=99?'Maximum level':`${fmt(need)} XP to level ${lv+1}`}</small>`}</span>${!lock && ap === s.page ? '<i class="dk-live"></i>' : ''}<span class="notice-badge" data-b="notice:${s.page}" hidden></span></button>`;
+    const pop = UI.levelPop[s.id], popping = pop && Date.now() - pop < 1600;
+    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span>${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span><small data-b="toNext:${s.id}">${lv>=99?'Maximum level':`${fmt(need)} XP to level ${lv+1}`}</small>`}</span>${!lock && ap === s.page ? '<i class="dk-live"></i>' : ''}<span class="notice-badge" data-b="notice:${s.page}" hidden></span></button>`;
   }).join('');
   UI.upd();
 };

@@ -439,6 +439,12 @@ test('companion tricks: halved passives, tricks fire through the real engine, fo
  own('bogwisp');S.beast.kills.goblin=1;const r=q.research(D.MON.goblin);q.setPet(null);assert.equal(r.rank,q.research(D.MON.goblin).rank+1,'wisp reveals one stage early');
  for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[20];own('gobbo');S.hp=q.maxHp();const before=JSON.stringify(S);q.forecast('goblin');assert.equal(JSON.stringify(S),before,'forecast with a trick leaves the save untouched');
 });
+test('combat progress bar starts empty for a new hero and measures later levels from the level itself',()=>{
+ const {q}=harness();const S=q.S,D=q.data;
+ assert.equal(q.combatLvl(),3);assert.equal(Math.round(q.combatProgress().pct),0,'fresh hero starts at 0%, not 40%');
+ S.xp.attack=D.XPF[2];const mid=q.combatProgress().pct;assert.ok(mid>0&&mid<100,'fills as you train');
+ S.xp.attack=D.XPF[3];S.xp.strength=D.XPF[2];assert.equal(q.combatLvl(),4);assert.equal(Math.round(q.combatProgress().pct),38,'combat 4.375 shows 38%: measured from level 4 itself');
+});
 test('restoration: new Willowbrook projects, regional materials, villager voices and legacy bonuses',()=>{
  const {q,load}=harness();load('fx');load('routes');const S=q.S,D=q.data;S.coins=1e6;
  const wb=q.projectsForTown('willowbrook').map(([id])=>id);for(const id of ['well','inn','forge','garden','library','watchtower'])assert.ok(wb.includes(id),id);

@@ -2093,6 +2093,15 @@ img.pxscene{width:100%;height:auto!important;aspect-ratio:160/90;object-fit:cont
 .trophy{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px;border:1px solid var(--line);border-radius:10px;text-align:center}
 .trophy.hung{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 10%,transparent)}
 .trophy small{color:var(--dim)}
+/* Skill level-up in the left menu: a light sweep across the row and a bounce of the level number */
+.dk.lvl-pop,#combatnav .combat-entry.lvl-pop{position:relative;overflow:hidden;animation:lvlRowGlow 1.6s ease-out var(--pop-delay,0ms) both}
+.dk.lvl-pop::after,#combatnav .combat-entry.lvl-pop::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 30%,color-mix(in srgb,var(--c) 55%,#fff6c0) 50%,transparent 70%);transform:translateX(-120%);animation:lvlSweep 1s ease-out var(--pop-delay,0ms) both}
+.dk.lvl-pop [data-b^="lvl:"],#combatnav .combat-entry.lvl-pop .combat-menu-level{display:inline-block;animation:lvlBounce .7s cubic-bezier(.3,1.6,.5,1) calc(var(--pop-delay,0ms) + .15s) both}
+@keyframes lvlSweep{to{transform:translateX(120%)}}
+@keyframes lvlRowGlow{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 70%,transparent);border-color:var(--c)}100%{box-shadow:0 0 0 10px transparent}}
+@keyframes lvlBounce{0%{transform:scale(1)}40%{transform:scale(1.6);color:var(--c)}100%{transform:scale(1)}}
+.calm .dk.lvl-pop,.calm .dk.lvl-pop::after,.calm .dk.lvl-pop [data-b^="lvl:"],.calm #combatnav .combat-entry.lvl-pop,.calm #combatnav .combat-entry.lvl-pop::after,.calm #combatnav .combat-entry.lvl-pop .combat-menu-level{animation:none!important}
+@media (prefers-reduced-motion:reduce){.dk.lvl-pop,.dk.lvl-pop::after,.dk.lvl-pop [data-b^="lvl:"],#combatnav .combat-entry.lvl-pop,#combatnav .combat-entry.lvl-pop::after,#combatnav .combat-entry.lvl-pop .combat-menu-level{animation:none!important}}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -6705,11 +6714,16 @@ DQ.combatLvl = () => {
   return Math.floor(base + Math.max(m, r, g));
 };
 /* Progress towards the next combat level: the formula evaluated with fractional skill levels, plus the cheapest single-skill route. */
+let startCache = null;
+const combatStart = () => { if (startCache == null) { const f = DQ.newState(), L = {}; ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].forEach(k => { let l = 1; while (l < 99 && (f.xp[k] || 0) >= D.XPF[l + 1]) l++; L[k] = l; }); startCache = combatFrom(L); } return startCache; };
 const combatFrom = L => { const base = .25 * (L.defence + L.hitpoints); return base + Math.max(.325 * (L.attack + L.strength), .325 * Math.floor(1.5 * L.ranged), .325 * Math.floor(1.5 * L.magic)); };
 DQ.combatProgress = () => {
   const ids = ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'], L = {}, F = {};
   ids.forEach(k => { L[k] = DQ.lvl(k); F[k] = L[k] + (L[k] >= 99 ? 0 : DQ.pctNext(k) / 100); });
-  const lvl = DQ.combatLvl(), next = lvl + 1, cont = Math.max(lvl, combatFrom(F)), pct = lvl >= 126 ? 100 : Math.min(99, Math.max(0, (cont - lvl) * 100));
+  /* A new hero starts part-way through combat 3 (Health starts at 10), so the first level's bar is measured from that
+     starting point: it begins empty instead of at 40%. Every later level is measured from the level itself. */
+  const lvl = DQ.combatLvl(), next = lvl + 1, cont = Math.max(lvl, combatFrom(F)), start = combatStart(), base = lvl === Math.floor(start) ? Math.max(lvl, start) : lvl;
+  const pct = lvl >= 126 ? 100 : Math.min(99, Math.max(0, (cont - base) / (next - base) * 100));
   const routes = ids.filter(k => DQ.skillUnlocked(k)).map(k => { const T = { ...L }; while (T[k] < 99 && Math.floor(combatFrom(T)) < next) T[k]++; return Math.floor(combatFrom(T)) >= next ? { skill: k, xp: Math.max(0, D.XPF[T[k]] - DQ.S.xp[k]) } : null; }).filter(Boolean).sort((a, b) => a.xp - b.xp);
   return { lvl, next, pct, best: routes[0] || null, routes };
 };
@@ -10523,10 +10537,23 @@ const hubDefault = h => {
   return h.pages[0];
 };
 
+/* A skill row in the left menu celebrates its level-up: a light sweep and a bounce of the level number (CSS, on the
+   browser's own timeline). Re-renders during the animation resume it where it was instead of restarting it. */
+UI.levelPop = {};
+let lastCombat = null;
+DQ.on && DQ.on('levelup', sk => {
+  const now = Date.now(); UI.levelPop[sk] = now;
+  const c = DQ.combatLvl(); if (lastCombat != null && c > lastCombat) UI.levelPop.combat = now; lastCombat = c;
+  const row = document.querySelector(`#skilldock .dk[data-a="${D.SK[sk] ? D.SK[sk].page : sk}"]`);
+  if (row) { row.classList.remove('lvl-pop'); void row.offsetWidth; row.style.setProperty('--pop-delay', '0ms'); row.classList.add('lvl-pop'); }
+  if (UI.levelPop.combat === now) { const e = document.querySelector('#combatnav .combat-entry'); if (e) { e.classList.remove('lvl-pop'); void e.offsetWidth; e.style.setProperty('--pop-delay', '0ms'); e.classList.add('lvl-pop'); } }
+});
 UI.renderRail = () => {
+  if (lastCombat == null && DQ.S) lastCombat = DQ.combatLvl();
   const cur = UI.hubOf(UI.view).id;
   $('#rail').innerHTML = `<div class="brand">${ico('candle')}<b>Idlewick</b></div>` + HUBS.filter(h=>h.id!=='combat').map(h => `<button class="hub ${h.id === cur ? 'on' : ''}" data-do="hub" data-a="${h.id}" aria-label="${h.name}">${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${h.id}"></i></button>`).join('');
-  $('#combatnav').innerHTML=`<button class="hub combat-entry ${cur==='combat'?'on':''}" data-do="hub" data-a="combat" aria-label="Combat">${ico('attack')}<span>Combat</span><b class="combat-menu-level mono" data-b="combat">${DQ.combatLvl()}</b><i class="hubdot" data-b="hubdot:combat"></i><span class="combat-menu-bar bar" data-tip="text:Progress to the next combat level"><i data-b="combatbar" style="width:${DQ.combatProgress().pct.toFixed(1)}%"></i></span></button>`;
+  const cpop=UI.levelPop.combat,cpopping=cpop&&Date.now()-cpop<1600;
+  $('#combatnav').innerHTML=`<button class="hub combat-entry ${cur==='combat'?'on':''} ${cpopping?'lvl-pop':''}" ${cpopping?`style="--c:var(--brass);--pop-delay:-${Date.now()-cpop}ms"`:''} data-do="hub" data-a="combat" aria-label="Combat">${ico('attack')}<span>Combat</span><b class="combat-menu-level mono" data-b="combat">${DQ.combatLvl()}</b><i class="hubdot" data-b="hubdot:combat"></i><span class="combat-menu-bar bar" data-tip="text:Progress to the next combat level"><i data-b="combatbar" style="width:${DQ.combatProgress().pct.toFixed(1)}%"></i></span></button>`;
   UI.upd();
 };
 UI.B.notice = (e, page) => {
@@ -10565,7 +10592,8 @@ UI.renderDock = () => {
   el.innerHTML = `<div class="dk-h">Skills</div>` + D.SKILLS.filter(s => s.group !== 'combat').map(s => {
     const lock = !DQ.skillUnlocked(s.id);
     const lv=DQ.lvl(s.id),need=lv>=99?0:Math.max(0,D.XPF[lv+1]-(S().xp[s.id]||0));
-    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''}" style="--c:${s.col}" data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span>${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span><small data-b="toNext:${s.id}">${lv>=99?'Maximum level':`${fmt(need)} XP to level ${lv+1}`}</small>`}</span>${!lock && ap === s.page ? '<i class="dk-live"></i>' : ''}<span class="notice-badge" data-b="notice:${s.page}" hidden></span></button>`;
+    const pop = UI.levelPop[s.id], popping = pop && Date.now() - pop < 1600;
+    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span>${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span><small data-b="toNext:${s.id}">${lv>=99?'Maximum level':`${fmt(need)} XP to level ${lv+1}`}</small>`}</span>${!lock && ap === s.page ? '<i class="dk-live"></i>' : ''}<span class="notice-badge" data-b="notice:${s.page}" hidden></span></button>`;
   }).join('');
   UI.upd();
 };
