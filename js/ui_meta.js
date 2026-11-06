@@ -199,7 +199,9 @@ UI.toolsPanel = () => {
   return `<section data-reference="true" class="panel toolsp" id="inventory-tools"><h3>Gathering tools</h3><p class="hint">Your best owned tool is used automatically.</p><div class="toolrows">${rows}</div></section>`;
 };
 const origChar = UI.V.character;
-UI.V.character = () => { const h = origChar().replace('<div class="slots" id="packgrid">', '<div class="selbar" id="selbar"></div><div class="slots" id="packgrid">'), tail = '</section></div></div>', i = h.lastIndexOf(tail); return i < 0 ? h : h.slice(0, i + 10) + UI.toolsPanel() + h.slice(i + 10); };
+UI.V.character = () => { const h = origChar().replace('<div class="slots" id="packgrid">', '<div class="selbar" id="selbar"></div><div class="slots" id="packgrid">'), tail = '</section></div></div>', i = h.lastIndexOf(tail); return h; };
+/* Gathering tools have their own light view in the Hero section (Hero → Tools), so the inventory stays about items. */
+UI.V.tools = () => UI.toolsPanel();
 
 
 /* ---------- Item comparison in the item panel and in tooltips ---------- */

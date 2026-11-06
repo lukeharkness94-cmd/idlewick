@@ -74,6 +74,14 @@ const fs=require('node:fs');
     DQ.go('map');const left=document.querySelector('.explore-left')?.innerText||'';for(let i=0;i<5;i++)DQ.closeModal&&DQ.closeModal();document.querySelectorAll('.note').forEach(n=>n.remove());return {badge,after,gear,order,left};});
    assert.ok(r.badge,'New badge shows after an unlock');assert.ok(!r.after,'New badge clears once the page is opened');assert.equal(r.gear,0,'no weapon in work scenes');
    assert.ok(r.order.every((v,i,a)=>v>=0&&(!i||v>a[i-1])),'quest card reads name, story, rewards, action: '+r.order);assert.match(r.left,/quests/);assert.match(r.left,/Exploration/);}
+  // Combat: the preview, the preparation brief and the start control describe the same encounter; the eat stepper works.
+  {const r=await page.evaluate(()=>{const S=DQ.S;S.beast.kills.goblin=1;DQ.ui.taskChoice.combat='goblin';DQ.go('combat');DQ.ui.render(true);
+    const nm=document.querySelector('#av-foe')?.closest('.side')?.querySelector('.nm')?.innerText||'',brief=document.querySelector('.battle-brief h3')?.innerText||'',ctl=document.querySelector('.arena-ctl')?.innerText||'',danger=document.querySelector('.battle-brief .danger')?.innerText||'';
+    const at=S.settings.eatAt;DQ.ui.DO.eatstep('10');const after=S.settings.eatAt;S.settings.eatAt=at;
+    S.journey='boss';S.journeyTarget='grubnash';const was=S.towns.willowbrook.boss;S.towns.willowbrook.boss=true;DQ.go('overview');DQ.ui.render(true);const home=document.querySelector('.journey')?.innerText||'';S.towns.willowbrook.boss=was;
+    return {nm,brief,ctl,danger,at,after,home};});
+   assert.match(r.nm,/Goblin/);assert.match(r.brief,/Goblin/);assert.match(r.ctl,/Goblin/);assert.match(r.danger,/danger/i);assert.equal(r.after,Math.min(70,r.at+10));
+   assert.match(r.home,/Goal complete/i);assert.match(r.home,/Choose another goal/);}
   // Viewing combat must never display another activity's progress as an attack timer.
   await page.evaluate(()=>{DQ.paused=true;DQ.startAct('fish','shrimp',{quiet:true});DQ.act.t0=Date.now()-DQ.act.dur/2;DQ.go('combat');DQ.ui.render(false);});
   assert.equal(await page.evaluate(()=>DQ.act.kind),'fish');

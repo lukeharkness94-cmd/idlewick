@@ -91,13 +91,13 @@ UI.mapSVG = sel => {
   const towns = D.TOWNS.map(t => {
     const open = DQ.townUnlocked(t.id), boss = DQ.S.towns[t.id] && DQ.S.towns[t.id].boss, isSel = t.id === sel, isCur = t.id === cur;
     const spr = DQ.spr24Url('town_' + t.id);
-    return `<g class="mt ${open ? '' : 'locked'} ${isSel ? 'sel' : ''}" transform="translate(${t.x} ${t.y})" data-do="mapsel" data-a="${t.id}" tabindex="0" role="button" aria-label="${esc(t.name)}${open ? '' : ', locked'}">
+    return `<g class="mt ${open ? '' : 'locked'} ${isSel ? 'sel' : ''}" transform="translate(${t.x} ${t.y})" data-do="mapsel" data-a="${t.id}" tabindex="0" role="button" aria-label="${open ? esc(t.name) : 'Unknown road'}${open ? '' : ', locked'}">
       <rect x="-26" y="-26" width="52" height="52" fill="transparent"/>
       ${isSel ? `<g class="selbr" fill="#f3d58a"><rect x="-30" y="-30" width="12" height="4"/><rect x="-30" y="-30" width="4" height="12"/><rect x="18" y="-30" width="12" height="4"/><rect x="26" y="-30" width="4" height="12"/><rect x="-30" y="26" width="12" height="4"/><rect x="-30" y="18" width="4" height="12"/><rect x="18" y="26" width="12" height="4"/><rect x="26" y="18" width="4" height="12"/></g>` : ''}
       <image href="${spr}" x="-24" y="-34" width="48" height="48" class="pxsvg ${open ? '' : 'dimmed'}"/>
       ${open ? '' : `<g style="color:#f3e6c0"><use href="#i-lock" x="-9" y="-6" width="18" height="18"/></g>`}
       <text y="44" text-anchor="middle" class="ml">${open ? esc(t.name) : '???'}</text>
-      <text y="62" text-anchor="middle" class="ms">${open ? (boss ? '★ Boss defeated' : 'Boss awaits') : 'Unknown road'}</text>
+      ${open ? `<text y="62" text-anchor="middle" class="ms">${boss ? '★ Boss defeated' : 'Boss awaits'}</text>` : ''}
       ${isCur ? `<rect x="-24" y="20" width="48" height="4" fill="#f3d58a" class="curbar"/>` : ''}</g>`;
   }).join('');
   const hero = DQ.heroUrl(L, eq.body ? I[eq.body].col : L.tunic, eq.head ? I[eq.head].col : undefined);

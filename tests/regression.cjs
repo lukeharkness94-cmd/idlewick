@@ -468,6 +468,13 @@ test('every town keeps a quest within reach from its first quest to its boss, an
   assert.ok(adv.length>=5,`${t.id} has ${adv.length} quests`);}
  assert.equal(new Set(D.QUESTS.map(x=>x.id)).size,D.QUESTS.length,'quest ids are unique');
 });
+test('a chosen boss goal completes when that boss falls and is never silently replaced',()=>{
+ const {q}=harness();const S=q.S;q.ui.DO.destination&&0;
+ S.journey='boss';delete S.journeyTarget;assert.equal(q.goalTarget().id,'grubnash');assert.equal(q.goalDone(),false);
+ S.towns.willowbrook.boss=true;assert.equal(q.goalTarget().id,'grubnash','still the boss you chose');assert.equal(q.goalDone(),true);
+ S.journeyTarget=null;assert.equal(q.goalTarget().id,'oldtusk','an older save adopts the next undefeated boss');assert.equal(q.goalDone(),false);
+ S.journey='house';S.house.owned=false;assert.equal(q.goalDone('house'),false);S.house.owned=true;assert.equal(q.goalDone('house'),true);
+});
 test('unique gear: effects are real, first copies have a bad-luck guarantee, stats stay modest',()=>{
  const {q}=harness();const S=q.S,D=q.data;
  const uniques=Object.values(D.ITEMS).filter(it=>it.unique);assert.ok(uniques.length>=19,'11 new uniques plus 8 boss trophies with effects');

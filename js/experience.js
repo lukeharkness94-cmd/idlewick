@@ -20,11 +20,11 @@ UI.V.bestiary=()=>{
 Object.assign(UI.DO,{guidetown:id=>{UI.tab.guideTown=id;UI.render(false);},guidefilter:id=>{UI.tab.guideFilter=id;UI.render(false);}});
 const combat=UI.V.combat;
 UI.V.combat=()=>{
- const html=combat(),m=D.MON[Q.fight?.id]||D.MONLIST.find(m=>m.town===S().town&&!m.boss),known=Q.weakKnown(m);
+ const html=combat(),m=Q.combatFocus(),known=Q.weakKnown(m),seen=!!(Q.fight&&Q.fight.id===m.id)||(S().beast.kills[m.id]||0)>0,dg=Q.dangerOf(m);
  const needs=t=>t==='pierce'?'ranged':['fire','frost','storm','aether'].includes(t)?'magic':null;
  const counters=known?Q.weakOf(m).weak.map(t=>{const sk=needs(t),locked=sk&&!Q.skillUnlocked(sk);return `${D.DTYPES[t].name}: ${ {stab:'dagger',slash:'sword',crush:'warhammer',pierce:'bow and arrows',fire:'fire spell',frost:'frost spell',storm:'storm spell',aether:'aether spell'}[t]}${locked?` (${D.SK[sk].name} not learned yet)`:''}`;}).join(' · '):'';
  const tips=known?Q.matchup(m).slice(0,2).map(([kind,line])=>`<span class="${kind==='good'?'ok':kind==='bad'?'bad':'dim'}">${esc(line)}</span>`).join(''):`<span>Defeat this creature to reveal its strengths and weaknesses in the field guide.</span>`;
- const intel=`<section class="panel battle-brief"><div class="phead"><h3>${esc(m.name)} · preparation</h3><button class="btn sm" data-do="guide" data-a="${m.id}">Field guide</button></div><div class="battle-facts"><span>Level <b>${m.cl}</b></span><span>Health <b>${m.hp}</b></span><span>Hits up to <b>${m.max}</b></span></div><div class="battle-advice">${counters?`<span class="ok">Try ${esc(counters)}</span>`:''}${tips}</div><div class="btnrow"><button class="btn sm" data-do="go" data-a="character">Equipment</button></div></section>`;
+ const intel=`<section class="panel battle-brief"><div class="phead"><h3>${seen?esc(m.name):'Unknown creature'} · preparation</h3><button class="btn sm" data-do="guide" data-a="${m.id}">Field guide</button></div><p class="danger ${dg.key}"><b>${dg.label}</b> · ${esc(dg.why)}</p><div class="battle-facts"><span>Level <b>${m.cl}</b></span><span>Health <b>${m.hp}</b></span><span>Hits up to <b>${m.max}</b></span></div><div class="battle-advice">${counters?`<span class="ok">Try ${esc(counters)}</span>`:''}${tips}</div><div class="btnrow"><button class="btn sm" data-do="go" data-a="character">Equipment</button></div></section>`;
  return html.replace('<!--battle-brief-->',intel);
 };
 const render=UI.render;

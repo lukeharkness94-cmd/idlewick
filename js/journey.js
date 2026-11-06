@@ -198,17 +198,34 @@ DQ.journeyDoneWhen = next => {
   return '';
 };
 /* the boss destination names the boss you are actually heading for */
-const destLabel = id => { if (id === 'boss' && S().towns.willowbrook && S().towns.willowbrook.boss && DQ.regionBoss) { const b = DQ.regionBoss(); return b ? `Defeat ${b.boss.short || b.name}` : 'Every boss defeated'; } return destinations[id] || destinations.boss; };
+/* The chosen boss goal is fixed when you choose it (S().journeyTarget), so defeating that boss completes the goal
+   instead of silently moving it on. Older saves adopt the next undefeated boss the first time this is read. */
+DQ.goalTarget = () => { const st = S(); if (!st.journeyTarget || !D.MON[st.journeyTarget]) { const b = DQ.regionBoss && DQ.regionBoss(); st.journeyTarget = b ? b.id : 'grubnash'; } return D.MON[st.journeyTarget]; };
+const bossDown = m => !!(m && S().towns[m.town] && S().towns[m.town].boss);
+DQ.goalDone = (id = S().journey || 'boss') => id === 'boss' ? bossDown(DQ.goalTarget()) : id === 'house' ? !!(S().house && S().house.owned) : id === 'village' ? !nextVillageProject() : D.PROJECTS[id] ? !!S().projects[id] : false;
+const destLabel = id => { if (id === 'boss') { const b = (S().journey || 'boss') === 'boss' ? DQ.goalTarget() : DQ.regionBoss(); return b ? `Defeat ${b.boss.short || b.name}` : 'Every boss defeated'; } return destinations[id] || destinations.boss; };
 const fresh = () => DQ.advLvl() < 5 && !(S().towns.willowbrook && S().towns.willowbrook.boss);
 UI.journeyPanel = () => {
+  const goal = S().journey || 'boss', label = destLabel(goal);
+  if (DQ.goalDone(goal)) {
+    /* the chosen goal is finished: say so, offer the natural next goal and a way to choose another */
+    const t = goal === 'boss' ? DQ.goalTarget() : null, nextTown = t && D.TOWNS[D.TOWN[t.town].idx + 1], bq = t && D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === t.id)), claim = bq && DQ.questState(bq) === 'ready';
+    const nb = DQ.regionBoss(), detail = goal === 'boss' ? `${t.name} is defeated.${nextTown ? ` ${nextTown.name} is now open.` : ''}` : goal === 'house' ? 'Your cottage is yours. Rooms and furniture add lasting bonuses.' : goal === 'village' ? 'Every Willowbrook project is complete. Their benefits are permanent.' : `${D.PROJECTS[goal].name} is complete. ${D.PROJECTS[goal].reward}`;
+    const primary = claim ? `<button class="btn primary" data-do="qclaim" data-a="${bq.id}">Claim ${esc(bq.giver)}’s reward</button>` : goal === 'boss' && nb ? `<button class="btn primary" data-do="destination" data-a="boss">Next goal: defeat ${esc(nb.boss.short || nb.name)}</button>` : '';
+    return `<section class="panel journey goal-done"><div class="phead"><div><span class="k">Goal complete</span><h2>${ico('check')} ${esc(label)}</h2></div></div>
+      <p class="journey-why">${esc(detail)}</p>
+      <div class="btnrow wrap">${primary}${nextTown && !claim && S().town !== nextTown.id ? `<button class="btn" data-do="journeytravel" data-a="${nextTown.id}">Travel to ${esc(nextTown.name)}</button>` : ''}<button class="btn" data-do="choosegoal">Choose another goal</button></div>
+      ${(g => g.length ? `<div class="also-goals"><span class="k">Also worth doing</span><ul>${g.map(x => `<li><small>${esc(x.span)}</small><button class="linkish" data-do="${x.action}" data-a="${x.a}">${esc(x.text)}</button></li>`).join('')}</ul></div>` : '')(DQ.optionalGoals ? DQ.optionalGoals() : [])}</section>`;
+  }
   const next = DQ.journeyNext(), done = DQ.journeyDoneWhen(next), firstTime = !S().seen.firstTask && DQ.totalXp() === 0;
   return `<section class="panel journey"><div class="phead"><div><span class="k">Next step</span><h2>${esc(next.title)}</h2></div></div>
     <p class="journey-why">${esc(next.detail)}</p>${done ? `<p class="journey-done">${ico('check')} ${esc(done)}</p>` : ''}
     <div class="btnrow wrap">${(() => { const running = next.action === 'journeytask' && DQ.act && DQ.act.kind === next.a && DQ.act.id === next.b; return next.action === 'journeytask' ? `<button class="btn primary" data-do="journeytask" data-a="${next.a}" data-b="${next.b || ''}">${running ? 'Open the task' : 'Start'}</button>` : actionHtml(next); })()}${D.PROJECTS[S().journey] ? pinButton(S().journey) : ''}</div>
     ${fresh() ? `<p class="journey-pause">${firstTime ? 'Pick one task at a time. It keeps working while you explore other pages or close the game, so any moment is a fine place to stop.' : 'A good place to pause: whenever a quest is claimed. Your task keeps working while you are away.'}</p>` : ''}
     ${fresh() ? '' : (g => g.length ? `<div class="also-goals"><span class="k">Also worth doing</span><ul>${g.map(x => `<li><small>${esc(x.span)}</small><button class="linkish" data-do="${x.action}" data-a="${x.a}">${esc(x.text)}</button></li>`).join('')}</ul></div>` : '')(DQ.optionalGoals())}
-    <div class="destination-picker"><span class="k">Your destination: ${esc(destLabel(S().journey))}</span><div class="destination-choices" aria-label="Choose your destination">${Object.entries(destinations).map(([id, label]) => `<button class="chip sm ${S().journey === id ? 'on' : ''}" aria-pressed="${S().journey === id}" data-do="destination" data-a="${id}">${esc(destLabel(id))}</button>`).join('')}</div></div></section>`;
+    <div class="destination-line"><span class="k">Your goal: ${esc(label)}</span><button class="btn sm" data-do="choosegoal">Change goal</button></div></section>`;
 };
+UI.DO.choosegoal = () => DQ.modal({ title: 'Choose a goal', body: `<p class="sm dim">Home keeps pointing you at one goal until it is done. Changing it never loses progress.</p><div class="goal-choices">${Object.keys(destinations).map(id => `<button class="goal-choice ${S().journey === id ? 'on' : ''}" aria-pressed="${S().journey === id}" data-do="destination" data-a="${id}"><b>${esc(id === 'boss' ? (b => b ? `Defeat ${b.boss.short || b.name}` : 'Every boss defeated')(DQ.regionBoss()) : destinations[id])}</b><small>${DQ.goalDone(id) && id !== 'boss' ? 'Complete' : esc(DQ.journeyNext(id).title)}</small></button>`).join('')}</div>`, actions: [{ label: 'Close' }] });
 UI.projectsPanel = () => {
   const town=S().town, entries=DQ.projectsForTown(town);
   const id=entries.some(([key])=>key===UI.tab.projectChoice)?UI.tab.projectChoice:entries[0][0],project=D.PROJECTS[id];
@@ -253,7 +270,7 @@ Object.assign(UI.DO, {
     if (S().projects[id]) return UI.DO.openproject(id);
     const next = DQ.journeyNext(id); UI.DO[next.action](next.a, next.b);
   },
-  destination: id => { if (!destinations[id]) return; S().journey = id; DQ.save(); if (UI.view === 'overview') UI.render(false); else DQ.go('overview'); },
+  destination: id => { if (!destinations[id]) return; S().journey = id; if (id === 'boss') { const b = DQ.regionBoss(); S().journeyTarget = b ? b.id : S().journeyTarget; } DQ.closeModal && DQ.closeModal(); DQ.save(); if (UI.view === 'overview') UI.render(false); else DQ.go('overview'); },
   journeytask: (kind, id) => { DQ.closeModal(); if (DQ.startAct(kind, id, { quiet: true })) DQ.go(DQ.actPage()); else { const page = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving', fight: 'combat' }[kind] || (kind === 'recipe' && D.RECIPES[id] ? D.SK[D.RECIPES[id].skill].page : null); if (page) { if (UI.taskChoice) UI.taskChoice[page] = id; DQ.go(page); } } },
   journeytravel: id => { DQ.closeModal(); DQ.travel(id); DQ.go('overview'); },
   projectfinish: id => { if (DQ.finishProject(id)) UI.render(false); },

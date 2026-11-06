@@ -26,7 +26,7 @@ function mapSVG(sel) {
     <g transform="translate(900 430)" opacity=".7"><circle r="22" fill="none" stroke="#6a4a2a" stroke-width="1.5"/><path d="M0-26L5 0 0 26-5 0zM-26 0L0-5 26 0 0 5z" fill="#6a4a2a"/><text y="-30" text-anchor="middle" font-size="11" fill="#6a4a2a" font-family="serif">N</text></g>`;
   const towns = D.TOWNS.map((t, i) => {
     const open = DQ.townUnlocked(t.id), boss = S().towns[t.id] && S().towns[t.id].boss, isCur = t.id === cur, isSel = t.id === sel;
-    return `<g class="mt ${open ? '' : 'locked'} ${isSel ? 'sel' : ''}" transform="translate(${t.x} ${t.y})" data-do="mapsel" data-a="${t.id}" tabindex="0" role="button" aria-label="${t.name}${open ? '' : ', locked'}">
+    return `<g class="mt ${open ? '' : 'locked'} ${isSel ? 'sel' : ''}" transform="translate(${t.x} ${t.y})" data-do="mapsel" data-a="${t.id}" tabindex="0" role="button" aria-label="${open ? t.name : 'Unknown road'}${open ? '' : ', locked'}">
       ${open ? '' : `<circle r="64" fill="#0d1215" opacity=".5" style="filter:blur(14px)"/>`}
       ${isSel ? `<circle r="34" fill="none" stroke="#f3d58a" stroke-width="2" stroke-dasharray="4 4" class="selring"/>` : ''}
       <circle r="24" fill="${open ? t.col : '#55606a'}" stroke="#2a2418" stroke-width="3"/><circle r="24" fill="none" stroke="#f3e6c0" stroke-width="1.5" opacity=".6"/>
@@ -62,7 +62,12 @@ UI.V.map = () => {
   const sel = UI.mapSel = UI.mapSel || S().town, t = D.TOWN[sel], open = DQ.townUnlocked(t.id), here = S().town === sel, boss = D.MON[t.boss], done = S().towns[sel] && S().towns[sel].boss;
   const prev = D.TOWNS[t.idx - 1], counts = [['fishing', 'fish', 'fishing spot'], ['woodcutting', 'wood', 'tree type'], ['mining', 'mine', 'ore'], ['thieving', 'thieve', 'target']].map(([sk, k, w]) => { const n = D.NODES[k].filter(x => x.town === sel).length; return n ? `<span class="rw" style="--c:${D.SK[sk].col}">${ico(sk)}${n} ${w}${n > 1 ? 's' : ''}</span>` : ''; }).join('');
   const mons = D.MONLIST.filter(m => m.town === sel && !m.boss), qn = D.QUESTS.filter(q => q.town === sel);
-  return `<section class="panel travel-controls"><div class="phead"><h2>World · Travel</h2><small class="here-chip">${ico('pin')} You are in <b>${D.TOWN[S().town].name}</b></small></div><p class="travel-help dim">Each new road opens when you defeat the boss of the town before it.</p><div class="task-controls"><label for="travel-town">Destination${UI.choiceButtons(`<select id="travel-town" data-in="travel-town">${D.TOWNS.map(town => `<option value="${town.id}" ${town.id === sel ? 'selected' : ''} ${DQ.townUnlocked(town.id) ? '' : 'disabled'}>${town.name}${town.id === S().town ? ' · You are here' : DQ.townUnlocked(town.id) ? '' : ` · Locked: defeat ${D.TOWNS[town.idx - 1] ? D.MON[D.TOWNS[town.idx - 1].boss].boss.short || D.MON[D.TOWNS[town.idx - 1].boss].name : 'its boss'}`}</option>`).join('')}</select>`)}</label><button class="btn primary" data-do="${here ? 'go' : 'travel'}" data-a="${here ? 'combat' : sel}" ${open ? '' : 'disabled'}>${here ? 'Explore combat' : open ? `Travel to ${esc(t.name)}` : 'Locked'}</button></div></section><div class="mapw"><section class="panel mappanel fancy">${UI.mapSVG(sel)}<div class="maplegend"><span><i class="lg c"></i> You are here</span></div></section>
+  /* The map is the region selector; this short list is its keyboard and screen-reader alternative, using the same
+     names the map shows (locked roads stay "Unknown road" until they open). */
+  const knownBoss = town => { const prev = D.TOWNS[town.idx - 1]; return prev && DQ.townUnlocked(prev.id) ? (D.MON[prev.boss].boss.short || D.MON[prev.boss].name) : null; };
+  const regionList = `<ul class="region-list" aria-label="Regions">${D.TOWNS.map(town => { const o = DQ.townUnlocked(town.id), h = town.id === S().town, done = S().towns[town.id] && S().towns[town.id].boss, kb = knownBoss(town);
+    return `<li><button class="region-row ${town.id === sel ? 'on' : ''} ${o ? '' : 'locked'}" data-do="mapsel" data-a="${town.id}" aria-pressed="${town.id === sel}">${ico(h ? 'pin' : done ? 'check' : o ? 'town' : 'lock')}<span><b>${o ? esc(town.name) : 'Unknown road'}</b><small>${h ? 'You are here' : done ? 'Boss defeated' : o ? 'Open road' : kb ? `Locked · defeat ${esc(kb)}` : 'Further down the road'}</small></span></button></li>`; }).join('')}</ul>`;
+  return `<section class="panel travel-controls"><div class="phead"><h2>World</h2><small class="here-chip">${ico('pin')} You are in <b>${D.TOWN[S().town].name}</b></small></div><p class="travel-help dim">Select a region on the map or in the list to preview it. Each new road opens when you defeat the boss of the town before it.</p></section><div class="mapw"><section class="panel mappanel fancy">${UI.mapSVG(sel)}<div class="maplegend"><span><i class="lg c"></i> You are here</span></div>${regionList}</section>
     <section class="panel towninfo" style="--c:${t.col}">${open ? UI.scene(t.id) : `<div class="scene fog">${ico('lock')}</div>`}
       <div class="ti-body"><span class="k">${here ? 'Current location' : open ? 'Open road' : 'Locked'}</span><h2>${open ? t.name : 'Unknown lands'}</h2><p class="dim">${open ? t.tag : 'The road is closed.'}</p>
       ${open && !here ? `<button class="btn primary travel-go" data-do="travel" data-a="${sel}">${ico('map')} Travel to ${esc(t.name)}</button>` : ''}
@@ -163,7 +168,7 @@ UI.packGrid = () => {
   return ids.map(id => { const spare = D.ITEMS[id].slot !== 'ammo' && S().equip[D.ITEMS[id].slot] === id; return `<button class="slot ${UI.sel === id && UI.selFrom === 'pack' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="pack" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().inv[id]} ${spare ? 'spare copies' : 'in backpack'}">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().inv[id])}</span>${spare ? '<span class="spare-tag">Spare</span>' : ''}${DQ.gearMark ? DQ.gearMark(id) : ''}</button>`; }).join('');
 };
 UI.detail = (id, from) => {
-  if (!id || !DQ.have(id)) return `<p class="dim" style="margin:0">Nothing selected.</p>`;
+  if (!id || !DQ.have(id)) return `<div class="detail detail-empty"><span class="k">Item details</span><p class="dim">Select an item to see what it is for, how it compares with what you wear, where more come from, and what you can do with it.</p></div>`;
   const it = D.ITEMS[id], n = from === 'bank' ? (S().bank[id] || 0) : (S().inv[id] || 0), can = it.slot ? DQ.canEquip(id) : null;
   const btns = [];
   if (it.slot) btns.push(can.equipped ? '<span class="spare-explanation">Already equipped · this is a spare copy</span>' : `<button class="btn ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
@@ -172,7 +177,7 @@ UI.detail = (id, from) => {
   else btns.push(`<button class="btn" data-do="deposit" data-a="${id}" data-b="all">Bank</button>`);
   if (!DQ.sellable(id)) btns.push(`<p class="keepsake-note">${ico('lock')} ${esc(DQ.KEEPSAKE_NOTE)}</p>`);
   else btns.push(`<button class="btn" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell 1 ${UI.money(it.val)}</button>${n > 1 ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all ${UI.money(it.val * n)}</button>` : ''}`);
-  return `<div class="detail"><div class="dt-h">${itm(id)}<div><b style="color:${it.col}">${esc(it.name)}</b><small>${fmt(n)} in ${from === 'bank' ? 'bank' : 'pack'}</small></div></div><p class="sm">${UI.itemSub(it) || (it.type === 'junk' ? 'Junk. Good only for selling.' : DQ.cap(it.type))}</p><div class="btnrow wrap">${btns.join('')}</div></div>`;
+  return `<div class="detail"><div class="dt-h">${itm(id)}<div><b style="color:${it.col}">${esc(it.name)}</b><small>${fmt(n)} in ${from === 'bank' ? 'bank' : 'pack'}</small></div></div><div class="btnrow wrap">${btns.join('')}</div><div class="detail-info">${(DQ.tips && DQ.tips.item ? DQ.tips.item(id) : '') || `<p class="sm">${UI.itemSub(it) || DQ.cap(it.type)}</p>`}</div></div>`;
 };
 UI.V.character = () => {
   const s = S(), b = DQ.bonus(), ps = DQ.pstats(), marks = DQ.heroMarks();

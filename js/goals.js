@@ -60,11 +60,10 @@ DQ.goals = () => {
     else { const tot = q.obj.reduce((a, o, i) => a + Math.min(1, DQ.objProg(q, p, i) / o.n), 0) / q.obj.length; add({ id: 'mq:' + q.id, cat: 'Quests', icon: q.unlocks, col: sk.col, title: `Learn ${sk.name}`, sub: st === 'ready' ? 'Quest complete: claim it!' : q.obj.find((o, i) => DQ.objProg(q, p, i) < o.n).label, pct: st === 'ready' ? 1 : tot, go: 'quests', ready: st === 'ready', big: true, act: st === 'ready' ? { label: 'Claim', do: 'qclaim', a: q.id } : null }); }
   });
   /* 5. Tools for skills you have been training */
-  D.TOOLS.forEach(([k, sk]) => {
-    if (!DQ.skillUnlocked(sk) || DQ.lvl(sk) < 2) return; const t = DQ.toolTier(sk); if (t >= 5) return;
-    const it = D.ITEMS[`tool_${k}_${t + 1}`], sold = Object.values(D.SHOPS).some(l => l.includes(it.id));
-    add({ id: 'tool:' + k, cat: 'Gear', icon: it.ic, col: it.col, title: it.name, sub: `${Math.round(D.TOOL_SPEED[t + 1] * 100)}% faster ${D.SK[sk].name.toLowerCase()} · ${fmt(S().coins)} / ${fmt(it.buy)} coins`, pct: clamp(S().coins / it.buy, 0, 1), eta: etaCoins(it.buy - S().coins), go: 'shop', ready: S().coins >= it.buy && sold, minor: DQ.xpRate(sk) <= 0 });
-  });
+  /* one combined card: the cheapest worthwhile upgrade, and how many others are waiting (Hero → Tools) */
+  const toolUps = D.TOOLS.map(([k, sk]) => { if (!DQ.skillUnlocked(sk) || DQ.lvl(sk) < 2) return null; const t = DQ.toolTier(sk); if (t >= 5) return null; const it = D.ITEMS[`tool_${k}_${t + 1}`]; return it ? { k, sk, t, it, sold: Object.values(D.SHOPS).some(l => l.includes(it.id)), used: DQ.xpRate(sk) > 0 } : null; }).filter(Boolean).sort((x, y) => (y.used - x.used) || x.it.buy - y.it.buy);
+  if (toolUps.length) { const u = toolUps[0], more = toolUps.length - 1;
+    add({ id: 'tools', cat: 'Gear', icon: u.it.ic, col: u.it.col, title: more ? `Tool upgrades (${toolUps.length})` : u.it.name, sub: `${more ? `Cheapest: ${u.it.name}, ` : ''}${Math.round(D.TOOL_SPEED[u.t + 1] * 100)}% faster ${D.SK[u.sk].name.toLowerCase()} · ${fmt(S().coins)} / ${fmt(u.it.buy)} coins`, pct: clamp(S().coins / u.it.buy, 0, 1), eta: etaCoins(u.it.buy - S().coins), go: 'tools', ready: S().coins >= u.it.buy && u.sold, minor: !u.used }); }
   /* 6. Home: house, furniture, plots */
   if (!S().house.owned) { if (adv >= D.HOUSE.adv) add({ id: 'house', cat: 'Home', icon: 'house', col: '#d8a64a', title: 'Buy a house', sub: `${fmt(S().coins)} / ${fmt(D.HOUSE.price)} coins`, pct: clamp(S().coins / D.HOUSE.price, 0, 1), eta: etaCoins(D.HOUSE.price - S().coins), go: 'house', ready: S().coins >= D.HOUSE.price }); }
   else {

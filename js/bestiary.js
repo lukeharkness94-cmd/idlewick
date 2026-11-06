@@ -89,7 +89,7 @@ UI.openGuide = id => {
     ${sec(4, `<p>${esc(lore.note || 'No notes yet.')}</p>`)}
     ${sec(5, `<p class="legend">${esc(lore.legend || '')}</p>`)}
     ${seen ? UI.slayerHtml(m) : ''}<p class="sm dim gstars">Slayer stars: <span class="stars">${'★'.repeat(DQ.beastStars(id))}${'☆'.repeat(3 - DQ.beastStars(id))}</span> (+${DQ.beastStars(id) * 4}% damage against it)</p>`; UI.guideOpen = id;
-  DQ.modal({ title: 'Field guide', wide: true, body, actions: [{ label: 'Close' }, ...(m.town === S().town ? [{ label: 'Fight it', primary: true, fn: () => { DQ.go('combat'); DQ.startAct('fight', id); } }] : [])] });
+  DQ.modal({ title: 'Field guide', wide: true, body, actions: [{ label: 'Close' }, ...(m.town === S().town && !m.boss ? [{ label: 'Prepare for it', fn: () => { UI.taskChoice.combat = id; DQ.go('combat'); } }] : []), ...(m.town === S().town ? [{ label: 'Fight it', primary: true, fn: () => { UI.taskChoice.combat = id; DQ.go('combat'); DQ.startAct('fight', id); } }] : [])] });
 };
 Object.assign(UI.DO, { guide: a => UI.openGuide(a) });
 

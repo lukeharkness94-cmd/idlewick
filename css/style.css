@@ -2240,3 +2240,42 @@ p{font-size:inherit}
 .h-stats{min-width:auto!important;flex:0 0 auto!important}
 #view .illustrated-card small,#view .illustrated-card .meta{font-size:13.5px}#view .illustrated-card b{font-size:15.5px!important}
 .logo h1,#title .logo h1{font-family:'Pixelify Sans','Alegreya SC',serif!important}
+/* combat: one selected encounter, labelled danger, start/retreat beside the arena, slots-first abilities, food stepper */
+.arena-ctl{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.arena-ctl:empty{display:none}
+.battle-brief .danger{margin:2px 0 6px;font-size:15px!important}.danger b{display:inline-flex;align-items:center;gap:6px}
+.danger b::before{content:'';width:10px;height:10px;border-radius:50%;background:currentColor;display:inline-block}
+.danger.easy b{color:var(--good)}.danger.fair b{color:var(--brass-hi)}.danger.hard b{color:var(--bad)}
+.abil-slots{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.abil-slot{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:9px;border:1px dashed var(--line2);color:var(--mute);font-size:14.5px}
+.abil-slot.full{border-style:solid;border-color:var(--brass);color:var(--ink)}.abil-slot .ic{width:20px;height:20px}
+.abil-tabs{margin-bottom:8px}
+.eat-step{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.eat-step>span{color:var(--mute);font-size:15px}.eat-step output{min-width:96px;text-align:center;font-size:15px}
+.eat-step .btn{min-width:38px;font-size:18px!important}
+.boss-rematch{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}.boss-rematch b{display:block}.boss-rematch small{color:var(--mute)}
+.destination-line{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.goal-done h2 .ic{width:20px;height:20px;vertical-align:-3px}
+.goal-choices{display:grid;gap:8px;margin-top:10px}
+.goal-choice{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+.goal-choice.on{border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass)}.goal-choice small{color:var(--mute)}
+/* Inventory: a larger grid and a stable detail panel beside it on desktop (actions first, then the shared item info) */
+@media (min-width:861px){
+  .character-layout>.col{display:grid!important;grid-template-columns:minmax(0,1fr) 340px!important;gap:12px;align-items:start}
+  .character-layout>.col>#detailbox,.character-layout>.col>#detailbox.empty{display:block!important;position:sticky;top:110px;grid-column:2;grid-row:1 / span 3}
+  .character-layout>.col>section:not(#detailbox){grid-column:1}
+}
+#packgrid,.slots{grid-template-columns:repeat(auto-fill,minmax(76px,1fr))!important;gap:8px!important}
+#packgrid .slot,.slots .slot{min-height:76px}
+#packgrid .slot :is(img,.ic,.gico),.slots .slot :is(img,.ic,.gico){width:48px!important;height:48px!important}
+#detailbox .detail-info{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:15px}
+#detailbox .detail-info>b:first-child{display:none}
+#detailbox .detail-empty p{font-size:15px!important;margin:6px 0 0}
+@media (min-width:861px){
+  .character-layout .selbar,.bank-layout .selbar{display:none!important}
+  .view .character-layout .detail .btnrow,.view #detailbox .detail .btnrow{display:flex!important}
+  .character-layout #packfilter-select .choice-button b,.character-layout #packfilter-select .choice-button .ic{display:none}
+}
+.region-list{list-style:none;margin:14px 0 0;padding:12px 0 0;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}
+.region-row{width:100%;display:flex;align-items:center;gap:9px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.region-row .ic{width:18px;height:18px;flex:none}.region-row span{display:flex;flex-direction:column;min-width:0}.region-row b{font-size:15px}.region-row small{font-size:13px;color:var(--mute)}
+.region-row.on{border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass)}.region-row.locked b{color:var(--mute)}

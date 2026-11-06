@@ -62,11 +62,19 @@ UI.weaponLine = () => {
   return `<div class="wline"><span class="tag">${W.name}</span> ${dt ? dchip(dt, '') : ''} <small class="mono">${(DQ.combatInterval() / 1000).toFixed(2)}s per attack</small></div><small class="dim">${W.note}.${wt === 'staff' ? ' Pick the element for your spells:' : ' Change weapons on the Inventory page.'}</small>${spells}`;
 };
 UI.abilityPanel = () => {
-  const on = S().abilities || [], slots = DQ.abilSlots();
-  return `<section class="panel"><div class="phead"><h2>Abilities</h2><small class="mono">${on.length} / ${slots} slots</small></div><div class="abils">${D.ABIL.map(a => {
-    const unl = DQ.abilUnlocked(a), sel = on.includes(a.id), active = DQ.ability(a.id), why = !unl ? `${D.SK[a.skill].name} ${a.lvl}` : sel && !active ? (a.needShield && !S().equip.shield ? 'needs a shield' : `${a.style} only`) : '';
-    return `<button class="abil ${sel ? 'on' : ''} ${unl ? '' : 'locked'} ${sel && !active ? 'idle' : ''}" data-do="abil" data-a="${a.id}" data-tip="text:${esc(a.name)}: ${esc(a.text)}">${ico(unl ? a.ic : 'lock')}<span><b>${a.name}</b><small>${why || (a.style ? DQ.cap(a.style) : 'Any style')}</small></span></button>`;
-  }).join('')}</div><p class="hint">A third slot opens at combat level 40.</p></section>`;
+  /* Slots first, each empty slot pointing at abilities you can use now; future abilities sit in their own tab so they
+     stay discoverable without crowding a beginner's screen. */
+  const on = S().abilities || [], slots = DQ.abilSlots(), tab = UI.tab.abil || 'ready';
+  const ready = D.ABIL.filter(a => DQ.abilUnlocked(a)), future = D.ABIL.filter(a => !DQ.abilUnlocked(a)).sort((x, y) => (DQ.skillUnlocked(x.skill) ? 0 : 1) - (DQ.skillUnlocked(y.skill) ? 0 : 1) || (x.lvl - DQ.lvl(x.skill)) - (y.lvl - DQ.lvl(y.skill)));
+  const card = a => { const unl = DQ.abilUnlocked(a), sel = on.includes(a.id), active = DQ.ability(a.id), why = !unl ? `${D.SK[a.skill].name} ${a.lvl}` : sel && !active ? (a.needShield && !S().equip.shield ? 'needs a shield' : `${a.style} only`) : '';
+    return `<button class="abil ${sel ? 'on' : ''} ${unl ? '' : 'locked'} ${sel && !active ? 'idle' : ''}" data-do="abil" data-a="${a.id}" ${unl ? '' : 'disabled'} aria-pressed="${sel}" data-tip="text:${esc(a.name)}: ${esc(a.text)}">${ico(unl ? a.ic : 'lock')}<span><b>${a.name}</b><small>${unl ? (sel ? (why ? `Equipped · ${why}` : 'Equipped') : (a.style ? DQ.cap(a.style) : 'Any style')) : `Unlocks at ${why}`}</small></span></button>`; };
+  const slotRow = Array.from({ length: slots }, (_, i) => { const a = D.ABIL.find(x => x.id === on[i]); return a ? `<span class="abil-slot full">${ico(a.ic)}<b>${a.name}</b></span>` : `<span class="abil-slot empty">${ico('plus' in (DQ.ICONS || {}) ? 'plus' : 'star')}<span>${ready.length ? 'Empty slot · choose below' : 'Empty slot · first ability at ' + (future[0] ? `${D.SK[future[0].skill].name} ${future[0].lvl}` : '')}</span></span>`; }).join('');
+  const list = tab === 'future' ? future : ready;
+  return `<section class="panel abilp"><div class="phead"><h2>Abilities</h2><small class="mono">${on.length} / ${slots} slots</small></div>
+    <div class="abil-slots">${slotRow}</div>
+    <div class="tabs abil-tabs" role="tablist"><button class="tab ${tab === 'ready' ? 'on' : ''}" role="tab" aria-selected="${tab === 'ready'}" data-do="tab" data-a="abil" data-b="ready">Ready to use <b class="mono">${ready.length}</b></button><button class="tab ${tab === 'future' ? 'on' : ''}" role="tab" aria-selected="${tab === 'future'}" data-do="tab" data-a="abil" data-b="future">Future <b class="mono">${future.length}</b></button></div>
+    <div class="abils">${list.length ? list.map(card).join('') : `<p class="dim sm">${tab === 'ready' ? 'No abilities yet. Train combat skills: the Future tab shows when each one unlocks.' : 'Every ability is unlocked.'}</p>`}</div>
+    <p class="hint">A third slot opens at combat level 40.</p></section>`;
 };
 UI.forecastResults = {};
 const showForecast = (id, text) => {
@@ -120,13 +128,14 @@ Object.assign(UI.DO, {
   qclear: () => { S().queue = []; DQ.emit('queue'); },
   decide: (a, b) => DQ.resolveEvent(a, b),
   abil: a => { if (DQ.toggleAbility(a)) { DQ.sfx('equip'); UI.render(false); } },
+  eatstep: d => { const st = S().settings; st.eatAt = Math.max(30, Math.min(70, (st.eatAt || 50) + (+d || 0))); UI.render(false); },
   comparegear: (a, b) => {
     const el = document.getElementById('fc-' + a); if (!el) return;
     showForecast(a, 'Comparing builds…');
     setTimeout(() => {
       const current = DQ.forecast(a), candidate = DQ.forecast(a, b);
       if (!current || !candidate || current.blocked || candidate.blocked) { showForecast(a, 'This build cannot start the fight. Check level, location and ammunition.'); return; }
-      showForecast(a, `Current build: ${current.wins}/${current.trials} wins. With ${D.ITEMS[b].name}: ${candidate.wins}/${candidate.trials} wins. Current health and available food; equipment stays as equipped.`);
+      showForecast(a, `Current build: ${current.wins}/${current.trials} wins. With ${D.ITEMS[b].name}: ${candidate.wins}/${candidate.trials} wins. Simulated estimate at your current health and food, not a guarantee; equipment stays as equipped.`);
     }, 30);
   },
   forecast: a => {
