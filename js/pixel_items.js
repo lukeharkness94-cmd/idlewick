@@ -21,12 +21,33 @@ const FISH = {
   carp: { len: 13, dep: 5.4, body: '#d09a48', belly: '#ecd49a', tail: 'fork', marks: 'scales', barbel: true },
   pike: { len: 15, dep: 3, body: '#7f9a4a', belly: '#d8d6a0', tail: 'fork', marks: 'spots', snout: true },
   skyfin: { len: 12, dep: 3.6, body: '#7fc4ee', belly: '#e6f6ff', tail: 'fork', wings: true },
-  voideel: { len: 15, dep: 2.4, body: '#5a3a9a', belly: '#9a7ad8', tail: 'eel', glow: '#c8a8ff' }
+  voideel: { len: 15, dep: 2.4, body: '#5a3a9a', belly: '#9a7ad8', tail: 'eel', glow: '#c8a8ff' },
+  /* Nov 2026: fourteen more, each with its own outline (shape features below), not a recolour */
+  minnow: { len: 8, dep: 2.4, body: '#a8b4a0', belly: '#e8ecdc', tail: 'fork', stripe: '#5a6a50' },
+  perch: { len: 12, dep: 4.4, body: '#9aa84a', belly: '#e8e0a0', tail: 'square', marks: 'bars', fin: 'spiky' },
+  bream: { len: 12, dep: 6.4, body: '#b8a878', belly: '#ece0c0', tail: 'fork', marks: 'scales' },
+  mackerel: { len: 14, dep: 3, body: '#3a7a8a', belly: '#e0eef0', tail: 'crescent', marks: 'waves', finlets: '#e8e8a0' },
+  flounder: { len: 12, dep: 7, body: '#8a7a5a', belly: '#c8b890', tail: 'round', flat: true, marks: 'spots' },
+  catfish: { len: 14, dep: 4, body: '#5a5a4a', belly: '#a8a080', tail: 'round', whiskers: true },
+  char: { len: 13, dep: 3.8, body: '#5a6a7a', belly: '#e86a4a', tail: 'fork', marks: 'spots' },
+  grayling: { len: 13, dep: 3.4, body: '#8a8a9a', belly: '#dcdce4', tail: 'fork', sail: true },
+  bogpuffer: { len: 10, dep: 7, body: '#7a8a4a', belly: '#d8d8a0', tail: 'round', spines: true },
+  bogray: { ray: 5, body: '#5a6a5a', belly: '#b8c0a8' },
+  cinderfish: { len: 13, dep: 4.4, body: '#3a2a2a', belly: '#e8603a', tail: 'shark', glowspots: '#ffb04a' },
+  basaltjaw: { len: 12, dep: 5.6, body: '#4a4a52', belly: '#8a8a92', tail: 'square', teeth: true, fin: 'tall' },
+  stormray: { ray: 7, body: '#6a8ab8', belly: '#dfe8f8', zap: '#fff6a0' },
+  ghostfin: { len: 14, dep: 3.8, body: '#c8d0e8', belly: '#f0f4ff', tail: 'veil', glow: '#e8f0ff' }
 };
 function fish(s, sp, ox, oy, cooked) {
   const body = rp(cooked ? mix(sp.body, '#c87a30', .62) : sp.body), belly = rp(cooked ? mix(sp.belly, '#f0c070', .55) : sp.belly), fin = rp(cooked ? '#9a5a2a' : mix(sp.body, '#3a2448', .25));
   const L = sp.len, H = sp.dep, x0 = ox + (15 - L) / 2 + 1, cy = oy + 8, x1 = x0 + L;
   if (sp.tail === 'eel') { for (let i = 0; i <= L; i++) { const y = cy + Math.round(Math.sin(i / 2.2) * 1.6); s.dot(x0 + i, y, body); s.dot(x0 + i, y + 1, i % 3 ? body : belly); } s.fix(x1, cy, EYE); for (let i = 2; i < L; i += 4) s.fix(x0 + i, cy + Math.round(Math.sin(i / 2.2) * 1.6), sp.glow); return; }
+  if (sp.ray) { /* rays: a diamond of wings and a whip tail; the wider the wings, the larger the ray */
+    const W = sp.ray * (ox > 0 ? 1.9 : 1), cx = ox + 9 + (ox > 0 ? 6 : 0), H2 = sp.ray * (ox > 0 ? 1.1 : .75);
+    s.poly([[cx - W, cy], [cx, cy - H2], [cx + W * .55, cy], [cx, cy + H2]], body); s.ell(cx - W * .15, cy + 1, W * .35, H2 * .35, belly);
+    s.line(cx - W, cy, cx - W - (ox > 0 ? 7 : 4), cy + 2, fin); s.fix(cx + W * .25, cy - 1, EYE); s.fix(cx + W * .1, cy - 1, EYE);
+    if (sp.zap && !cooked) { s.fix(cx - W * .5, cy - 1, sp.zap); s.fix(cx - W * .3, cy - 2, sp.zap); s.fix(cx - W * .1, cy - 1, sp.zap); }
+    return; }
   s.ell(x0 + L * .55, cy, L * .5, H / 2 + (sp.wide ? .5 : 0), body); s.ell(x0 + L * .55, cy + H * .28, L * .4, H * .22, belly);
   /* tails */
   const tx = x0 + 1;
@@ -35,10 +56,20 @@ function fish(s, sp, ox, oy, cooked) {
   else if (sp.tail === 'round') s.ell(tx - 1, cy, 1.6, 2.4, fin);
   else if (sp.tail === 'crescent') s.poly([[tx + 1, cy], [tx - 2, cy - 4], [tx - 1, cy], [tx - 2, cy + 4]], fin);
   else if (sp.tail === 'shark') s.poly([[tx + 1, cy], [tx - 2, cy - 5], [tx - 1, cy], [tx - 1, cy + 3]], fin);
+  else if (sp.tail === 'veil') { s.poly([[tx + 1, cy - 1], [tx - 4, cy - 4], [tx - 3, cy + 1], [tx - 5, cy + 5], [tx + 1, cy + 1]], rp(mix(sp.body, '#ffffff', .35))); }
   /* fins and features */
   if (sp.fin === 'tall') s.poly([[x0 + L * .45, cy - H / 2], [x0 + L * .55, cy - H / 2 - 3], [x0 + L * .65, cy - H / 2]], fin);
   else if (sp.sail) s.poly([[x0 + L * .3, cy - H / 2], [x0 + L * .45, cy - H / 2 - 3], [x0 + L * .7, cy - H / 2]], fin);
+  else if (sp.fin === 'spiky') { for (let i = 0; i < 4; i++) s.line(x0 + L * .35 + i * 1.5, cy - H / 2, x0 + L * .35 + i * 1.5 + .5, cy - H / 2 - 2, fin); }
+  else if (sp.flat) { s.poly([[x0 + 1, cy - H / 2 + 1], [x0 + L * .5, cy - H / 2 - 1], [x1 - 1, cy - H / 2 + 1]], fin); s.poly([[x0 + 1, cy + H / 2 - 1], [x0 + L * .5, cy + H / 2 + 1], [x1 - 1, cy + H / 2 - 1]], fin); }
   else s.poly([[x0 + L * .4, cy - H / 2], [x0 + L * .5, cy - H / 2 - 1.5], [x0 + L * .62, cy - H / 2]], fin);
+  if (sp.spines) for (let i = 0; i < 7; i++) { const a = i / 6 * Math.PI, X2 = x0 + L * .55 + Math.cos(a) * (L * .5 + 1), Y2 = cy - Math.sin(a) * (H / 2 + 1); s.fix(Math.round(X2), Math.round(Y2), cooked ? fin.lo : mix(sp.body, '#3a2448', .4)); }
+  if (sp.whiskers) { s.line(x1, cy + 1, x1 + 3, cy + 3, fin); s.line(x1, cy, x1 + 3, cy - 1, fin); }
+  if (sp.flat && !cooked) s.fix(x1 - 3, cy - 2, EYE);
+  if (!cooked && sp.marks === 'bars') for (let i = 0; i < 4; i++) s.line(x0 + 3 + i * 2.2, cy - H / 2 + 1, x0 + 3 + i * 2.2, cy + 1, null, body.lo);
+  if (!cooked && sp.marks === 'waves') for (let i = 0; i < 4; i++) { s.fix(x0 + 3 + i * 2, cy - 1 - (i % 2), body.out); s.fix(x0 + 4 + i * 2, cy - (i % 2), body.out); }
+  if (!cooked && sp.glowspots) for (let i = 0; i < 4; i++) s.fix(x0 + 3 + i * 2.4, cy + (i % 2 ? 1 : -1), sp.glowspots);
+  if (!cooked && sp.glow && sp.tail !== 'eel') { s.fix(x0 + L * .4, cy - 1, sp.glow); s.fix(x0 + L * .7, cy, sp.glow); }
   if (!cooked) if (sp.finlets) for (let i = 0; i < 3; i++) s.fix(x0 + 3 + i * 2, cy - H / 2, sp.finlets);
   if (sp.bill) s.line(x1, cy - 1, x1 + 4, cy - 1, rp('#3f5a74'));
   if (sp.snout) { s.dot(x1, cy, body); s.dot(x1 + 1, cy, body); }
@@ -67,11 +98,19 @@ const WOOD = {
   willow: { bark: '#7a7a54', inner: '#d8c890', slim: true, moss: '#8aa65a' }, maple: { bark: '#8a4a32', inner: '#e0a070', leaf: '#d8603a' },
   yew: { bark: '#4a3a30', inner: '#c86a4a', sprig: '#3f7a4a' }, magic: { bark: '#4a3a7a', inner: '#b8a0ff', glow: '#e0d0ff' },
   birch: { bark: '#e9e2cf', inner: '#e8c890', marks: '#3a3a3a', slim: true }, elder: { bark: '#a8b890', inner: '#f0e8c0', knot: true },
-  gloomwood: { bark: '#3a2a4a', inner: '#7a5a9a', glow: '#b88aff', twist: true }
+  gloomwood: { bark: '#3a2a4a', inner: '#7a5a9a', glow: '#b88aff', twist: true },
+  hazel: { bark: '#8a6a44', inner: '#d8b880', bundle: true }, ash: { bark: '#a8a090', inner: '#ece0c0', split: true },
+  palm: { bark: '#a88a58', inner: '#e8d0a0', frond: '#6aa04a' }, cedar: { bark: '#8a4a30', inner: '#d88a5a', resin: '#f0b040' },
+  pine: { bark: '#6a4a30', inner: '#d8b070', cone: '#8a5a30' }, mangrove: { bark: '#5a4030', inner: '#b88a5a', roots: true },
+  cinderbark: { bark: '#2a2020', inner: '#e8603a', charred: '#ffb04a' }, windpine: { bark: '#8a98a8', inner: '#e8f0f8', swirl: '#ffffff' },
+  wraithbark: { bark: '#b8b8c8', inner: '#f0f0ff', wisp: '#e0e8ff', slim: true }
 };
 function logSprite(s, w) {
   const bark = rp(w.bark), inner = rp(w.inner), draw = (dx, dy, len, r) => { s.poly([[1 + dx, 9 + dy], [1 + dx + len, 9 + dy - len * .45], [3 + dx + len, 11 + dy - len * .45], [3 + dx, 13 + dy]], bark); s.ell(2 + dx + len, 10 + dy - len * .45, r, r, inner); s.fix(2 + dx + len, 10 + dy - len * .45, inner.lo); };
-  if (w.pair) { draw(0, 2, 9, 1.8); draw(2, -2, 9, 1.8); }
+  if (w.bundle) { draw(0, 3, 9, 1.1); draw(1, 0, 10, 1.1); draw(3, -3, 9, 1.1); s.line(6, 7, 7, 12, null, '#c8a070'); }
+  else if (w.split) { s.poly([[1, 10], [10, 5], [13, 8], [4, 13]], bark); s.poly([[2, 10], [10, 6], [12, 8], [4, 12]], inner); for (let i = 0; i < 3; i++) s.line(3 + i * 3, 11 - i, 5 + i * 3, 10 - i, null, inner.lo); }
+  else if (w.roots) { draw(1, -1, 9, 1.8); s.line(3, 12, 1, 15, bark); s.line(4, 13, 4, 15, bark); s.line(5, 12, 7, 15, bark); }
+  else if (w.pair) { draw(0, 2, 9, 1.8); draw(2, -2, 9, 1.8); }
   else if (w.thick) { s.poly([[1, 9], [10, 4], [14, 7], [5, 13]], bark); s.ell(12, 5.5, 2.8, 2.6, inner); s.fix(12, 5, inner.lo); s.fix(12, 6, inner.base); s.line(4, 10, 9, 7, null, bark.lo); }
   else if (w.slim) { draw(1, 0, 10, 1.4); }
   else if (w.twist) { for (let i = 0; i < 11; i++) { s.dot(2 + i, 12 - i * .7 + Math.round(Math.sin(i) * 1), bark); s.dot(2 + i, 13 - i * .7 + Math.round(Math.sin(i) * 1), bark); } s.ell(13, 4.5, 1.6, 1.6, inner); }
@@ -82,6 +121,12 @@ function logSprite(s, w) {
   if (w.sprig) { s.line(10, 12, 14, 10, rp(w.sprig)); s.fix(12, 12, w.sprig); s.fix(13, 12, w.sprig); }
   if (w.glow) for (const [x, y] of [[5, 9], [8, 8], [11, 2]]) s.fix(x, y, w.glow);
   if (w.knot) { s.ell(6, 9, 1.2, 1.2, rp('#7a8a64')); }
+  if (w.resin) for (const [x, y] of [[5, 10], [9, 8]]) { s.fix(x, y, w.resin); s.fix(x, y + 1, w.resin); }
+  if (w.cone) { s.ell(13, 12, 1.8, 2.4, rp(w.cone)); s.fix(13, 11, '#c89a60'); s.fix(12, 13, '#5a3a20'); }
+  if (w.frond) { s.line(3, 10, 12, 5, null, mix(w.bark, '#3a2448', .3)); s.line(4, 12, 13, 7, null, mix(w.bark, '#3a2448', .3)); s.poly([[12, 13], [15, 11], [14, 15]], rp(w.frond)); }
+  if (w.charred) for (const [x, y] of [[4, 11], [7, 9], [10, 7], [6, 12]]) s.fix(x, y, w.charred);
+  if (w.swirl) for (let i = 0; i < 5; i++) s.fix(4 + i * 2, 10 - i + (i % 2), w.swirl);
+  if (w.wisp) { s.line(3, 6, 6, 3, null, w.wisp); s.line(9, 4, 11, 1, null, w.wisp); }
 }
 
 /* ---------- ore: rock formations and seams per metal ---------- */
@@ -97,7 +142,18 @@ const ORE = {
   adamant:   { col: '#2cc464', rock: '#56665a', style: 'crystal' },                  /* green crystal spikes */
   runite:    { col: '#18d6ee', rock: '#3e4e5c', style: 'cluster', extra: '#e8ffff' },/* glowing cyan crystal cluster */
   astralite: { col: '#efe2ff', rock: '#2c2848', style: 'stars', extra: '#b89aff' },  /* starlight in night-dark rock */
-  voidstone: { col: '#a83cff', rock: '#1c1824', style: 'shards', extra: '#ff6ad8' }  /* violet shards in black rock */
+  voidstone: { col: '#a83cff', rock: '#1c1824', style: 'shards', extra: '#ff6ad8' }, /* violet shards in black rock */
+  flint:      { col: '#5a5a5e', rock: '#b8ae98', style: 'chips', extra: '#f0f0ea' },   /* dark knapped chips in chalk */
+  quartz:     { col: '#f4f8ff', rock: '#7a7a84', style: 'prism' },                     /* clear six-sided prisms */
+  amber:      { col: '#f0a030', rock: '#6a5040', style: 'drops', extra: '#5a3a1a' },   /* honey drops with an inclusion */
+  jet:        { col: '#1a1a24', rock: '#6a6458', style: 'glossy', extra: '#c8d0e0' },  /* glossy black ovals */
+  jade:       { col: '#5ab87a', rock: '#8a8a78', style: 'banded', extra: '#c8f0d0' },  /* pale bands through green */
+  bloodstone: { col: '#3a7a4a', rock: '#5a5a54', style: 'speckle', extra: '#d83a3a' }, /* green stone, red flecks */
+  moonstone:  { col: '#dce4ff', rock: '#4a4a62', style: 'sheen', extra: '#9ab8ff' },   /* blue sheen crescents */
+  bogiron:    { col: '#a85a24', rock: '#4a4234', style: 'crust', extra: '#d8a060' },   /* rusty crust lumps */
+  obsidian:   { col: '#241c34', rock: '#5a4a44', style: 'glass', extra: '#a888ff' },   /* sharp black glass */
+  skyglass:   { col: '#c4ecff', rock: '#8aa0b8', style: 'feather', extra: '#ffffff' }, /* feathered wisps */
+  nullite:    { col: '#4a2a7a', rock: '#2a2430', style: 'rings', extra: '#0a0610' }    /* hollow rings */
 };
 /* one drawer for the 16 px item and the 32 px mining rock (k = 1 or 2) */
 function drawOre(s, kind, k = 1) {
@@ -115,6 +171,17 @@ function drawOre(s, kind, k = 1) {
     case 'crystal': [[6, 9, 4], [9, 7, 6], [12, 9, 4]].forEach(([x, y, h]) => { s.poly([[X(x - 1), X(y + 2)], [X(x), X(y + 2 - h)], [X(x + 1), X(y + 2)]], m); s.fix(X(x), X(y + 2 - h), m.gl); }); break;
     case 'cluster': [[8, 8, 6, 0], [5, 10, 4, -1], [11, 10, 4, 1], [8, 11, 3, 0]].forEach(([x, y, h, lean]) => { s.poly([[X(x - 1), X(y + 2)], [X(x + lean), X(y + 2 - h)], [X(x + 1), X(y + 2)]], m); s.fix(X(x + lean), X(y + 2 - h), o.extra); }); dot(8, 11, 1, ramp(o.extra)); break;
     case 'stars': [[6, 7], [10, 6], [9, 11], [5, 11], [12, 9]].forEach(([x, y], i) => { const c = i % 2 ? o.extra : o.col; s.fix(X(x), X(y), c); if (k > 1 || i < 2) { s.fix(X(x) - 1, X(y), c); s.fix(X(x) + 1, X(y), c); s.fix(X(x), X(y) - 1, c); s.fix(X(x), X(y) + 1, c); } s.fix(X(x), X(y), '#ffffff'); }); break;
+    case 'chips': [[5, 8, 1], [9, 6, -1], [11, 10, 1], [6, 11, -1]].forEach(([x, y, d]) => { s.poly([[X(x - 1.5), X(y + 1)], [X(x), X(y - 1.5)], [X(x + 1.5), X(y + d)]], m); s.fix(X(x), X(y - 1), o.extra); }); break;
+    case 'prism': [[6, 10, 5], [9, 9, 7], [12, 11, 4]].forEach(([x, y, h]) => { s.rect(X(x - 1), X(y + 2 - h), Math.max(2, k * 2), X(h), m); s.fix(X(x - 1), X(y + 2 - h), '#ffffff'); s.fix(X(x), X(y + 1 - h), m.lo); }); break;
+    case 'drops': [[6, 8, 1.8], [10, 10, 2.2], [8, 12, 1.3]].forEach(([x, y, r], i) => { dot(x, y, r); s.fix(X(x) - 1, X(y) - 1, '#fff2c0'); if (i === 1) s.fix(X(x), X(y), o.extra); }); break;
+    case 'glossy': [[6, 8, 2, 1.4], [10, 10, 2.4, 1.6]].forEach(([x, y, a, b]) => { s.ell(X(x), X(y), a * k, b * k, m); s.fix(X(x) - 1, X(y) - 1, o.extra); }); break;
+    case 'banded': for (const y of [6, 9, 12]) { s.line(X(4), X(y), X(12), X(y - 2), m); s.line(X(4), X(y) + 1, X(12), X(y - 2) + 1, y === 9 ? rp(o.extra) : m); } break;
+    case 'speckle': s.ell(X(8), X(9), 4 * k, 3.4 * k, m); [[6, 8], [9, 7], [10, 10], [7, 11], [11, 8]].forEach(([x, y]) => s.fix(X(x), X(y), o.extra)); break;
+    case 'sheen': [[6, 8], [10, 10]].forEach(([x, y]) => { s.ell(X(x), X(y), 2.4 * k, 2 * k, m); s.line(X(x - 1), X(y - 1), X(x + 1), X(y - 1), null, o.extra); }); break;
+    case 'crust': [[5, 9, 2], [8, 7, 2.2], [11, 10, 2], [8, 11, 1.6]].forEach(([x, y, r]) => { s.ell(X(x), X(y), r * k, r * k * .8, m); s.fix(X(x), X(y) - 1, o.extra); }); break;
+    case 'glass': [[7, 10, 6, -2], [11, 11, 4, 1]].forEach(([x, y, h, lean]) => { s.poly([[X(x - 2), X(y + 2)], [X(x + lean), X(y + 2 - h)], [X(x + 2), X(y + 2)]], m); s.line(X(x + lean), X(y + 2 - h), X(x + lean + 1), X(y + 1), null, o.extra); }); break;
+    case 'feather': for (const [a, b, c2, d] of [[4, 11, 11, 5], [6, 12, 12, 8]]) { s.line(X(a), X(b), X(c2), X(d), m); for (let i = 1; i < 4; i++) s.fix(X(a + (c2 - a) * i / 4) + 1, X(b + (d - b) * i / 4), o.extra); } break;
+    case 'rings': [[6, 8, 2.2], [10, 10, 2.6]].forEach(([x, y, r]) => { s.ell(X(x), X(y), r * k, r * k, m); s.ell(X(x), X(y), r * k * .45, r * k * .45, rp(o.extra)); }); break;
     case 'shards': [[6, 10, 5, -1], [9, 8, 7, 1], [12, 11, 4, 0]].forEach(([x, y, h, lean]) => { s.poly([[X(x - 1), X(y + 2)], [X(x + lean), X(y + 2 - h)], [X(x + 1), X(y + 2)]], m); s.fix(X(x + lean), X(y + 2 - h), o.extra); s.line(X(x), X(y + 1), X(x), X(y + 2 - h / 2), null, '#2a1030'); }); break;
   }
 }
@@ -284,12 +351,59 @@ const UNIQUE = {
 };
 /* ---------- the dispatcher: one finished design per item id ---------- */
 const TIER_OF = id => ['bronze', 'iron', 'steel', 'mithril', 'adamant', 'rune', 'astral'].find(t => id.startsWith(t + '_'));
+/* wooden shields: nine shapes in their own wood, with rope or iron fittings; never the metal kiteshield drawing */
+function woodShield(s, id) {
+  const log = id.replace(/_shield$/, ''), w = WOOD[log] || WOOD.normal, wood = rp(w.inner), bark = rp(w.bark), rope = rp('#c8a070'), iron = R.iron;
+  const shapes = {
+    hazel: () => { s.ell(8, 8, 5.4, 5.4, wood); s.ell(8, 8, 1.6, 1.6, rope); for (let a = 0; a < 6; a++) s.fix(8 + Math.round(Math.cos(a) * 4), 8 + Math.round(Math.sin(a) * 4), bark.base); },
+    ash: () => { s.ell(8, 8, 6.4, 6.4, wood); s.ell(8, 8, 2, 2, iron); for (const x of [4, 8, 12]) s.line(x, 2, x, 14, null, w.bark); },
+    palm: () => { s.ell(8, 8, 6, 6.6, wood); for (let r = 2; r <= 6; r += 2) for (let a = 0; a < 12; a++) s.fix(8 + Math.round(Math.cos(a / 2) * r), 8 + Math.round(Math.sin(a / 2) * r), bark.base); },
+    cedar: () => { s.poly([[2, 2], [14, 2], [14, 8], [8, 15], [2, 8]], wood); s.line(8, 2, 8, 14, null, w.bark); s.rect(2, 2, 13, 1, iron); s.fix(5, 5, w.resin || '#f0b040'); },
+    pine: () => { s.rect(3, 1, 10, 14, wood); for (const x of [5, 8, 11]) s.line(x, 1, x, 14, null, w.bark); s.rect(3, 4, 10, 1, iron); s.rect(3, 11, 10, 1, iron); },
+    mangrove: () => { s.ell(8, 8, 5, 7, wood); s.line(4, 3, 12, 13, rope); s.line(12, 3, 4, 13, rope); s.ell(8, 8, 1.6, 1.6, bark); },
+    cinderbark: () => { s.poly([[3, 2], [13, 2], [14, 7], [8, 15], [2, 7]], bark); s.poly([[5, 4], [11, 4], [11, 7], [8, 12], [5, 7]], wood); [[4, 6], [12, 6], [8, 3]].forEach(([x, y]) => s.fix(x, y, '#ffb04a')); },
+    windpine: () => { s.poly([[8, 1], [14, 5], [13, 12], [8, 15], [3, 12], [2, 5]], wood); s.poly([[8, 4], [11, 6], [8, 11], [5, 6]], rp('#e8f0f8')); s.fix(8, 6, '#ffffff'); },
+    wraithbark: () => { s.rect(2, 2, 12, 12, wood); s.ell(8, 2, 6, 1.4, wood); for (const [x, y] of [[4, 5], [11, 6], [6, 11], [10, 11]]) s.fix(x, y, w.wisp || '#e0e8ff'); s.rect(2, 7, 12, 1, rope); }
+  };
+  (shapes[log] || shapes.hazel)(); s.fix(3, 3, wood.gl);
+}
+/* skilling charms: a cord and a pendant cut from the mineral, each cut its own shape */
+function charmSprite(s, id) {
+  const ore = id.replace(/_charm$/, ''), o = ORE[ore] || { col: '#999999' }, m = ramp(o.col, { gl: .8 }), cord = rp('#8a6440');
+  s.line(3, 2, 8, 7, cord); s.line(13, 2, 8, 7, cord);
+  const cut = {
+    flint: () => s.poly([[6, 8], [11, 9], [8, 15]], m), quartz: () => { s.rect(7, 7, 3, 7, m); s.poly([[7, 7], [8, 5], [10, 7]], m); },
+    amber: () => { s.ell(8, 11, 3, 3.6, m); s.fix(8, 11, o.extra); }, jet: () => s.ell(8, 11, 3.6, 2.6, m),
+    jade: () => { s.ell(8, 11, 3.6, 3.6, m); for (const [i, j] of [[0, 0], [1, 0], [0, 1], [-1, 0], [0, -1]]) s.erase(8 + i, 11 + j); }, bloodstone: () => { s.rect(5, 8, 7, 6, m); s.fix(7, 10, o.extra); s.fix(10, 12, o.extra); },
+    moonstone: () => { s.ell(8, 11, 3.6, 3.6, m); for (let j = -3; j <= 3; j++) for (let i = -3; i <= 3; i++) if (i * i + j * j <= 7) s.erase(10 + i, 10 + j); },
+    bogiron: () => { s.poly([[5, 9], [11, 9], [12, 13], [8, 15], [4, 13]], m); s.fix(7, 11, o.extra); }, obsidian: () => { s.poly([[8, 7], [11, 11], [8, 15], [5, 11]], m); s.line(8, 8, 9, 13, null, o.extra); },
+    skyglass: () => { s.poly([[8, 7], [12, 12], [8, 13], [4, 12]], m); s.line(5, 12, 11, 12, null, '#ffffff'); }, silver: () => { s.poly([[8, 7], [12, 9], [11, 14], [5, 14], [4, 9]], m); s.line(8, 8, 8, 13, null, '#ffffff'); }, nullite: () => { s.ell(8, 11, 3.6, 3.6, m); s.ell(8, 11, 1.8, 1.8, rp('#0a0610')); }
+  };
+  (cut[ore] || cut.jet)(); s.fix(7, 9, m.gl);
+}
+/* fish suppers: the vessel gives the outline (bowl, pie, plate, pot, wrap, skewer, pan, platter); the fish and the crop
+   are drawn in it, so no two suppers share a silhouette and colour */
+function dishSprite(s, d) {
+  const f = rp(mix(d.fish, '#c87a30', .45)), c = rp(d.crop), clay = rp('#b8704a'), cream = rp('#f2ead8'), iron = R.iron, v = d.vessel;
+  const fishBit = (x, y, w) => { s.ell(x, y, w, 1.4, f); s.poly([[x - w, y], [x - w - 2, y - 1.5], [x - w - 2, y + 1.5]], f); s.fix(x + w - 1, y - 1, '#2a1c1f'); };
+  if (v === 'bowl' || v === 'bowl2') { s.ell(8, 10, 6.5, 2.2, v === 'bowl' ? clay : cream); s.poly([[2, 10], [14, 10], [12, 14], [4, 14]], v === 'bowl' ? clay : cream); s.ell(8, 10, 5, 1.4, rp(v === 'bowl' ? '#c8984a' : '#a8b878')); s.ell(6, 9.5, 1.4, 1, c); s.ell(10, 10, 1.6, 1, f); if (v === 'bowl2') [[5, 6], [9, 5], [12, 7]].forEach(([x, y]) => s.fix(x, y, '#f4f0e8')); }
+  else if (v === 'pie' || v === 'pie2') { s.poly([[2, 11], [14, 11], [13, 14], [3, 14]], clay); s.ell(8, 10, 6, 2.6, rp(v === 'pie' ? '#e0b060' : '#d8d0e8')); for (const x of [5, 8, 11]) s.line(x, 8, x, 12, null, '#b88a40'); s.fix(8, 6, d.fish); s.fix(7, 6, d.fish); s.fix(10, 9, d.crop); }
+  else if (v === 'plate' || v === 'plate2') { s.ell(8, 12, 7, 2.2, cream); fishBit(8, 10, v === 'plate' ? 4 : 3); if (v === 'plate') { s.ell(12, 11, 1.6, 1.2, c); s.ell(4, 12, 1.4, 1, c); } else { for (const [x, y] of [[3, 12], [4, 11], [12, 12], [13, 11]]) s.rect(x, y, 1, 2, c); } }
+  else if (v === 'pot') { s.ell(8, 9, 6, 2, iron); s.poly([[2, 9], [14, 9], [13, 14], [3, 14]], iron); s.rect(0, 9, 2, 1, iron); s.rect(14, 9, 2, 1, iron); s.ell(8, 9, 4.6, 1.2, c); s.fix(7, 9, d.fish); s.fix(9, 8, d.fish); }
+  else if (v === 'wrap' || v === 'wrap2') { s.poly([[3, 12], [6, 5], [13, 8], [11, 14]], v === 'wrap' ? c : rp('#e8d8a8')); s.line(6, 5, 11, 14, null, v === 'wrap' ? c.lo : '#c8b080'); s.ell(9, 9, 1.8, 1.2, f); if (v === 'wrap2') s.ell(7, 10, 1.4, 1, c); }
+  else if (v === 'skewer' || v === 'skewer2') { s.line(1, 14, 15, 2, rp('#c8a070')); for (const [x, y, k] of [[4, 11, 0], [8, 8, 1], [12, 5, 0]]) s.ell(x, y, 1.8, 1.6, k ? c : f); if (v === 'skewer2') { s.line(1, 11, 11, 3, rp('#c8a070')); s.ell(6, 7, 1.4, 1.2, f); } }
+  else if (v === 'pan') { s.ell(7, 10, 6, 3, iron); s.line(12, 10, 15, 13, R.wood); s.line(12, 11, 15, 14, R.wood); fishBit(7, 10, 3.4); s.fix(4, 9, d.crop); s.fix(9, 12, d.crop); }
+  else { s.ell(8, 11, 7.4, 3, rp('#8a6a4a')); s.ell(5, 10, 2.6, 1.6, c); s.ell(11, 10, 2.6, 1.8, c.lo ? c : c); fishBit(8, 12, 3); }
+}
 function itemSprite(id) {
   const it = D.ITEMS[id]; if (!it) return null;
   const s = Spr(16, 16), col = it.col || '#999999';
   if (id.startsWith('raw_') && (FISH[id.slice(4)] || id === 'raw_shrimp' || id === 'raw_lobster')) { const k = id.slice(4); if (k === 'shrimp') shrimp(s); else if (k === 'lobster') lobster(s); else fish(s, FISH[k], 0, 0); return s; }
   if (it.type === 'food' && (FISH[id] || id === 'shrimp' || id === 'lobster')) { if (id === 'shrimp') shrimp(s, true); else if (id === 'lobster') lobster(s, true); else fish(s, FISH[id], 0, -1, true); garnish(s); return s; }
   if (id === 'burnt') { plate(s); fish(s, { len: 11, dep: 3.4, body: '#3a322e', belly: '#5a4a3e', tail: 'fork' }, 0, -2, false); return s; }
+  if (it.dish) { dishSprite(s, it.dish); return s; }
+  if (it.wood && it.slot === 'shield') { woodShield(s, id); return s; }
+  if (it.charm) { charmSprite(s, id); return s; }
   if (FOOD[id]) { FOOD[id](s); return s; }
   if (PRODUCE[id]) { PRODUCE[id](s); return s; }
   if (RELIC[id]) { RELIC[id](s); return s; }

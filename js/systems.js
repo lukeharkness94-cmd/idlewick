@@ -36,6 +36,9 @@ const GATHER = ['fishing', 'woodcutting', 'mining', 'thieving', 'farming'];
 /* wooden traps you hold are your first hunting gear: +5% Hunting XP each, up to three */
 DQ.extraXp = sk => { const f = DQ.fx(); return 1 + f.xpAll + (f.xp[sk] || 0) + (sk === 'hunting' ? .05 * Math.min(3, DQ.have('wooden_trap')) : 0); };
 DQ.extraSpeed = sk => { const f = DQ.fx(); return f.speedAll + (f.speed[sk] || 0) + (GATHER.includes(sk) ? f.gather : 0); };
+/* a worn skilling charm (amulet slot) strengthens its one skill: faster gathering, or more XP when making */
+DQ.charmFor = sk => { const a = S().equip.amulet, it = a && D.ITEMS[a]; return it && it.charm && it.charm.skill === sk ? it.charm : null; };
+{ const sp0 = DQ.extraSpeed, xp0 = DQ.extraXp; DQ.extraSpeed = sk => sp0(sk) + ((DQ.charmFor(sk) || {}).speed || 0); DQ.extraXp = sk => xp0(sk) + ((DQ.charmFor(sk) || {}).xp || 0); }
 DQ.packMax = () => DQ.PACK_SLOTS + DQ.fx().pack;
 DQ.coinMult = () => 1 + DQ.fx().coin + (DQ.uniqueFx && DQ.uniqueFx().fortune ? .05 : 0);
 

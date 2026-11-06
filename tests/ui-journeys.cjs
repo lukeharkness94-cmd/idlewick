@@ -18,7 +18,8 @@ const URL=process.env.IDLEWICK_URL||'http://127.0.0.1:8765/';
    await page.evaluate(()=>{DQ.go('overview');});assert.match(await page.locator('.journey-done').innerText(),/0\/5 shrimp/);
    await page.evaluate(()=>{DQ.startAct('fish','shrimp',{quiet:true});DQ.simulate(5*60000);DQ.startAct('wood','normal',{quiet:true});DQ.simulate(4*60000);DQ.ui.render(true);});
    assert.match(await page.locator('.journey h2').innerText(),/Claim First Steps/);
-   await page.evaluate(()=>{for(let i=0;i<4;i++)DQ.closeModal&&DQ.closeModal();document.querySelectorAll('.note').forEach(n=>n.remove());});assert.equal(await page.evaluate(()=>DQ.skillUnlocked('cooking')),true,'First Steps teaches the cooking fire');
+   await page.evaluate(()=>{DQ.stopAct&&DQ.stopAct(true);DQ.ui.render(true);for(let i=0;i<4;i++)DQ.closeModal&&DQ.closeModal();document.querySelectorAll('.note').forEach(n=>n.remove());});assert.equal(await page.evaluate(()=>DQ.skillUnlocked('cooking')),true,'First Steps teaches the cooking fire');
+   await page.waitForTimeout(1500);await page.evaluate(()=>{for(let i=0;i<4;i++)DQ.closeModal&&DQ.closeModal();document.querySelectorAll('.note').forEach(n=>n.remove());});await page.waitForTimeout(600);
    await page.locator('.journey .btn.primary').click();await page.waitForTimeout(300);
    assert.equal(await page.evaluate(()=>DQ.S.q.first_steps.s),'done');
    /* the first useful upgrade: the boss advice now offers armour the purse can buy */

@@ -92,4 +92,36 @@ UI.detail = (id, from) => {
   return h.replace(/<\/div>\s*$/, `<p class="item-uses">${esc(line)}</p>${go}</div>`);
 };
 UI.DO.userecipe = id => { const r = D.RECIPES[id]; if (!r) return; UI.returnTo = { page: UI.view, label: titleOf(UI.view) }; UI.focusTask ? UI.focusTask(D.SK[r.skill].page, r.id, r.tab, r.skill) : go(D.SK[r.skill].page); };
+/* ---------- One shared answer to "what is this, what is it for, how do I get it" (Nov 2026) ----------
+   Generated from the game's own definitions every time, so it cannot drift: gathering spots (with skill level and
+   whether they work from any town), recipes (with the ingredients you hold), shops in towns you have reached, creature
+   drops (unmet creatures stay unnamed) and quest rewards. Used by every item tooltip and the inventory detail panel. */
+DQ.sourcesOf = id => {
+  const it = D.ITEMS[id], out = []; if (!it) return out;
+  for (const kind of ['fish', 'wood', 'mine', 'thieve']) for (const n of (D.NODES[kind] || []).filter(n => n.item === id)) {
+    const sk = D.SK[n.skill], lock = !DQ.skillUnlocked(n.skill) ? ` (learn ${sk.name} first)` : DQ.lvl(n.skill) < n.lvl ? ` (you are ${DQ.lvl(n.skill)})` : '';
+    const where = DQ.nodeRegional(n) ? `only in ${DQ.townUnlocked(n.town) ? D.TOWN[n.town].name : 'a later region'}` : DQ.nodeDiscovered(n) ? 'from any town' : DQ.townUnlocked(n.town) ? `found in ${D.TOWN[n.town].name}, then from any town` : 'found in a later region';
+    out.push(`${{ fish: 'Catch', wood: 'Chop', mine: 'Mine', thieve: 'Steal' }[kind]}: ${sk.name} ${n.lvl}${lock}, ${where}`);
+  }
+  for (const r of Object.values(D.RECIPES).filter(r => r.out && r.out[id]).sort((a, b) => a.lvl - b.lvl).slice(0, 2)) {
+    const ing = Object.entries(r.in).map(([k, n]) => `${DQ.fmt(Math.min(DQ.have(k), n))}/${n} ${D.ITEMS[k] ? D.ITEMS[k].name.toLowerCase() : k}`).join(', ');
+    out.push(`Make: ${D.SK[r.skill].name} ${r.lvl}${!DQ.skillUnlocked(r.skill) ? ' (not learned yet)' : DQ.lvl(r.skill) < r.lvl ? ` (you are ${DQ.lvl(r.skill)})` : ''} · ${ing}`);
+  }
+  const shops = Object.entries(D.SHOPS || {}).filter(([t, l]) => l.includes(id) && DQ.townUnlocked(t)).map(([t]) => D.TOWN[t].name);
+  if (shops.length) out.push(`Buy: ${shops.slice(0, 3).join(', ')}${shops.length > 3 ? '…' : ''}`);
+  const mons = D.MONLIST.filter(m => (m.drops || []).some(d => d[0] === id)), met = mons.filter(m => (S().beast.kills[m.id] || 0) > 0);
+  if (met.length) out.push(`Dropped by ${met.slice(0, 3).map(m => m.name).join(', ')}${mons.length > met.length ? ' and creatures you have not met' : ''}`);
+  else if (mons.length && !it.unique) out.push(`Dropped by a creature${DQ.townUnlocked(mons[0].town) ? ` around ${D.TOWN[mons[0].town].name}` : ' further down the road'}`);
+  const qs = D.QUESTS.filter(q => !q.secret && q.reward && q.reward.items && q.reward.items[id] && DQ.questState(q) !== 'done');
+  if (qs.length) out.push(`Quest reward: ${qs.slice(0, 2).map(q => q.name).join(', ')}`);
+  return out;
+};
+DQ.purposeOf = id => { const it = D.ITEMS[id]; if (!it) return ''; if (it.charm) { const n = it.charm.skill === 'research' ? 'Scholarship' : D.SK[it.charm.skill] ? D.SK[it.charm.skill].name : it.charm.skill; return it.charm.speed ? `While worn: ${n} is ${Math.round(it.charm.speed * 100)}% faster.` : `While worn: +${Math.round(it.charm.xp * 100)}% ${n} XP.`; } return it.sub || ''; };
+const tipInfo0 = DQ.tips.item;
+DQ.tips.item = id => {
+  const h = tipInfo0(id); if (!h) return h;
+  const p = DQ.purposeOf(id), src = DQ.sourcesOf(id);
+  const add = `${p && !h.includes(esc(p)) ? `<div class="ok item-purpose">${esc(p)}</div>` : ''}${src.length ? `<div class="item-sources"><b>How to get it</b>${src.map(x => `<span>${esc(x)}</span>`).join('')}</div>` : ''}`;
+  return add ? h.replace(/<\/div>\s*$/, add + '</div>') : h;
+};
 })();

@@ -335,3 +335,20 @@ Stages are separate commits so each can be reverted on its own.
   - Exploration: 25 fish, 25 logs, visit Mossbarrow.
   - Crafting (Hettie's quest) now opens at Hero 8 and uses ordinary logs. Thieving, Smithing, Magic, Ranged and Enchanting are unchanged.
 - **Older saves:** `migrate()` grants every skill the save had under `D.UNLOCK_BEFORE` (or any skill with XP), once, marked by `unlockRules: 2`.
+
+**Stage 4: content, sources and making categories**
+- **Content counts** (before → after): fish 15 → 29, trees 9 → 18, ores and minerals 11 → 22 (gathering 35 → 69). Recipes 121 → 196: cooking 22 → 49, smithing 57 → 72, crafting 42 → 75. Recipes are about 1.6×, not fully doubled; each addition has a real use rather than padding the count.
+- **Largest gap between unlocks:** fishing 14 → 6, woodcutting 15 → 10, mining 15 → 9, cooking 10 → 7, crafting 9 → 6, smithing unchanged at 12.
+- **Uses for the new content:**
+  - New fish cook into food. Thirteen "fish suppers" combine a new fish with a crop (`dish` on the item).
+  - New logs make nine wooden shields (`D.WOOD_SHIELDS`): about 60% of a metal shield's defence, plus ranged or magic.
+  - New minerals, and silver, make twelve skilling charms (`D.CHARMS`), amulets that make one non-combat skill faster or give it more XP. `DQ.charmFor` in systems.js extends extraSpeed/extraXp.
+  - Gathering tools can now be made (`D.TOOL_MAKE`, data3.js): Smithing makes pickaxes, axes and hoes; Crafting makes rods and gloves. Inputs cost about the tool's sale value; the shop sells at 3× that.
+  - Formerly unused materials now have uses: silver, wolf pelt, gloomwood, voidstone.
+- **Art:** new features in the fish drawer (flat, ray, spines, whiskers, bars, waves, veil, glow spots); new log features; eleven mineral structures in `drawOre`; nine tree kinds; `woodShield`, `charmSprite` and `dishSprite` in pixel_items.js. art-pixel.cjs passes (pixel-unique items, distinct fish and tree outlines).
+- **Shared information:** `DQ.sourcesOf(id)` and `DQ.purposeOf(id)` (routes.js) add "How to get it" (gathering spots with level and any-town or regional, recipes with ingredients held, shops in reached towns, creature drops, quest rewards) and the item's purpose to every item tooltip and the inventory detail panel. All of it comes from the game definitions. Unmet creatures and unreached towns are never named.
+- **Crafting and Smithing pages:** categories by material, then type (`DQ.recipeGroup`, ui_core.js). Smithing: Smelting, each metal (Weapons / Armour), Tools. Crafting: Armour (by hide), Wood (Bows / Staves / Shields), Arrows, Jewellery, Charms, Basics, Tools.
+  - Each category chip shows how many items are ready, or a lock with its level.
+  - Each card shows "Ready to make", "Missing …" (amber) or "🔒 Smithing 30 (you are 12)" (grey).
+  - The stage follows the visible category.
+- **Economy:** `sim-economy.cjs 24` gives 493k coins at 24h (461k before) and Hero 64 (63). New resources sell at about 80% of their neighbours' values.

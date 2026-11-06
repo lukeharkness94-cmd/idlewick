@@ -128,3 +128,16 @@ Before: 100% for every boss with counters, and up to 0% without them. Old Tusk s
 - Hero level after 30 minutes of fishing: 10 → 8. Hero-level unlocks arrive later by the same margin.
 - `sim-opening.cjs`: combat 8 at 25 minutes (was 22), Hero 8 when you get there (was 10). Following the boss advice wins 97% (was 90%), because the longer opening leaves more food in the pack.
 - From level 20 on nothing changes, so the mid- and late-game evidence above still holds. `sim-economy.cjs 24` coin timings are unchanged in shape.
+
+## Content expansion (Nov 2026 brief)
+
+`node scripts/sim-economy.cjs 24` before and after adding 34 gathering resources and 75 recipes. New fish, logs and minerals sell at about 80% of their level neighbours.
+
+| Hour | Coins before | Coins after | Hero before | Hero after |
+| --- | --- | --- | --- | --- |
+| 4 | 25,654 | 29,082 | 38 | 39 |
+| 12 | 145,270 | 163,605 | 54 | 55 |
+| 24 | 461,321 | 492,763 | 63 | 64 |
+
+- About 7% more coins at 24h: richer mid-game choices, not a loop. Suppers sell for roughly their ingredients, and made tools cost about their sale value in materials.
+- The opening is unchanged: `sim-opening.cjs` still reaches combat 8 at 25 minutes.

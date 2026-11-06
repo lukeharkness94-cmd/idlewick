@@ -67,7 +67,22 @@ const FISH = [
   ['carp', 'Carp', '#d9a050', 'mossbarrow', 12, 25, 2200, 12, 55, 6, 12],
   ['pike', 'Pike', '#8fae6a', 'mossbarrow', 16, 40, 2300, 16, 65, 6, 14],
   ['skyfin', 'Skyfin', '#9fd8ff', 'skyreach', 88, 140, 3600, 90, 260, 24, 520],
-  ['voideel', 'Void eel', '#8a5ad8', 'hollow', 95, 160, 3800, 96, 290, 26, 700],
+  /* Nov 2026 additions: fill the long stretches between catches; ordinary ones work from any town once discovered */
+  ['minnow', 'Minnow', '#b8c4a8', 'willowbrook', 3, 14, 2000, 3, 34, 3, 4],
+  ['perch', 'Perch', '#a8b45a', 'willowbrook', 7, 24, 2150, 7, 44, 4, 6],
+  ['bream', 'Bream', '#c8b888', 'mossbarrow', 22, 55, 2450, 20, 75, 8, 16],
+  ['mackerel', 'Mackerel', '#4a8a9a', 'saltmere', 26, 62, 2500, 23, 82, 8, 19],
+  ['flounder', 'Flounder', '#9a8a64', 'saltmere', 33, 76, 2650, 28, 96, 10, 29],
+  ['catfish', 'Catfish', '#6a6a58', 'mossbarrow', 38, 86, 2750, 35, 110, 11, 42],
+  ['char', 'Arctic char', '#e8704a', 'ironpeak', 44, 94, 2900, 42, 128, 13, 64],
+  ['grayling', 'Grayling', '#9a9aac', 'ironpeak', 56, 105, 3000, 52, 145, 15, 96],
+  ['bogpuffer', 'Bog puffer', '#8a9a52', 'gloomfen', 66, 112, 3050, 66, 165, 17, 152],
+  ['bogray', 'Bog ray', '#6a7a64', 'gloomfen', 70, 115, 3100, 70, 180, 18, 184],
+  ['cinderfish', 'Cinderfish', '#d8603a', 'emberfall', 79, 118, 3300, 78, 215, 21, 272],
+  ['basaltjaw', 'Basaltjaw', '#5a5a64', 'emberfall', 86, 132, 3500, 86, 240, 23, 368],
+  ['stormray', 'Storm ray', '#7a9ac8', 'skyreach', 92, 150, 3700, 92, 270, 25, 480],
+  ['ghostfin', 'Ghostfin', '#d8e0f4', 'hollow', 98, 170, 3900, 97, 300, 27, 608],
+  ['voideel', 'Void eel', '#8a5ad8', 'hollow', 95, 160, 3800, 96, 290, 26, 560],
 ];
 const WOOD = [
   ['normal', 'Logs', 'Tree', '#a07a4f', 'willowbrook', 1, 18, 2200, 3],
@@ -79,6 +94,15 @@ const WOOD = [
   ['birch', 'Birch logs', 'Birch tree', '#e6dcc4', 'mossbarrow', 8, 30, 2300, 5],
   ['elder', 'Elder logs', 'Elder tree', '#c9e0a8', 'skyreach', 88, 320, 3800, 360],
   ['gloomwood', 'Gloomwood logs', 'Gloomwood tree', '#5a4a7a', 'hollow', 95, 380, 4000, 480],
+  ['hazel', 'Hazel logs', 'Hazel tree', '#b89a6a', 'willowbrook', 5, 24, 2250, 3],
+  ['ash', 'Ash logs', 'Ash tree', '#cfc0a0', 'mossbarrow', 22, 50, 2500, 10],
+  ['palm', 'Palm logs', 'Palm tree', '#c8a868', 'saltmere', 27, 60, 2550, 12],
+  ['cedar', 'Cedar logs', 'Cedar tree', '#b0603a', 'ironpeak', 40, 88, 2750, 26],
+  ['pine', 'Pine logs', 'Pine tree', '#9a7a52', 'ironpeak', 52, 130, 3000, 48],
+  ['mangrove', 'Mangrove logs', 'Mangrove tree', '#7a5a3a', 'gloomfen', 67, 210, 3400, 120],
+  ['cinderbark', 'Cinderbark logs', 'Cinderbark tree', '#4a3430', 'emberfall', 80, 275, 3700, 224],
+  ['windpine', 'Windpine logs', 'Windpine tree', '#a8b8c8', 'skyreach', 92, 345, 3900, 336],
+  ['wraithbark', 'Wraithbark logs', 'Wraithbark tree', '#c8c8d8', 'hollow', 98, 400, 4100, 448],
 ];
 const ORES = [
   ['copper', 'Copper', '#cf8a52', 'willowbrook', 1, 17, 2200, 6],
@@ -92,6 +116,18 @@ const ORES = [
   ['silver', 'Silver', '#d6dde4', 'mossbarrow', 20, 40, 2600, 35],
   ['astralite', 'Astralite', '#e2d4ff', 'skyreach', 90, 150, 4800, 900],
   ['voidstone', 'Voidstone', '#6a4aa8', 'hollow', 97, 180, 5200, 1300],
+  /* minerals for skilling charms (Crafting): each strengthens one non-combat skill */
+  ['flint', 'Flint', '#8a8a86', 'willowbrook', 4, 15, 2150, 4],
+  ['quartz', 'Quartz', '#e8eef4', 'willowbrook', 10, 24, 2300, 7],
+  ['amber', 'Amber', '#e8a030', 'mossbarrow', 18, 34, 2500, 13],
+  ['jet', 'Jet', '#2a2a34', 'saltmere', 26, 44, 2700, 21],
+  ['jade', 'Jade', '#5ab87a', 'saltmere', 35, 56, 2900, 36],
+  ['bloodstone', 'Bloodstone', '#3a6a4a', 'ironpeak', 46, 70, 3100, 60],
+  ['moonstone', 'Moonstone', '#d8e0ff', 'ironpeak', 58, 84, 3400, 96],
+  ['bogiron', 'Bog iron', '#9a5a2a', 'gloomfen', 64, 92, 3600, 128],
+  ['obsidian', 'Obsidian', '#2a2238', 'emberfall', 78, 115, 4100, 304],
+  ['skyglass', 'Skyglass', '#bfe6ff', 'skyreach', 91, 146, 4700, 608],
+  ['nullite', 'Nullite', '#3a2a5a', 'hollow', 99, 185, 5300, 1120],
 ];
 const THIEF = [
   ['villager', 'Villager', 'willowbrook', 1, 8, 2000, 3, 9, 2, null],
@@ -216,6 +252,20 @@ farmCook('cheese_pie', 'Cheese and onion pie', '#e8c070', 35, 110, 15, { crop_wh
 farmCook('berry_cake', 'Strawberry cake', '#f08aa0', 45, 140, 18, { crop_wheat: 2, egg: 1, milk: 1, crop_strawberry: 2 }, 140);
 farmCook('pumpkin_pie', 'Pumpkin pie', '#ef8a3a', 55, 170, 20, { crop_pumpkin: 1, crop_wheat: 1, egg: 1 }, 180);
 farmCook('honey_roast', 'Honey truffle roast', '#c8782a', 70, 230, 26, { honey: 1, truffle: 1, crop_potato: 2 }, 320);
+/* Fish suppers (Nov 2026): one new fish and one crop, so farming and fishing feed each other. They heal about four
+   more than the fish alone and sell for roughly their ingredients, so they are a preparation choice, not a money loop. */
+[['perch_stew', 'Perch and onion stew', 'perch', 'onion', 'bowl'], ['bream_greens', 'Bream with greens', 'bream', 'cabbage', 'plate'],
+ ['mackerel_pie', 'Mackerel pie', 'mackerel', 'wheat', 'pie'], ['flounder_supper', 'Flounder supper', 'flounder', 'potato', 'plate2'],
+ ['catfish_pot', 'Catfish pumpkin pot', 'catfish', 'pumpkin', 'pot'], ['char_goldleaf', 'Goldleaf char', 'char', 'goldleaf', 'wrap'],
+ ['grayling_sunbloom', 'Sunbloom grayling', 'grayling', 'sunbloom', 'skewer'], ['puffer_broth', 'Marsh puffer broth', 'bogpuffer', 'onion', 'bowl2'],
+ ['ray_wraps', 'Bog ray wraps', 'bogray', 'cabbage', 'wrap2'], ['cinder_roast', 'Ember-roast cinderfish', 'cinderfish', 'pumpkin', 'pan'],
+ ['basalt_melon', 'Basaltjaw and melon', 'basaltjaw', 'moonmelon', 'platter'], ['storm_skewers', 'Storm ray skewers', 'stormray', 'starfruit', 'skewer2'],
+ ['ghostfin_supper', 'Ghostfin supper', 'ghostfin', 'moonmelon', 'pie2']
+].forEach(([id, name, f, crop, vessel]) => {
+  const F = FISH.find(x => x[0] === f), lvl = Math.min(99, F[7] + 3), cropVal = (ITEMS['crop_' + crop] || { val: 5 }).val;
+  farmCook(id, name, F[2], lvl, Math.round(F[8] * 1.25), F[9] + 4, { [f]: 1, ['crop_' + crop]: 1 }, F[10] + cropVal + 2);
+  ITEMS[id].dish = { vessel, fish: F[2], crop: (ITEMS['crop_' + crop] || {}).col || '#8ab060' };
+});
 
 /* Gear: melee */
 const PIECES = [['weapon', 'dagger', 'dagger', 1, 0, .6], ['weapon', 'hammer', 'warhammer', 3, 3, 1.1], ['weapon', 'sword', 'sword', 2, 0, .8], ['head', 'helm', 'full helm', 2, 2, .5], ['shield', 'shield', 'kiteshield', 3, 4, .8], ['legs', 'legs', 'platelegs', 3, 6, 1], ['body', 'body', 'platebody', 5, 8, 1.4]];
@@ -287,6 +337,37 @@ mk('string', { name: 'Leather string', ic: 'bit', col: '#c8a070', val: 3, type: 
 mk('wooden_trap', { name: 'Wooden trap', ic: 'bit', col: '#a8784a', val: 9, type: 'craft', trap: true, sub: 'Starting hunting gear: each one held adds 5% Hunting XP (up to three).' });
 addR({ id: 'craft_string', skill: 'crafting', tab: 'Leather', name: 'Leather string', lvl: 1, xp: 6, t: 1800, in: { cowhide: 1 }, out: { string: 3 }, ev: 'craft' });
 addR({ id: 'craft_trap', skill: 'crafting', tab: 'Leather', name: 'Wooden trap', lvl: 2, xp: 12, t: 2400, in: { log_normal: 2, string: 1 }, out: { wooden_trap: 1 }, ev: 'craft' });
+/* Wooden shields (Nov 2026): a lighter alternative to metal kiteshields. About 60% of the defence of the metal shield at
+   the same requirement, plus a ranged or magic bonus, so archers and casters have a reason to carry one. */
+D.WOOD_SHIELDS = [
+  ['hazel', 'Hazel buckler', 5, 1, { def: 1, rng: 1 }], ['ash', 'Ash round shield', 24, 12, { def: 3, mag: 2 }],
+  ['palm', 'Palm wicker shield', 29, 15, { def: 4, rng: 3 }], ['cedar', 'Cedar heater', 42, 25, { def: 7, mag: 4 }],
+  ['pine', 'Pine tower shield', 54, 32, { def: 9, rng: 5 }], ['mangrove', 'Mangrove ward', 69, 42, { def: 12, mag: 7 }],
+  ['cinderbark', 'Cinderbark shield', 82, 50, { def: 17, rng: 9 }], ['windpine', 'Windpine aegis', 93, 56, { def: 20, mag: 11 }],
+  ['wraithbark', 'Wraithbark bulwark', 99, 60, { def: 22, rng: 8, mag: 8 }]
+];
+D.WOOD_SHIELDS.forEach(([log, name, lvl, dreq, b], i) => {
+  const id = log + '_shield', val = Math.round(14 * Math.pow(1.62, i) + lvl * 2);
+  mk(id, { name, ic: 'shield', col: (WOOD.find(w => w[0] === log) || [])[3] || '#a07a4f', val, type: 'gear', slot: 'shield', req: { defence: dreq }, b, tier: i, wood: true });
+  addR({ id: 'craft_' + id, skill: 'crafting', tab: 'Shields', name, lvl, xp: Math.round(20 + lvl * 2.2), t: 2800, in: { ['log_' + log]: 4, string: 2 }, out: { [id]: 1 }, ev: 'craft' });
+});
+/* Skilling charms: amulets that make one non-combat skill faster (gathering) or more rewarding (making). A real
+   alternative to combat amulets in the same slot, which saved preparations make easy to swap. */
+D.CHARMS = [
+  ['flint', 'Flint charm', 'woodcutting', 'speed', .05], ['quartz', 'Quartz charm', 'fishing', 'speed', .05],
+  ['amber', 'Amber charm', 'farming', 'xp', .06], ['jet', 'Jet charm', 'thieving', 'speed', .05],
+  ['jade', 'Jade charm', 'cooking', 'xp', .06], ['bloodstone', 'Bloodstone charm', 'mining', 'speed', .06],
+  ['moonstone', 'Moonstone charm', 'research', 'xp', .07], ['bogiron', 'Bog-iron charm', 'smithing', 'xp', .07],
+  ['obsidian', 'Obsidian charm', 'crafting', 'xp', .07], ['skyglass', 'Skyglass charm', 'herbalism', 'xp', .08],
+  ['nullite', 'Nullite charm', 'hunting', 'xp', .08], ['silver', 'Silver charm', 'exploration', 'xp', .06]
+];
+D.CHARMS.forEach(([ore, name, skill, kind, amt]) => {
+  const o = ORES.find(x => x[0] === ore), lvl = Math.min(99, o[4] + 2), id = ore + '_charm';
+  mk(id, { name, ic: 'amulet', col: o[2], val: Math.round(o[7] * 4 + 10), type: 'gear', slot: 'amulet', b: {}, charm: { skill, [kind]: amt }, sub: `${kind === 'speed' ? `${Math.round(amt * 100)}% faster` : `+${Math.round(amt * 100)}% XP in`} ${skill === 'research' ? 'Scholarship' : skill.charAt(0).toUpperCase() + skill.slice(1)} while worn` });
+  addR({ id: 'craft_' + id, skill: 'crafting', tab: 'Jewellery', name, lvl, xp: Math.round(15 + lvl * 1.8), t: 2600, in: { ['ore_' + ore]: 3, string: 1, ...(ore === 'nullite' ? { ore_voidstone: 1 } : {}) }, out: { [id]: 1 }, ev: 'craft' });
+});
+/* older materials stay useful: wolf pelts line the pine tower shield; gloomwood braces the wraithbark bulwark */
+D.RECIPES.craft_pine_shield.in.wolf_pelt = 1; D.RECIPES.craft_wraithbark_shield.in.log_gloomwood = 2;
 
 /* Boss trophies */
 mk('chief_helm', { name: "Grubnash's war-helm", ic: 'helm', col: '#8fbf6a', val: 600, type: 'gear', slot: 'head', req: { defence: 5 }, b: { def: 14, str: 3 }, rare: 1 });

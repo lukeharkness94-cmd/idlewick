@@ -15,7 +15,17 @@ const TREE = {
   magic: { kind: 'round', leaf: '#8a76c8', deep: '#5a4a96', bark: '#4a3a7a', sparkle: '#f0e6ff' },
   birch: { kind: 'tall', leaf: '#9cc45a', deep: '#6f9a42', bark: '#ece6d4', marks: '#3a3a3a' },
   elder: { kind: 'gnarled', leaf: '#b8d890', deep: '#88a868', bark: '#a8a890' },
-  gloomwood: { kind: 'gnarled', leaf: '#5a4a7a', deep: '#3a2e5a', bark: '#3a2a4a', sparkle: '#b88aff' }
+  gloomwood: { kind: 'gnarled', leaf: '#5a4a7a', deep: '#3a2e5a', bark: '#3a2a4a', sparkle: '#b88aff' },
+  /* Nov 2026: nine more, each with its own silhouette */
+  hazel: { kind: 'bush', leaf: '#7aa850', deep: '#5a8840', bark: '#8a6a44', berries: '#a8784a' },
+  ash: { kind: 'ash', leaf: '#8ab868', deep: '#6a9850', bark: '#a8a090' },
+  palm: { kind: 'palm', leaf: '#6aa04a', deep: '#4a8038', bark: '#a88a58' },
+  cedar: { kind: 'cedar', leaf: '#3f7a50', deep: '#2a5a3a', bark: '#8a4a30' },
+  pine: { kind: 'pine', leaf: '#2f6a48', deep: '#1f4a34', bark: '#6a4a30' },
+  mangrove: { kind: 'mangrove', leaf: '#5a8a4a', deep: '#3a6a3a', bark: '#5a4030' },
+  cinderbark: { kind: 'snag', leaf: '#5a3a30', deep: '#3a2420', bark: '#2a2020', embers: '#ffb04a' },
+  windpine: { kind: 'windswept', leaf: '#7aa0b8', deep: '#5a8098', bark: '#8a98a8' },
+  wraithbark: { kind: 'weeping', leaf: '#c8d0e0', deep: '#9aa4bc', bark: '#b8b8c8', sparkle: '#ffffff' }
 };
 function treeSprite(id) {
   const t = TREE[id] || TREE.normal; if (t.kind === 'oak') return A.sprites.oak();
@@ -24,11 +34,21 @@ function treeSprite(id) {
   else if (t.kind === 'willow') { s.poly([[14, 46], [18, 46], [17, 22], [15, 22]], bark); s.ell(16, 16, 11, 9, L); for (let x = 6; x <= 26; x += 2) s.line(x, 18, x + (x < 16 ? -1 : 1), 34 - Math.abs(x - 16) * .5, (x / 2) % 2 ? L : Dp); }
   else if (t.kind === 'tall') { s.rect(14, 16, 4, 31, bark); [[16, 12, 7, 9, L], [12, 20, 4, 5, Dp], [20, 22, 4, 5, Dp], [16, 9, 5, 6, L]].forEach(([x, y, rx, ry, r]) => s.ell(x, y, rx, ry, r)); for (let y = 20; y < 46; y += 4) s.fix(14 + (y % 8 ? 0 : 2), y, t.marks); }
   else if (t.kind === 'gnarled') { for (let y = 46; y > 22; y--) { const x = 16 + Math.round(Math.sin(y / 4) * 2); s.dot(x, y, bark); s.dot(x + 1, y, bark); s.dot(x + 2, y, bark); } s.line(17, 26, 9, 18, bark); s.line(17, 24, 25, 17, bark); [[10, 15, 6, 4.4], [23, 14, 6, 4.4], [16, 10, 7, 5.4]].forEach(([x, y, rx, ry], i) => s.ell(x, y, rx, ry, i === 2 ? L : Dp)); }
+  else if (t.kind === 'bush') { for (const x of [11, 16, 21]) s.line(16, 46, x, 30, bark); [[10, 30, 6, 6], [22, 30, 6, 6], [16, 25, 8, 7], [16, 34, 9, 5]].forEach(([x, y, rx, ry], i) => s.ell(x, y, rx, ry, i % 2 ? Dp : L)); }
+  else if (t.kind === 'ash') { s.rect(15, 20, 3, 27, bark); s.line(16, 26, 10, 18, bark); s.line(17, 24, 23, 16, bark); s.ell(16, 13, 7, 11, Dp); s.ell(15, 11, 6, 9, L); }
+  else if (t.kind === 'palm') { for (let y = 46; y > 14; y--) { const x = 14 + Math.round((46 - y) * .18); s.dot(x, y, bark); s.dot(x + 1, y, bark); if (y % 3 === 0) s.fix(x, y, bark.lo); } const tx = 20, ty = 13; for (const [dx, dy] of [[-11, 4], [-8, -3], [0, -8], [8, -4], [11, 5], [4, 6]]) { s.line(tx, ty, tx + dx, ty + dy, L); s.line(tx, ty + 1, tx + dx, ty + dy + 1, Dp); } s.ell(tx, ty + 2, 1.6, 1.6, rp('#7a5a30')); }
+  else if (t.kind === 'cedar') { s.rect(15, 14, 3, 33, bark); [[8, 14, 4], [17, 22, 4], [11, 30, 4], [6, 38, 3]].forEach(([half, y, h], i) => s.poly([[16 - half - 2, y + h], [16, y], [16 + half + 4, y + h]], i % 2 ? Dp : L)); s.ell(16, 9, 3, 4, L); }
+  else if (t.kind === 'pine') { s.rect(15, 40, 2, 7, bark); for (let i = 0; i < 6; i++) { const y = 4 + i * 6, half = 2 + i * 1.6; s.poly([[16, y], [16 + half, y + 8], [16 - half, y + 8]], i % 2 ? Dp : L); } }
+  else if (t.kind === 'mangrove') { for (const [x0, x1] of [[6, 14], [26, 18], [11, 15], [21, 17]]) s.line(x0, 46, x1, 34, bark); s.rect(14, 22, 4, 13, bark); s.ell(16, 16, 12, 7, Dp); s.ell(16, 14, 10, 5.4, L); }
+  else if (t.kind === 'snag') { s.poly([[13, 46], [19, 46], [18, 14], [15, 14]], bark); for (const [a, b, c, d] of [[16, 26, 7, 18], [17, 22, 25, 14], [16, 18, 11, 10], [17, 30, 24, 26]]) { s.line(a, b, c, d, bark); s.line(a, b + 1, c, d + 1, bark); } s.ell(9, 17, 3, 2, Dp); s.ell(24, 13, 3, 2, L); }
+  else if (t.kind === 'windswept') { for (let y = 46; y > 18; y--) { const x = 12 + Math.round((46 - y) * .3); s.dot(x, y, bark); s.dot(x + 1, y, bark); } [[22, 16, 9, 4], [25, 22, 6, 3], [17, 12, 6, 3]].forEach(([x, y, rx, ry], i) => s.ell(x, y, rx, ry, i % 2 ? Dp : L)); s.line(28, 14, 31, 13, L); }
+  else if (t.kind === 'weeping') { s.poly([[14, 46], [18, 46], [17, 16], [15, 16]], bark); s.ell(16, 12, 9, 6, L); for (let x = 7; x <= 25; x += 3) { const len = 18 + ((x * 7) % 9); for (let y = 14; y < 14 + len; y++) s.dot(x + ((y >> 2) % 2), y, (x / 3) % 2 ? L : Dp); } }
   else { s.poly([[13, 46], [19, 46], [18, 26], [14, 26]], bark); [[16, 15, 10, 9, Dp], [16, 12, 8.5, 7, L], [9, 18, 5, 4.4, L], [23, 17, 5.5, 4.6, L]].forEach(([x, y, rx, ry, r]) => s.ell(x, y, rx, ry, r)); }
   [[12, 9], [19, 8], [22, 14], [9, 15]].forEach(([x, y]) => { if (s.at(x, y)) { s.fix(x, y, L.gl); } });
   if (t.fall) [[8, 26], [24, 30], [12, 40]].forEach(([x, y]) => s.fix(x, y, t.fall));
   if (t.berries) [[12, 22], [20, 26], [15, 32], [10, 35]].forEach(([x, y]) => s.fix(x, y, t.berries));
   if (t.sparkle) [[10, 10], [22, 9], [16, 4], [26, 18]].forEach(([x, y]) => s.fix(x, y, t.sparkle));
+  if (t.embers) [[8, 18], [24, 14], [12, 10], [22, 27], [16, 36]].forEach(([x, y]) => s.fix(x, y, t.embers));
   return s;
 }
 

@@ -118,3 +118,18 @@ set('exploration', { catch: 25, chop: 25, 'visit:mossbarrow': 1 });
 const mp = D.QM.miners_pick; if (mp) { mp.adv = 3; mp.blurb = 'Brannoc’s old mine is full of rats and its props are rotten. Clear the rats and bring timber, and he will hand you his spare pickaxe so you can learn Mining.'; mp.obj = [{ ev: 'chop', key: 'normal', n: 10, label: 'Chop 10 logs for new pit props' }, { ev: 'kill', key: 'rat', n: 4, label: 'Clear 4 rats from the old mine' }]; }
 const mc = D.QM.mq_crafting; if (mc) { mc.adv = 8; mc.obj = mc.obj.map(o => o.ev === 'chop' && o.key === 'birch' ? { ev: 'chop', key: 'normal', n: 15, label: 'Chop 15 logs for her frames' } : o); }
 })();
+
+(() => {
+const D = window.DQ.data, add = r => { r.t = r.t || 2400; D.RECIPES[r.id] = r; D.RLIST[r.skill].push(r); return r; };
+/* Make your own gathering tools (Nov 2026): Smithing forges pickaxes, axes and hoes; Crafting makes rods and thief
+   gloves. Inputs cost about the tool's sale value (the shop sells at three times that), so making is the cheaper route
+   for a skilled player without becoming a money loop. */
+D.TOOL_MAKE = { bars: ['bar_iron', 'bar_steel', 'bar_mithril', 'bar_adamant', 'bar_rune'], smith: [16, 31, 51, 71, 86], logs: ['log_normal', 'log_oak', 'log_willow', 'log_maple', 'log_yew'], rodLvl: [10, 26, 46, 61, 76], hides: ['cowhide', 'frost_pelt', 'bogscale', 'drakehide', 'wyrm_scale'], gloveLvl: [8, 30, 50, 70, 85] };
+for (let t = 1; t <= 5; t++) {
+  const T = D.TOOL_MAKE, bar = T.bars[t - 1], bv = D.ITEMS[bar].val, need = id => Math.max(2, Math.ceil(D.ITEMS[id].val * .9 / bv));
+  for (const k of ['pick', 'axe', 'hoe']) { const id = `tool_${k}_${t}`; add({ id: 'smith_' + id, skill: 'smithing', tab: 'Tools', name: D.ITEMS[id].name, lvl: T.smith[t - 1], xp: Math.round(30 * Math.pow(2.1, t)), t: 3000, in: { [bar]: need(id), [T.logs[t - 1]]: 2 }, out: { [id]: 1 }, ev: 'smith' }); }
+  const rod = `tool_rod_${t}`, gl = `tool_gloves_${t}`, hv = D.ITEMS[T.hides[t - 1]].val;
+  add({ id: 'craft_' + rod, skill: 'crafting', tab: 'Tools', name: D.ITEMS[rod].name, lvl: T.rodLvl[t - 1], xp: Math.round(28 * Math.pow(2.1, t)), t: 3000, in: { [T.logs[t - 1]]: 3, string: 2, [bar]: Math.max(1, Math.ceil(D.ITEMS[rod].val * .7 / bv)) }, out: { [rod]: 1 }, ev: 'craft' });
+  add({ id: 'craft_' + gl, skill: 'crafting', tab: 'Tools', name: D.ITEMS[gl].name, lvl: T.gloveLvl[t - 1], xp: Math.round(28 * Math.pow(2.1, t)), t: 3000, in: { [T.hides[t - 1]]: Math.max(2, Math.ceil(D.ITEMS[gl].val * .9 / hv)), string: 2 }, out: { [gl]: 1 }, ev: 'craft' });
+}
+})();

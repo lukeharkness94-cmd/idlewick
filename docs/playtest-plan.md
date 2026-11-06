@@ -104,3 +104,12 @@ Unverified without people: whether the Next step card is read or skipped; whethe
 8. Did you notice the "New" badge on a newly unlocked skill? Did you open it because of the badge?
 
 Unverified without people: whether saved preparations are used beyond the first try, whether the slower opening loses impatient players before the first boss, and whether the combat page's two-column split reads as "you" and "the fight".
+
+## Questions for the Nov 2026 brief build (prepared, not yet run)
+
+1. Could you find the next thing to make on the Crafting and Smithing pages? Did the categories match how you think about them?
+2. When something could not be made yet, did you know why and where to go?
+3. Did you use a skilling charm, a wooden shield or a made tool? Which one, and why?
+4. Did you notice you could gather from any town? Did anything feel like an errand?
+5. Was each new skill unlock clear (Cooking, Mining, Farming, Hunting)? Did any feel like a chore?
+6. Did "Goal complete" on Home help you choose what to do next?
