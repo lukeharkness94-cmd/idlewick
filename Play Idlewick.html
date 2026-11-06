@@ -7095,7 +7095,8 @@ const ICON = {
   gear: s => { const g = R.iron; s.ell(8, 8, 5, 5, g); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; s.rect(Math.round(8 + Math.cos(a) * 6) - 1, Math.round(8 + Math.sin(a) * 6) - 1, 2, 2, g); } s.ell(8, 8, 2, 2, rp('#3a3a44')); },
   bell: s => { s.poly([[5, 4], [11, 4], [13, 12], [3, 12]], R.gold); s.ell(8, 4, 3, 2, R.gold); s.rect(2, 12, 12, 1, R.gold); s.ell(8, 14, 1.4, 1.2, rp('#7a5a2a')); s.fix(6, 6, R.gold.gl); },
   coin: s => { s.ell(8, 8, 6, 6, R.gold); s.ell(8, 8, 4, 4, ramp('#f0c860')); s.line(8, 5, 8, 11, null, R.gold.lo); s.fix(6, 5, '#fff6c0'); },
-  sound: s => { s.rect(2, 6, 3, 4, R.wood); s.poly([[5, 6], [10, 2], [10, 14], [5, 10]], R.gold); s.line(12, 5, 13, 8, null, '#9ab0c0'); s.line(13, 8, 12, 11, null, '#9ab0c0'); },
+  /* speaker on the left, two solid wave arcs on the right: the drawing's weight sits on the canvas centre */
+  sound: s => { s.rect(1, 6, 3, 4, R.wood); s.poly([[4, 6], [8, 3], [8, 13], [4, 10]], R.gold); const w = rp('#e8dcc0'); s.line(10, 6, 10, 9, w); s.fix(11, 5, w.base); s.fix(11, 10, w.base); s.line(13, 4, 13, 11, w); s.fix(14, 5, w.base); s.fix(14, 10, w.base); s.fix(12, 3, w.base); s.fix(12, 12, w.base); },
   pin: s => { s.ell(8, 6, 4.6, 4.6, R.red); s.poly([[4, 8], [12, 8], [8, 15]], R.red); s.ell(8, 6, 1.6, 1.6, rp('#f4ecd8')); },
   clock: s => { s.ell(8, 8, 6, 6, R.gold); s.ell(8, 8, 4.4, 4.4, rp('#f4ecd8')); s.line(8, 8, 8, 5, null, '#2a1c1f'); s.line(8, 8, 11, 8, null, '#2a1c1f'); },
   star: s => { const pts = []; for (let i = 0; i < 10; i++) { const r = i % 2 ? 2.8 : 6.6, a = -Math.PI / 2 + i * Math.PI / 5; pts.push([8 + Math.cos(a) * r, 8.5 + Math.sin(a) * r]); } s.poly(pts, R.gold); s.fix(7, 6, '#fff6c0'); },
@@ -7130,7 +7131,7 @@ Object.assign(ICON, {
   nest: s => { s.ell(8, 11, 6.5, 3.4, R.wood); s.ell(8, 9.5, 4, 1.4, rp('#5a3a22')); s.ell(6, 8, 1.6, 1.8, rp('#cfe6f0')); s.ell(10, 8, 1.6, 1.8, rp('#cfe6f0')); },
   ring_logo: s => { s.ell(8, 9, 6, 6, R.gold); for (let j = -4; j <= 4; j++) for (let i = -4; i <= 4; i++) if (i * i + j * j <= 12) s.erase(8 + i, 9 + j); s.ell(8, 3, 2, 2, rp('#3f7fd6')); },
   bit: s => { s.ell(8, 8, 3, 3, R.gold); },
-  mute: s => { ICON.sound(s); for (let y = 5; y <= 11; y++) s.erase(12, y), s.erase(13, y); const r = rp('#c8483c'); s.line(11, 5, 15, 10, r); s.line(15, 5, 11, 10, r); }
+  mute: s => { s.rect(1, 6, 3, 4, R.wood); s.poly([[4, 6], [8, 3], [8, 13], [4, 10]], R.gold); const r = rp('#c8483c'); s.line(10, 5, 14, 10, r); s.line(14, 5, 10, 10, r); s.line(11, 5, 15, 10, r); s.line(15, 5, 11, 10, r); }
 });
 const ICON_ALIAS = { book: 'research', scroll: 'quest', compass: 'exploration', sword: 'attack', rod: 'fishing', glove: 'thieving', hoe: 'farming', hammer: 'smithing', bottle: 'herbalism', rune: 'enchanting', house: 'home', bank: 'bag', users: 'bag', paw: 'hunting', defence: 'defence', health: 'hitpoints' };
 function iconSprite(id) { const k = ICON[id] ? id : ICON_ALIAS[id]; const f = ICON[k]; if (!f) return null; const s = Spr(16, 16); const out = f(s); return out && out.w ? out : s; }
