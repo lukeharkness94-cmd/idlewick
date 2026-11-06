@@ -47,8 +47,6 @@
         }
       }
     }
-    const live=view.querySelector('.combat-live'),controls=view.querySelector('.combat-targets > .encounter-controls');
-    if(live && controls)live.prepend(controls);
   };
   const render = UI.render;
   UI.render = fresh => {

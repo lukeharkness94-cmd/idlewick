@@ -235,6 +235,56 @@ function bigStar() {
   return s;
 }
 A.bigStarUrl = () => A.url('bigstar', bigStar);
+/* ================= Skill emblems (32 x 32) =================
+   The rail, skill rows and level-up moments show skills at 32px or more, where the 16px glyphs read as blocky. These
+   are separate, more detailed drawings of the same objects (same palette, top-left light, selective outlines). The
+   16px glyphs stay for small inline icons. */
+const thick = (s, x0, y0, x1, y1, r, w = 2) => { for (let i = 0; i < w; i++) s.line(x0 + i, y0, x1 + i, y1, r); };
+const EMBLEM = {
+  fishing: s => { thick(s, 3, 29, 21, 4, R.wood); thick(s, 3, 29, 7, 23, rp('#5a3b2a'), 3); s.line(22, 4, 25, 15, null, '#e8dcc0'); s.line(25, 15, 25, 17, null, '#e8dcc0');
+    const f = rp('#5f9ac8'); s.ell(23, 23, 6, 3.4, f); s.poly([[28, 23], [31, 19], [31, 27]], f); s.ell(21, 24.5, 4, 1.4, rp('#d8e6ea')); s.poly([[20, 19], [24, 18], [23, 21]], rp('#c86a44')); s.fix(19, 22, '#2a1c1f'); s.fix(18, 21, '#ffffff'); s.fix(25, 17, '#c8483c'); },
+  woodcutting: s => { const lg = R.wood; s.rect(5, 21, 14, 8, R.bark); s.line(8, 24, 16, 24, null, '#5a3b2a'); s.ell(5, 25, 2.6, 4, rp('#d8b080')); s.ell(5, 25, 1.2, 2, rp('#b8865a')); s.fix(5, 25, '#7a5236');
+    thick(s, 10, 28, 22, 6, lg); s.poly([[18, 3], [28, 1], [30, 11], [23, 12], [20, 8]], R.steel); s.line(28, 2, 30, 10, null, '#ffffff'); s.rect(19, 6, 4, 3, R.iron); },
+  mining: s => { s.poly([[16, 23], [29, 21], [31, 29], [18, 31]], R.stone); s.poly([[21, 24], [25, 23], [24, 27]], R.copper); s.fix(27, 27, '#f0b070'); s.fix(20, 28, R.tin.gl);
+    thick(s, 7, 29, 18, 8, R.wood); for (let i = 0; i <= 24; i++) { const t = i / 24, x = 4 + 24 * t, y = 9 - Math.sin(t * Math.PI) * 6 + t * 2; s.dot(x, y, R.iron); s.dot(x, y + 1, R.iron); } s.fix(5, 9, R.iron.gl); s.fix(27, 11, R.iron.gl); },
+  thieving: s => { const b = rp('#6a4a7a'); s.poly([[6, 30], [4, 18], [8, 13], [20, 13], [24, 18], [22, 30]], b); s.rect(10, 9, 8, 5, b); s.line(8, 13, 20, 13, null, '#e6b84a'); s.rect(12, 6, 4, 3, rp('#4a3a5a'));
+    for (const [x, y] of [[22, 26], [25, 22], [27, 27]]) { s.ell(x, y, 3.4, 3.4, R.gold); s.fix(x - 1, y - 1, '#fff6c0'); s.fix(x, y + 1, R.gold.lo); } s.fix(10, 18, '#9a7aaa'); },
+  farming: s => { s.ell(13, 27, 11, 4, R.soil); s.line(4, 26, 22, 26, null, '#5a3b2a'); const st = R.leafCrop; s.line(13, 25, 13, 15, st); s.ell(9, 15, 4, 2.4, st); s.ell(17, 12, 4.4, 2.6, st); s.ell(12, 9, 2.4, 3, rp('#8cc85a')); s.fix(8, 14, '#c8e8a0');
+    thick(s, 20, 30, 28, 5, R.wood); s.poly([[24, 2], [31, 3], [30, 8], [26, 6]], R.iron); s.fix(30, 4, R.iron.gl); },
+  cooking: s => { for (const [x, h] of [[9, 6], [14, 8], [19, 6]]) { s.poly([[x - 3, 31], [x, 31 - h], [x + 3, 31]], rp('#e0603a')); s.poly([[x - 1, 31], [x, 28 - h / 3], [x + 1, 31]], rp('#ffb04a')); }
+    s.ell(15, 18, 11, 6, R.iron); s.rect(3, 15, 24, 3, R.iron); s.rect(1, 13, 4, 2, R.iron); s.rect(25, 13, 4, 2, R.iron); s.ell(15, 15, 9, 2, rp('#c88a4a')); s.fix(12, 15, '#ffd08a'); s.fix(18, 14, '#e8a060');
+    for (const [x, y] of [[11, 9], [12, 6], [17, 8], [18, 5], [22, 9]]) s.fix(x, y, '#f4f0e8'); },
+  smithing: s => { const a = R.iron; s.poly([[3, 15], [27, 15], [29, 17], [22, 20], [9, 20], [3, 18]], a); s.rect(11, 20, 9, 5, a); s.poly([[7, 25], [24, 25], [26, 30], [5, 30]], rp('#6a7480')); s.line(4, 15, 26, 15, null, '#e8eef2');
+    thick(s, 18, 13, 26, 3, R.wood); s.poly([[22, 1], [30, 0], [31, 6], [24, 7]], R.steel); s.fix(30, 1, '#ffffff'); for (const [x, y, c] of [[14, 11, '#ffd060'], [11, 9, '#ffb04a'], [17, 8, '#fff6c0'], [9, 12, '#ff8a3a']]) s.fix(x, y, c); },
+  crafting: s => { const sp = R.woodLight; s.rect(4, 14, 14, 3, sp); s.rect(4, 27, 14, 3, sp); const th = rp('#c8483c'); s.rect(6, 17, 10, 10, th); for (const y of [19, 22, 25]) s.line(6, y, 15, y, null, '#8a2a2a');
+    s.line(16, 22, 22, 20, th); s.line(22, 20, 25, 23, th); thick(s, 18, 28, 28, 3, R.steel, 1); s.line(19, 28, 29, 3, R.steel); s.fix(28, 4, '#2a1c1f'); s.fix(29, 2, '#ffffff'); },
+  magic: s => { thick(s, 5, 30, 18, 11, R.wood); s.rect(15, 12, 5, 2, R.gold); const orb = ramp('#9b87e0', { gl: .85 }); s.ell(22, 8, 5.4, 5.4, orb); s.fix(20, 5, '#ffffff'); s.fix(21, 5, '#f0e8ff');
+    for (const [x, y] of [[29, 3], [14, 4], [29, 14], [27, 1], [12, 7]]) s.fix(x, y, '#e8e0ff'); s.fix(28, 2, '#b8a8f0'); s.fix(30, 3, '#b8a8f0'); s.fix(29, 4, '#b8a8f0'); },
+  research: s => { const cv = rp('#8a3a3a'); s.poly([[1, 9], [15, 7], [16, 9], [17, 7], [31, 9], [31, 27], [17, 26], [16, 28], [15, 26], [1, 27]], cv); const pg = rp('#f4ecd8');
+    s.poly([[3, 10], [15, 9], [15, 25], [3, 25]], pg); s.poly([[17, 9], [29, 10], [29, 25], [17, 25]], rp('#e8dcc0')); for (const y of [13, 16, 19, 22]) { s.line(5, y, 13, y, null, '#9a8a7a'); s.line(19, y, 27, y, null, '#a89a88'); }
+    s.rect(23, 4, 3, 10, R.gold); s.fix(24, 14, R.gold.lo); },
+  hunting: s => { const h = R.gold; for (let i = 0; i <= 40; i++) { const t = i / 40, x = 3 + 21 * t, y = 9 + Math.sin(t * Math.PI * .5) * 11, w = 2 + Math.round(t * 3); for (let k = 0; k < w; k++) s.dot(x, y - k + (w >> 1), h); }
+    s.ell(26, 20, 3, 6.4, h); s.ell(27, 20, 1.6, 4.6, rp('#5a3a22')); s.rect(2, 8, 3, 3, R.wood); for (const x of [10, 18]) { const y = Math.round(9 + Math.sin((x - 3) / 21 * Math.PI * .5) * 11); s.rect(x, y - 3, 2, 6, R.leather); } s.line(10, 13, 19, 28, R.leather); s.line(19, 28, 19, 22, R.leather); s.fix(7, 8, '#fff6c0'); s.fix(14, 11, '#fff6c0'); },
+  exploration: s => { s.ell(16, 16, 13, 13, R.gold); s.ell(16, 16, 10.4, 10.4, rp('#f4ecd8')); for (const [x, y] of [[16, 7], [16, 25], [7, 16], [25, 16]]) s.fix(x, y, '#5a4a3a');
+    s.poly([[16, 7], [18.5, 16], [16, 18], [13.5, 16]], R.red); s.poly([[16, 25], [13.5, 16], [16, 14], [18.5, 16]], R.iron); s.ell(16, 16, 1.4, 1.4, R.gold); s.rect(14, 1, 4, 3, R.gold); s.fix(9, 8, '#ffffff'); },
+  herbalism: s => { const st = R.stone; s.poly([[5, 17], [27, 17], [24, 28], [8, 28]], st); s.rect(9, 28, 14, 2, st); s.ell(16, 17, 11, 2.4, rp('#5a5550')); s.ell(16, 17, 8, 1.4, rp('#6ea846'));
+    thick(s, 17, 17, 26, 3, rp('#b8b2a8'), 3); const lf = R.leafCrop; s.poly([[3, 15], [6, 4], [10, 14]], lf); s.line(6, 6, 6, 14, null, '#3f7a3c'); s.poly([[9, 13], [14, 7], [13, 15]], rp('#8cc85a')); s.ell(22, 12, 1.8, 1.8, rp('#e48aa8')); s.fix(22, 12, '#fff0f4'); },
+  enchanting: s => { const st = rp('#6a7088'); s.poly([[8, 29], [10, 6], [16, 2], [22, 6], [24, 29]], st); s.rect(6, 28, 20, 3, rp('#4a4e60')); const g = '#8fc0ff';
+    s.line(16, 8, 16, 23, null, g); s.line(11, 13, 21, 13, null, g); s.line(12, 19, 16, 23, null, g); s.line(20, 19, 16, 23, null, g); s.fix(16, 8, '#e8f4ff'); for (const [x, y] of [[4, 7], [27, 10], [29, 5], [3, 15]]) s.fix(x, y, '#cfe0ff'); s.fix(26, 4, '#8fc0ff'); },
+  attack: s => { const b = R.steel; for (let i = 0; i < 3; i++) s.line(9 + i, 21, 26 + i - 1, 3, b); s.line(10, 21, 27, 3, null, '#ffffff'); s.poly([[26, 1], [30, 1], [30, 5]], b);
+    thick(s, 3, 15, 15, 27, R.gold, 2); thick(s, 3, 29, 9, 23, R.leather, 2); s.ell(3, 29, 1.6, 1.6, R.gold); s.fix(8, 18, '#fff6c0'); },
+  strength: s => { const sk = rp('#e0a070'); s.rect(3, 19, 15, 8, sk); s.ell(11, 18, 6, 4.6, sk); s.rect(15, 8, 7, 17, sk); s.ell(19, 7, 5, 4.6, sk); for (const y of [4, 6, 8]) s.line(16, y, 22, y, null, sk.lo); s.line(9, 22, 16, 22, null, sk.lo);
+    s.rect(1, 18, 4, 10, rp('#4f7fbf')); s.fix(8, 14, '#fff0d8'); s.fix(9, 14, '#fff0d8'); s.fix(16, 4, '#fff0d8'); s.fix(25, 26, '#f3d58a'); s.fix(27, 23, '#f3d58a'); s.fix(26, 29, '#f3d58a'); },
+  defence: s => { s.poly([[4, 3], [28, 3], [28, 15], [16, 30], [4, 15]], R.steel); s.poly([[7, 6], [25, 6], [25, 15], [16, 26], [7, 15]], rp('#3f6fd6'));
+    s.rect(15, 6, 2, 19, rp('#e6b84a')); s.rect(7, 12, 18, 2, rp('#e6b84a')); s.ell(16, 13, 2.4, 2.4, R.gold); s.fix(5, 4, '#ffffff'); s.fix(9, 8, '#8ab0ff'); },
+  hitpoints: s => { const r = R.red; s.ell(10, 12, 7, 6.6, r); s.ell(22, 12, 7, 6.6, r); s.poly([[3, 14], [29, 14], [16, 29]], r); s.ell(9, 10, 2.4, 2, rp('#f08070')); s.fix(8, 9, '#ffffff'); s.fix(9, 9, '#ffffff'); s.fix(8, 10, '#ffe0d8'); },
+  ranged: s => { for (let i = 0; i <= 40; i++) { const t = i / 40, b = Math.sin(t * Math.PI) * 6; s.dot(4 + 20 * t - b, 29 - 26 * t - b, R.wood); s.dot(5 + 20 * t - b, 29 - 26 * t - b, R.wood); }
+    s.line(5, 29, 25, 3, null, '#efe4c8'); s.line(8, 23, 27, 6, R.woodLight); s.poly([[26, 4], [30, 2], [28, 7]], R.iron); s.poly([[7, 23], [5, 27], [9, 25]], rp('#e8e0d0')); s.fix(6, 24, '#c8483c'); s.ell(10, 20, 1.4, 1.4, R.leather); }
+};
+EMBLEM.scholarship = EMBLEM.research;
+function emblemSprite(id) { const f = EMBLEM[id]; if (!f) return null; const s = Spr(32, 32); f(s); return s; }
+Object.assign(A, { EMBLEM, emblemSprite, emblemUrl: id => EMBLEM[id] ? A.url('emblem:' + id, () => emblemSprite(id)) : null });
+
 Object.assign(A, { trophySprite, trophyUrl: (id, gilded) => A.url('trophy:' + id + (gilded ? ':gold' : ''), () => trophySprite(id, gilded)) });
 Object.assign(A, { workerSprite, treeSprite, rockSprite, piece, sceneFor, furnSprite, iconSprite, TREE, TOWN, ICON, ICON_ALIAS,
   treeUrl: id => A.url('tree:' + id, () => treeSprite(id)), rockUrl: id => A.url('rock:' + id, () => rockSprite(id)),

@@ -73,7 +73,7 @@ UI.openGuide = id => {
   const drops = (() => {
     const all = DQ.knows(m, 'drops'); const rows = m.drops.slice().sort((a, b) => b[2] - a[2]).map(([item, , p]) => {
       const found = !!B.drops[id + ':' + item], rar = D.rarityOf(p), it = D.ITEMS[item];
-      if (!all && !found) return ''; return `<div class="gdrop ${found ? 'got' : ''}"><span class="itm sm" style="--c:${it.col}">${ico(it.ic)}</span><b style="color:${RAR_COL[rar[0]]}">${esc(it.name)}</b><small>${rar[1]}${DQ.knows(m, 'legend') ? ` · about 1 in ${fmt(Math.round(1 / p))}` : ''}</small><span class="gmark">${found ? 'Found' : 'Not found yet'}</span></div>`;
+      if (!all && !found) return ''; return `<div class="gdrop ${found ? 'got' : ''}"><span class="itm sm" style="--c:${it.col}">${ico(it.ic)}</span><b style="color:${RAR_COL[rar[0]]}">${esc(it.name)}</b>${it.unique ? ` <span class="tag" data-tip="text:${esc(it.unique.name + ': ' + it.unique.text)}">Unique</span>` : ''}<small>${it.unique && !m.boss && !(S().uniqFound || {})[item] ? `first copy guaranteed within ${Math.ceil(2.5 / p)} defeats (${Math.min((S().upity || {})[item] || 0, Math.ceil(2.5 / p))} so far) · ` : ''}${rar[1]}${DQ.knows(m, 'legend') ? ` · about 1 in ${fmt(Math.round(1 / p))}` : ''}</small><span class="gmark">${found ? 'Found' : 'Not found yet'}</span></div>`;
     }).join('');
     const hidden = all ? 0 : m.drops.filter(d => !B.drops[id + ':' + d[0]]).length;
     return `${rows}${hidden ? `<p class="dim" style="margin:6px 0 0">${hidden} more item${hidden > 1 ? 's' : ''} you have not found yet. Reach the <b>Drop table</b> entry${r.rank <= 3 ? ` (${fmt(T[3] - r.kills)} more defeat${T[3] - r.kills > 1 ? 's' : ''})` : ''} to see them all.</p>` : ''}`;
@@ -157,4 +157,11 @@ Object.assign(UI.DO, {
 });
 const house0 = UI.V.house;
 if (house0) UI.V.house = () => house0() + (S().house.owned ? UI.trophyWallHtml() : '');
+/* where a unique comes from (shown with the item, in tooltips, the comparison and the field guide) */
+DQ.uniqueSource = id => {
+  const m = D.MONLIST.find(x => !x.boss && (x.drops || []).some(d => d[0] === id)), b = D.MONLIST.find(x => x.boss && x.boss.first === id);
+  if (b) return { boss: b, text: `Always dropped by ${b.name} the first time you defeat it.` };
+  if (!m) return null; const p = m.drops.find(d => d[0] === id)[2], need = Math.ceil(2.5 / p), have = (S().upity || {})[id] || 0, met = (S().beast.kills[m.id] || 0) > 0, found = (S().uniqFound || {})[id];
+  return { mon: m, need, have, met, found, text: met ? `Dropped by ${m.name} in ${D.TOWN[m.town].name}, rarely.${found ? '' : ` Your first copy is guaranteed within ${need} defeats (${Math.min(have, need)} so far).`}` : `Found somewhere in ${D.TOWN[m.town].name}.` };
+};
 })();

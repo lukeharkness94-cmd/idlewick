@@ -173,18 +173,19 @@ DQ.combatLvl = () => {
   return Math.floor(base + Math.max(m, r, g));
 };
 /* Progress towards the next combat level: the formula evaluated with fractional skill levels, plus the cheapest single-skill route. */
-let startCache = null;
-const combatStart = () => { if (startCache == null) { const f = DQ.newState(), L = {}; ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].forEach(k => { let l = 1; while (l < 99 && (f.xp[k] || 0) >= D.XPF[l + 1]) l++; L[k] = l; }); startCache = combatFrom(L); } return startCache; };
 const combatFrom = L => { const base = .25 * (L.defence + L.hitpoints); return base + Math.max(.325 * (L.attack + L.strength), .325 * Math.floor(1.5 * L.ranged), .325 * Math.floor(1.5 * L.magic)); };
 DQ.combatProgress = () => {
   const ids = ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'], L = {}, F = {};
   ids.forEach(k => { L[k] = DQ.lvl(k); F[k] = L[k] + (L[k] >= 99 ? 0 : DQ.pctNext(k) / 100); });
-  /* A new hero starts part-way through combat 3 (Health starts at 10), so the first level's bar is measured from that
-     starting point: it begins empty instead of at 40%. Every later level is measured from the level itself. */
-  const lvl = DQ.combatLvl(), next = lvl + 1, cont = Math.max(lvl, combatFrom(F)), start = combatStart(), base = lvl === Math.floor(start) ? Math.max(lvl, start) : lvl;
-  const pct = lvl >= 126 ? 100 : Math.min(99, Math.max(0, (cont - base) / (next - base) * 100));
-  const routes = ids.filter(k => DQ.skillUnlocked(k)).map(k => { const T = { ...L }; while (T[k] < 99 && Math.floor(combatFrom(T)) < next) T[k]++; return Math.floor(combatFrom(T)) >= next ? { skill: k, xp: Math.max(0, D.XPF[T[k]] - DQ.S.xp[k]) } : null; }).filter(Boolean).sort((a, b) => a.xp - b.xp);
-  return { lvl, next, pct, best: routes[0] || null, routes };
+  /* The bar follows the skill you are training (or else the cheapest route): how far that skill has come towards the XP
+     that tips the combat level over, so the percentage and "N XP reaches combat X" always describe the same thing. Combat
+     level only changes on whole skill levels, so the earlier fractional-formula bar could read 99% with a level to go. */
+  const lvl = DQ.combatLvl(), next = lvl + 1;
+  const routes = ids.filter(k => DQ.skillUnlocked(k)).map(k => { const T = { ...L }; while (T[k] < 99 && Math.floor(combatFrom(T)) < next) T[k]++; return Math.floor(combatFrom(T)) >= next ? { skill: k, xp: Math.max(0, D.XPF[T[k]] - DQ.S.xp[k]), from: D.XPF[L[k]], to: D.XPF[T[k]] } : null; }).filter(Boolean).sort((a, b) => a.xp - b.xp);
+  const st = DQ.weaponStyle ? DQ.weaponStyle() : 'melee', focus = { accurate: 'attack', aggressive: 'strength', defensive: 'defence', offense: st }[(DQ.S.style || {})[st]];
+  const route = routes.find(r => r.skill === focus) || routes[0] || null;
+  const pct = lvl >= 126 || !route ? 100 : Math.min(99, Math.max(0, (DQ.S.xp[route.skill] - route.from) / Math.max(1, route.to - route.from) * 100));
+  return { lvl, next, pct, best: routes[0] || null, route, routes };
 };
 /* Catch-up: while your combat level trails your Hero level, combat skills learn faster (+15% per level behind, up to +200%). */
 /* fractional combat level (skills' progress counted), so the catch-up bonus eases off smoothly instead of in steps */

@@ -104,7 +104,11 @@ const fs=require('node:fs');
    const S=DQ.S,D=DQ.data,crop=D.CROPS[0];window.__setup('willowbrook',['rune_sword'],null);const g0=DQ.growDur(crop),a={kind:'fish',id:'shrimp',pace:'steady',count:0},d0=DQ.actDur(a);
    window.__setup('willowbrook',['rune_sword'],'toast');const g1=DQ.growDur(crop);window.__setup('willowbrook',['rune_sword'],'stormchick');const d1=DQ.actDur(a),d2=DQ.actDur(Object.assign({},a,{count:10}));
    window.__setup('willowbrook',['rune_sword'],null);S.beast.kills.goblin=1;const r0=DQ.research(D.MON.goblin).rank;window.__setup('willowbrook',['rune_sword'],'bogwisp');const r1=DQ.research(D.MON.goblin).rank;
-   return {g0,g1,d0,d1,d2,r0,r1};});
+   /* Night study: research progresses 10% faster through the live research tick */
+   const T=D.TECHS.find(t=>!t.repeatable&&t.tier===1),run=pet=>{window.__setup('willowbrook',['rune_sword'],pet);S.research.active=[{id:T.id,left:T.mins*60000}];S.research.done={};for(let i=0;i<60;i++)DQ.advanceWorld(1000);return T.mins*60000-S.research.active[0].left;};
+   const n0=run(null),n1=run('quill');
+   return {g0,g1,d0,d1,d2,r0,r1,n0,n1};});
+  assert.ok(Math.abs(rates.n1/rates.n0-1.1)<.01,`Night study: research 10% faster (${rates.n0} → ${rates.n1})`);
   assert.ok(Math.abs(rates.g1/rates.g0-.9)<.02,'Early riser: crops ripen 10% sooner');
   assert.ok(rates.d1<rates.d0&&rates.d2>rates.d1,'Tailwind: first ten actions faster, then normal');
   assert.equal(rates.r1,rates.r0+1,"Will-o'-wisp: one stage early");

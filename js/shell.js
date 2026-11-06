@@ -83,10 +83,15 @@ UI.renderDock = () => {
     const lock = !DQ.skillUnlocked(s.id);
     const lv=DQ.lvl(s.id),need=lv>=99?0:Math.max(0,D.XPF[lv+1]-(S().xp[s.id]||0));
     const pop = UI.levelPop[s.id], popping = pop && Date.now() - pop < 1600;
-    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" ${lock ? '' : (() => { const nx = UI.nextUnlock(s.id); return nx ? `data-tip="text:Next: level ${nx.lvl} → ${esc(nx.what)}"` : ''; })()} data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span>${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span><small data-b="toNext:${s.id}">${lv>=99?'Maximum level':`${fmt(need)} XP to level ${lv+1}`}</small>`}</span>${!lock && ap === s.page ? '<i class="dk-live"></i>' : ''}<span class="notice-badge" data-b="notice:${s.page}" hidden></span></button>`;
+    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" ${lock ? '' : (() => { const nx = UI.nextUnlock(s.id); return nx ? `data-tip="text:Next: level ${nx.lvl} → ${esc(nx.what)}"` : ''; })()} data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span>${!lock && S().newSkills && S().newSkills[s.id] ? '<span class="dk-new">New</span>' : ''}${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span><small data-b="toNext:${s.id}">${lv>=99?'Maximum level':`${fmt(need)} XP to level ${lv+1}`}</small>`}</span>${!lock && ap === s.page ? '<i class="dk-live"></i>' : ''}<span class="notice-badge" data-b="notice:${s.page}" hidden></span></button>`;
   }).join('');
   UI.upd();
 };
+/* A newly unlocked skill wears a small "New" badge in the rail until its page is first opened. */
+const notifyNew0 = DQ.notify;
+DQ.notify = o => { const k = o && o.key || ''; if (o && o.kind === 'unlock' && k.startsWith('unlock:') && D.SK[k.slice(7)]) { const st = S(); (st.newSkills = st.newSkills || {})[k.slice(7)] = true; } const r = notifyNew0(o); UI.renderDock && UI.renderDock(); return r; };
+const goNew0 = DQ.go;
+DQ.go = id => { const st = S(), sk = st && st.newSkills && Object.keys(st.newSkills).find(k => D.SK[k] && D.SK[k].page === id); if (sk) { delete st.newSkills[sk]; } const r = goNew0(id); if (sk) UI.renderDock(); return r; };
 DQ.on('act', () => UI.renderDock && UI.renderDock());
 DQ.on('lvl', () => UI.renderDock && UI.renderDock());
 

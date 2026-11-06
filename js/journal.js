@@ -68,10 +68,25 @@ UI.V.journal = () => {
   const J = (S().journal || []).slice().reverse(), shown = J.slice(0, UI.journalShown);
   const groups = []; for (const e of shown) { const d = day(e.t), g = groups[groups.length - 1]; if (g && g.d === d) g.e.push(e); else groups.push({ d, e: [e] }); }
   const art = e => e.kind === 'skill' && D.SK[e.icon] ? DQ.artImage('skill', e.icon, 32, 'jr-art', '') : D.ITEMS[e.icon] ? DQ.itemIco(D.ITEMS[e.icon]) : ico(e.icon || 'star');
-  return `<section class="panel journal"><div class="phead"><div><span class="k">${esc(S().name)}’s</span><h2>Adventure journal</h2></div><small>${fmt(J.length)} entr${J.length === 1 ? 'y' : 'ies'}</small></div>
+  return `<section class="panel journal"><div class="phead"><div><span class="k">${esc(S().name)}’s</span><h2>Adventure journal</h2></div><span class="btnrow"><small>${fmt(J.length)} entr${J.length === 1 ? 'y' : 'ies'}</small><button class="btn sm" data-do="copystory">Copy my story</button></span></div>
     ${groups.length ? groups.map(g => `<div class="jr-day"><div class="jr-date">Day ${g.d}</div><ol class="jr-list">${g.e.map(e => `<li class="jr-${e.kind}"><span class="jr-ic">${art(e)}</span><span><p>${esc(e.text)}</p><small>${esc(D.TOWN[e.town] ? D.TOWN[e.town].name : '')}${e.away ? ' · while away' : ''} · ${new Date(e.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small></span></li>`).join('')}</ol></div>`).join('')
       : '<p class="dim">Nothing written yet. Your first quest, your first boss and every discovery will be recorded here.</p>'}
     ${J.length > shown.length ? `<button class="btn sm" data-do="journalmore">Show older entries</button>` : ''}</section>`;
 };
 UI.DO.journalmore = () => { UI.journalShown += 60; UI.render(false); };
+/* welcome back: what interestingly changed while you were away, straight from the journal */
+const ret0 = UI.returnExtras;
+UI.returnExtras = sum => {
+  const h = ret0 ? ret0(sum) : '', since = Date.now() - ((sum && sum.real) || 0) - 60000;
+  const J = (S().journal || []).filter(e => e.t >= since && e.kind !== 'rest').slice(-3).reverse();
+  return h + (J.length ? `<div class="k" style="margin:14px 0 6px">Since you left</div><ul class="since-left">${J.map(e => `<li>${esc(e.text)}</li>`).join('')}</ul><button class="btn sm" data-do="returnpick" data-a="go" data-b="journal">Open journal</button>` : '');
+};
+/* Copy my story: a short, voluntary summary to share by hand. The hero's chosen name and accomplishments only. */
+DQ.storyText = () => {
+  const st = S(), bosses = D.MONLIST.filter(m => m.boss && st.towns[m.town] && st.towns[m.town].boss).map(m => m.boss.short || m.name);
+  const titles = DQ.beastTitles ? DQ.beastTitles().map(m => DQ.beastTitleName(m)) : [], quests = D.QUESTS.filter(q => DQ.questState(q) === 'done').length;
+  const recent = (st.journal || []).filter(e => ['boss', 'quest', 'choice', 'loot', 'title', 'memory', 'project'].includes(e.kind)).slice(-4).reverse().map(e => '- ' + e.text);
+  return [`${st.name} · Hero level ${DQ.advLvl()} · combat ${DQ.combatLvl()} · ${fmt(quests)} quests`, bosses.length ? `Bosses defeated: ${bosses.join(', ')}` : 'No bosses defeated yet', titles.length ? `Titles: ${titles.join(', ')}` : '', recent.length ? 'Lately:' : '', ...recent, '(Idlewick)'].filter(Boolean).join('\n');
+};
+UI.DO.copystory = () => DQ.copyText ? DQ.copyText(DQ.storyText(), 'Story') : null;
 })();

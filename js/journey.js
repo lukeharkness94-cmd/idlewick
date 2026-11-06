@@ -49,6 +49,18 @@ Object.entries({
   hungry_cook: 'Eight perfect shrimp! The banquet is saved. Take some coins, and take my advice: never fight a goblin chief on an empty stomach.',
   chiefs_end: 'The hill fort is ours. Listen: the children are playing on the green again. The road to Mossbarrow is open, and they say something big has been trampling their fields.'
 }).forEach(([id, line]) => { if (D.QM[id]) D.QM[id].thanks = line; });
+/* A boss victory is felt in its town: a villager speaks on the victory card, townsfolk return to the scenes, and a
+   later note on the door remembers it (touches.js). [speaker, on the day, a note some time later] */
+D.BOSS_VOICES = {
+  grubnash: ['Elder Wren', 'Listen. No war cries. Just the well bucket and the hens.', 'Sergeant Orrin hung Grubnash’s war-horn over the tavern door. Nobody is allowed to blow it.'],
+  oldtusk: ['Granny Bramble', 'The fields will grow straight again. I might even plant pumpkins.', 'The farmers left a sack of turnips on your step. Old Tusk ate their last ones.'],
+  barnacle: ['Harbourmaster Ilsa', 'Every ship in the bay rang its bell when he went down. Did you hear them?', 'The fishing boats sail out at dawn again. Ilsa says the harbour is louder than it has been in years.'],
+  frostmaw: ['Captain Hrod', 'The pass is open. The first cart through is carrying your name on a banner.', 'Hrod sent a dwarf-forged mug with your name on it. It is very heavy.'],
+  morwenna: ['Gravewarden Lysa', 'The dead are sleeping. I might sleep too, for the first time in a month.', 'Lysa planted marsh-lilies over Morwenna’s hut. They are already blooming.'],
+  pyrrhax: ['Warden Ignis', 'The banners can fly again. We will need to sew new ones; he burned all the old ones.', 'Emberfall’s new banners arrived. One of them has a very flattering picture of you.'],
+  zephyrion: ['Abbot Seren', 'The sky bridges hold. The monks are already arguing about who crosses first.', 'The monks finished the first new sky bridge and named it after you, then argued about the spelling.'],
+  hollowking: ['The Last Herald', 'The crown is empty, and the silence with it. Go home. They will want to hear it from you.', 'Every bell in the realm rang at noon today, for no reason anyone could name.']
+};
 const destinations = { boss: 'Defeat Grubnash', house: 'Build my first home', well: D.PROJECTS.well.name, inn: D.PROJECTS.inn.name, village: 'Restore Willowbrook' };
 const nextVillageProject = () => DQ.projectsForTown('willowbrook').map(([id]) => id).find(id => !S().projects[id]);
 DQ.pinProject = id => {
@@ -91,7 +103,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   }
   const bossQuest = D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === 'grubnash'));
   if (bossQuest && DQ.questState(bossQuest) === 'ready') return step('Claim your victory reward', 'Return to the quest giver for the rewards you earned by defeating Grubnash.', 'qclaim', bossQuest.id);
-  if (S().towns.willowbrook.boss) return step('The road is open', 'Grubnash is defeated. Visit Mossbarrow or choose your next destination.', 'go', 'map');
+  if (S().towns.willowbrook.boss) return DQ.regionNext();
   if (S().town !== 'willowbrook') return step('Return to Willowbrook', 'Grubnash awaits outside the village.', 'journeytravel', 'willowbrook');
   const first = D.QM.first_steps, firstState = DQ.questState(first);
   if (firstState === 'new') return step('Meet Elder Wren', 'Goblins have broken Willowbrook’s well. Elder Wren’s first job for you: a little food and a little timber.', 'qstart', first.id);
@@ -117,6 +129,36 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
     return task('Cook your provisions', msg, 'recipe', 'cook_shrimp');
   }
   return task('Grow a little stronger', `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins. ` : ''}Food is fine; a few more combat levels or better gear will tip the odds. Check the forecast on the Combat page.`, 'fight', 'chicken');
+};
+/* After Grubnash the boss destination follows the next region boss: travel, its quest, training, then the most useful
+   preparation from the real save (DQ.prepAdvice) until the forecast favours you. */
+DQ.regionBoss = () => { for (const t of D.TOWNS) { const b = D.MON[t.boss]; if (b && !(S().towns[t.id] && S().towns[t.id].boss)) return b; } return null; };
+DQ.regionNext = () => {
+  const b = DQ.regionBoss(); if (!b) return step('The realm is at peace', 'Every boss is defeated. Chase a collection, a title or a trophy, or restore what is left.', 'go', 'bestiary');
+  const town = D.TOWN[b.town], short = b.boss.short || b.name, bq = D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === b.id));
+  if (S().town !== b.town) return step(`Travel to ${town.name}`, `${short} is the next challenge on the road.`, 'journeytravel', b.town);
+  if (bq && DQ.questState(bq) === 'ready') return step('Claim your victory reward', `${bq.giver} is waiting to thank you.`, 'qclaim', bq.id);
+  if (bq && DQ.questState(bq) === 'new') return step(`Accept “${bq.name}”`, `${bq.giver} asks you to face ${short}. Accepting makes the victory count.`, 'qstart', bq.id);
+  const req = b.boss.req;
+  if (DQ.combatLvl() < req) { const foe = D.MONLIST.filter(m => m.town === b.town && !m.boss && m.cl <= DQ.combatLvl() + 4).sort((a, c) => c.cl - a.cl)[0] || D.MONLIST.find(m => m.town === b.town && !m.boss);
+    return task(`Train for ${short}`, `Combat ${DQ.combatLvl()} / ${req}. ${foe ? `${foe.name}s are a fair fight here.` : ''}`, 'fight', foe ? foe.id : b.id); }
+  const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
+  if (f && f.winRate >= .75) return step(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'go', 'combat');
+  const tip = DQ.prepAdvice ? DQ.prepAdvice(b.id, f)[0] : null;
+  return tip ? step(tip.title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${tip.text}`, tip.action || 'go', tip.a || 'combat') : step(`Challenge ${short}`, 'You are ready by level. Check the forecast on the Combat page.', 'go', 'combat');
+};
+/* Optional goals beside the one primary action: something short, something over a few sessions, a long pursuit */
+DQ.optionalGoals = () => {
+  const out = [], town = S().town;
+  const q = D.QUESTS.find(x => x.town === town && !x.secret && ['active', 'ready'].includes(DQ.questState(x)) && !x.obj.some(o => o.ev === 'boss')) || D.QUESTS.find(x => x.adventure && DQ.questState(x) === 'active');
+  if (q) out.push({ span: 'Short', text: `Finish “${q.name}” for ${q.giver}`, action: 'go', a: 'quests' });
+  else if (DQ.loadouts && !DQ.loadouts().length && DQ.advLvl() >= 15) out.push({ span: 'Short', text: 'Save your current gear as a preparation, then try another', action: 'go', a: 'character' });
+  const proj = DQ.projectsForTown(town).filter(([id]) => !S().projects[id]).sort((a, c) => (a[1].cost.coins || 0) - (c[1].cost.coins || 0))[0];
+  if (proj) out.push({ span: 'A few sessions', text: `${proj[1].name}: ${proj[1].reward}`, action: 'openproject', a: proj[0] });
+  const chase = D.MONLIST.find(m => m.town === town && !m.boss && (S().beast.kills[m.id] || 0) > 0 && m.drops.some(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique && !(S().uniqFound || {})[d[0]]));
+  if (chase && DQ.uniqueSource) { const id = chase.drops.find(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique)[0], src = DQ.uniqueSource(id); out.push({ span: 'Long', text: `${D.ITEMS[id].name} from ${chase.name}s: ${src.need - Math.min(src.have, src.need)} more defeats at most`, action: 'guide', a: chase.id }); }
+  else if (DQ.understanding) { const mons = D.MONLIST.filter(m => m.town === town), u = mons.filter(m => DQ.understanding(m).done).length; if (u < mons.length && mons.some(m => S().beast.kills[m.id])) out.push({ span: 'Long', text: `${D.TOWN[town].name} field guide: ${u} / ${mons.length} creatures understood`, action: 'go', a: 'bestiary' }); }
+  return out.slice(0, 3);
 };
 DQ.finishProject = id => {
   const project = D.PROJECTS[id];
@@ -151,8 +193,12 @@ DQ.journeyDoneWhen = next => {
   if (next.action === 'qclaim') return 'Done when you claim the reward.';
   const req = D.MON.grubnash.boss.req;
   if (/^Train for Grubnash/.test(next.title) && DQ.combatLvl() < req) return `Done when your combat level reaches ${req} (now ${DQ.combatLvl()}).`;
+  const rb = DQ.regionBoss && S().towns.willowbrook.boss && DQ.regionBoss();
+  if (rb && /^Train for /.test(next.title) && DQ.combatLvl() < rb.boss.req) return `Done when your combat level reaches ${rb.boss.req} (now ${DQ.combatLvl()}).`;
   return '';
 };
+/* the boss destination names the boss you are actually heading for */
+const destLabel = id => { if (id === 'boss' && S().towns.willowbrook && S().towns.willowbrook.boss && DQ.regionBoss) { const b = DQ.regionBoss(); return b ? `Defeat ${b.boss.short || b.name}` : 'Every boss defeated'; } return destinations[id] || destinations.boss; };
 const fresh = () => DQ.advLvl() < 5 && !(S().towns.willowbrook && S().towns.willowbrook.boss);
 UI.journeyPanel = () => {
   const next = DQ.journeyNext(), done = DQ.journeyDoneWhen(next), firstTime = !S().seen.firstTask && DQ.totalXp() === 0;
@@ -160,7 +206,8 @@ UI.journeyPanel = () => {
     <p class="journey-why">${esc(next.detail)}</p>${done ? `<p class="journey-done">${ico('check')} ${esc(done)}</p>` : ''}
     <div class="btnrow wrap">${(() => { const running = next.action === 'journeytask' && DQ.act && DQ.act.kind === next.a && DQ.act.id === next.b; return next.action === 'journeytask' ? `<button class="btn primary" data-do="journeytask" data-a="${next.a}" data-b="${next.b || ''}">${running ? 'Open the task' : 'Start'}</button>` : actionHtml(next); })()}${D.PROJECTS[S().journey] ? pinButton(S().journey) : ''}</div>
     ${fresh() ? `<p class="journey-pause">${firstTime ? 'Pick one task at a time. It keeps working while you explore other pages or close the game, so any moment is a fine place to stop.' : 'A good place to pause: whenever a quest is claimed. Your task keeps working while you are away.'}</p>` : ''}
-    <div class="destination-picker"><span class="k">Your destination: ${esc(destinations[S().journey] || destinations.boss)}</span><div class="destination-choices" aria-label="Choose your destination">${Object.entries(destinations).map(([id, label]) => `<button class="chip sm ${S().journey === id ? 'on' : ''}" aria-pressed="${S().journey === id}" data-do="destination" data-a="${id}">${esc(label)}</button>`).join('')}</div></div></section>`;
+    ${fresh() ? '' : (g => g.length ? `<div class="also-goals"><span class="k">Also worth doing</span><ul>${g.map(x => `<li><small>${esc(x.span)}</small><button class="linkish" data-do="${x.action}" data-a="${x.a}">${esc(x.text)}</button></li>`).join('')}</ul></div>` : '')(DQ.optionalGoals())}
+    <div class="destination-picker"><span class="k">Your destination: ${esc(destLabel(S().journey))}</span><div class="destination-choices" aria-label="Choose your destination">${Object.entries(destinations).map(([id, label]) => `<button class="chip sm ${S().journey === id ? 'on' : ''}" aria-pressed="${S().journey === id}" data-do="destination" data-a="${id}">${esc(destLabel(id))}</button>`).join('')}</div></div></section>`;
 };
 UI.projectsPanel = () => {
   const town=S().town, entries=DQ.projectsForTown(town);
@@ -177,7 +224,7 @@ UI.V.projects = () => UI.projectsPanel();
 UI.returnPlan = sum => {
   const next = DQ.journeyNext();
   const status = sum.died ? 'Your hero was defeated. Replenish food and review equipment before resuming combat.' : sum.stopped ? 'Your task finished or stopped. Check the next step before starting another.' : DQ.act ? DQ.actLabel() + ' is still running.' : 'No task is running.';
-  return `<section class="return-plan"><h3>${esc(destinations[S().journey] || destinations.boss)}</h3><p>${esc(status)}</p><p>${esc(next.detail)}</p>${actionHtml(next)}</section>${UI.returnChoices()}`;
+  return `<section class="return-plan"><h3>${esc(destLabel(S().journey))}</h3><p>${esc(status)}</p><p>${esc(next.detail)}</p>${actionHtml(next)}</section>${UI.returnChoices()}`;
 };
 /* Other good options after an absence, read from the real save. Each says what it costs, so a choice is a real
    trade-off; nothing is shown as affordable unless it is, and nothing here is timed or expires. */

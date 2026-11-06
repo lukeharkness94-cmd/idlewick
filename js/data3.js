@@ -56,6 +56,11 @@ D.STUDY_KILLS = 3;   // kills needed to learn a regular creature's weaknesses
 const AB = (id, name, ic, skill, lvl, style, text, extra) => Object.assign({ id, name, ic, skill, lvl, style, text }, extra || {});
 /* Damage-type rules, one table for the engine and every piece of advice (plan.js DQ.typeMult / DQ.typeRuleText).
    Bosses are counter checks, not locks: weaknesses help and resistances hurt, but less than on ordinary creatures. */
+/* Style parity (owner-approved melee rebalance, Nov 2026). Combat level counts Attack + Strength for melee but 1.5x
+   Ranged or Magic, so at equal combat level an archer's or mage's level is 4/3 of a fighter's Attack and Strength.
+   Melee therefore uses 4/3 of Attack and Strength as its effective levels for hitting and damage (engine pstats),
+   keeping Attack = accuracy and Strength = damage. Evidence: PARITY=1 node scripts/sim-bosses.cjs. */
+D.STYLE_TUNE = { meleeLevel: 4 / 3 };
 D.TYPE_RULES = { normal: { weak: 1.5, focus: 2, resist: .5 }, boss: { weak: 1.3, focus: 1.6, resist: .7 } };
 D.ABIL = [
   AB('power', 'Power Strike', 'strength', 'strength', 8, 'melee', 'Every 4th attack hits for double damage.'),

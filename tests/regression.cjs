@@ -123,7 +123,7 @@ test('town projects consume supplies once and grant lasting benefits', () => {
 test('destination follows quest, food, training and victory state', () => {
   const {q}=harness(); assert.equal(q.journeyNext().a,'first_steps');
   q.S.q.first_steps={done:true}; q.S.towns.willowbrook.boss=true;
-  assert.equal(q.journeyNext().a,'map');
+  assert.equal(q.journeyNext().action,'journeytravel');assert.equal(q.journeyNext().a,'mossbarrow','after Grubnash the destination points to the next region');
   q.S.journey='well'; assert.equal(q.journeyNext().b,'normal');
 });
 
@@ -439,11 +439,16 @@ test('companion tricks: halved passives, tricks fire through the real engine, fo
  own('bogwisp');S.beast.kills.goblin=1;const r=q.research(D.MON.goblin);q.setPet(null);assert.equal(r.rank,q.research(D.MON.goblin).rank+1,'wisp reveals one stage early');
  for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[20];own('gobbo');S.hp=q.maxHp();const before=JSON.stringify(S);q.forecast('goblin');assert.equal(JSON.stringify(S),before,'forecast with a trick leaves the save untouched');
 });
-test('combat progress bar starts empty for a new hero and measures later levels from the level itself',()=>{
+test('combat progress bar follows the trained skill and agrees with the XP it names',()=>{
  const {q}=harness();const S=q.S,D=q.data;
- assert.equal(q.combatLvl(),3);assert.equal(Math.round(q.combatProgress().pct),0,'fresh hero starts at 0%, not 40%');
- S.xp.attack=D.XPF[2];const mid=q.combatProgress().pct;assert.ok(mid>0&&mid<100,'fills as you train');
- S.xp.attack=D.XPF[3];S.xp.strength=D.XPF[2];assert.equal(q.combatLvl(),4);assert.equal(Math.round(q.combatProgress().pct),38,'combat 4.375 shows 38%: measured from level 4 itself');
+ assert.equal(q.combatLvl(),3);assert.equal(Math.round(q.combatProgress().pct),0,'fresh hero starts at 0%');
+ /* the reported case: Defence 2, Health 10, Attack 4, Strength 5 (combat 5), almost at Attack 5 while training Accurate */
+ const lv=(k,l,f=0)=>S.xp[k]=Math.round(D.XPF[l]+(D.XPF[l+1]-D.XPF[l])*f);
+ lv('defence',2,.5);lv('hitpoints',10);lv('attack',4,.4);lv('strength',5,.9);S.style.melee='accurate';
+ const c=q.combatProgress();assert.equal(c.lvl,5);assert.equal(c.route.skill,'attack','follows the skill being trained');
+ const pct=(S.xp.attack-c.route.from)/(c.route.to-c.route.from)*100;assert.ok(Math.abs(c.pct-pct)<1e-9&&c.pct<99,`bar ${c.pct.toFixed(0)}% matches the ${c.route.xp} XP still needed`);
+ assert.equal(c.route.xp,c.route.to-S.xp.attack);
+ S.xp.attack=c.route.to-1;assert.ok(q.combatProgress().pct>90);S.xp.attack=c.route.to;assert.equal(q.combatLvl(),6,'filling the bar raises the combat level');
 });
 test('unique gear: effects are real, first copies have a bad-luck guarantee, stats stay modest',()=>{
  const {q}=harness();const S=q.S,D=q.data;
@@ -453,8 +458,8 @@ test('unique gear: effects are real, first copies have a bad-luck guarantee, sta
  for(const it of fresh.filter(x=>!['wardens_greathelm','smugglers_knot'].includes(x.id)))assert.ok(D.MONLIST.some(m=>m.drops.some(d=>d[0]===it.id)),'drop source for '+it.id);
  /* lifesteal: a fight with Leechfang ends with more health than with an iron dagger */
  for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[14];S.town='mossbarrow';S.towns.mossbarrow={visited:true,boss:false};S.settings.autoEat=false;
- const hpAfter=id=>{S.equip.weapon=id;S.hp=q.maxHp()-6;q.fxDirty();q.startAct('fight','boar',{quiet:true});q.simulate(60000);q.stopAct(true);return S.hp;};
- let a=0,b=0;for(let i=0;i<6;i++){a+=hpAfter('leechfang');b+=hpAfter('iron_dagger');}assert.ok(a>b,`lifesteal heals in combat (${a} vs ${b})`);
+ const heals=id=>{S.equip.weapon=id;S.hp=q.maxHp()-6;q.fxDirty();q.effectHits={};q.startAct('fight','boar',{quiet:true});q.simulate(60000);q.stopAct(true);return (q.effectHits||{}).lifesteal||0;};
+ assert.ok(heals('leechfang')>0,'Leech heals during the fight');assert.equal(heals('iron_dagger'),0,'and an ordinary dagger does not');
  /* swift and fortune */
  S.equip.weapon='bronze_sword';const base=q.combatInterval();S.equip.ring='storm_feather';assert.ok(q.combatInterval()<base,'Gale: faster attacks');
  S.equip.ring='smugglers_knot';q.fxDirty();assert.ok(q.coinMult()>1.04,"Smuggler's luck: +5% coins");delete S.equip.ring;
@@ -564,6 +569,58 @@ test('bestiary understanding: optional objectives with a fair alternative, rewar
  S.beast.kills.frostmaw=1;S.beast.answered={frostmaw:4};assert.equal(q.understanding(b).done,false);S.beast.answered.frostmaw=5;assert.ok(q.understood('frostmaw'));
  S.beast.answered={};S.beast.kills.frostmaw=3;assert.ok(q.understood('frostmaw'),'or three victories');
  const o=JSON.parse(JSON.stringify(S));delete o.beast.weakWins;delete o.beast.answered;assert.ok(q.validateSave(o),'older saves without the counters load');
+});
+test('melee parity: at equal combat level a fighter hits about as hard as an archer',()=>{
+ const {q}=harness();const S=q.S,D=q.data;assert.ok(Math.abs(D.STYLE_TUNE.meleeLevel-4/3)<1e-9);
+ const at=(style,L)=>{for(const k of Object.keys(S.xp))S.xp[k]=0;S.xp.defence=D.XPF[L];S.xp.hitpoints=D.XPF[L];S.equip={};S.ammo={id:null,n:0};
+  if(style==='melee'){S.xp.attack=D.XPF[L];S.xp.strength=D.XPF[L];S.inv.mithril_sword=1;q.equipItem('mithril_sword');}
+  else{S.unlocked.ranged=true;S.xp.ranged=D.XPF[Math.round(L*4/3)];S.inv.bow_maple=1;q.equipItem('bow_maple');S.inv.arrow_mithril=50;q.equipItem('arrow_mithril');}
+  q.fxDirty();return {cl:q.combatLvl(),ps:q.pstats()};};
+ const m=at('melee',45),r=at('ranged',45);assert.ok(Math.abs(m.cl-r.cl)<=1,'same combat level');
+ const ratio=(m.ps.max*m.ps.acc)/(r.ps.max*r.ps.acc);assert.ok(ratio>.75&&ratio<1.35,`melee/ranged max*accuracy ratio ${ratio.toFixed(2)}`);
+});
+test('saved preparations: items conserved, missing and locked shown honestly, previous restored, build text private',()=>{
+ const {q,load}=harness();load('skill_expansion_data');load('companions');load('loadouts');const S=q.S,D=q.data;
+ for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[30];S.name='Secret Name';S.coins=987654;
+ const count=()=>{const t={};for(const src of [S.inv,S.bank])for(const [k,n] of Object.entries(src))t[k]=(t[k]||0)+n;for(const [sl,id] of Object.entries(S.equip))if(sl!=='ammo')t[id]=(t[id]||0)+1;if(S.ammo.id)t[S.ammo.id]=(t[S.ammo.id]||0)+S.ammo.n;return JSON.stringify(Object.keys(t).sort().map(k=>[k,t[k]]));};
+ for(const id of ['iron_sword','iron_helm','mithril_hammer','steel_shield'])S.inv[id]=1;S.bank.vipers_kiss=1;
+ q.equipItem('iron_sword');q.equipItem('iron_helm');S.abilities=['power'];q.loadoutSave('Sword');
+ q.equipItem('mithril_hammer');q.unequip('head');S.abilities=['power','brace'];q.loadoutSave('Hammer');
+ const before=count();
+ let p=q.loadoutPlan(q.loadouts()[0]);assert.ok(p.rows.some(r=>r.slot==='weapon'&&r.status==='equip'));assert.ok(p.rows.some(r=>r.slot==='head'&&r.status==='equip'));
+ q.loadoutApply(q.loadouts()[0]);assert.equal(S.equip.weapon,'iron_sword');assert.equal(S.equip.head,'iron_helm');assert.equal(JSON.stringify(S.abilities),'["power"]');assert.equal(count(),before,'items conserved');
+ q.loadoutApply(S.loadoutPrev);assert.equal(S.equip.weapon,'mithril_hammer','return to previous');assert.equal(count(),before);
+ /* from the bank, missing and locked */
+ const lo={name:'Test',equip:{weapon:'vipers_kiss',ring:'storm_feather',body:'rune_body'},abilities:['brace','ward'],spell:null,pet:'gobbo'};
+ p=q.loadoutPlan(lo);const st=sl=>p.rows.find(r=>r.slot===sl).status;assert.equal(st('weapon'),'bank');assert.equal(st('ring'),'missing');assert.equal(st('body'),'locked');assert.ok(p.petMissing);
+ const r=q.loadoutApply(lo);assert.equal(S.equip.weapon,'vipers_kiss','taken from the bank');assert.ok(!S.equip.ring,'nothing invented');assert.ok(r.skipped.some(x=>/Storm feather/i.test(x)));assert.equal(count(),before,'items conserved through the bank');
+ /* the shared text carries the build, not the save */
+ const t=q.buildText();assert.match(t,/combat \d+/);assert.match(t,/Venom/);assert.doesNotMatch(t,/Secret Name|987654|dashboard-quest/);
+ const o=JSON.parse(JSON.stringify(S));delete o.loadouts;delete o.loadoutPrev;assert.ok(q.validateSave(o),'older saves load');
+});
+test('unique finds suggest a plan: honest source, guarantee progress, what it is good for, mystery kept',()=>{
+ const {q,load}=harness();load('lore');load('bestiary');const S=q.S,D=q.data;
+ for(const it of Object.values(D.ITEMS).filter(x=>x.unique))assert.ok(D.UNIQUE_USE[it.unique.key],'good-for text for '+it.id);
+ let src=q.uniqueSource('leechfang');assert.match(src.text,/somewhere in Mossbarrow/,'mystery kept until the creature is met');assert.doesNotMatch(src.text,/wolf/i);
+ S.beast.kills.wolf=3;S.upity={leechfang:40};src=q.uniqueSource('leechfang');assert.match(src.text,/Grey wolf/);assert.match(src.text,/guaranteed within 375 defeats \(40 so far\)/);
+ S.uniqFound={leechfang:1};assert.doesNotMatch(q.uniqueSource('leechfang').text,/guaranteed/,'quiet once found');
+ assert.match(q.uniqueSource('chief_helm').text,/first time you defeat/);
+});
+test('later regions: the destination follows the next boss and optional goals come from existing content',()=>{
+ const {q,load}=harness();load('lore');load('bestiary');const S=q.S,D=q.data;
+ for(const t of ['willowbrook','mossbarrow','saltmere'])S.towns[t]={visited:true,boss:true};S.towns.ironpeak={visited:true,boss:false};S.q.first_steps={s:'done',p:[5,5]};
+ S.town='saltmere';assert.equal(q.journeyNext().a,'ironpeak','travel to the next boss region');
+ S.town='ironpeak';for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[36];
+ const fq=D.QUESTS.find(x=>x.obj.some(o=>o.ev==='boss'&&o.key==='frostmaw'));if(fq)S.q[fq.id]={s:'active',p:[0]};
+ const n=q.journeyNext();assert.match(n.title,/Train for Frostmaw/);assert.match(q.journeyDoneWhen(n),/combat level reaches 45/);
+ S.beast.kills.troll=5;const g=q.optionalGoals();assert.ok(g.length>=1&&g.length<=3);assert.ok(g.some(x=>/Thunderclap maul/.test(x.text)),'a unique to chase, with honest guarantee progress');
+});
+test('return and sharing: what changed while away, a boss victory remembered, a story without save data',()=>{
+ const {q,load}=harness();load('adventures');load('lore');load('bestiary');load('journal');load('companions');load('loadouts');load('touches');const S=q.S,D=q.data;
+ S.name='Tess';S.coins=123456;S.towns.willowbrook.boss=true;
+ for(const id of Object.keys(D.BOSS_VOICES))assert.ok(D.MON[id]&&D.BOSS_VOICES[id].length===3,'voice and later note for '+id);
+ S.journal=[];q.journal('boss','Grubnash is defeated.','skull');const h=q.ui.returnExtras({real:6*3600e3,items:{}});assert.match(h,/Since you left/);assert.match(h,/Grubnash is defeated/);
+ const t=q.storyText();assert.match(t,/Tess · Hero level/);assert.match(t,/Bosses defeated: Grubnash/);assert.doesNotMatch(t,/123456|dashboard-quest|"inv"/);
 });
 test('restoration: new Willowbrook projects, regional materials, villager voices and legacy bonuses',()=>{
  const {q,load}=harness();load('fx');load('routes');const S=q.S,D=q.data;S.coins=1e6;

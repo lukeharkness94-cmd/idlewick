@@ -24,11 +24,8 @@ UI.V.combat=()=>{
  const needs=t=>t==='pierce'?'ranged':['fire','frost','storm','aether'].includes(t)?'magic':null;
  const counters=known?Q.weakOf(m).weak.map(t=>{const sk=needs(t),locked=sk&&!Q.skillUnlocked(sk);return `${D.DTYPES[t].name}: ${ {stab:'dagger',slash:'sword',crush:'warhammer',pierce:'bow and arrows',fire:'fire spell',frost:'frost spell',storm:'storm spell',aether:'aether spell'}[t]}${locked?` (${D.SK[sk].name} not learned yet)`:''}`;}).join(' · '):'';
  const tips=known?Q.matchup(m).slice(0,2).map(([kind,line])=>`<span class="${kind==='good'?'ok':kind==='bad'?'bad':'dim'}">${esc(line)}</span>`).join(''):`<span>Defeat this creature to reveal its strengths and weaknesses in the field guide.</span>`;
- const intel=`<section class="panel battle-brief"><div class="phead"><h3>${esc(m.name)} · preparation</h3><button class="btn sm" data-do="guide" data-a="${m.id}">Field guide</button></div><div class="battle-facts"><span>Enemy max hit <b>${m.max}</b></span><span>Your max hit <b>${Q.pstats().max}</b></span><span>Attack every <b>${(Q.actDur({kind:'fight',pace:Q.act?.kind==='fight'?Q.act.pace:'steady'})/1000).toFixed(2)}s</b></span></div><div class="battle-advice">${counters?`<span class="ok">Try ${esc(counters)}</span>`:''}${tips}</div><div class="btnrow"><button class="btn sm" data-do="go" data-a="character">Equipment</button><button class="btn sm" data-do="go" data-a="cooking">Prepare food</button></div></section>`;
- /* Ranged and Magic are combat styles, each trained by its own skill: say how a locked one is learned */
- const styles=['ranged','magic'].filter(k=>!Q.skillUnlocked(k));
- const styleNote=styles.length?`<p class="style-note">${Q.ico('lock')}<span><b>Other fighting styles.</b> ${styles.map(k=>`<b>${D.SK[k].name}</b> is a combat style with its own skill (equip a ${k==='ranged'?'bow and arrows':'staff and runes'}). ${esc(Q.skillTeacher(k))}.`).join(' ')}</span></p>`:'';
- return html.replace('<div class="combat-live">','<div class="combat-live">'+intel).replace(/(<section class="panel combat-training">[\s\S]*?)(<\/section>)/,'$1'+styleNote+'$2');
+ const intel=`<section class="panel battle-brief"><div class="phead"><h3>${esc(m.name)} · preparation</h3><button class="btn sm" data-do="guide" data-a="${m.id}">Field guide</button></div><div class="battle-facts"><span>Level <b>${m.cl}</b></span><span>Health <b>${m.hp}</b></span><span>Hits up to <b>${m.max}</b></span></div><div class="battle-advice">${counters?`<span class="ok">Try ${esc(counters)}</span>`:''}${tips}</div><div class="btnrow"><button class="btn sm" data-do="go" data-a="character">Equipment</button></div></section>`;
+ return html.replace('<!--battle-brief-->',intel);
 };
 const render=UI.render;
 UI.render=fresh=>{

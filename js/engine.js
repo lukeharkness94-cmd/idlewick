@@ -349,7 +349,7 @@ DQ.pstats = () => {
   let acc, max, sp = null;
   if (st === 'ranged') { const e = L('ranged') + 8; acc = e * (64 + b.rng); max = Math.floor(2 + e * (64 + b.rngStr) / DMG_DIV); }
   else if (st === 'magic') { sp = pickSpell() || D.SPELLS[0]; const e = L('magic') + 8; acc = e * (64 + b.mag); max = sp.max + Math.floor(L('magic') / 10) + Math.floor(b.mag / 12); }
-  else { const e = L('attack') + 8 + (sty.melee === 'accurate' ? 3 : 0), es = L('strength') + 8 + (sty.melee === 'aggressive' ? 3 : 0); acc = e * (64 + b.atk); max = Math.floor(2 + es * (64 + b.str) / DMG_DIV); }
+  else { const k = (D.STYLE_TUNE && D.STYLE_TUNE.meleeLevel) || 1, e = L('attack') * k + 8 + (sty.melee === 'accurate' ? 3 : 0), es = L('strength') * k + 8 + (sty.melee === 'aggressive' ? 3 : 0); acc = e * (64 + b.atk); max = Math.floor(2 + es * (64 + b.str) / DMG_DIV); }
   const f = DQ.fx(), raw = max * (1 + f.dmg) * DQ.buffMult('weak'); max = Math.max(1, Math.round(raw));
   return { style: st, acc, max, maxRaw: raw, defRoll, red: Math.min(.75, b.def / (b.def + 320) + f.dr), spell: sp };
 };
@@ -505,7 +505,7 @@ function kill(m) {
     if (uniq && !guaranteed && !found[id]) { const P = S().upity = S().upity || {}; P[id] = (P[id] || 0) + 1; pity = P[id] >= Math.ceil(2.5 / p); }
     if (!(guaranteed || pity || chance(Math.min(1, p * DQ.buffMult('luck') * (DQ.uniqueFx().fortune ? 1.25 : 1))))) continue;
     if (uniq) { const firstCopy = !found[id]; found[id] = 1; if (S().upity) delete S().upity[id];
-      if (firstCopy && !DQ.forecasting) { DQ.notify({ kind: 'unlock', key: 'unique:' + id, icon: D.ITEMS[id].ic, col: D.ITEMS[id].col, title: `Unique find: ${D.ITEMS[id].name}`, text: `${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, sound: 'unique', burst: true, ttl: 14000 }); S().freshUnique = id; if (DQ.journal) DQ.journal('loot', `${m.name} dropped ${D.ITEMS[id].name}. ${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, D.ITEMS[id].ic); } }
+      if (firstCopy && !DQ.forecasting) { DQ.notify({ kind: 'unlock', key: 'unique:' + id, icon: D.ITEMS[id].ic, col: D.ITEMS[id].col, title: `Unique find: ${D.ITEMS[id].name}`, text: `${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}${D.UNIQUE_USE && D.UNIQUE_USE[D.ITEMS[id].unique.key] ? ` Good for ${D.UNIQUE_USE[D.ITEMS[id].unique.key]}.` : ''}`, action: { label: 'Inspect', fn: () => { DQ.ui.sel = id; DQ.ui.selFrom = 'pack'; DQ.go('character'); DQ.ui.render(false); } }, sound: 'unique', burst: true, ttl: 14000 }); S().freshUnique = id; if (DQ.journal) DQ.journal('loot', `${m.name} dropped ${D.ITEMS[id].name}. ${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, D.ITEMS[id].ic); } }
     const n = rnd(a, b), rar = D.rarityOf(guaranteed ? 0 : p); got.push(id);
     if (id === 'coin_pouch') { const cc = Math.round(rnd(m.coins[0] + 5, m.coins[1] * 3 + 10) * DQ.coinMult() * (DQ.trick && DQ.trick('comb') ? 1.5 : 1)); if (DQ.trick && DQ.trick('comb')) fxHit('comb'); extraCoins += cc; drops.push({ id, n: cc, rar, coins: true }); loot.push(`a pouch of ${fmt(cc)} coins`); continue; }
     if (id === 'treasure_chest') {
@@ -530,7 +530,7 @@ function kill(m) {
       const t = S().towns[m.town] || (S().towns[m.town] = { visited: true, boss: false }); t.boss = true; const next = D.TOWNS[D.TOWN[m.town].idx + 1];
       if (next && !S().towns[next.id]) S().towns[next.id] = { visited: false, boss: false };
       DQ.sfx('boss');
-      DQ.notify({ kind: 'boss', key: 'boss:' + m.id, icon: 'skull', col: '#f3d58a', title: `${m.boss.short} is defeated`, text: next ? `The road to ${next.name} is open.` : 'The realm is safe. For now.', action: next ? { label: 'Open the map', fn: () => DQ.go('map') } : null, sound: false, burst: true, ttl: 15000 });
+      DQ.notify({ kind: 'boss', key: 'boss:' + m.id, icon: 'skull', col: '#f3d58a', title: `${m.boss.short} is defeated`, text: (next ? `The road to ${next.name} is open.` : 'The realm is safe. For now.') + (D.BOSS_VOICES && D.BOSS_VOICES[m.id] ? ` ${D.BOSS_VOICES[m.id][0]}: “${D.BOSS_VOICES[m.id][1]}”` : ''), action: next ? { label: 'Open the map', fn: () => DQ.go('map') } : null, sound: false, burst: true, ttl: 15000 });
       DQ.log(`${m.name} falls. ${next ? 'The road to ' + next.name + ' opens.' : ''}`, 'quest');
       DQ.achDirty = true; DQ.fxDirty(); DQ.emit('travelunlock');
     }

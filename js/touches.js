@@ -25,7 +25,8 @@ const weatherHtml = town => {
 /* ---------- 1. villagers return to restored places ---------- */
 const TOWNSFOLK = { willowbrook: ['villager', 'farmer'], mossbarrow: ['farmhand', 'villager'], saltmere: ['dockhand', 'merchant'], ironpeak: ['dwarf', 'dockhand'], gloomfen: ['witch', 'villager'], emberfall: ['fireguard', 'dwarf'], skyreach: ['monk', 'villager'], hollow: ['monk', 'fireguard'] };
 const villagersHtml = town => {
-  const restored = Object.entries(D.PROJECTS || {}).filter(([id, p]) => p.town === town && S().projects[id]).length; if (!restored) return '';
+  /* people come back when a town is restored, or when the threat over it is gone */
+  const restored = Object.entries(D.PROJECTS || {}).filter(([id, p]) => p.town === town && S().projects[id]).length + (S().towns[town] && S().towns[town].boss ? 1 : 0); if (!restored) return '';
   const folk = (TOWNSFOLK[town] || ['villager']).slice(0, Math.min(2, restored)).filter(id => DQ.pixelArt && DQ.pixelArt.hasCreature(id));
   return folk.map((id, i) => `<span class="scene-folk f${i}" aria-hidden="true">${DQ.artImage('creature', id, 96, '', '')}</span>`).join('');
 };
@@ -89,7 +90,8 @@ const NOTES = {
 };
 const extras0 = UI.returnExtras;
 UI.returnExtras = sum => {
-  const h = extras0 ? extras0(sum) : '', gap = (sum && sum.real) || 0, list = NOTES[S().town] || NOTES.willowbrook;
+  const h = extras0 ? extras0(sum) : '', gap = (sum && sum.real) || 0, b = D.TOWN[S().town] && D.MON[D.TOWN[S().town].boss], won = b && S().towns[S().town] && S().towns[S().town].boss && D.BOSS_VOICES && D.BOSS_VOICES[b.id];
+  const list = (NOTES[S().town] || NOTES.willowbrook).concat(won ? [[D.BOSS_VOICES[b.id][0], D.BOSS_VOICES[b.id][2]]] : []);
   if (gap < 4 * 3600e3 || hash(dayKey() + S().name) > .45) return h;
   const [who, text] = list[Math.floor(hash(dayKey() + 'note') * list.length)];
   return h + `<div class="door-note" role="note"><p>${esc(text)}</p><small>— ${esc(who)}</small></div>`;

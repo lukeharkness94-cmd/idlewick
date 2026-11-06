@@ -234,9 +234,12 @@ DQ.tips.item = id => { const h = origTip(id), it = D.ITEMS[id]; if (!h || !it ||
 const tipBase = DQ.tips.item;
 DQ.tips.item = id => { const h = tipBase(id), f = D.ITEMS[id] && D.ITEMS[id].flavour; return f && h ? h.replace('<div class="dim">Worth', `<div class="flav">${esc(f)}</div><div class="dim">Worth`) : h; };
 /* unique effects: named in tooltips, and compared side by side when choosing gear */
-UI.uniqueLine = (it, cls = '') => it && it.unique ? `<div class="unique-fx ${cls}">${ico('star')}<b>${esc(it.unique.name)}</b> <span>${esc(it.unique.text)}</span></div>` : '';
+/* where a unique comes from: the creature once you have met it (otherwise only its region, to keep the mystery), the
+   honest first-copy guarantee from the engine's bad-luck protection, and what the effect is good for */
+UI.uniqueLine = (it, cls = '', full = false) => { if (!it || !it.unique) return ''; const use = D.UNIQUE_USE && D.UNIQUE_USE[it.unique.key], src = full && DQ.uniqueSource(it.id);
+  return `<div class="unique-fx ${cls}">${ico('star')}<b>${esc(it.unique.name)}</b> <span>${esc(it.unique.text)}</span>${full && use ? `<small class="unique-use">Good for ${esc(use)}. Its stats are modest, so ordinary gear can be stronger when the effect does not matter.</small>` : ''}${src ? `<small class="unique-src">${esc(src.text)}</small>` : ''}</div>`; };
 const tipUnique = DQ.tips.item;
-DQ.tips.item = id => { const h = tipUnique(id), it = D.ITEMS[id]; return h && it && it.unique ? h.replace('<div class="dim">Worth', `${UI.uniqueLine(it)}<div class="dim">Worth`) : h; };
+DQ.tips.item = id => { const h = tipUnique(id), it = D.ITEMS[id]; return h && it && it.unique ? h.replace('<div class="dim">Worth', `${UI.uniqueLine(it, '', true)}<div class="dim">Worth`) : h; };
 const cmpUnique = UI.compareHtml;
 UI.compareHtml = id => {
   const h = cmpUnique(id), it = D.ITEMS[id]; if (!h || !it || !it.slot) return h;

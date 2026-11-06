@@ -18,6 +18,7 @@ Q.artImage = (kind, id, size = 96, cls = '', alt = '') => {
   if (kind === 'fish') { const s = A.url('fishnode:' + id, () => A.fishLarge(id)); return s ? img(s, 32, 16, size, cls, alt || id) : ''; }
   if (kind === 'wood' || kind === 'tree') return img(A.treeUrl(id), 32, 48, size * 1.1, cls, alt || id);
   if (kind === 'mine' || kind === 'rock') return img(A.rockUrl(id), 32, 32, size, cls, alt || id);
+  if (kind === 'skill' && size >= 32 && A.emblemUrl && A.emblemUrl(id)) return img(A.emblemUrl(id), 32, 32, size, cls, alt || id);
   if (kind === 'skill' || kind === 'icon') { const u = A.iconUrl(id); return u ? img(u, 16, 16, size, cls, alt || id) : ''; }
   if (kind === 'plant') { const [stage, col] = String(id).split('|'), c = D.CROPS.find(x => x.col === col); return img(A.plantUrl(+stage, c ? c.id : null), 16, 16, size, cls, alt); }
   return '';

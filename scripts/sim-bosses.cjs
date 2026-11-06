@@ -22,6 +22,7 @@ q.ui = { V: {}, DO: {}, B: {}, homeSections: [], render() {}, tabState: () => nu
 /* the same gameplay systems the shipped page composes on top: field guide, enchantments, adventures, companion tricks */
 for (const n of ['lore', 'hunting', 'bestiary', 'skill_expansion', 'adventures', 'companions']) { try { load(n); } catch (e) { console.error('sim-bosses: could not load ' + n + ': ' + e.message); process.exit(1); } }
 const D = q.data;
+if (process.env.MELEE_K) D.STYLE_TUNE.meleeLevel = +process.env.MELEE_K;
 const cookLvl = id => { const r = Object.values(D.RECIPES).find(r => r.out && r.out[id]); return r ? r.lvl : 1; };
 const run = (boss, extra, useCounter) => {
   q.S = q.newState(); const S = q.S; S.settings.notify = false; q.fxDirty();
