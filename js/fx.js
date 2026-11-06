@@ -91,7 +91,7 @@ const queue = [], MAX_NOW = 1;
 const live = () => $$('.note', notesEl).filter(n => !n.classList.contains('out'));
 const nowLive = () => live().length;
 DQ.noteLog = []; DQ.noteMissed = 0;
-DQ.notificationTier = o => ['level', 'adv', 'unlock', 'death', 'warn', 'boss'].includes(o.kind) || /^(qr:|qo:|qnew$|project:)/.test(o.key || '') ? 'now' : 'quiet';
+DQ.notificationTier = o => ['level', 'adv', 'unlock', 'death', 'warn', 'boss'].includes(o.kind) || o.thanks || /^(qr:|qo:|qnew$|project:)/.test(o.key || '') ? 'now' : 'quiet';
 DQ.notificationPage = o => {
   if (o.page) return o.page;
   const k = o.key || '', D = DQ.data;
@@ -149,6 +149,7 @@ const centredStar=()=>{
       x.beginPath();x.arc(S/2,S/2,S/2,0,Math.PI*2);x.clip();x.drawImage(raw,S/2-cx*k,S/2-cy*k,W*k,H*k);starUrl=c.toDataURL();}catch(e){return '';}}
   return `<img class="lr-star-img" src="${starUrl}" width="104" height="104" alt="" draggable="false">`;
 };
+DQ.heroRevealWorthy=o=>!Number.isFinite(o.to)||(o.gains||[]).length>0||o.to%5===0;
 const showLevelReveal=o=>{
   if(modalEl){levelQueue.push(o);pumpLevel();return true;}
   const sk=o.skill&&DQ.data.SK[o.skill],hero=o.kind==='adv',name=hero?'Hero':(sk?.name||'Skill'),level=o.to||String(o.title||'').match(/\d+/)?.[0]||'';
@@ -173,7 +174,10 @@ DQ.notify = o => {
   }
   if(o.kind==='unlock'&&(o.key||'').startsWith('unlock:')&&showSkillUnlock(o))return;
   /* Skill levels use compact bottom cards; only the overall Hero level takes over. */
-  if(o.kind==='adv'&&showLevelReveal(o))return;
+  /* The full Hero reveal is kept for levels that unlock something and every fifth level; the others arrive as a
+     compact card that is always shown (even with notifications off), so no Hero level passes unseen. */
+  if(o.kind==='adv'&&DQ.heroRevealWorthy(o)&&showLevelReveal(o))return;
+  if(o.kind==='adv')o={...o,force:true};
   if (DQ.ui && DQ.ui.view === DQ.notificationPage(o) && !['unlock','level','adv'].includes(o.kind)) {
     markSilent(o, false);
     if (DQ.notificationTier(o) === 'now') {

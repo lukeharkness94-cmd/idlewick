@@ -401,8 +401,19 @@ test('boss preparation follows the battle forecast and caches it',()=>{
  for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[30];S.unlocked.cooking=true;S.xp.cooking=D.XPF[10];S.hp=q.maxHp();S.inv.bread=40;
  const boss=D.QUESTS.find(x=>x.obj.some(o=>o.ev==='boss'&&o.key==='grubnash'));if(boss)S.q[boss.id]={s:'active',p:boss.obj.map(()=>0)};
  S.journey='boss';const a=q.bossForecast('grubnash'),b=q.bossForecast('grubnash');assert.ok(a&&a===b,'second call uses the cache');
- const next=q.journeyNext();assert.ok(a.winRate>=.75?next.title==='Challenge Grubnash':/food|stronger|provisions/i.test(next.title),next.title);
+ const next=q.journeyNext();assert.ok(a.winRate>=.75?next.title==='Challenge Grubnash':/food|stronger|provisions|armour|buy|equip|rest|switch|save/i.test(next.title),next.title);
  q.forecasting=true;assert.equal(q.bossForecast('grubnash'),null,'never nests inside another forecast');q.forecasting=false;
+});
+test('first boss: reachable gate and honest preparation advice from the real save',()=>{
+ const {q}=harness();const S=q.S,D=q.data,m=D.MON.grubnash;
+ assert.equal(m.boss.req,8,'Grubnash opens at combat 8 (scripts/sim-opening.cjs)');assert.ok(m.hp<=24&&m.max<=3,'first boss stays a beginner fight');
+ assert.match(D.QM.chiefs_end.blurb||D.QUESTS.find(x=>x.id==='chiefs_end').blurb||'',/combat level 8/);
+ for(const k of ['attack','strength','defence'])S.xp[k]=D.XPF[8];S.xp.hitpoints=D.XPF[11];S.hp=4;S.coins=100;q.fxDirty();
+ let adv=q.prepAdvice('grubnash');assert.equal(adv[0].key,'rest','low health comes first');
+ const buy=adv.find(x=>x.key==='buy');assert.ok(buy&&buy.afford===false&&!/^Buy armour for your empty/.test(buy.title),'never claims an unaffordable set is affordable');
+ S.coins=1000;S.hp=q.maxHp();adv=q.prepAdvice('grubnash');assert.ok(adv.find(x=>x.key==='buy').afford,'affordable once coins cover it');
+ assert.ok(adv.some(x=>x.key==='weak'),'suggests his weakness (crush)');
+ const before=JSON.stringify(S);q.prepAdvice('grubnash');assert.equal(JSON.stringify(S),before,'advice never changes the save');
 });
 test('restoration: new Willowbrook projects, regional materials, villager voices and legacy bonuses',()=>{
  const {q,load}=harness();load('fx');load('routes');const S=q.S,D=q.data;S.coins=1e6;

@@ -41,6 +41,14 @@ const regionalProjects = [
 ];
 for(const [town,id,name,story,cost,fx,reward] of regionalProjects)D.PROJECTS[id]={town,name,story,cost,reward:reward+' Resting health recovery is 2% faster.',fx:Object.assign({regen:.02},fx)};
 DQ.projectsForTown = town => Object.entries(D.PROJECTS).filter(([,p])=>p.town===town);
+/* The opening arc: what each Willowbrook villager says when you finish their job, and what it changed. Shown on
+   the quest-complete card (not the bell), so the first half hour has visible acknowledgement. Words only. */
+Object.entries({
+  first_steps: 'Good timber, and you will not faint on the road. The well needs twenty logs for a new winch. Or keep your coins for armour; Grubnash will not wait politely either way.',
+  goblin_menace: 'Six fewer goblins at the farms, and the east road is quiet tonight. Grubnash will have heard. He is dug in on the hill fort; mind his war cry.',
+  hungry_cook: 'Eight perfect shrimp! The banquet is saved. Take some coins, and take my advice: never fight a goblin chief on an empty stomach.',
+  chiefs_end: 'The hill fort is ours. Listen: the children are playing on the green again. The road to Mossbarrow is open, and they say something big has been trampling their fields.'
+}).forEach(([id, line]) => { if (D.QM[id]) D.QM[id].thanks = line; });
 const destinations = { boss: 'Defeat Grubnash', house: 'Build my first home', well: D.PROJECTS.well.name, inn: D.PROJECTS.inn.name, village: 'Restore Willowbrook' };
 const nextVillageProject = () => DQ.projectsForTown('willowbrook').map(([id]) => id).find(id => !S().projects[id]);
 DQ.pinProject = id => {
@@ -87,7 +95,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (S().town !== 'willowbrook') return step('Return to Willowbrook', 'Grubnash awaits outside the village.', 'journeytravel', 'willowbrook');
   const first = D.QM.first_steps, firstState = DQ.questState(first);
   if (firstState === 'new') return step('Meet Elder Wren', 'Accept First Steps, or simply start fishing or chopping: the quest is accepted for you and your work counts.', 'qstart', first.id);
-  if (firstState === 'ready') return step('Claim First Steps', 'Collect your XP and coins from Elder Wren.', 'qclaim', first.id);
+  if (firstState === 'ready') return step('Claim First Steps', 'Collect your XP and coins from Elder Wren. Her broken well is waiting on timber, and Grubnash on you.', 'qclaim', first.id);
   if (firstState === 'active') {
     const p = S().q[first.id], index = first.obj.findIndex((o, i) => DQ.objProg(first, p, i) < o.n);
     if (index >= 0) return index === 0 ? task('Catch five shrimp', 'Your first quest prepares food and earns Hero XP.', 'fish', 'shrimp') : task('Chop five logs', 'Gather timber to complete First Steps.', 'wood', 'normal');
@@ -99,6 +107,9 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   /* Ready by level: let the battle forecast decide what, if anything, is missing. */
   const f = DQ.bossForecast ? DQ.bossForecast('grubnash') : null;
   if (f && f.winRate >= .75) return step('Challenge Grubnash', `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current gear and food.`, 'go', 'combat');
+  /* the most useful concrete step from the real save: rest, armour you own or can afford, his weakness, food */
+  const prep = DQ.prepAdvice ? DQ.prepAdvice('grubnash', f).filter(x => x.key !== 'food' && x.key !== 'level') : [];
+  if (prep.length && (prep[0].afford !== false)) return step(prep[0].title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${prep[0].text}`, prep[0].action || 'go', prep[0].a || 'combat');
   const needFood = f && f.foodPerKill != null ? Math.ceil(f.foodPerKill * 1.5) : DQ.maxHp() * 2;
   if (food < needFood) {
     const msg = `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins. ` : ''}Food restores ${fmt(food)} health; about ${fmt(needFood)} would carry you through.`;
@@ -154,8 +165,27 @@ UI.V.projects = () => UI.projectsPanel();
 UI.returnPlan = sum => {
   const next = DQ.journeyNext();
   const status = sum.died ? 'Your hero was defeated. Replenish food and review equipment before resuming combat.' : sum.stopped ? 'Your task finished or stopped. Check the next step before starting another.' : DQ.act ? DQ.actLabel() + ' is still running.' : 'No task is running.';
-  return `<section class="return-plan"><h3>${esc(destinations[S().journey] || destinations.boss)}</h3><p>${esc(status)}</p><p>${esc(next.detail)}</p>${actionHtml(next)}</section>`;
+  return `<section class="return-plan"><h3>${esc(destinations[S().journey] || destinations.boss)}</h3><p>${esc(status)}</p><p>${esc(next.detail)}</p>${actionHtml(next)}</section>${UI.returnChoices()}`;
 };
+/* Other good options after an absence, read from the real save. Each says what it costs, so a choice is a real
+   trade-off; nothing is shown as affordable unless it is, and nothing here is timed or expires. */
+DQ.returnChoices = () => {
+  const out = [];
+  const projects = DQ.projectsForTown(S().town).filter(([id]) => !S().projects[id]);
+  const ready = projects.find(([, p]) => DQ.canAfford(p.cost));
+  if (ready) { const [id, p] = ready; out.push({ title: `Restore ${p.name.toLowerCase()}`, text: `You hold everything it needs${p.cost.coins ? `, including ${fmt(p.cost.coins)} coins you could otherwise put towards gear` : ''}. ${p.reward}`, action: 'openproject', a: id }); }
+  else if (projects.length) {
+    const short = ([, p]) => Object.entries(p.cost).reduce((n, [k, q]) => n + Math.max(0, q - (k === 'coins' ? S().coins : DQ.have(k))) * (k === 'coins' ? 1 : (D.ITEMS[k]?.val || 1)), 0);
+    const [id, p] = projects.slice().sort((a, b) => short(a) - short(b))[0];
+    const miss = Object.entries(p.cost).map(([k, q]) => [k, q - (k === 'coins' ? S().coins : DQ.have(k))]).filter(([, n]) => n > 0).map(([k, n]) => k === 'coins' ? `${fmt(n)} coins` : `${fmt(n)} ${D.ITEMS[k].name.toLowerCase()}`);
+    out.push({ title: `Closest restoration: ${p.name.toLowerCase()}`, text: `Still needed: ${miss.join(', ')}.`, action: 'openproject', a: id });
+  }
+  const near = D.SKILLS.filter(sk => DQ.skillUnlocked(sk.id) && D.UNL[sk.id]).map(sk => { const L = DQ.lvl(sk.id), nextLvl = Object.keys(D.UNL[sk.id]).map(Number).find(l => l > L); return nextLvl === L + 1 ? { sk, nextLvl, pct: DQ.pctNext(sk.id), what: D.UNL[sk.id][nextLvl] } : null; }).filter(Boolean).sort((a, b) => b.pct - a.pct)[0];
+  if (near && near.pct >= 50) out.push({ title: `${near.sk.name} ${near.nextLvl} is close`, text: `${Math.round(near.pct)}% of the way there; it unlocks ${[].concat(near.what).join(', ').toLowerCase()}.`, action: 'go', a: near.sk.page });
+  return out;
+};
+UI.returnChoices = () => { const L = DQ.returnChoices(); return L.length ? `<div class="k" style="margin:14px 0 6px">Other good options</div><div class="return-choices">${L.map(x => `<div><b>${esc(x.title)}</b><small>${esc(x.text)}</small><button class="btn sm" data-do="returnpick" data-a="${x.action}" data-b="${x.a}">Open</button></div>`).join('')}</div>` : ''; };
+UI.DO.returnpick = (action, a) => { DQ.closeModal(); if (UI.DO[action]) UI.DO[action](a); };
 Object.assign(UI.DO, {
   pinproject: id => { if (DQ.pinProject(id)) UI.render(false); },
   openproject: id => { const p=D.PROJECTS[id];if(!p)return;if(p.town!==S().town){const next=DQ.journeyNext(id);return UI.DO[next.action](next.a,next.b);} UI.tab.projectChoice = id; if (UI.view === 'projects') UI.render(false); else DQ.go('projects'); },

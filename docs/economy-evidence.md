@@ -49,3 +49,16 @@ Fresh-character simulation, fighting the best available Willowbrook target with 
 | --- | --- | --- |
 | Fights from the start | 82 | 66 |
 | Gathered to Hero 10 first | 81 | 45 |
+
+## First boss rebalance (Nov 2026)
+
+`node scripts/sim-opening.cjs` plays a purposeful beginner through the real engine (First Steps, Goblin Menace, cooking, the best Willowbrook target with training styles rotated, quests claimed), then runs 96 forecast fights against Grubnash at full health for each preparation level. `node scripts/sim-bosses.cjs` checks every boss at its requirement with region melee gear and 15 of the best cookable food (no counters).
+
+| At the gate | Before (combat 10, hp 28, max 4) | After (combat 8, hp 20, max 3) |
+| --- | --- | --- |
+| Minutes to the gate | 28 | 21 |
+| As reached / +15 shrimp | 0% / 0% | 18% / 26% |
+| Bronze armour + 15 shrimp | 1% | 68% |
+| Armour + warhammer (his weakness) + 15 shrimp | 25% | 92% |
+
+The economy simulator does not model combat, so its coin table is unchanged by this tuning.

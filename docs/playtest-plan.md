@@ -50,3 +50,24 @@ No human sessions have been run for this build. These are the things a scripted 
 7. **Listening (needs a person).** Ten minutes in two regions with ambience on. Is anything repetitive, too loud or fatiguing? Check the master, music, effects and ambience sliders one at a time, and mute.
 
 Record answers against the 1 to 5 questions above. Do not merge scripted-run timings with human results.
+
+## Enthusiasts and genre sceptics (Nov 2026 build, prepared, not yet run)
+
+Recruit both: **enthusiasts** (play idle or RuneScape-style games regularly) and **sceptics** (have tried idle games and bounced off, or avoid the genre). No sessions have been run. Do not record results until real people have played.
+
+| Step | Enthusiast: watch for | Sceptic: watch for |
+| --- | --- | --- |
+| First 25 minutes, fresh hero | Do they optimise (style rotation, food) without being told? Time to challenge Grubnash (simulated 21 min). | Can they say *why* they are gathering? Do they read Wren's and Orrin's lines? Do they hesitate anywhere? |
+| The goblin satchel choice | Do they reason about XP versus coins? | Do they feel the choice mattered? |
+| Grubnash preparation | Do they trust the preparation steps and the forecast, or check them themselves? | Do they follow a step? Does "Not a guarantee" feel honest or discouraging? |
+| A loss to Grubnash | Do they understand why? | Do they retry, or quit? |
+| Welcome back after 6 hours | Are the "Other good options" useful? | Is it short enough? Do they pick something? |
+| Hero levels 4 to 9 | Do they miss the full reveal for small levels? | Are there still too many interruptions? |
+
+Questions for both, after the 1 to 5 set above:
+1. When did you first care about something in the game, and what was it?
+2. Was there a moment you felt clever?
+3. Did any screen tell you something you did not believe?
+4. What would make you open it again tomorrow, if anything?
+
+Unanswered until people play: whether 21 minutes feels short or long to each group; whether the satchel and thanks lines read as charming or as filler; whether sceptics read preparation steps at all; whether enthusiasts want the full Hero reveal back for every level.

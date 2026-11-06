@@ -176,7 +176,38 @@ const ICON = {
   star: s => { const pts = []; for (let i = 0; i < 10; i++) { const r = i % 2 ? 2.8 : 6.6, a = -Math.PI / 2 + i * Math.PI / 5; pts.push([8 + Math.cos(a) * r, 8.5 + Math.sin(a) * r]); } s.poly(pts, R.gold); s.fix(7, 6, '#fff6c0'); },
   trophy: s => { s.poly([[4, 2], [12, 2], [11, 8], [5, 8]], R.gold); s.rect(7, 8, 2, 4, R.gold); s.rect(4, 12, 8, 2, R.wood); s.line(2, 3, 3, 6, null, R.gold.base); s.line(14, 3, 13, 6, null, R.gold.base); s.fix(6, 3, '#fff6c0'); }
 };
-const ICON_ALIAS = { book: 'research', scroll: 'quest', compass: 'exploration', sword: 'attack', rod: 'fishing', glove: 'thieving', hoe: 'farming', hammer: 'smithing', bottle: 'herbalism', rune: 'enchanting', house: 'home', bank: 'bag', users: 'bag', paw: 'hunting', mute: 'sound', defence: 'defence', health: 'hitpoints' };
+/* Interface glyphs drawn as pixel art too (Nov 2026): no icon falls back to a line glyph any more. Item-type
+   icons reuse the matching item sprite so a "fish" icon is the same shrimp you catch. */
+const itemIcon = id => () => A.itemSprite(id);
+const stroke2 = (s, pts, r) => { for (let i = 0; i + 1 < pts.length; i++) { const [a, b] = [pts[i], pts[i + 1]]; s.line(a[0], a[1], b[0], b[1], r); s.line(a[0] + 1, a[1], b[0] + 1, b[1], r); } };
+Object.assign(ICON, {
+  fish: itemIcon('raw_shrimp'), log: itemIcon('log_normal'), ore: itemIcon('ore_copper'), bar: itemIcon('bar_bronze'), gem: itemIcon('gem_sapphire'),
+  hide: itemIcon('cowhide'), bone: itemIcon('old_bone'), pouch: itemIcon('coin_pouch'), arrow_ammo: itemIcon('arrow_bronze'), helm: itemIcon('bronze_helm'),
+  body: itemIcon('bronze_body'), legs: itemIcon('bronze_legs'), shield: itemIcon('bronze_shield'), staff: itemIcon('staff_normal'), ring: itemIcon('ring_sapphire'),
+  amulet: itemIcon('amulet_sapphire'), food: itemIcon('bread'), bow: itemIcon('bow_normal'), seed: itemIcon('seed_potato'), crop: itemIcon('crop_potato'),
+  egg: itemIcon('egg'), dagger: itemIcon('bronze_dagger'), heart: s => ICON.hitpoints(s),
+  close: s => { const r = rp('#c8483c'); stroke2(s, [[3, 3], [11, 11]], r); stroke2(s, [[11, 3], [3, 11]], r); s.line(3, 4, 11, 12, r); s.line(12, 4, 4, 12, r); },
+  check: s => { const r = rp('#5cc08a'); stroke2(s, [[2, 8], [5, 11], [12, 4]], r); s.line(2, 9, 5, 12, r); s.line(6, 12, 13, 5, r); },
+  chevron: s => { const r = R.iron; stroke2(s, [[5, 2], [10, 7], [5, 12]], r); s.line(5, 3, 9, 7, r); s.line(9, 8, 5, 12, r); },
+  arrow: s => { s.rect(2, 7, 9, 3, R.gold); s.poly([[9, 3], [15, 8.5], [9, 14]], R.gold); },
+  lock: s => { s.rect(5, 2, 6, 2, R.iron); s.rect(4, 3, 2, 5, R.iron); s.rect(10, 3, 2, 5, R.iron); s.rect(3, 7, 10, 8, R.gold); s.fix(8, 10, '#2a1c1f'); s.fix(8, 11, '#2a1c1f'); s.fix(4, 8, '#fff6c0'); },
+  skull: s => { const b = rp('#e8e0d0'); s.ell(8, 7, 5.5, 5, b); s.rect(5, 11, 6, 3, b); for (const [x, y] of [[5, 6], [6, 6], [5, 7], [6, 7], [9, 6], [10, 6], [9, 7], [10, 7], [8, 9]]) s.fix(x, y, '#2a1c1f'); for (const x of [6, 8, 10]) s.fix(x, 13, '#8a7a6a'); },
+  info: s => { s.ell(8, 8, 6.6, 6.6, rp('#3f7fbf')); s.fix(8, 4, '#ffffff'); s.fix(7, 4, '#ffffff'); for (let y = 7; y <= 11; y++) { s.fix(7, y, '#ffffff'); s.fix(8, y, '#ffffff'); } s.fix(6, 7, '#ffffff'); s.fix(6, 11, '#ffffff'); s.fix(9, 11, '#ffffff'); },
+  sun: s => { s.ell(8, 8, 3.6, 3.6, R.gold); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; s.dot(8 + Math.round(Math.cos(a) * 6), 8 + Math.round(Math.sin(a) * 6), R.gold); s.dot(8 + Math.round(Math.cos(a) * 5.4), 8 + Math.round(Math.sin(a) * 5.4), R.gold); } },
+  moon: s => { s.ell(8, 8, 6, 6, rp('#e8dca8')); for (let j = -6; j <= 6; j++) for (let i = -6; i <= 6; i++) if (i * i + j * j <= 22) s.erase(11 + i, 6 + j); s.fix(4, 7, '#fff6c0'); },
+  music: s => { const r = rp('#9b87e0'); s.ell(4, 12, 2.4, 1.8, r); s.ell(11, 11, 2.4, 1.8, r); s.rect(6, 3, 1, 9, r); s.rect(13, 2, 1, 9, r); s.rect(6, 2, 8, 2, r); },
+  town: s => { s.rect(1, 9, 6, 6, R.plaster); s.poly([[0, 10], [4, 5], [8, 10]], R.straw); s.rect(8, 6, 7, 9, R.stone); s.poly([[7, 7], [11.5, 2], [16, 7]], R.red); s.rect(3, 11, 2, 4, R.wood); s.rect(10, 10, 2, 2, rp('#f0d060')); },
+  save: s => { s.rect(2, 2, 12, 12, rp('#3f7fbf')); s.rect(4, 2, 7, 4, rp('#d8dce0')); s.fix(9, 3, '#2a1c1f'); s.fix(9, 4, '#2a1c1f'); s.rect(4, 9, 8, 5, rp('#f4ecd8')); },
+  flag: s => { s.rect(3, 1, 2, 14, R.wood); s.poly([[5, 2], [14, 4], [5, 8]], R.red); s.fix(6, 3, '#ff9a8a'); },
+  barn: s => { s.rect(2, 7, 12, 8, R.red); s.poly([[1, 8], [8, 2], [15, 8]], rp('#7a3a2a')); s.rect(6, 10, 4, 5, R.wood); s.line(6, 10, 9, 14, null, '#f4ecd8'); s.line(9, 10, 6, 14, null, '#f4ecd8'); },
+  candle: s => { s.rect(6, 7, 4, 8, rp('#f4ecd8')); s.ell(8, 4, 1.6, 2.4, rp('#ffb04a')); s.fix(8, 4, '#fff6c0'); s.fix(8, 6, '#2a1c1f'); s.rect(4, 14, 8, 1, R.gold); },
+  fire: s => { s.poly([[3, 14], [2, 9], [5, 4], [6, 8], [8, 1], [11, 7], [12, 5], [14, 10], [13, 14]], rp('#e0603a')); s.poly([[5, 14], [5, 10], [8, 6], [11, 10], [11, 14]], rp('#ffb04a')); s.fix(8, 11, '#fff6c0'); },
+  nest: s => { s.ell(8, 11, 6.5, 3.4, R.wood); s.ell(8, 9.5, 4, 1.4, rp('#5a3a22')); s.ell(6, 8, 1.6, 1.8, rp('#cfe6f0')); s.ell(10, 8, 1.6, 1.8, rp('#cfe6f0')); },
+  ring_logo: s => { s.ell(8, 9, 6, 6, R.gold); for (let j = -4; j <= 4; j++) for (let i = -4; i <= 4; i++) if (i * i + j * j <= 12) s.erase(8 + i, 9 + j); s.ell(8, 3, 2, 2, rp('#3f7fd6')); },
+  bit: s => { s.ell(8, 8, 3, 3, R.gold); },
+  mute: s => { ICON.sound(s); for (let y = 5; y <= 11; y++) s.erase(12, y), s.erase(13, y); const r = rp('#c8483c'); s.line(11, 5, 15, 10, r); s.line(15, 5, 11, 10, r); }
+});
+const ICON_ALIAS = { book: 'research', scroll: 'quest', compass: 'exploration', sword: 'attack', rod: 'fishing', glove: 'thieving', hoe: 'farming', hammer: 'smithing', bottle: 'herbalism', rune: 'enchanting', house: 'home', bank: 'bag', users: 'bag', paw: 'hunting', defence: 'defence', health: 'hitpoints' };
 function iconSprite(id) { const k = ICON[id] ? id : ICON_ALIAS[id]; const f = ICON[k]; if (!f) return null; const s = Spr(16, 16); const out = f(s); return out && out.w ? out : s; }
 
 Object.assign(A, { workerSprite, treeSprite, rockSprite, piece, sceneFor, furnSprite, iconSprite, TREE, TOWN, ICON, ICON_ALIAS,

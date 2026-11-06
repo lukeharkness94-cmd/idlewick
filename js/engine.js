@@ -78,7 +78,7 @@ function onAdv(from, to) {
   if (!DQ.sim.on) {
     DQ.log(`Hero level ${to} reached.`, 'quest');
   }
-  DQ.notify({ kind: 'adv', key: 'adv', icon: 'star', col: '#d8a64a', title: `Hero level ${to}!`, text: (gains.length ? `Unlocked: ${gains.join(', ')}. ` : '') + `All experience now earns +${((to - 1) * .25).toFixed(1).replace(".0", "")}% bonus.`, sound: 'level', ttl: 14000, burst: true });
+  DQ.notify({ kind: 'adv', key: 'adv', icon: 'star', col: '#d8a64a', title: `Hero level ${to}!`, text: (gains.length ? `Unlocked: ${gains.join(', ')}. ` : '') + `All experience now earns +${((to - 1) * .25).toFixed(1).replace(".0", "")}% bonus.`, sound: 'level', ttl: 14000, burst: true, from, to, gains: gains.slice() });
   DQ.achDirty = true; checkQuests(); DQ.emit('lvl');
 }
 DQ.addCoins = (n, o = {}) => {
@@ -163,7 +163,7 @@ DQ.claimQuest = id => {
   Object.entries(r.xp || {}).forEach(([k, v]) => DQ.addXp(k, v, { raw: true }));
   DQ.addCoins(r.coins || 0); Object.entries(r.items || {}).forEach(([k, v]) => DQ.grant(k, v));
   DQ.log(`Quest complete: ${q.name}.`, 'quest');
-  DQ.notify({ kind: 'quest', key: 'qd:' + id, icon: 'quest', col: '#f3d58a', title: `Quest complete: ${q.name}`, text: 'Rewards: ' + DQ.rewardText(r, q).join(' · '), sound: 'quest', burst: true, ttl: 10000 });
+  DQ.notify({ kind: 'quest', key: 'qd:' + id, icon: 'quest', col: '#f3d58a', title: `Quest complete: ${q.name}`, thanks: !!q.thanks, text: (q.thanks ? `${q.giver}: “${q.thanks}” ` : '') + 'Rewards: ' + DQ.rewardText(r, q).join(' · '), sound: 'quest', burst: true, ttl: 10000 });
   DQ.achDirty = true; checkQuests(); DQ.emit('quests');
 };
 
@@ -607,6 +607,12 @@ DQ.simulate = (ms, real = ms) => {
       n.unlocks = [...new Set([...(previous.unlocks || []), ...(n.unlocks || [])])];
       n.title = `${D.SK[n.skill].name} levels ${n.from + 1}–${n.to}!`;
       if (n.unlocks.length) n.text = n.unlocks.join(' ');
+    }
+    /* several Hero levels while away become one card that still lists everything they unlocked */
+    if (previous && n.kind === 'adv') {
+      n.gains = [...new Set([...(previous.gains || []), ...(n.gains || [])])]; n.from = Number.isFinite(previous.from) ? previous.from : previous.to - 1;
+      n.title = `Hero levels ${n.from + 1}–${n.to}!`;
+      n.text = (n.gains.length ? `Unlocked: ${n.gains.join(', ')}. ` : '') + n.text.replace(/^Unlocked: [^.]*\. /, '');
     }
     summaries.set(key, n);
   }

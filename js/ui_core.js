@@ -9,6 +9,23 @@ UI.itm = itm; UI.set = set;
 UI.money = amount => `<span class="money" role="img" aria-label="${fmt(amount)} coins"><span class="money-icon" aria-hidden="true">${ico('coin')}</span><span aria-hidden="true">${fmt(amount)}</span></span>`;
 /* Render existing choice definitions as visible buttons, never native dropdowns.
    The select is parsed in an inert template only; it never enters the page. */
+/* Every button choice carries the same pixel icon the menus use, so options read at a glance. */
+UI.choiceIcon = (kind, id, a, text) => {
+  const t = String(text || '').toLowerCase();
+  if (kind === 'training-focus') return { accurate: 'attack', aggressive: 'strength', defensive: 'defence', offense: a === 'magic' ? 'magic' : 'ranged' }[id];
+  if (kind === 'eat-threshold') return 'heart';
+  if (kind === 'combat-spell') { const el = D.SPELL_EL && D.DTYPES[D.SPELL_EL[id]]; return el ? el.ic : 'magic'; }
+  if (kind === 'qrule') return /^time/.test(id) ? 'clock' : /^count/.test(id) ? 'check' : id === 'level' ? 'star' : 'arrow';
+  if (kind === 'qpace') return { careful: 'defence', steady: 'clock', push: 'fire' }[id] || 'clock';
+  if (kind === 'itemfilter') return { all: 'bag', armour: 'body', weapon: 'attack', jewel: 'ring', tool: 'mining', food: 'food', potion: 'bottle', resource: 'log', craft: 'crafting', gem: 'gem', farm: 'crop', other: 'bit' }[id];
+  if (kind === 'settings-category') return /audio|sound/.test(t) ? 'sound' : /interface/.test(t) ? 'gear' : /gameplay/.test(t) ? 'attack' : /save/.test(t) ? 'save' : /shortcut/.test(t) ? 'info' : /art/.test(t) ? 'star' : /about/.test(t) ? 'candle' : 'gear';
+  if (kind === 'travel-town') return 'town';
+  if (kind === 'town-project') return 'home';
+  if (kind === 'house-room' || kind === 'house-furniture') return 'home';
+  if (kind === 'worker-choice' || kind === 'hire-choice') return 'users';
+  if (D.SK[id]) return id;
+  return '';
+};
 UI.choiceButtons = html => {
   const template = document.createElement('template'); template.innerHTML = html;
   const source = template.content.querySelector('select');
@@ -18,7 +35,7 @@ UI.choiceButtons = html => {
   const attrs = [...source.attributes].filter(a => a.name.startsWith('data-')).map(a => `${a.name}="${esc(a.value)}"`).join(' ');
   return `<span class="choice-buttons" role="group" aria-label="${esc(label)}" ${source.id ? `id="${esc(source.id)}"` : ''}>${[...source.options].map(option => {
     const id = option.value, item = D.ITEMS[id];
-    const art = item ? DQ.itemIco(item) : kind === 'pet-choice' ? DQ.artImage('creature', id, 40, '', '') : '';
+    const art = item ? DQ.itemIco(item) : kind === 'pet-choice' ? DQ.artImage('creature', id, 40, '', '') : (n => n ? ico(n) : '')(UI.choiceIcon(kind, id, source.dataset.a, option.textContent));
     return `<button type="button" class="choice-button ${option.selected ? 'on' : ''}" data-do="choose" ${attrs} data-b="${esc(id)}" value="${esc(id)}" aria-pressed="${option.selected}" ${source.disabled || option.disabled ? 'disabled' : ''}>${art}<span>${esc(option.textContent)}</span></button>`;
   }).join('')}</span>`;
 };

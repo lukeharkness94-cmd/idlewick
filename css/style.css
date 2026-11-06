@@ -1992,3 +1992,18 @@ img.pxscene{width:100%;height:auto!important;aspect-ratio:160/90;object-fit:cont
 #title .ver,.ver{pointer-events:none}
 @media (max-height:900px),(max-width:600px){#title{overflow-y:auto}#title .create{margin-bottom:56px}.face-swatch{width:36px!important;height:36px!important}.face-swatch img{width:28px;height:28px}}
 .shop-later{display:block}.shop-later .ic{display:inline-block;vertical-align:-2px;margin-right:4px}
+/* Preparation steps on the boss card: concrete, from the real save */
+.prep-steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.prep-steps li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+.prep-steps li b{grid-column:1}.prep-steps li small{grid-column:1;color:var(--dim)}
+.prep-steps li .btn{grid-column:2;grid-row:1/3;align-self:center}
+.special-line{border-left:3px solid #e5b04a;padding-left:8px}
+@media (max-width:560px){.prep-steps li{grid-template-columns:1fr}.prep-steps li .btn{grid-column:1;grid-row:auto;justify-self:start}}
+.return-choices{display:flex;flex-direction:column;gap:8px}
+.return-choices>div{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.return-choices small{grid-column:1;color:var(--dim)}.return-choices .btn{grid-column:2;grid-row:1/3}
+/* action bar: the task's own pixel art, no tinted tile behind it; whole-number scale */
+.h-tic{background:none}
+.h-tic img{width:32px;height:32px;object-fit:contain;image-rendering:pixelated}
+.h-tic img.px24,.h-tic>.art-sprite{width:48px;height:48px}
+.h-stop .ic{width:20px;height:20px}

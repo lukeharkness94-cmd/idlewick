@@ -77,7 +77,7 @@ DQ.on('lvl', () => UI.renderDock && UI.renderDock());
 /* ---------- Top bar ---------- */
 UI.renderHud = () => {
   const a = DQ.act, sk = a && DQ.actSkill(), s = sk && D.SK[sk], fight = a && a.kind === 'fight' && D.MON[a.id];
-  const taskArt = a && (fight ? DQ.monSprite(fight, 48) : a.kind === 'recipe' ? DQ.itemIco(D.ITEMS[Object.keys(D.RECIPES[a.id].out)[0]]) : a.kind === 'alch' ? DQ.itemIco(D.ITEMS[a.id]) : DQ.artImage(a.kind, a.id, 48, '', DQ.actLabel()));
+  const taskArt = a && (fight ? DQ.monSprite(fight, 48) : a.kind === 'recipe' ? DQ.itemIco(D.ITEMS[Object.keys(D.RECIPES[a.id].out)[0]]) : a.kind === 'alch' ? DQ.itemIco(D.ITEMS[a.id]) : (() => { const n = (D.NODES[a.kind] || []).find(x => x.id === a.id); return n && D.ITEMS[n.item] ? DQ.itemIco(D.ITEMS[n.item]) : DQ.artImage(a.kind, a.id, 48, '', DQ.actLabel()); })());
   const task = a ? `<div class="h-task" style="--c:${s ? s.col : '#d8a64a'}">
       <span class="h-tic">${taskArt}</span>
       <button class="h-tb" data-do="plan" data-tip="text:Pace, stop rule and queue"><span class="h-t1"><b>${esc(DQ.actLabel().replace(/ rock$/, ''))}</b><span class="h-meta"><span data-b="hud:eta"></span><span data-b="hud:rate"></span></span></span><span class="bar prog"><i data-prog="@"></i></span><span class="h-t3"><small>${fight ? `Combat <b class="mono" data-b="combat"></b> vs Lv ${fight.cl} · ` : s ? `${s.name} <b class="mono" data-b="lvl:${sk}"></b> · ` : ''}${D.PACE[a.pace || 'steady'].name}${(S().queue || []).length ? ` · ${S().queue.length} queued` : ''} · <span data-b="hud:count"></span></small><span class="hq hb" data-b="hudbuff" hidden></span></span></button>

@@ -28,6 +28,7 @@ check('every item, creature, companion, townsperson, animal, fishing spot, tree,
   for (const n of D.NODES.mine) if (!A.ORE[n.id]) miss.push('rock:' + n.id);
   for (const t of D.TOWNS) if (!A.TOWN[t.id]) miss.push('scene:' + t.id);
   for (const s of D.SKILLS) if (!A.iconSprite(s.id)) miss.push('icon:' + s.id);
+  for (const id of Object.keys(Q.ICONS || {})) if (!A.iconSprite(id)) miss.push('ui-icon:' + id); /* no interface glyph falls back to line art */
   for (const c of D.CROPS) for (let st = 0; st <= 3; st++) if (!A.plantStage(st, c.id)) miss.push('plant:' + c.id + st);
   for (const p of Object.keys(D.PROJECTS)) for (const done of [false, true]) if (!A.piece(p, done)) miss.push('project:' + p);
   assert.deepEqual(miss, []);

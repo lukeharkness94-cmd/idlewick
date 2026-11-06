@@ -229,3 +229,15 @@ Approved roadmap stages are implemented in order. Research/Scholarship lives in 
 - **Progression**: combat XP chip no longer folds catch-up into "+N% XP" (catch-up shown separately, eases off smoothly); gear for unlearned Ranged or Magic neither drops nor sells, with who teaches the skill; A Hunter's Bow needs only Mossbarrow and Hero 18; basic leather needs Defence 1; recipe levels cap at 99 (astral platebody).
 - **Usability**: travel states where you are and what opens each road; level-up notes open the new recipe or node; Ready to make is a switch; materials list their uses with a route; denser type and spacing at 100% zoom; the combat page uses two stable columns.
 - **Reliability (earlier in this pass)**: project pins never block loading; relics are unsellable keepsakes with safe recovery; live crop art follows growth; study objectives open the guide and reveal weak points; Emberfall's ashen anvil discovery; ambience timers no longer accumulate.
+
+## Enthusiasts and sceptics pass (Nov 2026, Claude Code)
+
+Read `docs/experience-assessment.md` first: the prioritised findings, the before and after evidence, the skill audit and the proposals awaiting approval.
+
+- **First boss**: Grubnash opens at combat 8 (level 12, 20 health, max hit 3, attack 7, defence 6). His mechanics and drops are unchanged. Evidence comes from `scripts/sim-opening.cjs` and `scripts/sim-bosses.cjs` (see `docs/economy-evidence.md`).
+- **Preparation**: `DQ.prepAdvice(monId, forecast)` in `plan.js` gives concrete, honest steps from the real save. `UI.prepSteps` and `UI.specialLine` appear on the boss card. Forecast results say "Estimate … Not a guarantee". The Home objective uses the same advice.
+- **Level-ups**: `DQ.heroRevealWorthy` keeps the full Hero reveal for levels that unlock something and every fifth level. Other levels get a compact card that is always shown. Offline Hero levels merge into one card that keeps every unlock.
+- **Opening arc**: First Steps has a motive (the well's winch). `thanks` lines on four Willowbrook quests (in `journey.js`) are shown as a card. The `goblin_satchel` discovery (adventures.js, reliable within four goblins) offers XP or coins.
+- **Return**: `DQ.returnChoices()` and `UI.returnChoices()` add "Other good options" to the welcome-back summary.
+- **Icons**: every `DQ.ICONS` id has pixel art (`pixel_world.js`), and `tests/art-pixel.cjs` enforces it. `UI.choiceIcon` puts icons on all button choices. The action bar uses the task's item art without a tinted tile.
+- **Open**: late bosses need a counter-aware simulation. Bestiary mastery objectives and companion effects are proposals awaiting approval.

@@ -327,7 +327,8 @@ mon('chicken', 'Chicken', 'willowbrook', 1, 3, 1, 1, 1, [0, 3], '#e8d8a0', [['fe
 mon('rat', 'Giant rat', 'willowbrook', 3, 5, 1, 2, 2, [0, 2], '#a6998a', []);
 mon('goblin', 'Goblin', 'willowbrook', 5, 7, 2, 3, 2, [3, 14], '#6fb35e', [['rune', [1, 3], .08]]);
 mon('cow', 'Cow', 'willowbrook', 8, 10, 2, 3, 4, [0, 5], '#d6c2a4', [['cowhide', [1, 1], 1]]);
-mon('grubnash', 'Grubnash the Goblin Chief', 'willowbrook', 16, 45, 5, 10, 8, [80, 160], '#8fbf6a', [['cowhide', [2, 3], .5], ['chief_helm', [1, 1], .12]], { req: 10, first: 'chief_helm', special: { every: 4, mult: 1.8, name: 'War cry' }, short: 'Grubnash' });
+/* First boss, tuned Nov 2026 (scripts/sim-opening.cjs): a beginner reaches combat 8 in ~21 minutes; prepared (bronze armour, ~15 cooked fish) wins about two times in three. */
+mon('grubnash', 'Grubnash the Goblin Chief', 'willowbrook', 12, 32, 4, 7, 6, [80, 160], '#8fbf6a', [['cowhide', [2, 3], .5], ['chief_helm', [1, 1], .12]], { req: 8, first: 'chief_helm', special: { every: 4, mult: 1.8, name: 'War cry' }, short: 'Grubnash' });
 mon('boar', 'Wild boar', 'mossbarrow', 10, 14, 3, 9, 8, [2, 10], '#9a6a4a', [['boar_tusk', [1, 1], .5]]);
 mon('wolf', 'Grey wolf', 'mossbarrow', 13, 18, 3, 12, 10, [0, 4], '#9aa0a8', [['wolf_pelt', [1, 1], .7]]);
 mon('scarecrow', 'Haunted scarecrow', 'mossbarrow', 16, 22, 4, 14, 14, [5, 20], '#d9b860', [['seed_wheat', [1, 3], .25], ['seed_pumpkin', [1, 1], .05]]);
@@ -409,7 +410,7 @@ Object.values(ITEMS).forEach(it => { if (!it.buy) it.buy = Math.max(1, Math.ceil
 /* ---------- Quests ---------- */
 const Q = (id, town, name, giver, adv, req, blurb, obj, reward) => ({ id, town, name, giver, adv, req, blurb, obj, reward });
 D.QUESTS = [
-  Q('first_steps', 'willowbrook', 'First Steps', 'Elder Wren', 1, null, 'Every adventurer starts with a full belly and a wood stack. Catch some shrimp and chop a few logs.',
+  Q('first_steps', 'willowbrook', 'First Steps', 'Elder Wren', 1, null, 'Goblins smashed the winch on the village well and ran off with the bucket. Elder Wren needs timber for a new winch, and you need something in your belly before you go after them. Catch some shrimp and chop a few logs.',
     [{ ev: 'catch', key: 'shrimp', n: 5, label: 'Catch 5 shrimp' }, { ev: 'chop', key: 'normal', n: 5, label: 'Chop 5 logs' }], { xp: { fishing: 80, woodcutting: 80 }, coins: 60 }),
   Q('goblin_menace', 'willowbrook', 'Goblin Menace', 'Sergeant Orrin', 1, null, 'Goblins keep raiding the east farms. Thin their numbers.',
     [{ ev: 'kill', key: 'goblin', n: 6, label: 'Defeat 6 goblins' }], { xp: { strength: 250, hitpoints: 120 }, coins: 120 }),
@@ -417,7 +418,7 @@ D.QUESTS = [
     [{ ev: 'cook', key: 'shrimp', n: 8, label: 'Cook 8 shrimp' }], { xp: { cooking: 350 }, coins: 150 }),
   Q('miners_pick', 'willowbrook', "A Miner's Pick", 'Old Brannoc', 6, null, 'Brannoc lost his pickaxe and his patience. Show him how it is done.',
     [{ ev: 'mine', key: 'copper', n: 6, label: 'Mine 6 copper ore' }, { ev: 'mine', key: 'tin', n: 6, label: 'Mine 6 tin ore' }], { xp: { mining: 300 }, coins: 150, items: { tool_pick_1: 1 } }),
-  Q('chiefs_end', 'willowbrook', "The Chief's Last Stand", 'Sergeant Orrin', 6, 'goblin_menace', 'Grubnash leads the goblins from a hill fort. End it. You need combat level 10 to face him.',
+  Q('chiefs_end', 'willowbrook', "The Chief's Last Stand", 'Sergeant Orrin', 6, 'goblin_menace', 'Grubnash leads the goblins from a hill fort. End it. You need combat level 8 to face him.',
     [{ ev: 'boss', key: 'grubnash', n: 1, label: 'Defeat Grubnash the Goblin Chief' }], { xp: { attack: 800, strength: 800, defence: 400 }, coins: 400 }),
 
   Q('seeds_of_hope', 'mossbarrow', 'Seeds of Hope', 'Granny Bramble', 10, null, 'Granny Bramble lends you a corner of her farm. Show her you can grow something.',

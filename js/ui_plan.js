@@ -74,12 +74,25 @@ const showForecast = (id, text) => {
   const el = document.getElementById('fc-' + id);
   if (el) el.textContent = text;
 };
+/* Up to three concrete preparation steps from the real save; each opens the page where it is done. */
+UI.prepSteps = (m, fc) => {
+  const steps = DQ.prepAdvice(m.id, fc || UI.lastForecast[m.id]).slice(0, 3);
+  if (!steps.length) return `<p class="sm ok">✓ Nothing obvious to prepare: full health, armour in every slot and enough food.</p>`;
+  return `<ol class="prep-steps">${steps.map(x => `<li><b>${esc(x.title)}</b><small>${esc(x.text)}</small>${x.action ? `<button class="btn sm" data-do="${x.action}" data-a="${x.a}">${x.a === 'shop' ? 'Open shop' : x.a === 'character' ? 'Equipment' : x.a === 'combat' ? 'Train' : 'Go to ' + esc(D.SK[x.a] ? D.SK[x.a].name : x.a)}</button>` : ''}</li>`).join('')}</ol>`;
+};
+/* The boss special, spelled out: when it lands, how hard, and what stops it. */
+UI.specialLine = m => {
+  const sp = m.boss && m.boss.special; if (!sp) return '';
+  const hit = Math.round(m.max * sp.mult), stops = D.ABIL.filter(a => ['bash', 'ward', 'brace'].includes(a.id)).map(a => `${a.name}${DQ.abilUnlocked(a) ? '' : ` (${D.SK[a.skill].name} ${a.lvl})`}`);
+  return `<p class="sm special-line">${ico('info')} <b>${esc(sp.name)}</b> every ${sp.every}th attack: a sure hit of about ${hit} before armour. Softened or stopped by ${stops.join(', ')}.</p>`;
+};
+UI.lastForecast = {};
 UI.bossIntel = m => {
   const B = D.BOSSMECH[m.id]; if (!B) return '';
   const w = DQ.weakOf(m), mu = DQ.matchup(m);
   const alternatives = Object.keys({ ...S().inv, ...S().bank }).filter(id => D.ITEMS[id].slot && D.ITEMS[id].slot !== 'ammo' && DQ.canEquip(id).ok && S().equip[D.ITEMS[id].slot] !== id);
   const compare = alternatives.length ? `<section data-reference="true"><h3>Compare an equipment change</h3><p class="sm">Simulate your current build and one item you own, using your current health and food. Results are estimates from separate trial fights.</p><div class="btnrow wrap">${alternatives.map(id => `<button class="btn sm" data-do="comparegear" data-a="${m.id}" data-b="${id}">${esc(D.ITEMS[id].name)}</button>`).join('')}</div></section>` : '';
-  return `<div class="intel"><div class="k">Prepare for this fight</div><p class="sm">Health ${Math.ceil(S().hp)} / ${DQ.maxHp()} · ${DQ.supplyInfo({kind:'fight'})?.label || 'No supplies'}. Auto-eat ${S().settings.autoEat ? 'on' : 'off'}.</p><div class="btnrow wrap"><button class="btn sm" data-do="go" data-a="character">Review equipment</button><button class="btn sm" data-do="go" data-a="cooking">Prepare food</button></div><p class="sm">${B.text}</p>
+  return `<div class="intel"><div class="k">Prepare for this fight</div><p class="sm">Health ${Math.ceil(S().hp)} / ${DQ.maxHp()} · ${DQ.supplyInfo({kind:'fight'})?.label || 'No supplies'}. Auto-eat ${S().settings.autoEat ? 'on' : 'off'}.</p>${UI.prepSteps(m)}<p class="sm">${B.text}</p>${UI.specialLine(m)}
     ${m.id === 'hollowking' ? '' : `<div class="chips">${w.weak.map(t => dchip(t, 'weak')).join('')}${w.resist.map(t => dchip(t, 'res')).join('')}</div>`}
     <div class="sm"><b>Counters:</b> ${B.counters.join(' · ')}</div>
     <div class="match">${mu.map(([k, t]) => `<div class="${k === 'good' ? 'ok' : k === 'bad' ? 'bad' : 'dim'}">${k === 'good' ? '✓' : k === 'bad' ? '✗' : '•'} ${t}</div>`).join('')}</div>
@@ -121,8 +134,9 @@ Object.assign(UI.DO, {
     setTimeout(() => {
       const r = DQ.forecast(a);
       if (!r || r.blocked) return showForecast(a, 'Cannot fight it right now. Check level, location and ammunition.');
-      const pct = Math.round(r.winRate * 100);
-      showForecast(a, `${pct >= 80 ? 'Favourable' : pct >= 40 ? 'Uncertain' : 'Dangerous'} · ${r.wins}/${r.trials} simulated wins at your current health, with your available food${r.wins ? ` · about ${Math.round(r.avgMs / 1000)}s · ${r.foodPerKill.toFixed(1)} food` : ''}`);
+      const pct = Math.round(r.winRate * 100); UI.lastForecast[a] = r;
+      const next = DQ.prepAdvice(a, r)[0];
+      showForecast(a, `Estimate: ${pct >= 80 ? 'favourable' : pct >= 40 ? 'uncertain' : 'dangerous'} · ${r.wins}/${r.trials} simulated wins at your current health, with your available food${r.wins ? ` · about ${Math.round(r.avgMs / 1000)}s · ${r.foodPerKill.toFixed(1)} food` : ''}.${next ? ` Most useful next step: ${next.title.charAt(0).toLowerCase() + next.title.slice(1)}.` : ''} Not a guarantee.`);
     }, 30);
   },
 });

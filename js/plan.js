@@ -132,6 +132,55 @@ DQ.forecast = (monId, gearId) => {
   return res;
 };
 
+/* ---------- Preparation advice: concrete next steps from the real save (health, owned gear, shop stock, coins, food) ----------
+   Ordered by how much each step usually changes a fight. Never claims a purchase is affordable when it is not. */
+DQ.prepAdvice = (monId, fc) => {
+  const m = D.MON[monId]; if (!m) return [];
+  const out = [], max = DQ.maxHp(), hp = Math.ceil(S().hp), town = S().town, coins = S().coins;
+  const owned = id => DQ.have(id) || (S().bank && S().bank[id]);
+  if (hp < max * .9) { const per = Math.ceil(max / 50) * (1 + DQ.fx().regen), secs = Math.ceil((max - hp) / per * 3); out.push({ key: 'rest', title: 'Rest to full health first', text: `Health ${hp} / ${max}. You recover about ${secs}s outside combat, for example while fishing or cooking.`, action: 'go', a: 'fishing' }); }
+  const stock = (D.SHOPS[town] || []).filter(id => !DQ.lockedSkillFor(id)), buys = [], who = (m.boss && m.boss.short) || m.name;
+  for (const slot of ['body', 'legs', 'head', 'shield']) {
+    if (S().equip[slot]) continue;
+    if (slot === 'shield' && S().equip.weapon && D.ITEMS[S().equip.weapon].two) continue;
+    const def = id => (D.ITEMS[id].b || {}).def || 0;
+    const mine = Object.keys({ ...S().inv, ...(S().bank || {}) }).filter(id => D.ITEMS[id] && D.ITEMS[id].slot === slot && owned(id) && DQ.canEquip(id).ok).sort((a, b) => def(b) - def(a))[0];
+    if (mine) { out.push({ key: 'equip:' + slot, title: `Equip your ${D.ITEMS[mine].name.toLowerCase()}`, text: `Your ${slot === 'shield' ? 'off hand' : slot} slot is empty and you already own one.`, action: 'go', a: 'character' }); continue; }
+    const buy = stock.filter(id => D.ITEMS[id].slot === slot && D.ITEMS[id].buy && DQ.canEquip(id).ok).sort((a, b) => def(b) - def(a))[0];
+    if (buy) buys.push(buy);
+  }
+  if (buys.length) {
+    const price = buys.reduce((n, id) => n + D.ITEMS[id].buy, 0), names = buys.map(id => D.ITEMS[id].name.toLowerCase());
+    const list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
+    const cheapest = Math.min(...buys.map(id => D.ITEMS[id].buy));
+    out.push({ key: 'buy', title: coins >= price ? `Buy armour for your empty slots (${fmt(price)} coins)` : coins >= cheapest ? 'Buy what armour you can afford' : 'Save for armour', text: `The shop here sells ${list}. ${coins >= price ? `You have ${fmt(coins)} coins, enough for all of it.` : `You have ${fmt(coins)} of the ${fmt(price)} coins for the full set.`} Armour makes every hit you take smaller or rarer.`, action: 'go', a: 'shop', afford: coins >= price, items: buys });
+  }
+  if (DQ.weakKnown(m)) {
+    const weak = DQ.weakOf(m).weak, mine = DQ.myDtype();
+    if (weak.length && !weak.includes(mine)) {
+      const fits = id => { const it = D.ITEMS[id]; return it && it.slot === 'weapon' && it.wtype && D.WTYPES[it.wtype] && weak.includes(D.WTYPES[it.wtype].dtype) && DQ.canEquip(id).ok; };
+      const have = Object.keys({ ...S().inv, ...(S().bank || {}) }).find(id => owned(id) && fits(id)), shop = stock.find(fits);
+      const name = D.DTYPES[weak[0]] ? D.DTYPES[weak[0]].name.toLowerCase() : weak[0];
+      /* elemental weaknesses are met with a spell: say which one, and what is missing (staff, runes or Magic level) */
+      let spellFix = null; const sp = DQ.skillUnlocked('magic') && (D.SPELLS || []).filter(x => weak.includes(D.SPELL_EL[x.id])).sort((a, b) => a.lvl - b.lvl)[0];
+      if (sp && !(D.WTYPES[D.weaponType()] && D.weaponType() === 'staff' && weak.includes(mine))) {
+        const el = D.DTYPES[D.SPELL_EL[sp.id]].name.toLowerCase(), staff = Object.keys({ ...S().inv, ...(S().bank || {}) }).find(id => owned(id) && D.ITEMS[id] && D.ITEMS[id].wtype === 'staff' && DQ.canEquip(id).ok);
+        spellFix = DQ.lvl('magic') < sp.lvl ? { key: 'weak', title: `Train Magic to ${sp.lvl} for ${sp.name}`, text: `${who} is weak to ${el}. Magic ${DQ.lvl('magic')} / ${sp.lvl}.`, action: 'go', a: 'magic' }
+          : !staff ? { key: 'weak', title: `Get a staff to cast ${sp.name}`, text: `${who} is weak to ${el}, and you know ${sp.name}. A staff from the shop lets you cast it.`, action: 'go', a: 'shop' }
+          : { key: 'weak', title: `Equip your ${D.ITEMS[staff].name.toLowerCase()} and cast ${sp.name}`, text: `${who} is weak to ${el}. You have ${fmt(DQ.have('rune'))} runes (${sp.runes} per cast).`, action: 'go', a: 'character' };
+      }
+      if (have) out.push({ key: 'weak', title: `Switch to your ${D.ITEMS[have].name.toLowerCase()}`, text: `${who} is weak to ${name}: about half as much damage again per hit.`, action: 'go', a: 'character' });
+      else if (spellFix) out.push(spellFix);
+      else if (shop) out.push({ key: 'weak', title: coins >= D.ITEMS[shop].buy ? `Buy the ${D.ITEMS[shop].name.toLowerCase()} (${fmt(D.ITEMS[shop].buy)} coins)` : `Save for the ${D.ITEMS[shop].name.toLowerCase()}`, text: `${who} is weak to ${name}. ${coins >= D.ITEMS[shop].buy ? 'The shop here sells one.' : `${fmt(coins)} / ${fmt(D.ITEMS[shop].buy)} coins.`}`, action: 'go', a: 'shop', afford: coins >= D.ITEMS[shop].buy });
+    }
+  }
+  const heal = DQ.foods().reduce((t, id) => t + D.ITEMS[id].heal * DQ.have(id), 0);
+  const need = fc && fc.foodPerKill != null && fc.wins ? Math.ceil(fc.foodPerKill * 1.5) * 3 : Math.round(max * (m.boss ? 2.5 : 1));
+  if (heal < need) out.push({ key: 'food', title: heal ? 'Bring more food' : 'Bring food', text: `Your food restores ${fmt(heal)} health; aim for about ${fmt(need)}.${DQ.have('raw_shrimp') && DQ.skillUnlocked('cooking') ? ' You have raw shrimp to cook.' : ''}`, action: 'go', a: DQ.have('raw_shrimp') && DQ.skillUnlocked('cooking') ? 'cooking' : 'fishing' });
+  if (m.boss && DQ.combatLvl() < m.boss.req) out.unshift({ key: 'level', title: `Reach combat ${m.boss.req}`, text: `Combat ${DQ.combatLvl()} / ${m.boss.req}.`, action: 'go', a: 'combat' });
+  return out;
+};
+
 /* ---------- Away events: things that happened while you were gone, each with a choice ---------- */
 const tIdx = () => D.TOWN[S().town].idx;
 const EVENTS = {
