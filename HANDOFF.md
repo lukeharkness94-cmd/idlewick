@@ -299,3 +299,9 @@ Full write-up: `docs/experience-assessment.md` → "Review response".
 - **Early pace**: `D.EARLY_PACE` (non-combat skills only). Evidence is in `docs/economy-evidence.md` → "Early pace".
 - **Proposals, not built** (need approval): `docs/proposals.md`.
 - **Tests**: regression covers melee parity, saved preparations, unique plans, later regions, return/sharing, the combat-bar route and early pace. ui-current covers the combat layout, field-guide links, the New badge, no weapon in work scenes, quest order and the map summary. ui-effects covers the Night study test.
+
+## Town quests to each boss (Nov 2026, approved: "add enough quest options in each town")
+
+- 29 quests in data.js (`TQ(...)`, after the main quests), so that every town has a quest available within 6 Hero levels from its first quest to its boss. Willowbrook +2, Mossbarrow +2, Saltmere +2, Ironpeak +5 (Hero 34–46), Gloomfen +4 (60–67), Emberfall +4 (77–86), Skyreach +5 (84–95), the Hollow Crown +4 (90–98).
+- They use only existing creatures, gathering spots, recipes and crops. Givers are existing characters except where a town had none to spare. Each has a `thanks` line, shown on the claim card and in the journal. Rewards follow each region's neighbouring quests (coins pass through economy.js as usual).
+- Regression: every objective must point at a real creature, spot, recipe output, crop or item; every requirement must exist; ids must be unique; and no town may have a gap of more than 6 Hero levels between quests.

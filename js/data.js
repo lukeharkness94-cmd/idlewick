@@ -534,6 +534,113 @@ D.QUESTS.unshift(
     [{ ev: 'catch', key: '*', n: 25, label: 'Fish up 25 catches (lost pages turn up in the nets)' }, { ev: 'kill', key: 'smuggler', n: 5, label: 'Take the spellbook cover back from 5 smugglers' }, { ev: 'deliver', key: 'gem_sapphire', n: 1, label: 'Bring a sapphire to focus your first spell' }],
     { xp: { magic: 150 }, coins: 300, items: { staff_normal: 1, rune: 60 } }),
 );
+/* ---------- Town quests that carry each region to its boss (Nov 2026) ----------
+   Every town keeps an open quest within a few Hero levels from arrival to its boss, so there is always a reason to
+   continue. Existing places, creatures, gathering spots and recipes only; rewards in line with each region's neighbours.
+   `thanks` is said when the quest is claimed (journal and claim note). */
+const TQ = (id, town, name, giver, adv, req, blurb, obj, reward, thanks) => ({ ...Q(id, town, name, giver, adv, req, blurb, obj, reward), thanks });
+const k = (key, n, label) => ({ ev: 'kill', key, n, label }), act = (ev, key, n, label) => ({ ev, key, n, label });
+D.QUESTS.push(
+  /* Willowbrook: between the first quests and Grubnash */
+  TQ('wb_granary', 'willowbrook', 'Rats in the Granary', 'Mabel the Cook', 5, 'hungry_cook', 'Something has been at the winter grain, and Mabel has found tiny teeth marks on her best pie dish. Clear the granary and bake the village something to celebrate.',
+    [k('rat', 12, 'Clear 12 rats from the granary'), act('cook', 'baked_potato', 5, 'Bake 5 potatoes for the clean-up crew')], { xp: { attack: 400, cooking: 300 }, coins: 140 },
+    'Not one sack lost. You can have the first slice of everything this week.'),
+  TQ('wb_tattercaps', 'willowbrook', 'Tattercaps in the Lane', 'Elder Wren', 8, 'first_steps', 'Little hooded tattercaps have been pulling washing off lines and leading rilljaws into the reed ponds. Elder Wren suspects the goblins taught them.',
+    [k('tattercap', 6, 'Shoo 6 tattercaps out of the lanes'), k('rilljaw', 6, 'Drive 6 rilljaws back into deep water')], { xp: { strength: 600, defence: 400 }, coins: 220 },
+    'They always did copy the worst of us. With Grubnash gone, perhaps they will copy you instead.'),
+
+  /* Mossbarrow: after Old Tusk, on to Saltmere */
+  TQ('mb_silver', 'mossbarrow', 'The Silver Seam', 'Old Brannoc', 20, 'miners_pick', 'Brannoc followed a rumour to a silver seam above Mossbarrow and came back with a sore back and no silver. He would like to be proved right.',
+    [act('mine', 'silver', 15, 'Mine 15 silver ore'), act('catch', 'pike', 15, 'Catch 15 pike for the miners’ supper')], { xp: { mining: 1800, fishing: 1200 }, coins: 650 },
+    'Told them. Fifty years I have been telling them.'),
+  TQ('mb_bellhares', 'mossbarrow', 'Under the Bellhare Moon', 'Granny Bramble', 23, 'seeds_of_hope', 'At the bellhare moon the rootbound wake and the hares ring through the fields. Granny Bramble wants the harvest in before they trample it.',
+    [k('bellhare', 8, 'Calm 8 bellhares'), k('rootbound', 8, 'Put 8 rootbound back to sleep'), act('harvest', 'strawberry', 10, 'Bring in 10 strawberries before the moon')], { xp: { defence: 2000, farming: 1800 }, coins: 900 },
+    'Every berry in and not a hare hurt. My mother never managed that, and she had three dogs.'),
+
+  /* Saltmere: past Barnacle, towards Ironpeak */
+  TQ('sm_wreckers', 'saltmere', 'The Wreck Divers', 'Harbourmaster Ilsa', 30, 'captains_bane', 'With Barnacle gone, wrecklings have crawled out of the old hulks to pick over what is left. Ilsa wants the harbour floor safe enough to salvage.',
+    [k('wreckling', 10, 'Clear 10 wrecklings from the hulks'), act('catch', 'salmon', 20, 'Catch 20 salmon for the salvage crew')], { xp: { attack: 3500, fishing: 2500 }, coins: 1400 },
+    'Half of Saltmere is down there. Now we can go and get it back.'),
+  TQ('sm_fleet', 'saltmere', 'Iron for the Fleet', 'Smith Tolla', 33, 'forged_in_salt', 'The new fishing fleet needs fittings, and Tolla needs a second pair of hands at the forge and willow for the hulls.',
+    [act('smelt', 'bar_iron', 20, 'Smelt 20 iron bars'), act('smith', '*', 15, 'Smith 15 fittings at any anvil'), act('chop', 'willow', 20, 'Chop 20 willow logs for the hulls')], { xp: { smithing: 4000, woodcutting: 2500 }, coins: 1800 },
+    'First new boat in ten years. We are naming it after you. Well, after your hammer.'),
+
+  /* Ironpeak: Hero 34 to 47, the long climb to Frostmaw */
+  TQ('ip_chimes', 'ironpeak', 'Chimes in the Pass', 'Captain Hrod', 34, 'trollbane', 'Something rings in the high pass at night. The watch say it is chimehorns calling the ice wolves down. Captain Hrod says it is your turn on watch.',
+    [k('chimehorn', 12, 'Silence 12 chimehorns'), k('icewolf', 10, 'Turn back 10 ice wolves')], { xp: { attack: 7000, defence: 5000 }, coins: 2200 },
+    'Quiet at last. Frostmaw will notice. Good. Let it come down to us for a change.'),
+  TQ('ip_gold', 'ironpeak', 'Gold for the Hall', 'Foreman Dagna', 37, 'deep_vein', 'The great hall’s doors were once gilded. Dagna means to see them gleam again before Frostmaw is driven off, so the mountain knows who it belongs to.',
+    [act('mine', 'gold', 25, 'Mine 25 gold ore'), act('smelt', 'bar_gold', 10, 'Smelt 10 gold bars')], { xp: { mining: 9000, smithing: 6000 }, coins: 3000 },
+    'There. Now it looks like a hall worth defending.'),
+  TQ('ip_raiders', 'ironpeak', 'Raiders at the Gate', 'Captain Hrod', 40, 'ip_chimes', 'Raiders have learned that the watch is stretched thin. Hold the gate, and keep the watch fed while you do.',
+    [k('raider', 15, 'Repel 15 raiders'), act('cook', 'lobster', 20, 'Cook 20 lobsters for the watch')], { xp: { strength: 12000, cooking: 6000 }, coins: 3800 },
+    'The gate held. And for once the watch is not complaining about the food.'),
+  TQ('ip_frostpelt', 'ironpeak', 'Furs for the Long Night', 'Hearthkeeper Brunn', 43, 'frozen_catch', 'Winter on the peak is worst just before Frostmaw wakes. Brunn needs warm coats for the watch and fuel for the hearths.',
+    [k('icewolf', 15, 'Gather pelts from 15 ice wolves'), act('craft', '*', 8, 'Craft 8 pieces of warm gear'), act('chop', 'maple', 20, 'Chop 20 maple logs for the hearths')], { xp: { crafting: 9000, woodcutting: 7000 }, coins: 4200 },
+    'Every hearth lit and every guard in fur. Now we can wait out anything. Even a dragon.'),
+  TQ('ip_longnight', 'ironpeak', 'Before the Long Night', 'Captain Hrod', 46, 'ip_raiders', 'The trolls and rimewings always come down before Frostmaw. Thin them out, and the watch will stand with you when the dragon comes.',
+    [k('troll', 15, 'Drive back 15 trolls'), k('rimewing', 8, 'Bring down 8 rimewings'), act('deliver', 'swordfish', 10, 'Stock the watch with 10 cooked swordfish')], { xp: { attack: 15000, hitpoints: 8000 }, coins: 5000 },
+    'The mountain is ready. Now so are you. Frostmaw is waiting at the top.'),
+
+  /* Gloomfen: Hero 60 to 68, towards Morwenna */
+  TQ('gf_lanterns', 'gloomfen', 'Lanterns over the Bog', 'Boatwright Sorrel', 60, 'yew_planks', 'Candletoads swallow the marsh lights, and murkbells ring travellers off the path. Sorrel wants the route lit and safe for the boats.',
+    [k('candletoad', 15, 'Clear 15 candletoads from the lantern posts'), k('murkbell', 10, 'Silence 10 murkbells'), act('chop', 'yew', 30, 'Chop 30 yew logs for new posts')], { xp: { defence: 30000, woodcutting: 25000 }, coins: 6500 },
+    'A light every twenty paces. Nobody drowns on my route again.'),
+  TQ('gf_rivets', 'gloomfen', 'Adamant Rivets', 'Boatwright Sorrel', 62, 'gf_lanterns', 'Bog water eats ordinary nails. Sorrel’s new boats need adamant rivets, and nobody in Gloomfen can smelt it.',
+    [act('mine', 'adamant', 15, 'Mine 15 adamant ore'), act('smelt', 'bar_adamant', 10, 'Smelt 10 adamant bars')], { xp: { mining: 35000, smithing: 30000 }, coins: 7500 },
+    'These will outlast the boat. They might outlast the bog.'),
+  TQ('gf_reeds', 'gloomfen', 'The Reed Stalkers', 'Gravewarden Lysa', 64, 'bone_collector', 'Reedstalkers and bogsnappers guard the path to Morwenna’s hut. Lysa will not let you go up it alone until they are dealt with.',
+    [k('reedstalker', 15, 'Clear 15 reedstalkers'), k('bogsnapper', 15, 'Drive off 15 bogsnappers')], { xp: { attack: 40000, strength: 30000 }, coins: 8500 },
+    'The path is open. So is her door. She knows you are coming.'),
+  TQ('gf_wraithlight', 'gloomfen', 'Wraithlight', 'Mother Alder', 67, 'swamp_supper', 'Wraiths gather where Morwenna’s lanterns burn. Mother Alder says a hunter who eats well and walks in the light will not be taken.',
+    [k('wraith', 15, 'Put 15 wraiths to rest'), k('siltmarionette', 8, 'Cut the strings of 8 silt marionettes'), act('cook', 'monkfish', 30, 'Cook 30 monkfish for the road')], { xp: { hitpoints: 30000, cooking: 30000 }, coins: 9500 },
+    'Now you smell of supper, not fear. The wraiths hate that.'),
+
+  /* Emberfall: Hero 77 to 86, towards Pyrrhax */
+  TQ('ef_glass', 'emberfall', 'Ash and Glass', 'Magmasmith Kael', 77, 'forge_of_embers', 'Glassbacks have been grazing on the runite seams, leaving shards that ruin a forge. Kael wants the seams cleared and worked.',
+    [k('glassback', 12, 'Drive off 12 glassbacks'), act('mine', 'runite', 15, 'Mine 15 runite ore')], { xp: { defence: 90000, mining: 70000 }, coins: 16000 },
+    'Clean ore at last. Now I can forge you something worthy of the wyrm.'),
+  TQ('ef_hounds', 'emberfall', 'Hounds of the Caldera', 'Warden Ignis', 80, 'drakehide_deal', 'Hounds run the caldera rim in packs, and the cinderlooms weave their dens out of living flame. The wardens cannot reach Pyrrhax while they hold the rim.',
+    [k('hound', 25, 'Break up 25 hounds'), k('cinderloom', 12, 'Unravel 12 cinderlooms')], { xp: { strength: 120000, hitpoints: 60000 }, coins: 19000 },
+    'The rim is ours. From up there you can hear the wyrm breathing.'),
+  TQ('ef_anglers', 'emberfall', 'The Angler’s Lantern', 'Quartermaster Vess', 83, 'shark_feast', 'Anglerfish hunt by the light of the lava pools. Vess wants a stock of them salted for the wardens’ last march.',
+    [act('catch', 'anglerfish', 30, 'Catch 30 anglerfish'), act('cook', 'anglerfish', 30, 'Cook 30 anglerfish')], { xp: { fishing: 110000, cooking: 110000 }, coins: 21000 },
+    'Enough for every warden. Nobody faces a dragon on an empty stomach in my watch.'),
+  TQ('ef_furnace', 'emberfall', 'The Furnace Heart', 'Warden Ignis', 86, 'ef_hounds', 'Emberlords stoke the furnace that keeps Pyrrhax warm, and furnacemites carry the coals. Put out the furnace and the wyrm will come out angry and cold.',
+    [k('emberlord', 15, 'Defeat 15 emberlords'), k('furnacemite', 10, 'Scatter 10 furnacemites'), act('smith', '*', 10, 'Smith 10 pieces at the cooling anvils')], { xp: { attack: 150000, smithing: 90000 }, coins: 24000 },
+    'Cold for the first time in a hundred years. Go now, before it warms again.'),
+
+  /* Skyreach: Hero 84 to 95, towards Zephyrion */
+  TQ('sr_feathers', 'skyreach', 'Feathers of the Gale', 'Brother Aldous', 84, 'cloud_harvest', 'The monks fletch their prayer flags from hawk feathers and hang them from elder poles. Both have been scarce since the storms began.',
+    [k('hawk', 25, 'Gather feathers from 25 hawks'), act('chop', 'elder', 25, 'Chop 25 elder logs for flag poles')], { xp: { ranged: 180000, woodcutting: 140000 }, coins: 30000 },
+    'The flags fly again. Listen. The wind sounds kinder already.'),
+  TQ('sr_astral', 'skyreach', 'Star Iron', 'Abbot Seren', 87, null, 'Astralite falls on the high terraces after every storm. The monastery bells cracked in the last one, and Seren wants them recast in star iron.',
+    [act('mine', 'astralite', 25, 'Mine 25 astralite'), act('smelt', 'bar_astral', 10, 'Smelt 10 astral bars')], { xp: { mining: 200000, smithing: 160000 }, coins: 34000 },
+    'Listen to them ring. High and clear, and the whole mountain listening. Star iron remembers where it fell from.'),
+  TQ('sr_golems', 'skyreach', 'Golems of the Stair', 'Abbot Seren', 90, 'sr_astral', 'The stone golems that guard the thousand steps no longer know friend from foe, and prismkites dazzle anyone who climbs. The way to Zephyrion runs through them.',
+    [k('golem', 20, 'Still 20 golems'), k('prismkite', 12, 'Ground 12 prismkites')], { xp: { defence: 240000, strength: 200000 }, coins: 40000 },
+    'The stair is clear. At the top, the storm has a name.'),
+  TQ('sr_thunder', 'skyreach', 'Thunder in the Loom', 'Brother Aldous', 92, 'sr_feathers', 'Thunderlooms weave the storm out of cloud, and wyverns ride it. Unpick both, and Zephyrion will have to fight without its weather.',
+    [k('thunderloom', 15, 'Unpick 15 thunderlooms'), k('wyvern', 15, 'Bring down 15 wyverns')], { xp: { attack: 280000, hitpoints: 140000 }, coins: 46000 },
+    'Blue sky. I had almost forgotten the colour.'),
+  TQ('sr_hermit', 'skyreach', 'The Hermit’s Riddle', 'Abbot Seren', 95, 'sr_golems', 'Gale hermits know the way into Zephyrion’s eyrie, but they only answer those who bring the mountain’s gifts.',
+    [k('galehermit', 10, 'Win the answers of 10 gale hermits'), act('harvest', 'starfruit', 20, 'Bring 20 starfruit as gifts'), act('catch', 'skyfin', 40, 'Catch 40 skyfin as gifts')], { xp: { farming: 220000, fishing: 220000 }, coins: 52000 },
+    'The hermits have answered. Up, they say, and into the wind. It has been waiting for someone to argue with.'),
+
+  /* The Hollow Crown: Hero 90 to 98, towards the Hollow King */
+  TQ('hc_echoes', 'hollow', 'Echoes in the Dark', 'The Last Herald', 90, null, 'Echohusks repeat the last words of everyone the Hollow King has taken, and shades follow the voices. The Herald wants them quiet so the names can be written down.',
+    [k('echohusk', 20, 'Silence 20 echohusks'), k('shade', 15, 'Disperse 15 shades')], { xp: { defence: 350000, hitpoints: 200000 }, coins: 80000 },
+    'Every name, written down at last. Now someone will remember them.'),
+  TQ('hc_foundations', 'hollow', 'Voidstone Foundations', 'The Last Herald', 93, 'hc_echoes', 'The road into the Crown is falling into the dark. Voidstone and gloomwood are the only things that hold there.',
+    [act('mine', 'voidstone', 25, 'Mine 25 voidstone'), act('chop', 'gloomwood', 25, 'Chop 25 gloomwood logs')], { xp: { mining: 320000, woodcutting: 320000 }, coins: 90000 },
+    'A road that will still be here tomorrow. That is more than this place has had in a long time.'),
+  TQ('hc_threads', 'hollow', 'Threads of the Saint', 'The Last Herald', 95, 'hc_echoes', 'Threadsaints stitch the Hollow King’s court together and pale orbits keep it lit. Cut the threads and put out the lights.',
+    [k('threadsaint', 12, 'Cut the threads of 12 threadsaints'), k('paleorbit', 15, 'Put out 15 pale orbits'), act('catch', 'voideel', 30, 'Catch 30 void eels for the long watch')], { xp: { attack: 450000, fishing: 300000 }, coins: 110000 },
+    'The court is coming apart. He will have to face you himself now.'),
+  TQ('hc_bloom', 'hollow', 'The Last Bloom', 'The Last Herald', 98, 'hc_threads', 'Nullblooms open wherever the King’s horrors walk, and each one swallows a little more of the world. Close them, and the realm stops shrinking.',
+    [k('horror', 15, 'Defeat 15 horrors'), k('nullbloom', 10, 'Close 10 nullblooms')], { xp: { strength: 500000, hitpoints: 300000 }, coins: 130000 },
+    'Look. Where the last bloom closed, something green is coming up through the stone. I had forgotten that things could grow here.'),
+);
 D.QM = Object.fromEntries(D.QUESTS.map(q => [q.id, q]));
 D.SKILLS.forEach(s => { if (s.quest) s.questName = D.QM[s.quest].name; });
 

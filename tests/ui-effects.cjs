@@ -48,7 +48,7 @@ const fs=require('node:fs');
   for(const [key,[town,gear,kind,id]] of Object.entries(U)){
    const r=await page.evaluate(([town,gear,kind,id,key])=>{
     const S=DQ.S,run=mode=>{window.__setup(town,gear,null,key==='laststand'?(S)=>{S.settings.autoEat=false;}:null);
-     if(mode==='forecast'){S.hp=Math.ceil(DQ.maxHp()/2);const f=DQ.forecast(id);return {hits:window.__hits(),blocked:!f||f.blocked};}
+     if(mode==='forecast'){let f=null;/* chance effects (riposte) can miss in one short forecast now melee wins quickly: up to four forecasts */for(let i=0;i<4;i++){S.hp=Math.ceil(DQ.maxHp()/2);f=DQ.forecast(id);const h=window.__hits();if(!f||f.blocked||(h[key]||0)>0)break;}return {hits:window.__hits(),blocked:!f||f.blocked};}
      if(!DQ.startAct(kind,id,{quiet:true}))return {hits:{},blocked:true};
      if(mode==='live'){for(let i=0;i<600;i++)DQ.advanceTime(1000,1000,DQ.act?DQ.act.progress||0:0);}else DQ.simulate(DQ.offlineEff(3*3600e3),3*3600e3);
      const h=window.__hits();DQ.stopAct(true);return {hits:h};};

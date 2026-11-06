@@ -7,7 +7,7 @@ Nothing here is built. Each one needs new rewards, unlocks or quests, or a balan
 - **Proposal**: move War Brewing (Might) to Tier I, or cut its research cost by about half. No new items.
 - **Evidence to gather**: time from the Herbalism unlock to the first Might potion, before and after (sim-economy), and whether early bosses become trivial with Might (sim-bosses COUNTER).
 
-## 2. Ironpeak midgame chapter (Hero 32 to 45)
+## 2. Ironpeak midgame chapter (Hero 32 to 45) — APPROVED AND BUILT, see HANDOFF "Town quests"
 - **Problem**: every Ironpeak quest unlocks at Hero 32 or below, and Gloomfen's quests start at 50 behind Frostmaw (requirement 45). Players near Hero 46 have no new story; the Next step card now points to training and Frostmaw, which fixes the presentation only.
 - **Proposal**: three quests for an existing Ironpeak giver at Hero 36, 40 and 44 (mining, smithing a named piece, and a Frostmaw preparation step), reusing existing items and creatures. Rewards: XP and coins in line with neighbouring quests, with no new gear.
 
