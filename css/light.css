@@ -34,7 +34,7 @@
 :root[data-theme="light"] .seg button.on{background:#fffcf3;color:var(--brass-hi);box-shadow:0 1px 3px #6a532044}
 :root[data-theme="light"] .tab.on{background:#fffcf3;color:var(--brass-hi)}
 :root[data-theme="light"] .stab.on{background:#fffcf3;color:var(--ink);border-color:var(--brass)}
-:root[data-theme="light"] .h-stop:hover{color:#fff}
+:root[data-theme="light"] #hud .h-stop:hover{color:var(--ink)}
 
 /* ---------- Cards that were painted dark ---------- */
 :root[data-theme="light"] .arena{background:linear-gradient(180deg,#efe6cf,#e4d9bd)}

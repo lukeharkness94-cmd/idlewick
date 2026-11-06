@@ -2199,3 +2199,44 @@ body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)
 .explore-left li{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mute)}.explore-left li b{color:var(--ink)}
 .explore-left li .ic{width:16px;height:16px;flex:none}.explore-left li.ok{color:var(--good)}
 .note .n-x{display:grid;place-items:center}.note .n-x .ic{width:16px!important;height:16px!important}
+
+/* ===================== UI standard (Nov 2026 brief) =====================
+   One type scale: 16.5px body, 16px button labels, Alegreya SC headings (bundled locally), meta text at 14px.
+   Supersedes the "Density at 100% zoom" step-down. Panels keep tight padding so larger text does not add empty space.
+   Revert by deleting this block. */
+:root{--t-body:16.5px;--t-meta:14px;--t-btn:16px;--t-h2:20px;--t-h3:17px}
+body{font-size:var(--t-body)!important;line-height:1.5}
+h1,h2,h3,.phead h2,.panel h2{font-family:var(--f-display)!important;font-weight:700;letter-spacing:.01em}
+.panel h2,.phead h2,h2{font-size:var(--t-h2)!important}
+h3,.panel h3{font-size:var(--t-h3)}
+small,.sm,.hint,.dim.sm{font-size:var(--t-meta)}
+p{font-size:inherit}
+.btn,.tab,.stab,.choice-button,.chip,.tog{font-size:var(--t-btn)!important}
+.btn{min-height:38px;padding:6px 14px}
+.btn.sm{font-size:15px!important;min-height:34px;padding:4px 11px}
+.k{font-size:12.5px;letter-spacing:.08em}
+.tag,.lvchip,.state{font-size:12.5px}
+/* gold is for selection and important actions; quieter frames elsewhere */
+.panel{box-shadow:none}
+.panel .panel{border-color:transparent;background:transparent;padding:0}
+/* left rail: icon, name, level or lock, one bar. Exact XP lives in the row's hover and focus detail. */
+#skilldock .dk{min-height:44px!important;padding:5px 9px!important;gap:9px}
+#skilldock .dk .dk-n{font-size:15.5px!important;font-weight:600}
+#skilldock .dk .dk-top b{font-size:15px!important}
+#skilldock .dk .bar{height:4px;margin-top:3px}
+#skilldock .skill-emblem{width:32px!important;height:32px!important}
+#view p:not(.sm):not(.hint):not(.k),#view .blurb,#view li{font-size:16px}
+#view .ftr-does{font-size:14.5px}#view .ftr-does em{font-size:13px}
+/* comparable cards share a grid; wide screens add columns instead of stretching text across empty space */
+.qgrid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:12px;align-items:start}
+/* header: Stop reads as a control, not an error; action progress (thick, gold) and level progress (thin, skill colour) differ */
+#hud .h-stop{width:auto!important;height:34px;padding:0 10px;display:inline-flex!important;align-items:center;gap:6px;color:var(--ink);font:600 14px var(--f-ui);background:var(--panel2);border:1px solid var(--line2)}
+#hud .h-stop:hover{background:color-mix(in srgb,var(--brass) 18%,var(--panel2))!important;border-color:var(--brass)!important;color:var(--ink)!important}
+.stop-sq{width:10px;height:10px;border-radius:2px;background:currentColor;display:inline-block}
+.h-task .bar.prog{height:7px}.h-task .bar.prog i{background:var(--brass)}
+.h-task .bar.h-xp{height:3px;margin-top:2px;opacity:.9}.h-task .bar.h-xp i{background:var(--c)}
+#hud .h-name .h-hp{display:flex!important;flex-direction:row!important;align-items:center;gap:8px;margin-top:3px;min-width:0;width:100%;flex:none}
+#hud .h-name .h-hp .bar{flex:1 1 auto;min-width:60px;height:5px;display:block}#hud .h-name .h-hp small{font-size:12.5px;white-space:nowrap}
+.h-stats{min-width:auto!important;flex:0 0 auto!important}
+#view .illustrated-card small,#view .illustrated-card .meta{font-size:13.5px}#view .illustrated-card b{font-size:15.5px!important}
+.logo h1,#title .logo h1{font-family:'Pixelify Sans','Alegreya SC',serif!important}
