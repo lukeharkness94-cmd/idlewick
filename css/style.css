@@ -2180,3 +2180,22 @@ body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)
 .encounter-list>.enc-row{padding:4px 10px 4px 4px!important;gap:10px}
 .filtbar{grid-template-columns:minmax(0,1fr)!important}.filtbar>.tabs{min-width:0;max-width:100%}.filtbar>.search{max-width:320px;justify-self:start}
 #packfilter-select>.choice-button>:is(.ic,img,.gico),#bankfilter-select>.choice-button>:is(.ic,img,.gico){width:16px!important;height:16px!important}
+/* Quest cards read top to bottom: ribbon, name and place, story, requirements, rewards, action. */
+.quest.main{padding-top:14px!important}
+.quest.main .mq-ribbon{position:static!important;align-self:flex-start;margin:0 0 8px;border-radius:999px;padding:3px 12px 3px 6px}
+.mq-ribbon .ic{width:16px!important;height:16px!important}
+.quest .quest-story{margin:10px 0 0}.quest .quest-story .blurb{margin:0}.quest-say{margin:6px 0 0;font-style:italic;color:var(--mute)}
+.quest .quest-objs{margin-top:12px}.quest .quest-objs>.k,.quest .rewards>.k{display:block;margin-bottom:4px}
+.quest .rewards{margin-top:12px}.quest .quest-actions{margin-top:12px}
+/* Recent activity: icons at a readable 32px (2x the 16px glyphs) in a fixed 44px well. */
+.bell-row .n-ic{width:44px;height:44px;display:grid;place-items:center;flex:none}
+.bell-row .n-ic>:is(.ic,img,.gico,.item-art){width:32px!important;height:32px!important}
+/* Pop-ups always clear the bottom menu: the menu height is measured live into --bottom-navigation-space (layout.js). */
+#notes{bottom:calc(var(--bottom-navigation-space,24px) - 8px + env(safe-area-inset-bottom,0px))!important;z-index:130!important}
+#detailbox{bottom:calc(var(--bottom-navigation-space,78px) - 8px + env(safe-area-inset-bottom,0px))!important;z-index:125!important}
+#fx{z-index:131}
+.explore-left{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.explore-left ul{list-style:none;margin:6px 0 10px;padding:0;display:grid;gap:5px}
+.explore-left li{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mute)}.explore-left li b{color:var(--ink)}
+.explore-left li .ic{width:16px;height:16px;flex:none}.explore-left li.ok{color:var(--good)}
+.note .n-x{display:grid;place-items:center}.note .n-x .ic{width:16px!important;height:16px!important}

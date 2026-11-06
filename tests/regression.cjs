@@ -450,6 +450,13 @@ test('combat progress bar follows the trained skill and agrees with the XP it na
  assert.equal(c.route.xp,c.route.to-S.xp.attack);
  S.xp.attack=c.route.to-1;assert.ok(q.combatProgress().pct>90);S.xp.attack=c.route.to;assert.equal(q.combatLvl(),6,'filling the bar raises the combat level');
 });
+test('early levels are slower for non-combat skills and full speed from level 20; combat keeps its own pace',()=>{
+ const {q}=harness();const S=q.S,D=q.data;
+ assert.ok(Math.abs(q.earlyPace('fishing')-.3)<1e-9,'level 1 learns at 30%');
+ S.xp.fishing=D.XPF[10];assert.ok(q.earlyPace('fishing')>.6&&q.earlyPace('fishing')<.7);
+ S.xp.fishing=D.XPF[20];assert.equal(q.earlyPace('fishing'),1);
+ assert.equal(q.earlyPace('attack'),1);assert.equal(q.earlyPace('hitpoints'),1);
+});
 test('unique gear: effects are real, first copies have a bad-luck guarantee, stats stay modest',()=>{
  const {q}=harness();const S=q.S,D=q.data;
  const uniques=Object.values(D.ITEMS).filter(it=>it.unique);assert.ok(uniques.length>=19,'11 new uniques plus 8 boss trophies with effects');

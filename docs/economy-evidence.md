@@ -97,3 +97,34 @@ Before: 100% for every boss with counters, and up to 0% without them. Old Tusk s
 
 - A pure ranged or magic hero tops out at combat 97, melee at 113, so the final boss now asks for 97.
 - At equal combat level, melee is the weakest style. This is recorded for a future decision and left unchanged.
+
+## Melee parity (Nov 2026, approved: "Rebalance melee across the whole game")
+
+`D.STYLE_TUNE.meleeLevel = 4/3` (data3.js) multiplies effective Attack and Strength in `DQ.pstats`, so a melee hero at a given combat level hits about as often and as hard as the other styles. Same harness as the table above (`PARITY=1 node scripts/sim-bosses.cjs`, weaknesses and resistances removed, 96 fights).
+
+| Boss | Melee before | Melee after | Ranged | Magic |
+| --- | --- | --- | --- | --- |
+| Frostmaw | 23% | 80% | 97% | 98% |
+| Morwenna | 69% | 100% | 95% | 100% |
+| Pyrrhax | 38% | 89% | 99% | 98% |
+| Zephyrion | 75% | 98% | 100% | 100% |
+| Hollow King | 65% | 97% | 100% | 98% |
+
+- Melee is now inside the band of the other styles everywhere except Frostmaw (80%), where it is still the weakest. That is left for a decision, not retuned.
+- The opening is barely affected: combat 8 at 22 minutes before the early-pace change below, and following the boss advice wins 90% or more.
+- Not retuned: later bosses with general (non-counter) melee preparation now win 84 to 98% (previously 25 to 75%). Whether bosses should be made harder again is an open decision.
+
+## Early pace (Nov 2026 playtest: "level 6 after 4 minutes")
+
+`D.EARLY_PACE = { from: .3, until: 20 }` (state.js): non-combat skills earn 30% XP at level 1, rising evenly to full XP at level 20. Combat skills are unchanged. Normal trees give 18 XP (was 25). Measured through the real engine with `scripts` harness code (fresh hero, one task, no quests):
+
+| Minutes | Fishing before → after | Woodcutting before → after |
+| --- | --- | --- |
+| 1 | 3 → 2 | 5 → 2 |
+| 4 | 7 → 4 | 10 → 6 |
+| 10 | 10 → 7 | 14 → 10 |
+| 30 | 16 → 13 | 21 → 17 |
+
+- Hero level after 30 minutes of fishing: 10 → 8. Hero-level unlocks arrive later by the same margin.
+- `sim-opening.cjs`: combat 8 at 25 minutes (was 22), Hero 8 when you get there (was 10). Following the boss advice wins 97% (was 90%), because the longer opening leaves more food in the pack.
+- From level 20 on nothing changes, so the mid- and late-game evidence above still holds. `sim-economy.cjs 24` coin timings are unchanged in shape.

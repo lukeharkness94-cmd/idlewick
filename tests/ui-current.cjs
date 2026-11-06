@@ -66,6 +66,14 @@ const fs=require('node:fs');
    }
    assert.ok(await page.locator('#hud [aria-label="Settings"]').isVisible());
   }
+  // A newly unlocked skill wears "New" in the rail until its page is opened; work scenes show the tool, never the weapon.
+  {const r=await page.evaluate(()=>{const S=DQ.S,D=DQ.data;delete (S.newSkills||{}).herbalism;S.stats.harvest=20;S.unlocked.herbalism=false;DQ.notify({kind:'unlock',key:'unlock:herbalism',title:'Herbalism unlocked',text:'',icon:'herbalism'});DQ.ui.renderDock();
+    const badge=!!document.querySelector('#skilldock .dk[data-a="'+D.SK.herbalism.page+'"] .dk-new');DQ.go(D.SK.herbalism.page);DQ.ui.renderDock();const after=!!document.querySelector('#skilldock .dk[data-a="'+D.SK.herbalism.page+'"] .dk-new');
+    S.inv.bronze_sword=1;DQ.equipItem('bronze_sword');DQ.go('fishing');DQ.startAct('fish','shrimp',{quiet:true});DQ.ui.render(true);const gear=document.querySelectorAll('.activity-scene .scene-gear').length;DQ.stopAct();
+    DQ.ui.tab.quests='available';DQ.go('quests');const card=document.querySelector('.quest');const order=card?['.phead','.quest-story','.rewards','.quest-actions'].map(k=>{const e=card.querySelector(k);return e?[...card.querySelectorAll('*')].indexOf(e):-1;}):[];
+    DQ.go('map');const left=document.querySelector('.explore-left')?.innerText||'';for(let i=0;i<5;i++)DQ.closeModal&&DQ.closeModal();document.querySelectorAll('.note').forEach(n=>n.remove());return {badge,after,gear,order,left};});
+   assert.ok(r.badge,'New badge shows after an unlock');assert.ok(!r.after,'New badge clears once the page is opened');assert.equal(r.gear,0,'no weapon in work scenes');
+   assert.ok(r.order.every((v,i,a)=>v>=0&&(!i||v>a[i-1])),'quest card reads name, story, rewards, action: '+r.order);assert.match(r.left,/quests/);assert.match(r.left,/Exploration/);}
   // Viewing combat must never display another activity's progress as an attack timer.
   await page.evaluate(()=>{DQ.paused=true;DQ.startAct('fish','shrimp',{quiet:true});DQ.act.t0=Date.now()-DQ.act.dur/2;DQ.go('combat');DQ.ui.render(false);});
   assert.equal(await page.evaluate(()=>DQ.act.kind),'fish');

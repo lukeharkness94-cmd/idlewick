@@ -70,7 +70,7 @@ const FISH = [
   ['voideel', 'Void eel', '#8a5ad8', 'hollow', 95, 160, 3800, 96, 290, 26, 700],
 ];
 const WOOD = [
-  ['normal', 'Logs', 'Tree', '#a07a4f', 'willowbrook', 1, 25, 2200, 3],
+  ['normal', 'Logs', 'Tree', '#a07a4f', 'willowbrook', 1, 18, 2200, 3],
   ['oak', 'Oak logs', 'Oak tree', '#b58a52', 'willowbrook', 15, 38, 2400, 8],
   ['willow', 'Willow logs', 'Willow tree', '#9db86a', 'saltmere', 30, 68, 2600, 18],
   ['maple', 'Maple logs', 'Maple tree', '#c9703f', 'ironpeak', 45, 100, 2800, 40],

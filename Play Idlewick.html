@@ -586,7 +586,7 @@ img.px.sil{filter:brightness(0) opacity(.45)}
 @media (min-width:861px) and (max-width:1280px){.advw{display:none}}
 
 /* ---------- Pixel interface ---------- */
-:root{--f-display:'Pixelify Sans','Alegreya SC',Georgia,serif}
+/* Pixelify Sans draws C almost closed (Cowhide read as Oowhide) and 5 like S, so names, numbers and headings use Alegreya SC; Pixelify stays only on large map labels (.ml). */
 .pxi{display:inline-block;background-color:currentColor;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;image-rendering:pixelated}
 .portrait.pxport{display:grid;place-items:end center;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 50% 30%,#2c4350,#111a1f);box-shadow:inset 0 0 0 2px #d8a64a,0 0 0 1px #0008;flex:none}
 .avatar.you .portrait.pxport{width:100%!important;height:100%!important;box-shadow:none}
@@ -1484,7 +1484,7 @@ body[data-page="quests"] .quest.ready { animation: none; }
 @media (max-width:600px) { .coach-art { display:none; } .skill-coach { gap:8px; } .skill-coach p { font-size:12px; } .first-play-art { display:none; } }
 
 /* Hunting expeditions and creature collection */
-.area-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.area-card{border:1px solid var(--line2);border-radius:10px;padding:12px;background:var(--panel2);box-shadow:inset 0 1px color-mix(in srgb,var(--ink) 7%,transparent)}.area-card.selected{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 18%,transparent)}.area-head,.encounter-list>div,.quest-hunt{display:flex;align-items:center;gap:10px}.area-head{justify-content:space-between;margin-bottom:10px}.area-head small,.encounter-list small,.quest-hunt small{display:block;color:var(--mute)}.encounter-list{display:grid;gap:7px}.encounter-list>div{padding:6px;border-radius:7px;background:color-mix(in srgb,var(--panel) 70%,transparent)}.encounter-list img{width:48px;height:48px;flex:none}.quest-hunt{margin:10px 0 14px;padding:10px;border:1px solid var(--brass);border-radius:9px;background:color-mix(in srgb,var(--brass) 9%,var(--panel2))}.quest-hunt>span{flex:1}.creature-abilities{display:grid;gap:4px;width:100%}.creature-ability{display:flex;justify-content:space-between;gap:8px;padding:5px 7px;border:1px solid var(--line2);border-radius:6px}.creature-ability.open{border-color:color-mix(in srgb,var(--good) 55%,var(--line2))}.creature-ability.locked{opacity:.55}
+.area-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.area-card{border:1px solid var(--line2);border-radius:10px;padding:12px;background:var(--panel2);box-shadow:inset 0 1px color-mix(in srgb,var(--ink) 7%,transparent)}.area-card.selected{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 18%,transparent)}.area-head,.encounter-list>.enc-row,.quest-hunt{display:flex;align-items:center;gap:10px}.area-head{justify-content:space-between;margin-bottom:10px}.area-head small,.encounter-list small,.quest-hunt small{display:block;color:var(--mute)}.encounter-list{display:grid;gap:7px}.encounter-list>.enc-row{padding:6px;border-radius:7px;background:color-mix(in srgb,var(--panel) 70%,transparent)}.encounter-list img{width:48px;height:48px;flex:none}.quest-hunt{margin:10px 0 14px;padding:10px;border:1px solid var(--brass);border-radius:9px;background:color-mix(in srgb,var(--brass) 9%,var(--panel2))}.quest-hunt>span{flex:1}.creature-abilities{display:grid;gap:4px;width:100%}.creature-ability{display:flex;justify-content:space-between;gap:8px;padding:5px 7px;border:1px solid var(--line2);border-radius:6px}.creature-ability.open{border-color:color-mix(in srgb,var(--good) 55%,var(--line2))}.creature-ability.locked{opacity:.55}
 
 /* Deliberate, full-screen skill reveal */
 .skill-unlock{position:relative;min-height:430px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;isolation:isolate}.skill-unlock>*:not(.unlock-rays){position:relative;z-index:2}.skill-unlock h2{font-size:42px;margin:10px 0 4px;color:var(--ink)}.skill-unlock p{max-width:520px;font-size:17px;color:var(--mute)}.unlock-emblem{width:154px;height:154px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,var(--panel) 38%,color-mix(in srgb,var(--c) 34%,transparent) 40%,transparent 70%);filter:drop-shadow(0 10px 18px color-mix(in srgb,var(--c) 35%,transparent))}.unlock-emblem img{width:128px;height:128px;image-rendering:pixelated}.unlock-ribbon{padding:6px 22px;margin-top:10px;background:var(--cream);color:#241b13;font-family:var(--f-display);font-size:20px;font-weight:700;clip-path:polygon(4% 0,96% 3%,100% 45%,96% 100%,4% 96%,0 55%)}.unlock-rays{position:absolute;z-index:0;width:520px;height:520px;border-radius:50%;background:repeating-conic-gradient(from 8deg,color-mix(in srgb,var(--c) 66%,transparent) 0 9deg,transparent 9deg 23deg);opacity:.7;animation:unlock-spin 22s linear infinite}.unlock-rays:after{content:"";position:absolute;inset:25%;border-radius:50%;background:color-mix(in srgb,var(--c) 22%,var(--panel));box-shadow:0 0 70px 40px color-mix(in srgb,var(--c) 24%,transparent)}@keyframes unlock-spin{to{transform:rotate(360deg)}}
@@ -1916,8 +1916,8 @@ h3 { font-size:17px; }
 .beast{padding:8px 10px}
 .petc{padding:10px 8px}
 .illustrated-choices,.beasts,.guide-cards{grid-auto-rows:auto}
-.encounter-list{gap:4px!important}.encounter-list>div{padding:4px 8px!important;min-height:0!important}
-.encounter-list>div img,.encounter-list>div .painted-sprite{width:40px!important;height:40px!important}
+.encounter-list{gap:4px!important}.encounter-list>.enc-row{padding:4px 8px!important;min-height:0!important}
+.encounter-list>.enc-row img,.encounter-list>.enc-row .painted-sprite{width:40px!important;height:40px!important}
 .area-grid,.area-grid>.area-card{grid-auto-rows:auto}.area-card{padding:10px}
 /* level-up reveal: emblem pops in, rings ripple out from it, ribbon and title rise in after */
 .lr-v2{min-height:0;padding:18px 0 8px;overflow:visible}
@@ -2193,6 +2193,87 @@ body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)
 .herb-path li .btn{align-self:flex-start}
 .understanding{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;padding:8px 10px;margin-bottom:8px;border:1px dashed var(--line);border-radius:8px}
 .understanding small{display:block}.understanding.done{border-style:solid;border-color:var(--brass)}.understanding.done b{color:var(--brass)}
+/* saved preparations */
+.lo-save{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.lo-save input{flex:1 1 200px;min-width:0;padding:7px 10px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);color:var(--ink)}
+.lo-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.lo-card{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.lo-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.lo-icons{display:flex;gap:2px;flex-wrap:wrap}.lo-icons img{width:32px;height:32px}
+.lo-diff{margin:0;padding-left:16px;font-size:13px}.lo-diff .up{color:var(--good,#5cc08a)}.lo-diff .bad{color:var(--bad)}
+.copy-box{width:100%;font:13px var(--f-mono,monospace);background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}
+.unique-use,.unique-src{display:block;width:100%;color:var(--dim);margin-top:2px}
+.also-goals{margin-top:12px}.also-goals ul{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.also-goals li{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:baseline}.also-goals small{color:var(--dim);text-transform:uppercase;letter-spacing:.08em;font-size:11px}
+.linkish{background:none;border:0;padding:0;color:var(--ink);text-align:left;font:inherit;cursor:pointer;text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px}.linkish:hover{color:var(--brass)}
+.since-left{margin:0 0 8px;padding-left:18px;font-size:14px}.since-left li{margin:2px 0}
+
+/* Combat page: your fighter (left) holds combat level, weapon and each combat skill once, beside its training focus. */
+.fighter{display:flex;flex-direction:column;gap:12px;border-color:color-mix(in srgb,var(--brass) 45%,var(--line))}
+.ftr-head{display:flex;align-items:center;gap:10px 18px;flex-wrap:wrap}
+.ftr-head .cl-num{display:flex;align-items:center;gap:10px;padding:4px 14px}
+.ftr-head .cl-num b{font-size:28px;line-height:1}.ftr-head .cl-num .k{white-space:nowrap}
+.ftr-head .cl-prog{display:flex;flex-direction:column;gap:4px;min-width:180px;flex:1}
+.ftr-weapon{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-block:1px solid var(--line)}
+.ftr-weapon>.ic{width:22px;height:22px;flex:none;margin-top:2px}.ftr-weapon>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ftr-rows{display:flex;flex-direction:column;gap:6px}
+.ftr-row{display:grid;grid-template-columns:minmax(150px,1fr) minmax(0,1.3fr) minmax(112px,auto);align-items:center;gap:8px 12px;padding:6px 8px;border-radius:8px;background:color-mix(in srgb,var(--c) 7%,transparent)}
+.ftr-row.idle{opacity:.72}
+.ftr-skill{display:flex;align-items:center;gap:9px;background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer;min-width:0}
+.ftr-skill .ic{width:24px;height:24px;flex:none}.ftr-skill>span{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.ftr-skill .bar{height:5px}.ftr-skill .bar i{background:var(--c)}
+.ftr-does{font-size:13px;color:var(--mute);line-height:1.35}.ftr-does b{color:var(--ink)}.ftr-does em{display:block;font-style:normal;font-size:12px;color:var(--dim)}
+.ftr-train{justify-content:center;flex-direction:column;gap:0;min-height:40px;padding:4px 10px}.ftr-train small{font-size:11px;color:var(--dim)}
+.ftr-train.on small{color:inherit}
+.fighter .style-note{margin:0}
+.combat-supplies .phead{margin-bottom:6px}.combat-supplies #foodbox{margin-bottom:8px}.combat-supplies>label{display:flex;flex-direction:column;gap:5px;color:var(--mute);font-size:13px}
+.combat-side>.cl-key{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--dim);font-size:12.5px}
+@media (max-width:560px){.ftr-row{grid-template-columns:minmax(0,1fr) auto}.ftr-does{grid-column:1/-1;grid-row:2}}
+.ftr-wname{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fighter .cl-prog-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.fighter .cl-prog .bar{height:8px}.fighter .cl-prog .bar i{background:var(--brass)}.fighter .cl-prog small{color:var(--mute)}.fighter .cl-boost{color:var(--good)!important}
+/* Phones: one column in play order (fight, where to hunt, the foe, you, the boss, then supporting panels). */
+@media (max-width:899px){
+  .combat-dashboard>.combat-live,.combat-dashboard>.combat-side{display:contents}
+  .combat-dashboard{gap:10px}
+  .combat-dashboard .arena{order:1}.combat-dashboard .combat-targets{order:2}.combat-dashboard .battle-brief{order:3}.combat-dashboard .fighter{order:4}
+  .combat-dashboard .bosscard{order:5}.combat-dashboard .combat-supplies{order:6}.combat-dashboard .combat-live>.panel:not(.arena):not(.fighter):not(.combat-supplies){order:7}.combat-dashboard .lootp{order:8}.combat-dashboard .cl-key{order:9}
+}
+.encounter-list>.enc-row{width:100%;border:1px solid transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.encounter-list>.enc-row:hover,.encounter-list>.enc-row:focus-visible{border-color:color-mix(in srgb,var(--brass) 55%,var(--line))}
+.enc-art{background:none;border:0;padding:0;cursor:pointer;display:inline-flex}
+/* Backpack and bank categories stay on one line: compact buttons, and on narrow screens the row scrolls sideways in place. */
+#packfilter-select,#bankfilter-select{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding-bottom:3px}
+#packfilter-select>.choice-button,#bankfilter-select>.choice-button{flex:0 0 auto;min-height:36px;padding:5px 10px;gap:6px;font-size:13.5px;white-space:nowrap}
+#packfilter-select>.choice-button .ic,#bankfilter-select>.choice-button .ic{width:16px;height:16px}
+#packfilter-select>.choice-button span,#bankfilter-select>.choice-button span{overflow-wrap:normal}
+.logo h1{font-family:'Pixelify Sans','Alegreya SC',serif}
+#hud .h-stop .ic{width:16px!important;height:16px!important;margin:0}
+.dk-new{margin-left:auto;margin-right:6px;padding:1px 6px;border-radius:999px;background:var(--brass);color:#1b1405;font:700 10.5px/1.4 var(--f-ui);letter-spacing:.05em;text-transform:uppercase;flex:none}
+/* Hunting lists: each creature preview at 64px (2x its 32px sprite); wide cards pack rows into columns. */
+.encounter-list{grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr))}
+.encounter-list>.enc-row img,.encounter-list>.enc-row .painted-sprite{width:64px!important;height:64px!important}
+.encounter-list>.enc-row{padding:4px 10px 4px 4px!important;gap:10px}
+.filtbar{grid-template-columns:minmax(0,1fr)!important}.filtbar>.tabs{min-width:0;max-width:100%}.filtbar>.search{max-width:320px;justify-self:start}
+#packfilter-select>.choice-button>:is(.ic,img,.gico),#bankfilter-select>.choice-button>:is(.ic,img,.gico){width:16px!important;height:16px!important}
+/* Quest cards read top to bottom: ribbon, name and place, story, requirements, rewards, action. */
+.quest.main{padding-top:14px!important}
+.quest.main .mq-ribbon{position:static!important;align-self:flex-start;margin:0 0 8px;border-radius:999px;padding:3px 12px 3px 6px}
+.mq-ribbon .ic{width:16px!important;height:16px!important}
+.quest .quest-story{margin:10px 0 0}.quest .quest-story .blurb{margin:0}.quest-say{margin:6px 0 0;font-style:italic;color:var(--mute)}
+.quest .quest-objs{margin-top:12px}.quest .quest-objs>.k,.quest .rewards>.k{display:block;margin-bottom:4px}
+.quest .rewards{margin-top:12px}.quest .quest-actions{margin-top:12px}
+/* Recent activity: icons at a readable 32px (2x the 16px glyphs) in a fixed 44px well. */
+.bell-row .n-ic{width:44px;height:44px;display:grid;place-items:center;flex:none}
+.bell-row .n-ic>:is(.ic,img,.gico,.item-art){width:32px!important;height:32px!important}
+/* Pop-ups always clear the bottom menu: the menu height is measured live into --bottom-navigation-space (layout.js). */
+#notes{bottom:calc(var(--bottom-navigation-space,24px) - 8px + env(safe-area-inset-bottom,0px))!important;z-index:130!important}
+#detailbox{bottom:calc(var(--bottom-navigation-space,78px) - 8px + env(safe-area-inset-bottom,0px))!important;z-index:125!important}
+#fx{z-index:131}
+.explore-left{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.explore-left ul{list-style:none;margin:6px 0 10px;padding:0;display:grid;gap:5px}
+.explore-left li{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mute)}.explore-left li b{color:var(--ink)}
+.explore-left li .ic{width:16px;height:16px;flex:none}.explore-left li.ok{color:var(--good)}
+.note .n-x{display:grid;place-items:center}.note .n-x .ic{width:16px!important;height:16px!important}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -2716,7 +2797,7 @@ const FISH = [
   ['voideel', 'Void eel', '#8a5ad8', 'hollow', 95, 160, 3800, 96, 290, 26, 700],
 ];
 const WOOD = [
-  ['normal', 'Logs', 'Tree', '#a07a4f', 'willowbrook', 1, 25, 2200, 3],
+  ['normal', 'Logs', 'Tree', '#a07a4f', 'willowbrook', 1, 18, 2200, 3],
   ['oak', 'Oak logs', 'Oak tree', '#b58a52', 'willowbrook', 15, 38, 2400, 8],
   ['willow', 'Willow logs', 'Willow tree', '#9db86a', 'saltmere', 30, 68, 2600, 18],
   ['maple', 'Maple logs', 'Maple tree', '#c9703f', 'ironpeak', 45, 100, 2800, 40],
@@ -3062,6 +3143,8 @@ uq('thunderclap_maul', { name: 'Thunderclap maul', ic: 'hammer', col: '#c8b860',
 uq('stormcaller_staff', { name: 'Stormcaller staff', ic: 'staff', col: '#9ab8ff', val: 3500, slot: 'weapon', style: 'magic', req: { magic: 40 }, b: { mag: 25 }, unique: U('arc', 'Arc', '20% chance for a spell to arc and hit again for half damage.'), flavour: 'Raiders stole it from a weather-witch. The weather has not forgiven them.' });
 uq('berserkers_torc', { name: "Berserker's torc", ic: 'amulet', col: '#c86a3a', val: 6000, slot: 'amulet', b: { str: 6 }, unique: U('fury', 'Fury', 'Deal up to 35% more damage the lower your health.'), flavour: 'Pulled from the fen with its owner still attached. He did not want to let go.' });
 uq('salamander_coat', { name: 'Salamander coat', ic: 'body', col: '#e0703a', val: 20000, slot: 'body', req: { defence: 70 }, b: { def: 40 }, lth: 1, unique: U('laststand', 'Last stand', 'Once per fight, a blow that would defeat you leaves you at 1 health instead.'), flavour: 'Drake leather that remembers being on fire, and refuses to do it again.' });
+/* what each signature effect is good for: shown with the item so a find can suggest a plan */
+D.UNIQUE_USE = { lifesteal: 'long fights when food is short', marked: 'a fast opening against tough targets', thorns: 'enemies that hit often', poison: 'long boss fights', twin: 'quick kills and steady damage', bulwark: 'bosses with heavy special attacks', fortune: 'farming drops and coins rather than hard fights', stun: 'bosses whose attacks you would rather skip', arc: 'magic users who want more damage', fury: 'bold play at low health', laststand: 'a safety net in a fight you might lose', roar: 'blunting the opening blow', hide: 'enemies that land many small hits', riposte: 'trading blows with hard hitters', slow: 'fights where fewer enemy attacks matter most', curse: 'mages in long fights', ember: 'fire-weak enemies, with a bow', swift: 'more attacks in every fight', sovereign: 'sustained boss fights' };
 /* rare drops from one regional monster each (first copy guaranteed after about 2.5x the expected number of defeats) */
 [['wolf', 'leechfang', 1 / 150], ['scarecrow', 'wyrdwood_bow', 1 / 150], ['crab', 'thornback_buckler', 1 / 160], ['bandit', 'vipers_kiss', 1 / 180], ['pirate', 'gale_sabre', 1 / 200],
  ['troll', 'thunderclap_maul', 1 / 220], ['raider', 'stormcaller_staff', 1 / 220], ['zombie', 'berserkers_torc', 1 / 250], ['drake', 'salamander_coat', 1 / 260]]
@@ -3432,6 +3515,11 @@ D.STUDY_KILLS = 3;   // kills needed to learn a regular creature's weaknesses
 const AB = (id, name, ic, skill, lvl, style, text, extra) => Object.assign({ id, name, ic, skill, lvl, style, text }, extra || {});
 /* Damage-type rules, one table for the engine and every piece of advice (plan.js DQ.typeMult / DQ.typeRuleText).
    Bosses are counter checks, not locks: weaknesses help and resistances hurt, but less than on ordinary creatures. */
+/* Style parity (owner-approved melee rebalance, Nov 2026). Combat level counts Attack + Strength for melee but 1.5x
+   Ranged or Magic, so at equal combat level an archer's or mage's level is 4/3 of a fighter's Attack and Strength.
+   Melee therefore uses 4/3 of Attack and Strength as its effective levels for hitting and damage (engine pstats),
+   keeping Attack = accuracy and Strength = damage. Evidence: PARITY=1 node scripts/sim-bosses.cjs. */
+D.STYLE_TUNE = { meleeLevel: 4 / 3 };
 D.TYPE_RULES = { normal: { weak: 1.5, focus: 2, resist: .5 }, boss: { weak: 1.3, focus: 1.6, resist: .7 } };
 D.ABIL = [
   AB('power', 'Power Strike', 'strength', 'strength', 8, 'melee', 'Every 4th attack hits for double damage.'),
@@ -6611,6 +6699,56 @@ function bigStar() {
   return s;
 }
 A.bigStarUrl = () => A.url('bigstar', bigStar);
+/* ================= Skill emblems (32 x 32) =================
+   The rail, skill rows and level-up moments show skills at 32px or more, where the 16px glyphs read as blocky. These
+   are separate, more detailed drawings of the same objects (same palette, top-left light, selective outlines). The
+   16px glyphs stay for small inline icons. */
+const thick = (s, x0, y0, x1, y1, r, w = 2) => { for (let i = 0; i < w; i++) s.line(x0 + i, y0, x1 + i, y1, r); };
+const EMBLEM = {
+  fishing: s => { thick(s, 3, 29, 21, 4, R.wood); thick(s, 3, 29, 7, 23, rp('#5a3b2a'), 3); s.line(22, 4, 25, 15, null, '#e8dcc0'); s.line(25, 15, 25, 17, null, '#e8dcc0');
+    const f = rp('#5f9ac8'); s.ell(23, 23, 6, 3.4, f); s.poly([[28, 23], [31, 19], [31, 27]], f); s.ell(21, 24.5, 4, 1.4, rp('#d8e6ea')); s.poly([[20, 19], [24, 18], [23, 21]], rp('#c86a44')); s.fix(19, 22, '#2a1c1f'); s.fix(18, 21, '#ffffff'); s.fix(25, 17, '#c8483c'); },
+  woodcutting: s => { const lg = R.wood; s.rect(5, 21, 14, 8, R.bark); s.line(8, 24, 16, 24, null, '#5a3b2a'); s.ell(5, 25, 2.6, 4, rp('#d8b080')); s.ell(5, 25, 1.2, 2, rp('#b8865a')); s.fix(5, 25, '#7a5236');
+    thick(s, 10, 28, 22, 6, lg); s.poly([[18, 3], [28, 1], [30, 11], [23, 12], [20, 8]], R.steel); s.line(28, 2, 30, 10, null, '#ffffff'); s.rect(19, 6, 4, 3, R.iron); },
+  mining: s => { s.poly([[16, 23], [29, 21], [31, 29], [18, 31]], R.stone); s.poly([[21, 24], [25, 23], [24, 27]], R.copper); s.fix(27, 27, '#f0b070'); s.fix(20, 28, R.tin.gl);
+    thick(s, 7, 29, 18, 8, R.wood); for (let i = 0; i <= 24; i++) { const t = i / 24, x = 4 + 24 * t, y = 9 - Math.sin(t * Math.PI) * 6 + t * 2; s.dot(x, y, R.iron); s.dot(x, y + 1, R.iron); } s.fix(5, 9, R.iron.gl); s.fix(27, 11, R.iron.gl); },
+  thieving: s => { const b = rp('#6a4a7a'); s.poly([[6, 30], [4, 18], [8, 13], [20, 13], [24, 18], [22, 30]], b); s.rect(10, 9, 8, 5, b); s.line(8, 13, 20, 13, null, '#e6b84a'); s.rect(12, 6, 4, 3, rp('#4a3a5a'));
+    for (const [x, y] of [[22, 26], [25, 22], [27, 27]]) { s.ell(x, y, 3.4, 3.4, R.gold); s.fix(x - 1, y - 1, '#fff6c0'); s.fix(x, y + 1, R.gold.lo); } s.fix(10, 18, '#9a7aaa'); },
+  farming: s => { s.ell(13, 27, 11, 4, R.soil); s.line(4, 26, 22, 26, null, '#5a3b2a'); const st = R.leafCrop; s.line(13, 25, 13, 15, st); s.ell(9, 15, 4, 2.4, st); s.ell(17, 12, 4.4, 2.6, st); s.ell(12, 9, 2.4, 3, rp('#8cc85a')); s.fix(8, 14, '#c8e8a0');
+    thick(s, 20, 30, 28, 5, R.wood); s.poly([[24, 2], [31, 3], [30, 8], [26, 6]], R.iron); s.fix(30, 4, R.iron.gl); },
+  cooking: s => { for (const [x, h] of [[9, 6], [14, 8], [19, 6]]) { s.poly([[x - 3, 31], [x, 31 - h], [x + 3, 31]], rp('#e0603a')); s.poly([[x - 1, 31], [x, 28 - h / 3], [x + 1, 31]], rp('#ffb04a')); }
+    s.ell(15, 18, 11, 6, R.iron); s.rect(3, 15, 24, 3, R.iron); s.rect(1, 13, 4, 2, R.iron); s.rect(25, 13, 4, 2, R.iron); s.ell(15, 15, 9, 2, rp('#c88a4a')); s.fix(12, 15, '#ffd08a'); s.fix(18, 14, '#e8a060');
+    for (const [x, y] of [[11, 9], [12, 6], [17, 8], [18, 5], [22, 9]]) s.fix(x, y, '#f4f0e8'); },
+  smithing: s => { const a = R.iron; s.poly([[3, 15], [27, 15], [29, 17], [22, 20], [9, 20], [3, 18]], a); s.rect(11, 20, 9, 5, a); s.poly([[7, 25], [24, 25], [26, 30], [5, 30]], rp('#6a7480')); s.line(4, 15, 26, 15, null, '#e8eef2');
+    thick(s, 18, 13, 26, 3, R.wood); s.poly([[22, 1], [30, 0], [31, 6], [24, 7]], R.steel); s.fix(30, 1, '#ffffff'); for (const [x, y, c] of [[14, 11, '#ffd060'], [11, 9, '#ffb04a'], [17, 8, '#fff6c0'], [9, 12, '#ff8a3a']]) s.fix(x, y, c); },
+  crafting: s => { const sp = R.woodLight; s.rect(4, 14, 14, 3, sp); s.rect(4, 27, 14, 3, sp); const th = rp('#c8483c'); s.rect(6, 17, 10, 10, th); for (const y of [19, 22, 25]) s.line(6, y, 15, y, null, '#8a2a2a');
+    s.line(16, 22, 22, 20, th); s.line(22, 20, 25, 23, th); thick(s, 18, 28, 28, 3, R.steel, 1); s.line(19, 28, 29, 3, R.steel); s.fix(28, 4, '#2a1c1f'); s.fix(29, 2, '#ffffff'); },
+  magic: s => { thick(s, 5, 30, 18, 11, R.wood); s.rect(15, 12, 5, 2, R.gold); const orb = ramp('#9b87e0', { gl: .85 }); s.ell(22, 8, 5.4, 5.4, orb); s.fix(20, 5, '#ffffff'); s.fix(21, 5, '#f0e8ff');
+    for (const [x, y] of [[29, 3], [14, 4], [29, 14], [27, 1], [12, 7]]) s.fix(x, y, '#e8e0ff'); s.fix(28, 2, '#b8a8f0'); s.fix(30, 3, '#b8a8f0'); s.fix(29, 4, '#b8a8f0'); },
+  research: s => { const cv = rp('#8a3a3a'); s.poly([[1, 9], [15, 7], [16, 9], [17, 7], [31, 9], [31, 27], [17, 26], [16, 28], [15, 26], [1, 27]], cv); const pg = rp('#f4ecd8');
+    s.poly([[3, 10], [15, 9], [15, 25], [3, 25]], pg); s.poly([[17, 9], [29, 10], [29, 25], [17, 25]], rp('#e8dcc0')); for (const y of [13, 16, 19, 22]) { s.line(5, y, 13, y, null, '#9a8a7a'); s.line(19, y, 27, y, null, '#a89a88'); }
+    s.rect(23, 4, 3, 10, R.gold); s.fix(24, 14, R.gold.lo); },
+  hunting: s => { const h = R.gold; for (let i = 0; i <= 40; i++) { const t = i / 40, x = 3 + 21 * t, y = 9 + Math.sin(t * Math.PI * .5) * 11, w = 2 + Math.round(t * 3); for (let k = 0; k < w; k++) s.dot(x, y - k + (w >> 1), h); }
+    s.ell(26, 20, 3, 6.4, h); s.ell(27, 20, 1.6, 4.6, rp('#5a3a22')); s.rect(2, 8, 3, 3, R.wood); for (const x of [10, 18]) { const y = Math.round(9 + Math.sin((x - 3) / 21 * Math.PI * .5) * 11); s.rect(x, y - 3, 2, 6, R.leather); } s.line(10, 13, 19, 28, R.leather); s.line(19, 28, 19, 22, R.leather); s.fix(7, 8, '#fff6c0'); s.fix(14, 11, '#fff6c0'); },
+  exploration: s => { s.ell(16, 16, 13, 13, R.gold); s.ell(16, 16, 10.4, 10.4, rp('#f4ecd8')); for (const [x, y] of [[16, 7], [16, 25], [7, 16], [25, 16]]) s.fix(x, y, '#5a4a3a');
+    s.poly([[16, 7], [18.5, 16], [16, 18], [13.5, 16]], R.red); s.poly([[16, 25], [13.5, 16], [16, 14], [18.5, 16]], R.iron); s.ell(16, 16, 1.4, 1.4, R.gold); s.rect(14, 1, 4, 3, R.gold); s.fix(9, 8, '#ffffff'); },
+  herbalism: s => { const st = R.stone; s.poly([[5, 17], [27, 17], [24, 28], [8, 28]], st); s.rect(9, 28, 14, 2, st); s.ell(16, 17, 11, 2.4, rp('#5a5550')); s.ell(16, 17, 8, 1.4, rp('#6ea846'));
+    thick(s, 17, 17, 26, 3, rp('#b8b2a8'), 3); const lf = R.leafCrop; s.poly([[3, 15], [6, 4], [10, 14]], lf); s.line(6, 6, 6, 14, null, '#3f7a3c'); s.poly([[9, 13], [14, 7], [13, 15]], rp('#8cc85a')); s.ell(22, 12, 1.8, 1.8, rp('#e48aa8')); s.fix(22, 12, '#fff0f4'); },
+  enchanting: s => { const st = rp('#6a7088'); s.poly([[8, 29], [10, 6], [16, 2], [22, 6], [24, 29]], st); s.rect(6, 28, 20, 3, rp('#4a4e60')); const g = '#8fc0ff';
+    s.line(16, 8, 16, 23, null, g); s.line(11, 13, 21, 13, null, g); s.line(12, 19, 16, 23, null, g); s.line(20, 19, 16, 23, null, g); s.fix(16, 8, '#e8f4ff'); for (const [x, y] of [[4, 7], [27, 10], [29, 5], [3, 15]]) s.fix(x, y, '#cfe0ff'); s.fix(26, 4, '#8fc0ff'); },
+  attack: s => { const b = R.steel; for (let i = 0; i < 3; i++) s.line(9 + i, 21, 26 + i - 1, 3, b); s.line(10, 21, 27, 3, null, '#ffffff'); s.poly([[26, 1], [30, 1], [30, 5]], b);
+    thick(s, 3, 15, 15, 27, R.gold, 2); thick(s, 3, 29, 9, 23, R.leather, 2); s.ell(3, 29, 1.6, 1.6, R.gold); s.fix(8, 18, '#fff6c0'); },
+  strength: s => { const sk = rp('#e0a070'); s.rect(3, 19, 15, 8, sk); s.ell(11, 18, 6, 4.6, sk); s.rect(15, 8, 7, 17, sk); s.ell(19, 7, 5, 4.6, sk); for (const y of [4, 6, 8]) s.line(16, y, 22, y, null, sk.lo); s.line(9, 22, 16, 22, null, sk.lo);
+    s.rect(1, 18, 4, 10, rp('#4f7fbf')); s.fix(8, 14, '#fff0d8'); s.fix(9, 14, '#fff0d8'); s.fix(16, 4, '#fff0d8'); s.fix(25, 26, '#f3d58a'); s.fix(27, 23, '#f3d58a'); s.fix(26, 29, '#f3d58a'); },
+  defence: s => { s.poly([[4, 3], [28, 3], [28, 15], [16, 30], [4, 15]], R.steel); s.poly([[7, 6], [25, 6], [25, 15], [16, 26], [7, 15]], rp('#3f6fd6'));
+    s.rect(15, 6, 2, 19, rp('#e6b84a')); s.rect(7, 12, 18, 2, rp('#e6b84a')); s.ell(16, 13, 2.4, 2.4, R.gold); s.fix(5, 4, '#ffffff'); s.fix(9, 8, '#8ab0ff'); },
+  hitpoints: s => { const r = R.red; s.ell(10, 12, 7, 6.6, r); s.ell(22, 12, 7, 6.6, r); s.poly([[3, 14], [29, 14], [16, 29]], r); s.ell(9, 10, 2.4, 2, rp('#f08070')); s.fix(8, 9, '#ffffff'); s.fix(9, 9, '#ffffff'); s.fix(8, 10, '#ffe0d8'); },
+  ranged: s => { for (let i = 0; i <= 40; i++) { const t = i / 40, b = Math.sin(t * Math.PI) * 6; s.dot(4 + 20 * t - b, 29 - 26 * t - b, R.wood); s.dot(5 + 20 * t - b, 29 - 26 * t - b, R.wood); }
+    s.line(5, 29, 25, 3, null, '#efe4c8'); s.line(8, 23, 27, 6, R.woodLight); s.poly([[26, 4], [30, 2], [28, 7]], R.iron); s.poly([[7, 23], [5, 27], [9, 25]], rp('#e8e0d0')); s.fix(6, 24, '#c8483c'); s.ell(10, 20, 1.4, 1.4, R.leather); }
+};
+EMBLEM.scholarship = EMBLEM.research;
+function emblemSprite(id) { const f = EMBLEM[id]; if (!f) return null; const s = Spr(32, 32); f(s); return s; }
+Object.assign(A, { EMBLEM, emblemSprite, emblemUrl: id => EMBLEM[id] ? A.url('emblem:' + id, () => emblemSprite(id)) : null });
+
 Object.assign(A, { trophySprite, trophyUrl: (id, gilded) => A.url('trophy:' + id + (gilded ? ':gold' : ''), () => trophySprite(id, gilded)) });
 Object.assign(A, { workerSprite, treeSprite, rockSprite, piece, sceneFor, furnSprite, iconSprite, TREE, TOWN, ICON, ICON_ALIAS,
   treeUrl: id => A.url('tree:' + id, () => treeSprite(id)), rockUrl: id => A.url('rock:' + id, () => rockSprite(id)),
@@ -6858,7 +6996,11 @@ DQ.advProgress = () => {
   return { pct: clamp((t - a) / (b - a) * 100, 0, 100), cur: t - a, next: b - a, need: b - t };
 };
 const COMBAT_SKILLS = new Set(['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic']);
-DQ.xpMult = sk => (1 + .005 * (DQ.lvl(sk) - 1)) * (1 + .0025 * (DQ.advLvl() - 1)) * (COMBAT_SKILLS.has(sk) ? 1 + DQ.combatCatchUp() : 1) * (DQ.extraXp ? DQ.extraXp(sk) : 1) * (DQ.buffMult ? DQ.buffMult('xp') : 1);
+/* Early pace (Nov 2026 playtest: "level 6 after 4 minutes"): non-combat skills learn at 30% at level 1, rising evenly to
+   the full rate at level 20. Combat keeps its own tuned opening (combat 8 at about 22 minutes, sim-opening.cjs). */
+D.EARLY_PACE = { from: .3, until: 20 };
+DQ.earlyPace = sk => { const E = D.EARLY_PACE, l = DQ.lvl(sk); return !E || COMBAT_SKILLS.has(sk) || l >= E.until ? 1 : E.from + (1 - E.from) * (l - 1) / (E.until - 1); };
+DQ.xpMult = sk => DQ.earlyPace(sk) * (1 + .005 * (DQ.lvl(sk) - 1)) * (1 + .0025 * (DQ.advLvl() - 1)) * (COMBAT_SKILLS.has(sk) ? 1 + DQ.combatCatchUp() : 1) * (DQ.extraXp ? DQ.extraXp(sk) : 1) * (DQ.buffMult ? DQ.buffMult('xp') : 1);
 DQ.actionProgress = sk => Object.entries(D.SK[sk]?.actionReq || {}).map(([stat,need])=>({stat,need,have:DQ.S.stats[stat]||0}));
 DQ.skillUnlocked = sk => { const s=D.SK[sk]; if(!s)return false; if(s.actionReq)return !!DQ.S.unlocked[sk]||DQ.actionProgress(sk).every(r=>r.have>=r.need); return s.quest?!!DQ.S.unlocked[sk]:s.unlock<=DQ.advLvl(); };
 const actionNames={kill:'combat victories',catch:'fish caught',chop:'logs chopped',harvest:'crops harvested',craft:'items crafted',smith:'smithing actions'};
@@ -6870,18 +7012,19 @@ DQ.combatLvl = () => {
   return Math.floor(base + Math.max(m, r, g));
 };
 /* Progress towards the next combat level: the formula evaluated with fractional skill levels, plus the cheapest single-skill route. */
-let startCache = null;
-const combatStart = () => { if (startCache == null) { const f = DQ.newState(), L = {}; ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].forEach(k => { let l = 1; while (l < 99 && (f.xp[k] || 0) >= D.XPF[l + 1]) l++; L[k] = l; }); startCache = combatFrom(L); } return startCache; };
 const combatFrom = L => { const base = .25 * (L.defence + L.hitpoints); return base + Math.max(.325 * (L.attack + L.strength), .325 * Math.floor(1.5 * L.ranged), .325 * Math.floor(1.5 * L.magic)); };
 DQ.combatProgress = () => {
   const ids = ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'], L = {}, F = {};
   ids.forEach(k => { L[k] = DQ.lvl(k); F[k] = L[k] + (L[k] >= 99 ? 0 : DQ.pctNext(k) / 100); });
-  /* A new hero starts part-way through combat 3 (Health starts at 10), so the first level's bar is measured from that
-     starting point: it begins empty instead of at 40%. Every later level is measured from the level itself. */
-  const lvl = DQ.combatLvl(), next = lvl + 1, cont = Math.max(lvl, combatFrom(F)), start = combatStart(), base = lvl === Math.floor(start) ? Math.max(lvl, start) : lvl;
-  const pct = lvl >= 126 ? 100 : Math.min(99, Math.max(0, (cont - base) / (next - base) * 100));
-  const routes = ids.filter(k => DQ.skillUnlocked(k)).map(k => { const T = { ...L }; while (T[k] < 99 && Math.floor(combatFrom(T)) < next) T[k]++; return Math.floor(combatFrom(T)) >= next ? { skill: k, xp: Math.max(0, D.XPF[T[k]] - DQ.S.xp[k]) } : null; }).filter(Boolean).sort((a, b) => a.xp - b.xp);
-  return { lvl, next, pct, best: routes[0] || null, routes };
+  /* The bar follows the skill you are training (or else the cheapest route): how far that skill has come towards the XP
+     that tips the combat level over, so the percentage and "N XP reaches combat X" always describe the same thing. Combat
+     level only changes on whole skill levels, so the earlier fractional-formula bar could read 99% with a level to go. */
+  const lvl = DQ.combatLvl(), next = lvl + 1;
+  const routes = ids.filter(k => DQ.skillUnlocked(k)).map(k => { const T = { ...L }; while (T[k] < 99 && Math.floor(combatFrom(T)) < next) T[k]++; return Math.floor(combatFrom(T)) >= next ? { skill: k, xp: Math.max(0, D.XPF[T[k]] - DQ.S.xp[k]), from: D.XPF[L[k]], to: D.XPF[T[k]] } : null; }).filter(Boolean).sort((a, b) => a.xp - b.xp);
+  const st = DQ.weaponStyle ? DQ.weaponStyle() : 'melee', focus = { accurate: 'attack', aggressive: 'strength', defensive: 'defence', offense: st }[(DQ.S.style || {})[st]];
+  const route = routes.find(r => r.skill === focus) || routes[0] || null;
+  const pct = lvl >= 126 || !route ? 100 : Math.min(99, Math.max(0, (DQ.S.xp[route.skill] - route.from) / Math.max(1, route.to - route.from) * 100));
+  return { lvl, next, pct, best: routes[0] || null, route, routes };
 };
 /* Catch-up: while your combat level trails your Hero level, combat skills learn faster (+15% per level behind, up to +200%). */
 /* fractional combat level (skills' progress counted), so the catch-up bonus eases off smoothly instead of in steps */
@@ -7390,7 +7533,7 @@ const trunc = (t, n) => { t = String(t || '').replace(/<[^>]+>/g, ''); return t.
 const ago = t => { const s = Math.round((Date.now() - t) / 1000); return s < 60 ? 'just now' : s < 3600 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`; };
 DQ.openBell = () => {
   DQ.noteMissed = 0; const L = DQ.noteLog.filter(e => DQ.notificationTier(e.o) === 'quiet').slice(0, 25);
-  const body = L.length ? `<div class="bell-list">${L.map((e, i) => { const o = e.o, a = inferActions(o)[0]; return `<div class="bell-row ${e.silent ? 'quiet' : ''}" style="--c:${o.col || '#d8a64a'}"><span class="n-ic">${ico(o.icon || 'star')}</span><div class="bell-t"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(trunc(o.text, 140))}</span>` : ''}<small>${ago(e.t)}</small></div>${a ? `<button class="btn sm" data-i="${i}">${esc(a.label)}</button>` : ''}</div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing yet. Routine progress and finds will be listed here.</p>';
+  const body = L.length ? `<div class="bell-list">${L.map((e, i) => { const o = e.o, a = inferActions(o)[0]; return `<div class="bell-row ${e.silent ? 'quiet' : ''}" style="--c:${o.col || '#d8a64a'}"><span class="n-ic">${DQ.data.ITEMS[o.icon] ? DQ.itemIco(DQ.data.ITEMS[o.icon]) : DQ.data.SK[o.icon] && DQ.artImage ? DQ.artImage('skill', o.icon, 32, '', '') : ico(o.icon || 'star')}</span><div class="bell-t"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(trunc(o.text, 140))}</span>` : ''}<small>${ago(e.t)}</small></div>${a ? `<button class="btn sm" data-i="${i}">${esc(a.label)}</button>` : ''}</div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing yet. Routine progress and finds will be listed here.</p>';
   DQ.modal({ title: 'Recent activity', wide: true, body, actions: [{ label: 'Close', primary: true }] });
   $$('.bell-row .btn').forEach(b => b.onclick = () => { const e = L[+b.dataset.i], a = e && inferActions(e.o)[0]; DQ.closeModal(); a && a.fn && a.fn(); });
 };
@@ -7872,7 +8015,7 @@ DQ.pstats = () => {
   let acc, max, sp = null;
   if (st === 'ranged') { const e = L('ranged') + 8; acc = e * (64 + b.rng); max = Math.floor(2 + e * (64 + b.rngStr) / DMG_DIV); }
   else if (st === 'magic') { sp = pickSpell() || D.SPELLS[0]; const e = L('magic') + 8; acc = e * (64 + b.mag); max = sp.max + Math.floor(L('magic') / 10) + Math.floor(b.mag / 12); }
-  else { const e = L('attack') + 8 + (sty.melee === 'accurate' ? 3 : 0), es = L('strength') + 8 + (sty.melee === 'aggressive' ? 3 : 0); acc = e * (64 + b.atk); max = Math.floor(2 + es * (64 + b.str) / DMG_DIV); }
+  else { const k = (D.STYLE_TUNE && D.STYLE_TUNE.meleeLevel) || 1, e = L('attack') * k + 8 + (sty.melee === 'accurate' ? 3 : 0), es = L('strength') * k + 8 + (sty.melee === 'aggressive' ? 3 : 0); acc = e * (64 + b.atk); max = Math.floor(2 + es * (64 + b.str) / DMG_DIV); }
   const f = DQ.fx(), raw = max * (1 + f.dmg) * DQ.buffMult('weak'); max = Math.max(1, Math.round(raw));
   return { style: st, acc, max, maxRaw: raw, defRoll, red: Math.min(.75, b.def / (b.def + 320) + f.dr), spell: sp };
 };
@@ -8028,7 +8171,7 @@ function kill(m) {
     if (uniq && !guaranteed && !found[id]) { const P = S().upity = S().upity || {}; P[id] = (P[id] || 0) + 1; pity = P[id] >= Math.ceil(2.5 / p); }
     if (!(guaranteed || pity || chance(Math.min(1, p * DQ.buffMult('luck') * (DQ.uniqueFx().fortune ? 1.25 : 1))))) continue;
     if (uniq) { const firstCopy = !found[id]; found[id] = 1; if (S().upity) delete S().upity[id];
-      if (firstCopy && !DQ.forecasting) { DQ.notify({ kind: 'unlock', key: 'unique:' + id, icon: D.ITEMS[id].ic, col: D.ITEMS[id].col, title: `Unique find: ${D.ITEMS[id].name}`, text: `${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, sound: 'unique', burst: true, ttl: 14000 }); S().freshUnique = id; if (DQ.journal) DQ.journal('loot', `${m.name} dropped ${D.ITEMS[id].name}. ${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, D.ITEMS[id].ic); } }
+      if (firstCopy && !DQ.forecasting) { DQ.notify({ kind: 'unlock', key: 'unique:' + id, icon: D.ITEMS[id].ic, col: D.ITEMS[id].col, title: `Unique find: ${D.ITEMS[id].name}`, text: `${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}${D.UNIQUE_USE && D.UNIQUE_USE[D.ITEMS[id].unique.key] ? ` Good for ${D.UNIQUE_USE[D.ITEMS[id].unique.key]}.` : ''}`, action: { label: 'Inspect', fn: () => { DQ.ui.sel = id; DQ.ui.selFrom = 'pack'; DQ.go('character'); DQ.ui.render(false); } }, sound: 'unique', burst: true, ttl: 14000 }); S().freshUnique = id; if (DQ.journal) DQ.journal('loot', `${m.name} dropped ${D.ITEMS[id].name}. ${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, D.ITEMS[id].ic); } }
     const n = rnd(a, b), rar = D.rarityOf(guaranteed ? 0 : p); got.push(id);
     if (id === 'coin_pouch') { const cc = Math.round(rnd(m.coins[0] + 5, m.coins[1] * 3 + 10) * DQ.coinMult() * (DQ.trick && DQ.trick('comb') ? 1.5 : 1)); if (DQ.trick && DQ.trick('comb')) fxHit('comb'); extraCoins += cc; drops.push({ id, n: cc, rar, coins: true }); loot.push(`a pouch of ${fmt(cc)} coins`); continue; }
     if (id === 'treasure_chest') {
@@ -8053,7 +8196,7 @@ function kill(m) {
       const t = S().towns[m.town] || (S().towns[m.town] = { visited: true, boss: false }); t.boss = true; const next = D.TOWNS[D.TOWN[m.town].idx + 1];
       if (next && !S().towns[next.id]) S().towns[next.id] = { visited: false, boss: false };
       DQ.sfx('boss');
-      DQ.notify({ kind: 'boss', key: 'boss:' + m.id, icon: 'skull', col: '#f3d58a', title: `${m.boss.short} is defeated`, text: next ? `The road to ${next.name} is open.` : 'The realm is safe. For now.', action: next ? { label: 'Open the map', fn: () => DQ.go('map') } : null, sound: false, burst: true, ttl: 15000 });
+      DQ.notify({ kind: 'boss', key: 'boss:' + m.id, icon: 'skull', col: '#f3d58a', title: `${m.boss.short} is defeated`, text: (next ? `The road to ${next.name} is open.` : 'The realm is safe. For now.') + (D.BOSS_VOICES && D.BOSS_VOICES[m.id] ? ` ${D.BOSS_VOICES[m.id][0]}: “${D.BOSS_VOICES[m.id][1]}”` : ''), action: next ? { label: 'Open the map', fn: () => DQ.go('map') } : null, sound: false, burst: true, ttl: 15000 });
       DQ.log(`${m.name} falls. ${next ? 'The road to ' + next.name + ' opens.' : ''}`, 'quest');
       DQ.achDirty = true; DQ.fxDirty(); DQ.emit('travelunlock');
     }
@@ -9077,7 +9220,7 @@ const B = UI.B = {
   combat: e => set(e, DQ.combatLvl()),
   combatbar: e => { const w = DQ.combatProgress().pct.toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; },
   combatnext: e => { const c = DQ.combatProgress(); set(e, c.best ? `${Math.floor(c.pct)}% to ${c.next}` : 'Max'); },
-  combatroute: e => { const c = DQ.combatProgress(); set(e, c.best ? `${fmt(c.best.xp)} ${D.SK[c.best.skill].name} XP reaches combat ${c.next}` : 'Combat level maxed'); },
+  combatroute: e => { const c = DQ.combatProgress(); set(e, c.route ? `${fmt(c.route.xp)} more ${D.SK[c.route.skill].name} XP reaches combat ${c.next}${c.best && c.best.skill !== c.route.skill ? ` (or ${fmt(c.best.xp)} ${D.SK[c.best.skill].name})` : ''}` : 'Combat level maxed'); },
   combatboost: e => { const b = DQ.combatCatchUp(); set(e, b > 0 ? `Catch-up: +${Math.round(b * 100)}% combat XP while you trail your Hero level` : ''); e.hidden = !(b > 0); },
   adv: e => set(e, DQ.advLvl()),
   totlvl: e => set(e, DQ.totalLvl()),
@@ -9200,7 +9343,7 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
       <span class="choice-art">${art(c,96)}</span><b>${esc(c.name)}</b><small>${c.caption||esc(c.reason||'')}</small><span class="choice-state">${working?'● Working':c.locked?'Locked':c.away?'Travel required':choice.id===c.id?'✓ Selected':'Available'}</span>${working?`<span class="bar prog"><i data-prog="${kind}:${c.id}"></i></span>`:''}</button>`;
   }).join('') || '<p class="dim">No recipes match. Try another category.</p>'}</div></section>`;
   if(kind==='fight')return `<section class="panel encounter-controls"><div class="phead"><h2>${esc(choice.name)}</h2><small>Combat <b data-b="combat"></b></small></div>${action}<div class="task-summary">${choice.info||''}</div></section>${cards}`;
-  const stage = `<section class="panel activity-stage ${running?'working':''}" style="--c:${D.SK[key]?.col||'var(--brass)'};--work-beat:${Math.max(900,Math.min(1700,(DQ.act?.dur||3600)/3))}ms"><div class="activity-scene ${kind} skill-${key}" data-kind="${kind}" data-task="${choice.id}" style="--landscape:url('${DQ.sceneUrl ? DQ.sceneUrl(S().town) : ''}')"><span class="scene-target">${art(choice, choice.artKind==='item' ? 48 : kind==='wood' ? 144 : 96)}</span>${choice.yieldId&&kind!=='fish'?`<span class="scene-yield"><small>Produces</small>${DQ.itemIco(D.ITEMS[choice.yieldId])}</span>`:''}${running?`<span class="scene-worker" aria-hidden="true"><img class="px" src="${DQ.heroWorkFigureUrl?DQ.heroWorkFigureUrl(S().look):DQ.heroFigureUrl(S().look)}" width="72" height="102" alt=""></span><span class="action-tool" aria-hidden="true">${ico({wood:'woodcutting',mine:'mining',fish:'rod',thieve:'glove',recipe:{cooking:'cooking',smithing:'hammer',crafting:'crafting'}[key],alch:'staff'}[kind]||key)}</span><span class="work-atmosphere" aria-hidden="true"><i></i><i></i><i></i><i></i></span>`:''}</div>
+  const stage = `<section class="panel activity-stage ${running?'working':''}" style="--c:${D.SK[key]?.col||'var(--brass)'};--work-beat:${Math.max(900,Math.min(1700,(DQ.act?.dur||3600)/3))}ms"><div class="activity-scene ${kind} skill-${key}" data-kind="${kind}" data-task="${choice.id}" style="--landscape:url('${DQ.sceneUrl ? DQ.sceneUrl(S().town) : ''}')"><span class="scene-target">${art(choice, choice.artKind==='item' ? 48 : kind==='wood' ? 144 : 96)}</span>${choice.yieldId&&kind!=='fish'?`<span class="scene-yield"><small>Produces</small>${DQ.itemIco(D.ITEMS[choice.yieldId])}</span>`:''}${running?`<span class="scene-worker" aria-hidden="true"><img class="px" src="${DQ.heroWorkFigureUrl?DQ.heroWorkFigureUrl(S().look):DQ.heroFigureUrl(S().look)}" width="72" height="102" alt=""></span><span class="action-tool" aria-hidden="true">${(t => t ? DQ.itemIco(D.ITEMS[t]) : ico({wood:'woodcutting',mine:'mining',fish:'rod',thieve:'glove',recipe:{cooking:'cooking',smithing:'hammer',crafting:'crafting'}[key],alch:'staff'}[kind]||key))((k => { const n = k && DQ.toolTier(key); return n && D.ITEMS[`tool_${k}_${n}`] ? `tool_${k}_${n}` : null; })(DQ.toolKey && DQ.toolKey(key)))}</span><span class="work-atmosphere" aria-hidden="true"><i></i><i></i><i></i><i></i></span>`:''}</div>
     <div class="activity-caption"><div class="phead"><div><small>${esc(title)} · Level <b data-b="lvl:${key}"></b></small><h2>${esc(choice.name)}</h2></div><span class="activity-state ${running?'ok':'dim'}">${running?'● Working':choice.blocked?'Preview':'Ready'}</span></div>${running?'<span class="bar prog activity-progress"><i data-prog="@"></i></span>':''}${action}<div class="task-summary">${choice.info||''}${choice.blocked&&!running?`<p class="bad">${esc(choice.reason)}</p>`:''}</div></div></section>`;
   return `<div class="activity-workspace task-panel">${stage}${cards}</div>`;
 };
@@ -9265,38 +9408,43 @@ UI.V.combat = () => {
   const preview = f || mons.find(m=>m.id===UI.taskChoice.combat) || mons[0];
   const foe = preview ? `<div class="avatar foe-guide ${preview.boss ? 'boss' : ''}" id="av-foe" style="--c:${preview.col}" data-do="guide" data-a="${preview.id}" role="button" tabindex="0" aria-label="${esc(preview.name)}: open its field guide" data-tip="text:${esc(preview.name)} · open its field guide">${DQ.battleFoe ? DQ.battleFoe(preview) : DQ.monSprite(preview,192)}</div><div class="nm">${esc(preview.name)} <span class="lvchip ${preview.cl - DQ.combatLvl() <= 3 ? 'easy' : preview.cl - DQ.combatLvl() <= 14 ? 'fair' : 'hard'}">Lv ${preview.cl}</span></div><span class="bar hpb"><i ${f?'data-b="fhp"':'style="width:100%"'}></i></span><small class="mono" ${f?'data-b="fhptxt"':''}>${preview.hp} / ${preview.hp} health</small>`
     : `<div class="avatar idle" id="av-foe" style="--c:#4a5a5e">?</div><div class="empty-foe">Choose a target to start fighting.</div>`;
-  const stances = st === 'melee' ? [['accurate', 'Accurate', 'attack'], ['aggressive', 'Aggressive', 'strength'], ['defensive', 'Defensive', 'defence']] : [['offense', 'Offensive', st === 'ranged' ? 'ranged' : 'magic'], ['defensive', 'Defensive', st === 'ranged' ? 'ranged + defence' : 'magic + defence']];
   const cur = sty[st];
   const wname = S().equip.weapon ? D.ITEMS[S().equip.weapon].name : 'Bare hands';
   let bossCard = '';
   if (boss) {
     const t = D.TOWN[town], done = S().towns[town] && S().towns[town].boss, req = boss.boss.req, ok = DQ.combatLvl() >= req, next = D.TOWNS[t.idx + 1], on = f && f.id === boss.id;
-    bossCard = `<section class="panel bosscard fancy" style="--c:${boss.col}"><div class="avatar boss" style="--c:${boss.col}">${DQ.monSprite(boss, 64, 'bob')}</div><div class="bc-main"><span class="k">${done ? 'Defeated' : 'Boss'}</span><h2>${esc(boss.name)}</h2>
+    bossCard = `<section class="panel bosscard fancy" style="--c:${boss.col}"><div class="avatar boss foe-guide" style="--c:${boss.col}" data-do="guide" data-a="${boss.id}" role="button" tabindex="0" aria-label="${esc(boss.name)}: open its field guide">${DQ.monSprite(boss, 64, 'bob')}</div><div class="bc-main"><span class="k">${done ? 'Defeated' : 'Boss'}</span><h2>${esc(boss.name)}</h2>
       <p class="sm dim">${done ? 'Fight again for loot, with a small chance at its trophy.' : next ? `Defeat it to open the road to <b>${next.name}</b>.` : 'The final challenge in the realm.'}</p>
       <div class="bc-req ${ok ? 'ok' : 'bad'}">${ok ? '✓' : '✗'} Combat level ${req} required <span class="mono">(you: ${DQ.combatLvl()})</span></div></div>
       ${UI.bossIntel(boss)}
       <button class="btn ${ok ? 'primary' : ''} bc-btn" ${ok ? '' : 'data-do="noop" '} ${ok ? `data-do="act" data-a="fight" data-b="${boss.id}"` : ''}>${on ? 'Retreat' : done ? 'Fight again' : 'Challenge'}</button><span class="progw"><i data-prog="fight:${boss.id}"></i></span></section>`;
   }
-  const Lv = DQ.lvl, melee = .325 * (Lv('attack') + Lv('strength')), rng = .325 * Math.floor(1.5 * Lv('ranged')), mag = .325 * Math.floor(1.5 * Lv('magic')), best = Math.max(melee, rng, mag);
-  const bestName = best === melee ? 'Melee' : best === rng ? 'Ranged' : 'Magic';
-  const clvl = `<section class="panel clvl slim"><div class="cl-num" data-tip="text:Combat level is made from Defence, Health and your best fighting style. Train any of them to raise it. Monsters are tagged against it."><span class="k">Your combat level</span><b class="mono" data-b="combat"></b></div>
-    <div class="cl-prog"><div class="cl-prog-top"><b>Next level</b><small class="mono" data-b="combatnext"></small></div><span class="bar"><i data-b="combatbar"></i></span><small data-b="combatroute"></small><small class="cl-boost" data-b="combatboost"></small></div>
-    <div class="cl-b"><div class="cl-parts"><span>${ico('defence')}Defence <b class="mono">${Lv('defence')}</b></span><span>${ico('hitpoints')}Health <b class="mono">${Lv('hitpoints')}</b></span><span>${ico(bestName === 'Melee' ? 'attack' : bestName === 'Ranged' ? 'ranged' : 'magic')}${bestName === 'Melee' ? `Attack <b class="mono">${Lv('attack')}</b> + Strength <b class="mono">${Lv('strength')}</b>` : `${bestName} <b class="mono">${Lv(bestName.toLowerCase())}</b>`}</span></div></div>
-    <div class="cl-key"><span class="lvchip easy">Easy</span><span class="lvchip fair">Fair</span><span class="lvchip hard">Hard</span></div></section>`;
+  const Lv = DQ.lvl;
+  /* Your fighter: combat level, weapon and every combat skill exactly once, each beside what it does for you now
+     and the button that makes your fights train it. */
+  const trainBtn = (value, label) => `<button type="button" class="choice-button ftr-train ${cur === value ? 'on' : ''}" data-do="style" data-a="${st}" data-b="${value}" aria-pressed="${cur === value}">${cur === value ? 'Training' : 'Train'}<small>${label}</small></button>`;
+  const trainFor = { attack: st === 'melee' ? trainBtn('accurate', 'Accurate') : '', strength: st === 'melee' ? trainBtn('aggressive', 'Aggressive') : '', defence: trainBtn('defensive', st === 'melee' ? 'Defensive' : `${st === 'ranged' ? 'Ranged' : 'Magic'} + Defence`), ranged: st === 'ranged' ? trainBtn('offense', 'Offensive') : '', magic: st === 'magic' ? trainBtn('offense', 'Offensive') : '' };
+  const offStyle = k => st !== k ? `<em>${k === 'ranged' ? 'With a bow and arrows' : k === 'magic' ? 'With a staff and runes' : 'With a melee weapon'}</em>` : '';
+  const does = {
+    attack: `Chance to hit${offStyle('melee')}`, strength: `Max hit${st === 'melee' ? ` <b class="mono">${ps.max}</b>` : ''}${offStyle('melee')}`,
+    defence: `Blocks <b class="mono">${Math.round(ps.red * 100)}%</b> of damage and dodges hits`, hitpoints: `Health <b class="mono" data-b="hptxt"></b>`,
+    ranged: `Hit chance and damage${st === 'ranged' ? ` · max hit <b class="mono">${ps.max}</b>` : ''}${offStyle('ranged')}`, magic: `Spell accuracy${st === 'magic' ? ` · max hit <b class="mono">${ps.max}</b>` : ''}${offStyle('magic')}`
+  };
+  const lockedStyles = ['ranged', 'magic'].filter(k => !DQ.skillUnlocked(k));
+  const rows = ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].filter(k => !lockedStyles.includes(k)).map(k => `<div class="ftr-row ${(k === 'attack' || k === 'strength') && st !== 'melee' || (k === 'ranged' || k === 'magic') && st !== k ? 'idle' : ''}" style="--c:${D.SK[k].col}"><button class="ftr-skill" data-do="go" data-a="${D.SK[k].page}" data-tip="skill:${k}">${ico(k)}<span><b>${D.SK[k].name} <span class="mono" data-b="lvl:${k}"></span></b><span class="bar"><i data-b="xpbar:${k}"></i></span></span></button><span class="ftr-does">${does[k]}</span>${trainFor[k] || '<span></span>'}</div>`).join('');
+  const lockNote = lockedStyles.length ? `<p class="style-note">${ico('lock')}<span>${lockedStyles.map(k => `<b>${D.SK[k].name}</b> is another fighting style (${k === 'ranged' ? 'bow and arrows' : 'staff and runes'}). ${esc(DQ.skillTeacher ? DQ.skillTeacher(k) : DQ.unlockHow(k))}.`).join(' ')}</span></p>` : '';
+  const fighter = `<section class="panel fighter"><div class="ftr-head"><div class="cl-num" data-tip="text:Combat level is made from Defence, Health and your best fighting style. Train any of them to raise it. Monsters are tagged against it."><span class="k">Combat level</span><b class="mono" data-b="combat"></b></div>
+    <div class="cl-prog"><div class="cl-prog-top"><b>Next level</b><small class="mono" data-b="combatnext"></small></div><span class="bar"><i data-b="combatbar"></i></span><small data-b="combatroute"></small><small class="cl-boost" data-b="combatboost"></small></div></div>
+    <div class="ftr-weapon">${ico(st === 'ranged' ? 'bow' : st === 'magic' ? 'staff' : 'sword')}<div><div class="ftr-wname"><b>${esc(wname)}</b> <span class="tag">${st}</span></div>${UI.weaponLine()}${(t => t ? `<small class="dim">Speed: ${esc(t)}</small>` : '')(DQ.combatSpeedText().split(' · ').slice(1).join(' · '))}${st === 'ranged' ? `<div class="sm dim">Ammo: <span data-b="ammo"></span></div>` : ''}${st === 'magic' ? `<div class="sm dim">Spell: <b>${ps.spell.name}</b> · Runes: <span class="mono" data-b="runes"></span></div>` : ''}</div></div>
+    <div class="ftr-rows" role="group" aria-label="Combat skills and training focus">${rows}</div>${lockNote}</section>`;
   const choices = mons.map(m => ({ id: m.id, name: m.name, artKind: 'creature', caption: `Level ${m.cl}${m.boss ? ' · Boss' : ''}`, blocked: !!m.boss && DQ.combatLvl() < m.boss.req, locked: !!m.boss && DQ.combatLvl() < m.boss.req, reason: m.boss ? `Combat level ${m.boss.req} required` : '', info: `<p>Level ${m.cl} · ${m.hp} health${m.boss ? ' · Boss' : ''}. Food available restores ${fmt(DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0))} health.</p>` }));
   const controls = UI.areaPanel ? UI.areaPanel(town) : UI.taskPanel('combat', 'Combat', 'fight', choices, 'Fight');
   const battle = `<section class="panel arena encounter-arena" style="--landscape:url('${DQ.sceneUrl ? DQ.sceneUrl(town) : ''}');background-image:linear-gradient(color-mix(in srgb,var(--panel) 45%,transparent),color-mix(in srgb,var(--panel) 70%,transparent)),var(--landscape)"><div class="side"><div class="splats" id="sp-you"></div><div class="avatar you" id="av-you">${DQ.battleHero ? DQ.battleHero() : `<img class="px encounter-hero" src="${DQ.heroFigureUrl(S().look)}" width="144" height="204" alt="Your equipped hero">`}</div><div class="nm">${esc(S().name)} <span class="lvchip you">Combat ${DQ.combatLvl()}</span></div><span class="bar hpb"><i data-b="hpbar"></i></span><small class="mono" data-b="hptxt"></small></div>
       <div class="mid"><span class="vs">vs</span>${f ? `<span class="bar prog" aria-label="Next attack" style="--c:var(--brass)"><i data-prog="fight:${f.id}"></i></span>` : `<small class="dim">Preview</small>`}</div>
       <div class="side"><div class="splats" id="sp-foe"></div>${foe}</div></section>`;
-  const training = `<section class="panel combat-training"><label for="training-focus">Train${UI.choiceButtons(`<select id="training-focus" data-in="training-focus" data-a="${st}">${stances.map(([value, name, skill]) => `<option value="${value}" ${cur === value ? 'selected' : ''}>${D.SK[skill] ? D.SK[skill].name : skill} · ${name}</option>`).join('')}</select>`)}</label><button class="tog ${S().settings.autoEat ? 'on' : ''}" data-do="autoeat"><span class="sw"></span>Auto-eat ${S().settings.autoEat ? 'on' : 'off'}</button><label for="eat-threshold">Eat below${UI.choiceButtons(`<select id="eat-threshold" data-in="eat-threshold">${[30,40,50,60,70].map(n=>`<option value="${n}" ${S().settings.eatAt === n ? 'selected' : ''}>${n}% health</option>`).join('')}</select>`)}</label></section>`;
-  return `<div class="combat-dashboard"><div class="combat-live">${battle}${clvl}${training}</div><div class="combat-targets">${controls}</div>${bossCard}
-    <section class="panel"><div class="phead"><h2>Loadout</h2><small class="mono">Max hit ${ps.max}</small></div>
-      <div class="loadout"><div>${ico(st === 'ranged' ? 'bow' : st === 'magic' ? 'staff' : 'sword')} <b>${esc(wname)}</b> <span class="tag">${st}</span></div>${UI.weaponLine()}<div class="combat-speed"><b>Attack speed</b> ${esc(DQ.combatSpeedText())}</div>
-      ${st === 'ranged' ? `<div class="sm dim">Ammo: <span data-b="ammo"></span></div>` : ''}${st === 'magic' ? `<div class="sm dim">Spell: <b>${ps.spell.name}</b> · Runes: <span class="mono" data-b="runes"></span></div>` : ''}</div>
-</section>
-    ${UI.abilityPanel()}
-    <section class="panel"><div class="phead"><h2>Food</h2></div><div class="chips" id="foodbox">${UI.foodChips()}</div></section>
-    <section class="panel"><div class="phead"><h2>Combat skills</h2><small>What each one does</small></div><div class="tiles two">${['attack', 'strength', 'defence', 'ranged', 'hitpoints'].map((k, i) => { const d = { attack: 'Chance to hit', strength: `Hit harder · max hit ${ps.max}`, defence: `Dodge and armour · blocks ${Math.round(ps.red * 100)}%`, ranged: 'Bows: hit chance and damage', hitpoints: 'Your health' }[k]; return UI.tile(k, i).replace(/<\/button>\s*$/, `<small class="tiledesc">${d}</small></button>`); }).join('')}</div></section>${UI.lootPanel()}</div>`;
+  const supplies = `<section class="panel combat-supplies"><div class="phead"><h2>Food</h2><button class="tog ${S().settings.autoEat ? 'on' : ''}" data-do="autoeat"><span class="sw"></span>Auto-eat ${S().settings.autoEat ? 'on' : 'off'}</button></div><div class="chips" id="foodbox">${UI.foodChips()}</div><label for="eat-threshold">Eat below${UI.choiceButtons(`<select id="eat-threshold" data-in="eat-threshold">${[30,40,50,60,70].map(n=>`<option value="${n}" ${S().settings.eatAt === n ? 'selected' : ''}>${n}% health</option>`).join('')}</select>`)}</label></section>`;
+  /* Left: you (the arena, your fighter, abilities, food). Right: the fight (where to hunt, the chosen foe, the boss, loot). */
+  return `<div class="combat-dashboard"><div class="combat-live">${battle}${fighter}${UI.abilityPanel()}${supplies}</div><div class="combat-side"><div class="combat-targets">${controls}</div><!--battle-brief-->${bossCard}${UI.lootPanel()}<div class="cl-key"><span class="lvchip easy">Easy</span><span class="lvchip fair">Fair</span><span class="lvchip hard">Hard</span><small>Creature tags compare their level with yours.</small></div></div></div>`;
 };
 UI.tile = (sk, i = 0) => {
   const s = D.SK[sk], locked = !DQ.skillUnlocked(sk);
@@ -9378,6 +9526,23 @@ function mapSVG(sel) {
     ${decor}${roads}${towns}<g id="hero-pin" transform="translate(${ct.x} ${ct.y - 40})" class="pin"><path d="M0 22C-14 4-14-14 0-14S14 4 0 22z" fill="#d8a64a" stroke="#2a2418" stroke-width="2"/><circle cy="-2" r="5" fill="#2a2418"/></g></svg>`;
 }
 UI.MAP_LAND = MAP_LAND; UI.mapSVG = mapSVG;
+/* What is still left to do in a town: quests, creatures to meet, places to restore, the boss. Links to Exploration. */
+UI.leftToExplore = town => {
+  const qs = D.QUESTS.filter(q => q.town === town), qLeft = qs.filter(q => !(S().q[q.id] && S().q[q.id].s === 'done')).length;
+  const mons = D.MONLIST.filter(m => m.town === town), met = mons.filter(m => (S().beast.kills[m.id] || 0) > 0).length;
+  const projs = DQ.projectsForTown ? DQ.projectsForTown(town) : [], pLeft = projs.filter(([id]) => !S().projects[id]).length;
+  const finds = Object.entries(D.DISCOVERIES || {}).filter(([id, d]) => d.place === town && DQ.discovered && DQ.discovered(id)).length;
+  const bossDone = S().towns[town] && S().towns[town].boss;
+  const row = (ic, text, ok) => `<li class="${ok ? 'ok' : ''}">${ico(ok ? 'check' : ic)}<span>${text}</span></li>`;
+  const all = !qLeft && met === mons.length && !pLeft && bossDone;
+  return `<div class="explore-left"><div class="k">${all ? 'Fully explored' : 'Left to explore here'}</div><ul>
+    ${row('quest', qLeft ? `<b>${qLeft}</b> of ${qs.length} quests still to finish` : `All ${qs.length} quests complete`, !qLeft)}
+    ${row('paw', met < mons.length ? `<b>${mons.length - met}</b> of ${mons.length} creatures not yet met` : `Every creature met (${mons.length})`, met === mons.length)}
+    ${projs.length ? row('house', pLeft ? `<b>${pLeft}</b> of ${projs.length} places to restore` : 'Everything restored', !pLeft) : ''}
+    ${row('skull', bossDone ? 'Boss defeated' : 'Boss still undefeated', bossDone)}
+    ${finds ? row('star', `${finds} discover${finds === 1 ? 'y' : 'ies'} made here`, true) : ''}</ul>
+    <div class="btnrow"><button class="btn sm" data-do="go" data-a="exploration">${ico('exploration')} Exploration</button><button class="btn sm" data-do="go" data-a="quests">${ico('quest')} Quests</button></div></div>`;
+};
 UI.V.map = () => {
   const sel = UI.mapSel = UI.mapSel || S().town, t = D.TOWN[sel], open = DQ.townUnlocked(t.id), here = S().town === sel, boss = D.MON[t.boss], done = S().towns[sel] && S().towns[sel].boss;
   const prev = D.TOWNS[t.idx - 1], counts = [['fishing', 'fish', 'fishing spot'], ['woodcutting', 'wood', 'tree type'], ['mining', 'mine', 'ore'], ['thieving', 'thieve', 'target']].map(([sk, k, w]) => { const n = D.NODES[k].filter(x => x.town === sel).length; return n ? `<span class="rw" style="--c:${D.SK[sk].col}">${ico(sk)}${n} ${w}${n > 1 ? 's' : ''}</span>` : ''; }).join('');
@@ -9387,7 +9552,7 @@ UI.V.map = () => {
       <div class="ti-body"><span class="k">${here ? 'Current location' : open ? 'Open road' : 'Locked'}</span><h2>${open ? t.name : 'Unknown lands'}</h2><p class="dim">${open ? t.tag : 'The road is closed.'}</p>
       ${open && !here ? `<button class="btn primary travel-go" data-do="travel" data-a="${sel}">${ico('map')} Travel to ${esc(t.name)}</button>` : ''}
       ${open ? `<p>${t.blurb}</p><div class="rws">${counts}<span class="rw" style="--c:#8a9bff">${ico('attack')}Monsters Lv ${mons[0].cl}-${mons[mons.length - 1].cl}</span><span class="rw" style="--c:#d8a64a">${ico('shop')}Shop</span><span class="rw" style="--c:#d8a64a">${ico('quest')}${qn.length} quests</span></div>
-        <div class="bossrow ${done ? 'done' : ''}"><div class="avatar boss sm" style="--c:${boss.col}">${DQ.monSprite(boss, 40)}</div><div><b>${esc(boss.name)}</b><small>${done ? 'Defeated' : `Combat level ${boss.boss.req} to challenge`}</small></div></div>`
+        <div class="bossrow ${done ? 'done' : ''}"><div class="avatar boss sm" style="--c:${boss.col}">${DQ.monSprite(boss, 40)}</div><div><b>${esc(boss.name)}</b><small>${done ? 'Defeated' : `Combat level ${boss.boss.req} to challenge`}</small></div></div>${UI.leftToExplore(sel)}`
         : `<p>${prev ? `Defeat <b>${esc(D.MON[prev.boss].name)}</b> in ${prev.name} to open this road.` : ''}</p>${prev && DQ.townUnlocked(prev.id) ? `<p class="sm dim">You need combat level ${D.MON[prev.boss].boss.req} to face them. You are ${DQ.combatLvl()}.</p>` : ''}`}
       </div></section></div>`;
 };
@@ -9451,9 +9616,13 @@ UI.V.quests = () => {
     const blk = DQ.questBlockers(q);
     const req = s === 'locked' && q.main ? `<div class="reqs">${blk.map(b => `<div class="bad">✗ ${b}</div>`).join('')}</div>` : s === 'locked' ? `<div class="reqs bad">${DQ.advLvl() < q.adv ? `Hero level ${q.adv} <span class="mono">(you: ${DQ.advLvl()})</span>` : ''}${prevQ && !(S().q[q.req] && S().q[q.req].s === 'done') ? ` Finish “${prevQ.name}” first` : ''}</div>` : '';
     const sk = q.main && D.SK[q.unlocks];
+    /* reading order: name, where, the story (and anything said), what is needed, rewards, then the action */
+    const say = q.say || q.intro ? `<p class="quest-say">“${esc(q.say || q.intro)}”</p>` : '';
+    const actions = `<div class="quest-actions">${s === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>` : s === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Claim reward</button>` : s === 'active' ? `<button class="btn primary" data-do="questcontinue" data-a="${q.id}">Continue quest</button>` : ''}</div>`;
     return `<section class="panel quest ${s} ${q.main ? 'main' : ''}" style="--i:${i};${sk ? `--c:${sk.col}` : ''}" id="q-${q.id}">${sk ? `<span class="mq-ribbon">${ico('star')} Main quest · Unlocks ${sk.name}</span>` : ''}<div class="phead" style="margin:0"><div><h2>${q.name}</h2><small>${q.giver} · ${t.name}</small></div><span class="state ${s}">${{ new: 'Available', locked: 'Locked', active: 'In progress', ready: 'Ready', done: 'Complete' }[s]}</span></div>
-      ${DQ.questImpact && DQ.questImpact(q.id) ? `<p class="quest-impact">Town change · ${esc(DQ.questImpact(q.id))}</p>` : ''}${req}<div class="quest-actions">${s === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>` : s === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Claim reward</button>` : s === 'active' ? `<button class="btn primary" data-do="questcontinue" data-a="${q.id}">Continue quest</button>` : ''}</div>${s === 'locked' ? '' : objs}<section data-reference="true" class="quest-story" id="quest-story-${q.id}"><h3>Story &amp; rewards</h3><p class="blurb">${q.blurb}</p><div class="rewards"><span class="k">Rewards</span><div class="rws">${sk ? `<span class="rw unlockrw" style="--c:${sk.col}">${ico(q.unlocks)}Learn ${sk.name}</span>` : ''}${UI.rewards(q.reward)}</div></div>
-      </section></section>`;
+      <div class="quest-story" id="quest-story-${q.id}"><p class="blurb">${q.blurb}</p>${say}</div>
+      ${DQ.questImpact && DQ.questImpact(q.id) ? `<p class="quest-impact">Town change · ${esc(DQ.questImpact(q.id))}</p>` : ''}${req}${s === 'locked' ? '' : `<div class="quest-objs"><div class="k">Required</div>${objs}</div>`}
+      <div class="rewards"><span class="k">Rewards</span><div class="rws">${sk ? `<span class="rw unlockrw" style="--c:${sk.col}">${ico(q.unlocks)}Learn ${sk.name}</span>` : ''}${UI.rewards(q.reward)}</div></div>${actions}</section>`;
   }).join('') : '';
   const done = D.QUESTS.filter(groups.done).length;
   return `<section class="panel shophead"><div><span class="k">Quest log</span><h2>${done} of ${D.QUESTS.length} complete</h2></div><div class="tabs">${Object.entries(names).map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="qtab" data-a="${k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</div></section>
@@ -9814,8 +9983,8 @@ UI.areaPanel=town=>{
   const active=DQ.act?.kind==='fight'&&DQ.act.area,qt=questTarget(),areas=D.AREAS[town]||[];
   return `<section class="panel activity-choices hunt-areas"><div class="phead"><div><span class="k">Hunting</span><h2>Choose an area</h2></div><small>${esc(D.TOWN[town].name)}</small></div>
     
-    ${qt?`<div class="quest-hunt">${DQ.artImage('creature',qt,48,'',D.MON[qt].name)}<span><b>Quest target: ${esc(D.MON[qt].name)}</b></span><button class="btn primary" data-do="huntquest" data-a="${qt}">Track target</button></div>`:''}
-    <div class="area-grid">${areas.map(a=>{const odds=DQ.encounterOdds(a),on=active===a.id;return `<article class="area-card ${on?'selected':''}"><div class="area-head"><div><b>${esc(a.name)}</b><small>Level ${Math.min(...odds.map(x=>x.monster.cl))}–${Math.max(...odds.map(x=>x.monster.cl))}</small></div><button class="btn ${on?'':'primary'}" data-do="huntarea" data-a="${a.id}">${on?'Retreat':'Explore'}</button></div><div class="encounter-list">${odds.map(x=>`<div>${DQ.monSprite(x.monster,48,(S().beast.kills[x.id]||0)?'':'sil')}<span><b>${(S().beast.kills[x.id]||0)?esc(x.monster.name):'Unknown creature'}</b><small>${x.pct>=45?'Common':x.pct>=20?'Uncommon':'Rare'} · ${x.pct}%</small></span></div>`).join('')}</div></article>`}).join('')}</div>
+    ${qt?`<div class="quest-hunt"><button type="button" class="enc-art" data-do="guide" data-a="${qt}" aria-label="${esc(D.MON[qt].name)}: open its field guide">${DQ.artImage('creature',qt,48,'',D.MON[qt].name)}</button><span><b>Quest target: ${esc(D.MON[qt].name)}</b></span><button class="btn primary" data-do="huntquest" data-a="${qt}">Track target</button></div>`:''}
+    <div class="area-grid">${areas.map(a=>{const odds=DQ.encounterOdds(a),on=active===a.id;return `<article class="area-card ${on?'selected':''}"><div class="area-head"><div><b>${esc(a.name)}</b><small>Level ${Math.min(...odds.map(x=>x.monster.cl))}–${Math.max(...odds.map(x=>x.monster.cl))}</small></div><button class="btn ${on?'':'primary'}" data-do="huntarea" data-a="${a.id}">${on?'Retreat':'Explore'}</button></div><div class="encounter-list">${odds.map(x=>{const met=(S().beast.kills[x.id]||0)>0,nm=met?esc(x.monster.name):'Unknown creature';return `<button type="button" class="enc-row" data-do="guide" data-a="${x.id}" data-tip="text:${nm} · open its field guide" aria-label="${nm}: open its field guide">${DQ.monSprite(x.monster,64,met?'':'sil')}<span><b>${nm}</b><small>${x.pct>=45?'Common':x.pct>=20?'Uncommon':'Rare'} · ${x.pct}%</small></span></button>`;}).join('')}</div></article>`}).join('')}</div>
     <section data-reference="true"><h3>Hunting and creature collecting</h3><p>Hunt any enemy for field research. Each region has one signature wild companion to bond with.</p></section></section>`;
 };
 Object.assign(UI.DO,{
@@ -10855,10 +11024,15 @@ UI.renderDock = () => {
     const lock = !DQ.skillUnlocked(s.id);
     const lv=DQ.lvl(s.id),need=lv>=99?0:Math.max(0,D.XPF[lv+1]-(S().xp[s.id]||0));
     const pop = UI.levelPop[s.id], popping = pop && Date.now() - pop < 1600;
-    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" ${lock ? '' : (() => { const nx = UI.nextUnlock(s.id); return nx ? `data-tip="text:Next: level ${nx.lvl} → ${esc(nx.what)}"` : ''; })()} data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span>${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span><small data-b="toNext:${s.id}">${lv>=99?'Maximum level':`${fmt(need)} XP to level ${lv+1}`}</small>`}</span>${!lock && ap === s.page ? '<i class="dk-live"></i>' : ''}<span class="notice-badge" data-b="notice:${s.page}" hidden></span></button>`;
+    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" ${lock ? '' : (() => { const nx = UI.nextUnlock(s.id); return nx ? `data-tip="text:Next: level ${nx.lvl} → ${esc(nx.what)}"` : ''; })()} data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span>${!lock && S().newSkills && S().newSkills[s.id] ? '<span class="dk-new">New</span>' : ''}${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span><small data-b="toNext:${s.id}">${lv>=99?'Maximum level':`${fmt(need)} XP to level ${lv+1}`}</small>`}</span>${!lock && ap === s.page ? '<i class="dk-live"></i>' : ''}<span class="notice-badge" data-b="notice:${s.page}" hidden></span></button>`;
   }).join('');
   UI.upd();
 };
+/* A newly unlocked skill wears a small "New" badge in the rail until its page is first opened. */
+const notifyNew0 = DQ.notify;
+DQ.notify = o => { const k = o && o.key || ''; if (o && o.kind === 'unlock' && k.startsWith('unlock:') && D.SK[k.slice(7)]) { const st = S(); (st.newSkills = st.newSkills || {})[k.slice(7)] = true; } const r = notifyNew0(o); UI.renderDock && UI.renderDock(); return r; };
+const goNew0 = DQ.go;
+DQ.go = id => { const st = S(), sk = st && st.newSkills && Object.keys(st.newSkills).find(k => D.SK[k] && D.SK[k].page === id); if (sk) { delete st.newSkills[sk]; } const r = goNew0(id); if (sk) UI.renderDock(); return r; };
 DQ.on('act', () => UI.renderDock && UI.renderDock());
 DQ.on('lvl', () => UI.renderDock && UI.renderDock());
 
@@ -11213,9 +11387,12 @@ DQ.tips.item = id => { const h = origTip(id), it = D.ITEMS[id]; if (!h || !it ||
 const tipBase = DQ.tips.item;
 DQ.tips.item = id => { const h = tipBase(id), f = D.ITEMS[id] && D.ITEMS[id].flavour; return f && h ? h.replace('<div class="dim">Worth', `<div class="flav">${esc(f)}</div><div class="dim">Worth`) : h; };
 /* unique effects: named in tooltips, and compared side by side when choosing gear */
-UI.uniqueLine = (it, cls = '') => it && it.unique ? `<div class="unique-fx ${cls}">${ico('star')}<b>${esc(it.unique.name)}</b> <span>${esc(it.unique.text)}</span></div>` : '';
+/* where a unique comes from: the creature once you have met it (otherwise only its region, to keep the mystery), the
+   honest first-copy guarantee from the engine's bad-luck protection, and what the effect is good for */
+UI.uniqueLine = (it, cls = '', full = false) => { if (!it || !it.unique) return ''; const use = D.UNIQUE_USE && D.UNIQUE_USE[it.unique.key], src = full && DQ.uniqueSource(it.id);
+  return `<div class="unique-fx ${cls}">${ico('star')}<b>${esc(it.unique.name)}</b> <span>${esc(it.unique.text)}</span>${full && use ? `<small class="unique-use">Good for ${esc(use)}. Its stats are modest, so ordinary gear can be stronger when the effect does not matter.</small>` : ''}${src ? `<small class="unique-src">${esc(src.text)}</small>` : ''}</div>`; };
 const tipUnique = DQ.tips.item;
-DQ.tips.item = id => { const h = tipUnique(id), it = D.ITEMS[id]; return h && it && it.unique ? h.replace('<div class="dim">Worth', `${UI.uniqueLine(it)}<div class="dim">Worth`) : h; };
+DQ.tips.item = id => { const h = tipUnique(id), it = D.ITEMS[id]; return h && it && it.unique ? h.replace('<div class="dim">Worth', `${UI.uniqueLine(it, '', true)}<div class="dim">Worth`) : h; };
 const cmpUnique = UI.compareHtml;
 UI.compareHtml = id => {
   const h = cmpUnique(id), it = D.ITEMS[id]; if (!h || !it || !it.slot) return h;
@@ -11479,7 +11656,7 @@ UI.openGuide = id => {
   const drops = (() => {
     const all = DQ.knows(m, 'drops'); const rows = m.drops.slice().sort((a, b) => b[2] - a[2]).map(([item, , p]) => {
       const found = !!B.drops[id + ':' + item], rar = D.rarityOf(p), it = D.ITEMS[item];
-      if (!all && !found) return ''; return `<div class="gdrop ${found ? 'got' : ''}"><span class="itm sm" style="--c:${it.col}">${ico(it.ic)}</span><b style="color:${RAR_COL[rar[0]]}">${esc(it.name)}</b><small>${rar[1]}${DQ.knows(m, 'legend') ? ` · about 1 in ${fmt(Math.round(1 / p))}` : ''}</small><span class="gmark">${found ? 'Found' : 'Not found yet'}</span></div>`;
+      if (!all && !found) return ''; return `<div class="gdrop ${found ? 'got' : ''}"><span class="itm sm" style="--c:${it.col}">${ico(it.ic)}</span><b style="color:${RAR_COL[rar[0]]}">${esc(it.name)}</b>${it.unique ? ` <span class="tag" data-tip="text:${esc(it.unique.name + ': ' + it.unique.text)}">Unique</span>` : ''}<small>${it.unique && !m.boss && !(S().uniqFound || {})[item] ? `first copy guaranteed within ${Math.ceil(2.5 / p)} defeats (${Math.min((S().upity || {})[item] || 0, Math.ceil(2.5 / p))} so far) · ` : ''}${rar[1]}${DQ.knows(m, 'legend') ? ` · about 1 in ${fmt(Math.round(1 / p))}` : ''}</small><span class="gmark">${found ? 'Found' : 'Not found yet'}</span></div>`;
     }).join('');
     const hidden = all ? 0 : m.drops.filter(d => !B.drops[id + ':' + d[0]]).length;
     return `${rows}${hidden ? `<p class="dim" style="margin:6px 0 0">${hidden} more item${hidden > 1 ? 's' : ''} you have not found yet. Reach the <b>Drop table</b> entry${r.rank <= 3 ? ` (${fmt(T[3] - r.kills)} more defeat${T[3] - r.kills > 1 ? 's' : ''})` : ''} to see them all.</p>` : ''}`;
@@ -11563,6 +11740,13 @@ Object.assign(UI.DO, {
 });
 const house0 = UI.V.house;
 if (house0) UI.V.house = () => house0() + (S().house.owned ? UI.trophyWallHtml() : '');
+/* where a unique comes from (shown with the item, in tooltips, the comparison and the field guide) */
+DQ.uniqueSource = id => {
+  const m = D.MONLIST.find(x => !x.boss && (x.drops || []).some(d => d[0] === id)), b = D.MONLIST.find(x => x.boss && x.boss.first === id);
+  if (b) return { boss: b, text: `Always dropped by ${b.name} the first time you defeat it.` };
+  if (!m) return null; const p = m.drops.find(d => d[0] === id)[2], need = Math.ceil(2.5 / p), have = (S().upity || {})[id] || 0, met = (S().beast.kills[m.id] || 0) > 0, found = (S().uniqFound || {})[id];
+  return { mon: m, need, have, met, found, text: met ? `Dropped by ${m.name} in ${D.TOWN[m.town].name}, rarely.${found ? '' : ` Your first copy is guaranteed within ${need} defeats (${Math.min(have, need)} so far).`}` : `Found somewhere in ${D.TOWN[m.town].name}.` };
+};
 })();
 
 </script>
@@ -12276,6 +12460,18 @@ Object.entries({
   hungry_cook: 'Eight perfect shrimp! The banquet is saved. Take some coins, and take my advice: never fight a goblin chief on an empty stomach.',
   chiefs_end: 'The hill fort is ours. Listen: the children are playing on the green again. The road to Mossbarrow is open, and they say something big has been trampling their fields.'
 }).forEach(([id, line]) => { if (D.QM[id]) D.QM[id].thanks = line; });
+/* A boss victory is felt in its town: a villager speaks on the victory card, townsfolk return to the scenes, and a
+   later note on the door remembers it (touches.js). [speaker, on the day, a note some time later] */
+D.BOSS_VOICES = {
+  grubnash: ['Elder Wren', 'Listen. No war cries. Just the well bucket and the hens.', 'Sergeant Orrin hung Grubnash’s war-horn over the tavern door. Nobody is allowed to blow it.'],
+  oldtusk: ['Granny Bramble', 'The fields will grow straight again. I might even plant pumpkins.', 'The farmers left a sack of turnips on your step. Old Tusk ate their last ones.'],
+  barnacle: ['Harbourmaster Ilsa', 'Every ship in the bay rang its bell when he went down. Did you hear them?', 'The fishing boats sail out at dawn again. Ilsa says the harbour is louder than it has been in years.'],
+  frostmaw: ['Captain Hrod', 'The pass is open. The first cart through is carrying your name on a banner.', 'Hrod sent a dwarf-forged mug with your name on it. It is very heavy.'],
+  morwenna: ['Gravewarden Lysa', 'The dead are sleeping. I might sleep too, for the first time in a month.', 'Lysa planted marsh-lilies over Morwenna’s hut. They are already blooming.'],
+  pyrrhax: ['Warden Ignis', 'The banners can fly again. We will need to sew new ones; he burned all the old ones.', 'Emberfall’s new banners arrived. One of them has a very flattering picture of you.'],
+  zephyrion: ['Abbot Seren', 'The sky bridges hold. The monks are already arguing about who crosses first.', 'The monks finished the first new sky bridge and named it after you, then argued about the spelling.'],
+  hollowking: ['The Last Herald', 'The crown is empty, and the silence with it. Go home. They will want to hear it from you.', 'Every bell in the realm rang at noon today, for no reason anyone could name.']
+};
 const destinations = { boss: 'Defeat Grubnash', house: 'Build my first home', well: D.PROJECTS.well.name, inn: D.PROJECTS.inn.name, village: 'Restore Willowbrook' };
 const nextVillageProject = () => DQ.projectsForTown('willowbrook').map(([id]) => id).find(id => !S().projects[id]);
 DQ.pinProject = id => {
@@ -12318,7 +12514,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   }
   const bossQuest = D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === 'grubnash'));
   if (bossQuest && DQ.questState(bossQuest) === 'ready') return step('Claim your victory reward', 'Return to the quest giver for the rewards you earned by defeating Grubnash.', 'qclaim', bossQuest.id);
-  if (S().towns.willowbrook.boss) return step('The road is open', 'Grubnash is defeated. Visit Mossbarrow or choose your next destination.', 'go', 'map');
+  if (S().towns.willowbrook.boss) return DQ.regionNext();
   if (S().town !== 'willowbrook') return step('Return to Willowbrook', 'Grubnash awaits outside the village.', 'journeytravel', 'willowbrook');
   const first = D.QM.first_steps, firstState = DQ.questState(first);
   if (firstState === 'new') return step('Meet Elder Wren', 'Goblins have broken Willowbrook’s well. Elder Wren’s first job for you: a little food and a little timber.', 'qstart', first.id);
@@ -12344,6 +12540,36 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
     return task('Cook your provisions', msg, 'recipe', 'cook_shrimp');
   }
   return task('Grow a little stronger', `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins. ` : ''}Food is fine; a few more combat levels or better gear will tip the odds. Check the forecast on the Combat page.`, 'fight', 'chicken');
+};
+/* After Grubnash the boss destination follows the next region boss: travel, its quest, training, then the most useful
+   preparation from the real save (DQ.prepAdvice) until the forecast favours you. */
+DQ.regionBoss = () => { for (const t of D.TOWNS) { const b = D.MON[t.boss]; if (b && !(S().towns[t.id] && S().towns[t.id].boss)) return b; } return null; };
+DQ.regionNext = () => {
+  const b = DQ.regionBoss(); if (!b) return step('The realm is at peace', 'Every boss is defeated. Chase a collection, a title or a trophy, or restore what is left.', 'go', 'bestiary');
+  const town = D.TOWN[b.town], short = b.boss.short || b.name, bq = D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === b.id));
+  if (S().town !== b.town) return step(`Travel to ${town.name}`, `${short} is the next challenge on the road.`, 'journeytravel', b.town);
+  if (bq && DQ.questState(bq) === 'ready') return step('Claim your victory reward', `${bq.giver} is waiting to thank you.`, 'qclaim', bq.id);
+  if (bq && DQ.questState(bq) === 'new') return step(`Accept “${bq.name}”`, `${bq.giver} asks you to face ${short}. Accepting makes the victory count.`, 'qstart', bq.id);
+  const req = b.boss.req;
+  if (DQ.combatLvl() < req) { const foe = D.MONLIST.filter(m => m.town === b.town && !m.boss && m.cl <= DQ.combatLvl() + 4).sort((a, c) => c.cl - a.cl)[0] || D.MONLIST.find(m => m.town === b.town && !m.boss);
+    return task(`Train for ${short}`, `Combat ${DQ.combatLvl()} / ${req}. ${foe ? `${foe.name}s are a fair fight here.` : ''}`, 'fight', foe ? foe.id : b.id); }
+  const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
+  if (f && f.winRate >= .75) return step(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'go', 'combat');
+  const tip = DQ.prepAdvice ? DQ.prepAdvice(b.id, f)[0] : null;
+  return tip ? step(tip.title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${tip.text}`, tip.action || 'go', tip.a || 'combat') : step(`Challenge ${short}`, 'You are ready by level. Check the forecast on the Combat page.', 'go', 'combat');
+};
+/* Optional goals beside the one primary action: something short, something over a few sessions, a long pursuit */
+DQ.optionalGoals = () => {
+  const out = [], town = S().town;
+  const q = D.QUESTS.find(x => x.town === town && !x.secret && ['active', 'ready'].includes(DQ.questState(x)) && !x.obj.some(o => o.ev === 'boss')) || D.QUESTS.find(x => x.adventure && DQ.questState(x) === 'active');
+  if (q) out.push({ span: 'Short', text: `Finish “${q.name}” for ${q.giver}`, action: 'go', a: 'quests' });
+  else if (DQ.loadouts && !DQ.loadouts().length && DQ.advLvl() >= 15) out.push({ span: 'Short', text: 'Save your current gear as a preparation, then try another', action: 'go', a: 'character' });
+  const proj = DQ.projectsForTown(town).filter(([id]) => !S().projects[id]).sort((a, c) => (a[1].cost.coins || 0) - (c[1].cost.coins || 0))[0];
+  if (proj) out.push({ span: 'A few sessions', text: `${proj[1].name}: ${proj[1].reward}`, action: 'openproject', a: proj[0] });
+  const chase = D.MONLIST.find(m => m.town === town && !m.boss && (S().beast.kills[m.id] || 0) > 0 && m.drops.some(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique && !(S().uniqFound || {})[d[0]]));
+  if (chase && DQ.uniqueSource) { const id = chase.drops.find(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique)[0], src = DQ.uniqueSource(id); out.push({ span: 'Long', text: `${D.ITEMS[id].name} from ${chase.name}s: ${src.need - Math.min(src.have, src.need)} more defeats at most`, action: 'guide', a: chase.id }); }
+  else if (DQ.understanding) { const mons = D.MONLIST.filter(m => m.town === town), u = mons.filter(m => DQ.understanding(m).done).length; if (u < mons.length && mons.some(m => S().beast.kills[m.id])) out.push({ span: 'Long', text: `${D.TOWN[town].name} field guide: ${u} / ${mons.length} creatures understood`, action: 'go', a: 'bestiary' }); }
+  return out.slice(0, 3);
 };
 DQ.finishProject = id => {
   const project = D.PROJECTS[id];
@@ -12378,8 +12604,12 @@ DQ.journeyDoneWhen = next => {
   if (next.action === 'qclaim') return 'Done when you claim the reward.';
   const req = D.MON.grubnash.boss.req;
   if (/^Train for Grubnash/.test(next.title) && DQ.combatLvl() < req) return `Done when your combat level reaches ${req} (now ${DQ.combatLvl()}).`;
+  const rb = DQ.regionBoss && S().towns.willowbrook.boss && DQ.regionBoss();
+  if (rb && /^Train for /.test(next.title) && DQ.combatLvl() < rb.boss.req) return `Done when your combat level reaches ${rb.boss.req} (now ${DQ.combatLvl()}).`;
   return '';
 };
+/* the boss destination names the boss you are actually heading for */
+const destLabel = id => { if (id === 'boss' && S().towns.willowbrook && S().towns.willowbrook.boss && DQ.regionBoss) { const b = DQ.regionBoss(); return b ? `Defeat ${b.boss.short || b.name}` : 'Every boss defeated'; } return destinations[id] || destinations.boss; };
 const fresh = () => DQ.advLvl() < 5 && !(S().towns.willowbrook && S().towns.willowbrook.boss);
 UI.journeyPanel = () => {
   const next = DQ.journeyNext(), done = DQ.journeyDoneWhen(next), firstTime = !S().seen.firstTask && DQ.totalXp() === 0;
@@ -12387,7 +12617,8 @@ UI.journeyPanel = () => {
     <p class="journey-why">${esc(next.detail)}</p>${done ? `<p class="journey-done">${ico('check')} ${esc(done)}</p>` : ''}
     <div class="btnrow wrap">${(() => { const running = next.action === 'journeytask' && DQ.act && DQ.act.kind === next.a && DQ.act.id === next.b; return next.action === 'journeytask' ? `<button class="btn primary" data-do="journeytask" data-a="${next.a}" data-b="${next.b || ''}">${running ? 'Open the task' : 'Start'}</button>` : actionHtml(next); })()}${D.PROJECTS[S().journey] ? pinButton(S().journey) : ''}</div>
     ${fresh() ? `<p class="journey-pause">${firstTime ? 'Pick one task at a time. It keeps working while you explore other pages or close the game, so any moment is a fine place to stop.' : 'A good place to pause: whenever a quest is claimed. Your task keeps working while you are away.'}</p>` : ''}
-    <div class="destination-picker"><span class="k">Your destination: ${esc(destinations[S().journey] || destinations.boss)}</span><div class="destination-choices" aria-label="Choose your destination">${Object.entries(destinations).map(([id, label]) => `<button class="chip sm ${S().journey === id ? 'on' : ''}" aria-pressed="${S().journey === id}" data-do="destination" data-a="${id}">${esc(label)}</button>`).join('')}</div></div></section>`;
+    ${fresh() ? '' : (g => g.length ? `<div class="also-goals"><span class="k">Also worth doing</span><ul>${g.map(x => `<li><small>${esc(x.span)}</small><button class="linkish" data-do="${x.action}" data-a="${x.a}">${esc(x.text)}</button></li>`).join('')}</ul></div>` : '')(DQ.optionalGoals())}
+    <div class="destination-picker"><span class="k">Your destination: ${esc(destLabel(S().journey))}</span><div class="destination-choices" aria-label="Choose your destination">${Object.entries(destinations).map(([id, label]) => `<button class="chip sm ${S().journey === id ? 'on' : ''}" aria-pressed="${S().journey === id}" data-do="destination" data-a="${id}">${esc(destLabel(id))}</button>`).join('')}</div></div></section>`;
 };
 UI.projectsPanel = () => {
   const town=S().town, entries=DQ.projectsForTown(town);
@@ -12404,7 +12635,7 @@ UI.V.projects = () => UI.projectsPanel();
 UI.returnPlan = sum => {
   const next = DQ.journeyNext();
   const status = sum.died ? 'Your hero was defeated. Replenish food and review equipment before resuming combat.' : sum.stopped ? 'Your task finished or stopped. Check the next step before starting another.' : DQ.act ? DQ.actLabel() + ' is still running.' : 'No task is running.';
-  return `<section class="return-plan"><h3>${esc(destinations[S().journey] || destinations.boss)}</h3><p>${esc(status)}</p><p>${esc(next.detail)}</p>${actionHtml(next)}</section>${UI.returnChoices()}`;
+  return `<section class="return-plan"><h3>${esc(destLabel(S().journey))}</h3><p>${esc(status)}</p><p>${esc(next.detail)}</p>${actionHtml(next)}</section>${UI.returnChoices()}`;
 };
 /* Other good options after an absence, read from the real save. Each says what it costs, so a choice is a real
    trade-off; nothing is shown as affordable unless it is, and nothing here is timed or expires. */
@@ -13092,8 +13323,6 @@ if(UI.V.settings){const settings=UI.V.settings;UI.V.settings=()=>settings()+`<se
         }
       }
     }
-    const live=view.querySelector('.combat-live'),controls=view.querySelector('.combat-targets > .encounter-controls');
-    if(live && controls)live.prepend(controls);
   };
   const render = UI.render;
   UI.render = fresh => {
@@ -13142,11 +13371,8 @@ UI.V.combat=()=>{
  const needs=t=>t==='pierce'?'ranged':['fire','frost','storm','aether'].includes(t)?'magic':null;
  const counters=known?Q.weakOf(m).weak.map(t=>{const sk=needs(t),locked=sk&&!Q.skillUnlocked(sk);return `${D.DTYPES[t].name}: ${ {stab:'dagger',slash:'sword',crush:'warhammer',pierce:'bow and arrows',fire:'fire spell',frost:'frost spell',storm:'storm spell',aether:'aether spell'}[t]}${locked?` (${D.SK[sk].name} not learned yet)`:''}`;}).join(' · '):'';
  const tips=known?Q.matchup(m).slice(0,2).map(([kind,line])=>`<span class="${kind==='good'?'ok':kind==='bad'?'bad':'dim'}">${esc(line)}</span>`).join(''):`<span>Defeat this creature to reveal its strengths and weaknesses in the field guide.</span>`;
- const intel=`<section class="panel battle-brief"><div class="phead"><h3>${esc(m.name)} · preparation</h3><button class="btn sm" data-do="guide" data-a="${m.id}">Field guide</button></div><div class="battle-facts"><span>Enemy max hit <b>${m.max}</b></span><span>Your max hit <b>${Q.pstats().max}</b></span><span>Attack every <b>${(Q.actDur({kind:'fight',pace:Q.act?.kind==='fight'?Q.act.pace:'steady'})/1000).toFixed(2)}s</b></span></div><div class="battle-advice">${counters?`<span class="ok">Try ${esc(counters)}</span>`:''}${tips}</div><div class="btnrow"><button class="btn sm" data-do="go" data-a="character">Equipment</button><button class="btn sm" data-do="go" data-a="cooking">Prepare food</button></div></section>`;
- /* Ranged and Magic are combat styles, each trained by its own skill: say how a locked one is learned */
- const styles=['ranged','magic'].filter(k=>!Q.skillUnlocked(k));
- const styleNote=styles.length?`<p class="style-note">${Q.ico('lock')}<span><b>Other fighting styles.</b> ${styles.map(k=>`<b>${D.SK[k].name}</b> is a combat style with its own skill (equip a ${k==='ranged'?'bow and arrows':'staff and runes'}). ${esc(Q.skillTeacher(k))}.`).join(' ')}</span></p>`:'';
- return html.replace('<div class="combat-live">','<div class="combat-live">'+intel).replace(/(<section class="panel combat-training">[\s\S]*?)(<\/section>)/,'$1'+styleNote+'$2');
+ const intel=`<section class="panel battle-brief"><div class="phead"><h3>${esc(m.name)} · preparation</h3><button class="btn sm" data-do="guide" data-a="${m.id}">Field guide</button></div><div class="battle-facts"><span>Level <b>${m.cl}</b></span><span>Health <b>${m.hp}</b></span><span>Hits up to <b>${m.max}</b></span></div><div class="battle-advice">${counters?`<span class="ok">Try ${esc(counters)}</span>`:''}${tips}</div><div class="btnrow"><button class="btn sm" data-do="go" data-a="character">Equipment</button></div></section>`;
+ return html.replace('<!--battle-brief-->',intel);
 };
 const render=UI.render;
 UI.render=fresh=>{
@@ -13236,12 +13462,124 @@ UI.V.journal = () => {
   const J = (S().journal || []).slice().reverse(), shown = J.slice(0, UI.journalShown);
   const groups = []; for (const e of shown) { const d = day(e.t), g = groups[groups.length - 1]; if (g && g.d === d) g.e.push(e); else groups.push({ d, e: [e] }); }
   const art = e => e.kind === 'skill' && D.SK[e.icon] ? DQ.artImage('skill', e.icon, 32, 'jr-art', '') : D.ITEMS[e.icon] ? DQ.itemIco(D.ITEMS[e.icon]) : ico(e.icon || 'star');
-  return `<section class="panel journal"><div class="phead"><div><span class="k">${esc(S().name)}’s</span><h2>Adventure journal</h2></div><small>${fmt(J.length)} entr${J.length === 1 ? 'y' : 'ies'}</small></div>
+  return `<section class="panel journal"><div class="phead"><div><span class="k">${esc(S().name)}’s</span><h2>Adventure journal</h2></div><span class="btnrow"><small>${fmt(J.length)} entr${J.length === 1 ? 'y' : 'ies'}</small><button class="btn sm" data-do="copystory">Copy my story</button></span></div>
     ${groups.length ? groups.map(g => `<div class="jr-day"><div class="jr-date">Day ${g.d}</div><ol class="jr-list">${g.e.map(e => `<li class="jr-${e.kind}"><span class="jr-ic">${art(e)}</span><span><p>${esc(e.text)}</p><small>${esc(D.TOWN[e.town] ? D.TOWN[e.town].name : '')}${e.away ? ' · while away' : ''} · ${new Date(e.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small></span></li>`).join('')}</ol></div>`).join('')
       : '<p class="dim">Nothing written yet. Your first quest, your first boss and every discovery will be recorded here.</p>'}
     ${J.length > shown.length ? `<button class="btn sm" data-do="journalmore">Show older entries</button>` : ''}</section>`;
 };
 UI.DO.journalmore = () => { UI.journalShown += 60; UI.render(false); };
+/* welcome back: what interestingly changed while you were away, straight from the journal */
+const ret0 = UI.returnExtras;
+UI.returnExtras = sum => {
+  const h = ret0 ? ret0(sum) : '', since = Date.now() - ((sum && sum.real) || 0) - 60000;
+  const J = (S().journal || []).filter(e => e.t >= since && e.kind !== 'rest').slice(-3).reverse();
+  return h + (J.length ? `<div class="k" style="margin:14px 0 6px">Since you left</div><ul class="since-left">${J.map(e => `<li>${esc(e.text)}</li>`).join('')}</ul><button class="btn sm" data-do="returnpick" data-a="go" data-b="journal">Open journal</button>` : '');
+};
+/* Copy my story: a short, voluntary summary to share by hand. The hero's chosen name and accomplishments only. */
+DQ.storyText = () => {
+  const st = S(), bosses = D.MONLIST.filter(m => m.boss && st.towns[m.town] && st.towns[m.town].boss).map(m => m.boss.short || m.name);
+  const titles = DQ.beastTitles ? DQ.beastTitles().map(m => DQ.beastTitleName(m)) : [], quests = D.QUESTS.filter(q => DQ.questState(q) === 'done').length;
+  const recent = (st.journal || []).filter(e => ['boss', 'quest', 'choice', 'loot', 'title', 'memory', 'project'].includes(e.kind)).slice(-4).reverse().map(e => '- ' + e.text);
+  return [`${st.name} · Hero level ${DQ.advLvl()} · combat ${DQ.combatLvl()} · ${fmt(quests)} quests`, bosses.length ? `Bosses defeated: ${bosses.join(', ')}` : 'No bosses defeated yet', titles.length ? `Titles: ${titles.join(', ')}` : '', recent.length ? 'Lately:' : '', ...recent, '(Idlewick)'].filter(Boolean).join('\n');
+};
+UI.DO.copystory = () => DQ.copyText ? DQ.copyText(DQ.storyText(), 'Story') : null;
+})();
+
+</script>
+<script>
+/* Idlewick: saved preparations (Inventory). Save the equipment, ammunition, abilities, spell and companion you are
+   using under a name; see what applying one would change; apply only what you own and can use (taking a needed item
+   from the bank, never inventing one); and return to your previous preparation in one click. Equipping goes through
+   DQ.equipItem / DQ.unequip, so items are conserved exactly as with manual swaps. Also: Copy build, a plain-text summary
+   of the current preparation to share by hand (no save data, no identifiers). Saved as S().loadouts / S().loadoutPrev. */
+(() => {
+const DQ = window.DQ, D = DQ.data, UI = DQ.ui, { esc, ico } = DQ;
+const S = () => DQ.S;
+const GEAR = ['head', 'body', 'legs', 'weapon', 'shield', 'ring', 'amulet'];
+const MAX = 6;
+DQ.loadouts = () => (S().loadouts = Array.isArray(S().loadouts) ? S().loadouts : []);
+DQ.loadoutCapture = name => ({ name: String(name || 'Preparation').slice(0, 24), equip: Object.fromEntries(GEAR.map(sl => [sl, S().equip[sl] || null])), /* null = saved as empty; a missing slot is left alone */ ammo: S().ammo.id || null, abilities: (S().abilities || []).slice(), spell: S().spell || null, pet: S().pets.active || null });
+const owned = id => (S().inv[id] || 0) + ((S().bank && S().bank[id]) || 0);
+const reqWhy = id => { const it = D.ITEMS[id]; if (!it) return 'no longer exists'; for (const [sk, l] of Object.entries(it.req || {})) { if (!DQ.skillUnlocked(sk)) return `${D.SK[sk].name} is not learned`; if (DQ.lvl(sk) < l) return `needs ${D.SK[sk].name} ${l}`; } return ''; };
+/* what applying would change, slot by slot, honestly */
+DQ.loadoutPlan = lo => {
+  const rows = [];
+  for (const sl of GEAR) {
+    if (!(sl in (lo.equip || {}))) continue;
+    const from = S().equip[sl] || null, to = (lo.equip || {})[sl] || null;
+    if (from === to) continue;
+    if (!to) { rows.push({ slot: sl, from, to, status: 'remove' }); continue; }
+    const why = reqWhy(to);
+    if (why) rows.push({ slot: sl, from, to, status: 'locked', why });
+    else if (S().inv[to]) rows.push({ slot: sl, from, to, status: 'equip' });
+    else if (S().bank && S().bank[to]) rows.push({ slot: sl, from, to, status: 'bank' });
+    else rows.push({ slot: sl, from, to, status: 'missing' });
+  }
+  if (lo.ammo && lo.ammo !== S().ammo.id) { const why = reqWhy(lo.ammo); rows.push({ slot: 'ammo', from: S().ammo.id, to: lo.ammo, status: why ? 'locked' : owned(lo.ammo) ? (S().inv[lo.ammo] ? 'equip' : 'bank') : 'missing', why }); }
+  const abil = (lo.abilities || []).filter(id => D.AB[id]), usable = abil.filter(id => DQ.abilUnlocked(D.AB[id])).slice(0, DQ.abilSlots()), lockedAb = abil.filter(id => !DQ.abilUnlocked(D.AB[id]));
+  const spellOk = lo.spell && D.SPELLS.find(x => x.id === lo.spell && DQ.lvl('magic') >= x.lvl);
+  const petOk = lo.pet && S().pets.owned[lo.pet];
+  return { rows, abilities: usable, lockedAbilities: lockedAb, abilityChange: usable.join() !== (S().abilities || []).join(), spell: spellOk ? lo.spell : null, spellChange: !!spellOk && lo.spell !== S().spell, spellLocked: lo.spell && !spellOk, pet: petOk ? lo.pet : null, petChange: !!petOk && lo.pet !== S().pets.active, petMissing: lo.pet && !petOk };
+};
+DQ.loadoutChanges = p => p.rows.filter(r => ['equip', 'bank', 'remove'].includes(r.status)).length + (p.abilityChange ? 1 : 0) + (p.spellChange ? 1 : 0) + (p.petChange ? 1 : 0);
+DQ.loadoutApply = (lo, { remember = true } = {}) => {
+  const p = DQ.loadoutPlan(lo), skipped = [];
+  if (remember) S().loadoutPrev = DQ.loadoutCapture('Previous preparation');
+  for (const r of p.rows) {
+    if (r.status === 'remove') { if (r.slot === 'ammo') DQ.unequip('ammo'); else DQ.unequip(r.slot); continue; }
+    if (r.status === 'bank') { const before = S().inv[r.to] || 0; DQ.withdraw(r.to, r.slot === 'ammo' ? S().bank[r.to] : 1); if ((S().inv[r.to] || 0) <= before) { skipped.push(`${D.ITEMS[r.to].name} (no backpack room)`); continue; } }
+    if (r.status === 'equip' || r.status === 'bank') { const res = DQ.equipItem(r.to); if (res && res.ok === false) skipped.push(`${D.ITEMS[r.to].name} (${res.why})`); continue; }
+    if (r.status === 'missing') skipped.push(`${D.ITEMS[r.to] ? D.ITEMS[r.to].name : r.to} (not owned)`);
+    if (r.status === 'locked') skipped.push(`${D.ITEMS[r.to] ? D.ITEMS[r.to].name : r.to} (${r.why})`);
+  }
+  if (p.abilityChange) S().abilities = p.abilities;
+  if (p.spell) S().spell = p.spell;
+  if (p.pet && p.petChange) DQ.setPet(p.pet);
+  p.lockedAbilities.forEach(id => skipped.push(`${D.AB[id].name} (not learned)`));
+  if (p.spellLocked) skipped.push('spell (Magic too low)'); if (p.petMissing) skipped.push('companion (not found yet)');
+  DQ.fxDirty(); DQ.invDirty = true; DQ.emit('lvl'); DQ.save && DQ.save();
+  return { skipped };
+};
+DQ.loadoutSave = name => { const L = DQ.loadouts(), lo = DQ.loadoutCapture(name), i = L.findIndex(x => x.name === lo.name); if (i >= 0) L[i] = lo; else { if (L.length >= MAX) return false; L.push(lo); } DQ.save && DQ.save(); return true; };
+DQ.loadoutDelete = i => { DQ.loadouts().splice(i, 1); DQ.save && DQ.save(); };
+
+/* Copy build: what you are wearing and why, as plain text. Nothing from the save beyond the build itself. */
+DQ.buildText = () => {
+  const st = S(), L = DQ.lvl, it = id => D.ITEMS[id], lines = [];
+  const style = DQ.weaponStyle(), main = style === 'melee' ? `Attack ${L('attack')} · Strength ${L('strength')}` : style === 'ranged' ? `Ranged ${L('ranged')}` : `Magic ${L('magic')}`;
+  lines.push(`Idlewick build · combat ${DQ.combatLvl()} (${main} · Defence ${L('defence')} · Health ${L('hitpoints')})`);
+  for (const sl of GEAR) { const id = st.equip[sl]; if (!id) continue; const x = it(id), e = (st.enchants || {})[id]; lines.push(`- ${DQ.SLOT_NAMES ? DQ.SLOT_NAMES[sl] : sl}: ${x.name}${e ? ` +${e}` : ''}${x.unique ? ` — ${x.unique.name}: ${x.unique.text}` : ''}`); }
+  if (st.ammo.id) lines.push(`- Ammunition: ${it(st.ammo.id).name}`);
+  const ab = (st.abilities || []).filter(id => D.AB[id]).map(id => D.AB[id].name); if (ab.length) lines.push(`- Abilities: ${ab.join(', ')}`);
+  if (style === 'magic' && st.spell) { const sp = D.SPELLS.find(x => x.id === st.spell); if (sp) lines.push(`- Spell: ${sp.name}`); }
+  const p = st.pets.active && D.PET[st.pets.active]; if (p) lines.push(`- Companion: ${p.name}${p.trick ? ` — ${p.trick.name}: ${p.trick.text}` : ''}`);
+  return lines.join('\n');
+};
+DQ.copyText = async (text, label) => {
+  try { await navigator.clipboard.writeText(text); DQ.toast(`${label} copied`); }
+  catch (e) { DQ.modal({ title: label, body: `<p class="sm dim">Copy the text below.</p><textarea class="copy-box" readonly rows="8">${esc(text)}</textarea>`, actions: [{ label: 'Done', primary: true }] }); setTimeout(() => { const t = document.querySelector('.copy-box'); if (t) t.select(); }, 50); }
+};
+
+/* ---------- the Inventory panel ---------- */
+const STATUS = { equip: ['up', 'Equip'], bank: ['up', 'From bank'], remove: ['dim', 'Unequip'], missing: ['bad', 'Not owned'], locked: ['bad', 'Locked'] };
+UI.loadoutPanel = () => {
+  const L = DQ.loadouts(), prev = S().loadoutPrev, prevPlan = prev && DQ.loadoutPlan(prev);
+  const card = (lo, i) => { const p = DQ.loadoutPlan(lo), n = DQ.loadoutChanges(p);
+    const lines = p.rows.map(r => `<li class="${STATUS[r.status][0]}">${esc(STATUS[r.status][1])}: ${esc(r.to ? D.ITEMS[r.to].name : D.ITEMS[r.from].name)}${r.why ? ` (${esc(r.why)})` : ''}</li>`).concat(p.abilityChange ? [`<li class="up">Abilities: ${esc(p.abilities.map(a => D.AB[a].name).join(', ') || 'none')}</li>`] : [], p.spellChange ? [`<li class="up">Spell: ${esc(D.SPELLS.find(x => x.id === p.spell).name)}</li>`] : [], p.petChange ? [`<li class="up">Companion: ${esc(D.PET[p.pet].name)}</li>`] : [], p.lockedAbilities.map(a => `<li class="bad">Not learned: ${esc(D.AB[a].name)}</li>`), p.petMissing ? ['<li class="bad">Companion not found yet</li>'] : []);
+    return `<div class="lo-card"><div class="lo-head"><b>${esc(lo.name)}</b><span class="lo-icons">${Object.values(lo.equip || {}).filter(Boolean).map(id => D.ITEMS[id] ? DQ.itemIco(D.ITEMS[id]) : '').join('')}</span></div>${n || lines.length ? `<ul class="lo-diff">${lines.join('')}</ul>` : '<small class="dim">This is what you are wearing.</small>'}<div class="btnrow"><button class="btn sm ${n ? 'primary' : ''}" data-do="loapply" data-a="${i}" ${n ? '' : 'disabled'}>${n ? `Apply (${n} change${n > 1 ? 's' : ''})` : 'Applied'}</button><button class="btn sm" data-do="lodelete" data-a="${i}" aria-label="Delete ${esc(lo.name)}">Delete</button></div></div>`; };
+  return `<section class="panel loadouts"><div class="phead"><h2>Preparations</h2><small>${L.length} / ${MAX}</small></div>
+    <div class="lo-save"><input id="lo-name" maxlength="24" placeholder="Name this preparation (e.g. Frostmaw)" aria-label="Preparation name"><button class="btn sm primary" data-do="losave">Save current</button>${prev && DQ.loadoutChanges(prevPlan) ? `<button class="btn sm" data-do="loprev">Return to previous</button>` : ''}<button class="btn sm" data-do="copybuild">${ico('quest')} Copy build</button></div>
+    ${L.length ? `<div class="lo-list">${L.map(card).join('')}</div>` : '<p class="sm dim">Save what you are wearing, try something else, and switch back in one click. Missing or locked items are shown, never invented.</p>'}</section>`;
+};
+Object.assign(UI.DO, {
+  losave: () => { const el = document.getElementById('lo-name'), name = (el && el.value.trim()) || `Preparation ${DQ.loadouts().length + 1}`; if (!DQ.loadoutSave(name)) return DQ.toast(`You can keep ${MAX} preparations. Delete one first.`, true); DQ.sfx('equip'); UI.render(false); },
+  loapply: i => { const lo = DQ.loadouts()[+i]; if (!lo) return; const r = DQ.loadoutApply(lo); DQ.sfx('equip'); UI.renderHud && UI.renderHud(); UI.render(false); if (r.skipped.length) DQ.toast(`Applied “${lo.name}”. Skipped: ${r.skipped.join(', ')}`); else DQ.toast(`Applied “${lo.name}”`); },
+  loprev: () => { const lo = S().loadoutPrev; if (!lo) return; const r = DQ.loadoutApply(lo); DQ.sfx('equip'); UI.renderHud && UI.renderHud(); UI.render(false); DQ.toast(r.skipped.length ? `Back to your previous preparation. Skipped: ${r.skipped.join(', ')}` : 'Back to your previous preparation'); },
+  lodelete: i => { DQ.loadoutDelete(+i); UI.render(false); },
+  copybuild: () => DQ.copyText(DQ.buildText(), 'Build')
+});
+const char0 = UI.V.character;
+UI.V.character = () => char0() + UI.loadoutPanel();
 })();
 
 </script>
@@ -13332,13 +13670,13 @@ const weatherHtml = town => {
 /* ---------- 1. villagers return to restored places ---------- */
 const TOWNSFOLK = { willowbrook: ['villager', 'farmer'], mossbarrow: ['farmhand', 'villager'], saltmere: ['dockhand', 'merchant'], ironpeak: ['dwarf', 'dockhand'], gloomfen: ['witch', 'villager'], emberfall: ['fireguard', 'dwarf'], skyreach: ['monk', 'villager'], hollow: ['monk', 'fireguard'] };
 const villagersHtml = town => {
-  const restored = Object.entries(D.PROJECTS || {}).filter(([id, p]) => p.town === town && S().projects[id]).length; if (!restored) return '';
+  /* people come back when a town is restored, or when the threat over it is gone */
+  const restored = Object.entries(D.PROJECTS || {}).filter(([id, p]) => p.town === town && S().projects[id]).length + (S().towns[town] && S().towns[town].boss ? 1 : 0); if (!restored) return '';
   const folk = (TOWNSFOLK[town] || ['villager']).slice(0, Math.min(2, restored)).filter(id => DQ.pixelArt && DQ.pixelArt.hasCreature(id));
   return folk.map((id, i) => `<span class="scene-folk f${i}" aria-hidden="true">${DQ.artImage('creature', id, 96, '', '')}</span>`).join('');
 };
 
-/* ---------- 4 + 5. your weapon rests beside you; your companion keeps you company ---------- */
-const gearHtml = () => { const w = S().equip.weapon && D.ITEMS[S().equip.weapon]; return w ? `<span class="scene-gear" aria-hidden="true" title="${esc(w.name)}">${DQ.itemIco(w)}</span>` : ''; };
+/* ---------- 5. your companion keeps you company (work scenes show your tool, never your weapon) ---------- */
 const petHtml = () => { const p = S().pets.active && D.PET[S().pets.active]; return p ? `<span class="scene-pet ${['fish', 'ghost', 'bird'].includes(p.spr) ? 'floats' : ''}" aria-hidden="true">${DQ.petSprite(p, 64)}</span>` : ''; };
 const trick0 = DQ.trickNote;
 if (trick0) DQ.trickNote = (text, where) => { trick0(text, where); const pet = !(DQ.sim && DQ.sim.on) && !DQ.forecasting && document.querySelector('.scene-pet'); if (pet) { pet.classList.remove('hop'); void pet.offsetWidth; pet.classList.add('hop'); } };
@@ -13349,7 +13687,7 @@ UI.render = fresh => {
   render0(fresh);
   const town = S().town, scene = document.querySelector('.activity-scene');
   if (scene && !scene.querySelector('.weather')) {
-    scene.insertAdjacentHTML('beforeend', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town) + (scene.classList.contains('fish') ? '' : villagersHtml(town)) + (scene.querySelector('.scene-worker') ? gearHtml() + petHtml() : ''));
+    scene.insertAdjacentHTML('beforeend', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town) + (scene.classList.contains('fish') ? '' : villagersHtml(town)) + (scene.querySelector('.scene-worker') ? petHtml() : ''));
   }
   const arena = document.querySelector('.encounter-arena');
   if (arena && !arena.querySelector('.weather')) arena.insertAdjacentHTML('afterbegin', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town));
@@ -13396,7 +13734,8 @@ const NOTES = {
 };
 const extras0 = UI.returnExtras;
 UI.returnExtras = sum => {
-  const h = extras0 ? extras0(sum) : '', gap = (sum && sum.real) || 0, list = NOTES[S().town] || NOTES.willowbrook;
+  const h = extras0 ? extras0(sum) : '', gap = (sum && sum.real) || 0, b = D.TOWN[S().town] && D.MON[D.TOWN[S().town].boss], won = b && S().towns[S().town] && S().towns[S().town].boss && D.BOSS_VOICES && D.BOSS_VOICES[b.id];
+  const list = (NOTES[S().town] || NOTES.willowbrook).concat(won ? [[D.BOSS_VOICES[b.id][0], D.BOSS_VOICES[b.id][2]]] : []);
   if (gap < 4 * 3600e3 || hash(dayKey() + S().name) > .45) return h;
   const [who, text] = list[Math.floor(hash(dayKey() + 'note') * list.length)];
   return h + `<div class="door-note" role="note"><p>${esc(text)}</p><small>— ${esc(who)}</small></div>`;
@@ -13442,6 +13781,7 @@ Q.artImage = (kind, id, size = 96, cls = '', alt = '') => {
   if (kind === 'fish') { const s = A.url('fishnode:' + id, () => A.fishLarge(id)); return s ? img(s, 32, 16, size, cls, alt || id) : ''; }
   if (kind === 'wood' || kind === 'tree') return img(A.treeUrl(id), 32, 48, size * 1.1, cls, alt || id);
   if (kind === 'mine' || kind === 'rock') return img(A.rockUrl(id), 32, 32, size, cls, alt || id);
+  if (kind === 'skill' && size >= 32 && A.emblemUrl && A.emblemUrl(id)) return img(A.emblemUrl(id), 32, 32, size, cls, alt || id);
   if (kind === 'skill' || kind === 'icon') { const u = A.iconUrl(id); return u ? img(u, 16, 16, size, cls, alt || id) : ''; }
   if (kind === 'plant') { const [stage, col] = String(id).split('|'), c = D.CROPS.find(x => x.col === col); return img(A.plantUrl(+stage, c ? c.id : null), 16, 16, size, cls, alt); }
   return '';

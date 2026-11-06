@@ -161,7 +161,11 @@ DQ.advProgress = () => {
   return { pct: clamp((t - a) / (b - a) * 100, 0, 100), cur: t - a, next: b - a, need: b - t };
 };
 const COMBAT_SKILLS = new Set(['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic']);
-DQ.xpMult = sk => (1 + .005 * (DQ.lvl(sk) - 1)) * (1 + .0025 * (DQ.advLvl() - 1)) * (COMBAT_SKILLS.has(sk) ? 1 + DQ.combatCatchUp() : 1) * (DQ.extraXp ? DQ.extraXp(sk) : 1) * (DQ.buffMult ? DQ.buffMult('xp') : 1);
+/* Early pace (Nov 2026 playtest: "level 6 after 4 minutes"): non-combat skills learn at 30% at level 1, rising evenly to
+   the full rate at level 20. Combat keeps its own tuned opening (combat 8 at about 22 minutes, sim-opening.cjs). */
+D.EARLY_PACE = { from: .3, until: 20 };
+DQ.earlyPace = sk => { const E = D.EARLY_PACE, l = DQ.lvl(sk); return !E || COMBAT_SKILLS.has(sk) || l >= E.until ? 1 : E.from + (1 - E.from) * (l - 1) / (E.until - 1); };
+DQ.xpMult = sk => DQ.earlyPace(sk) * (1 + .005 * (DQ.lvl(sk) - 1)) * (1 + .0025 * (DQ.advLvl() - 1)) * (COMBAT_SKILLS.has(sk) ? 1 + DQ.combatCatchUp() : 1) * (DQ.extraXp ? DQ.extraXp(sk) : 1) * (DQ.buffMult ? DQ.buffMult('xp') : 1);
 DQ.actionProgress = sk => Object.entries(D.SK[sk]?.actionReq || {}).map(([stat,need])=>({stat,need,have:DQ.S.stats[stat]||0}));
 DQ.skillUnlocked = sk => { const s=D.SK[sk]; if(!s)return false; if(s.actionReq)return !!DQ.S.unlocked[sk]||DQ.actionProgress(sk).every(r=>r.have>=r.need); return s.quest?!!DQ.S.unlocked[sk]:s.unlock<=DQ.advLvl(); };
 const actionNames={kill:'combat victories',catch:'fish caught',chop:'logs chopped',harvest:'crops harvested',craft:'items crafted',smith:'smithing actions'};

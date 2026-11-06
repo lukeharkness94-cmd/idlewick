@@ -181,3 +181,15 @@ Reading:
    - **Bosses:** answer the special 5 times (Brace, Shield Bash, Arcane Ward, or survive it), or defeat it 3 times.
    - **Reward:** the next research stage early (with its usual coins); bosses also get a gold-rimmed trophy and a journal line.
    - **Tracking:** `S().beast.weakWins` and `S().beast.answered` (older saves start at zero).
+
+## Experimentation, goals and the combat page (Nov 2026)
+
+What has improved, and how far the evidence goes:
+- **Trying a different setup costs one click.** Saved preparations apply owned items, take them from the bank, show what is missing or locked, and can be undone. Tests prove that items are never lost or duplicated; whether players come back to them is unknown.
+- **A rare find suggests a next step** ("Good for …", Inspect, its source and the first-copy guarantee). This is a presentation change only: drop rates are untouched.
+- **Later regions always name a next step**, and up to three optional goals sit beside it. This covers the thin Ironpeak stretch in presentation only. New content is a proposal (docs/proposals.md).
+- **Melee is no longer the weak style** (simulated; see economy-evidence). Frostmaw remains the exception at 80%.
+- **The combat page answers "how strong am I in this style?" in one place**, and each combat skill appears once. This is verified in the real page at 390, 1440, 2560 and 3440 wide in both themes (ui-current, ui-audit). Whether people read the split as intended is untested.
+- **The opening is slower** (Fishing level 4 at 4 minutes instead of 7). That responds to one playtester's report. The right pace still has to be found through play.
+
+What still needs to be earned through play: whether experimentation and optional goals give people reasons to return, and whether the slower opening keeps both impatient and patient players. No sessions have been run for this build.

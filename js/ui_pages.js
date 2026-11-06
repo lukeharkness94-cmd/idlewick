@@ -41,6 +41,23 @@ function mapSVG(sel) {
     ${decor}${roads}${towns}<g id="hero-pin" transform="translate(${ct.x} ${ct.y - 40})" class="pin"><path d="M0 22C-14 4-14-14 0-14S14 4 0 22z" fill="#d8a64a" stroke="#2a2418" stroke-width="2"/><circle cy="-2" r="5" fill="#2a2418"/></g></svg>`;
 }
 UI.MAP_LAND = MAP_LAND; UI.mapSVG = mapSVG;
+/* What is still left to do in a town: quests, creatures to meet, places to restore, the boss. Links to Exploration. */
+UI.leftToExplore = town => {
+  const qs = D.QUESTS.filter(q => q.town === town), qLeft = qs.filter(q => !(S().q[q.id] && S().q[q.id].s === 'done')).length;
+  const mons = D.MONLIST.filter(m => m.town === town), met = mons.filter(m => (S().beast.kills[m.id] || 0) > 0).length;
+  const projs = DQ.projectsForTown ? DQ.projectsForTown(town) : [], pLeft = projs.filter(([id]) => !S().projects[id]).length;
+  const finds = Object.entries(D.DISCOVERIES || {}).filter(([id, d]) => d.place === town && DQ.discovered && DQ.discovered(id)).length;
+  const bossDone = S().towns[town] && S().towns[town].boss;
+  const row = (ic, text, ok) => `<li class="${ok ? 'ok' : ''}">${ico(ok ? 'check' : ic)}<span>${text}</span></li>`;
+  const all = !qLeft && met === mons.length && !pLeft && bossDone;
+  return `<div class="explore-left"><div class="k">${all ? 'Fully explored' : 'Left to explore here'}</div><ul>
+    ${row('quest', qLeft ? `<b>${qLeft}</b> of ${qs.length} quests still to finish` : `All ${qs.length} quests complete`, !qLeft)}
+    ${row('paw', met < mons.length ? `<b>${mons.length - met}</b> of ${mons.length} creatures not yet met` : `Every creature met (${mons.length})`, met === mons.length)}
+    ${projs.length ? row('house', pLeft ? `<b>${pLeft}</b> of ${projs.length} places to restore` : 'Everything restored', !pLeft) : ''}
+    ${row('skull', bossDone ? 'Boss defeated' : 'Boss still undefeated', bossDone)}
+    ${finds ? row('star', `${finds} discover${finds === 1 ? 'y' : 'ies'} made here`, true) : ''}</ul>
+    <div class="btnrow"><button class="btn sm" data-do="go" data-a="exploration">${ico('exploration')} Exploration</button><button class="btn sm" data-do="go" data-a="quests">${ico('quest')} Quests</button></div></div>`;
+};
 UI.V.map = () => {
   const sel = UI.mapSel = UI.mapSel || S().town, t = D.TOWN[sel], open = DQ.townUnlocked(t.id), here = S().town === sel, boss = D.MON[t.boss], done = S().towns[sel] && S().towns[sel].boss;
   const prev = D.TOWNS[t.idx - 1], counts = [['fishing', 'fish', 'fishing spot'], ['woodcutting', 'wood', 'tree type'], ['mining', 'mine', 'ore'], ['thieving', 'thieve', 'target']].map(([sk, k, w]) => { const n = D.NODES[k].filter(x => x.town === sel).length; return n ? `<span class="rw" style="--c:${D.SK[sk].col}">${ico(sk)}${n} ${w}${n > 1 ? 's' : ''}</span>` : ''; }).join('');
@@ -50,7 +67,7 @@ UI.V.map = () => {
       <div class="ti-body"><span class="k">${here ? 'Current location' : open ? 'Open road' : 'Locked'}</span><h2>${open ? t.name : 'Unknown lands'}</h2><p class="dim">${open ? t.tag : 'The road is closed.'}</p>
       ${open && !here ? `<button class="btn primary travel-go" data-do="travel" data-a="${sel}">${ico('map')} Travel to ${esc(t.name)}</button>` : ''}
       ${open ? `<p>${t.blurb}</p><div class="rws">${counts}<span class="rw" style="--c:#8a9bff">${ico('attack')}Monsters Lv ${mons[0].cl}-${mons[mons.length - 1].cl}</span><span class="rw" style="--c:#d8a64a">${ico('shop')}Shop</span><span class="rw" style="--c:#d8a64a">${ico('quest')}${qn.length} quests</span></div>
-        <div class="bossrow ${done ? 'done' : ''}"><div class="avatar boss sm" style="--c:${boss.col}">${DQ.monSprite(boss, 40)}</div><div><b>${esc(boss.name)}</b><small>${done ? 'Defeated' : `Combat level ${boss.boss.req} to challenge`}</small></div></div>`
+        <div class="bossrow ${done ? 'done' : ''}"><div class="avatar boss sm" style="--c:${boss.col}">${DQ.monSprite(boss, 40)}</div><div><b>${esc(boss.name)}</b><small>${done ? 'Defeated' : `Combat level ${boss.boss.req} to challenge`}</small></div></div>${UI.leftToExplore(sel)}`
         : `<p>${prev ? `Defeat <b>${esc(D.MON[prev.boss].name)}</b> in ${prev.name} to open this road.` : ''}</p>${prev && DQ.townUnlocked(prev.id) ? `<p class="sm dim">You need combat level ${D.MON[prev.boss].boss.req} to face them. You are ${DQ.combatLvl()}.</p>` : ''}`}
       </div></section></div>`;
 };
@@ -114,9 +131,13 @@ UI.V.quests = () => {
     const blk = DQ.questBlockers(q);
     const req = s === 'locked' && q.main ? `<div class="reqs">${blk.map(b => `<div class="bad">✗ ${b}</div>`).join('')}</div>` : s === 'locked' ? `<div class="reqs bad">${DQ.advLvl() < q.adv ? `Hero level ${q.adv} <span class="mono">(you: ${DQ.advLvl()})</span>` : ''}${prevQ && !(S().q[q.req] && S().q[q.req].s === 'done') ? ` Finish “${prevQ.name}” first` : ''}</div>` : '';
     const sk = q.main && D.SK[q.unlocks];
+    /* reading order: name, where, the story (and anything said), what is needed, rewards, then the action */
+    const say = q.say || q.intro ? `<p class="quest-say">“${esc(q.say || q.intro)}”</p>` : '';
+    const actions = `<div class="quest-actions">${s === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>` : s === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Claim reward</button>` : s === 'active' ? `<button class="btn primary" data-do="questcontinue" data-a="${q.id}">Continue quest</button>` : ''}</div>`;
     return `<section class="panel quest ${s} ${q.main ? 'main' : ''}" style="--i:${i};${sk ? `--c:${sk.col}` : ''}" id="q-${q.id}">${sk ? `<span class="mq-ribbon">${ico('star')} Main quest · Unlocks ${sk.name}</span>` : ''}<div class="phead" style="margin:0"><div><h2>${q.name}</h2><small>${q.giver} · ${t.name}</small></div><span class="state ${s}">${{ new: 'Available', locked: 'Locked', active: 'In progress', ready: 'Ready', done: 'Complete' }[s]}</span></div>
-      ${DQ.questImpact && DQ.questImpact(q.id) ? `<p class="quest-impact">Town change · ${esc(DQ.questImpact(q.id))}</p>` : ''}${req}<div class="quest-actions">${s === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>` : s === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Claim reward</button>` : s === 'active' ? `<button class="btn primary" data-do="questcontinue" data-a="${q.id}">Continue quest</button>` : ''}</div>${s === 'locked' ? '' : objs}<section data-reference="true" class="quest-story" id="quest-story-${q.id}"><h3>Story &amp; rewards</h3><p class="blurb">${q.blurb}</p><div class="rewards"><span class="k">Rewards</span><div class="rws">${sk ? `<span class="rw unlockrw" style="--c:${sk.col}">${ico(q.unlocks)}Learn ${sk.name}</span>` : ''}${UI.rewards(q.reward)}</div></div>
-      </section></section>`;
+      <div class="quest-story" id="quest-story-${q.id}"><p class="blurb">${q.blurb}</p>${say}</div>
+      ${DQ.questImpact && DQ.questImpact(q.id) ? `<p class="quest-impact">Town change · ${esc(DQ.questImpact(q.id))}</p>` : ''}${req}${s === 'locked' ? '' : `<div class="quest-objs"><div class="k">Required</div>${objs}</div>`}
+      <div class="rewards"><span class="k">Rewards</span><div class="rws">${sk ? `<span class="rw unlockrw" style="--c:${sk.col}">${ico(q.unlocks)}Learn ${sk.name}</span>` : ''}${UI.rewards(q.reward)}</div></div>${actions}</section>`;
   }).join('') : '';
   const done = D.QUESTS.filter(groups.done).length;
   return `<section class="panel shophead"><div><span class="k">Quest log</span><h2>${done} of ${D.QUESTS.length} complete</h2></div><div class="tabs">${Object.entries(names).map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="qtab" data-a="${k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</div></section>

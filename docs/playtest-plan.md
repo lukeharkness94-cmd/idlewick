@@ -91,3 +91,16 @@ Ask both enthusiasts and sceptics after a session, then "why?":
 7. Would you come back tomorrow without being asked?
 
 Unverified without people: whether the Next step card is read or skipped; whether "Most useful change" after a defeat changes behaviour; whether players find ability slots without the advice.
+
+## Questions for the experimentation, goals and combat-page build (prepared, not yet run)
+
+1. Did you save a preparation in the Inventory? Did you use it again later, or only once?
+2. When a unique item dropped, did the "Good for …" line change what you did next?
+3. On Home, did "Also worth doing" offer something you chose over the Next step? Why?
+4. After coming back, did "Since you left" tell you something you cared about?
+5. Did you use Copy build or Copy my story? Where did you paste it?
+6. On the new combat page, could you say which skill your fights are training without looking for it?
+7. Did the first 10 minutes feel too slow, about right, or still too fast? (The early-pace change is unverified with people.)
+8. Did you notice the "New" badge on a newly unlocked skill? Did you open it because of the badge?
+
+Unverified without people: whether saved preparations are used beyond the first try, whether the slower opening loses impatient players before the first boss, and whether the combat page's two-column split reads as "you" and "the fight".

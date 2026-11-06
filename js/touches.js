@@ -31,8 +31,7 @@ const villagersHtml = town => {
   return folk.map((id, i) => `<span class="scene-folk f${i}" aria-hidden="true">${DQ.artImage('creature', id, 96, '', '')}</span>`).join('');
 };
 
-/* ---------- 4 + 5. your weapon rests beside you; your companion keeps you company ---------- */
-const gearHtml = () => { const w = S().equip.weapon && D.ITEMS[S().equip.weapon]; return w ? `<span class="scene-gear" aria-hidden="true" title="${esc(w.name)}">${DQ.itemIco(w)}</span>` : ''; };
+/* ---------- 5. your companion keeps you company (work scenes show your tool, never your weapon) ---------- */
 const petHtml = () => { const p = S().pets.active && D.PET[S().pets.active]; return p ? `<span class="scene-pet ${['fish', 'ghost', 'bird'].includes(p.spr) ? 'floats' : ''}" aria-hidden="true">${DQ.petSprite(p, 64)}</span>` : ''; };
 const trick0 = DQ.trickNote;
 if (trick0) DQ.trickNote = (text, where) => { trick0(text, where); const pet = !(DQ.sim && DQ.sim.on) && !DQ.forecasting && document.querySelector('.scene-pet'); if (pet) { pet.classList.remove('hop'); void pet.offsetWidth; pet.classList.add('hop'); } };
@@ -43,7 +42,7 @@ UI.render = fresh => {
   render0(fresh);
   const town = S().town, scene = document.querySelector('.activity-scene');
   if (scene && !scene.querySelector('.weather')) {
-    scene.insertAdjacentHTML('beforeend', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town) + (scene.classList.contains('fish') ? '' : villagersHtml(town)) + (scene.querySelector('.scene-worker') ? gearHtml() + petHtml() : ''));
+    scene.insertAdjacentHTML('beforeend', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town) + (scene.classList.contains('fish') ? '' : villagersHtml(town)) + (scene.querySelector('.scene-worker') ? petHtml() : ''));
   }
   const arena = document.querySelector('.encounter-arena');
   if (arena && !arena.querySelector('.weather')) arena.insertAdjacentHTML('afterbegin', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town));
