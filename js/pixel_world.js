@@ -211,9 +211,10 @@ const ICON_ALIAS = { book: 'research', scroll: 'quest', compass: 'exploration', 
 function iconSprite(id) { const k = ICON[id] ? id : ICON_ALIAS[id]; const f = ICON[k]; if (!f) return null; const s = Spr(16, 16); const out = f(s); return out && out.w ? out : s; }
 
 /* boss trophies: the boss itself mounted on a carved oak plaque with a brass nameplate (40 x 44) */
-function trophySprite(id) {
+function trophySprite(id, gilded) {
   const c = A.creatureSprite && A.creatureSprite(id); if (!c) return null;
   const s = Spr(40, 44), oak = R.wood || rp('#8a5a32');
+  if (gilded) s.poly([[0, 1], [40, 1], [40, 31], [20, 44], [0, 31]], R.gold);
   s.poly([[2, 3], [38, 3], [38, 30], [20, 42], [2, 30]], oak);
   s.poly([[5, 6], [35, 6], [35, 29], [20, 38], [5, 29]], rp('#5a3a22'));
   s.stamp(c, 4, 3);
@@ -234,7 +235,7 @@ function bigStar() {
   return s;
 }
 A.bigStarUrl = () => A.url('bigstar', bigStar);
-Object.assign(A, { trophySprite, trophyUrl: id => A.url('trophy:' + id, () => trophySprite(id)) });
+Object.assign(A, { trophySprite, trophyUrl: (id, gilded) => A.url('trophy:' + id + (gilded ? ':gold' : ''), () => trophySprite(id, gilded)) });
 Object.assign(A, { workerSprite, treeSprite, rockSprite, piece, sceneFor, furnSprite, iconSprite, TREE, TOWN, ICON, ICON_ALIAS,
   treeUrl: id => A.url('tree:' + id, () => treeSprite(id)), rockUrl: id => A.url('rock:' + id, () => rockSprite(id)),
   furnUrl: (id, ic) => A.url('furn:' + id, () => furnSprite(id, ic)), workerUrl: sk => A.url('worker:' + sk, () => workerSprite(sk)), cottageUrl: () => A.url('cottage', () => A.sprites.cottage()), iconUrl: id => A.url('icon:' + id, () => iconSprite(id)) });

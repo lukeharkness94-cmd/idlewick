@@ -167,3 +167,17 @@ Reading:
 - Herbalism's first useful potion is still a long way off (Scholarship at Hero 16, then Tier II research).
 - Hero 46+ (late Ironpeak) is still thin, and late magic may be underpowered.
 - Companion tricks are small (Gobbo's heckle barely moves a boss fight). That's by design for now.
+
+
+### Decisions implemented (owner approval, Nov 2026)
+1. **Healing draught as an emergency drink:** drunk automatically once food runs out and health drops below 25%, at most once per fight. It applies in forecasts and offline, shows a "Draught +N" splat, and the item text says so.
+2. **Late magic: the gap was a simulator artefact.** `PARITY=1 node scripts/sim-bosses.cjs` compares the three styles at the same combat level (the combat formula counts Ranged and Magic at 1.5×, so a mage has a higher Magic level than a fighter's Attack). Against each boss with its weaknesses removed, ranged and magic match or beat melee at every boss (table in `docs/economy-evidence.md`), so no change was made to magic.
+   - **Real defect found:** a pure ranged or pure magic hero can only reach combat 97, while melee reaches 113, so the Hollow King's old requirement of 105 locked pure archers and mages out of the final boss. It is now 97 for every style, and a regression enforces it.
+   - **New finding (not changed, needs a decision):** at the same combat level, melee is the weakest style at most bosses (general melee 23–75% against 98–100% for ranged and magic).
+3. **Hollow King retune:** requirement 105 → 97, health 434 → 580, max hit 32 → 36. Melee general build: 100% → 50%; +5 levels: 81%; all preparations: 100%; ranged and magic: 100%. His phase weaknesses are unchanged.
+4. **Stacking preparations:** accepted as is. Each preparation on its own still leaves real risk.
+5. **Bestiary understanding:** one optional objective per creature in the field guide, with the reward shown up front.
+   - **Ordinary creatures:** 10 wins whose finishing blow used a weak point, or 25 more defeats after its weak point is known.
+   - **Bosses:** answer the special 5 times (Brace, Shield Bash, Arcane Ward, or survive it), or defeat it 3 times.
+   - **Reward:** the next research stage early (with its usual coins); bosses also get a gold-rimmed trophy and a journal line.
+   - **Tracking:** `S().beast.weakWins` and `S().beast.answered` (older saves start at zero).

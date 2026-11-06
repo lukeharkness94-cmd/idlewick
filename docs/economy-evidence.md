@@ -82,3 +82,18 @@ Before: 100% for every boss with counters, and up to 0% without them. Old Tusk s
 ## Preparation choices (Nov 2026 review)
 
 `COMPARE=1 PARTS=1 node scripts/sim-bosses.cjs` compares, for each boss at its requirement: no abilities, a general build, each preparation on its own, the field-guide counter, all alternative preparations together, and +5 levels. The results table and reading are in `docs/experience-assessment.md` (Review response). The earlier "plain melee 0%" column used no abilities and should not be read as "melee cannot win".
+
+## Style parity and the Hollow King (Nov 2026)
+
+`PARITY=1 node scripts/sim-bosses.cjs`: each hero at the boss's combat requirement, made from its own style, with best region gear, its style's abilities and 15 food, against the boss with weaknesses and resistances removed (96 fights).
+
+| Boss | Melee | Ranged | Magic |
+| --- | --- | --- | --- |
+| Frostmaw | 23% | 99% | 98% |
+| Morwenna | 69% | 99% | 100% |
+| Pyrrhax | 38% | 99% | 98% |
+| Zephyrion | 75% | 100% | 100% |
+| Hollow King (new: req 97, hp 580, max 36) | 65% | 100% | 100% |
+
+- A pure ranged or magic hero tops out at combat 97, melee at 113, so the final boss now asks for 97.
+- At equal combat level, melee is the weakest style. This is recorded for a future decision and left unchanged.

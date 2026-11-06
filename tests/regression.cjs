@@ -550,6 +550,21 @@ test('Home leads with one next step that says how you will know it is done',()=>
  S.q.first_steps={s:'done',p:[5,5]};S.unlocked.cooking=true;S.xp.cooking=D.XPF[3];const boss=D.QUESTS.find(x=>x.obj.some(o=>o.ev==='boss'));S.q[boss.id]={s:'active',p:[0]};
  next=q.journeyNext();if(/^Train for Grubnash/.test(next.title))assert.match(q.journeyDoneWhen(next),/combat level reaches 8/);
 });
+test('every boss requirement can be met by any single combat style',()=>{
+ const {q}=harness();const S=q.S,D=q.data;
+ for(const style of ['attack','ranged','magic']){for(const k of ['defence','hitpoints',style,...(style==='attack'?['strength']:[])])S.xp[k]=D.XPF[99];
+  const top=q.combatLvl();for(const m of D.MONLIST.filter(x=>x.boss))assert.ok(top>=m.boss.req,`${style}-only (combat ${top}) can face ${m.id} (needs ${m.boss.req})`);
+  for(const k of ['attack','strength','ranged','magic'])S.xp[k]=0;}
+});
+test('bestiary understanding: optional objectives with a fair alternative, rewarded with the next entry early',()=>{
+ const {q,load}=harness();load('lore');load('bestiary');const S=q.S,D=q.data,m=D.MON.goblin,b=D.MON.frostmaw;
+ S.beast.kills.goblin=5;const r0=q.research(m).rank;assert.equal(q.understanding(m).done,false);
+ S.beast.weakWins={goblin:10};assert.ok(q.understanding(m).done,'10 weak-point wins');assert.equal(q.research(m).rank,r0+1,'next entry early');
+ S.beast.weakWins={};const alt=q.understanding(m).altNeed;S.beast.kills.goblin=alt;assert.ok(q.understanding(m).done,'fair alternative: more defeats, any style');
+ S.beast.kills.frostmaw=1;S.beast.answered={frostmaw:4};assert.equal(q.understanding(b).done,false);S.beast.answered.frostmaw=5;assert.ok(q.understood('frostmaw'));
+ S.beast.answered={};S.beast.kills.frostmaw=3;assert.ok(q.understood('frostmaw'),'or three victories');
+ const o=JSON.parse(JSON.stringify(S));delete o.beast.weakWins;delete o.beast.answered;assert.ok(q.validateSave(o),'older saves without the counters load');
+});
 test('restoration: new Willowbrook projects, regional materials, villager voices and legacy bonuses',()=>{
  const {q,load}=harness();load('fx');load('routes');const S=q.S,D=q.data;S.coins=1e6;
  const wb=q.projectsForTown('willowbrook').map(([id])=>id);for(const id of ['well','inn','forge','garden','library','watchtower'])assert.ok(wb.includes(id),id);

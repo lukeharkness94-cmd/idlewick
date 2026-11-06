@@ -11,7 +11,7 @@ DQ.researchXp = t => t.mins * 30 * t.tier;
 
 /* ---------- Potions: made in the Brewery, drunk from your backpack ---------- */
 const potion = (id, name, col, val, drink) => { D.ITEMS[id] = Object.assign({ id, name, col, val, ic: 'bottle', type: 'potion', drink }, {}); };
-potion('potion_heal', 'Healing draught', '#e2574c', 40, { heal: .4, text: 'Heals 40% of your health at once' });
+potion('potion_heal', 'Healing draught', '#e2574c', 40, { heal: .4, text: 'Heals 40% of your health at once. In a fight it is drunk for you once your food runs out and health drops below 25% (once per fight)' });
 potion('potion_haste', 'Potion of Haste', '#5fd0ff', 120, { buff: 'slow', mult: .85, mins: 20, name: 'Haste', text: 'Tasks are 15% faster for 20 minutes' });
 potion('potion_might', 'Potion of Might', '#ff8a3a', 150, { buff: 'weak', mult: 1.15, mins: 20, name: 'Might', text: 'You hit 15% harder for 20 minutes' });
 potion('potion_fortune', 'Potion of Fortune', '#5cc08a', 400, { buff: 'luck', mult: 1.5, mins: 30, name: 'Fortune', text: 'Rare drops are 50% more likely for 30 minutes' });

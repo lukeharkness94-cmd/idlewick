@@ -361,7 +361,7 @@ mon('zephyrion', 'Zephyrion the Storm Roc', 'skyreach', 110, 613, 54, 92, 88, [1
 mon('voidknight', 'Void knight', 'hollow', 104, 320, 38, 104, 104, [700, 1500], '#6a4aa8', [['ore_voidstone', [1, 1], .3]]);
 mon('shade', 'Hollow shade', 'hollow', 108, 340, 40, 110, 100, [800, 1700], '#3a2a5a', [['rune', [20, 40], .5]]);
 mon('horror', 'Abyssal horror', 'hollow', 112, 380, 42, 112, 108, [1000, 2000], '#8a3a6a', [['gem_diamond', [1, 2], .2], ['wyrm_scale', [1, 1], .03]]);
-mon('hollowking', 'The Hollow King', 'hollow', 126, 700, 44, 104, 100, [25000, 40000], '#b08aff', [['ore_voidstone', [3, 6], 1], ['hollow_crown', [1, 1], .1]], { req: 105, first: 'hollow_crown', special: { every: 4, mult: 1.6, name: 'Crown of sorrow' }, short: 'The Hollow King' });
+mon('hollowking', 'The Hollow King', 'hollow', 126, 935, 50, 104, 100, [25000, 40000], '#b08aff', [['ore_voidstone', [3, 6], 1], ['hollow_crown', [1, 1], .1]], { req: 97, first: 'hollow_crown', special: { every: 4, mult: 1.6, name: 'Crown of sorrow' }, short: 'The Hollow King' });
 
 /* ---------- Combat loot: every monster also rolls on its town's loot table ---------- */
 mk('coin_pouch', { name: 'Coin pouch', ic: 'pouch', col: '#f3d58a', val: 0, type: 'container' });
@@ -503,7 +503,7 @@ D.QUESTS = [
     [{ ev: 'harvest', key: 'starfruit', n: 15, label: 'Harvest 15 starfruit' }, { ev: 'catch', key: 'skyfin', n: 20, label: 'Catch 20 skyfin' }], { xp: { farming: 150000, fishing: 100000 }, coins: 30000 }),
   Q('storm_breaker', 'skyreach', 'Stormbreaker', 'Abbot Seren', 82, 'cloud_harvest', 'Zephyrion has torn the bridges from the sky. You need combat level 95.',
     [{ ev: 'boss', key: 'zephyrion', n: 1, label: 'Defeat Zephyrion the Storm Roc' }], { xp: { attack: 200000, strength: 200000, defence: 200000 }, coins: 80000 }),
-  Q('crownfall', 'hollow', 'Crownfall', 'The Last Herald', 88, 'storm_breaker', 'The Hollow King waits on a drowned throne. End the long sorrow. You need combat level 105.',
+  Q('crownfall', 'hollow', 'Crownfall', 'The Last Herald', 88, 'storm_breaker', 'The Hollow King waits on a drowned throne. End the long sorrow. You need combat level 97.',
     [{ ev: 'kill', key: 'voidknight', n: 20, label: 'Defeat 20 void knights' }, { ev: 'boss', key: 'hollowking', n: 1, label: 'Defeat the Hollow King' }], { xp: { attack: 400000, strength: 400000, defence: 400000, hitpoints: 200000 }, coins: 250000 }),
   Q('wyrm_slayer', 'emberfall', 'Wyrmslayer', 'Warden Ignis', 75, 'drakehide_deal', 'Pyrrhax has burned every banner in the realm. End it. You need combat level 85.',
     [{ ev: 'boss', key: 'pyrrhax', n: 1, label: 'Defeat Pyrrhax the Ember Wyrm' }], { xp: { attack: 100000, strength: 100000, defence: 100000, hitpoints: 60000 }, coins: 40000 }),

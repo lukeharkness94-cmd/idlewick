@@ -58,7 +58,7 @@ const herbGoals=()=>{const done=id=>DQ.techDone&&DQ.techDone(id),R=D.POTION_RECI
  const r1=done('herbalism'),scholar=DQ.advLvl()>=D.RESEARCH_ADV;
  return `<section class="panel herb-goals"><div class="phead"><h2>First goals</h2><small>Herbalism</small></div><ol class="herb-path">
   ${step(true,r1,'Research Herbalism',scholar?'In Scholarship: 900 coins and 10 onions.':`Scholarship opens at Hero ${D.RESEARCH_ADV}.`,scholar?'<button class="btn sm" data-do="go" data-a="research">Open Scholarship</button>':'')}
-  ${step(r1,DQ.have('potion_heal')>0,'Brew a Healing draught',`Drink it to restore 40% of your health at once: before a boss instead of resting, or between hard fights. <span class="rws">${mats(R)}</span>`)}
+  ${step(r1,DQ.have('potion_heal')>0,'Brew a Healing draught',`Restores 40% of your health. In a fight it is drunk for you once your food runs out and health is low (once per fight): a safety net for a hard boss. <span class="rws">${mats(R)}</span>`)}
   ${step(r1,false,'Next: War Brewing → Potion of Might','+15% damage for 20 minutes. Worth brewing for a boss you keep losing to, not for everyday fights. Research it in Scholarship (Tier II).')}
  </ol></section>`;};
 UI.V.brewery=()=>DQ.skillUnlocked('herbalism')?`${hero('herbalism')}${herbGoals()}${brewery()}`:UI.lockedPage('herbalism');

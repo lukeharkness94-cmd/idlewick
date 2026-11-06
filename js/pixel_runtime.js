@@ -27,7 +27,7 @@ Q.petSprite = (p, size = 48, cls = '') => { const id = A.hasCreature(p.id) ? p.i
 Q.animalSprite = (a, size = 96, cls = '') => Q.artImage('creature', a.id, size, cls, a.name);
 /* crop plots: soil, sprout, young plant, mature (the live binder in ui_extra.js re-renders through this) */
 Q.plantSprite = (stage, col, size = 96, cls = '') => { const c = D.CROPS.find(x => x.col === col); const alt = !c ? 'Empty soil' : c.name + (stage >= 3 ? ' ready to harvest' : stage === 0 ? ' just sown' : ' growing'); return img(A.plantUrl(c ? stage : 0, c ? c.id : null), 16, 16, size, cls, alt); };
-Q.trophyArt = (id, size = 88, cls = '') => { const u = A.trophyUrl(id); return u ? img(u, 40, 44, size, 'trophy-art ' + cls, (D.MON[id] ? D.MON[id].name : id) + ' trophy') : ''; };
+Q.trophyArt = (id, size = 88, cls = '') => { const u = A.trophyUrl(id, !!(Q.understood && Q.understood(id))); return u ? img(u, 40, 44, size, 'trophy-art ' + cls, (D.MON[id] ? D.MON[id].name : id) + ' trophy') : ''; };
 Q.furnIco = (id, ic) => img(A.furnUrl(id, ic), 16, 16, 40, 'furn-art', id);
 Q.cottageArt = () => `<img class="pxa cottage-art" src="${A.cottageUrl()}" width="192" height="160" alt="A cottage on the hill" draggable="false">`;
 Q.workerArt = skill => img(A.workerUrl(skill), 32, 32, 44, 'worker-art', skill + ' worker');

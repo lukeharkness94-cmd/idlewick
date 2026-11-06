@@ -279,3 +279,9 @@ Full write-up: `docs/experience-assessment.md` → "Review response".
 - **Simulator**: sim-bosses loads lore, hunting, bestiary, skill_expansion, adventures and companions; `COMPARE=1` (and `PARTS=1`) runs the preparation comparison.
 - **Awaiting approval**: Hollow King retune, a late-magic parity check, stacking-to-guarantee, Healing draught auto-drink, bestiary understanding objectives.
 - **New tests**: `tests/ui-effects.cjs`, `tests/ui-journeys.cjs` (both need a preview server).
+
+- **Approved and built (Nov 2026)**:
+  - **Healing draught:** drunk automatically when food runs out below 25% health, once per fight (engine monsterAttack).
+  - **Hollow King:** requirement 97 (the highest any single style can reach; a regression checks every boss), health 580, max hit 36.
+  - **Bestiary understanding:** objectives (`DQ.understanding`, `DQ.understood`) raise the research rank by one when done, and bosses get a gold-rimmed trophy (`trophySprite(id, gilded)`). The counters live in `S().beast.weakWins` and `S().beast.answered`.
+  - **Simulator:** `PARITY=1` compares the styles at equal combat level. Late magic is not behind; melee is the weakest style at equal combat level (left for a decision).

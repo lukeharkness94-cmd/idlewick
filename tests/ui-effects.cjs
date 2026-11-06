@@ -63,6 +63,15 @@ const fs=require('node:fs');
    if(key!=='fortune')assert.ok(r.fc.blocked||n('fc')>0,`${key}: fires inside a forecast`);
    assert.equal(r.without[key]||0,0,`${key}: stops when the item is removed`);
   }
+  /* Healing draught: drunk once, automatically, when food is gone and health is low */
+  const draught=await page.evaluate(()=>{window.__setup('ironpeak',['bronze_sword'],null,S=>{S.inv={potion_heal:3};S.settings.autoEat=true;});DQ.S.inv.shark=0;DQ.startAct('fight','frostmaw',{quiet:true});for(let i=0;i<120&&DQ.act;i++)DQ.advanceTime(1000,1000,DQ.act?DQ.act.progress||0:0);const h=window.__hits().draught||0;const left=DQ.have('potion_heal');DQ.stopAct(true);return {h,left};});
+  assert.equal(draught.h,1,'the draught is drunk once in the fight');assert.equal(draught.left,2,'exactly one draught used');
+  /* field-guide understanding is recorded by real fights: weak-point wins (goblins are weak to slash) and answered boss specials */
+  const under=await page.evaluate(()=>{window.__setup('willowbrook',['rune_sword','rune_helm','rune_body','rune_legs'],null);const B=DQ.S.beast;B.weakWins={};B.answered={};
+   DQ.startAct('fight','goblin',{quiet:true});for(let i=0;i<120;i++)DQ.advanceTime(1000,1000,DQ.act?DQ.act.progress||0:0);DQ.stopAct(true);
+   window.__setup('ironpeak',['rune_sword','rune_helm','rune_body','rune_legs'],null);DQ.S.beast.answered={};DQ.startAct('fight','frostmaw',{quiet:true});for(let i=0;i<300;i++)DQ.advanceTime(1000,1000,DQ.act?DQ.act.progress||0:0);DQ.stopAct(true);
+   return {weak:(DQ.S.beast.weakWins||{}).goblin||0,answered:(DQ.S.beast.answered||{}).frostmaw||0};});
+  assert.ok(under.weak>0,'weak-point wins are recorded');assert.ok(under.answered>0,'answered specials are recorded');
   /* Gale: the advertised 10% faster attacks reach the live attack interval (regression for the overridden combatInterval) */
   const gale=await page.evaluate(()=>{window.__setup('willowbrook',['rune_sword'],null);const a=DQ.combatInterval();window.__setup('willowbrook',['rune_sword','storm_feather'],null);const b=DQ.combatInterval();
    DQ.startAct('fight','goblin',{quiet:true});const live=DQ.act.dur;DQ.stopAct(true);return {a,b,live,text:DQ.combatSpeedText()};});

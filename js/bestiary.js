@@ -8,8 +8,21 @@ const RANKS = D.RESEARCH.ranks, KEYS = RANKS.map(r => r[0]);
 /* ---------- research state ---------- */
 DQ.killsOf = m => Math.floor((S().beast.kills[m.id] || 0) * (1 + (DQ.fx ? DQ.fx().study : 0)));
 DQ.researchAt = m => m.boss ? D.RESEARCH.boss : D.RESEARCH.regular;
+/* Understanding (approved Nov 2026): one optional objective per creature that shows you learned it, with a fair
+   alternative route so no style is forced. Ordinary creatures: 10 wins whose finishing blow used a weak point, or 25
+   more defeats after its weak point is known. Bosses: answer its special 5 times (Brace, Shield Bash, Arcane Ward, or
+   simply survive it), or defeat it 3 times. Reward: the next research stage early (its usual coins) and, for bosses,
+   a gold rim on the trophy. */
+DQ.understanding = m => {
+  const B = S().beast, T = DQ.researchAt(m), k = B.kills[m.id] || 0;
+  if (m.boss) { const a = (B.answered || {})[m.id] || 0; return { main: 'Answer its special 5 times (Brace, Shield Bash, Arcane Ward, or survive it)', have: Math.min(5, a), need: 5, alt: 'or defeat it 3 times', altHave: Math.min(3, k), altNeed: 3, done: a >= 5 || k >= 3 }; }
+  const w = (B.weakWins || {})[m.id] || 0, altNeed = (T[1] || 1) + 25;
+  return { main: 'Win 10 times using its weak point', have: Math.min(10, w), need: 10, alt: `or reach ${altNeed} defeats`, altHave: Math.min(altNeed, k), altNeed, done: w >= 10 || k >= altNeed };
+};
+DQ.understood = id => { const m = D.MON[id]; return !!m && DQ.understanding(m).done; };
 DQ.research = m => {
   const k = DQ.killsOf(m), T = DQ.researchAt(m); let rank = 0; T.forEach(t => { if (k >= t) rank++; });
+  if (rank >= 1 && rank < T.length && DQ.understanding(m).done) rank++;
   return { kills: k, rank, next: rank < T.length ? T[rank] : null, need: rank < T.length ? T[rank] - k : 0, T };
 };
 DQ.knows = (m, key) => DQ.research(m).rank >= KEYS.indexOf(key) + 1;
@@ -118,7 +131,8 @@ DQ.toggleTrophy = id => {
 /* reaching a title or trophy is announced (kept in offline summaries); stars stay quiet */
 const recordKill1 = DQ.recordKill;
 DQ.recordKill = (m, drops) => {
-  const before = S().beast.kills[m.id] || 0; recordKill1(m, drops); const after = S().beast.kills[m.id] || 0;
+  const before = S().beast.kills[m.id] || 0, knew = DQ.understanding(m).done; recordKill1(m, drops); const after = S().beast.kills[m.id] || 0;
+  if (!knew && DQ.understanding(m).done && !DQ.forecasting && DQ.journal) DQ.journal('title', `You understand ${m.name} now. The field guide fills in its next entry${m.boss ? ', and its trophy gains a gold rim' : ''}.`, 'book');
   if (DQ.forecasting) return;
   const crossed = n => before < n && after >= n;
   if (m.boss && crossed(10)) DQ.notify({ kind: 'unlock', key: 'slayer:trophy:' + m.id, icon: 'trophy', col: '#d8a64a', title: `Trophy earned: ${m.boss.short || m.name}`, text: `Ten victories over ${m.name}. ${S().house.owned ? 'Hang it on your cottage wall.' : 'It will wait for you until you own a cottage.'}`, action: { label: 'Open the field guide', fn: () => UI.openGuide(m.id) }, sound: 'quest', ttl: 12000 });
@@ -128,7 +142,9 @@ DQ.recordKill = (m, drops) => {
 UI.slayerHtml = m => {
   const goals = DQ.slayerGoals(m), wearing = S().title === 'beast:' + m.id, hung = (S().house.wall || []).includes(m.id);
   const rows = goals.map(g => `<li class="${g.done ? 'on' : ''}">${ico(g.done ? 'check' : 'lock')}<b>${fmt(g.n)} defeats</b><small>${esc(g.reward)}${g.done ? '' : ` · ${fmt(g.left)} more`}</small>${g.done && g.title ? `<button class="btn sm" data-do="beasttitle" data-a="${wearing ? '' : 'beast:' + m.id}">${wearing ? 'Remove title' : 'Wear title'}</button>` : ''}${g.done && g.trophy ? (S().house.owned ? `<button class="btn sm" data-do="trophy" data-a="${m.id}">${hung ? 'Take down' : 'Hang in cottage'}</button>` : '<small class="dim">Hang it once you own a cottage</small>') : ''}</li>`).join('');
-  return `<div class="gsec slayer"><div class="gh">${m.boss && DQ.trophyArt ? `<span class="slayer-trophy ${DQ.trophyEarned(m.id) ? '' : 'tro-locked'}">${DQ.trophyArt(m.id, 88)}</span>` : ico('trophy')}<b>Slayer goals</b><small>Rewards for repeated victories</small></div><ol class="slayer-goals">${rows}</ol></div>`;
+  const u = DQ.understanding(m);
+  const under = `<div class="understanding ${u.done ? 'done' : ''}">${ico(u.done ? 'check' : 'book')}<span><b>Understanding</b><small>${esc(u.main)}: ${u.have}/${u.need} · ${esc(u.alt)}: ${u.altHave}/${u.altNeed}</small><small class="dim">Reward: the next field-guide entry early${m.boss ? ' and a gold rim on its trophy' : ''}.</small></span></div>`;
+  return `<div class="gsec slayer">${under}<div class="gh">${m.boss && DQ.trophyArt ? `<span class="slayer-trophy ${DQ.trophyEarned(m.id) ? '' : 'tro-locked'}">${DQ.trophyArt(m.id, 88)}</span>` : ico('trophy')}<b>Slayer goals</b><small>Rewards for repeated victories</small></div><ol class="slayer-goals">${rows}</ol></div>`;
 };
 UI.trophyWallHtml = () => {
   const bosses = D.MONLIST.filter(m => m.boss), W = S().house.wall || [];

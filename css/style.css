@@ -2116,3 +2116,5 @@ body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)
 .journey .destination-picker .k{display:block;margin-bottom:6px}
 .journey .destination-choices .chip.sm{font-size:13px;padding:4px 10px}
 .herb-path li .btn{align-self:flex-start}
+.understanding{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;padding:8px 10px;margin-bottom:8px;border:1px dashed var(--line);border-radius:8px}
+.understanding small{display:block}.understanding.done{border-style:solid;border-color:var(--brass)}.understanding.done b{color:var(--brass)}

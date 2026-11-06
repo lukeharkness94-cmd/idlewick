@@ -447,8 +447,8 @@ function monsterAttack(f, m, ps, sty) {
   if (f.stun) { f.stun = 0; DQ.splat('foe', 'Stunned', 'miss', 600); return; }
   if (U.roar && !f.roared) { f.roared = 1; fxHit('roar'); DQ.splat('you', 'Roar!', 'miss', 600); return; }
   const special = m.boss && m.boss.special && f.ma % m.boss.special.every === 0, sp = special && m.boss.special;
-  if (special && A('bash') && f.ma - (f.lastBash || -99) >= 8) { f.lastBash = f.ma; DQ.splat('you', 'Bash!', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your shield bash interrupts ${sp.name}!`, 'good'); return; }
-  if (special && A('ward') && f.ma - (f.lastWard || -99) >= 6) { f.lastWard = f.ma; DQ.splat('you', 'Ward', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your ward absorbs ${sp.name}.`, 'good'); return; }
+  if (special && A('bash') && f.ma - (f.lastBash || -99) >= 8) { f.lastBash = f.ma; if (!DQ.forecasting) beastNote('answered', m.id); DQ.splat('you', 'Bash!', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your shield bash interrupts ${sp.name}!`, 'good'); return; }
+  if (special && A('ward') && f.ma - (f.lastWard || -99) >= 6) { f.lastWard = f.ma; if (!DQ.forecasting) beastNote('answered', m.id); DQ.splat('you', 'Ward', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your ward absorbs ${sp.name}.`, 'good'); return; }
   if (DQ.trick && DQ.trick('heckle') && !f.heckled && f.ma >= 2) { f.heckled = 1; fxHit('heckle'); DQ.splat('you', 'Oi!', 'miss', 600); if (!DQ.sim.on) DQ.trickNote('heckled it into missing!', document.getElementById('av-foe')); return; }
   let acc = hitChance((m.att + 8) * (64 + m.att), ps.defRoll); if (f.pinned > 0) { acc *= .75; f.pinned--; }
   let taken = 0;
@@ -476,13 +476,21 @@ function monsterAttack(f, m, ps, sty) {
   if (special && !DQ.sim.on) { DQ.log(`${m.name} unleashes ${sp.name}!`, 'bad'); DQ.emit('bossSpecial', m); }
   if (!DQ.sim.on && m.boss && m.boss.special) DQ.emit('bossTell', m, (f.ma + 1) % m.boss.special.every === 0);
   if (S().hp <= 0) { die(); return 'dead'; }
+  if (special && !DQ.forecasting) beastNote('answered', m.id);
   if (f.hp <= 0) { kill(m); return 'dead'; }
   if (A('second') && !f.sw && S().hp < DQ.maxHp() * .3) { f.sw = 1; const h = Math.round(DQ.maxHp() * .3); S().hp += h; DQ.floatAt(document.querySelector('.hud .hp'), `Second wind +${h}`, '#5cc08a'); }
   autoEat();
+  /* Healing draught: an emergency drink once the food is gone and health is low, at most once per fight */
+  if (S().settings.autoEat && !f.drank && !DQ.foods().length && S().hp < DQ.maxHp() * .25 && DQ.have('potion_heal')) {
+    f.drank = 1; DQ.take('potion_heal', 1); const h = Math.min(Math.round(DQ.maxHp() * .4), DQ.maxHp() - S().hp); S().hp += h; fxHit('draught'); DQ.splat('you', 'Draught +' + h, 'heal', 950);
+  }
   if (DQ.act && DQ.act.pace === 'careful' && S().hp < DQ.maxHp() * .35 && !DQ.foods().length) { DQ.stopAct(false, 'You retreated at low health with no food left (Careful pace).'); return 'dead'; }
 }
+/* field-guide understanding (bestiary.js): wins whose finishing blow used a weak point, and boss specials you answered */
+const beastNote = (key, id) => { const B = S().beast; const T = B[key] = B[key] || {}; T[id] = (T[id] || 0) + 1; };
 function kill(m) {
-  const f = DQ.fight; S().stats.kill++; if (DQ.act) DQ.act.count++;
+  const f = DQ.fight;
+  if (f && !DQ.forecasting) { const wr = DQ.weakOf(m, f); if (f.lastEl && wr.weak.includes(f.lastEl)) beastNote('weakWins', m.id); } S().stats.kill++; if (DQ.act) DQ.act.count++;
   const c = Math.round(rnd(m.coins[0], m.coins[1]) * DQ.coinMult()); DQ.addCoins(c);
   const loot = c ? [`${fmt(c)} coins`] : [], got = [], drops = [];
   const first = m.boss && !(S().towns[m.town] && S().towns[m.town].boss);

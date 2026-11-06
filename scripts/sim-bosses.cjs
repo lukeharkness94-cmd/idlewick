@@ -115,6 +115,43 @@ const compare = boss => {
   res('over', S => { general(S, 5); town(S); gearUp(S); foodFor(S, 15); }, `+5 levels in 4 skills (${Math.round(4 * ((D.XPF[Math.min(99, lv0 + 5)] || 0) - (D.XPF[lv0] || 0)) / 1000)}k XP)`);
   return rows.join('\n');
 };
+/* PARITY=1: are the three styles on par at the same combat level? Each hero has the combat level of the region's
+   boss requirement, made from its own style (the combat formula counts Ranged and Magic at 1.5x, so a mage at the same
+   combat level has a higher Magic level than a fighter's Attack). Same armour, best weapon (and arrows or spell) of the
+   region and the one before, 15 food, the style's own abilities, no weakness or resistance on the target. */
+const parity = boss => {
+  const out = [], town = boss.town, tier = D.TOWN[town].idx, req = boss.boss.req;
+  const region = new Set([...(D.TOWN_GEAR[town] || []), ...(D.TOWN_GEAR[D.TOWNS[Math.max(0, tier - 1)].id] || []), ...['arrow_bronze', 'arrow_iron', 'arrow_steel', 'arrow_mithril', 'arrow_adamant', 'arrow_rune', 'arrow_astral'].slice(0, tier + 1)]);
+  const savedWeak = D.WEAK[boss.id], savedMech = boss.id === 'hollowking' ? D.HOLLOW_PHASES : null;
+  D.WEAK[boss.id] = { weak: [], resist: [] }; if (savedMech) D.HOLLOW_PHASES = D.HOLLOW_PHASES.map(() => ({ weak: [], resist: [] }));
+  for (const style of ['melee', 'ranged', 'magic']) {
+    q.S = q.newState(); const S = q.S; S.settings.notify = false; S.town = town; D.TOWNS.slice(0, tier + 1).forEach(t => { S.towns[t.id] = { visited: true, boss: t.id !== town }; });
+    /* the levels that make exactly this combat level for this style */
+    let L = 10; const set = n => { S.xp.defence = D.XPF[n]; S.xp.hitpoints = D.XPF[n]; if (style === 'melee') { S.xp.attack = D.XPF[n]; S.xp.strength = D.XPF[n]; } else { S.unlocked[style] = true; S.xp[style] = D.XPF[Math.min(99, Math.round(n * 4 / 3))]; } };
+    while (L < 99) { set(L); q.fxDirty(); if (q.combatLvl() >= req) break; L++; }
+    const pick = re => Object.keys(D.ITEMS).filter(id => re.test(id) && region.has(id)).map(id => { S.inv[id] = 1; const ok = q.canEquip(id).ok; delete S.inv[id]; return ok ? id : null; }).filter(Boolean);
+    for (const slot of ['head', 'body', 'legs']) { const best = pick(new RegExp(`_${({ head: 'helm', body: 'body', legs: 'legs' })[slot]}$`)).filter(id => !/robe_/.test(id)).sort((a, b) => (D.ITEMS[b].b.def || 0) - (D.ITEMS[a].b.def || 0))[0]; if (best) { S.inv[best] = 1; q.equipItem(best); } }
+    let wpn;
+    if (style === 'melee') wpn = pick(/^(bronze|iron|steel|mithril|adamant|rune|astral)_(sword|hammer)$/).sort((a, b) => (D.ITEMS[b].b.atk + D.ITEMS[b].b.str) - (D.ITEMS[a].b.atk + D.ITEMS[a].b.str))[0];
+    if (style === 'ranged') { wpn = pick(/^bow_/).pop(); const ar = pick(/^arrow_/).pop(); S.inv[ar] = 5000; q.equipItem(ar); }
+    if (style === 'magic') { wpn = pick(/^staff_/).pop(); S.inv.rune = 99999; const sp = D.SPELLS.filter(x => q.lvl('magic') >= x.lvl).pop(); S.spell = sp.id; }
+    S.inv[wpn] = 1; q.equipItem(wpn);
+    if (style !== 'melee') S.inv.shield = 0;
+    if (!S.equip.shield && style === 'melee') { const sh = pick(/_shield$/).sort((a, b) => D.ITEMS[b].b.def - D.ITEMS[a].b.def)[0]; if (sh) { S.inv[sh] = 1; q.equipItem(sh); } }
+    S.abilities = (style === 'melee' ? ['power', 'brace', 'bash', 'second'] : style === 'ranged' ? ['aimed', 'brace', 'pin', 'kite'] : ['brace', 'ward', 'focus', 'second']).filter(a => q.abilUnlocked(D.AB[a])).slice(0, q.abilSlots());
+    const f = D.FISH_IDS.filter(id => { const r = Object.values(D.RECIPES).find(r => r.out && r.out[id]); return !r || r.lvl <= L; }).sort((a, b) => D.ITEMS[b].heal - D.ITEMS[a].heal)[0]; S.inv[f] = 15; S.hp = q.maxHp(); q.fxDirty();
+    const ps = q.pstats(), interval = q.combatInterval(), dps = ps.max / 2 * (q.weaponStyle() === 'magic' ? 1 : 1) / (interval / 1000);
+    const fs4 = [0, 1, 2, 3].map(() => q.forecast(boss.id)), w = fs4.reduce((n, x) => n + x.wins, 0), ms = fs4.reduce((n, x) => n + x.ms, 0);
+    out.push(`    ${style.padEnd(7)} combat ${q.combatLvl()} · ${wpn}${style === 'magic' ? ' + ' + S.spell : ''} · max hit ${ps.max} every ${(interval / 1000).toFixed(2)}s (≈${dps.toFixed(1)} dmg/s before accuracy) · win ${Math.round(w / 96 * 100)}% · ${w ? Math.round(ms / w / 1000) + 's per win' : '-'}`);
+  }
+  D.WEAK[boss.id] = savedWeak; if (savedMech) D.HOLLOW_PHASES = savedMech;
+  return out.join('\n');
+};
+if (process.env.PARITY) {
+  console.log('Style parity at each boss requirement, against the boss with its weaknesses and resistances removed (96 forecast fights):');
+  for (const b of D.MONLIST.filter(m => m.boss && (!process.env.ONLY || process.env.ONLY.split(',').includes(m.id)))) { console.log(`  ${b.id} (combat ${b.boss.req})`); console.log(parity(b)); }
+  process.exit(0);
+}
 if (process.env.COMPARE) {
   console.log('Preparation choices at each boss requirement (96 forecast fights per row):');
   for (const b of D.MONLIST.filter(m => m.boss && (!process.env.ONLY || process.env.ONLY.split(',').includes(m.id)))) { console.log(`  ${b.id} (combat ${b.boss.req})`); console.log(compare(b)); }
