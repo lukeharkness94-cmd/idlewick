@@ -2319,3 +2319,6 @@ p{font-size:inherit}
 @media (max-width:520px){.skill-coach.pop{grid-template-columns:1fr}.skill-coach.pop .coach-art{margin:0 auto}}
 .modal .skill-coach.pop p,.modal .skill-coach.pop .lesson-goal{font-size:16px!important;line-height:1.45}.modal .skill-coach.pop .lesson-towards{font-size:15px!important}
 #tip .tt-how{color:#e8c878!important;display:flex!important;gap:4px;align-items:flex-start}#tip .tt-how .ic{width:12px!important;height:12px!important;margin-top:2px;flex:none}
+/* slightly heavier text (Alegreya Sans 500, bundled): the 400 weight read thin at the new sizes */
+body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
+.btn,.tab,.stab,.chip,.choice-button,.tog{font-weight:700}

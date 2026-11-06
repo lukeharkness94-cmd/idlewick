@@ -221,12 +221,14 @@ DQ.recipeGroup = r => {
   if(r.skill==='smithing'){ if(r.id.startsWith('smelt_'))return {g:'Smelting'}; if(r.tab==='Tools')return {g:'Tools'}; return {g:METAL[m]||'Other',s:it.slot==='weapon'?'Weapons':'Armour'}; }
   if(r.skill==='crafting'){ if(r.tab==='Tools')return {g:'Tools'}; if(it.charm)return {g:'Charms'}; if(r.tab==='Jewellery')return {g:'Jewellery'}; if(r.tab==='Arrows')return {g:'Arrows'};
     if(it.slot&&HIDE[m]&&it.slot!=='weapon')return {g:'Armour',s:HIDE[m]}; if(r.tab==='Bows')return {g:'Wood',s:'Bows'}; if(r.tab==='Staves')return {g:'Wood',s:'Staves'}; if(r.tab==='Shields'||it.wood)return {g:'Wood',s:'Shields'}; return {g:'Basics'}; }
+  if(r.skill==='cooking'){ if(it.dish)return {g:'Fish suppers'}; if(r.tab==='Farmhouse')return {g:'Farmhouse'}; const b=r.lvl<=25?'Level 1–25':r.lvl<=50?'Level 26–50':r.lvl<=75?'Level 51–75':'Level 76–99'; return {g:'Fish',s:b}; }
   return {g:r.tab||'All'};
 };
 UI.V.recipes = sk => {
   /* Categories by material, then by type (Nov 2026): Smithing groups by metal (weapons / armour), Crafting by what you
      make (armour by hide, wood by bows / staves / shields). Each chip says how many are ready, or the level it opens at. */
-  const list=D.RLIST[sk],grp=r=>DQ.recipeGroup(r),groups=[...new Set(list.map(r=>grp(r).g))];
+  /* every list in level order, so new additions never trail at the end */
+  const list=D.RLIST[sk].slice().sort((a,b)=>a.lvl-b.lvl||a.name.localeCompare(b.name)),grp=r=>DQ.recipeGroup(r),order=['Fish','Fish suppers','Farmhouse','Smelting','Bronze','Iron','Steel','Mithril','Adamant','Rune','Astral','Basics','Armour','Wood','Arrows','Jewellery','Charms','Tools'],groups=[...new Set(list.map(r=>grp(r).g))].sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
   const g=UI.tab[sk]=groups.includes(UI.tab[sk])?UI.tab[sk]:(groups.find(x=>list.some(r=>grp(r).g===x&&DQ.lvl(sk)>=r.lvl&&DQ.canMake(r)))||groups[0]);
   const subs=[...new Set(list.filter(r=>grp(r).g===g).map(r=>grp(r).s).filter(Boolean))],sub=UI.tab[sk+'sub']=subs.includes(UI.tab[sk+'sub'])?UI.tab[sk+'sub']:subs[0],only=UI.tab[sk+'ready'];
   const inG=(r,x,y)=>grp(r).g===x&&(!y||grp(r).s===y),chip=(x,y,on,act,b)=>{const rs=list.filter(r=>inG(r,x,y)),ready=rs.filter(r=>DQ.lvl(sk)>=r.lvl&&DQ.canMake(r)).length,min=Math.min(...rs.map(r=>r.lvl)),locked=DQ.lvl(sk)<min;

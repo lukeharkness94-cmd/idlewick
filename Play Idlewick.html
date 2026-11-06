@@ -2394,6 +2394,9 @@ p{font-size:inherit}
 @media (max-width:520px){.skill-coach.pop{grid-template-columns:1fr}.skill-coach.pop .coach-art{margin:0 auto}}
 .modal .skill-coach.pop p,.modal .skill-coach.pop .lesson-goal{font-size:16px!important;line-height:1.45}.modal .skill-coach.pop .lesson-towards{font-size:15px!important}
 #tip .tt-how{color:#e8c878!important;display:flex!important;gap:4px;align-items:flex-start}#tip .tt-how .ic{width:12px!important;height:12px!important;margin-top:2px;flex:none}
+/* slightly heavier text (Alegreya Sans 500, bundled): the 400 weight read thin at the new sizes */
+body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
+.btn,.tab,.stab,.chip,.choice-button,.tog{font-weight:700}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -9912,12 +9915,14 @@ DQ.recipeGroup = r => {
   if(r.skill==='smithing'){ if(r.id.startsWith('smelt_'))return {g:'Smelting'}; if(r.tab==='Tools')return {g:'Tools'}; return {g:METAL[m]||'Other',s:it.slot==='weapon'?'Weapons':'Armour'}; }
   if(r.skill==='crafting'){ if(r.tab==='Tools')return {g:'Tools'}; if(it.charm)return {g:'Charms'}; if(r.tab==='Jewellery')return {g:'Jewellery'}; if(r.tab==='Arrows')return {g:'Arrows'};
     if(it.slot&&HIDE[m]&&it.slot!=='weapon')return {g:'Armour',s:HIDE[m]}; if(r.tab==='Bows')return {g:'Wood',s:'Bows'}; if(r.tab==='Staves')return {g:'Wood',s:'Staves'}; if(r.tab==='Shields'||it.wood)return {g:'Wood',s:'Shields'}; return {g:'Basics'}; }
+  if(r.skill==='cooking'){ if(it.dish)return {g:'Fish suppers'}; if(r.tab==='Farmhouse')return {g:'Farmhouse'}; const b=r.lvl<=25?'Level 1–25':r.lvl<=50?'Level 26–50':r.lvl<=75?'Level 51–75':'Level 76–99'; return {g:'Fish',s:b}; }
   return {g:r.tab||'All'};
 };
 UI.V.recipes = sk => {
   /* Categories by material, then by type (Nov 2026): Smithing groups by metal (weapons / armour), Crafting by what you
      make (armour by hide, wood by bows / staves / shields). Each chip says how many are ready, or the level it opens at. */
-  const list=D.RLIST[sk],grp=r=>DQ.recipeGroup(r),groups=[...new Set(list.map(r=>grp(r).g))];
+  /* every list in level order, so new additions never trail at the end */
+  const list=D.RLIST[sk].slice().sort((a,b)=>a.lvl-b.lvl||a.name.localeCompare(b.name)),grp=r=>DQ.recipeGroup(r),order=['Fish','Fish suppers','Farmhouse','Smelting','Bronze','Iron','Steel','Mithril','Adamant','Rune','Astral','Basics','Armour','Wood','Arrows','Jewellery','Charms','Tools'],groups=[...new Set(list.map(r=>grp(r).g))].sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
   const g=UI.tab[sk]=groups.includes(UI.tab[sk])?UI.tab[sk]:(groups.find(x=>list.some(r=>grp(r).g===x&&DQ.lvl(sk)>=r.lvl&&DQ.canMake(r)))||groups[0]);
   const subs=[...new Set(list.filter(r=>grp(r).g===g).map(r=>grp(r).s).filter(Boolean))],sub=UI.tab[sk+'sub']=subs.includes(UI.tab[sk+'sub'])?UI.tab[sk+'sub']:subs[0],only=UI.tab[sk+'ready'];
   const inG=(r,x,y)=>grp(r).g===x&&(!y||grp(r).s===y),chip=(x,y,on,act,b)=>{const rs=list.filter(r=>inG(r,x,y)),ready=rs.filter(r=>DQ.lvl(sk)>=r.lvl&&DQ.canMake(r)).length,min=Math.min(...rs.map(r=>r.lvl)),locked=DQ.lvl(sk)<min;
