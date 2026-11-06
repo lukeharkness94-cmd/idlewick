@@ -12,7 +12,7 @@ Baseline commit `f8197ac`. Two design perspectives, not real players: **Player A
 | 4 | **The opening had tasks but no reason.** First Steps was "catch shrimp, chop logs". Finished quests went to the bell, so nobody acknowledged the work. The earliest discovery needed Woodcutting 10 and up to 1,500 chops. | Mostly B. | **Improved**: villager motive, thanks lines, an early discovery with a choice. |
 | 5 | **The return summary said what happened but offered one path.** | Both. | **Improved**: "Other good options" with real costs. |
 | 6 | **About half the interface icons were unfinished line glyphs** (close, lock, check, info, item categories…). Button choices had text only. | Both (polish and readability). | **Fixed**: all 83 icons are pixel art (enforced by test), and choices carry icons. |
-| 7 | **The late bosses depend on counters.** With region melee gear at the requirement, the win rate falls from 46% (Frostmaw) to 17% (Morwenna), 4% (Pyrrhax) and 0% (Zephyrion, Hollow King). These fights are designed around elemental, ranged and phase counters. The simulator does not use counters, so this is **not proof of a spike**. | A (late game). | **Open**: needs a counter-aware simulation before any retune. |
+| 7 | **The late bosses depend on counters.** With region melee gear at the requirement, the win rate falls from 46% (Frostmaw) to 17% (Morwenna), 4% (Pyrrhax) and 0% (Zephyrion, Hollow King). These fights are designed around elemental, ranged and phase counters. The simulator does not use counters, so this is **not proof of a spike**. | A (late game). | **Measured**: with counters, not a spike (see below). |
 | 8 | **Bestiary mastery and companions have no visible goals.** Slayer stars (+4% damage at 10, 50 and 250 defeats) and the six research stamps exist but are not framed as objectives. | A. | **Proposal only** (mechanical rewards need approval). |
 
 ## Improvements in detail
@@ -79,11 +79,28 @@ Weakness: Herbalism and Enchanting arrive with no named first target, and the pr
 
 1. **Bestiary mastery objectives:** three goals per creature (10, 50 and 250 defeats already give slayer stars), with the reward shown before you start. A new reward, such as a trophy furnishing or a cosmetic title, is a new effect, so it needs approval.
 2. **Companion distinctness:** give each curated companion one unique, readable effect in place of the shared small percentage bonuses. This is a mechanical change.
-3. **Late-boss counter simulation, then tuning:** extend `sim-bosses.cjs` with counter loadouts (fire spells for Frostmaw, frost for Pyrrhax, bow and Pin Down for Zephyrion, three styles for the Hollow King) before deciding whether anything needs retuning.
+3. **Counters may be too strong (measured, not changed):** see "Late bosses with counters" below. A possible retune would make counters a big advantage rather than a near-guarantee. That's a balance change, so it awaits your call after playtesting.
 4. **Keep or remove the satchel rewards:** +60 Attack and Defence XP, or +40 coins. Both are tiny and removable in one line.
 
 ## Remaining weak stretches
 - Mossbarrow to Saltmere (Hero 18–30) has the fewest stories. The Bramble Mill adventure is the only thread.
 - Hero 46+ (late Ironpeak) was flagged as thin earlier and is unchanged.
 - Herbalism and Enchanting first steps need named targets.
-- Late-boss difficulty is unverified for counter play.
+- Counter play makes the bosses before the Hollow King near-certain wins. Whether that feels rewarding or too easy is a playtest question.
+
+## Late bosses with counters (`COUNTER=1 node scripts/sim-bosses.cjs`)
+
+The simulated hero stands at each boss's requirement and follows the field guide: the matching spell (with staff), a bow and arrows against pierce, or the matching melee weapon. Gear comes only from that region and the one before, plus 15 of the best cookable food. The counter skill is set to keep combat level at the requirement. Abilities slotted: Focus and Ward, Pin, Aimed and Keep Distance, or Power, Bash and Brace.
+
+| Boss | Counter used | Win at requirement | Food per win | +3 levels |
+| --- | --- | --- | --- | --- |
+| Grubnash | Bronze warhammer | 100% | 1.7 | 100% |
+| Old Tusk | Oak bow, iron arrows | 100% | 1.4 | 100% |
+| Barnacle | Oak staff (Spark, storm) | 100% | 8.1 | 100% |
+| Frostmaw | Willow staff, Fire Surge | 100% | 1.5 | 100% |
+| Morwenna | Maple bow, adamant arrows | 100% | 2.5 | 100% |
+| Pyrrhax | Yew bow, rune arrows | 100% | 3.8 | 100% |
+| Zephyrion | Magic bow, astral arrows | 100% | 2.7 | 100% |
+| Hollow King | Elder staff, Aether Blast | 67% | 13.3 | 79% |
+
+**Reading:** with plain melee the later bosses look like walls (0–46%). With the field guide's counter they are near-certain wins. The design intent (bosses as counter checks) works, but the gap is very wide. One caveat: this assumes the player has trained the counter style as far as their melee, which a melee-only player will not have done.

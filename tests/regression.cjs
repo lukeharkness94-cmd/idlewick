@@ -415,6 +415,18 @@ test('first boss: reachable gate and honest preparation advice from the real sav
  assert.ok(adv.some(x=>x.key==='weak'),'suggests his weakness (crush)');
  const before=JSON.stringify(S);q.prepAdvice('grubnash');assert.equal(JSON.stringify(S),before,'advice never changes the save');
 });
+test('slayer goals: titles and boss trophies are earned at their milestones and survive a save round trip',()=>{
+ const {q,load}=harness();load('lore');load('bestiary');const S=q.S,D=q.data;
+ assert.ok(q.slayerGoals,'bestiary module loaded');
+ const g=q.slayerGoals(D.MON.goblin);assert.equal(JSON.stringify(g.map(x=>x.n)),'[10,50,250]');assert.ok(g[2].title&&/Goblin Slayer/.test(g[2].reward),'regular title at 250, named up front');
+ assert.equal(q.beastTitleEarned('goblin'),false);S.beast.kills.goblin=250;assert.equal(q.beastTitleEarned('goblin'),true);
+ q.setTitle('beast:goblin');assert.equal(q.heroTitle(),'Goblin Slayer');
+ q.setTitle('beast:rat');assert.equal(S.title,null,'cannot wear an unearned title');
+ S.beast.kills.grubnash=9;assert.equal(q.trophyEarned('grubnash'),false);S.beast.kills.grubnash=10;assert.equal(q.trophyEarned('grubnash'),true);
+ S.house.owned=true;assert.ok(q.toggleTrophy('grubnash'));assert.equal(JSON.stringify(S.house.wall),'["grubnash"]');assert.equal(q.toggleTrophy('oldtusk'),false,'unearned trophies cannot be hung');
+ const back=q.validateSave(JSON.parse(JSON.stringify(S)));assert.equal(JSON.stringify(back.house.wall),'["grubnash"]');
+ const old=JSON.parse(JSON.stringify(S));delete old.house.wall;assert.ok(Array.isArray(q.validateSave(old).house.wall),'older saves get an empty wall');
+});
 test('restoration: new Willowbrook projects, regional materials, villager voices and legacy bonuses',()=>{
  const {q,load}=harness();load('fx');load('routes');const S=q.S,D=q.data;S.coins=1e6;
  const wb=q.projectsForTown('willowbrook').map(([id])=>id);for(const id of ['well','inn','forge','garden','library','watchtower'])assert.ok(wb.includes(id),id);

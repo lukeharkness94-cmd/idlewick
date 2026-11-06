@@ -29,7 +29,7 @@ DQ.newState = (name = 'Adventurer', look) => {
     style: { melee: 'aggressive', ranged: 'offense', magic: 'offense' }, spell: 'spark',
     act: null, log: [], tut: { done: {}, hidden: false },
     gameTime: 0, farm: { plots: [{ crop: null }, { crop: null }, { crop: null }], plotsBought: 3, animals: [], pensBought: 2, feed: 0, autoReplant: true, last: 'potato', next: null },
-    pets: { owned: {}, active: null }, hunt: { area: null, target: null, encounters: 0 }, enchants: {}, house: { owned: false, rooms: {}, furn: {} }, workers: [], hire: { cands: [], at: -1e9 }, beast: { kills: {}, drops: {} },
+    pets: { owned: {}, active: null }, hunt: { area: null, target: null, encounters: 0 }, enchants: {}, house: { owned: false, rooms: {}, furn: {}, wall: [] }, workers: [], hire: { cands: [], at: -1e9 }, beast: { kills: {}, drops: {} },
   };
 };
 DQ.S = DQ.newState();

@@ -2007,3 +2007,14 @@ img.pxscene{width:100%;height:auto!important;aspect-ratio:160/90;object-fit:cont
 .h-tic img{width:32px;height:32px;object-fit:contain;image-rendering:pixelated}
 .h-tic img.px24,.h-tic>.art-sprite{width:48px;height:48px}
 .h-stop .ic{width:20px;height:20px}
+/* Slayer goals and the trophy wall */
+.slayer-goals{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.slayer-goals li{display:grid;grid-template-columns:auto 1fr auto;gap:2px 8px;align-items:center}
+.slayer-goals li small{grid-column:2;color:var(--dim)}.slayer-goals li b{grid-column:2}
+.slayer-goals li>.ic{grid-row:1/3}.slayer-goals li .btn,.slayer-goals li>small.dim{grid-column:3;grid-row:1/3}
+.slayer-goals li.on b{color:var(--good,#5cc08a)}
+.slayer-trophy.tro-locked img,.trophy.tro-locked img{filter:brightness(0) opacity(.35)}
+.trophies{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.trophy{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px;border:1px solid var(--line);border-radius:10px;text-align:center}
+.trophy.hung{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 10%,transparent)}
+.trophy small{color:var(--dim)}

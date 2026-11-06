@@ -210,6 +210,18 @@ Object.assign(ICON, {
 const ICON_ALIAS = { book: 'research', scroll: 'quest', compass: 'exploration', sword: 'attack', rod: 'fishing', glove: 'thieving', hoe: 'farming', hammer: 'smithing', bottle: 'herbalism', rune: 'enchanting', house: 'home', bank: 'bag', users: 'bag', paw: 'hunting', defence: 'defence', health: 'hitpoints' };
 function iconSprite(id) { const k = ICON[id] ? id : ICON_ALIAS[id]; const f = ICON[k]; if (!f) return null; const s = Spr(16, 16); const out = f(s); return out && out.w ? out : s; }
 
+/* boss trophies: the boss itself mounted on a carved oak plaque with a brass nameplate (40 x 44) */
+function trophySprite(id) {
+  const c = A.creatureSprite && A.creatureSprite(id); if (!c) return null;
+  const s = Spr(40, 44), oak = R.wood || rp('#8a5a32');
+  s.poly([[2, 3], [38, 3], [38, 30], [20, 42], [2, 30]], oak);
+  s.poly([[5, 6], [35, 6], [35, 29], [20, 38], [5, 29]], rp('#5a3a22'));
+  s.stamp(c, 4, 3);
+  s.rect(12, 34, 16, 4, R.gold); s.fix(13, 35, '#fff6c0'); for (let x = 15; x <= 25; x += 2) s.fix(x, 36, '#7a5a2a');
+  s.fix(4, 4, '#ffd9a0'); s.fix(36, 4, '#ffd9a0');
+  return s;
+}
+Object.assign(A, { trophySprite, trophyUrl: id => A.url('trophy:' + id, () => trophySprite(id)) });
 Object.assign(A, { workerSprite, treeSprite, rockSprite, piece, sceneFor, furnSprite, iconSprite, TREE, TOWN, ICON, ICON_ALIAS,
   treeUrl: id => A.url('tree:' + id, () => treeSprite(id)), rockUrl: id => A.url('rock:' + id, () => rockSprite(id)),
   furnUrl: (id, ic) => A.url('furn:' + id, () => furnSprite(id, ic)), workerUrl: sk => A.url('worker:' + sk, () => workerSprite(sk)), cottageUrl: () => A.url('cottage', () => A.sprites.cottage()), iconUrl: id => A.url('icon:' + id, () => iconSprite(id)) });

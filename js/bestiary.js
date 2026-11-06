@@ -43,7 +43,7 @@ UI.V.bestiary = () => {
   const B = S().beast, tot = DQ.researchTotals(), stars = id => '★'.repeat(DQ.beastStars(id)) + '☆'.repeat(3 - DQ.beastStars(id));
   const groups = D.TOWNS.map(t => `<div class="sgroup"><div class="k">${DQ.townUnlocked(t.id) ? esc(t.name) : '???'}</div><div class="beasts">${D.MONLIST.filter(m => m.town === t.id).map(m => {
     const r = DQ.research(m), seen = r.rank >= 1;
-    return `<button class="beast ${seen ? '' : 'unk'} ${m.boss ? 'bossb' : ''}" style="--c:${m.col}" data-do="guide" data-a="${m.id}">${DQ.monSprite(m, 72, seen ? 'bob' : 'sil')}<div><b>${seen ? esc(m.name) : '???'}</b>${pips(r)}<small>${seen ? `Lv ${m.cl} · ${fmt(r.kills)} defeated · <span class="stars" data-tip="text:Slayer stars at 10, 50 and 250 defeats. Each adds 4% damage against this monster.">${stars(m.id)}</span>` : 'Defeat it to add it to the guide'}</small><small class="dim">${seen ? nextLine(m, r) : ''}</small></div></button>`;
+    return `<button class="beast ${seen ? '' : 'unk'} ${m.boss ? 'bossb' : ''}" style="--c:${m.col}" data-do="guide" data-a="${m.id}">${DQ.monSprite(m, 72, seen ? 'bob' : 'sil')}<div><b>${seen ? esc(m.name) : '???'}</b>${pips(r)}<small>${seen ? `Lv ${m.cl} · ${fmt(r.kills)} defeated · <span class="stars" data-tip="text:Slayer goals at 10, 50 and 250 defeats: each adds 4% damage against this monster, and the last earns a title (bosses: a trophy at 10, a title at 50).">${stars(m.id)}</span>` : 'Defeat it to add it to the guide'}</small><small class="dim">${seen ? nextLine(m, r) : ''}</small></div></button>`;
   }).join('')}</div></div>`).join('');
   const ladder = RANKS.map((x, i) => `<span class="lad" data-tip="text:${esc(x[2])}"><b>${i + 1}</b>${x[1]}<small>${D.RESEARCH.regular[i]} defeat${D.RESEARCH.regular[i] > 1 ? 's' : ''}</small></span>`).join('');
   return `<section class="panel shophead"><div><span class="k">Bestiary</span><h2>${tot.sighted} of ${D.MONLIST.length} monsters met · ${tot.done} fully researched</h2></div><div class="tabs">${[['monsters', 'Field guide'], ['pets', 'Creatures']].map(([k, n]) => `<button class="tab ${UI.beastTab === k ? 'on' : ''}" data-do="beasttab" data-a="${k}">${n}</button>`).join('')}</div></section>
@@ -75,7 +75,7 @@ UI.openGuide = id => {
     <div class="gsec ${r.rank > 3 ? '' : 'part'}"><div class="gh"><b>${RANKS[3][1]}</b><small>${RANKS[3][2]}</small></div>${dr}</div>
     ${sec(4, `<p>${esc(lore.note || 'No notes yet.')}</p>`)}
     ${sec(5, `<p class="legend">${esc(lore.legend || '')}</p>`)}
-    <p class="sm dim gstars">Slayer stars: <span class="stars">${'★'.repeat(DQ.beastStars(id))}${'☆'.repeat(3 - DQ.beastStars(id))}</span> (+${DQ.beastStars(id) * 4}% damage against it)</p>`;
+    ${seen ? UI.slayerHtml(m) : ''}<p class="sm dim gstars">Slayer stars: <span class="stars">${'★'.repeat(DQ.beastStars(id))}${'☆'.repeat(3 - DQ.beastStars(id))}</span> (+${DQ.beastStars(id) * 4}% damage against it)</p>`; UI.guideOpen = id;
   DQ.modal({ title: 'Field guide', wide: true, body, actions: [{ label: 'Close' }, ...(m.town === S().town ? [{ label: 'Fight it', primary: true, fn: () => { DQ.go('combat'); DQ.startAct('fight', id); } }] : [])] });
 };
 Object.assign(UI.DO, { guide: a => UI.openGuide(a) });
@@ -87,4 +87,58 @@ DQ.tips.mon = id => {
   h += `<div class="dim">Research ${r.rank}/6${r.next != null ? ` · ${r.need} more defeat${r.need > 1 ? 's' : ''}: ${RANKS[r.rank][1]}` : ' · complete'}</div>`;
   return h;
 };
+
+/* ---------- Slayer goals (approved Nov 2026): three milestones per creature, rewards shown before you start ----------
+   Every milestone keeps its slayer star (+4% damage against that creature). Regular creatures award a title at 250
+   defeats. Bosses award a trophy for the cottage wall at 10 defeats and a title at 50. Titles and trophies are cosmetic. */
+const titleCase = t => t.replace(/(^|\s)\S/g, c => c.toUpperCase());
+DQ.slayerGoals = m => {
+  const k = S().beast.kills[m.id] || 0, who = m.boss ? (m.boss.short || m.name) : m.name;
+  const goals = [
+    { n: 10, reward: `★ +4% damage${m.boss ? ' · a trophy for your cottage' : ''}`, trophy: !!m.boss },
+    { n: 50, reward: `★★ +8% damage${m.boss ? ` · the title “${DQ.beastTitleName(m)}”` : ''}`, title: !!m.boss },
+    { n: 250, reward: `★★★ +12% damage${m.boss ? '' : ` · the title “${DQ.beastTitleName(m)}”`}`, title: !m.boss }
+  ];
+  return goals.map(g => Object.assign(g, { done: k >= g.n, left: Math.max(0, g.n - k), who }));
+};
+DQ.beastTitleName = m => m.boss ? `Bane of ${m.boss.short || m.name}` : `${titleCase(m.name)} Slayer`;
+DQ.beastTitleEarned = id => { const m = D.MON[id]; return !!m && (S().beast.kills[id] || 0) >= (m.boss ? 50 : 250); };
+DQ.trophyEarned = id => { const m = D.MON[id]; return !!(m && m.boss) && (S().beast.kills[id] || 0) >= 10; };
+DQ.beastTitles = () => D.MONLIST.filter(m => DQ.beastTitleEarned(m.id));
+const setTitle0 = DQ.setTitle, heroTitle0 = DQ.heroTitle;
+DQ.setTitle = t => { if (typeof t === 'string' && t.startsWith('beast:')) { S().title = DQ.beastTitleEarned(t.slice(6)) ? t : null; DQ.emit('title'); return; } return setTitle0(t); };
+DQ.heroTitle = () => { const t = S().title; if (typeof t === 'string' && t.startsWith('beast:')) { const id = t.slice(6); return DQ.beastTitleEarned(id) ? DQ.beastTitleName(D.MON[id]) : ''; } return heroTitle0(); };
+/* the trophy wall: earned boss trophies can be hung in the cottage (S().house.wall, a list of boss ids) */
+DQ.toggleTrophy = id => {
+  if (!DQ.trophyEarned(id) || !S().house.owned) return false;
+  const W = S().house.wall = Array.isArray(S().house.wall) ? S().house.wall.filter(x => D.MON[x]) : [];
+  const i = W.indexOf(id); if (i >= 0) W.splice(i, 1); else W.push(id);
+  DQ.save && DQ.save(); return true;
+};
+/* reaching a title or trophy is announced (kept in offline summaries); stars stay quiet */
+const recordKill1 = DQ.recordKill;
+DQ.recordKill = (m, drops) => {
+  const before = S().beast.kills[m.id] || 0; recordKill1(m, drops); const after = S().beast.kills[m.id] || 0;
+  if (DQ.forecasting) return;
+  const crossed = n => before < n && after >= n;
+  if (m.boss && crossed(10)) DQ.notify({ kind: 'unlock', key: 'slayer:trophy:' + m.id, icon: 'trophy', col: '#d8a64a', title: `Trophy earned: ${m.boss.short || m.name}`, text: `Ten victories over ${m.name}. ${S().house.owned ? 'Hang it on your cottage wall.' : 'It will wait for you until you own a cottage.'}`, action: { label: 'Open the field guide', fn: () => UI.openGuide(m.id) }, sound: 'quest', ttl: 12000 });
+  const tn = m.boss ? 50 : 250;
+  if (crossed(tn)) DQ.notify({ kind: 'unlock', key: 'slayer:title:' + m.id, icon: 'star', col: '#d8a64a', title: `Title earned: ${DQ.beastTitleName(m)}`, text: `${fmt(tn)} victories over ${m.name}. Wear it from the field guide.`, action: { label: 'Wear title', fn: () => { DQ.setTitle('beast:' + m.id); UI.renderHud && UI.renderHud(); } }, sound: 'quest', ttl: 12000 });
+};
+UI.slayerHtml = m => {
+  const goals = DQ.slayerGoals(m), wearing = S().title === 'beast:' + m.id, hung = (S().house.wall || []).includes(m.id);
+  const rows = goals.map(g => `<li class="${g.done ? 'on' : ''}">${ico(g.done ? 'check' : 'lock')}<b>${fmt(g.n)} defeats</b><small>${esc(g.reward)}${g.done ? '' : ` · ${fmt(g.left)} more`}</small>${g.done && g.title ? `<button class="btn sm" data-do="beasttitle" data-a="${wearing ? '' : 'beast:' + m.id}">${wearing ? 'Remove title' : 'Wear title'}</button>` : ''}${g.done && g.trophy ? (S().house.owned ? `<button class="btn sm" data-do="trophy" data-a="${m.id}">${hung ? 'Take down' : 'Hang in cottage'}</button>` : '<small class="dim">Hang it once you own a cottage</small>') : ''}</li>`).join('');
+  return `<div class="gsec slayer"><div class="gh">${m.boss && DQ.trophyArt ? `<span class="slayer-trophy ${DQ.trophyEarned(m.id) ? '' : 'tro-locked'}">${DQ.trophyArt(m.id, 88)}</span>` : ico('trophy')}<b>Slayer goals</b><small>Rewards for repeated victories</small></div><ol class="slayer-goals">${rows}</ol></div>`;
+};
+UI.trophyWallHtml = () => {
+  const bosses = D.MONLIST.filter(m => m.boss), W = S().house.wall || [];
+  return `<section class="panel trophy-wall"><div class="phead"><h2>${ico('trophy')} Trophy wall</h2><small>${W.length} of ${bosses.length} hung</small></div><div class="trophies">${bosses.map(m => { const got = DQ.trophyEarned(m.id), on = W.includes(m.id), k = S().beast.kills[m.id] || 0;
+    return `<div class="trophy ${got ? '' : 'tro-locked'} ${on ? 'hung' : ''}">${DQ.trophyArt ? DQ.trophyArt(m.id, 88) : ''}<b>${got || k ? esc(m.boss.short || m.name) : '???'}</b>${got ? `<button class="btn sm ${on ? '' : 'primary'}" data-do="trophy" data-a="${m.id}">${on ? 'Take down' : 'Hang'}</button>` : `<small>${k ? `${fmt(10 - k)} more victories` : 'Defeat this boss 10 times'}</small>`}</div>`; }).join('')}</div></section>`;
+};
+Object.assign(UI.DO, {
+  beasttitle: a => { DQ.setTitle(a || null); UI.renderHud && UI.renderHud(); if (UI.guideOpen && document.querySelector('.gladder')) UI.openGuide(UI.guideOpen); },
+  trophy: a => { if (DQ.toggleTrophy(a)) { if (UI.view === 'house') UI.render(false); if (UI.guideOpen && document.querySelector('.gladder')) UI.openGuide(UI.guideOpen); } }
+});
+const house0 = UI.V.house;
+if (house0) UI.V.house = () => house0() + (S().house.owned ? UI.trophyWallHtml() : '');
 })();
