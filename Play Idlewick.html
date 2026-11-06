@@ -7053,7 +7053,7 @@ DQ.sfx = name => {
     if (now - (last[name] || 0) < gap && name !== 'hit' && name !== 'miss') return;
     if (Math.random() > prob && name !== 'hit') return;
   } else if (now - (last[name] || 0) < 60) return;
-  const IMPORTANT = new Set(['level', 'quest', 'boss', 'death', 'restore', 'region', 'adventure', 'discover', 'unlock', 'ach', 'collection']);
+  const IMPORTANT = new Set(['level', 'quest', 'boss', 'death', 'restore', 'region', 'adventure', 'discover', 'unlock', 'ach', 'collection', 'unique']);
   recent.push(now); while (recent.length && now - recent[0] > 400) recent.shift();
   if (recent.length > 5 && !IMPORTANT.has(name)) return;
   last[name] = now; try { SFX[name] && SFX[name](); } catch (e) {}
