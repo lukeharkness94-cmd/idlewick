@@ -12,7 +12,7 @@ DQ.sourceOf = id => {
   const it = D.ITEMS[id]; if (!it) return null;
   for (const kind of ['fish', 'wood', 'mine', 'thieve']) {
     const nodes = (D.NODES[kind] || []).filter(n => n.item === id).sort((a, b) => a.lvl - b.lvl);
-    if (nodes.length) { const n = nodes.find(x => x.town === S().town) || nodes[0]; return { kind, id: n.id, page: PAGE[kind], skill: n.skill, lvl: n.lvl, town: n.town, name: n.name }; }
+    if (nodes.length) { const n = nodes.find(x => DQ.nodeHere(x)) || nodes[0]; return { kind, id: n.id, page: PAGE[kind], skill: n.skill, lvl: n.lvl, town: n.town, name: n.name }; }
   }
   if (id.startsWith('crop_')) return { kind: 'farm', page: 'farming', skill: 'farming', name: it.name };
   const animal = (D.ANIMALS || []).find(a => a.prod === id); if (animal) return { kind: 'animal', page: 'farming', skill: 'farming', name: animal.name };
@@ -25,7 +25,7 @@ DQ.sourceOf = id => {
   return null;
 };
 const where = src => {
-  const town = src.town && src.town !== S().town ? ` in ${D.TOWN[src.town].name}` : '';
+  const town = src.town && src.town !== S().town && !(src.kind !== 'shop' && D.NODE && DQ.nodeHere(D.NODE[src.kind + ':' + src.id])) ? ` in ${D.TOWN[src.town].name}` : '';
   const lvl = src.skill && src.lvl > 1 ? ` (${D.SK[src.skill].name} ${src.lvl})` : '';
   return `${src.name}${lvl}${town}`;
 };

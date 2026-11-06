@@ -26,7 +26,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
  await p.evaluate(()=>{DQ.ui.beastTab='monsters';DQ.go('bestiary');});await p.waitForTimeout(900);await p.screenshot({path:'/tmp/idlewick-audit-guide.png'});
  await p.evaluate(()=>DQ.go('combat'));await p.waitForTimeout(900);await p.screenshot({path:'/tmp/idlewick-audit-combat.png'});
  // Real unlock path and a persistent first-use lesson.
- await p.evaluate(()=>{DQ.S=DQ.newState('Unlock');DQ.S.settings.muted=true;DQ.S.settings.notify=false;DQ.S.stats.kill=10;DQ.checkActionUnlocks();DQ.closeModal();DQ.go('hunting');});
+ await p.evaluate(()=>{DQ.S=DQ.newState('Unlock');DQ.S.settings.muted=true;DQ.S.settings.notify=false;DQ.S.stats.chop=20;DQ.S.inv.wooden_trap=3;for(const k of ['attack','strength','defence','hitpoints'])DQ.S.xp[k]=DQ.data.XPF[10];DQ.checkActionUnlocks();DQ.closeModal();DQ.go('hunting');});
  assert.equal(await p.locator('.skill-coach').count(),1);assert.match(await p.locator('.skill-coach').innerText(),/Try this/);
  await p.evaluate(()=>{DQ.go('overview');DQ.go('hunting');});assert.equal(await p.locator('.skill-coach').count(),1);
  await p.locator('[data-do="lessonclose"]').click();await p.evaluate(()=>{DQ.go('overview');DQ.go('hunting');});assert.equal(await p.locator('.skill-coach').count(),0);

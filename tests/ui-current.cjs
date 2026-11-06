@@ -28,9 +28,9 @@ const fs=require('node:fs');
   await page.locator('#cr-go').click();await page.waitForTimeout(1000);
   await page.evaluate(()=>{DQ.S.tut.hidden=true;DQ.go('overview');DQ.ui.render(false);document.querySelectorAll('.note').forEach(el=>el.remove());});
   const roadmap=await page.locator('.unlock-roadmap').innerText();
-  assert.match(roadmap,/Hunting/);assert.match(roadmap,/0\/10 combat victories/);assert.match(roadmap,/Exploration/);assert.match(roadmap,/25 fish caught/);
-  await page.evaluate(()=>{DQ.S.stats.kill=10;DQ.checkActionUnlocks();});
-  assert.equal(await page.evaluate(()=>DQ.skillUnlocked('hunting')&&DQ.S.unlocked.hunting),true);
+  assert.match(roadmap,/Cooking/);assert.match(roadmap,/0\/5\s*Fish caught/i);assert.match(roadmap,/0\/5\s*Logs chopped/i);
+  await page.evaluate(()=>{DQ.S.stats.catch=5;DQ.S.stats.chop=5;DQ.checkActionUnlocks();});
+  assert.equal(await page.evaluate(()=>DQ.skillUnlocked('cooking')&&DQ.S.unlocked.cooking),true);
   await page.evaluate(()=>{DQ.closeModal();document.querySelectorAll('.note').forEach(el=>el.remove());});
   await page.evaluate(()=>{
    DQ.S.settings.muted=true;DQ.S.settings.notify=false;DQ.S.tut.hidden=true;
@@ -67,7 +67,7 @@ const fs=require('node:fs');
    assert.ok(await page.locator('#hud [aria-label="Settings"]').isVisible());
   }
   // A newly unlocked skill wears "New" in the rail until its page is opened; work scenes show the tool, never the weapon.
-  {const r=await page.evaluate(()=>{const S=DQ.S,D=DQ.data;delete (S.newSkills||{}).herbalism;S.stats.harvest=20;S.unlocked.herbalism=false;DQ.notify({kind:'unlock',key:'unlock:herbalism',title:'Herbalism unlocked',text:'',icon:'herbalism'});DQ.ui.renderDock();
+  {const r=await page.evaluate(()=>{const S=DQ.S,D=DQ.data;delete (S.newSkills||{}).herbalism;S.stats.harvest=20;S.unlocked.herbalism=true;DQ.notify({kind:'unlock',key:'unlock:herbalism',title:'Herbalism unlocked',text:'',icon:'herbalism'});DQ.ui.renderDock();
     const badge=!!document.querySelector('#skilldock .dk[data-a="'+D.SK.herbalism.page+'"] .dk-new');DQ.go(D.SK.herbalism.page);DQ.ui.renderDock();const after=!!document.querySelector('#skilldock .dk[data-a="'+D.SK.herbalism.page+'"] .dk-new');
     S.inv.bronze_sword=1;DQ.equipItem('bronze_sword');DQ.go('fishing');DQ.startAct('fish','shrimp',{quiet:true});DQ.ui.render(true);const gear=document.querySelectorAll('.activity-scene .scene-gear').length;DQ.stopAct();
     DQ.ui.tab.quests='available';DQ.go('quests');const card=document.querySelector('.quest');const order=card?['.phead','.quest-story','.rewards','.quest-actions'].map(k=>{const e=card.querySelector(k);return e?[...card.querySelectorAll('*')].indexOf(e):-1;}):[];

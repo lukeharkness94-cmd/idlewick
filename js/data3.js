@@ -97,3 +97,24 @@ D.PACE = {
 };
 D.STOP_RULES = [['none', 'Until I stop it'], ['time:30', 'For 30 minutes'], ['time:60', 'For 1 hour'], ['time:120', 'For 2 hours'], ['count:50', 'Until 50 done'], ['count:200', 'Until 200 done'], ['count:1000', 'Until 1,000 done'], ['level', 'Until the next level']];
 })();
+
+/* ---------- Practical skill unlocks (Nov 2026 brief) ----------
+   Unlocks use the existing actionReq system, extended with a few requirement kinds (state.js DQ.actionProgress):
+   stats (personal action records: catch, chop, harvest, craft, smith, kill), hero, combat, skill:<id>, tool:<skill>
+   (any owned tool of that skill, checked), own:<item> (checked, kept), use:<item> (consumed when you learn the skill),
+   visit:<town>, beasts (different creatures studied). D.UNLOCK_BEFORE keeps every skill older saves had already earned.
+   Revert one skill by restoring its old rule from D.UNLOCK_BEFORE. */
+(() => {
+const D = window.DQ.data, set = (id, req) => { const s = D.SK[id]; if (!s) return; s.actionReq = req; delete s.unlock; };
+D.UNLOCK_BEFORE = { cooking: { hero: 3 }, mining: { hero: 6 }, farming: { hero: 10 }, research: { hero: 16 }, hunting: { kill: 10 }, herbalism: { harvest: 20 }, exploration: { catch: 25, chop: 25 } };
+set('cooking', { catch: 5, chop: 5 });
+set('mining', { 'tool:mining': 1 });
+set('farming', { hero: 5, chop: 15, 'use:seed_potato': 5 });
+set('research', { hero: 12, beasts: 8 });
+set('hunting', { chop: 20, 'own:wooden_trap': 3, combat: 8 });
+set('herbalism', { harvest: 20, 'skill:farming': 10 });
+set('exploration', { catch: 25, chop: 25, 'visit:mossbarrow': 1 });
+/* starter routes that no longer ask for the skill they unlock */
+const mp = D.QM.miners_pick; if (mp) { mp.adv = 3; mp.blurb = 'Brannoc’s old mine is full of rats and its props are rotten. Clear the rats and bring timber, and he will hand you his spare pickaxe so you can learn Mining.'; mp.obj = [{ ev: 'chop', key: 'normal', n: 10, label: 'Chop 10 logs for new pit props' }, { ev: 'kill', key: 'rat', n: 4, label: 'Clear 4 rats from the old mine' }]; }
+const mc = D.QM.mq_crafting; if (mc) { mc.adv = 8; mc.obj = mc.obj.map(o => o.ev === 'chop' && o.key === 'birch' ? { ev: 'chop', key: 'normal', n: 15, label: 'Chop 15 logs for her frames' } : o); }
+})();

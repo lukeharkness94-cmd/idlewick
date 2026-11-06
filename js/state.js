@@ -24,6 +24,7 @@ DQ.newState = (name = 'Adventurer', look) => {
     xp, coins: 25, hp: 10, inv: { bread: 5 }, bank: {}, equip: { weapon: 'bronze_sword' }, ammo: { id: null, n: 0 },
     town: 'willowbrook', towns: { willowbrook: { visited: true, boss: false } },
     q: {}, ach: {}, seen: {}, unlocked: {},
+    unlockRules: 2,
     stats: { harvest: 0, collect: 0, pets: 0, furnish: 0, hired: 0, catch: 0, chop: 0, mine: 0, thieve: 0, cook: 0, burn: 0, smelt: 0, smith: 0, craft: 0, alch: 0, brew: 0, enchant: 0, kill: 0, earned: 0, deaths: 0, bought: 0, sold: 0, equipped: 0, tools: 0, rare: 0 },
     settings: { masterVol: 1, ambience: true, ambVol: .45, theme: 'dark', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
     style: { melee: 'aggressive', ranged: 'offense', magic: 'offense' }, spell: 'spark',
@@ -89,6 +90,7 @@ function candidateState(o) {
   if (result.act && !validAction(result.act)) throw new Error('Invalid active task');
   if (result.queue && result.queue.some(a => !validAction(a))) throw new Error('Invalid queue');
   if (result.buffs && result.buffs.some(b => !record(b) || !Number.isFinite(b.until) || !Number.isFinite(b.mult) || b.mult <= 0)) throw new Error('Invalid buff');
+  if (!o || o.unlockRules === undefined) delete result.unlockRules; /* older saves: migrate their unlocks once */
   migrate(result);
   return result;
 }
@@ -106,6 +108,16 @@ function migrate(S) {
   const ids = D.TOWNS.map(t => t.id); let last = -1; ids.forEach((id, i) => { if (S.towns[id]) last = i; });
   for (let i = 0; i < last; i++) if (!S.towns[ids[i]]) S.towns[ids[i]] = { visited: false, boss: false };
   if (!Array.isArray(S.farm.plots)) S.farm.plots = [];
+  /* practical unlocks (Nov 2026): keep every skill an older save had already earned under the earlier rules. Runs once. */
+  if (!S.unlockRules) {
+  const xpTotal = D.SKILLS.reduce((a, s) => a + ((S.xp || {})[s.id] || 0), 0) - D.XPF[10]; let hero = 1; while (hero < 99 && xpTotal >= D.advReq(hero + 1)) hero++;
+  for (const [sk, before] of Object.entries(D.UNLOCK_BEFORE || {})) {
+    if (S.unlocked[sk]) continue;
+    const had = before.hero ? hero >= before.hero : Object.entries(before).every(([k, n]) => ((S.stats || {})[k] || 0) >= n);
+    if (had || (S.xp && S.xp[sk] > 0)) S.unlocked[sk] = true;
+  }
+  S.unlockRules = 2;
+  }
 }
 DQ.saveHealth = '';
 let observedSave;
@@ -166,10 +178,25 @@ const COMBAT_SKILLS = new Set(['attack', 'strength', 'defence', 'hitpoints', 'ra
 D.EARLY_PACE = { from: .3, until: 20 };
 DQ.earlyPace = sk => { const E = D.EARLY_PACE, l = DQ.lvl(sk); return !E || COMBAT_SKILLS.has(sk) || l >= E.until ? 1 : E.from + (1 - E.from) * (l - 1) / (E.until - 1); };
 DQ.xpMult = sk => DQ.earlyPace(sk) * (1 + .005 * (DQ.lvl(sk) - 1)) * (1 + .0025 * (DQ.advLvl() - 1)) * (COMBAT_SKILLS.has(sk) ? 1 + DQ.combatCatchUp() : 1) * (DQ.extraXp ? DQ.extraXp(sk) : 1) * (DQ.buffMult ? DQ.buffMult('xp') : 1);
-DQ.actionProgress = sk => Object.entries(D.SK[sk]?.actionReq || {}).map(([stat,need])=>({stat,need,have:DQ.S.stats[stat]||0}));
-DQ.skillUnlocked = sk => { const s=D.SK[sk]; if(!s)return false; if(s.actionReq)return !!DQ.S.unlocked[sk]||DQ.actionProgress(sk).every(r=>r.have>=r.need); return s.quest?!!DQ.S.unlocked[sk]:s.unlock<=DQ.advLvl(); };
+/* Each unlock requirement with live progress. kind says how an item is treated: 'record' (a personal action count),
+   'checked' (must be held, kept), 'consumed' (taken when you learn the skill) or 'level'. */
+DQ.reqProgress = (stat, need) => {
+  const S = DQ.S, [k, a] = stat.includes(':') ? stat.split(':') : [stat, null];
+  if (k === 'hero') return { stat, need, have: DQ.advLvl(), kind: 'level' };
+  if (k === 'combat') return { stat, need, have: DQ.combatLvl(), kind: 'level' };
+  if (k === 'skill') return { stat, need, have: DQ.lvl(a), kind: 'level', skill: a };
+  if (k === 'tool') return { stat, need, have: DQ.toolTier(a) > 0 ? 1 : 0, kind: 'checked', skill: a };
+  if (k === 'own' || k === 'use') return { stat, need, have: DQ.have(a), kind: k === 'own' ? 'checked' : 'consumed', item: a };
+  if (k === 'visit') return { stat, need, have: S.towns[a] && S.towns[a].visited ? 1 : 0, kind: 'record', town: a };
+  if (k === 'beasts') return { stat, need, have: Object.values(S.beast && S.beast.kills || {}).filter(n => n > 0).length, kind: 'record' };
+  return { stat, need, have: S.stats[stat] || 0, kind: 'record' };
+};
+DQ.actionProgress = sk => Object.entries(D.SK[sk]?.actionReq || {}).map(([stat, need]) => DQ.reqProgress(stat, need));
+DQ.skillUnlocked = sk => { const s=D.SK[sk]; if(!s)return false; if(DQ.S.unlocked[sk])return true; if(s.actionReq){const r=DQ.actionProgress(sk);return !r.some(x=>x.kind==='consumed')&&r.every(x=>x.have>=x.need);} return s.quest?false:s.unlock<=DQ.advLvl(); };
 const actionNames={kill:'combat victories',catch:'fish caught',chop:'logs chopped',harvest:'crops harvested',craft:'items crafted',smith:'smithing actions'};
-DQ.unlockHow = sk => { const s=D.SK[sk]; if(s.actionReq)return DQ.actionProgress(sk).map(r=>`${Math.min(r.have,r.need)}/${r.need} ${actionNames[r.stat]||r.stat}`).join(' and '); return s.quest?`Complete the main quest “${s.questName}”`:`Reach Hero level ${s.unlock}`; };
+DQ.reqLabel = r => { const [k, a] = r.stat.includes(':') ? r.stat.split(':') : [r.stat, null], I = a && D.ITEMS[a];
+  return k === 'hero' ? `Hero level ${r.need}` : k === 'combat' ? `Combat level ${r.need}` : k === 'skill' ? `${D.SK[a].name} level ${r.need}` : k === 'tool' ? `Own a ${({ mining: 'pickaxe', fishing: 'fishing rod', woodcutting: 'axe', thieving: 'pair of thief gloves', farming: 'hoe' })[a] || 'tool'} (kept)` : k === 'own' ? `Hold ${r.need} ${I ? I.name.toLowerCase() + (r.need > 1 && !/s$/.test(I.name) ? 's' : '') : a} (kept)` : k === 'use' ? `${r.need} ${I ? I.name.toLowerCase() : a} (used when you learn it)` : k === 'visit' ? `Visit ${D.TOWN[a] ? D.TOWN[a].name : a}` : k === 'beasts' ? `Different creatures studied` : `${DQ.cap ? DQ.cap(actionNames[r.stat] || r.stat) : (actionNames[r.stat] || r.stat)}`; };
+DQ.unlockHow = sk => { const s=D.SK[sk]; if(s.actionReq)return DQ.actionProgress(sk).map(r=>`${DQ.reqLabel(r)} (${r.kind === 'level' ? `now ${r.have}` : `${Math.min(r.have,r.need)}/${r.need}`})`).join(', '); return s.quest?`Complete the main quest “${s.questName}”`:`Reach Hero level ${s.unlock}`; };
 DQ.maxHp = () => DQ.lvl('hitpoints');
 DQ.combatLvl = () => {
   const L = DQ.lvl, base = .25 * (L('defence') + L('hitpoints'));
@@ -266,6 +293,14 @@ DQ.bonus = () => {
 DQ.weaponStyle = () => { const w = D.ITEMS[DQ.S.equip.weapon]; return (w && w.style) || 'melee'; };
 
 /* ---------- Tools and perks ---------- */
+/* Ordinary gathering is not tied to where you stand (Nov 2026 brief): once you have reached a resource's home town,
+   that fishing spot, tree or ore can be worked from any town through its skill page. Levels and tools still apply.
+   Exceptions stay regional: thieving targets (they are people in that town) and the signature resources below.
+   Discoveries and adventures still depend on where you actually are. Revert: make nodeHere return n.town === S().town. */
+D.SIGNATURE_NODES = new Set(['skyfin', 'voideel', 'elder', 'gloomwood', 'astralite', 'voidstone']);
+DQ.nodeRegional = n => !!n && (n.skill === 'thieving' || D.SIGNATURE_NODES.has(n.id));
+DQ.nodeDiscovered = n => !!n && (n.town === DQ.S.town || !!(DQ.S.towns[n.town] && DQ.S.towns[n.town].visited));
+DQ.nodeHere = n => !!n && (n.town === DQ.S.town || (!DQ.nodeRegional(n) && DQ.nodeDiscovered(n)));
 DQ.toolKey = sk => { const t = D.TOOLS.find(t => t[1] === sk); return t && t[0]; };
 DQ.toolTier = sk => { const k = DQ.toolKey(sk); if (!k) return 0; for (let t = 5; t >= 1; t--) if (DQ.have(`tool_${k}_${t}`)) return t; return 0; };
 DQ.perkSpeed = sk => { const l = DQ.lvl(sk); return D.PERKS.reduce((a, p) => a + (p.speed && l >= p.lvl ? p.speed : 0), 0); };

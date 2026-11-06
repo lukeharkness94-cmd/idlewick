@@ -305,3 +305,33 @@ Full write-up: `docs/experience-assessment.md` → "Review response".
 - 29 quests in data.js (`TQ(...)`, after the main quests), so that every town has a quest available within 6 Hero levels from its first quest to its boss. Willowbrook +2, Mossbarrow +2, Saltmere +2, Ironpeak +5 (Hero 34–46), Gloomfen +4 (60–67), Emberfall +4 (77–86), Skyreach +5 (84–95), the Hollow Crown +4 (90–98).
 - They use only existing creatures, gathering spots, recipes and crops. Givers are existing characters except where a town had none to spare. Each has a `thanks` line, shown on the claim card and in the journal. Rewards follow each region's neighbouring quests (coins pass through economy.js as usual).
 - Regression: every objective must point at a real creature, spot, recipe output, crop or item; every requirement must exist; ids must be unique; and no town may have a gap of more than 6 Hero levels between quests.
+
+## Nov 2026 brief: clearer RPG, fewer errands (Claude Code) — from 69f7422
+
+Stages are separate commits so each can be reverted on its own.
+
+**Stage 1: readability and navigation (c65e564)**
+- **Type:** a "UI standard" block at the end of css/style.css: 16.5px body, 16px buttons, Alegreya SC headings, 14px meta text. Delete the block to revert.
+- **Rail:** icon, name, level or lock, and one bar; exact XP is in the row's hover/focus detail. Every skill fits at 1440 × 900.
+- **Header:** health sits with the name and Hero bar. Stop is a neutral labelled control. Action progress and skill-level progress are separate bars.
+
+**Stage 2: layouts (d66f825)**
+- **Combat:** `DQ.combatFocus()` is the single selected encounter for the preview, the brief and the start/retreat strip. Also: `DQ.dangerOf(m)` gives a labelled danger line, the eat threshold is a stepper, abilities show slots first with Ready/Future tabs, and a defeated boss is an optional rematch.
+- **Home:** `S().journeyTarget` fixes a boss goal when you choose it, and `DQ.goalDone()` drives the "Goal complete" panel. "Choose a goal" is a dialog.
+- **Inventory:** a stable `#detailbox` on desktop and 48px item art. Tools moved to Hero → Tools (`UI.V.tools`).
+- **World:** the map is the selector. The region list under it uses the map's names, and locked names no longer leak.
+
+**Stage 3: everyday resources and skill unlocks**
+- **Gathering from any town:** `DQ.nodeHere(n)` (state.js). An ordinary fishing spot, tree or ore can be worked from any town once its home town has been reached.
+- **Regional exceptions:** thieving targets, and the signature resources in `D.SIGNATURE_NODES` (skyfin, void eel, elder, gloomwood, astralite, voidstone).
+- **What stays local:** discoveries and adventures still check where you are. Revert by making nodeHere return `n.town === S().town`.
+- **Unlock rules:** in data3.js, built on the existing actionReq system with requirement kinds hero, combat, skill:, tool:, own: (kept), use: (consumed when learned), visit: and beasts. `DQ.reqProgress` / `DQ.reqLabel` (state.js) supply progress and labels. `UI.unlockSteps` (skill_expansion.js) is shared by the locked page and Home's "Unlocks ahead".
+  - Cooking: 5 fish caught + 5 logs chopped.
+  - Mining: own any pickaxe (kept). It is sold in Willowbrook, or Old Brannoc's "A Miner's Pick" now asks for logs and rats instead of mining.
+  - Farming: Hero 5, 15 logs chopped, 5 potato seeds (planted).
+  - Scholarship: Hero 12 + 8 different creatures studied.
+  - Hunting: 20 logs chopped, hold 3 wooden traps, combat 8. Leather string comes from a cowhide (Crafting 1), traps from 2 logs + string (Crafting 2). Held traps give +5% Hunting XP each, up to 3.
+  - Herbalism: 20 harvests + Farming 10.
+  - Exploration: 25 fish, 25 logs, visit Mossbarrow.
+  - Crafting (Hettie's quest) now opens at Hero 8 and uses ordinary logs. Thieving, Smithing, Magic, Ranged and Enchanting are unchanged.
+- **Older saves:** `migrate()` grants every skill the save had under `D.UNLOCK_BEFORE` (or any skill with XP), once, marked by `unlockRules: 2`.

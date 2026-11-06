@@ -214,6 +214,10 @@ const FOOD = {
   honey_roast: s => { plate(s); const m = rp('#c0702a'); s.ell(8, 8.6, 5, 3.6, m); s.line(11, 7, 15, 4, rp('#efe2c4')); [[6, 8], [9, 7]].forEach(([x, y]) => s.fix(x, y, '#ffd060')); }
 };
 const PRODUCE = {
+  /* leather string: a coiled cord with a knotted tail */
+  string: s => { const c = rp('#c8a070'); for (let i = 0; i < 26; i++) { const a = i / 26 * Math.PI * 3.2, r = 5.2 - i * .12; s.dot(8 + Math.cos(a) * r, 8 + Math.sin(a) * r * .8, c); } s.line(10, 11, 14, 14, c); s.ell(14, 14, 1.2, 1.2, rp('#8a6440')); s.fix(5, 5, c.gl); },
+  /* wooden trap: a slatted box with a spring jaw and a trigger peg */
+  wooden_trap: s => { const w = rp('#a8784a'); s.rect(2, 8, 12, 6, w); for (const x of [5, 8, 11]) s.line(x, 8, x, 13, null, w.lo); s.poly([[2, 8], [8, 3], [14, 8]], rp('#8a6440')); s.line(3, 7, 13, 7, rp('#9aa3ad')); s.rect(7, 4, 2, 2, rp('#c8a070')); s.fix(3, 9, w.gl); },
   egg: s => { s.ell(8, 9, 4, 5, rp('#f6efe0')); s.fix(6, 6, '#ffffff'); s.fix(10, 11, rp('#f6efe0').lo); },
   milk: s => { s.poly([[5, 5], [11, 5], [12, 14], [4, 14]], rp('#f4f4f0')); s.rect(6, 2, 4, 3, rp('#e8e0d0')); s.rect(6, 1, 4, 1, rp('#4a8ac0')); s.line(5, 9, 11, 9, null, rp('#4a8ac0').base); },
   wool: s => { const w = rp('#efe8d8'); s.ell(8, 9, 5.6, 5, w); for (let i = 0; i < 4; i++) s.line(4 + i * 2, 5, 6 + i * 2, 13, null, w.lo); s.line(12, 12, 15, 15, rp('#d8cfb8')); },

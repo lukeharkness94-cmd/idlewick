@@ -8,7 +8,7 @@ const log=()=>{};
 await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/');await p.locator('#t-new').click();await p.locator('#crname').fill('Miller');await p.locator('#cr-go').click();await p.waitForTimeout(800);await p.keyboard.press('Escape');
 const ev=(f,a)=>p.evaluate(f,a);
 await ev(()=>{DQ.closeModal&&DQ.closeModal();DQ.holdNotes=false;const S=DQ.S,X=DQ.data.XPF;for(const s of ['woodcutting','fishing','cooking','attack','strength','defence','hitpoints','smithing','mining','farming'])S.xp[s]=Math.max(S.xp[s],X[45]);
- S.towns.mossbarrow={visited:true,boss:false};S.towns.willowbrook.boss=true;S.inv.bread=200;S.coins=5000;S.unlocked.smithing=true;S.unlocked.cooking=true;});
+ S.towns.mossbarrow={visited:true,boss:false};S.towns.willowbrook.boss=true;S.inv.bread=200;S.coins=5000;S.unlocked.smithing=true;S.unlocked.cooking=true;S.unlocked.mining=true;S.unlocked.farming=true;});
 /* 1. discovery through real chopping */
 const node=await ev(()=>DQ.data.NODES.wood.filter(n=>n.town==='willowbrook'&&n.lvl<=DQ.lvl('woodcutting')).sort((a,b)=>b.lvl-a.lvl)[0].id);
 await ev(n=>DQ.startAct('wood',n),node);let t=0;while(!(await ev(()=>DQ.discovered('weathered_map')))&&t<60){await ev(()=>DQ.simulate(10*60000));t++;}

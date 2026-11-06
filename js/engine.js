@@ -41,7 +41,7 @@ function unlockText(sk, from, to) {
 /* a level-up note opens what it unlocked: the new recipe in its own category, or the new gathering spot, highlighted */
 function levelAction(sk, from, to) {
   const sd = D.SK[sk], recipe = (D.RLIST[sk] || []).filter(r => r.lvl > from && r.lvl <= to).sort((a, b) => b.lvl - a.lvl)[0];
-  const node = !recipe && Object.values(D.NODES || {}).flat().filter(n => n.skill === sk && n.lvl > from && n.lvl <= to && n.town === S().town).sort((a, b) => b.lvl - a.lvl)[0];
+  const node = !recipe && Object.values(D.NODES || {}).flat().filter(n => n.skill === sk && n.lvl > from && n.lvl <= to && DQ.nodeHere(n)).sort((a, b) => b.lvl - a.lvl)[0];
   const target = recipe || node;
   if (target && DQ.ui && DQ.ui.focusTask) return { label: `Open ${target.name}`, fn: () => DQ.ui.focusTask(sd.page, target.id, recipe ? recipe.tab : null, sk) };
   return { label: `Open ${sd.name}`, fn: () => DQ.go(sd.page) };
@@ -110,7 +110,7 @@ function objDone(q, st, i) {
   const next = q.obj.findIndex((o, j) => j !== i && DQ.objProg(q, st, j) < o.n);
   if (next < 0) return; /* whole quest done: the 'ready to claim' notice covers it */
   const o = q.obj[next], kind = OBJ_KIND[o.ev], node = kind && D.NODE[kind + ':' + o.key];
-  const go = node && node.town === S().town && DQ.skillUnlocked(node.skill) && DQ.lvl(node.skill) >= node.lvl;
+  const go = node && DQ.nodeHere(node) && DQ.skillUnlocked(node.skill) && DQ.lvl(node.skill) >= node.lvl;
   const act = go ? { label: 'Start ' + (kind === 'mine' ? 'mining' : kind === 'wood' ? 'chopping' : 'fishing'), fn: () => DQ.startAct(kind, o.key) } : { label: 'View quest', fn: () => DQ.go('quests') };
   DQ.notify({ kind: 'quest', key: 'qo:' + q.id + ':' + i, icon: 'quest', col: '#d8a64a', title: `${q.name}: part done`, text: `${q.obj[i].label} is finished. Next: ${o.label}.`, action: act, sound: 'quest', ttl: 12000 });
 }
@@ -227,7 +227,7 @@ DQ.startAct = (kind, id, o = {}) => {
     DQ.fight = { id, hp: m.hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 };
   } else {
     const n = D.NODE[kind + ':' + id];
-    if (n.town !== S().town) return bad(`That is found in ${D.TOWN[n.town].name}`);
+    if (!DQ.nodeHere(n)) return bad(DQ.nodeRegional(n) ? `That is only found in ${D.TOWN[n.town].name}` : `Reach ${D.TOWN[n.town].name} once to discover it`);
     if (!DQ.skillUnlocked(n.skill)) return bad(`${D.SK[n.skill].name} is not unlocked yet`);
     if (DQ.lvl(n.skill) < n.lvl) return bad(`Requires ${D.SK[n.skill].name} ${n.lvl}`);
   }
@@ -706,7 +706,7 @@ DQ.resumeAfterLoad = () => {
   if (s) {
     try {
       let ok = false; const k = s.kind;
-      if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town; else ok = !!D.NODE[k + ':' + s.id] && D.NODE[k + ':' + s.id].town === S().town;
+      if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town; else ok = !!D.NODE[k + ':' + s.id] && DQ.nodeHere(D.NODE[k + ':' + s.id]);
       if (ok) { DQ.act = { kind: k, id: s.id, area: s.area || null, target: s.target || null, questTarget: !!s.questTarget, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0, progress: s.progress || 0 }; DQ.act.dur = DQ.actDur(DQ.act); DQ.act.t0 -= DQ.act.progress; if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
     } catch (e) {}
     if (!DQ.act) S().act = null;

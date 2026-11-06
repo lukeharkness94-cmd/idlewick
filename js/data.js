@@ -282,6 +282,11 @@ JEW.forEach(([g, rl, al, rb, ab], i) => {
 
 mk('cloth', { name: 'Woollen cloth', ic: 'hide', col: '#efe8d8', val: 30, type: 'resource' });
 addR({ id: 'craft_cloth', skill: 'crafting', tab: 'Leather', name: 'Woollen cloth', lvl: 12, xp: 25, t: 2200, in: { wool: 2 }, out: { cloth: 1 }, ev: 'craft' });
+/* Hunting preparation (Nov 2026): leather string from a cowhide, then wooden traps. Held traps are your first hunting gear. */
+mk('string', { name: 'Leather string', ic: 'bit', col: '#c8a070', val: 3, type: 'craft', sub: 'Cut from cowhide. Ties traps and strings bows.' });
+mk('wooden_trap', { name: 'Wooden trap', ic: 'bit', col: '#a8784a', val: 9, type: 'craft', trap: true, sub: 'Starting hunting gear: each one held adds 5% Hunting XP (up to three).' });
+addR({ id: 'craft_string', skill: 'crafting', tab: 'Leather', name: 'Leather string', lvl: 1, xp: 6, t: 1800, in: { cowhide: 1 }, out: { string: 3 }, ev: 'craft' });
+addR({ id: 'craft_trap', skill: 'crafting', tab: 'Leather', name: 'Wooden trap', lvl: 2, xp: 12, t: 2400, in: { log_normal: 2, string: 1 }, out: { wooden_trap: 1 }, ev: 'craft' });
 
 /* Boss trophies */
 mk('chief_helm', { name: "Grubnash's war-helm", ic: 'helm', col: '#8fbf6a', val: 600, type: 'gear', slot: 'head', req: { defence: 5 }, b: { def: 14, str: 3 }, rare: 1 });

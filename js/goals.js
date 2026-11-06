@@ -20,7 +20,7 @@ const lvlProg = (sk, target) => {
 
 DQ.goals = () => {
   const out = [], add = g => out.push(Object.assign({ eta: null }, g));
-  const where = n => n && n.town && !DQ.townUnlocked(n.town) ? ` (in ${D.TOWN[n.town].name}, not yet reached)` : n && n.town && n.town !== S().town ? ` (in ${D.TOWN[n.town].name})` : '';
+  const where = n => n && n.town && !DQ.townUnlocked(n.town) ? ` (in ${D.TOWN[n.town].name}, not yet reached)` : n && n.town && n.town !== S().town && !(DQ.nodeHere && DQ.nodeHere(n)) ? ` (in ${D.TOWN[n.town].name})` : '';
 
   /* 1. Next unlock in each skill you can train */
   D.SKILLS.forEach(s => {

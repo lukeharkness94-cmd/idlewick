@@ -33,7 +33,8 @@ DQ.fx = () => {
   return (fxCache = f);
 };
 const GATHER = ['fishing', 'woodcutting', 'mining', 'thieving', 'farming'];
-DQ.extraXp = sk => { const f = DQ.fx(); return 1 + f.xpAll + (f.xp[sk] || 0); };
+/* wooden traps you hold are your first hunting gear: +5% Hunting XP each, up to three */
+DQ.extraXp = sk => { const f = DQ.fx(); return 1 + f.xpAll + (f.xp[sk] || 0) + (sk === 'hunting' ? .05 * Math.min(3, DQ.have('wooden_trap')) : 0); };
 DQ.extraSpeed = sk => { const f = DQ.fx(); return f.speedAll + (f.speed[sk] || 0) + (GATHER.includes(sk) ? f.gather : 0); };
 DQ.packMax = () => DQ.PACK_SLOTS + DQ.fx().pack;
 DQ.coinMult = () => 1 + DQ.fx().coin + (DQ.uniqueFx && DQ.uniqueFx().fortune ? .05 : 0);

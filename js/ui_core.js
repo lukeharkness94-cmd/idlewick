@@ -148,7 +148,11 @@ UI.toolLine = sk => {
 };
 UI.lockedPage = sk => {
   const s = D.SK[sk], need = s.unlock, cur = DQ.advLvl();
-  if(s.actionReq){const pages={kill:'combat',catch:'fishing',chop:'woodcutting',harvest:'farming',craft:'crafting',smith:'smithing'};return `<section class="panel locked-page" style="--c:${s.col}">${DQ.artImage('skill',sk,64,'',s.name)}<h2>${s.name}</h2><p>${esc(s.blurb)}</p><h3>Unlock through play</h3><p>${esc(DQ.unlockHow(sk))}</p>${DQ.actionProgress(sk).map(r=>`<div class="stack"><span class="bar"><i style="width:${Math.min(100,r.have/r.need*100)}%"></i></span><button class="btn" data-do="go" data-a="${pages[r.stat]}">Continue ${D.SK[pages[r.stat]]?.name||'Combat'}</button></div>`).join('')}</section>`;}
+  if(s.actionReq){
+    /* every requirement with live progress and a direct route; quests that hand over a required item are named too */
+    const items=DQ.actionProgress(sk).map(r=>r.item||(r.stat.startsWith('tool:')?`tool_${DQ.toolKey(r.skill)}_1`:null)).filter(Boolean);
+    const qs=D.QUESTS.filter(q=>!q.secret&&q.reward&&q.reward.items&&items.some(i=>q.reward.items[i])&&DQ.questState(q)!=='done');
+    return `<section class="panel locked-page" style="--c:${s.col}">${DQ.artImage('skill',sk,64,'',s.name)}<h2>${s.name} is not learned yet</h2><p>${esc(s.blurb)}</p><h3>What you need</h3><div class="unlock-steps">${UI.unlockSteps?UI.unlockSteps(sk):esc(DQ.unlockHow(sk))}</div>${qs.length?`<p class="sm">Also from a quest: ${qs.map(q=>`<button class="linkish" data-do="openquest" data-a="${q.id}">${esc(q.name)}</button> (${esc(q.giver)}, ${esc(D.TOWN[q.town].name)})`).join(', ')}.</p>`:''}<p class="hint">Items marked “kept” stay in your pack. Items marked “used” are taken once, when you learn the skill.</p></section>`;}
 
   if (s.quest) {
     const q = D.QM[s.quest], st = DQ.questState(q), blk = DQ.questBlockers(q), t = D.TOWN[q.town];
@@ -188,12 +192,12 @@ const KIND_OF = { fishing: 'fish', woodcutting: 'wood', mining: 'mine', thieving
 UI.V.gather = sk => {
   const kind=KIND_OF[sk],nodes=[...D.NODES[kind]].sort((a,b)=>a.lvl-b.lvl);
   const choices=nodes.map(n=>{
-    const away=n.town!==S().town,levelLocked=DQ.lvl(sk)<n.lvl,townLocked=!DQ.townUnlocked(n.town);
+    const away=!DQ.nodeHere(n)&&DQ.townUnlocked(n.town),levelLocked=DQ.lvl(sk)<n.lvl,townLocked=!DQ.townUnlocked(n.town),regional=DQ.nodeRegional(n);
     const town=D.TOWN[n.town],prev=D.TOWNS[town.idx-1];
-    const requirements=[levelLocked?`Requires ${D.SK[sk].name} ${n.lvl}`:'',townLocked?(prev?`Defeat ${D.MON[prev.boss].name} in ${prev.name} to open ${town.name}`:`Unlock ${town.name}`):away?`Travel to ${town.name}`:''].filter(Boolean);
+    const requirements=[levelLocked?`Requires ${D.SK[sk].name} ${n.lvl}`:'',townLocked?(prev?`Defeat ${D.MON[prev.boss].name} in ${prev.name} to open ${town.name}`:`Unlock ${town.name}`):away?(regional?`Only in ${town.name}: travel there`:`Reach ${town.name} once to discover it`):''].filter(Boolean);
     return {id:n.id,name:n.name,artKind:kind,yieldId:n.item,town:n.town,away,inspectable:true,
       locked:levelLocked||townLocked,blocked:levelLocked||away,reason:requirements.join(' · '),
-      caption:`Level ${n.lvl} · ${esc(town.name)}`,
+      caption:`Level ${n.lvl} · ${regional?`Only in ${esc(town.name)}`:DQ.nodeDiscovered(n)?'Any town':`Found in ${esc(town.name)}`}`,
       info:`<p>${(n.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor(kind,n.id)/1000).toFixed(1)}s per ${kind==='wood'||kind==='mine'?'resource':kind==='fish'?'catch':'attempt'} · ${kind==='wood'||kind==='mine'?'3 steady strikes · never misses':kind==='fish'?'Guaranteed catch':Math.round(DQ.successChance(kind,n)*100)+'% success'}</p><p>${n.item?`<b class="mono" data-b="count:${n.item}"></b> ${esc(D.ITEMS[n.item].name.toLowerCase())} held`:`${n.cmin}–${n.cmax} coins · ${n.dmg} damage if caught`}</p>`};
   });
   if(!UI.taskChoice[sk]&&!DQ.act)UI.taskChoice[sk]=choices.find(c=>!c.blocked)?.id;

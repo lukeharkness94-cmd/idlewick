@@ -144,7 +144,7 @@ test('queued actions conserve time across different task durations', () => {
   assert.ok(Math.abs(a.act.progress-b.act.progress)<.01);
 });
 test('a stopped task does not run again without supplies', () => {
-  const {q}=harness();q.S.xp.fishing=q.data.advReq(4);q.S.inv.raw_shrimp=1;
+  const {q}=harness();q.S.xp.fishing=q.data.advReq(4);q.S.stats.catch=5;q.S.stats.chop=5;q.S.inv.raw_shrimp=1;
   q.startAct('recipe','cook_shrimp',{quiet:true});q.simulate(60000);
   assert.equal(q.have('raw_shrimp'),0);assert.equal(q.act,null);assert.equal(q.S.gameTime,60000);
 });
@@ -282,7 +282,7 @@ test('new players receive one persistent lesson per unlocked skill', () => {
   assert.equal(q.lessonForPage('cooking'),null);
   assert.equal(q.acknowledgeLesson('woodcutting'),true); assert.equal(q.lessonForPage('woodcutting'),null);
   const saved=q.exportSave(); assert.equal(q.importSave(saved),true); assert.equal(q.lessonForPage('woodcutting'),null);
-  q.S.xp.fishing=q.data.advReq(4); assert.equal(q.lessonForPage('cooking').id,'cooking');
+  q.S.xp.fishing=q.data.advReq(4);q.S.stats.catch=5;q.S.stats.chop=5; assert.equal(q.lessonForPage('cooking').id,'cooking');
   assert.equal(q.acknowledgeLesson('missing'),false);
 });
 test('existing saves skip lessons for used skills but introduce untouched skills', () => {
@@ -327,7 +327,7 @@ test('Scholarship credits legacy discoveries once and preserves existing coins',
  assert.equal(q.importSave(q.exportSave()),true);assert.equal(q.S.xp.research,xp);
 });
 test('Scholarship projects award XP once and field notes can repeat',()=>{
- const {q}=harness();q.S.xp.fishing=q.data.XPF[70];q.S.coins=1000;q.S.inv.feather=10;
+ const {q}=harness();q.S.xp.fishing=q.data.XPF[70];q.S.unlocked.research=true;q.S.coins=1000;q.S.inv.feather=10;
  assert.equal(q.startResearch('field_notes'),true);assert.equal(q.S.coins,975);assert.equal(q.have('feather'),8);
  q.researchTick(300000);const xp=q.S.xp.research;assert.ok(xp>0);assert.equal(q.techDone('field_notes'),false);
  q.researchTick(300000);assert.equal(q.S.xp.research,xp);assert.equal(q.startResearch('field_notes'),true);q.researchTick(300000);assert.ok(q.S.xp.research>xp);
@@ -474,6 +474,35 @@ test('a chosen boss goal completes when that boss falls and is never silently re
  S.towns.willowbrook.boss=true;assert.equal(q.goalTarget().id,'grubnash','still the boss you chose');assert.equal(q.goalDone(),true);
  S.journeyTarget=null;assert.equal(q.goalTarget().id,'oldtusk','an older save adopts the next undefeated boss');assert.equal(q.goalDone(),false);
  S.journey='house';S.house.owned=false;assert.equal(q.goalDone('house'),false);S.house.owned=true;assert.equal(q.goalDone('house'),true);
+});
+test('ordinary gathering works from any visited town; thieving and signature resources stay regional',()=>{
+ const {q}=harness();const S=q.S,D=q.data;S.unlocked.fishing=true;
+ const herring=D.NODE['fish:herring'],carp=D.NODE['fish:carp'],farmer=D.NODE['thieve:farmer'];
+ S.town='mossbarrow';S.towns.mossbarrow={visited:true};S.towns.willowbrook.visited=true;
+ assert.ok(q.nodeHere(herring),'Willowbrook herring can be fished from Mossbarrow once discovered');
+ S.town='willowbrook';delete S.towns.mossbarrow;assert.ok(!q.nodeHere(carp),'Mossbarrow carp needs one visit first');
+ S.towns.mossbarrow={visited:true};assert.ok(q.nodeHere(carp));
+ S.town='mossbarrow';assert.ok(!q.nodeHere(farmer),'thieving targets are local people');
+ S.towns.skyreach={visited:true};assert.ok(!q.nodeHere(D.NODE['fish:skyfin']),'signature fish stays in Skyreach');
+ S.xp.fishing=D.XPF[5];assert.equal(q.startAct('fish','sardine',{quiet:true}),true,'starts a Willowbrook spot from Mossbarrow');q.stopAct&&q.stopAct(true);
+});
+test('practical skill unlocks: requirements, routes, consumption, no cycles, older saves keep their skills',()=>{
+ const {q,load}=harness();load('skill_expansion');const S=q.S,D=q.data;
+ assert.equal(q.skillUnlocked('cooking'),false);S.stats.catch=5;S.stats.chop=5;assert.equal(q.skillUnlocked('cooking'),true,'cooking from catching and chopping');
+ assert.equal(q.skillUnlocked('mining'),false);S.inv.tool_pick_1=1;assert.equal(q.skillUnlocked('mining'),true,'a pickaxe, kept');assert.equal(q.have('tool_pick_1'),1);
+ assert.ok(D.SHOPS.willowbrook.includes('tool_pick_1'),'the pickaxe is sold in Willowbrook');assert.ok(!D.QM.miners_pick.obj.some(o=>o.ev==='mine'),'the pickaxe quest does not need Mining');
+ S.xp.fishing=D.advReq(5);S.stats.chop=15;S.inv.seed_potato=7;assert.equal(q.skillUnlocked('farming'),false,'consumed requirements wait for the learning moment');
+ q.checkActionUnlocks();assert.equal(S.unlocked.farming,true);assert.equal(q.have('seed_potato'),2,'five seeds planted');
+ assert.ok(D.RECIPES.craft_string.in.cowhide&&D.RECIPES.craft_trap.in.string,'traps need string, string needs a cowhide');
+ assert.ok(D.RECIPES.craft_string.lvl<=1&&D.RECIPES.craft_trap.lvl<=2,'traps are made at Crafting 1-2');
+ /* prerequisite graph: no skill needs itself through skills or the recipes of required items */
+ const needs=sk=>{const out=new Set();for(const st of Object.keys(D.SK[sk].actionReq||{})){const [k,a]=st.split(':');if(k==='skill')out.add(a);if(k==='own'||k==='use'){const r=Object.values(D.RECIPES).find(r=>r.out[a]);if(r)out.add(r.skill);}}if(D.SK[sk].quest)for(const o of D.QM[D.SK[sk].quest].obj){const m={catch:'fishing',chop:'woodcutting',mine:'mining',smelt:'smithing',smith:'smithing',craft:'crafting',cook:'cooking',harvest:'farming'}[o.ev];if(m)out.add(m);}return out;};
+ const seen=new Set(),walk=(sk,path)=>{assert.ok(!path.includes(sk),'cycle: '+[...path,sk].join(' > '));for(const n of needs(sk))walk(n,[...path,sk]);};for(const s of D.SKILLS)walk(s.id,[]);
+ /* older save at Hero 7 with no pickaxe keeps Mining and Cooking; the migration runs once */
+ const {q:o}=harness();
+ const st=o.S;st.xp.fishing=o.data.advReq(7);delete st.unlockRules;st.unlocked={};const raw=JSON.stringify(st);const back=o.validateSave(JSON.parse(raw));
+ assert.equal(back.unlocked.mining,true);assert.equal(back.unlocked.cooking,true);assert.equal(back.unlockRules,2);
+ const fresh=o.newState('Fresh');fresh.xp.fishing=o.data.advReq(7);const again=o.validateSave(JSON.parse(JSON.stringify(fresh)));assert.ok(!again.unlocked.mining,'new-rule heroes are not given Mining by Hero level');
 });
 test('unique gear: effects are real, first copies have a bad-luck guarantee, stats stay modest',()=>{
  const {q}=harness();const S=q.S,D=q.data;

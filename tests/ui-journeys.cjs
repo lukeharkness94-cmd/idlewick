@@ -18,6 +18,7 @@ const URL=process.env.IDLEWICK_URL||'http://127.0.0.1:8765/';
    await page.evaluate(()=>{DQ.go('overview');});assert.match(await page.locator('.journey-done').innerText(),/0\/5 shrimp/);
    await page.evaluate(()=>{DQ.startAct('fish','shrimp',{quiet:true});DQ.simulate(5*60000);DQ.startAct('wood','normal',{quiet:true});DQ.simulate(4*60000);DQ.ui.render(true);});
    assert.match(await page.locator('.journey h2').innerText(),/Claim First Steps/);
+   await page.evaluate(()=>{for(let i=0;i<4;i++)DQ.closeModal&&DQ.closeModal();document.querySelectorAll('.note').forEach(n=>n.remove());});assert.equal(await page.evaluate(()=>DQ.skillUnlocked('cooking')),true,'First Steps teaches the cooking fire');
    await page.locator('.journey .btn.primary').click();await page.waitForTimeout(300);
    assert.equal(await page.evaluate(()=>DQ.S.q.first_steps.s),'done');
    /* the first useful upgrade: the boss advice now offers armour the purse can buy */
@@ -34,7 +35,7 @@ const URL=process.env.IDLEWICK_URL||'http://127.0.0.1:8765/';
 
   /* 3. Herbalism and Enchanting, unlock to first use (seeded: 20 harvests; 30 crafts and 20 smithing actions) */
   {const {ctx,page,errors}=await fresh();
-   await page.evaluate(()=>{const S=DQ.S,D=DQ.data;S.stats.harvest=20;S.stats.craft=30;S.stats.smith=20;DQ.checkActionUnlocks();DQ.closeModal&&DQ.closeModal();DQ.closeModal&&DQ.closeModal();for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[20];S.inv.bronze_sword=1;S.inv.iron_body=1;DQ.equipItem('bronze_sword');DQ.equipItem('iron_body');DQ.go('brewery');});
+   await page.evaluate(()=>{const S=DQ.S,D=DQ.data;S.stats.harvest=20;S.stats.craft=30;S.stats.smith=20;S.unlocked.farming=true;S.xp.farming=D.XPF[10];DQ.checkActionUnlocks();DQ.closeModal&&DQ.closeModal();DQ.closeModal&&DQ.closeModal();for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[20];S.inv.bronze_sword=1;S.inv.iron_body=1;DQ.equipItem('bronze_sword');DQ.equipItem('iron_body');DQ.go('brewery');});
    await page.waitForTimeout(200);const herb=await page.locator('.herb-goals').innerText();assert.match(herb,/Research Herbalism/);assert.match(herb,/Healing draught/);assert.match(herb,/Potion of Might/);
    await page.evaluate(()=>{DQ.closeModal&&DQ.closeModal();DQ.go('enchanting');});await page.waitForTimeout(200);
    const ench=await page.locator('.ench-list').innerText();assert.match(ench,/best first/i);assert.match(ench,/sword/i);assert.match(ench,/runes .*held/);
