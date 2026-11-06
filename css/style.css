@@ -2289,3 +2289,7 @@ p{font-size:inherit}
 .illustrated-card.missing{border-color:color-mix(in srgb,var(--brass) 45%,var(--line))}
 .illustrated-card.missing .choice-state{color:var(--brass-hi)}
 .illustrated-card.locked .choice-state{color:var(--mute)}
+/* icon buttons: no padding, so a whole-number-scaled icon always sits centred; the title-screen mute gets a 44px target */
+.iconb{padding:0!important}
+#t-mute.tmute{width:44px;height:44px;border-radius:12px}
+#t-mute.tmute>.ic{margin:0}
