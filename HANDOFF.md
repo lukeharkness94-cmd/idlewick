@@ -26,6 +26,7 @@ Shop prices use `UI.money(amount)`: a small visible coin and formatted amount, w
 - Approved concept canvas: top bar holds the hero, the page menu (Home, Quests, World, Village, Hero, Shop) and coins/bell/settings/mute. Village is a new hub (Town projects, House, Workers); World is now Map and Exploration.
 - Left column (208px): Now card (current task, progress, count opens the plan, Stop/Retreat; gold outline when you are on its page), Combat, then all 14 skills at 44px rows. Fits 1440 × 900 without scrolling; shorter windows scroll the column.
 - Top menu compacts below 1480px (packchip hidden) and turns icon-only below 1290px. Phones (≤860px) unchanged: bottom bar now includes Village.
+- Follow-up (MacBook Air feedback): below 940px tall the left column compacts (36px rows, two-line Now card with a square Stop) so no scrolling down to 720px. Activity pages lock to the window; only `.illustrated-choices` (or the farm animals panel) scrolls. `tests/ui-fit.cjs` covers 1440×900, 1470×820, 1440×780, 1280×800 and 1280×720.
 - Next stages: paged choices with a context panel, Quests as list + detail, Combat and Scholarship fitted to one screen, page merges, a 1280 × 720 fit test.
 
 ## Latest navigation, artwork and controls

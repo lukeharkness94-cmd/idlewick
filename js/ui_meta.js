@@ -54,7 +54,7 @@ UI.render = fresh => {
 DQ.on('ui', () => {
   const st = S(); if (!DQ.started || !st || !st.seenTabs || st.seenTabs.plan || !DQ.planUnlocked()) return;
   st.seenTabs.plan = 1;
-  DQ.notify({ kind: 'unlock', key: 'plan', icon: 'clock', col: '#8fc7ff', title: 'Task planning unlocked', text: 'Choose a pace, set stop rules and queue the next task. Tap the task bar at the top, or the arrow on any card.', action: { label: 'Open plan', fn: () => UI.openPlan() }, sound: 'unlock', ttl: 14000 });
+  DQ.notify({ kind: 'unlock', key: 'plan', icon: 'clock', col: '#8fc7ff', title: 'Task planning unlocked', text: 'Choose a pace, set stop rules and queue the next task. Tap the count on the Now card (top left), or the arrow on any card.', action: { label: 'Open plan', fn: () => UI.openPlan() }, sound: 'unlock', ttl: 14000 });
 });
 
 

@@ -2464,6 +2464,46 @@ body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
 @media (min-width:861px) and (max-width:1479px){.tnav{padding:0 7px;gap:5px}.topnav{gap:2px;padding-right:6px}.tnav .ic{width:24px;height:24px}#hud .packchip{display:none}}
 @media (min-width:861px) and (max-width:1289px){.tnav span{display:none}.tnav .hubdot{position:absolute;top:4px;right:2px}}
 @media (max-width:860px){#nowcard{display:none!important}}
+/* Shorter windows (a MacBook Air browser is ~700–800px tall): the left column keeps every skill on screen without
+   scrolling by tightening row height and spacing, never the text size. */
+@media (min-width:861px) and (max-height:939px){
+  .sidebar{gap:6px!important}
+  .now{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:'go stop' 'bar bar' 'plan plan';gap:4px 6px;padding:7px 8px}
+  .now .now-k{display:none}
+  .now .now-go{grid-area:go}
+  .now .bar.prog{grid-area:bar;height:5px}
+  .now .now-f{display:contents}
+  .now .now-plan{grid-area:plan}
+  .now .now-stop{grid-area:stop;width:32px;height:32px;padding:0;justify-content:center}
+  .now .now-sl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .now.idle{display:flex;flex-direction:column;gap:4px}
+  .now.idle{padding:7px 10px}
+  #combatnav .combat-entry{min-height:36px!important;padding:2px 9px 7px!important}
+  #combatnav .combat-entry>.ic{width:24px!important;height:24px!important}
+  #combatnav .combat-entry .combat-menu-bar{bottom:4px}
+  .sidebar .dock{gap:2px!important}
+  .sidebar .dock .dk-h{padding:0 10px!important;line-height:20px!important}
+  #skilldock .dk{min-height:36px!important;padding:1px 9px!important}
+  #skilldock .dk .bar{margin-top:0!important}
+  .sidebar .dock .dk>.dk-info{gap:2px!important}
+}
+@media (min-width:861px) and (max-height:719px){.sidebar .dock .dk-h{display:none!important}}
+/* Activity pages (gather, make, farm): the page itself never scrolls on desktop. The action panel stays still and
+   only the list of things to gather or make scrolls, inside its own panel. */
+@media (min-width:861px){
+  html:has(#view > :is(.activity-workspace.task-panel,.farm-workspace)){overflow:hidden;height:100%}
+  html:has(#view > :is(.activity-workspace.task-panel,.farm-workspace)) body{overflow:hidden;height:100%}
+  #app:has(#view > :is(.activity-workspace.task-panel,.farm-workspace)){height:100dvh;min-height:0;box-sizing:border-box;padding-bottom:14px!important;align-items:stretch}
+  #app:has(#view > :is(.activity-workspace.task-panel,.farm-workspace)) > main{display:flex;flex-direction:column;min-height:0;height:100%;overflow:hidden}
+  main > #view:has(> :is(.activity-workspace.task-panel,.farm-workspace)){flex:1 1 auto;min-height:0;display:flex!important;flex-direction:column}
+  #view > :is(.activity-workspace.task-panel,.farm-workspace){flex:1 1 auto;min-height:0;align-items:stretch!important}
+  #view > :is(.activity-workspace.task-panel,.farm-workspace) > .workspace-focus{min-height:0;overflow-y:auto;scrollbar-width:thin}
+  #view > :is(.activity-workspace.task-panel,.farm-workspace) > .workspace-options{min-height:0;overflow:hidden}
+  #view > .activity-workspace.task-panel .workspace-options > .activity-choices{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+  #view > .activity-workspace.task-panel .activity-choices > .illustrated-choices{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin;padding:2px 4px 4px 2px;align-content:start;grid-auto-rows:max-content!important;grid-template-rows:none!important}
+  #app:has(#view > :is(.activity-workspace.task-panel,.farm-workspace)) #hud{position:relative!important;top:0!important;flex:none}
+  #view > .farm-workspace .workspace-options > *{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin}
+}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -11711,7 +11751,7 @@ UI.renderHud = () => {
       <span class="now-k">Now<i> · on this page</i></span>
       <button class="now-go" data-do="go" data-a="${DQ.actPage()}" data-tip="text:Go to this activity"><span class="now-ic">${taskArt}</span><b>${esc(DQ.actLabel().replace(/ rock$/, ''))}</b></button>
       <span class="bar prog" role="img" aria-label="This action"><i data-prog="@"></i></span>
-      <span class="now-f"><button class="now-plan" data-do="plan" data-tip="text:Pace, stop rule and queue"><span data-b="hud:count"></span><span class="hq hb" data-b="hudbuff" hidden></span></button><button class="now-stop" data-do="stop" aria-label="${fight ? 'Retreat' : 'Stop this task'}" data-tip="text:${fight ? 'Retreat' : 'Stop this task'} (Space)"><i class="stop-sq" aria-hidden="true"></i>${fight ? 'Retreat' : 'Stop'}</button></span></div>`
+      <span class="now-f"><button class="now-plan" data-do="plan" data-tip="text:Pace, stop rule and queue"><span data-b="hud:count"></span><span class="hq hb" data-b="hudbuff" hidden></span></button><button class="now-stop" data-do="stop" aria-label="${fight ? 'Retreat' : 'Stop this task'}" data-tip="text:${fight ? 'Retreat' : 'Stop this task'} (Space)"><i class="stop-sq" aria-hidden="true"></i><span class="now-sl">${fight ? 'Retreat' : 'Stop'}</span></button></span></div>`
     : `<div class="now idle"><span class="now-k">Now</span><b class="now-idle">Nothing running</b>${S().lastAct ? `<button class="btn sm primary" data-do="resume">Resume</button>` : `<small>Pick a skill below to start</small>`}</div>`;
   $('#hud').innerHTML = `<button class="h-hero" data-do="go" data-a="character" data-tip="text:Your inventory">${UI.portrait(48)}<span class="h-lv mono" data-b="adv"></span></button>
     <div class="h-name"><b>${esc(S().name)}</b><span class="bar" role="img" aria-label="Hero level progress"><i data-b="advbar"></i></span><small>${DQ.heroTitle() ? `<i class="h-title">${esc(DQ.heroTitle())}</i>` : `Hero level <span data-b="adv"></span> · <span data-b="advline"></span>`}</small><div class="hp h-hp" data-tip="text:Health"><span class="bar" role="img" aria-label="Health"><i data-b="hpbar"></i></span><small class="mono" data-b="hptxt"></small></div></div>
@@ -11874,7 +11914,7 @@ UI.render = fresh => {
 DQ.on('ui', () => {
   const st = S(); if (!DQ.started || !st || !st.seenTabs || st.seenTabs.plan || !DQ.planUnlocked()) return;
   st.seenTabs.plan = 1;
-  DQ.notify({ kind: 'unlock', key: 'plan', icon: 'clock', col: '#8fc7ff', title: 'Task planning unlocked', text: 'Choose a pace, set stop rules and queue the next task. Tap the task bar at the top, or the arrow on any card.', action: { label: 'Open plan', fn: () => UI.openPlan() }, sound: 'unlock', ttl: 14000 });
+  DQ.notify({ kind: 'unlock', key: 'plan', icon: 'clock', col: '#8fc7ff', title: 'Task planning unlocked', text: 'Choose a pace, set stop rules and queue the next task. Tap the count on the Now card (top left), or the arrow on any card.', action: { label: 'Open plan', fn: () => UI.openPlan() }, sound: 'unlock', ttl: 14000 });
 });
 
 

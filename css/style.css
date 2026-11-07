@@ -2389,3 +2389,43 @@ body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
 @media (min-width:861px) and (max-width:1479px){.tnav{padding:0 7px;gap:5px}.topnav{gap:2px;padding-right:6px}.tnav .ic{width:24px;height:24px}#hud .packchip{display:none}}
 @media (min-width:861px) and (max-width:1289px){.tnav span{display:none}.tnav .hubdot{position:absolute;top:4px;right:2px}}
 @media (max-width:860px){#nowcard{display:none!important}}
+/* Shorter windows (a MacBook Air browser is ~700–800px tall): the left column keeps every skill on screen without
+   scrolling by tightening row height and spacing, never the text size. */
+@media (min-width:861px) and (max-height:939px){
+  .sidebar{gap:6px!important}
+  .now{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:'go stop' 'bar bar' 'plan plan';gap:4px 6px;padding:7px 8px}
+  .now .now-k{display:none}
+  .now .now-go{grid-area:go}
+  .now .bar.prog{grid-area:bar;height:5px}
+  .now .now-f{display:contents}
+  .now .now-plan{grid-area:plan}
+  .now .now-stop{grid-area:stop;width:32px;height:32px;padding:0;justify-content:center}
+  .now .now-sl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .now.idle{display:flex;flex-direction:column;gap:4px}
+  .now.idle{padding:7px 10px}
+  #combatnav .combat-entry{min-height:36px!important;padding:2px 9px 7px!important}
+  #combatnav .combat-entry>.ic{width:24px!important;height:24px!important}
+  #combatnav .combat-entry .combat-menu-bar{bottom:4px}
+  .sidebar .dock{gap:2px!important}
+  .sidebar .dock .dk-h{padding:0 10px!important;line-height:20px!important}
+  #skilldock .dk{min-height:36px!important;padding:1px 9px!important}
+  #skilldock .dk .bar{margin-top:0!important}
+  .sidebar .dock .dk>.dk-info{gap:2px!important}
+}
+@media (min-width:861px) and (max-height:719px){.sidebar .dock .dk-h{display:none!important}}
+/* Activity pages (gather, make, farm): the page itself never scrolls on desktop. The action panel stays still and
+   only the list of things to gather or make scrolls, inside its own panel. */
+@media (min-width:861px){
+  html:has(#view > :is(.activity-workspace.task-panel,.farm-workspace)){overflow:hidden;height:100%}
+  html:has(#view > :is(.activity-workspace.task-panel,.farm-workspace)) body{overflow:hidden;height:100%}
+  #app:has(#view > :is(.activity-workspace.task-panel,.farm-workspace)){height:100dvh;min-height:0;box-sizing:border-box;padding-bottom:14px!important;align-items:stretch}
+  #app:has(#view > :is(.activity-workspace.task-panel,.farm-workspace)) > main{display:flex;flex-direction:column;min-height:0;height:100%;overflow:hidden}
+  main > #view:has(> :is(.activity-workspace.task-panel,.farm-workspace)){flex:1 1 auto;min-height:0;display:flex!important;flex-direction:column}
+  #view > :is(.activity-workspace.task-panel,.farm-workspace){flex:1 1 auto;min-height:0;align-items:stretch!important}
+  #view > :is(.activity-workspace.task-panel,.farm-workspace) > .workspace-focus{min-height:0;overflow-y:auto;scrollbar-width:thin}
+  #view > :is(.activity-workspace.task-panel,.farm-workspace) > .workspace-options{min-height:0;overflow:hidden}
+  #view > .activity-workspace.task-panel .workspace-options > .activity-choices{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+  #view > .activity-workspace.task-panel .activity-choices > .illustrated-choices{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin;padding:2px 4px 4px 2px;align-content:start;grid-auto-rows:max-content!important;grid-template-rows:none!important}
+  #app:has(#view > :is(.activity-workspace.task-panel,.farm-workspace)) #hud{position:relative!important;top:0!important;flex:none}
+  #view > .farm-workspace .workspace-options > *{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin}
+}
