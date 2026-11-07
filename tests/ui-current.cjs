@@ -21,7 +21,7 @@ const fs=require('node:fs');
    assert.equal(entrance.name,'rgb(233, 228, 213)',`${theme} entrance name contrast`);
    assert.equal(entrance.back,'rgb(233, 228, 213)',`${theme} entrance Back contrast`);
    assert.equal(entrance.begin,'rgb(27, 20, 5)',`${theme} primary button contrast`);
-   assert.match(entrance.form,/Alegreya Sans/);assert.match(entrance.logo,/Pixelify Sans/);
+   assert.match(entrance.form,/Alegreya/); /* Storybook lettering (default) uses the Alegreya book serif */assert.match(entrance.logo,/Pixelify Sans/);
    assert.equal(entrance.overflow,false);
   }
   if(process.env.ENTRANCE_PREVIEW){await page.setViewportSize({width:738,height:800});await page.screenshot({path:process.env.ENTRANCE_PREVIEW});}

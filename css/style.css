@@ -2941,3 +2941,30 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
 .btn.ev-opt{display:inline-grid;justify-items:start;gap:1px;text-align:left;padding:6px 12px;max-width:240px;height:auto;line-height:1.2}
 .btn.ev-opt small{font-size:13px;font-weight:500;opacity:.8;white-space:normal}
 .btn.primary.ev-opt small{color:#3a2508;opacity:.9}
+
+/* Lettering (Nov 2026): fantasy type across the whole game, chosen in Settings → Lettering (js/lettering.js) */
+:root.type-storybook,:root.type-adventurer{--f-body:'Alegreya',Georgia,'Times New Roman',serif;--f-ui:'Alegreya',Georgia,serif;--f-mono:'Alegreya',Georgia,serif}
+:root.type-storybook{--f-display:'Cinzel','Alegreya SC',Georgia,serif}
+:root.type-adventurer{--f-display:'MedievalSharp','Alegreya SC',Georgia,serif}
+:root.type-pixel{--f-display:'Silkscreen','Pixelify Sans',monospace;--f-body:'Pixelify Sans','Alegreya Sans',sans-serif;--f-ui:'Pixelify Sans','Alegreya Sans',sans-serif;--f-mono:'Pixelify Sans',monospace}
+/* book serifs read lighter than a sans at the same size: text is set a step heavier, numbers line up */
+:root.type-storybook body,:root.type-adventurer body{font-weight:500}
+:root.type-storybook .mono,:root.type-adventurer .mono,:root.type-pixel .mono{font-variant-numeric:lining-nums tabular-nums;font-weight:600}
+:root.type-storybook b,:root.type-storybook strong,:root.type-adventurer b,:root.type-adventurer strong{font-weight:700}
+:root.type-storybook .btn,:root.type-adventurer .btn{font-weight:700}
+:root.type-storybook :is(h1,h2,h3){letter-spacing:.04em;font-weight:700}
+:root.type-storybook h2{font-size:20px}
+:root.type-adventurer :is(h1,h2,h3){font-weight:400;letter-spacing:.01em}
+:root.type-pixel :is(h1,h2,h3){font-weight:700;letter-spacing:.02em}
+:root.type-pixel h2{font-size:18px}
+/* the Settings picker shows each lettering in its own fonts */
+.letter-opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.letter-opt{display:grid;gap:2px;padding:10px 12px;border-radius:12px;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);text-align:left;cursor:pointer}
+.letter-opt.on{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 30%,transparent)}
+.letter-opt b{font-size:17px}.letter-opt span{font-size:16px}.letter-opt small{font-size:13px;color:var(--mute)}
+.type-sample-storybook b{font-family:'Cinzel',serif}.type-sample-storybook span{font-family:'Alegreya',serif;font-weight:500}
+.type-sample-adventurer b{font-family:'MedievalSharp',serif;font-weight:400}.type-sample-adventurer span{font-family:'Alegreya',serif;font-weight:500}
+.type-sample-pixel b{font-family:'Silkscreen',monospace}.type-sample-pixel span{font-family:'Pixelify Sans',sans-serif}
+.type-sample-original b{font-family:'Alegreya SC',serif}.type-sample-original span{font-family:'Alegreya Sans',sans-serif}
+/* full-height figures everywhere (Alegreya's default old-style numerals read small in a game full of numbers) */
+:root.type-storybook body,:root.type-adventurer body{font-variant-numeric:lining-nums}

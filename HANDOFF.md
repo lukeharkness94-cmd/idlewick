@@ -407,3 +407,6 @@ Stages are separate commits so each can be reverted on its own.
 
 ## Welcome back, at a glance (Nov 2026)
 - `js/welcome.js` (`UI.welcomeBody`) replaces the text summary: a banner (portrait, time away in the Silkscreen pixel face, a status chip), picture tiles for level-ups, XP, coins, creatures and items (big abbreviated numbers), chips for quest rewards and research, one next-step card, picture cards for other good options (`DQ.returnChoices` entries carry `art`), then decisions. Decision buttons show their odds under the label instead of a line of text. Silkscreen is embedded from `fonts/` by the packager.
+
+## Fantasy lettering (Nov 2026)
+- New default type, "Storybook": Cinzel headings, Alegreya (calligraphic book serif, weight 500, lining figures) for text, buttons and numbers, replacing the thin Alegreya Sans and the JetBrains Mono code font. Settings → Lettering also offers Adventurer (MedievalSharp headings), Pixel (Silkscreen + Pixelify Sans) and Original. Applied via `type-*` classes on <html> that redefine the font variables; all fonts are local variable woff2 files in fonts/ (SIL OFL), embedded by the packager.

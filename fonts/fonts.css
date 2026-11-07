@@ -66,3 +66,9 @@
 /* Silkscreen (SIL Open Font License): a pixel display face for big numbers and short headlines */
 @font-face { font-family: 'Silkscreen'; font-style: normal; font-weight: 400; font-display: swap; src: url(./Silkscreen-400.woff2) format('woff2'); }
 @font-face { font-family: 'Silkscreen'; font-style: normal; font-weight: 700; font-display: swap; src: url(./Silkscreen-700.woff2) format('woff2'); }
+
+/* Fantasy type (Nov 2026): Cinzel, Alegreya and MedievalSharp, Latin subsets, variable weights (SIL Open Font License) */
+@font-face { font-family: 'Cinzel'; font-style: normal; font-weight: 400 900; font-display: swap; src: url(./Cinzel.woff2) format('woff2'); }
+@font-face { font-family: 'Alegreya'; font-style: normal; font-weight: 400 900; font-display: swap; src: url(./Alegreya.woff2) format('woff2'); }
+@font-face { font-family: 'Alegreya'; font-style: italic; font-weight: 400 900; font-display: swap; src: url(./Alegreya-Italic.woff2) format('woff2'); }
+@font-face { font-family: 'MedievalSharp'; font-style: normal; font-weight: 400; font-display: swap; src: url(./MedievalSharp.woff2) format('woff2'); }
