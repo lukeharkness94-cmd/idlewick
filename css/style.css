@@ -2733,3 +2733,14 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 .gear-verdict .gear-cmp{position:static}
 :root[data-theme="light"] .gear-cmp.up,:root[data-theme="light"] .gear-verdict.up{color:#2f8a57}
 :root[data-theme="light"] .gear-cmp.down,:root[data-theme="light"] .gear-verdict.down{color:#c0392b}
+
+/* Recommended levels on quests (Nov 2026): compact chips on rows, a labelled row on the quest card */
+.qrecs{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.qrec{display:inline-flex;align-items:center;padding:1px 7px;border-radius:999px;font-size:13px;font-weight:700;line-height:1.5;border:1px solid var(--line2);background:var(--panel2);color:var(--mute)}
+.qrec.ok{color:#5cc08a;border-color:color-mix(in srgb,#5cc08a 45%,var(--line))}
+.qrec.short{color:#e6a64a;border-color:color-mix(in srgb,#e6a64a 50%,var(--line))}
+:root[data-theme="light"] .qrec.ok{color:#2f7a4c}
+:root[data-theme="light"] .qrec.short{color:#a8641a}
+.quest-rec{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.quest-rec .k{margin-right:4px}
+.quest-rec .qrec{font-size:14px;padding:2px 9px}

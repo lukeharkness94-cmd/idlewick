@@ -912,4 +912,11 @@ test('gear arrows follow the stat table: gains outweighing losses are green, the
     if(net>0)assert.equal(v,'up',it.id);else if(net<0)assert.ok(v==='down'||v==='unique',it.id);else assert.notEqual(v,'up',it.id);S.equip[it.slot]=null;}
   assert.ok(n>60,'audited '+n+' items');
 });
+test('quests recommend a Hero, Combat and skill level worked out from their objectives', () => {
+  const {q}=harness();const D=q.data;
+  assert.deepEqual({...q.questRec(D.QM.goblin_menace)},{hero:1,combat:D.MON.goblin?D.MON[D.QM.goblin_menace.obj.find(o=>o.ev==='kill'||o.ev==='boss').key].cl:5,skill:null});
+  const deep=q.questRec(D.QM.deep_vein);assert.equal(deep.skill.sk,'mining');assert.ok(deep.skill.lvl>1);
+  for(const x of D.QUESTS){const r=q.questRec(x);assert.ok(r.hero>=1&&Number.isFinite(r.combat),x.id);if(x.town!=='willowbrook')assert.ok(r.hero>1,x.id+' (adventures take their region\'s Hero level)');}
+  assert.ok(q.questRecScore(D.QM.crownfall)>q.questRecScore(D.QM.first_steps),'late quests sort after early ones');
+});
 console.log(tests+' regression checks passed');

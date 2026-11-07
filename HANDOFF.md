@@ -374,3 +374,6 @@ Stages are separate commits so each can be reverted on its own.
 ## Six restoration projects in every town (Nov 2026)
 - Each region now restores six places like Willowbrook: its original project plus five more (`moreProjects` in js/journey.js, ids `moss_*`, `salt_*`, `iron_*`, `fen_*`, `ember_*`, `sky_*`, `hollow_*`). Costs use regional materials and rise through the region (2–8 hours of that region's earnings in `sim-economy.cjs 24`; milestones unchanged). Bonuses are small and mostly skill-specific (+5% XP or +3% speed for one skill; a few +1% damage reduction, +2% coins, +3% food healing, +5% resting; Skyreach's bell is the only +1% XP to all).
 - Every project has a villager voice and its own damaged/restored 32×32 piece (`piece()` in js/pixel_world.js keyed by `art`) placed in the town scene (`PLACE`).
+
+## Recommended quest levels (Nov 2026)
+- `DQ.questRec(q)` (js/meta.js) works out a recommended Hero level (the quest's own, or its region's first for adventures), Combat level (the strongest creature it sends you to fight) and the highest skill level its gathering/making steps need. Shown as chips on quest rows and a "Recommended" row on the quest card, green once met and amber before. Quest lists sort by `questRecScore` after main/ready quests.

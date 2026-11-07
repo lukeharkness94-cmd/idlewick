@@ -2808,6 +2808,17 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 .gear-verdict .gear-cmp{position:static}
 :root[data-theme="light"] .gear-cmp.up,:root[data-theme="light"] .gear-verdict.up{color:#2f8a57}
 :root[data-theme="light"] .gear-cmp.down,:root[data-theme="light"] .gear-verdict.down{color:#c0392b}
+
+/* Recommended levels on quests (Nov 2026): compact chips on rows, a labelled row on the quest card */
+.qrecs{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.qrec{display:inline-flex;align-items:center;padding:1px 7px;border-radius:999px;font-size:13px;font-weight:700;line-height:1.5;border:1px solid var(--line2);background:var(--panel2);color:var(--mute)}
+.qrec.ok{color:#5cc08a;border-color:color-mix(in srgb,#5cc08a 45%,var(--line))}
+.qrec.short{color:#e6a64a;border-color:color-mix(in srgb,#e6a64a 50%,var(--line))}
+:root[data-theme="light"] .qrec.ok{color:#2f7a4c}
+:root[data-theme="light"] .qrec.short{color:#a8641a}
+.quest-rec{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.quest-rec .k{margin-right:4px}
+.quest-rec .qrec{font-size:14px;padding:2px 9px}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -10191,6 +10202,32 @@ DQ.gearVerdict = id => {
 DQ.gearNet = id => { const c = DQ.compareItem(id); return c && !c.same && !c.tool && c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : null; };
 DQ.gearMark = id => { const v = DQ.gearVerdict(id); return v ? `<span class="gear-cmp ${v}" aria-label="${v === 'up' ? 'Better than equipped' : v === 'down' ? 'Worse than equipped' : 'Unique effect'}">${v === 'up' ? '▲' : v === 'down' ? '▼' : '✦'}</span>` : ''; };
 
+/* ---------- Recommended levels for quests (Nov 2026) ----------
+   So players can tell which quest to tackle first: the Hero level the quest opens at, the Combat level of the
+   strongest creature it sends you to fight (its creature level), and the highest skill level any of its gathering or
+   making steps needs. Worked out from the objectives, so new quests get it for free. */
+const NODE_EV = { catch: 'fish', chop: 'wood', mine: 'mine', thieve: 'thieve' };
+DQ.questRec = q => {
+  if (!q) return null; let combat = 0, skill = null;
+  const need = (sk, lvl) => { if (sk && lvl > 1 && (!skill || lvl > skill.lvl)) skill = { sk, lvl }; };
+  for (const o of q.obj || []) {
+    if (['kill', 'boss', 'guide'].includes(o.ev)) { const m = D.MON[o.key]; if (m && m.cl) combat = Math.max(combat, m.cl); continue; }
+    if (o.key === '*' || !o.key) continue;
+    if (NODE_EV[o.ev]) { const n = (D.NODES[NODE_EV[o.ev]] || []).find(x => x.id === o.key); if (n) need(n.skill, n.lvl); continue; }
+    if (o.ev === 'harvest') { const c = D.CROP && D.CROP[o.key]; if (c) need('farming', c.lvl); continue; }
+    if (['cook', 'smelt', 'smith', 'craft'].includes(o.ev)) { const r = (Array.isArray(D.RECIPES) ? D.RECIPES : Object.values(D.RECIPES)).find(r => r.id === o.key || r.id.endsWith('_' + o.key) || (r.out && r.out[o.key])); if (r) need(r.skill, r.lvl); }
+  }
+  /* adventures are found rather than given, so they carry no Hero level of their own: use their region's first */
+  const floor = (D.QUESTS || []).filter(x => x.town === q.town && x.adv > 1).reduce((m, x) => Math.min(m, x.adv), Infinity);
+  return { hero: Math.max(q.adv || 1, q.town === 'willowbrook' || floor === Infinity ? 1 : floor), combat, skill };
+};
+/* one number for ordering a quest list: whichever recommendation is highest, on the Hero scale */
+DQ.questRecScore = q => { const r = DQ.questRec(q); return r ? Math.max(r.hero, r.combat, r.skill ? r.skill.lvl : 0) : 0; };
+DQ.questRecParts = q => { const r = DQ.questRec(q); if (!r) return []; const out = [{ k: 'hero', n: 'Hero', lvl: r.hero, ok: DQ.advLvl() >= r.hero }];
+  if (r.combat) out.push({ k: 'combat', n: 'Combat', lvl: r.combat, ok: DQ.combatLvl() >= r.combat });
+  if (r.skill && D.SK[r.skill.sk]) out.push({ k: r.skill.sk, n: D.SK[r.skill.sk].name, lvl: r.skill.lvl, ok: DQ.lvl(r.skill.sk) >= r.skill.lvl });
+  return out; };
+
 /* ---------- The playtest report: plain text, easy to paste ---------- */
 const hm = ms => { ms = Math.max(0, ms); const m = Math.round(ms / 60000); return m < 60 ? `${m}m` : `${Math.floor(m / 60)}h ${m % 60}m`; };
 DQ.playtestReport = () => {
@@ -10727,7 +10764,9 @@ UI.V.quests = () => {
   const st = q => DQ.questState(q), groups = { active: q => ['active', 'ready'].includes(st(q)), available: q => st(q) === 'new', upcoming: q => st(q) === 'locked' && !(DQ.questHidden && DQ.questHidden(q)) && (DQ.townUnlocked(q.town) || q.main), done: q => st(q) === 'done' };
   const names = { active: 'Active', available: 'Available', upcoming: 'Upcoming', done: 'Completed' };
   const tab = UI.questTab = groups[UI.questTab] ? UI.questTab : D.QUESTS.some(groups.active) ? 'active' : 'available';
-  const list = D.QUESTS.filter(groups[tab]).sort((a, b) => (b.main ? 1 : 0) - (a.main ? 1 : 0) || (st(a) === 'ready' ? -1 : 0) - (st(b) === 'ready' ? -1 : 0) || a.adv - b.adv);
+  const list = D.QUESTS.filter(groups[tab]).sort((a, b) => (b.main ? 1 : 0) - (a.main ? 1 : 0) || (st(a) === 'ready' ? -1 : 0) - (st(b) === 'ready' ? -1 : 0) || (DQ.questRecScore ? DQ.questRecScore(a) - DQ.questRecScore(b) : 0) || a.adv - b.adv);
+  /* recommended levels: short on the row, in full on the card; green once you meet them */
+  const recChips = (q, short) => (DQ.questRecParts ? DQ.questRecParts(q) : []).filter(r => !short || r.k !== 'hero' || r.lvl > 1).map(r => `<span class="qrec ${r.ok ? 'ok' : 'short'}" title="Recommended ${r.n} level ${r.lvl}">${short && r.k === 'combat' ? 'Combat' : esc(r.n)} ${r.lvl}</span>`).join('');
   const selected = list.find(q => q.id === UI.tab.questSelected) || list[0];
   UI.tab.questSelected = selected && selected.id;
   /* List and detail (one-screen overhaul): a compact list of quest rows that scrolls, and the selected quest in full. */
@@ -10735,7 +10774,7 @@ UI.V.quests = () => {
     const s = st(q), p = S().q[q.id], t = D.TOWN[q.town], sk = q.main && D.SK[q.unlocks];
     const pct = p ? Math.round(q.obj.reduce((a, o, j) => a + Math.min(1, DQ.objProg(q, p, j) / o.n), 0) / q.obj.length * 100) : 0;
     const blk = s === 'locked' ? (DQ.advLvl() < q.adv ? `Hero level ${q.adv}` : (DQ.questBlockers(q)[0] || 'Not yet')) : '';
-    return `<button class="qrow ${s} ${q.main ? 'main' : ''} ${q.id === (selected && selected.id) ? 'on' : ''}" data-do="qselect" data-a="${q.id}" aria-pressed="${q.id === (selected && selected.id)}" style="${sk ? `--c:${sk.col}` : ''}"><span class="qr-face">${(DQ.folkPortrait && DQ.folkPortrait(q.giver, 40)) || ico(q.main ? 'star' : s === 'locked' ? 'lock' : 'quest')}${q.main ? `<i class="qr-main">${ico('star')}</i>` : ''}</span><span class="qr-t"><b>${esc(q.name)}</b><small>${s === 'locked' ? esc(String(blk).replace(/<[^>]+>/g, '')) : `${esc(q.giver)} · ${esc(t.name)}`}</small>${s === 'active' || s === 'ready' ? `<span class="bar"><i style="width:${pct}%"></i></span>` : ''}</span><span class="state ${s}">${{ new: 'New', locked: 'Locked', active: pct + '%', ready: 'Ready', done: 'Done' }[s]}</span></button>`;
+    return `<button class="qrow ${s} ${q.main ? 'main' : ''} ${q.id === (selected && selected.id) ? 'on' : ''}" data-do="qselect" data-a="${q.id}" aria-pressed="${q.id === (selected && selected.id)}" style="${sk ? `--c:${sk.col}` : ''}"><span class="qr-face">${(DQ.folkPortrait && DQ.folkPortrait(q.giver, 40)) || ico(q.main ? 'star' : s === 'locked' ? 'lock' : 'quest')}${q.main ? `<i class="qr-main">${ico('star')}</i>` : ''}</span><span class="qr-t"><b>${esc(q.name)}</b><small>${s === 'locked' ? esc(String(blk).replace(/<[^>]+>/g, '')) : `${esc(q.giver)} · ${esc(t.name)}`}</small>${s === 'done' ? '' : `<span class="qrecs">${recChips(q, true)}</span>`}${s === 'active' || s === 'ready' ? `<span class="bar"><i style="width:${pct}%"></i></span>` : ''}</span><span class="state ${s}">${{ new: 'New', locked: 'Locked', active: pct + '%', ready: 'Ready', done: 'Done' }[s]}</span></button>`;
   };
   const cards = selected ? [selected].map((q, i) => {
     const s = st(q), p = S().q[q.id], t = D.TOWN[q.town];
@@ -10749,7 +10788,7 @@ UI.V.quests = () => {
     const actions = `<div class="quest-actions">${s === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>` : s === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Claim reward</button>` : s === 'active' ? `<button class="btn primary" data-do="questcontinue" data-a="${q.id}">Continue quest</button>` : ''}</div>`;
     return `<section class="panel quest ${s} ${q.main ? 'main' : ''}" style="--i:${i};${sk ? `--c:${sk.col}` : ''}" id="q-${q.id}">${sk ? `<span class="mq-ribbon">${ico('star')} Main quest · Unlocks ${sk.name}</span>` : ''}<div class="phead quest-head" style="margin:0">${DQ.folkPortrait ? `<button class="quest-face" data-do="folkfrom" data-a="${esc(q.giver)}" data-tip="text:About ${esc(q.giver)}">${DQ.folkPortrait(q.giver, 96)}</button>` : ''}<div><h2>${q.name}</h2><small>${q.giver} · ${t.name}</small></div><span class="state ${s}">${{ new: 'Available', locked: 'Locked', active: 'In progress', ready: 'Ready', done: 'Complete' }[s]}</span></div>
       <div class="quest-story" id="quest-story-${q.id}"><p class="blurb">${q.blurb}</p>${say}</div>
-      ${DQ.questImpact && DQ.questImpact(q.id) ? `<p class="quest-impact">Town change · ${esc(DQ.questImpact(q.id))}</p>` : ''}${req}${s === 'locked' ? '' : `<div class="quest-objs"><div class="k">Required</div>${objs}</div>`}
+      ${DQ.questImpact && DQ.questImpact(q.id) ? `<p class="quest-impact">Town change · ${esc(DQ.questImpact(q.id))}</p>` : ''}${req}${s === 'done' ? '' : `<div class="quest-rec"><span class="k">Recommended</span>${recChips(q)}</div>`}${s === 'locked' ? '' : `<div class="quest-objs"><div class="k">Required</div>${objs}</div>`}
       <div class="rewards"><span class="k">Rewards</span><div class="rws">${sk ? `<span class="rw unlockrw" style="--c:${sk.col}">${ico(q.unlocks)}Learn ${sk.name}</span>` : ''}${UI.rewards(q.reward)}</div></div>${actions}</section>`;
   }).join('') : '';
   const done = D.QUESTS.filter(groups.done).length;

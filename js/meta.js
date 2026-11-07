@@ -150,6 +150,32 @@ DQ.gearVerdict = id => {
 DQ.gearNet = id => { const c = DQ.compareItem(id); return c && !c.same && !c.tool && c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : null; };
 DQ.gearMark = id => { const v = DQ.gearVerdict(id); return v ? `<span class="gear-cmp ${v}" aria-label="${v === 'up' ? 'Better than equipped' : v === 'down' ? 'Worse than equipped' : 'Unique effect'}">${v === 'up' ? '▲' : v === 'down' ? '▼' : '✦'}</span>` : ''; };
 
+/* ---------- Recommended levels for quests (Nov 2026) ----------
+   So players can tell which quest to tackle first: the Hero level the quest opens at, the Combat level of the
+   strongest creature it sends you to fight (its creature level), and the highest skill level any of its gathering or
+   making steps needs. Worked out from the objectives, so new quests get it for free. */
+const NODE_EV = { catch: 'fish', chop: 'wood', mine: 'mine', thieve: 'thieve' };
+DQ.questRec = q => {
+  if (!q) return null; let combat = 0, skill = null;
+  const need = (sk, lvl) => { if (sk && lvl > 1 && (!skill || lvl > skill.lvl)) skill = { sk, lvl }; };
+  for (const o of q.obj || []) {
+    if (['kill', 'boss', 'guide'].includes(o.ev)) { const m = D.MON[o.key]; if (m && m.cl) combat = Math.max(combat, m.cl); continue; }
+    if (o.key === '*' || !o.key) continue;
+    if (NODE_EV[o.ev]) { const n = (D.NODES[NODE_EV[o.ev]] || []).find(x => x.id === o.key); if (n) need(n.skill, n.lvl); continue; }
+    if (o.ev === 'harvest') { const c = D.CROP && D.CROP[o.key]; if (c) need('farming', c.lvl); continue; }
+    if (['cook', 'smelt', 'smith', 'craft'].includes(o.ev)) { const r = (Array.isArray(D.RECIPES) ? D.RECIPES : Object.values(D.RECIPES)).find(r => r.id === o.key || r.id.endsWith('_' + o.key) || (r.out && r.out[o.key])); if (r) need(r.skill, r.lvl); }
+  }
+  /* adventures are found rather than given, so they carry no Hero level of their own: use their region's first */
+  const floor = (D.QUESTS || []).filter(x => x.town === q.town && x.adv > 1).reduce((m, x) => Math.min(m, x.adv), Infinity);
+  return { hero: Math.max(q.adv || 1, q.town === 'willowbrook' || floor === Infinity ? 1 : floor), combat, skill };
+};
+/* one number for ordering a quest list: whichever recommendation is highest, on the Hero scale */
+DQ.questRecScore = q => { const r = DQ.questRec(q); return r ? Math.max(r.hero, r.combat, r.skill ? r.skill.lvl : 0) : 0; };
+DQ.questRecParts = q => { const r = DQ.questRec(q); if (!r) return []; const out = [{ k: 'hero', n: 'Hero', lvl: r.hero, ok: DQ.advLvl() >= r.hero }];
+  if (r.combat) out.push({ k: 'combat', n: 'Combat', lvl: r.combat, ok: DQ.combatLvl() >= r.combat });
+  if (r.skill && D.SK[r.skill.sk]) out.push({ k: r.skill.sk, n: D.SK[r.skill.sk].name, lvl: r.skill.lvl, ok: DQ.lvl(r.skill.sk) >= r.skill.lvl });
+  return out; };
+
 /* ---------- The playtest report: plain text, easy to paste ---------- */
 const hm = ms => { ms = Math.max(0, ms); const m = Math.round(ms / 60000); return m < 60 ? `${m}m` : `${Math.floor(m / 60)}h ${m % 60}m`; };
 DQ.playtestReport = () => {
