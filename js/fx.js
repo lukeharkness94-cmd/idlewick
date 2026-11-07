@@ -45,8 +45,8 @@ DQ.floatAt = (el, html, col) => {
   if (DQ.sim.on || document.hidden || !el || !fxEl) return;
   const r = el.getBoundingClientRect(); if (!r.width && !r.height) return;
   const f = document.createElement('div'); f.className = 'fl'; f.style.setProperty('--c', col || '#f3d58a');
-  f.style.left = DQ.px(r.left + r.width / 2 + (Math.random() - .5) * Math.min(70, r.width * .5)) + 'px';
-  f.style.top = DQ.px(r.top + Math.min(r.height / 2, 36)) + 'px';
+  f.style.left = DQ.toPage(r.left + r.width / 2 + (Math.random() - .5) * Math.min(70, r.width * .5)) + 'px';
+  f.style.top = DQ.toPage(r.top + Math.min(r.height / 2, 36)) + 'px';
   f.innerHTML = html; fxEl.appendChild(f); f.addEventListener('animationend', () => f.remove());
   const live = fxEl.querySelectorAll('.fl'); if (live.length > 9) live[0].remove();
 };
@@ -322,7 +322,7 @@ function initTips() {
     if (x === null) { px = tr.left + tr.width / 2 - r.width / 2; py = tr.bottom + 8; }
     if (px + r.width > innerWidth - 8) px = innerWidth - r.width - 8; if (px < 8) px = 8;
     if (py + r.height > innerHeight - 8) py = (x === null ? tr.top - r.height - 8 : y - r.height - 14); if (py < 8) py = 8;
-    tipEl.style.transform = `translate(${DQ.px(px)}px,${DQ.px(py)}px)`;
+    tipEl.style.transform = `translate(${DQ.toPage(px)}px,${DQ.toPage(py)}px)`;
   };
   const hide = () => { clearTimeout(tipTimer); tipTarget = null; tipEl.classList.remove('on'); };
   document.addEventListener('mouseover', e => {

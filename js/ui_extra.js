@@ -198,8 +198,8 @@ DQ.on('loot', (m, drops, c) => {
   const a = from.getBoundingClientRect(), b = box.getBoundingClientRect(), fx = $('#fx');
   drops.slice(0, 4).forEach((d, i) => {
     const it = D.ITEMS[d.id], el = document.createElement('div'); el.className = 'flyloot'; el.style.setProperty('--c', d.rar[2]); el.innerHTML = DQ.itemIco(it);
-    el.style.left = DQ.px(a.left + a.width / 2) + 'px'; el.style.top = DQ.px(a.top + a.height / 2) + 'px'; fx.appendChild(el);
-    const dx = DQ.px(b.left + 30 - (a.left + a.width / 2)), dy = DQ.px(b.top + 20 - (a.top + a.height / 2)), up = -60 - Math.random() * 40, sx = (Math.random() - .5) * 80;
+    el.style.left = DQ.toPage(a.left + a.width / 2) + 'px'; el.style.top = DQ.toPage(a.top + a.height / 2) + 'px'; fx.appendChild(el);
+    const dx = DQ.toPage(b.left + 30 - (a.left + a.width / 2)), dy = DQ.toPage(b.top + 20 - (a.top + a.height / 2)), up = -60 - Math.random() * 40, sx = (Math.random() - .5) * 80;
     el.animate([{ transform: 'translate(-50%,-50%) scale(.4)', opacity: 0 }, { transform: `translate(calc(-50% + ${sx}px),calc(-50% + ${up}px)) scale(1.3)`, opacity: 1, offset: .35 }, { transform: `translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(.7)`, opacity: .9 }], { duration: 900, delay: i * 120, easing: 'cubic-bezier(.3,.7,.4,1)', fill: 'both' }).onfinish = () => el.remove();
   });
 });

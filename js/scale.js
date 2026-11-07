@@ -7,7 +7,7 @@
 (() => {
   const DQ = window.DQ, root = document.documentElement, BASE = 1920;
   DQ.zoom = 1;
-  DQ.px = v => v / DQ.zoom;
+  DQ.toPage = v => v / DQ.zoom;
   const apply = () => {
     const desk = innerWidth > 860, z = desk ? innerWidth / BASE : 1;
     DQ.zoom = z; root.style.zoom = z === 1 ? '' : String(z);
