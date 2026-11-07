@@ -903,4 +903,13 @@ test('first-hour polish: combat XP stops at the creature\'s health, and a first 
   let t=0;while(q.act&&t<600000&&!S.towns.willowbrook.boss){q.advanceTime(2000,2000,q.act?q.act.progress||0:0);t+=2000;}
   assert.equal(S.towns.willowbrook.boss,true,'Grubnash falls');assert.equal(q.act,null,'and the fight ends there');
 });
+test('gear arrows follow the stat table: gains outweighing losses are green, the reverse red, for every slot', () => {
+  const {q}=harness();const D=q.data,S=q.S;for(const k of Object.keys(S.xp))S.xp[k]=D.XPF[99];q.fxDirty();
+  S.equip.weapon='bronze_dagger';assert.equal(q.gearVerdict('iron_sword'),'up','Soldier\'s Blade beats the Bronze Knife on Attack and Strength, even though it swings slower');
+  const gear=Object.values(D.ITEMS).filter(i=>i.slot&&i.slot!=='ammo'&&i.type!=='tool');let n=0;
+  for(const it of gear){const others=gear.filter(g=>g.slot===it.slot&&g.id!==it.id);S.equip[it.slot]=others[0]&&others[0].id;if(!S.equip[it.slot])continue;
+    const v=q.gearVerdict(it.id),net=q.gearNet(it.id);if(v==null&&!q.canEquip(it.id).ok)continue;n++;
+    if(net>0)assert.equal(v,'up',it.id);else if(net<0)assert.ok(v==='down'||v==='unique',it.id);else assert.notEqual(v,'up',it.id);S.equip[it.slot]=null;}
+  assert.ok(n>60,'audited '+n+' items');
+});
 console.log(tests+' regression checks passed');

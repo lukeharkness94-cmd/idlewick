@@ -366,3 +366,7 @@ Stages are separate commits so each can be reverted on its own.
   - Each card shows "Ready to make", "Missing …" (amber) or "🔒 Smithing 30 (you are 12)" (grey).
   - The stage follows the visible category.
 - **Economy:** `sim-economy.cjs 24` gives 493k coins at 24h (461k before) and Hero 64 (63). New resources sell at about 80% of their neighbours' values.
+
+## Sprite resolution and gear arrows (Nov 2026)
+- Sprites up to 64 px are upscaled with Scale2x twice (4× pixels, same designs) in `js/pixelart.js` (`hires`, `logicalOf`); `snapAll` in pixel_runtime.js snaps to the logical size so layout is unchanged. Quest-giver faces use the same upscaler. Scenes and backdrops are unchanged.
+- Gear arrows now compare the summed stat changes for every slot (weapons used damage per second, which marked Soldier's Blade as worse than a Bronze Knife). They show in the backpack, bank, shop, rare shop, recipe cards, item tooltips and the item panel ("Better overall · stats +10 in total"). Regression check covers every gear item.

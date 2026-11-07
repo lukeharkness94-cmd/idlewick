@@ -66,9 +66,26 @@ function Spr(w, h) {
 const cache = new Map();
 const toCanvas = (s, o) => { const c = document.createElement('canvas'); c.width = s.w; c.height = s.h; const x = c.getContext('2d'), cols = s.render(o);
   for (let i = 0; i < cols.length; i++) if (cols[i]) { x.fillStyle = cols[i]; x.fillRect(i % s.w, (i / s.w) | 0, 1, 1); } return c; };
-const url = (key, make, o) => { if (cache.has(key)) return cache.get(key); const s = make(); const u = s ? toCanvas(s, o).toDataURL() : null; cache.set(key, u); return u; };
+/* Higher pixel count, same design (Nov 2026): small sprites (up to 64 px) are drawn, then doubled twice with Scale2x
+   (EPX), a pixel-art upscaler that keeps every colour and shape but smooths stair-step edges and diagonals into 4x
+   the pixels. Layout keeps the original (logical) size: logicalOf(url) tells the snapper what it was. */
+const HIRES = 4, logical = new Map();
+const scale2x = c => {
+  const w = c.width, h = c.height, src = new Uint32Array(c.getContext('2d').getImageData(0, 0, w, h).data.buffer);
+  const o = document.createElement('canvas'); o.width = w * 2; o.height = h * 2; const od = o.getContext('2d').createImageData(w * 2, h * 2), dst = new Uint32Array(od.data.buffer);
+  const at = (x, y) => src[Math.min(h - 1, Math.max(0, y)) * w + Math.min(w - 1, Math.max(0, x))];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const P = at(x, y), A = at(x, y - 1), B = at(x + 1, y), C = at(x - 1, y), Dn = at(x, y + 1);
+    const e0 = C === A && C !== Dn && A !== B ? A : P, e1 = A === B && A !== C && B !== Dn ? B : P, e2 = Dn === C && Dn !== B && C !== A ? C : P, e3 = B === Dn && B !== A && Dn !== C ? Dn : P;
+    const i = (y * 2) * w * 2 + x * 2; dst[i] = e0; dst[i + 1] = e1; dst[i + w * 2] = e2; dst[i + w * 2 + 1] = e3;
+  }
+  o.getContext('2d').putImageData(od, 0, 0); return o;
+};
+const hires = c => { if (!c || Math.max(c.width, c.height) > 64) return c; let o = c; for (let k = 1; k < HIRES; k *= 2) o = scale2x(o); return o; };
+const url = (key, make, o) => { if (cache.has(key)) return cache.get(key); const s = make(); let u = null; if (s) { const c = toCanvas(s, o), up = hires(c); u = up.toDataURL(); if (up !== c) logical.set(u, [c.width, c.height]); } cache.set(key, u); return u; };
 /* an <img> at a whole-number scale; size is the target box, the sprite is scaled by the largest integer that fits */
 const img = (u, w, h, box, cls = '', alt = '') => { const k = Math.max(1, Math.floor(Math.min(box / w, box / h))); return `<img class="pxa ${cls}" src="${u}" width="${w * k}" height="${h * k}" alt="${alt.replace(/"/g, '&quot;')}" draggable="false">`; };
+const logicalOf = u => logical.get(u) || null;
 
 /* ---------- shared palette: every sprite draws from these ramps ---------- */
 const R = {
@@ -321,7 +338,7 @@ function iconMining() { const s = Spr(16, 16); s.line(4, 14, 11, 5, R.wood); s.l
 /* ---------- public API ---------- */
 const SPRITES = { chicken, goblin, wolf, oak, pine, pike, carp, sword, bow, platebody, ore, log, gem, potato, cottage, iconFishing, iconWoodcutting, iconMining };
 DQ.pixelArt = {
-  ramp, mix, Spr, R, SKIN, HAIR, hero, url, img, toCanvas, sprites: SPRITES, composeScene,
+  ramp, mix, Spr, R, SKIN, HAIR, hero, url, img, toCanvas, hires, logicalOf, sprites: SPRITES, composeScene,
   sprite: (name, ...args) => url(name + ':' + args.join(','), () => SPRITES[name](...args)),
   heroUrl: (o) => url('hero:' + JSON.stringify(o), () => hero(o)),
   sceneUrl: () => { const k = 'scene:willowbrook'; if (!cache.has(k)) cache.set(k, composeScene().toDataURL()); return cache.get(k); }

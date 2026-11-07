@@ -212,7 +212,9 @@ UI.compareHtml = id => {
   if (c.same) return `<div class="cmp"><span class="k">Currently equipped · ${esc(DQ.SLOT_NAMES[c.slot])}</span></div>`;
   if (c.tool) return c.better ? `<div class="cmp"><span class="k">Compared with ${c.cur ? esc(c.cur.name) : 'no tool'}</span>${c.rows.map(r => `<div class="cmprow up"><span>${r.n}</span><b class="mono">${r.a}% \u2192 ${r.b}%</b><em>\u25B2 ${sg(r.d)}%</em></div>`).join('')}</div>` : `<div class="cmp"><span class="k">You already own a better or equal tool</span></div>`;
   const combat = c.rows.filter(r => r.key && r.d !== 0);
-  return `<div class="cmp slot-comparison"><div class="k">${esc(DQ.SLOT_NAMES[c.slot])} · equipped ${c.cur ? esc(c.cur.name) : 'nothing'}</div>
+  const v = DQ.gearVerdict && DQ.gearVerdict(id), net = c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : null;
+  const verdict = v === 'up' || v === 'down' ? `<p class="gear-verdict ${v}"><span class="gear-cmp ${v}">${v === 'up' ? '▲' : '▼'}</span> ${v === 'up' ? 'Better overall' : 'Worse overall'}${net != null ? ` · stats ${sg(net)} in total` : ' · fills an empty slot'}</p>` : '';
+  return `<div class="cmp slot-comparison"><div class="k">${esc(DQ.SLOT_NAMES[c.slot])} · equipped ${c.cur ? esc(c.cur.name) : 'nothing'}</div>${verdict}
     <table><thead><tr><th>Stat</th><th>Equipped</th><th>This item</th><th>Change</th></tr></thead><tbody>${c.itemRows.map(r => `<tr class="${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}"><th>${UI.statNames[r.key]}</th><td>${r.a}</td><td>${r.b}</td><td>${r.d ? sg(r.d) : '—'}</td></tr>`).join('')}</tbody></table>
     ${c.styleChange ? `<p class="sm">Style ${c.styleChange[0]} → ${c.styleChange[1]}</p>` : ''}
     ${combat.length ? `<section data-reference="true"><h3>Combat impact</h3>${combat.map(r => `<div class="cmprow"><span>${r.n}</span><b>${r.delta ? '' : r.a + ' → ' + r.b}</b><em>${sg(r.d)}${r.unit || ''}</em></div>`).join('')}</section>` : ''}
@@ -221,7 +223,8 @@ UI.compareHtml = id => {
 UI.compareLine = id => {
   const c = DQ.compareItem(id); if (!c || c.tool) return '';
   if (c.same) return '<span class="dim">Currently equipped</span>';
-  return `<span class="cmpline">vs ${c.cur ? esc(c.cur.name) : `empty ${DQ.SLOT_NAMES[c.slot].toLowerCase()} slot`}: ${c.itemRows.map(r => `<span class="${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}">${UI.statNames[r.key]} ${r.d ? sg(r.d) : '±0'}</span>`).join(' · ')}</span>`;
+  const v = DQ.gearVerdict && DQ.gearVerdict(id);
+  return `<span class="cmpline">${v === 'up' || v === 'down' ? `<span class="gear-cmp inline ${v}">${v === 'up' ? '▲' : '▼'}</span> ` : ''}vs ${c.cur ? esc(c.cur.name) : `empty ${DQ.SLOT_NAMES[c.slot].toLowerCase()} slot`}: ${c.itemRows.map(r => `<span class="${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}">${UI.statNames[r.key]} ${r.d ? sg(r.d) : '±0'}</span>`).join(' · ')}</span>`;
 };
 const origDetail = UI.detail;
 UI.detail = (id, from) => {

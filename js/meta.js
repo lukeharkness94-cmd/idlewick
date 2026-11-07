@@ -132,20 +132,22 @@ DQ.compareItem = id => {
   return { slot, cur: current, rows, itemRows, styleChange: A.style !== B.style ? [A.style, B.style] : null, need, unmet: can.ok ? '' : can.why };
 };
 
-/* Upgrade marker for inventory and bank cards: better or worse than what is worn in that slot.
-   Weapons compare damage per second; armour and jewellery compare their total bonuses. Uniques whose stats are lower
-   show their effect marker instead of a down arrow, because the effect is the point. */
+/* Upgrade marker wherever gear appears (backpack, bank, shop, recipes, tooltips, item panel): better or worse than
+   what is worn in that slot. Every slot, weapons included, adds up the stat changes against the equipped item: if the
+   gains outweigh the losses it is an upgrade (green), if the losses outweigh the gains it is worse (red), and an even
+   trade shows nothing. (Weapons used to follow the damage-per-second estimate, which marked a sword with more Attack
+   and Strength as worse; the player reads the stat table, so the arrow now agrees with it.) Uniques whose stats are
+   lower show their effect marker instead of a down arrow, because the effect is the point. */
 DQ.gearVerdict = id => {
   const it = D.ITEMS[id]; if (!it || !it.slot || it.slot === 'ammo' || it.type === 'tool') return null;
   if (S().equip[it.slot] === id || !DQ.canEquip(id).ok) return null;
   const c = DQ.compareItem(id); if (!c || c.same) return null;
-  let d;
-  if (it.slot === 'weapon') { const r = c.rows.find(x => x.main); d = r ? r.d : 0; }
-  else d = c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : 1;
+  const d = c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : 1;
   if (d > 0) return 'up';
   if (d < 0) return it.unique ? 'unique' : 'down';
   return it.unique && !(c.cur && c.cur.unique) ? 'unique' : null;
 };
+DQ.gearNet = id => { const c = DQ.compareItem(id); return c && !c.same && !c.tool && c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : null; };
 DQ.gearMark = id => { const v = DQ.gearVerdict(id); return v ? `<span class="gear-cmp ${v}" aria-label="${v === 'up' ? 'Better than equipped' : v === 'down' ? 'Worse than equipped' : 'Unique effect'}">${v === 'up' ? '▲' : v === 'down' ? '▼' : '✦'}</span>` : ''; };
 
 /* ---------- The playtest report: plain text, easy to paste ---------- */

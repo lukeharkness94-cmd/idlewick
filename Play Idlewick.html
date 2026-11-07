@@ -2797,6 +2797,17 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 @media (min-width:861px){html.lw-wide #view>.combat-dashboard{grid-template-columns:minmax(0,1100px) minmax(0,1fr)!important}}
 .qlist>.qrow,.folk-grid>.folk-card{flex:none}
 .qlist>.qrow:first-of-type{border-top-width:1px;border-top-style:solid;padding-top:8px}
+
+/* Gear upgrade arrows everywhere gear appears (Nov 2026): green when the stat gains outweigh the losses against what
+   is worn, red when they do not. Same marker in the backpack, bank, shop, recipe cards, tooltips and the item panel. */
+.illustrated-card{position:relative}
+.illustrated-card>.gear-cmp{top:6px;right:8px;font-size:15px}
+.gear-cmp.inline{position:static;font-size:13px}
+.gear-verdict{margin:4px 0 6px;font-weight:700;font-size:14px}
+.gear-verdict.up{color:#5cc08a}.gear-verdict.down{color:#e2574c}
+.gear-verdict .gear-cmp{position:static}
+:root[data-theme="light"] .gear-cmp.up,:root[data-theme="light"] .gear-verdict.up{color:#2f8a57}
+:root[data-theme="light"] .gear-cmp.down,:root[data-theme="light"] .gear-verdict.down{color:#c0392b}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -6129,9 +6140,26 @@ function Spr(w, h) {
 const cache = new Map();
 const toCanvas = (s, o) => { const c = document.createElement('canvas'); c.width = s.w; c.height = s.h; const x = c.getContext('2d'), cols = s.render(o);
   for (let i = 0; i < cols.length; i++) if (cols[i]) { x.fillStyle = cols[i]; x.fillRect(i % s.w, (i / s.w) | 0, 1, 1); } return c; };
-const url = (key, make, o) => { if (cache.has(key)) return cache.get(key); const s = make(); const u = s ? toCanvas(s, o).toDataURL() : null; cache.set(key, u); return u; };
+/* Higher pixel count, same design (Nov 2026): small sprites (up to 64 px) are drawn, then doubled twice with Scale2x
+   (EPX), a pixel-art upscaler that keeps every colour and shape but smooths stair-step edges and diagonals into 4x
+   the pixels. Layout keeps the original (logical) size: logicalOf(url) tells the snapper what it was. */
+const HIRES = 4, logical = new Map();
+const scale2x = c => {
+  const w = c.width, h = c.height, src = new Uint32Array(c.getContext('2d').getImageData(0, 0, w, h).data.buffer);
+  const o = document.createElement('canvas'); o.width = w * 2; o.height = h * 2; const od = o.getContext('2d').createImageData(w * 2, h * 2), dst = new Uint32Array(od.data.buffer);
+  const at = (x, y) => src[Math.min(h - 1, Math.max(0, y)) * w + Math.min(w - 1, Math.max(0, x))];
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const P = at(x, y), A = at(x, y - 1), B = at(x + 1, y), C = at(x - 1, y), Dn = at(x, y + 1);
+    const e0 = C === A && C !== Dn && A !== B ? A : P, e1 = A === B && A !== C && B !== Dn ? B : P, e2 = Dn === C && Dn !== B && C !== A ? C : P, e3 = B === Dn && B !== A && Dn !== C ? Dn : P;
+    const i = (y * 2) * w * 2 + x * 2; dst[i] = e0; dst[i + 1] = e1; dst[i + w * 2] = e2; dst[i + w * 2 + 1] = e3;
+  }
+  o.getContext('2d').putImageData(od, 0, 0); return o;
+};
+const hires = c => { if (!c || Math.max(c.width, c.height) > 64) return c; let o = c; for (let k = 1; k < HIRES; k *= 2) o = scale2x(o); return o; };
+const url = (key, make, o) => { if (cache.has(key)) return cache.get(key); const s = make(); let u = null; if (s) { const c = toCanvas(s, o), up = hires(c); u = up.toDataURL(); if (up !== c) logical.set(u, [c.width, c.height]); } cache.set(key, u); return u; };
 /* an <img> at a whole-number scale; size is the target box, the sprite is scaled by the largest integer that fits */
 const img = (u, w, h, box, cls = '', alt = '') => { const k = Math.max(1, Math.floor(Math.min(box / w, box / h))); return `<img class="pxa ${cls}" src="${u}" width="${w * k}" height="${h * k}" alt="${alt.replace(/"/g, '&quot;')}" draggable="false">`; };
+const logicalOf = u => logical.get(u) || null;
 
 /* ---------- shared palette: every sprite draws from these ramps ---------- */
 const R = {
@@ -6384,7 +6412,7 @@ function iconMining() { const s = Spr(16, 16); s.line(4, 14, 11, 5, R.wood); s.l
 /* ---------- public API ---------- */
 const SPRITES = { chicken, goblin, wolf, oak, pine, pike, carp, sword, bow, platebody, ore, log, gem, potato, cottage, iconFishing, iconWoodcutting, iconMining };
 DQ.pixelArt = {
-  ramp, mix, Spr, R, SKIN, HAIR, hero, url, img, toCanvas, sprites: SPRITES, composeScene,
+  ramp, mix, Spr, R, SKIN, HAIR, hero, url, img, toCanvas, hires, logicalOf, sprites: SPRITES, composeScene,
   sprite: (name, ...args) => url(name + ':' + args.join(','), () => SPRITES[name](...args)),
   heroUrl: (o) => url('hero:' + JSON.stringify(o), () => hero(o)),
   sceneUrl: () => { const k = 'scene:willowbrook'; if (!cache.has(k)) cache.set(k, composeScene().toDataURL()); return cache.get(k); }
@@ -10101,20 +10129,22 @@ DQ.compareItem = id => {
   return { slot, cur: current, rows, itemRows, styleChange: A.style !== B.style ? [A.style, B.style] : null, need, unmet: can.ok ? '' : can.why };
 };
 
-/* Upgrade marker for inventory and bank cards: better or worse than what is worn in that slot.
-   Weapons compare damage per second; armour and jewellery compare their total bonuses. Uniques whose stats are lower
-   show their effect marker instead of a down arrow, because the effect is the point. */
+/* Upgrade marker wherever gear appears (backpack, bank, shop, recipes, tooltips, item panel): better or worse than
+   what is worn in that slot. Every slot, weapons included, adds up the stat changes against the equipped item: if the
+   gains outweigh the losses it is an upgrade (green), if the losses outweigh the gains it is worse (red), and an even
+   trade shows nothing. (Weapons used to follow the damage-per-second estimate, which marked a sword with more Attack
+   and Strength as worse; the player reads the stat table, so the arrow now agrees with it.) Uniques whose stats are
+   lower show their effect marker instead of a down arrow, because the effect is the point. */
 DQ.gearVerdict = id => {
   const it = D.ITEMS[id]; if (!it || !it.slot || it.slot === 'ammo' || it.type === 'tool') return null;
   if (S().equip[it.slot] === id || !DQ.canEquip(id).ok) return null;
   const c = DQ.compareItem(id); if (!c || c.same) return null;
-  let d;
-  if (it.slot === 'weapon') { const r = c.rows.find(x => x.main); d = r ? r.d : 0; }
-  else d = c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : 1;
+  const d = c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : 1;
   if (d > 0) return 'up';
   if (d < 0) return it.unique ? 'unique' : 'down';
   return it.unique && !(c.cur && c.cur.unique) ? 'unique' : null;
 };
+DQ.gearNet = id => { const c = DQ.compareItem(id); return c && !c.same && !c.tool && c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : null; };
 DQ.gearMark = id => { const v = DQ.gearVerdict(id); return v ? `<span class="gear-cmp ${v}" aria-label="${v === 'up' ? 'Better than equipped' : v === 'down' ? 'Worse than equipped' : 'Unique effect'}">${v === 'up' ? '▲' : v === 'down' ? '▼' : '✦'}</span>` : ''; };
 
 /* ---------- The playtest report: plain text, easy to paste ---------- */
@@ -10340,7 +10370,7 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
   const cards = `<section class="panel activity-choices"><div class="phead"><h2>${kind==='fight'?'Choose an opponent':kind==='recipe'?'Choose what to make':kind==='alch'?'Choose an item':({fish:'Fish catalogue',wood:'Trees',mine:'Ore deposits',thieve:'Targets'}[kind]||'Choose your spot')}</h2><small>${choices.some(c=>c.town)?`${choices.length} resources · all regions`:D.TOWN[S().town].name}</small></div>${UI.taskToolbar[key] || ''}<div class="illustrated-choices">${choices.filter(c=>c.visible!==false).map(c=>{
     const working=DQ.act&&DQ.act.kind===kind&&DQ.act.id===c.id;
     return `<button class="illustrated-card ${working?'active':''} ${choice.id===c.id?'selected':''} ${c.locked?'locked':''} ${c.missing?'missing':''}" data-do="taskselect" data-a="${kind}" data-b="${c.id}" data-page="${key}" aria-pressed="${choice.id===c.id}" ${c.locked?`aria-disabled="true" data-tip="text:${esc(c.reason||'Not unlocked yet')}"`:''}>
-      <span class="choice-art">${art(c,96)}</span><b>${c.locked?'???':esc(c.name)}</b><small>${c.locked?`${ico('lock')}<span>${esc(c.short||String(c.reason||'Not unlocked yet').replace(/^Requires [A-Za-z ]+? (\d+)/,'Lv $1').replace(/^Requires /,''))}</span>`:c.caption||esc(c.reason||'')}</small>${c.locked?'':`<span class="choice-state">${working?'● Working':c.stateText?(choice.id===c.id&&!c.locked&&!c.missing?'✓ Selected · ':'')+c.stateText:c.locked?'Locked':c.away?'Travel required':choice.id===c.id?'✓ Selected':'Available'}</span>`}${working?`<span class="bar prog"><i data-prog="${kind}:${c.id}"></i></span>`:''}</button>`;
+      <span class="choice-art">${art(c,96)}</span>${!c.locked && DQ.gearMark ? (g => g && D.ITEMS[g] && D.ITEMS[g].slot ? DQ.gearMark(g) : '')(c.yieldId || (c.artKind === 'item' ? c.artId || c.id : null)) : ''}<b>${c.locked?'???':esc(c.name)}</b><small>${c.locked?`${ico('lock')}<span>${esc(c.short||String(c.reason||'Not unlocked yet').replace(/^Requires [A-Za-z ]+? (\d+)/,'Lv $1').replace(/^Requires /,''))}</span>`:c.caption||esc(c.reason||'')}</small>${c.locked?'':`<span class="choice-state">${working?'● Working':c.stateText?(choice.id===c.id&&!c.locked&&!c.missing?'✓ Selected · ':'')+c.stateText:c.locked?'Locked':c.away?'Travel required':choice.id===c.id?'✓ Selected':'Available'}</span>`}${working?`<span class="bar prog"><i data-prog="${kind}:${c.id}"></i></span>`:''}</button>`;
   }).join('') || '<p class="dim">No recipes match. Try another category.</p>'}</div></section>`;
   if(kind==='fight')return `<section class="panel encounter-controls"><div class="phead"><h2>${esc(choice.name)}</h2><small>Combat <b data-b="combat"></b></small></div>${action}<div class="task-summary">${choice.info||''}</div></section>${cards}`;
   const stage = `<section class="panel activity-stage ${running?'working':''}" style="--c:${D.SK[key]?.col||'var(--brass)'};--work-beat:${Math.max(900,Math.min(1700,(DQ.act?.dur||3600)/3))}ms"><div class="activity-scene ${kind} skill-${key}" data-kind="${kind}" data-task="${choice.id}" style="--landscape:url('${DQ.sceneUrl ? DQ.sceneUrl(S().town) : ''}')"><span class="scene-target">${art(choice, choice.artKind==='item' ? 48 : kind==='wood' ? 144 : 96)}</span>${choice.yieldId&&kind!=='fish'?`<span class="scene-yield"><small>Produces</small>${DQ.itemIco(D.ITEMS[choice.yieldId])}</span>`:''}${running?`<span class="scene-worker" aria-hidden="true"><img class="px" src="${DQ.heroWorkFigureUrl?DQ.heroWorkFigureUrl(S().look):DQ.heroFigureUrl(S().look)}" width="72" height="102" alt=""></span><span class="action-tool" aria-hidden="true">${(t => t ? DQ.itemIco(D.ITEMS[t]) : ico({wood:'woodcutting',mine:'mining',fish:'rod',thieve:'glove',recipe:{cooking:'cooking',smithing:'hammer',crafting:'crafting'}[key],alch:'staff'}[kind]||key))((k => { const n = k && DQ.toolTier(key); return n && D.ITEMS[`tool_${k}_${n}`] ? `tool_${k}_${n}` : null; })(DQ.toolKey && DQ.toolKey(key)))}</span><span class="work-atmosphere" aria-hidden="true"><i></i><i></i><i></i><i></i></span>`:''}</div>
@@ -10640,7 +10670,7 @@ UI.V.shop = () => {
   const owned = it ? DQ.have(id) : 0, tool = it && it.type === 'tool', count = tool ? 1 : qty;
   const cost = it ? (buying ? it.buy * count : it.val * Math.min(count, owned)) : 0;
   const disabled = !it || (buying && (S().coins < cost || (tool && owned)));
-  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span><b>${esc(D.ITEMS[item].name)}</b><span class="stock-price">${UI.money(buying?D.ITEMS[item].buy:D.ITEMS[item].val)}</span>${buying?'':'<small>'+DQ.have(item)+' held</small>'}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
+  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span>${DQ.gearMark ? DQ.gearMark(item) : ''}<b>${esc(D.ITEMS[item].name)}</b><span class="stock-price">${UI.money(buying?D.ITEMS[item].buy:D.ITEMS[item].val)}</span>${buying?'':'<small>'+DQ.have(item)+' held</small>'}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
     ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
       <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} ${disabled ? 'disabled' : ''}>${tool && owned && buying ? 'Already owned' : (buying ? 'Buy' : 'Sell')+' ×'+(buying?count:Math.min(count,owned))} ${tool && owned && buying ? '' : UI.money(cost)}</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all ${UI.money(it.val * owned)}</button>` : ''}</div>
       ${buying && S().coins < cost ? `<p class="bad">Need ${UI.money(cost - S().coins)} more.</p>` : ''}
@@ -12442,7 +12472,9 @@ UI.compareHtml = id => {
   if (c.same) return `<div class="cmp"><span class="k">Currently equipped · ${esc(DQ.SLOT_NAMES[c.slot])}</span></div>`;
   if (c.tool) return c.better ? `<div class="cmp"><span class="k">Compared with ${c.cur ? esc(c.cur.name) : 'no tool'}</span>${c.rows.map(r => `<div class="cmprow up"><span>${r.n}</span><b class="mono">${r.a}% \u2192 ${r.b}%</b><em>\u25B2 ${sg(r.d)}%</em></div>`).join('')}</div>` : `<div class="cmp"><span class="k">You already own a better or equal tool</span></div>`;
   const combat = c.rows.filter(r => r.key && r.d !== 0);
-  return `<div class="cmp slot-comparison"><div class="k">${esc(DQ.SLOT_NAMES[c.slot])} · equipped ${c.cur ? esc(c.cur.name) : 'nothing'}</div>
+  const v = DQ.gearVerdict && DQ.gearVerdict(id), net = c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : null;
+  const verdict = v === 'up' || v === 'down' ? `<p class="gear-verdict ${v}"><span class="gear-cmp ${v}">${v === 'up' ? '▲' : '▼'}</span> ${v === 'up' ? 'Better overall' : 'Worse overall'}${net != null ? ` · stats ${sg(net)} in total` : ' · fills an empty slot'}</p>` : '';
+  return `<div class="cmp slot-comparison"><div class="k">${esc(DQ.SLOT_NAMES[c.slot])} · equipped ${c.cur ? esc(c.cur.name) : 'nothing'}</div>${verdict}
     <table><thead><tr><th>Stat</th><th>Equipped</th><th>This item</th><th>Change</th></tr></thead><tbody>${c.itemRows.map(r => `<tr class="${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}"><th>${UI.statNames[r.key]}</th><td>${r.a}</td><td>${r.b}</td><td>${r.d ? sg(r.d) : '—'}</td></tr>`).join('')}</tbody></table>
     ${c.styleChange ? `<p class="sm">Style ${c.styleChange[0]} → ${c.styleChange[1]}</p>` : ''}
     ${combat.length ? `<section data-reference="true"><h3>Combat impact</h3>${combat.map(r => `<div class="cmprow"><span>${r.n}</span><b>${r.delta ? '' : r.a + ' → ' + r.b}</b><em>${sg(r.d)}${r.unit || ''}</em></div>`).join('')}</section>` : ''}
@@ -12451,7 +12483,8 @@ UI.compareHtml = id => {
 UI.compareLine = id => {
   const c = DQ.compareItem(id); if (!c || c.tool) return '';
   if (c.same) return '<span class="dim">Currently equipped</span>';
-  return `<span class="cmpline">vs ${c.cur ? esc(c.cur.name) : `empty ${DQ.SLOT_NAMES[c.slot].toLowerCase()} slot`}: ${c.itemRows.map(r => `<span class="${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}">${UI.statNames[r.key]} ${r.d ? sg(r.d) : '±0'}</span>`).join(' · ')}</span>`;
+  const v = DQ.gearVerdict && DQ.gearVerdict(id);
+  return `<span class="cmpline">${v === 'up' || v === 'down' ? `<span class="gear-cmp inline ${v}">${v === 'up' ? '▲' : '▼'}</span> ` : ''}vs ${c.cur ? esc(c.cur.name) : `empty ${DQ.SLOT_NAMES[c.slot].toLowerCase()} slot`}: ${c.itemRows.map(r => `<span class="${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}">${UI.statNames[r.key]} ${r.d ? sg(r.d) : '±0'}</span>`).join(' · ')}</span>`;
 };
 const origDetail = UI.detail;
 UI.detail = (id, from) => {
@@ -12629,7 +12662,7 @@ UI.rarePage = () => {
   const selected = choices.find(c => c.key === UI.tab.rareChoice) || choices[0];
   const cost = selected.price * selected.count, affordable = S().coins >= cost;
   const disabled = selected.locked || selected.owned || !affordable;
-  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${esc(D.TOWN[S().town].name)}</small></div>${UI.shopTabs('rare')}<div class="illustrated-choices">${choices.map(c=>`<button class="illustrated-card ${c===selected?'selected':''}" data-do="rareselect" data-a="${c.key}" aria-pressed="${c===selected}"><span class="choice-art">${DQ.itemIco(D.ITEMS[c.id||(c.key.startsWith('cache:')?'treasure_chest':'potion_fortune')])}</span><b>${esc(c.name)}</b><span class="stock-price">${UI.money(c.price)}</span>${c.owned||c.locked?'<small>'+(c.owned?'Owned':'Locked')+'</small>':''}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>Rare item</h2></div>
+  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${esc(D.TOWN[S().town].name)}</small></div>${UI.shopTabs('rare')}<div class="illustrated-choices">${choices.map(c=>`<button class="illustrated-card ${c===selected?'selected':''}" data-do="rareselect" data-a="${c.key}" aria-pressed="${c===selected}"><span class="choice-art">${DQ.itemIco(D.ITEMS[c.id||(c.key.startsWith('cache:')?'treasure_chest':'potion_fortune')])}</span>${c.id && DQ.gearMark ? DQ.gearMark(c.id) : ''}<b>${esc(c.name)}</b><span class="stock-price">${UI.money(c.price)}</span>${c.owned||c.locked?'<small>'+(c.owned?'Owned':'Locked')+'</small>':''}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>Rare item</h2></div>
     <div class="shop-workspace"><div class="shop-purchase">${selected.id ? UI.shopPreview(selected.id) : `<h3>${esc(selected.name)}</h3>`}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${selected.key.startsWith('mat:') ? '' : 'disabled'}>${[1,10,100].map(n => `<option value="${n}" ${selected.count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
     <div class="shop-action"><button class="btn primary" data-do="rarebuy" data-a="${selected.key}" ${disabled ? 'disabled' : ''}>${selected.owned ? 'Owned' : selected.locked ? 'Locked' : selected.key.startsWith('cache:') ? 'Open' : selected.key.startsWith('tonic:') ? 'Drink' : 'Buy'}${selected.key.startsWith('mat:')?' ×'+selected.count:''} ${UI.money(cost)}</button></div>
     ${selected.text ? `<p class="sm">${esc(selected.text)}</p>` : ''}${!affordable ? `<p class="bad sm">Need ${UI.money(cost - S().coins)} more.</p>` : ''}
@@ -15104,7 +15137,7 @@ const NAT_ICON = 16;
 const snapAll = root => {
   const els = [...(root || document).querySelectorAll('img.pxa, i.ic.pxi')], plan = [];
   for (const el of els) {
-    const nat = el.tagName === 'IMG' ? el.naturalWidth : NAT_ICON, natH = el.tagName === 'IMG' ? el.naturalHeight : NAT_ICON;
+    const lg = el.tagName === 'IMG' && el.naturalWidth && A.logicalOf && A.logicalOf(el.currentSrc || el.src), nat = el.tagName === 'IMG' ? (lg ? lg[0] : el.naturalWidth) : NAT_ICON, natH = el.tagName === 'IMG' ? (lg ? lg[1] : el.naturalHeight) : NAT_ICON;
     if (!nat) { if (el.tagName === 'IMG' && !el.dataset.snapWait) { el.dataset.snapWait = 1; el.addEventListener('load', () => queue(), { once: true }); } continue; }
     const w = el.offsetWidth; if (!w) continue;
     const hh = el.offsetHeight, byH = hh && hh / natH < w / nat, ratio = byH ? hh / natH : w / nat, k = nat >= 64 || byH ? Math.max(1, Math.floor(ratio + .001)) : Math.max(1, Math.round(ratio - .01));
@@ -15407,7 +15440,7 @@ if (settings0) UI.V.settings = () => settings0() + `<section class="panel"><div 
       if (k === 'plume') { for (let y = 4; y < 12; y++) for (let x = 7; x < 25; x++) if (inFace(x, y + 3)) P(x, y, y < 6 ? h3 : x > 19 ? h2 : hc2); P(7, 11, h2, 18, 1); for (let i = 0; i < 6; i++) P(15 + i, 4 - Math.floor(i / 2), '#d83a2a', 2, 2); }
     }
     if (L.earring) P(23, 18, '#e8c040');
-    return c.toDataURL();
+    const A = DQ.pixelArt; return (A && A.hires ? A.hires(c) : c).toDataURL();
   };
   const cache = {};
   DQ.folkUrl = f => cache[f.id] || (cache[f.id] = paint(f));

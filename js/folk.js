@@ -130,7 +130,7 @@
       if (k === 'plume') { for (let y = 4; y < 12; y++) for (let x = 7; x < 25; x++) if (inFace(x, y + 3)) P(x, y, y < 6 ? h3 : x > 19 ? h2 : hc2); P(7, 11, h2, 18, 1); for (let i = 0; i < 6; i++) P(15 + i, 4 - Math.floor(i / 2), '#d83a2a', 2, 2); }
     }
     if (L.earring) P(23, 18, '#e8c040');
-    return c.toDataURL();
+    const A = DQ.pixelArt; return (A && A.hires ? A.hires(c) : c).toDataURL();
   };
   const cache = {};
   DQ.folkUrl = f => cache[f.id] || (cache[f.id] = paint(f));
