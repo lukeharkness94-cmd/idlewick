@@ -2504,14 +2504,20 @@ body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
   #app:has(#view > :is(.activity-workspace.task-panel,.farm-workspace)) #hud{position:relative!important;top:0!important;flex:none}
   #view > .farm-workspace .workspace-options > *{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin}
 }
-/* Locked choices: the blacked-out picture on top, then ??? and a short requirement underneath. The full wording is in
-   the card's tooltip, and selecting it shows the requirement beside the scene. */
-.activity-choices .illustrated-card.locked{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;justify-items:center;text-align:center;align-content:center;row-gap:2px;cursor:pointer}
-.activity-choices .illustrated-card.locked .choice-art{grid-column:1;grid-row:1;width:auto;height:46px;display:grid;place-items:center}
-.activity-choices .illustrated-card.locked .choice-art img{width:72px;height:46px;max-height:46px;object-fit:contain}
-.activity-choices .illustrated-card.locked>b{grid-column:1;justify-content:center}
-.activity-choices .illustrated-card.locked>small{grid-column:1;display:block!important;line-height:1.3}
+/* Every choice card stacks: picture on top, then name, one short line and its state, all centred, so text never
+   breaks down a narrow column beside the art. Locked cards show ??? and a short requirement; the full wording is in the
+   tooltip and beside the scene when selected. */
+.activity-choices .illustrated-card{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto!important;justify-items:center;text-align:center;align-content:start;row-gap:2px!important;min-height:0!important;padding:8px 8px 9px!important}
+.activity-choices .illustrated-card .choice-art{grid-column:1!important;grid-row:auto!important;width:100%!important;height:64px!important;display:grid;place-items:center}
+.activity-choices .illustrated-card .choice-art img{width:80px!important;height:64px!important;max-height:64px!important;object-fit:contain}
+.activity-choices .illustrated-card .choice-art .activity-item-art{--art-size:48px!important;width:48px!important;height:48px!important;display:grid;place-items:center;overflow:hidden}
+.activity-choices .illustrated-card .choice-art .activity-item-art img,.activity-choices .illustrated-card .choice-art .activity-item-art .ic{width:48px!important;height:48px!important;max-height:48px!important}
+.activity-choices .illustrated-card>b,.activity-choices .illustrated-card>small,.activity-choices .illustrated-card>.choice-state{grid-column:1!important;justify-content:center;max-width:100%}
+.activity-choices .illustrated-card>b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.activity-choices .illustrated-card>small{display:block!important;line-height:1.3}
+.activity-choices .illustrated-card.locked{cursor:pointer}
 .activity-choices .illustrated-card.locked>small .ic{display:inline-block;vertical-align:-2px;margin-right:4px}
+.activity-choices .illustrated-choices{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))!important}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -14665,7 +14671,7 @@ const snapAll = root => {
     const nat = el.tagName === 'IMG' ? el.naturalWidth : NAT_ICON, natH = el.tagName === 'IMG' ? el.naturalHeight : NAT_ICON;
     if (!nat) { if (el.tagName === 'IMG' && !el.dataset.snapWait) { el.dataset.snapWait = 1; el.addEventListener('load', () => queue(), { once: true }); } continue; }
     const w = el.offsetWidth; if (!w) continue;
-    const ratio = w / nat, k = nat >= 64 ? Math.max(1, Math.floor(ratio + .001)) : Math.max(1, Math.round(ratio - .01));
+    const hh = el.offsetHeight, byH = hh && hh / natH < w / nat, ratio = byH ? hh / natH : w / nat, k = nat >= 64 || byH ? Math.max(1, Math.floor(ratio + .001)) : Math.max(1, Math.round(ratio - .01));
     const want = nat * k; if (Math.abs(w - want) < .5 && el.dataset.snapped) continue;
     plan.push([el, want, natH * k]);
   }

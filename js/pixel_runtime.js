@@ -103,7 +103,7 @@ const snapAll = root => {
     const nat = el.tagName === 'IMG' ? el.naturalWidth : NAT_ICON, natH = el.tagName === 'IMG' ? el.naturalHeight : NAT_ICON;
     if (!nat) { if (el.tagName === 'IMG' && !el.dataset.snapWait) { el.dataset.snapWait = 1; el.addEventListener('load', () => queue(), { once: true }); } continue; }
     const w = el.offsetWidth; if (!w) continue;
-    const ratio = w / nat, k = nat >= 64 ? Math.max(1, Math.floor(ratio + .001)) : Math.max(1, Math.round(ratio - .01));
+    const hh = el.offsetHeight, byH = hh && hh / natH < w / nat, ratio = byH ? hh / natH : w / nat, k = nat >= 64 || byH ? Math.max(1, Math.floor(ratio + .001)) : Math.max(1, Math.round(ratio - .01));
     const want = nat * k; if (Math.abs(w - want) < .5 && el.dataset.snapped) continue;
     plan.push([el, want, natH * k]);
   }
