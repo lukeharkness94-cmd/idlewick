@@ -54,7 +54,7 @@ function create() {
 
 function start(isNew) {
   const S = DQ.S, away = Date.now() - S.lastSeen;
-  DQ.firstRun = isNew; DQ.started = true;
+  DQ.firstRun = isNew; DQ.started = true; if (DQ.applyScale) DQ.applyScale();
   $('#title').classList.add('out'); setTimeout(() => { $('#title').hidden = true; $('#title').classList.remove('out'); $('#title').innerHTML = ''; }, 600);
   $('#app').hidden = false; DQ.musicMode(DQ.act?.kind === 'fight' ? 'combat' : S.town); DQ.musicStart(); DQ.audioApply();
   D.SKILLS.forEach(s => { if (DQ.skillUnlocked(s.id)) S.unlocked[s.id] = true; });
