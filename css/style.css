@@ -2755,3 +2755,26 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 .proj-line .proj-t small{color:var(--mute);font-size:14px}
 .proj-line .bar{height:5px}
 .proj-ic{display:grid;place-items:center;width:36px;height:36px}
+
+/* The village is the project menu (Nov 2026): the town scene with a clickable spot on every restoration site, and
+   the chosen site's story and needs beside it */
+.village-projects{display:grid;gap:16px;align-items:start}
+@media (min-width:861px){.village-projects{grid-template-columns:minmax(0,1fr) minmax(400px,440px)}}
+.village-map{min-width:0;text-align:center}
+.village-map .phead{text-align:left}
+/* whole-number scale: 3x (960 x 540) on full desktops, 2x on narrower windows, fluid on phones */
+.village-scene{position:relative;display:inline-block;line-height:0;max-width:100%}
+.village-scene>img.scene{display:block;width:960px;height:540px;border-radius:10px}
+html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:640px;height:360px}
+@media (max-width:860px){.village-scene>img.scene{width:100%!important;height:auto!important}}
+.site-spot{position:absolute;padding:0;border:2px solid transparent;border-radius:8px;background:transparent;cursor:pointer;transition:border-color .2s,background-color .2s,box-shadow .2s}
+.site-spot:hover,.site-spot:focus-visible{border-color:color-mix(in srgb,var(--brass) 80%,transparent);background:color-mix(in srgb,var(--brass) 14%,transparent);outline:none}
+.site-spot.on{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 35%,transparent),0 0 18px color-mix(in srgb,var(--brass) 40%,transparent)}
+.site-mark{position:absolute;top:-12px;left:50%;transform:translateX(-50%);min-width:22px;padding:1px 6px;border-radius:999px;font-size:13px;font-weight:700;line-height:1.5;background:var(--panel);border:1px solid var(--line2);color:var(--ink);white-space:nowrap;pointer-events:none}
+.site-spot.st0 .site-mark{background:#e6a64a;color:#2a1a08;border-color:#c88a30}
+.site-spot.st4 .site-mark{background:#3f8a5a;color:#f4fff6;border-color:#2f7a4c}
+.village-changes{margin-top:8px}
+.project-card .proj-story{font-size:16.5px;line-height:1.5;margin:4px 0 8px}
+.project-card .villager-line{display:block;margin:0 0 8px;color:var(--mute)}
+.project-card .proj-benefit{margin:0 0 10px}
+.project-card .proj-benefit .k{margin-right:6px}

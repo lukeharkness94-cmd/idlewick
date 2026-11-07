@@ -377,3 +377,9 @@ Stages are separate commits so each can be reverted on its own.
 
 ## Recommended quest levels (Nov 2026)
 - `DQ.questRec(q)` (js/meta.js) works out a recommended Hero level (the quest's own, or its region's first for adventures), Combat level (the strongest creature it sends you to fight) and the highest skill level its gathering/making steps need. Shown as chips on quest rows and a "Recommended" row on the quest card, green once met and amber before. Quest lists sort by `questRecScore` after main/ready quests.
+
+## Lived-in towns, deliveries and the clickable village (Nov 2026)
+- Town scenes (`js/towns.js`, replaces `sceneFor`) are 320 × 180: three rows of homes (lit and smoking when lived in; more are lived in as the town is restored), streets with townsfolk, the region's landmark and trade, and every restoration site along the front at its construction stage (`stagePiece`: ruin → foundations → walls under scaffolding → nearly finished → restored).
+- Projects are built in deliveries (`DQ.projectGive/projectNeed/projectProgress/projectStage` in js/journey.js; `S().projectGiven`, sanitised on load). Each material can be handed over as you get it; completion happens when the last delivery lands.
+- The Projects page is the village: `A.siteLayout(town)` places a clickable spot over each site (badge: ! ruined, % in progress, ✓ restored); the card beside it gives the place's small story, benefit, stage bar, materials with Deliver buttons. The scene renders at 3× (960 × 540) on full desktops and 2× on shorter or narrower windows.
+- Buttons must not use `data-b` values that match a live binder (e.g. `coins`); project buttons pass `id|item` in `data-a`.

@@ -314,19 +314,33 @@ UI.journeyPanel = () => {
 };
 UI.DO.choosegoal = () => DQ.modal({ title: 'Choose a goal', body: `<p class="sm dim">Home keeps pointing you at one goal until it is done. Changing it never loses progress.</p><div class="goal-choices">${Object.keys(destinations).map(id => `<button class="goal-choice ${S().journey === id ? 'on' : ''}" aria-pressed="${S().journey === id}" data-do="destination" data-a="${id}"><b>${esc(id === 'boss' ? (b => b ? `Defeat ${b.boss.short || b.name}` : 'Every boss defeated')(DQ.regionBoss()) : destinations[id])}</b><small>${DQ.goalDone(id) && id !== 'boss' ? 'Complete' : esc(DQ.journeyNext(id).title)}</small></button>`).join('')}</div>`, actions: [{ label: 'Close' }] });
 UI.projectsPanel = () => {
-  const town=S().town, entries=DQ.projectsForTown(town);
-  const id=entries.some(([key])=>key===UI.tab.projectChoice)?UI.tab.projectChoice:entries[0][0],project=D.PROJECTS[id];
+  /* The village is the menu (Nov 2026): every restoration site in the town scene is a spot you can click. The card
+     beside it tells that place's small story, how far the work has got and what it still needs, with a Deliver
+     button for each material. */
+  const town = S().town, entries = DQ.projectsForTown(town);
+  const id = entries.some(([key]) => key === UI.tab.projectChoice) ? UI.tab.projectChoice : (entries.find(([k]) => !S().projects[k]) || entries[0])[0], project = D.PROJECTS[id];
+  UI.tab.projectChoice = id;
   const done = S().projects[id], need = DQ.projectNeed(id), canFinish = !done && S().town === project.town && Object.keys(need).length && DQ.canAfford(need);
   const changes = (town==='willowbrook'?['first_steps', 'hungry_cook']:[]).filter(q => S().q[q] && S().q[q].s === 'done');
   const stage = DQ.projectStage(id), pct = Math.round(DQ.projectProgress(id) * 100), g = (S().projectGiven || {})[id] || {};
-  const canGive = !done && Object.keys(need).some(k => held(k) > 0);
+  const canGive = !done && Object.keys(need).some(k => held(k) > 0), voice = D.PROJECT_VOICES[id];
+  const A = DQ.pixelArt, W = (A && A.SCENE_W) || 320, H = (A && A.SCENE_H) || 180, shown = new Set(entries.map(([k]) => k));
+  const spots = A && A.siteLayout ? A.siteLayout(town).filter(sp => shown.has(sp.id)).map(sp => { const st = DQ.projectStage(sp.id), p = D.PROJECTS[sp.id];
+    return `<button class="site-spot st${st} ${sp.id === id ? 'on' : ''}" style="left:${(sp.X / W * 100).toFixed(3)}%;top:${(sp.Y / H * 100).toFixed(3)}%;width:${(32 / W * 100).toFixed(3)}%;height:${(34 / H * 100).toFixed(3)}%" data-do="projectpick" data-a="${sp.id}" aria-pressed="${sp.id === id}" aria-label="${esc(p.name)}: ${esc(DQ.PROJECT_STAGES[st])}" data-tip="text:${esc(p.name)} · ${esc(DQ.PROJECT_STAGES[st])}"><span class="site-mark">${st >= 4 ? '✓' : st ? Math.round(DQ.projectProgress(sp.id) * 100) + '%' : '!'}</span></button>`; }).join('') : '';
+  const story = done ? `<p class="proj-story">${esc(project.story)}</p>${voice ? `<p class="villager-line"><b>${esc(voice[0])}:</b> “${esc(voice[1])}”</p>` : ''}`
+    : `<p class="proj-story">${esc(project.before || (stage ? `Work is under way. ${voice ? voice[0] + ' comes by most days to see how it is going.' : ''}` : `It has stood like this for years.${voice ? ` ${voice[0]} is hoping someone will take it on.` : ''}`))} Once it is done: ${esc(project.story.charAt(0).toLowerCase() + project.story.slice(1))}</p>`;
   const lines = done ? '' : `<div class="proj-lines">${Object.entries(project.cost).map(([item, n]) => { const got = Math.min(n, g[item] || 0), left = n - got, have = held(item), name = item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase();
     return `<div class="proj-line ${left ? '' : 'ok'}"><span class="proj-ic">${item === 'coins' ? ico('coin') : DQ.itemIco(D.ITEMS[item])}</span><span class="proj-t"><b>${fmt(got)} / ${fmt(n)} ${esc(name)}</b><small>${left ? `${fmt(have)} held` : '✓ Delivered'}</small><span class="bar"><i style="width:${Math.round(got / n * 100)}%"></i></span></span>${left ? (have > 0 ? `<button class="btn sm" data-do="projectgive" data-a="${id}|${item}">Deliver ${fmt(Math.min(left, Math.floor(have)))}</button>` : (item !== 'coins' && UI.routeChip ? UI.routeChip(item) : '')) : ''}</div>`; }).join('')}</div>`;
-  return `<div class="town-project-workspace"><section class="panel"><div class="phead"><h2>${esc(D.TOWN[town].name)} · projects</h2>${pinButton(id)}</div><label class="page-picker" for="town-project">Project${UI.choiceButtons(`<select id="town-project" data-in="town-project">${entries.map(([key, p]) => `<option value="${key}" ${key === id ? 'selected' : ''}>${esc(p.name)}${S().projects[key] ? ' · Complete' : DQ.projectStage(key) ? ' · ' + DQ.PROJECT_STAGES[DQ.projectStage(key)] : ''}</option>`).join('')}</select>`)}</label>
-    <h3>${esc(project.name)}</h3><p>${esc(done ? project.story : project.reward)}</p>
-    ${done ? '<p class="ok">Restored · permanent benefit active</p>' : `<div class="proj-stage"><span class="k">${esc(DQ.PROJECT_STAGES[stage])}</span><span class="bar"><i style="width:${pct}%"></i></span><small>${pct}%</small></div>${lines}<div class="btnrow">${canFinish ? `<button class="btn primary" data-do="projectfinish" data-a="${id}">Complete project</button>` : canGive ? `<button class="btn primary" data-do="projectgive" data-a="${id}">Deliver all I can</button><button class="btn" data-do="projectnext" data-a="${id}">What next?</button>` : `<button class="btn primary" data-do="projectnext" data-a="${id}">Work on this project</button>`}</div><p class="sm dim">Deliver materials as you get them: the building rises with every delivery.</p>`}</section>
-    <section class="panel town-projects"><div class="phead"><h2>A living ${esc(D.TOWN[town].name)}</h2></div>${UI.scene(town)}${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}${entries.filter(([key])=>S().projects[key]).map(([key,p])=>`<p class="village-change">✓ ${esc(p.story)}${D.PROJECT_VOICES[key]?`<span class="villager-line"><b>${esc(D.PROJECT_VOICES[key][0])}:</b> “${esc(D.PROJECT_VOICES[key][1])}”</span>`:''}</p>`).join('')}<p class="sm dim">Completed quests and projects change the village.</p></section></div>`;
+  const restored = entries.filter(([k]) => S().projects[k]).length;
+  return `<div class="village-projects"><section class="panel town-projects village-map"><div class="phead"><h2>A living ${esc(D.TOWN[town].name)}</h2><small>${restored} of ${entries.length} restored · click a building</small></div>
+      <div class="village-scene">${UI.scene(town)}${spots}</div>
+      ${changes.length ? `<div class="village-changes">${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}</div>` : ''}</section>
+    <section class="panel project-card ${done ? 'done' : ''}"><div class="phead"><div><small>${esc(D.TOWN[town].name)} · restoration</small><h2>${esc(project.name)}</h2></div>${pinButton(id)}</div>
+      ${story}<p class="proj-benefit"><span class="k">${done ? 'Benefit, active' : 'Benefit'}</span> ${esc(project.reward)}</p>
+      ${done ? '<p class="ok">Restored</p>' : `<div class="proj-stage"><span class="k">${esc(DQ.PROJECT_STAGES[stage])}</span><span class="bar"><i style="width:${pct}%"></i></span><small>${pct}%</small></div>${lines}<div class="btnrow">${canFinish ? `<button class="btn primary" data-do="projectfinish" data-a="${id}">Complete project</button>` : canGive ? `<button class="btn primary" data-do="projectgive" data-a="${id}">Deliver all I can</button><button class="btn" data-do="projectnext" data-a="${id}">What next?</button>` : `<button class="btn primary" data-do="projectnext" data-a="${id}">Work on this project</button>`}</div>`}
+    </section></div>`;
 };
+
 UI.homeSections.unshift(UI.journeyPanel); /* the one primary objective leads Home */
 UI.V.projects = () => UI.projectsPanel();
 UI.returnPlan = sum => {
@@ -366,6 +380,7 @@ Object.assign(UI.DO, {
   journeytask: (kind, id) => { DQ.closeModal(); if (DQ.startAct(kind, id, { quiet: true })) DQ.go(DQ.actPage()); else { const page = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving', fight: 'combat' }[kind] || (kind === 'recipe' && D.RECIPES[id] ? D.SK[D.RECIPES[id].skill].page : null); if (page) { if (UI.taskChoice) UI.taskChoice[page] = id; DQ.go(page); } } },
   journeytravel: id => { DQ.closeModal(); DQ.travel(id); DQ.go('overview'); },
   projectfinish: id => { if (DQ.finishProject(id)) UI.render(false); },
+  projectpick: id => { if (!D.PROJECTS[id]) return; UI.tab.projectChoice = id; UI.render(false); },
   projectgive: arg => { const [id, item] = String(arg).split('|'); if (DQ.projectGive(id, item || null)) UI.render(false); },
   safetyexport: () => DQ.downloadSave(),
   safetyreload: () => location.reload()

@@ -68,6 +68,10 @@ const STYLE = {
   hollow: { walls: ['#4a4058', '#3a3448', '#5a4e66'], roofs: ['#2a2238', '#342a44', '#221c30'], leaf: '#4a3a5a', homes: 14, landmark: ['castle', 236, 26], trees: 5, stars: true, glow: '#c8a8ff', ruined: .35 }
 };
 
+/* where each restoration site stands in a town scene (32 x 32 each, in scene pixels); the Projects page puts a
+   clickable spot over each one */
+const siteLayout = town => { const sites = Object.keys(D.PROJECTS || {}).filter(k => D.PROJECTS[k].town === town), n = sites.length, gap = (W - 16) / Math.max(1, n);
+  return sites.map((id, i) => ({ id, i, X: Math.round(8 + gap * (i + .5) - 16), Y: i % 2 ? 144 : 134 })).sort((a, b) => a.Y - b.Y); };
 function sceneFor(town, stages = {}) {
   const T = A.TOWN[town] || A.TOWN.willowbrook, st = Object.assign({ ground: T.ground }, STYLE[town] || STYLE.willowbrook), rnd = seeded(town);
   const c = make(), x = c.getContext('2d'), P = painter(x), { f, ell, ridge } = P;
@@ -122,8 +126,7 @@ function sceneFor(town, stages = {}) {
   const people = 10 + Math.round(12 * lived);
   for (let i = 0; i < people; i++) folk(P, 8 + Math.floor(rnd() * (W - 16)), i % 2 ? 92 : 132, rnd);
   /* restoration sites along the front: a dug plot each, the piece at its stage; hidden relic sites are just grass */
-  const sites = Object.keys(D.PROJECTS || {}).filter(k => D.PROJECTS[k].town === town), n = sites.length, gap = (W - 16) / Math.max(1, n);
-  sites.map((id, i) => ({ id, i, X: Math.round(8 + gap * (i + .5) - 16), Y: i % 2 ? 144 : 134 })).sort((a, b) => a.Y - b.Y).forEach(({ id, X, Y }) => {
+  siteLayout(town).forEach(({ id, X, Y }) => {
     const pj = D.PROJECTS[id], sg = stages[id] || 0; if (pj.relic && sg < 4) return;
     ell(mix(T.ground, '#3a2a1a', sg >= 4 ? .12 : .3), X + 16, Y + 31, 14, 3);
     ell('rgba(30,40,24,.28)', X + 16, Y + 31, 10, 2);
@@ -133,5 +136,5 @@ function sceneFor(town, stages = {}) {
   for (let i = 0; i < 26; i++) { const gx = Math.floor(rnd() * W), gy = 168 + Math.floor(rnd() * 10); f(mix(T.ground, '#1e2a14', .35), gx, gy, 1, 2); f(mix(T.ground, '#1e2a14', .35), gx + 2, gy - 1, 1, 3); }
   return c;
 }
-Object.assign(A, { sceneFor, stagePiece, TOWN_STYLE: STYLE });
+Object.assign(A, { sceneFor, stagePiece, siteLayout, SCENE_W: W, SCENE_H: H, TOWN_STYLE: STYLE });
 })();
