@@ -390,3 +390,6 @@ Stages are separate commits so each can be reverted on its own.
 ## Notifications at the top; companion pop-ups (Nov 2026)
 - Desktop: notification cards (`#notes`) and short messages (`.toast`) appear at the top right just below the menu bar; a short message sits above the cards. Phones keep them above the bottom menu.
 - A new creature companion opens a pop-up (art, bonus, Make active / Meet them) through `DQ.popupQueue`, which waits for any open dialog to close; the bell keeps the record. Notifications with `popup` use this route.
+
+## House room pictures and worker beds (Nov 2026)
+- `js/house_rooms.js`: each House room button shows a 24 × 24 code-drawn room scene (`DQ.roomArt`). The Workers page opens with a Worker beds panel: beds filled (bed icons) and `DQ.bedPlan()`'s single next step for another bed (buy the cottage → build the Servants' quarters → place/upgrade Bunk beds, with the cost) and a button straight to that room. Beds come only from Bunk beds (+1/+2/+3 over the one you start with); the "No free beds" message names the next step.
