@@ -10,10 +10,13 @@ const HUBS = [
   { id: 'quests', name: 'Quests', ic: 'quest', pages: ['quests'] },
   { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'magic', 'brewery', 'enchanting', 'research'] },
   { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'bestiary'] },
-  { id: 'world', name: 'World', ic: 'map', pages: ['map', 'exploration', 'projects', 'house', 'hirelings'] },
-  { id: 'shop', name: 'Shop', ic: 'shop', pages: ['shop'] },
+  { id: 'world', name: 'World', ic: 'map', pages: ['map', 'exploration'] },
+  { id: 'village', name: 'Village', ic: 'house', pages: ['projects', 'house', 'hirelings'] },
   { id: 'hero', name: 'Hero', ic: 'bag', pages: ['character', 'tools', 'bank', 'skillsummary', 'mastery', 'achievements'] },
+  { id: 'shop', name: 'Shop', ic: 'shop', pages: ['shop'] },
 ];
+/* The page menu along the top bar (desktop). Combat and every skill live down the left; phones keep the bottom bar. */
+const TOP = ['home', 'quests', 'world', 'village', 'hero', 'shop'];
 const UTILITIES = { id: 'settings', name: 'Settings', pages: ['settings', 'balance'] };
 const TAB = { hunting:['Hunting','paw'], exploration:['Exploration','map'], enchanting:['Enchanting','rune'], brewery: ['Herbalism', 'bottle'], overview: ['Home', 'home'], skillsummary: ['Skill levels', 'star'], tools: ['Tools', 'mining'], activity: ['Activity', 'clock'], journal: ['Journal', 'book'], projects: ['Town projects', 'house'], combat: ['Fight', 'attack'], bestiary: ['Bestiary', 'book'], map: ['Map', 'map'], quests: ['Quests', 'quest'], shop: ['Shop', 'shop'], character: ['Inventory & equipment', 'bag'], bank: ['Bank', 'bank'], house: ['House', 'house'], hirelings: ['Workers', 'users'], achievements: ['Achievements', 'trophy'], mastery: ['Mastery', 'trophy'], research: ['Scholarship', 'book'], settings: ['Settings', 'gear'] };
 UI.hubOf = p => HUBS.find(h => h.pages.includes(p)) || (UTILITIES.pages.includes(p) ? UTILITIES : HUBS[0]);
@@ -36,6 +39,7 @@ DQ.on && DQ.on('levelup', sk => {
   if (row) { row.classList.remove('lvl-pop'); void row.offsetWidth; row.style.setProperty('--pop-delay', '0ms'); row.classList.add('lvl-pop'); }
   if (UI.levelPop.combat === now) { const e = document.querySelector('#combatnav .combat-entry'); if (e) { e.classList.remove('lvl-pop'); void e.offsetWidth; e.style.setProperty('--pop-delay', '0ms'); e.classList.add('lvl-pop'); } }
 });
+const topNav = () => { const cur = UI.hubOf(UI.view).id; return `<nav class="topnav" id="topnav" aria-label="Pages">${TOP.map(id => { const h = HUBS.find(x => x.id === id), on = id === cur; return `<button class="tnav ${on ? 'on' : ''}" data-do="hub" data-a="${id}" aria-label="${h.name}" ${on ? 'aria-current="page"' : ''}>${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${id}"></i></button>`; }).join('')}</nav>`; };
 UI.renderRail = () => {
   if (lastCombat == null && DQ.S) lastCombat = DQ.combatLvl();
   const cur = UI.hubOf(UI.view).id;
@@ -71,7 +75,11 @@ const prevRender = UI.render;
 UI.render = fresh => {
   prevRender(fresh); lastIn[UI.hubOf(UI.view).id] = UI.view; subnav(); UI.renderDock(); UI.renderPins(); UI.packWarn(true); UI.upd();
   const cur = UI.hubOf(UI.view).id; $$('.hub').forEach(b => b.classList.toggle('on', b.dataset.a === cur));
+  $$('#topnav .tnav').forEach(b => { const on = b.dataset.a === cur; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  UI.markNow();
 };
+/* The Now card is outlined when its activity is the page you are looking at. */
+UI.markNow = () => { const n = $('#nowcard .now'); if (n) n.classList.toggle('here', !!DQ.act && DQ.actPage && DQ.actPage() === UI.view); };
 
 /* ---------- The skills menu: a second menu, always in reach, so the things people open most are one click away ---------- */
 /* what the next level of a skill opens, for the left-menu tooltip */
@@ -104,12 +112,19 @@ UI.renderHud = () => {
       <button class="h-tb" data-do="plan" data-tip="text:Pace, stop rule and queue"><span class="h-t1"><b>${esc(DQ.actLabel().replace(/ rock$/, ''))}</b><span class="h-meta"><span data-b="hud:eta"></span><span data-b="hud:rate"></span></span></span><span class="bar prog" role="img" aria-label="This action"><i data-prog="@"></i></span>${sk ? `<span class="bar h-xp" role="img" aria-label="${esc(s.name)} level progress" data-tip="text:${esc(s.name)} level progress"><i data-b="xpbar:${sk}"></i></span>` : ''}<span class="h-t3"><small>${fight ? `Combat <b class="mono" data-b="combat"></b> vs Lv ${fight.cl} · ` : s ? `${s.name} <b class="mono" data-b="lvl:${sk}"></b> · ` : ''}${D.PACE[a.pace || 'steady'].name}${(S().queue || []).length ? ` · ${S().queue.length} queued` : ''} · <span data-b="hud:count"></span></small><span class="hq hb" data-b="hudbuff" hidden></span></span></button>
       <button class="h-stop" data-do="stop" aria-label="Stop this task" data-tip="text:Stop this task (Space)"><i class="stop-sq" aria-hidden="true"></i><span>Stop</span></button></div>`
     : `<div class="h-task idle"><span class="h-tic">${ico('clock')}</span><div class="h-tb"><b>Nothing running</b><small>Choose your next step on Home</small><span class="hq hb" data-b="hudbuff" hidden></span></div>${S().lastAct ? `<button class="btn sm primary" data-do="resume">Resume</button>` : `<button class="btn sm" data-do="go" data-a="overview">Your destination</button>`}</div>`;
+  const nowEl = $('#nowcard');
+  if (nowEl) nowEl.innerHTML = a ? `<div class="now" style="--c:${s ? s.col : '#d8a64a'}">
+      <span class="now-k">Now<i> · on this page</i></span>
+      <button class="now-go" data-do="go" data-a="${DQ.actPage()}" data-tip="text:Go to this activity"><span class="now-ic">${taskArt}</span><b>${esc(DQ.actLabel().replace(/ rock$/, ''))}</b></button>
+      <span class="bar prog" role="img" aria-label="This action"><i data-prog="@"></i></span>
+      <span class="now-f"><button class="now-plan" data-do="plan" data-tip="text:Pace, stop rule and queue"><span data-b="hud:count"></span><span class="hq hb" data-b="hudbuff" hidden></span></button><button class="now-stop" data-do="stop" aria-label="${fight ? 'Retreat' : 'Stop this task'}" data-tip="text:${fight ? 'Retreat' : 'Stop this task'} (Space)"><i class="stop-sq" aria-hidden="true"></i>${fight ? 'Retreat' : 'Stop'}</button></span></div>`
+    : `<div class="now idle"><span class="now-k">Now</span><b class="now-idle">Nothing running</b>${S().lastAct ? `<button class="btn sm primary" data-do="resume">Resume</button>` : `<small>Pick a skill below to start</small>`}</div>`;
   $('#hud').innerHTML = `<button class="h-hero" data-do="go" data-a="character" data-tip="text:Your inventory">${UI.portrait(48)}<span class="h-lv mono" data-b="adv"></span></button>
     <div class="h-name"><b>${esc(S().name)}</b><span class="bar" role="img" aria-label="Hero level progress"><i data-b="advbar"></i></span><small>${DQ.heroTitle() ? `<i class="h-title">${esc(DQ.heroTitle())}</i>` : `Hero level <span data-b="adv"></span> · <span data-b="advline"></span>`}</small><div class="hp h-hp" data-tip="text:Health"><span class="bar" role="img" aria-label="Health"><i data-b="hpbar"></i></span><small class="mono" data-b="hptxt"></small></div></div>
-    ${UI.petBadge ? UI.petBadge() : ''}${task}
+    ${UI.petBadge ? UI.petBadge() : ''}${topNav()}${task}
     <div class="h-stats"><div class="h-coin" data-tip="text:Coins">${ico('coin')}<b class="mono" data-b="coins"></b></div></div>
     <div class="h-btns"><button class="packchip" data-do="go" data-a="character" data-tip="text:Backpack">${ico('bag')}<span class="mono" data-b="packchip"></span></button><button class="iconb" data-do="go" data-a="map" aria-label="Travel: you are in ${esc(D.TOWN[S().town].name)}" data-tip="text:You are in ${esc(D.TOWN[S().town].name)}. Open the map to travel">${ico('pin')}</button><button class="iconb bellb" data-do="bell" aria-label="Recent activity" data-tip="text:Recent activity">${ico('bell')}<i class="belldot" data-b="belldot" hidden></i></button><button class="iconb" data-do="go" data-a="settings" aria-label="Settings" data-tip="text:Settings">${ico('gear')}</button><button class="iconb" data-do="mute" aria-label="Mute" data-tip="text:${S().settings.muted ? 'Unmute (M)' : 'Mute (M)'}">${ico(S().settings.muted ? 'mute' : 'sound')}</button></div>`;
-  UI.upd(); UI.collectProg();
+  UI.markNow(); UI.upd(); UI.collectProg();
 };
 
 /* ---------- Pinned quests: one slim strip ---------- */

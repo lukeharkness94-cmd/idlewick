@@ -22,6 +22,12 @@ The equipped copy is stored separately from inventory. Equipping consumes exactl
 
 Shop prices use `UI.money(amount)`: a small visible coin and formatted amount, with an accessible currency label. Do not restore "8 coins each" prose on cards. Buy/sell totals show quantity and the coin amount; rare offers and inventory selling use the same visual treatment. Locked/owned rare cards retain their visible prices.
 
+## One-screen overhaul, stage 1: shell (Nov 2026, Claude Code)
+- Approved concept canvas: top bar holds the hero, the page menu (Home, Quests, World, Village, Hero, Shop) and coins/bell/settings/mute. Village is a new hub (Town projects, House, Workers); World is now Map and Exploration.
+- Left column (208px): Now card (current task, progress, count opens the plan, Stop/Retreat; gold outline when you are on its page), Combat, then all 14 skills at 44px rows. Fits 1440 × 900 without scrolling; shorter windows scroll the column.
+- Top menu compacts below 1480px (packchip hidden) and turns icon-only below 1290px. Phones (≤860px) unchanged: bottom bar now includes Village.
+- Next stages: paged choices with a context panel, Quests as list + detail, Combat and Scholarship fitted to one screen, page merges, a 1280 × 720 fit test.
+
 ## Latest navigation, artwork and controls
 
 - Home contains Home and Activity. Skills begins with Skill levels and includes all skills, Brewery and Mastery. Combat retains Fight and Bestiary. World contains Map, Town projects, House, Workers and Research. Shop stands alone. Hero contains Inventory & equipment, Bank and Achievements. Settings is a persistent HUD gear button, with developer balance accessible there.
