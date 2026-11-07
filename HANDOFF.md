@@ -397,3 +397,7 @@ Stages are separate commits so each can be reverted on its own.
 ## Short messages and away-choice results (Nov 2026)
 - Short messages (`DQ.toast`) appear just above the button that was pressed (its position is remembered at the press, so redrawn buttons still count) when on the same page/dialog within 1.5 s, otherwise at the bottom; they draw in `#toastlayer` above dialogs. Notification cards stay at the top right under the menu.
 - Choices from time away (`DQ.resolveEvent`) measure what changed (coins, items, health, new effects) and the card turns into a result in place, in both the welcome-back pop-up and Activity (`UI.eventResultHtml`); no message is sent behind the dialog. Results clear on leaving the page or closing the pop-up. Fixed a crash in `makeAwayEvents` when fewer event types were possible than the number rolled.
+
+## Compact item tiles; lists keep their place (Nov 2026)
+- Backpack/bank slots are 64px (48px art); shop stock tiles are about 100px wide (48px art, name, small price) in a wider stock panel.
+- `js/keep_scroll.js` (loaded last) notes every scrolled element's position before a same-page redraw and restores it after, so picking an item no longer throws the list back to the top a moment later. Changing page still starts at the top.

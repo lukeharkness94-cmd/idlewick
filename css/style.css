@@ -2868,3 +2868,18 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
 .evr-tile.loss b{color:#e2574c}.evr-tile.gain b{color:#5cc08a}
 .evr-tile .evr-art{display:grid;place-items:center;width:48px;height:48px}.evr-tile .evr-art .ic{width:32px;height:32px}
 @media (prefers-reduced-motion:reduce){.ev-result,.evr-tile{animation:none}}
+
+/* Compact item tiles (Nov 2026): shop stock as small tiles (48px picture, name, price on one line) and backpack/bank
+   slots at 64px, so a full pack or a long shop list fits without huge cards */
+#packgrid,.slots{grid-template-columns:repeat(auto-fill,minmax(64px,1fr))!important;gap:6px!important}
+#packgrid .slot,.slots .slot{min-height:64px}
+#packgrid .slot :is(img,.ic,.gico),.slots .slot :is(img,.ic,.gico){width:48px!important;height:48px!important}
+.visual-shop .shop-stock .illustrated-choices{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))!important;gap:8px!important;grid-auto-rows:max-content}
+.visual-shop .shop-stock .illustrated-card{height:auto!important;min-height:0!important;padding:8px 6px!important;gap:3px!important}
+.visual-shop .shop-stock .illustrated-card .choice-art{height:52px!important;min-height:52px!important;width:auto!important;margin:0!important}
+.visual-shop .shop-stock .illustrated-card .choice-art :is(img,.ic){width:48px!important;height:48px!important}
+.visual-shop .shop-stock .illustrated-card b{font-size:14px;line-height:1.2}
+.visual-shop .shop-stock .illustrated-card small{font-size:13px}
+.visual-shop .shop-stock .stock-price{padding-top:0;margin-top:0!important}
+@media (min-width:861px){.visual-shop{grid-template-columns:minmax(0,1.7fr) minmax(320px,.8fr)!important}}
+.visual-shop .shop-stock .stock-price .money .ic,.visual-shop .shop-stock .stock-price img{width:18px!important;height:18px!important}
