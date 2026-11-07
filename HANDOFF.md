@@ -401,3 +401,6 @@ Stages are separate commits so each can be reverted on its own.
 ## Compact item tiles; lists keep their place (Nov 2026)
 - Backpack/bank slots are 64px (48px art); shop stock tiles are about 100px wide (48px art, name, small price) in a wider stock panel.
 - `js/keep_scroll.js` (loaded last) notes every scrolled element's position before a same-page redraw and restores it after, so picking an item no longer throws the list back to the top a moment later. Changing page still starts at the top.
+
+## Compact top menu on narrower windows (Nov 2026)
+- Below the 1600 layout width (`html.lw-1600`, roughly windows under 1360px) the six top-bar page buttons stack a 13px label under the icon, halving the menu's width so it never overlaps the coins, backpack and settings; `tests/ui-fit.cjs` checks 1000–1920px windows.

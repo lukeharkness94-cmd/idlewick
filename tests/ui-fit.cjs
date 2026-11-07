@@ -62,6 +62,12 @@ const assert=require('node:assert/strict');
     assert.ok(r.bottom<=r.vh+1&&r.viewOver<=8,`${page}: ${sel} fully on screen at ${w}x${h} (bottom ${Math.round(r.bottom)} of ${r.vh}, overflow ${r.viewOver})`);
    }
   }
-  console.log('PASS one-screen fit: every skill visible at laptop heights; activity pages scroll only their list of choices; no desktop page scrolls the window; Quests is list + detail; Combat shows only the fight, style and creatures, with the rest in pop-ups; readable text at 1280x720; the map, Inventory and village fit at 1920x1080, 2560x1080 and 3440x1440.');
+  /* the top menu never runs into the coins, backpack and settings, from small laptop windows up */
+  for(const w of [1000,1100,1180,1280,1366,1440,1600,1920]){
+   await p.setViewportSize({width:w,height:760});await p.evaluate(()=>{DQ.closeModal&&DQ.closeModal();DQ.go('overview');});await p.waitForTimeout(250);
+   const t=await p.evaluate(()=>{const n=[...document.querySelectorAll('#topnav .tnav')].map(e=>e.getBoundingClientRect()),st=document.querySelector('#hud .h-stats').getBoundingClientRect(),hn=document.querySelector('#hud .h-name').getBoundingClientRect();return {navR:Math.max(...n.map(r=>r.right)),navL:Math.min(...n.map(r=>r.left)),stats:st.left,name:hn.right};});
+   assert.ok(t.navR<=t.stats-4&&t.navL>=t.name,`top menu fits between the hero and the counters at ${w}px (${JSON.stringify(t)})`);
+  }
+  console.log('PASS one-screen fit: every skill visible at laptop heights; activity pages scroll only their list of choices; no desktop page scrolls the window; Quests is list + detail; Combat shows only the fight, style and creatures, with the rest in pop-ups; readable text at 1280x720; the map, Inventory and village fit at 1920x1080, 2560x1080 and 3440x1440; the top menu fits from 1000px windows up.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1);});
