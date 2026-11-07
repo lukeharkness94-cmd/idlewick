@@ -2686,3 +2686,34 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
   #view>.folk-layout>.folk-detail{min-height:0;overflow-y:auto}
 }
 @media (max-width:860px){.folk-layout{grid-template-columns:minmax(0,1fr)}}
+/* Combat tools show their state (js/combat_simple.js) */
+.ct-btn{min-height:52px;padding:6px 14px 6px 8px}
+.ct-l{display:flex;flex-direction:column;align-items:flex-start;line-height:1.2}
+.ct-l>span{font:600 15px var(--f-ui)}.ct-l small{font:500 13.5px var(--f-body);color:var(--mute)}
+.ct-btn.tone-ok small{color:var(--good,#7ed69a)}.ct-btn.tone-warn small{color:var(--brass-hi)}.ct-btn.tone-bad small{color:var(--bad,#f08a7e)}
+.ct-btn.tone-bad{border-color:color-mix(in srgb,var(--bad,#f08a7e) 55%,var(--line2))}
+.ct-btn:focus-visible{outline:2px solid var(--brass-hi);outline-offset:2px}
+
+/* Readability floor (Nov 2026 review): no visible text under 13px in the 1920 design, so even at the 85% desktop
+   floor nothing renders under 11px; meta text that carries information gets 13.5–14px. */
+#hud .h-lv{font-size:13px!important;min-width:20px}
+#hud .h-name small,#hud .h-name small *{font-size:13.5px!important}
+#hud .hp small,#hud .packchip span{font-size:13.5px!important}
+.illustrated-card .choice-state,#view .illustrated-card .choice-state{font-size:13px!important}
+.tech .study-reward,.chip small,.eq small,.ingredient span,.plot small,.plot .ptime,.filter-toggle b,.activity-state,.sh-line span,.chipx span{font-size:13px!important}
+.now .now-k{font-size:13px}
+#loglist time{font-size:13px}
+.also-goals li small{font-size:13px!important}.lvchip{font-size:13px!important}
+.k,#app .k{font-size:13px}
+.fig-mark,.maplegend span,.fighter small,#view small.dim{font-size:13px}
+@media (max-width:860px){
+  .subnav.skills .stab span{font-size:12px!important}
+  .rail .hub,.rail .hub span{font-size:12px!important}
+  .ct-btn{flex:1 1 calc(50% - 8px)}
+}
+.qdetail .quest{position:relative}
+@media (max-width:899px){.combat-dashboard .combat-tools{order:1}.combat-dashboard .encounter-arena{order:1}}
+@media (max-width:860px){.quest-face .folk-face{width:64px;height:64px}.quest-head{gap:10px}}
+.mq-ribbon{font-size:13px!important}.pinbtn{font-size:13px}
+.state{font-size:13px!important}
+.ss-btn small,.ss-weapon small{font-size:13px!important}

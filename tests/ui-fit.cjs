@@ -40,7 +40,17 @@ const assert=require('node:assert/strict');
   for(const key of ['skills','abilities','food','prep','boss','loot']){await p.locator(`.combat-tools [data-a="${key}"]`).click();assert.equal(await p.locator('.modal .combat-pop .panel, .modal .combat-pop .intel').count()>0,true,`${key} pop-up`);await p.evaluate(()=>DQ.closeModal());}
   await p.evaluate(()=>{DQ.ui.questTab='upcoming';DQ.go('quests');});
   assert.ok(await p.locator('.qlist .qrow').count()>1,'quest list rows');assert.equal(await p.locator('.qdetail .quest').count(),1,'one quest in full');
+  /* readability floor: desktop scaling never drops below 85%, and no visible text renders under 11 screen pixels */
+  await p.setViewportSize({width:1280,height:720});
+  assert.ok(await p.evaluate(()=>DQ.zoom>=0.85),'desktop zoom keeps a readability floor');
+  for(const page of ['overview','quests','people','combat','fishing','smithing','character','shop','house','research']){
+   await p.evaluate(v=>{DQ.go(v);DQ.closeModal&&DQ.closeModal();},page);await p.waitForTimeout(120);
+   const small=await p.evaluate(()=>{for(const el of document.querySelectorAll('#app *')){if(el.closest('svg'))continue;if(![...el.childNodes].some(n=>n.nodeType===3&&n.textContent.trim().length>1))continue;const r=el.getBoundingClientRect();if(!r.width||r.bottom<0||r.top>innerHeight)continue;const fs=parseFloat(getComputedStyle(el).fontSize)*DQ.zoom;if(fs<10.9)return (el.className||el.tagName)+' '+fs.toFixed(1)+'px: '+el.textContent.trim().slice(0,30);}return '';});
+   assert.equal(small,'',`${page}: readable text at 1280x720`);
+  }
+  await p.evaluate(()=>{DQ.go('combat');DQ.closeModal&&DQ.closeModal();});
+  assert.ok(await p.locator('.combat-tools .ct-btn small').count()>=4,'combat buttons show their state');
   assert.deepEqual(errors,[]);
-  console.log('PASS one-screen fit: every skill visible at laptop heights; activity pages scroll only their list of choices; no desktop page scrolls the window; Quests is list + detail; Combat shows only the fight, style and creatures, with the rest in pop-ups.');
+  console.log('PASS one-screen fit: every skill visible at laptop heights; activity pages scroll only their list of choices; no desktop page scrolls the window; Quests is list + detail; Combat shows only the fight, style and creatures, with the rest in pop-ups; readable text at 1280x720.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1);});

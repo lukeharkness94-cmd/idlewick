@@ -31,6 +31,7 @@ Shop prices use `UI.money(amount)`: a small visible coin and formatted amount, w
 - Stage 3 (Nov 2026): whole-page scaling to a 1920 × 1080 design (`js/scale.js`); Combat in three columns; House rebuilt around the pixel cottage with furniture cards; one `#pagebar` row for page tabs, Back-to link and pinned quests; skill-row action counts sit after the skill name.
 - Backdrops (Nov 2026): `js/backdrop.js` paints 18 scenes (2 everyday choices + 16 combat areas) into cached data URLs; html.has-backdrop + --backdrop; Settings → Backdrop.
 - Folk (Nov 2026): 27 quest givers in `D.FOLK` with portraits and notes; Quests hub gains a People tab; S.folkSeen tracks notes already announced (first sync on an old save is silent).
+- Readability review (Nov 2026): desktop zoom floor 85% (1280 and 1440 laptops no longer shrink to 67–75%); 13px minimum text; Combat buttons carry status and an Equipment shortcut; phone Combat order fixed (fight first), quest Pin anchored to its card, phone tab labels 12px.
 - Next stages: paged choices with a context panel, Quests as list + detail, Combat and Scholarship fitted to one screen, page merges, a 1280 × 720 fit test.
 
 ## Latest navigation, artwork and controls
