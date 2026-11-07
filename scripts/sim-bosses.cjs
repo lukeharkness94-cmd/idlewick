@@ -37,9 +37,10 @@ const run = (boss, extra, useCounter) => {
   for (const id of gear) { const it = D.ITEMS[id]; if (!it || new RegExp(process.env.SKIP || "bow_|staff_|_dagger").test(id)) continue; S.inv[id] = (S.inv[id] || 0) + 1; if (!q.canEquip(id).ok) { delete S.inv[id]; continue; } const sc = (it.atk || 0) + (it.str || 0) + (it.def || 0); if (!slots[it.slot] || sc > slots[it.slot][1]) slots[it.slot] = [id, sc]; }
   Object.values(slots).forEach(([id]) => q.equipItem(id));
   const food = D.FISH_IDS.filter(id => cookLvl(id) <= L).sort((a, b) => D.ITEMS[b].heal - D.ITEMS[a].heal)[0] || 'shrimp';
-  S.inv[food] = 15; const how = useCounter ? counter(boss) : 'melee'; if (process.env.NOABIL) S.abilities = []; S.abilities = (S.abilities || []).filter(a => q.abilUnlocked(D.AB[a])).slice(0, q.abilSlots()); S.hp = q.maxHp(); q.fxDirty();
+  S.inv[food] = 15; const how = useCounter ? counter(boss) : 'melee'; if (process.env.NOABIL) S.abilities = []; S.abilities = (S.abilities || []).filter(a => q.abilUnlocked(D.AB[a])).slice(0, q.abilSlots()); if (!process.env.NOABIL) { q.fxDirty(); q.fillAbilities(); } S.hp = q.maxHp(); q.fxDirty();
   const fs4 = [0, 1, 2, 3].map(() => q.forecast(boss.id)), f = fs4[0] && { trials: 96, wins: fs4.reduce((n, x) => n + x.wins, 0), ms: fs4.reduce((n, x) => n + x.ms, 0), eaten: fs4.reduce((n, x) => n + x.eaten, 0) };
   if (f) { f.winRate = f.wins / f.trials; f.avgMs = f.wins ? f.ms / f.wins : null; f.foodPerKill = f.wins ? f.eaten / f.wins : null; }
+  if (process.env.DEBUG === boss.id && !extra) console.log('run():', JSON.stringify(q.S.equip), q.S.abilities, Object.keys(q.S.inv).filter(k=>q.S.inv[k]), q.maxHp(), q.lvl('attack'), q.lvl('defence'));
   if (process.env.ADVICE === boss.id && !extra) { q.S.hp = Math.ceil(q.maxHp() * .6); console.log(JSON.stringify(q.prepAdvice(boss.id, f).map(x => x.title + ' — ' + x.text), null, 1)); q.S.hp = q.maxHp(); }
   return { how, combat: q.combatLvl(), L, hp: q.maxHp(), food, heal: D.ITEMS[food].heal, win: f ? Math.round(f.wins / f.trials * 100) : null, fpk: f && f.foodPerKill != null ? f.foodPerKill.toFixed(1) : '-', t: f && f.avgMs ? Math.round(f.avgMs / 1000) + 's' : '-', gear: Object.values(slots).map(x => x[0]).join(' ') };
 };
@@ -55,12 +56,12 @@ const counter = boss => {
   if (el && !w.weak.includes('pierce') || boss.id === 'hollowking') {
     S.unlocked.magic = true; S.xp.magic = D.XPF[C]; q.fxDirty();
     const sp = D.SPELLS.filter(x => D.SPELL_EL[x.id] === el && q.lvl('magic') >= x.lvl).pop() || D.SPELLS.filter(x => q.lvl('magic') >= x.lvl).pop();
-    const staff = pick(/^staff_/); S.inv[staff] = 1; q.equipItem(staff); S.spell = sp.id; S.inv.rune = 5000; S.abilities = ['focus', 'ward'];
+    const staff = pick(/^staff_/); S.inv[staff] = 1; q.equipItem(staff); S.spell = sp.id; S.inv.rune = 5000; S.abilities = ['brace', 'focus', 'ward'];
     return `magic, ${staff}, ${sp.name}`;
   }
   if (w.weak.includes('pierce')) {
     S.unlocked.ranged = true; S.xp.ranged = D.XPF[C]; q.fxDirty();
-    const bow = pick(/^bow_/), arrow = pick(/^arrow_/); S.inv[bow] = 1; q.equipItem(bow); S.inv[arrow] = 3000; q.equipItem(arrow); S.abilities = ['pin', 'aimed', 'kite'];
+    const bow = pick(/^bow_/), arrow = pick(/^arrow_/); S.inv[bow] = 1; q.equipItem(bow); S.inv[arrow] = 3000; q.equipItem(arrow); S.abilities = ['brace', 'pin', 'aimed', 'kite'];
     return `ranged, ${bow}, ${arrow}`;
   }
   const want = w.weak.includes('crush') ? /_hammer$/ : w.weak.includes('stab') ? /_dagger$/ : /_sword$/, wpn = pick(new RegExp('^(bronze|iron|steel|mithril|adamant|rune)' + want.source));
@@ -85,7 +86,7 @@ const compare = boss => {
   const lv0 = Math.max(10, base.L), general = (S2, extraLv = 0) => { for (const k of ['attack', 'strength', 'defence', 'hitpoints']) S2.xp[k] = D.XPF[Math.min(99, lv0 + extraLv)] || 0; };
   const res = (label, setupFn, costText) => {
     q.S = q.newState(); const S = q.S; S.settings.notify = false; q.fxDirty(); setupFn(S);
-    S.hp = q.maxHp(); q.fxDirty(); const fs4 = [0, 1, 2, 3].map(() => q.forecast(boss.id)); const w = fs4.reduce((n, x) => n + (x ? x.wins : 0), 0), e = fs4.reduce((n, x) => n + (x ? x.eaten : 0), 0);
+    S.hp = q.maxHp(); q.fxDirty(); if (process.env.DEBUG === boss.id && label === 'general') console.log('general:', JSON.stringify(S.equip), S.abilities, Object.keys(S.inv).filter(k=>S.inv[k]), q.maxHp(), q.lvl('attack'), q.lvl('defence')); const fs4 = [0, 1, 2, 3].map(() => q.forecast(boss.id)); const w = fs4.reduce((n, x) => n + (x ? x.wins : 0), 0), e = fs4.reduce((n, x) => n + (x ? x.eaten : 0), 0);
     rows.push(`    ${label.padEnd(9)} win ${String(Math.round(w / 96 * 100)).padStart(3)}%  food/win ${w ? (e / w).toFixed(1) : '-'}  | ${costText}`);
   };
   const town = S => { S.town = boss.town; D.TOWNS.slice(0, D.TOWN[boss.town].idx + 1).forEach(t => { S.towns[t.id] = { visited: true, boss: t.id !== boss.town }; }); };

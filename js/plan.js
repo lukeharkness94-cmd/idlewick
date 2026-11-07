@@ -21,10 +21,19 @@ DQ.ability = id => {
 };
 DQ.toggleAbility = id => {
   const L = S().abilities = S().abilities || [], a = D.AB[id];
-  if (L.includes(id)) { L.splice(L.indexOf(id), 1); return true; }
+  if (L.includes(id)) { L.splice(L.indexOf(id), 1); S().settings.autoAbil = false; return true; }
   if (!DQ.abilUnlocked(a)) return DQ.toast(`Requires ${D.SK[a.skill].name} ${a.lvl}`, true);
   if (L.length >= DQ.abilSlots()) return DQ.toast(`All ${DQ.abilSlots()} ability slots are full. Remove one first.`, true);
   L.push(id); return true;
+};
+/* Empty ability slots fill themselves when a fight starts, with abilities you already have (Brace first: later bosses'
+   special attacks are built around it). Never replaces a choice; removing an ability yourself turns this off. */
+DQ.fillAbilities = () => {
+  const st = S(), on = st.abilities = st.abilities || [], free = DQ.abilSlots() - on.length; if (free <= 0 || st.settings.autoAbil === false) return [];
+  const sty = DQ.weaponStyle(), order = ['brace', sty === 'melee' ? 'power' : sty === 'ranged' ? 'aimed' : 'focus', sty === 'melee' && st.equip.shield ? 'bash' : null, 'second', sty === 'ranged' ? 'pin' : sty === 'magic' ? 'ward' : 'execute', sty === 'ranged' ? 'kite' : null];
+  const added = [];
+  for (const id of order) { if (added.length >= free) break; const a = id && D.AB[id]; if (!a || on.includes(id) || !DQ.abilUnlocked(a) || (a.style && a.style !== sty)) continue; on.push(id); added.push(a.name); }
+  return added;
 };
 DQ.weakKnown = m => m.boss || (S().beast.kills[m.id] || 0) >= D.STUDY_KILLS;
 DQ.weakOf = (m, f) => {
@@ -170,6 +179,20 @@ DQ.prepAdvice = (monId, fc) => {
     const cheapest = Math.min(...buys.map(id => D.ITEMS[id].buy));
     out.push({ key: 'buy', title: coins >= price ? `Buy armour for your empty slots (${fmt(price)} coins)` : coins >= cheapest ? 'Buy what armour you can afford' : 'Save for armour', text: `The shop here sells ${list}. ${coins >= price ? `You have ${fmt(coins)} coins, enough for all of it.` : `You have ${fmt(coins)} of the ${fmt(price)} coins for the full set.`} Armour makes every hit you take smaller or rarer.`, action: 'go', a: 'shop', afford: coins >= price, items: buys });
   }
+  /* upgrades: a clearly better weapon or armour piece (20% or more) that you already own, or that the shop here sells */
+  { const score = id => { const it = D.ITEMS[id], b = it.b || {}; return it.slot === 'weapon' ? (b.atk || 0) + (b.str || 0) + (b.rng || 0) + (b.mag || 0) : (b.def || 0); };
+    const nm = id => D.ITEMS[id].name.toLowerCase(), ups = []; let own = null;
+    for (const slot of ['weapon', 'body', 'legs', 'head', 'shield']) {
+      const cur = S().equip[slot]; if (!cur || !D.ITEMS[cur]) continue; const cs = score(cur), cstyle = D.ITEMS[cur].style || 'melee';
+      const better = id => { const it = D.ITEMS[id]; return it && it.slot === slot && !it.unique && DQ.canEquip(id).ok && (slot !== 'weapon' || (it.style || 'melee') === cstyle) && score(id) >= Math.max(cs * 1.2, cs + 3); };
+      const o = Object.keys({ ...S().inv, ...(S().bank || {}) }).filter(id => owned(id) && better(id)).sort((a, b) => score(b) - score(a))[0];
+      if (o) { if (!own) own = [o, cur]; continue; }
+      const b = stock.filter(id => D.ITEMS[id].buy && better(id)).sort((a, b) => score(b) - score(a))[0]; if (b) ups.push(b);
+    }
+    if (own) out.push({ key: 'upgrade', title: `Wear your ${nm(own[0])}`, text: `It is clearly stronger than the ${nm(own[1])} you have on, and you already own it.`, action: 'go', a: 'character' });
+    else if (ups.length) { const price = ups.reduce((n, id) => n + D.ITEMS[id].buy, 0), names = ups.slice(0, 3).map(nm), list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
+      out.push({ key: 'upgrade', title: coins >= price ? `Upgrade your gear (${fmt(price)} coins)` : 'Save for better gear', text: `The shop here sells ${list}${ups.length > 3 ? ' and more' : ''}, clearly stronger than what you wear. ${coins >= price ? `You have ${fmt(coins)} coins.` : `You have ${fmt(coins)} of ${fmt(price)} coins.`}`, action: 'go', a: 'shop' }); }
+  }
   if (DQ.weakKnown(m)) {
     const weak = DQ.weakOf(m).weak, mine = DQ.myDtype();
     if (weak.length && !weak.includes(mine)) {
@@ -262,3 +285,5 @@ DQ.resolveEvent = (id, opt) => {
   L.splice(i, 1); DQ.sfx(bad ? 'hurt' : 'coin'); DQ.toast(msg, bad); DQ.log(`${e.title}: ${msg}`, bad ? 'bad' : 'good'); DQ.emit('inbox');
 };
 })();
+
+{ const start0 = DQ.startAct; DQ.startAct = (kind, id, o = {}) => { if (kind === 'fight') { const add = DQ.fillAbilities(); if (add.length && !DQ.sim.on) DQ.log(`Ready for the fight: ${add.join(' and ')} slotted into your empty ability slots. Change them under Abilities.`); } return start0(kind, id, o); }; }

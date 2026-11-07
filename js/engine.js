@@ -413,7 +413,7 @@ function combatRound() {
     if (A('execute') && f.hp < mhp * .3) max *= 1.5;
     /* unique gear (data.js unique.key) */
     if (U.marked && f.pa <= 3) { sure = true; max *= 1.5; fxHit('marked'); }
-    if (U.fury) { max *= 1 + .35 * (1 - clamp(S().hp / DQ.maxHp(), 0, 1)); if (S().hp < DQ.maxHp()) fxHit('fury'); }
+    if (U.fury) { max *= 1.1 + .3 * (1 - clamp(S().hp / DQ.maxHp(), 0, 1)); fxHit('fury'); } /* always +10%, up to +40% as health falls */
     const mDef = (m.def + 8) * (64 + m.def);
     if (sure || Math.random() < hitChance(acc, mDef)) dealt = rnd(1, Math.max(1, Math.round(max)));
     if (dealt && A('pin')) f.pinned = 2;

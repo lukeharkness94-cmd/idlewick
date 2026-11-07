@@ -87,7 +87,7 @@ D.BOSSMECH = {
   zephyrion: { mech: 'airborne', text: 'Stays in the air: melee barely reaches him unless he is pinned to the ground.', counters: ['Bow with Pin Down grounds him', 'Storm spells and arrows', 'Brace for Thunder dive'] },
   hollowking: { mech: 'phases', text: 'Changes form twice. Above two thirds health he is weak to crush, then to aether and fire, then to pierce.', counters: ['A warhammer for phase one', 'Magic for phase two', 'A bow for the final phase', 'Elemental Focus and Ward'] },
 };
-D.HOLLOW_PHASES = [WR(['crush'], ['aether', 'fire', 'frost', 'storm']), WR(['aether', 'fire'], ['stab', 'slash', 'crush', 'pierce']), WR(['pierce'], ['stab', 'slash', 'crush', 'aether'])];
+D.HOLLOW_PHASES = [WR(['crush'], ['aether', 'fire', 'frost', 'storm']), WR(['aether', 'fire'], ['stab', 'slash', 'crush', 'pierce']), WR(['pierce'], ['stab', 'slash', 'crush'])];
 
 /* ---------- Pace for idle tasks ---------- */
 D.PACE = {

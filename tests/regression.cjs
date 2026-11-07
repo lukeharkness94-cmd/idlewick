@@ -874,4 +874,20 @@ test('progression gates are sensible: basic leather, the Ranged quest, shop stoc
     for(const o of mq.obj){if(o.ev==='kill'||o.ev==='boss')assert.ok(D.MON[o.key],mq.id+' targets a real creature');if(o.ev==='deliver')assert.ok(D.ITEMS[o.key],mq.id+' delivers a real item');}
   }
 });
+test('combat balance review: empty ability slots fill for a fight, the final boss has a route for every style, Fury is always on, and advice names clear upgrades',()=>{
+  const {q}=harness();const D=q.data,S=q.S;
+  /* empty slots fill with abilities you have (Brace first), never replacing a choice; removing one turns it off */
+  for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[30];q.fxDirty();
+  S.abilities=[];const added=q.fillAbilities();assert.deepEqual(S.abilities,['brace','power']);assert.equal(added.length,2);
+  S.abilities=['second'];q.fillAbilities();assert.deepEqual(S.abilities,['second','brace'],'a chosen ability stays');
+  q.toggleAbility('second');assert.equal(S.settings.autoAbil,false);S.abilities=[];q.fillAbilities();assert.deepEqual(S.abilities,[],'removing an ability yourself turns auto-fill off');
+  S.settings.autoAbil=true;S.abilities=[];
+  /* the Hollow King: each of melee (crush), magic (aether) and ranged (pierce) has a weak phase and a phase it is not resisted in */
+  const P=D.HOLLOW_PHASES;for(const t of ['crush','aether','pierce']){assert.ok(P.some(p=>p.weak.includes(t)),t+' has a weak phase');assert.ok(P.some(p=>!p.resist.includes(t)),t+' is not resisted in every phase');}
+  /* Fury is noticeable at full health */
+  assert.match(D.ITEMS.berserkers_torc.unique.text,/10% more damage/);
+  /* advice names a clearly better owned piece */
+  S.inv.bronze_body=1;q.equipItem('bronze_body');S.inv.steel_body=1;S.hp=q.maxHp();const steelOk=q.canEquip('steel_body').ok;
+  const adv=q.prepAdvice('goblin');if(steelOk)assert.ok(adv.some(a=>a.key==='upgrade'&&/steel/.test(a.title)),'advice: '+JSON.stringify(adv.map(a=>a.title)));
+});
 console.log(tests+' regression checks passed');
