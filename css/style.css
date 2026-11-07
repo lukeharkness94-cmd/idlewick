@@ -2823,3 +2823,19 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
 .mini-t{display:grid;gap:1px;min-width:0}
 .mini-t small{font-size:14px;color:var(--mute)}
 .mini-t small.ok{color:#5cc08a}.mini-t small.bad{color:#e6a64a}
+
+/* Notifications near the top (Nov 2026): on desktop, cards and short messages appear at the top right, just below the
+   menu bar, where they are hard to miss; a short message sits above the cards. Phones keep them above the bottom menu. */
+@media (min-width:861px){
+  #notes{top:116px;bottom:auto!important;right:16px}
+  #fx .toast{top:116px;bottom:auto;left:auto;right:16px;transform:none;animation-name:toast-top}
+  #fx:has(.toast)+#notes{top:168px}
+  #notes .note{animation-name:noteInTop}
+}
+@keyframes noteInTop{from{opacity:0;transform:translateY(-14px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes toast-top{0%{opacity:0;transform:translateY(-10px)}10%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}
+/* the new-companion pop-up */
+.pet-pop{display:grid;justify-items:center;gap:6px;text-align:center}
+.pet-pop-art{display:grid;place-items:center;width:150px;height:150px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--c) 30%,transparent),transparent);animation:qrv-pop .5s cubic-bezier(.2,1.4,.4,1) both}
+.pet-pop p{margin:0}.pet-pop-fx{color:var(--c);font-weight:700}
+@media (prefers-reduced-motion:reduce){.pet-pop-art{animation:none}}

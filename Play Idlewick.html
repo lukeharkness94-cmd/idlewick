@@ -2898,6 +2898,22 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
 .mini-t{display:grid;gap:1px;min-width:0}
 .mini-t small{font-size:14px;color:var(--mute)}
 .mini-t small.ok{color:#5cc08a}.mini-t small.bad{color:#e6a64a}
+
+/* Notifications near the top (Nov 2026): on desktop, cards and short messages appear at the top right, just below the
+   menu bar, where they are hard to miss; a short message sits above the cards. Phones keep them above the bottom menu. */
+@media (min-width:861px){
+  #notes{top:116px;bottom:auto!important;right:16px}
+  #fx .toast{top:116px;bottom:auto;left:auto;right:16px;transform:none;animation-name:toast-top}
+  #fx:has(.toast)+#notes{top:168px}
+  #notes .note{animation-name:noteInTop}
+}
+@keyframes noteInTop{from{opacity:0;transform:translateY(-14px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes toast-top{0%{opacity:0;transform:translateY(-10px)}10%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}
+/* the new-companion pop-up */
+.pet-pop{display:grid;justify-items:center;gap:6px;text-align:center}
+.pet-pop-art{display:grid;place-items:center;width:150px;height:150px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--c) 30%,transparent),transparent);animation:qrv-pop .5s cubic-bezier(.2,1.4,.4,1) both}
+.pet-pop p{margin:0}.pet-pop-fx{color:var(--c);font-weight:700}
+@media (prefers-reduced-motion:reduce){.pet-pop-art{animation:none}}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -8776,6 +8792,8 @@ DQ.notify = o => {
     if(id){DQ.S.seen['tutorial:'+id]=true;if(DQ.S.tut?.done)delete DQ.S.tut.done['lesson:'+id];}
   }
   if(o.kind==='unlock'&&(o.key||'').startsWith('unlock:')&&showSkillUnlock(o))return;
+  /* a new creature companion is a moment: it opens its own pop-up (queued behind any open dialog) instead of a card */
+  if(o.popup&&DQ.popupQueue){markSilent(o,false);if(o.sound!==false)DQ.sfx(o.sound||'notify');DQ.popupQueue(o.popup);return;}
   /* Skill levels use compact bottom cards; only the overall Hero level takes over. */
   /* The full Hero reveal is kept for levels that unlock something and every fifth level; the others arrive as a
      compact card that is always shown (even with notifications off), so no Hero level passes unseen. */
@@ -8872,7 +8890,13 @@ DQ.closeModal = () => {
   inertBefore.clear();
   if (modalTrigger && modalTrigger.isConnected) modalTrigger.focus();
   if (DQ.holdNotes) { DQ.holdNotes = false; setTimeout(pump, 250); }
+  closeQueued();
 };
+/* pop-ups that must not replace a dialog already open: shown one at a time, each after the last one closes */
+const popups = [];
+const nextPopup = () => { if (!popups.length) return; if (document.querySelector('.modal')) { setTimeout(nextPopup, 600); return; } DQ.modal(popups.shift()); };
+DQ.popupQueue = o => { popups.push(o); if (popups.length === 1) setTimeout(nextPopup, 250); };
+const closeQueued = () => { if (popups.length) setTimeout(nextPopup, 350); };
 DQ.modal = o => {
   DQ.closeModal(); modalTrigger = document.activeElement;
   const m = document.createElement('div'); m.className = 'modal';
@@ -9717,7 +9741,10 @@ DQ.awardPet = id => {
   const p = D.PET[id], o = S().pets.owned; if (!p || o[id]) return false;
   o[id] = { aff: 0, found: Date.now() }; S().stats.pets = Object.keys(o).length;
   if (!S().pets.active) { S().pets.active = id; DQ.fxDirty(); }
-  DQ.notify({ kind: 'unlock', key: 'pet:' + id, icon: 'paw', col: p.col, title: `New creature: ${p.name}!`, text: `A ${p.kind.toLowerCase()} has joined your collection. ${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, sound: 'gem', burst: true, ttl: 14000 });
+  const active = S().pets.active === id;
+  DQ.notify({ kind: 'unlock', key: 'pet:' + id, icon: 'paw', col: p.col, title: `New creature: ${p.name}!`, text: `A ${p.kind.toLowerCase()} has joined your collection. ${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, sound: 'gem', burst: true, ttl: 14000,
+    popup: { title: `A new companion: ${p.name}!`, body: `<div class="pet-pop" style="--c:${p.col}"><span class="pet-pop-art">${DQ.petSprite ? DQ.petSprite(p, 128) : ''}</span><p><b>${DQ.esc(p.name)}</b> the ${DQ.esc(p.kind.toLowerCase())} has joined you.</p><p class="pet-pop-fx">${DQ.esc(p.text)}.</p><p class="sm dim">${active ? 'They are your active companion now.' : 'Make them your companion to get this bonus.'}</p></div>`,
+      actions: [...(active ? [] : [{ label: 'Make active', primary: true, fn: () => { DQ.setPet(id); DQ.ui.render && DQ.ui.render(false); } }]), { label: 'Meet them', primary: active, fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, { label: 'Close' }] } });
   DQ.log(`A new creature joins you: ${p.name} the ${p.kind.toLowerCase()}!`, 'quest'); DQ.emit('pets'); DQ.achDirty = true; return true;
 };
 DQ.petRoll = (type, key) => {

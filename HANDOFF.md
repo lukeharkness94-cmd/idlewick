@@ -386,3 +386,7 @@ Stages are separate commits so each can be reverted on its own.
 
 ## Quest reward reveal (Nov 2026)
 - `js/quest_claim.js`: claiming on the Quests page turns the quest card into a reveal (giver's thanks, then each reward tile pops in with its amount counting up on elapsed time). Stays until Continue, or until another quest/tab is chosen or the page changes. Reduced effects shows everything at once. The duplicate page banner is dismissed; the bell keeps the record.
+
+## Notifications at the top; companion pop-ups (Nov 2026)
+- Desktop: notification cards (`#notes`) and short messages (`.toast`) appear at the top right just below the menu bar; a short message sits above the cards. Phones keep them above the bottom menu.
+- A new creature companion opens a pop-up (art, bonus, Make active / Meet them) through `DQ.popupQueue`, which waits for any open dialog to close; the bell keeps the record. Notifications with `popup` use this route.

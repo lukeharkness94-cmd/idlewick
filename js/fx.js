@@ -184,6 +184,8 @@ DQ.notify = o => {
     if(id){DQ.S.seen['tutorial:'+id]=true;if(DQ.S.tut?.done)delete DQ.S.tut.done['lesson:'+id];}
   }
   if(o.kind==='unlock'&&(o.key||'').startsWith('unlock:')&&showSkillUnlock(o))return;
+  /* a new creature companion is a moment: it opens its own pop-up (queued behind any open dialog) instead of a card */
+  if(o.popup&&DQ.popupQueue){markSilent(o,false);if(o.sound!==false)DQ.sfx(o.sound||'notify');DQ.popupQueue(o.popup);return;}
   /* Skill levels use compact bottom cards; only the overall Hero level takes over. */
   /* The full Hero reveal is kept for levels that unlock something and every fifth level; the others arrive as a
      compact card that is always shown (even with notifications off), so no Hero level passes unseen. */
@@ -280,7 +282,13 @@ DQ.closeModal = () => {
   inertBefore.clear();
   if (modalTrigger && modalTrigger.isConnected) modalTrigger.focus();
   if (DQ.holdNotes) { DQ.holdNotes = false; setTimeout(pump, 250); }
+  closeQueued();
 };
+/* pop-ups that must not replace a dialog already open: shown one at a time, each after the last one closes */
+const popups = [];
+const nextPopup = () => { if (!popups.length) return; if (document.querySelector('.modal')) { setTimeout(nextPopup, 600); return; } DQ.modal(popups.shift()); };
+DQ.popupQueue = o => { popups.push(o); if (popups.length === 1) setTimeout(nextPopup, 250); };
+const closeQueued = () => { if (popups.length) setTimeout(nextPopup, 350); };
 DQ.modal = o => {
   DQ.closeModal(); modalTrigger = document.activeElement;
   const m = document.createElement('div'); m.className = 'modal';
