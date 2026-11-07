@@ -243,6 +243,7 @@ function welcome(sum, gap) {
     ${items.length ? `<div class="k" style="margin:12px 0 6px">Gained</div><div class="rws">${items.map(([id, n]) => `<span class="rw" style="--c:${D.ITEMS[id].col}">${ico(D.ITEMS[id].ic)}${fmt(n)}× ${D.ITEMS[id].name}</span>`).join('')}</div>` : ''}
     ${sum.levels.length ? `<div class="k" style="margin:12px 0 6px">Level-ups</div><div class="rws">${Object.entries(sum.levels.reduce((a, [k, l]) => (a[k] = l, a), {})).map(([k, l]) => `<span class="rw" style="--c:${D.SK[k].col}">${ico(k)}${D.SK[k].name} ${l}</span>`).join('')}</div>` : ''}`;
   DQ.holdNotes = true;
+  if (UI.welcomeBody) return DQ.modal({ title: 'Welcome back', wide: true, body: UI.welcomeBody(sum, gap), actions: [{ label: 'Continue', primary: true }] });
   DQ.modal({ title: 'Welcome back', wide: true, body: body + UI.returnExtras(sum), actions: [{ label: 'Continue', primary: true }] });
 }
 

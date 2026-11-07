@@ -100,7 +100,7 @@ UI.returnExtras = sum => {
   let h = returnExtras0(sum); const bits = [];
   if ((DQ.awayDone || []).length) bits.push(`Research finished: <b>${DQ.awayDone.map(esc).join(', ')}</b>`);
   const ready = D.QUESTS.filter(q => DQ.questState(q) === 'ready').length; if (ready) bits.push(`<b>${ready}</b> quest reward${ready > 1 ? 's' : ''} ready to claim`);
-  return h + (bits.length ? `<p class="sm" style="margin:14px 0 0">${bits.join('<br>')}</p>` : '');
+  return h + (bits.length && !UI.welcomeOwnsChips ? `<p class="sm" style="margin:14px 0 0">${bits.join('<br>')}</p>` : '');
 };
 DQ.on('welcome', (sum, gap) => {
   const xp = Object.entries(sum.xp || {}).sort((a, b) => b[1] - a[1]).slice(0, 3), items = Object.entries(sum.items || {}).sort((a, b) => ((D.ITEMS[b[0]] || {}).val || 0) * b[1] - ((D.ITEMS[a[0]] || {}).val || 0) * a[1]).slice(0, 3);

@@ -2896,3 +2896,48 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
   html.lw-1300 .tnav{padding:0 6px}
   html.lw-1300 .h-name{flex-basis:104px}
 }
+
+/* Welcome back, at a glance (Nov 2026): pixel display numbers, picture tiles, one next-step card */
+.wb{display:grid;gap:14px}
+.wb .k{display:block;margin-bottom:6px}
+.wb-num,.wb-time{font-family:'Silkscreen',var(--f-mono);font-weight:700;letter-spacing:.02em}
+.wb-banner{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 14px;border-radius:14px;background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--brass) 18%,transparent),transparent 60%),var(--panel2);border:1px solid color-mix(in srgb,var(--brass) 35%,var(--line))}
+.wb-face .portrait{border-radius:12px;border:2px solid var(--brass);overflow:hidden}
+.wb-hello .k{margin:0}
+.wb-time{font-size:34px;line-height:1.1;color:var(--brass-hi,#f3d58a)}
+.wb-time small{font:600 15px var(--f-ui);color:var(--mute);margin-left:8px;letter-spacing:0}
+.wb-status{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;font-weight:700;font-size:15px;background:var(--panel);border:1px solid var(--line2)}
+.wb-status .ic{width:20px;height:20px}
+.wb-status.ok{color:#5cc08a;border-color:color-mix(in srgb,#5cc08a 50%,var(--line))}
+.wb-status.warn{color:#e6a64a;border-color:color-mix(in srgb,#e6a64a 50%,var(--line))}
+.wb-status.bad{color:#e2574c;border-color:color-mix(in srgb,#e2574c 50%,var(--line))}
+.wb-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.wb-tile{display:grid;justify-items:center;gap:2px;padding:10px 6px 8px;border-radius:12px;background:color-mix(in srgb,var(--c) 10%,var(--panel2));border:1px solid color-mix(in srgb,var(--c) 40%,var(--line));text-align:center;animation:qrv-pop .45s cubic-bezier(.2,1.4,.4,1) both}
+.wb-tile:nth-child(2){animation-delay:.06s}.wb-tile:nth-child(3){animation-delay:.12s}.wb-tile:nth-child(4){animation-delay:.18s}.wb-tile:nth-child(n+5){animation-delay:.24s}
+.wb-tile.level{box-shadow:0 0 14px color-mix(in srgb,var(--c) 45%,transparent);border-color:var(--c)}
+.wb-tile .wb-num{font-size:20px;color:var(--ink)}
+.wb-tile small{font-size:13px;color:var(--mute);line-height:1.2}
+.wb-art{display:grid;place-items:center;width:64px;height:64px}
+.wb-coin .ic{width:40px;height:40px}
+.wb-empty{display:flex;gap:10px;align-items:center;padding:12px;border-radius:12px;background:var(--panel2);color:var(--mute)}
+.wb-chips{display:flex;flex-wrap:wrap;gap:8px}
+.wb-chip{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;border:1px solid color-mix(in srgb,var(--brass) 55%,var(--line));background:color-mix(in srgb,var(--brass) 12%,var(--panel2));color:var(--ink);font:600 15px var(--f-ui);cursor:pointer}
+.wb-chip .wb-num{color:var(--brass-hi,#f3d58a)}
+.wb-next{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;border:1px solid var(--brass);background:color-mix(in srgb,var(--brass) 10%,var(--panel2))}
+.wb-next-ic{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:color-mix(in srgb,var(--brass) 22%,transparent)}
+.wb-next-ic .ic{width:30px;height:30px}
+.wb-next>div{display:grid;gap:2px;min-width:0}.wb-next .k{margin:0}.wb-next b{font-size:17px}.wb-next small{color:var(--mute);font-size:14px}
+.wb-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.wb-opt{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:center;padding:8px 12px 8px 8px;border-radius:12px;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);text-align:left;cursor:pointer}
+.wb-opt:hover{border-color:var(--brass)}
+.wb-opt>span:last-child{display:grid;gap:2px}.wb-opt b{font-size:15.5px}.wb-opt small{font-size:13.5px;color:var(--mute)}
+.wb-fine{margin:0}
+@media (max-width:640px){.wb-banner{grid-template-columns:auto minmax(0,1fr)}.wb-status{grid-column:1/-1;justify-self:start}.wb-next{grid-template-columns:minmax(0,1fr)}.wb-next-ic{display:none}}
+@media (prefers-reduced-motion:reduce){.wb-tile{animation:none}}
+.m-card.wide:has(.wb){width:min(900px,calc(var(--vw100,100vw) - 32px));max-width:none}
+.wb-tile .wb-num{font-size:19px;white-space:nowrap}
+/* a choice shows its odds under its label instead of in a line of text below */
+.ev-opts{display:flex;flex-wrap:wrap;gap:8px}
+.btn.ev-opt{display:inline-grid;justify-items:start;gap:1px;text-align:left;padding:6px 12px;max-width:240px;height:auto;line-height:1.2}
+.btn.ev-opt small{font-size:13px;font-weight:500;opacity:.8;white-space:normal}
+.btn.primary.ev-opt small{color:#3a2508;opacity:.9}

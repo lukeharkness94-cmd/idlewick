@@ -404,3 +404,6 @@ Stages are separate commits so each can be reverted on its own.
 
 ## Compact top menu on narrower windows (Nov 2026)
 - Below the 1600 layout width (`html.lw-1600`, roughly windows under 1360px) the six top-bar page buttons stack a 13px label under the icon, halving the menu's width so it never overlaps the coins, backpack and settings; `tests/ui-fit.cjs` checks 1000–1920px windows.
+
+## Welcome back, at a glance (Nov 2026)
+- `js/welcome.js` (`UI.welcomeBody`) replaces the text summary: a banner (portrait, time away in the Silkscreen pixel face, a status chip), picture tiles for level-ups, XP, coins, creatures and items (big abbreviated numbers), chips for quest rewards and research, one next-step card, picture cards for other good options (`DQ.returnChoices` entries carry `art`), then decisions. Decision buttons show their odds under the label instead of a line of text. Silkscreen is embedded from `fonts/` by the packager.
