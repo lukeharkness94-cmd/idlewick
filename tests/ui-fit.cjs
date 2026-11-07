@@ -33,14 +33,14 @@ const assert=require('node:assert/strict');
   }
   /* Combat: the fight, the fighting style and the creatures stay on screen; everything else scrolls beneath */
   await p.evaluate(()=>{DQ.go('combat');DQ.closeModal&&DQ.closeModal();});await p.waitForTimeout(1300);
-  const vis=sel=>p.locator(sel).first().evaluate(e=>{const r=e.getBoundingClientRect();return r.top>=0&&r.top<innerHeight-40&&r.height>40;});
-  for(const sel of ['.encounter-arena','.style-strip','.combat-targets','.combat-col','.combat-side'])assert.ok(await vis(sel),`combat: ${sel} on screen`);
-  const arenaTop=await p.locator('.encounter-arena').evaluate(e=>e.getBoundingClientRect().top);
-  await p.locator('.combat-col').evaluate(e=>e.scrollTop=e.scrollHeight);
-  assert.equal(await p.locator('.encounter-arena').evaluate(e=>e.getBoundingClientRect().top),arenaTop,'the fight stays put while the rest scrolls');
+  const vis=sel=>p.locator(sel).first().evaluate(e=>{const r=e.getBoundingClientRect();return r.top>=0&&r.top<innerHeight-30&&r.height>20;});
+  for(const sel of ['.encounter-arena','.style-strip','.combat-targets','.combat-tools'])assert.ok(await vis(sel),`combat: ${sel} on screen`);
+  assert.equal(await p.locator('.combat-col').evaluate(e=>getComputedStyle(e).display),'none','combat skills, abilities and food live in pop-ups');
+  assert.equal(await p.locator('.combat-side').evaluate(e=>getComputedStyle(e).display),'none','preparation, boss and loot live in pop-ups');
+  for(const key of ['skills','abilities','food','prep','boss','loot']){await p.locator(`.combat-tools [data-a="${key}"]`).click();assert.equal(await p.locator('.modal .combat-pop .panel, .modal .combat-pop .intel').count()>0,true,`${key} pop-up`);await p.evaluate(()=>DQ.closeModal());}
   await p.evaluate(()=>{DQ.ui.questTab='upcoming';DQ.go('quests');});
   assert.ok(await p.locator('.qlist .qrow').count()>1,'quest list rows');assert.equal(await p.locator('.qdetail .quest').count(),1,'one quest in full');
   assert.deepEqual(errors,[]);
-  console.log('PASS one-screen fit: every skill visible at laptop heights; activity pages scroll only their list of choices; no desktop page scrolls the window; Quests is list + detail; Combat keeps the fight, style and creatures on screen.');
+  console.log('PASS one-screen fit: every skill visible at laptop heights; activity pages scroll only their list of choices; no desktop page scrolls the window; Quests is list + detail; Combat shows only the fight, style and creatures, with the rest in pop-ups.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1);});

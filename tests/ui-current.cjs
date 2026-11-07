@@ -58,7 +58,7 @@ const fs=require('node:fs');
      if(width>=1100)assert.ok(await page.locator('#view').evaluate(el=>el.getBoundingClientRect().width>700),`${id} main workspace does not collapse`);
     }
     if(id==='combat'){
-     assert.match(await page.locator('.ftr-weapon').innerText(),/s per attack/);
+     assert.match(await page.locator('.ftr-weapon').textContent(),/s per attack/);
      assert.ok(await page.locator('.encounter-arena').evaluate(el=>getComputedStyle(el).backgroundRepeat.split(',').every(value=>value.trim()==='no-repeat')));
      assert.equal(await page.locator('.combat-col .combat-supplies').count(),1);assert.equal(await page.locator('.combat-col .fighter .ftr-row').count()>=4,true);assert.equal(await page.locator('.combat-side .battle-brief').count(),1);assert.equal(await page.locator('.tiledesc').count(),0);
      assert.equal(await page.locator('.combat-live .lootp').count(),0);if(width===1440&&theme==='dark'){await page.evaluate(()=>{for(let i=0;i<3;i++)DQ.closeModal();});await page.locator('.encounter-list .enc-row').first().click();assert.match(await page.locator('.modal').innerText(),/Field guide/);await page.evaluate(()=>DQ.closeModal());}

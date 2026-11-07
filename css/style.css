@@ -2625,3 +2625,18 @@ body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
 .qrow:focus{outline:none}
 .qrow:focus-visible{outline:2px solid var(--brass-hi);outline-offset:-3px}
 #view>.qlayout>.qlist{padding:4px 6px 4px 4px!important}
+/* Combat, simplified (js/combat_simple.js): only the fight, fighting style and creatures show; everything else opens in
+   pop-ups from the .combat-tools row. The hidden panels stay in the page so the pop-ups can mirror them live. */
+.combat-dashboard .combat-col,.combat-dashboard .combat-side{display:none!important}
+.combat-dashboard .hunt-areas section[data-reference]{display:none!important}
+.combat-tools{display:flex;flex-wrap:wrap;gap:8px}
+.ct-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:4px 14px 4px 8px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);color:var(--ink);font:600 15px var(--f-ui);cursor:pointer}
+.ct-btn:hover{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 12%,var(--panel2))}
+.ct-btn .ic{width:28px;height:28px}
+.ct-btn b{font-size:14px;color:var(--brass-hi)}
+.combat-pop>.panel{margin:0;border:0;background:none;box-shadow:none;padding:0}
+.combat-pop .bosscard{display:grid}
+@media (min-width:861px){
+  #view>.combat-dashboard{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)!important}
+}
+#view>.combat-dashboard>.combat-side,#view>.combat-dashboard>.combat-live>.combat-col{display:none!important}
