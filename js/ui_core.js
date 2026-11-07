@@ -217,7 +217,7 @@ UI.focusTask = (page, id, tab, sk) => {
 
 /* ---------- Recipe pages ---------- */
 /* recipe categories: first row by material or discipline, second row by type */
-const METAL={bronze:'Bronze',iron:'Iron',steel:'Steel',mithril:'Mithril',adamant:'Adamant',rune:'Rune',astral:'Astral'},HIDE={leather:'Leather',frost:'Frostpelt',bog:'Bogscale',drake:'Drakehide'};
+const METAL_BAR={Bronze:'bar_bronze',Iron:'bar_iron',Steel:'bar_steel',Mithril:'bar_mithril',Adamant:'bar_adamant',Rune:'bar_rune',Astral:'bar_astral',Smelting:'ore_copper'},METAL={bronze:'Bronze',iron:'Iron',steel:'Steel',mithril:'Mithril',adamant:'Adamant',rune:'Rune',astral:'Astral'},HIDE={leather:'Leather',frost:'Frostpelt',bog:'Bogscale',drake:'Drakehide'};
 DQ.recipeGroup = r => {
   const out=Object.keys(r.out)[0],it=D.ITEMS[out]||{},m=out.split('_')[0];
   if(r.skill==='smithing'){ if(r.id.startsWith('smelt_'))return {g:'Smelting'}; if(r.tab==='Tools')return {g:'Tools'}; return {g:METAL[m]||'Other',s:it.slot==='weapon'?'Weapons':'Armour'}; }
@@ -234,7 +234,8 @@ UI.V.recipes = sk => {
   const g=UI.tab[sk]=groups.includes(UI.tab[sk])?UI.tab[sk]:(groups.find(x=>list.some(r=>grp(r).g===x&&DQ.lvl(sk)>=r.lvl&&DQ.canMake(r)))||groups[0]);
   const subs=[...new Set(list.filter(r=>grp(r).g===g).map(r=>grp(r).s).filter(Boolean))],sub=UI.tab[sk+'sub']=subs.includes(UI.tab[sk+'sub'])?UI.tab[sk+'sub']:subs[0],only=UI.tab[sk+'ready'];
   const inG=(r,x,y)=>grp(r).g===x&&(!y||grp(r).s===y),chip=(x,y,on,act,b)=>{const rs=list.filter(r=>inG(r,x,y)),ready=rs.filter(r=>DQ.lvl(sk)>=r.lvl&&DQ.canMake(r)).length,min=Math.min(...rs.map(r=>r.lvl)),locked=DQ.lvl(sk)<min;
-    return `<button class="chip rc-chip ${on?'on':''} ${locked?'locked':''}" data-do="tab" data-a="${act}" data-b="${esc(b)}" aria-pressed="${on}">${locked?ico('lock'):''}<span>${esc(y||x)}</span><small>${locked?`Lv ${min}`:ready?`${ready} ready`:''}</small></button>`;};
+    const metalBar=!y&&sk==='smithing'&&METAL_BAR[x],pic=metalBar&&D.ITEMS[metalBar]?metalBar:x==='Tools'&&sk==='smithing'?'tool_pick_1':Object.keys((rs[0]||{out:{}}).out)[0],art=pic&&D.ITEMS[pic]?`<span class="rc-art ${locked?'blackout':''}">${DQ.itemIco(D.ITEMS[pic])}</span>`:'';
+    return `<button class="chip rc-chip ${on?'on':''} ${locked?'locked':''}" data-do="tab" data-a="${act}" data-b="${esc(b)}" aria-pressed="${on}">${art}${locked?ico('lock'):''}<span>${esc(y||x)}</span><small>${locked?`Lv ${min}`:ready?`${ready} ready`:''}</small></button>`;};
   UI.taskToolbar[sk]=`<div class="recipe-categories" role="group" aria-label="Category">${groups.map(x=>chip(x,null,x===g,sk,x)).join('')}<span class="filter-sep" aria-hidden="true"></span><button class="filter-toggle ${only?'on':''}" role="switch" aria-checked="${only?'true':'false'}" data-do="readyonly" data-a="${sk}"><span class="ft-track" aria-hidden="true"><span class="ft-knob"></span></span><span>Ready to make</span><b>${only?'On':'Off'}</b></button></div>${subs.length>1?`<div class="recipe-categories recipe-sub" role="group" aria-label="Type">${subs.map(y=>chip(g,y,y===sub,sk+'sub',y)).join('')}</div>`:''}`;
   const missingOf=r=>Object.entries(r.in).filter(([id,n])=>DQ.have(id)<n).map(([id,n])=>`${n-DQ.have(id)} ${D.ITEMS[id].name.toLowerCase()}`);
   const choices=list.map(r=>{const outId=Object.keys(r.out)[0],it=D.ITEMS[outId],lvlLock=!DQ.skillUnlocked(sk)||DQ.lvl(sk)<r.lvl,miss=lvlLock?[]:missingOf(r);

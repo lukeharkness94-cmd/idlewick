@@ -2329,3 +2329,7 @@ body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
 .illustrated-card.locked small{color:var(--ink);display:flex;gap:5px;align-items:center}.illustrated-card.locked small .ic{width:14px;height:14px;flex:none}
 .locked-why{display:flex;gap:6px;align-items:center;color:var(--ink)}.locked-why .ic{width:16px;height:16px}
 .activity-stage .blackout img{filter:brightness(0) opacity(.6)!important}
+/* category chips carry a picture of what is inside */
+.rc-chip .rc-art{display:inline-grid;place-items:center;width:32px;height:32px;margin:-4px 0 -4px -4px}
+.rc-chip .rc-art :is(img,.ic,.gico){width:32px!important;height:32px!important}
+.rc-chip.locked>.ic{width:14px;height:14px;margin-left:-14px;align-self:flex-end}
