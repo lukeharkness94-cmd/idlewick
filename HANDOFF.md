@@ -370,3 +370,7 @@ Stages are separate commits so each can be reverted on its own.
 ## Sprite resolution and gear arrows (Nov 2026)
 - Sprites up to 64 px are upscaled with Scale2x twice (4× pixels, same designs) in `js/pixelart.js` (`hires`, `logicalOf`); `snapAll` in pixel_runtime.js snaps to the logical size so layout is unchanged. Quest-giver faces use the same upscaler. Scenes and backdrops are unchanged.
 - Gear arrows now compare the summed stat changes for every slot (weapons used damage per second, which marked Soldier's Blade as worse than a Bronze Knife). They show in the backpack, bank, shop, rare shop, recipe cards, item tooltips and the item panel ("Better overall · stats +10 in total"). Regression check covers every gear item.
+
+## Six restoration projects in every town (Nov 2026)
+- Each region now restores six places like Willowbrook: its original project plus five more (`moreProjects` in js/journey.js, ids `moss_*`, `salt_*`, `iron_*`, `fen_*`, `ember_*`, `sky_*`, `hollow_*`). Costs use regional materials and rise through the region (2–8 hours of that region's earnings in `sim-economy.cjs 24`; milestones unchanged). Bonuses are small and mostly skill-specific (+5% XP or +3% speed for one skill; a few +1% damage reduction, +2% coins, +3% food healing, +5% resting; Skyreach's bell is the only +1% XP to all).
+- Every project has a villager voice and its own damaged/restored 32×32 piece (`piece()` in js/pixel_world.js keyed by `art`) placed in the town scene (`PLACE`).

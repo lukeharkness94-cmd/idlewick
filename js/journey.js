@@ -40,6 +40,54 @@ const regionalProjects = [
  ['hollow','refuge','Rebuild the travellers’ refuge','A welcoming refuge stands among the fallen kingdom’s ruins.',{coins:15000,log_elder:25,bar_adamant:12},{xpAll:.03},'+3% XP to every skill.']
 ];
 for(const [town,id,name,story,cost,fx,reward] of regionalProjects)D.PROJECTS[id]={town,name,story,cost,reward:reward+' Resting health recovery is 2% faster.',fx:Object.assign({regen:.02},fx)};
+/* Every region restores six places, like Willowbrook (Nov 2026). The five below each town's first project use that
+   region's own materials and grow in cost; their bonuses are small and mostly skill-specific so that finishing all of
+   them across the map adds up to a pleasant edge rather than a new balance curve. art = the restoration piece drawn. */
+const moreProjects = {
+ mossbarrow: [
+  ['moss_windmill','windmill','Mend the windmill sails','The sails turn again and the miller grinds the whole valley’s grain.',{coins:250,log_hazel:30,wool:8},{grow:.03},'Crops grow 3% faster.',['Miller Tansy','Listen to her creak! That is the sound of bread, that is.']],
+  ['moss_granary','granary','Rebuild the granary','Dry grain stores mean seed for every season.',{coins:400,log_birch:40,crop_wheat:20},{xp_farming:.05},'+5% Farming XP.',['Farmer Hobb','No more rats in the seed corn. Plant whatever you like.']],
+  ['moss_pond','pond','Clear the mill pond','The weed is gone and carp rise in the clear pond.',{coins:600,ore_flint:30,raw_carp:20},{speed_fishing:.03},'Fishing is 3% faster.',['A Mossbarrow child','I saw a fish as big as my arm! Well, nearly.']],
+  ['moss_tannery','tannery','Reopen the tannery','Hides hang in rows and the leatherworkers are busy again.',{coins:900,cowhide:20,log_oak:30},{xp_crafting:.05},'+5% Crafting XP.',['Tanner Rook','Smells awful, works beautifully. Bring me hides.']],
+  ['moss_hall','hall','Raise the harvest hall','A long hall for harvest suppers, with a kitchen at one end.',{coins:1200,crop_cabbage:25,bar_bronze:20,milk:15},{heal:.03},'Food restores 3% more health.',['A Mossbarrow trader','The whole village ate together last night. First time in years.']]],
+ saltmere: [
+  ['salt_smokehouse','smokehouse','Relight the smokehouse','Fish hang in the sweet smoke and keep for the winter.',{coins:800,log_palm:40,raw_herring:25},{xp_cooking:.05},'+5% Cooking XP.',['Smoker Marla','Herring, mackerel, anything that swims. It all tastes of oak now.']],
+  ['salt_nets','nets','Mend the drying nets','The nets are whole and the boats come home heavy.',{coins:1100,string:30,log_oak:30},{xp_fishing:.05},'+5% Fishing XP.',['A Saltmere dockhand','No holes! The fish are outraged.']],
+  ['salt_lighthouse','beacon','Light the harbour beacon','A brazier burns at the harbour mouth and the reefs are safe at night.',{coins:1500,ore_quartz:40,bar_iron:15},{dr:.01},'Monsters deal 1% less damage.',['Keeper Ansel','The lighthouse shows the coast, the beacon shows the way in. The rocks stay rocks.']],
+  ['salt_saltpans','saltpans','Rake the salt pans','White salt dries in neat squares along the shore.',{coins:2000,ore_quartz:30,raw_mackerel:25},{coin:.02},'+2% coins from every source.',['Salter Gwen','Salt pays for everything here. Now it pays again.']],
+  ['salt_boathouse','boathouse','Rebuild the boathouse','Hulls are tarred and new boats take shape on the slip.',{coins:2600,log_willow:40,bar_iron:20},{speed_woodcutting:.03},'Woodcutting is 3% faster.',['Shipwright Odo','Every boat needs timber, and every timber needs a good axe.']]],
+ ironpeak: [
+  ['iron_smelter','smelter','Fire the great smelter','The great furnace roars and ingots cool in long rows.',{coins:1800,ore_coal:40,ore_iron:40},{speed_smithing:.03},'Smithing is 3% faster.',['Smelter Dagny','Hot enough to melt a grudge. Bring ore.']],
+  ['iron_lift','lift','Repair the mine lift','The cage rattles up and down the shaft again.',{coins:2500,bar_iron:25,log_pine:30},{xp_mining:.05},'+5% Mining XP.',['A pit boy','No more ladders! My legs thank you.']],
+  ['iron_furstore','furstore','Stock the fur store','Warm furs for every miner going up the cold slopes.',{coins:3200,frost_pelt:15,log_cedar:30},{regen:.05},'Resting health recovery is 5% faster.',['Old Gunnhild','Wrap up. The mountain does not care how brave you are.']],
+  ['iron_assay','assay','Reopen the assay office','The assayer weighs every find and pays a fair price.',{coins:4000,ore_silver:25,bar_steel:12},{speed_crafting:.03},'Crafting is 3% faster.',['Assayer Brannoc','Silver, jet, a bit of gold. I know it all by the weight.']],
+  ['iron_gate','gate','Rehang the hold gate','The iron gate swings shut and the wolves stay outside.',{coins:5000,bar_steel:25,ore_jet:20},{dr:.01},'Monsters deal 1% less damage.',['A hold guard','Two tonnes of iron on new hinges. Let them knock.']]],
+ gloomfen: [
+  ['fen_boardwalk','boardwalk','Lay the boardwalk','Planks run over the bog, dry underfoot all the way.',{coins:3500,log_mangrove:30,log_maple:30},{gather:.02},'Gathering is 2% faster.',['A Gloomfen guide','Nobody has lost a boot since. Well, one boot.']],
+  ['fen_herbary','herbary','Reopen the herbary','Bundles of marsh herbs dry beneath the rafters.',{coins:4500,crop_goldleaf:20,log_maple:25},{xp_herbalism:.05},'+5% Herbalism XP.',['Herbwife Mora','Bogmint for fevers, goldleaf for everything else.']],
+  ['fen_stilthouse','stilthouse','Raise the stilt houses','Homes stand above the water again, lamps in every window.',{coins:5500,log_mangrove:40,bogscale:10},{heal:.03},'Food restores 3% more health.',['A fen mother','Dry floors! The children can finally sit down.']],
+  ['fen_eelweir','eelweir','Mend the eel weir','The woven weir guides the catch into waiting baskets.',{coins:6500,raw_catfish:30,log_maple:30},{speed_fishing:.03},'Fishing is 3% faster.',['Eel-catcher Pip','The fen gives, if you ask it nicely and mend your weir.']],
+  ['fen_shrine','shrine','Rekindle the marsh shrine','A small flame burns at the shrine and the mist keeps its distance.',{coins:8000,ore_bogiron:20,bar_steel:20},{xp_magic:.05},'+5% Magic XP.',['Sister Wyn','The wisps used to come right up to the door. Not now.']]],
+ emberfall: [
+  ['ember_kiln','kiln','Restore the glass kiln','Molten obsidian is drawn into shining shapes.',{coins:7000,ore_obsidian:20,log_cinderbark:30},{speed_crafting:.03},'Crafting is 3% faster.',['Glassblower Ines','Blow gently, cool slowly, and never sneeze.']],
+  ['ember_armoury','armoury','Restock the armoury','Racks of blades and shields stand ready on the walls.',{coins:9000,bar_mithril:15,log_yew:30},{xp_smithing:.05},'+5% Smithing XP.',['Armourer Vass','Every blade sharpened, every strap oiled.']],
+  ['ember_baths','baths','Reopen the hot baths','Steaming pools fed by the mountain soothe tired fighters.',{coins:11000,ore_obsidian:25,bar_mithril:10},{regen:.05},'Resting health recovery is 5% faster.',['A fireguard of Emberfall','Ten minutes in there and you forget you were ever stabbed.']],
+  ['ember_ward','ward','Raise the flame wards','Carved wards line the walls and turn the heat aside.',{coins:13000,ember_core:3,bar_mithril:20},{dr:.01},'Monsters deal 1% less damage.',['Warden Kael','Let the fire come. The wards are hungry.']],
+  ['ember_forge','greatforge','Relight the dragon forge','The great forge burns with mountain fire again.',{coins:16000,drakehide:6,log_cinderbark:40},{speed_smithing:.03},'Smithing is 3% faster.',['Old Brannoc’s cousin','Hotter than ours back home. Do not tell him I said so.']]],
+ skyreach: [
+  ['sky_windchimes','chimes','Hang the wind chimes','Chimes of skyglass ring softly over the terraces.',{coins:12000,ore_skyglass:10,log_windpine:30},{xp_research:.05},'+5% Scholarship XP.',['Brother Aldous','The monks study better with a little music.']],
+  ['sky_terraces','terraces','Replant the terraces','Sunbloom grows in steps down the mountainside.',{coins:15000,crop_sunbloom:20,log_magic:20},{grow:.03},'Crops grow 3% faster.',['Gardener Lio','Up here the sun is closer. The flowers know it.']],
+  ['sky_scriptorium','scriptorium','Reopen the scriptorium','Copyists bend over their desks and the ink never dries out.',{coins:18000,log_magic:30,feather:60},{xp_enchanting:.05},'+5% Enchanting XP.',['Scribe Oriel','Every word copied twice, in case the wind takes one.']],
+  ['sky_eyrie','eyrie','Rebuild the eyrie','Messenger birds roost here and carry word between the peaks.',{coins:22000,log_windpine:40,bar_adamant:10},{xp_exploration:.05},'+5% Exploration XP.',['Falconer Brisa','She will find you anywhere. Usually with a beak first.']],
+  ['sky_bell','bigbell','Raise the great bell','A deep bell tolls across the clouds at dawn and dusk.',{coins:26000,bar_mithril:30,ore_skyglass:15},{xpAll:.01},'+1% XP to every skill.',['The Abbot','We had forgotten what the morning sounded like.']]],
+ hollow: [
+  ['hollow_camp','camp','Pitch the waystation','Tents and a warm fire for travellers among the ruins.',{coins:20000,log_wraithbark:30,cloth:20},{heal:.03},'Food restores 3% more health.',['A weary traveller','A fire! I could weep.']],
+  ['hollow_watch','watchfire','Light the watchfires','Beacons burn along the old walls through the long night.',{coins:25000,log_elder:30,bar_adamant:15},{dr:.01},'Monsters deal 1% less damage.',['A Hollow scout','We see them coming now. That is half the battle.']],
+  ['hollow_archive','archive','Dig out the old archive','Scrolls of the fallen kingdom are recovered and read again.',{coins:30000,log_wraithbark:40,ore_nullite:10},{xp_research:.05},'+5% Scholarship XP.',['Archivist Pell','The kingdom kept wonderful records. And terrible secrets.']],
+  ['hollow_garden','gravegarden','Tend the memorial garden','Pale flowers grow over the old graves, and nobody walks past in fear.',{coins:36000,crop_moonmelon:15,ore_voidstone:10},{regen:.05},'Resting health recovery is 5% faster.',['A mourner','My grandmother is here somewhere. Now she has flowers.']],
+  ['hollow_throne','throne','Restore the throne hall','Banners hang again in the great hall of the fallen kingdom.',{coins:45000,bar_rune:12,log_elder:40},{coin:.02},'+2% coins from every source.',['The last steward','It is not a kingdom again. But it is a home.']]]
+};
+for (const [town, list] of Object.entries(moreProjects)) for (const [id, art, name, story, cost, fx, reward, voice] of list) { D.PROJECTS[id] = { town, art, name, story, cost, fx, reward }; D.PROJECT_VOICES[id] = voice; }
 DQ.projectsForTown = town => Object.entries(D.PROJECTS).filter(([,p])=>p.town===town);
 /* The opening arc: what each Willowbrook villager says when you finish their job, and what it changed. Shown on
    the quest-complete card (not the bell), so the first half hour has visible acknowledgement. Words only. */

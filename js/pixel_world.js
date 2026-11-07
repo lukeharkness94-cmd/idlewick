@@ -77,12 +77,56 @@ function piece(kind, done) {
     case 'bell': s.rect(8, 6, 2, 23, wood); s.rect(22, 6, 2, 23, wood); s.rect(6, 5, 20, 2, wood); if (done) { s.poly([[13, 9], [19, 9], [21, 18], [11, 18]], ramp('#d8b050', { gl: .75 })); s.fix(16, 19, '#7a5a2a'); } break;
     case 'lamps': for (const x of [6, 16, 26]) { s.rect(x, 12, 2, 17, R.iron); s.ell(x + 1, 10, 2.4, 2.4, done ? ramp('#ffe08a', { gl: .9 }) : rp('#4a4a40')); } break;
     case 'star': s.rect(15, 14, 2, 15, R.iron); s.ell(16, 28, 6, 2, stone); if (done) { const pts = []; for (let i = 0; i < 10; i++) { const r = i % 2 ? 3 : 7, a = -Math.PI / 2 + i * Math.PI / 5; pts.push([16 + Math.cos(a) * r, 8 + Math.sin(a) * r]); } s.poly(pts, ramp('#e2d4ff', { gl: .9 })); s.fix(16, 7, '#ffffff'); } break;
+    /* the five further projects in every region (Nov 2026) */
+    case 'windmill': s.rect(12, 12, 8, 17, R.plaster); s.poly([[11, 13], [16, 7], [21, 13]], done ? R.red : rp('#5a3030')); if (done) for (const [dx, dy] of [[1, -1], [-1, 1], [1, 1], [-1, -1]]) s.line(16, 11, 16 + dx * 10, 11 + dy * 9, R.wood); else { s.line(16, 11, 24, 4, wood); s.line(16, 11, 11, 19, wood); rubble(); } s.rect(14, 23, 4, 6, wood); break;
+    case 'granary': s.rect(7, 13, 18, 16, wood); s.poly(done ? [[5, 14], [16, 5], [27, 14]] : [[5, 14], [12, 9], [20, 11], [27, 14]], done ? R.straw : rp('#6a5a3a')); for (const x of [8, 24]) s.rect(x - 1, 26, 2, 4, stone); if (done) { s.rect(13, 19, 6, 10, R.woodLight); [[10, 28], [22, 28]].forEach(([a, b]) => s.ell(a, b, 2, 1.4, R.straw)); } else rubble(); break;
+    case 'pond': s.ell(16, 23, 12, 5, stone); s.ell(16, 23, 10, 3.6, done ? R.water : rp('#4a5a3a')); if (done) { s.fix(12, 22, '#e8f6ff'); s.ell(21, 23, 1.6, .8, rp('#e0a040')); s.line(6, 14, 6, 21, R.leafCrop); s.line(8, 15, 8, 21, R.leafCrop); } else [[10, 22], [20, 24], [15, 21]].forEach(([a, b]) => s.ell(a, b, 2, 1, rp('#5a7a3a'))); break;
+    case 'tannery': s.rect(4, 12, 2, 17, wood); s.rect(26, 12, 2, 17, wood); s.rect(4, 11, 24, 2, wood); if (done) [[9, 13, '#a8683a'], [16, 13, '#8a5030'], [23, 13, '#c88a4a']].forEach(([x, y, c]) => s.poly([[x - 3, y], [x + 3, y], [x + 2, y + 9], [x - 2, y + 9]], rp(c))); else { s.poly([[8, 13], [12, 13], [11, 19], [9, 19]], rp('#5a4030')); rubble(); } s.ell(16, 28, 6, 2, stone); break;
+    case 'hall': s.rect(3, 15, 26, 14, done ? rp('#d8c098') : rp('#7a6a58')); s.poly(done ? [[1, 16], [16, 7], [31, 16]] : [[1, 16], [9, 11], [14, 14], [31, 16]], done ? rp('#7a4a2a') : rp('#4a3a30')); s.rect(14, 21, 5, 8, wood); if (done) { for (const x of [6, 23]) s.rect(x, 18, 3, 3, ramp('#f6d880')); s.ell(24, 6, 1.6, 1.4, rp('#d8d8d8')); s.rect(23, 8, 2, 7, stone); } else rubble(); break;
+    case 'smokehouse': s.rect(9, 12, 14, 17, wood); s.poly([[7, 13], [16, 6], [25, 13]], done ? R.wood : rp('#4a3a30')); if (done) { s.ell(16, 4, 3, 1.6, rp('#c8c8c8')); for (const x of [11, 15, 19]) s.poly([[x, 16], [x + 2, 16], [x + 1, 22]], rp('#c8904a')); } else { s.rect(12, 17, 8, 6, rp('#2a2424')); rubble(); } break;
+    case 'nets': s.rect(4, 8, 2, 21, wood); s.rect(26, 8, 2, 21, wood); s.rect(4, 8, 24, 1, wood); for (let x = 6; x < 26; x += 3) for (let y = 10; y < 24; y += 3) if (done || (x + y) % 4) { s.line(x, y, x + 2, y + 2, null, '#c8b890'); s.line(x + 2, y, x, y + 2, null, '#c8b890'); } if (done) s.ell(16, 26, 2, 1, rp('#c0c8d0')); break;
+    case 'beacon': s.rect(12, 14, 8, 15, stone); s.rect(10, 12, 12, 3, stone); s.rect(11, 8, 10, 4, R.iron); if (done) { s.poly([[12, 8], [16, 1], [20, 8]], ramp('#ff9a3a', { gl: .9 })); s.fix(16, 5, '#fff2a0'); } else { s.rect(12, 9, 8, 2, rp('#2a2424')); rubble(); } break;
+    case 'saltpans': for (let i = 0; i < 3; i++) { s.rect(3 + i * 9, 20, 8, 8, stone); s.rect(4 + i * 9, 21, 6, 6, done ? rp(i === 1 ? '#f4f4f0' : '#dce8ec') : rp('#4a5a6a')); } if (done) { s.poly([[10, 18], [14, 12], [18, 18]], rp('#f8f8f4')); s.line(22, 10, 26, 19, R.wood); } break;
+    case 'boathouse': s.rect(4, 14, 24, 15, wood); s.poly(done ? [[2, 15], [16, 6], [30, 15]] : [[2, 15], [9, 10], [15, 13], [30, 15]], done ? rp('#4a6a8a') : rp('#3a4048')); s.rect(10, 19, 12, 10, rp('#1e2a34')); if (done) s.poly([[11, 26], [21, 26], [19, 29], [13, 29]], R.woodLight); else rubble(); break;
+    case 'smelter': s.poly([[8, 29], [24, 29], [21, 8], [11, 8]], stone); s.rect(12, 20, 8, 6, done ? ramp('#ff8a3a', { gl: .85 }) : rp('#2a2424')); if (done) { s.fix(15, 21, '#fff2a0'); s.ell(16, 5, 3, 2, rp('#a0a0a0')); s.rect(24, 26, 6, 2, R.iron); s.rect(25, 24, 4, 2, R.gold); } else rubble(); break;
+    case 'lift': s.rect(6, 3, 2, 26, wood); s.rect(24, 3, 2, 26, wood); s.rect(6, 3, 20, 2, wood); s.ell(16, 6, 2.4, 2.4, R.iron); s.line(16, 8, 16, done ? 14 : 22, null, '#8a8a90'); if (done) { s.rect(11, 14, 10, 10, R.iron); s.rect(12, 15, 8, 8, rp('#3a3a44')); } else { s.poly([[10, 25], [20, 23], [21, 29], [11, 29]], rp('#4a4a50')); } break;
+    case 'furstore': house('#9aa0a8', '#e8eef4'); if (done) [[7, 24, '#e8e8f0'], [24, 24, '#a8a0b0']].forEach(([x, y, c]) => s.ell(x, y, 3, 4, rp(c))); break;
+    case 'assay': house('#b8b0a4', '#6a6a74', '#c0c8d0'); if (done) { s.line(16, 8, 16, 13, R.gold); s.line(12, 10, 20, 10, R.gold); } break;
+    case 'gate': for (const x of [3, 25]) s.rect(x, 6, 4, 23, stone); s.rect(3, 4, 26, 4, stone); if (done) { s.rect(7, 9, 18, 20, R.iron); for (let x = 9; x < 25; x += 3) s.line(x, 9, x, 28, null, '#3a3a44'); s.rect(7, 18, 18, 1, R.steel); } else { s.poly([[7, 20], [14, 16], [15, 29], [7, 29]], rp('#4a4a50')); rubble(); } break;
+    case 'boardwalk': for (let x = 1; x < 31; x += 3) { if (done || x % 9) { s.rect(x, 22, 2, 3, wood); } } if (done) { s.rect(1, 21, 30, 1, R.woodLight); for (const x of [4, 16, 28]) s.rect(x, 25, 1, 5, wood); } s.ell(8, 28, 4, 1.4, rp('#3a4a3a')); s.ell(24, 28, 5, 1.4, rp('#3a4a3a')); break;
+    case 'herbary': house('#8a9a6a', '#4a5a3a'); if (done) for (const x of [9, 13, 19, 23]) s.line(x, 15, x, 18, R.leafCrop); break;
+    case 'stilthouse': for (const x of [8, 14, 18, 24]) s.rect(x, 20, 2, 10, wood); s.rect(5, 10, 22, 11, done ? rp('#7a6a4a') : rp('#4a4034')); s.poly(done ? [[3, 11], [16, 3], [29, 11]] : [[3, 11], [12, 6], [29, 11]], done ? rp('#6a7a4a') : rp('#3a4030')); if (done) s.rect(14, 13, 4, 4, ramp('#f6d880')); s.rect(0, 28, 32, 2, rp('#3a4a3a')); break;
+    case 'eelweir': for (let x = 3; x < 29; x += 4) s.rect(x, 14, 2, 15, wood); if (done) { for (let y = 16; y < 28; y += 3) s.line(3, y, 28, y, null, '#9a8a5a'); s.ell(26, 27, 3, 2, R.straw); } else { s.line(3, 18, 12, 18, null, '#6a5a3a'); s.erase(15, 14); } s.rect(0, 26, 32, 3, rp('#3a5a5a')); break;
+    case 'shrine': s.rect(10, 18, 12, 11, stone); s.poly([[8, 19], [16, 11], [24, 19]], stone); s.rect(14, 22, 4, 7, rp('#2a2a30')); if (done) { s.poly([[14, 22], [16, 17], [18, 22]], ramp('#9ad0ff', { gl: .9 })); s.fix(16, 20, '#ffffff'); } else rubble(); break;
+    case 'kiln': s.ell(16, 20, 10, 9, stone); s.rect(6, 20, 20, 9, stone); s.ell(16, 24, 4, 4, done ? ramp('#ff8a3a', { gl: .85 }) : rp('#2a2424')); if (done) { s.rect(24, 22, 4, 6, rp('#3a2a3a')); s.fix(25, 23, '#c8a8ff'); s.ell(16, 9, 2, 1.6, rp('#b0a0a0')); } else rubble(); break;
+    case 'armoury': house('#6a4a44', '#3a2a2a', '#c0c8d0'); if (done) { s.line(8, 21, 8, 28, R.steel); s.ell(24, 24, 2.4, 3, R.iron); } break;
+    case 'baths': s.ell(16, 24, 13, 5, stone); s.ell(16, 24, 11, 3.6, done ? rp('#5ab0c0') : rp('#3a2a26')); if (done) for (const [x, y] of [[10, 16], [16, 13], [22, 16]]) { s.line(x, y, x + 1, y + 4, null, '#e8e8e8'); } else rubble(); break;
+    case 'ward': for (const x of [5, 15, 25]) { s.rect(x, 10, 3, 19, rp('#5a4040')); if (done) { s.fix(x + 1, 13, '#ffb04a'); s.fix(x + 1, 18, '#ff8a3a'); } } if (!done) { s.erase(25, 10); s.erase(26, 11); rubble(); } break;
+    case 'greatforge': s.rect(3, 14, 26, 15, rp('#5a4040')); s.rect(22, 2, 6, 13, rp('#5a4040')); s.rect(7, 18, 12, 7, done ? ramp('#ff6a2a', { gl: .9 }) : rp('#2a1a1a')); if (done) { s.fix(12, 20, '#fff2a0'); s.ell(25, 2, 2, 1.4, rp('#ff8a3a')); s.poly([[20, 21], [28, 21], [26, 24], [22, 24]], R.iron); } else rubble(); break;
+    case 'chimes': s.rect(4, 6, 24, 2, wood); s.rect(15, 2, 2, 5, wood); for (const [x, l] of [[7, 10], [11, 14], [16, 12], [21, 16], [25, 9]]) { if (done || x < 15) { s.line(x, 8, x, 8 + l, null, '#c8c8c8'); s.rect(x - 1, 8 + l, 2, 3, done ? ramp('#9ad8f0', { gl: .9 }) : rp('#5a6a70')); } } break;
+    case 'terraces': for (let i = 0; i < 3; i++) { s.rect(2 + i * 4, 18 + i * 4, 28 - i * 8, 3, stone); s.rect(3 + i * 4, 16 + i * 4, 26 - i * 8, 2, R.soil); if (done) for (let x = 5 + i * 4; x < 28 - i * 4; x += 4) s.fix(x, 15 + i * 4, i % 2 ? '#f0d060' : '#ffb04a'); } break;
+    case 'scriptorium': house('#e8e0d0', '#c8483c'); if (done) { s.rect(8, 17, 3, 3, ramp('#f6d880')); s.line(25, 6, 28, 2, null, '#f4ecd8'); } break;
+    case 'eyrie': s.rect(14, 10, 4, 19, stone); s.ell(16, 9, 9, 3, wood); if (done) { s.ell(16, 7, 6, 2, R.straw); s.poly([[13, 5], [16, 2], [19, 5]], rp('#8a6a4a')); s.fix(17, 3, '#e0c060'); } else rubble(); break;
+    case 'bigbell': s.rect(5, 4, 3, 25, stone); s.rect(24, 4, 3, 25, stone); s.poly([[3, 5], [16, 0], [29, 5]], rp('#c8483c')); if (done) { s.poly([[11, 8], [21, 8], [24, 21], [8, 21]], ramp('#c09040', { gl: .7 })); s.fix(16, 22, '#6a4a20'); } else s.poly([[9, 25], [20, 23], [22, 29], [8, 29]], rp('#5a4a30')); break;
+    case 'camp': s.poly([[3, 29], [11, 14], [19, 29]], done ? rp('#a89070') : rp('#5a4a40')); s.poly([[14, 29], [22, 16], [30, 29]], done ? rp('#8a7a9a') : rp('#4a4050')); if (done) { s.poly([[14, 29], [16, 24], [18, 29]], ramp('#ff8a3a', { gl: .85 })); } else rubble(); break;
+    case 'watchfire': for (const x of [7, 23]) { s.rect(x - 1, 14, 3, 15, stone); s.rect(x - 3, 12, 7, 3, R.iron); if (done) s.poly([[x - 2, 12], [x + 1, 4], [x + 3, 12]], ramp('#ff8a3a', { gl: .85 })); } if (!done) rubble(); break;
+    case 'archive': house('#5a4a6a', '#2a2238'); if (done) { s.rect(8, 17, 3, 3, ramp('#c8a8ff')); s.rect(21, 17, 3, 3, ramp('#c8a8ff')); } break;
+    case 'gravegarden': for (const x of [6, 16, 26]) { s.rect(x - 2, 18, 4, 9, stone); s.ell(x, 18, 2, 1.6, stone); if (done) { s.fix(x - 3, 27, '#e0d0ff'); s.fix(x + 2, 27, '#ffffff'); } } s.rect(1, 28, 30, 2, done ? R.leafCrop : R.soil); break;
+    case 'throne': s.rect(4, 8, 24, 21, rp('#4a3e5a')); s.rect(13, 14, 6, 15, done ? rp('#7a2a3a') : rp('#2a2230')); if (done) { for (const x of [7, 22]) { s.rect(x, 9, 3, 10, rp('#b08aff')); s.fix(x + 1, 18, '#e0d0ff'); } s.rect(14, 10, 4, 3, R.gold); } else rubble(); break;
     default: house('#d8c8a8', '#8a5a3a');
   }
   return s;
 }
 const PLACE = { well: [.82, .9], inn: [.12, .86], forge: [.58, .92], garden: [.36, .97], library: [.24, .84], watchtower: [.94, .82], bell: [.47, .86], lamps: [.7, .95], star: [.82, .74],
-  market: [.62, .9], jetty: [.7, .92], hearth: [.5, .9], lanterns: [.4, .92], cistern: [.55, .9], bridge: [.48, .9], refuge: [.45, .9] };
+  market: [.62, .9], jetty: [.7, .92], hearth: [.5, .9], lanterns: [.4, .92], cistern: [.55, .9], bridge: [.48, .9], refuge: [.45, .9],
+  /* five more per region, spread along the foreground between the landmarks */
+  moss_windmill: [.1, .97], moss_granary: [.3, .9], moss_pond: [.46, .98], moss_tannery: [.8, .97], moss_hall: [.94, .86],
+  salt_smokehouse: [.12, .86], salt_nets: [.3, .96], salt_lighthouse: [.5, .9], salt_saltpans: [.86, .98], salt_boathouse: [.92, .84],
+  iron_smelter: [.1, .97], iron_lift: [.3, .88], iron_furstore: [.7, .97], iron_assay: [.86, .88], iron_gate: [.5, .99],
+  fen_boardwalk: [.22, .98], fen_herbary: [.1, .86], fen_stilthouse: [.6, .9], fen_eelweir: [.78, .98], fen_shrine: [.92, .86],
+  ember_kiln: [.1, .97], ember_armoury: [.3, .9], ember_baths: [.72, .98], ember_ward: [.88, .9], ember_forge: [.4, .99],
+  sky_windchimes: [.1, .9], sky_terraces: [.28, .98], sky_scriptorium: [.66, .97], sky_eyrie: [.84, .88], sky_bell: [.94, .98],
+  hollow_camp: [.12, .97], hollow_watch: [.28, .88], hollow_archive: [.62, .98], hollow_garden: [.78, .9], hollow_throne: [.92, .98] };
 
 /* ================= Town scenes (160 x 90) ================= */
 const TOWN = {
@@ -128,7 +172,7 @@ function sceneFor(town, projects = {}) {
     const spr = name === 'cottage' ? A.sprites.cottage() : TREE[name] ? treeSprite(name) : landmark(name); shadow(px + spr.w / 2, py + spr.h - 1, spr.w * .32); put(spr, px, py); }
   /* each restoration project of this town, damaged or restored, placed by hand */
   for (const [id, pj] of Object.entries(D.PROJECTS || {})) { if (pj.town !== town) continue; if (pj.relic && !projects[id]) continue;
-    const [fx, fy] = PLACE[id] || [.86, .9], spr = piece(id, !!projects[id]), X = Math.round(fx * W - 16), Y = Math.round(fy * H - 32); shadow(X + 16, Y + 31, 10); put(spr, X, Y); }
+    const [fx, fy] = PLACE[id] || [.86, .9], spr = piece(pj.art || id, !!projects[id]), X = Math.round(fx * W - 16), Y = Math.round(fy * H - 32); shadow(X + 16, Y + 31, 10); put(spr, X, Y); }
   [[10, 70], [24, 82], [120, 72], [140, 84]].forEach(([a, b]) => { x.fillStyle = mix(T.ground, '#1e2a14', .35); x.fillRect(a, b, 1, 2); x.fillRect(a + 2, b - 1, 1, 3); });
   return c;
 }
