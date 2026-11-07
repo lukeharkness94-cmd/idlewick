@@ -2793,3 +2793,22 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
   #view>.character-layout{min-height:0}
   #view>.character-layout>.col{min-height:0;max-height:100%;overflow-y:auto;scrollbar-width:thin;align-content:start}
 }
+
+/* Quest reward reveal inside the quest window (Nov 2026) */
+.quest-reveal{display:grid;gap:16px;overflow:hidden;position:relative}
+.quest-reveal::before{content:"";position:absolute;inset:-40% -10% auto;height:120%;background:radial-gradient(closest-side,color-mix(in srgb,var(--brass) 26%,transparent),transparent);pointer-events:none;animation:qrv-glow 1.6s ease-out both}
+.qrv-head{display:flex;gap:16px;align-items:center;position:relative}
+.qrv-head h2{margin:2px 0 4px}
+.qrv-face{border-radius:12px;border:2px solid var(--brass);background:var(--panel2);animation:qrv-pop .5s cubic-bezier(.2,1.4,.4,1) both}
+.qrv-thanks{margin:0;color:var(--mute);font-style:italic}
+.qrv-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;position:relative}
+.qrv-tile{display:grid;justify-items:center;gap:4px;padding:14px 8px 12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--c) 45%,var(--line));background:color-mix(in srgb,var(--c) 10%,var(--panel2));text-align:center;animation:qrv-pop .45s cubic-bezier(.2,1.4,.4,1) both;animation-delay:calc(var(--i) * 160ms + 200ms)}
+.qrv-tile b{font-size:22px;color:var(--ink)}
+.qrv-tile small{font-size:14px;color:var(--mute)}
+.qrv-tile.unlock{border-color:var(--c);box-shadow:0 0 16px color-mix(in srgb,var(--c) 40%,transparent)}
+.qrv-art{display:grid;place-items:center;width:64px;height:64px}
+.qrv-art .ic,.qr-coin .ic{width:40px;height:40px}
+.quest-reveal.calm::before,.quest-reveal.calm .qrv-tile,.quest-reveal.calm .qrv-face{animation:none}
+@keyframes qrv-pop{from{opacity:0;transform:translateY(10px) scale(.7)}to{opacity:1;transform:none}}
+@keyframes qrv-glow{from{opacity:0;transform:scale(.6)}40%{opacity:1}to{opacity:.55;transform:none}}
+@media (prefers-reduced-motion:reduce){.quest-reveal::before,.qrv-tile,.qrv-face{animation:none}}

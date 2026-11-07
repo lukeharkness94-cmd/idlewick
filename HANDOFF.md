@@ -383,3 +383,6 @@ Stages are separate commits so each can be reverted on its own.
 - Projects are built in deliveries (`DQ.projectGive/projectNeed/projectProgress/projectStage` in js/journey.js; `S().projectGiven`, sanitised on load). Each material can be handed over as you get it; completion happens when the last delivery lands.
 - The Projects page is the village: `A.siteLayout(town)` places a clickable spot over each site (badge: ! ruined, % in progress, ✓ restored); the card beside it gives the place's small story, benefit, stage bar, materials with Deliver buttons. The scene renders at 3× (960 × 540) on full desktops and 2× on shorter or narrower windows.
 - Buttons must not use `data-b` values that match a live binder (e.g. `coins`); project buttons pass `id|item` in `data-a`.
+
+## Quest reward reveal (Nov 2026)
+- `js/quest_claim.js`: claiming on the Quests page turns the quest card into a reveal (giver's thanks, then each reward tile pops in with its amount counting up on elapsed time). Stays until Continue, or until another quest/tab is chosen or the page changes. Reduced effects shows everything at once. The duplicate page banner is dismissed; the bell keeps the record.
