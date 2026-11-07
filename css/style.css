@@ -2429,3 +2429,11 @@ body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
   #app:has(#view > :is(.activity-workspace.task-panel,.farm-workspace)) #hud{position:relative!important;top:0!important;flex:none}
   #view > .farm-workspace .workspace-options > *{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin}
 }
+/* Locked choices: the blacked-out picture on top, then ??? and a short requirement underneath. The full wording is in
+   the card's tooltip, and selecting it shows the requirement beside the scene. */
+.activity-choices .illustrated-card.locked{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;justify-items:center;text-align:center;align-content:center;row-gap:2px;cursor:pointer}
+.activity-choices .illustrated-card.locked .choice-art{grid-column:1;grid-row:1;width:auto;height:46px;display:grid;place-items:center}
+.activity-choices .illustrated-card.locked .choice-art img{width:72px;height:46px;max-height:46px;object-fit:contain}
+.activity-choices .illustrated-card.locked>b{grid-column:1;justify-content:center}
+.activity-choices .illustrated-card.locked>small{grid-column:1;display:block!important;line-height:1.3}
+.activity-choices .illustrated-card.locked>small .ic{display:inline-block;vertical-align:-2px;margin-right:4px}
