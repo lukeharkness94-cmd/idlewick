@@ -129,7 +129,14 @@ UI.V.quests = () => {
   const list = D.QUESTS.filter(groups[tab]).sort((a, b) => (b.main ? 1 : 0) - (a.main ? 1 : 0) || (st(a) === 'ready' ? -1 : 0) - (st(b) === 'ready' ? -1 : 0) || a.adv - b.adv);
   const selected = list.find(q => q.id === UI.tab.questSelected) || list[0];
   UI.tab.questSelected = selected && selected.id;
-  const cards = list.length ? list.map((q, i) => {
+  /* List and detail (one-screen overhaul): a compact list of quest rows that scrolls, and the selected quest in full. */
+  const rowOf = q => {
+    const s = st(q), p = S().q[q.id], t = D.TOWN[q.town], sk = q.main && D.SK[q.unlocks];
+    const pct = p ? Math.round(q.obj.reduce((a, o, j) => a + Math.min(1, DQ.objProg(q, p, j) / o.n), 0) / q.obj.length * 100) : 0;
+    const blk = s === 'locked' ? (DQ.advLvl() < q.adv ? `Hero level ${q.adv}` : (DQ.questBlockers(q)[0] || 'Not yet')) : '';
+    return `<button class="qrow ${s} ${q.main ? 'main' : ''} ${q.id === (selected && selected.id) ? 'on' : ''}" data-do="qselect" data-a="${q.id}" aria-pressed="${q.id === (selected && selected.id)}" style="${sk ? `--c:${sk.col}` : ''}">${ico(q.main ? 'star' : s === 'locked' ? 'lock' : 'quest')}<span class="qr-t"><b>${esc(q.name)}</b><small>${s === 'locked' ? esc(String(blk).replace(/<[^>]+>/g, '')) : `${esc(q.giver)} · ${esc(t.name)}`}</small>${s === 'active' || s === 'ready' ? `<span class="bar"><i style="width:${pct}%"></i></span>` : ''}</span><span class="state ${s}">${{ new: 'New', locked: 'Locked', active: pct + '%', ready: 'Ready', done: 'Done' }[s]}</span></button>`;
+  };
+  const cards = selected ? [selected].map((q, i) => {
     const s = st(q), p = S().q[q.id], t = D.TOWN[q.town];
     const objs = q.obj.map((o, j) => { const pr = DQ.objProg(q, p, j), ok = pr >= o.n; return `<div class="obj ${ok ? 'ok' : ''}"><span>${ok ? ico('check') : ''}${o.label}</span><span class="mono" ${p ? `data-b="qtxt:${q.id}:${j}"` : ''}>${p ? '' : `0 / ${fmt(o.n)}`}</span><span class="bar"><i ${p ? `data-b="qbar:${q.id}:${j}"` : ''}></i></span></div>`; }).join('');
     const prevQ = q.req ? D.QM[q.req] : null;
@@ -146,7 +153,7 @@ UI.V.quests = () => {
   }).join('') : '';
   const done = D.QUESTS.filter(groups.done).length;
   return `<section class="panel shophead"><div><span class="k">Quest log</span><h2>${done} of ${D.QUESTS.length} complete</h2></div><div class="tabs">${Object.entries(names).map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="qtab" data-a="${k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</div></section>
-    ${list.length ? `<div class="qgrid">${cards}</div>` : `<section class="panel"><p class="dim" style="margin:0">${{ active: 'No active quests. Check the Available tab.', available: 'Nothing new right now. Level up or travel to find more.', upcoming: 'No upcoming quests in the towns you have opened.', done: 'You have not finished any quests yet.' }[tab]}</p></section>`}`;
+    ${list.length ? `<div class="qlayout"><nav class="qlist" aria-label="${names[tab]} quests">${list.map(rowOf).join('')}</nav><div class="qdetail">${cards}</div></div>` : `<section class="panel"><p class="dim" style="margin:0">${{ active: 'No active quests. Check the Available tab.', available: 'Nothing new right now. Level up or travel to find more.', upcoming: 'No upcoming quests in the towns you have opened.', done: 'You have not finished any quests yet.' }[tab]}</p></section>`}`;
 };
 
 /* ---------- Character ---------- */
@@ -304,6 +311,7 @@ const DO = {
   newgame: () => DQ.modal({ title: 'Erase everything?', body: '<p>This permanently deletes your hero, items and progress and returns you to the title screen. Export your save first if you might want it back.</p>', actions: [{ label: 'Erase and restart', primary: true, fn: () => { DQ.act = null; DQ.eraseSave(); DQ.paused = true; location.reload(); } }, { label: 'Keep playing' }] }),
 };
 UI.DO = DO;
+UI.DO.qselect = a => { UI.tab.questSelected = a; UI.render(false); if (innerWidth <= 860) document.querySelector('.qdetail')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); };
 DO.choose = (a, b, button) => {
   const group = button.closest('.choice-buttons');
   group.querySelectorAll('button').forEach(el => { el.classList.toggle('on', el === button); el.setAttribute('aria-pressed', String(el === button)); });

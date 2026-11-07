@@ -25,7 +25,15 @@ const assert=require('node:assert/strict');
     assert.equal(await p.locator('.workspace-focus').evaluate(e=>e.getBoundingClientRect().top),before,'the action panel stays still while the list scrolls');
    }
   }
+  /* every desktop page: the window itself never scrolls; Quests is a list beside the selected quest */
+  await p.setViewportSize({width:1440,height:780});
+  for(const page of ['overview','activity','journal','quests','combat','bestiary','map','exploration','projects','house','hirelings','character','tools','bank','skillsummary','mastery','achievements','shop','hunting','magic','brewery','enchanting','research','settings']){
+   await p.evaluate(v=>{DQ.go(v);DQ.closeModal&&DQ.closeModal();},page);
+   assert.ok(await p.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1),`${page}: the window does not scroll`);
+  }
+  await p.evaluate(()=>{DQ.ui.questTab='upcoming';DQ.go('quests');});
+  assert.ok(await p.locator('.qlist .qrow').count()>1,'quest list rows');assert.equal(await p.locator('.qdetail .quest').count(),1,'one quest in full');
   assert.deepEqual(errors,[]);
-  console.log('PASS one-screen fit: every skill visible at laptop heights; activity pages scroll only their list of choices.');
+  console.log('PASS one-screen fit: every skill visible at laptop heights; activity pages scroll only their list of choices; no desktop page scrolls the window; Quests is list + detail.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1);});
