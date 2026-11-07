@@ -2640,3 +2640,15 @@ body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
   #view>.combat-dashboard{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)!important}
 }
 #view>.combat-dashboard>.combat-side,#view>.combat-dashboard>.combat-live>.combat-col{display:none!important}
+/* Backdrops (js/backdrop.js): a code-drawn pixel scene behind the game under a theme wash; panels are slightly
+   see-through so the scene shows around and beneath them. */
+:root{--backdrop-wash:rgba(8,12,16,.32)}
+:root[data-theme="light"]{--backdrop-wash:rgba(250,246,236,.62)}
+html.has-backdrop,html.has-backdrop body{background:linear-gradient(var(--backdrop-wash),var(--backdrop-wash)),var(--backdrop) center bottom/cover fixed no-repeat,var(--ground,#0f1418)!important;image-rendering:pixelated}
+html.has-backdrop #app :is(.panel,.hud),html.has-backdrop .sidebar :is(.dk,.now,.combat-entry){background-color:color-mix(in srgb,var(--panel) 88%,transparent)!important}
+html.has-backdrop #app .panel :is(.panel,.illustrated-card){background-color:color-mix(in srgb,var(--panel2) 92%,transparent)}
+.bd-opts{display:flex;gap:12px;flex-wrap:wrap}
+.bd-opt{display:flex;flex-direction:column;gap:6px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--ink);cursor:pointer;font:600 15px var(--f-ui)}
+.bd-opt img{width:240px;height:135px;border-radius:8px;image-rendering:pixelated}
+.bd-opt.on{border-color:var(--brass);box-shadow:0 0 0 1px var(--brass)}
+html.has-backdrop .sidebar .dock .dk-h{background:none!important}
