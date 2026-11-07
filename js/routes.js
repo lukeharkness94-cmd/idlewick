@@ -54,10 +54,12 @@ Object.assign(UI.DO, {
 const render0 = UI.render;
 UI.render = fresh => {
   render0(fresh);
+  /* the return link sits in the page bar beside the page tabs and pinned quest, not as a row of its own */
+  const bar = $('#routebar') || $('#view'); if (bar && bar.id === 'routebar') bar.innerHTML = '';
   const r = UI.returnTo; if (!r) return;
   if (r.page === UI.view) { UI.returnTo = null; return; }
-  const view = $('#view'); if (!view || view.querySelector('.returnbar')) return;
-  view.insertAdjacentHTML('afterbegin', `<div class="returnbar" role="navigation" aria-label="Return"><button class="btn sm" data-do="routeback">${ico('arrow')}<span>Back to ${esc(r.label)}</span></button><button class="n-x" data-do="routeclose" aria-label="Dismiss">${ico('close')}</button></div>`);
+  if (!bar || bar.querySelector('.returnbar')) return;
+  bar.insertAdjacentHTML('afterbegin', `<div class="returnbar" role="navigation" aria-label="Return"><button class="btn sm" data-do="routeback">${ico('arrow')}<span>Back to ${esc(r.label)}</span></button><button class="n-x" data-do="routeclose" aria-label="Dismiss">${ico('close')}</button></div>`);
 };
 /* moving through the main menus is a fresh start, not a detour */
 const hub0 = UI.DO.hub; if (hub0) UI.DO.hub = (...a) => { UI.returnTo = null; return hub0(...a); };

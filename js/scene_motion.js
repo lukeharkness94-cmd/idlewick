@@ -19,7 +19,7 @@ function fly(el,frames,options){
  const a=animate(el,frames,options);if(!a){el.remove();return;}const finish=a.onfinish,cancel=a.oncancel;
  a.onfinish=()=>{finish?.();el.remove();};a.oncancel=()=>{cancel?.();el.remove();};
 }
-function point(el,scene){const a=el.getBoundingClientRect(),b=scene.getBoundingClientRect();return {x:a.left-b.left+a.width/2,y:a.top-b.top+a.height*.55};}
+function point(el,scene){const a=el.getBoundingClientRect(),b=scene.getBoundingClientRect();return {x:(a.left-b.left+a.width/2)/(window.DQ.zoom||1),y:(a.top-b.top+a.height*.55)/(window.DQ.zoom||1)};}
 function sparks(scene,x,y,col,count=4){
  for(let i=0;i<count;i++){
   const el=effect(scene,'pixel-spark','',x,y);el.style.background=col;

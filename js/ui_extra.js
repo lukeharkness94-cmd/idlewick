@@ -82,19 +82,18 @@ UI.V.house = () => {
       <div class="bc-req ${ok ? 'ok' : 'bad'}">${ok ? '✓' : '✗'} Hero level ${D.HOUSE.adv} <span class="mono">(you: ${DQ.advLvl()})</span></div><div class="quick"><button class="btn primary" data-do="buyhouse" ${ok ? '' : 'disabled'}>${ico('coin')} Buy for ${fmt(D.HOUSE.price)} coins</button></div></div></section>`;
   }
   const f = DQ.fx(), sum = [['xpAll', v => `+${Math.round(v * 100)}% XP`], ['coin', v => `+${Math.round(v * 100)}% coins`], ['regen', v => `+${Math.round(v * 100)}% regeneration`], ['pack', v => `+${v} backpack slots`], ['dr', v => `${Math.round(v * 100)}% less damage`], ['plots', v => `+${v} plots`], ['workers', v => `+${v} worker beds`], ['dmg', v => `+${Math.round(v * 100)}% damage`]].filter(([k]) => f[k]).map(([k, fn]) => `<span class="rw" style="--c:#f3d58a">${fn(f[k])}</span>`).join('');
-  const selectedRoom = D.ROOMS.find(r => r.id === UI.tab.houseRoom) || D.ROOMS[0];
-  const selectedFurniture = selectedRoom.furn.find(f => f.id === UI.tab.houseFurniture) || selectedRoom.furn[0];
-  const rooms = [selectedRoom].map((r, i) => {
-    const built = H.rooms[r.id];
-    if (!built) return `<section class="panel room locked" style="--i:${i}"><div class="phead" style="margin:0"><h2>${r.name}</h2><span class="state">Not built</span></div><p class="blurb">${r.blurb}</p><div class="rws">${r.furn.map(fu => `<span class="rw" style="--c:#8fa09e">${ico(fu.ic)}${fu.name}</span>`).join('')}</div><button class="btn ${S().coins >= r.price ? 'primary' : ''}" data-do="buildroom" data-a="${r.id}">Build for ${fmt(r.price)} coins</button></section>`;
-    return `<section class="panel room" style="--i:${i}"><label class="page-picker" for="house-furniture">Furniture${UI.choiceButtons(`<select id="house-furniture" data-in="house-furniture">${r.furn.map(fu => `<option value="${fu.id}" ${fu === selectedFurniture ? 'selected' : ''}>${fu.name}</option>`).join('')}</select>`)}</label>${[selectedFurniture].map(fu => {
-      const t = H.furn[fu.id] || 0, vals = Object.values(fu.fx)[0], nextCost = fu.costs[t];
-      return `<div class="furn"><div class="fu-h"><span class="fu-ic">${DQ.furnIco ? DQ.furnIco(fu.id, fu.ic) : ico(fu.ic)}</span><div><b>${fu.name}</b><small>${t ? fu.label(vals[t - 1]) : 'Not placed yet'}</small></div><span class="pips">${[1, 2, 3].map(n => `<i class="${t >= n ? 'on' : ''}"></i>`).join('')}</span></div>
-        ${t < 3 ? `<div class="fu-next"><button class="btn sm ${DQ.canAfford(nextCost) ? 'primary' : ''}" data-do="furnish" data-a="${fu.id}" ${DQ.canAfford(nextCost) ? '' : 'disabled'}>${t ? 'Upgrade' : 'Build'}</button><small>${t ? 'Upgrade' : 'Place'}: ${fu.label(vals[t])}</small><div class="rws">${costChips(nextCost)}</div></div>` : '<small class="ok">Fully upgraded</small>'}</div>`;
-    }).join('')}</section>`;
-  }).join('');
-  return `<section class="panel"><div class="phead"><h2>Your home</h2></div><label class="page-picker" for="house-room">Room${UI.choiceButtons(`<select id="house-room" data-in="house-room">${D.ROOMS.map(r => `<option value="${r.id}" ${r === selectedRoom ? 'selected' : ''}>${r.name}${H.rooms[r.id] ? '' : ' · Not built'}</option>`).join('')}</select>`)}</label></section><div class="qgrid">${rooms}</div><section data-reference="true" class="panel" id="house-bonuses"><h3>Home bonuses &amp; appearance</h3><div class="rws">${sum}</div>${houseArt()}</section>`;
+  /* One screen: the cottage, your bonuses and the rooms on the left; every piece of furniture in the chosen room as a
+     card on the right, each with its level, what the next level gives, the cost and one button. */
+  const room = D.ROOMS.find(r => r.id === UI.tab.houseRoom) || D.ROOMS[0], built = H.rooms[room.id];
+  const roomBtns = D.ROOMS.map(r => { const b = H.rooms[r.id], n = r.furn.reduce((a, fu) => a + (H.furn[fu.id] || 0), 0); return `<button class="hroom ${r === room ? 'on' : ''} ${b ? '' : 'unbuilt'}" data-do="houseroom" data-a="${r.id}" aria-pressed="${r === room}"><b>${esc(r.name)}</b><small>${b ? `${n} / ${r.furn.length * 3} upgrades` : `Build · ${fmt(r.price)} coins`}</small></button>`; }).join('');
+  const furnCard = fu => {
+    const t = H.furn[fu.id] || 0, vals = Object.values(fu.fx)[0], nextCost = fu.costs[t], can = built && t < 3 && DQ.canAfford(nextCost);
+    return `<div class="hfurn ${t ? 'placed' : ''}"><span class="hf-art">${DQ.furnIco ? DQ.furnIco(fu.id, fu.ic) : ico(fu.ic)}</span><b>${esc(fu.name)}</b><span class="pips">${[1, 2, 3].map(n => `<i class="${t >= n ? 'on' : ''}"></i>`).join('')}</span><small class="hf-now">${t ? esc(fu.label(vals[t - 1])) : 'Not placed yet'}</small>${t < 3 ? `<small class="hf-next">${t ? 'Next' : 'Place'}: ${esc(fu.label(vals[t]))}</small><div class="rws">${costChips(nextCost)}</div><button class="btn sm ${can ? 'primary' : ''}" data-do="furnish" data-a="${fu.id}" ${can ? '' : 'disabled'}>${!built ? 'Build the room first' : t ? 'Upgrade' : 'Place'}</button>` : '<small class="ok">Fully upgraded</small>'}</div>`;
+  };
+  return `<div class="house-layout"><aside class="house-side"><section class="panel house-hero">${(DQ.cottageArt && DQ.cottageArt()) || houseArt()}<h2>Your home</h2>${sum ? `<div class="rws">${sum}</div>` : '<p class="dim sm">Place furniture to earn lasting bonuses.</p>'}</section><nav class="panel house-rooms" aria-label="Rooms"><span class="k">Rooms</span>${roomBtns}</nav></aside>
+    <section class="panel house-room"><div class="phead"><div><h2>${esc(room.name)}</h2><small>${esc(room.blurb)}</small></div>${built ? '<span class="state ok">Built</span>' : `<button class="btn ${S().coins >= room.price ? 'primary' : ''}" data-do="buildroom" data-a="${room.id}">Build for ${fmt(room.price)} coins</button>`}</div><div class="hfurn-grid">${room.furn.map(furnCard).join('')}</div></section></div>`;
 };
+UI.DO.houseroom = a => { UI.tab.houseRoom = a; UI.render(false); };
 
 /* ---------- Hirelings ---------- */
 UI.V.hirelings = () => {
@@ -199,8 +198,8 @@ DQ.on('loot', (m, drops, c) => {
   const a = from.getBoundingClientRect(), b = box.getBoundingClientRect(), fx = $('#fx');
   drops.slice(0, 4).forEach((d, i) => {
     const it = D.ITEMS[d.id], el = document.createElement('div'); el.className = 'flyloot'; el.style.setProperty('--c', d.rar[2]); el.innerHTML = DQ.itemIco(it);
-    el.style.left = (a.left + a.width / 2) + 'px'; el.style.top = (a.top + a.height / 2) + 'px'; fx.appendChild(el);
-    const dx = b.left + 30 - (a.left + a.width / 2), dy = b.top + 20 - (a.top + a.height / 2), up = -60 - Math.random() * 40, sx = (Math.random() - .5) * 80;
+    el.style.left = DQ.px(a.left + a.width / 2) + 'px'; el.style.top = DQ.px(a.top + a.height / 2) + 'px'; fx.appendChild(el);
+    const dx = DQ.px(b.left + 30 - (a.left + a.width / 2)), dy = DQ.px(b.top + 20 - (a.top + a.height / 2)), up = -60 - Math.random() * 40, sx = (Math.random() - .5) * 80;
     el.animate([{ transform: 'translate(-50%,-50%) scale(.4)', opacity: 0 }, { transform: `translate(calc(-50% + ${sx}px),calc(-50% + ${up}px)) scale(1.3)`, opacity: 1, offset: .35 }, { transform: `translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(.7)`, opacity: .9 }], { duration: 900, delay: i * 120, easing: 'cubic-bezier(.3,.7,.4,1)', fill: 'both' }).onfinish = () => el.remove();
   });
 });

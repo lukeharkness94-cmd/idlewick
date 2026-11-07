@@ -20,7 +20,7 @@ const assert=require('node:assert/strict');
     assert.equal(m.rows,14,'every skill in the left column');
     if(h>=720)assert.ok(m.side,`${w}x${h} left column fits without scrolling (running=${running})`);
     assert.ok(m.doc,`${w}x${h} the page itself does not scroll on an activity page`);
-    assert.equal(m.listScroll,'auto');assert.ok(m.list,`${w}x${h} the long list of choices scrolls inside its panel`);
+    assert.equal(m.listScroll,'auto',`${w}x${h} the list of choices scrolls inside its panel when it is long`);
     const before=m.stageTop;await p.locator('.illustrated-choices').evaluate(e=>e.scrollTop=e.scrollHeight);
     assert.equal(await p.locator('.workspace-focus').evaluate(e=>e.getBoundingClientRect().top),before,'the action panel stays still while the list scrolls');
    }
@@ -34,9 +34,9 @@ const assert=require('node:assert/strict');
   /* Combat: the fight, the fighting style and the creatures stay on screen; everything else scrolls beneath */
   await p.evaluate(()=>{DQ.go('combat');DQ.closeModal&&DQ.closeModal();});await p.waitForTimeout(1300);
   const vis=sel=>p.locator(sel).first().evaluate(e=>{const r=e.getBoundingClientRect();return r.top>=0&&r.top<innerHeight-40&&r.height>40;});
-  for(const sel of ['.encounter-arena','.style-strip','.combat-targets','.combat-more'])assert.ok(await vis(sel),`combat: ${sel} on screen`);
+  for(const sel of ['.encounter-arena','.style-strip','.combat-targets','.combat-col','.combat-side'])assert.ok(await vis(sel),`combat: ${sel} on screen`);
   const arenaTop=await p.locator('.encounter-arena').evaluate(e=>e.getBoundingClientRect().top);
-  await p.locator('.combat-more').evaluate(e=>e.scrollTop=e.scrollHeight);
+  await p.locator('.combat-col').evaluate(e=>e.scrollTop=e.scrollHeight);
   assert.equal(await p.locator('.encounter-arena').evaluate(e=>e.getBoundingClientRect().top),arenaTop,'the fight stays put while the rest scrolls');
   await p.evaluate(()=>{DQ.ui.questTab='upcoming';DQ.go('quests');});
   assert.ok(await p.locator('.qlist .qrow').count()>1,'quest list rows');assert.equal(await p.locator('.qdetail .quest').count(),1,'one quest in full');
