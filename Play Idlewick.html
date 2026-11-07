@@ -2853,6 +2853,21 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
 .project-card .villager-line{display:block;margin:0 0 8px;color:var(--mute)}
 .project-card .proj-benefit{margin:0 0 10px}
 .project-card .proj-benefit .k{margin-right:6px}
+
+/* World map fits the window at every size (Nov 2026): the map takes the height that is left after the legend and the
+   region list, keeping its shape (letterboxed in the panel), so nothing falls off the bottom on wide or short screens */
+@media (min-width:861px){
+  #view>.mapw>.mappanel{display:flex;flex-direction:column;align-items:stretch}
+  #view>.mapw>.mappanel>svg{flex:1 1 auto;min-height:0;width:100%;height:auto;max-height:100%}
+  #view>.mapw>.mappanel>.maplegend,#view>.mapw>.mappanel>.region-list{flex:none}
+  #view>.mapw>.mappanel>.region-list{margin-top:8px;padding-top:8px}
+}
+/* Inventory: preparations live in the right column, which scrolls on its own if a long list of them needs it */
+@media (min-width:861px){
+  .character-layout>.col>.loadouts{grid-column:1/-1;margin:0}
+  #view>.character-layout{min-height:0}
+  #view>.character-layout>.col{min-height:0;max-height:100%;overflow-y:auto;scrollbar-width:thin;align-content:start}
+}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -15161,7 +15176,8 @@ Object.assign(UI.DO, {
   copybuild: () => DQ.copyText(DQ.buildText(), 'Build')
 });
 const char0 = UI.V.character;
-UI.V.character = () => char0() + UI.loadoutPanel();
+/* Preparations sit in the right-hand column under the backpack, so the whole Inventory page fits the window */
+UI.V.character = () => { const h = char0(), lo = UI.loadoutPanel(), i = h.lastIndexOf('</div></div>'); return i > 0 ? h.slice(0, i) + lo + h.slice(i) : h + lo; };
 })();
 
 </script>

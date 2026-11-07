@@ -2778,3 +2778,18 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
 .project-card .villager-line{display:block;margin:0 0 8px;color:var(--mute)}
 .project-card .proj-benefit{margin:0 0 10px}
 .project-card .proj-benefit .k{margin-right:6px}
+
+/* World map fits the window at every size (Nov 2026): the map takes the height that is left after the legend and the
+   region list, keeping its shape (letterboxed in the panel), so nothing falls off the bottom on wide or short screens */
+@media (min-width:861px){
+  #view>.mapw>.mappanel{display:flex;flex-direction:column;align-items:stretch}
+  #view>.mapw>.mappanel>svg{flex:1 1 auto;min-height:0;width:100%;height:auto;max-height:100%}
+  #view>.mapw>.mappanel>.maplegend,#view>.mapw>.mappanel>.region-list{flex:none}
+  #view>.mapw>.mappanel>.region-list{margin-top:8px;padding-top:8px}
+}
+/* Inventory: preparations live in the right column, which scrolls on its own if a long list of them needs it */
+@media (min-width:861px){
+  .character-layout>.col>.loadouts{grid-column:1/-1;margin:0}
+  #view>.character-layout{min-height:0}
+  #view>.character-layout>.col{min-height:0;max-height:100%;overflow-y:auto;scrollbar-width:thin;align-content:start}
+}

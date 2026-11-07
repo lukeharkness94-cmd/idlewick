@@ -51,6 +51,17 @@ const assert=require('node:assert/strict');
   await p.evaluate(()=>{DQ.go('combat');DQ.closeModal&&DQ.closeModal();});
   assert.ok(await p.locator('.combat-tools .ct-btn small').count()>=4,'combat buttons show their state');
   assert.deepEqual(errors,[]);
-  console.log('PASS one-screen fit: every skill visible at laptop heights; activity pages scroll only their list of choices; no desktop page scrolls the window; Quests is list + detail; Combat shows only the fight, style and creatures, with the rest in pop-ups; readable text at 1280x720.');
+  /* wide and ultrawide screens: the world map (legend and region list included), Inventory with its preparations and
+     the clickable village all sit inside the window */
+  for(const [w,h] of [[1920,1080],[2560,1080],[3440,1440]]){
+   await p.setViewportSize({width:w,height:h});
+   for(const [page,sel] of [['map','.mappanel .region-list'],['character','.loadouts'],['projects','.village-scene']]){
+    await p.evaluate(g=>{DQ.closeModal&&DQ.closeModal();DQ.go(g);},page);await p.waitForTimeout(400);
+    const r=await p.evaluate(s=>{const e=document.querySelector(s);if(!e)return null;const b=e.getBoundingClientRect(),v=document.getElementById('view');return {bottom:b.bottom,vh:innerHeight,doc:document.documentElement.scrollHeight<=innerHeight+1,viewOver:v.scrollHeight-v.clientHeight};},sel);
+    assert.ok(r,`${page}: ${sel} present at ${w}x${h}`);assert.ok(r.doc,`${page}: window does not scroll at ${w}x${h}`);
+    assert.ok(r.bottom<=r.vh+1&&r.viewOver<=8,`${page}: ${sel} fully on screen at ${w}x${h} (bottom ${Math.round(r.bottom)} of ${r.vh}, overflow ${r.viewOver})`);
+   }
+  }
+  console.log('PASS one-screen fit: every skill visible at laptop heights; activity pages scroll only their list of choices; no desktop page scrolls the window; Quests is list + detail; Combat shows only the fight, style and creatures, with the rest in pop-ups; readable text at 1280x720; the map, Inventory and village fit at 1920x1080, 2560x1080 and 3440x1440.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1);});

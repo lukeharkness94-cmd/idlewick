@@ -90,5 +90,6 @@ Object.assign(UI.DO, {
   copybuild: () => DQ.copyText(DQ.buildText(), 'Build')
 });
 const char0 = UI.V.character;
-UI.V.character = () => char0() + UI.loadoutPanel();
+/* Preparations sit in the right-hand column under the backpack, so the whole Inventory page fits the window */
+UI.V.character = () => { const h = char0(), lo = UI.loadoutPanel(), i = h.lastIndexOf('</div></div>'); return i > 0 ? h.slice(0, i) + lo + h.slice(i) : h + lo; };
 })();
