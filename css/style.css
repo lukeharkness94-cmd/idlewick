@@ -2812,3 +2812,14 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
 @keyframes qrv-pop{from{opacity:0;transform:translateY(10px) scale(.7)}to{opacity:1;transform:none}}
 @keyframes qrv-glow{from{opacity:0;transform:scale(.6)}40%{opacity:1}to{opacity:.55;transform:none}}
 @media (prefers-reduced-motion:reduce){.quest-reveal::before,.qrv-tile,.qrv-face{animation:none}}
+
+/* Mini-boss challenges on the hunting panel (Nov 2026) */
+.mini-strip{display:grid;gap:8px;margin:0 0 12px}
+.mini-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+.mini-card{display:grid;grid-template-columns:72px minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;border:1px solid color-mix(in srgb,var(--brass) 45%,var(--line));background:color-mix(in srgb,var(--brass) 7%,var(--panel2))}
+.mini-card.on{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 30%,transparent)}
+.mini-card.done{border-color:color-mix(in srgb,#5cc08a 45%,var(--line));background:var(--panel2)}
+.mini-art{display:grid;place-items:center;width:72px;height:72px;padding:0;border:0;background:none;cursor:pointer}
+.mini-t{display:grid;gap:1px;min-width:0}
+.mini-t small{font-size:14px;color:var(--mute)}
+.mini-t small.ok{color:#5cc08a}.mini-t small.bad{color:#e6a64a}

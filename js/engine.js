@@ -221,6 +221,7 @@ DQ.startAct = (kind, id, o = {}) => {
     const m = D.MON[id];
     if (m.town !== S().town) return bad(`${m.name} lives in ${D.TOWN[m.town].name}`);
     if (m.boss && DQ.combatLvl() < m.boss.req) return bad(`You need combat level ${m.boss.req} to challenge ${m.boss.short}`);
+    if (m.mini && DQ.combatLvl() < m.mini.req) return bad(`You need combat level ${m.mini.req} to challenge ${m.mini.short}`);
     const st = DQ.weaponStyle();
     if (st === 'ranged' && !(S().ammo.id && (S().ammo.n > 0 || DQ.have(S().ammo.id)))) return bad('Equip some arrows first');
     if (st === 'magic' && !pickSpell()) return bad('You need more Arcane runes for a spell');
@@ -448,7 +449,7 @@ function monsterAttack(f, m, ps, sty) {
   if (f.poison) { const pd = f.poison * Math.max(1, Math.round(ps.max * .12)); f.hp -= pd; DQ.splat('foe', pd, 'hit poison', 300); fxHit('poisontick'); if (f.hp <= 0) { kill(m); return 'dead'; } }
   if (f.stun) { f.stun = 0; DQ.splat('foe', 'Stunned', 'miss', 600); return; }
   if (U.roar && !f.roared) { f.roared = 1; fxHit('roar'); DQ.splat('you', 'Roar!', 'miss', 600); return; }
-  const special = m.boss && m.boss.special && f.ma % m.boss.special.every === 0, sp = special && m.boss.special;
+  const bm = m.boss || m.mini, special = bm && bm.special && f.ma % bm.special.every === 0, sp = special && bm.special;
   if (special && A('bash') && f.ma - (f.lastBash || -99) >= 8) { f.lastBash = f.ma; if (!DQ.forecasting) beastNote('answered', m.id); DQ.splat('you', 'Bash!', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your shield bash interrupts ${sp.name}!`, 'good'); return; }
   if (special && A('ward') && f.ma - (f.lastWard || -99) >= 6) { f.lastWard = f.ma; if (!DQ.forecasting) beastNote('answered', m.id); DQ.splat('you', 'Ward', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your ward absorbs ${sp.name}.`, 'good'); return; }
   if (DQ.trick && DQ.trick('heckle') && !f.heckled && f.ma >= 2) { f.heckled = 1; fxHit('heckle'); DQ.splat('you', 'Oi!', 'miss', 600); if (!DQ.sim.on) DQ.trickNote('heckled it into missing!', document.getElementById('av-foe')); return; }
@@ -476,7 +477,7 @@ function monsterAttack(f, m, ps, sty) {
   if (S().hp <= 0 && U.laststand && !f.last) { f.last = 1; S().hp = 1; fxHit('laststand'); DQ.splat('you', 'Last stand!', 'miss', 1000); }
   if (taken) setTimeout(() => DQ.sfx('hurt'), 900);
   if (special && !DQ.sim.on) { DQ.log(`${m.name} unleashes ${sp.name}!`, 'bad'); DQ.emit('bossSpecial', m); }
-  if (!DQ.sim.on && m.boss && m.boss.special) DQ.emit('bossTell', m, (f.ma + 1) % m.boss.special.every === 0);
+  if (!DQ.sim.on && (m.boss || m.mini) && (m.boss || m.mini).special) DQ.emit('bossTell', m, (f.ma + 1) % (m.boss || m.mini).special.every === 0);
   if (S().hp <= 0) { die(); return 'dead'; }
   if (special && !DQ.forecasting) beastNote('answered', m.id);
   if (f.hp <= 0) { kill(m); return 'dead'; }
@@ -495,11 +496,11 @@ function kill(m) {
   if (f && !DQ.forecasting) { const wr = DQ.weakOf(m, f); if (f.lastEl && wr.weak.includes(f.lastEl)) beastNote('weakWins', m.id); } S().stats.kill++; if (DQ.act) DQ.act.count++;
   const c = Math.round(rnd(m.coins[0], m.coins[1]) * DQ.coinMult()); DQ.addCoins(c);
   const loot = c ? [`${fmt(c)} coins`] : [], got = [], drops = [];
-  const first = m.boss && !(S().towns[m.town] && S().towns[m.town].boss);
+  const first = m.boss && !(S().towns[m.town] && S().towns[m.town].boss), firstMini = m.mini && !(S().minis && S().minis[m.id]);
   if (DQ.uniqueFx().fortune) fxHit('fortune');
   let extraCoins = 0;
   for (const [id, [a, b], p] of m.drops) {
-    const guaranteed = first && m.boss.first === id;
+    const guaranteed = (first && m.boss.first === id) || (firstMini && m.mini.first === id);
     /* weapons and armour for a skill you have not learned yet (bows before Ranged, staves before Magic) do not drop */
     if (!guaranteed && D.ITEMS[id] && (D.ITEMS[id].type === 'gear' || D.ITEMS[id].type === 'ammo') && DQ.lockedSkillFor(id)) continue;
     const uniq = !m.boss && D.ITEMS[id] && D.ITEMS[id].unique, found = S().uniqFound = S().uniqFound || {};
@@ -538,6 +539,13 @@ function kill(m) {
       /* a first victory ends the fight: no instant rematch at whatever health is left (repeat fights for loot continue) */
       if (!DQ.forecasting) { if (DQ.creatureGainXp) DQ.creatureGainXp(m); DQ.stopAct(true); return; }
     }
+  }
+  /* a mini-boss: the first victory is recorded and noted, and ends the fight like a boss's */
+  if (firstMini) {
+    S().minis = S().minis || {}; S().minis[m.id] = true;
+    if (!DQ.sim.on && !DQ.forecasting) { DQ.sfx('boss'); DQ.notify({ kind: 'boss', key: 'mini:' + m.id, icon: 'skull', col: '#f3d58a', title: `${m.mini.short} is defeated`, text: m.mini.won || `${D.TOWN[m.town].name} breathes a little easier.`, burst: true }); DQ.log(`${m.name} falls.`, 'quest'); }
+    DQ.achDirty = true;
+    if (!DQ.forecasting) { if (DQ.creatureGainXp) DQ.creatureGainXp(m); DQ.stopAct(true); return; }
   }
   if (DQ.creatureGainXp) DQ.creatureGainXp(m);
   const next = DQ.nextEncounter && DQ.nextEncounter(m);

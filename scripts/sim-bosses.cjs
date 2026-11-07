@@ -20,13 +20,13 @@ const q = ctx.DQ; q.notify = q.pulse = q.floatAt = q.flash = q.burstAt = q.burst
 q.ui = { V: {}, DO: {}, B: {}, homeSections: [], render() {}, tabState: () => null }; q.tips = { item: () => '' }; q.goals = () => [];
 ['research', 'journey'].forEach(load);
 /* the same gameplay systems the shipped page composes on top: field guide, enchantments, adventures, companion tricks */
-for (const n of ['lore', 'hunting', 'bestiary', 'skill_expansion', 'adventures', 'companions']) { try { load(n); } catch (e) { console.error('sim-bosses: could not load ' + n + ': ' + e.message); process.exit(1); } }
+for (const n of ['lore', 'hunting', 'minibosses', 'bestiary', 'skill_expansion', 'adventures', 'companions']) { try { load(n); } catch (e) { console.error('sim-bosses: could not load ' + n + ': ' + e.message); process.exit(1); } }
 const D = q.data;
 if (process.env.MELEE_K) D.STYLE_TUNE.meleeLevel = +process.env.MELEE_K;
 const cookLvl = id => { const r = Object.values(D.RECIPES).find(r => r.out && r.out[id]); return r ? r.lvl : 1; };
 const run = (boss, extra, useCounter) => {
   q.S = q.newState(); const S = q.S; S.settings.notify = false; q.fxDirty();
-  const req = boss.boss.req + extra; let L = 1;
+  const req = (boss.boss || boss.mini).req + extra; let L = 1;
   const setL = n => ['attack', 'strength', 'defence', 'hitpoints'].forEach(k => { S.xp[k] = D.XPF[Math.max(10, n)] || 0; });
   while (L < 99) { setL(L); if (q.combatLvl() >= req) break; L++; }
   if (q.lvl('hitpoints') < 10) S.xp.hitpoints = D.XPF[10];
@@ -165,7 +165,8 @@ if (process.env.COUNTER) {
   process.exit(0);
 }
 console.log('boss          req  combat lv  hp  food (heal)          win%  food/kill  time   +3 levels');
-for (const b of D.MONLIST.filter(m => m.boss)) {
+/* mini-bosses (js/minibosses.js) sit on the same ladder, in level order with the bosses */
+for (const b of D.MONLIST.filter(m => m.boss || m.mini).sort((x, y) => x.cl - y.cl)) {
   const a = run(b, 0), c = run(b, 3);
-  console.log(`${b.id.padEnd(13)} ${String(b.boss.req).padEnd(4)} ${String(a.combat).padEnd(6)} ${String(a.L).padEnd(3)} ${String(a.hp).padEnd(3)} ${(a.food + ' (' + a.heal + ')').padEnd(20)} ${String(a.win).padEnd(5)} ${String(a.fpk).padEnd(10)} ${a.t.padEnd(6)} ${c.win}%  ${process.env.GEAR ? a.gear : ""}`);
+  console.log(`${(b.mini ? '·' + b.id : b.id).padEnd(13)} ${String((b.boss || b.mini).req).padEnd(4)} ${String(a.combat).padEnd(6)} ${String(a.L).padEnd(3)} ${String(a.hp).padEnd(3)} ${(a.food + ' (' + a.heal + ')').padEnd(20)} ${String(a.win).padEnd(5)} ${String(a.fpk).padEnd(10)} ${a.t.padEnd(6)} ${c.win}%  ${process.env.GEAR ? a.gear : ""}`);
 }

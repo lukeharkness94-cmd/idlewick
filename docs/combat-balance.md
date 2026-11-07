@@ -48,3 +48,13 @@ play by `tests/ui-effects.cjs`; no change.
 
 Early bosses (Grubnash, Old Tusk, Barnacle) stay forgiving at their requirement for accessibility; their cost shows in
 food per kill rather than in losses.
+
+## Mini-bosses (Nov 2026)
+The climb from Grubnash (level 12, challenge from Combat 8) to Old Tusk (level 26, from Combat 18) had no named steps. Mossbarrow now has two challenges (`js/minibosses.js`), fought directly from the Challenges strip and never in random encounters:
+
+| | level | challenge from | special | weak / resists | first victory |
+|---|---|---|---|---|---|
+| Gnarlroot | 18 | Combat 13 | Root snare every 4th attack (x1.4) | fire, slash / crush, pierce | Iron shield |
+| The Rookmother | 22 | Combat 16 | Diving strike every 3rd attack (x1.4) | pierce, storm / crush | Iron platebody |
+
+`node scripts/sim-bosses.cjs` (ladder now includes mini-bosses, marked ·) at the requirement with region melee gear: Grubnash 100% (1.3 food/kill), Gnarlroot 100% (7.8), Rookmother 100% (9.2), Old Tusk 100% (8.6). Each is a real food-and-preparation step without being a wall. Quests: Roots in the Orchard (Granny Bramble, Hero 12) and The Rookmother (Hunter Wynn, Hero 15).
