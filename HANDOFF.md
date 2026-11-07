@@ -30,6 +30,7 @@ Shop prices use `UI.money(amount)`: a small visible coin and formatted amount, w
 - Stage 2 (Nov 2026): choice cards stack (art on top, short text below; locked = ??? + "Lv 26 · Reach Saltmere", full text in tooltip). Pixel snapping fits both width and height. Desktop shell for every page: window never scrolls; Quests list + detail; Scholarship summary left / projects right; long lists scroll in Exploration, Shop, Map, Skill levels; Combat: `.combat-top` (arena, arena controls, style strip | creature list scrolling in place) stays on screen; `.combat-more` (fighter, abilities, food | preparation, boss, loot) scrolls beneath, min 96px; very short windows fall back to the content area scrolling.
 - Stage 3 (Nov 2026): whole-page scaling to a 1920 × 1080 design (`js/scale.js`); Combat in three columns; House rebuilt around the pixel cottage with furniture cards; one `#pagebar` row for page tabs, Back-to link and pinned quests; skill-row action counts sit after the skill name.
 - Backdrops (Nov 2026): `js/backdrop.js` paints 18 scenes (2 everyday choices + 16 combat areas) into cached data URLs; html.has-backdrop + --backdrop; Settings → Backdrop.
+- Folk (Nov 2026): 27 quest givers in `D.FOLK` with portraits and notes; Quests hub gains a People tab; S.folkSeen tracks notes already announced (first sync on an old save is silent).
 - Next stages: paged choices with a context panel, Quests as list + detail, Combat and Scholarship fitted to one screen, page merges, a 1280 × 720 fit test.
 
 ## Latest navigation, artwork and controls

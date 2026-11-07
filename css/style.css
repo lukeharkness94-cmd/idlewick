@@ -2652,3 +2652,37 @@ html.has-backdrop #app .panel :is(.panel,.illustrated-card){background-color:col
 .bd-opt img{width:240px;height:135px;border-radius:8px;image-rendering:pixelated}
 .bd-opt.on{border-color:var(--brass);box-shadow:0 0 0 1px var(--brass)}
 html.has-backdrop .sidebar .dock .dk-h{background:none!important}
+/* Quest givers' faces (js/folk.js): on quest rows, the quest card and the People page. */
+.folk-face{image-rendering:pixelated;display:block}
+.qrow{grid-template-columns:44px minmax(0,1fr) auto}
+.qr-face{position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:10px;background:color-mix(in srgb,var(--brass) 10%,var(--ground));border:1px solid var(--line2);overflow:hidden}
+.qr-face .folk-face{width:40px;height:40px}
+.qr-main{position:absolute;right:-1px;bottom:-1px;display:grid;place-items:center;width:18px;height:18px;border-radius:6px;background:var(--panel)}
+.qr-main .ic{width:14px!important;height:14px!important}
+.quest-head{display:flex;align-items:center;gap:14px}
+.quest-head>div{flex:1;min-width:0}
+.quest-face{flex:none;padding:0;border:2px solid color-mix(in srgb,var(--brass) 50%,var(--line2));border-radius:14px;background:color-mix(in srgb,var(--brass) 10%,var(--ground));overflow:hidden;cursor:pointer;line-height:0}
+.quest-face:hover{border-color:var(--brass)}
+.quest-face .folk-face{width:96px;height:96px}
+.folk-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,520px);gap:14px;align-items:start;min-height:0}
+.folk-list{margin:0;min-width:0}
+.folk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:10px}
+.folk-card{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--ink);cursor:pointer;text-align:center}
+.folk-card .folk-face{width:64px;height:64px;border-radius:10px;background:color-mix(in srgb,var(--brass) 10%,var(--ground))}
+.folk-card b{font:700 15px var(--f-ui)}.folk-card small{color:var(--mute);font-size:13.5px}
+.folk-card.on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 12%,var(--panel2))}
+.folk-detail{margin:0;display:flex;flex-direction:column;gap:10px}
+.folk-head{display:flex;align-items:center;gap:16px}
+.folk-head .folk-face.big{width:128px;height:128px;border-radius:16px;border:2px solid color-mix(in srgb,var(--brass) 50%,var(--line2));background:color-mix(in srgb,var(--brass) 10%,var(--ground))}
+.folk-head h2{margin:0}.folk-head small{color:var(--mute)}
+.folk-notes{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.folk-notes li{padding:10px 12px;border-left:3px solid var(--brass);background:var(--panel2);border-radius:0 10px 10px 0;line-height:1.45}
+.folk-quests{display:flex;flex-wrap:wrap;gap:6px}
+@media (min-width:861px){
+  #app>main>#view:has(> .folk-layout){overflow:hidden;display:flex!important;flex-direction:column}
+  #view>.folk-layout{flex:1 1 auto;min-height:0;align-items:stretch}
+  #view>.folk-layout>.folk-list{display:flex;flex-direction:column;min-height:0}
+  #view>.folk-layout>.folk-list>.folk-grid{flex:1 1 auto;min-height:0;overflow-y:auto;align-content:start;padding:2px}
+  #view>.folk-layout>.folk-detail{min-height:0;overflow-y:auto}
+}
+@media (max-width:860px){.folk-layout{grid-template-columns:minmax(0,1fr)}}
