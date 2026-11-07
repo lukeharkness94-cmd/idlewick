@@ -120,7 +120,7 @@ DQ.actionCount = page => {
   if (page === 'quests') return D.QUESTS.filter(q => ['new', 'ready'].includes(DQ.questState(q))).length;
   if (page === 'projects') return Object.entries(D.PROJECTS || {}).filter(([id, p]) => p.town === s.town && !s.projects[id] && DQ.canAfford(p.cost)).length;
   if (page === 'farming' && DQ.skillUnlocked('farming')) return s.farm.plots.filter(DQ.plotRipe).length + s.farm.animals.filter(a => a.stored > 0).length;
-  if (page === 'research' && DQ.advLvl() >= D.RESEARCH_ADV && DQ.researchSlots) {
+  if (page === 'research' && DQ.scholarOpen && DQ.scholarOpen() && DQ.researchSlots) {
     const free = DQ.researchSlots() - (s.research?.active || []).length;
     return Math.max(0, Math.min(free, D.TECHS.filter(t => !DQ.techReason(t) && DQ.techCanAfford(t)).length));
   }

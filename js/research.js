@@ -4,7 +4,8 @@
 const DQ = window.DQ, D = DQ.data, UI = DQ.ui, { $, $$, ico, fmt, esc } = DQ;
 const S = () => DQ.S, GT = () => S().gameTime || 0;
 const MIN = 60000;
-D.RESEARCH_ADV = 16;                       /* Hero level that opens the Research hall */
+D.RESEARCH_ADV = 16;                       /* legacy: Scholarship now opens through its skill unlock (DQ.scholarOpen) */
+DQ.scholarOpen = () => DQ.skillUnlocked('research');
 D.TECH_TIER_ADV = [0, 16, 28, 45, 65];
 D.SCHOLAR_TIER = [0, 1, 10, 20, 30];
 DQ.researchXp = t => t.mins * 30 * t.tier;
@@ -70,7 +71,7 @@ DQ.techDone = id => !!R().done[id];
 DQ.researchSlots = () => 1 + (DQ.lvl('research') >= 20 || DQ.advLvl() >= 40 ? 1 : 0);
 DQ.techReason = t => {
   if (DQ.techDone(t.id)) return 'done'; if (R().active.some(a => a.id === t.id)) return 'active';
-  if (DQ.advLvl() < D.RESEARCH_ADV) return `Hero level ${D.RESEARCH_ADV}`;
+  if (!DQ.scholarOpen()) return 'Learn Scholarship first';
   if (DQ.lvl('research') < D.SCHOLAR_TIER[t.tier]) return `Scholarship ${D.SCHOLAR_TIER[t.tier]}`;
   const miss = t.req.find(r => !DQ.techDone(r)); if (miss) return `Needs ${D.TECH[miss].name}`;
   return '';
@@ -150,15 +151,15 @@ DQ.on('research', () => { if (['research', 'brewery'].includes(UI.view)) UI.refr
 
 /* locked until the Research hall opens, with a preview */
 const rpage = UI.V.research;
-UI.V.research = () => DQ.advLvl() < D.RESEARCH_ADV ? UI.teaser({ ic: 'rune', title: 'Scholarship', adv: D.RESEARCH_ADV, col: '#b08aff', blurb: 'Study new methods and brew potions.', bullets: ['Projects take time and keep running while you are away', 'Permanent boosts: faster gathering, bigger packs, more coins and more', 'Unlock potions for timed boosts: haste, might, fortune and more'] }) : rpage();
+UI.V.research = () => !DQ.scholarOpen() ? UI.lockedPage('research') : rpage();
 const ts0 = UI.tabState;
-UI.tabState = p => p === 'research' ? (DQ.advLvl() < D.RESEARCH_ADV ? { lock: D.RESEARCH_ADV } : (S().seenTabs && S().seenTabs.research ? null : { fresh: true })) : ts0(p);
-const prevR = UI.render; UI.render = fresh => { prevR(fresh); if (UI.view === 'research' && DQ.advLvl() >= D.RESEARCH_ADV) { S().seenTabs = S().seenTabs || {}; S().seenTabs.research = 1; } };
+UI.tabState = p => p === 'research' ? (!DQ.scholarOpen() ? { lock: true } : (S().seenTabs && S().seenTabs.research ? null : { fresh: true })) : ts0(p);
+const prevR = UI.render; UI.render = fresh => { prevR(fresh); if (UI.view === 'research' && DQ.scholarOpen()) { S().seenTabs = S().seenTabs || {}; S().seenTabs.research = 1; } };
 
 /* Up next suggests a project when a slot is free */
 const goals = DQ.goals;
 DQ.goals = (...a) => {
-  const g = goals(...a); if (DQ.advLvl() < D.RESEARCH_ADV || R().active.length >= DQ.researchSlots()) return g;
+  const g = goals(...a); if (!DQ.scholarOpen() || R().active.length >= DQ.researchSlots()) return g;
   const ready = D.TECHS.filter(t => !DQ.techReason(t) && DQ.techCanAfford(t)); if (!ready.length) return g;
   return [{ id: 'research', cat: 'Research', icon: 'rune', col: '#b08aff', title: 'Start a research project', sub: `${ready.length} project${ready.length > 1 ? 's' : ''} ready, such as ${ready[0].name}`, pct: 1, ready: true, go: 'research' }].concat(g);
 };

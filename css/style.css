@@ -2322,3 +2322,10 @@ p{font-size:inherit}
 /* slightly heavier text (Alegreya Sans 500, bundled): the 400 weight read thin at the new sizes */
 body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
 .btn,.tab,.stab,.chip,.choice-button,.tog{font-weight:700}
+/* locked content is blacked out: a dark silhouette and the requirement, never the name or the artwork */
+.blackout img,.blackout .ic,.blackout .gico,.blackout canvas{filter:brightness(0) opacity(.75)!important}
+.illustrated-card.locked{filter:none!important;opacity:1!important;cursor:not-allowed}
+.illustrated-card.locked b{color:var(--mute);letter-spacing:.1em}
+.illustrated-card.locked small{color:var(--ink);display:flex;gap:5px;align-items:center}.illustrated-card.locked small .ic{width:14px;height:14px;flex:none}
+.locked-why{display:flex;gap:6px;align-items:center;color:var(--ink)}.locked-why .ic{width:16px;height:16px}
+.activity-stage .blackout img{filter:brightness(0) opacity(.6)!important}

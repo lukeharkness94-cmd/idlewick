@@ -32,7 +32,7 @@ const TEASERS = {
   const orig = UI.V[k], need = () => k === 'house' ? D.HOUSE.adv : D.HIRE.adv;
   UI.V[k] = () => DQ.advLvl() < need() ? UI.teaser(TEASERS[k]()) : orig();
 });
-/* planning (pace, stop rules, the queue) arrives at Hero level 5 */
+/* planning (pace, stop rules, the queue) arrives at Hero level D.PLAN_ADV (8) */
 const origPlan = UI.planHtml;
 UI.planHtml = () => DQ.planUnlocked() ? origPlan() : UI.teaser({ ic: 'clock', title: 'Task planning', adv: D.PLAN_ADV, col: '#8fc7ff', blurb: 'Tell your hero how to work, and what to do next.', bullets: ['Pace: careful, steady or pushing hard', 'Stop rules: for 30 minutes, until 200 done, until the next level', 'A queue, so the next task starts by itself, even while you are away'] });
 

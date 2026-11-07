@@ -192,7 +192,7 @@ test('project and research badges disappear when resources or slots are unavaila
   q.S.coins=1e8;for(const id of Object.keys(q.data.ITEMS))q.S.bank[id]=100000;
   assert.equal(q.noticeCount('projects'),q.projectsForTown(q.S.town).length);
   q.S.coins=0;assert.equal(q.noticeCount('projects'),0);
-  q.S.coins=1e8;for(const sk of Object.keys(q.S.xp))q.S.xp[sk]=100000;
+  q.S.coins=1e8;for(const sk of Object.keys(q.S.xp))q.S.xp[sk]=100000;q.S.unlocked.research=true;
   assert.ok(q.noticeCount('research')>0);
   q.S.research.active=Array.from({length:q.researchSlots()},()=>({id:q.data.TECHS[0].id,left:100}));
   assert.equal(q.noticeCount('research'),0);
@@ -333,7 +333,7 @@ test('Scholarship projects award XP once and field notes can repeat',()=>{
  q.researchTick(300000);assert.equal(q.S.xp.research,xp);assert.equal(q.startResearch('field_notes'),true);q.researchTick(300000);assert.ok(q.S.xp.research>xp);
 });
 test('Scholarship gates tiers by skill level and retains legacy second slots',()=>{
- const {q}=harness();q.S.xp.fishing=q.data.XPF[70];const t=q.data.TECHS.find(t=>t.tier===2);
+ const {q}=harness();q.S.xp.fishing=q.data.XPF[70];q.S.unlocked.research=true;const t=q.data.TECHS.find(t=>t.tier===2);
  assert.match(q.techReason(t),/Scholarship 10/);q.S.xp.research=q.data.XPF[10];for(const id of t.req)q.S.research.done[id]=1;assert.equal(q.techReason(t),'');
  assert.equal(q.researchSlots(),2);q.S.xp.fishing=0;q.S.xp.research=q.data.XPF[20];assert.equal(q.researchSlots(),2);
 });
@@ -503,6 +503,17 @@ test('practical skill unlocks: requirements, routes, consumption, no cycles, old
  const st=o.S;st.xp.fishing=o.data.advReq(7);delete st.unlockRules;st.unlocked={};const raw=JSON.stringify(st);const back=o.validateSave(JSON.parse(raw));
  assert.equal(back.unlocked.mining,true);assert.equal(back.unlocked.cooking,true);assert.equal(back.unlockRules,2);
  const fresh=o.newState('Fresh');fresh.xp.fishing=o.data.advReq(7);const again=o.validateSave(JSON.parse(JSON.stringify(fresh)));assert.ok(!again.unlocked.mining,'new-rule heroes are not given Mining by Hero level');
+});
+test('every unlock has one source of truth: once a skill says it is learned, its page and content open',()=>{
+ const {q,load}=harness();load('skill_expansion');const S=q.S,D=q.data;
+ /* the reported case: Scholarship learned at Hero 12 with 8 creatures studied must open the Research hall, not ask for Hero 16 */
+ S.xp.fishing=D.advReq(12);['chicken','rat','goblin','cow','brambleback','lanternmoth','rilljaw','tattercap'].forEach(m=>S.beast.kills[m]=1);
+ q.checkActionUnlocks();assert.equal(q.skillUnlocked('research'),true);assert.ok(q.advLvl()<16);
+ const t1=D.TECHS.find(t=>t.tier===1&&!(t.req||[]).length);assert.notEqual(q.techReason(t1),'Learn Scholarship first');assert.ok(!/Hero level/.test(String(q.techReason(t1))),'no stale Hero 16 gate');
+ assert.equal(q.lessonForPage('research')&&q.lessonForPage('research').id,'research','its guide is offered once it is learned');
+ /* while locked, every description points at the same requirements */
+ const {q:r,load:l2}=harness();l2('skill_expansion');assert.equal(r.skillUnlocked('research'),false);assert.equal(r.techReason(t1),'Learn Scholarship first');assert.equal(r.lessonForPage('research'),null);
+ for(const s of D.SKILLS){const how=r.unlockHow(s.id),teach=r.skillTeacher(s.id);if(!r.skillUnlocked(s.id)){assert.ok(how&&how.length>3,s.id+' explains its unlock');assert.ok(!/Hero level 16|Hero 16/.test(how+teach),s.id+' quotes no stale gate');}}
 });
 test('unique gear: effects are real, first copies have a bad-luck guarantee, stats stay modest',()=>{
  const {q}=harness();const S=q.S,D=q.data;

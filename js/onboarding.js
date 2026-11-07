@@ -45,7 +45,7 @@ DQ.lessonForPage=page=>{
   if(!lessons[skill]||S().tut.done['lesson:'+skill])return null;
   if(S().tut.hidden&&!S().seen['tutorial:'+skill])return null;
   if(D.SK[skill]&&!DQ.skillUnlocked(skill))return null;
-  if(skill==='house'&&DQ.advLvl()<D.HOUSE.adv||skill==='hirelings'&&DQ.advLvl()<D.HIRE.adv||skill==='research'&&DQ.advLvl()<D.RESEARCH_ADV)return null;
+  if(skill==='house'&&DQ.advLvl()<D.HOUSE.adv||skill==='hirelings'&&DQ.advLvl()<D.HIRE.adv||skill==='research'&&!DQ.skillUnlocked('research'))return null;
   return {id:skill,...lessons[skill]};
 };
 DQ.acknowledgeLesson=id=>{DQ.initGuides();if(!lessons[id])return false;S().tut.done['lesson:'+id]=true;delete S().seen['tutorial:'+id];DQ.save();return true;};

@@ -116,7 +116,7 @@ set('herbalism', { harvest: 20, 'skill:farming': 10 });
 set('exploration', { catch: 25, chop: 25, 'visit:mossbarrow': 1 });
 /* starter routes that no longer ask for the skill they unlock */
 const mp = D.QM.miners_pick; if (mp) { mp.adv = 3; mp.blurb = 'Brannoc’s old mine is full of rats and its props are rotten. Clear the rats and bring timber, and he will hand you his spare pickaxe so you can learn Mining.'; mp.obj = [{ ev: 'chop', key: 'normal', n: 10, label: 'Chop 10 logs for new pit props' }, { ev: 'kill', key: 'rat', n: 4, label: 'Clear 4 rats from the old mine' }]; }
-const mc = D.QM.mq_crafting; if (mc) { mc.adv = 8; mc.obj = mc.obj.map(o => o.ev === 'chop' && o.key === 'birch' ? { ev: 'chop', key: 'normal', n: 15, label: 'Chop 15 logs for her frames' } : o); }
+const mc = D.QM.mq_crafting; if (mc) { mc.adv = 8; D.SK.crafting.unlock = 8; mc.obj = mc.obj.map(o => o.ev === 'chop' && o.key === 'birch' ? { ev: 'chop', key: 'normal', n: 15, label: 'Chop 15 logs for her frames' } : o); }
 })();
 
 (() => {
