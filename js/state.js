@@ -18,7 +18,7 @@ DQ.invDirty = false;
 DQ.newState = (name = 'Adventurer', look) => {
   const xp = {}; D.SKILLS.forEach(s => xp[s.id] = 0); xp.hitpoints = D.XPF[10];
   return {
-    journey: 'boss', projects: {}, pinnedProject: null, noticeBadges: {},
+    journey: 'boss', projects: {}, projectGiven: {}, pinnedProject: null, noticeBadges: {},
     v: 2, name, look: look || { skin: D.LOOKS.skin[0], hair: D.LOOKS.hair[1], tunic: D.LOOKS.tunic[0], face: 'bright' },
     created: Date.now(), lastSeen: Date.now(), playtime: 0, awayMs: 0, awayEff: 0, tele: { adv: {}, skill: {}, first: {}, away: [], sessions: 0 }, seenTabs: {}, disc: {}, lastAway: null, exportedAt: 0, snoozeBk: 0, title: null, research: { done: {}, active: [] },
     xp, coins: 25, hp: 10, inv: { bread: 5 }, bank: {}, equip: { weapon: 'bronze_sword' }, ammo: { id: null, n: 0 },
@@ -74,6 +74,11 @@ function candidateState(o) {
   /* A pin is only a display preference: any defined project (village, regional or relic) is kept; an unknown or obsolete
      one is cleared rather than rejecting an otherwise valid hero. Saves rejected by the old well/inn-only rule now load. */
   if (result.pinnedProject !== null && !(typeof result.pinnedProject === 'string' && Object.prototype.hasOwnProperty.call(D.PROJECTS || {}, result.pinnedProject))) result.pinnedProject = null;
+  /* partial deliveries to projects: unknown projects or items are dropped, quantities must be whole and non-negative */
+  if (!result.projectGiven || typeof result.projectGiven !== 'object' || Array.isArray(result.projectGiven)) result.projectGiven = {};
+  for (const [pid, g] of Object.entries(result.projectGiven)) { const pj = (D.PROJECTS || {})[pid];
+    if (!pj || !g || typeof g !== 'object' || result.projects[pid]) { delete result.projectGiven[pid]; continue; }
+    for (const [k, n] of Object.entries(g)) if (!(k in pj.cost) || !Number.isFinite(n) || n < 0) delete g[k]; else g[k] = Math.min(Math.floor(n), pj.cost[k]); }
   if (!D.TOWN[result.town]) throw new Error('Unknown town');
   if (Object.values(result.equip).some(id => id && !D.ITEMS[id])) throw new Error('Unknown equipment');
   if (result.workers.some(w => !record(w)) || result.farm.animals.some(a => !record(a) || !D.ANIMAL[a.id])) throw new Error('Invalid worker or animal');

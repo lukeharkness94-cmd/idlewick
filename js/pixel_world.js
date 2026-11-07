@@ -351,7 +351,7 @@ function emblemSprite(id) { const f = EMBLEM[id]; if (!f) return null; const s =
 Object.assign(A, { EMBLEM, emblemSprite, emblemUrl: id => EMBLEM[id] ? A.url('emblem:' + id, () => emblemSprite(id)) : null });
 
 Object.assign(A, { trophySprite, trophyUrl: (id, gilded) => A.url('trophy:' + id + (gilded ? ':gold' : ''), () => trophySprite(id, gilded)) });
-Object.assign(A, { workerSprite, treeSprite, rockSprite, piece, sceneFor, furnSprite, iconSprite, TREE, TOWN, ICON, ICON_ALIAS,
+Object.assign(A, { workerSprite, treeSprite, rockSprite, piece, sceneFor, landmark, furnSprite, iconSprite, TREE, TOWN, ICON, ICON_ALIAS,
   treeUrl: id => A.url('tree:' + id, () => treeSprite(id)), rockUrl: id => A.url('rock:' + id, () => rockSprite(id)),
   furnUrl: (id, ic) => A.url('furn:' + id, () => furnSprite(id, ic)), workerUrl: sk => A.url('worker:' + sk, () => workerSprite(sk)), cottageUrl: () => A.url('cottage', () => A.sprites.cottage()), iconUrl: id => A.url('icon:' + id, () => iconSprite(id)) });
 })();

@@ -2744,3 +2744,14 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 .quest-rec{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
 .quest-rec .k{margin-right:4px}
 .quest-rec .qrec{font-size:14px;padding:2px 9px}
+
+/* Restoration projects are built in deliveries (Nov 2026) */
+.proj-stage{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;margin:6px 0 10px}
+.proj-stage .bar{height:8px}
+.proj-lines{display:grid;gap:8px;margin-bottom:10px}
+.proj-line{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:10px;padding:6px 8px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.proj-line.ok{border-color:color-mix(in srgb,#5cc08a 40%,var(--line))}
+.proj-line .proj-t{display:grid;gap:2px;min-width:0}
+.proj-line .proj-t small{color:var(--mute);font-size:14px}
+.proj-line .bar{height:5px}
+.proj-ic{display:grid;place-items:center;width:36px;height:36px}

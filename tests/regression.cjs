@@ -191,8 +191,9 @@ test('project and research badges disappear when resources or slots are unavaila
   const {q,load}=harness();load('fx');
   q.S.coins=1e8;for(const id of Object.keys(q.data.ITEMS))q.S.bank[id]=100000;
   assert.equal(q.noticeCount('projects'),q.projectsForTown(q.S.town).length);
-  q.S.coins=0;assert.equal(q.noticeCount('projects'),0);
-  q.S.coins=1e8;for(const sk of Object.keys(q.S.xp))q.S.xp[sk]=100000;q.S.unlocked.research=true;
+  q.S.coins=0;assert.equal(q.noticeCount('projects'),q.projectsForTown(q.S.town).length,'materials can be delivered without coins');
+  q.S.bank={};q.S.inv={};assert.equal(q.noticeCount('projects'),0,'nothing to deliver, nothing to count');
+  for(const id of Object.keys(q.data.ITEMS))q.S.bank[id]=100000;q.S.coins=1e8;for(const sk of Object.keys(q.S.xp))q.S.xp[sk]=100000;q.S.unlocked.research=true;
   assert.ok(q.noticeCount('research')>0);
   q.S.research.active=Array.from({length:q.researchSlots()},()=>({id:q.data.TECHS[0].id,left:100}));
   assert.equal(q.noticeCount('research'),0);
@@ -918,5 +919,14 @@ test('quests recommend a Hero, Combat and skill level worked out from their obje
   const deep=q.questRec(D.QM.deep_vein);assert.equal(deep.skill.sk,'mining');assert.ok(deep.skill.lvl>1);
   for(const x of D.QUESTS){const r=q.questRec(x);assert.ok(r.hero>=1&&Number.isFinite(r.combat),x.id);if(x.town!=='willowbrook')assert.ok(r.hero>1,x.id+' (adventures take their region\'s Hero level)');}
   assert.ok(q.questRecScore(D.QM.crownfall)>q.questRecScore(D.QM.first_steps),'late quests sort after early ones');
+});
+test('projects are built in deliveries: stages rise, saves keep partial work, completion grants the benefit', () => {
+  const {q}=harness();const S=q.S;S.town='willowbrook';S.inv.log_normal=12;S.coins=0;
+  assert.equal(q.projectStage('well'),0);assert.ok(q.projectGive('well','log_normal')>0);assert.equal(S.inv.log_normal||0,0,'logs handed over');
+  assert.equal(S.projectGiven.well.log_normal,12);assert.ok(q.projectStage('well')>=1&&q.projectStage('well')<4,'partly built');
+  assert.equal(q.projectNeed('well').log_normal,8);
+  const loaded=q.validateSave?q.validateSave(JSON.parse(JSON.stringify(S))):null;if(loaded)assert.equal(loaded.projectGiven.well.log_normal,12,'partial deliveries survive a save');
+  S.inv.log_normal=8;S.coins=25;assert.equal(q.finishProject('well'),true);assert.equal(S.projects.well,true);assert.ok(!S.projectGiven.well);assert.equal(q.projectStage('well'),4);
+  S.town='mossbarrow';S.inv.log_hazel=30;assert.equal(q.projectGive('moss_windmill','log_hazel'),30);assert.equal(q.projectStage('moss_windmill'),2,'one of three materials in: a third built');
 });
 console.log(tests+' regression checks passed');

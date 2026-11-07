@@ -35,8 +35,10 @@ Q.workerArt = skill => img(A.workerUrl(skill), 32, 32, 44, 'worker-art', skill +
 
 /* ---------- town scenes, with every restoration project in its current state ---------- */
 const scenes = {};
-Q.sceneUrl = id => { const pj = (Q.S && Q.S.projects) || {}, key = id + ':' + Object.keys(D.PROJECTS || {}).filter(k => D.PROJECTS[k].town === id).map(k => pj[k] ? 1 : 0).join('');
-  if (!scenes[key]) scenes[key] = A.sceneFor(id, pj).toDataURL(); return scenes[key]; };
+Q.sceneUrl = id => { const ids = Object.keys(D.PROJECTS || {}).filter(k => D.PROJECTS[k].town === id), stages = {};
+  for (const k of ids) stages[k] = Q.projectStage ? Q.projectStage(k) : ((Q.S && Q.S.projects && Q.S.projects[k]) ? 4 : 0);
+  const key = id + ':' + ids.map(k => stages[k]).join('');
+  if (!scenes[key]) scenes[key] = A.sceneFor(id, stages).toDataURL(); return scenes[key]; };
 UI.scene = (id, cls = '') => `<img class="scene pxscene pxa ${cls}" src="${Q.sceneUrl(id)}" alt="" draggable="false">`;
 
 /* ---------- the hero ---------- */
