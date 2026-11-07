@@ -9,7 +9,7 @@
       if (!grid) return;
       /* Two stable columns instead of height-based packing: the fight (live) on the left, everything else stacked in
          reading order on the right. Cards no longer jump between positions when the window is resized or zoomed. */
-      if (!grid.querySelector(':scope > .combat-side')) {
+      if (!grid.querySelector('.combat-side')) {
         const side = document.createElement('div'); side.className = 'combat-side';
         for (const card of [...grid.children]) if (!card.classList.contains('combat-live')) side.append(card);
         grid.append(side);

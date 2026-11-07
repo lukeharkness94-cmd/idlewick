@@ -2158,7 +2158,8 @@ body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)
 .fighter .cl-prog .bar{height:8px}.fighter .cl-prog .bar i{background:var(--brass)}.fighter .cl-prog small{color:var(--mute)}.fighter .cl-boost{color:var(--good)!important}
 /* Phones: one column in play order (fight, where to hunt, the foe, you, the boss, then supporting panels). */
 @media (max-width:899px){
-  .combat-dashboard>.combat-live,.combat-dashboard>.combat-side{display:contents}
+  .combat-dashboard>.combat-live,.combat-dashboard>.combat-side,.combat-dashboard .combat-top,.combat-dashboard .combat-more,.combat-dashboard .combat-col,.combat-dashboard .combat-top>.combat-live,.combat-dashboard .combat-more>.combat-side{display:contents}
+  .combat-dashboard .arena-ctl{order:1}.combat-dashboard .style-strip{order:1}
   .combat-dashboard{gap:10px}
   .combat-dashboard .arena{order:1}.combat-dashboard .combat-targets{order:2}.combat-dashboard .battle-brief{order:3}.combat-dashboard .fighter{order:4}
   .combat-dashboard .bosscard{order:5}.combat-dashboard .combat-supplies{order:6}.combat-dashboard .combat-live>.panel:not(.arena):not(.fighter):not(.combat-supplies){order:7}.combat-dashboard .lootp{order:8}.combat-dashboard .cl-key{order:9}
@@ -2497,8 +2498,6 @@ body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
   #view>.panel:has(> .skl){flex:1 1 auto!important;min-height:0;display:flex;flex-direction:column}
   #view>.panel>.skl{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin;align-content:start}
   /* Combat: the fight column and the areas/preparation column scroll separately; the page never does */
-  #view>.combat-dashboard{flex:1 1 auto!important;min-height:0;align-items:stretch!important}
-  #view>.combat-dashboard>:is(.combat-live,.combat-side){min-height:0;overflow-y:auto;scrollbar-width:thin;padding-right:4px}
 }
 @media (min-width:861px){
   #view>.scholarship-grid,#view>.panel>.area-grid,#view>.visual-shop>.shop-stock>.illustrated-choices,#view>.panel>.skl,.qlist{grid-auto-rows:max-content!important;grid-template-rows:none!important}
@@ -2514,3 +2513,44 @@ body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
   #view:has(> .scholarship-grid)>.page-help{grid-column:1 / -1;grid-row:3}
   #view:has(> .scholarship-grid)>:not(.skillhero,.scholarship-overview,.scholarship-grid,.page-help){grid-column:1 / -1}
 }
+
+/* Combat: the fight, its controls, your fighting style and the creatures to fight stay on screen together; everything
+   else (combat skills, abilities, food, preparation, boss, loot) scrolls underneath. */
+.style-strip{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:6px 8px;margin:0}
+.ss-weapon{display:flex;align-items:center;gap:8px;padding:4px 8px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--ink);text-align:left;cursor:pointer}
+.ss-weapon:hover{border-color:var(--brass)}
+.ss-weapon .ic{width:28px;height:28px}
+.ss-weapon span{display:flex;flex-direction:column;line-height:1.2}.ss-weapon b{font:700 15px var(--f-ui)}.ss-weapon small{font-size:13px;color:var(--mute)}
+.ss-train{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.ss-train .k{display:none}
+.ss-btn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:3px 9px 3px 5px;text-align:left}
+.ss-btn .ic{width:24px;height:24px}
+.ss-btn span{display:flex;flex-direction:column;line-height:1.15;font:600 14.5px var(--f-ui)}.ss-btn small{font:500 12.5px var(--f-body);color:var(--mute)}
+.ss-btn.on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 16%,var(--panel2));box-shadow:inset 0 0 0 1px var(--brass)}
+@media (min-width:900px){
+  .combat-dashboard{display:flex!important;flex-direction:column;gap:12px}
+  .combat-top,.combat-more{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:14px;align-items:start}
+  .combat-top{align-items:stretch}
+  .combat-top>.combat-live,.combat-more>.combat-col,.combat-more>.combat-side{display:flex;flex-direction:column;gap:10px;min-width:0}
+  .combat-top>.combat-targets{contain:size;overflow-y:auto;scrollbar-width:thin;min-height:0;padding:2px}
+  .combat-top>.combat-targets>*{margin:0}
+}
+@media (min-width:900px) and (min-width:1800px){.combat-more>.combat-side{display:grid!important;grid-template-columns:none}}
+@media (min-width:861px){
+  #app>main>#view:has(> .combat-dashboard){overflow-y:auto;display:flex!important;flex-direction:column;gap:12px}
+  #view>.combat-dashboard{flex:1 1 0!important;min-height:0}
+  #view>.combat-dashboard>.combat-top{flex:none}
+  #view>.combat-dashboard>.combat-more{flex:1 1 auto;min-height:180px;overflow-y:auto;scrollbar-width:thin;padding:2px 4px 2px 2px;align-items:start}
+}
+.style-strip{flex-wrap:nowrap}
+.ss-weapon{flex:0 1 auto;min-width:0;max-width:170px}
+.ss-weapon span{min-width:0}.ss-weapon b,.ss-weapon small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ss-train{flex:1 1 auto;min-width:0;justify-content:flex-end}
+@media (max-width:1300px){.style-strip{flex-wrap:wrap}}
+@media (min-width:861px){
+  #view:has(> .combat-dashboard)>.page-help{position:fixed;right:18px;bottom:18px;z-index:6;margin:0}
+  #view>.combat-dashboard>.combat-more{min-height:96px!important}
+}
+@media (min-width:900px){.combat-dashboard>.combat-top,.combat-dashboard>.combat-more{align-self:stretch;width:100%}}
+.arena-ctl{flex-wrap:nowrap!important}.arena-ctl>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.arena-ctl>.btn{flex:none}
+@media (min-width:900px){.combat-top>.combat-live,.combat-top>.combat-targets,.combat-more>.combat-col,.combat-more>.combat-side{grid-column:auto!important;grid-row:auto!important}}
