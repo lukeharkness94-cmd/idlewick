@@ -2903,8 +2903,6 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
    menu bar, where they are hard to miss; a short message sits above the cards. Phones keep them above the bottom menu. */
 @media (min-width:861px){
   #notes{top:116px;bottom:auto!important;right:16px}
-  #fx .toast{top:116px;bottom:auto;left:auto;right:16px;transform:none;animation-name:toast-top}
-  #fx:has(.toast)+#notes{top:168px}
   #notes .note{animation-name:noteInTop}
 }
 @keyframes noteInTop{from{opacity:0;transform:translateY(-14px) scale(.97)}to{opacity:1;transform:none}}
@@ -2928,6 +2926,23 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
 .wb-next{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--brass) 45%,var(--line));background:color-mix(in srgb,var(--brass) 8%,var(--panel2))}
 .wb-next>div{display:grid;gap:2px;min-width:0}.wb-next small{color:var(--mute);font-size:14px}
 .wb-next img{border-radius:8px}
+
+/* Short messages (Nov 2026): at the bottom, or just above the button that was pressed, and always above pop-ups */
+#toastlayer{position:fixed;inset:0;pointer-events:none;z-index:300}
+.toast.at-btn{bottom:auto;transform:translate(-50%,-100%);animation-name:toast-near}
+@keyframes toast-near{0%{opacity:0;margin-top:6px}10%{opacity:1;margin-top:0}85%{opacity:1}100%{opacity:0}}
+/* the outcome of a choice from your time away, shown where the choice was */
+.ev-result{display:grid;gap:10px;padding:12px 14px;border-radius:12px;border:1px solid color-mix(in srgb,var(--c) 60%,var(--line));background:color-mix(in srgb,var(--c) 12%,var(--panel2));animation:qrv-pop .45s cubic-bezier(.2,1.4,.4,1) both}
+.ev-result.bad{--c:#e2574c}
+.ev-result .evr-head{display:flex;gap:10px;align-items:center}
+.ev-result .evr-head b{font-size:17px}
+.ev-result .evr-msg{margin:0}
+.evr-tiles{display:flex;flex-wrap:wrap;gap:8px}
+.evr-tile{display:grid;justify-items:center;gap:2px;min-width:96px;padding:8px 10px;border-radius:10px;background:var(--panel);border:1px solid var(--line2);animation:qrv-pop .45s cubic-bezier(.2,1.4,.4,1) both;animation-delay:calc(var(--i) * 140ms + 150ms)}
+.evr-tile b{font-size:19px}.evr-tile small{font-size:14px;color:var(--mute)}
+.evr-tile.loss b{color:#e2574c}.evr-tile.gain b{color:#5cc08a}
+.evr-tile .evr-art{display:grid;place-items:center;width:48px;height:48px}.evr-tile .evr-art .ic{width:32px;height:32px}
+@media (prefers-reduced-motion:reduce){.ev-result,.evr-tile{animation:none}}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -3254,6 +3269,7 @@ html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,ht
 <canvas id="confetti"></canvas>
 <div id="fx" aria-live="polite"></div>
 <div id="notes" aria-live="polite"></div>
+<div id="toastlayer" aria-live="polite"></div>
 
 <script>
 /* Idlewick: shared helpers and icon sprite. Everything hangs off window.DQ. */
@@ -8701,10 +8717,18 @@ function loop(now) {
 }
 
 /* ---------- toast ---------- */
+/* where the last button was pressed: its box and page at that moment (buttons are often redrawn by the press itself) */
+const lastPress = { rect: null, at: 0, view: null, modal: false };
+const press = b => { const r = b.getBoundingClientRect(); lastPress.rect = { left: r.left, top: r.top, width: r.width }; lastPress.at = performance.now(); lastPress.view = DQ.ui && DQ.ui.view; lastPress.modal = !!b.closest('.modal'); };
+document.addEventListener('pointerdown', e => { const b = e.target.closest && e.target.closest('button,[role="button"],a'); if (b) press(b); }, true);
+document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && document.activeElement && document.activeElement.closest('button')) press(document.activeElement); }, true);
 DQ.toast = (msg, bad) => {
   if (DQ.sim.on) return; if (bad) DQ.sfx('error');
   const t = document.createElement('div'); t.className = 'toast' + (bad ? ' bad' : ''); t.textContent = msg;
-  $$('.toast').forEach(x => x.remove()); fxEl.appendChild(t); setTimeout(() => t.remove(), 2600);
+  /* beside the button just pressed (within the last second and a half), otherwise at the bottom of the window */
+  const layer = document.getElementById('toastlayer') || fxEl, r = lastPress.rect, near = r && performance.now() - lastPress.at < 1500 && (DQ.ui && DQ.ui.view) === lastPress.view && lastPress.modal === !!document.querySelector('.modal');
+  if (near) { const z = DQ.toPage ? DQ.toPage : v => v; if (r.width) { t.classList.add('at-btn'); const W = z(innerWidth); t.style.left = Math.min(W - 180, Math.max(180, z(r.left + r.width / 2))) + 'px'; t.style.top = Math.max(60, z(r.top) - 8) + 'px'; } }
+  $$('.toast').forEach(x => x.remove()); layer.appendChild(t); setTimeout(() => t.remove(), 2600);
 };
 
 /* Routine progress stays in the interface and recent activity.
@@ -10200,14 +10224,17 @@ DQ.makeAwayEvents = (sum, away) => {
   const ctx = { topItem: top && DQ.sellable(top[0]) && D.ITEMS[top[0]].val * top[1] >= 40 ? top[0] : null, pushed: (S().lastPace === 'push'), died: sum.died };
   const n = Math.min(3, Math.max(1, Math.floor(away / (40 * 60000)))), pool = Object.entries(EVENTS).filter(([, e]) => e.ok(ctx)), out = [];
   if (ctx.pushed && EVENTS.injury.ok(ctx) && chance(.6)) { out.push('injury'); }
-  while (out.length < n && pool.length) { const k = DQ.weighted(pool.filter(([k]) => !out.includes(k)).map(([k, e]) => [k, e.w])); if (!k || out.includes(k)) break; out.push(k); }
+  while (out.length < n && pool.length) { const left = pool.filter(([k]) => !out.includes(k)); if (!left.length) break; const k = DQ.weighted(left.map(([k, e]) => [k, e.w])); if (!k || out.includes(k)) break; out.push(k); }
   S().inbox = S().inbox || [];
   out.forEach(k => S().inbox.push(Object.assign({ id: Date.now() + k, type: k, at: Date.now() }, EVENTS[k].make(ctx))));
   if (S().inbox.length > 6) S().inbox.splice(0, S().inbox.length - 6);
 };
 DQ.resolveEvent = (id, opt) => {
   const L = S().inbox || [], i = L.findIndex(e => e.id === id); if (i < 0) return; const e = L[i]; let msg = '', bad = false;
-  const coins = n => { DQ.addCoins(n); }, pay = n => { if (S().coins < n) { DQ.toast('Not enough coins', true); return false; } S().coins -= n; return true; };
+  /* what the choice actually did, measured rather than described: coins, health, items and effects before and after */
+  const snap = () => ({ coins: S().coins, hp: S().hp, items: Object.assign({}, S().inv, ...Object.entries(S().bank || {}).map(([k, n]) => ({ [k]: (S().inv[k] || 0) + n }))), buffs: DQ.buffs().map(b => b.name) });
+  const before = snap(), shown = !!document.querySelector('#inboxbox'), toast0 = DQ.toast; if (shown) DQ.toast = () => {};
+  const coins = n => { DQ.addCoins(n); }, pay = n => { if (S().coins < n) { DQ.toast = toast0; toast0('Not enough coins', true); return false; } S().coins -= n; return true; };
   const it = e.item && D.ITEMS[e.item];
   switch (e.type + ':' + opt) {
     case 'trader:sell': { const n = Math.min(e.n, DQ.have(e.item)); DQ.take(e.item, n); const c = Math.round(it.val * 1.5 * n); coins(c); msg = `Sold ${fmt(n)} for ${fmt(c)} coins.`; break; }
@@ -10226,7 +10253,14 @@ DQ.resolveEvent = (id, opt) => {
     case 'rare:buy': if (!pay(e.price)) return; DQ.give(e.item, 1); msg = `You buy the ${it.name}.`; break;
     default: msg = 'You let it go.';
   }
-  L.splice(i, 1); DQ.sfx(bad ? 'hurt' : 'coin'); DQ.toast(msg, bad); DQ.log(`${e.title}: ${msg}`, bad ? 'bad' : 'good'); DQ.emit('inbox');
+  DQ.toast = toast0; L.splice(i, 1); DQ.sfx(bad ? 'hurt' : 'coin');
+  const after = snap(), items = {};
+  for (const k of new Set([...Object.keys(before.items), ...Object.keys(after.items)])) { const d = (after.items[k] || 0) - (before.items[k] || 0); if (d && D.ITEMS[k]) items[k] = d; }
+  const opt0 = (e.opts || []).find(o => o[0] === opt);
+  DQ.eventResults = [{ id: e.id, title: e.title, ic: e.ic, col: e.col, chose: opt0 ? opt0[1] : '', msg, bad, coins: after.coins - before.coins, hp: after.hp - before.hp, items, buffs: after.buffs.filter(b => !before.buffs.includes(b)) }].concat(DQ.eventResults || []).slice(0, 6);
+  /* the result is shown where the choice was made; a short message only when that place is not on screen */
+  if (!shown) DQ.toast(msg, bad);
+  DQ.log(`${e.title}: ${msg}`, bad ? 'bad' : 'good'); DQ.emit('inbox');
 };
 })();
 
@@ -11842,8 +11876,16 @@ UI.planSummary = () => {
 };
 
 /* ---------- Decisions from time away ---------- */
-UI.inboxHtml = () => { const L = S().inbox || []; return L.map(e => `<div class="event" style="--c:${e.col}"><span class="ev-ic">${ico(e.ic)}</span><div class="ev-b"><b>${esc(e.title)}</b><p class="sm">${esc(e.text)}</p><div class="ev-opts">${e.opts.map(([k, l, sub], i) => `<button class="btn sm ${i ? '' : 'primary'}" data-do="decide" data-a="${e.id}" data-b="${k}" ${sub ? `data-tip="text:${esc(sub)}"` : ''}>${esc(l)}</button>`).join('')}</div>${e.opts.some(o => o[2]) ? `<small class="dim">${e.opts.filter(o => o[2]).map(o => `${esc(o[1])}: ${esc(o[2])}`).join(' · ')}</small>` : ''}</div></div>`).join(''); };
-UI.inboxPanel = () => (S().inbox || []).length ? `<section class="panel inboxp fancy"><div class="phead"><h2>Decisions waiting</h2><small>From your time away</small></div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></section>` : '';
+/* the outcome of each choice made here, as a card in its place: what you chose, what happened, and tiles for every
+   coin, item, point of health and effect it changed (Nov 2026) */
+UI.eventResultHtml = r => { const tiles = [];
+  if (r.coins) tiles.push(`<div class="evr-tile ${r.coins > 0 ? 'gain' : 'loss'}"><span class="evr-art">${ico('coin')}</span><b>${r.coins > 0 ? '+' : '−'}${fmt(Math.abs(r.coins))}</b><small>coins</small></div>`);
+  for (const [k, n] of Object.entries(r.items || {})) tiles.push(`<div class="evr-tile ${n > 0 ? 'gain' : 'loss'}"><span class="evr-art">${DQ.itemIco(D.ITEMS[k])}</span><b>${n > 0 ? '+' : '−'}${fmt(Math.abs(n))}</b><small>${esc(D.ITEMS[k].name)}</small></div>`);
+  if (r.hp) tiles.push(`<div class="evr-tile ${r.hp > 0 ? 'gain' : 'loss'}"><span class="evr-art">${ico('heart')}</span><b>${r.hp > 0 ? '+' : '−'}${Math.abs(r.hp)}</b><small>health</small></div>`);
+  for (const b of r.buffs || []) tiles.push(`<div class="evr-tile loss"><span class="evr-art">${ico('clock')}</span><b>${esc(b)}</b><small>for a while</small></div>`);
+  return `<div class="ev-result ${r.bad ? 'bad' : ''}" style="--c:${r.col}"><div class="evr-head"><span class="ev-ic">${ico(r.ic)}</span><div><b>${esc(r.title)}</b>${r.chose ? `<small class="dim"> · you chose: ${esc(r.chose)}</small>` : ''}</div></div><p class="evr-msg">${r.bad ? '✗' : '✓'} ${esc(r.msg)}</p>${tiles.length ? `<div class="evr-tiles">${tiles.map((t, i) => t.replace('class="evr-tile', `style="--i:${i}" class="evr-tile`)).join('')}</div>` : ''}</div>`; };
+UI.inboxHtml = () => { const L = S().inbox || []; return (DQ.eventResults || []).map(UI.eventResultHtml).join('') + L.map(e => `<div class="event" style="--c:${e.col}"><span class="ev-ic">${ico(e.ic)}</span><div class="ev-b"><b>${esc(e.title)}</b><p class="sm">${esc(e.text)}</p><div class="ev-opts">${e.opts.map(([k, l, sub], i) => `<button class="btn sm ${i ? '' : 'primary'}" data-do="decide" data-a="${e.id}" data-b="${k}" ${sub ? `data-tip="text:${esc(sub)}"` : ''}>${esc(l)}</button>`).join('')}</div>${e.opts.some(o => o[2]) ? `<small class="dim">${e.opts.filter(o => o[2]).map(o => `${esc(o[1])}: ${esc(o[2])}`).join(' · ')}</small>` : ''}</div></div>`).join(''); };
+UI.inboxPanel = () => (S().inbox || []).length || (DQ.eventResults || []).length ? `<section class="panel inboxp fancy"><div class="phead"><h2>Decisions waiting</h2><small>From your time away</small></div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></section>` : '';
 UI.returnExtras = sum => {
   const L = S().inbox || [], tips = [];
   const raw = Object.keys(sum.items || {}).filter(id => id.startsWith('raw_') && DQ.have(id));
@@ -11851,9 +11893,12 @@ UI.returnExtras = sum => {
   const ore = Object.keys(sum.items || {}).find(id => id.startsWith('ore_')), sr = ore && D.RLIST.smithing.find(r => r.tab === 'Bars' && r.in[ore] && DQ.canMake(r) && DQ.lvl('smithing') >= r.lvl);
   if (sr && DQ.skillUnlocked('smithing')) tips.push(`<button class="btn sm" data-do="qquick" data-a="recipe" data-b="${sr.id}">${ico('smithing')} Queue smelting ${sr.name.toLowerCase()}</button>`);
   if (Object.keys({ ...S().inv, ...S().bank }).some(id => D.ITEMS[id].type === 'junk')) tips.push(`<button class="btn sm" data-do="sellall">${ico('coin')} Sell all junk</button>`);
-  return (L.length ? `<div class="k" style="margin:16px 0 8px">Decisions</div><div class="events" id="inboxbox">${UI.inboxHtml()}</div>` : '') + (tips.length ? `<div class="k" style="margin:16px 0 8px">What next?</div><div class="btnrow wrap">${tips.join('')}</div>` : '');
+  return (L.length || (DQ.eventResults || []).length ? `<div class="k" style="margin:16px 0 8px">Decisions</div><div class="events" id="inboxbox">${UI.inboxHtml()}</div>` : '') + (tips.length ? `<div class="k" style="margin:16px 0 8px">What next?</div><div class="btnrow wrap">${tips.join('')}</div>` : '');
 };
-DQ.on('inbox', () => { $$('#inboxbox').forEach(b => b.innerHTML = UI.inboxHtml() || '<p class="sm dim" style="margin:0">All settled.</p>'); UI.renderHud(); if (UI.view === 'overview' && !(S().inbox || []).length) UI.refresh(); });
+DQ.on('inbox', () => { $$('#inboxbox').forEach(b => b.innerHTML = UI.inboxHtml() || '<p class="sm dim" style="margin:0">All settled.</p>'); UI.renderHud(); if (UI.view === 'overview' && !(S().inbox || []).length && !document.querySelector('.modal #inboxbox')) UI.refresh(); });
+/* results stay until you move on: another page, or closing the welcome-back pop-up */
+{ const go0 = DQ.go; DQ.go = (...a) => { if (a[0] !== UI.view) DQ.eventResults = []; return go0(...a); };
+  const close0 = DQ.closeModal; DQ.closeModal = (...a) => { if (document.querySelector('.modal #inboxbox')) DQ.eventResults = []; return close0(...a); }; }
 
 /* ---------- Combat build pieces ---------- */
 const dchip = (t, cls) => { const d = D.DTYPES[t]; return `<span class="dchip ${cls}" style="--c:${d.col}" data-tip="text:${d.name}">${ico(d.ic)}${d.name}</span>`; };

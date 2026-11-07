@@ -79,10 +79,18 @@ function loop(now) {
 }
 
 /* ---------- toast ---------- */
+/* where the last button was pressed: its box and page at that moment (buttons are often redrawn by the press itself) */
+const lastPress = { rect: null, at: 0, view: null, modal: false };
+const press = b => { const r = b.getBoundingClientRect(); lastPress.rect = { left: r.left, top: r.top, width: r.width }; lastPress.at = performance.now(); lastPress.view = DQ.ui && DQ.ui.view; lastPress.modal = !!b.closest('.modal'); };
+document.addEventListener('pointerdown', e => { const b = e.target.closest && e.target.closest('button,[role="button"],a'); if (b) press(b); }, true);
+document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && document.activeElement && document.activeElement.closest('button')) press(document.activeElement); }, true);
 DQ.toast = (msg, bad) => {
   if (DQ.sim.on) return; if (bad) DQ.sfx('error');
   const t = document.createElement('div'); t.className = 'toast' + (bad ? ' bad' : ''); t.textContent = msg;
-  $$('.toast').forEach(x => x.remove()); fxEl.appendChild(t); setTimeout(() => t.remove(), 2600);
+  /* beside the button just pressed (within the last second and a half), otherwise at the bottom of the window */
+  const layer = document.getElementById('toastlayer') || fxEl, r = lastPress.rect, near = r && performance.now() - lastPress.at < 1500 && (DQ.ui && DQ.ui.view) === lastPress.view && lastPress.modal === !!document.querySelector('.modal');
+  if (near) { const z = DQ.toPage ? DQ.toPage : v => v; if (r.width) { t.classList.add('at-btn'); const W = z(innerWidth); t.style.left = Math.min(W - 180, Math.max(180, z(r.left + r.width / 2))) + 'px'; t.style.top = Math.max(60, z(r.top) - 8) + 'px'; } }
+  $$('.toast').forEach(x => x.remove()); layer.appendChild(t); setTimeout(() => t.remove(), 2600);
 };
 
 /* Routine progress stays in the interface and recent activity.

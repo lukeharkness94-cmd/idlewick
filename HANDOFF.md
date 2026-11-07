@@ -393,3 +393,7 @@ Stages are separate commits so each can be reverted on its own.
 
 ## House room pictures and worker beds (Nov 2026)
 - `js/house_rooms.js`: each House room button shows a 24 × 24 code-drawn room scene (`DQ.roomArt`). The Workers page opens with a Worker beds panel: beds filled (bed icons) and `DQ.bedPlan()`'s single next step for another bed (buy the cottage → build the Servants' quarters → place/upgrade Bunk beds, with the cost) and a button straight to that room. Beds come only from Bunk beds (+1/+2/+3 over the one you start with); the "No free beds" message names the next step.
+
+## Short messages and away-choice results (Nov 2026)
+- Short messages (`DQ.toast`) appear just above the button that was pressed (its position is remembered at the press, so redrawn buttons still count) when on the same page/dialog within 1.5 s, otherwise at the bottom; they draw in `#toastlayer` above dialogs. Notification cards stay at the top right under the menu.
+- Choices from time away (`DQ.resolveEvent`) measure what changed (coins, items, health, new effects) and the card turns into a result in place, in both the welcome-back pop-up and Activity (`UI.eventResultHtml`); no message is sent behind the dialog. Results clear on leaving the page or closing the pop-up. Fixed a crash in `makeAwayEvents` when fewer event types were possible than the number rolled.

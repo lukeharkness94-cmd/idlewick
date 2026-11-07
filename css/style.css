@@ -2828,8 +2828,6 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
    menu bar, where they are hard to miss; a short message sits above the cards. Phones keep them above the bottom menu. */
 @media (min-width:861px){
   #notes{top:116px;bottom:auto!important;right:16px}
-  #fx .toast{top:116px;bottom:auto;left:auto;right:16px;transform:none;animation-name:toast-top}
-  #fx:has(.toast)+#notes{top:168px}
   #notes .note{animation-name:noteInTop}
 }
 @keyframes noteInTop{from{opacity:0;transform:translateY(-14px) scale(.97)}to{opacity:1;transform:none}}
@@ -2853,3 +2851,20 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
 .wb-next{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--brass) 45%,var(--line));background:color-mix(in srgb,var(--brass) 8%,var(--panel2))}
 .wb-next>div{display:grid;gap:2px;min-width:0}.wb-next small{color:var(--mute);font-size:14px}
 .wb-next img{border-radius:8px}
+
+/* Short messages (Nov 2026): at the bottom, or just above the button that was pressed, and always above pop-ups */
+#toastlayer{position:fixed;inset:0;pointer-events:none;z-index:300}
+.toast.at-btn{bottom:auto;transform:translate(-50%,-100%);animation-name:toast-near}
+@keyframes toast-near{0%{opacity:0;margin-top:6px}10%{opacity:1;margin-top:0}85%{opacity:1}100%{opacity:0}}
+/* the outcome of a choice from your time away, shown where the choice was */
+.ev-result{display:grid;gap:10px;padding:12px 14px;border-radius:12px;border:1px solid color-mix(in srgb,var(--c) 60%,var(--line));background:color-mix(in srgb,var(--c) 12%,var(--panel2));animation:qrv-pop .45s cubic-bezier(.2,1.4,.4,1) both}
+.ev-result.bad{--c:#e2574c}
+.ev-result .evr-head{display:flex;gap:10px;align-items:center}
+.ev-result .evr-head b{font-size:17px}
+.ev-result .evr-msg{margin:0}
+.evr-tiles{display:flex;flex-wrap:wrap;gap:8px}
+.evr-tile{display:grid;justify-items:center;gap:2px;min-width:96px;padding:8px 10px;border-radius:10px;background:var(--panel);border:1px solid var(--line2);animation:qrv-pop .45s cubic-bezier(.2,1.4,.4,1) both;animation-delay:calc(var(--i) * 140ms + 150ms)}
+.evr-tile b{font-size:19px}.evr-tile small{font-size:14px;color:var(--mute)}
+.evr-tile.loss b{color:#e2574c}.evr-tile.gain b{color:#5cc08a}
+.evr-tile .evr-art{display:grid;place-items:center;width:48px;height:48px}.evr-tile .evr-art .ic{width:32px;height:32px}
+@media (prefers-reduced-motion:reduce){.ev-result,.evr-tile{animation:none}}

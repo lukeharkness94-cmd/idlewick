@@ -256,14 +256,17 @@ DQ.makeAwayEvents = (sum, away) => {
   const ctx = { topItem: top && DQ.sellable(top[0]) && D.ITEMS[top[0]].val * top[1] >= 40 ? top[0] : null, pushed: (S().lastPace === 'push'), died: sum.died };
   const n = Math.min(3, Math.max(1, Math.floor(away / (40 * 60000)))), pool = Object.entries(EVENTS).filter(([, e]) => e.ok(ctx)), out = [];
   if (ctx.pushed && EVENTS.injury.ok(ctx) && chance(.6)) { out.push('injury'); }
-  while (out.length < n && pool.length) { const k = DQ.weighted(pool.filter(([k]) => !out.includes(k)).map(([k, e]) => [k, e.w])); if (!k || out.includes(k)) break; out.push(k); }
+  while (out.length < n && pool.length) { const left = pool.filter(([k]) => !out.includes(k)); if (!left.length) break; const k = DQ.weighted(left.map(([k, e]) => [k, e.w])); if (!k || out.includes(k)) break; out.push(k); }
   S().inbox = S().inbox || [];
   out.forEach(k => S().inbox.push(Object.assign({ id: Date.now() + k, type: k, at: Date.now() }, EVENTS[k].make(ctx))));
   if (S().inbox.length > 6) S().inbox.splice(0, S().inbox.length - 6);
 };
 DQ.resolveEvent = (id, opt) => {
   const L = S().inbox || [], i = L.findIndex(e => e.id === id); if (i < 0) return; const e = L[i]; let msg = '', bad = false;
-  const coins = n => { DQ.addCoins(n); }, pay = n => { if (S().coins < n) { DQ.toast('Not enough coins', true); return false; } S().coins -= n; return true; };
+  /* what the choice actually did, measured rather than described: coins, health, items and effects before and after */
+  const snap = () => ({ coins: S().coins, hp: S().hp, items: Object.assign({}, S().inv, ...Object.entries(S().bank || {}).map(([k, n]) => ({ [k]: (S().inv[k] || 0) + n }))), buffs: DQ.buffs().map(b => b.name) });
+  const before = snap(), shown = !!document.querySelector('#inboxbox'), toast0 = DQ.toast; if (shown) DQ.toast = () => {};
+  const coins = n => { DQ.addCoins(n); }, pay = n => { if (S().coins < n) { DQ.toast = toast0; toast0('Not enough coins', true); return false; } S().coins -= n; return true; };
   const it = e.item && D.ITEMS[e.item];
   switch (e.type + ':' + opt) {
     case 'trader:sell': { const n = Math.min(e.n, DQ.have(e.item)); DQ.take(e.item, n); const c = Math.round(it.val * 1.5 * n); coins(c); msg = `Sold ${fmt(n)} for ${fmt(c)} coins.`; break; }
@@ -282,7 +285,14 @@ DQ.resolveEvent = (id, opt) => {
     case 'rare:buy': if (!pay(e.price)) return; DQ.give(e.item, 1); msg = `You buy the ${it.name}.`; break;
     default: msg = 'You let it go.';
   }
-  L.splice(i, 1); DQ.sfx(bad ? 'hurt' : 'coin'); DQ.toast(msg, bad); DQ.log(`${e.title}: ${msg}`, bad ? 'bad' : 'good'); DQ.emit('inbox');
+  DQ.toast = toast0; L.splice(i, 1); DQ.sfx(bad ? 'hurt' : 'coin');
+  const after = snap(), items = {};
+  for (const k of new Set([...Object.keys(before.items), ...Object.keys(after.items)])) { const d = (after.items[k] || 0) - (before.items[k] || 0); if (d && D.ITEMS[k]) items[k] = d; }
+  const opt0 = (e.opts || []).find(o => o[0] === opt);
+  DQ.eventResults = [{ id: e.id, title: e.title, ic: e.ic, col: e.col, chose: opt0 ? opt0[1] : '', msg, bad, coins: after.coins - before.coins, hp: after.hp - before.hp, items, buffs: after.buffs.filter(b => !before.buffs.includes(b)) }].concat(DQ.eventResults || []).slice(0, 6);
+  /* the result is shown where the choice was made; a short message only when that place is not on screen */
+  if (!shown) DQ.toast(msg, bad);
+  DQ.log(`${e.title}: ${msg}`, bad ? 'bad' : 'good'); DQ.emit('inbox');
 };
 })();
 

@@ -37,8 +37,16 @@ UI.planSummary = () => {
 };
 
 /* ---------- Decisions from time away ---------- */
-UI.inboxHtml = () => { const L = S().inbox || []; return L.map(e => `<div class="event" style="--c:${e.col}"><span class="ev-ic">${ico(e.ic)}</span><div class="ev-b"><b>${esc(e.title)}</b><p class="sm">${esc(e.text)}</p><div class="ev-opts">${e.opts.map(([k, l, sub], i) => `<button class="btn sm ${i ? '' : 'primary'}" data-do="decide" data-a="${e.id}" data-b="${k}" ${sub ? `data-tip="text:${esc(sub)}"` : ''}>${esc(l)}</button>`).join('')}</div>${e.opts.some(o => o[2]) ? `<small class="dim">${e.opts.filter(o => o[2]).map(o => `${esc(o[1])}: ${esc(o[2])}`).join(' · ')}</small>` : ''}</div></div>`).join(''); };
-UI.inboxPanel = () => (S().inbox || []).length ? `<section class="panel inboxp fancy"><div class="phead"><h2>Decisions waiting</h2><small>From your time away</small></div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></section>` : '';
+/* the outcome of each choice made here, as a card in its place: what you chose, what happened, and tiles for every
+   coin, item, point of health and effect it changed (Nov 2026) */
+UI.eventResultHtml = r => { const tiles = [];
+  if (r.coins) tiles.push(`<div class="evr-tile ${r.coins > 0 ? 'gain' : 'loss'}"><span class="evr-art">${ico('coin')}</span><b>${r.coins > 0 ? '+' : '−'}${fmt(Math.abs(r.coins))}</b><small>coins</small></div>`);
+  for (const [k, n] of Object.entries(r.items || {})) tiles.push(`<div class="evr-tile ${n > 0 ? 'gain' : 'loss'}"><span class="evr-art">${DQ.itemIco(D.ITEMS[k])}</span><b>${n > 0 ? '+' : '−'}${fmt(Math.abs(n))}</b><small>${esc(D.ITEMS[k].name)}</small></div>`);
+  if (r.hp) tiles.push(`<div class="evr-tile ${r.hp > 0 ? 'gain' : 'loss'}"><span class="evr-art">${ico('heart')}</span><b>${r.hp > 0 ? '+' : '−'}${Math.abs(r.hp)}</b><small>health</small></div>`);
+  for (const b of r.buffs || []) tiles.push(`<div class="evr-tile loss"><span class="evr-art">${ico('clock')}</span><b>${esc(b)}</b><small>for a while</small></div>`);
+  return `<div class="ev-result ${r.bad ? 'bad' : ''}" style="--c:${r.col}"><div class="evr-head"><span class="ev-ic">${ico(r.ic)}</span><div><b>${esc(r.title)}</b>${r.chose ? `<small class="dim"> · you chose: ${esc(r.chose)}</small>` : ''}</div></div><p class="evr-msg">${r.bad ? '✗' : '✓'} ${esc(r.msg)}</p>${tiles.length ? `<div class="evr-tiles">${tiles.map((t, i) => t.replace('class="evr-tile', `style="--i:${i}" class="evr-tile`)).join('')}</div>` : ''}</div>`; };
+UI.inboxHtml = () => { const L = S().inbox || []; return (DQ.eventResults || []).map(UI.eventResultHtml).join('') + L.map(e => `<div class="event" style="--c:${e.col}"><span class="ev-ic">${ico(e.ic)}</span><div class="ev-b"><b>${esc(e.title)}</b><p class="sm">${esc(e.text)}</p><div class="ev-opts">${e.opts.map(([k, l, sub], i) => `<button class="btn sm ${i ? '' : 'primary'}" data-do="decide" data-a="${e.id}" data-b="${k}" ${sub ? `data-tip="text:${esc(sub)}"` : ''}>${esc(l)}</button>`).join('')}</div>${e.opts.some(o => o[2]) ? `<small class="dim">${e.opts.filter(o => o[2]).map(o => `${esc(o[1])}: ${esc(o[2])}`).join(' · ')}</small>` : ''}</div></div>`).join(''); };
+UI.inboxPanel = () => (S().inbox || []).length || (DQ.eventResults || []).length ? `<section class="panel inboxp fancy"><div class="phead"><h2>Decisions waiting</h2><small>From your time away</small></div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></section>` : '';
 UI.returnExtras = sum => {
   const L = S().inbox || [], tips = [];
   const raw = Object.keys(sum.items || {}).filter(id => id.startsWith('raw_') && DQ.have(id));
@@ -46,9 +54,12 @@ UI.returnExtras = sum => {
   const ore = Object.keys(sum.items || {}).find(id => id.startsWith('ore_')), sr = ore && D.RLIST.smithing.find(r => r.tab === 'Bars' && r.in[ore] && DQ.canMake(r) && DQ.lvl('smithing') >= r.lvl);
   if (sr && DQ.skillUnlocked('smithing')) tips.push(`<button class="btn sm" data-do="qquick" data-a="recipe" data-b="${sr.id}">${ico('smithing')} Queue smelting ${sr.name.toLowerCase()}</button>`);
   if (Object.keys({ ...S().inv, ...S().bank }).some(id => D.ITEMS[id].type === 'junk')) tips.push(`<button class="btn sm" data-do="sellall">${ico('coin')} Sell all junk</button>`);
-  return (L.length ? `<div class="k" style="margin:16px 0 8px">Decisions</div><div class="events" id="inboxbox">${UI.inboxHtml()}</div>` : '') + (tips.length ? `<div class="k" style="margin:16px 0 8px">What next?</div><div class="btnrow wrap">${tips.join('')}</div>` : '');
+  return (L.length || (DQ.eventResults || []).length ? `<div class="k" style="margin:16px 0 8px">Decisions</div><div class="events" id="inboxbox">${UI.inboxHtml()}</div>` : '') + (tips.length ? `<div class="k" style="margin:16px 0 8px">What next?</div><div class="btnrow wrap">${tips.join('')}</div>` : '');
 };
-DQ.on('inbox', () => { $$('#inboxbox').forEach(b => b.innerHTML = UI.inboxHtml() || '<p class="sm dim" style="margin:0">All settled.</p>'); UI.renderHud(); if (UI.view === 'overview' && !(S().inbox || []).length) UI.refresh(); });
+DQ.on('inbox', () => { $$('#inboxbox').forEach(b => b.innerHTML = UI.inboxHtml() || '<p class="sm dim" style="margin:0">All settled.</p>'); UI.renderHud(); if (UI.view === 'overview' && !(S().inbox || []).length && !document.querySelector('.modal #inboxbox')) UI.refresh(); });
+/* results stay until you move on: another page, or closing the welcome-back pop-up */
+{ const go0 = DQ.go; DQ.go = (...a) => { if (a[0] !== UI.view) DQ.eventResults = []; return go0(...a); };
+  const close0 = DQ.closeModal; DQ.closeModal = (...a) => { if (document.querySelector('.modal #inboxbox')) DQ.eventResults = []; return close0(...a); }; }
 
 /* ---------- Combat build pieces ---------- */
 const dchip = (t, cls) => { const d = D.DTYPES[t]; return `<span class="dchip ${cls}" style="--c:${d.col}" data-tip="text:${d.name}">${ico(d.ic)}${d.name}</span>`; };

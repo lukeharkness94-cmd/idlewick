@@ -13,7 +13,7 @@ await ev(()=>{DQ.closeModal&&DQ.closeModal();DQ.holdNotes=false;const S=DQ.S,X=D
 const node=await ev(()=>DQ.data.NODES.wood.filter(n=>n.town==='willowbrook'&&n.lvl<=DQ.lvl('woodcutting')).sort((a,b)=>b.lvl-a.lvl)[0].id);
 await ev(n=>DQ.startAct('wood',n),node);let t=0;while(!(await ev(()=>DQ.discovered('weathered_map')))&&t<60){await ev(()=>DQ.simulate(10*60000));t++;}
 await p.waitForTimeout(500);log('discovered after',t*10,'min chopping; quest hidden?',await ev(()=>DQ.questHidden(DQ.data.QM.am_map)),'| modal:',await ev(()=>document.querySelector('.modal h2,.modal .mh')?.textContent||'none'));
-await ev(()=>DQ.closeModal&&DQ.closeModal());
+for(let k=0;k<4;k++){await ev(()=>DQ.closeModal&&DQ.closeModal());await p.waitForTimeout(450);} /* queued pop-ups (a new companion) open one after another */
 /* 2. accept via the quest log button; duplicate accept is a no-op */
 await ev(()=>{DQ.go('quests');DQ.ui.tab.questSelected='am_map';DQ.ui.render(false)});await p.waitForTimeout(400);
 const acc=p.locator('[data-do="qstart"][data-a="am_map"]');log('accept button',await acc.count());await acc.first().click();await ev(()=>DQ.startQuest('am_map'));
