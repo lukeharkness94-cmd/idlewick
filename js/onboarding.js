@@ -48,6 +48,7 @@ DQ.lessonForPage=page=>{
   if(skill==='house'&&DQ.advLvl()<D.HOUSE.adv||skill==='hirelings'&&DQ.advLvl()<D.HIRE.adv||skill==='research'&&!DQ.skillUnlocked('research'))return null;
   return {id:skill,...lessons[skill]};
 };
+DQ.lessonInfo=id=>{DQ.initGuides();return lessons[id]||null;};
 DQ.acknowledgeLesson=id=>{DQ.initGuides();if(!lessons[id])return false;S().tut.done['lesson:'+id]=true;delete S().seen['tutorial:'+id];DQ.save();return true;};
 const intro=()=>`<section class="panel first-play-guide"><div class="first-play-art">${DQ.monSprite(D.MON.chicken,96)}</div><div><span class="k">A short introduction</span><h2>Welcome to Willowbrook</h2><p>Gather supplies, turn them into useful things, and help your village grow. Pick one task at a time; it keeps working while you explore or close the game.</p><div class="first-play-path"><span>Gather</span> → <span>Make &amp; equip</span> → <span>Fight &amp; restore</span></div><div class="btnrow wrap"><button class="btn primary" data-do="introstart">${S().q.first_steps?.s==='done'?'Explore activities':'Start First Steps'}</button><button class="btn sm" data-do="introskip">Skip introduction</button></div></div></section>`;
 const coachHtml=l=>`<div class="skill-coach pop" aria-label="First-time ${esc(l.title)} guide"><span class="coach-art">${DQ.artImage(l.art[0],l.art[1],96,'',l.title)}</span><div><p>${esc(l.text)}</p>${l.towards?`<p class="lesson-towards">${esc(l.towards)}</p>`:''}<p class="lesson-goal"><strong>Try this:</strong> ${esc(l.goal)}</p></div></div>`;

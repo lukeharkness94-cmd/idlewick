@@ -151,7 +151,7 @@ DQ.prepAdvice = (monId, fc) => {
   const m = D.MON[monId]; if (!m) return [];
   const out = [], max = DQ.maxHp(), hp = Math.ceil(S().hp), town = S().town, coins = S().coins;
   const owned = id => DQ.have(id) || (S().bank && S().bank[id]);
-  if (hp < max * .9) { const per = Math.ceil(max / 50) * (1 + DQ.fx().regen), secs = Math.ceil((max - hp) / per * 3); out.push({ key: 'rest', title: 'Rest to full health first', text: `Health ${hp} / ${max}. You recover about ${secs}s outside combat, for example while fishing or cooking.`, action: 'go', a: 'fishing' }); }
+  if (hp < max * (DQ.act && DQ.act.kind === 'fight' && DQ.act.id !== monId ? .6 : .9)) { const per = Math.ceil(max / 50) * (1 + DQ.fx().regen), secs = Math.ceil((max - hp) / per * 3); out.push({ key: 'rest', title: 'Rest to full health first', text: `Health ${hp} / ${max}. You recover about ${secs}s outside combat, for example while fishing or cooking.`, action: 'go', a: 'fishing' }); }
   const stock = (D.SHOPS[town] || []).filter(id => !DQ.lockedSkillFor(id)), buys = [], who = (m.boss && m.boss.short) || m.name;
   /* abilities: an empty slot, or a boss special nothing in your slots answers, or a slotted ability your weapon cannot use */
   { const L = S().abilities || [], slots = DQ.abilSlots(), style = DQ.weaponStyle();
@@ -161,7 +161,7 @@ DQ.prepAdvice = (monId, fc) => {
     const idle = L.map(id => D.AB[id]).filter(a => a && !DQ.ability(a.id));
     const answers = L.some(id => ['brace', 'bash', 'ward'].includes(id) && DQ.ability(id));
     if (idle.length) out.push({ key: 'abil', title: `${idle[0].name} does nothing with this weapon`, text: `${idle[0].style ? `It needs a ${idle[0].style} weapon.` : 'It needs a shield.'}${best[0] ? ` Swap in ${best[0].name}: ${best[0].text}` : ''}`, action: 'go', a: 'combat' });
-    else if (L.length < slots && best[0]) out.push({ key: 'abil', title: `Slot ${best[0].name}`, text: `${L.length} of ${slots} ability slots used. ${best[0].text}`, action: 'go', a: 'combat' });
+    else if (L.length < slots && best[0]) out.push({ key: 'abil', title: `Slot ${best[0].name}`, text: `${L.length} of ${slots} ability slots used. ${best[0].text}`, action: 'abil', a: best[0].id });
     else if (m.boss && m.boss.special && !answers && best[0] && ['brace', 'bash', 'ward'].includes(best[0].id)) out.push({ key: 'abil', title: `Swap in ${best[0].name}`, text: `Nothing in your slots answers ${m.boss.special.name}. ${best[0].text}`, action: 'go', a: 'combat' });
   }
   for (const slot of ['body', 'legs', 'head', 'shield']) {
@@ -169,7 +169,7 @@ DQ.prepAdvice = (monId, fc) => {
     if (slot === 'shield' && S().equip.weapon && D.ITEMS[S().equip.weapon].two) continue;
     const def = id => (D.ITEMS[id].b || {}).def || 0;
     const mine = Object.keys({ ...S().inv, ...(S().bank || {}) }).filter(id => D.ITEMS[id] && D.ITEMS[id].slot === slot && owned(id) && DQ.canEquip(id).ok).sort((a, b) => def(b) - def(a))[0];
-    if (mine) { out.push({ key: 'equip:' + slot, title: `Equip your ${D.ITEMS[mine].name.toLowerCase()}`, text: `Your ${slot === 'shield' ? 'off hand' : slot} slot is empty and you already own one.`, action: 'go', a: 'character' }); continue; }
+    if (mine) { out.push({ key: 'equip:' + slot, title: `Equip your ${D.ITEMS[mine].name.toLowerCase()}`, text: `Your ${slot === 'shield' ? 'off hand' : slot} slot is empty and you already own one.`, action: DQ.have(mine) ? 'equip' : 'go', a: DQ.have(mine) ? mine : 'bank' }); continue; }
     const buy = stock.filter(id => D.ITEMS[id].slot === slot && D.ITEMS[id].buy && DQ.canEquip(id).ok).sort((a, b) => def(b) - def(a))[0];
     if (buy) buys.push(buy);
   }
@@ -189,7 +189,7 @@ DQ.prepAdvice = (monId, fc) => {
       if (o) { if (!own) own = [o, cur]; continue; }
       const b = stock.filter(id => D.ITEMS[id].buy && better(id)).sort((a, b) => score(b) - score(a))[0]; if (b) ups.push(b);
     }
-    if (own) out.push({ key: 'upgrade', title: `Wear your ${nm(own[0])}`, text: `It is clearly stronger than the ${nm(own[1])} you have on, and you already own it.`, action: 'go', a: 'character' });
+    if (own) out.push({ key: 'upgrade', title: `Wear your ${nm(own[0])}`, text: `It is clearly stronger than the ${nm(own[1])} you have on, and you already own it.`, action: DQ.have(own[0]) ? 'equip' : 'go', a: DQ.have(own[0]) ? own[0] : 'bank' });
     else if (ups.length) { const price = ups.reduce((n, id) => n + D.ITEMS[id].buy, 0), names = ups.slice(0, 3).map(nm), list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
       out.push({ key: 'upgrade', title: coins >= price ? `Upgrade your gear (${fmt(price)} coins)` : 'Save for better gear', text: `The shop here sells ${list}${ups.length > 3 ? ' and more' : ''}, clearly stronger than what you wear. ${coins >= price ? `You have ${fmt(coins)} coins.` : `You have ${fmt(coins)} of ${fmt(price)} coins.`}`, action: 'go', a: 'shop' }); }
   }
@@ -211,7 +211,7 @@ DQ.prepAdvice = (monId, fc) => {
           : !staff ? { key: 'weak', title: `Get a staff to cast ${sp.name}`, text: `${who} is weak to ${el}, and you know ${sp.name}. A staff from the shop lets you cast it.`, action: 'go', a: 'shop' }
           : { key: 'weak', title: `Equip your ${D.ITEMS[staff].name.toLowerCase()} and cast ${sp.name}`, text: `${who} is weak to ${el}. ${DQ.have('rune') >= sp.runes * 30 ? `You have ${fmt(DQ.have('rune'))} runes (${sp.runes} per cast).` : `You have ${fmt(DQ.have('rune'))} runes; a long fight can use ${fmt(sp.runes * 30)} or more (${sp.runes} per cast). The shop sells Arcane runes.`}`, action: 'go', a: DQ.have('rune') >= sp.runes * 30 ? 'character' : 'shop' };
       }
-      if (have) out.push({ key: 'weak', title: `Switch to your ${D.ITEMS[have].name.toLowerCase()}`, text: `${who} is weak to ${name}: ${pctUp(DQ.typeMult(m, 'weak'))} damage per hit.${arrowsFor(have)}`, action: 'go', a: 'character' });
+      if (have) out.push({ key: 'weak', title: `Switch to your ${D.ITEMS[have].name.toLowerCase()}`, text: `${who} is weak to ${name}: ${pctUp(DQ.typeMult(m, 'weak'))} damage per hit.${arrowsFor(have)}`, action: DQ.have(have) ? 'equip' : 'go', a: DQ.have(have) ? have : 'bank' });
       else if (spellFix) out.push(spellFix);
       else if (!shop && weak.includes('pierce') && !DQ.skillUnlocked('ranged')) out.push({ key: 'weak', info: true, title: `${who} is weak to arrows`, text: `Ranged is not learned yet. ${DQ.skillTeacher ? DQ.skillTeacher('ranged') : ''}.` });
       else if (shop) out.push({ key: 'weak', title: coins >= D.ITEMS[shop].buy ? `Buy the ${D.ITEMS[shop].name.toLowerCase()} (${fmt(D.ITEMS[shop].buy)} coins)` : `Save for the ${D.ITEMS[shop].name.toLowerCase()}`, text: `${who} is weak to ${name}. ${coins >= D.ITEMS[shop].buy ? 'The shop here sells one.' : `${fmt(coins)} / ${fmt(D.ITEMS[shop].buy)} coins.`}`, action: 'go', a: 'shop', afford: coins >= D.ITEMS[shop].buy }); if (out.length && out[out.length - 1].key === 'weak' && shop) out[out.length - 1].text += arrowsFor(shop);

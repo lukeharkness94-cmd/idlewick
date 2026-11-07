@@ -115,10 +115,20 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (bossQuest && DQ.questState(bossQuest) === 'new') return step('Accept the Grubnash quest', 'Make your boss victory count toward the village quest and its rewards.', 'qstart', bossQuest.id);
   if (!DQ.skillUnlocked('cooking')) return (S().stats.catch || 0) < 5 ? task('Learn Cooking', 'Food keeps you standing in a fight. Catch five fish and chop five logs for a cooking fire.', 'fish', 'shrimp') : task('Learn Cooking', 'Chop five logs for a cooking fire, then cook your catch.', 'wood', 'normal');
   const food = DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0), req = D.MON.grubnash.boss.req;
+  /* never send a beginner to fight with nothing to eat: chickens peck back, and a knock-out ends the session's training */
+  if (DQ.combatLvl() < req && food < DQ.maxHp()) return DQ.have('raw_shrimp') >= 12 || (DQ.act && DQ.act.kind === 'recipe' && DQ.have('raw_shrimp') > 0)
+    ? task('Cook food for training', `Chickens peck back. You have ${fmt(DQ.have('raw_shrimp'))} raw shrimp; cooked, they keep you on your feet so fights are not cut short.`, 'recipe', 'cook_shrimp')
+    : task('Catch shrimp to cook', 'Chickens peck back. Catch about a dozen shrimp, cook them, then train: with food in your pack the fights keep going while you are away.', 'fish', 'shrimp');
+  /* an idle beginner keeps the starting focus (Strength) forever; point at the skill that is falling behind */
+  if (DQ.combatLvl() < req && DQ.weaponStyle() === 'melee') {
+    const sk = ['attack', 'strength', 'defence'].map(k => [k, DQ.lvl(k)]).sort((a, b) => a[1] - b[1]), [low, lv] = sk[0], top = sk[2][1];
+    const want = { attack: 'accurate', strength: 'aggressive', defence: 'defensive' }[low];
+    if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. Your ${D.SK[low].name} (${lv}) is falling behind your ${D.SK[sk[2][0]].name} (${top}): ${low === 'attack' ? 'you miss more often' : low === 'defence' ? 'you take more damage' : 'your hits stay small'}. This switches your training focus and fights chickens.`, 'journeytrain', want, 'chicken');
+  }
   if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Attack, Strength and Defence using the combat training focus.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
   /* Ready by level: let the battle forecast decide what, if anything, is missing. */
   const f = DQ.bossForecast ? DQ.bossForecast('grubnash') : null;
-  if (f && f.winRate >= .75) return step('Challenge Grubnash', `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current gear and food.`, 'go', 'combat');
+  if (f && f.winRate >= .75) return task('Challenge Grubnash', `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current gear and food.`, 'fight', 'grubnash');
   /* the most useful concrete step from the real save: rest, armour you own or can afford, his weakness, food */
   const prep = DQ.prepAdvice ? DQ.prepAdvice('grubnash', f).filter(x => x.key !== 'food' && x.key !== 'level') : [];
   if (prep.length && (prep[0].afford !== false)) return step(prep[0].title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${prep[0].text}`, prep[0].action || 'go', prep[0].a || 'combat');
@@ -140,10 +150,11 @@ DQ.regionNext = () => {
   if (bq && DQ.questState(bq) === 'ready') return step('Claim your victory reward', `${bq.giver} is waiting to thank you.`, 'qclaim', bq.id);
   if (bq && DQ.questState(bq) === 'new') return step(`Accept “${bq.name}”`, `${bq.giver} asks you to face ${short}. Accepting makes the victory count.`, 'qstart', bq.id);
   const req = b.boss.req;
-  if (DQ.combatLvl() < req) { const foe = D.MONLIST.filter(m => m.town === b.town && !m.boss && m.cl <= DQ.combatLvl() + 4).sort((a, c) => c.cl - a.cl)[0] || D.MONLIST.find(m => m.town === b.town && !m.boss);
+  if (DQ.combatLvl() < req) { const fs = DQ.foodStep && DQ.foodStep(`Training here hits back harder than chickens.`); if (fs) return fs; }
+  if (DQ.combatLvl() < req) { const foe = D.MONLIST.filter(m => m.town === b.town && !m.boss && m.cl <= DQ.combatLvl() + 2).sort((a, c) => c.cl - a.cl)[0] || D.MONLIST.find(m => m.town === b.town && !m.boss);
     return task(`Train for ${short}`, `Combat ${DQ.combatLvl()} / ${req}. ${foe ? `${foe.name}s are a fair fight here.` : ''}`, 'fight', foe ? foe.id : b.id); }
   const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
-  if (f && f.winRate >= .75) return step(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'go', 'combat');
+  if (f && f.winRate >= .75) return task(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'fight', b.id);
   const tip = DQ.prepAdvice ? DQ.prepAdvice(b.id, f)[0] : null;
   return tip ? step(tip.title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${tip.text}`, tip.action || 'go', tip.a || 'combat') : step(`Challenge ${short}`, 'You are ready by level. Check the forecast on the Combat page.', 'go', 'combat');
 };
@@ -271,6 +282,7 @@ Object.assign(UI.DO, {
     const next = DQ.journeyNext(id); UI.DO[next.action](next.a, next.b);
   },
   destination: id => { if (!destinations[id]) return; S().journey = id; if (id === 'boss') { const b = DQ.regionBoss(); S().journeyTarget = b ? b.id : S().journeyTarget; } DQ.closeModal && DQ.closeModal(); DQ.save(); if (UI.view === 'overview') UI.render(false); else DQ.go('overview'); },
+  journeytrain: (focus, mon) => { DQ.closeModal(); S().style.melee = focus; if (!(DQ.act && DQ.act.kind === 'fight')) DQ.startAct('fight', mon, { quiet: true }); DQ.go('combat'); DQ.toast(`Training focus: ${DQ.cap(focus)}`); },
   journeytask: (kind, id) => { DQ.closeModal(); if (DQ.startAct(kind, id, { quiet: true })) DQ.go(DQ.actPage()); else { const page = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving', fight: 'combat' }[kind] || (kind === 'recipe' && D.RECIPES[id] ? D.SK[D.RECIPES[id].skill].page : null); if (page) { if (UI.taskChoice) UI.taskChoice[page] = id; DQ.go(page); } } },
   journeytravel: id => { DQ.closeModal(); DQ.travel(id); DQ.go('overview'); },
   projectfinish: id => { if (DQ.finishProject(id)) UI.render(false); },
@@ -313,12 +325,25 @@ DQ.startAct = (kind, id, o = {}) => {
   return r;
 };
 
+/* Food before training anywhere: when your food heals less than your own health, catch (about a dozen) and cook the best
+   fish you can make here. Returns null when the pack is fine or nothing can be cooked yet. */
+DQ.foodStep = why => {
+  const food = DQ.foods().reduce((n, f) => n + DQ.have(f) * D.ITEMS[f].heal, 0); if (food >= DQ.maxHp() || !DQ.skillUnlocked('cooking')) return null;
+  const options = Object.values(D.RECIPES).filter(r => r.skill === 'cooking' && r.lvl <= DQ.lvl('cooking') && Object.keys(r.in || {}).length === 1).map(r => {
+    const raw = Object.keys(r.in)[0], out = Object.keys(r.out)[0], node = (D.NODES.fish || []).find(n => n.item === raw && n.lvl <= DQ.lvl('fishing') && DQ.nodeHere(n));
+    return node && D.ITEMS[out] && D.ITEMS[out].heal ? { r, raw, out, node, heal: D.ITEMS[out].heal } : null; }).filter(Boolean).sort((a, b) => b.heal - a.heal);
+  const o = options[0]; if (!o) return null; const name = D.ITEMS[o.out].name.toLowerCase(), have = DQ.have(o.raw);
+  if (have >= 12 || (DQ.act && DQ.act.kind === 'recipe' && have > 0)) return task(`Cook ${name} for the road`, `${why} You have ${fmt(have)} to cook; food in your pack keeps fights going while you are away.`, 'recipe', o.r.id);
+  return task(`Catch fish to cook`, `${why} Catch about a dozen ${D.ITEMS[o.raw].name.toLowerCase()}, cook them, then train.`, 'fish', o.node.id);
+};
+
 /* One cached forecast per meaningful change (combat level, gear, food, town), so Home stays fast. */
 const fcCache = { key: '', at: 0, res: null };
 DQ.bossForecast = id => {
   const m = D.MON[id]; if (!m || m.town !== S().town || DQ.forecasting || !DQ.forecast) return null;
   const food = DQ.foods().reduce((n, f) => n + DQ.have(f) * D.ITEMS[f].heal, 0);
-  const key = JSON.stringify([id, DQ.combatLvl(), S().equip, Math.round(food / 20), DQ.maxHp(), S().town]);
+  /* food in steps of half your health (a beginner's whole pack is 6–15 health), current health in quarters, abilities and focus */
+  const max = DQ.maxHp(), key = JSON.stringify([id, DQ.combatLvl(), S().equip, Math.min(12, Math.floor(food / Math.max(3, max / 2))), Math.round(S().hp / max * 4), max, S().town, S().abilities, S().style]);
   if (fcCache.key === key && fcCache.res) return fcCache.res;
   if (fcCache.key !== key && Date.now() - fcCache.at < 1500 && fcCache.res) return fcCache.res;
   fcCache.key = key; fcCache.at = Date.now();

@@ -2717,3 +2717,5 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 .mq-ribbon{font-size:13px!important}.pinbtn{font-size:13px}
 .state{font-size:13px!important}
 .ss-btn small,.ss-weapon small{font-size:13px!important}
+.lr-guide{margin-top:10px;padding:10px 14px;border-radius:10px;background:color-mix(in srgb,var(--brass) 8%,var(--panel2));text-align:left;display:flex;flex-direction:column;gap:6px}
+.lr-guide p{margin:0}.lr-guide .lesson-towards{color:var(--mute)}

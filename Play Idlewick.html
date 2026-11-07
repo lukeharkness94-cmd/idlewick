@@ -2792,6 +2792,8 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 .mq-ribbon{font-size:13px!important}.pinbtn{font-size:13px}
 .state{font-size:13px!important}
 .ss-btn small,.ss-weapon small{font-size:13px!important}
+.lr-guide{margin-top:10px;padding:10px 14px;border-radius:10px;background:color-mix(in srgb,var(--brass) 8%,var(--panel2));text-align:left;display:flex;flex-direction:column;gap:6px}
+.lr-guide p{margin:0}.lr-guide .lesson-towards{color:var(--mute)}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -8412,7 +8414,9 @@ const showSkillUnlock=o=>{
   const id=(o.key||'').slice(7),sk=DQ.data.SK[id];if(!sk)return false;
   const art=DQ.artImage('skill',id,96,'',sk.name)||ico(id);
   const open=o.action&&o.action.fn?o.action.fn:()=>DQ.go(sk.page);
-  DQ.modal({title:`${sk.name} unlocked`,wide:true,sticky:true,body:`<div class="level-reveal lr-v2 lr-unlock" style="--c:${o.col||sk.col||'#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><span class="lr-ripple" aria-hidden="true"></span><span class="lr-ripple r2" aria-hidden="true"></span><span class="lr-ripple r3" aria-hidden="true"></span><span class="lr-rays" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><span class="lr-ribbon">New skill</span><h2>${esc(sk.name)}</h2><p>${esc(String(o.text||'').replace(/<[^>]+>/g,'').trim()||sk.blurb||'')}</p></div>`,actions:[{label:`Open ${sk.name}`,primary:true,fn:()=>{DQ.closeModal();open();setTimeout(pumpLevel,180);}},{label:'Later',fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
+  /* the skill's quick guide rides along with its unlock, so a new skill is one pop-up, not two in a row */
+  const L=DQ.lessonInfo&&DQ.lessonInfo(id);if(L&&DQ.acknowledgeLesson)DQ.acknowledgeLesson(id);
+  DQ.modal({title:`${sk.name} unlocked`,wide:true,sticky:true,body:`<div class="level-reveal lr-v2 lr-unlock" style="--c:${o.col||sk.col||'#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><span class="lr-ripple" aria-hidden="true"></span><span class="lr-ripple r2" aria-hidden="true"></span><span class="lr-ripple r3" aria-hidden="true"></span><span class="lr-rays" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><span class="lr-ribbon">New skill</span><h2>${esc(sk.name)}</h2><p>${esc(String(o.text||'').replace(/<[^>]+>/g,'').trim()||sk.blurb||'')}</p>${L?`<div class="lr-guide"><p>${esc(L.text)}</p>${L.towards?`<p class="lesson-towards">${esc(L.towards)}</p>`:''}${L.goal?`<p class="lesson-goal"><strong>Try this:</strong> ${esc(L.goal)}</p>`:''}</div>`:''}</div>`,actions:[{label:`Open ${sk.name}`,primary:true,fn:()=>{DQ.closeModal();open();setTimeout(pumpLevel,180);}},{label:'Later',fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
   DQ.sfx('unlock');setTimeout(()=>DQ.burstEl(document.querySelector('.level-emblem'),o.col||sk.col||'#d8a64a',44),100);return true;
 };
 const levelQueue=[];let levelRetry=0;
@@ -9037,16 +9041,18 @@ function combatRound() {
     if (dealt && U.poison) { f.poison = Math.min(3, (f.poison || 0) + 1); fxHit('poison'); }
     if (dealt && U.curse && sty === 'magic') { f.curse = Math.min(3, (f.curse || 0) + 1); fxHit('curse'); }
   }
+  /* XP counts the damage the creature could actually take: overkill on weak creatures teaches nothing extra */
+  const xpDealt = Math.min(dealt, Math.max(0, f.hp));
   f.hp -= dealt; DQ.splat('foe', dealt, dealt ? 'hit ' + tag : 'miss', 0);
   if (dealt && (U.lifesteal || U.sovereign)) { const before = S().hp; S().hp = Math.min(DQ.maxHp(), S().hp + Math.max(1, Math.round(dealt * (U.lifesteal ? .2 : .08)))); const h = Math.round(S().hp - before); if (h > 0) { fxHit(U.lifesteal ? 'lifesteal' : 'sovereign'); DQ.splat('you', '+' + h, 'heal', 300); } }
   if (U.ember && sty === 'ranged') { const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(2, Math.round(ps.max * .25))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 300); fxHit('ember'); }
   if (DQ.trick && DQ.trick('charge') && f.round === 1) { fxHit('charge'); const c = Math.max(1, Math.round(ps.max * W.dmg * .5)); f.hp -= c; DQ.splat('foe', c, 'hit power', 250); }
   if (DQ.trick && DQ.trick('ember') && f.pa % 6 === 0) { fxHit('trickember'); const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(1, Math.round(ps.max * .5))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 320); }
   DQ.sfx(sty === 'ranged' ? 'bow' : sty === 'magic' ? 'cast' : dealt ? 'hit' : 'miss');
-  if (dealt) {
+  if (xpDealt) {
     let first = null;
-    DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, dealt * per); if (!i) first = [sk, x]; });
-    DQ.addXp('hitpoints', dealt * 1.33);
+    DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, xpDealt * per); if (!i) first = [sk, x]; });
+    DQ.addXp('hitpoints', xpDealt * 1.33);
     if (first) DQ.floatAt(document.getElementById('av-foe'), `${ico(first[0])}+${fmt(first[1])} XP`, D.SK[first[0]].col);
   }
   if (f.hp <= 0) return kill(m);
@@ -9147,6 +9153,8 @@ function kill(m) {
       DQ.notify({ kind: 'boss', key: 'boss:' + m.id, icon: 'skull', col: '#f3d58a', title: `${m.boss.short} is defeated`, text: (next ? `The road to ${next.name} is open.` : 'The realm is safe. For now.') + (D.BOSS_VOICES && D.BOSS_VOICES[m.id] ? ` ${D.BOSS_VOICES[m.id][0]}: “${D.BOSS_VOICES[m.id][1]}”` : ''), action: next ? { label: 'Open the map', fn: () => DQ.go('map') } : null, sound: false, burst: true, ttl: 15000 });
       DQ.log(`${m.name} falls. ${next ? 'The road to ' + next.name + ' opens.' : ''}`, 'quest');
       DQ.achDirty = true; DQ.fxDirty(); DQ.emit('travelunlock');
+      /* a first victory ends the fight: no instant rematch at whatever health is left (repeat fights for loot continue) */
+      if (!DQ.forecasting) { if (DQ.creatureGainXp) DQ.creatureGainXp(m); DQ.stopAct(true); return; }
     }
   }
   if (DQ.creatureGainXp) DQ.creatureGainXp(m);
@@ -9719,7 +9727,7 @@ DQ.prepAdvice = (monId, fc) => {
   const m = D.MON[monId]; if (!m) return [];
   const out = [], max = DQ.maxHp(), hp = Math.ceil(S().hp), town = S().town, coins = S().coins;
   const owned = id => DQ.have(id) || (S().bank && S().bank[id]);
-  if (hp < max * .9) { const per = Math.ceil(max / 50) * (1 + DQ.fx().regen), secs = Math.ceil((max - hp) / per * 3); out.push({ key: 'rest', title: 'Rest to full health first', text: `Health ${hp} / ${max}. You recover about ${secs}s outside combat, for example while fishing or cooking.`, action: 'go', a: 'fishing' }); }
+  if (hp < max * (DQ.act && DQ.act.kind === 'fight' && DQ.act.id !== monId ? .6 : .9)) { const per = Math.ceil(max / 50) * (1 + DQ.fx().regen), secs = Math.ceil((max - hp) / per * 3); out.push({ key: 'rest', title: 'Rest to full health first', text: `Health ${hp} / ${max}. You recover about ${secs}s outside combat, for example while fishing or cooking.`, action: 'go', a: 'fishing' }); }
   const stock = (D.SHOPS[town] || []).filter(id => !DQ.lockedSkillFor(id)), buys = [], who = (m.boss && m.boss.short) || m.name;
   /* abilities: an empty slot, or a boss special nothing in your slots answers, or a slotted ability your weapon cannot use */
   { const L = S().abilities || [], slots = DQ.abilSlots(), style = DQ.weaponStyle();
@@ -9729,7 +9737,7 @@ DQ.prepAdvice = (monId, fc) => {
     const idle = L.map(id => D.AB[id]).filter(a => a && !DQ.ability(a.id));
     const answers = L.some(id => ['brace', 'bash', 'ward'].includes(id) && DQ.ability(id));
     if (idle.length) out.push({ key: 'abil', title: `${idle[0].name} does nothing with this weapon`, text: `${idle[0].style ? `It needs a ${idle[0].style} weapon.` : 'It needs a shield.'}${best[0] ? ` Swap in ${best[0].name}: ${best[0].text}` : ''}`, action: 'go', a: 'combat' });
-    else if (L.length < slots && best[0]) out.push({ key: 'abil', title: `Slot ${best[0].name}`, text: `${L.length} of ${slots} ability slots used. ${best[0].text}`, action: 'go', a: 'combat' });
+    else if (L.length < slots && best[0]) out.push({ key: 'abil', title: `Slot ${best[0].name}`, text: `${L.length} of ${slots} ability slots used. ${best[0].text}`, action: 'abil', a: best[0].id });
     else if (m.boss && m.boss.special && !answers && best[0] && ['brace', 'bash', 'ward'].includes(best[0].id)) out.push({ key: 'abil', title: `Swap in ${best[0].name}`, text: `Nothing in your slots answers ${m.boss.special.name}. ${best[0].text}`, action: 'go', a: 'combat' });
   }
   for (const slot of ['body', 'legs', 'head', 'shield']) {
@@ -9737,7 +9745,7 @@ DQ.prepAdvice = (monId, fc) => {
     if (slot === 'shield' && S().equip.weapon && D.ITEMS[S().equip.weapon].two) continue;
     const def = id => (D.ITEMS[id].b || {}).def || 0;
     const mine = Object.keys({ ...S().inv, ...(S().bank || {}) }).filter(id => D.ITEMS[id] && D.ITEMS[id].slot === slot && owned(id) && DQ.canEquip(id).ok).sort((a, b) => def(b) - def(a))[0];
-    if (mine) { out.push({ key: 'equip:' + slot, title: `Equip your ${D.ITEMS[mine].name.toLowerCase()}`, text: `Your ${slot === 'shield' ? 'off hand' : slot} slot is empty and you already own one.`, action: 'go', a: 'character' }); continue; }
+    if (mine) { out.push({ key: 'equip:' + slot, title: `Equip your ${D.ITEMS[mine].name.toLowerCase()}`, text: `Your ${slot === 'shield' ? 'off hand' : slot} slot is empty and you already own one.`, action: DQ.have(mine) ? 'equip' : 'go', a: DQ.have(mine) ? mine : 'bank' }); continue; }
     const buy = stock.filter(id => D.ITEMS[id].slot === slot && D.ITEMS[id].buy && DQ.canEquip(id).ok).sort((a, b) => def(b) - def(a))[0];
     if (buy) buys.push(buy);
   }
@@ -9757,7 +9765,7 @@ DQ.prepAdvice = (monId, fc) => {
       if (o) { if (!own) own = [o, cur]; continue; }
       const b = stock.filter(id => D.ITEMS[id].buy && better(id)).sort((a, b) => score(b) - score(a))[0]; if (b) ups.push(b);
     }
-    if (own) out.push({ key: 'upgrade', title: `Wear your ${nm(own[0])}`, text: `It is clearly stronger than the ${nm(own[1])} you have on, and you already own it.`, action: 'go', a: 'character' });
+    if (own) out.push({ key: 'upgrade', title: `Wear your ${nm(own[0])}`, text: `It is clearly stronger than the ${nm(own[1])} you have on, and you already own it.`, action: DQ.have(own[0]) ? 'equip' : 'go', a: DQ.have(own[0]) ? own[0] : 'bank' });
     else if (ups.length) { const price = ups.reduce((n, id) => n + D.ITEMS[id].buy, 0), names = ups.slice(0, 3).map(nm), list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
       out.push({ key: 'upgrade', title: coins >= price ? `Upgrade your gear (${fmt(price)} coins)` : 'Save for better gear', text: `The shop here sells ${list}${ups.length > 3 ? ' and more' : ''}, clearly stronger than what you wear. ${coins >= price ? `You have ${fmt(coins)} coins.` : `You have ${fmt(coins)} of ${fmt(price)} coins.`}`, action: 'go', a: 'shop' }); }
   }
@@ -9779,7 +9787,7 @@ DQ.prepAdvice = (monId, fc) => {
           : !staff ? { key: 'weak', title: `Get a staff to cast ${sp.name}`, text: `${who} is weak to ${el}, and you know ${sp.name}. A staff from the shop lets you cast it.`, action: 'go', a: 'shop' }
           : { key: 'weak', title: `Equip your ${D.ITEMS[staff].name.toLowerCase()} and cast ${sp.name}`, text: `${who} is weak to ${el}. ${DQ.have('rune') >= sp.runes * 30 ? `You have ${fmt(DQ.have('rune'))} runes (${sp.runes} per cast).` : `You have ${fmt(DQ.have('rune'))} runes; a long fight can use ${fmt(sp.runes * 30)} or more (${sp.runes} per cast). The shop sells Arcane runes.`}`, action: 'go', a: DQ.have('rune') >= sp.runes * 30 ? 'character' : 'shop' };
       }
-      if (have) out.push({ key: 'weak', title: `Switch to your ${D.ITEMS[have].name.toLowerCase()}`, text: `${who} is weak to ${name}: ${pctUp(DQ.typeMult(m, 'weak'))} damage per hit.${arrowsFor(have)}`, action: 'go', a: 'character' });
+      if (have) out.push({ key: 'weak', title: `Switch to your ${D.ITEMS[have].name.toLowerCase()}`, text: `${who} is weak to ${name}: ${pctUp(DQ.typeMult(m, 'weak'))} damage per hit.${arrowsFor(have)}`, action: DQ.have(have) ? 'equip' : 'go', a: DQ.have(have) ? have : 'bank' });
       else if (spellFix) out.push(spellFix);
       else if (!shop && weak.includes('pierce') && !DQ.skillUnlocked('ranged')) out.push({ key: 'weak', info: true, title: `${who} is weak to arrows`, text: `Ranged is not learned yet. ${DQ.skillTeacher ? DQ.skillTeacher('ranged') : ''}.` });
       else if (shop) out.push({ key: 'weak', title: coins >= D.ITEMS[shop].buy ? `Buy the ${D.ITEMS[shop].name.toLowerCase()} (${fmt(D.ITEMS[shop].buy)} coins)` : `Save for the ${D.ITEMS[shop].name.toLowerCase()}`, text: `${who} is weak to ${name}. ${coins >= D.ITEMS[shop].buy ? 'The shop here sells one.' : `${fmt(coins)} / ${fmt(D.ITEMS[shop].buy)} coins.`}`, action: 'go', a: 'shop', afford: coins >= D.ITEMS[shop].buy }); if (out.length && out[out.length - 1].key === 'weak' && shop) out[out.length - 1].text += arrowsFor(shop);
@@ -13617,10 +13625,20 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (bossQuest && DQ.questState(bossQuest) === 'new') return step('Accept the Grubnash quest', 'Make your boss victory count toward the village quest and its rewards.', 'qstart', bossQuest.id);
   if (!DQ.skillUnlocked('cooking')) return (S().stats.catch || 0) < 5 ? task('Learn Cooking', 'Food keeps you standing in a fight. Catch five fish and chop five logs for a cooking fire.', 'fish', 'shrimp') : task('Learn Cooking', 'Chop five logs for a cooking fire, then cook your catch.', 'wood', 'normal');
   const food = DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0), req = D.MON.grubnash.boss.req;
+  /* never send a beginner to fight with nothing to eat: chickens peck back, and a knock-out ends the session's training */
+  if (DQ.combatLvl() < req && food < DQ.maxHp()) return DQ.have('raw_shrimp') >= 12 || (DQ.act && DQ.act.kind === 'recipe' && DQ.have('raw_shrimp') > 0)
+    ? task('Cook food for training', `Chickens peck back. You have ${fmt(DQ.have('raw_shrimp'))} raw shrimp; cooked, they keep you on your feet so fights are not cut short.`, 'recipe', 'cook_shrimp')
+    : task('Catch shrimp to cook', 'Chickens peck back. Catch about a dozen shrimp, cook them, then train: with food in your pack the fights keep going while you are away.', 'fish', 'shrimp');
+  /* an idle beginner keeps the starting focus (Strength) forever; point at the skill that is falling behind */
+  if (DQ.combatLvl() < req && DQ.weaponStyle() === 'melee') {
+    const sk = ['attack', 'strength', 'defence'].map(k => [k, DQ.lvl(k)]).sort((a, b) => a[1] - b[1]), [low, lv] = sk[0], top = sk[2][1];
+    const want = { attack: 'accurate', strength: 'aggressive', defence: 'defensive' }[low];
+    if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. Your ${D.SK[low].name} (${lv}) is falling behind your ${D.SK[sk[2][0]].name} (${top}): ${low === 'attack' ? 'you miss more often' : low === 'defence' ? 'you take more damage' : 'your hits stay small'}. This switches your training focus and fights chickens.`, 'journeytrain', want, 'chicken');
+  }
   if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Attack, Strength and Defence using the combat training focus.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
   /* Ready by level: let the battle forecast decide what, if anything, is missing. */
   const f = DQ.bossForecast ? DQ.bossForecast('grubnash') : null;
-  if (f && f.winRate >= .75) return step('Challenge Grubnash', `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current gear and food.`, 'go', 'combat');
+  if (f && f.winRate >= .75) return task('Challenge Grubnash', `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current gear and food.`, 'fight', 'grubnash');
   /* the most useful concrete step from the real save: rest, armour you own or can afford, his weakness, food */
   const prep = DQ.prepAdvice ? DQ.prepAdvice('grubnash', f).filter(x => x.key !== 'food' && x.key !== 'level') : [];
   if (prep.length && (prep[0].afford !== false)) return step(prep[0].title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${prep[0].text}`, prep[0].action || 'go', prep[0].a || 'combat');
@@ -13642,10 +13660,11 @@ DQ.regionNext = () => {
   if (bq && DQ.questState(bq) === 'ready') return step('Claim your victory reward', `${bq.giver} is waiting to thank you.`, 'qclaim', bq.id);
   if (bq && DQ.questState(bq) === 'new') return step(`Accept “${bq.name}”`, `${bq.giver} asks you to face ${short}. Accepting makes the victory count.`, 'qstart', bq.id);
   const req = b.boss.req;
-  if (DQ.combatLvl() < req) { const foe = D.MONLIST.filter(m => m.town === b.town && !m.boss && m.cl <= DQ.combatLvl() + 4).sort((a, c) => c.cl - a.cl)[0] || D.MONLIST.find(m => m.town === b.town && !m.boss);
+  if (DQ.combatLvl() < req) { const fs = DQ.foodStep && DQ.foodStep(`Training here hits back harder than chickens.`); if (fs) return fs; }
+  if (DQ.combatLvl() < req) { const foe = D.MONLIST.filter(m => m.town === b.town && !m.boss && m.cl <= DQ.combatLvl() + 2).sort((a, c) => c.cl - a.cl)[0] || D.MONLIST.find(m => m.town === b.town && !m.boss);
     return task(`Train for ${short}`, `Combat ${DQ.combatLvl()} / ${req}. ${foe ? `${foe.name}s are a fair fight here.` : ''}`, 'fight', foe ? foe.id : b.id); }
   const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
-  if (f && f.winRate >= .75) return step(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'go', 'combat');
+  if (f && f.winRate >= .75) return task(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'fight', b.id);
   const tip = DQ.prepAdvice ? DQ.prepAdvice(b.id, f)[0] : null;
   return tip ? step(tip.title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${tip.text}`, tip.action || 'go', tip.a || 'combat') : step(`Challenge ${short}`, 'You are ready by level. Check the forecast on the Combat page.', 'go', 'combat');
 };
@@ -13773,6 +13792,7 @@ Object.assign(UI.DO, {
     const next = DQ.journeyNext(id); UI.DO[next.action](next.a, next.b);
   },
   destination: id => { if (!destinations[id]) return; S().journey = id; if (id === 'boss') { const b = DQ.regionBoss(); S().journeyTarget = b ? b.id : S().journeyTarget; } DQ.closeModal && DQ.closeModal(); DQ.save(); if (UI.view === 'overview') UI.render(false); else DQ.go('overview'); },
+  journeytrain: (focus, mon) => { DQ.closeModal(); S().style.melee = focus; if (!(DQ.act && DQ.act.kind === 'fight')) DQ.startAct('fight', mon, { quiet: true }); DQ.go('combat'); DQ.toast(`Training focus: ${DQ.cap(focus)}`); },
   journeytask: (kind, id) => { DQ.closeModal(); if (DQ.startAct(kind, id, { quiet: true })) DQ.go(DQ.actPage()); else { const page = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving', fight: 'combat' }[kind] || (kind === 'recipe' && D.RECIPES[id] ? D.SK[D.RECIPES[id].skill].page : null); if (page) { if (UI.taskChoice) UI.taskChoice[page] = id; DQ.go(page); } } },
   journeytravel: id => { DQ.closeModal(); DQ.travel(id); DQ.go('overview'); },
   projectfinish: id => { if (DQ.finishProject(id)) UI.render(false); },
@@ -13815,12 +13835,25 @@ DQ.startAct = (kind, id, o = {}) => {
   return r;
 };
 
+/* Food before training anywhere: when your food heals less than your own health, catch (about a dozen) and cook the best
+   fish you can make here. Returns null when the pack is fine or nothing can be cooked yet. */
+DQ.foodStep = why => {
+  const food = DQ.foods().reduce((n, f) => n + DQ.have(f) * D.ITEMS[f].heal, 0); if (food >= DQ.maxHp() || !DQ.skillUnlocked('cooking')) return null;
+  const options = Object.values(D.RECIPES).filter(r => r.skill === 'cooking' && r.lvl <= DQ.lvl('cooking') && Object.keys(r.in || {}).length === 1).map(r => {
+    const raw = Object.keys(r.in)[0], out = Object.keys(r.out)[0], node = (D.NODES.fish || []).find(n => n.item === raw && n.lvl <= DQ.lvl('fishing') && DQ.nodeHere(n));
+    return node && D.ITEMS[out] && D.ITEMS[out].heal ? { r, raw, out, node, heal: D.ITEMS[out].heal } : null; }).filter(Boolean).sort((a, b) => b.heal - a.heal);
+  const o = options[0]; if (!o) return null; const name = D.ITEMS[o.out].name.toLowerCase(), have = DQ.have(o.raw);
+  if (have >= 12 || (DQ.act && DQ.act.kind === 'recipe' && have > 0)) return task(`Cook ${name} for the road`, `${why} You have ${fmt(have)} to cook; food in your pack keeps fights going while you are away.`, 'recipe', o.r.id);
+  return task(`Catch fish to cook`, `${why} Catch about a dozen ${D.ITEMS[o.raw].name.toLowerCase()}, cook them, then train.`, 'fish', o.node.id);
+};
+
 /* One cached forecast per meaningful change (combat level, gear, food, town), so Home stays fast. */
 const fcCache = { key: '', at: 0, res: null };
 DQ.bossForecast = id => {
   const m = D.MON[id]; if (!m || m.town !== S().town || DQ.forecasting || !DQ.forecast) return null;
   const food = DQ.foods().reduce((n, f) => n + DQ.have(f) * D.ITEMS[f].heal, 0);
-  const key = JSON.stringify([id, DQ.combatLvl(), S().equip, Math.round(food / 20), DQ.maxHp(), S().town]);
+  /* food in steps of half your health (a beginner's whole pack is 6–15 health), current health in quarters, abilities and focus */
+  const max = DQ.maxHp(), key = JSON.stringify([id, DQ.combatLvl(), S().equip, Math.min(12, Math.floor(food / Math.max(3, max / 2))), Math.round(S().hp / max * 4), max, S().town, S().abilities, S().style]);
   if (fcCache.key === key && fcCache.res) return fcCache.res;
   if (fcCache.key !== key && Date.now() - fcCache.at < 1500 && fcCache.res) return fcCache.res;
   fcCache.key = key; fcCache.at = Date.now();
@@ -14389,6 +14422,7 @@ DQ.lessonForPage=page=>{
   if(skill==='house'&&DQ.advLvl()<D.HOUSE.adv||skill==='hirelings'&&DQ.advLvl()<D.HIRE.adv||skill==='research'&&!DQ.skillUnlocked('research'))return null;
   return {id:skill,...lessons[skill]};
 };
+DQ.lessonInfo=id=>{DQ.initGuides();return lessons[id]||null;};
 DQ.acknowledgeLesson=id=>{DQ.initGuides();if(!lessons[id])return false;S().tut.done['lesson:'+id]=true;delete S().seen['tutorial:'+id];DQ.save();return true;};
 const intro=()=>`<section class="panel first-play-guide"><div class="first-play-art">${DQ.monSprite(D.MON.chicken,96)}</div><div><span class="k">A short introduction</span><h2>Welcome to Willowbrook</h2><p>Gather supplies, turn them into useful things, and help your village grow. Pick one task at a time; it keeps working while you explore or close the game.</p><div class="first-play-path"><span>Gather</span> → <span>Make &amp; equip</span> → <span>Fight &amp; restore</span></div><div class="btnrow wrap"><button class="btn primary" data-do="introstart">${S().q.first_steps?.s==='done'?'Explore activities':'Start First Steps'}</button><button class="btn sm" data-do="introskip">Skip introduction</button></div></div></section>`;
 const coachHtml=l=>`<div class="skill-coach pop" aria-label="First-time ${esc(l.title)} guide"><span class="coach-art">${DQ.artImage(l.art[0],l.art[1],96,'',l.title)}</span><div><p>${esc(l.text)}</p>${l.towards?`<p class="lesson-towards">${esc(l.towards)}</p>`:''}<p class="lesson-goal"><strong>Try this:</strong> ${esc(l.goal)}</p></div></div>`;

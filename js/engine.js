@@ -423,16 +423,18 @@ function combatRound() {
     if (dealt && U.poison) { f.poison = Math.min(3, (f.poison || 0) + 1); fxHit('poison'); }
     if (dealt && U.curse && sty === 'magic') { f.curse = Math.min(3, (f.curse || 0) + 1); fxHit('curse'); }
   }
+  /* XP counts the damage the creature could actually take: overkill on weak creatures teaches nothing extra */
+  const xpDealt = Math.min(dealt, Math.max(0, f.hp));
   f.hp -= dealt; DQ.splat('foe', dealt, dealt ? 'hit ' + tag : 'miss', 0);
   if (dealt && (U.lifesteal || U.sovereign)) { const before = S().hp; S().hp = Math.min(DQ.maxHp(), S().hp + Math.max(1, Math.round(dealt * (U.lifesteal ? .2 : .08)))); const h = Math.round(S().hp - before); if (h > 0) { fxHit(U.lifesteal ? 'lifesteal' : 'sovereign'); DQ.splat('you', '+' + h, 'heal', 300); } }
   if (U.ember && sty === 'ranged') { const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(2, Math.round(ps.max * .25))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 300); fxHit('ember'); }
   if (DQ.trick && DQ.trick('charge') && f.round === 1) { fxHit('charge'); const c = Math.max(1, Math.round(ps.max * W.dmg * .5)); f.hp -= c; DQ.splat('foe', c, 'hit power', 250); }
   if (DQ.trick && DQ.trick('ember') && f.pa % 6 === 0) { fxHit('trickember'); const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(1, Math.round(ps.max * .5))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 320); }
   DQ.sfx(sty === 'ranged' ? 'bow' : sty === 'magic' ? 'cast' : dealt ? 'hit' : 'miss');
-  if (dealt) {
+  if (xpDealt) {
     let first = null;
-    DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, dealt * per); if (!i) first = [sk, x]; });
-    DQ.addXp('hitpoints', dealt * 1.33);
+    DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, xpDealt * per); if (!i) first = [sk, x]; });
+    DQ.addXp('hitpoints', xpDealt * 1.33);
     if (first) DQ.floatAt(document.getElementById('av-foe'), `${ico(first[0])}+${fmt(first[1])} XP`, D.SK[first[0]].col);
   }
   if (f.hp <= 0) return kill(m);
@@ -533,6 +535,8 @@ function kill(m) {
       DQ.notify({ kind: 'boss', key: 'boss:' + m.id, icon: 'skull', col: '#f3d58a', title: `${m.boss.short} is defeated`, text: (next ? `The road to ${next.name} is open.` : 'The realm is safe. For now.') + (D.BOSS_VOICES && D.BOSS_VOICES[m.id] ? ` ${D.BOSS_VOICES[m.id][0]}: “${D.BOSS_VOICES[m.id][1]}”` : ''), action: next ? { label: 'Open the map', fn: () => DQ.go('map') } : null, sound: false, burst: true, ttl: 15000 });
       DQ.log(`${m.name} falls. ${next ? 'The road to ' + next.name + ' opens.' : ''}`, 'quest');
       DQ.achDirty = true; DQ.fxDirty(); DQ.emit('travelunlock');
+      /* a first victory ends the fight: no instant rematch at whatever health is left (repeat fights for loot continue) */
+      if (!DQ.forecasting) { if (DQ.creatureGainXp) DQ.creatureGainXp(m); DQ.stopAct(true); return; }
     }
   }
   if (DQ.creatureGainXp) DQ.creatureGainXp(m);

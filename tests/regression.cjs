@@ -890,4 +890,17 @@ test('combat balance review: empty ability slots fill for a fight, the final bos
   S.inv.bronze_body=1;q.equipItem('bronze_body');S.inv.steel_body=1;S.hp=q.maxHp();const steelOk=q.canEquip('steel_body').ok;
   const adv=q.prepAdvice('goblin');if(steelOk)assert.ok(adv.some(a=>a.key==='upgrade'&&/steel/.test(a.title)),'advice: '+JSON.stringify(adv.map(a=>a.title)));
 });
+test('first-hour polish: combat XP stops at the creature\'s health, and a first boss victory ends the fight',()=>{
+  const {q}=harness();const D=q.data,S=q.S;
+  for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[60];q.fxDirty();S.hp=q.maxHp();S.inv.shrimp=50;
+  const m=D.MON.chicken,split=q.xpSplit('melee').reduce((n,[,per])=>n+per,0),before=S.xp.strength+S.xp.attack+S.xp.defence;
+  q.startAct('fight','chicken',{quiet:true});const k0=S.stats.kill||0;q.advanceTime(120000,120000,0);const kills=(S.stats.kill||0)-k0;
+  const gained=S.xp.strength+S.xp.attack+S.xp.defence-before,cap=kills*m.hp*split*q.xpMult('strength')*1.05+1;
+  assert.ok(kills>0,'the hero fights');assert.ok(gained<=cap,`XP per kill is capped by the chicken's health: ${gained} <= ${cap}`);
+  q.stopAct(true);
+  /* Grubnash, first time: the fight stops after the victory instead of an instant rematch */
+  S.town='willowbrook';S.towns.willowbrook={visited:true,boss:false};S.hp=q.maxHp();q.startAct('fight','grubnash',{quiet:true});
+  let t=0;while(q.act&&t<600000&&!S.towns.willowbrook.boss){q.advanceTime(2000,2000,q.act?q.act.progress||0:0);t+=2000;}
+  assert.equal(S.towns.willowbrook.boss,true,'Grubnash falls');assert.equal(q.act,null,'and the fight ends there');
+});
 console.log(tests+' regression checks passed');
