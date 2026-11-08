@@ -76,7 +76,10 @@ Q.heroUrl = Q.heroBustUrl;
 UI.portrait = (size = 48, cls = '') => `<span class="portrait px-portrait ${cls}" style="width:${size}px;height:${size}px"><img class="pxa" src="${Q.heroBustUrl(Q.S && Q.S.look)}" width="${size}" height="${size}" alt="Your hero"></span>`;
 /* combat: the hero and foe as whole sprites; attacks move the whole figure, hits flash */
 Q.battleHero = () => `<span class="battle-rig hero-rig px-hero encounter-hero" role="img" aria-label="Your equipped hero"><span class="rig-torso"><img class="pxa" src="${Q.heroFigureUrl(Q.S.look)}" width="144" height="192" alt="" draggable="false"></span></span>`;
-Q.battleFoe = m => `<span class="battle-rig foe-rig px-foe" role="img" aria-label="${esc(m.name)} ready for battle" data-creature="${m.id}"><span class="foe-torso">${Q.artImage('creature', m.id, 192, '', m.name)}</span></span>`;
+/* creatures are drawn facing right; in a fight they stand on the right, so they are mirrored to face the hero (the
+   chicken is the one drawn facing left already) */
+const FACES_LEFT = new Set(['chicken']);
+Q.battleFoe = m => `<span class="battle-rig foe-rig px-foe" role="img" aria-label="${esc(m.name)} ready for battle" data-creature="${m.id}"><span class="foe-torso">${FACES_LEFT.has(m.id) ? Q.artImage('creature', m.id, 192, '', m.name) : `<span class="foe-face">${Q.artImage('creature', m.id, 192, '', m.name)}</span>`}</span></span>`;
 const pose0 = Q.poseBattle;
 Q.poseBattle = (avatar, style, phase, animate) => { const root = avatar && avatar.querySelector('.px-hero'); if (!root) return pose0 ? pose0(avatar, style, phase, animate) : false; if (Q.S.settings.reduceFx) return true;
   const attack = phase === 'attack', dir = attack ? 1 : -1; animate(root, [{ transform: 'translateX(0)' }, { transform: `translateX(${-dir * 4}px)`, offset: .25 }, { transform: `translateX(${dir * 14}px)`, offset: .5 }, { transform: 'translateX(0)' }], { duration: attack ? (Q.battleTiming ? Q.battleTiming.duration : 420) : 340, easing: 'ease-in-out' }); return true; };

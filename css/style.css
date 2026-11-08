@@ -3018,3 +3018,4 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 :is(html.lw-1600,html.short) .kit-adds{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
 #view>.combat-dashboard>.combat-targets>.arena-ctl{flex:none;margin:0}
 .kit-abil>span,.kit-add>span{white-space:normal}
+.foe-face{display:inline-block;transform:scaleX(-1);line-height:0}
