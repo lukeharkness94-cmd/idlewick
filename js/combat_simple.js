@@ -40,39 +40,54 @@
     const m = DQ.modal({ title: p.title, body: html, wide: true });
     m.dataset.more = key; open = key; UI.upd && UI.upd();
   };
-  /* Layout (Nov 2026, after "abilities are a small scroll at the bottom"): abilities get a full-height panel beside the
-     fight, at eye level with your hero, so they never shrink into a scrolling strip; the fighting style (with the
-     combat skills) runs under both; food takes the last row and the reference buttons head the creatures column. */
-  const addBar = () => {
-    const dash = document.querySelector('#view .combat-dashboard'); if (!dash || dash.querySelector('.combat-tools')) return;
-    const strip = dash.querySelector('.combat-live .style-strip'), arena = dash.querySelector('.combat-live .encounter-arena'); if (!strip) return;
-    const btns = POPS.filter(p => p.bar !== false && (p.go || dash.querySelector(p.from))).map(p => { let b = null; try { b = p.badge && p.badge(); } catch (e) { b = null; } return `<button class="ct-btn ${b && b.tone ? 'tone-' + b.tone : ''}" data-do="combatmore" data-a="${p.key}" aria-label="${esc(p.label)}${b ? ': ' + esc(b.t) : ''}">${ico(p.ic)}<span class="ct-l"><span>${esc(p.label)}</span>${b ? `<small>${esc(b.t)}</small>` : ''}</span></button>`; }).join('');
-    if (arena) { const row = document.createElement('div'); row.className = 'fight-row'; arena.before(row); row.appendChild(arena); row.insertAdjacentHTML('beforeend', abilPanel()); }
-    else strip.insertAdjacentHTML('afterend', abilPanel());
-    strip.insertAdjacentHTML('afterend', `<div class="kit-bottom">${foodPanel(dash)}</div>`);
-    /* the reference buttons (preparation, equipment, boss, loot) head the creatures column: they are about whom to fight */
-    const tg = dash.querySelector('.combat-targets'), tools = `<nav class="combat-tools" aria-label="More combat options">${btns}</nav>`;
-    if (tg) tg.insertAdjacentHTML('afterbegin', tools); else strip.insertAdjacentHTML('afterend', tools);
-    /* "Selected: creature · Explore" belongs with the creatures you pick from, which frees the left column for you */
-    const ctl = dash.querySelector('.combat-live > .arena-ctl'), tools2 = tg && tg.querySelector('.combat-tools'); if (ctl && tools2) tools2.after(ctl);
+  /* Layout D (Nov 2026, chosen by the player from four concepts): 1 Choose on the left (areas and creatures, the boss
+     at the foot); on the right 2 a one-line Ready check (danger, food, gear, with Details and Loot), 3 the fight as
+     the biggest thing on screen, and under it one action bar: Train (each style with its skill level), Abilities
+     (slots and every ability you can slot) and Food. The stage gives way on small screens, never the action bar. */
+  const dashHas = sel => !!document.querySelector('#view .combat-dashboard ' + sel);
+  const readyLine = (tight = false) => {
+    const m = focus(), d = m && DQ.dangerOf ? DQ.dangerOf(m) : null, heal = foodHeal(), slots = ['head', 'body', 'legs', 'shield', 'weapon', 'amulet', 'ring'], worn = slots.filter(k => S().equip[k]).length;
+    const ok = d && d.key === 'easy' && heal > 0, t = ok ? 'ok' : d && d.key !== 'easy' && d.key !== 'fair' ? 'bad' : 'warn';
+    const head = !m ? 'Choose a creature' : tight ? `${ok ? 'Ready' : d && d.key !== 'easy' ? 'Careful' : 'Not ready'}: ${esc(m.name)}` : `${ok ? 'Ready for' : d && d.key !== 'easy' ? 'Careful with' : 'Not ready for'} ${esc(m.name)}`;
+    const item = (good, text) => `<span class="rl-i ${good ? 'ok' : 'warn'}">${good ? '✓' : '!'} ${text}</span>`;
+    return `<div class="ready-line tone-${t}"><span class="step-n">2</span><b class="rl-head">${head}</b>${d ? item(d.key === 'easy', esc(d.label)) : ''}${item(heal > 0, heal ? `Food ${heal} health${S().settings.autoEat && !tight ? ' · auto-eat' : ''}` : 'No food')}<button class="rl-i ${worn < 4 ? 'warn' : 'ok'}" data-do="go" data-a="character">${worn < 4 ? '!' : '✓'} Gear ${worn}/${slots.length}${tight ? '' : ' worn'}</button><span class="rl-tools">${dashHas('.combat-side .battle-brief') ? `<button class="btn sm" data-do="combatmore" data-a="prep">${ico('info')}Details</button>` : ''}${dashHas('.combat-side .lootp') ? `<button class="btn sm" data-do="combatmore" data-a="loot">${ico('pouch')}Loot</button>` : ''}</span></div>`;
   };
-  /* abilities: each slot, and the abilities you can put in one, as buttons right under the fighting style; food: what
-     you carry (click to eat), auto-eat and when to eat, cloned from the page's own food panel */
+  const bossBtn = () => { const b = bossOf(), p = byKey('boss'); if (!b || !dashHas(p.from)) return ''; let bg = null; try { bg = p.badge(); } catch (e) { bg = null; }
+    return `<button class="boss-foot ${bg && bg.tone ? 'tone-' + bg.tone : ''}" data-do="combatmore" data-a="boss">${ico('trophy')}<span><b>Boss: ${esc(b.name)}</b><small>${esc(bg ? bg.t : '')}</small></span><span class="bf-go">${bg && bg.t === 'Defeated' ? 'Details' : 'Challenge'}</span></button>`; };
+  const addBar = () => {
+    const dash = document.querySelector('#view .combat-dashboard'); if (!dash || dash.dataset.d) return;
+    const live = dash.querySelector('.combat-live'), strip = live && live.querySelector('.style-strip'), arena = live && live.querySelector('.encounter-arena'), ctl = live && live.querySelector('.arena-ctl'), tg = dash.querySelector('.combat-targets');
+    if (!live || !strip) return; dash.dataset.d = '1'; dash.classList.add('combat-d');
+    if (tg) { tg.insertAdjacentHTML('afterbegin', '<div class="step-h"><span class="step-n">1</span>Choose</div>'); tg.insertAdjacentHTML('beforeend', bossBtn()); }
+    const tight = /\b(short|lw-1600)\b/.test(document.documentElement.className) && innerWidth > 860;
+    live.insertAdjacentHTML('afterbegin', readyLine(tight));
+    /* on shorter or narrower desktops the fight's own line (Fighting … / Retreat, or Selected … / Explore) joins the
+       ready line so the stage keeps its height for the fighters */
+    if (arena && ctl) { ctl.classList.add('stage-ctl'); ctl.insertAdjacentHTML('afterbegin', '<span class="step-n on">3</span>'); if (tight) { ctl.classList.add('in-ready'); live.querySelector('.ready-line').appendChild(ctl); arena.classList.add('no-ctl'); } else arena.appendChild(ctl); }
+    strip.insertAdjacentHTML('beforebegin', `<div class="combat-hud"><section class="panel hud-train"><div class="kit-head"><span class="k">Train</span></div></section>${abilPanel()}${foodPanel()}</div>`);
+    const train = live.querySelector('.hud-train'); train.appendChild(strip);
+    const w = strip.querySelector('.ss-weapon'); if (w) train.querySelector('.kit-head').appendChild(w);
+  };
   const abilPanel = () => {
     const on = S().abilities || [], slots = DQ.abilSlots ? DQ.abilSlots() : 0, ready = D.ABIL.filter(a => DQ.abilUnlocked(a)), spare = ready.filter(a => !on.includes(a.id));
     const next = D.ABIL.filter(a => !DQ.abilUnlocked(a)).sort((x, y) => (x.lvl - DQ.lvl(x.skill)) - (y.lvl - DQ.lvl(y.skill)))[0];
     const why = a => DQ.ability(a.id) ? 'In use' : a.needShield && !S().equip.shield ? 'Needs a shield' : a.style ? `${DQ.cap(a.style)} only` : 'Idle';
     const slotHtml = Array.from({ length: slots }, (_, i) => { const a = D.ABIL.find(x => x.id === on[i]);
-      return a ? `<button class="kit-abil on ${DQ.ability(a.id) ? '' : 'idle'}" data-do="abil" data-a="${a.id}" aria-pressed="true" data-tip="text:${esc(a.name)}: ${esc(a.text)} Click to take it out of the slot.">${ico(a.ic)}<span><b>${esc(a.name)}</b><small>${esc(why(a))} · remove</small></span></button>`
-        : `<span class="kit-abil empty">${ico('star')}<span><b>Empty slot</b><small>${spare.length ? 'Pick an ability below' : next ? `Next at ${esc(D.SK[next.skill].name)} ${next.lvl}` : ''}</small></span></span>`; }).join('');
-    const full = on.length >= slots, adds = spare.map(a => `<button class="kit-add" data-do="${full ? 'abilswap' : 'abil'}" data-a="${a.id}" data-tip="text:${esc(a.name)}: ${esc(a.text)}${full ? ' Replaces your last slot.' : ''}">${ico(a.ic)}<span>${esc(a.name)}</span></button>`).join('');
+      return a ? `<button class="ab-tile on ${DQ.ability(a.id) ? '' : 'idle'}" data-do="abil" data-a="${a.id}" aria-pressed="true" data-tip="text:${esc(a.name)}: ${esc(a.text)} Click to take it out of the slot.">${ico(a.ic)}<b>${esc(a.name)}</b><small>${esc(why(a))}</small></button>`
+        : `<span class="ab-tile empty">${ico('star')}<b>Empty</b><small>${spare.length ? 'Pick below' : 'Slot ' + (i + 1)}</small></span>`; }).join('');
+    const nextSlot = slots < 3 ? `<span class="ab-tile locked"><b>Slot ${slots + 1}</b><small>Combat 40</small></span>` : '';
+    const full = on.length >= slots;
+    const adds = spare.map(a => `<button class="ab-add" data-do="${full ? 'abilswap' : 'abil'}" data-a="${a.id}" aria-label="${full ? 'Swap in ' : 'Add '}${esc(a.name)}" data-tip="text:${esc(a.name)}: ${esc(a.text)}${full ? ' Replaces your last slot.' : ''}">${ico(a.ic)}<span>${esc(a.name)}</span></button>`).join('');
+    const nxt = next ? (() => { const need = D.XPF[next.lvl] || 1, have = S().xp[next.skill] || 0; return `<div class="ab-next"><span>${ready.length ? 'Next' : 'First ability'}: <b>${esc(next.name)}</b> at ${esc(D.SK[next.skill].name)} ${next.lvl}</span><span class="bar"><i style="width:${Math.min(100, Math.round(have / need * 100))}%"></i></span></div>`; })() : '';
     return `<section class="panel combat-abils"><div class="kit-head"><span class="k">Abilities <b class="mono">${on.length}/${slots}</b></span><button class="linkish" data-do="combatmore" data-a="abilities">All abilities</button></div>
-      <div class="kit-slots">${slotHtml}</div>${adds ? `<div class="kit-sub">${full ? 'Swap in (replaces your last slot)' : 'Add to a slot'}</div><div class="kit-adds">${adds}</div>` : ''}</section>`;
+      <div class="ab-slots">${slotHtml}${nextSlot}</div>${adds ? `<div class="ab-adds"><span class="kit-sub">${full ? 'Swap in' : 'Add'}</span>${adds}</div>` : nxt}</section>`;
   };
-  const foodPanel = dash => {
-    const sup = dash.querySelector('.combat-col .combat-supplies'), food = sup ? sup.cloneNode(true) : null;
-    if (food) { food.querySelectorAll('[id]').forEach(e => e.removeAttribute('id')); const h = food.querySelector('h2'); if (h) h.outerHTML = '<span class="k">Food</span>'; }
-    return `<section class="panel combat-food">${food ? food.innerHTML : '<span class="k">Food</span><p class="dim sm">No food carried.</p>'}</section>`;
+  const foodPanel = () => {
+    const foods = (DQ.foods ? DQ.foods() : []).filter(id => DQ.have(id) > 0), heal = foodHeal(), at = S().settings.eatAt || 50;
+    const tiles = foods.map(id => { const it = D.ITEMS[id]; return `<button class="food-tile" data-do="eat" data-a="${id}" data-tip="item:${id}">${DQ.itemIco(it)}<span><b>${esc(it.name)} <span class="mono" data-b="count:${id}"></span></b><small>+${it.heal} each</small></span></button>`; }).join('');
+    return `<section class="panel combat-food"><div class="kit-head"><span class="k">Food · ${heal} health</span><button class="tog ${S().settings.autoEat ? 'on' : ''}" data-do="autoeat"><span class="sw"></span>Auto-eat</button></div>
+      <div class="food-tiles">${tiles || '<p class="dim sm">No food carried. Cook fish or buy bread in the shop.</p>'}</div>
+      <div class="eat-step" role="group" aria-label="Eat below this health"><span>Eat below</span><button type="button" class="btn sm" data-do="eatstep" data-a="-10" aria-label="Eat at lower health">−</button><output class="mono">${at}%</output><button type="button" class="btn sm" data-do="eatstep" data-a="10" aria-label="Eat at higher health">+</button></div></section>`;
   };
   UI.DO.abilswap = id => { const on = S().abilities || []; if (on.length >= DQ.abilSlots()) DQ.toggleAbility(on[on.length - 1]); if (DQ.toggleAbility(id)) DQ.sfx && DQ.sfx('equip'); UI.render(false); };
   const render = UI.render;

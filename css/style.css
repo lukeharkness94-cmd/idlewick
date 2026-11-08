@@ -3019,3 +3019,100 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 #view>.combat-dashboard>.combat-targets>.arena-ctl{flex:none;margin:0}
 .kit-abil>span,.kit-add>span{white-space:normal}
 .foe-face{display:inline-block;transform:scaleX(-1);line-height:0}
+/* ===== Combat layout D (Nov 2026, js/combat_simple.js): 1 Choose | 2 Ready line, 3 the fight, action bar ===== */
+.step-n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:color-mix(in srgb,var(--good) 35%,var(--panel2));color:var(--ink);font:700 14px var(--f-ui);flex:none}
+.step-n.on{background:var(--brass);color:#2a1a08}
+.step-h{display:flex;align-items:center;gap:8px;font:700 17px var(--f-display);padding:2px 2px 0}
+@media (min-width:861px){
+  #view>.combat-dashboard.combat-d{grid-template-columns:320px minmax(0,1fr)!important}
+  .combat-d>.combat-targets{order:-1}
+  .combat-d .area-grid{grid-template-columns:minmax(0,1fr)!important}
+  .combat-d .hunt-areas{padding:10px}
+  #view>.combat-dashboard.combat-d>.combat-live>.encounter-arena{flex:1 1 auto;min-height:220px}
+}
+.combat-d .encounter-arena{display:flex;align-items:flex-end;justify-content:space-around;padding-top:56px}
+.stage-ctl{position:absolute;top:10px;left:10px;right:10px;display:flex;align-items:center;gap:10px;padding:6px 8px 6px 10px;border-radius:10px;background:color-mix(in srgb,var(--panel) 82%,transparent);z-index:3;margin:0!important}
+.stage-ctl>span:not(.step-n){flex:1;min-width:0;font-size:16px}
+.stage-ctl .btn{min-height:40px}
+.ready-line{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:8px 12px;border-radius:12px;border:1px solid var(--line2);background:var(--panel)}
+.ready-line.tone-ok{border-color:color-mix(in srgb,var(--good) 55%,var(--line2));background:color-mix(in srgb,var(--good) 10%,var(--panel))}
+.ready-line.tone-warn{border-color:color-mix(in srgb,#e8b44a 55%,var(--line2))}
+.ready-line.tone-bad{border-color:color-mix(in srgb,var(--bad) 60%,var(--line2));background:color-mix(in srgb,var(--bad) 10%,var(--panel))}
+.rl-head{font:700 17px var(--f-display)}
+.ready-line.tone-ok .rl-head{color:var(--good)}.ready-line.tone-bad .rl-head{color:var(--bad)}
+.rl-i{font-size:15px;color:var(--ink)}.rl-i.warn{color:#e8b44a}
+button.rl-i{border:0;background:none;padding:0;cursor:pointer;font-family:inherit;text-decoration:underline;text-underline-offset:3px}
+.rl-tools{margin-left:auto;display:flex;gap:6px}.rl-tools .btn{display:inline-flex;align-items:center;gap:6px}.rl-tools .ic{width:20px;height:20px}
+.combat-hud{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1.25fr) minmax(0,.8fr);gap:10px;align-items:stretch}
+.combat-hud>.panel{margin:0;padding:10px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.combat-hud .kit-head{min-height:30px}
+.hud-train .kit-head .ss-weapon{border:0;background:none;padding:0;max-width:60%}
+.hud-train .style-strip{display:block!important;padding:0;border:0;background:none;box-shadow:none;margin:0}
+.hud-train .ss-train{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.hud-train .ss-btn{flex-direction:column;align-items:flex-start;min-height:62px;padding:8px;gap:4px}
+.hud-train .ss-btn>span{width:100%}
+.hud-train .ss-hp,.hud-train .ss-cl{min-height:36px}
+.ab-slots{display:flex;flex-wrap:wrap;gap:6px}
+.ab-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:96px;min-height:70px;padding:4px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);font:600 14px var(--f-ui);text-align:center}
+.ab-tile .ic{width:28px;height:28px}.ab-tile b{font-size:14px;line-height:1.1}.ab-tile small{font:500 13px var(--f-body);color:var(--mute)}
+.ab-tile.on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 14%,var(--panel2));cursor:pointer}
+.ab-tile.on.idle,.ab-tile.empty{border-style:dashed}.ab-tile.empty{color:var(--mute)}
+.ab-tile.locked{background:transparent;color:var(--mute);border-color:var(--line)}
+.ab-adds{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:5px;align-items:center}
+.ab-adds .kit-sub{grid-column:1/-1;margin:0}
+.ab-add{display:flex;align-items:center;gap:6px;min-height:36px;padding:2px 8px 2px 4px;border:1px solid var(--line2);border-radius:9px;background:transparent;color:var(--ink);font:600 14px var(--f-ui);text-align:left;cursor:pointer;min-width:0}
+.ab-add .ic{width:24px;height:24px;flex:none}.ab-add span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ab-add:hover,.ab-tile.on:hover{border-color:var(--brass-hi)}
+.ab-next{display:flex;flex-direction:column;gap:4px;font-size:14px}.ab-next .bar{height:6px}
+.food-tiles{display:flex;flex-wrap:wrap;gap:6px}
+.food-tile{display:flex;align-items:center;gap:6px;min-height:44px;padding:4px 10px 4px 4px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);font:600 15px var(--f-ui);text-align:left;cursor:pointer}
+.food-tile>span{display:flex;flex-direction:column;line-height:1.15}.food-tile small{font:500 13px var(--f-body);color:var(--good)}
+.food-tile .item-art{width:32px;height:32px}
+.combat-food .eat-step output{min-width:56px}
+.boss-foot{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;border:1px solid var(--line2);background:var(--panel2);color:var(--ink);text-align:left;cursor:pointer;flex:none;margin-top:auto!important}
+.boss-foot .ic{width:30px;height:30px}.boss-foot>span{display:flex;flex-direction:column;flex:1;font-size:16px}.boss-foot small{font-size:14px;color:var(--mute)}
+.boss-foot.tone-ok small{color:var(--good)}.boss-foot .bf-go{flex:none;color:var(--brass-hi);font-size:15px}
+@media (max-width:860px){
+  .combat-hud{grid-template-columns:minmax(0,1fr)}
+  .combat-dashboard.combat-d .ready-line,.combat-dashboard.combat-d .combat-hud{order:1}
+}
+.ab-adds{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+:is(html.lw-1600,html.short) .combat-d .encounter-arena .avatar{height:150px}
+:is(html.lw-1600,html.short) .combat-d .encounter-arena .avatar>.art-sprite,:is(html.lw-1600,html.short) .combat-d .encounter-arena .avatar .foe-torso img{width:128px!important;height:128px!important}
+:is(html.lw-1600,html.short) .combat-d .encounter-arena .avatar>.encounter-hero,:is(html.lw-1600,html.short) .combat-d .encounter-arena .avatar .rig-torso img{width:96px!important;height:128px!important}
+:is(html.lw-1600,html.short) .combat-hud{grid-template-columns:minmax(0,.95fr) minmax(0,1.6fr) minmax(0,.8fr)}
+:is(html.lw-1600,html.short) .hud-train .ss-train{grid-template-columns:repeat(2,minmax(0,1fr))}
+:is(html.lw-1600,html.short) .ab-tile{width:84px;min-height:62px}
+:is(html.lw-1600,html.short) .ab-adds{grid-template-columns:repeat(auto-fill,minmax(136px,1fr))}
+.combat-food .kit-head{flex-wrap:wrap;row-gap:4px}
+.combat-food .eat-step{gap:6px}
+:is(html.lw-1600,html.short) .ab-tile{width:104px;min-height:58px}
+:is(html.lw-1600,html.short) .ab-tile b{white-space:nowrap}
+:is(html.lw-1600,html.short) .combat-d .encounter-arena{padding-top:50px}
+:is(html.lw-1600,html.short) .stage-ctl{top:6px;padding:4px 6px 4px 8px}
+:is(html.lw-1600,html.short) .stage-ctl .btn{min-height:36px}
+:is(html.lw-1600,html.short) .hud-train .ss-btn{grid-column:1/-1;flex-direction:row;align-items:center;min-height:40px;padding:4px 8px}
+:is(html.lw-1600,html.short) .hud-train .ss-btn>span{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center}
+:is(html.lw-1600,html.short) .hud-train .ss-btn .ss-xp{grid-column:1/-1;margin-top:2px}
+/* the creature sits on the ground line at whatever size the stage uses */
+.combat-d .px-foe{display:flex;align-items:flex-end;justify-content:center}
+:is(html.lw-1600,html.short) .combat-d .foe-rig{--rig-unit:2.67px}
+.foe-face{display:block}
+.stage-ctl.in-ready{position:static;flex:1 1 100%;background:none;padding:6px 0 0;border-top:1px solid var(--line);border-radius:0}
+.combat-d .encounter-arena.no-ctl{padding-top:12px!important}
+html.short .combat-d .encounter-arena .avatar{height:112px}
+html.short .combat-d .encounter-arena .avatar>.art-sprite,html.short .combat-d .encounter-arena .avatar .foe-torso img{width:96px!important;height:96px!important}
+html.short .combat-d .encounter-arena .avatar>.encounter-hero,html.short .combat-d .encounter-arena .avatar .rig-torso img{width:72px!important;height:96px!important}
+html.short .combat-d .foe-rig{--rig-unit:2px}
+html.short .combat-d .encounter-arena{min-height:0!important}
+:is(html.lw-1600,html.short) .combat-hud{grid-template-columns:minmax(0,.9fr) minmax(0,1.85fr) minmax(0,.75fr)}
+.ab-add span{white-space:normal;line-height:1.1}
+:is(html.lw-1600,html.short) .combat-d .encounter-arena .avatar img{height:128px!important;width:auto!important;max-width:100%}
+html.short .combat-d .encounter-arena .avatar img{height:96px!important}
+.stage-ctl.in-ready{flex:0 0 auto;border-top:0;padding:0;margin-left:4px!important}
+.stage-ctl.in-ready>span:not(.step-n){display:none}
+.ready-line:has(.in-ready) .rl-tools{margin-left:auto}
+.ready-line:has(.in-ready){gap:6px 10px}
+.ready-line:has(.in-ready){gap:6px 8px;padding:6px 10px}
+.ready-line:has(.in-ready) .rl-head{font-size:16px}
+.ready-line:has(.in-ready) .rl-tools .btn{padding-left:8px;padding-right:8px}
