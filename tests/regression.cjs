@@ -929,4 +929,14 @@ test('projects are built in deliveries: stages rise, saves keep partial work, co
   S.inv.log_normal=8;S.coins=25;assert.equal(q.finishProject('well'),true);assert.equal(S.projects.well,true);assert.ok(!S.projectGiven.well);assert.equal(q.projectStage('well'),4);
   S.town='mossbarrow';S.inv.log_hazel=30;assert.equal(q.projectGive('moss_windmill','log_hazel'),30);assert.equal(q.projectStage('moss_windmill'),2,'one of three materials in: a third built');
 });
+test('cook any fish you hold (level sets the burn), gentler burning, thieving shop prices and chests, selling animals', () => {
+  const {q}=harness();const D=q.data,S=q.S;S.unlocked.cooking=true;S.xp.cooking=D.XPF[5];
+  const lob=D.RECIPES.cook_lobster;assert.equal(q.recipeLvlOk(lob),false,'not without the raw fish');S.inv.raw_lobster=3;assert.equal(q.recipeLvlOk(lob),true,'a caught fish can always be cooked');
+  assert.ok(q.burnChance(lob)>.6,'far below the recipe level it mostly burns');assert.ok(q.burnChance(D.RECIPES.cook_shrimp)<=.3,'at or above level the burn chance starts at 30% or less');
+  S.xp.cooking=D.XPF[99];assert.ok(q.burnChance(lob)<=.02);
+  assert.equal(q.buyPrice('bronze_sword'),D.ITEMS.bronze_sword.buy,'no thieving, no discount');S.unlocked.thieving=true;S.xp.thieving=D.XPF[99];
+  assert.ok(q.buyPrice('iron_sword')<D.ITEMS.iron_sword.buy&&q.sellPrice('iron_sword')>D.ITEMS.iron_sword.val,'a trained thief haggles both ways');
+  S.towns.mossbarrow={visited:true,boss:false};S.unlocked.farming=true;S.xp.farming=D.XPF[30];S.coins=99999;S.farm.pensBought=Math.max(1,S.farm.pensBought);const A=D.ANIMALS[0];q.buyAnimal(A.id);
+  const c=S.coins;assert.equal(q.sellAnimal(0),true);assert.equal(S.farm.animals.length,0,'the pen is free');assert.equal(S.coins-c,Math.floor(A.price/2));
+});
 console.log(tests+' regression checks passed');

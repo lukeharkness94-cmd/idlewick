@@ -49,7 +49,7 @@ DQ.awardPet = id => {
   if (!S().pets.active) { S().pets.active = id; DQ.fxDirty(); }
   const active = S().pets.active === id;
   DQ.notify({ kind: 'unlock', key: 'pet:' + id, icon: 'paw', col: p.col, title: `New creature: ${p.name}!`, text: `A ${p.kind.toLowerCase()} has joined your collection. ${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, sound: 'gem', burst: true, ttl: 14000,
-    popup: { title: `A new companion: ${p.name}!`, body: `<div class="pet-pop" style="--c:${p.col}"><span class="pet-pop-art">${DQ.petSprite ? DQ.petSprite(p, 128) : ''}</span><p><b>${DQ.esc(p.name)}</b> the ${DQ.esc(p.kind.toLowerCase())} has joined you.</p><p class="pet-pop-fx">${DQ.esc(p.text)}.</p><p class="sm dim">${active ? 'They are your active companion now.' : 'Make them your companion to get this bonus.'}</p></div>`,
+    popup: (DQ.sim && DQ.sim.on) || DQ.forecasting ? null : { title: `A new companion: ${p.name}!`, body: `<div class="pet-pop" style="--c:${p.col}"><span class="pet-pop-art">${(() => { try { return DQ.petSprite ? DQ.petSprite(p, 128) : ''; } catch (e) { return ''; } })()}</span><p><b>${DQ.esc(p.name)}</b> the ${DQ.esc(p.kind.toLowerCase())} has joined you.</p><p class="pet-pop-fx">${DQ.esc(p.text)}.</p><p class="sm dim">${active ? 'They are your active companion now.' : 'Make them your companion to get this bonus.'}</p></div>`,
       actions: [...(active ? [] : [{ label: 'Make active', primary: true, fn: () => { DQ.setPet(id); DQ.ui.render && DQ.ui.render(false); } }]), { label: 'Meet them', primary: active, fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, { label: 'Close' }] } });
   DQ.log(`A new creature joins you: ${p.name} the ${p.kind.toLowerCase()}!`, 'quest'); DQ.emit('pets'); DQ.achDirty = true; return true;
 };
@@ -118,6 +118,15 @@ DQ.buyAnimal = id => {
   if (S().coins < a.price) return DQ.toast('Not enough coins', true);
   S().coins -= a.price; F.animals.push({ id, t: 0, stored: 0, happy: 0, name: DQ.pick(['Clover', 'Daisy', 'Pickle', 'Muffin', 'Bramble', 'Nutmeg', 'Turnip', 'Poppy', 'Sprout', 'Hazel', 'Beans', 'Fern']) });
   DQ.sfx('buy'); DQ.log(`You buy a ${a.name.toLowerCase()}.`); DQ.emit('farm');
+};
+/* Selling an animal frees its pen for another (Nov 2026): anything it has stored is collected first, and the livestock
+   trader pays half what it cost. */
+DQ.animalSellPrice = i => { const a = S().farm.animals[i]; return a && D.ANIMAL[a.id] ? Math.floor(D.ANIMAL[a.id].price / 2) : 0; };
+DQ.sellAnimal = i => {
+  const F = S().farm, a = F.animals[i]; if (!a) return false; const A = D.ANIMAL[a.id], price = DQ.animalSellPrice(i);
+  if (a.stored) DQ.collect(i);
+  F.animals.splice(i, 1); DQ.addCoins(price); DQ.sfx('coin');
+  DQ.log(`You sell ${a.name} the ${A.name.toLowerCase()} for ${fmt(price)} coins. The pen is free.`); DQ.emit('farm'); return true;
 };
 DQ.buyPen = () => {
   const F = S().farm, price = D.PEN_PRICES[F.pensBought]; if (price === undefined) return DQ.toast('Your barn is as big as it gets', true);

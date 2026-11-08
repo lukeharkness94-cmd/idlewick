@@ -2968,3 +2968,8 @@ html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:
 .type-sample-original b{font-family:'Alegreya SC',serif}.type-sample-original span{font-family:'Alegreya Sans',sans-serif}
 /* full-height figures everywhere (Alegreya's default old-style numerals read small in a game full of numbers) */
 :root.type-storybook body,:root.type-adventurer body{font-variant-numeric:lining-nums}
+/* Thieving perks under the selected target */
+.thief-perks{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.thief-perk{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:14px;border:1px solid color-mix(in srgb,#b88af0 50%,var(--line));background:color-mix(in srgb,#b88af0 12%,var(--panel2))}
+.thief-perk .ic{width:18px;height:18px}
+.thief-perk.off{opacity:.6;border-style:dashed}

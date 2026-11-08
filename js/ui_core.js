@@ -192,6 +192,9 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
 
 /* ---------- Gather pages (fishing, woodcutting, mining, thieving) ---------- */
 const KIND_OF = { fishing: 'fish', woodcutting: 'wood', mining: 'mine', thieving: 'thieve' };
+/* what your Thieving level does for you, in chips under the target (engine.js has the rules) */
+UI.thiefPerks = () => { const L = DQ.thiefLvl(), chip = (ic, t, on) => `<span class="thief-perk ${on ? '' : 'off'}">${ico(ic)}${t}</span>`;
+  return `<div class="thief-perks">${chip('shop', `Shops ${(L * .15).toFixed(0)}% cheaper · sell ${(L * .2).toFixed(0)}% higher`, L >= 1)}${chip('pouch', L >= 20 ? `Chests +${L}% coins${L >= 30 ? ' · extra gem' : ''}` : 'Lockpicking at 20', L >= 20)}${chip('lock', L >= 25 ? `Pick locked chests · ${Math.round(DQ.pickChance() * 100)}%` : 'Pick locks at 25', L >= 25)}</div>`; };
 UI.V.gather = sk => {
   const kind=KIND_OF[sk],nodes=[...D.NODES[kind]].sort((a,b)=>a.lvl-b.lvl);
   const choices=nodes.map(n=>{
@@ -202,7 +205,7 @@ UI.V.gather = sk => {
       locked:levelLocked||townLocked,blocked:levelLocked||away,reason:requirements.join(' · '),
       short:[levelLocked?`Lv ${n.lvl}`:'',townLocked?`Reach ${town.name}`:''].filter(Boolean).join(' · '),
       caption:`Level ${n.lvl} · ${regional?`Only in ${esc(town.name)}`:DQ.nodeDiscovered(n)?'Any town':`Found in ${esc(town.name)}`}`,
-      info:`<p>${(n.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor(kind,n.id)/1000).toFixed(1)}s per ${kind==='wood'||kind==='mine'?'resource':kind==='fish'?'catch':'attempt'} · ${kind==='wood'||kind==='mine'?'3 steady strikes · never misses':kind==='fish'?'Guaranteed catch':Math.round(DQ.successChance(kind,n)*100)+'% success'}</p><p>${n.item?`<b class="mono" data-b="count:${n.item}"></b> ${esc(D.ITEMS[n.item].name.toLowerCase())} held`:`${n.cmin}–${n.cmax} coins · ${n.dmg} damage if caught`}</p>`};
+      info:`${kind==='thieve'&&UI.thiefPerks?UI.thiefPerks():''}<p>${(n.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor(kind,n.id)/1000).toFixed(1)}s per ${kind==='wood'||kind==='mine'?'resource':kind==='fish'?'catch':'attempt'} · ${kind==='wood'||kind==='mine'?'3 steady strikes · never misses':kind==='fish'?'Guaranteed catch':Math.round(DQ.successChance(kind,n)*100)+'% success'}</p><p>${n.item?`<b class="mono" data-b="count:${n.item}"></b> ${esc(D.ITEMS[n.item].name.toLowerCase())} held`:`${n.cmin}–${n.cmax} coins · ${n.dmg} damage if caught`}</p>`};
   });
   if(!UI.taskChoice[sk]&&!DQ.act)UI.taskChoice[sk]=choices.find(c=>!c.blocked)?.id;
   return UI.taskPanel(sk,D.SK[sk].name,kind,choices,{fish:'Fish',wood:'Chop',mine:'Mine',thieve:'Pickpocket'}[kind])+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress &amp; tools</h3>${UI.skillHero(sk,UI.toolLine(sk))}</section>`;
@@ -232,18 +235,18 @@ UI.V.recipes = sk => {
      make (armour by hide, wood by bows / staves / shields). Each chip says how many are ready, or the level it opens at. */
   /* every list in level order, so new additions never trail at the end */
   const list=D.RLIST[sk].slice().sort((a,b)=>a.lvl-b.lvl||a.name.localeCompare(b.name)),grp=r=>DQ.recipeGroup(r),order=['Fish','Fish suppers','Farmhouse','Smelting','Bronze','Iron','Steel','Mithril','Adamant','Rune','Astral','Basics','Armour','Wood','Arrows','Jewellery','Charms','Tools'],groups=[...new Set(list.map(r=>grp(r).g))].sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
-  const g=UI.tab[sk]=groups.includes(UI.tab[sk])?UI.tab[sk]:(groups.find(x=>list.some(r=>grp(r).g===x&&DQ.lvl(sk)>=r.lvl&&DQ.canMake(r)))||groups[0]);
+  const g=UI.tab[sk]=groups.includes(UI.tab[sk])?UI.tab[sk]:(groups.find(x=>list.some(r=>grp(r).g===x&&DQ.recipeLvlOk(r)&&DQ.canMake(r)))||groups[0]);
   const subs=[...new Set(list.filter(r=>grp(r).g===g).map(r=>grp(r).s).filter(Boolean))],sub=UI.tab[sk+'sub']=subs.includes(UI.tab[sk+'sub'])?UI.tab[sk+'sub']:subs[0],only=UI.tab[sk+'ready'];
-  const inG=(r,x,y)=>grp(r).g===x&&(!y||grp(r).s===y),chip=(x,y,on,act,b)=>{const rs=list.filter(r=>inG(r,x,y)),ready=rs.filter(r=>DQ.lvl(sk)>=r.lvl&&DQ.canMake(r)).length,min=Math.min(...rs.map(r=>r.lvl)),locked=DQ.lvl(sk)<min;
+  const inG=(r,x,y)=>grp(r).g===x&&(!y||grp(r).s===y),chip=(x,y,on,act,b)=>{const rs=list.filter(r=>inG(r,x,y)),ready=rs.filter(r=>DQ.recipeLvlOk(r)&&DQ.canMake(r)).length,min=Math.min(...rs.map(r=>r.lvl)),locked=DQ.lvl(sk)<min&&!rs.some(r=>DQ.recipeLvlOk(r));
     const metalBar=!y&&sk==='smithing'&&METAL_BAR[x],pic=metalBar&&D.ITEMS[metalBar]?metalBar:x==='Tools'&&sk==='smithing'?'tool_pick_1':Object.keys((rs[0]||{out:{}}).out)[0],art=pic&&D.ITEMS[pic]?`<span class="rc-art ${locked?'blackout':''}">${DQ.itemIco(D.ITEMS[pic])}</span>`:'';
     return `<button class="chip rc-chip ${on?'on':''} ${locked?'locked':''}" data-do="tab" data-a="${act}" data-b="${esc(b)}" aria-pressed="${on}">${art}${locked?ico('lock'):''}<span>${esc(y||x)}</span><small>${locked?`Lv ${min}`:ready?`${ready} ready`:''}</small></button>`;};
   UI.taskToolbar[sk]=`<div class="recipe-categories" role="group" aria-label="Category">${groups.map(x=>chip(x,null,x===g,sk,x)).join('')}<span class="filter-sep" aria-hidden="true"></span><button class="filter-toggle ${only?'on':''}" role="switch" aria-checked="${only?'true':'false'}" data-do="readyonly" data-a="${sk}"><span class="ft-track" aria-hidden="true"><span class="ft-knob"></span></span><span>Ready to make</span><b>${only?'On':'Off'}</b></button></div>${subs.length>1?`<div class="recipe-categories recipe-sub" role="group" aria-label="Type">${subs.map(y=>chip(g,y,y===sub,sk+'sub',y)).join('')}</div>`:''}`;
   const missingOf=r=>Object.entries(r.in).filter(([id,n])=>DQ.have(id)<n).map(([id,n])=>`${n-DQ.have(id)} ${D.ITEMS[id].name.toLowerCase()}`);
-  const choices=list.map(r=>{const outId=Object.keys(r.out)[0],it=D.ITEMS[outId],lvlLock=!DQ.skillUnlocked(sk)||DQ.lvl(sk)<r.lvl,miss=lvlLock?[]:missingOf(r);
+  const choices=list.map(r=>{const outId=Object.keys(r.out)[0],it=D.ITEMS[outId],lvlLock=!DQ.skillUnlocked(sk)||!DQ.recipeLvlOk(r),miss=lvlLock?[]:missingOf(r);
     return {id:r.id,name:r.name,artKind:'item',artId:outId,visible:inG(r,g,subs.length>1?sub:null)&&(!only||DQ.canMake(r)),locked:lvlLock,missing:!lvlLock&&miss.length>0,blocked:lvlLock||miss.length>0,
     reason:lvlLock?`Requires ${D.SK[sk].name} ${r.lvl}`:miss.length?`Missing ${miss.join(', ')}`:'',
     stateText:lvlLock?`🔒 ${D.SK[sk].name} ${r.lvl} (you are ${DQ.lvl(sk)})`:miss.length?`Missing ${miss.length===1?miss[0]:miss.length+' materials'}`:'Ready to make',
-    caption:`Level ${r.lvl} · ${UI.statLine(it.b)||DQ.purposeOf&&DQ.purposeOf(outId)||`${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`}`,
+    caption:r.burn&&!lvlLock&&DQ.lvl(sk)<r.lvl?`Level ${r.lvl} · ${Math.round(DQ.burnChance(r)*100)}% burn`:`Level ${r.lvl} · ${UI.statLine(it.b)||DQ.purposeOf&&DQ.purposeOf(outId)||`${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`}`,
     info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}</p><div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>`<span class="ingredient ${DQ.have(id)>=n?'':'bad'}">${DQ.itemIco(D.ITEMS[id])}<span>${esc(D.ITEMS[id].name)} <b data-b="count:${id}"></b> / ${n}</span>${DQ.have(id)>=n||!UI.routeChip?'':UI.routeChip(id)}</span>`).join('')}</div>`};});
   return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'?'Make':'Craft')+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress</h3>${UI.skillHero(sk)}</section>`;
 };

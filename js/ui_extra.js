@@ -58,7 +58,7 @@ UI.V.farming = () => {
     const A = D.ANIMAL[an.id], pr = D.ITEMS[A.prod];
     return `<div class="pen" data-i="${i}" data-b="pen:${i}" style="--c:${A.col}"><button class="pspr" data-do="petanimal" data-a="${i}" data-tip="text:Pet ${esc(an.name)}: makes them work 25% faster for 3 minutes">${DQ.animalSprite(A, 64, 'bob')}</button>
       <div class="pen-t"><b>${esc(an.name)}</b><small>${A.name} · makes ${pr.name.toLowerCase()} every ${left(DQ.animalPeriod(an))}</small><span class="bar pbar"><i></i></span><small><span class="pst mono"></span> ${pr.name.toLowerCase()} ready <span class="tag hungrytag">Hungry</span><span class="tag happytag">Happy</span></small></div>
-      <button class="btn sm" data-do="collect" data-a="${i}">Collect</button></div>`;
+      <button class="btn sm" data-do="collect" data-a="${i}">Collect</button><button class="btn sm pen-sell" data-do="sellanimal" data-a="${i}" data-tip="text:Sell to free this pen · ${fmt(DQ.animalSellPrice(i))} coins">Sell</button></div>`;
   }).join('');
   const nextPen = D.PEN_PRICES[F.pensBought], mossOpen = DQ.townUnlocked('mossbarrow');
   const market = D.ANIMALS.map(a => { const lock = DQ.lvl('farming') < a.lvl; return `<div class="srow ${lock || S().coins < a.price ? 'cant' : ''}" id="buy-${a.id}"><span class="mini">${DQ.animalSprite(a, 40)}</span><div class="sr-t"><b>${a.name}</b><small>Makes ${D.ITEMS[a.prod].name.toLowerCase()} (${fmt(D.ITEMS[a.prod].val)} coins) · <span class="${lock ? 'bad' : 'ok'}">Farming ${a.lvl}</span></small></div><span class="price mono">${ico('coin')}${fmt(a.price)}</span><button class="btn sm ${lock ? '' : 'primary'}" data-do="buyanimal" data-a="${a.id}" ${lock ? 'disabled' : ''}>Buy</button></div>`; }).join('');
@@ -162,6 +162,7 @@ Object.assign(UI.DO, {
   harvestall: () => DQ.harvestAll(),
   autoreplant: () => { S().farm.autoReplant = !S().farm.autoReplant; R(); },
   buyplot: () => DQ.buyPlot(), buypen: () => DQ.buyPen(), buyanimal: a => DQ.buyAnimal(a),
+  sellanimal: a => { const i = +a, an = S().farm.animals[i]; if (!an) return; const A = D.ANIMAL[an.id]; DQ.modal({ title: `Sell ${an.name}?`, body: `<p>The livestock trader pays <b>${fmt(DQ.animalSellPrice(i))} coins</b> for ${esc(an.name)} the ${esc(A.name.toLowerCase())}${an.stored ? `, and you collect the ${an.stored} ${esc(D.ITEMS[A.prod].name.toLowerCase())} waiting first` : ''}. The pen is then free for another animal.</p>`, actions: [{ label: `Sell for ${fmt(DQ.animalSellPrice(i))}`, primary: true, fn: () => { DQ.sellAnimal(i); UI.render(false); } }, { label: 'Keep' }] }); },
   collect: a => DQ.collect(+a), collectall: () => DQ.collectAll(), petanimal: a => DQ.petAnimal(+a),
   filltrough: () => DQ.fillTrough(), makefeed: () => DQ.makeFeed(),
   buyhouse: () => DQ.buyHouse(), buildroom: a => DQ.buildRoom(a), furnish: a => DQ.furnish(a),

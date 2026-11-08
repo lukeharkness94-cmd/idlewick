@@ -410,3 +410,8 @@ Stages are separate commits so each can be reverted on its own.
 
 ## Fantasy lettering (Nov 2026)
 - New default type, "Storybook": Cinzel headings, Alegreya (calligraphic book serif, weight 500, lining figures) for text, buttons and numbers, replacing the thin Alegreya Sans and the JetBrains Mono code font. Settings → Lettering also offers Adventurer (MedievalSharp headings), Pixel (Silkscreen + Pixelify Sans) and Original. Applied via `type-*` classes on <html> that redefine the font variables; all fonts are local variable woff2 files in fonts/ (SIL OFL), embedded by the packager.
+
+## Thieving purpose, cooking, burning, selling animals (Nov 2026)
+- Thieving now matters beyond its (deliberately low) coins (`engine.js`): Silver tongue (shops 0.15% cheaper and buy 0.2% dearer per level: `DQ.buyPrice/sellPrice`, used by the shop, item panel and `DQ.buy/sell`); Lockpicking (treasure chests +1% coins per level from 20, a second gem from 30; "Pick the lock" choice on away chests from 25, `DQ.pickChance`); signature hauls more likely above the target's level. Announced as level unlocks (D.UNL) and shown as chips on the Thieving page (`UI.thiefPerks`). sim-economy milestones unchanged (the simulated player does not train Thieving).
+- Cooking: any raw fish you hold can be cooked whatever your level (`DQ.recipeLvlOk`); level sets the burn: 30% at the recipe's level, −2.5%/level above to 1%, +4%/level below to 85% (was 55% at level, −2%/level). Cards and group tabs follow.
+- Farm animals can be sold (half price, stored produce collected first) to free a pen: `DQ.sellAnimal`, Sell button with confirmation on each pen.

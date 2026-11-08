@@ -203,7 +203,11 @@ DQ.successChance = (kind, n) => {
   const L = DQ.lvl(n.skill);
   return kind === 'thieve' ? clamp(.5 + (L - n.lvl) * .016, .4, .95) : clamp(.58 + (L - n.lvl) * .012, .55, .96);
 };
-DQ.burnChance = r => clamp(.55 - (DQ.lvl('cooking') - r.lvl) * .02 - DQ.fx().burn, .01, .55);
+/* Cooking (Nov 2026): any fish you hold raw can be cooked, whatever your level; your Cooking level sets how often it
+   burns. At the recipe's level 30%, falling 2.5% per level above it to 1%; below the recipe's level 4% more per level
+   short, up to 85%. (Was 55% at level, falling 2% per level.) */
+DQ.recipeLvlOk = r => !!r && (DQ.lvl(r.skill) >= r.lvl || (r.skill === 'cooking' && !!r.burn && Object.keys(r.in || {}).some(k => /^raw_/.test(k) && DQ.have(k) > 0)));
+DQ.burnChance = r => { const gap = DQ.lvl('cooking') - r.lvl; return gap >= 0 ? clamp(.30 - gap * .025 - DQ.fx().burn, .01, .30) : clamp(.30 - gap * .04 - DQ.fx().burn, .01, .85); };
 DQ.canMake = r => Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n);
 const meleeSkill = () => ({ accurate: 'attack', aggressive: 'strength', defensive: 'defence' }[S().style.melee]);
 
@@ -212,7 +216,7 @@ DQ.startAct = (kind, id, o = {}) => {
   const bad = m => { if (!o.quiet) DQ.toast(m, true); return false; };
   if (kind === 'recipe') {
     const r = D.RECIPES[id]; if (!DQ.skillUnlocked(r.skill)) return bad(`${D.SK[r.skill].name} is not unlocked yet`);
-    if (DQ.lvl(r.skill) < r.lvl) return bad(`Requires ${D.SK[r.skill].name} ${r.lvl}`);
+    if (!DQ.recipeLvlOk(r)) return bad(`Requires ${D.SK[r.skill].name} ${r.lvl}`);
     if (!DQ.canMake(r)) return bad('You are missing materials');
   } else if (kind === 'alch') {
     if (!DQ.skillUnlocked('magic') || DQ.lvl('magic') < D.ALCH[0].lvl) return bad(`Alchemy needs Magic ${D.ALCH[0].lvl}`);
@@ -295,7 +299,7 @@ function thieveDone(n) {
     DQ.floatAt(document.querySelector('.card.active .own') || document.querySelector('.card.active'), `${ico('coin')}+${c} coins`, '#f3d58a');
     S().stats.thieve++; DQ.qev('thieve', n.id); DQ.sfx('thieve');
     if (DQ.trick && DQ.trick('echo') && chance(1 / 20)) { fxHit('echo'); DQ.addCoins(c); DQ.trickNote(`echo! +${c} coins`); }
-    if (n.loot && chance(n.loot[1])) { DQ.grant(n.loot[0]); DQ.log(`You also lift ${itemName(n.loot[0]).toLowerCase()}.`, 'good'); }
+    if (n.loot && chance(Math.min(n.loot[1] * 2, n.loot[1] * (1 + Math.max(0, DQ.lvl('thieving') - n.lvl) * .02)))) { DQ.grant(n.loot[0]); DQ.log(`You also lift ${itemName(n.loot[0]).toLowerCase()}.`, 'good'); }
   } else {
     if (DQ.trick && DQ.trick('paws') && (S().gameTime || 0) - (S().pets.paws ?? -1e12) >= 60000) { S().pets.paws = S().gameTime || 0; fxHit('paws'); DQ.trickNote('covered for you!'); return; }
     const d = Math.max(1, Math.round(rnd(1, n.dmg) * DQ.pace().risk)); S().hp -= d; DQ.sfx('hurt');
@@ -309,7 +313,7 @@ function recipeDone(r) {
   const outId = Object.keys(r.out)[0];
   if (DQ.act) DQ.act.count++;
   const taster = DQ.trick && DQ.trick('taster'); if (taster && r.burn && DQ.act && DQ.act.count === 1) fxHit('taster');
-  if (r.burn && !(taster && DQ.act && DQ.act.count === 1) && chance(Math.min(.9, DQ.burnChance(r) * DQ.pace().risk * (taster ? .75 : 1)))) { DQ.grant('burnt'); S().stats.burn++; DQ.floatAt(document.querySelector('.card.active'), 'Burnt!', '#e2574c'); DQ.sfx('hurt'); }
+  if (r.burn && !(taster && DQ.act && DQ.act.count === 1) && chance(Math.min(.92, DQ.burnChance(r) * DQ.pace().risk * (taster ? .75 : 1)))) { DQ.grant('burnt'); S().stats.burn++; DQ.floatAt(document.querySelector('.card.active'), 'Burnt!', '#e2574c'); DQ.sfx('hurt'); }
   else {
     const dbl = chance(DQ.dblChance(r.skill)) ? 2 : 1;
     Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n * dbl));
@@ -512,7 +516,8 @@ function kill(m) {
     const n = rnd(a, b), rar = D.rarityOf(guaranteed ? 0 : p); got.push(id);
     if (id === 'coin_pouch') { const cc = Math.round(rnd(m.coins[0] + 5, m.coins[1] * 3 + 10) * DQ.coinMult() * (DQ.trick && DQ.trick('comb') ? 1.5 : 1)); if (DQ.trick && DQ.trick('comb')) fxHit('comb'); extraCoins += cc; drops.push({ id, n: cc, rar, coins: true }); loot.push(`a pouch of ${fmt(cc)} coins`); continue; }
     if (id === 'treasure_chest') {
-      const cc = Math.round((rnd(m.coins[1] * 5, m.coins[1] * 12) + 50) * DQ.coinMult()); extraCoins += cc; const gem = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(gem); S().stats.rare++;
+      const cc = Math.round((rnd(m.coins[1] * 5, m.coins[1] * 12) + 50) * DQ.coinMult() * (1 + .01 * DQ.thiefLvl())); extraCoins += cc; const gem = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(gem); S().stats.rare++;
+      if (DQ.thiefLvl() >= 30) { const g2 = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g2); drops.push({ id: g2, n: 1, rar: D.RARITY[2] }); }
       const gl = (D.TOWN_GEAR[m.town] || []).filter(g => !DQ.lockedSkillFor(g)), gi = gl.length && chance(.35) ? DQ.pick(gl) : null; if (gi) DQ.grant(gi);
       drops.push({ id, n: cc, rar, coins: true }, { id: gem, n: 1, rar: D.RARITY[2] }); if (gi) drops.push({ id: gi, n: 1, rar: D.RARITY[3] });
       loot.push(`a treasure chest (${fmt(cc)} coins, ${itemName(gem).toLowerCase()}${gi ? ', ' + itemName(gi).toLowerCase() : ''})`);
@@ -583,10 +588,20 @@ DQ.travel = id => {
 DQ.lockedSkillFor = id => { const it = D.ITEMS[id]; return it && it.req ? Object.keys(it.req).find(k => D.SK[k] && !DQ.skillUnlocked(k)) || null : null; };
 DQ.skillTeacher = sk => { const s = D.SK[sk]; if (!s) return ''; const q = s.quest && D.QM[s.quest];
   return q ? `${q.giver} in ${D.TOWN[q.town].name} teaches it (“${q.name}”, from Hero ${q.adv})` : s.actionReq ? DQ.unlockHow(sk) : `It unlocks at Hero level ${s.unlock}`; };
+/* Thieving's purpose (Nov 2026). A trained thief haggles, picks locks and knows where the good stuff is:
+   - Silver tongue: every shop sells to you 0.15% cheaper and buys from you 0.2% dearer per Thieving level
+     (about 15% off and 20% more at 99);
+   - Lockpicking: treasure chests from creatures hold 1% more coins per Thieving level, with a second gem from 30,
+     and locked chests found while away can be picked safely (DQ.pickChance);
+   - Signature hauls: each target's special item turns up more often the further your level is above the target. */
+DQ.thiefLvl = () => DQ.skillUnlocked && DQ.skillUnlocked('thieving') ? DQ.lvl('thieving') : 0;
+DQ.buyPrice = id => { const it = D.ITEMS[id]; return it ? Math.max(1, Math.round(it.buy * (1 - .0015 * DQ.thiefLvl()))) : 0; };
+DQ.sellPrice = id => { const it = D.ITEMS[id]; return it ? Math.round((it.val || 0) * (1 + .002 * DQ.thiefLvl())) : 0; };
+DQ.pickChance = () => clamp(.45 + DQ.thiefLvl() * .01, .45, .97);
 DQ.buy = (id, qty = 1) => {
-  const it = D.ITEMS[id]; let price = it.buy * qty;
+  const it = D.ITEMS[id]; let price = DQ.buyPrice(id) * qty;
   const lock = DQ.lockedSkillFor(id); if (lock) return DQ.toast(`Learn ${D.SK[lock].name} first. ${DQ.skillTeacher(lock)}.`, true);
-  if (it.type === 'tool') { if (DQ.have(id)) return DQ.toast('You already own that', true); qty = 1; price = it.buy; }
+  if (it.type === 'tool') { if (DQ.have(id)) return DQ.toast('You already own that', true); qty = 1; price = DQ.buyPrice(id); }
   if (S().coins < price) return DQ.toast('Not enough coins', true);
   S().coins -= price; DQ.give(id, qty); S().stats.bought += qty; if (it.type === 'tool') S().stats.tools++;
   DQ.sfx('buy'); DQ.achDirty = true; DQ.emit('shop'); return true;
@@ -602,7 +617,7 @@ DQ.sell = (id, qty, from) => {
   if (!qty) return;
   if (store) { store[id] -= qty; if (!store[id]) delete store[id]; DQ.invDirty = true; }
   else DQ.take(id, qty);
-  const coins = (it.val || 0) * qty;
+  const coins = DQ.sellPrice(id) * qty;
   DQ.addCoins(coins); S().stats.sold += qty; DQ.sfx('sell'); DQ.achDirty = true; DQ.emit('shop'); return coins;
 };
 DQ.sellJunk = () => { let c = 0; Object.keys({ ...S().inv, ...S().bank }).forEach(id => { if (D.ITEMS[id] && D.ITEMS[id].type === 'junk' && DQ.sellable(id)) c += DQ.sell(id, DQ.have(id)) || 0; }); return c; };
