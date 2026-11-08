@@ -2392,7 +2392,7 @@ body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
 @media (max-width:860px){#nowcard{display:none!important}}
 /* Shorter windows (a MacBook Air browser is ~700–800px tall): the left column keeps every skill on screen without
    scrolling by tightening row height and spacing, never the text size. */
-@media (min-width:861px){html.short{
+@media (min-width:861px){html:is(.short,.rail-tight){
   .sidebar{gap:6px!important}
   .now{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:'go stop' 'bar bar' 'plan plan';gap:4px 6px;padding:7px 8px}
   .now .now-k{display:none}

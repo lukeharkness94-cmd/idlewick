@@ -64,7 +64,7 @@ function draw(id){
  case 'dagger':poly([[17,31],[30,8],[39,4],[37,15],[23,36]],STEEL);line(23,27,34,12,'#e5e6d1');line(12,27,29,39,GOLD);line(16,36,7,45,WOOD);break;
  case 'candle':oval(24,41,19,5,GOLD);r(17,18,14,22,PAPER);poly([[19,18],[22,22],[26,19],[29,26],[31,18]],'#f2e4bd');line(24,18,24,12,INK);poly([[24,2],[31,10],[28,16],[21,16],[18,11]],'#e4af5d');poly([[24,7],[27,12],[24,15],[22,12]],'#f7dfa0');break;
  case 'fire':poly([[8,33],[11,20],[18,25],[24,4],[31,16],[38,12],[42,31],[36,42],[16,44]],'#cd7853');poly([[16,34],[21,21],[25,27],[29,16],[35,34],[29,41],[20,41]],'#ecc16c');poly([[22,37],[26,29],[29,37],[25,41]],'#f4e0a5');break;
- default: throw Error('Missing UI icon drawing: '+id);
+ default: oval(24,24,12,12,GOLD);break; /* newer icons are drawn by the pixel-art runtime, which replaces this */
  }
  return p.canvas();
 }

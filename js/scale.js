@@ -23,6 +23,8 @@
     const h = innerHeight / z, w = innerWidth / z;
     root.style.setProperty('--vh', h / 100 + 'px'); root.style.setProperty('--vh100', h + 'px'); root.style.setProperty('--vw100', w + 'px');
     root.classList.toggle('scaled', desk); root.classList.toggle('short', desk && h < 940);
+    /* 17 skills: the left column uses its compact rows on any window under 1180 page pixels tall */
+    root.classList.toggle('rail-tight', desk && h < 1180);
     root.classList.toggle('lw-1600', desk && w < 1600); root.classList.toggle('lw-1300', desk && w < 1300); root.classList.toggle('lw-wide', desk && w > 2300);
   };
   DQ.applyScale = apply;

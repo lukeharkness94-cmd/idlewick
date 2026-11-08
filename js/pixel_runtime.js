@@ -15,6 +15,7 @@ Q.artImage = (kind, id, size = 96, cls = '', alt = '') => {
   const item = D.ITEMS[id];
   if (kind === 'item') return item ? img(A.itemUrl(id), 16, 16, size, cls, alt || item.name) : '';
   if (kind === 'creature' || kind === 'thieve') { const k = String(id).replace(/^wild_/, ''), u = A.hasCreature(k) ? A.creatureUrl(k) : null; return u ? img(u, 32, 32, size, cls, alt || k) : ''; }
+  if (kind === 'island') { const u = A.islandUrl && A.islandUrl(id); return u ? img(u, 32, 32, size, cls, alt || id) : ''; }
   if (kind === 'fish') { const s = A.url('fishnode:' + id, () => A.fishLarge(id)); return s ? img(s, 32, 16, size, cls, alt || id) : ''; }
   if (kind === 'wood' || kind === 'tree') return img(A.treeUrl(id), 32, 48, size * 1.1, cls, alt || id);
   if (kind === 'mine' || kind === 'rock') return img(A.rockUrl(id), 32, 32, size, cls, alt || id);

@@ -2476,7 +2476,7 @@ body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
 @media (max-width:860px){#nowcard{display:none!important}}
 /* Shorter windows (a MacBook Air browser is ~700–800px tall): the left column keeps every skill on screen without
    scrolling by tightening row height and spacing, never the text size. */
-@media (min-width:861px){html.short{
+@media (min-width:861px){html:is(.short,.rail-tight){
   .sidebar{gap:6px!important}
   .now{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:'go stop' 'bar bar' 'plan plan';gap:4px 6px;padding:7px 8px}
   .now .now-k{display:none}
@@ -3534,6 +3534,8 @@ DQ.injectSprite = () => {
     const h = innerHeight / z, w = innerWidth / z;
     root.style.setProperty('--vh', h / 100 + 'px'); root.style.setProperty('--vh100', h + 'px'); root.style.setProperty('--vw100', w + 'px');
     root.classList.toggle('scaled', desk); root.classList.toggle('short', desk && h < 940);
+    /* 17 skills: the left column uses its compact rows on any window under 1180 page pixels tall */
+    root.classList.toggle('rail-tight', desk && h < 1180);
     root.classList.toggle('lw-1600', desk && w < 1600); root.classList.toggle('lw-1300', desk && w < 1300); root.classList.toggle('lw-wide', desk && w > 2300);
   };
   DQ.applyScale = apply;
@@ -4619,6 +4621,71 @@ for(const it of Object.values(D.ITEMS)){
 }
 for(const q of D.QUESTS||Object.values(D.QM))if(q.id!=='first_steps'&&q.reward?.coins)q.reward.coins=Math.round(q.reward.coins*.65);
 for(const a of D.ACH||[])a.coins=Math.round(a.coins*.35);
+})();
+
+</script>
+<script>
+/* Carpentry, Sailing and Beastmastery (Nov 2026): data. Art is in skills_new_art.js, behaviour and pages in
+   skills_new.js.
+   - Carpentry (artisan): saw logs into planks, then build boats. Unlocks after chopping 60 logs at Woodcutting 10.
+   - Sailing (gathering): timed voyages to islands for loot found nowhere else in such a mix. Each island needs a boat
+     of a certain size (Carpentry builds them). Unlocks once you have visited Saltmere and own a skiff.
+   - Beastmastery (gathering): train your companions. Every session raises the companion's level, and your
+     Beastmastery level makes every companion's bonus stronger and farm animals produce faster. Unlocks with your
+     first companion and Hunting 5. */
+(() => {
+const DQ = window.DQ, D = DQ.data;
+for (const s of [
+  { id: 'carpentry', name: 'Carpentry', col: '#c08a4a', group: 'artisan', page: 'carpentry', actionReq: { chop: 60, 'skill:woodcutting': 10 }, blurb: 'Saw logs into planks and build boats.' },
+  { id: 'sailing', name: 'Sailing', col: '#3f8fc8', group: 'gather', page: 'sailing', actionReq: { 'visit:saltmere': 1, 'own:boat_skiff': 1 }, blurb: 'Sail from Saltmere to far islands and bring back what you find.' },
+  { id: 'beastmastery', name: 'Beastmastery', col: '#d08a5a', group: 'gather', page: 'beastmastery', actionReq: { pets: 1, 'skill:hunting': 5 }, blurb: 'Train your companions: stronger bonds and stronger bonuses.' }
+]) { D.SKILLS.push(s); D.SK[s.id] = s; }
+const icons = DQ.ICONS || {}; for (const k of ['carpentry', 'sailing', 'beastmastery', 'plank', 'boat', 'island']) if (!(k in icons)) icons[k] = 'M4 12h16';
+
+/* ---------- items: planks from the seven main woods, and five boats ---------- */
+const item = (id, o) => { D.ITEMS[id] = Object.assign({ id, val: 1, ic: 'plank', col: '#aab', type: 'resource' }, o); return D.ITEMS[id]; };
+const WOODS = [['normal', 'Planks', 1, 19], ['oak', 'Oak planks', 10, 31], ['willow', 'Willow planks', 22, 46], ['maple', 'Maple planks', 38, 68], ['yew', 'Yew planks', 52, 86], ['magic', 'Magic planks', 68, 108], ['elder', 'Elder planks', 82, 125]];
+D.RLIST.carpentry = D.RLIST.carpentry || [];
+const add = r => { r.t = r.t || 2400; D.RECIPES[r.id] = r; D.RLIST.carpentry.push(r); return r; };
+for (const [w, name, lvl, xp] of WOODS) {
+  const log = D.ITEMS['log_' + w]; if (!log) continue;
+  item('plank_' + w, { name, col: log.col, val: Math.round(log.val * 2 + 1), buy: Math.round(log.buy * 2.4), wood: w, sub: `Sawn from ${log.name.toLowerCase()}. Boats are built from them.` });
+  add({ id: 'saw_' + w, skill: 'carpentry', tab: 'Planks', name, lvl, xp, t: 2200, in: { ['log_' + w]: 1 }, out: { ['plank_' + w]: 1 }, ev: 'carve' });
+}
+/* boats: tier sets which islands you can reach; owned boats are moored, not carried (like tools) */
+D.BOATS = [
+  ['boat_skiff', 'Skiff', 1, 8, 120, { plank_normal: 12, string: 4 }, '#a07a4f'],
+  ['boat_cog', 'Cog', 2, 25, 450, { plank_oak: 20, plank_willow: 10, cloth: 4, bar_iron: 6 }, '#b58a52'],
+  ['boat_sloop', 'Sloop', 3, 45, 1200, { plank_maple: 25, cloth: 8, bar_steel: 8 }, '#c9703f'],
+  ['boat_caravel', 'Caravel', 4, 65, 3000, { plank_yew: 30, cloth: 12, bar_mithril: 8 }, '#5f9a5a'],
+  ['boat_galleon', 'Galleon', 5, 85, 7000, { plank_magic: 30, plank_elder: 15, cloth: 20, bar_adamant: 10 }, '#8f7fe0']
+];
+for (const [id, name, tier, lvl, xp, inp, col] of D.BOATS) {
+  item(id, { name, col, type: 'boat', ic: 'boat', tier, val: Object.entries(inp).reduce((v, [k, n]) => v + (D.ITEMS[k] ? D.ITEMS[k].val * n : 0), 0), sub: `A tier ${tier} boat. Moored at Saltmere; Sailing uses your largest.` });
+  add({ id: 'build_' + id.slice(5), skill: 'carpentry', tab: 'Boats', name, lvl, xp, t: 9000, in: inp, out: { [id]: 1 }, ev: 'carve' });
+}
+
+/* ---------- Sailing: islands ---------- */
+/* [id, name, level, boat tier, seconds, xp, coins, loot [[item, [min,max], chance]], blurb] */
+D.VOYAGES = [
+  ['gull_rock', 'Gull Rock', 1, 1, 20, 24, [10, 40], [['feather', [6, 14], .9], ['raw_herring', [2, 5], .6], ['string', [1, 3], .3]], 'A guano-white stack an hour out of the harbour. Gulls, nests and the odd wreck.'],
+  ['kelp_isle', 'Kelp Isle', 10, 1, 28, 42, [20, 60], [['raw_mackerel', [3, 6], .7], ['seed_cabbage', [1, 3], .4], ['cloth', [1, 1], .15]], 'Kelp forests and a hermit who trades seeds for news.'],
+  ['smugglers_cay', 'Smugglers’ Cay', 20, 2, 36, 75, [60, 160], [['coin_pouch', [1, 1], .35], ['gem_sapphire', [1, 1], .2], ['cloth', [1, 3], .4]], 'Caves the smugglers think nobody knows about.'],
+  ['amber_shoals', 'Amber Shoals', 30, 2, 42, 110, [80, 200], [['ore_amber', [3, 7], .8], ['raw_tuna', [2, 5], .6], ['seed_strawberry', [1, 3], .3]], 'Shallow golden water where amber washes up on every tide.'],
+  ['coral_reach', 'Coral Reach', 40, 3, 50, 165, [120, 300], [['raw_swordfish', [2, 4], .7], ['raw_lobster', [2, 5], .6], ['gem_emerald', [1, 1], .2]], 'A reef you can walk along at low tide, if you are quick.'],
+  ['spice_atoll', 'Spice Atoll', 52, 3, 58, 225, [160, 380], [['seed_goldleaf', [1, 3], .5], ['seed_pumpkin', [2, 4], .5], ['cloth', [2, 4], .5]], 'Traders who swap rare seeds for good cloth and better stories.'],
+  ['storm_spire', 'Storm Spire', 64, 4, 66, 310, [240, 520], [['raw_stormray', [1, 3], .6], ['ore_skyglass', [1, 3], .4], ['gem_ruby', [1, 1], .25]], 'A needle of rock that lightning visits every evening.'],
+  ['sunken_crown', 'Sunken Crown', 78, 4, 74, 440, [400, 900], [['raw_monkfish', [2, 4], .6], ['gem_diamond', [1, 1], .15], ['treasure_chest', [1, 1], .08]], 'The drowned palace of a kingdom older than the Hollow.'],
+  ['worlds_edge', 'World’s Edge', 90, 5, 84, 620, [700, 1500], [['raw_voideel', [1, 3], .6], ['ore_astralite', [1, 2], .4], ['seed_starfruit', [1, 2], .3]], 'Where the map stops and the sea goes on.']
+].map(([id, name, lvl, boat, secs, xp, coins, loot, blurb]) => ({ id, name, lvl, boat, t: secs * 1000, xp: Math.round(secs * (4.5 + lvl * .33)), coins, loot: loot.filter(([k]) => D.ITEMS[k]), blurb }));
+/* voyage XP per second is about 85% of gathering at the same level (5 + 0.4 x level raw XP a second), since the haul
+   is the main reward */
+D.VOYAGE = Object.fromEntries(D.VOYAGES.map(v => [v.id, v]));
+
+/* ---------- unlocks announced on level-up ---------- */
+const unl = (sk, l, name) => { if (l <= 1) return; ((D.UNL[sk] = D.UNL[sk] || {})[l] = D.UNL[sk][l] || []).push(name); };
+for (const v of D.VOYAGES) unl('sailing', v.lvl, `Voyage to ${v.name}`);
+[[10, 'Companion bonuses +5%'], [25, 'Farm animals produce faster'], [30, 'Companion bonuses +15%'], [50, 'Companion bonuses +25%'], [75, 'Companion bonuses +37%'], [99, 'Companion bonuses +50%']].forEach(([l, n]) => unl('beastmastery', l, n));
 })();
 
 </script>
@@ -8148,6 +8215,79 @@ Object.assign(A, { sceneFor, stagePiece, siteLayout, SCENE_W: W, SCENE_H: H, TOW
 
 </script>
 <script>
+/* Carpentry, Sailing and Beastmastery (Nov 2026): art, drawn in code in the house style (top-left light, ramps from
+   the shared palette, coloured outlines). Planks and boats (16 x 16 items), islands (32 x 32), and each skill's
+   emblem (32 x 32) and icon (16 x 16). Items are routed through A.itemSprite / A.itemUrl. */
+(() => {
+const DQ = window.DQ, D = DQ.data, A = DQ.pixelArt; if (!A || !A.itemSprite) return;
+const { Spr, ramp, mix, R } = A, rp = c => ramp(c);
+
+/* planks: a short stack, each wood its own colour and a different stack and binding so no two read alike */
+const PLANK = { normal: [3, null], oak: [3, 'rope'], willow: [2, 'rope'], maple: [3, 'iron'], yew: [4, 'iron'], magic: [3, 'gold'], elder: [4, 'gold'] };
+const plank = (s, w) => {
+  const log = D.ITEMS['log_' + w] || { col: '#a07a4f' }, b = rp(mix(log.col, '#ffffff', .12)), d = rp(mix(log.col, '#3a2414', .3));
+  const [n, band] = PLANK[w] || [3, null];
+  for (let i = 0; i < n; i++) { const y = 13 - i * 3, x0 = 1 + (i % 2), x1 = 15 - ((i + 1) % 2); s.rect(x0, y - 2, x1 - x0, 2, i % 2 ? d : b); s.line(x0, y - 2, x1 - 1, y - 2, null, mix(log.col, '#ffffff', .35)); s.fix(x0 + 3 + i, y - 1, mix(log.col, '#2a1a10', .5)); s.fix(x1 - 4 - i, y - 1, mix(log.col, '#2a1a10', .5)); }
+  if (w === 'magic') [[4, 3], [11, 5]].forEach(([x, y]) => s.fix(x, y, '#e0d0ff'));
+  if (w === 'elder') s.fix(8, 4, '#f4ffe0');
+  if (band) { const c = band === 'rope' ? R.straw : band === 'iron' ? R.iron : R.gold; for (const x of [4, 11]) s.line(x, 14 - n * 3, x, 13, c); }
+};
+/* boats: hull shapes and rigs grow with the tier */
+const boat = (s, tier, col) => {
+  const hull = rp(col), dark = rp(mix(col, '#2a1a10', .35)), sail = rp('#f4ecd8');
+  const len = [0, 10, 12, 13, 14, 15][tier], x0 = Math.round((16 - len) / 2), y = 11;
+  s.poly([[x0, y], [x0 + len, y], [x0 + len - 2, y + 3], [x0 + 2, y + 3]], hull); s.line(x0 + 1, y + 1, x0 + len - 2, y + 1, null, mix(col, '#2a1a10', .45));
+  s.rect(0, 15, 16, 1, rp('#4f8fc0'));
+  if (tier === 1) { s.line(x0 + 2, y - 3, x0 + 7, y - 1, R.wood); s.fix(x0 + 8, y - 1, '#8a6a42'); return; } /* oars */
+  const mast = x0 + Math.floor(len / 2); s.line(mast, 2, mast, y - 1, dark);
+  if (tier === 2) s.rect(mast - 3, 3, 6, 6, sail);
+  if (tier === 3) s.poly([[mast + 1, 2], [mast + 6, y - 1], [mast + 1, y - 1]], sail);
+  if (tier >= 4) { s.poly([[mast + 1, 2], [mast + 5, 5], [mast + 1, 8]], sail); s.poly([[mast - 1, 3], [mast - 5, 6], [mast - 1, 9]], sail); }
+  if (tier === 5) { s.line(x0 + 2, 5, x0 + 2, y - 1, dark); s.rect(x0, 5, 3, 3, rp('#c8483c')); s.fix(mast, 1, '#e6b84a'); }
+};
+const base = A.itemSprite;
+A.itemSprite = id => {
+  const it = D.ITEMS[id];
+  if (it && id.startsWith('plank_')) { const s = Spr(16, 16); plank(s, id.slice(6)); return s; }
+  if (it && it.type === 'boat') { const s = Spr(16, 16); boat(s, it.tier, it.col); return s; }
+  return base(id);
+};
+A.itemUrl = id => A.url('item:' + id, () => A.itemSprite(id));
+
+/* islands (32 x 32): a patch of sea and the island's own shape */
+const sea = s => { s.rect(0, 18, 32, 14, rp('#3f7fb0')); for (let i = 0; i < 6; i++) s.line(2 + i * 5, 22 + (i % 3) * 3, 4 + i * 5, 22 + (i % 3) * 3, null, '#9cd0f0'); };
+const ISLAND = {
+  gull_rock: s => { sea(s); s.poly([[10, 22], [14, 6], [20, 8], [23, 22]], R.stone); s.line(14, 8, 18, 9, null, '#ffffff'); [[12, 12], [19, 14], [16, 18]].forEach(([x, y]) => s.fix(x, y, '#f4f4f0')); s.fix(22, 4, '#f4f4f0'); s.fix(23, 3, '#f4f4f0'); },
+  kelp_isle: s => { sea(s); s.ell(16, 21, 11, 4, rp('#d8c890')); s.ell(16, 19, 7, 3, rp('#6a9a4a')); for (const x of [4, 8, 25, 28]) s.line(x, 30, x + 1, 23, rp('#3a7a4a')); s.rect(15, 14, 4, 4, R.wood); s.poly([[14, 14], [17, 11], [20, 14]], R.straw); },
+  smugglers_cay: s => { sea(s); s.poly([[4, 22], [9, 10], [24, 9], [29, 22]], rp('#7a6a5a')); s.ell(16, 18, 4, 4, rp('#1e1a1a')); s.rect(21, 14, 3, 3, R.wood); s.fix(22, 15, '#e6b84a'); },
+  amber_shoals: s => { sea(s); s.ell(16, 22, 13, 3, rp('#e0c070')); for (const [x, y] of [[8, 21], [14, 23], [20, 21], [25, 22]]) s.ell(x, y, 1.4, 1, ramp('#ffb04a', { gl: .9 })); },
+  coral_reach: s => { sea(s); for (const [x, c] of [[6, '#e8705a'], [12, '#f0a0c0'], [18, '#e8705a'], [24, '#f0d060']]) { s.line(x, 26, x, 18, rp(c)); s.line(x, 21, x - 2, 18, rp(c)); s.line(x, 22, x + 2, 19, rp(c)); } },
+  spice_atoll: s => { sea(s); s.ell(16, 21, 12, 4, rp('#d8c890')); s.line(10, 21, 12, 8, R.wood); s.ell(12, 8, 5, 2, R.leafCrop); s.rect(18, 15, 7, 5, rp('#c8483c')); s.rect(18, 14, 7, 1, rp('#f0d060')); },
+  storm_spire: s => { s.rect(0, 0, 32, 18, rp('#3a3a5a')); sea(s); s.poly([[13, 24], [16, 2], [19, 24]], R.stone); s.line(23, 2, 21, 7, null, '#fff2a0'); s.line(21, 7, 24, 9, null, '#fff2a0'); s.line(24, 9, 21, 14, null, '#fff2a0'); },
+  sunken_crown: s => { sea(s); s.rect(8, 16, 16, 6, rp('#8a8aa0')); for (const x of [8, 13, 18, 23]) s.rect(x, 12, 2, 5, rp('#8a8aa0')); s.poly([[12, 12], [16, 8], [20, 12]], R.gold); s.fix(16, 10, '#e0405a'); },
+  worlds_edge: s => { s.rect(0, 0, 32, 18, rp('#1e1a34')); [[4, 3], [12, 6], [22, 2], [28, 8], [18, 10]].forEach(([x, y]) => s.fix(x, y, '#e0d0ff')); sea(s); s.rect(27, 18, 5, 14, rp('#0a0a14')); for (let y = 19; y < 32; y += 3) s.fix(26, y, '#b0c8ff'); }
+};
+A.ISLAND = ISLAND;
+A.islandUrl = id => ISLAND[id] ? A.url('island:' + id, () => { const s = Spr(32, 32); ISLAND[id](s); return s; }) : null;
+
+/* skill emblems (32 x 32) and icons (16 x 16) */
+const EMB = {
+  carpentry: s => { s.rect(4, 18, 24, 4, rp('#c08a4a')); s.rect(4, 22, 24, 4, rp('#a06a3a')); s.line(4, 18, 27, 18, null, '#e8c890'); s.poly([[8, 4], [24, 12], [22, 15], [6, 7]], R.steel); for (let x = 9; x < 23; x += 2) s.fix(x, 8 + Math.round((x - 9) / 2.3), '#5a6068'); s.rect(23, 12, 5, 4, R.wood); },
+  sailing: s => { s.rect(0, 24, 32, 8, rp('#3f7fb0')); s.line(2, 26, 8, 26, null, '#9cd0f0'); s.line(20, 28, 28, 28, null, '#9cd0f0'); s.poly([[5, 20], [27, 20], [24, 25], [8, 25]], R.wood); s.line(16, 3, 16, 20, R.wood); s.poly([[17, 4], [27, 17], [17, 17]], rp('#f4ecd8')); s.poly([[15, 6], [7, 17], [15, 17]], rp('#e8dcc0')); s.rect(15, 2, 4, 2, rp('#c8483c')); },
+  beastmastery: s => { s.ell(16, 20, 8, 7, rp('#d08a5a')); for (const [x, y] of [[7, 9], [13, 6], [19, 6], [25, 9]]) s.ell(x, y, 3, 3.4, rp('#d08a5a')); s.ell(16, 21, 4, 3, rp('#f0c0a0')); s.fix(14, 18, '#ffffff'); s.line(4, 29, 28, 29, null, '#c8a050'); }
+};
+const ICO = {
+  carpentry: s => { s.rect(1, 10, 14, 3, rp('#c08a4a')); s.line(1, 10, 14, 10, null, '#e8c890'); s.poly([[3, 2], [13, 7], [12, 9], [2, 4]], R.steel); s.rect(12, 6, 3, 3, R.wood); },
+  sailing: s => { s.rect(0, 13, 16, 3, rp('#3f7fb0')); s.poly([[2, 11], [14, 11], [12, 14], [4, 14]], R.wood); s.line(8, 1, 8, 11, R.wood); s.poly([[9, 2], [14, 9], [9, 9]], rp('#f4ecd8')); },
+  beastmastery: s => { s.ell(8, 10, 4, 3.6, rp('#d08a5a')); for (const [x, y] of [[3, 5], [6, 3], [10, 3], [13, 5]]) s.ell(x, y, 1.6, 1.8, rp('#d08a5a')); },
+  plank: s => plank(s, 'oak'), boat: s => boat(s, 3, '#b58a52'), island: s => { s.rect(0, 11, 16, 5, rp('#3f7fb0')); s.ell(8, 11, 6, 2, rp('#d8c890')); s.line(7, 11, 8, 3, R.wood); s.ell(8, 3, 3, 1.4, R.leafCrop); }
+};
+if (A.EMBLEM) Object.assign(A.EMBLEM, EMB);
+if (A.ICON) Object.assign(A.ICON, ICO);
+})();
+
+</script>
+<script>
 /* Native 48px interface symbols. Detailed imagery at the existing UI sizes. */
 (() => {
 const Q=window.DQ,INK='#29343b',PAPER='#e8d9b2',GOLD='#d8b66b',STEEL='#a9bec4',WOOD='#a68358',BLUE='#77a9c2',GREEN='#85b18a',RED='#ce8277';
@@ -8214,7 +8354,7 @@ function draw(id){
  case 'dagger':poly([[17,31],[30,8],[39,4],[37,15],[23,36]],STEEL);line(23,27,34,12,'#e5e6d1');line(12,27,29,39,GOLD);line(16,36,7,45,WOOD);break;
  case 'candle':oval(24,41,19,5,GOLD);r(17,18,14,22,PAPER);poly([[19,18],[22,22],[26,19],[29,26],[31,18]],'#f2e4bd');line(24,18,24,12,INK);poly([[24,2],[31,10],[28,16],[21,16],[18,11]],'#e4af5d');poly([[24,7],[27,12],[24,15],[22,12]],'#f7dfa0');break;
  case 'fire':poly([[8,33],[11,20],[18,25],[24,4],[31,16],[38,12],[42,31],[36,42],[16,44]],'#cd7853');poly([[16,34],[21,21],[25,27],[29,16],[35,34],[29,41],[20,41]],'#ecc16c');poly([[22,37],[26,29],[29,37],[25,41]],'#f4e0a5');break;
- default: throw Error('Missing UI icon drawing: '+id);
+ default: oval(24,24,12,12,GOLD);break; /* newer icons are drawn by the pixel-art runtime, which replaces this */
  }
  return p.canvas();
 }
@@ -8251,7 +8391,7 @@ DQ.newState = (name = 'Adventurer', look) => {
     town: 'willowbrook', towns: { willowbrook: { visited: true, boss: false } },
     q: {}, ach: {}, seen: {}, unlocked: {},
     unlockRules: 2,
-    stats: { harvest: 0, collect: 0, pets: 0, furnish: 0, hired: 0, catch: 0, chop: 0, mine: 0, thieve: 0, cook: 0, burn: 0, smelt: 0, smith: 0, craft: 0, alch: 0, brew: 0, enchant: 0, kill: 0, earned: 0, deaths: 0, bought: 0, sold: 0, equipped: 0, tools: 0, rare: 0 },
+    stats: { carve: 0, voyage: 0, train: 0, harvest: 0, collect: 0, pets: 0, furnish: 0, hired: 0, catch: 0, chop: 0, mine: 0, thieve: 0, cook: 0, burn: 0, smelt: 0, smith: 0, craft: 0, alch: 0, brew: 0, enchant: 0, kill: 0, earned: 0, deaths: 0, bought: 0, sold: 0, equipped: 0, tools: 0, rare: 0 },
     settings: { masterVol: 1, ambience: true, ambVol: .45, theme: 'dark', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
     style: { melee: 'aggressive', ranged: 'offense', magic: 'offense' }, spell: 'spark',
     act: null, log: [], tut: { done: {}, hidden: false },
@@ -9303,10 +9443,13 @@ DQ.checkAch = () => {
 
 /* ---------- Activities ---------- */
 const KIND_SKILL = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving', alch: 'magic' };
+/* Activity kinds added by later skills (Sailing's voyages, Beastmastery's training): each registers
+   { skill, page, label(a), dur(id), check(id) -> refusal text or '', done(a) } here (Nov 2026). */
+const EXT = DQ.KIND_EXT = DQ.KIND_EXT || {};
 DQ.actKey = a => a ? a.kind + ':' + a.id : '';
-DQ.actSkill = a => { a = a || DQ.act; if (!a) return null; if (a.kind === 'recipe') return D.RECIPES[a.id].skill; if (a.kind === 'fight') { const st = DQ.weaponStyle(); return st === 'ranged' ? 'ranged' : st === 'magic' ? 'magic' : D.SK[meleeSkill()].id; } return KIND_SKILL[a.kind]; };
+DQ.actSkill = a => { a = a || DQ.act; if (!a) return null; if (EXT[a.kind]) return EXT[a.kind].skill; if (a.kind === 'recipe') return D.RECIPES[a.id].skill; if (a.kind === 'fight') { const st = DQ.weaponStyle(); return st === 'ranged' ? 'ranged' : st === 'magic' ? 'magic' : D.SK[meleeSkill()].id; } return KIND_SKILL[a.kind]; };
 DQ.actLabel = a => {
-  a = a || DQ.act; if (!a) return '';
+  a = a || DQ.act; if (!a) return ''; if (EXT[a.kind]) return EXT[a.kind].label(a);
   if (a.kind === 'fish') return `Fishing ${D.NODE['fish:' + a.id].name.toLowerCase()}`;
   if (a.kind === 'wood') return `Cutting ${D.NODE['wood:' + a.id].name.toLowerCase()}`;
   if (a.kind === 'mine') return `Mining ${D.NODE['mine:' + a.id].name.toLowerCase()}`;
@@ -9316,7 +9459,7 @@ DQ.actLabel = a => {
   const r = D.RECIPES[a.id]; return { cooking: 'Cooking', smithing: 'Making', crafting: 'Crafting' }[r.skill] + ' ' + r.name.toLowerCase();
 };
 const baseDur = (kind, id) => kind === 'recipe' ? D.RECIPES[id].t : kind === 'alch' ? 2600 : kind === 'fight' ? 2000 : D.NODE[kind + ':' + id].t;
-DQ.durFor = (kind, id) => { const sk = kind === 'recipe' ? D.RECIPES[id].skill : KIND_SKILL[kind]; return Math.round(baseDur(kind, id) * (sk ? DQ.speedMult(sk) : 1)); };
+DQ.durFor = (kind, id) => { if (EXT[kind]) return Math.round(EXT[kind].dur(id) * DQ.speedMult(EXT[kind].skill)); const sk = kind === 'recipe' ? D.RECIPES[id].skill : KIND_SKILL[kind]; return Math.round(baseDur(kind, id) * (sk ? DQ.speedMult(sk) : 1)); };
 DQ.successChance = (kind, n) => {
   const L = DQ.lvl(n.skill);
   return kind === 'thieve' ? clamp(.5 + (L - n.lvl) * .016, .4, .95) : clamp(.58 + (L - n.lvl) * .012, .55, .96);
@@ -9348,6 +9491,9 @@ DQ.startAct = (kind, id, o = {}) => {
     if (st === 'ranged' && !(S().ammo.id && (S().ammo.n > 0 || DQ.have(S().ammo.id)))) return bad('Equip some arrows first');
     if (st === 'magic' && !pickSpell()) return bad('You need more Arcane runes for a spell');
     DQ.fight = { id, hp: m.hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 };
+  } else if (EXT[kind]) {
+    if (!DQ.skillUnlocked(EXT[kind].skill)) return bad(`${D.SK[EXT[kind].skill].name} is not unlocked yet`);
+    const why = EXT[kind].check(id); if (why) return bad(why);
   } else {
     const n = D.NODE[kind + ':' + id];
     if (!DQ.nodeHere(n)) return bad(DQ.nodeRegional(n) ? `That is only found in ${D.TOWN[n.town].name}` : `Reach ${D.TOWN[n.town].name} once to discover it`);
@@ -9373,7 +9519,7 @@ DQ.actDur = a => {
 };
 DQ.stopAct = (silent, why) => {
   if (!DQ.act) return;
-  const stopped = DQ.act, stoppedPage = stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
+  const stopped = DQ.act, stoppedPage = EXT[stopped.kind] ? EXT[stopped.kind].page : stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
   DQ.act = null; DQ.fight = null; S().act = null;
   if (why && !DQ.forecasting) setTimeout(() => { if (!DQ.act) DQ.advanceQueue(); }, 0);
   if (!DQ.sim.on) { if (!silent) { DQ.log('You stop what you were doing.'); DQ.sfx('stop'); } if (why && (S().queue || []).length) why += ' Moving on to your next queued task.'; if (why) DQ.notify({ kind: 'warn', key: 'stopped', page: stoppedPage, icon: 'info', col: '#e5b04a', title: 'Task stopped', text: why, sound: 'stop', ttl: 9000 }); }
@@ -9687,6 +9833,7 @@ function complete() {
   else if (a.kind === 'alch') alchDone(a.id);
   else if (a.kind === 'fight') combatRound();
   else if (a.kind === 'thieve') thieveDone(D.NODE['thieve:' + a.id]);
+  else if (EXT[a.kind]) EXT[a.kind].done(a);
   else gatherDone(a.kind, D.NODE[a.kind + ':' + a.id]);
   DQ.checkActionUnlocks?.();
   if (!DQ.sim.on && a.kind !== 'fight') DQ.emit('workcycle', { kind: a.kind, id: a.id, quantity: a.count - beforeCount });
@@ -9892,7 +10039,7 @@ DQ.fx = () => {
   f.dmg += f.trophy * Object.values(S().towns).filter(t => t.boss).length;
   const ap = S().pets.active && D.PET[S().pets.active];
   if (ap) {
-    const m = 1 + .25 * (DQ.petLevel(ap.id) - 1), b = ap.bonus;
+    const m = (1 + .25 * (DQ.petLevel(ap.id) - 1)) * (DQ.beastMult ? DQ.beastMult() : 1), b = ap.bonus;
     if (b.xpAll) f.xpAll += b.xpAll * m; if (b.coin) f.coin += b.coin * m; if (b.dmg) f.dmg += b.dmg * m; if (b.dr) f.dr += b.dr * m; if (b.heal) f.heal += b.heal * m; if (b.speed) f.speedAll += b.speed * m;
     Object.entries(b.xp || {}).forEach(([k, v]) => f.xp[k] = (f.xp[k] || 0) + v * m);
   }
@@ -10801,7 +10948,7 @@ const B = UI.B = {
   town: e => set(e, D.TOWN[S().town].name),
   playtime: e => set(e, DQ.fmtTime(S().playtime)),
 };
-DQ.actPage = () => { const a = DQ.act; if (!a) return null; if (a.kind === 'fight') return 'combat'; if (a.kind === 'alch') return 'magic'; if (a.kind === 'recipe') return D.RECIPES[a.id].skill; return { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' }[a.kind]; };
+DQ.actPage = () => { const a = DQ.act; if (!a) return null; if (DQ.KIND_EXT && DQ.KIND_EXT[a.kind]) return DQ.KIND_EXT[a.kind].page; if (a.kind === 'fight') return 'combat'; if (a.kind === 'alch') return 'magic'; if (a.kind === 'recipe') return D.RECIPES[a.id].skill; return { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' }[a.kind]; };
 UI.upd = () => { $$('[data-b]').forEach(e => { const [k, a, b] = e.dataset.b.split(':'); if (B[k]) B[k](e, a, b); }); };
 let progEls = [];
 UI.collectProg = () => { progEls = $$('[data-prog]'); for (const el of progEls) if (!el.dataset.ring) { el.style.width='100%'; el.style.transformOrigin='left'; el.style.transform=`scaleX(${progOf(el.dataset.prog)})`; } };
@@ -10902,7 +11049,7 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
   const running = DQ.act && DQ.act.kind === kind && DQ.act.id === choice.id;
   const art = (c, size=96) => `<span class="${c.locked || c.blackout ? 'blackout' : ''}">${c.artKind === 'item' ? `<span class="activity-item-art" style="--art-size:${size}px">${DQ.itemIco(D.ITEMS[c.artId || c.id])}</span>` : DQ.artImage(c.artKind || (kind==='fight'?'creature':kind),c.artId || c.id,size,c.locked&&['fight','thieve'].includes(kind)?'sil':'',c.locked||c.blackout?'Locked':c.name)}</span>`;
   const action = `<div class="activity-actions">${choice.away?`<button class="btn primary" data-do="taskmap" data-a="${choice.town}">View ${esc(D.TOWN[choice.town].name)}</button>`:''}<button class="btn primary task-primary" data-do="act" data-a="${kind}" data-b="${choice.id}" ${!running && choice.blocked ? 'disabled' : ''}>${running ? kind === 'fight' ? 'Retreat' : 'Stop' : choice.blackout ? 'Locked' : esc(verb+' '+choice.name.replace(/^(Cook|Bars|Weapons|Armour) · /,''))}</button>${DQ.planUnlocked && DQ.planUnlocked() ? `<button class="btn" data-do="queueadd" data-a="${kind}" data-b="${choice.id}" ${choice.locked||choice.away ? 'disabled' : ''}>Queue</button>` : ''}</div>`;
-  const cards = `<section class="panel activity-choices"><div class="phead"><h2>${kind==='fight'?'Choose an opponent':kind==='recipe'?'Choose what to make':kind==='alch'?'Choose an item':({fish:'Fish catalogue',wood:'Trees',mine:'Ore deposits',thieve:'Targets'}[kind]||'Choose your spot')}</h2><small>${choices.some(c=>c.town)?`${choices.length} resources · all regions`:D.TOWN[S().town].name}</small></div>${UI.taskToolbar[key] || ''}<div class="illustrated-choices">${choices.filter(c=>c.visible!==false).map(c=>{
+  const cards = `<section class="panel activity-choices"><div class="phead"><h2>${kind==='fight'?'Choose an opponent':kind==='recipe'?'Choose what to make':kind==='alch'?'Choose an item':({fish:'Fish catalogue',wood:'Trees',mine:'Ore deposits',thieve:'Targets',sail:'Islands',train:'Your companions'}[kind]||'Choose your spot')}</h2><small>${choices.some(c=>c.town)?`${choices.length} resources · all regions`:D.TOWN[S().town].name}</small></div>${UI.taskToolbar[key] || ''}<div class="illustrated-choices">${choices.filter(c=>c.visible!==false).map(c=>{
     const working=DQ.act&&DQ.act.kind===kind&&DQ.act.id===c.id;
     return `<button class="illustrated-card ${working?'active':''} ${choice.id===c.id?'selected':''} ${c.locked?'locked':''} ${c.missing?'missing':''}" data-do="taskselect" data-a="${kind}" data-b="${c.id}" data-page="${key}" aria-pressed="${choice.id===c.id}" ${c.locked?`aria-disabled="true" data-tip="text:${esc(c.reason||'Not unlocked yet')}"`:''}>
       <span class="choice-art">${art(c,96)}</span>${!c.locked && DQ.gearMark ? (g => g && D.ITEMS[g] && D.ITEMS[g].slot ? DQ.gearMark(g) : '')(c.yieldId || (c.artKind === 'item' ? c.artId || c.id : null)) : ''}<b>${c.locked?'???':esc(c.name)}</b><small>${c.locked?`${ico('lock')}<span>${esc(c.short||String(c.reason||'Not unlocked yet').replace(/^Requires [A-Za-z ]+? (\d+)/,'Lv $1').replace(/^Requires /,''))}</span>`:c.caption||esc(c.reason||'')}</small>${c.locked?'':`<span class="choice-state">${working?'● Working':c.stateText?(choice.id===c.id&&!c.locked&&!c.missing?'✓ Selected · ':'')+c.stateText:c.locked?'Locked':c.away?'Travel required':choice.id===c.id?'✓ Selected':'Available'}</span>`}${working?`<span class="bar prog"><i data-prog="${kind}:${c.id}"></i></span>`:''}</button>`;
@@ -10971,7 +11118,7 @@ UI.V.recipes = sk => {
     stateText:lvlLock?`🔒 ${D.SK[sk].name} ${r.lvl} (you are ${DQ.lvl(sk)})`:miss.length?`Missing ${miss.length===1?miss[0]:miss.length+' materials'}`:'Ready to make',
     caption:r.burn&&!lvlLock&&DQ.lvl(sk)<r.lvl?`Level ${r.lvl} · ${Math.round(DQ.burnChance(r)*100)}% burn`:`Level ${r.lvl} · ${UI.statLine(it.b)||DQ.purposeOf&&DQ.purposeOf(outId)||`${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`}`,
     info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}</p><div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>`<span class="ingredient ${DQ.have(id)>=n?'':'bad'}">${DQ.itemIco(D.ITEMS[id])}<span>${esc(D.ITEMS[id].name)} <b data-b="count:${id}"></b> / ${n}</span>${DQ.have(id)>=n||!UI.routeChip?'':UI.routeChip(id)}</span>`).join('')}</div>`};});
-  return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'?'Make':'Craft')+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress</h3>${UI.skillHero(sk)}</section>`;
+  return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'||sk==='carpentry'?'Make':'Craft')+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress</h3>${UI.skillHero(sk)}</section>`;
 };
 
 /* ---------- Magic page ---------- */
@@ -11700,6 +11847,83 @@ if (area0) UI.areaPanel = town => {
 /* quest tracking: a mini-boss target is fought directly (it is never in a random encounter) */
 const hq0 = UI.DO.huntquest;
 if (hq0) UI.DO.huntquest = id => { if (D.MON[id] && D.MON[id].mini) { DQ.startAct('fight', id); UI.render(false); return; } hq0(id); };
+})();
+
+</script>
+<script>
+/* Carpentry, Sailing and Beastmastery (Nov 2026): behaviour and pages. Data in skills_new_data.js, art in
+   skills_new_art.js. Sailing ('sail') and Beastmastery ('train') are activity kinds registered on DQ.KIND_EXT, so
+   they run, queue, stop and catch up offline exactly like every other task. */
+(() => {
+const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S, { esc, fmt, ico, chance, rnd } = DQ;
+const A = DQ.pixelArt;
+
+/* ---------- boats are moored, not carried (like tools) ---------- */
+const isTool0 = DQ.isTool; DQ.isTool = id => isTool0(id) || !!(D.ITEMS[id] && D.ITEMS[id].type === 'boat');
+DQ.boatTier = () => (D.BOATS || []).reduce((t, [id, , tier]) => DQ.have(id) > 0 ? Math.max(t, tier) : t, 0);
+const boatName = tier => ((D.BOATS || []).find(b => b[2] === tier) || [, 'boat'])[1];
+
+/* ---------- labels for carpentry recipes ---------- */
+const label0 = DQ.actLabel;
+DQ.actLabel = a => { a = a || DQ.act; if (a && a.kind === 'recipe' && D.RECIPES[a.id] && D.RECIPES[a.id].skill === 'carpentry') { const r = D.RECIPES[a.id]; return (r.tab === 'Boats' ? 'Building a ' : 'Sawing ') + r.name.toLowerCase(); } return label0(a); };
+
+/* ---------- Sailing: voyages ---------- */
+const floatAt = (txt, col) => { if (!DQ.sim.on && DQ.floatAt) DQ.floatAt(document.querySelector('.scene-target') || document.querySelector('.card.active'), txt, col); };
+DQ.KIND_EXT.sail = {
+  skill: 'sailing', page: 'sailing',
+  label: a => `Sailing to ${D.VOYAGE[a.id].name}`,
+  dur: id => D.VOYAGE[id].t,
+  check: id => { const v = D.VOYAGE[id]; if (!v) return 'There is no such island'; if (DQ.lvl('sailing') < v.lvl) return `Requires Sailing ${v.lvl}`; if (DQ.boatTier() < v.boat) return `Needs a ${boatName(v.boat).toLowerCase()} or larger (Carpentry builds boats)`; return ''; },
+  done: a => {
+    const v = D.VOYAGE[a.id]; if (!v) return DQ.stopAct(true);
+    if (DQ.act) DQ.act.count++;
+    const c = Math.round(rnd(v.coins[0], v.coins[1]) * DQ.coinMult()); DQ.addCoins(c);
+    const got = [];
+    for (const [k, [lo, hi], p] of v.loot) if (chance(p)) { const n = rnd(lo, hi); DQ.grant(k, n); got.push(`${n} ${D.ITEMS[k].name.toLowerCase()}`); }
+    const x = DQ.addXp('sailing', v.xp); S().stats.voyage = (S().stats.voyage || 0) + 1; DQ.qev('sail', v.id); DQ.petRoll && DQ.petRoll('skill', 'sailing');
+    if (!DQ.sim.on) { DQ.log(`Back from ${v.name}: ${fmt(c)} coins${got.length ? ', ' + got.join(', ') : ''}.`, 'good'); floatAt(`+${fmt(Math.round(x))} XP · +${fmt(c)} coins`, '#3f8fc8'); DQ.sfx && DQ.sfx('fish'); }
+  }
+};
+
+/* ---------- Beastmastery: training companions ---------- */
+DQ.beastMult = () => 1 + (DQ.skillUnlocked('beastmastery') ? DQ.lvl('beastmastery') * .005 : 0);
+DQ.KIND_EXT.train = {
+  skill: 'beastmastery', page: 'beastmastery',
+  label: a => `Training ${(D.PET[a.id] || {}).name || 'a companion'}`,
+  dur: () => 6000,
+  check: id => !D.PET[id] ? 'There is no such companion' : !S().pets.owned[id] ? 'You have not found that companion yet' : '',
+  done: a => {
+    const p = D.PET[a.id], o = S().pets.owned[a.id]; if (!p || !o) return DQ.stopAct(true);
+    if (DQ.act) DQ.act.count++;
+    const before = DQ.petLevel(a.id); if (!Number.isFinite(o.xp)) o.xp = (D.CREATURE_LEVELS || [0])[Math.max(0, before - 1)] || 0;
+    o.xp += 2 + DQ.lvl('beastmastery') / 15;
+    const x = DQ.addXp('beastmastery', Math.round(6 * (5 + DQ.lvl('beastmastery') * .35) + before * 4)); S().stats.train = (S().stats.train || 0) + 1; DQ.qev('train', a.id);
+    const after = DQ.petLevel(a.id);
+    if (after > before) { DQ.fxDirty(); if (!DQ.sim.on) DQ.notify({ kind: 'unlock', key: 'creature:' + a.id, title: `${p.name} reached level ${after}!`, text: 'Their companion bonus is stronger.', icon: 'paw', col: p.col, sound: 'perk', burst: true }); DQ.emit('pets'); }
+    if (!DQ.sim.on) floatAt(`+${fmt(Math.round(x))} XP · ♥`, '#d08a5a');
+  }
+};
+/* stronger companion bonuses and busier farm animals */
+const animal0 = DQ.animalPeriod; if (animal0) DQ.animalPeriod = a => animal0(a) * (DQ.skillUnlocked('beastmastery') && DQ.lvl('beastmastery') >= 25 ? 1 - DQ.lvl('beastmastery') * .003 : 1);
+
+/* ---------- pages ---------- */
+UI.V.carpentry = () => UI.V.recipes('carpentry');
+UI.V.sailing = () => {
+  const tier = DQ.boatTier(), L = DQ.lvl('sailing');
+  const choices = D.VOYAGES.map(v => { const lvlLock = L < v.lvl, boatLock = tier < v.boat;
+    return { id: v.id, name: v.name, artKind: 'island', locked: lvlLock, blocked: lvlLock || boatLock, reason: [lvlLock ? `Requires Sailing ${v.lvl}` : '', boatLock ? `Needs a ${boatName(v.boat).toLowerCase()} or larger` : ''].filter(Boolean).join(' · '),
+      short: lvlLock ? `Lv ${v.lvl}` : boatLock ? boatName(v.boat) : '', caption: `Level ${v.lvl} · ${boatName(v.boat)}`, stateText: boatLock && !lvlLock ? `Needs a ${boatName(v.boat).toLowerCase()}` : '',
+      info: `<p>${esc(v.blurb)}</p><p class="sm dim">${tier ? `Your largest boat: ${esc(boatName(tier))}.` : 'You have no boat yet.'} Carpentry builds bigger boats for farther islands.</p><p>${(v.xp * DQ.xpMult('sailing')).toFixed(0)} XP · ${(DQ.durFor('sail', v.id) / 1000).toFixed(0)}s voyage · ${fmt(v.coins[0])}–${fmt(v.coins[1])} coins</p><div class="voy-loot">${v.loot.map(([k, , p]) => `<span class="voy-item" data-tip="item:${k}">${DQ.itemIco(D.ITEMS[k])}<small>${Math.round(p * 100)}%</small></span>`).join('')}</div>` }; });
+  return UI.taskPanel('sailing', 'Sailing', 'sail', choices, 'Sail to');
+};
+UI.V.beastmastery = () => {
+  const owned = (D.PETS || []).filter(p => S().pets.owned[p.id]);
+  const choices = owned.map(p => { const lv = DQ.petLevel(p.id), cid = A && A.hasCreature(p.id) ? p.id : p.mon || p.id;
+    return { id: p.id, name: p.name, artKind: 'creature', artId: cid, caption: `Level ${lv} · ${esc(p.kind || 'Companion')}`, stateText: S().pets.active === p.id ? 'Your companion' : '',
+      info: `<p>${esc(p.text || '')}</p><p>${(DQ.durFor('train', p.id) / 1000).toFixed(0)}s per session · ${Math.round((6 * (5 + DQ.lvl('beastmastery') * .35) + lv * 4) * DQ.xpMult('beastmastery'))} XP · Companion bonuses ×${DQ.beastMult().toFixed(2)}</p>` }; });
+  if (!choices.length) return `<section class="panel"><h2>Beastmastery</h2><p>You have no companions to train yet. Hunting and rare finds bring them.</p></section>`;
+  return UI.taskPanel('beastmastery', 'Beastmastery', 'train', choices, 'Train');
+};
 })();
 
 </script>
@@ -12740,7 +12964,7 @@ const S = () => DQ.S;
 const HUBS = [
   { id: 'home', name: 'Home', ic: 'home', pages: ['overview', 'activity', 'journal'] },
   { id: 'quests', name: 'Quests', ic: 'quest', pages: ['quests', 'people'] },
-  { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'magic', 'brewery', 'enchanting', 'research'] },
+  { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'magic', 'brewery', 'enchanting', 'research', 'carpentry', 'sailing', 'beastmastery'] },
   { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'bestiary'] },
   { id: 'world', name: 'World', ic: 'map', pages: ['map', 'exploration'] },
   { id: 'village', name: 'Village', ic: 'house', pages: ['projects', 'house', 'hirelings'] },
@@ -12750,7 +12974,7 @@ const HUBS = [
 /* The page menu along the top bar (desktop). Combat and every skill live down the left; phones keep the bottom bar. */
 const TOP = ['home', 'quests', 'world', 'village', 'hero', 'shop'];
 const UTILITIES = { id: 'settings', name: 'Settings', pages: ['settings', 'balance'] };
-const TAB = { hunting:['Hunting','paw'], exploration:['Exploration','map'], enchanting:['Enchanting','rune'], brewery: ['Herbalism', 'bottle'], overview: ['Home', 'home'], skillsummary: ['Skill levels', 'star'], tools: ['Tools', 'mining'], activity: ['Activity', 'clock'], journal: ['Journal', 'book'], projects: ['Town projects', 'house'], combat: ['Fight', 'attack'], bestiary: ['Bestiary', 'book'], map: ['Map', 'map'], quests: ['Quests', 'quest'], people: ['People', 'users'], shop: ['Shop', 'shop'], character: ['Inventory & equipment', 'bag'], bank: ['Bank', 'bank'], house: ['House', 'house'], hirelings: ['Workers', 'users'], achievements: ['Achievements', 'trophy'], mastery: ['Mastery', 'trophy'], research: ['Scholarship', 'book'], settings: ['Settings', 'gear'] };
+const TAB = { carpentry:['Carpentry','carpentry'], sailing:['Sailing','sailing'], beastmastery:['Beastmastery','beastmastery'], hunting:['Hunting','paw'], exploration:['Exploration','map'], enchanting:['Enchanting','rune'], brewery: ['Herbalism', 'bottle'], overview: ['Home', 'home'], skillsummary: ['Skill levels', 'star'], tools: ['Tools', 'mining'], activity: ['Activity', 'clock'], journal: ['Journal', 'book'], projects: ['Town projects', 'house'], combat: ['Fight', 'attack'], bestiary: ['Bestiary', 'book'], map: ['Map', 'map'], quests: ['Quests', 'quest'], people: ['People', 'users'], shop: ['Shop', 'shop'], character: ['Inventory & equipment', 'bag'], bank: ['Bank', 'bank'], house: ['House', 'house'], hirelings: ['Workers', 'users'], achievements: ['Achievements', 'trophy'], mastery: ['Mastery', 'trophy'], research: ['Scholarship', 'book'], settings: ['Settings', 'gear'] };
 UI.hubOf = p => HUBS.find(h => h.pages.includes(p)) || (UTILITIES.pages.includes(p) ? UTILITIES : HUBS[0]);
 const lastIn = {};
 const hubDefault = h => {
@@ -15230,7 +15454,10 @@ Object.assign(lessons,{
  hunting:{title:'Hunting',text:'Every creature you meet adds to your field knowledge.',towards:'Victories → Hunting XP, field knowledge and signature companion encounters.',goal:'Explore the Meadow Path and study the creatures you meet.',art:['skill','hunting']},
  exploration:{title:'Exploration',text:'Visit new regions and discover creatures to earn Exploration XP.',towards:'New towns and creature discoveries → a more complete realm guide.',goal:'Open the map and work toward the next town road.',art:['skill','exploration']},
  herbalism:{title:'Herbalism',text:'Brew remedies and potions from plants and other ingredients.',towards:'Harvests → potions → healing and timed boosts.',goal:'Research a remedy, then brew your first potion.',art:['skill','herbalism']},
- enchanting:{title:'Enchanting',text:'Use runes and gems to strengthen equipped gear.',towards:'Enchantment ranks → stronger existing combat bonuses.',goal:'Equip an item and collect the materials for its first enchantment.',art:['skill','enchanting']}
+ enchanting:{title:'Enchanting',text:'Use runes and gems to strengthen equipped gear.',towards:'Enchantment ranks → stronger existing combat bonuses.',goal:'Equip an item and collect the materials for its first enchantment.',art:['skill','enchanting']},
+ carpentry:{title:'Carpentry',text:'Saw logs into planks, then build boats from planks, string, cloth and metal.',towards:'Logs → planks → boats → Sailing to farther islands.',goal:'Saw some planks, then build a skiff (12 planks and 4 string).',art:['skill','carpentry']},
+ sailing:{title:'Sailing',text:'Send your boat on voyages. Each island has its own haul, and a bigger boat reaches farther.',towards:'Voyages → coins, rare fish, seeds, gems and ore.',goal:'Sail to Gull Rock, then build a cog in Carpentry for Smugglers’ Cay.',art:['skill','sailing']},
+ beastmastery:{title:'Beastmastery',text:'Train your companions. Each session raises their level, and your level strengthens every companion bonus.',towards:'Training → companion levels and bonuses → faster farm animals at 25.',goal:'Train your active companion until it gains a level.',art:['skill','beastmastery']}
 });
 Object.assign(lessons,{
  house:{towards:'Furniture gives lasting bonuses to your whole adventure.',title:'Your home',text:'Buy a home, then add rooms and furniture for permanent bonuses.',goal:'Save the purchase price, then start with a storage chest for backpack space.',art:['skill','woodcutting']},
@@ -15848,6 +16075,7 @@ Q.artImage = (kind, id, size = 96, cls = '', alt = '') => {
   const item = D.ITEMS[id];
   if (kind === 'item') return item ? img(A.itemUrl(id), 16, 16, size, cls, alt || item.name) : '';
   if (kind === 'creature' || kind === 'thieve') { const k = String(id).replace(/^wild_/, ''), u = A.hasCreature(k) ? A.creatureUrl(k) : null; return u ? img(u, 32, 32, size, cls, alt || k) : ''; }
+  if (kind === 'island') { const u = A.islandUrl && A.islandUrl(id); return u ? img(u, 32, 32, size, cls, alt || id) : ''; }
   if (kind === 'fish') { const s = A.url('fishnode:' + id, () => A.fishLarge(id)); return s ? img(s, 32, 16, size, cls, alt || id) : ''; }
   if (kind === 'wood' || kind === 'tree') return img(A.treeUrl(id), 32, 48, size * 1.1, cls, alt || id);
   if (kind === 'mine' || kind === 'rock') return img(A.rockUrl(id), 32, 32, size, cls, alt || id);

@@ -17,7 +17,7 @@ const assert=require('node:assert/strict');
     await p.waitForTimeout(1300);
     const m=await p.evaluate(()=>{const sb=document.querySelector('.sidebar'),list=document.querySelector('.illustrated-choices'),stage=document.querySelector('.workspace-focus');
      return {rows:document.querySelectorAll('#skilldock .dk').length,side:sb.scrollHeight<=sb.clientHeight+1,doc:document.documentElement.scrollHeight<=innerHeight+1,list:list.scrollHeight>list.clientHeight,listScroll:getComputedStyle(list).overflowY,stageTop:stage.getBoundingClientRect().top};});
-    assert.equal(m.rows,14,'every skill in the left column');
+    assert.equal(m.rows,17,'every skill in the left column');
     if(h>=720)assert.ok(m.side,`${w}x${h} left column fits without scrolling (running=${running})`);
     assert.ok(m.doc,`${w}x${h} the page itself does not scroll on an activity page`);
     assert.equal(m.listScroll,'auto',`${w}x${h} the list of choices scrolls inside its panel when it is long`);

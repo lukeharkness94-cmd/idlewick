@@ -26,7 +26,7 @@ DQ.fx = () => {
   f.dmg += f.trophy * Object.values(S().towns).filter(t => t.boss).length;
   const ap = S().pets.active && D.PET[S().pets.active];
   if (ap) {
-    const m = 1 + .25 * (DQ.petLevel(ap.id) - 1), b = ap.bonus;
+    const m = (1 + .25 * (DQ.petLevel(ap.id) - 1)) * (DQ.beastMult ? DQ.beastMult() : 1), b = ap.bonus;
     if (b.xpAll) f.xpAll += b.xpAll * m; if (b.coin) f.coin += b.coin * m; if (b.dmg) f.dmg += b.dmg * m; if (b.dr) f.dr += b.dr * m; if (b.heal) f.heal += b.heal * m; if (b.speed) f.speedAll += b.speed * m;
     Object.entries(b.xp || {}).forEach(([k, v]) => f.xp[k] = (f.xp[k] || 0) + v * m);
   }

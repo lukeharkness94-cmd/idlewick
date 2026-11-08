@@ -418,3 +418,11 @@ Stages are separate commits so each can be reverted on its own.
 
 ## Tools are equipped, not carried (Nov 2026)
 - Owned tools stay in `S.inv`/`S.bank` (save compatibility, `DQ.have`/`toolTier` unchanged) but `DQ.isTool` keeps them out of `DQ.packSlots`, the backpack and bank grids, their category tabs, and Bank all. The Tools tab lists them.
+
+## Carpentry, Sailing and Beastmastery (Nov 2026)
+- Files: `js/skills_new_data.js` (skills, items, recipes, voyages, unlock lines; loaded after economy.js), `js/skills_new_art.js` (planks, boats, islands, emblems, icons; after towns.js), `js/skills_new.js` (activity kinds, perks, pages; after minibosses.js).
+- **Carpentry** (artisan; unlocks after chopping 60 logs at Woodcutting 10): saw 7 woods into planks (Lv 1–82), build 5 boats (Skiff 8, Cog 25, Sloop 45, Caravel 65, Galleon 85) from planks, string, cloth and bars. Uses the shared recipe page.
+- **Sailing** (gathering; unlocks after visiting Saltmere with a skiff): 9 timed voyages (20–84s) to islands, each needing a boat tier; coins plus island loot (feathers, fish, seeds, gems, ores, cloth, chests). Activity kind `sail` on `DQ.KIND_EXT`. Voyage XP ≈ 85% of gathering per second (5 + 0.4 × level raw/s) since the haul is the reward.
+- **Beastmastery** (gathering; unlocks with a companion and Hunting 5): train owned companions (kind `train`, 6s sessions) to raise their level; each Beastmastery level adds 0.5% to every companion bonus (`DQ.beastMult`, ×1.5 at 99) and from 25 farm animals produce 0.3%/level faster.
+- Engine: `DQ.KIND_EXT[kind] = { skill, page, label, dur, check, done }` lets a skill add an activity kind that starts, stops, queues and catches up offline like the rest. Boats count as moored (DQ.isTool), not carried.
+- Rail: 17 skills; `html.rail-tight` (page height under 1180) applies the compact 36px rows. icons48's legacy renderer no longer throws on new icon names.

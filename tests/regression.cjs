@@ -943,4 +943,15 @@ test('owned tools are equipped: they keep working but take no backpack slot', ()
   const {q}=harness();const D=q.data,S=q.S;const pick=Object.keys(D.ITEMS).find(id=>D.ITEMS[id].type==='tool'&&/pick/.test(id))||Object.keys(D.ITEMS).find(id=>D.ITEMS[id].type==='tool');
   const before=q.packSlots();S.inv[pick]=1;assert.equal(q.packSlots(),before,'a tool does not use a backpack slot');assert.ok(q.have(pick)>0,'and is still owned');
 });
+test('Carpentry, Sailing and Beastmastery: planks and boats, voyages that need a big enough boat, companion training', () => {
+  const {q,load}=harness();load('skills_new_data');load('skills_new');const D=q.data,S=q.S;for(const k of ['carpentry','sailing','beastmastery'])S.xp[k]=S.xp[k]||0;
+  for(const k of ['woodcutting','hunting'])S.xp[k]=D.XPF[20];S.stats.chop=100;q.checkActionUnlocks&&q.checkActionUnlocks();S.unlocked.carpentry=true;
+  S.inv.log_normal=40;S.inv.string=8;assert.ok(q.startAct('recipe','saw_normal',{quiet:true}));q.simulate(60000);q.stopAct(true);assert.ok(q.have('plank_normal')>=12,'planks sawn');
+  S.xp.carpentry=D.XPF[10];assert.ok(q.startAct('recipe','build_skiff',{quiet:true}));q.simulate(30000);q.stopAct(true);assert.ok(q.have('boat_skiff')>=1,'a skiff built');
+  assert.equal(q.isTool('boat_skiff'),true,'boats are moored, not carried');
+  S.unlocked.sailing=true;assert.equal(q.startAct('sail','smugglers_cay',{quiet:true}),false,'a skiff cannot reach Smugglers’ Cay');
+  assert.ok(q.startAct('sail','gull_rock',{quiet:true}));const c=S.coins;q.simulate(120000);q.stopAct(true);assert.ok(S.stats.voyage>=4&&S.coins>c&&S.xp.sailing>0,'voyages pay out');
+  const pet=D.PETS[0].id;S.pets.owned[pet]={aff:0,found:1};S.unlocked.beastmastery=true;assert.ok(q.startAct('train',pet,{quiet:true}));q.simulate(180000);q.stopAct(true);
+  assert.ok(q.petLevel(pet)>=2&&S.xp.beastmastery>0,'training raises the companion');S.xp.beastmastery=D.XPF[50];assert.ok(Math.abs(q.beastMult()-1.25)<.01,'Beastmastery 50: companion bonuses x1.25');
+});
 console.log(tests+' regression checks passed');

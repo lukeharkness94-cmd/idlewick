@@ -185,10 +185,13 @@ DQ.checkAch = () => {
 
 /* ---------- Activities ---------- */
 const KIND_SKILL = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving', alch: 'magic' };
+/* Activity kinds added by later skills (Sailing's voyages, Beastmastery's training): each registers
+   { skill, page, label(a), dur(id), check(id) -> refusal text or '', done(a) } here (Nov 2026). */
+const EXT = DQ.KIND_EXT = DQ.KIND_EXT || {};
 DQ.actKey = a => a ? a.kind + ':' + a.id : '';
-DQ.actSkill = a => { a = a || DQ.act; if (!a) return null; if (a.kind === 'recipe') return D.RECIPES[a.id].skill; if (a.kind === 'fight') { const st = DQ.weaponStyle(); return st === 'ranged' ? 'ranged' : st === 'magic' ? 'magic' : D.SK[meleeSkill()].id; } return KIND_SKILL[a.kind]; };
+DQ.actSkill = a => { a = a || DQ.act; if (!a) return null; if (EXT[a.kind]) return EXT[a.kind].skill; if (a.kind === 'recipe') return D.RECIPES[a.id].skill; if (a.kind === 'fight') { const st = DQ.weaponStyle(); return st === 'ranged' ? 'ranged' : st === 'magic' ? 'magic' : D.SK[meleeSkill()].id; } return KIND_SKILL[a.kind]; };
 DQ.actLabel = a => {
-  a = a || DQ.act; if (!a) return '';
+  a = a || DQ.act; if (!a) return ''; if (EXT[a.kind]) return EXT[a.kind].label(a);
   if (a.kind === 'fish') return `Fishing ${D.NODE['fish:' + a.id].name.toLowerCase()}`;
   if (a.kind === 'wood') return `Cutting ${D.NODE['wood:' + a.id].name.toLowerCase()}`;
   if (a.kind === 'mine') return `Mining ${D.NODE['mine:' + a.id].name.toLowerCase()}`;
@@ -198,7 +201,7 @@ DQ.actLabel = a => {
   const r = D.RECIPES[a.id]; return { cooking: 'Cooking', smithing: 'Making', crafting: 'Crafting' }[r.skill] + ' ' + r.name.toLowerCase();
 };
 const baseDur = (kind, id) => kind === 'recipe' ? D.RECIPES[id].t : kind === 'alch' ? 2600 : kind === 'fight' ? 2000 : D.NODE[kind + ':' + id].t;
-DQ.durFor = (kind, id) => { const sk = kind === 'recipe' ? D.RECIPES[id].skill : KIND_SKILL[kind]; return Math.round(baseDur(kind, id) * (sk ? DQ.speedMult(sk) : 1)); };
+DQ.durFor = (kind, id) => { if (EXT[kind]) return Math.round(EXT[kind].dur(id) * DQ.speedMult(EXT[kind].skill)); const sk = kind === 'recipe' ? D.RECIPES[id].skill : KIND_SKILL[kind]; return Math.round(baseDur(kind, id) * (sk ? DQ.speedMult(sk) : 1)); };
 DQ.successChance = (kind, n) => {
   const L = DQ.lvl(n.skill);
   return kind === 'thieve' ? clamp(.5 + (L - n.lvl) * .016, .4, .95) : clamp(.58 + (L - n.lvl) * .012, .55, .96);
@@ -230,6 +233,9 @@ DQ.startAct = (kind, id, o = {}) => {
     if (st === 'ranged' && !(S().ammo.id && (S().ammo.n > 0 || DQ.have(S().ammo.id)))) return bad('Equip some arrows first');
     if (st === 'magic' && !pickSpell()) return bad('You need more Arcane runes for a spell');
     DQ.fight = { id, hp: m.hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 };
+  } else if (EXT[kind]) {
+    if (!DQ.skillUnlocked(EXT[kind].skill)) return bad(`${D.SK[EXT[kind].skill].name} is not unlocked yet`);
+    const why = EXT[kind].check(id); if (why) return bad(why);
   } else {
     const n = D.NODE[kind + ':' + id];
     if (!DQ.nodeHere(n)) return bad(DQ.nodeRegional(n) ? `That is only found in ${D.TOWN[n.town].name}` : `Reach ${D.TOWN[n.town].name} once to discover it`);
@@ -255,7 +261,7 @@ DQ.actDur = a => {
 };
 DQ.stopAct = (silent, why) => {
   if (!DQ.act) return;
-  const stopped = DQ.act, stoppedPage = stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
+  const stopped = DQ.act, stoppedPage = EXT[stopped.kind] ? EXT[stopped.kind].page : stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
   DQ.act = null; DQ.fight = null; S().act = null;
   if (why && !DQ.forecasting) setTimeout(() => { if (!DQ.act) DQ.advanceQueue(); }, 0);
   if (!DQ.sim.on) { if (!silent) { DQ.log('You stop what you were doing.'); DQ.sfx('stop'); } if (why && (S().queue || []).length) why += ' Moving on to your next queued task.'; if (why) DQ.notify({ kind: 'warn', key: 'stopped', page: stoppedPage, icon: 'info', col: '#e5b04a', title: 'Task stopped', text: why, sound: 'stop', ttl: 9000 }); }
@@ -569,6 +575,7 @@ function complete() {
   else if (a.kind === 'alch') alchDone(a.id);
   else if (a.kind === 'fight') combatRound();
   else if (a.kind === 'thieve') thieveDone(D.NODE['thieve:' + a.id]);
+  else if (EXT[a.kind]) EXT[a.kind].done(a);
   else gatherDone(a.kind, D.NODE[a.kind + ':' + a.id]);
   DQ.checkActionUnlocks?.();
   if (!DQ.sim.on && a.kind !== 'fight') DQ.emit('workcycle', { kind: a.kind, id: a.id, quantity: a.count - beforeCount });
