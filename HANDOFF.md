@@ -433,3 +433,8 @@ Stages are separate commits so each can be reverted on its own.
 - Sailing: voyages bring cloth (boats, furniture), gems, exotic seeds and other regions' ores early; "Sea legs": +0.3% Fishing speed per Sailing level.
 - Beastmastery: "Lay traps · <region>" (kind `train`, id `lure:<town>`, 8s, a quarter of traps break) befriends that region's signature companion (`DQ.signatureOf`, `DQ.befriendChance`: 3% + 0.15%/level, more above the region's level, max 25%); otherwise brings that region's hides, feathers and trophies. Region trap lines open at Beastmastery town-index × 10. Training companions and the companion-bonus / farm-animal perks remain.
 - Evidence: `node scripts/sim-new-skills.cjs` (voyage XP and value per hour vs Fishing; plank value added; boat material costs). See docs/economy-evidence.md.
+
+## Towns and skill scenes to scale (Nov 2026)
+- Towns are drawn at 640 × 360 (was 320 × 180) so homes, townsfolk and the 32 px restoration pieces agree in size; more streets, a square, framed windows, shutters, flower boxes and smoke. Your boats are moored at Saltmere's quay by tier, traps sit at the meadow's edge once Beastmastery lures there, crops grow by the Willowbrook cottage.
+- The Village scene fills its panel (no longer snapped to 1×/2×) and pans sideways on phones, starting on the chosen site.
+- Skill pages no longer stretch the whole town behind the hero: each kind has a close-up of its part of town (woodland edge, quarry, jetty, market street, kitchen, forge, workshop, timber yard, mage's study, harbour with your boat and the chosen island on the horizon, trap meadow) at the hero's 3× scale. The hero is 72 × 96 (was stretched to 102) with feet on the scene's ground line. `tests/ui-current.cjs` checks the sizes.

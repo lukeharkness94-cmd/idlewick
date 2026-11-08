@@ -338,7 +338,7 @@ function iconMining() { const s = Spr(16, 16); s.line(4, 14, 11, 5, R.wood); s.l
 /* ---------- public API ---------- */
 const SPRITES = { chicken, goblin, wolf, oak, pine, pike, carp, sword, bow, platebody, ore, log, gem, potato, cottage, iconFishing, iconWoodcutting, iconMining };
 DQ.pixelArt = {
-  ramp, mix, Spr, R, SKIN, HAIR, hero, url, img, toCanvas, hires, logicalOf, sprites: SPRITES, composeScene,
+  ramp, mix, Spr, R, SKIN, HAIR, hero, url, img, toCanvas, hires, scale2x, logicalOf, sprites: SPRITES, composeScene,
   sprite: (name, ...args) => url(name + ':' + args.join(','), () => SPRITES[name](...args)),
   heroUrl: (o) => url('hero:' + JSON.stringify(o), () => hero(o)),
   sceneUrl: () => { const k = 'scene:willowbrook'; if (!cache.has(k)) cache.set(k, composeScene().toDataURL()); return cache.get(k); }

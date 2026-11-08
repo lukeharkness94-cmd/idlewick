@@ -16,7 +16,14 @@ UI.render = (fresh, ...rest) => {
   const same = !fresh || UI.view === lastView, kept = same ? save() : null;
   const r = render0(fresh, ...rest); lastView = UI.view;
   if (kept) { restore(kept); requestAnimationFrame(() => restore(kept)); }
+  pan();
   return r;
 };
 let lastView = UI.view;
+/* the village scene pans sideways on narrow screens: keep where the player panned to, or start on the chosen site */
+const pan = () => { const el = document.querySelector('#view .village-pan'); if (!el || el.scrollWidth <= el.clientWidth + 2) return;
+  el.onscroll = () => { UI.tab.villagePan = el.scrollLeft; };
+  if (UI.tab.villagePan != null && UI.view === lastPanView) { el.scrollLeft = UI.tab.villagePan; return; }
+  lastPanView = UI.view; const on = el.querySelector('.site-spot.on'); if (on) { const r = on.offsetLeft + on.offsetWidth / 2 - el.clientWidth / 2; el.scrollLeft = Math.max(0, r); UI.tab.villagePan = el.scrollLeft; } };
+let lastPanView = null;
 })();

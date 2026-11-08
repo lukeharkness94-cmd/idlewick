@@ -76,8 +76,8 @@ html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,ht
 .subnav{overflow-y:hidden}
 
 /* Purposeful work poses, with activity-specific atmosphere. */
-.scene-worker { position:absolute; left:12%; bottom:18px; width:72px; height:102px; transform-origin:50% 95%; }
-.scene-worker img { width:72px; height:102px; image-rendering:pixelated; }
+.scene-worker { position:absolute; left:12%; bottom:12px; width:72px; height:96px; transform-origin:50% 95%; } /* feet on the district's ground line, 3x like the target */
+.scene-worker img { width:72px; height:96px; image-rendering:pixelated; }
 .activity-stage.working .scene-worker { animation:worker-effort var(--work-beat,1200ms) ease-in-out infinite; }
 .activity-stage.working .scene-target { animation:none; }
 .activity-stage.working .action-tool { left:calc(12% + 48px); bottom:76px; transform-origin:20% 85%; animation:tool-strike var(--work-beat,1200ms) ease-in-out infinite; z-index:2; }

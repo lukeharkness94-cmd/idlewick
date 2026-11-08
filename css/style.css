@@ -1316,11 +1316,10 @@ body[data-page="quests"] .quest.ready { animation: none; }
 /* Illustrated play: the target is the centre of the screen, with choices beside it. */
 .activity-workspace { display:grid; grid-template-columns:minmax(280px,.95fr) minmax(0,1.2fr); gap:16px; align-items:start; }
 .activity-stage { padding:0; overflow:hidden; }
-.activity-scene { position:relative; height:250px; isolation:isolate; display:flex; align-items:flex-end; justify-content:center; overflow:hidden; background-color:#94aa76; background-image:linear-gradient(#9ec3c230,#50754320),var(--landscape); background-size:cover; background-position:center; image-rendering:pixelated; border-bottom:1px solid var(--line); }
-.activity-scene::after { content:""; position:absolute; left:0; right:0; bottom:0; height:22px; background:#597a45; border-top:3px solid #a8b77c; z-index:-1; }
-.activity-scene.fish { background-color:#648d94; }
-.activity-scene.fish::after { height:64px; background:repeating-linear-gradient(0deg,#688e91 0 4px,#83a8a2 4px 6px,#6b9296 6px 12px); border-top-color:#b5c9b4; }
-.activity-scene.mine::after { background:#787b70; border-top-color:#b3ad91; }
+/* the district behind an activity (towns.js districtFor, 240 x 100) is shown at 3x, the hero's and the target's
+   scale, anchored at the feet line; a wider panel shows more of the street, never a bigger or smaller town */
+.activity-scene { position:relative; height:250px; isolation:isolate; display:flex; align-items:flex-end; justify-content:center; overflow:hidden; background-color:#94aa76; background-image:var(--landscape); background-size:720px 300px; background-position:center bottom; background-repeat:no-repeat; image-rendering:pixelated; border-bottom:1px solid var(--line); }
+.activity-scene.sail .scene-target { display:none; }
 .scene-target { display:flex; align-items:flex-end; justify-content:center; margin-bottom:12px; filter:drop-shadow(0 8px 2px #21362d50); }
 .scene-target > img { object-fit:contain; } /* whole-number 3x, the same scale as the working hero (ui_core.js) */
 .scene-yield { position:absolute; right:14px; bottom:20px; display:flex; flex-direction:column; align-items:center; gap:4px; border:1px solid #e2d1a16b; border-radius:10px; padding:7px; background:#192b27d9; color:#fff1cf; }
@@ -1722,7 +1721,6 @@ body[data-page="quests"] .quest.ready { animation: none; }
   .task-panel .activity-stage .activity-scene { min-height:190px; height:100%; }
   .task-panel .activity-stage .activity-caption { min-width:0; padding:0; }
   .task-panel .activity-stage .scene-target { transform:none; }
-  .task-panel .activity-stage .scene-target > :is(img,.painted-sprite) { width:150px!important; height:150px!important; }
 }
 .scholarship-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(255px,100%),1fr)); gap:12px; width:100%; }
 .scholarship-grid .tech { min-width:0; display:flex; flex-direction:column; gap:8px; }
@@ -2762,11 +2760,10 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 @media (min-width:861px){.village-projects{grid-template-columns:minmax(0,1fr) minmax(400px,440px)}}
 .village-map{min-width:0;text-align:center}
 .village-map .phead{text-align:left}
-/* whole-number scale: 3x (960 x 540) on full desktops, 2x on narrower windows, fluid on phones */
-.village-scene{position:relative;display:inline-block;line-height:0;max-width:100%}
-.village-scene>img.scene{display:block;width:960px;height:540px;border-radius:10px}
-html.lw-1600 .village-scene>img.scene,html.short .village-scene>img.scene{width:640px;height:360px}
-@media (max-width:860px){.village-scene>img.scene{width:100%!important;height:auto!important}}
+/* the 640 x 360 town fills the panel's width (kept short enough to fit the window); phones pan it sideways */
+.village-scene{position:relative;display:block;line-height:0;margin:0 auto;width:100%;max-width:calc((var(--vh100, 100vh) - 300px) * 16 / 9)}
+.village-scene>img.scene{display:block;width:100%;height:auto!important;aspect-ratio:16/9;border-radius:10px}
+@media (max-width:860px){.village-pan{overflow-x:auto;overscroll-behavior-x:contain;border-radius:10px}.village-scene{max-width:none;width:760px}}
 .site-spot{position:absolute;padding:0;border:2px solid transparent;border-radius:8px;background:transparent;cursor:pointer;transition:border-color .2s,background-color .2s,box-shadow .2s}
 .site-spot:hover,.site-spot:focus-visible{border-color:color-mix(in srgb,var(--brass) 80%,transparent);background:color-mix(in srgb,var(--brass) 14%,transparent);outline:none}
 .site-spot.on{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 35%,transparent),0 0 18px color-mix(in srgb,var(--brass) 40%,transparent)}

@@ -180,6 +180,15 @@ const fs=require('node:fs');
   await page.evaluate(()=>{DQ.stopAct(true);DQ.go('woodcutting');});
   await page.locator('#hud [aria-label="Settings"]').click();
   assert.equal(await page.evaluate(()=>DQ.ui.view),'settings');
+  /* towns to one scale: every town draws at 640 x 360 with each restoration site inside it, every skill's district
+     draws for every town, the hero and the target stand at 3x on the district's ground line */
+  const scale=await page.evaluate(()=>{const A=DQ.pixelArt,D=DQ.data,out=[];for(const t of Object.keys(A.TOWN_STYLE)){const c=A.sceneFor(t,{},{boats:[1,5],traps:true,farm:true});if(c.width!==640||c.height!==360)out.push(t+' size');for(const s of A.siteLayout(t))if(s.X<0||s.X+32>640||s.Y<0||s.Y+32>360)out.push(t+' site '+s.id);
+    for(const [k,key] of [['wood','woodcutting'],['mine','mining'],['fish','fishing'],['thieve','thieving'],['recipe','cooking'],['recipe','smithing'],['recipe','crafting'],['recipe','carpentry'],['alch','magic'],['sail','sailing'],['train','beastmastery']]){const d=A.districtFor(t,k,key,{island:'gull_rock',tier:2});if(d.width!==240||d.height!==100)out.push(t+' '+k);}}return out;});
+  assert.deepEqual(scale,[],'town and district scenes');
+  await page.evaluate(()=>{DQ.go('woodcutting');DQ.startAct('wood','normal',{quiet:true});DQ.ui.render(false);});await page.waitForTimeout(200);
+  const fig=await page.evaluate(()=>{const w=document.querySelector('.scene-worker img'),t=document.querySelector('.scene-target img'),sc=document.querySelector('.activity-scene');return {w:[w.offsetWidth,w.offsetHeight],t:[t.offsetWidth,t.offsetHeight],bg:getComputedStyle(sc).backgroundSize};});
+  assert.deepEqual(fig,{w:[72,96],t:[96,144],bg:'720px 300px'},'hero, tree and district share one 3x scale');
+  await page.evaluate(()=>{DQ.stopAct(true);});
   assert.deepEqual(errors,[]);
   if(process.env.UI_PREVIEW){await page.setViewportSize({width:1440,height:1000});await page.evaluate(()=>{DQ.go('woodcutting');DQ.startAct('wood','normal',{quiet:true});DQ.ui.render(false);});await page.waitForTimeout(800);await page.screenshot({path:process.env.UI_PREVIEW,fullPage:true});}
   console.log('PASS current UI: navigation, both themes at 390/1440/1920/2560/3440, batch quest acceptance, research ordering, distinct live inventory art, same-page levels with unlock details, quiet bell history, work/combat effects, cleanup and reduced motion.');
