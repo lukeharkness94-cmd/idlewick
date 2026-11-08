@@ -3055,8 +3055,8 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 .thief-perk .ic{width:18px;height:18px}
 .thief-perk.off{opacity:.6;border-style:dashed}
 .comp-on{color:#e6c060;font-weight:700;margin:0 0 6px}
-/* Combat skills on the fighting-style strip, ability slots and food beneath it (Nov 2026): what you act on in combat
-   is on screen; the level breakdown, the full ability list, preparation, boss and loot stay in pop-ups */
+/* Combat (Nov 2026): combat skills on the fighting-style strip; abilities in a full-height panel beside the fight;
+   food and the reference buttons (preparation, equipment, boss, loot) on the last row */
 .ss-btn .ss-xp,.ss-hp .ss-xp{display:block;height:4px;width:100%;min-width:70px;margin-top:3px}
 .ss-btn small b,.ss-hp small b{color:var(--ink);font-weight:700}
 .ss-hp,.ss-cl{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:3px 9px 3px 5px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--ink);text-align:left}
@@ -3065,23 +3065,43 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 .ss-hp small,.ss-cl small{font:500 13px var(--f-body);color:var(--mute)}
 .ss-cl{cursor:pointer}.ss-cl:hover{border-color:var(--brass)}.ss-cl b{color:var(--brass-hi)}
 .style-strip{flex-wrap:wrap!important}.ss-train{justify-content:flex-start!important}
-.combat-kit{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:10px 18px;padding:10px 12px;margin:0}
-.kit-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
-.kit-head .k{font:700 14px var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}.kit-head .k b{color:var(--ink)}
-.kit-row{display:flex;flex-wrap:wrap;gap:6px}
-.kit-abil,.kit-add{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:3px 10px 3px 5px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);color:var(--ink);text-align:left;font:600 14.5px var(--f-ui)}
-.kit-abil .ic,.kit-add .ic{width:26px;height:26px}
-.kit-abil>span{display:flex;flex-direction:column;line-height:1.15}.kit-abil small{font:500 13px var(--f-body);color:var(--mute)}
+.fight-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,42%);gap:10px;align-items:stretch}
+.fight-row>.encounter-arena{min-width:0}
+.combat-abils{display:flex;flex-direction:column;gap:6px;padding:10px 12px;margin:0;min-width:0}
+.kit-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.kit-head .k,.combat-food .k{font:700 14px var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}.kit-head .k b{color:var(--ink)}
+.kit-sub{font:500 13px var(--f-body);color:var(--mute);margin-top:2px}
+.kit-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px}
+.kit-adds{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:5px}
+.kit-abil,.kit-add{display:flex;align-items:center;gap:6px;min-height:40px;padding:3px 8px 3px 4px;border:1px solid var(--line2);border-radius:9px;background:var(--panel2);color:var(--ink);text-align:left;font:600 14px var(--f-ui);min-width:0}
+.kit-abil .ic,.kit-add .ic{width:26px;height:26px;flex:none}
+.kit-abil>span,.kit-add>span{display:flex;flex-direction:column;line-height:1.15;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kit-abil small{font:500 13px var(--f-body);color:var(--mute)}
 .kit-abil.on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 14%,var(--panel2));cursor:pointer}
 .kit-abil.on.idle{border-style:dashed}
 .kit-abil.empty{border-style:dashed;color:var(--mute)}
-.kit-add{cursor:pointer;border-style:solid;background:transparent}.kit-add:hover,.kit-abil.on:hover{border-color:var(--brass-hi)}
-.kit-food .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
-.kit-food .tog{margin-bottom:6px}
-@media (max-width:860px){.combat-kit{grid-template-columns:minmax(0,1fr)}}
-.kit-food .phead{margin:0 0 6px;justify-content:flex-start}
-@media (min-width:861px){#view>.combat-dashboard>.combat-live>.combat-kit{flex:0 1 auto;min-height:72px;overflow-y:auto;scrollbar-width:thin}}
-@media (max-width:899px){.combat-dashboard .combat-kit{order:1}}
+.kit-add{cursor:pointer;background:transparent}.kit-add:hover,.kit-abil.on:hover{border-color:var(--brass-hi)}
+.kit-bottom{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px}
+.combat-food{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:6px 12px;margin:0;flex:1 1 360px;min-width:0}
+.combat-food .phead{display:contents}.combat-food .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+.combat-food .eat-step>span,.combat-food .eat-step output{font-size:14px}
+.kit-bottom .combat-tools{flex:0 1 auto;align-content:center}
+@media (max-width:899px){.combat-dashboard .fight-row,.combat-dashboard .kit-bottom{order:1}.fight-row{grid-template-columns:minmax(0,1fr)}}
+#view>.combat-dashboard>.combat-targets>.combat-tools{flex:none}.combat-targets>.combat-tools .ct-btn{flex:1 1 auto}
+/* narrower desktops: a smaller fight (whole 4x sprites) so abilities beside it and food beneath fit without scrolling */
+:is(html.lw-1600,html.short) .fight-row .encounter-arena .avatar{height:150px}
+:is(html.lw-1600,html.short) .fight-row .encounter-arena .avatar>.art-sprite,:is(html.lw-1600,html.short) .fight-row .encounter-arena .avatar .foe-torso img{width:128px!important;height:128px!important}
+:is(html.lw-1600,html.short) .fight-row .encounter-arena .avatar>.encounter-hero,:is(html.lw-1600,html.short) .fight-row .encounter-arena .avatar .rig-torso img{width:96px!important;height:128px!important}
+:is(html.lw-1600,html.short) .fight-row{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}
+:is(html.lw-1600,html.short) .ss-weapon{max-width:128px;padding:3px 6px}
+:is(html.lw-1600,html.short) :is(.ss-btn,.ss-hp,.ss-cl){padding:3px 6px 3px 4px;gap:4px;min-width:0}
+:is(html.lw-1600,html.short) :is(.ss-btn,.ss-hp) .ss-xp{min-width:48px}
+:is(html.lw-1600,html.short) .ss-cl small{display:none}
+:is(html.lw-1600,html.short) .fight-row{grid-template-columns:minmax(260px,.66fr) minmax(0,1fr)}
+:is(html.lw-1600,html.short) .kit-slots{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+:is(html.lw-1600,html.short) .kit-adds{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+#view>.combat-dashboard>.combat-targets>.arena-ctl{flex:none;margin:0}
+.kit-abil>span,.kit-add>span{white-space:normal}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -16333,27 +16353,39 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
     const m = DQ.modal({ title: p.title, body: html, wide: true });
     m.dataset.more = key; open = key; UI.upd && UI.upd();
   };
+  /* Layout (Nov 2026, after "abilities are a small scroll at the bottom"): abilities get a full-height panel beside the
+     fight, at eye level with your hero, so they never shrink into a scrolling strip; the fighting style (with the
+     combat skills) runs under both; food takes the last row and the reference buttons head the creatures column. */
   const addBar = () => {
     const dash = document.querySelector('#view .combat-dashboard'); if (!dash || dash.querySelector('.combat-tools')) return;
-    const strip = dash.querySelector('.combat-live .style-strip'); if (!strip) return;
-    strip.insertAdjacentHTML('afterend', kit(dash)); /* the tools row goes between the strip and the kit (below) */
+    const strip = dash.querySelector('.combat-live .style-strip'), arena = dash.querySelector('.combat-live .encounter-arena'); if (!strip) return;
     const btns = POPS.filter(p => p.bar !== false && (p.go || dash.querySelector(p.from))).map(p => { let b = null; try { b = p.badge && p.badge(); } catch (e) { b = null; } return `<button class="ct-btn ${b && b.tone ? 'tone-' + b.tone : ''}" data-do="combatmore" data-a="${p.key}" aria-label="${esc(p.label)}${b ? ': ' + esc(b.t) : ''}">${ico(p.ic)}<span class="ct-l"><span>${esc(p.label)}</span>${b ? `<small>${esc(b.t)}</small>` : ''}</span></button>`; }).join('');
-    strip.insertAdjacentHTML('afterend', `<nav class="combat-tools" aria-label="More combat options">${btns}</nav>`);
+    if (arena) { const row = document.createElement('div'); row.className = 'fight-row'; arena.before(row); row.appendChild(arena); row.insertAdjacentHTML('beforeend', abilPanel()); }
+    else strip.insertAdjacentHTML('afterend', abilPanel());
+    strip.insertAdjacentHTML('afterend', `<div class="kit-bottom">${foodPanel(dash)}</div>`);
+    /* the reference buttons (preparation, equipment, boss, loot) head the creatures column: they are about whom to fight */
+    const tg = dash.querySelector('.combat-targets'), tools = `<nav class="combat-tools" aria-label="More combat options">${btns}</nav>`;
+    if (tg) tg.insertAdjacentHTML('afterbegin', tools); else strip.insertAdjacentHTML('afterend', tools);
+    /* "Selected: creature · Explore" belongs with the creatures you pick from, which frees the left column for you */
+    const ctl = dash.querySelector('.combat-live > .arena-ctl'), tools2 = tg && tg.querySelector('.combat-tools'); if (ctl && tools2) tools2.after(ctl);
   };
   /* abilities: each slot, and the abilities you can put in one, as buttons right under the fighting style; food: what
      you carry (click to eat), auto-eat and when to eat, cloned from the page's own food panel */
-  const kit = dash => {
+  const abilPanel = () => {
     const on = S().abilities || [], slots = DQ.abilSlots ? DQ.abilSlots() : 0, ready = D.ABIL.filter(a => DQ.abilUnlocked(a)), spare = ready.filter(a => !on.includes(a.id));
     const next = D.ABIL.filter(a => !DQ.abilUnlocked(a)).sort((x, y) => (x.lvl - DQ.lvl(x.skill)) - (y.lvl - DQ.lvl(y.skill)))[0];
     const why = a => DQ.ability(a.id) ? 'In use' : a.needShield && !S().equip.shield ? 'Needs a shield' : a.style ? `${DQ.cap(a.style)} only` : 'Idle';
     const slotHtml = Array.from({ length: slots }, (_, i) => { const a = D.ABIL.find(x => x.id === on[i]);
-      return a ? `<button class="kit-abil on ${DQ.ability(a.id) ? '' : 'idle'}" data-do="abil" data-a="${a.id}" aria-pressed="true" data-tip="text:${esc(a.name)}: ${esc(a.text)} Click to take it out of the slot.">${ico(a.ic)}<span><b>${esc(a.name)}</b><small>${esc(why(a))}</small></span></button>`
-        : `<span class="kit-abil empty">${ico('star')}<span><b>Empty slot</b><small>${spare.length ? 'Choose one below' : next ? `Next at ${esc(D.SK[next.skill].name)} ${next.lvl}` : ''}</small></span></span>`; }).join('');
-    const full = on.length >= slots, adds = spare.map(a => `<button class="kit-add" data-do="${full ? 'abilswap' : 'abil'}" data-a="${a.id}" data-tip="text:${esc(a.name)}: ${esc(a.text)}${full ? ' Replaces your last slot.' : ''}">${ico(a.ic)}<span>${full ? 'Swap in ' : ''}${esc(a.name)}</span></button>`).join('');
+      return a ? `<button class="kit-abil on ${DQ.ability(a.id) ? '' : 'idle'}" data-do="abil" data-a="${a.id}" aria-pressed="true" data-tip="text:${esc(a.name)}: ${esc(a.text)} Click to take it out of the slot.">${ico(a.ic)}<span><b>${esc(a.name)}</b><small>${esc(why(a))} · remove</small></span></button>`
+        : `<span class="kit-abil empty">${ico('star')}<span><b>Empty slot</b><small>${spare.length ? 'Pick an ability below' : next ? `Next at ${esc(D.SK[next.skill].name)} ${next.lvl}` : ''}</small></span></span>`; }).join('');
+    const full = on.length >= slots, adds = spare.map(a => `<button class="kit-add" data-do="${full ? 'abilswap' : 'abil'}" data-a="${a.id}" data-tip="text:${esc(a.name)}: ${esc(a.text)}${full ? ' Replaces your last slot.' : ''}">${ico(a.ic)}<span>${esc(a.name)}</span></button>`).join('');
+    return `<section class="panel combat-abils"><div class="kit-head"><span class="k">Abilities <b class="mono">${on.length}/${slots}</b></span><button class="linkish" data-do="combatmore" data-a="abilities">All abilities</button></div>
+      <div class="kit-slots">${slotHtml}</div>${adds ? `<div class="kit-sub">${full ? 'Swap in (replaces your last slot)' : 'Add to a slot'}</div><div class="kit-adds">${adds}</div>` : ''}</section>`;
+  };
+  const foodPanel = dash => {
     const sup = dash.querySelector('.combat-col .combat-supplies'), food = sup ? sup.cloneNode(true) : null;
-    if (food) { food.querySelectorAll('[id]').forEach(e => e.removeAttribute('id')); const h = food.querySelector('h2'); if (h) h.remove(); }
-    return `<section class="panel combat-kit"><div class="kit-part kit-abils"><div class="kit-head"><span class="k">Abilities <b class="mono">${on.length}/${slots}</b></span><button class="linkish" data-do="combatmore" data-a="abilities">All abilities</button></div><div class="kit-row">${slotHtml}</div>${adds ? `<div class="kit-row kit-adds">${adds}</div>` : ''}</div>
-      <div class="kit-part kit-food"><div class="kit-head"><span class="k">Food</span></div>${food ? food.innerHTML : '<p class="dim sm">No food carried.</p>'}</div></section>`;
+    if (food) { food.querySelectorAll('[id]').forEach(e => e.removeAttribute('id')); const h = food.querySelector('h2'); if (h) h.outerHTML = '<span class="k">Food</span>'; }
+    return `<section class="panel combat-food">${food ? food.innerHTML : '<span class="k">Food</span><p class="dim sm">No food carried.</p>'}</section>`;
   };
   UI.DO.abilswap = id => { const on = S().abilities || []; if (on.length >= DQ.abilSlots()) DQ.toggleAbility(on[on.length - 1]); if (DQ.toggleAbility(id)) DQ.sfx && DQ.sfx('equip'); UI.render(false); };
   const render = UI.render;

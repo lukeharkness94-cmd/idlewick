@@ -40,27 +40,39 @@
     const m = DQ.modal({ title: p.title, body: html, wide: true });
     m.dataset.more = key; open = key; UI.upd && UI.upd();
   };
+  /* Layout (Nov 2026, after "abilities are a small scroll at the bottom"): abilities get a full-height panel beside the
+     fight, at eye level with your hero, so they never shrink into a scrolling strip; the fighting style (with the
+     combat skills) runs under both; food takes the last row and the reference buttons head the creatures column. */
   const addBar = () => {
     const dash = document.querySelector('#view .combat-dashboard'); if (!dash || dash.querySelector('.combat-tools')) return;
-    const strip = dash.querySelector('.combat-live .style-strip'); if (!strip) return;
-    strip.insertAdjacentHTML('afterend', kit(dash)); /* the tools row goes between the strip and the kit (below) */
+    const strip = dash.querySelector('.combat-live .style-strip'), arena = dash.querySelector('.combat-live .encounter-arena'); if (!strip) return;
     const btns = POPS.filter(p => p.bar !== false && (p.go || dash.querySelector(p.from))).map(p => { let b = null; try { b = p.badge && p.badge(); } catch (e) { b = null; } return `<button class="ct-btn ${b && b.tone ? 'tone-' + b.tone : ''}" data-do="combatmore" data-a="${p.key}" aria-label="${esc(p.label)}${b ? ': ' + esc(b.t) : ''}">${ico(p.ic)}<span class="ct-l"><span>${esc(p.label)}</span>${b ? `<small>${esc(b.t)}</small>` : ''}</span></button>`; }).join('');
-    strip.insertAdjacentHTML('afterend', `<nav class="combat-tools" aria-label="More combat options">${btns}</nav>`);
+    if (arena) { const row = document.createElement('div'); row.className = 'fight-row'; arena.before(row); row.appendChild(arena); row.insertAdjacentHTML('beforeend', abilPanel()); }
+    else strip.insertAdjacentHTML('afterend', abilPanel());
+    strip.insertAdjacentHTML('afterend', `<div class="kit-bottom">${foodPanel(dash)}</div>`);
+    /* the reference buttons (preparation, equipment, boss, loot) head the creatures column: they are about whom to fight */
+    const tg = dash.querySelector('.combat-targets'), tools = `<nav class="combat-tools" aria-label="More combat options">${btns}</nav>`;
+    if (tg) tg.insertAdjacentHTML('afterbegin', tools); else strip.insertAdjacentHTML('afterend', tools);
+    /* "Selected: creature · Explore" belongs with the creatures you pick from, which frees the left column for you */
+    const ctl = dash.querySelector('.combat-live > .arena-ctl'), tools2 = tg && tg.querySelector('.combat-tools'); if (ctl && tools2) tools2.after(ctl);
   };
   /* abilities: each slot, and the abilities you can put in one, as buttons right under the fighting style; food: what
      you carry (click to eat), auto-eat and when to eat, cloned from the page's own food panel */
-  const kit = dash => {
+  const abilPanel = () => {
     const on = S().abilities || [], slots = DQ.abilSlots ? DQ.abilSlots() : 0, ready = D.ABIL.filter(a => DQ.abilUnlocked(a)), spare = ready.filter(a => !on.includes(a.id));
     const next = D.ABIL.filter(a => !DQ.abilUnlocked(a)).sort((x, y) => (x.lvl - DQ.lvl(x.skill)) - (y.lvl - DQ.lvl(y.skill)))[0];
     const why = a => DQ.ability(a.id) ? 'In use' : a.needShield && !S().equip.shield ? 'Needs a shield' : a.style ? `${DQ.cap(a.style)} only` : 'Idle';
     const slotHtml = Array.from({ length: slots }, (_, i) => { const a = D.ABIL.find(x => x.id === on[i]);
-      return a ? `<button class="kit-abil on ${DQ.ability(a.id) ? '' : 'idle'}" data-do="abil" data-a="${a.id}" aria-pressed="true" data-tip="text:${esc(a.name)}: ${esc(a.text)} Click to take it out of the slot.">${ico(a.ic)}<span><b>${esc(a.name)}</b><small>${esc(why(a))}</small></span></button>`
-        : `<span class="kit-abil empty">${ico('star')}<span><b>Empty slot</b><small>${spare.length ? 'Choose one below' : next ? `Next at ${esc(D.SK[next.skill].name)} ${next.lvl}` : ''}</small></span></span>`; }).join('');
-    const full = on.length >= slots, adds = spare.map(a => `<button class="kit-add" data-do="${full ? 'abilswap' : 'abil'}" data-a="${a.id}" data-tip="text:${esc(a.name)}: ${esc(a.text)}${full ? ' Replaces your last slot.' : ''}">${ico(a.ic)}<span>${full ? 'Swap in ' : ''}${esc(a.name)}</span></button>`).join('');
+      return a ? `<button class="kit-abil on ${DQ.ability(a.id) ? '' : 'idle'}" data-do="abil" data-a="${a.id}" aria-pressed="true" data-tip="text:${esc(a.name)}: ${esc(a.text)} Click to take it out of the slot.">${ico(a.ic)}<span><b>${esc(a.name)}</b><small>${esc(why(a))} · remove</small></span></button>`
+        : `<span class="kit-abil empty">${ico('star')}<span><b>Empty slot</b><small>${spare.length ? 'Pick an ability below' : next ? `Next at ${esc(D.SK[next.skill].name)} ${next.lvl}` : ''}</small></span></span>`; }).join('');
+    const full = on.length >= slots, adds = spare.map(a => `<button class="kit-add" data-do="${full ? 'abilswap' : 'abil'}" data-a="${a.id}" data-tip="text:${esc(a.name)}: ${esc(a.text)}${full ? ' Replaces your last slot.' : ''}">${ico(a.ic)}<span>${esc(a.name)}</span></button>`).join('');
+    return `<section class="panel combat-abils"><div class="kit-head"><span class="k">Abilities <b class="mono">${on.length}/${slots}</b></span><button class="linkish" data-do="combatmore" data-a="abilities">All abilities</button></div>
+      <div class="kit-slots">${slotHtml}</div>${adds ? `<div class="kit-sub">${full ? 'Swap in (replaces your last slot)' : 'Add to a slot'}</div><div class="kit-adds">${adds}</div>` : ''}</section>`;
+  };
+  const foodPanel = dash => {
     const sup = dash.querySelector('.combat-col .combat-supplies'), food = sup ? sup.cloneNode(true) : null;
-    if (food) { food.querySelectorAll('[id]').forEach(e => e.removeAttribute('id')); const h = food.querySelector('h2'); if (h) h.remove(); }
-    return `<section class="panel combat-kit"><div class="kit-part kit-abils"><div class="kit-head"><span class="k">Abilities <b class="mono">${on.length}/${slots}</b></span><button class="linkish" data-do="combatmore" data-a="abilities">All abilities</button></div><div class="kit-row">${slotHtml}</div>${adds ? `<div class="kit-row kit-adds">${adds}</div>` : ''}</div>
-      <div class="kit-part kit-food"><div class="kit-head"><span class="k">Food</span></div>${food ? food.innerHTML : '<p class="dim sm">No food carried.</p>'}</div></section>`;
+    if (food) { food.querySelectorAll('[id]').forEach(e => e.removeAttribute('id')); const h = food.querySelector('h2'); if (h) h.outerHTML = '<span class="k">Food</span>'; }
+    return `<section class="panel combat-food">${food ? food.innerHTML : '<span class="k">Food</span><p class="dim sm">No food carried.</p>'}</section>`;
   };
   UI.DO.abilswap = id => { const on = S().abilities || []; if (on.length >= DQ.abilSlots()) DQ.toggleAbility(on[on.length - 1]); if (DQ.toggleAbility(id)) DQ.sfx && DQ.sfx('equip'); UI.render(false); };
   const render = UI.render;
