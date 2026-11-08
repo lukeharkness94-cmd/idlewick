@@ -234,7 +234,10 @@ DQ.pctNext = sk => { const l = DQ.lvl(sk); if (l >= 99) return 100; const a = D.
 /* ---------- Items ---------- */
 DQ.pack = id => DQ.S.inv[id] || 0;
 DQ.have = id => (DQ.S.inv[id] || 0) + (DQ.S.bank[id] || 0);
-DQ.packSlots = () => Object.keys(DQ.S.inv).length;
+/* Tools (pickaxes, axes, rods, gloves …) are equipped the moment you own them: they are kept with your things for old
+   saves' sake but never take a backpack slot and are not shown in the backpack or bank (the Tools tab lists them). */
+DQ.isTool = id => !!(DQ.data.ITEMS[id] && DQ.data.ITEMS[id].type === 'tool');
+DQ.packSlots = () => Object.keys(DQ.S.inv).filter(id => !DQ.isTool(id)).length;
 DQ.give = (id, n = 1) => {
   const S = DQ.S; if (n <= 0) return;
   if (S.inv[id]) S.inv[id] += n;

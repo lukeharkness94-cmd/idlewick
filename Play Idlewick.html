@@ -8460,7 +8460,10 @@ DQ.pctNext = sk => { const l = DQ.lvl(sk); if (l >= 99) return 100; const a = D.
 /* ---------- Items ---------- */
 DQ.pack = id => DQ.S.inv[id] || 0;
 DQ.have = id => (DQ.S.inv[id] || 0) + (DQ.S.bank[id] || 0);
-DQ.packSlots = () => Object.keys(DQ.S.inv).length;
+/* Tools (pickaxes, axes, rods, gloves …) are equipped the moment you own them: they are kept with your things for old
+   saves' sake but never take a backpack slot and are not shown in the backpack or bank (the Tools tab lists them). */
+DQ.isTool = id => !!(DQ.data.ITEMS[id] && DQ.data.ITEMS[id].type === 'tool');
+DQ.packSlots = () => Object.keys(DQ.S.inv).filter(id => !DQ.isTool(id)).length;
 DQ.give = (id, n = 1) => {
   const S = DQ.S; if (n <= 0) return;
   if (S.inv[id]) S.inv[id] += n;
@@ -11102,7 +11105,7 @@ const catOf = it => it.type === 'tool' ? 'tool' : it.type === 'ammo' ? 'weapon' 
 /* "Crafting items" is a lens, not a box: anything that some recipe uses, wherever it also sits (ores, logs, bars, fish, crops …) */
 const inCat = (id, f) => f === 'all' || (f === 'craft' ? ING.has(id) : catOf(D.ITEMS[id]) === f);
 const byCat = (a, b) => CAT_ORDER.indexOf(catOf(D.ITEMS[a])) - CAT_ORDER.indexOf(catOf(D.ITEMS[b])) || D.ITEMS[a].name.localeCompare(D.ITEMS[b].name);
-UI.catTabs = (store, cur, act) => `${UI.choiceButtons(`<select id="${act}-select" data-in="itemfilter" data-a="${act}" aria-label="${act === 'packfilter' ? 'Backpack' : 'Bank'} category">${Object.entries(CAT).filter(([k]) => k === 'all' || k === cur || Object.keys(store).some(id => inCat(id, k))).map(([k, n]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${n} (${k === 'all' ? Object.keys(store).length : Object.keys(store).filter(id => inCat(id, k)).length})</option>`).join('')}</select>`)}`;
+UI.catTabs = (store, cur, act) => `${UI.choiceButtons(`<select id="${act}-select" data-in="itemfilter" data-a="${act}" aria-label="${act === 'packfilter' ? 'Backpack' : 'Bank'} category">${Object.entries(CAT).filter(([k]) => k === 'all' || k === cur || Object.keys(store).filter(id => !DQ.isTool(id)).some(id => inCat(id, k))).map(([k, n]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${n} (${k === 'all' ? Object.keys(store).filter(id => !DQ.isTool(id)).length : Object.keys(store).filter(id => !DQ.isTool(id)).filter(id => inCat(id, k)).length})</option>`).join('')}</select>`)}`;
 
 /* ---------- Map ---------- */
 const MAP_LAND = 'M40 330C50 210 170 130 320 110C470 90 590 56 760 70C900 82 950 190 944 300C938 404 884 462 760 452C640 470 520 430 400 450C280 480 140 470 80 420C52 394 40 362 40 330Z';
@@ -11258,14 +11261,14 @@ const equipCell = slot => {
   const it = D.ITEMS[id];
   return `<button class="eq" style="--c:${it.col}" data-do="unequip" data-a="${slot}" aria-label="${DQ.SLOT_NAMES[slot]}: ${esc(it.name)}. Unequip" data-tip="item:${id}">${DQ.itemIco(it)}${slot === 'ammo' ? `<b class="mono">${fmtK(S().ammo.n)}</b>` : ''}<small>${DQ.SLOT_NAMES[slot]}</small></button>`;
 };
-UI.packSorted = () => Object.keys(S().inv).sort(byCat);
+UI.packSorted = () => Object.keys(S().inv).filter(id => !DQ.isTool(id)).sort(byCat);
 UI.packFilter = 'all'; UI.packQ = '';
 UI.packVisible = () => UI.packSorted().filter(id => inCat(id, UI.packFilter) && D.ITEMS[id].name.toLowerCase().includes(UI.packQ.toLowerCase()));
 /* Item cards already provide the complete visible inventory selector. */
 UI.inventoryPicker = () => '';
 UI.packGrid = () => {
   const ids = UI.packVisible();
-  if (!ids.length) return `<p class="dim" style="grid-column:1/-1;margin:6px 0">${Object.keys(S().inv).length ? 'Nothing in your backpack matches. Try another filter, or look in the bank.' : 'Your backpack is empty.'}</p>`;
+  if (!ids.length) return `<p class="dim" style="grid-column:1/-1;margin:6px 0">${UI.packSorted().length ? 'Nothing in your backpack matches. Try another filter, or look in the bank.' : 'Your backpack is empty.'}</p>`;
   return ids.map(id => { const spare = D.ITEMS[id].slot !== 'ammo' && S().equip[D.ITEMS[id].slot] === id; return `<button class="slot ${UI.sel === id && UI.selFrom === 'pack' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="pack" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().inv[id]} ${spare ? 'spare copies' : 'in backpack'}">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().inv[id])}</span>${spare ? '<span class="spare-tag">Spare</span>' : ''}${DQ.gearMark ? DQ.gearMark(id) : ''}</button>`; }).join('');
 };
 UI.detail = (id, from) => {
@@ -11294,9 +11297,9 @@ UI.V.character = () => {
 };
 
 /* ---------- Bank ---------- */
-const bankIds = () => Object.keys(S().bank).filter(id => inCat(id, UI.bankFilter) && D.ITEMS[id].name.toLowerCase().includes(UI.bankQ.toLowerCase())).sort(byCat);
+const bankIds = () => Object.keys(S().bank).filter(id => !DQ.isTool(id) && inCat(id, UI.bankFilter) && D.ITEMS[id].name.toLowerCase().includes(UI.bankQ.toLowerCase())).sort(byCat);
 UI.bankGrid = () => { const ids = bankIds(); return ids.length ? ids.map(id => `<button class="slot ${UI.sel === id && UI.selFrom === 'bank' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="bank" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().bank[id]} in bank">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().bank[id])}</span>${DQ.gearMark ? DQ.gearMark(id) : ''}</button>`).join('') : `<p class="dim" style="grid-column:1/-1">${Object.keys(S().bank).length ? 'Nothing matches that filter.' : 'Your bank is empty. Overflow and deposits end up here.'}</p>`; };
-UI.V.bank = () => `<section class="panel shophead"><div><h2>Bank</h2><small class="dim">${Object.keys(S().bank).length} item types · Used automatically by tasks</small></div><button class="btn" data-do="depositall">${ico('bank')}Deposit backpack</button></section>
+UI.V.bank = () => `<section class="panel shophead"><div><h2>Bank</h2><small class="dim">${Object.keys(S().bank).filter(id => !DQ.isTool(id)).length} item types · Used automatically by tasks</small></div><button class="btn" data-do="depositall">${ico('bank')}Deposit backpack</button></section>
   <div class="chargrid"><section class="panel"><div class="phead bank-filters"><div class="tabs">${UI.catTabs(S().bank, UI.bankFilter, 'bankfilter')}</div><input id="bankq" class="search" data-in="bankq" placeholder="Search" value="${esc(UI.bankQ)}" aria-label="Search bank"></div>${UI.inventoryPicker('bank')}<div class="slots big" id="bankgrid">${UI.bankGrid()}</div></section>
   <section class="panel" id="detailbox">${UI.detail(UI.sel, UI.selFrom)}</section></div>`;
 
@@ -11393,7 +11396,7 @@ const DO = {
   unequip: a => { if (DQ.unequip(a)) { DQ.sfx('equip'); UI.renderHud(); UI.render(false); } },
   deposit: (a, b) => { DQ.deposit(a, b === 'all' ? S().inv[a] : +b); DQ.sfx('tab'); UI.sel = null; UI.render(false); },
   withdraw: (a, b) => { const r = DQ.withdraw(a, b === 'all' ? S().bank[a] : +b); if (r < 0) DQ.toast('Your backpack is full', true); else DQ.sfx('tab'); if (!S().bank[a]) UI.sel = null; UI.render(false); },
-  depositall: () => { Object.keys(S().inv).forEach(id => DQ.deposit(id, S().inv[id])); DQ.sfx('tab'); UI.sel = null; UI.render(false); },
+  depositall: () => { Object.keys(S().inv).filter(id => !DQ.isTool(id)).forEach(id => DQ.deposit(id, S().inv[id])); DQ.sfx('tab'); UI.sel = null; UI.render(false); },
   bankfilter: a => { UI.bankFilter = a; UI.render(false); },
   packfilter: a => { UI.packFilter = a; UI.render(false); },
   achfilter: a => { UI.achFilter = a; UI.render(false); },

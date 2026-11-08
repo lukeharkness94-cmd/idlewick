@@ -939,4 +939,8 @@ test('cook any fish you hold (level sets the burn), gentler burning, thieving sh
   S.towns.mossbarrow={visited:true,boss:false};S.unlocked.farming=true;S.xp.farming=D.XPF[30];S.coins=99999;S.farm.pensBought=Math.max(1,S.farm.pensBought);const A=D.ANIMALS[0];q.buyAnimal(A.id);
   const c=S.coins;assert.equal(q.sellAnimal(0),true);assert.equal(S.farm.animals.length,0,'the pen is free');assert.equal(S.coins-c,Math.floor(A.price/2));
 });
+test('owned tools are equipped: they keep working but take no backpack slot', () => {
+  const {q}=harness();const D=q.data,S=q.S;const pick=Object.keys(D.ITEMS).find(id=>D.ITEMS[id].type==='tool'&&/pick/.test(id))||Object.keys(D.ITEMS).find(id=>D.ITEMS[id].type==='tool');
+  const before=q.packSlots();S.inv[pick]=1;assert.equal(q.packSlots(),before,'a tool does not use a backpack slot');assert.ok(q.have(pick)>0,'and is still owned');
+});
 console.log(tests+' regression checks passed');
