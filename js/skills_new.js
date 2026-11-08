@@ -32,24 +32,46 @@ DQ.KIND_EXT.sail = {
   }
 };
 
-/* ---------- Beastmastery: training companions ---------- */
+/* ---------- Beastmastery: lay traps to befriend, train to strengthen ---------- */
 DQ.beastMult = () => 1 + (DQ.skillUnlocked('beastmastery') ? DQ.lvl('beastmastery') * .005 : 0);
+/* each region's signature wild companion (one per region; until now only a rare drop in fights) */
+DQ.signatureOf = town => (D.PETS || []).find(p => p.collectible && p.mon && D.MON[p.mon] && D.MON[p.mon].town === town && String(p.id).startsWith('wild_')) || null;
+DQ.lureLvl = town => (D.TOWN[town] ? D.TOWN[town].idx : 0) * 10 || 1;
+DQ.befriendChance = town => Math.min(.25, .03 + DQ.lvl('beastmastery') * .0015 + Math.max(0, DQ.lvl('beastmastery') - DQ.lureLvl(town)) * .002);
+const lureLoot = town => { const out = []; for (const m of D.MONLIST.filter(m => m.town === town && !m.boss && !m.mini)) for (const [k] of m.drops || []) { const it = D.ITEMS[k]; if (it && !it.slot && it.type !== 'container' && !it.unique && !out.includes(k)) out.push(k); } return out.length ? out : ['feather']; };
+const trainCheck = id => {
+  if (String(id).startsWith('lure:')) { const town = id.slice(5); if (!D.TOWN[town]) return 'There is no such region'; if (!DQ.townUnlocked(town) || !(S().towns[town] && S().towns[town].visited)) return `Reach ${D.TOWN[town].name} first`; if (DQ.lvl('beastmastery') < DQ.lureLvl(town)) return `Requires Beastmastery ${DQ.lureLvl(town)}`; if (DQ.have('wooden_trap') < 1) return 'You need a wooden trap (Crafting makes them)'; return ''; }
+  return !D.PET[id] ? 'There is no such companion' : !S().pets.owned[id] ? 'You have not found that companion yet' : '';
+};
 DQ.KIND_EXT.train = {
   skill: 'beastmastery', page: 'beastmastery',
-  label: a => `Training ${(D.PET[a.id] || {}).name || 'a companion'}`,
-  dur: () => 6000,
-  check: id => !D.PET[id] ? 'There is no such companion' : !S().pets.owned[id] ? 'You have not found that companion yet' : '',
+  label: a => String(a.id).startsWith('lure:') ? `Laying traps in ${D.TOWN[a.id.slice(5)].name}` : `Training ${(D.PET[a.id] || {}).name || 'a companion'}`,
+  dur: id => String(id).startsWith('lure:') ? 8000 : 6000,
+  check: trainCheck,
   done: a => {
+    const L = DQ.lvl('beastmastery');
+    if (String(a.id).startsWith('lure:')) {
+      const town = a.id.slice(5); if (DQ.have('wooden_trap') < 1) return DQ.stopAct(false, 'Out of wooden traps. Craft some more to keep laying them.');
+      if (DQ.act) DQ.act.count++;
+      if (chance(.25)) DQ.take('wooden_trap', 1); /* a trap breaks now and then */
+      const sig = DQ.signatureOf(town);
+      if (sig && !S().pets.owned[sig.id] && !DQ.forecasting && chance(DQ.befriendChance(town))) DQ.awardPet(sig.id);
+      else { const k = DQ.pick(lureLoot(town)), n = rnd(1, 3); DQ.grant(k, n); if (!DQ.sim.on) floatAt(`+${n} ${D.ITEMS[k].name.toLowerCase()}`, '#d08a5a'); }
+      DQ.addXp('beastmastery', Math.round(8 * (5 + L * .35))); S().stats.train = (S().stats.train || 0) + 1; DQ.qev('lure', town);
+      return;
+    }
     const p = D.PET[a.id], o = S().pets.owned[a.id]; if (!p || !o) return DQ.stopAct(true);
     if (DQ.act) DQ.act.count++;
     const before = DQ.petLevel(a.id); if (!Number.isFinite(o.xp)) o.xp = (D.CREATURE_LEVELS || [0])[Math.max(0, before - 1)] || 0;
-    o.xp += 2 + DQ.lvl('beastmastery') / 15;
-    const x = DQ.addXp('beastmastery', Math.round(6 * (5 + DQ.lvl('beastmastery') * .35) + before * 4)); S().stats.train = (S().stats.train || 0) + 1; DQ.qev('train', a.id);
+    o.xp += 2 + L / 15;
+    const x = DQ.addXp('beastmastery', Math.round(6 * (5 + L * .35) + before * 4)); S().stats.train = (S().stats.train || 0) + 1; DQ.qev('train', a.id);
     const after = DQ.petLevel(a.id);
     if (after > before) { DQ.fxDirty(); if (!DQ.sim.on) DQ.notify({ kind: 'unlock', key: 'creature:' + a.id, title: `${p.name} reached level ${after}!`, text: 'Their companion bonus is stronger.', icon: 'paw', col: p.col, sound: 'perk', burst: true }); DQ.emit('pets'); }
     if (!DQ.sim.on) floatAt(`+${fmt(Math.round(x))} XP · ♥`, '#d08a5a');
   }
 };
+/* Sailing's sea legs: every Sailing level makes Fishing 0.3% faster */
+const speed0 = DQ.extraSpeed; if (speed0) DQ.extraSpeed = sk => speed0(sk) + (sk === 'fishing' && DQ.skillUnlocked('sailing') ? DQ.lvl('sailing') * .003 : 0);
 /* stronger companion bonuses and busier farm animals */
 const animal0 = DQ.animalPeriod; if (animal0) DQ.animalPeriod = a => animal0(a) * (DQ.skillUnlocked('beastmastery') && DQ.lvl('beastmastery') >= 25 ? 1 - DQ.lvl('beastmastery') * .003 : 1);
 
@@ -64,11 +86,17 @@ UI.V.sailing = () => {
   return UI.taskPanel('sailing', 'Sailing', 'sail', choices, 'Sail to');
 };
 UI.V.beastmastery = () => {
+  const L = DQ.lvl('beastmastery'), traps = DQ.have('wooden_trap');
+  /* trap lines: one card per region, its signature companion as the picture (silhouette until befriended) */
+  const lures = D.TOWNS.map(t => { const sig = DQ.signatureOf(t.id), lvl = DQ.lureLvl(t.id), seen = S().towns[t.id] && S().towns[t.id].visited, lvlLock = L < lvl, got = sig && S().pets.owned[sig.id];
+    return { id: 'lure:' + t.id, name: seen ? `Lay traps · ${t.name}` : '???', artKind: 'creature', artId: sig ? (A && A.hasCreature(sig.id) ? sig.id : sig.mon) : 'chicken', locked: lvlLock || !seen, blackout: !seen, blocked: lvlLock || !seen || !traps,
+      reason: [!seen ? `Reach ${t.name}` : '', lvlLock ? `Requires Beastmastery ${lvl}` : '', !traps ? 'Needs a wooden trap' : ''].filter(Boolean).join(' · '),
+      short: !seen ? `Reach ${t.name}` : lvlLock ? `Lv ${lvl}` : '', caption: got ? `${esc(sig.name)} befriended` : `Befriend ${sig ? esc(sig.name) : 'a creature'}`, stateText: got ? '✓ Befriended · hides and feathers' : `${(DQ.befriendChance(t.id) * 100).toFixed(1)}% per trap`,
+      info: `<p>Lay traps around ${esc(t.name)}. ${got ? 'You have befriended its signature companion; traps now bring hides, feathers and other trophies.' : `Each trap has a ${(DQ.befriendChance(t.id) * 100).toFixed(1)}% chance to befriend <b>${sig ? esc(sig.name) : 'its companion'}</b>; otherwise it brings hides, feathers and other trophies.`}</p><p>${traps} wooden trap${traps === 1 ? '' : 's'} · about 1 in 4 breaks · 8s per trap</p>` }; });
   const owned = (D.PETS || []).filter(p => S().pets.owned[p.id]);
-  const choices = owned.map(p => { const lv = DQ.petLevel(p.id), cid = A && A.hasCreature(p.id) ? p.id : p.mon || p.id;
-    return { id: p.id, name: p.name, artKind: 'creature', artId: cid, caption: `Level ${lv} · ${esc(p.kind || 'Companion')}`, stateText: S().pets.active === p.id ? 'Your companion' : '',
-      info: `<p>${esc(p.text || '')}</p><p>${(DQ.durFor('train', p.id) / 1000).toFixed(0)}s per session · ${Math.round((6 * (5 + DQ.lvl('beastmastery') * .35) + lv * 4) * DQ.xpMult('beastmastery'))} XP · Companion bonuses ×${DQ.beastMult().toFixed(2)}</p>` }; });
-  if (!choices.length) return `<section class="panel"><h2>Beastmastery</h2><p>You have no companions to train yet. Hunting and rare finds bring them.</p></section>`;
-  return UI.taskPanel('beastmastery', 'Beastmastery', 'train', choices, 'Train');
+  const train = owned.map(p => { const lv = DQ.petLevel(p.id), cid = A && A.hasCreature(p.id) ? p.id : p.mon || p.id;
+    return { id: p.id, name: `Train ${p.name}`, artKind: 'creature', artId: cid, caption: `Level ${lv} · ${esc(p.kind || 'Companion')}`, stateText: S().pets.active === p.id ? 'Your companion' : '',
+      info: `<p>${esc(p.text || '')}</p><p>${(DQ.durFor('train', p.id) / 1000).toFixed(0)}s per session · Companion bonuses ×${DQ.beastMult().toFixed(2)}</p>` }; });
+  return UI.taskPanel('beastmastery', 'Beastmastery', 'train', [...train, ...lures], '');
 };
 })();

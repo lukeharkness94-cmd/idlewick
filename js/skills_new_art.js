@@ -33,6 +33,7 @@ A.itemSprite = id => {
   const it = D.ITEMS[id];
   if (it && id.startsWith('plank_')) { const s = Spr(16, 16); plank(s, id.slice(6)); return s; }
   if (it && it.type === 'boat') { const s = Spr(16, 16); boat(s, it.tier, it.col); return s; }
+  if (id === 'tool_handsaw') { const s = Spr(16, 16); s.poly([[1, 9], [11, 4], [12, 7], [3, 12]], R.bronze || rp('#c08a4a')); for (let x = 2; x < 11; x += 2) s.fix(x, 10 - Math.round(x / 2), '#5a3a1a'); s.line(2, 9, 11, 5, null, '#f0c890'); s.rect(11, 3, 4, 5, R.wood); s.rect(12, 4, 2, 3, rp('#3a2414')); return s; }
   return base(id);
 };
 A.itemUrl = id => A.url('item:' + id, () => A.itemSprite(id));

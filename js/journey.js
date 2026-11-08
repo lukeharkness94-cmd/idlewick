@@ -88,6 +88,10 @@ const moreProjects = {
   ['hollow_throne','throne','Restore the throne hall','Banners hang again in the great hall of the fallen kingdom.',{coins:45000,bar_rune:12,log_elder:40},{coin:.02},'+2% coins from every source.',['The last steward','It is not a kingdom again. But it is a home.']]]
 };
 for (const [town, list] of Object.entries(moreProjects)) for (const [id, art, name, story, cost, fx, reward, voice] of list) { D.PROJECTS[id] = { town, art, name, story, cost, fx, reward }; D.PROJECT_VOICES[id] = voice; }
+/* Carpentry (Nov 2026): from Saltmere on, restoration is built with sawn planks rather than raw logs; Willowbrook and
+   Mossbarrow keep logs, since Carpentry may not be learned yet. Logs already handed over are converted on load. */
+for (const p of Object.values(D.PROJECTS)) { const t = D.TOWN[p.town]; if (!t || t.idx < 2 || p.relic) continue;
+  for (const k of Object.keys(p.cost)) if (k.startsWith('log_') && D.ITEMS['plank_' + k.slice(4)]) { p.cost['plank_' + k.slice(4)] = p.cost[k]; delete p.cost[k]; } }
 DQ.projectsForTown = town => Object.entries(D.PROJECTS).filter(([,p])=>p.town===town);
 /* Projects are built in deliveries (Nov 2026): each material can be handed over whenever you have some, the building
    rises in stages as the deliveries add up, and it is complete once everything is in. S().projectGiven[id][item]

@@ -426,3 +426,10 @@ Stages are separate commits so each can be reverted on its own.
 - **Beastmastery** (gathering; unlocks with a companion and Hunting 5): train owned companions (kind `train`, 6s sessions) to raise their level; each Beastmastery level adds 0.5% to every companion bonus (`DQ.beastMult`, ×1.5 at 99) and from 25 farm animals produce 0.3%/level faster.
 - Engine: `DQ.KIND_EXT[kind] = { skill, page, label, dur, check, done }` lets a skill add an activity kind that starts, stops, queues and catches up offline like the rest. Boats count as moored (DQ.isTool), not carried.
 - Rail: 17 skills; `html.rail-tight` (page height under 1180) applies the compact 36px rows. icons48's legacy renderer no longer throws on new icon names.
+
+## New skills: earlier unlocks from things you make, and a purpose each (Nov 2026)
+- Unlocks: Carpentry ← own a Bronze handsaw (Smithing 2: 1 bronze bar + 2 logs); Sailing ← own a skiff (Carpentry 8) and have visited Saltmere; Beastmastery ← own 3 wooden traps (Crafting) and Combat 10. No companion needed.
+- Carpentry: planks replace logs in every furniture upgrade (tiers 2–3) and in restoration projects from Saltmere on (logs already delivered convert on load); boats for Sailing. Planks are worth ~1.15× the log, so sawing is a modest value-add, not a coin machine.
+- Sailing: voyages bring cloth (boats, furniture), gems, exotic seeds and other regions' ores early; "Sea legs": +0.3% Fishing speed per Sailing level.
+- Beastmastery: "Lay traps · <region>" (kind `train`, id `lure:<town>`, 8s, a quarter of traps break) befriends that region's signature companion (`DQ.signatureOf`, `DQ.befriendChance`: 3% + 0.15%/level, more above the region's level, max 25%); otherwise brings that region's hides, feathers and trophies. Region trap lines open at Beastmastery town-index × 10. Training companions and the companion-bonus / farm-animal perks remain.
+- Evidence: `node scripts/sim-new-skills.cjs` (voyage XP and value per hour vs Fishing; plank value added; boat material costs). See docs/economy-evidence.md.

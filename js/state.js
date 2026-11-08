@@ -78,7 +78,9 @@ function candidateState(o) {
   if (!result.projectGiven || typeof result.projectGiven !== 'object' || Array.isArray(result.projectGiven)) result.projectGiven = {};
   for (const [pid, g] of Object.entries(result.projectGiven)) { const pj = (D.PROJECTS || {})[pid];
     if (!pj || !g || typeof g !== 'object' || result.projects[pid]) { delete result.projectGiven[pid]; continue; }
-    for (const [k, n] of Object.entries(g)) if (!(k in pj.cost) || !Number.isFinite(n) || n < 0) delete g[k]; else g[k] = Math.min(Math.floor(n), pj.cost[k]); }
+    for (const [k, n] of Object.entries(g)) { if (!(k in pj.cost) && k.startsWith('log_') && ('plank_' + k.slice(4)) in pj.cost && Number.isFinite(n)) { g['plank_' + k.slice(4)] = (g['plank_' + k.slice(4)] || 0) + n; delete g[k]; continue; }
+      if (!(k in pj.cost) || !Number.isFinite(n) || n < 0) delete g[k]; else g[k] = Math.min(Math.floor(n), pj.cost[k]); }
+    for (const [k, n] of Object.entries(g)) if (k in pj.cost) g[k] = Math.min(Math.floor(n), pj.cost[k]); }
   if (!D.TOWN[result.town]) throw new Error('Unknown town');
   if (Object.values(result.equip).some(id => id && !D.ITEMS[id])) throw new Error('Unknown equipment');
   if (result.workers.some(w => !record(w)) || result.farm.animals.some(a => !record(a) || !D.ANIMAL[a.id])) throw new Error('Invalid worker or animal');

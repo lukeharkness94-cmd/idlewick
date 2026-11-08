@@ -141,3 +141,37 @@ Before: 100% for every boss with counters, and up to 0% without them. Old Tusk s
 
 - About 7% more coins at 24h: richer mid-game choices, not a loop. Suppers sell for roughly their ingredients, and made tools cost about their sale value in materials.
 - The opening is unchanged: `sim-opening.cjs` still reaches combat 8 at 25 minutes.
+
+## New skills (Nov 2026): node scripts/sim-new-skills.cjs
+
+```
+Sailing voyages (per hour, before speed bonuses)
+island           lvl boat  XP/h     coin value/h   fishing at same level: XP/h  value/h
+Gull Rock        1   1     6912     7092           5400                         1800
+Kelp Isle        10  1     11031    6853           14727                        3273
+Smugglers’ Cay   20  2     15540    12800          22500                        4500
+Amber Shoals     30  2     20083    15866          29077                        6923
+Coral Reach      40  3     24624    20146          34714                        14143
+Spice Atoll      52  3     30072    20203          36000                        20400
+Storm Spire      64  4     35509    40456          39600                        30000
+Sunken Crown     78  4     41857    35270          37125                        56250
+World’s Edge     90  5     47301    66390          42000                        87000
+
+Carpentry planks (per hour): XP and value added over selling the logs
+Planks           lvl 1   XP/h 9327    value added/h 1636
+Oak planks       lvl 10  XP/h 15218   value added/h 3273
+Willow planks    lvl 22  XP/h 22582   value added/h 3273
+Maple planks     lvl 38  XP/h 33382   value added/h 6545
+Yew planks       lvl 52  XP/h 42218   value added/h 13091
+Magic planks     lvl 68  XP/h 53018   value added/h 27818
+Elder planks     lvl 82  XP/h 61364   value added/h 45818
+
+Boats: materials value vs. the boat
+Skiff     carpentry 8   reaches tier 1 islands · materials worth 44 coins
+Cog       carpentry 25  reaches tier 2 islands · materials worth 350 coins
+Sloop     carpentry 45  reaches tier 3 islands · materials worth 904 coins
+Caravel   carpentry 65  reaches tier 4 islands · materials worth 2290 coins
+Galleon   carpentry 85  reaches tier 5 islands · materials worth 8530 coins
+```
+
+Sailing XP runs at roughly 75–110% of Fishing at the same level while the haul is worth about Fishing's value early and mid, less late. Plank sawing adds 1.6k–46k coins an hour of value over selling logs (it costs the logs and the time), so Carpentry pays mainly through what planks build. sim-economy milestones are unchanged: its simulated player does not train these skills.

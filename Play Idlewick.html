@@ -4627,18 +4627,19 @@ for(const a of D.ACH||[])a.coins=Math.round(a.coins*.35);
 <script>
 /* Carpentry, Sailing and Beastmastery (Nov 2026): data. Art is in skills_new_art.js, behaviour and pages in
    skills_new.js.
-   - Carpentry (artisan): saw logs into planks, then build boats. Unlocks after chopping 60 logs at Woodcutting 10.
-   - Sailing (gathering): timed voyages to islands for loot found nowhere else in such a mix. Each island needs a boat
-     of a certain size (Carpentry builds them). Unlocks once you have visited Saltmere and own a skiff.
-   - Beastmastery (gathering): train your companions. Every session raises the companion's level, and your
-     Beastmastery level makes every companion's bonus stronger and farm animals produce faster. Unlocks with your
-     first companion and Hunting 5. */
+   Each unlocks from something you have made, mid-game rather than at the end:
+   - Carpentry (artisan): smith a bronze handsaw. Saw logs into planks for house furniture, town projects and boats.
+   - Sailing (gathering): build a skiff and reach Saltmere. Voyages bring cloth, gems, exotic seeds and other
+     regions' ores early; every Sailing level makes Fishing 0.3% faster.
+   - Beastmastery (gathering): own 3 wooden traps (Crafting) and reach Combat 10. Lay traps to befriend each
+     region's signature companion (the reliable route to them) and gather hides; train companions; every level makes
+     companion bonuses stronger and, from 25, farm animals faster. */
 (() => {
 const DQ = window.DQ, D = DQ.data;
 for (const s of [
-  { id: 'carpentry', name: 'Carpentry', col: '#c08a4a', group: 'artisan', page: 'carpentry', actionReq: { chop: 60, 'skill:woodcutting': 10 }, blurb: 'Saw logs into planks and build boats.' },
+  { id: 'carpentry', name: 'Carpentry', col: '#c08a4a', group: 'artisan', page: 'carpentry', actionReq: { 'own:tool_handsaw': 1 }, blurb: 'Saw logs into planks for furniture, town projects and boats.' },
   { id: 'sailing', name: 'Sailing', col: '#3f8fc8', group: 'gather', page: 'sailing', actionReq: { 'visit:saltmere': 1, 'own:boat_skiff': 1 }, blurb: 'Sail from Saltmere to far islands and bring back what you find.' },
-  { id: 'beastmastery', name: 'Beastmastery', col: '#d08a5a', group: 'gather', page: 'beastmastery', actionReq: { pets: 1, 'skill:hunting': 5 }, blurb: 'Train your companions: stronger bonds and stronger bonuses.' }
+  { id: 'beastmastery', name: 'Beastmastery', col: '#d08a5a', group: 'gather', page: 'beastmastery', actionReq: { 'own:wooden_trap': 3, combat: 10 }, blurb: 'Lay traps to befriend wild companions, and train them into stronger allies.' }
 ]) { D.SKILLS.push(s); D.SK[s.id] = s; }
 const icons = DQ.ICONS || {}; for (const k of ['carpentry', 'sailing', 'beastmastery', 'plank', 'boat', 'island']) if (!(k in icons)) icons[k] = 'M4 12h16';
 
@@ -4649,7 +4650,7 @@ D.RLIST.carpentry = D.RLIST.carpentry || [];
 const add = r => { r.t = r.t || 2400; D.RECIPES[r.id] = r; D.RLIST.carpentry.push(r); return r; };
 for (const [w, name, lvl, xp] of WOODS) {
   const log = D.ITEMS['log_' + w]; if (!log) continue;
-  item('plank_' + w, { name, col: log.col, val: Math.round(log.val * 2 + 1), buy: Math.round(log.buy * 2.4), wood: w, sub: `Sawn from ${log.name.toLowerCase()}. Boats are built from them.` });
+  item('plank_' + w, { name, col: log.col, val: Math.round(log.val * 1.15) + 1, buy: Math.round(log.buy * 2.4), wood: w, sub: `Sawn from ${log.name.toLowerCase()}. Boats are built from them.` });
   add({ id: 'saw_' + w, skill: 'carpentry', tab: 'Planks', name, lvl, xp, t: 2200, in: { ['log_' + w]: 1 }, out: { ['plank_' + w]: 1 }, ev: 'carve' });
 }
 /* boats: tier sets which islands you can reach; owned boats are moored, not carried (like tools) */
@@ -4665,6 +4666,12 @@ for (const [id, name, tier, lvl, xp, inp, col] of D.BOATS) {
   add({ id: 'build_' + id.slice(5), skill: 'carpentry', tab: 'Boats', name, lvl, xp, t: 9000, in: inp, out: { [id]: 1 }, ev: 'carve' });
 }
 
+/* the handsaw that opens Carpentry: smithed from a bronze bar and two logs, then kept with your tools */
+item('tool_handsaw', { name: 'Bronze handsaw', type: 'tool', ic: 'carpentry', col: '#c08a4a', val: 12, buy: 0, sub: 'Smithed from bronze and wood. With it you can learn Carpentry.' });
+if (D.RLIST.smithing) { const r = { id: 'smith_handsaw', skill: 'smithing', tab: 'Tools', name: 'Bronze handsaw', lvl: 2, xp: 14, t: 2600, in: { bar_bronze: 1, log_normal: 2 }, out: { tool_handsaw: 1 }, ev: 'smith' }; D.RECIPES[r.id] = r; D.RLIST.smithing.push(r); }
+/* planks in the house: the second and third tier of every piece of furniture asks for planks instead of logs */
+for (const room of D.ROOMS || []) for (const f of room.furn || []) (f.costs || []).forEach((c, t) => { if (t < 1) return; for (const k of Object.keys(c)) if (k.startsWith('log_') && D.ITEMS['plank_' + k.slice(4)]) { c['plank_' + k.slice(4)] = c[k]; delete c[k]; } });
+
 /* ---------- Sailing: islands ---------- */
 /* [id, name, level, boat tier, seconds, xp, coins, loot [[item, [min,max], chance]], blurb] */
 D.VOYAGES = [
@@ -4677,15 +4684,15 @@ D.VOYAGES = [
   ['storm_spire', 'Storm Spire', 64, 4, 66, 310, [240, 520], [['raw_stormray', [1, 3], .6], ['ore_skyglass', [1, 3], .4], ['gem_ruby', [1, 1], .25]], 'A needle of rock that lightning visits every evening.'],
   ['sunken_crown', 'Sunken Crown', 78, 4, 74, 440, [400, 900], [['raw_monkfish', [2, 4], .6], ['gem_diamond', [1, 1], .15], ['treasure_chest', [1, 1], .08]], 'The drowned palace of a kingdom older than the Hollow.'],
   ['worlds_edge', 'World’s Edge', 90, 5, 84, 620, [700, 1500], [['raw_voideel', [1, 3], .6], ['ore_astralite', [1, 2], .4], ['seed_starfruit', [1, 2], .3]], 'Where the map stops and the sea goes on.']
-].map(([id, name, lvl, boat, secs, xp, coins, loot, blurb]) => ({ id, name, lvl, boat, t: secs * 1000, xp: Math.round(secs * (4.5 + lvl * .33)), coins, loot: loot.filter(([k]) => D.ITEMS[k]), blurb }));
-/* voyage XP per second is about 85% of gathering at the same level (5 + 0.4 x level raw XP a second), since the haul
-   is the main reward */
+].map(([id, name, lvl, boat, secs, xp, coins, loot, blurb]) => ({ id, name, lvl, boat, t: secs * 1000, xp: Math.round(secs * (6 + lvl * .42)), coins, loot: loot.filter(([k]) => D.ITEMS[k]), blurb }));
+/* voyage XP is about 75–110% of Fishing's at the same level (scripts/sim-new-skills.cjs), since the haul is half the reward */
 D.VOYAGE = Object.fromEntries(D.VOYAGES.map(v => [v.id, v]));
 
 /* ---------- unlocks announced on level-up ---------- */
 const unl = (sk, l, name) => { if (l <= 1) return; ((D.UNL[sk] = D.UNL[sk] || {})[l] = D.UNL[sk][l] || []).push(name); };
 for (const v of D.VOYAGES) unl('sailing', v.lvl, `Voyage to ${v.name}`);
-[[10, 'Companion bonuses +5%'], [25, 'Farm animals produce faster'], [30, 'Companion bonuses +15%'], [50, 'Companion bonuses +25%'], [75, 'Companion bonuses +37%'], [99, 'Companion bonuses +50%']].forEach(([l, n]) => unl('beastmastery', l, n));
+[[5, 'Sea legs: Fishing 0.3% faster per Sailing level']].forEach(([l, n]) => unl('sailing', l, n));
+[[10, 'Lay traps in Mossbarrow'], [20, 'Lay traps in Saltmere'], [30, 'Lay traps in Ironpeak Hold'], [40, 'Lay traps in Gloomfen'], [50, 'Lay traps in Emberfall'], [60, 'Lay traps in Skyreach'], [70, 'Lay traps in the Hollow'], [10, 'Companion bonuses +5%'], [25, 'Farm animals produce faster'], [30, 'Companion bonuses +15%'], [50, 'Companion bonuses +25%'], [75, 'Companion bonuses +37%'], [99, 'Companion bonuses +50%']].forEach(([l, n]) => unl('beastmastery', l, n));
 })();
 
 </script>
@@ -8250,6 +8257,7 @@ A.itemSprite = id => {
   const it = D.ITEMS[id];
   if (it && id.startsWith('plank_')) { const s = Spr(16, 16); plank(s, id.slice(6)); return s; }
   if (it && it.type === 'boat') { const s = Spr(16, 16); boat(s, it.tier, it.col); return s; }
+  if (id === 'tool_handsaw') { const s = Spr(16, 16); s.poly([[1, 9], [11, 4], [12, 7], [3, 12]], R.bronze || rp('#c08a4a')); for (let x = 2; x < 11; x += 2) s.fix(x, 10 - Math.round(x / 2), '#5a3a1a'); s.line(2, 9, 11, 5, null, '#f0c890'); s.rect(11, 3, 4, 5, R.wood); s.rect(12, 4, 2, 3, rp('#3a2414')); return s; }
   return base(id);
 };
 A.itemUrl = id => A.url('item:' + id, () => A.itemSprite(id));
@@ -8444,7 +8452,9 @@ function candidateState(o) {
   if (!result.projectGiven || typeof result.projectGiven !== 'object' || Array.isArray(result.projectGiven)) result.projectGiven = {};
   for (const [pid, g] of Object.entries(result.projectGiven)) { const pj = (D.PROJECTS || {})[pid];
     if (!pj || !g || typeof g !== 'object' || result.projects[pid]) { delete result.projectGiven[pid]; continue; }
-    for (const [k, n] of Object.entries(g)) if (!(k in pj.cost) || !Number.isFinite(n) || n < 0) delete g[k]; else g[k] = Math.min(Math.floor(n), pj.cost[k]); }
+    for (const [k, n] of Object.entries(g)) { if (!(k in pj.cost) && k.startsWith('log_') && ('plank_' + k.slice(4)) in pj.cost && Number.isFinite(n)) { g['plank_' + k.slice(4)] = (g['plank_' + k.slice(4)] || 0) + n; delete g[k]; continue; }
+      if (!(k in pj.cost) || !Number.isFinite(n) || n < 0) delete g[k]; else g[k] = Math.min(Math.floor(n), pj.cost[k]); }
+    for (const [k, n] of Object.entries(g)) if (k in pj.cost) g[k] = Math.min(Math.floor(n), pj.cost[k]); }
   if (!D.TOWN[result.town]) throw new Error('Unknown town');
   if (Object.values(result.equip).some(id => id && !D.ITEMS[id])) throw new Error('Unknown equipment');
   if (result.workers.some(w => !record(w)) || result.farm.animals.some(a => !record(a) || !D.ANIMAL[a.id])) throw new Error('Invalid worker or animal');
@@ -11048,8 +11058,8 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
   if (choice.locked) choice = Object.assign({}, choice, { name: '???', blackout: true, blocked: true, info: `<p class="locked-why">${ico('lock')} ${esc(choice.reason || 'Not unlocked yet')}</p>` });
   const running = DQ.act && DQ.act.kind === kind && DQ.act.id === choice.id;
   const art = (c, size=96) => `<span class="${c.locked || c.blackout ? 'blackout' : ''}">${c.artKind === 'item' ? `<span class="activity-item-art" style="--art-size:${size}px">${DQ.itemIco(D.ITEMS[c.artId || c.id])}</span>` : DQ.artImage(c.artKind || (kind==='fight'?'creature':kind),c.artId || c.id,size,c.locked&&['fight','thieve'].includes(kind)?'sil':'',c.locked||c.blackout?'Locked':c.name)}</span>`;
-  const action = `<div class="activity-actions">${choice.away?`<button class="btn primary" data-do="taskmap" data-a="${choice.town}">View ${esc(D.TOWN[choice.town].name)}</button>`:''}<button class="btn primary task-primary" data-do="act" data-a="${kind}" data-b="${choice.id}" ${!running && choice.blocked ? 'disabled' : ''}>${running ? kind === 'fight' ? 'Retreat' : 'Stop' : choice.blackout ? 'Locked' : esc(verb+' '+choice.name.replace(/^(Cook|Bars|Weapons|Armour) · /,''))}</button>${DQ.planUnlocked && DQ.planUnlocked() ? `<button class="btn" data-do="queueadd" data-a="${kind}" data-b="${choice.id}" ${choice.locked||choice.away ? 'disabled' : ''}>Queue</button>` : ''}</div>`;
-  const cards = `<section class="panel activity-choices"><div class="phead"><h2>${kind==='fight'?'Choose an opponent':kind==='recipe'?'Choose what to make':kind==='alch'?'Choose an item':({fish:'Fish catalogue',wood:'Trees',mine:'Ore deposits',thieve:'Targets',sail:'Islands',train:'Your companions'}[kind]||'Choose your spot')}</h2><small>${choices.some(c=>c.town)?`${choices.length} resources · all regions`:D.TOWN[S().town].name}</small></div>${UI.taskToolbar[key] || ''}<div class="illustrated-choices">${choices.filter(c=>c.visible!==false).map(c=>{
+  const action = `<div class="activity-actions">${choice.away?`<button class="btn primary" data-do="taskmap" data-a="${choice.town}">View ${esc(D.TOWN[choice.town].name)}</button>`:''}<button class="btn primary task-primary" data-do="act" data-a="${kind}" data-b="${choice.id}" ${!running && choice.blocked ? 'disabled' : ''}>${running ? kind === 'fight' ? 'Retreat' : 'Stop' : choice.blackout ? 'Locked' : esc((verb?verb+' ':'')+choice.name.replace(/^(Cook|Bars|Weapons|Armour) · /,''))}</button>${DQ.planUnlocked && DQ.planUnlocked() ? `<button class="btn" data-do="queueadd" data-a="${kind}" data-b="${choice.id}" ${choice.locked||choice.away ? 'disabled' : ''}>Queue</button>` : ''}</div>`;
+  const cards = `<section class="panel activity-choices"><div class="phead"><h2>${kind==='fight'?'Choose an opponent':kind==='recipe'?'Choose what to make':kind==='alch'?'Choose an item':({fish:'Fish catalogue',wood:'Trees',mine:'Ore deposits',thieve:'Targets',sail:'Islands',train:'Traps and companions'}[kind]||'Choose your spot')}</h2><small>${choices.some(c=>c.town)?`${choices.length} resources · all regions`:D.TOWN[S().town].name}</small></div>${UI.taskToolbar[key] || ''}<div class="illustrated-choices">${choices.filter(c=>c.visible!==false).map(c=>{
     const working=DQ.act&&DQ.act.kind===kind&&DQ.act.id===c.id;
     return `<button class="illustrated-card ${working?'active':''} ${choice.id===c.id?'selected':''} ${c.locked?'locked':''} ${c.missing?'missing':''}" data-do="taskselect" data-a="${kind}" data-b="${c.id}" data-page="${key}" aria-pressed="${choice.id===c.id}" ${c.locked?`aria-disabled="true" data-tip="text:${esc(c.reason||'Not unlocked yet')}"`:''}>
       <span class="choice-art">${art(c,96)}</span>${!c.locked && DQ.gearMark ? (g => g && D.ITEMS[g] && D.ITEMS[g].slot ? DQ.gearMark(g) : '')(c.yieldId || (c.artKind === 'item' ? c.artId || c.id : null)) : ''}<b>${c.locked?'???':esc(c.name)}</b><small>${c.locked?`${ico('lock')}<span>${esc(c.short||String(c.reason||'Not unlocked yet').replace(/^Requires [A-Za-z ]+? (\d+)/,'Lv $1').replace(/^Requires /,''))}</span>`:c.caption||esc(c.reason||'')}</small>${c.locked?'':`<span class="choice-state">${working?'● Working':c.stateText?(choice.id===c.id&&!c.locked&&!c.missing?'✓ Selected · ':'')+c.stateText:c.locked?'Locked':c.away?'Travel required':choice.id===c.id?'✓ Selected':'Available'}</span>`}${working?`<span class="bar prog"><i data-prog="${kind}:${c.id}"></i></span>`:''}</button>`;
@@ -11885,24 +11895,46 @@ DQ.KIND_EXT.sail = {
   }
 };
 
-/* ---------- Beastmastery: training companions ---------- */
+/* ---------- Beastmastery: lay traps to befriend, train to strengthen ---------- */
 DQ.beastMult = () => 1 + (DQ.skillUnlocked('beastmastery') ? DQ.lvl('beastmastery') * .005 : 0);
+/* each region's signature wild companion (one per region; until now only a rare drop in fights) */
+DQ.signatureOf = town => (D.PETS || []).find(p => p.collectible && p.mon && D.MON[p.mon] && D.MON[p.mon].town === town && String(p.id).startsWith('wild_')) || null;
+DQ.lureLvl = town => (D.TOWN[town] ? D.TOWN[town].idx : 0) * 10 || 1;
+DQ.befriendChance = town => Math.min(.25, .03 + DQ.lvl('beastmastery') * .0015 + Math.max(0, DQ.lvl('beastmastery') - DQ.lureLvl(town)) * .002);
+const lureLoot = town => { const out = []; for (const m of D.MONLIST.filter(m => m.town === town && !m.boss && !m.mini)) for (const [k] of m.drops || []) { const it = D.ITEMS[k]; if (it && !it.slot && it.type !== 'container' && !it.unique && !out.includes(k)) out.push(k); } return out.length ? out : ['feather']; };
+const trainCheck = id => {
+  if (String(id).startsWith('lure:')) { const town = id.slice(5); if (!D.TOWN[town]) return 'There is no such region'; if (!DQ.townUnlocked(town) || !(S().towns[town] && S().towns[town].visited)) return `Reach ${D.TOWN[town].name} first`; if (DQ.lvl('beastmastery') < DQ.lureLvl(town)) return `Requires Beastmastery ${DQ.lureLvl(town)}`; if (DQ.have('wooden_trap') < 1) return 'You need a wooden trap (Crafting makes them)'; return ''; }
+  return !D.PET[id] ? 'There is no such companion' : !S().pets.owned[id] ? 'You have not found that companion yet' : '';
+};
 DQ.KIND_EXT.train = {
   skill: 'beastmastery', page: 'beastmastery',
-  label: a => `Training ${(D.PET[a.id] || {}).name || 'a companion'}`,
-  dur: () => 6000,
-  check: id => !D.PET[id] ? 'There is no such companion' : !S().pets.owned[id] ? 'You have not found that companion yet' : '',
+  label: a => String(a.id).startsWith('lure:') ? `Laying traps in ${D.TOWN[a.id.slice(5)].name}` : `Training ${(D.PET[a.id] || {}).name || 'a companion'}`,
+  dur: id => String(id).startsWith('lure:') ? 8000 : 6000,
+  check: trainCheck,
   done: a => {
+    const L = DQ.lvl('beastmastery');
+    if (String(a.id).startsWith('lure:')) {
+      const town = a.id.slice(5); if (DQ.have('wooden_trap') < 1) return DQ.stopAct(false, 'Out of wooden traps. Craft some more to keep laying them.');
+      if (DQ.act) DQ.act.count++;
+      if (chance(.25)) DQ.take('wooden_trap', 1); /* a trap breaks now and then */
+      const sig = DQ.signatureOf(town);
+      if (sig && !S().pets.owned[sig.id] && !DQ.forecasting && chance(DQ.befriendChance(town))) DQ.awardPet(sig.id);
+      else { const k = DQ.pick(lureLoot(town)), n = rnd(1, 3); DQ.grant(k, n); if (!DQ.sim.on) floatAt(`+${n} ${D.ITEMS[k].name.toLowerCase()}`, '#d08a5a'); }
+      DQ.addXp('beastmastery', Math.round(8 * (5 + L * .35))); S().stats.train = (S().stats.train || 0) + 1; DQ.qev('lure', town);
+      return;
+    }
     const p = D.PET[a.id], o = S().pets.owned[a.id]; if (!p || !o) return DQ.stopAct(true);
     if (DQ.act) DQ.act.count++;
     const before = DQ.petLevel(a.id); if (!Number.isFinite(o.xp)) o.xp = (D.CREATURE_LEVELS || [0])[Math.max(0, before - 1)] || 0;
-    o.xp += 2 + DQ.lvl('beastmastery') / 15;
-    const x = DQ.addXp('beastmastery', Math.round(6 * (5 + DQ.lvl('beastmastery') * .35) + before * 4)); S().stats.train = (S().stats.train || 0) + 1; DQ.qev('train', a.id);
+    o.xp += 2 + L / 15;
+    const x = DQ.addXp('beastmastery', Math.round(6 * (5 + L * .35) + before * 4)); S().stats.train = (S().stats.train || 0) + 1; DQ.qev('train', a.id);
     const after = DQ.petLevel(a.id);
     if (after > before) { DQ.fxDirty(); if (!DQ.sim.on) DQ.notify({ kind: 'unlock', key: 'creature:' + a.id, title: `${p.name} reached level ${after}!`, text: 'Their companion bonus is stronger.', icon: 'paw', col: p.col, sound: 'perk', burst: true }); DQ.emit('pets'); }
     if (!DQ.sim.on) floatAt(`+${fmt(Math.round(x))} XP · ♥`, '#d08a5a');
   }
 };
+/* Sailing's sea legs: every Sailing level makes Fishing 0.3% faster */
+const speed0 = DQ.extraSpeed; if (speed0) DQ.extraSpeed = sk => speed0(sk) + (sk === 'fishing' && DQ.skillUnlocked('sailing') ? DQ.lvl('sailing') * .003 : 0);
 /* stronger companion bonuses and busier farm animals */
 const animal0 = DQ.animalPeriod; if (animal0) DQ.animalPeriod = a => animal0(a) * (DQ.skillUnlocked('beastmastery') && DQ.lvl('beastmastery') >= 25 ? 1 - DQ.lvl('beastmastery') * .003 : 1);
 
@@ -11917,12 +11949,18 @@ UI.V.sailing = () => {
   return UI.taskPanel('sailing', 'Sailing', 'sail', choices, 'Sail to');
 };
 UI.V.beastmastery = () => {
+  const L = DQ.lvl('beastmastery'), traps = DQ.have('wooden_trap');
+  /* trap lines: one card per region, its signature companion as the picture (silhouette until befriended) */
+  const lures = D.TOWNS.map(t => { const sig = DQ.signatureOf(t.id), lvl = DQ.lureLvl(t.id), seen = S().towns[t.id] && S().towns[t.id].visited, lvlLock = L < lvl, got = sig && S().pets.owned[sig.id];
+    return { id: 'lure:' + t.id, name: seen ? `Lay traps · ${t.name}` : '???', artKind: 'creature', artId: sig ? (A && A.hasCreature(sig.id) ? sig.id : sig.mon) : 'chicken', locked: lvlLock || !seen, blackout: !seen, blocked: lvlLock || !seen || !traps,
+      reason: [!seen ? `Reach ${t.name}` : '', lvlLock ? `Requires Beastmastery ${lvl}` : '', !traps ? 'Needs a wooden trap' : ''].filter(Boolean).join(' · '),
+      short: !seen ? `Reach ${t.name}` : lvlLock ? `Lv ${lvl}` : '', caption: got ? `${esc(sig.name)} befriended` : `Befriend ${sig ? esc(sig.name) : 'a creature'}`, stateText: got ? '✓ Befriended · hides and feathers' : `${(DQ.befriendChance(t.id) * 100).toFixed(1)}% per trap`,
+      info: `<p>Lay traps around ${esc(t.name)}. ${got ? 'You have befriended its signature companion; traps now bring hides, feathers and other trophies.' : `Each trap has a ${(DQ.befriendChance(t.id) * 100).toFixed(1)}% chance to befriend <b>${sig ? esc(sig.name) : 'its companion'}</b>; otherwise it brings hides, feathers and other trophies.`}</p><p>${traps} wooden trap${traps === 1 ? '' : 's'} · about 1 in 4 breaks · 8s per trap</p>` }; });
   const owned = (D.PETS || []).filter(p => S().pets.owned[p.id]);
-  const choices = owned.map(p => { const lv = DQ.petLevel(p.id), cid = A && A.hasCreature(p.id) ? p.id : p.mon || p.id;
-    return { id: p.id, name: p.name, artKind: 'creature', artId: cid, caption: `Level ${lv} · ${esc(p.kind || 'Companion')}`, stateText: S().pets.active === p.id ? 'Your companion' : '',
-      info: `<p>${esc(p.text || '')}</p><p>${(DQ.durFor('train', p.id) / 1000).toFixed(0)}s per session · ${Math.round((6 * (5 + DQ.lvl('beastmastery') * .35) + lv * 4) * DQ.xpMult('beastmastery'))} XP · Companion bonuses ×${DQ.beastMult().toFixed(2)}</p>` }; });
-  if (!choices.length) return `<section class="panel"><h2>Beastmastery</h2><p>You have no companions to train yet. Hunting and rare finds bring them.</p></section>`;
-  return UI.taskPanel('beastmastery', 'Beastmastery', 'train', choices, 'Train');
+  const train = owned.map(p => { const lv = DQ.petLevel(p.id), cid = A && A.hasCreature(p.id) ? p.id : p.mon || p.id;
+    return { id: p.id, name: `Train ${p.name}`, artKind: 'creature', artId: cid, caption: `Level ${lv} · ${esc(p.kind || 'Companion')}`, stateText: S().pets.active === p.id ? 'Your companion' : '',
+      info: `<p>${esc(p.text || '')}</p><p>${(DQ.durFor('train', p.id) / 1000).toFixed(0)}s per session · Companion bonuses ×${DQ.beastMult().toFixed(2)}</p>` }; });
+  return UI.taskPanel('beastmastery', 'Beastmastery', 'train', [...train, ...lures], '');
 };
 })();
 
@@ -14562,6 +14600,10 @@ const moreProjects = {
   ['hollow_throne','throne','Restore the throne hall','Banners hang again in the great hall of the fallen kingdom.',{coins:45000,bar_rune:12,log_elder:40},{coin:.02},'+2% coins from every source.',['The last steward','It is not a kingdom again. But it is a home.']]]
 };
 for (const [town, list] of Object.entries(moreProjects)) for (const [id, art, name, story, cost, fx, reward, voice] of list) { D.PROJECTS[id] = { town, art, name, story, cost, fx, reward }; D.PROJECT_VOICES[id] = voice; }
+/* Carpentry (Nov 2026): from Saltmere on, restoration is built with sawn planks rather than raw logs; Willowbrook and
+   Mossbarrow keep logs, since Carpentry may not be learned yet. Logs already handed over are converted on load. */
+for (const p of Object.values(D.PROJECTS)) { const t = D.TOWN[p.town]; if (!t || t.idx < 2 || p.relic) continue;
+  for (const k of Object.keys(p.cost)) if (k.startsWith('log_') && D.ITEMS['plank_' + k.slice(4)]) { p.cost['plank_' + k.slice(4)] = p.cost[k]; delete p.cost[k]; } }
 DQ.projectsForTown = town => Object.entries(D.PROJECTS).filter(([,p])=>p.town===town);
 /* Projects are built in deliveries (Nov 2026): each material can be handed over whenever you have some, the building
    rises in stages as the deliveries add up, and it is complete once everything is in. S().projectGiven[id][item]
@@ -15455,9 +15497,9 @@ Object.assign(lessons,{
  exploration:{title:'Exploration',text:'Visit new regions and discover creatures to earn Exploration XP.',towards:'New towns and creature discoveries → a more complete realm guide.',goal:'Open the map and work toward the next town road.',art:['skill','exploration']},
  herbalism:{title:'Herbalism',text:'Brew remedies and potions from plants and other ingredients.',towards:'Harvests → potions → healing and timed boosts.',goal:'Research a remedy, then brew your first potion.',art:['skill','herbalism']},
  enchanting:{title:'Enchanting',text:'Use runes and gems to strengthen equipped gear.',towards:'Enchantment ranks → stronger existing combat bonuses.',goal:'Equip an item and collect the materials for its first enchantment.',art:['skill','enchanting']},
- carpentry:{title:'Carpentry',text:'Saw logs into planks, then build boats from planks, string, cloth and metal.',towards:'Logs → planks → boats → Sailing to farther islands.',goal:'Saw some planks, then build a skiff (12 planks and 4 string).',art:['skill','carpentry']},
- sailing:{title:'Sailing',text:'Send your boat on voyages. Each island has its own haul, and a bigger boat reaches farther.',towards:'Voyages → coins, rare fish, seeds, gems and ore.',goal:'Sail to Gull Rock, then build a cog in Carpentry for Smugglers’ Cay.',art:['skill','sailing']},
- beastmastery:{title:'Beastmastery',text:'Train your companions. Each session raises their level, and your level strengthens every companion bonus.',towards:'Training → companion levels and bonuses → faster farm animals at 25.',goal:'Train your active companion until it gains a level.',art:['skill','beastmastery']}
+ carpentry:{title:'Carpentry',text:'Saw logs into planks. Planks build furniture upgrades in your house, the restoration projects from Saltmere on, and boats.',towards:'Logs → planks → furniture, town projects and boats for Sailing.',goal:'Saw some planks, then build a skiff (12 planks and 4 string) to start Sailing.',art:['skill','carpentry']},
+ sailing:{title:'Sailing',text:'Send your boat on voyages. Each island has its own haul, and a bigger boat reaches farther. Every Sailing level also makes Fishing faster.',towards:'Voyages → cloth for boats and furniture, gems, exotic seeds and other regions’ ores early.',goal:'Sail to Gull Rock, then build a cog in Carpentry for Smugglers’ Cay.',art:['skill','sailing']},
+ beastmastery:{title:'Beastmastery',text:'Lay wooden traps to befriend each region’s signature companion, and train the companions you have. Your level strengthens every companion bonus.',towards:'Traps → new companions, hides and feathers · Training → stronger companions · Level 25 → faster farm animals.',goal:'Lay traps around Willowbrook until a companion joins you.',art:['skill','beastmastery']}
 });
 Object.assign(lessons,{
  house:{towards:'Furniture gives lasting bonuses to your whole adventure.',title:'Your home',text:'Buy a home, then add rooms and furniture for permanent bonuses.',goal:'Save the purchase price, then start with a storage chest for backpack space.',art:['skill','woodcutting']},
