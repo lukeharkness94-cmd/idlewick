@@ -85,6 +85,8 @@ UI.V.sailing = () => {
       info: `<p>${esc(v.blurb)}</p><p class="sm dim">${tier ? `Your largest boat: ${esc(boatName(tier))}.` : 'You have no boat yet.'} Carpentry builds bigger boats for farther islands.</p><p>${(v.xp * DQ.xpMult('sailing')).toFixed(0)} XP · ${(DQ.durFor('sail', v.id) / 1000).toFixed(0)}s voyage · ${fmt(v.coins[0])}–${fmt(v.coins[1])} coins</p><div class="voy-loot">${v.loot.map(([k, , p]) => `<span class="voy-item" data-tip="item:${k}">${DQ.itemIco(D.ITEMS[k])}<small>${Math.round(p * 100)}%</small></span>`).join('')}</div>` }; });
   return UI.taskPanel('sailing', 'Sailing', 'sail', choices, 'Sail to');
 };
+/* one clear way to choose who comes with you: only one companion at a time gives its bonus */
+const companionBtn = p => S().pets.active === p.id ? `<p class="comp-on">★ ${esc(p.name)} is with you: their bonus is active.</p>` : `<div class="btnrow"><button class="btn primary" data-do="setpet" data-a="${p.id}">Take ${esc(p.name)} as your companion</button></div><p class="sm dim">Only the companion with you gives its bonus${S().pets.active && D.PET[S().pets.active] ? ` (now ${esc(D.PET[S().pets.active].name)})` : ''}.</p>`;
 UI.V.beastmastery = () => {
   const L = DQ.lvl('beastmastery'), traps = DQ.have('wooden_trap');
   /* trap lines: one card per region, its signature companion as the picture (silhouette until befriended) */
@@ -92,11 +94,12 @@ UI.V.beastmastery = () => {
     return { id: 'lure:' + t.id, name: seen ? `Lay traps · ${t.name}` : '???', artKind: 'creature', artId: sig ? (A && A.hasCreature(sig.id) ? sig.id : sig.mon) : 'chicken', locked: lvlLock || !seen, blackout: !seen, blocked: lvlLock || !seen || !traps,
       reason: [!seen ? `Reach ${t.name}` : '', lvlLock ? `Requires Beastmastery ${lvl}` : '', !traps ? 'Needs a wooden trap' : ''].filter(Boolean).join(' · '),
       short: !seen ? `Reach ${t.name}` : lvlLock ? `Lv ${lvl}` : '', caption: got ? `${esc(sig.name)} befriended` : `Befriend ${sig ? esc(sig.name) : 'a creature'}`, stateText: got ? '✓ Befriended · hides and feathers' : `${(DQ.befriendChance(t.id) * 100).toFixed(1)}% per trap`,
-      info: `<p>Lay traps around ${esc(t.name)}. ${got ? 'You have befriended its signature companion; traps now bring hides, feathers and other trophies.' : `Each trap has a ${(DQ.befriendChance(t.id) * 100).toFixed(1)}% chance to befriend <b>${sig ? esc(sig.name) : 'its companion'}</b>; otherwise it brings hides, feathers and other trophies.`}</p><p>${traps} wooden trap${traps === 1 ? '' : 's'} · about 1 in 4 breaks · 8s per trap</p>` }; });
+      info: `${got ? companionBtn(sig) : ''}<p>Lay traps around ${esc(t.name)}. ${got ? 'You have befriended its signature companion; traps now bring hides, feathers and other trophies.' : `Each trap has a ${(DQ.befriendChance(t.id) * 100).toFixed(1)}% chance to befriend <b>${sig ? esc(sig.name) : 'its companion'}</b>; otherwise it brings hides, feathers and other trophies.`}</p><p>${traps} wooden trap${traps === 1 ? '' : 's'} · about 1 in 4 breaks · 8s per trap</p>` }; });
   const owned = (D.PETS || []).filter(p => S().pets.owned[p.id]);
   const train = owned.map(p => { const lv = DQ.petLevel(p.id), cid = A && A.hasCreature(p.id) ? p.id : p.mon || p.id;
-    return { id: p.id, name: `Train ${p.name}`, artKind: 'creature', artId: cid, caption: `Level ${lv} · ${esc(p.kind || 'Companion')}`, stateText: S().pets.active === p.id ? 'Your companion' : '',
-      info: `<p>${esc(p.text || '')}</p><p>${(DQ.durFor('train', p.id) / 1000).toFixed(0)}s per session · Companion bonuses ×${DQ.beastMult().toFixed(2)}</p>` }; });
+    const on = S().pets.active === p.id;
+    return { id: p.id, name: `Train ${p.name}`, artKind: 'creature', artId: cid, caption: `Level ${lv} · ${esc(p.kind || 'Companion')}`, stateText: on ? '★ With you' : 'Not with you',
+      info: `${companionBtn(p)}<p>${esc(p.text || '')}</p><p>${(DQ.durFor('train', p.id) / 1000).toFixed(0)}s per session · Companion bonuses ×${DQ.beastMult().toFixed(2)}</p>` }; });
   return UI.taskPanel('beastmastery', 'Beastmastery', 'train', [...train, ...lures], '');
 };
 })();
