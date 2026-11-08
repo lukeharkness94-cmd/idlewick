@@ -287,8 +287,8 @@ const studyNote = id => {
 if (guide0) UI.openGuide = id => {
   const r = guide0(id); if (DQ.forecasting) return r;
   DQ.qev('guide', id);
-  const note = studyNote(id), head = note && document.querySelector('.modal .ghead');
-  if (head && !document.querySelector('.modal .study-note')) head.insertAdjacentHTML('afterend', note);
+  const note = studyNote(id), col = note && document.querySelector('.modal .gcol-know .gcol-h'), head = note && document.querySelector('.modal .ghead');
+  if (!document.querySelector('.modal .study-note')) { if (col) col.insertAdjacentHTML('afterend', note); else if (head) head.insertAdjacentHTML('afterend', note); }
   return r;
 };
 /* "Continue quest" on a study objective opens the guide itself; a relic hand-in goes to the quest to claim it */

@@ -79,16 +79,19 @@ UI.openGuide = id => {
     return `${rows}${hidden ? `<p class="dim" style="margin:6px 0 0">${hidden} more item${hidden > 1 ? 's' : ''} you have not found yet. Reach the <b>Drop table</b> entry${r.rank <= 3 ? ` (${fmt(T[3] - r.kills)} more defeat${T[3] - r.kills > 1 ? 's' : ''})` : ''} to see them all.</p>` : ''}`;
   })();
   const dr = r.rank > 3 ? drops : (drops || '<p class="dim" style="margin:0">Nothing found yet.</p>');
-  const body = `<div class="ghead" style="--c:${m.col}"><div class="gsprite">${DQ.monSprite(m, 96, seen ? 'bob' : 'sil')}</div><div class="gtitle"><h3>${seen ? esc(m.name) : '???'}</h3><small>${seen ? `${m.boss ? 'Boss · ' : ''}${esc(D.TOWN[m.town].name)} · Level ${m.cl}` : 'You have not met this monster yet'}</small>
-      <div class="gprog"><span class="bar"><i style="width:${r.next == null ? 100 : Math.round((r.kills - (r.rank ? T[r.rank - 1] : 0)) / (T[r.rank] - (r.rank ? T[r.rank - 1] : 0)) * 100)}%"></i></span><small class="mono">${fmt(r.kills)} defeated · ${nextLine(m, r)}</small></div></div></div>
-    <ol class="gladder" aria-label="What each entry needs">${RANKS.map((x, i) => { const left = T[i] - r.kills; return `<li class="${left <= 0 ? 'on' : ''}">${ico(left <= 0 ? 'check' : 'lock')}<b>${x[1]}</b><small>${left <= 0 ? 'Unlocked' : `${fmt(left)} more defeat${left > 1 ? 's' : ''}`}</small></li>`; }).join('')}</ol>
-    ${seen ? sec(0, `<p>Found around ${esc(D.TOWN[m.town].name)}. Level ${m.cl}${m.boss ? `, and it guards the road onward` : ''}.</p>`) : lock(0)}
+  /* laid out across the width (Nov 2026): the creature and its research ladder on top, then three columns: what you
+     know about fighting it, what it carries, and its story with your slayer goals */
+  const ghead = `<div class="ghead" style="--c:${m.col}"><div class="gsprite">${DQ.monSprite(m, 96, seen ? 'bob' : 'sil')}</div><div class="gtitle"><h3>${seen ? esc(m.name) : '???'}</h3><small>${seen ? `${m.boss ? 'Boss · ' : ''}${esc(D.TOWN[m.town].name)} · Level ${m.cl}` : 'You have not met this monster yet'}</small>
+      <div class="gprog"><span class="bar"><i style="width:${r.next == null ? 100 : Math.round((r.kills - (r.rank ? T[r.rank - 1] : 0)) / (T[r.rank] - (r.rank ? T[r.rank - 1] : 0)) * 100)}%"></i></span><small class="mono">${fmt(r.kills)} defeated · ${nextLine(m, r)}</small></div></div></div>`;
+  const gladder = `<ol class="gladder" aria-label="What each entry needs">${RANKS.map((x, i) => { const left = T[i] - r.kills; return `<li class="${left <= 0 ? 'on' : ''}">${ico(left <= 0 ? 'check' : 'lock')}<b>${x[1]}</b><small>${left <= 0 ? 'Unlocked' : `${fmt(left)} more defeat${left > 1 ? 's' : ''}`}</small></li>`; }).join('')}</ol>`;
+  const know = `${seen ? sec(0, `<p>Found around ${esc(D.TOWN[m.town].name)}. Level ${m.cl}${m.boss ? `, and it guards the road onward` : ''}.</p>`) : lock(0)}
     ${sec(1, `<div class="chips">${UI.weakChips(m)}</div><p class="sm dim" style="margin:6px 0 0">${esc(DQ.typeRuleText(m))}</p>`)}
-    ${sec(2, `<p>Health <b class="mono">${m.hp}</b> · Hits up to <b class="mono">${m.max}</b> · Carries <b class="mono">${m.coins[1] ? `${m.coins[0]}-${m.coins[1]}` : 'no'}</b> coins</p>`)}
-    <div class="gsec ${r.rank > 3 ? '' : 'part'}"><div class="gh"><b>${RANKS[3][1]}</b><small>${RANKS[3][2]}</small></div>${dr}</div>
-    ${sec(4, `<p>${esc(lore.note || 'No notes yet.')}</p>`)}
+    ${sec(2, `<p>Health <b class="mono">${m.hp}</b> · Hits up to <b class="mono">${m.max}</b> · Carries <b class="mono">${m.coins[1] ? `${m.coins[0]}-${m.coins[1]}` : 'no'}</b> coins</p>`)}`;
+  const carries = `<div class="gsec ${r.rank > 3 ? '' : 'part'}"><div class="gh"><b>${RANKS[3][1]}</b><small>${RANKS[3][2]}</small></div><div class="gdrops">${dr}</div></div>`;
+  const story = `${sec(4, `<p>${esc(lore.note || 'No notes yet.')}</p>`)}
     ${sec(5, `<p class="legend">${esc(lore.legend || '')}</p>`)}
-    ${seen ? UI.slayerHtml(m) : ''}<p class="sm dim gstars">Slayer stars: <span class="stars">${'★'.repeat(DQ.beastStars(id))}${'☆'.repeat(3 - DQ.beastStars(id))}</span> (+${DQ.beastStars(id) * 4}% damage against it)</p>`; UI.guideOpen = id;
+    ${seen ? UI.slayerHtml(m) : ''}<p class="sm dim gstars">Slayer stars: <span class="stars">${'★'.repeat(DQ.beastStars(id))}${'☆'.repeat(3 - DQ.beastStars(id))}</span> (+${DQ.beastStars(id) * 4}% damage against it)</p>`;
+  const body = `<div class="fguide"><div class="ghero">${ghead}${gladder}</div><div class="gcols"><div class="gcol gcol-know"><div class="gcol-h">Know it</div>${know}</div><div class="gcol gcol-drops"><div class="gcol-h">What it carries</div>${carries}</div><div class="gcol gcol-story"><div class="gcol-h">Its story and your goals</div>${story}</div></div></div>`; UI.guideOpen = id;
   DQ.modal({ title: 'Field guide', wide: true, body, actions: [{ label: 'Close' }, ...(m.town === S().town && !m.boss ? [{ label: 'Prepare for it', fn: () => { UI.taskChoice.combat = id; DQ.go('combat'); } }] : []), ...(m.town === S().town ? [{ label: 'Fight it', primary: true, fn: () => { UI.taskChoice.combat = id; DQ.go('combat'); DQ.startAct('fight', id); } }] : [])] });
 };
 Object.assign(UI.DO, { guide: a => UI.openGuide(a) });

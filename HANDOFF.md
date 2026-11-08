@@ -449,3 +449,6 @@ Stages are separate commits so each can be reverted on its own.
 - Built in `js/combat_simple.js` by rearranging the page ui_core.js draws: the creatures column moves left with a step header and a boss button at its foot; the Ready line, the fight's own line and the `.combat-hud` (Train / Abilities / Food) are added around the arena; the old full panels stay hidden as pop-up sources.
 - Creatures face the hero in fights (mirrored; the chicken is drawn facing left already).
 - Laptop sizes: the stage gives way first (fight line moves into the Ready line, sprites 4×, then 3× on short windows); the action bar never scrolls. Checked at 1280 × 720, 1366 × 768, 1440 × 900, 1600 × 900 and 1920 × 1080 with every ability unlocked, both themes, and phones (stacked: Ready, fight, action bar, then Choose).
+
+## Field guide entry across the width (Nov 2026)
+- The entry (`UI.openGuide`, js/bestiary.js) was a long single-column scroll. It is now a wide card (`.fguide`, up to 1240px): the creature and its six-step research ladder on top, then three columns: Know it (sighted, weak points, vitals, and an adventure giver's study notes), What it carries (drop table), Its story and your goals (field notes, legend, understanding, slayer goals and stars). It fits without scrolling at 1440 x 790 and 1920 x 1080; phones stack it in one column.
