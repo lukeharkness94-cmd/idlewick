@@ -438,3 +438,8 @@ Stages are separate commits so each can be reverted on its own.
 - Towns are drawn at 640 × 360 (was 320 × 180) so homes, townsfolk and the 32 px restoration pieces agree in size; more streets, a square, framed windows, shutters, flower boxes and smoke. Your boats are moored at Saltmere's quay by tier, traps sit at the meadow's edge once Beastmastery lures there, crops grow by the Willowbrook cottage.
 - The Village scene fills its panel (no longer snapped to 1×/2×) and pans sideways on phones, starting on the chosen site.
 - Skill pages no longer stretch the whole town behind the hero: each kind has a close-up of its part of town (woodland edge, quarry, jetty, market street, kitchen, forge, workshop, timber yard, mage's study, harbour with your boat and the chosen island on the horizon, trap meadow) at the hero's 3× scale. The hero is 72 × 96 (was stretched to 102) with feet on the scene's ground line. `tests/ui-current.cjs` checks the sizes.
+
+## Combat: skills and abilities on screen (Nov 2026)
+- The player's rule: only "useful but nothing to do" information may be hidden behind a click; anything you act on stays visible.
+- Each fighting-style button shows its skill's level and progress bar (Attack/Strength/Defence, or Ranged/Magic + Defence); Health and the combat level (which opens the level breakdown) sit beside them.
+- Under the strip, `.combat-kit`: ability slots (filled slots show In use / Idle and remove on click), every ability you can slot as a button (Swap in when full, replacing the last slot via `UI.DO.abilswap`), and food (eat buttons, auto-eat, eat-below). The Combat skills, Abilities and Food pop-up buttons were removed from the tools row; Prepare, Equipment, Boss and Loot remain.

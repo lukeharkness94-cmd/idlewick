@@ -34,10 +34,13 @@ const assert=require('node:assert/strict');
   /* Combat: the fight, the fighting style and the creatures stay on screen; everything else scrolls beneath */
   await p.evaluate(()=>{DQ.go('combat');DQ.closeModal&&DQ.closeModal();});await p.waitForTimeout(1300);
   const vis=sel=>p.locator(sel).first().evaluate(e=>{const r=e.getBoundingClientRect();return r.top>=0&&r.top<innerHeight-30&&r.height>20;});
-  for(const sel of ['.encounter-arena','.style-strip','.combat-targets','.combat-tools'])assert.ok(await vis(sel),`combat: ${sel} on screen`);
-  assert.equal(await p.locator('.combat-col').evaluate(e=>getComputedStyle(e).display),'none','combat skills, abilities and food live in pop-ups');
+  for(const sel of ['.encounter-arena','.style-strip','.combat-targets','.combat-tools','.combat-kit'])assert.ok(await vis(sel),`combat: ${sel} on screen`);
+  /* what you act on is on screen: each combat skill's level on the style strip, ability slots and food beneath it */
+  assert.ok(await p.locator('.style-strip [data-b="lvl:attack"], .style-strip [data-b^="lvl:"]').count()>=3,'combat skill levels on the style strip');
+  assert.ok(await p.locator('.combat-kit .kit-abil').count()>=1,'ability slots on screen');assert.ok(await p.locator('.combat-kit [data-do="autoeat"]').count()===1,'food settings on screen');
+  assert.equal(await p.locator('.combat-col').evaluate(e=>getComputedStyle(e).display),'none','the full combat panels stay as pop-up sources');
   assert.equal(await p.locator('.combat-side').evaluate(e=>getComputedStyle(e).display),'none','preparation, boss and loot live in pop-ups');
-  for(const key of ['skills','abilities','food','prep','boss','loot']){await p.locator(`.combat-tools [data-a="${key}"]`).click();assert.equal(await p.locator('.modal .combat-pop .panel, .modal .combat-pop .intel').count()>0,true,`${key} pop-up`);await p.evaluate(()=>DQ.closeModal());}
+  for(const key of ['skills','abilities','prep','boss','loot']){await p.locator(`[data-do="combatmore"][data-a="${key}"]`).first().click();assert.equal(await p.locator('.modal .combat-pop .panel, .modal .combat-pop .intel').count()>0,true,`${key} pop-up`);await p.evaluate(()=>DQ.closeModal());}
   await p.evaluate(()=>{DQ.ui.questTab='upcoming';DQ.go('quests');});
   assert.ok(await p.locator('.qlist .qrow').count()>1,'quest list rows');assert.equal(await p.locator('.qdetail .quest').count(),1,'one quest in full');
   /* readability floor: desktop scaling never drops below 85%, and no visible text renders under 11 screen pixels */
@@ -49,7 +52,7 @@ const assert=require('node:assert/strict');
    assert.equal(small,'',`${page}: readable text at 1280x720`);
   }
   await p.evaluate(()=>{DQ.go('combat');DQ.closeModal&&DQ.closeModal();});
-  assert.ok(await p.locator('.combat-tools .ct-btn small').count()>=4,'combat buttons show their state');
+  assert.ok(await p.locator('.combat-tools .ct-btn small').count()>=3,'combat buttons show their state');
   assert.deepEqual(errors,[]);
   /* wide and ultrawide screens: the world map (legend and region list included), Inventory with its preparations and
      the clickable village all sit inside the window */

@@ -2971,3 +2971,30 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 .thief-perk .ic{width:18px;height:18px}
 .thief-perk.off{opacity:.6;border-style:dashed}
 .comp-on{color:#e6c060;font-weight:700;margin:0 0 6px}
+/* Combat skills on the fighting-style strip, ability slots and food beneath it (Nov 2026): what you act on in combat
+   is on screen; the level breakdown, the full ability list, preparation, boss and loot stay in pop-ups */
+.ss-btn .ss-xp,.ss-hp .ss-xp{display:block;height:4px;width:100%;min-width:70px;margin-top:3px}
+.ss-btn small b,.ss-hp small b{color:var(--ink);font-weight:700}
+.ss-hp,.ss-cl{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:3px 9px 3px 5px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--ink);text-align:left}
+.ss-hp .ic,.ss-cl .ic{width:24px;height:24px}
+.ss-hp>span,.ss-cl>span{display:flex;flex-direction:column;line-height:1.15;font:600 14.5px var(--f-ui)}
+.ss-hp small,.ss-cl small{font:500 13px var(--f-body);color:var(--mute)}
+.ss-cl{cursor:pointer}.ss-cl:hover{border-color:var(--brass)}.ss-cl b{color:var(--brass-hi)}
+.style-strip{flex-wrap:wrap!important}.ss-train{justify-content:flex-start!important}
+.combat-kit{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:10px 18px;padding:10px 12px;margin:0}
+.kit-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.kit-head .k{font:700 14px var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}.kit-head .k b{color:var(--ink)}
+.kit-row{display:flex;flex-wrap:wrap;gap:6px}
+.kit-abil,.kit-add{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:3px 10px 3px 5px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);color:var(--ink);text-align:left;font:600 14.5px var(--f-ui)}
+.kit-abil .ic,.kit-add .ic{width:26px;height:26px}
+.kit-abil>span{display:flex;flex-direction:column;line-height:1.15}.kit-abil small{font:500 13px var(--f-body);color:var(--mute)}
+.kit-abil.on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 14%,var(--panel2));cursor:pointer}
+.kit-abil.on.idle{border-style:dashed}
+.kit-abil.empty{border-style:dashed;color:var(--mute)}
+.kit-add{cursor:pointer;border-style:solid;background:transparent}.kit-add:hover,.kit-abil.on:hover{border-color:var(--brass-hi)}
+.kit-food .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.kit-food .tog{margin-bottom:6px}
+@media (max-width:860px){.combat-kit{grid-template-columns:minmax(0,1fr)}}
+.kit-food .phead{margin:0 0 6px;justify-content:flex-start}
+@media (min-width:861px){#view>.combat-dashboard>.combat-live>.combat-kit{flex:0 1 auto;min-height:72px;overflow-y:auto;scrollbar-width:thin}}
+@media (max-width:899px){.combat-dashboard .combat-kit{order:1}}
