@@ -3200,6 +3200,46 @@ html.short .combat-d .encounter-arena .avatar img{height:96px!important}
 .ready-line:has(.in-ready){gap:6px 8px;padding:6px 10px}
 .ready-line:has(.in-ready) .rl-head{font-size:16px}
 .ready-line:has(.in-ready) .rl-tools .btn{padding-left:8px;padding-right:8px}
+/* Ready line as pills; food panel without wrapping; fighters grow into a taller stage (container query) */
+.rl-i{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:14.5px;background:color-mix(in srgb,var(--good) 14%,transparent);color:var(--ink);border:1px solid color-mix(in srgb,var(--good) 35%,transparent)}
+.rl-i.warn{background:color-mix(in srgb,#e8b44a 14%,transparent);border-color:color-mix(in srgb,#e8b44a 45%,transparent);color:var(--ink)}
+button.rl-i{text-decoration:none;font:inherit;font-size:14.5px;padding:3px 10px;border:1px solid color-mix(in srgb,#e8b44a 45%,transparent)}
+button.rl-i.ok{border-color:color-mix(in srgb,var(--good) 35%,transparent)}
+button.rl-i:hover{border-color:var(--brass-hi)}
+.ready-line.tone-warn .rl-head{color:#e8b44a}
+.combat-food .kit-head{flex-wrap:nowrap}
+.combat-food .kit-head .k{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.combat-food .tog{flex:none;white-space:nowrap}
+.combat-food .eat-step{flex-wrap:nowrap;margin-top:auto}
+.combat-food .eat-step>span{white-space:nowrap;font-size:14px}
+.combat-food .eat-step .btn{min-width:34px;width:34px;height:34px;padding:0;font-size:17px!important}
+.combat-food .eat-step output{min-width:44px;font-size:14px}
+.food-none{margin:0;font-size:14px;color:#e8b44a}
+@media (min-width:861px){
+  .combat-d .encounter-arena{container-type:size;container-name:stage}
+  @container stage (min-height:300px){.combat-d .encounter-arena .avatar{height:150px!important}.combat-d .encounter-arena .avatar img{height:128px!important}}
+  @container stage (min-height:420px){.combat-d .encounter-arena .avatar{height:216px!important}.combat-d .encounter-arena #av-you img{height:192px!important}.combat-d .encounter-arena #av-foe img{height:192px!important}}
+}
+#view:has(> .combat-dashboard.combat-d)>.page-help{display:none!important}
+.combat-food .kit-head{flex-wrap:wrap}
+.combat-food .eat-step{margin-top:0}
+@media (min-width:861px){
+  @container stage (min-height:300px){:root:root .combat-d .encounter-arena .avatar{height:150px!important}}
+  @container stage (min-height:420px){:root:root .combat-d .encounter-arena .avatar{height:216px!important}}
+}
+@media (min-width:861px){
+  @container stage (min-height:300px){.combat-d #av-you img,.combat-d #av-foe img{height:128px!important;width:auto!important}}
+  @container stage (min-height:420px){.combat-d #av-you img,.combat-d #av-foe img{height:192px!important;width:auto!important}}
+}
+@media (min-width:861px){
+  @container stage (min-height:300px){.combat-d #av-you img{width:96px!important;height:128px!important;max-width:none!important}.combat-d #av-foe img{width:128px!important;height:128px!important;max-width:none!important}}
+  @container stage (min-height:420px){.combat-d #av-you img{width:144px!important;height:192px!important;max-width:none!important}.combat-d #av-foe img{width:192px!important;height:192px!important;max-width:none!important}}
+}
+.combat-d #av-you .hero-rig,.combat-d #av-foe .foe-rig{width:auto!important;height:auto!important;display:inline-flex;align-items:flex-end}
+.ready-line:has(.in-ready) .rl-i{padding:2px 7px;font-size:14px}
+.ready-line:has(.in-ready) .rl-head{font-size:15px}
+/* safety net: a very short stage (a wrapped ready line, a small window) draws the fighters at 2x rather than spill out */
+@media (min-width:861px){@container stage (max-height:205px){:root:root .combat-d .encounter-arena .avatar{height:72px!important}.combat-d #av-you img{width:48px!important;height:64px!important;max-width:none!important}.combat-d #av-foe img{width:64px!important;height:64px!important;max-width:none!important}}}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -16459,9 +16499,10 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
   const readyLine = (tight = false) => {
     const m = focus(), d = m && DQ.dangerOf ? DQ.dangerOf(m) : null, heal = foodHeal(), slots = ['head', 'body', 'legs', 'shield', 'weapon', 'amulet', 'ring'], worn = slots.filter(k => S().equip[k]).length;
     const ok = d && d.key === 'easy' && heal > 0, t = ok ? 'ok' : d && d.key !== 'easy' && d.key !== 'fair' ? 'bad' : 'warn';
-    const head = !m ? 'Choose a creature' : tight ? `${ok ? 'Ready' : d && d.key !== 'easy' ? 'Careful' : 'Not ready'}: ${esc(m.name)}` : `${ok ? 'Ready for' : d && d.key !== 'easy' ? 'Careful with' : 'Not ready for'} ${esc(m.name)}`;
+    const nm = m && (DQ.act && DQ.act.kind === 'fight' && DQ.act.id === m.id || (S().beast.kills[m.id] || 0) > 0) ? m.name : 'unknown creature';
+    const head = !m ? 'Choose a creature' : tight ? `${ok ? 'Ready' : d && d.key !== 'easy' ? 'Careful' : 'Not ready'}: ${esc(nm)}` : `${ok ? 'Ready for' : d && d.key !== 'easy' ? 'Careful with' : 'Not ready for'} ${esc(nm)}`;
     const item = (good, text) => `<span class="rl-i ${good ? 'ok' : 'warn'}">${good ? '✓' : '!'} ${text}</span>`;
-    return `<div class="ready-line tone-${t}"><span class="step-n">2</span><b class="rl-head">${head}</b>${d ? item(d.key === 'easy', esc(d.label)) : ''}${item(heal > 0, heal ? `Food ${heal} health${S().settings.autoEat && !tight ? ' · auto-eat' : ''}` : 'No food')}<button class="rl-i ${worn < 4 ? 'warn' : 'ok'}" data-do="go" data-a="character">${worn < 4 ? '!' : '✓'} Gear ${worn}/${slots.length}${tight ? '' : ' worn'}</button><span class="rl-tools">${dashHas('.combat-side .battle-brief') ? `<button class="btn sm" data-do="combatmore" data-a="prep">${ico('info')}Details</button>` : ''}${dashHas('.combat-side .lootp') ? `<button class="btn sm" data-do="combatmore" data-a="loot">${ico('pouch')}Loot</button>` : ''}</span></div>`;
+    return `<div class="ready-line tone-${t}">${tight ? '' : '<span class="step-n">2</span>'}<b class="rl-head">${head}</b>${d ? item(d.key === 'easy', esc(d.label)) : ''}${item(heal > 0, heal ? (tight ? `Food ${heal} hp` : `Food ${heal} health${S().settings.autoEat ? ' · auto-eat' : ''}`) : 'No food')}<button class="rl-i ${worn < 4 ? 'warn' : 'ok'}" data-do="go" data-a="character">${worn < 4 ? '!' : '✓'} Gear ${worn}/${slots.length}${tight ? '' : ' worn'}</button><span class="rl-tools"><button class="btn sm" data-do="pagehelp" aria-label="How to use Combat" data-tip="text:How to use Combat">${ico('book')}${tight ? '' : 'Guide'}</button>${dashHas('.combat-side .battle-brief') ? `<button class="btn sm" data-do="combatmore" data-a="prep" aria-label="Preparation details" data-tip="text:Preparation details">${ico('info')}${tight ? '' : 'Details'}</button>` : ''}${dashHas('.combat-side .lootp') ? `<button class="btn sm" data-do="combatmore" data-a="loot">${ico('pouch')}Loot</button>` : ''}</span></div>`;
   };
   const bossBtn = () => { const b = bossOf(), p = byKey('boss'); if (!b || !dashHas(p.from)) return ''; let bg = null; try { bg = p.badge(); } catch (e) { bg = null; }
     return `<button class="boss-foot ${bg && bg.tone ? 'tone-' + bg.tone : ''}" data-do="combatmore" data-a="boss">${ico('trophy')}<span><b>Boss: ${esc(b.name)}</b><small>${esc(bg ? bg.t : '')}</small></span><span class="bf-go">${bg && bg.t === 'Defeated' ? 'Details' : 'Challenge'}</span></button>`; };
@@ -16474,7 +16515,7 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
     live.insertAdjacentHTML('afterbegin', readyLine(tight));
     /* on shorter or narrower desktops the fight's own line (Fighting … / Retreat, or Selected … / Explore) joins the
        ready line so the stage keeps its height for the fighters */
-    if (arena && ctl) { ctl.classList.add('stage-ctl'); ctl.insertAdjacentHTML('afterbegin', '<span class="step-n on">3</span>'); if (tight) { ctl.classList.add('in-ready'); live.querySelector('.ready-line').appendChild(ctl); arena.classList.add('no-ctl'); } else arena.appendChild(ctl); }
+    if (arena && ctl) { ctl.classList.add('stage-ctl'); ctl.insertAdjacentHTML('afterbegin', '<span class="step-n on">3</span>'); if (tight) { if (!ctl.querySelector('button')) { ctl.remove(); } else { const n = ctl.querySelector('.step-n'); if (n) n.remove(); ctl.classList.add('in-ready'); live.querySelector('.ready-line').appendChild(ctl); } arena.classList.add('no-ctl'); } else arena.appendChild(ctl); }
     strip.insertAdjacentHTML('beforebegin', `<div class="combat-hud"><section class="panel hud-train"><div class="kit-head"><span class="k">Train</span></div></section>${abilPanel()}${foodPanel()}</div>`);
     const train = live.querySelector('.hud-train'); train.appendChild(strip);
     const w = strip.querySelector('.ss-weapon'); if (w) train.querySelector('.kit-head').appendChild(w);
@@ -16497,7 +16538,7 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
     const foods = (DQ.foods ? DQ.foods() : []).filter(id => DQ.have(id) > 0), heal = foodHeal(), at = S().settings.eatAt || 50;
     const tiles = foods.map(id => { const it = D.ITEMS[id]; return `<button class="food-tile" data-do="eat" data-a="${id}" data-tip="item:${id}">${DQ.itemIco(it)}<span><b>${esc(it.name)} <span class="mono" data-b="count:${id}"></span></b><small>+${it.heal} each</small></span></button>`; }).join('');
     return `<section class="panel combat-food"><div class="kit-head"><span class="k">Food · ${heal} health</span><button class="tog ${S().settings.autoEat ? 'on' : ''}" data-do="autoeat"><span class="sw"></span>Auto-eat</button></div>
-      <div class="food-tiles">${tiles || '<p class="dim sm">No food carried. Cook fish or buy bread in the shop.</p>'}</div>
+      <div class="food-tiles">${tiles || '<p class="food-none">None carried. Cook fish or buy bread.</p>'}</div>
       <div class="eat-step" role="group" aria-label="Eat below this health"><span>Eat below</span><button type="button" class="btn sm" data-do="eatstep" data-a="-10" aria-label="Eat at lower health">−</button><output class="mono">${at}%</output><button type="button" class="btn sm" data-do="eatstep" data-a="10" aria-label="Eat at higher health">+</button></div></section>`;
   };
   UI.DO.abilswap = id => { const on = S().abilities || []; if (on.length >= DQ.abilSlots()) DQ.toggleAbility(on[on.length - 1]); if (DQ.toggleAbility(id)) DQ.sfx && DQ.sfx('equip'); UI.render(false); };
@@ -16626,6 +16667,7 @@ const NAT_ICON = 16;
 const snapAll = root => {
   const els = [...(root || document).querySelectorAll('img.pxa, i.ic.pxi')], plan = [];
   for (const el of els) {
+    if (el.closest('.combat-d .avatar')) continue; /* the fight sizes its fighters to whole multiples in CSS by the stage's height */
     const lg = el.tagName === 'IMG' && el.naturalWidth && A.logicalOf && A.logicalOf(el.currentSrc || el.src), nat = el.tagName === 'IMG' ? (lg ? lg[0] : el.naturalWidth) : NAT_ICON, natH = el.tagName === 'IMG' ? (lg ? lg[1] : el.naturalHeight) : NAT_ICON;
     if (!nat) { if (el.tagName === 'IMG' && !el.dataset.snapWait) { el.dataset.snapWait = 1; el.addEventListener('load', () => queue(), { once: true }); } continue; }
     const w = el.offsetWidth; if (!w) continue;

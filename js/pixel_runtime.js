@@ -117,6 +117,7 @@ const NAT_ICON = 16;
 const snapAll = root => {
   const els = [...(root || document).querySelectorAll('img.pxa, i.ic.pxi')], plan = [];
   for (const el of els) {
+    if (el.closest('.combat-d .avatar')) continue; /* the fight sizes its fighters to whole multiples in CSS by the stage's height */
     const lg = el.tagName === 'IMG' && el.naturalWidth && A.logicalOf && A.logicalOf(el.currentSrc || el.src), nat = el.tagName === 'IMG' ? (lg ? lg[0] : el.naturalWidth) : NAT_ICON, natH = el.tagName === 'IMG' ? (lg ? lg[1] : el.naturalHeight) : NAT_ICON;
     if (!nat) { if (el.tagName === 'IMG' && !el.dataset.snapWait) { el.dataset.snapWait = 1; el.addEventListener('load', () => queue(), { once: true }); } continue; }
     const w = el.offsetWidth; if (!w) continue;

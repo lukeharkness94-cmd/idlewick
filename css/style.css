@@ -3116,3 +3116,43 @@ html.short .combat-d .encounter-arena .avatar img{height:96px!important}
 .ready-line:has(.in-ready){gap:6px 8px;padding:6px 10px}
 .ready-line:has(.in-ready) .rl-head{font-size:16px}
 .ready-line:has(.in-ready) .rl-tools .btn{padding-left:8px;padding-right:8px}
+/* Ready line as pills; food panel without wrapping; fighters grow into a taller stage (container query) */
+.rl-i{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:14.5px;background:color-mix(in srgb,var(--good) 14%,transparent);color:var(--ink);border:1px solid color-mix(in srgb,var(--good) 35%,transparent)}
+.rl-i.warn{background:color-mix(in srgb,#e8b44a 14%,transparent);border-color:color-mix(in srgb,#e8b44a 45%,transparent);color:var(--ink)}
+button.rl-i{text-decoration:none;font:inherit;font-size:14.5px;padding:3px 10px;border:1px solid color-mix(in srgb,#e8b44a 45%,transparent)}
+button.rl-i.ok{border-color:color-mix(in srgb,var(--good) 35%,transparent)}
+button.rl-i:hover{border-color:var(--brass-hi)}
+.ready-line.tone-warn .rl-head{color:#e8b44a}
+.combat-food .kit-head{flex-wrap:nowrap}
+.combat-food .kit-head .k{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.combat-food .tog{flex:none;white-space:nowrap}
+.combat-food .eat-step{flex-wrap:nowrap;margin-top:auto}
+.combat-food .eat-step>span{white-space:nowrap;font-size:14px}
+.combat-food .eat-step .btn{min-width:34px;width:34px;height:34px;padding:0;font-size:17px!important}
+.combat-food .eat-step output{min-width:44px;font-size:14px}
+.food-none{margin:0;font-size:14px;color:#e8b44a}
+@media (min-width:861px){
+  .combat-d .encounter-arena{container-type:size;container-name:stage}
+  @container stage (min-height:300px){.combat-d .encounter-arena .avatar{height:150px!important}.combat-d .encounter-arena .avatar img{height:128px!important}}
+  @container stage (min-height:420px){.combat-d .encounter-arena .avatar{height:216px!important}.combat-d .encounter-arena #av-you img{height:192px!important}.combat-d .encounter-arena #av-foe img{height:192px!important}}
+}
+#view:has(> .combat-dashboard.combat-d)>.page-help{display:none!important}
+.combat-food .kit-head{flex-wrap:wrap}
+.combat-food .eat-step{margin-top:0}
+@media (min-width:861px){
+  @container stage (min-height:300px){:root:root .combat-d .encounter-arena .avatar{height:150px!important}}
+  @container stage (min-height:420px){:root:root .combat-d .encounter-arena .avatar{height:216px!important}}
+}
+@media (min-width:861px){
+  @container stage (min-height:300px){.combat-d #av-you img,.combat-d #av-foe img{height:128px!important;width:auto!important}}
+  @container stage (min-height:420px){.combat-d #av-you img,.combat-d #av-foe img{height:192px!important;width:auto!important}}
+}
+@media (min-width:861px){
+  @container stage (min-height:300px){.combat-d #av-you img{width:96px!important;height:128px!important;max-width:none!important}.combat-d #av-foe img{width:128px!important;height:128px!important;max-width:none!important}}
+  @container stage (min-height:420px){.combat-d #av-you img{width:144px!important;height:192px!important;max-width:none!important}.combat-d #av-foe img{width:192px!important;height:192px!important;max-width:none!important}}
+}
+.combat-d #av-you .hero-rig,.combat-d #av-foe .foe-rig{width:auto!important;height:auto!important;display:inline-flex;align-items:flex-end}
+.ready-line:has(.in-ready) .rl-i{padding:2px 7px;font-size:14px}
+.ready-line:has(.in-ready) .rl-head{font-size:15px}
+/* safety net: a very short stage (a wrapped ready line, a small window) draws the fighters at 2x rather than spill out */
+@media (min-width:861px){@container stage (max-height:205px){:root:root .combat-d .encounter-arena .avatar{height:72px!important}.combat-d #av-you img{width:48px!important;height:64px!important;max-width:none!important}.combat-d #av-foe img{width:64px!important;height:64px!important;max-width:none!important}}}
