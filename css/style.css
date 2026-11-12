@@ -3345,3 +3345,60 @@ html.short .bp-art{width:56px;height:56px}
 @media (max-width:860px){.beast-howto-line,.beast-preview .bp-fit,.beast-preview .bp-cmp,.beast-preview .sm{display:none}.beast-preview{padding:8px 12px!important}.bp-art{width:48px;height:48px}}
 @media (max-width:860px){.beast-choice .bc-job{line-height:1;margin:-3px 0 -2px;font-size:13px}.beast-howto-line{display:none}}
 @media (max-width:860px){.beast-preview{margin-top:10px}.beast-preview .bp-fit,.beast-preview .bp-cmp,.beast-preview .sm{display:block}.beast-howto-line{display:none}}
+/* ===== The ranch (Nov 2026): a wooden, sunlit place of its own, unlike the dark panels elsewhere ===== */
+.ranch-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+.ranch-board{position:relative;overflow:hidden;border-radius:16px;border:3px solid #2e2014;background:linear-gradient(180deg,#6e4e2e,#4e361e);box-shadow:inset 0 2px 0 #96724a,inset 0 0 0 2px #3a2814,0 10px 30px -12px #000}
+.ranch-board::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 44px,#0000002e 44px 46px);mix-blend-mode:multiply}
+.ranch-strip{position:relative;height:calc(30px * var(--k));background-color:#a8d8ec;background-size:auto 100%;background-repeat:repeat-x;background-position:left top;image-rendering:pixelated;border-bottom:4px solid #2e2014}
+.ranch-sign{position:absolute;left:14px;top:10px;margin:0;padding:4px 14px;font:700 17px var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:#3a2410;background:linear-gradient(#f3dfa8,#d8bb78);border:2px solid #5a3e1e;border-radius:6px;box-shadow:0 3px 0 #2e2014,inset 0 1px #fff8}
+.ranch-sign::before,.ranch-sign::after{content:"";position:absolute;top:-8px;width:3px;height:10px;background:#5a3e1e}.ranch-sign::before{left:10px}.ranch-sign::after{right:10px}
+.pen-grid{position:relative;display:grid;grid-template-columns:repeat(3,calc(96px * var(--k)));justify-content:center;gap:12px 22px;padding:14px 14px 4px}
+.pen-cell{display:grid;gap:4px;justify-items:center;min-width:0}
+.pen{position:relative;padding:0;border:0;background:none;cursor:pointer;border-radius:6px;transition:transform .15s,filter .15s;display:block}
+.pen:hover{transform:translateY(-2px);filter:brightness(1.06)}
+.pen:focus-visible{outline:3px solid var(--brass-hi);outline-offset:3px}
+.pen.sel{outline:3px solid #f3d58a;outline-offset:3px;box-shadow:0 0 22px 2px #f3d58a66}
+.pen .pen-back,.pen .pen-front{position:absolute;left:0;top:0;image-rendering:pixelated;pointer-events:none}
+.pen .pen-front{z-index:2}
+.pen-beast{position:absolute;left:50%;bottom:calc(8px * var(--k));transform:translateX(-50%);z-index:1;line-height:0;filter:drop-shadow(0 calc(2px * var(--k)) 0 #0003);animation:pen-idle 2.6s ease-in-out infinite}
+.pen-cell:nth-child(2n) .pen-beast{animation-delay:-.9s}.pen-cell:nth-child(3n) .pen-beast{animation-delay:-1.7s}
+@keyframes pen-idle{0%,100%{transform:translateX(-50%) translateY(0)}45%{transform:translateX(-50%) translateY(calc(-2px * var(--k)))}}
+.pen.ps-nap .pen-beast{animation:pen-nap 3.4s ease-in-out infinite;filter:brightness(.82) drop-shadow(0 calc(2px * var(--k)) 0 #0003)}
+@keyframes pen-nap{0%,100%{transform:translateX(-50%) scaleY(1)}50%{transform:translateX(-50%) scaleY(.97)}}
+.pen.training .pen-beast{animation:pen-hop .55s ease-out 4}
+@keyframes pen-hop{0%,100%{transform:translateX(-50%) translate(0,0)}35%{transform:translateX(-50%) translate(calc(-14px * var(--k)),calc(-9px * var(--k)))}65%{transform:translateX(-50%) translate(calc(-22px * var(--k)),0)}82%{transform:translateX(-50%) translate(calc(-11px * var(--k)),calc(-5px * var(--k)))}}
+.pen-flag{position:absolute;right:8px;top:8px;z-index:3;padding:2px 10px 2px 8px;font:700 14px var(--f-ui);color:#3a2410;background:linear-gradient(#f6dc86,#d9a441);border:2px solid #5a3e1e;border-radius:3px 8px 8px 3px;box-shadow:0 2px 0 #2e2014}
+.pen-bond{position:absolute;left:8px;top:8px;z-index:3;display:grid;gap:3px;min-width:70px;padding:3px 8px;color:#f6dc86;font:700 14px var(--f-ui);background:#2e2014e0;border-radius:8px;text-align:left}
+.pen-bond .bar{height:5px;background:#0006}
+.pen-bowl{position:absolute;left:50%;bottom:calc(3px * var(--k));transform:translateX(-50%);z-index:3;display:grid;place-items:center;padding:1px 3px 3px;background:#8a6a42;border:2px solid #4a3220;border-radius:50% 50% 40% 40%;line-height:0}
+.pen-bowl .item-art{width:32px;height:32px}
+.pen-want{position:absolute;left:50%;top:calc(14px * var(--k));z-index:3;transform:translateX(-50%);font-size:22px;color:#ff7a9a;text-shadow:0 2px 0 #0006;animation:pen-want 1.4s ease-in-out infinite}
+@keyframes pen-want{0%,100%{transform:translateX(-50%) translateY(0) scale(1)}50%{transform:translateX(-50%) translateY(-5px) scale(1.15)}}
+.pen-zz{position:absolute;left:58%;top:calc(14px * var(--k));z-index:3;font:700 18px var(--f-display);color:#e8f0ff;text-shadow:0 2px 0 #0008;animation:pen-zz 2.6s ease-in-out infinite}
+@keyframes pen-zz{0%{opacity:0;transform:translate(0,8px) scale(.8)}30%{opacity:1}100%{opacity:0;transform:translate(12px,-14px) scale(1.2)}}
+.pen.empty .pen-back,.pen.empty .pen-front{filter:grayscale(.55) brightness(.8)}.pen.empty:hover .pen-back,.pen.empty:hover .pen-front{filter:none}
+.pen-sign{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;display:grid;gap:2px;padding:6px 12px;text-align:center;font:700 16px var(--f-display);color:#3a2410;background:linear-gradient(#f3dfa8,#d8bb78);border:2px solid #5a3e1e;border-radius:6px;box-shadow:0 3px 0 #2e2014}
+.pen-sign small{font:500 13.5px var(--f-body)}
+.pen-name{display:grid;justify-items:center;text-align:center;color:#f6e6c0;line-height:1.2}.pen-name b{font:700 16px var(--f-display)}
+.pen-name small{font-size:14px;color:#e0cfa4}.pen-name small.ps-ready{color:#ffb0c0;font-weight:700}.pen-name small.ps-nap{color:#bcd0ff}.pen-name small.ps-max{color:#b8e6a0}.pen-name small.ps-wait{color:#ffd9a0}
+.pen-pages{display:flex;gap:6px;justify-content:center;margin:4px 0 0}
+.ranch-shelf{position:relative;display:flex;align-items:center;gap:12px;margin:10px 12px 0;padding:8px 12px;border-radius:10px;background:linear-gradient(#3e2a16,#32200f);border:2px solid #20140a;box-shadow:inset 0 2px #5a4026,0 3px 0 #1a1008}
+.shelf-label{font:700 14px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;color:#d8bb78;white-space:nowrap}
+.shelf-items{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.shelf-food{display:flex;align-items:center;gap:6px;min-height:44px;padding:3px 12px 3px 6px;border-radius:9px;border:2px solid #6a4a2a;background:linear-gradient(#f3dfa8,#d8bb78);color:#3a2410;font:700 15px var(--f-ui);text-align:left;cursor:pointer}
+.shelf-food>span{display:grid;line-height:1.15}.shelf-food small{font:500 13.5px var(--f-body);color:#5a3e1e}.shelf-food .item-art{width:32px;height:32px}
+.shelf-food.on{border-color:#fff2b0;box-shadow:0 0 0 2px #f3d58a,0 0 14px #f3d58a88;background:linear-gradient(#fff0b8,#ecc972)}
+.shelf-none{font-size:15px;color:#f0dcb0}
+.ranch-empty{position:relative;display:grid;gap:10px;justify-items:center;padding:28px;color:#f6e6c0;text-align:center}
+.ranch-side{display:grid;gap:12px;min-width:0}
+.ranch-sheet{display:grid;gap:8px;border:2px solid #5a3e1e;background:linear-gradient(#2a2118,#1e1912)}
+.rs-head{display:flex;gap:12px;align-items:center}.rs-head h2{margin:2px 0 0}.rs-art{width:104px;height:104px;display:grid;place-items:center;border-radius:12px;background:radial-gradient(ellipse at 50% 90%,#6aa24455,#0000 70%)}
+.rs-passive{margin:0}.rs-xp{color:var(--mute)}.rs-cost{margin:0}.rs-with{align-self:center;color:var(--brass-hi);font-weight:700}
+.ranch-shedcard{display:grid;gap:6px;border:2px dashed #5a3e1e}.ranch-shedcard p{margin:0}
+.ranch-float{font:700 18px var(--f-display);color:#fff;text-shadow:0 2px 0 #0009,0 0 8px #0006;white-space:nowrap}
+.ranch-float.xp{color:#ffe08a;font-size:21px}.ranch-float.heart{color:#ff7a9a;font-size:22px}.ranch-float.up{color:#9ad375;font-size:24px}
+.beast-subpage.mode-shed .beast-focus,.beast-subpage.mode-shed .beast-owned-heading,.beast-subpage.mode-shed .beast-owned{display:none}
+.calm :is(.pen-beast,.pen-want,.pen-zz){animation:none}
+@media (prefers-reduced-motion:reduce){:is(.pen-beast,.pen-want,.pen-zz){animation:none!important}}
+@media (max-width:860px){.ranch-layout{grid-template-columns:minmax(0,1fr)}.pen-grid{grid-template-columns:repeat(1,calc(96px * var(--k)));padding:10px}.ranch-sign{font-size:15px;left:8px;top:6px}.ranch-shelf{flex-wrap:wrap;margin:8px 8px 0}.rs-art{width:72px;height:72px}.ranch-sheet{padding:10px}}
+.pen-sign small{color:#5a3e1e}

@@ -3429,6 +3429,63 @@ html.short .bp-art{width:56px;height:56px}
 @media (max-width:860px){.beast-howto-line,.beast-preview .bp-fit,.beast-preview .bp-cmp,.beast-preview .sm{display:none}.beast-preview{padding:8px 12px!important}.bp-art{width:48px;height:48px}}
 @media (max-width:860px){.beast-choice .bc-job{line-height:1;margin:-3px 0 -2px;font-size:13px}.beast-howto-line{display:none}}
 @media (max-width:860px){.beast-preview{margin-top:10px}.beast-preview .bp-fit,.beast-preview .bp-cmp,.beast-preview .sm{display:block}.beast-howto-line{display:none}}
+/* ===== The ranch (Nov 2026): a wooden, sunlit place of its own, unlike the dark panels elsewhere ===== */
+.ranch-layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+.ranch-board{position:relative;overflow:hidden;border-radius:16px;border:3px solid #2e2014;background:linear-gradient(180deg,#6e4e2e,#4e361e);box-shadow:inset 0 2px 0 #96724a,inset 0 0 0 2px #3a2814,0 10px 30px -12px #000}
+.ranch-board::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 44px,#0000002e 44px 46px);mix-blend-mode:multiply}
+.ranch-strip{position:relative;height:calc(30px * var(--k));background-color:#a8d8ec;background-size:auto 100%;background-repeat:repeat-x;background-position:left top;image-rendering:pixelated;border-bottom:4px solid #2e2014}
+.ranch-sign{position:absolute;left:14px;top:10px;margin:0;padding:4px 14px;font:700 17px var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:#3a2410;background:linear-gradient(#f3dfa8,#d8bb78);border:2px solid #5a3e1e;border-radius:6px;box-shadow:0 3px 0 #2e2014,inset 0 1px #fff8}
+.ranch-sign::before,.ranch-sign::after{content:"";position:absolute;top:-8px;width:3px;height:10px;background:#5a3e1e}.ranch-sign::before{left:10px}.ranch-sign::after{right:10px}
+.pen-grid{position:relative;display:grid;grid-template-columns:repeat(3,calc(96px * var(--k)));justify-content:center;gap:12px 22px;padding:14px 14px 4px}
+.pen-cell{display:grid;gap:4px;justify-items:center;min-width:0}
+.pen{position:relative;padding:0;border:0;background:none;cursor:pointer;border-radius:6px;transition:transform .15s,filter .15s;display:block}
+.pen:hover{transform:translateY(-2px);filter:brightness(1.06)}
+.pen:focus-visible{outline:3px solid var(--brass-hi);outline-offset:3px}
+.pen.sel{outline:3px solid #f3d58a;outline-offset:3px;box-shadow:0 0 22px 2px #f3d58a66}
+.pen .pen-back,.pen .pen-front{position:absolute;left:0;top:0;image-rendering:pixelated;pointer-events:none}
+.pen .pen-front{z-index:2}
+.pen-beast{position:absolute;left:50%;bottom:calc(8px * var(--k));transform:translateX(-50%);z-index:1;line-height:0;filter:drop-shadow(0 calc(2px * var(--k)) 0 #0003);animation:pen-idle 2.6s ease-in-out infinite}
+.pen-cell:nth-child(2n) .pen-beast{animation-delay:-.9s}.pen-cell:nth-child(3n) .pen-beast{animation-delay:-1.7s}
+@keyframes pen-idle{0%,100%{transform:translateX(-50%) translateY(0)}45%{transform:translateX(-50%) translateY(calc(-2px * var(--k)))}}
+.pen.ps-nap .pen-beast{animation:pen-nap 3.4s ease-in-out infinite;filter:brightness(.82) drop-shadow(0 calc(2px * var(--k)) 0 #0003)}
+@keyframes pen-nap{0%,100%{transform:translateX(-50%) scaleY(1)}50%{transform:translateX(-50%) scaleY(.97)}}
+.pen.training .pen-beast{animation:pen-hop .55s ease-out 4}
+@keyframes pen-hop{0%,100%{transform:translateX(-50%) translate(0,0)}35%{transform:translateX(-50%) translate(calc(-14px * var(--k)),calc(-9px * var(--k)))}65%{transform:translateX(-50%) translate(calc(-22px * var(--k)),0)}82%{transform:translateX(-50%) translate(calc(-11px * var(--k)),calc(-5px * var(--k)))}}
+.pen-flag{position:absolute;right:8px;top:8px;z-index:3;padding:2px 10px 2px 8px;font:700 14px var(--f-ui);color:#3a2410;background:linear-gradient(#f6dc86,#d9a441);border:2px solid #5a3e1e;border-radius:3px 8px 8px 3px;box-shadow:0 2px 0 #2e2014}
+.pen-bond{position:absolute;left:8px;top:8px;z-index:3;display:grid;gap:3px;min-width:70px;padding:3px 8px;color:#f6dc86;font:700 14px var(--f-ui);background:#2e2014e0;border-radius:8px;text-align:left}
+.pen-bond .bar{height:5px;background:#0006}
+.pen-bowl{position:absolute;left:50%;bottom:calc(3px * var(--k));transform:translateX(-50%);z-index:3;display:grid;place-items:center;padding:1px 3px 3px;background:#8a6a42;border:2px solid #4a3220;border-radius:50% 50% 40% 40%;line-height:0}
+.pen-bowl .item-art{width:32px;height:32px}
+.pen-want{position:absolute;left:50%;top:calc(14px * var(--k));z-index:3;transform:translateX(-50%);font-size:22px;color:#ff7a9a;text-shadow:0 2px 0 #0006;animation:pen-want 1.4s ease-in-out infinite}
+@keyframes pen-want{0%,100%{transform:translateX(-50%) translateY(0) scale(1)}50%{transform:translateX(-50%) translateY(-5px) scale(1.15)}}
+.pen-zz{position:absolute;left:58%;top:calc(14px * var(--k));z-index:3;font:700 18px var(--f-display);color:#e8f0ff;text-shadow:0 2px 0 #0008;animation:pen-zz 2.6s ease-in-out infinite}
+@keyframes pen-zz{0%{opacity:0;transform:translate(0,8px) scale(.8)}30%{opacity:1}100%{opacity:0;transform:translate(12px,-14px) scale(1.2)}}
+.pen.empty .pen-back,.pen.empty .pen-front{filter:grayscale(.55) brightness(.8)}.pen.empty:hover .pen-back,.pen.empty:hover .pen-front{filter:none}
+.pen-sign{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;display:grid;gap:2px;padding:6px 12px;text-align:center;font:700 16px var(--f-display);color:#3a2410;background:linear-gradient(#f3dfa8,#d8bb78);border:2px solid #5a3e1e;border-radius:6px;box-shadow:0 3px 0 #2e2014}
+.pen-sign small{font:500 13.5px var(--f-body)}
+.pen-name{display:grid;justify-items:center;text-align:center;color:#f6e6c0;line-height:1.2}.pen-name b{font:700 16px var(--f-display)}
+.pen-name small{font-size:14px;color:#e0cfa4}.pen-name small.ps-ready{color:#ffb0c0;font-weight:700}.pen-name small.ps-nap{color:#bcd0ff}.pen-name small.ps-max{color:#b8e6a0}.pen-name small.ps-wait{color:#ffd9a0}
+.pen-pages{display:flex;gap:6px;justify-content:center;margin:4px 0 0}
+.ranch-shelf{position:relative;display:flex;align-items:center;gap:12px;margin:10px 12px 0;padding:8px 12px;border-radius:10px;background:linear-gradient(#3e2a16,#32200f);border:2px solid #20140a;box-shadow:inset 0 2px #5a4026,0 3px 0 #1a1008}
+.shelf-label{font:700 14px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;color:#d8bb78;white-space:nowrap}
+.shelf-items{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.shelf-food{display:flex;align-items:center;gap:6px;min-height:44px;padding:3px 12px 3px 6px;border-radius:9px;border:2px solid #6a4a2a;background:linear-gradient(#f3dfa8,#d8bb78);color:#3a2410;font:700 15px var(--f-ui);text-align:left;cursor:pointer}
+.shelf-food>span{display:grid;line-height:1.15}.shelf-food small{font:500 13.5px var(--f-body);color:#5a3e1e}.shelf-food .item-art{width:32px;height:32px}
+.shelf-food.on{border-color:#fff2b0;box-shadow:0 0 0 2px #f3d58a,0 0 14px #f3d58a88;background:linear-gradient(#fff0b8,#ecc972)}
+.shelf-none{font-size:15px;color:#f0dcb0}
+.ranch-empty{position:relative;display:grid;gap:10px;justify-items:center;padding:28px;color:#f6e6c0;text-align:center}
+.ranch-side{display:grid;gap:12px;min-width:0}
+.ranch-sheet{display:grid;gap:8px;border:2px solid #5a3e1e;background:linear-gradient(#2a2118,#1e1912)}
+.rs-head{display:flex;gap:12px;align-items:center}.rs-head h2{margin:2px 0 0}.rs-art{width:104px;height:104px;display:grid;place-items:center;border-radius:12px;background:radial-gradient(ellipse at 50% 90%,#6aa24455,#0000 70%)}
+.rs-passive{margin:0}.rs-xp{color:var(--mute)}.rs-cost{margin:0}.rs-with{align-self:center;color:var(--brass-hi);font-weight:700}
+.ranch-shedcard{display:grid;gap:6px;border:2px dashed #5a3e1e}.ranch-shedcard p{margin:0}
+.ranch-float{font:700 18px var(--f-display);color:#fff;text-shadow:0 2px 0 #0009,0 0 8px #0006;white-space:nowrap}
+.ranch-float.xp{color:#ffe08a;font-size:21px}.ranch-float.heart{color:#ff7a9a;font-size:22px}.ranch-float.up{color:#9ad375;font-size:24px}
+.beast-subpage.mode-shed .beast-focus,.beast-subpage.mode-shed .beast-owned-heading,.beast-subpage.mode-shed .beast-owned{display:none}
+.calm :is(.pen-beast,.pen-want,.pen-zz){animation:none}
+@media (prefers-reduced-motion:reduce){:is(.pen-beast,.pen-want,.pen-zz){animation:none!important}}
+@media (max-width:860px){.ranch-layout{grid-template-columns:minmax(0,1fr)}.pen-grid{grid-template-columns:repeat(1,calc(96px * var(--k)));padding:10px}.ranch-sign{font-size:15px;left:8px;top:6px}.ranch-shelf{flex-wrap:wrap;margin:8px 8px 0}.rs-art{width:72px;height:72px}.ranch-sheet{padding:10px}}
+.pen-sign small{color:#5a3e1e}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -17547,11 +17604,11 @@ Q.beastGain=(id,xp)=>{if(Q.forecasting||!Number.isFinite(xp)||xp<=0||!S().pets.o
 Q.beastVictory=f=>{if(Q.forecasting||!f)return;const id=Q.beastActive();if(id)Q.beastGain(id,finite(f.heroXp)*.25);};
 /* Replace the old per-creature XP grant: combat now awards exactly 25% of actual hero combat XP on victory. */
 Q.creatureGainXp=()=>{};
-Q.beastTraining=id=>{const o=S().pets.owned[id];if(!o||!D.PET[id])return {ok:false,reason:'Choose an owned beast'};const lv=Q.petLevel(id),coins=30+lv*10,food=Q.foods().find(k=>D.ITEMS[k]?.heal>0&&Q.have(k)>=2),left=Math.max(0,finite(o.trainingUntil)-Date.now());
+Q.beastTraining=(id,want)=>{const o=S().pets.owned[id];if(!o||!D.PET[id])return {ok:false,reason:'Choose an owned beast'};const lv=Q.petLevel(id),coins=30+lv*10,food=want&&D.ITEMS[want]?.heal>0&&Q.have(want)>=2?want:Q.foods().find(k=>D.ITEMS[k]?.heal>0&&Q.have(k)>=2),left=Math.max(0,finite(o.trainingUntil)-Date.now());
  const reason=!Q.skillUnlocked('beastmastery')?'Learn Beastmastery first':lv>=MAX?'Bond complete':left?`Ready in ${Q.fmtTime(left)}`:S().coins<coins?`Needs ${coins} coins`:!food?'Needs 2 cooked food':'';
  return {ok:!reason,reason,coins,food,foodCount:2,xp:150+lv*50,left};};
 const transaction=mutate=>{const before=JSON.parse(JSON.stringify(S()));mutate();Q.fxDirty();if(!Q.save()){Q.S=before;Q.fxDirty();return false;}return true;};
-Q.trainBeast=id=>{if(Q.forecasting)return false;ensure();const t=Q.beastTraining(id);if(!t.ok)return false;
+Q.trainBeast=(id,want)=>{if(Q.forecasting)return false;ensure();const t=Q.beastTraining(id,want);if(!t.ok)return false;
  return transaction(()=>{S().coins-=t.coins;Q.take(t.food,2);S().pets.owned[id].trainingUntil=Date.now()+COOLDOWN;Q.beastGain(id,t.xp);Q.addXp('beastmastery',20);S().stats.train=(S().stats.train||0)+1;Q.qev('train',id);event('training',id,`${D.PET[id].name} trained beside you. +${t.xp} bond XP.`);});};
 Q.beastTrapReason=(id,tier)=>{const s=Q.beastSpec(id),t=D.BEAST_TRAPS[tier];if(!s||!Q.beastTargets().some(p=>p.id===id)||!t)return 'Choose a beast and trap';if(!Q.skillUnlocked('beastmastery'))return 'Learn Beastmastery first';if(S().pets.owned[id])return 'Already befriended';if(S().pets.expedition)return 'A trap is already out';if(Q.advLvl()<s.hero)return `Requires Hero ${s.hero}`;if(!S().towns[s.town]?.visited)return `Visit ${D.TOWN[s.town].name} first`;if(t.item?!Q.have(t.item):S().coins<t.cost)return t.item?'Needs a Rune trap':`Needs ${t.cost} coins`;return '';};
 Q.beastCaptureChance=(id,tier)=>D.BEAST_TRAPS[tier]?.[Q.beastSpec(id)?.rarity]||0;
@@ -18166,6 +18223,170 @@ Q.resolveBeastTrap = function (...a) { const before = new Set(Object.keys(S().pe
     Q.popupQueue({ title: 'A new companion', body: `<div class="beast-arrival"><div class="ba-art">${Q.petSprite(p, 96)}</div><div><h3>${esc(p.name)} · ${esc(Q.beastJob(id).role)}</h3><p>${esc(D.PET[id].text || '')}</p><p>${Q.beastCompare(id)}</p></div></div>`,
       actions: [{ label: cur && cur !== id ? `Keep ${D.PET[cur] ? D.PET[cur].name : 'current'}` : 'Later' }, { label: 'Bring along', primary: true, fn: () => Q.setPet(id) }] }); }
   return r; };
+})();
+
+</script>
+<script>
+/* The ranch (Nov 2026): pixel art for the Beastmastery page, drawn in code like everything else (docs/pixel-art-style.md:
+   top-left light, hue-shifted ramps, selective outlines, whole-number scales). Each owned beast lives in a pen:
+   fenced grass with a hut roofed in the beast's own colour, a hay bale, a water trough and a log hurdle to train over.
+   A pen is two images, 96 x 64 logical pixels each: the back (ground, hut, props, back fence) and the front fence, so
+   the beast can stand between them. A backdrop strip (barn, hills, trees) sits above the pens. */
+(() => {
+const Q = window.DQ, A = Q.pixelArt; if (!A || !A.townPainter) return;
+const { mix } = A, seeded = A.townSeeded;
+const PW = 96, PH = 64;
+const post = (f, x, y0, y1, wood) => { f(mix(wood, '#000000', .35), x, y0, 3, y1 - y0); f(wood, x, y0, 2, y1 - y0); f(mix(wood, '#ffffff', .28), x, y0, 1, y1 - y0); f(mix(wood, '#ffffff', .4), x - 1, y0 - 1, 4, 1); };
+const rail = (f, x0, x1, y, wood) => { f(mix(wood, '#000000', .3), x0, y + 2, x1 - x0, 1); f(wood, x0, y, x1 - x0, 2); f(mix(wood, '#ffffff', .25), x0, y, x1 - x0, 1); };
+/* the back of a pen: ground, hut, hay, trough, hurdle and the back fence */
+A.penBack = (id, col = '#a08060') => {
+  const rnd = seeded('pen:' + id), c = A.townMake(PW, PH), x = c.getContext('2d'), P = A.townPainter(x, PW, PH), { f, ell, tri } = P;
+  const g = '#6aa244', gd = mix(g, '#1e3a14', .3), gl = mix(g, '#ffffff', .22), dirt = '#b49264', wood = '#8a6a42';
+  f(g, 0, 0, PW, PH); f(gl, 0, 0, PW, 1);
+  for (let i = 0; i < 70; i++) f(i % 3 ? gd : gl, Math.floor(rnd() * PW), 12 + Math.floor(rnd() * (PH - 12)), 1 + (i % 2), 1);
+  ell(mix(dirt, '#000000', .12), 48, 41, 31, 13); ell(dirt, 47, 40, 29, 11); ell(mix(dirt, '#ffffff', .18), 44, 37, 14, 5);
+  for (let i = 0; i < 22; i++) f(mix(dirt, '#000000', .22), 22 + Math.floor(rnd() * 52), 32 + Math.floor(rnd() * 16), 2, 1);
+  /* back fence */
+  rail(f, 0, PW, 9, wood); rail(f, 0, PW, 14, wood); for (let px = 1; px < PW; px += 16) post(f, px, 5, 20, wood);
+  /* hut, roofed in the beast's colour */
+  const roof = mix(col, '#3a2414', .15), wall = '#d8c49a';
+  f(mix(wall, '#000000', .3), 7, 22, 26, 2); f(wall, 8, 12, 24, 11); f(mix(wall, '#ffffff', .25), 8, 12, 1, 11); f(mix(wall, '#000000', .2), 28, 12, 4, 11);
+  for (let j = 0; j < 8; j++) { const inset = 7 - j; f(mix(roof, '#ffffff', j % 3 === 0 ? .2 : 0), 6 + inset, 4 + j, 28 - inset * 2, 1); } f(mix(roof, '#000000', .4), 6, 12, 28, 1);
+  f('#3a2a20', 15, 16, 9, 7); f('#1e1612', 16, 17, 7, 6); f(mix(wall, '#000000', .4), 14, 15, 11, 1);
+  /* hay bale */
+  const hay = '#e6c660'; f(mix(hay, '#000000', .35), 64, 25, 20, 2); f(hay, 64, 15, 20, 10); f(mix(hay, '#ffffff', .3), 64, 15, 20, 2); f(mix(hay, '#000000', .25), 64, 19, 20, 1); f(mix(hay, '#000000', .25), 64, 22, 20, 1); f('#8a6a42', 70, 15, 1, 10); f('#8a6a42', 77, 15, 1, 10);
+  for (let i = 0; i < 9; i++) f(hay, 62 + Math.floor(rnd() * 24), 25 + Math.floor(rnd() * 3), 2, 1);
+  /* trough with water */
+  f(mix(wood, '#000000', .4), 66, 49, 22, 3); f(wood, 66, 43, 22, 7); f(mix(wood, '#ffffff', .25), 66, 43, 22, 1); f('#5a9ad0', 68, 45, 18, 3); f('#9cd0f0', 70, 45, 6, 1); f(mix(wood, '#000000', .25), 66, 43, 1, 7);
+  /* log hurdle to train over */
+  f(mix(wood, '#000000', .3), 8, 43, 3, 9); f(wood, 8, 43, 2, 9); f(mix(wood, '#000000', .3), 26, 43, 3, 9); f(wood, 26, 43, 2, 9);
+  f(mix('#7a5236', '#000000', .35), 7, 41, 24, 4); f('#7a5236', 7, 40, 24, 4); f(mix('#7a5236', '#ffffff', .25), 7, 40, 24, 1); f('#d8b878', 7, 41, 2, 2); f('#d8b878', 29, 41, 2, 2);
+  return c;
+};
+/* the front fence: low rails and posts, drawn over the beast's feet */
+A.penFront = () => {
+  const c = A.townMake(PW, PH), x = c.getContext('2d'), P = A.townPainter(x, PW, PH), { f } = P, wood = '#8a6a42';
+  rail(f, 0, PW, 55, wood); rail(f, 0, PW, 59, wood); for (let px = 1; px < PW; px += 16) post(f, px, 51, 64, wood);
+  post(f, 0, 9, 55, wood); post(f, PW - 3, 9, 55, wood);
+  return c;
+};
+/* the ranch strip above the pens: barn, hills, trees and a long fence (330 x 30) */
+A.ranchStrip = () => {
+  const W = 330, H = 30, c = A.townMake(W, H), x = c.getContext('2d'), P = A.townPainter(x, W, H), { f, ell } = P, rnd = seeded('ranch');
+  f('#a8d8ec', 0, 0, W, 12); f('#bfe2ee', 0, 12, W, 8); f('#cbe8ef', 0, 20, W, 10);
+  for (const [cx, cy, w] of [[40, 5, 24], [180, 3, 30], [270, 8, 20]]) { f('#ffffff', cx, cy, w, 3); f('#ffffff', cx + 4, cy - 2, w - 8, 2); }
+  for (let i = 0; i < W; i++) { const y = Math.round(16 + Math.sin(i / 20) * 3 + Math.sin(i / 7) * 1); f('#8cbf74', i, y, 1, H - y); }
+  for (let i = 0; i < W; i++) { const y = Math.round(21 + Math.sin(i / 14 + 2) * 2); f('#79b04f', i, y, 1, H - y); }
+  /* barn */
+  const bx = 232; f('#7a2a24', bx, 9, 32, 16); f('#a84a3a', bx, 9, 2, 16); f('#5a1c18', bx + 28, 9, 4, 16);
+  for (let j = 0; j < 8; j++) { const inset = 7 - j; f(j % 2 ? '#4a3a34' : '#5a4a42', bx - 3 + inset, 1 + j, 38 - inset * 2, 1); }
+  f('#e8dcc0', bx + 10, 12, 12, 13); f('#3a2a20', bx + 12, 14, 8, 11); f('#e8dcc0', bx + 15, 14, 2, 11); f('#e8dcc0', bx + 12, 17, 8, 1); f('#2a2830', bx + 14, 5, 4, 3);
+  /* trees */
+  for (const tx of [18, 62, 118, 150, 205, 310]) { f('#5a3a26', tx, 15, 2, 8); ell('#3f7a3c', tx + 1, 12, 7, 6); ell('#5f9a45', tx, 10, 5, 4); ell('#9cc45a', tx - 2, 8, 2, 1.5); }
+  /* the long fence across the front */
+  const wood = '#8a6a42'; rail(f, 0, W, 24, wood); for (let px = 2; px < W; px += 14) post(f, px, 21, 30, wood);
+  for (let i = 0; i < 40; i++) f(['#f0d060', '#e0607a', '#f4f0f4'][i % 3], Math.floor(rnd() * W), 26 + Math.floor(rnd() * 4), 1, 1);
+  return c;
+};
+const dataUrl = (key, make) => { const cache = (A._ranch = A._ranch || {}); if (cache[key]) return cache[key]; const c = make(); return cache[key] = c.toDataURL(); }; /* native size: shown at whole-number multiples (2x, 3x) so the pixels stay square */
+A.penBackUrl = (id, col) => dataUrl('b:' + id + col, () => A.penBack(id, col));
+A.penFrontUrl = () => dataUrl('front', () => A.penFront());
+A.ranchStripUrl = () => dataUrl('strip', () => A.ranchStrip());
+A.PEN_W = PW; A.PEN_H = PH;
+})();
+
+</script>
+<script>
+/* The Beastmastery ranch (Nov 2026). Your beasts live in pens. Pick a food from the shelf and feed a beast: that is
+   the training session (the same cost, cooldown and bond XP as before), shown as the food flying to the bowl, the
+   beast hopping the hurdle and the bond XP rising. A trained beast naps until its real cooldown ends. The companion
+   with you flies a flag. Capturing moves to the Trapper's shed and wooden-trap fieldwork keeps its own page, so the
+   ranch is only about owning and caring for your beasts. */
+(() => {
+const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S, A = Q.pixelArt, { esc, ico, fmt } = Q;
+if (!D.BEAST_SPECIES || !A || !A.penBackUrl) return;
+const MAX = 10, page0 = UI.V.beastmastery;
+const phone = () => innerWidth <= 860, tight = () => /\b(short|lw-1600)\b/.test(document.documentElement.className) && !phone();
+const K = () => phone() ? 2 : (innerHeight / (Q.zoom || 1) >= 900 ? 3 : 2), PER = () => phone() ? 1 : 6; /* whole-number pen scale: 3x when the window is tall enough for two rows, else 2x */
+UI.beastPenPage = 0; UI.beastFood = null;
+const view = () => UI.beastMode === 'field' ? 'field' : (UI.beastMode === 'capture' || UI.beastMode === 'shed') ? 'shed' : 'ranch';
+const owned = () => D.PETS.filter(p => S().pets.owned[p.id]);
+const foodsHeld = () => (Q.foods ? Q.foods() : []).filter(id => Q.have(id) > 0 && D.ITEMS[id] && D.ITEMS[id].heal > 0);
+const chosenFood = () => { const f = foodsHeld(); if (UI.beastFood && f.includes(UI.beastFood) && Q.have(UI.beastFood) >= 2) return UI.beastFood; return f.find(id => Q.have(id) >= 2) || f[0] || null; };
+const tabs = v => `<div class="beast-tabs btnrow ranch-tabs" role="tablist">${[['ranch', 'Ranch · your beasts'], ['shed', "Trapper's shed"], ['field', 'Fieldwork · wooden traps']].map(([k, l]) => `<button class="btn ${v === k ? 'on' : ''}" role="tab" aria-selected="${v === k}" data-do="beastmode" data-a="${k}">${l}</button>`).join('')}</div>`;
+const stateOf = id => { const t = Q.beastTraining(id, chosenFood()), o = S().pets.owned[id];
+  if (Q.petLevel(id) >= MAX) return { k: 'max', text: 'Fully bonded', t };
+  if (t.left > 0) return { k: 'nap', until: o.trainingUntil, t };
+  return t.ok ? { k: 'ready', text: 'Hungry for training', t } : { k: 'wait', text: t.reason, t }; };
+const penHtml = (p, k, sel) => {
+  const id = p.id, st = stateOf(id), lv = Q.petLevel(id), o = S().pets.owned[id], active = S().pets.active === id, food = chosenFood();
+  const note = st.k === 'nap' ? `Napping · ready in <span data-beast-due="${st.until}">${Q.fmtTime(Math.max(0, st.until - Date.now()))}</span>` : esc(st.text);
+  const base = D.BOND_XP[lv - 1], next = D.BOND_XP[lv] || base, pct = lv >= MAX ? 100 : Math.max(0, Math.min(100, 100 * (o.bondXp - base) / (next - base)));
+  return `<div class="pen-cell"><button class="pen ps-${st.k} ${sel ? 'sel' : ''} ${active ? 'active' : ''}" data-id="${id}" data-do="beastselect" data-a="${id}" aria-pressed="${sel}" aria-label="${esc(p.name)}, bond ${lv}. ${active ? 'With you. ' : ''}${esc(st.k === 'nap' ? 'Napping' : st.text)}" style="--k:${k};width:${96 * k}px;height:${64 * k}px">
+      <img class="pen-back" src="${A.penBackUrl(id, p.col)}" width="${96 * k}" height="${64 * k}" alt="" draggable="false">
+      <span class="pen-beast">${Q.petSprite(p, 32 * k)}</span>
+      <img class="pen-front" src="${A.penFrontUrl()}" width="${96 * k}" height="${64 * k}" alt="" draggable="false">
+      ${active ? `<span class="pen-flag">★ With you</span>` : ''}
+      ${st.k === 'ready' && food ? `<span class="pen-bowl" aria-hidden="true">${Q.itemIco(D.ITEMS[food])}</span>` : ''}
+      ${st.k === 'nap' ? `<span class="pen-zz" aria-hidden="true">Zz</span>` : ''}
+      ${st.k === 'ready' ? `<span class="pen-want" aria-hidden="true">♥</span>` : ''}
+      <span class="pen-bond"><b>Bond ${lv}</b><span class="bar"><i style="width:${pct}%"></i></span></span></button>
+    <div class="pen-name"><b>${esc(o.evolved && Q.beastSpec(id) ? Q.beastSpec(id).evolution : p.name)}</b><small class="ps-${st.k}">${note}</small></div></div>`; };
+const emptyPen = k => `<div class="pen-cell"><button class="pen empty" data-do="beastmode" data-a="shed" style="--k:${k};width:${96 * k}px;height:${64 * k}px" aria-label="Empty pen. Find a beast in the Trapper's shed."><img class="pen-back" src="${A.penBackUrl('empty', '#9a9a9a')}" width="${96 * k}" height="${64 * k}" alt="" draggable="false"><img class="pen-front" src="${A.penFrontUrl()}" width="${96 * k}" height="${64 * k}" alt="" draggable="false"><span class="pen-sign">Empty pen<small>Find a beast in the shed</small></span></button></div>`;
+const shelf = () => { const f = foodsHeld(), cur = chosenFood();
+  const tiles = f.length ? f.map(id => { const it = D.ITEMS[id]; return `<button class="shelf-food ${id === cur ? 'on' : ''}" data-do="beastfood" data-a="${id}" aria-pressed="${id === cur}" data-tip="item:${id}">${Q.itemIco(it)}<span><b>${esc(it.name)}</b><small>×${fmt(Q.have(id))} · +${it.heal}</small></span></button>`; }).join('')
+    : `<span class="shelf-none">The shelf is bare. Cook fish in Cooking, or buy bread at the shop: each session uses 2 cooked food.</span>`;
+  return `<div class="ranch-shelf"><span class="shelf-label">Food shelf</span><div class="shelf-items">${tiles}</div></div>`; };
+const sheet = id => { const p = D.PET[id], o = S().pets.owned[id], lv = Q.petLevel(id), st = stateOf(id), t = st.t, job = Q.beastJob && Q.beastJob(id), active = S().pets.active === id, food = chosenFood();
+  const next = D.BOND_XP[lv] || D.BOND_XP[MAX - 1], base = D.BOND_XP[lv - 1], pct = lv >= MAX ? 100 : Math.min(100, 100 * (o.bondXp - base) / (next - base));
+  const foodName = food ? D.ITEMS[food].name.toLowerCase() : 'cooked food';
+  return `<section class="panel ranch-sheet"><div class="rs-head"><span class="rs-art">${Q.petSprite(p, 96)}</span><div><span class="k">${active ? 'With you' : 'Resting in its pen'}${job ? ' · ' + esc(job.role) : ''} · Bond ${lv}/${MAX}</span><h2>${esc(o.evolved && Q.beastSpec(id) ? Q.beastSpec(id).evolution : p.name)}</h2></div></div>
+    <p class="rs-passive"><b>Gives you:</b> ${esc(Q.beastPassiveText(id))}</p>
+    <div class="bar" role="progressbar" aria-label="Bond progress" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+    <small class="rs-xp">${lv >= MAX ? 'Bond complete' : `${fmt(o.bondXp)} / ${fmt(next)} bond XP`}</small>
+    <div class="beast-milestones">${D.BOND_MILESTONES.map(n => `<span class="tag ${lv >= n ? 'ok' : ''}" data-tip="text:Bond ${n}: ${n === 10 ? 'evolution and final passive upgrade' : 'passive upgrade'}">${lv >= n ? '✓' : '◇'} ${n}</span>`).join('')}</div>
+    <p class="sm dim rs-cost">${lv >= MAX ? 'This bond is complete.' : `A session uses ${t.coins} coins and 2 ${esc(foodName)} for +${t.xp} bond XP, then it naps for 45 minutes. Wins share 25% of your combat XP.`}</p>
+    <div class="btnrow wrap"><button class="btn primary" data-do="beastfeed" data-a="${id}" ${t.ok ? '' : 'disabled'}>${t.ok ? `Feed & train · +${t.xp} bond XP` : esc(t.reason)}</button>${active ? `<span class="rs-with">★ With you</span>` : `<button class="btn" data-do="setpet" data-a="${id}">Bring along</button>`}</div></section>`; };
+const shedTeaser = () => { const j = S().pets.expedition; return `<section class="panel ranch-shedcard"><span class="k">Trapper's shed</span><p>${j ? `<b>Trap out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'No trap is out. Send one for a new beast.'}</p><button class="btn" data-do="beastmode" data-a="shed">Open the shed</button></section>`; };
+const ranch = () => {
+  const list = owned(), k = K(), per = PER(), pages = Math.max(1, Math.ceil(list.length / per)); UI.beastPenPage = Math.min(UI.beastPenPage, pages - 1);
+  const sel = list.find(p => p.id === UI.beastSelected) || list.find(p => p.id === S().pets.active) || list[0];
+  const slice = list.slice(UI.beastPenPage * per, UI.beastPenPage * per + per);
+  const cells = slice.map(p => penHtml(p, k, sel && p.id === sel.id)).join('') + (phone() ? '' : Array.from({ length: Math.max(0, per - slice.length) }, () => emptyPen(k)).join(''));
+  const nav = pages > 1 ? `<div class="pen-pages" role="group" aria-label="Pens">${Array.from({ length: pages }, (_, i) => `<button class="btn sm ${i === UI.beastPenPage ? 'on' : ''}" data-do="beastpenpage" data-a="${i}">${phone() ? (i + 1) + ' of ' + pages : i + 1}</button>`).join('')}</div>` : '';
+  const board = `<section class="ranch-board" style="--k:${k}"><div class="ranch-strip" style="background-image:url(${A.ranchStripUrl()});--k:${k}" role="img" aria-label="Your ranch"><h2 class="ranch-sign">Your menagerie</h2></div>
+    ${list.length ? `<div class="pen-grid">${cells}</div>${nav}` : `<div class="ranch-empty"><p><b>The pens are empty.</b> Send a trap from the shed to bring home your first beast.</p><button class="btn primary" data-do="beastmode" data-a="shed">Open the Trapper's shed</button></div>`}${list.length ? shelf() : ''}</section>`;
+  return `<div class="ranch-layout"><div class="ranch-main">${board}</div><div class="ranch-side">${sel ? sheet(sel.id) : ''}${shedTeaser()}</div></div>`; };
+UI.V.beastmastery = () => {
+  if (!Q.skillUnlocked('beastmastery')) return page0();
+  const v = view(); let h;
+  if (v === 'ranch') h = ranch();
+  else { const keep = UI.beastMode; UI.beastMode = v === 'shed' ? 'beasts' : 'field'; try { h = page0(); } finally { UI.beastMode = keep; } h = `<div class="beast-subpage mode-${v}">${h.replace(/<div class="beast-tabs[^>]*>[\s\S]*?<\/div>/, '')}</div>`; }
+  return tabs(v) + h; };
+UI.DO.beastfood = id => { UI.beastFood = id; UI.render(false); };
+UI.DO.beastpenpage = i => { UI.beastPenPage = Math.max(0, +i || 0); UI.render(false); };
+const mode0 = UI.DO.beastmode; UI.DO.beastmode = a => { UI.beastMode = a === 'ranch' ? 'beasts' : a; if (mode0 && !['ranch', 'shed', 'field'].includes(a)) return mode0(a); UI.render(false); };
+const sel0 = UI.DO.beastselect; UI.DO.beastselect = a => { UI.beastSelected = a; const i = owned().findIndex(p => p.id === a); if (i >= 0) UI.beastPenPage = Math.floor(i / PER()); UI.beastMode = view() === 'ranch' ? UI.beastMode : 'beasts'; UI.render(false); };
+/* feeding: the food flies from the shelf to the bowl, the beast hops the hurdle, hearts and the bond XP rise */
+const calm = () => !!(S().settings.reduceFx || document.documentElement.classList.contains('calm') || (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches));
+const page = v => v / (Q.zoom || 1);
+const float = (x, y, text, cls = '') => { const e = document.createElement('div'); e.className = 'ranch-float ' + cls; e.textContent = text; e.style.cssText = `position:fixed;left:${page(x)}px;top:${page(y)}px;z-index:430;pointer-events:none`; document.body.appendChild(e); const a = e.animate([{ transform: 'translate(-50%,0)', opacity: 0 }, { transform: 'translate(-50%,-14px)', opacity: 1, offset: .2 }, { transform: 'translate(-50%,-64px)', opacity: 0 }], { duration: 1600, easing: 'ease-out' }); a.onfinish = () => e.remove(); };
+UI.DO.beastfeed = id => {
+  const food = chosenFood(), t = Q.beastTraining(id, food); if (!t.ok) { Q.toast && Q.toast(t.reason, true); return; }
+  const chip = document.querySelector(`.shelf-food[data-a="${t.food}"]`), c = chip && chip.getBoundingClientRect(), lvBefore = Q.petLevel(id), icon = chip && chip.querySelector('.item-art');
+  const ok = Q.trainBeast(id, food); UI.beastStatus = ok ? 'Training complete' : t.reason; UI.render(false);
+  if (!ok || calm()) return;
+  requestAnimationFrame(() => {
+    const pen = document.querySelector(`.pen[data-id="${id}"]`); if (!pen) return; const r = pen.getBoundingClientRect(), tx = r.left + r.width / 2, ty = r.top + r.height * .78;
+    if (c && icon) { const g = icon.cloneNode(true); g.removeAttribute('data-snapped'); g.style.cssText = `position:fixed;left:${page(c.left + 8)}px;top:${page(c.top)}px;width:32px;height:32px;z-index:430;pointer-events:none`; document.body.appendChild(g);
+      const a = g.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${page(tx - c.left) * .5}px,${page(ty - c.top) * .5 - 50}px) scale(1.25)`, opacity: 1, offset: .5 }, { transform: `translate(${page(tx - c.left - 8)}px,${page(ty - c.top)}px) scale(.5)`, opacity: .2 }], { duration: 700, easing: 'cubic-bezier(.4,.1,.3,1)', fill: 'forwards' }); a.onfinish = () => g.remove(); }
+    pen.classList.add('training'); setTimeout(() => pen.classList.remove('training'), 2200);
+    setTimeout(() => { float(tx, r.top + r.height * .45, `+${t.xp} bond XP`, 'xp'); for (let i = 0; i < 4; i++) setTimeout(() => float(tx + (i - 1.5) * 26, r.top + r.height * .5, '♥', 'heart'), i * 140); if (Q.petLevel(id) > lvBefore) setTimeout(() => float(tx, r.top + r.height * .25, `Bond ${Q.petLevel(id)}!`, 'up'), 500); }, 650);
+  });
+};
+addEventListener('resize', () => { if (UI.view === 'beastmastery') UI.render(false); });
+/* a nap ends: refresh the pens once, quietly */
+let n = 0; Q.on('ui', () => { if (UI.view !== 'beastmastery' || ++n % 4 || view() !== 'ranch') return; const due = [...document.querySelectorAll('.pen.ps-nap [data-beast-due]')]; const now = Date.now(); if (due.some(e => +e.dataset.beastDue <= now)) UI.render(false); });
 })();
 
 </script>

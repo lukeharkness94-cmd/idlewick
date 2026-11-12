@@ -81,11 +81,11 @@ Q.beastGain=(id,xp)=>{if(Q.forecasting||!Number.isFinite(xp)||xp<=0||!S().pets.o
 Q.beastVictory=f=>{if(Q.forecasting||!f)return;const id=Q.beastActive();if(id)Q.beastGain(id,finite(f.heroXp)*.25);};
 /* Replace the old per-creature XP grant: combat now awards exactly 25% of actual hero combat XP on victory. */
 Q.creatureGainXp=()=>{};
-Q.beastTraining=id=>{const o=S().pets.owned[id];if(!o||!D.PET[id])return {ok:false,reason:'Choose an owned beast'};const lv=Q.petLevel(id),coins=30+lv*10,food=Q.foods().find(k=>D.ITEMS[k]?.heal>0&&Q.have(k)>=2),left=Math.max(0,finite(o.trainingUntil)-Date.now());
+Q.beastTraining=(id,want)=>{const o=S().pets.owned[id];if(!o||!D.PET[id])return {ok:false,reason:'Choose an owned beast'};const lv=Q.petLevel(id),coins=30+lv*10,food=want&&D.ITEMS[want]?.heal>0&&Q.have(want)>=2?want:Q.foods().find(k=>D.ITEMS[k]?.heal>0&&Q.have(k)>=2),left=Math.max(0,finite(o.trainingUntil)-Date.now());
  const reason=!Q.skillUnlocked('beastmastery')?'Learn Beastmastery first':lv>=MAX?'Bond complete':left?`Ready in ${Q.fmtTime(left)}`:S().coins<coins?`Needs ${coins} coins`:!food?'Needs 2 cooked food':'';
  return {ok:!reason,reason,coins,food,foodCount:2,xp:150+lv*50,left};};
 const transaction=mutate=>{const before=JSON.parse(JSON.stringify(S()));mutate();Q.fxDirty();if(!Q.save()){Q.S=before;Q.fxDirty();return false;}return true;};
-Q.trainBeast=id=>{if(Q.forecasting)return false;ensure();const t=Q.beastTraining(id);if(!t.ok)return false;
+Q.trainBeast=(id,want)=>{if(Q.forecasting)return false;ensure();const t=Q.beastTraining(id,want);if(!t.ok)return false;
  return transaction(()=>{S().coins-=t.coins;Q.take(t.food,2);S().pets.owned[id].trainingUntil=Date.now()+COOLDOWN;Q.beastGain(id,t.xp);Q.addXp('beastmastery',20);S().stats.train=(S().stats.train||0)+1;Q.qev('train',id);event('training',id,`${D.PET[id].name} trained beside you. +${t.xp} bond XP.`);});};
 Q.beastTrapReason=(id,tier)=>{const s=Q.beastSpec(id),t=D.BEAST_TRAPS[tier];if(!s||!Q.beastTargets().some(p=>p.id===id)||!t)return 'Choose a beast and trap';if(!Q.skillUnlocked('beastmastery'))return 'Learn Beastmastery first';if(S().pets.owned[id])return 'Already befriended';if(S().pets.expedition)return 'A trap is already out';if(Q.advLvl()<s.hero)return `Requires Hero ${s.hero}`;if(!S().towns[s.town]?.visited)return `Visit ${D.TOWN[s.town].name} first`;if(t.item?!Q.have(t.item):S().coins<t.cost)return t.item?'Needs a Rune trap':`Needs ${t.cost} coins`;return '';};
 Q.beastCaptureChance=(id,tier)=>D.BEAST_TRAPS[tier]?.[Q.beastSpec(id)?.rarity]||0;
