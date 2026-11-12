@@ -3451,3 +3451,13 @@ html.short .bp-art{width:56px;height:56px}
 .estate-trough-inline{display:inline-flex;align-items:center;margin-left:6px;font-size:15px}.estate-trough-inline>*{margin:0!important}
 .estate-pasture .pen:not(.emptypen) .pen-t>b{color:var(--ink)!important}
 .est-count i{color:#2a1a06!important}
+
+/* field guide page */
+.guide-how{margin:4px 0 10px;font-size:15px;color:var(--mute)}.guide-how b{color:var(--ink);font-weight:600}
+.guide-cards .beast{text-align:left}
+.guide-cards .beast>span{display:grid;gap:3px;min-width:0}
+.guide-fill{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}.guide-fill .bar{height:6px}.guide-fill small{font-size:13px;color:var(--mute);white-space:nowrap}
+.guide-next{font-size:14px;color:var(--mute)}.guide-next b{color:var(--ink)}
+.beast.quest-study{border-color:var(--brass)!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 35%,transparent)}
+.study-tag{display:inline-flex;align-items:center;gap:4px;font:600 13px var(--f-ui);font-style:normal;color:var(--brass-hi,#f3d58a)}.study-tag .ic,.study-tag .pxi{width:14px;height:14px}
+.obj .obj-go{margin-left:8px;vertical-align:middle;min-height:28px;padding:3px 10px;font-size:14px}.obj .obj-go .ic,.obj .obj-go .pxi{width:16px;height:16px}

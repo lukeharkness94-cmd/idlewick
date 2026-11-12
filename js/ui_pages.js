@@ -145,7 +145,7 @@ UI.V.quests = () => {
   };
   const cards = selected ? [selected].map((q, i) => {
     const s = st(q), p = S().q[q.id], t = D.TOWN[q.town];
-    const objs = q.obj.map((o, j) => { const pr = DQ.objProg(q, p, j), ok = pr >= o.n; return `<div class="obj ${ok ? 'ok' : ''}"><span>${ok ? ico('check') : ''}${o.label}</span><span class="mono" ${p ? `data-b="qtxt:${q.id}:${j}"` : ''}>${p ? '' : `0 / ${fmt(o.n)}`}</span><span class="bar"><i ${p ? `data-b="qbar:${q.id}:${j}"` : ''}></i></span></div>`; }).join('');
+    const objs = q.obj.map((o, j) => { const pr = DQ.objProg(q, p, j), ok = pr >= o.n; return `<div class="obj ${ok ? 'ok' : ''}"><span>${ok ? ico('check') : ''}${o.label}${o.ev === 'guide' && !ok && D.MON[o.key] ? ` <button class="btn sm obj-go" data-do="guide" data-a="${o.key}">${ico('book')}Open ${esc(D.MON[o.key].name)}’s page</button>` : ''}</span><span class="mono" ${p ? `data-b="qtxt:${q.id}:${j}"` : ''}>${p ? '' : `0 / ${fmt(o.n)}`}</span><span class="bar"><i ${p ? `data-b="qbar:${q.id}:${j}"` : ''}></i></span></div>`; }).join('');
     const prevQ = q.req ? D.QM[q.req] : null;
     const blk = DQ.questBlockers(q);
     const req = s === 'locked' && q.main ? `<div class="reqs">${blk.map(b => `<div class="bad">✗ ${b}</div>`).join('')}</div>` : s === 'locked' ? `<div class="reqs bad">${DQ.advLvl() < q.adv ? `Hero level ${q.adv} <span class="mono">(you: ${DQ.advLvl()})</span>` : ''}${prevQ && !(S().q[q.req] && S().q[q.req].s === 'done') ? ` Finish “${prevQ.name}” first` : ''}</div>` : '';

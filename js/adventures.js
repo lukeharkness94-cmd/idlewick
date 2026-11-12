@@ -274,7 +274,7 @@ if (locked0) UI.lockedPage = id => locked0(id) + (id === 'exploration' && Object
 const guide0 = UI.openGuide;
 /* Studying for an adventure means something: the quest-giver's notes reveal the creature's weak points (display only, derived
    from the quest's own progress, so nothing new is saved), and the guide says which weapon to bring. */
-const studyQuest = id => D.QUESTS.find(q => q.adventure && q.obj.some(o => o.ev === 'guide' && o.key === id) && S().q[q.id]);
+const studyQuest = id => D.QUESTS.find(q => q.obj.some(o => o.ev === 'guide' && o.key === id) && S().q[q.id]);
 const studied = id => { const q = studyQuest(id); if (!q) return false; const st = S().q[q.id], i = q.obj.findIndex(o => o.ev === 'guide' && o.key === id); return st.s === 'done' || st.s === 'ready' || (st.p && st.p[i] >= 1); };
 const weak0 = DQ.weakKnown;
 if (weak0) DQ.weakKnown = m => weak0(m) || (!!m && studied(m.id));
@@ -287,6 +287,10 @@ const studyNote = id => {
 if (guide0) UI.openGuide = id => {
   const r = guide0(id); if (DQ.forecasting) return r;
   DQ.qev('guide', id);
+  /* a creature someone told you about is named and pictured in the guide before you meet it, with their notes */
+  const m = D.MON[id], q = studyQuest(id);
+  if (m && q && studied(id) && DQ.research(m).rank < 1) { const h = document.querySelector('.modal .ghead'); if (h) { const t = h.querySelector('.gtitle h3'), sm = h.querySelector('.gtitle > small'), sp = h.querySelector('.gsprite');
+    if (t) t.textContent = m.name; if (sm) sm.textContent = `Not met yet · ${q.giver} told you about it · ${D.TOWN[m.town].name}, level ${m.cl}`; if (sp) sp.innerHTML = DQ.monSprite(m, 96, 'bob'); } }
   const note = studyNote(id), col = note && document.querySelector('.modal .gcol-know .gcol-h'), head = note && document.querySelector('.modal .ghead');
   if (!document.querySelector('.modal .study-note')) { if (col) col.insertAdjacentHTML('afterend', note); else if (head) head.insertAdjacentHTML('afterend', note); }
   return r;
