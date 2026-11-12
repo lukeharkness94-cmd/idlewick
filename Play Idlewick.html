@@ -3545,6 +3545,26 @@ html.short .bp-art{width:56px;height:56px}
 .beast.quest-study{border-color:var(--brass)!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 35%,transparent)}
 .study-tag{display:inline-flex;align-items:center;gap:4px;font:600 13px var(--f-ui);font-style:normal;color:var(--brass-hi,#f3d58a)}.study-tag .ic,.study-tag .pxi{width:14px;height:14px}
 .obj .obj-go{margin-left:8px;vertical-align:middle;min-height:28px;padding:3px 10px;font-size:14px}.obj .obj-go .ic,.obj .obj-go .pxi{width:16px;height:16px}
+
+/* enchanting rows: pictures first */
+.ench-row{display:grid!important;grid-template-columns:56px minmax(0,1fr) auto auto;align-items:center;gap:14px}
+.ench-item .pxi,.ench-item img{width:48px;height:48px}
+.ench-main{display:grid;gap:6px;min-width:0}.ench-name{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.ench-pips{display:inline-flex;gap:3px}.ench-pips i{width:10px;height:10px;transform:rotate(45deg);border:1px solid #9d7ce8;background:transparent}.ench-pips i.on{background:#b48cff;box-shadow:0 0 6px #b48cff88}
+.ench-gains{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.ench-gain{display:inline-flex;align-items:baseline;gap:5px;padding:2px 9px;border-radius:999px;border:1px solid var(--line2);font-size:15px}.ench-gain small{font-size:13px;color:var(--mute)}.ench-gain i{font-style:normal;color:var(--mute)}.ench-gain .up{color:var(--good)}
+.ench-costs{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.ench-cost{display:inline-grid;grid-template-columns:auto auto;align-items:center;gap:8px;padding:5px 10px 5px 6px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2)}
+.ench-cost.ok{border-color:color-mix(in srgb,var(--good) 60%,var(--line))}.ench-cost.short{border-color:color-mix(in srgb,var(--bad) 70%,var(--line));background:color-mix(in srgb,var(--bad) 8%,var(--panel2))}
+.ec-art{position:relative;display:inline-grid;place-items:center;width:36px;height:36px}.ec-art .pxi,.ec-art img{width:32px;height:32px}
+.ec-n{position:absolute;right:-6px;bottom:-4px;font:700 13px var(--f-ui);padding:0 4px;border-radius:6px;background:var(--panel);border:1px solid var(--line2)}
+.ec-t{display:grid;line-height:1.2}.ec-t b{font-size:14px}.ec-t small{font-size:13px}.ench-cost.ok .ec-t small{color:var(--good)}.ench-cost.short .ec-t small{color:var(--bad)}
+.ench-cost .route-chip,.ench-cost [data-do="route"]{grid-column:1/-1}
+@media (max-width:860px){.ench-row{grid-template-columns:48px minmax(0,1fr)}.ench-costs,.ench-row>.btn{grid-column:1/-1;justify-content:flex-start}}
+.ench-costs{flex-wrap:nowrap}.ench-cost{grid-template-columns:auto auto auto}.ench-cost .route-chip,.ench-cost [data-do="route"]{grid-column:auto}.ench-cost>:last-child:not(.ec-t){align-self:center}
+@media (max-width:860px){.ench-costs{flex-wrap:wrap}}
+.ench-row>span.ench-costs{flex-direction:row;flex:none}.ench-row>span.ench-main{display:grid;flex:none}.ench-row>span.ench-item{flex:none}
+.ench-row .ec-art img{width:32px;height:32px}.ench-row .ench-item img{width:48px;height:48px}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -14890,7 +14910,13 @@ DQ.bonus=()=>{const out=baseBonus();for(const [slot,id] of Object.entries(S().eq
    gains most from a first enchantment (the biggest share of its own bonus, weapon first on a tie). */
 DQ.enchantPlan=()=>Object.entries(S().equip).filter(([slot,id])=>slot!=='ammo'&&D.ITEMS[id]&&Object.keys(D.ITEMS[id].b||{}).length).map(([slot,id])=>{const it=D.ITEMS[id],r=S().enchants[id]||0,b=it.b||{},keys=Object.keys(b),total=keys.reduce((n,k)=>n+Math.abs(b[k]),0)+keys.length*r,need=gems[r],runes=5*(r+1);return {slot,id,it,rank:r,keys,gain:total?keys.length/total:0,need,runes,ready:r<5&&DQ.have('rune')>=runes&&DQ.have(need)>0};}).sort((a,b)=>b.gain-a.gain||(a.slot==='weapon'?-1:b.slot==='weapon'?1:0));
 UI.V.enchanting=()=>{const plan=DQ.enchantPlan(),best=plan.find(p=>p.rank<5),names=UI.statNames||{};
- return `${hero('enchanting')}<section class="panel"><div class="phead"><h2>Enchant equipped gear</h2><small>Up to +5 per item</small></div><p class="hint">Each rank adds +1 to every bonus the item already has: a big share on early gear, a small one on top-tier gear. Costs Arcane runes (shop) and a gem (mining, nests, chests).</p><div class="ench-list">${plan.map(p=>{const pct=Math.round(p.gain*100);return `<div class="ench-row ${p===best?'recommended':''}">${DQ.itemIco(p.it)}<span><b>${esc(p.it.name)} +${p.rank}</b>${p===best?' <span class="tag">Best first</span>':''}<small>${p.rank>=5?'Fully enchanted':`Next: ${p.keys.map(k=>`+1 ${names[k]||k}`).join(', ')} (about +${pct}% of its bonus) · ${p.runes} runes (${DQ.have('rune')} held) + 1 ${esc(D.ITEMS[p.need]?.name||p.need)} (${DQ.have(p.need)} held)`}</small></span>${p.rank<5&&!DQ.have(p.need)&&UI.routeChip?UI.routeChip(p.need):''}<button class="btn ${p.ready?'primary':''}" data-do="enchant" data-a="${p.id}" ${p.rank>=5||!p.ready?'disabled':''}>${p.rank>=5?'Complete':'Enchant'}</button></div>`;}).join('')||'<p>Equip a weapon or armour to enchant it.</p>'}</div></section>`;};
+ /* each row shows what it needs as pictures (Nov 2026, from the player): rank pips, stat changes as before→after chips,
+    and the runes and gem as tiles that are green when you have enough and red, with how many are missing, when not */
+ const pips=r=>`<span class="ench-pips" aria-label="Rank ${r} of 5">${[1,2,3,4,5].map(i=>`<i class="${i<=r?'on':''}"></i>`).join('')}</span>`;
+ const cost=(id,n)=>{const it=D.ITEMS[id],have=DQ.have(id),ok=have>=n;return `<span class="ench-cost ${ok?'ok':'short'}" data-tip="item:${id}"><span class="ec-art">${DQ.itemIco(it)}<b class="ec-n">×${n}</b></span><span class="ec-t"><b>${esc(it.name)}</b><small>${ok?`✓ ${fmt(have)} held`:`✗ ${fmt(have)} of ${n} · need ${n-have} more`}</small></span>${ok||!UI.routeChip?'':UI.routeChip(id)}</span>`;};
+ const gains=p=>p.keys.map(k=>{const v=(p.it.b[k]||0)+p.rank;return `<span class="ench-gain"><small>${esc(names[k]||k)}</small><b>${v}</b><i>→</i><b class="up">${v+1}</b></span>`;}).join('');
+ return `${hero('enchanting')}<section class="panel"><div class="phead"><h2>Enchant equipped gear</h2><small>Up to +5 per item</small></div><p class="hint">Each rank adds +1 to every bonus the item already has. You need Arcane runes (shop) and a gem (mining, nests, chests).</p><div class="ench-list">${plan.map(p=>{const pct=Math.round(p.gain*100),max=p.rank>=5;
+  return `<div class="ench-row ${p===best?'recommended':''} ${p.ready?'ready':''} ${max?'max':''}"><span class="ench-item">${DQ.itemIco(p.it)}</span><span class="ench-main"><span class="ench-name"><b>${esc(p.it.name)} +${p.rank}</b>${pips(p.rank)}${p===best?' <span class="tag">Best first</span>':''}</span>${max?'<small>Fully enchanted</small>':`<span class="ench-gains">${gains(p)}<small class="dim">about +${pct}% of its bonus</small></span>`}</span>${max?'':`<span class="ench-costs">${cost('rune',p.runes)}${p.need?cost(p.need,1):''}</span>`}<button class="btn ${p.ready?'primary':''}" data-do="enchant" data-a="${p.id}" ${max||!p.ready?'disabled':''}>${max?'Complete':p.ready?'Enchant':'Missing items'}</button></div>`;}).join('')||'<p>Equip a weapon or armour to enchant it.</p>'}</div></section>`;};
 Object.assign(UI.DO,{enchant:id=>{if(DQ.enchant(id))UI.render(false);}});
 const brewery=UI.V.brewery;
 /* Herbalism: a short path to the first useful potion, shown until Potion of Might is brewable */
