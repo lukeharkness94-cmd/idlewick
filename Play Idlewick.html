@@ -191,7 +191,7 @@ main{min-width:0;display:flex;flex-direction:column;gap:14px}
 .tab{background:none;border:1px solid transparent;color:var(--mute);padding:5px 14px;border-radius:99px;font-weight:600;font-size:15px;transition:all .2s}
 .tab:hover{color:var(--ink);background:var(--panel2)}
 .tab.on{background:var(--panel2);color:var(--brass-hi);border-color:var(--line2)}
-.tab b{font-size:11px;color:var(--mute);margin-left:4px}
+.tab b{font-size:13px;color:var(--mute);margin-left:4px}
 .tog{display:flex;align-items:center;gap:12px;background:none;border:0;padding:0;text-align:left;font-size:15px}
 .tog small{display:block;font-weight:400}
 .tog .sw{width:38px;height:21px;border-radius:99px;background:var(--ground);border:1px solid var(--line2);position:relative;transition:background .2s,border-color .2s;flex:none}
@@ -867,7 +867,7 @@ img.px.sil{filter:brightness(0) opacity(.45)}
 
 /* Backpack filters and tools */
 .filtbar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:0 0 10px}
-.filtbar .tabs{flex-wrap:wrap;gap:4px}.filtbar .tab{padding:5px 10px;font-size:12.5px}.filtbar .tab b{opacity:.7;font-size:11px;margin-left:3px}
+.filtbar .tabs{flex-wrap:wrap;gap:4px}.filtbar .tab{padding:5px 10px;font-size:12.5px}.filtbar .tab b{opacity:.7;font-size:13px;margin-left:3px}
 .filtbar .search{flex:1;min-width:140px;max-width:220px}
 .toolrows{display:flex;flex-direction:column;gap:8px}
 .toolrow{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:10px;background:var(--ground);border:1px solid var(--line)}
@@ -3253,6 +3253,117 @@ button.rl-i:hover{border-color:var(--brass-hi)}
 .fguide .gdrop{min-height:0}
 @media (max-width:980px){.fguide .ghero{grid-template-columns:minmax(0,1fr)}.fguide .gcols{grid-template-columns:minmax(0,1fr)}.fguide .gcol+.gcol{border-left:0;padding-left:0;border-top:1px solid var(--line)}}
 @media (max-width:600px){.fguide .ghero .gladder{grid-template-columns:repeat(2,minmax(0,1fr))}.fguide .gladder li{flex-wrap:wrap;min-width:0}.fguide .gdrop{flex-wrap:wrap}}
+
+/* Beastmastery: deliberate actions on screen; only the companion reference list scrolls. */
+.beast-tabs{margin-bottom:10px}.beast-workspace{display:grid;grid-template-columns:minmax(390px,1fr) minmax(360px,1fr);gap:14px;min-height:0;height:calc(var(--vh100,100vh) - 200px)}
+.beast-main{display:flex;flex-direction:column;gap:12px;min-width:0}.beast-main>.panel{padding:16px}.beast-focus{display:flex;gap:16px;align-items:flex-start}.beast-focus>div:last-child{flex:1;min-width:0}.beast-focus p{margin:8px 0}.beast-focus .bar{width:100%}.beast-portrait{flex:0 0 96px}.beast-milestones{display:flex;gap:6px;margin-top:8px}.beast-list{overflow:auto;min-height:0}.beast-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}.beast-choice{display:flex;flex-direction:column;align-items:center;gap:5px;background:var(--panel);color:var(--text);padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit}.beast-choice.on{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}.beast-choice small{font-size:14px}.beast-trap-status{padding:8px;border-left:3px solid #c8a25a}.beast-return{padding:12px;border-left:3px solid #82b957;margin:12px 0}
+@media(min-width:861px){html.short .beast-main>.panel{padding:10px}html.short .beast-focus p{margin:5px 0}html.short .beast-focus{gap:10px}html.short .beast-portrait{flex-basis:64px}html.short .beast-portrait img{max-width:64px;max-height:64px}}
+@media(max-width:860px){.beast-workspace{display:flex;flex-direction:column;height:auto}.beast-list{overflow:visible}.beast-focus{flex-wrap:wrap}.beast-focus>div:last-child{min-width:200px}.beast-cards{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
+/* Working state is a left edge, never a dot covering the level. */
+.dk-live{left:0!important;right:auto!important;top:6px!important;bottom:6px!important;width:3px!important;height:auto!important;border-radius:2px!important;box-shadow:none!important;animation:none!important;background:var(--good)}
+.dk:has(.dk-live){border-color:var(--good);background:color-mix(in srgb,var(--good) 8%,var(--panel))}
+/* Output is a separate visible tray, not a prop buried behind the characters. */
+.activity-stage .scene-yield.yield-tray{position:relative!important;inset:auto!important;z-index:3;display:flex;flex-direction:row;justify-content:center;align-items:center;gap:12px;margin:0;border-radius:0;border-width:1px 0 0;background:var(--panel2);padding:5px;min-height:56px}
+.scene-yield.yield-tray small{font-size:14px;color:var(--ink)}.scene-yield.yield-tray img{width:48px;height:48px}
+#notes{top:auto!important;bottom:calc(18px + var(--bottom-navigation-space,0px) + env(safe-area-inset-bottom,0px))!important;max-height:45%;justify-content:flex-end}
+#notes .note{animation:noticeRise .48s cubic-bezier(.18,.8,.28,1) both!important}#notes .note.out{animation:noticeLeave .22s ease-in both!important}
+@keyframes noticeRise{from{opacity:0;transform:translateY(36px) scale(.985)}to{opacity:1;transform:none}}@keyframes noticeLeave{to{opacity:0;transform:translateY(16px)}}
+@media(max-width:860px){#notes{bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}}
+.calm #notes .note{animation:none!important}@media(prefers-reduced-motion:reduce){#notes .note{animation:none!important}}
+.foe-death-ghost{position:fixed;z-index:290;pointer-events:none;display:grid;place-items:center}.foe-death-ghost img{max-width:100%;max-height:100%}.defeat-caption{position:fixed;transform:translateX(-50%);z-index:295;color:#fff0bc;background:#10242deb;border:1px solid #b89c57;border-radius:20px;padding:6px 15px;font-weight:700;pointer-events:none;white-space:nowrap}
+.tech-family{min-width:0;border:1px solid var(--line2);border-radius:10px;background:var(--panel2)}.tech-ranks{display:flex;gap:5px;flex-wrap:wrap;padding:8px}.tech-family>.tech{border:0!important;box-shadow:none!important;background:transparent!important}.route-travel{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 12px;border:1px solid var(--brass);border-radius:8px;flex:none!important}.requirement-route{cursor:pointer}.requirement-route:hover,.requirement-route:focus-visible{outline:2px solid var(--brass);outline-offset:2px}.qrow.ready{border-color:var(--good)!important;box-shadow:inset 4px 0 var(--good)}.qrow.ready .state{color:var(--good);font-weight:700}.qrow.done .state{color:var(--good)}
+.farm-estate{display:flex;flex-direction:column;gap:10px;min-height:0;flex:1;height:100%}.estate-controls{padding:10px 14px;flex:none}.estate-controls .phead{margin-bottom:6px}.estate-controls p{margin:4px 0}.estate-actions{display:flex;gap:8px;flex-wrap:wrap}.estate-actions .farm-actions{margin:0;gap:6px}.estate-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px;flex:1;min-height:0}.estate-land{position:relative;overflow:hidden;padding:10px;display:flex;flex-direction:column;min-height:0;background:#5a7948}.estate-scenery{height:32%;min-height:100px;background-size:cover;background-position:center top;image-rendering:pixelated;border-radius:8px}.estate-zones{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;min-height:0;margin-top:10px}.estate-zones h3{display:flex;align-items:center;justify-content:space-between;color:#fff2d6;margin:0 0 8px}.estate-fields,.estate-pasture{display:flex;flex-direction:column;min-height:0;padding:10px;border-radius:6px}.estate-fields{background:repeating-linear-gradient(0deg,#735034 0 9px,#825c3f 9px 12px);border:3px solid #a0804d}.estate-pasture{background:#749c53;border:5px double #e4c58a}.estate-fields>.plots{grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-rows:minmax(0,1fr);gap:6px;flex:1;min-height:0}.estate-fields .plot{padding:5px!important;min-height:0!important;background:#523f2d;color:#fff0d1;border:1px solid #b79561}.estate-fields .plot .pspr{height:48px}.estate-fields .plot .pspr img{max-height:48px;max-width:48px}.estate-fields .plot b{font-size:14px}.estate-pasture>.pens{display:grid;grid-template-columns:1fr 1fr!important;grid-auto-rows:minmax(0,1fr);gap:8px;flex:1;min-height:0}.estate-pasture .pen{display:flex;flex-direction:column;gap:3px;padding:5px!important;min-height:0!important;background:#3f6439;color:#fff1ce;border:3px double #ddc38c}.estate-pasture .pen>.pspr{width:48px;height:48px}.estate-pasture .pen>.pspr img{max-width:48px;max-height:48px}.estate-pasture .pen .pen-t small:first-of-type{display:none}.estate-pasture .pen .pen-sell{font-size:13px;padding:2px 6px}.estate-pasture .pen .pen-t b{font-size:14px}.estate-supplies{padding:12px;min-height:0;display:flex;flex-direction:column;gap:8px}.estate-supplies .seed-choices{display:grid;grid-template-columns:1fr;gap:5px}.estate-supplies .seed-choice{padding:4px 8px}.estate-supplies .seed-choice img{max-width:32px;max-height:32px}.estate-supplies #livestock-market{padding:0}.estate-supplies .srows{gap:4px}.estate-supplies .srow{padding:6px;gap:5px}.estate-supplies .mini img{max-width:32px;max-height:32px}.estate-pages{display:inline-flex;gap:4px}.estate-pages .btn{padding:3px 8px}.farm-estate [hidden]{display:none!important}
+@media(min-width:861px){html.short .estate-scenery{height:21%;min-height:65px}html.short .estate-fields .plot .pspr{height:32px}html.short .estate-pasture .pen>.pspr{height:32px;width:32px}html.short .estate-pasture .pen>.pspr img{max-height:32px;max-width:32px}html.short .estate-supplies{gap:5px;padding:8px}html.short .estate-supplies .seed-choice{padding:2px 6px}html.short .estate-controls .phead{margin:0}}
+@media(max-width:860px){.farm-estate{height:auto}.estate-layout{display:flex;flex-direction:column}.estate-land{min-height:600px}.estate-zones{min-height:430px}.estate-zones{grid-template-columns:1fr}.estate-fields>.plots{min-height:200px}.estate-pasture>.pens{min-height:210px}.estate-supplies .seed-choices{grid-template-columns:1fr 1fr}}
+.site-spot .site-mark{min-width:32px;white-space:nowrap;padding:4px 8px;border-radius:14px;background:#e4b052;color:#211606;font-weight:700;font-size:14px;box-shadow:0 2px 8px #0008;border:2px solid #fff0be}.site-spot.deliver-ready .site-mark{background:#b9e2a3;border-color:#e8ffd3;color:#183416}.site-spot.deliver-ready{outline:2px solid #9ad375;border-radius:8px}.site-spot:hover .site-mark,.site-spot:focus-visible .site-mark{filter:brightness(1.15)}
+.quest-reveal{box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;min-width:0;max-width:100%;overflow:hidden}.quest-reveal .qrv-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px}.quest-reveal .qrv-tile{min-width:0;padding:8px}.quest-reveal .qrv-art{height:48px}.quest-reveal .qrv-art img{max-width:48px;max-height:48px}.quest-reveal .qrv-thanks{font-size:16px;margin:6px 0}.quest-reveal .qrv-head{gap:12px}.quest-reveal .qrv-face{max-width:64px;max-height:64px}
+.beast-list{overflow:hidden;display:flex;flex-direction:column}.beast-owned{flex:none;grid-template-columns:repeat(3,minmax(0,1fr))}.beast-owned .beast-choice{padding:4px}.beast-owned .beast-choice img{max-width:48px;max-height:48px}.beast-targets{grid-template-columns:repeat(2,minmax(0,1fr));flex:1;min-height:0;grid-template-rows:repeat(2,minmax(0,1fr))}.beast-targets .beast-choice{padding:6px;min-height:0}.beast-targets .beast-choice img{max-width:48px;max-height:48px}.beast-mobile-tab{display:none}
+@media(max-width:860px){
+ html.compact-skill-navigation #subnav{display:none!important}.phone-skill-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.phone-skill-picker .btn{display:flex;flex-direction:column;padding:6px 2px;font-size:14px}.phone-skill-picker img{width:32px;height:32px}
+ .beast-mobile-tab{display:inline-flex}.beast-tabs{flex-wrap:wrap;gap:5px}.beast-tabs .btn{font-size:14px;padding:6px}.beast-tabs .btn:last-child{max-width:125px}.beast-workspace{height:calc(var(--vh100,100vh) - 390px);min-height:300px}.beast-main{display:contents}.beast-workspace[data-mode="beasts"] .beast-expedition,.beast-workspace[data-mode="beasts"] .beast-list{display:none}.beast-workspace[data-mode="capture"] .beast-focus,.beast-workspace[data-mode="collection"] .beast-main,.beast-workspace[data-mode="capture"] .beast-owned,.beast-workspace[data-mode="capture"] .beast-owned-heading,.beast-workspace[data-mode="collection"] .beast-targets,.beast-workspace[data-mode="collection"] .beast-targets-heading{display:none}.beast-workspace[data-mode="capture"]{display:grid;grid-template-rows:auto minmax(160px,1fr);height:auto}.beast-workspace[data-mode="collection"] .beast-focus,.beast-workspace[data-mode="collection"] .beast-expedition{display:none}.beast-focus .beast-portrait{flex-basis:64px}.beast-focus .beast-portrait img{max-width:64px;max-height:64px}.beast-focus{gap:10px;padding:12px!important}.beast-focus p{margin:6px 0}.beast-list{padding:10px}.beast-list h3{margin:0 0 6px}.beast-targets .beast-choice{font-size:14px}.beast-owned .beast-choice{font-size:14px}.beast-expedition{padding:10px!important}.beast-expedition p{font-size:14px;margin:5px 0}.beast-expedition .btn{font-size:14px;padding:6px}
+}
+.battle-companion{position:absolute;left:26%;bottom:90px;z-index:4;display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none}.battle-companion img{max-width:48px;max-height:48px}.battle-companion small{font-size:13px;color:var(--ink);background:var(--panel2);padding:2px 5px;border-radius:6px}
+.estate-mobile-tabs{display:none}.estate-action-group{display:contents}
+@media(max-width:860px){
+ .estate-mobile-tabs{display:flex;gap:4px;margin-bottom:7px}.estate-mobile-tabs .btn{font-size:14px;padding:5px 10px}.estate-controls .phead{margin:0 0 6px}.estate-controls{padding:8px}.estate-controls h2{font-size:20px}.estate-layout{min-height:0;display:flex;flex-direction:column}.estate-land{min-height:0;flex:1}.estate-zones{min-height:0;display:flex;flex:1;flex-direction:column}.estate-fields,.estate-pasture{flex:1;min-height:0}.estate-fields>.plots{min-height:0;grid-template-columns:repeat(2,minmax(0,1fr))!important}.estate-pasture>.pens{min-height:0}.estate-scenery{height:65px;min-height:65px;flex:none;background-position:center 27%}.estate-zones h3{margin:0 0 5px;font-size:16px}.estate-controls p{font-size:14px}.estate-actions .btn{font-size:14px;padding:5px 9px}.estate-fields .plot .pspr{height:32px}.estate-fields .plot .pspr img{max-width:32px;max-height:32px}.estate-pasture .pen .pen-t b{font-size:14px}.estate-supplies{gap:5px;padding:8px}.estate-supplies .btn{font-size:14px;padding:5px}.estate-supplies #farm-settings h3{font-size:16px;margin:8px 0}.estate-supplies .srow{padding:4px}
+ .farm-estate[data-section="fields"] .estate-pasture,.farm-estate[data-section="fields"] .estate-supplies,.farm-estate[data-section="pens"] .estate-fields,.farm-estate[data-section="pens"] .estate-supplies,.farm-estate[data-section="seeds"] .estate-land,.farm-estate[data-section="animals"] .estate-land{display:none}
+ .farm-estate:not([data-section="pens"]) .estate-action-group[data-zone="pens"],.farm-estate:not([data-section="fields"]) .estate-action-group[data-zone="fields"]{display:none}.farm-estate:not([data-section="pens"]) .estate-controls>p{display:none}
+ #app:has(.farm-estate){height:calc(var(--vh100,100vh) - 90px);min-height:0}#app:has(.farm-estate)>main{min-height:0;display:flex;flex-direction:column;overflow:hidden}#app:has(.farm-estate) #view{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}#app:has(.farm-estate) .farm-estate{flex:1;min-height:0}#app:has(.farm-estate) .page-help{display:none}
+}
+#combatnav .combat-entry .hubdot.live{left:0;right:auto;top:6px;bottom:6px;width:3px;height:auto;border-radius:2px;animation:none;box-shadow:none}
+.routed-locked{flex:none!important;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.routed-locked h3{margin:0}.routed-locked p{margin:0}.routed-locked img{max-width:48px;max-height:48px}
+@media(max-width:860px){
+ html.compact-skill-navigation .sidebar{display:contents!important}html.compact-skill-navigation .sidebar>*:not(#rail){display:none!important}html.compact-skill-navigation #hud{display:grid!important;grid-template-columns:40px minmax(90px,1fr) auto!important;gap:6px!important;padding:8px!important;margin-bottom:8px;min-height:0}
+ html.compact-skill-navigation #hud .h-hero{grid-column:1;grid-row:1;width:40px;height:40px}html.compact-skill-navigation #hud .h-name{grid-column:2;grid-row:1;width:auto;min-width:0}html.compact-skill-navigation #hud .h-name>small{display:none}html.compact-skill-navigation #hud .h-hp{margin-top:4px}html.compact-skill-navigation #hud .h-hp small{font-size:13px}
+ html.compact-skill-navigation #hud .h-stats{grid-column:3;grid-row:1;display:block}html.compact-skill-navigation #hud .h-btns{grid-column:1 / -1;grid-row:2;justify-content:flex-end}html.compact-skill-navigation #hud .h-task{grid-column:1 / -1;grid-row:3;min-height:38px;padding:5px}html.compact-skill-navigation #hud .h-task.idle{display:none}html.compact-skill-navigation #hud .h-btns .iconb{width:32px;height:32px}html.compact-skill-navigation #hud .hud-pet{display:none}
+ html.compact-skill-navigation #pagebar{margin:0 0 5px;min-height:32px}html.compact-skill-navigation #routebar{display:flex;align-items:center;gap:5px}
+ html.compact-skill-navigation #app:has(.beast-workspace){height:calc(var(--vh100,100vh) - 85px);min-height:0}html.compact-skill-navigation #app:has(.beast-workspace)>main{min-height:0;display:flex;flex-direction:column}html.compact-skill-navigation #view:has(.beast-workspace){flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}.beast-workspace{height:auto;min-height:0;flex:1}.beast-tabs{margin:4px 0 8px}.beast-tabs .btn:last-child{max-width:none}.beast-focus{flex-wrap:nowrap;flex:1}.beast-focus>div:last-child{min-width:0}.beast-focus h2{font-size:21px;margin:4px 0}.beast-focus .sm{font-size:14px}.beast-focus .beast-milestones{gap:4px}.beast-focus .tag{padding:2px 5px}.beast-focus .beast-portrait{flex-basis:48px}.beast-focus .beast-portrait img{max-width:48px;max-height:48px}#view:has(.beast-workspace) .page-help{display:none}
+ .estate-land{flex:1!important;height:100%}.estate-layout{flex:1;min-height:0}.estate-zones{flex:1;min-height:0}.estate-fields>.plots{height:100%;min-height:0}.estate-fields>.plots .plot{height:auto;min-height:60px!important}.estate-supplies{flex:1}.estate-controls{flex:none}.estate-scenery{min-height:45px;height:45px}.estate-fields .plot .pspr{height:28px}.estate-fields .plot .pspr img{max-height:28px;max-width:28px}
+}
+@media(max-width:860px){
+ #view:has(.scholarship-phone-controls)>.skillhero,#view:has(.scholarship-phone-controls)>.page-help{display:none}#view:has(.scholarship-phone-controls)>.scholarship-overview{display:none}#view:has(.scholarship-phone-controls[data-mode="slots"])>.scholarship-overview{display:block}#view:has(.scholarship-phone-controls[data-mode="slots"])>.scholarship-grid{display:none}.scholarship-phone-controls{display:flex;flex-direction:column;gap:6px}.scholarship-phone-controls .btnrow{justify-content:space-between}.scholarship-phone-controls .btn{font-size:14px;padding:6px 9px}.scholarship-grid{display:block!important}.scholarship-grid>[hidden]{display:none!important}.scholarship-grid .tech{min-height:0;height:auto;padding:12px;gap:8px}.scholarship-grid .tf{margin-top:12px}.scholarship-grid .th b{font-size:19px}.scholarship-grid p{margin:6px 0}.scholarship-overview>p,.scholarship-overview>.phead{display:none}.scholarship-overview .aslots{grid-template-columns:1fr;gap:8px}.scholarship-overview .aslot{padding:10px}.scholarship-overview #active-research h3{font-size:18px}
+}
+
+.estate-route-target{display:grid;grid-template-columns:40px 1fr;gap:5px;padding:8px;border:1px solid var(--brass);border-radius:8px}.estate-route-target img{width:40px;height:40px;grid-row:span 2}.estate-route-target .btn{grid-column:1 / -1}
+/* Compact navigation and a lower-priority ability kit (player request, 10 November). */
+@media(min-width:861px){
+ #app{grid-template-columns:180px minmax(0,1fr);gap:12px}
+ .sidebar .dock .dk{padding-left:6px;padding-right:6px;gap:6px}
+ #view>.combat-dashboard.combat-d{grid-template-columns:260px minmax(0,1fr)!important}
+ .combat-d .hunt-areas{padding:8px}
+ .combat-d .area-card{padding:8px}
+ .combat-d .area-head{gap:6px;flex-wrap:wrap}
+ .combat-d .quest-hunt{flex-wrap:wrap;padding:8px;gap:6px}
+ .combat-d .quest-hunt>span{min-width:110px}
+ .combat-d .encounter-list>.enc-row{gap:6px;padding:5px}
+ .combat-d .encounter-list>.enc-row>div{min-width:0}
+ .combat-d .combat-hud{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(200px,.65fr)}
+ .combat-d .combat-abils .kit-head{gap:6px;flex-wrap:wrap}
+ .combat-d .combat-abils .ab-slots{display:grid;grid-template-columns:1fr;gap:5px}
+ .combat-d .combat-abils .ab-tile{width:100%;min-height:40px;display:grid;grid-template-columns:28px minmax(0,1fr);column-gap:6px;text-align:left;padding:5px 7px}
+ .combat-d .combat-abils .ab-tile .ic{grid-row:span 2;width:24px;height:24px}
+ .combat-d .combat-abils .ab-tile b{white-space:normal;font-size:14px}
+ .combat-d .combat-abils .ab-tile small{font-size:13px}
+ .combat-d .combat-abils .ab-future-slot{color:var(--mute);font-size:13px}
+ .combat-d .combat-abils .ab-next{font-size:14px}
+}
+/* Storyboards: original town art, player-paced dialogue and explicit consequences. */
+.story-modal .m-card{width:min(1040px,calc(100% - 24px));max-height:calc(var(--vh100,100vh) - 36px);padding:18px;overflow:auto}.story-modal .m-card>h2{font-size:25px;margin:0 0 10px}.story-modal .m-body{overflow:visible;max-height:none}.story-modal .m-act{display:none}.story-scene{display:flex;flex-direction:column;gap:12px}.story-stage{position:relative;isolation:isolate;height:260px;overflow:hidden;border:1px solid var(--line2);border-radius:10px;background:var(--ground)}.story-landscape{width:100%;height:100%;object-fit:cover;image-rendering:pixelated;animation:story-camera 1.2s cubic-bezier(.2,.7,.3,1) both}.story-scene[data-shot="well"] .story-landscape{object-position:25% 80%}.story-scene[data-shot="gate"] .story-landscape{object-position:80% 55%}.story-scene[data-shot="kitchen"] .story-landscape{object-position:40% 35%}.story-location{position:absolute;top:12px;left:12px;padding:5px 10px;background:#0c171cde;border:1px solid #ac975d;color:#f9efd6;border-radius:8px;font-family:var(--f-display);z-index:2}.story-hero{position:absolute;width:96px;height:128px;object-fit:contain;image-rendering:pixelated;bottom:16px;left:24%;animation:story-arrive .55s ease-out both}.story-stage-person{position:absolute;right:18%;bottom:16px;z-index:2}.story-stage-person img{border:2px solid var(--brass);border-radius:10px;background:var(--panel)}.story-vignette{position:absolute;inset:0;pointer-events:none;background:linear-gradient(transparent 45%,#07151ba6)}.story-dialogue{display:flex;gap:14px;align-items:flex-start;padding:12px;border-left:3px solid var(--brass);background:var(--panel2);border-radius:8px}.story-portrait{flex:none;width:64px}.story-portrait img{max-width:64px;border-radius:8px}.story-dialogue>div{min-width:0}.story-line{font:500 21px/1.45 var(--f-body);margin:5px 0 0;outline:none;white-space:normal}.story-line:focus-visible{outline:1px solid var(--brass)}.story-controls{display:flex;align-items:center;justify-content:space-between;gap:10px}.story-controls small{font-size:14px;color:var(--mute)}.story-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}.story-choice.btn{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;text-align:left;gap:5px;padding:12px}.story-choice small{font:500 16px/1.3 var(--f-body);white-space:normal;color:var(--mute)}.story-remembered{display:block;margin-top:9px;color:var(--good);font-size:15px}.story-chapters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.story-chapter{display:flex;flex-direction:column;align-items:flex-start;text-align:left;white-space:normal}.story-chapter small{color:var(--mute);font-size:14px}.story-choice-record{font-size:15px;margin:6px 0}.story-restoration{position:absolute;inset:45px 10% 12px;display:flex;align-items:center;justify-content:center;gap:24px;z-index:3;background:color-mix(in srgb,var(--panel) 85%,transparent);border:1px solid var(--brass);border-radius:12px}.story-restoration>div{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--ink);font-size:16px}.story-restoration img{width:128px;height:128px;object-fit:contain;image-rendering:pixelated}.story-restoration>div:last-child img{animation:restoration-reveal .8s ease-out both}.story-repair-arrow{font-size:30px;color:var(--brass)}.restoration-feedback{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:none!important;padding:10px 12px;border:1px solid var(--good);border-radius:9px;background:var(--panel)}.restoration-feedback>span{flex:1}.restoration-feedback .ic{width:24px;height:24px;vertical-align:middle}.restoration-highlight{animation:restoration-focus 1.4s ease-out 2!important}
+@keyframes story-camera{from{transform:scale(1.04);filter:brightness(.75)}to{transform:scale(1);filter:brightness(1)}}@keyframes story-arrive{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}@keyframes restoration-reveal{from{opacity:0;transform:translateY(12px) scale(.9)}to{opacity:1;transform:none}}@keyframes restoration-focus{50%{box-shadow:0 0 0 5px #e4c166,0 0 24px #e4c166}}
+@media(max-width:860px){.story-modal .m-card{padding:12px;max-height:calc(var(--vh100,100vh) - 20px)}.story-modal .m-card>h2{font-size:21px}.story-stage{height:150px}.story-hero{width:48px;height:64px;left:20%;bottom:8px}.story-stage-person{right:12%;bottom:8px}.story-stage-person img{width:64px;height:64px}.story-dialogue{padding:9px;gap:9px}.story-portrait{width:40px}.story-portrait img,.story-portrait .portrait{width:40px!important;height:40px!important}.story-line{font-size:18px;line-height:1.35}.story-choices{grid-template-columns:1fr}.story-choice.btn{padding:9px;font-size:16px}.story-choice small{font-size:14px}.story-controls{flex-wrap:wrap}.story-controls small{order:2;width:100%;text-align:center}.story-chapters{grid-template-columns:1fr 1fr}.story-restoration{inset:35px 5px 5px;gap:16px}.story-restoration img{width:64px;height:64px}.story-restoration>div{font-size:14px;gap:2px}}
+.calm :is(.story-landscape,.story-hero,.story-restoration img,.restoration-highlight){animation:none!important}@media(prefers-reduced-motion:reduce){:is(.story-landscape,.story-hero,.story-restoration img,.restoration-highlight){animation:none!important}}
+/* Distinct farm workspaces, bounded tile heights and pages at every farm size. */
+.estate-section-tabs{margin:6px 0 10px}.estate-scenery{height:80px;min-height:80px;flex:none}.estate-zones{grid-template-columns:1fr!important;align-items:start}.estate-zones h3{justify-content:flex-start;gap:12px;flex-wrap:wrap}.estate-zones h3>span{margin-right:auto}.estate-zones h3 .estate-expand{max-width:230px;white-space:normal}.estate-fields,.estate-pasture{height:100%;align-content:start}.estate-fields>.plots{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))!important;grid-auto-rows:120px;flex:0 1 auto;align-content:start;gap:8px}.estate-fields .plot{height:120px!important;min-height:120px!important;max-height:120px;display:flex;flex-direction:column;justify-content:center;gap:4px}.estate-fields .plot .pspr{height:40px}.estate-pasture>.pens{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))!important;grid-auto-rows:150px;flex:0 1 auto;align-content:start;gap:8px}.estate-pasture .pen{height:150px;max-height:150px;display:grid;grid-template-columns:48px 1fr;align-content:center;column-gap:8px}.estate-pasture .pen>.pspr{grid-row:1}.estate-pasture .pen .pen-t{grid-column:2;grid-row:1;min-width:0}.estate-pasture .pen .pen-t small{font-size:13px}.estate-pasture .pen .pen-t b{font-size:15px}.estate-pasture .pen .pen-sell{font-size:14px}.estate-pasture .emptypen{display:flex;gap:5px;align-items:center;justify-content:center}.estate-pasture .emptypen small{font-size:14px;text-align:center}.estate-supply-tabs{margin-bottom:8px}
+.farm-estate:is([data-section="fields"],[data-section="seeds"]) :is(.estate-pasture,[data-zone="pens"]),.farm-estate:is([data-section="pens"],[data-section="animals"]) :is(.estate-fields,[data-zone="fields"]){display:none!important}
+@media(min-width:861px){html.short .estate-scenery{height:50px;min-height:50px}.estate-mobile-tabs{display:none!important}.estate-supply-tabs button{pointer-events:none}.estate-supply-tabs button:not(.on){display:none}.estate-fields>.plots{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))!important}.estate-pasture>.pens{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))!important}}
+@media(max-width:860px){.estate-section-tabs{display:none}.estate-scenery{height:40px;min-height:40px}.estate-fields>.plots{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows:100px;min-height:0!important;height:auto!important}.estate-fields>.plots .plot{height:100px!important;min-height:100px!important;max-height:100px}.estate-pasture>.pens{grid-template-columns:1fr!important;grid-auto-rows:140px;min-height:0!important;flex:none}.estate-pasture .pen{height:140px;max-height:140px}.estate-zones h3{gap:5px}.estate-expand{font-size:13px!important;padding:4px 6px!important}.estate-supplies .estate-supply-tabs{display:none}.estate-fields,.estate-pasture{padding:7px}}
+@media(min-width:861px){#app>main>#view:has(>.farm-estate){display:flex!important;flex-direction:column;overflow:hidden;gap:10px}#view>.farm-estate{height:auto;flex:1;min-height:0}#view:has(>.farm-estate)>.page-help{position:fixed;right:18px;bottom:14px;margin:0;z-index:6}.estate-supply-tabs{display:none!important}.estate-supply-title{margin:0 0 8px}}
+@media(max-width:860px){.estate-pasture>.pens{grid-auto-rows:120px}.estate-pasture .pen{height:120px;max-height:120px}}
+.estate-zones{align-items:stretch}.estate-fields,.estate-pasture{width:100%;min-width:0}
+@media(max-width:860px){.farm-estate[data-section="animals"] .estate-trough{display:none}.estate-supply-title{font-size:18px;margin:0 0 5px}}
+@media(max-width:860px){#app:has(.farm-estate){height:calc(var(--vh100,100vh) - 100px);padding-bottom:0!important}.estate-supplies #livestock-market>h3{display:none}}
+
+.story-line:focus-visible{outline:none}
+@media(min-width:861px){.mobile-skill-switch,.mobile-combat-switch{display:none!important}}
+.estate-section-tabs .btn.on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 15%,var(--panel2));box-shadow:inset 0 -2px var(--brass)}
+.estate-mobile-tabs .btn:is([data-a="fields"],[data-a="seeds"]){border-bottom-color:#c6a16d}.estate-mobile-tabs .btn:is([data-a="pens"],[data-a="animals"]){border-bottom-color:#8bb277}
+.estate-pages{align-items:center;white-space:nowrap}.estate-pages>span{font:500 14px var(--f-ui);color:var(--ink)}
+.story-error{color:var(--bad);font-size:16px;margin:0}
+/* Distinct farm destinations and a complete seed palette. */
+.estate-section-tabs{gap:10px}.estate-section-tabs .btn{min-height:58px;padding:7px 14px;gap:10px;justify-content:flex-start;transition:background-color .2s,border-color .2s,box-shadow .2s}.estate-section-tabs .btn>span{display:flex;flex-direction:column;align-items:flex-start;gap:2px}.estate-section-tabs .btn b{font-size:17px}.estate-section-tabs .btn small{font:500 14px var(--f-body);color:var(--mute)}.estate-section-tabs .btn img{width:32px;height:32px;object-fit:contain;flex:none;image-rendering:pixelated}.estate-section-tabs [data-a="fields"]{border-color:#a78955;border-left:4px solid #c6a15c;border-radius:6px;background:linear-gradient(135deg,color-mix(in srgb,#b68b41 20%,var(--panel)),var(--panel2))}.estate-section-tabs [data-a="pens"]{border-color:#5f9a86;border-left:4px solid #8cc4a8;border-radius:12px;background:linear-gradient(135deg,color-mix(in srgb,#589d82 20%,var(--panel)),var(--panel2))}.estate-section-tabs [data-a="fields"].on{border-color:#e2b967;box-shadow:inset 0 -3px #e2b967;background:linear-gradient(135deg,color-mix(in srgb,#bd944e 30%,var(--panel)),var(--panel2))}.estate-section-tabs [data-a="pens"].on{border-color:#a6d9be;box-shadow:inset 0 -3px #a6d9be;background:linear-gradient(135deg,color-mix(in srgb,#599d80 30%,var(--panel)),var(--panel2))}
+.estate-supplies .seed-choices{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:6px 0}.estate-supplies .seed-choice{min-width:0;min-height:46px;padding:5px 7px;gap:6px}.estate-supplies .seed-choice>span{min-width:0;font-size:15px;line-height:1.15;white-space:normal}.estate-supplies .seed-choice small{font-size:13px;line-height:1.15}.estate-supplies .seed-choice img{width:32px;height:32px;flex:none}
+@media(min-width:861px){.farm-estate:is([data-section="fields"],[data-section="seeds"]) .estate-layout{grid-template-columns:minmax(0,1fr) clamp(400px,38%,560px)}}
+@media(max-width:860px){.estate-mobile-tabs .btn{gap:4px}.estate-mobile-tabs .ic{width:18px;height:18px}.estate-supplies .seed-choice{padding:5px;min-height:48px}.estate-supplies .seed-choice>span{font-size:14px}.estate-supplies .seed-choice small{font-size:13px}}
+.estate-layout{view-transition-name:farm-workspace}::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}::view-transition{pointer-events:none}::view-transition-group(farm-workspace){animation-duration:.3s;overflow:clip;border-radius:12px}::view-transition-old(farm-workspace){animation:farm-workspace-out .22s ease-out both}::view-transition-new(farm-workspace){animation:farm-workspace-in .3s cubic-bezier(.2,.7,.3,1) both}
+@keyframes farm-workspace-out{to{opacity:0;transform:translateX(calc(var(--estate-enter-x,16px) * -.5))}}@keyframes farm-workspace-in{from{opacity:0;transform:translateX(var(--estate-enter-x,16px))}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){::view-transition-group(farm-workspace),::view-transition-old(farm-workspace),::view-transition-new(farm-workspace){animation:none!important}}
+@media(max-width:860px){.estate-mobile-tabs .btn{padding:5px 7px}.estate-mobile-tabs img{width:32px;height:32px;object-fit:contain}.estate-pasture>.pens{grid-auto-rows:110px}.estate-pasture .pen{height:110px;max-height:110px}}
+.estate-supplies #farm-settings>h3{display:none}.estate-supplies #farm-settings{margin-top:4px;padding-top:7px;border-top:1px solid var(--line)}
+/* Settings: five useful destinations, with the original controls arranged across the available width. */
+.settings-navigation{margin:0;padding:12px 16px;flex:none!important}.settings-navigation h1{font-size:23px;margin:0 0 9px}.settings-navigation nav{display:flex;gap:8px;flex-wrap:wrap}.settings-navigation .btn{gap:8px;padding:8px 14px}.settings-navigation .btn .ic{width:24px;height:24px}.settings-navigation .btn.on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 17%,var(--panel2));box-shadow:inset 0 -2px var(--brass)}
+.settings-workspace{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px;align-content:start;align-items:start;min-width:0}.settings-workspace>.panel{margin:0;padding:14px;min-width:0}.settings-card h2{font-size:20px}.settings-card h3{font-size:16px;margin:4px 0 8px}.settings-card .stack{gap:12px}.settings-card .stack>.stack{gap:12px}.settings-card .tog{align-items:flex-start;min-width:0;line-height:1.3}.settings-card .tog .sw{flex:none;margin-top:3px}.settings-card .tog small{display:block;white-space:normal;line-height:1.3;color:var(--mute);font-size:14px;margin-top:3px}.settings-card .tog b{font-size:16px}.settings-card .slide{grid-template-columns:minmax(90px,1fr) minmax(75px,1fr) 42px;gap:8px;font-size:15px}.settings-card .slide input{min-width:0;width:100%}.settings-card .seg{display:flex;flex-wrap:wrap;gap:5px}.settings-card .letter-opts{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.settings-card .letter-opt{padding:8px;min-width:0}.settings-card .letter-opt span{font-size:15px}.settings-card .bd-opts{display:grid;grid-template-columns:1fr 1fr;gap:7px}.settings-card .bd-opt{min-width:0;align-items:stretch}.settings-card .bd-opt img{width:100%;height:auto;aspect-ratio:16/9}.settings-card .bd-opt span{font-size:14px}.settings-field{padding-top:10px;border-top:1px solid var(--line)}.settings-field>.btnrow{margin-bottom:6px}.settings-card .nameedit{display:flex;flex-direction:column;gap:8px}.settings-card .nameedit input{width:100%;box-sizing:border-box}.settings-card .keys{margin:0;column-gap:10px}.settings-card .keys dd{margin:0;font-size:15px}.settings-card p{margin:0;line-height:1.4}.settings-card .btnrow{flex-wrap:wrap}.settings-card .tm-grid{grid-template-columns:1fr;gap:8px}.settings-card .tm-c{padding:8px}.settings-card .tm-big{font-size:22px}.settings-danger{border-color:color-mix(in srgb,var(--bad) 60%,var(--line))}.settings-card .bkrow{gap:7px}.settings-card .bkrow>span{min-width:0;overflow-wrap:anywhere}
+@media(min-width:861px){#app>main>#view:has(>.settings-navigation){display:flex!important;flex-direction:column;gap:12px}.settings-workspace{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;padding:1px 2px 8px}.settings-workspace[data-settings-group="gameplay"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:860px){.settings-navigation{padding:10px}.settings-navigation nav{gap:5px}.settings-navigation .btn{padding:7px 9px;font-size:15px}.settings-navigation .btn .ic{width:20px;height:20px}.settings-workspace{grid-template-columns:1fr;gap:10px}.settings-workspace>.panel{padding:12px}.settings-card .letter-opt span{font-size:14px}}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -4889,6 +5000,33 @@ const unl = (sk, l, name) => { if (l <= 1) return; ((D.UNL[sk] = D.UNL[sk] || {}
 for (const v of D.VOYAGES) unl('sailing', v.lvl, `Voyage to ${v.name}`);
 [[5, 'Sea legs: Fishing 0.3% faster per Sailing level']].forEach(([l, n]) => unl('sailing', l, n));
 [[10, 'Lay traps in Mossbarrow'], [20, 'Lay traps in Saltmere'], [30, 'Lay traps in Ironpeak Hold'], [40, 'Lay traps in Gloomfen'], [50, 'Lay traps in Emberfall'], [60, 'Lay traps in Skyreach'], [70, 'Lay traps in the Hollow'], [10, 'Companion bonuses +5%'], [25, 'Farm animals produce faster'], [30, 'Companion bonuses +15%'], [50, 'Companion bonuses +25%'], [75, 'Companion bonuses +37%'], [99, 'Companion bonuses +50%']].forEach(([l, n]) => unl('beastmastery', l, n));
+})();
+
+</script>
+<script>
+/* Beast bonds: additive content. Existing companion IDs, bonuses and tricks remain valid. */
+(() => {
+const D = window.DQ.data;
+D.BOND_XP = [0, 25, 100, 300, 750, 1400, 2400, 3800, 5600, 8000];
+D.BOND_MILESTONES = [2, 4, 6, 8, 10];
+D.BOND_PASSIVE_STEP = .006; // Five upgrades total +3 percentage points.
+D.BEAST_SPECIES = {
+  bond_wolf: { name: 'Hearthwolf', kind: 'Wolf', hero: 15, town: 'willowbrook', rarity: 'common', passive: 'crit', critDamage: 1.5, evolvedCritDamage: 2, base: .05, damage: .85, evolution: 'Moonmane', col: '#96acba' },
+  bond_boar: { name: 'Bramble boar', kind: 'Boar', hero: 18, town: 'mossbarrow', rarity: 'common', passive: 'coin', base: .08, damage: 1, evolution: 'Briarback', col: '#a47b55' },
+  bond_owl: { name: 'Duskwatch owl', kind: 'Owl', hero: 22, town: 'willowbrook', rarity: 'rare', passive: 'xpAll', base: .10, damage: .7, evolution: 'Starwarden', col: '#b0a0c8' },
+  bond_bear: { name: 'Honeyclaw', kind: 'Bear', hero: 26, town: 'mossbarrow', rarity: 'rare', passive: 'boss', base: .05, damage: 1.15, evolution: 'Sunkeeper', col: '#bb8950' }
+};
+for (const [id, s] of Object.entries(D.BEAST_SPECIES)) {
+  const p = { id, name: s.name, kind: s.kind, col: s.col, collectible: true, bonus: {}, text: 'A bond shaped by your adventures.', src: { type: 'beasttrap', hero: s.hero, town: s.town } };
+  D.PETS.push(p); D.PET[id] = p;
+}
+D.BEAST_TRAPS = {
+  basic: { name: 'Basic trap', cost: 40, hours: 1, common: .4, rare: .1, consolation: 5 },
+  iron: { name: 'Iron trap', cost: 120, hours: 2, common: .6, rare: .3, consolation: 10 },
+  rune: { name: 'Rune trap', item: 'rune_trap', hours: 4, common: .8, rare: .6, consolation: 20 }
+};
+D.ITEMS.rune_trap = { id: 'rune_trap', name: 'Rune trap', type: 'resource', ic: 'beastmastery', col: '#64bdd2', val: 80, sub: 'Rare regional boss drop. Send it from Beastmastery; a four-hour expedition has the best capture odds.' };
+for (const m of D.MONLIST.filter(m => m.boss)) if (!m.drops.some(d => d[0] === 'rune_trap')) m.drops.push(['rune_trap', [1, 1], .05]);
 })();
 
 </script>
@@ -8705,6 +8843,42 @@ if (A.ICON) Object.assign(A.ICON, ICO);
 
 </script>
 <script>
+/* Original 32px beast silhouettes and structural evolved forms, in the shared pixel palette. */
+(() => {
+const Q=window.DQ,A=Q.pixelArt,D=Q.data;if(!A)return;
+const {Spr,ramp,R}=A,eye=(s,x,y)=>{s.fix(x,y,'#291d2b');s.fix(x,y-1,'#fff3cf');};
+const draw=(kind,evolved=false)=>{
+ const s=Spr(32,32),fur=ramp({wolf:'#98aab6',boar:'#986b4b',owl:'#9583ad',bear:'#b7844d'}[kind]),dark=ramp('#574257'),cream=ramp('#e8d4a4'),gold=R.gold;
+ if(kind==='owl'){
+  if(evolved){s.poly([[12,18],[1,11],[3,23],[12,25]],fur);s.poly([[20,18],[30,10],[28,24],[20,26]],fur);}
+  s.ell(16,20,8,10,fur);s.ell(16,12,9,8,fur);s.poly([[8,8],[6,2],[13,6]],fur);s.poly([[19,6],[26,2],[24,10]],fur);
+  s.ell(12,12,4,5,cream);s.ell(20,12,4,5,cream);eye(s,12,12);eye(s,20,12);s.poly([[15,15],[18,15],[16,18]],gold);
+  for(let y=20;y<28;y+=3){s.fix(13,y,dark.base);s.fix(18,y+1,dark.base);}s.rect(10,29,5,2,gold);s.rect(18,29,5,2,gold);
+  if(evolved){s.poly([[11,5],[16,0],[21,5],[16,7]],gold);s.fix(16,3,'#e8f4ff');}
+ }else{
+  const bear=kind==='bear',boar=kind==='boar';
+  s.ell(17,bear?20:21,bear?10:11,bear?9:7,fur);
+  for(const x of bear?[8,22]:[9,22])s.rect(x,24,bear?5:3,7,dark);
+  if(kind==='wolf'){s.poly([[24,20],[31,13],[30,24],[25,27]],fur);s.poly([[10,11],[6,2],[4,14]],fur);s.poly([[16,11],[15,3],[20,13]],fur);}
+  if(boar){s.poly([[23,17],[29,12],[30,18],[26,21]],dark);for(let x=11;x<25;x+=3)s.poly([[x,16],[x-1,evolved?7:12],[x+3,16]],dark);}
+  if(bear){s.ell(9,8,4,4,fur);s.ell(21,8,4,4,fur);s.ell(9,8,2,2,dark);s.ell(21,8,2,2,dark);}
+  s.ell(13,15,bear?9:8,bear?8:7,fur);s.ell(boar?6:8,19,boar?5:4,3,cream);s.fix(boar?3:5,18,dark.out);eye(s,10,13);eye(s,17,13);
+  if(boar){s.poly([[5,23],[1,evolved?13:17],[3,23]],cream);s.poly([[11,24],[13,evolved?15:19],[14,24]],cream);}
+  if(evolved&&kind==='wolf'){s.poly([[18,13],[25,9],[23,16],[28,18],[23,22],[26,26],[18,25]],cream);s.ell(14,23,3,3,gold);}
+  if(evolved&&bear){s.poly([[5,21],[1,15],[8,18]],cream);s.poly([[23,18],[30,14],[28,23]],cream);s.ell(17,24,5,3,gold);s.fix(17,23,'#fff3cf');}
+ }
+ return s;
+};
+for(const [id,k]of [['bond_wolf','wolf'],['bond_boar','boar'],['bond_owl','owl'],['bond_bear','bear']]){A.PET_SPECS[id]=()=>draw(k);A.PET_SPECS['evolved:'+id]=()=>draw(k,true);}
+/* Legacy companions retain their anatomy and acquire a visible bonded mantle, crest or flight feathers. */
+Q.registerBondArt=()=>{for(const p of D.PETS){if(D.BEAST_SPECIES[p.id]||A.PET_SPECS['evolved:'+p.id])continue;const id=p.id,base=()=>A.creatureSprite(A.hasCreature(id)?id:p.mon);A.PET_SPECS['evolved:'+id]=()=>{const s=base();if(!s)return null;const g=R.gold;const bird=/owl|bird|moth|kite|chick/i.test(p.kind+' '+p.name);if(bird){s.poly([[3,17],[0,9],[7,15]],g);s.poly([[25,15],[31,8],[29,20]],g);}else{s.poly([[9,24],[6,16],[12,20],[16,18],[22,21],[25,16],[23,25]],g);}s.fix(16,20,'#fff3cf');return s;};}};Q.registerBondArt();
+const item0=A.itemSprite;
+A.itemSprite=id=>{if(id!=='rune_trap')return item0(id);const s=Spr(16,16),iron=ramp('#708c9b'),blue=ramp('#6ad2d5');s.poly([[2,7],[7,3],[14,7],[14,13],[7,15],[2,12]],iron);for(const x of [4,7,10,13])s.line(x,7,x,12,blue);s.poly([[5,2],[8,0],[11,2],[8,5]],blue);s.fix(8,2,'#fff3cf');s.line(2,8,13,8,null,R.gold.base);return s;};
+A.itemUrl=id=>A.url('item:'+id,()=>A.itemSprite(id));
+})();
+
+</script>
+<script>
 /* Native 48px interface symbols. Detailed imagery at the existing UI sizes. */
 (() => {
 const Q=window.DQ,INK='#29343b',PAPER='#e8d9b2',GOLD='#d8b66b',STEEL='#a9bec4',WOOD='#a68358',BLUE='#77a9c2',GREEN='#85b18a',RED='#ce8277';
@@ -8809,11 +8983,11 @@ DQ.newState = (name = 'Adventurer', look) => {
     q: {}, ach: {}, seen: {}, unlocked: {},
     unlockRules: 2,
     stats: { carve: 0, voyage: 0, train: 0, harvest: 0, collect: 0, pets: 0, furnish: 0, hired: 0, catch: 0, chop: 0, mine: 0, thieve: 0, cook: 0, burn: 0, smelt: 0, smith: 0, craft: 0, alch: 0, brew: 0, enchant: 0, kill: 0, earned: 0, deaths: 0, bought: 0, sold: 0, equipped: 0, tools: 0, rare: 0 },
-    settings: { masterVol: 1, ambience: true, ambVol: .45, theme: 'dark', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
+    settings: { masterVol: 1, ambience: true, ambVol: .45, theme: 'dark', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, storyScenes: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
     style: { melee: 'aggressive', ranged: 'offense', magic: 'offense' }, spell: 'spark',
     act: null, log: [], tut: { done: {}, hidden: false },
     gameTime: 0, farm: { plots: [{ crop: null }, { crop: null }, { crop: null }], plotsBought: 3, animals: [], pensBought: 2, feed: 0, autoReplant: true, last: 'potato', next: null },
-    pets: { owned: {}, active: null }, hunt: { area: null, target: null, encounters: 0 }, enchants: {}, house: { owned: false, rooms: {}, furn: {}, wall: [] }, workers: [], hire: { cands: [], at: -1e9 }, beast: { kills: {}, drops: {} },
+    pets: { owned: {}, active: null, tracks: {}, events: [], expedition: null, bondVersion: 1 }, hunt: { area: null, target: null, encounters: 0 }, enchants: {}, house: { owned: false, rooms: {}, furn: {}, wall: [] }, workers: [], hire: { cands: [], at: -1e9 }, beast: { kills: {}, drops: {} },
   };
 };
 DQ.S = DQ.newState();
@@ -8829,6 +9003,7 @@ const merge = (base, over) => {
 };
 const record = value => value && typeof value === 'object' && !Array.isArray(value);
 function candidateState(o) {
+  if (DQ.prepareBeastSave) o = DQ.prepareBeastSave(o);
   if (!record(o) || o.v !== 2 || !record(o.xp)) throw new Error('Unsupported save');
   const base = DQ.newState(); base.equip = {}; base.inv = {};
   function checkShape(value, expected) {
@@ -8874,7 +9049,7 @@ function candidateState(o) {
   }
   const validAction = a => {
     if (!record(a)) return false;
-    const known = a.kind === 'recipe' ? D.RECIPES[a.id] : a.kind === 'fight' ? D.MON[a.id] : a.kind === 'alch' ? D.ITEMS[a.id] : D.NODE[a.kind + ':' + a.id];
+    const known = a.kind === 'recipe' ? D.RECIPES[a.id] : a.kind === 'fight' ? D.MON[a.id] : a.kind === 'alch' ? D.ITEMS[a.id] : a.kind === 'sail' ? D.VOYAGE?.[a.id] : a.kind === 'train' ? (D.PET[a.id] || (String(a.id).startsWith('lure:') && D.TOWN[String(a.id).slice(5)])) : D.NODE[a.kind + ':' + a.id];
     return !!known && (!a.pace || !!D.PACE[a.pace]) && ['count', 'elapsed', 'progress', 'lvlTarget'].every(k => a[k] === undefined || (Number.isFinite(a[k]) && a[k] >= 0));
   };
   if (result.act && !validAction(result.act)) throw new Error('Invalid active task');
@@ -8894,6 +9069,7 @@ DQ.load = () => {
   } catch (e) { DQ.saveHealth = 'The saved hero could not be loaded. Keep a copy before starting again.'; return false; }
 };
 function migrate(S) {
+  if (DQ.migrateBeasts) DQ.migrateBeasts(S);
   /* Mossbarrow was added between Willowbrook and Saltmere: keep later roads open for older saves */
   const ids = D.TOWNS.map(t => t.id); let last = -1; ids.forEach((id, i) => { if (S.towns[id]) last = i; });
   for (let i = 0; i < last; i++) if (!S.towns[ids[i]]) S.towns[ids[i]] = { visited: false, boss: false };
@@ -9818,7 +9994,7 @@ function announceQuests() {
   if (!fresh.length) return;
   fresh.forEach(q => S().seen['q:' + q.id] = 1);
   if (DQ.firstRun) return;
-  fresh.filter(q => q.main).forEach(q => { const s = D.SK[q.unlocks]; DQ.notify({ kind: 'unlock', key: 'mq:' + q.id, icon: q.unlocks, col: s.col, title: `Main quest: ${q.name}`, text: `Learn ${s.name}. Speak to ${q.giver} in ${D.TOWN[q.town].name}.`, action: { label: 'View quest', fn: () => { DQ.ui.questTab = 'available'; DQ.go('quests'); } }, sound: 'unlock', ttl: 14000, burst: true }); });
+  fresh.filter(q => q.main && D.SK[q.unlocks]).forEach(q => { const s = D.SK[q.unlocks]; DQ.notify({ kind: 'unlock', key: 'mq:' + q.id, icon: q.unlocks, col: s.col, title: `Main quest: ${q.name}`, text: `Learn ${s.name}. Speak to ${q.giver} in ${D.TOWN[q.town].name}.`, action: { label: 'View quest', fn: () => { DQ.ui.questTab = 'available'; DQ.go('quests'); } }, sound: 'unlock', ttl: 14000, burst: true }); });
   fresh = fresh.filter(q => !q.main); if (!fresh.length) { DQ.emit('quests'); return; }
   DQ.notify({ kind: 'quest', key: 'qnew', icon: 'quest', col: '#d8a64a', title: fresh.length === 1 ? 'New quest available' : `${fresh.length} new quests available`, text: fresh.length === 1 ? `${fresh[0].name}, from ${fresh[0].giver}.` : fresh.slice(0, 2).map(q => q.name).join(', ') + (fresh.length > 2 ? '…' : ''), action: { label: 'View quests', fn: () => DQ.go('quests') }, sound: 'notify', ttl: 10000 });
   DQ.emit('quests');
@@ -10110,6 +10286,7 @@ function combatRound() {
     if (dealt && U.stun && chance(.12)) { f.stun = 1; fxHit('stun'); }
     if (dealt && U.poison) { f.poison = Math.min(3, (f.poison || 0) + 1); fxHit('poison'); }
     if (dealt && U.curse && sty === 'magic') { f.curse = Math.min(3, (f.curse || 0) + 1); fxHit('curse'); }
+    if (DQ.beastHeroHit) dealt = DQ.beastHeroHit(dealt, m, f);
   }
   /* XP counts the damage the creature could actually take: overkill on weak creatures teaches nothing extra */
   const xpDealt = Math.min(dealt, Math.max(0, f.hp));
@@ -10121,11 +10298,12 @@ function combatRound() {
   DQ.sfx(sty === 'ranged' ? 'bow' : sty === 'magic' ? 'cast' : dealt ? 'hit' : 'miss');
   if (xpDealt) {
     let first = null;
-    DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, xpDealt * per); if (!i) first = [sk, x]; });
-    DQ.addXp('hitpoints', xpDealt * 1.33);
+    DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, xpDealt * per); f.heroXp = (f.heroXp || 0) + x; if (!i) first = [sk, x]; });
+    f.heroXp = (f.heroXp || 0) + DQ.addXp('hitpoints', xpDealt * 1.33);
     if (first) DQ.floatAt(document.getElementById('av-foe'), `${ico(first[0])}+${fmt(first[1])} XP`, D.SK[first[0]].col);
   }
   if (f.hp <= 0) return kill(m);
+  if (DQ.beastAttack) { f.hp -= DQ.beastAttack(f, m); if (f.hp <= 0) return kill(m); }
   /* the monster attacks on its own clock: faster weapons get more swings in between */
   f.mt = (f.mt || 0) + (DQ.act ? DQ.act.dur * D.PACE[DQ.act.pace || 'steady'].speed : 2000);
   const clock = U.slow ? 2300 : 2000; if (U.slow) fxHit('slow');
@@ -10180,6 +10358,8 @@ function monsterAttack(f, m, ps, sty) {
 const beastNote = (key, id) => { const B = S().beast; const T = B[key] = B[key] || {}; T[id] = (T[id] || 0) + 1; };
 function kill(m) {
   const f = DQ.fight;
+  if (DQ.beastVictory) DQ.beastVictory(f, m);
+  if (!DQ.sim.on && !DQ.forecasting) DQ.emit('foedefeated', m);
   if (f && !DQ.forecasting) { const wr = DQ.weakOf(m, f); if (f.lastEl && wr.weak.includes(f.lastEl)) beastNote('weakWins', m.id); } S().stats.kill++; if (DQ.act) DQ.act.count++;
   const c = Math.round(rnd(m.coins[0], m.coins[1]) * DQ.coinMult()); DQ.addCoins(c);
   const loot = c ? [`${fmt(c)} coins`] : [], got = [], drops = [];
@@ -10242,6 +10422,7 @@ function kill(m) {
     if (!DQ.sim.on) { DQ.log(`You encounter ${/^[AEIOU]/.test(next.name) ? 'an' : 'a'} ${next.name.toLowerCase()}.`); DQ.emit('encounter', next); }
   } else f.hp = m.hp;
   f.round = 0;
+  f.heroXp = 0; // Keep the companion cadence across consecutive encounters.
 }
 
 /* ---------- Dispatch ---------- */
@@ -10417,7 +10598,7 @@ DQ.resumeAfterLoad = () => {
   if (s) {
     try {
       let ok = false; const k = s.kind;
-      if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town; else ok = !!D.NODE[k + ':' + s.id] && DQ.nodeHere(D.NODE[k + ':' + s.id]);
+      if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town; else if (EXT[k]) ok = !EXT[k].check(s.id); else ok = !!D.NODE[k + ':' + s.id] && DQ.nodeHere(D.NODE[k + ':' + s.id]);
       if (ok) { DQ.act = { kind: k, id: s.id, area: s.area || null, target: s.target || null, questTarget: !!s.questTarget, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0, progress: s.progress || 0 }; DQ.act.dur = DQ.actDur(DQ.act); DQ.act.t0 -= DQ.act.progress; if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
     } catch (e) {}
     if (!DQ.act) S().act = null;
@@ -10458,7 +10639,7 @@ DQ.fx = () => {
   f.dmg += f.trophy * Object.values(S().towns).filter(t => t.boss).length;
   const ap = S().pets.active && D.PET[S().pets.active];
   if (ap) {
-    const m = (1 + .25 * (DQ.petLevel(ap.id) - 1)) * (DQ.beastMult ? DQ.beastMult() : 1), b = ap.bonus;
+    const m = (1 + .25 * (Math.min(5, DQ.petLevel(ap.id)) - 1) + .05 * Math.max(0, DQ.petLevel(ap.id) - 5)) * (DQ.beastMult ? DQ.beastMult() : 1), b = ap.bonus;
     if (b.xpAll) f.xpAll += b.xpAll * m; if (b.coin) f.coin += b.coin * m; if (b.dmg) f.dmg += b.dmg * m; if (b.dr) f.dr += b.dr * m; if (b.heal) f.heal += b.heal * m; if (b.speed) f.speedAll += b.speed * m;
     Object.entries(b.xp || {}).forEach(([k, v]) => f.xp[k] = (f.xp[k] || 0) + v * m);
   }
@@ -10475,10 +10656,11 @@ DQ.packMax = () => DQ.PACK_SLOTS + DQ.fx().pack;
 DQ.coinMult = () => 1 + DQ.fx().coin + (DQ.uniqueFx && DQ.uniqueFx().fortune ? .05 : 0);
 
 /* ---------- Pets ---------- */
-DQ.awardPet = id => {
+DQ.awardPet = (id, options = {}) => {
   const p = D.PET[id], o = S().pets.owned; if (!p || o[id]) return false;
   o[id] = { aff: 0, found: Date.now() }; S().stats.pets = Object.keys(o).length;
   if (!S().pets.active) { S().pets.active = id; DQ.fxDirty(); }
+  if (options.quiet) { DQ.achDirty = true; return true; }
   const active = S().pets.active === id;
   DQ.notify({ kind: 'unlock', key: 'pet:' + id, icon: 'paw', col: p.col, title: `New creature: ${p.name}!`, text: `A ${p.kind.toLowerCase()} has joined your collection. ${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, sound: 'gem', burst: true, ttl: 14000,
     popup: (DQ.sim && DQ.sim.on) || DQ.forecasting ? null : { title: `A new companion: ${p.name}!`, body: `<div class="pet-pop" style="--c:${p.col}"><span class="pet-pop-art">${(() => { try { return DQ.petSprite ? DQ.petSprite(p, 128) : ''; } catch (e) { return ''; } })()}</span><p><b>${DQ.esc(p.name)}</b> the ${DQ.esc(p.kind.toLowerCase())} has joined you.</p><p class="pet-pop-fx">${DQ.esc(p.text)}.</p><p class="sm dim">${active ? 'They are your active companion now.' : 'Make them your companion to get this bonus.'}</p></div>`,
@@ -11356,7 +11538,7 @@ const B = UI.B = {
   count: (e, a) => set(e, fmtK(DQ.have(a))),
   ing: (e, a, b) => { const n = DQ.have(a); set(e, `${fmtK(n)}/${b}`); e.classList.toggle('bad', n < +b); },
   fhp: e => { if (DQ.fight) e.style.width = clamp(DQ.fight.hp / D.MON[DQ.fight.id].hp * 100, 0, 100) + '%'; },
-  fhptxt: e => { if (DQ.fight) set(e, `${Math.max(0, DQ.fight.hp)} / ${D.MON[DQ.fight.id].hp} health`); },
+  fhptxt: e => { if (DQ.fight) set(e, `${Math.ceil(Math.max(0, DQ.fight.hp))} / ${D.MON[DQ.fight.id].hp} health`); },
   qbar: (e, a, b) => { const q = D.QM[a], st = S().q[a]; e.style.width = clamp(DQ.objProg(q, st, +b) / q.obj[b].n * 100, 0, 100) + '%'; },
   qtxt: (e, a, b) => { const q = D.QM[a], st = S().q[a]; set(e, `${fmt(DQ.objProg(q, st, +b))} / ${fmt(q.obj[b].n)}`); },
   qall: (e, a) => { const q = D.QM[a], st = S().q[a]; let d = 0, t = 0; q.obj.forEach((o, i) => { d += Math.min(o.n, DQ.objProg(q, st, i)); t += o.n; }); e.style.width = (d / t * 100) + '%'; },
@@ -11470,7 +11652,7 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
   const action = `<div class="activity-actions">${choice.away?`<button class="btn primary" data-do="taskmap" data-a="${choice.town}">View ${esc(D.TOWN[choice.town].name)}</button>`:''}<button class="btn primary task-primary" data-do="act" data-a="${kind}" data-b="${choice.id}" ${!running && choice.blocked ? 'disabled' : ''}>${running ? kind === 'fight' ? 'Retreat' : 'Stop' : choice.blackout ? 'Locked' : esc((verb?verb+' ':'')+choice.name.replace(/^(Cook|Bars|Weapons|Armour) · /,''))}</button>${DQ.planUnlocked && DQ.planUnlocked() ? `<button class="btn" data-do="queueadd" data-a="${kind}" data-b="${choice.id}" ${choice.locked||choice.away ? 'disabled' : ''}>Queue</button>` : ''}</div>`;
   const cards = `<section class="panel activity-choices"><div class="phead"><h2>${kind==='fight'?'Choose an opponent':kind==='recipe'?'Choose what to make':kind==='alch'?'Choose an item':({fish:'Fish catalogue',wood:'Trees',mine:'Ore deposits',thieve:'Targets',sail:'Islands',train:'Traps and companions'}[kind]||'Choose your spot')}</h2><small>${choices.some(c=>c.town)?`${choices.length} resources · all regions`:D.TOWN[S().town].name}</small></div>${UI.taskToolbar[key] || ''}<div class="illustrated-choices">${choices.filter(c=>c.visible!==false).map(c=>{
     const working=DQ.act&&DQ.act.kind===kind&&DQ.act.id===c.id;
-    return `<button class="illustrated-card ${working?'active':''} ${choice.id===c.id?'selected':''} ${c.locked?'locked':''} ${c.missing?'missing':''}" data-do="taskselect" data-a="${kind}" data-b="${c.id}" data-page="${key}" aria-pressed="${choice.id===c.id}" ${c.locked?`aria-disabled="true" data-tip="text:${esc(c.reason||'Not unlocked yet')}"`:''}>
+    return `<button data-task-id="${c.id}" class="illustrated-card ${working?'active':''} ${choice.id===c.id?'selected':''} ${c.locked?'locked':''} ${c.missing?'missing':''}" data-do="taskselect" data-a="${kind}" data-b="${c.id}" data-page="${key}" aria-pressed="${choice.id===c.id}" ${c.locked?`aria-disabled="true" data-tip="text:${esc(c.reason||'Not unlocked yet')}"`:''}>
       <span class="choice-art">${art(c,96)}</span>${!c.locked && DQ.gearMark ? (g => g && D.ITEMS[g] && D.ITEMS[g].slot ? DQ.gearMark(g) : '')(c.yieldId || (c.artKind === 'item' ? c.artId || c.id : null)) : ''}<b>${c.locked?'???':esc(c.name)}</b><small>${c.locked?`${ico('lock')}<span>${esc(c.short||String(c.reason||'Not unlocked yet').replace(/^Requires [A-Za-z ]+? (\d+)/,'Lv $1').replace(/^Requires /,''))}</span>`:c.caption||esc(c.reason||'')}</small>${c.locked?'':`<span class="choice-state">${working?'● Working':c.stateText?(choice.id===c.id&&!c.locked&&!c.missing?'✓ Selected · ':'')+c.stateText:c.locked?'Locked':c.away?'Travel required':choice.id===c.id?'✓ Selected':'Available'}</span>`}${working?`<span class="bar prog"><i data-prog="${kind}:${c.id}"></i></span>`:''}</button>`;
   }).join('') || '<p class="dim">No recipes match. Try another category.</p>'}</div></section>`;
   if(kind==='fight')return `<section class="panel encounter-controls"><div class="phead"><h2>${esc(choice.name)}</h2><small>Combat <b data-b="combat"></b></small></div>${action}<div class="task-summary">${choice.info||''}</div></section>${cards}`;
@@ -11502,6 +11684,7 @@ UI.V.gather = sk => {
 
 /* open a page with one card chosen, in its category, scrolled into view and briefly highlighted */
 UI.focusTask = (page, id, tab, sk) => {
+  if (DQ.data.RECIPES[id]) { const r = DQ.data.RECIPES[id], g = DQ.recipeGroup(r); sk = r.skill; tab = g.g; UI.tab[sk + 'sub'] = g.s || null; }
   if (tab) { UI.tab[sk || page] = tab; UI.tab[(sk || page) + 'ready'] = false; }
   UI.taskChoice[page] = id; UI.spot = { id, until: Date.now() + 2600 }; DQ.go(page);
   setTimeout(() => { const el = document.querySelector(`.illustrated-card[data-b="${id}"]`); if (!el) return;
@@ -11800,7 +11983,7 @@ UI.V.quests = () => {
     const s = st(q), p = S().q[q.id], t = D.TOWN[q.town], sk = q.main && D.SK[q.unlocks];
     const pct = p ? Math.round(q.obj.reduce((a, o, j) => a + Math.min(1, DQ.objProg(q, p, j) / o.n), 0) / q.obj.length * 100) : 0;
     const blk = s === 'locked' ? (DQ.advLvl() < q.adv ? `Hero level ${q.adv}` : (DQ.questBlockers(q)[0] || 'Not yet')) : '';
-    return `<button class="qrow ${s} ${q.main ? 'main' : ''} ${q.id === (selected && selected.id) ? 'on' : ''}" data-do="qselect" data-a="${q.id}" aria-pressed="${q.id === (selected && selected.id)}" style="${sk ? `--c:${sk.col}` : ''}"><span class="qr-face">${(DQ.folkPortrait && DQ.folkPortrait(q.giver, 40)) || ico(q.main ? 'star' : s === 'locked' ? 'lock' : 'quest')}${q.main ? `<i class="qr-main">${ico('star')}</i>` : ''}</span><span class="qr-t"><b>${esc(q.name)}</b><small>${s === 'locked' ? esc(String(blk).replace(/<[^>]+>/g, '')) : `${esc(q.giver)} · ${esc(t.name)}`}</small>${s === 'done' ? '' : `<span class="qrecs">${recChips(q, true)}</span>`}${s === 'active' || s === 'ready' ? `<span class="bar"><i style="width:${pct}%"></i></span>` : ''}</span><span class="state ${s}">${{ new: 'New', locked: 'Locked', active: pct + '%', ready: 'Ready', done: 'Done' }[s]}</span></button>`;
+    return `<button class="qrow ${s} ${q.main ? 'main' : ''} ${q.id === (selected && selected.id) ? 'on' : ''}" data-do="qselect" data-a="${q.id}" aria-pressed="${q.id === (selected && selected.id)}" style="${sk ? `--c:${sk.col}` : ''}"><span class="qr-face">${(DQ.folkPortrait && DQ.folkPortrait(q.giver, 40)) || ico(q.main ? 'star' : s === 'locked' ? 'lock' : 'quest')}${q.main ? `<i class="qr-main">${ico('star')}</i>` : ''}</span><span class="qr-t"><b>${esc(q.name)}</b><small>${s === 'locked' ? esc(String(blk).replace(/<[^>]+>/g, '')) : `${esc(q.giver)} · ${esc(t.name)}`}</small>${s === 'done' ? '' : `<span class="qrecs">${recChips(q, true)}</span>`}${s === 'active' || s === 'ready' ? `<span class="bar"><i style="width:${pct}%"></i></span>` : ''}</span><span class="state ${s}">${{ new: 'New', locked: 'Locked', active: pct + '%', ready: '✓ Claim reward', done: '✓ Completed' }[s]}</span></button>`;
   };
   const cards = selected ? [selected].map((q, i) => {
     const s = st(q), p = S().q[q.id], t = D.TOWN[q.town];
@@ -11812,7 +11995,7 @@ UI.V.quests = () => {
     /* reading order: name, where, the story (and anything said), what is needed, rewards, then the action */
     const say = q.say || q.intro ? `<p class="quest-say">“${esc(q.say || q.intro)}”</p>` : '';
     const actions = `<div class="quest-actions">${s === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>` : s === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Claim reward</button>` : s === 'active' ? `<button class="btn primary" data-do="questcontinue" data-a="${q.id}">Continue quest</button>` : ''}</div>`;
-    return `<section class="panel quest ${s} ${q.main ? 'main' : ''}" style="--i:${i};${sk ? `--c:${sk.col}` : ''}" id="q-${q.id}">${sk ? `<span class="mq-ribbon">${ico('star')} Main quest · Unlocks ${sk.name}</span>` : ''}<div class="phead quest-head" style="margin:0">${DQ.folkPortrait ? `<button class="quest-face" data-do="folkfrom" data-a="${esc(q.giver)}" data-tip="text:About ${esc(q.giver)}">${DQ.folkPortrait(q.giver, 96)}</button>` : ''}<div><h2>${q.name}</h2><small>${q.giver} · ${t.name}</small></div><span class="state ${s}">${{ new: 'Available', locked: 'Locked', active: 'In progress', ready: 'Ready', done: 'Complete' }[s]}</span></div>
+    return `<section class="panel quest ${s} ${q.main ? 'main' : ''}" style="--i:${i};${sk ? `--c:${sk.col}` : ''}" id="q-${q.id}">${sk ? `<span class="mq-ribbon">${ico('star')} Main quest · Unlocks ${sk.name}</span>` : ''}<div class="phead quest-head" style="margin:0">${DQ.folkPortrait ? `<button class="quest-face" data-do="folkfrom" data-a="${esc(q.giver)}" data-tip="text:About ${esc(q.giver)}">${DQ.folkPortrait(q.giver, 96)}</button>` : ''}<div><h2>${q.name}</h2><small>${q.giver} · ${t.name}</small></div><span class="state ${s}">${{ new: 'Available', locked: 'Locked', active: 'In progress', ready: '✓ Ready to claim', done: '✓ Completed' }[s]}</span></div>
       <div class="quest-story" id="quest-story-${q.id}"><p class="blurb">${q.blurb}</p>${say}</div>
       ${DQ.questImpact && DQ.questImpact(q.id) ? `<p class="quest-impact">Town change · ${esc(DQ.questImpact(q.id))}</p>` : ''}${req}${s === 'done' ? '' : `<div class="quest-rec"><span class="k">Recommended</span>${recChips(q)}</div>`}${s === 'locked' ? '' : `<div class="quest-objs"><div class="k">Required</div>${objs}</div>`}
       <div class="rewards"><span class="k">Rewards</span><div class="rws">${sk ? `<span class="rw unlockrw" style="--c:${sk.col}">${ico(q.unlocks)}Learn ${sk.name}</span>` : ''}${UI.rewards(q.reward)}</div></div>${actions}</section>`;
@@ -11930,8 +12113,17 @@ const DO = {
   eatat: a => { S().settings.eatAt = +a; UI.render(false); },
   eat: a => { DQ.eat(a); UI.upd(); },
   spell: a => { S().spell = a; UI.render(false); },
-  qstart: a => { DQ.startQuest(a); if (S().q[a] && DQ.toast) DQ.toast(`Accepted: ${D.QM[a].name}. It is now under Active.`); if (UI.view === 'quests') UI.render(false); }, /* stays on Available so several quests can be accepted in a row */
-  qclaim: a => { DQ.claimQuest(a); if (UI.view === 'quests') { UI.questTab = null; UI.render(false); } },
+  qstart: a => {
+    const q = D.QM[a]; if (!q || DQ.questState(q) !== 'new') return;
+    DQ.startQuest(a);
+    if (DQ.toast) DQ.toast(`Accepted: ${q.name}. It is now under Active.`);
+    if (!D.QUESTS.some(q => DQ.questState(q) === 'new')) {
+      UI.questTab = 'active'; UI.tab.questSelected = a;
+      if (UI.view !== 'quests') return DQ.go('quests');
+    }
+    if (UI.view === 'quests') UI.render(false);
+  }, /* Keep batch acceptance available; open the accepted quest once the list is exhausted. */
+  qclaim: (a, choice) => { DQ.claimQuest(a, choice); if (UI.view === 'quests') { UI.questTab = null; UI.render(false); } },
   qtab: a => { UI.questTab = a; UI.render(false); },
   questcontinue: id => {
     const q = D.QM[id], progress = S().q[id];
@@ -12370,12 +12562,7 @@ UI.V.beastmastery = () => {
       reason: [!seen ? `Reach ${t.name}` : '', lvlLock ? `Requires Beastmastery ${lvl}` : '', !traps ? 'Needs a wooden trap' : ''].filter(Boolean).join(' · '),
       short: !seen ? `Reach ${t.name}` : lvlLock ? `Lv ${lvl}` : '', caption: got ? `${esc(sig.name)} befriended` : `Befriend ${sig ? esc(sig.name) : 'a creature'}`, stateText: got ? '✓ Befriended · hides and feathers' : `${(DQ.befriendChance(t.id) * 100).toFixed(1)}% per trap`,
       info: `${got ? companionBtn(sig) : ''}<p>Lay traps around ${esc(t.name)}. ${got ? 'You have befriended its signature companion; traps now bring hides, feathers and other trophies.' : `Each trap has a ${(DQ.befriendChance(t.id) * 100).toFixed(1)}% chance to befriend <b>${sig ? esc(sig.name) : 'its companion'}</b>; otherwise it brings hides, feathers and other trophies.`}</p><p>${traps} wooden trap${traps === 1 ? '' : 's'} · about 1 in 4 breaks · 8s per trap</p>` }; });
-  const owned = (D.PETS || []).filter(p => S().pets.owned[p.id]);
-  const train = owned.map(p => { const lv = DQ.petLevel(p.id), cid = A && A.hasCreature(p.id) ? p.id : p.mon || p.id;
-    const on = S().pets.active === p.id;
-    return { id: p.id, name: `Train ${p.name}`, artKind: 'creature', artId: cid, caption: `Level ${lv} · ${esc(p.kind || 'Companion')}`, stateText: on ? '★ With you' : 'Not with you',
-      info: `${companionBtn(p)}<p>${esc(p.text || '')}</p><p>${(DQ.durFor('train', p.id) / 1000).toFixed(0)}s per session · Companion bonuses ×${DQ.beastMult().toFixed(2)}</p>` }; });
-  return UI.taskPanel('beastmastery', 'Beastmastery', 'train', [...train, ...lures], '');
+  return UI.taskPanel('beastmastery', 'Fieldwork', 'train', lures, '');
 };
 })();
 
@@ -13500,7 +13687,7 @@ UI.renderDock = () => {
     const lock = !DQ.skillUnlocked(s.id);
     const lv=DQ.lvl(s.id),need=lv>=99?0:Math.max(0,D.XPF[lv+1]-(S().xp[s.id]||0));
     const pop = UI.levelPop[s.id], popping = pop && Date.now() - pop < 1600;
-    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" data-tip="rail:${s.id}" data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span><span class="notice-badge" data-b="notice:${s.page}" hidden></span>${!lock && S().newSkills && S().newSkills[s.id] ? '<span class="dk-new">New</span>' : ''}${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span>`}</span>${!lock && ap === s.page ? '<i class="dk-live"></i>' : ''}</button>`;
+    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" data-tip="rail:${s.id}" data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span><span class="notice-badge" data-b="notice:${s.page}" hidden></span>${!lock && S().newSkills && S().newSkills[s.id] ? '<span class="dk-new">New</span>' : ''}${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span>`}</span>${!lock && ap === s.page ? '<i class="dk-live" aria-label="Working"></i>' : ''}</button>`;
   }).join('');
   UI.upd();
 };
@@ -15181,6 +15368,7 @@ DQ.optionalGoals = () => {
 DQ.finishProject = id => {
   const project = D.PROJECTS[id];
   if (!project || S().projects[id] || S().town !== project.town || !DQ.canAfford(DQ.projectNeed(id))) return false;
+  if (!Object.keys(DQ.projectNeed(id)).length) { completeProject(id); return true; }
   DQ.projectGive(id); return !!S().projects[id];
 };
 function completeProject(id) {
@@ -15254,13 +15442,13 @@ UI.projectsPanel = () => {
   const town = S().town, entries = DQ.projectsForTown(town);
   const id = entries.some(([key]) => key === UI.tab.projectChoice) ? UI.tab.projectChoice : (entries.find(([k]) => !S().projects[k]) || entries[0])[0], project = D.PROJECTS[id];
   UI.tab.projectChoice = id;
-  const done = S().projects[id], need = DQ.projectNeed(id), canFinish = !done && S().town === project.town && Object.keys(need).length && DQ.canAfford(need);
+  const done = S().projects[id], need = DQ.projectNeed(id), canFinish = !done && S().town === project.town && DQ.canAfford(need);
   const changes = (town==='willowbrook'?['first_steps', 'hungry_cook']:[]).filter(q => S().q[q] && S().q[q].s === 'done');
   const stage = DQ.projectStage(id), pct = Math.round(DQ.projectProgress(id) * 100), g = (S().projectGiven || {})[id] || {};
   const canGive = !done && Object.keys(need).some(k => held(k) > 0), voice = D.PROJECT_VOICES[id];
   const A = DQ.pixelArt, W = (A && A.SCENE_W) || 320, H = (A && A.SCENE_H) || 180, shown = new Set(entries.map(([k]) => k));
-  const spots = A && A.siteLayout ? A.siteLayout(town).filter(sp => shown.has(sp.id)).map(sp => { const st = DQ.projectStage(sp.id), p = D.PROJECTS[sp.id];
-    return `<button class="site-spot st${st} ${sp.id === id ? 'on' : ''}" style="left:${((sp.X - 5) / W * 100).toFixed(3)}%;top:${((sp.Y - 6) / H * 100).toFixed(3)}%;width:${(42 / W * 100).toFixed(3)}%;height:${(42 / H * 100).toFixed(3)}%" data-do="projectpick" data-a="${sp.id}" aria-pressed="${sp.id === id}" aria-label="${esc(p.name)}: ${esc(DQ.PROJECT_STAGES[st])}" data-tip="text:${esc(p.name)} · ${esc(DQ.PROJECT_STAGES[st])}"><span class="site-mark">${st >= 4 ? '✓' : st ? Math.round(DQ.projectProgress(sp.id) * 100) + '%' : '!'}</span></button>`; }).join('') : '';
+  const spots = A && A.siteLayout ? A.siteLayout(town).filter(sp => shown.has(sp.id)).map(sp => { const st = DQ.projectStage(sp.id), p = D.PROJECTS[sp.id], ready = st < 4 && DQ.canAfford(DQ.projectNeed(sp.id));
+    return `<button class="site-spot ${ready ? 'deliver-ready' : ''} st${st} ${sp.id === id ? 'on' : ''}" style="left:${((sp.X - 5) / W * 100).toFixed(3)}%;top:${((sp.Y - 6) / H * 100).toFixed(3)}%;width:${(42 / W * 100).toFixed(3)}%;height:${(42 / H * 100).toFixed(3)}%" data-do="projectpick" data-a="${sp.id}" aria-pressed="${sp.id === id}" aria-label="${esc(p.name)}: ${ready ? 'All materials ready to deliver' : esc(DQ.PROJECT_STAGES[st])}" data-tip="text:${esc(p.name)} · ${esc(DQ.PROJECT_STAGES[st])}"><span class="site-mark">${st >= 4 ? '✓' : ready ? (Object.keys(DQ.projectNeed(sp.id)).length ? '✓ Deliver all' : '✓ Complete') : st ? Math.round(DQ.projectProgress(sp.id) * 100) + '%' : '! Repair'}</span></button>`; }).join('') : '';
   const story = done ? `<p class="proj-story">${esc(project.story)}</p>${voice ? `<p class="villager-line"><b>${esc(voice[0])}:</b> “${esc(voice[1])}”</p>` : ''}`
     : `<p class="proj-story">${esc(project.before || (stage ? `Work is under way. ${voice ? voice[0] + ' comes by most days to see how it is going.' : ''}` : `It has stood like this for years.${voice ? ` ${voice[0]} is hoping someone will take it on.` : ''}`))} Once it is done: ${esc(project.story.charAt(0).toLowerCase() + project.story.slice(1))}</p>`;
   const lines = done ? '' : `<div class="proj-lines">${Object.entries(project.cost).map(([item, n]) => { const got = Math.min(n, g[item] || 0), left = n - got, have = held(item), name = item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase();
@@ -15917,7 +16105,7 @@ Object.assign(lessons,{
  enchanting:{title:'Enchanting',text:'Use runes and gems to strengthen equipped gear.',towards:'Enchantment ranks → stronger existing combat bonuses.',goal:'Equip an item and collect the materials for its first enchantment.',art:['skill','enchanting']},
  carpentry:{title:'Carpentry',text:'Saw logs into planks. Planks build furniture upgrades in your house, the restoration projects from Saltmere on, and boats.',towards:'Logs → planks → furniture, town projects and boats for Sailing.',goal:'Saw some planks, then build a skiff (12 planks and 4 string) to start Sailing.',art:['skill','carpentry']},
  sailing:{title:'Sailing',text:'Send your boat on voyages. Each island has its own haul, and a bigger boat reaches farther. Every Sailing level also makes Fishing faster.',towards:'Voyages → cloth for boats and furniture, gems, exotic seeds and other regions’ ores early.',goal:'Sail to Gull Rock, then build a cog in Carpentry for Smugglers’ Cay.',art:['skill','sailing']},
- beastmastery:{title:'Beastmastery',text:'Lay wooden traps to befriend each region’s signature companion, and train the companions you have. Your level strengthens every companion bonus.',towards:'Traps → new companions, hides and feathers · Training → stronger companions · Level 25 → faster farm animals.',goal:'Lay traps around Willowbrook until a companion joins you.',art:['skill','beastmastery']}
+ beastmastery:{title:'Beastmastery',text:'Wins strengthen your assigned beast. Buy a training session with coins and cooked food, or send a trap expedition that returns while you are away. Wooden-trap fieldwork remains available.',towards:'Traps → new companions, hides and feathers · Training → stronger companions · Level 25 → faster farm animals.',goal:'Choose a beast, check its requirements and send a trap. Five misses guarantee the next expedition. Training is ready again after 45 minutes.',art:['skill','beastmastery']}
 });
 Object.assign(lessons,{
  house:{towards:'Furniture gives lasting bonuses to your whole adventure.',title:'Your home',text:'Buy a home, then add rooms and furniture for permanent bonuses.',goal:'Save the purchase price, then start with a storage chest for backpack space.',art:['skill','woodcutting']},
@@ -16532,7 +16720,7 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
     /* on shorter or narrower desktops the fight's own line (Fighting … / Retreat, or Selected … / Explore) joins the
        ready line so the stage keeps its height for the fighters */
     if (arena && ctl) { ctl.classList.add('stage-ctl'); ctl.insertAdjacentHTML('afterbegin', '<span class="step-n on">3</span>'); if (tight) { if (!ctl.querySelector('button')) { ctl.remove(); } else { const n = ctl.querySelector('.step-n'); if (n) n.remove(); ctl.classList.add('in-ready'); live.querySelector('.ready-line').appendChild(ctl); } arena.classList.add('no-ctl'); } else arena.appendChild(ctl); }
-    strip.insertAdjacentHTML('beforebegin', `<div class="combat-hud"><section class="panel hud-train"><div class="kit-head"><span class="k">Train</span></div></section>${abilPanel()}${foodPanel()}</div>`);
+    strip.insertAdjacentHTML('beforebegin', `<div class="combat-hud"><section class="panel hud-train"><div class="kit-head"><span class="k">Train</span></div></section>${foodPanel()}${abilPanel()}</div>`);
     const train = live.querySelector('.hud-train'); train.appendChild(strip);
     const w = strip.querySelector('.ss-weapon'); if (w) train.querySelector('.kit-head').appendChild(w);
   };
@@ -16542,13 +16730,11 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
     const why = a => DQ.ability(a.id) ? 'In use' : a.needShield && !S().equip.shield ? 'Needs a shield' : a.style ? `${DQ.cap(a.style)} only` : 'Idle';
     const slotHtml = Array.from({ length: slots }, (_, i) => { const a = D.ABIL.find(x => x.id === on[i]);
       return a ? `<button class="ab-tile on ${DQ.ability(a.id) ? '' : 'idle'}" data-do="abil" data-a="${a.id}" aria-pressed="true" data-tip="text:${esc(a.name)}: ${esc(a.text)} Click to take it out of the slot.">${ico(a.ic)}<b>${esc(a.name)}</b><small>${esc(why(a))}</small></button>`
-        : `<span class="ab-tile empty">${ico('star')}<b>Empty</b><small>${spare.length ? 'Pick below' : 'Slot ' + (i + 1)}</small></span>`; }).join('');
-    const nextSlot = slots < 3 ? `<span class="ab-tile locked"><b>Slot ${slots + 1}</b><small>Combat 40</small></span>` : '';
-    const full = on.length >= slots;
-    const adds = spare.map(a => `<button class="ab-add" data-do="${full ? 'abilswap' : 'abil'}" data-a="${a.id}" aria-label="${full ? 'Swap in ' : 'Add '}${esc(a.name)}" data-tip="text:${esc(a.name)}: ${esc(a.text)}${full ? ' Replaces your last slot.' : ''}">${ico(a.ic)}<span>${esc(a.name)}</span></button>`).join('');
+        : `<button class="ab-tile empty" data-do="combatmore" data-a="abilities" aria-label="Choose ability for slot ${i+1}">${ico('star')}<b>Empty</b><small>${spare.length ? 'Choose an ability' : 'Slot ' + (i + 1)}</small></button>`; }).join('');
+    const nextSlot = slots < 3 ? `<small class="ab-future-slot">Third slot · Combat 40</small>` : '';
     const nxt = next ? (() => { const need = D.XPF[next.lvl] || 1, have = S().xp[next.skill] || 0; return `<div class="ab-next"><span>${ready.length ? 'Next' : 'First ability'}: <b>${esc(next.name)}</b> at ${esc(D.SK[next.skill].name)} ${next.lvl}</span><span class="bar"><i style="width:${Math.min(100, Math.round(have / need * 100))}%"></i></span></div>`; })() : '';
-    return `<section class="panel combat-abils"><div class="kit-head"><span class="k">Abilities <b class="mono">${on.length}/${slots}</b></span><button class="linkish" data-do="combatmore" data-a="abilities">All abilities</button></div>
-      <div class="ab-slots">${slotHtml}${nextSlot}</div>${adds ? `<div class="ab-adds"><span class="kit-sub">${full ? 'Swap in' : 'Add'}</span>${adds}</div>` : nxt}</section>`;
+    return `<section class="panel combat-abils"><div class="kit-head"><span class="k">Abilities <b class="mono">${on.length}/${slots}</b></span><button class="linkish" data-do="combatmore" data-a="abilities">Manage</button></div>
+      <div class="ab-slots">${slotHtml}</div>${nextSlot}${ready.length ? '' : nxt}</section>`;
   };
   const foodPanel = () => {
     const foods = (DQ.foods ? DQ.foods() : []).filter(id => DQ.have(id) > 0), heal = foodHeal(), at = S().settings.eatAt || 50;
@@ -17053,11 +17239,25 @@ const render0 = UI.render; UI.render = (...a) => { apply(); return render0(...a)
 const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S, { esc, fmt, ico } = DQ;
 let reveal = null;
 const claim0 = UI.DO.qclaim;
-UI.DO.qclaim = a => {
+UI.DO.qclaim = (a, choice) => {
   const q = D.QM[a], ready = q && DQ.questState(q) === 'ready';
-  if (!ready || UI.view !== 'quests') return claim0(a);
-  claim0(a);
-  if (DQ.questState(q) === 'done') { reveal = { id: a, at: 0 }; UI.pageNotice = null; UI.render(false); if (UI.renderPageNotice) UI.renderPageNotice(); animate(); }
+  if (!ready || UI.view !== 'quests') return claim0(a, choice);
+  const card = document.querySelector('.qdetail > .quest'), rect = card && card.getBoundingClientRect(), tab = UI.questTab, selected = UI.tab.questSelected;
+  const render = UI.render;
+  // Claim updates state and HUD, but the surrounding quest list and selected card keep their identity.
+  UI.render = () => { UI.renderHud(); UI.renderRail(); };
+  try { claim0(a, choice); } finally { UI.render = render; UI.questTab = tab; UI.tab.questSelected = selected; }
+  if (DQ.questState(q) === 'done') {
+    // Quest/level events enqueue a redraw; this claim has already updated the surrounding UI in place.
+    if (UI._rt) { clearTimeout(UI._rt); UI._rt = 0; }
+    reveal = { id: a, at: 0, sel: selected, tab, height: rect ? rect.height / (DQ.zoom || 1) : 0 };
+    UI.pageNotice = null;
+    if (card) { const t = document.createElement('template'); t.innerHTML = html(); card.replaceWith(t.content.firstElementChild); }
+    else UI.render(false);
+    const row = document.querySelector('.qrow[data-a="' + a + '"]');
+    if (row) { row.classList.remove('ready'); row.classList.add('done'); const state = row.querySelector('.state'); if (state) { state.textContent = '✓ Completed'; state.className = 'state done'; } }
+    if (UI.renderPageNotice) UI.renderPageNotice(); animate();
+  }
 };
 UI.DO.qrevealdone = () => { reveal = null; UI.render(false); };
 const tiles = q => {
@@ -17071,7 +17271,7 @@ const tiles = q => {
 const html = () => {
   const q = D.QM[reveal.id]; if (!q) return '';
   const list = tiles(q), calm = S().settings.reduceFx;
-  return `<section class="panel quest-reveal ${calm ? 'calm' : ''}" aria-live="polite"><div class="qrv-head">${DQ.folkPortrait ? DQ.folkPortrait(q.giver, 96, 'qrv-face') : ''}<div><span class="k">Quest complete</span><h2>${esc(q.name)}</h2>${q.thanks ? `<p class="qrv-thanks">${esc(q.giver)}: “${esc(q.thanks)}”</p>` : `<p class="qrv-thanks">${esc(q.giver)} thanks you.</p>`}</div></div>
+  return `<section style="${reveal.height ? `height:${reveal.height}px;min-height:${reveal.height}px` : ''}" class="panel quest-reveal ${calm ? 'calm' : ''}" aria-live="polite"><div class="qrv-head">${DQ.folkPortrait ? DQ.folkPortrait(q.giver, 96, 'qrv-face') : ''}<div><span class="k">Quest complete</span><h2>${esc(q.name)}</h2>${q.thanks ? `<p class="qrv-thanks">${esc(q.giver)}: “${esc(q.thanks)}”</p>` : `<p class="qrv-thanks">${esc(q.giver)} thanks you.</p>`}</div></div>
     <div class="qrv-tiles">${list.map((t, i) => `<div class="qrv-tile ${t.cls || ''}" style="--c:${t.col};--i:${i}"><span class="qrv-art">${t.art}</span><b class="mono" ${t.n ? `data-count="${t.n}" data-unit="${esc(t.unit || '')}" data-pre="${t.pre ? 1 : ''}"` : ''}>${t.n ? (calm ? (t.pre ? fmt(t.n) + t.unit : fmt(t.n) + t.unit) : (t.pre ? '0' + t.unit : '0' + t.unit)) : '✦'}</b><small>${esc(t.label)}</small></div>`).join('')}</div>
     <div class="quest-actions"><button class="btn primary" data-do="qrevealdone">Continue</button></div></section>`;
 };
@@ -17176,6 +17376,481 @@ const pan = () => { const el = document.querySelector('#view .village-pan'); if 
   if (UI.tab.villagePan != null && UI.view === lastPanView) { el.scrollLeft = UI.tab.villagePan; return; }
   lastPanView = UI.view; const on = el.querySelector('.site-spot.on'); if (on) { const r = on.offsetLeft + on.offsetWidth / 2 - el.clientWidth / 2; el.scrollLeft = Math.max(0, r); UI.tab.villagePan = el.scrollLeft; } };
 let lastPanView = null;
+})();
+
+</script>
+<script>
+/* Ten-level bonds, deliberate training and wall-clock trap expeditions.
+   No bell entries, daily obligations or offline decay. All saves remain version 2. */
+(() => {
+const Q=window.DQ,D=Q.data,UI=Q.ui,S=()=>Q.S,{esc,fmt}=Q;
+const finite=(v,f=0)=>Number.isFinite(v)&&v>=0?v:f, own=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
+const record=o=>!!o&&typeof o==='object'&&!Array.isArray(o);
+Q.registerBondArt?.();
+const MAX=D.BOND_XP.length, COOLDOWN=45*60000;
+const oldLevel=Q.petLevel;
+Q.beastSpec=id=>D.BEAST_SPECIES[id]||(D.PET[id]?{name:D.PET[id].name,kind:D.PET[id].kind,town:D.MON[D.PET[id].mon]?.town||'willowbrook',hero:15,rarity:'rare',damage:.85,evolution:'True-bond '+D.PET[id].name,passive:'legacy',base:0}:null);
+Q.beastTargets=()=>D.PETS.filter(p=>D.BEAST_SPECIES[p.id]||(p.collectible&&p.id.startsWith('wild_')));
+Q.beastLevelFrom=x=>{let lv=1;while(lv<MAX&&finite(x)>=D.BOND_XP[lv])lv++;return lv;};
+/* Only companion fields are repaired; invalid core save values still fail the original validator. */
+Q.prepareBeastSave=o=>{
+ if(!record(o))return o;
+ const next={...o},p=record(o.pets)?{...o.pets}:{};p.owned=record(p.owned)?{...p.owned}:{};
+ for(const [id,v]of Object.entries(p.owned)){
+  if(!D.PET[id]||!record(v)){delete p.owned[id];continue;}
+  p.owned[id]={...v};for(const k of ['xp','aff','bondXp','trainingUntil'])if(k in v)p.owned[id][k]=finite(v[k]);
+ }
+ p.active=typeof p.active==='string'&&p.owned[p.active]?p.active:null;
+ p.tracks=record(p.tracks)?Object.fromEntries(Object.entries(p.tracks).filter(([k])=>D.PET[k]).map(([k,v])=>[k,Math.min(5,Math.floor(finite(v)))])):{};
+ p.events=Array.isArray(p.events)?p.events.filter(e=>record(e)&&typeof e.text==='string'&&Number.isFinite(e.t)).slice(-40):[];
+ const j=p.expedition;
+ p.expedition=record(j)&&D.PET[j.species]&&D.BEAST_TRAPS[j.tier]&&Number.isFinite(j.due)&&Number.isFinite(j.sent)&&j.due>=j.sent&&Number.isFinite(j.roll)&&j.roll>=0&&j.roll<1?{...j}:null;
+ next.pets=p;return next;
+};
+Q.migrateBeasts=st=>{
+ const p=st.pets; if(!p)return;
+ p.tracks=p.tracks||{};p.events=p.events||[];p.expedition=p.expedition||null;
+ for(const [id,o]of Object.entries(p.owned)){
+  if(!D.PET[id])continue;
+  if(!Number.isFinite(o.bondXp)){
+   /* Preserve earned old levels, not uncapped XP accumulated while already at the old maximum. */
+   const table=Number.isFinite(o.xp)?(D.CREATURE_LEVELS||D.PET_LEVELS):D.PET_LEVELS,x=finite(Number.isFinite(o.xp)?o.xp:o.aff);let lv=1;
+   table.forEach((t,i)=>{if(x>=t)lv=i+1;});lv=Math.min(MAX,lv);
+   o.bondXp=D.BOND_XP[lv-1];
+   if(lv<table.length&&table[lv]>table[lv-1])o.bondXp+=(D.BOND_XP[lv]-D.BOND_XP[lv-1])*Math.min(.999,(x-table[lv-1])/(table[lv]-table[lv-1]));
+  }
+  o.trainingUntil=finite(o.trainingUntil);o.evolved=Q.beastLevelFrom(o.bondXp)>=MAX;
+ }
+ p.bondVersion=1;
+};
+const ensure=()=>{const p=S().pets;if(p.bondVersion!==1||Object.values(p.owned).some(o=>!Number.isFinite(o.bondXp)))Q.migrateBeasts(S());return p;};
+Q.petLevel=id=>{const o=S().pets.owned[id];return !o?0:Number.isFinite(o.bondXp)?Q.beastLevelFrom(o.bondXp):oldLevel(id);};
+Q.beastPassive=(id,level=Q.petLevel(id))=>{const s=Q.beastSpec(id);if(!s)return null;const lv=Math.max(1,Math.min(MAX,level)),step=D.BOND_MILESTONES.filter(n=>n<=lv).length;return {key:s.passive,value:s.base+step*D.BOND_PASSIVE_STEP,steps:step,level:lv};};
+Q.beastPassiveText=id=>{const p=D.PET[id],b=Q.beastPassive(id);if(!p||!b)return '';if(b.key==='legacy')return `${p.text||'Signature companion bonus'} · bond multiplier ×${(1+.25*(Math.min(5,b.level)-1)+Math.max(0,b.level-5)*.05).toFixed(2)}`;return `+${+(b.value*100).toFixed(1)}% ${({crit:'critical-hit chance',coin:'coin find',xpAll:'XP gain',boss:'damage against bosses'})[b.key]}${b.level===MAX&&b.key==='crit'?' · critical hits strike twice':''}`;};
+Q.beastActive=()=>{const id=S().pets.active;return id&&D.PET[id]&&S().pets.owned[id]?id:null;};
+/* Existing signature bonuses stop their old multiplier at five, then grow gently. New species use only their one passive. */
+const fx0=Q.fx;let beastFxCache=null;
+Q.fx=()=>{const f=fx0(),id=Q.beastActive(),key=id+':'+Q.petLevel(id);if(beastFxCache?.f===f&&beastFxCache.key===key)return f;
+ if(id){const b=Q.beastPassive(id);if(b.key==='coin')f.coin+=b.value;if(b.key==='xpAll')f.xpAll+=b.value;}
+ beastFxCache={f,key};return f;};
+Q.beastHeroHit=(damage,m,f)=>{const id=Q.beastActive(),b=id&&Q.beastPassive(id);if(!b||!damage)return damage;
+ if(b.key==='boss'&&m.boss)damage*=1+b.value;
+ if(b.key==='crit'&&Math.random()<b.value){damage*=b.level===MAX?Q.beastSpec(id).evolvedCritDamage:Q.beastSpec(id).critDamage;Q.splat('foe',b.level===MAX?'Twin critical':'Critical','hit power',180);}
+ return Math.round(damage);
+};
+Q.beastDamage=(id,level=Q.petLevel(id))=>{const s=Q.beastSpec(id);return s?s.damage*(1+.12*Math.max(1,Math.min(MAX,level))):0;};
+/* Synchronised cadence: fixed species hit strength; attack spacing follows the hero's expected ordinary DPS.
+   At bond 10, a companion supplies 17.5% of baseline hero DPS rather than dominating low-level equipment. */
+Q.beastHeroDps=m=>{const ps=Q.pstats(),W=D.WTYPES[D.weaponType()],wr=Q.weakOf(m,Q.fight),dtype=Q.myDtype(),mult=wr.weak.includes(dtype)?Q.typeMult(m,'weak'):wr.resist.includes(dtype)?Q.typeMult(m,'resist'):1;
+ const acc=ps.acc*W.acc*(wr.weak.includes(dtype)?1.1:1),def=(m.def+8)*(64+m.def),hit=acc>def?1-(def+2)/(2*(acc+1)):acc/(2*(def+1));
+ const power=Q.ability('power')?1.22:1;return power*Math.max(.05,Math.min(.95,Math.max(.05,hit))*(Math.max(1,Math.round(ps.max*W.dmg*mult))+1)/2/(Q.combatInterval()/1000));};
+Q.beastAttack=(f,m)=>{const id=Q.beastActive();if(!id)return 0;
+ if(f.beastId!==id){f.beastId=id;f.beastClock=0;}
+ const hit=Q.beastDamage(id),maxHit=Q.beastDamage(id,MAX),period=maxHit/(Q.beastHeroDps(m)*.175)*1000;
+ f.beastClock=(f.beastClock||0)+(Q.act?.dur||Q.combatInterval());let damage=0;
+ while(f.beastClock+1e-6>=period){f.beastClock-=period;damage+=hit;}
+ if(damage){f.beastDamage=(f.beastDamage||0)+damage;Q.splat('foe',`${D.PET[id].name} ${+damage.toFixed(2)}`,'hit beast-hit',240);if(!Q.sim.on)Q.emit('beaststrike',id);}
+ return damage;
+};
+const event=(kind,id,text,now=Date.now())=>{if(Q.forecasting)return;const p=ensure();p.events.push({kind,id,text,t:now});if(p.events.length>40)p.events.splice(0,p.events.length-40);if(Q.journal)Q.journal('beast',text,'paw');};
+Q.beastGain=(id,xp)=>{if(Q.forecasting||!Number.isFinite(xp)||xp<=0||!S().pets.owned[id])return 0;const p=ensure(),o=p.owned[id],before=Q.petLevel(id),was=o.evolved;
+ const gain=Math.min(xp,Math.max(0,D.BOND_XP[MAX-1]-o.bondXp));o.bondXp+=gain;const after=Q.petLevel(id);
+ if(Q.sim.on){const b=Q.sim.beasts||(Q.sim.beasts={});b[id]=b[id]||{xp:0,from:before,to:before};b[id].xp+=gain;b[id].to=after;}
+ if(after>before){event('level',id,`${D.PET[id].name} grew from bond ${before} to ${after}.`);for(let lv=before+1;lv<=after;lv++)if(D.BOND_MILESTONES.includes(lv))event('milestone',id,`${D.PET[id].name}: bond ${lv} deepened your shared strength.`);}
+ if(after===MAX&&!was){o.evolved=true;event('evolution',id,`${D.PET[id].name} evolved into ${Q.beastSpec(id).evolution}.`);}
+ if(after!==before)Q.fxDirty();return gain;
+};
+Q.beastVictory=f=>{if(Q.forecasting||!f)return;const id=Q.beastActive();if(id)Q.beastGain(id,finite(f.heroXp)*.25);};
+/* Replace the old per-creature XP grant: combat now awards exactly 25% of actual hero combat XP on victory. */
+Q.creatureGainXp=()=>{};
+Q.beastTraining=id=>{const o=S().pets.owned[id];if(!o||!D.PET[id])return {ok:false,reason:'Choose an owned beast'};const lv=Q.petLevel(id),coins=30+lv*10,food=Q.foods().find(k=>D.ITEMS[k]?.heal>0&&Q.have(k)>=2),left=Math.max(0,finite(o.trainingUntil)-Date.now());
+ const reason=!Q.skillUnlocked('beastmastery')?'Learn Beastmastery first':lv>=MAX?'Bond complete':left?`Ready in ${Q.fmtTime(left)}`:S().coins<coins?`Needs ${coins} coins`:!food?'Needs 2 cooked food':'';
+ return {ok:!reason,reason,coins,food,foodCount:2,xp:150+lv*50,left};};
+const transaction=mutate=>{const before=JSON.parse(JSON.stringify(S()));mutate();Q.fxDirty();if(!Q.save()){Q.S=before;Q.fxDirty();return false;}return true;};
+Q.trainBeast=id=>{if(Q.forecasting)return false;ensure();const t=Q.beastTraining(id);if(!t.ok)return false;
+ return transaction(()=>{S().coins-=t.coins;Q.take(t.food,2);S().pets.owned[id].trainingUntil=Date.now()+COOLDOWN;Q.beastGain(id,t.xp);Q.addXp('beastmastery',20);S().stats.train=(S().stats.train||0)+1;Q.qev('train',id);event('training',id,`${D.PET[id].name} trained beside you. +${t.xp} bond XP.`);});};
+Q.beastTrapReason=(id,tier)=>{const s=Q.beastSpec(id),t=D.BEAST_TRAPS[tier];if(!s||!Q.beastTargets().some(p=>p.id===id)||!t)return 'Choose a beast and trap';if(!Q.skillUnlocked('beastmastery'))return 'Learn Beastmastery first';if(S().pets.owned[id])return 'Already befriended';if(S().pets.expedition)return 'A trap is already out';if(Q.advLvl()<s.hero)return `Requires Hero ${s.hero}`;if(!S().towns[s.town]?.visited)return `Visit ${D.TOWN[s.town].name} first`;if(t.item?!Q.have(t.item):S().coins<t.cost)return t.item?'Needs a Rune trap':`Needs ${t.cost} coins`;return '';};
+Q.beastCaptureChance=(id,tier)=>D.BEAST_TRAPS[tier]?.[Q.beastSpec(id)?.rarity]||0;
+Q.sendBeastTrap=(id,tier)=>{if(Q.forecasting)return false;ensure();if(Q.beastTrapReason(id,tier))return false;const t=D.BEAST_TRAPS[tier],now=Date.now();return transaction(()=>{if(t.item)Q.take(t.item,1);else S().coins-=t.cost;S().pets.expedition={species:id,tier,sent:now,due:now+t.hours*3600000,roll:Math.random()};event('sent',id,`A ${t.name.toLowerCase()} waits for ${D.PET[id].name}; it returns in ${t.hours} hour${t.hours===1?'':'s'}.`,now);});};
+Q.resolveBeastTrap=(now=Date.now())=>{if(Q.forecasting)return false;const p=ensure(),j=p.expedition;if(!j||now<j.due)return false;
+ return transaction(()=>{const t=D.BEAST_TRAPS[j.tier],tracks=p.tracks[j.species]||0,pity=tracks>=5,won=pity||j.roll<Q.beastCaptureChance(j.species,j.tier);p.expedition=null;
+  if(won){if(pity)p.tracks[j.species]=tracks-5;Q.awardPet(j.species,{quiet:true});Q.migrateBeasts(S());event('capture',j.species,`${D.PET[j.species].name} followed the trap trail home${pity?' — five tracks made the meeting certain':''}.`,now);}
+  else{S().coins+=t.consolation;p.tracks[j.species]=Math.min(5,tracks+1);event('return',j.species,`${D.PET[j.species].name} slipped away. +${t.consolation} coins, track ${p.tracks[j.species]}/5.`,now);}
+ });};
+/* Resolve real deadlines after offline work, never during forecasts or by consuming the effective-work cap. */
+const simulate0=Q.simulate;
+Q.simulate=(ms,real=ms)=>{const p=ensure(),before=new Set(p.events.map(e=>JSON.stringify(e))),summary=simulate0(ms,real);if(!Q.forecasting){Q.resolveBeastTrap();summary.beastEvents=ensure().events.filter(e=>!before.has(JSON.stringify(e))&&e.kind!=='sent');}return summary;};
+const world0=Q.advanceWorld;let wallPoll=0;
+Q.advanceWorld=dt=>{world0(dt);if(!Q.sim.on&&!Q.forecasting&&(wallPoll+=dt)>=1000){wallPoll=0;if(Q.resolveBeastTrap()&&UI.view==='beastmastery')UI.render(false);}};
+/* Training is a deliberate purchase, not an endlessly repeating paid task. Existing fieldwork lures are preserved. */
+const train0=Q.KIND_EXT.train;
+Q.KIND_EXT.train={...train0,check:id=>String(id).startsWith('lure:')?train0.check(id):'Use the Beast training button; sessions are deliberate purchases',done:a=>{if(String(a.id).startsWith('lure:'))return train0.done(a);Q.stopAct(true);}};
+const resume0=Q.resumeAfterLoad;
+Q.resumeAfterLoad=()=>{ensure();if(S().act?.kind==='train'&&!String(S().act.id).startsWith('lure:'))S().act=null;if(S().queue)S().queue=S().queue.filter(a=>a.kind!=='train'||String(a.id).startsWith('lure:'));return resume0();};
+const set0=Q.setPet;Q.setPet=id=>{if(id&&(!D.PET[id]||!S().pets.owned[id]))return;set0(id);if(Q.fight){Q.fight.beastClock=0;Q.fight.beastId=id;}if(UI.view==='beastmastery')UI.render(false);};
+for(const [id,p]of Object.entries(D.BEAST_SPECIES))D.PET[id].text=`+${p.base*100}% ${({crit:'critical-hit chance',coin:'coin find',xpAll:'XP gain',boss:'boss damage'})[p.passive]}; bond milestones add up to 3 percentage points.`;
+const abilities0=Q.creatureAbilities;
+Q.creatureAbilities=id=>D.BOND_MILESTONES.map(lv=>({lv,name:lv===10?'Evolution':'Deepening bond',text:lv===10?`${Q.beastSpec(id)?.evolution} · final passive upgrade`:'Passive grows by 0.6 percentage points (signature companions grow gently).',open:Q.petLevel(id)>=lv}));
+const petSprite0=Q.petSprite;
+Q.petSprite=(p,size=48,cls='')=>S().pets.owned[p.id]?.evolved&&Q.pixelArt?.hasCreature('evolved:'+p.id)?Q.artImage('creature','evolved:'+p.id,size,cls,Q.beastSpec(p.id).evolution):petSprite0(p,size,cls);
+const return0=UI.returnExtras;
+UI.returnExtras=sum=>{const rows=Object.entries(sum.beasts||{}).map(([id,b])=>`<li>${esc(D.PET[id]?.name||id)}: +${fmt(b.xp)} bond XP${b.to>b.from?` · bond ${b.from} → ${b.to}`:''}</li>`),events=(sum.beastEvents||[]).filter(e=>['capture','return','evolution','milestone'].includes(e.kind));return (return0?return0(sum):'')+((rows.length||events.length)?`<section class="beast-return"><h3>Your beasts grew too</h3><ul>${rows.join('')}${events.map(e=>`<li>${esc(e.text)}</li>`).join('')}</ul></section>`:'');};
+const activeCard=id=>{const p=D.PET[id],o=S().pets.owned[id],lv=Q.petLevel(id),next=D.BOND_XP[lv]||D.BOND_XP[MAX-1],xp=finite(o.bondXp),base=D.BOND_XP[lv-1],pct=lv===MAX?100:Math.min(100,100*(xp-base)/(next-base)),t=Q.beastTraining(id);return `<section class="panel beast-focus"><div class="beast-portrait">${Q.petSprite(p,96)}</div><div><span class="k">${S().pets.active===id?'With you':'Resting companion'} · Bond ${lv}/${MAX}</span><h2>${esc(o.evolved?Q.beastSpec(id).evolution:p.name)}</h2><p><b>Passive:</b> ${esc(Q.beastPassiveText(id))}</p><div class="bar" role="progressbar" aria-label="Bond progress" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div><small>${lv===MAX?'Bond complete':`${fmt(xp)} / ${fmt(next)} bond XP`}</small><div class="beast-milestones">${D.BOND_MILESTONES.map(n=>`<span class="tag ${lv>=n?'ok':''}" data-tip="text:Bond ${n}: ${n===10?'evolution and final passive upgrade':'passive upgrade'}">${lv>=n?'✓':'◇'} ${n}</span>`).join('')}</div><p class="sm dim">Wins share 25% of your earned combat XP. Training uses 2 ${esc(D.ITEMS[t.food]?.name||'cooked food')} and ${t.coins} coins; ready again in 45 minutes. No decay.</p><div class="btnrow wrap">${S().pets.active!==id?`<button class="btn" data-do="setpet" data-a="${id}">Bring along</button>`:''}<button class="btn primary" data-do="beasttrain" data-a="${id}" ${t.ok?'':'disabled'}>${t.ok?`Train · +${t.xp} bond XP`:esc(t.reason)}</button></div></div></section>`;};
+UI.beastMode='beasts';UI.beastOwnedPage=0;UI.beastTargetPage=0;
+const oldPage=UI.V.beastmastery;
+UI.V.beastmastery=()=>{ensure();if(!Q.skillUnlocked('beastmastery'))return oldPage();const owned=D.PETS.filter(p=>S().pets.owned[p.id]),selected=owned.find(p=>p.id===UI.beastSelected)||owned.find(p=>p.id===S().pets.active)||owned[0],j=S().pets.expedition,tier=UI.beastTier||'basic',targets=Q.beastTargets(),sel=targets.find(p=>p.id===UI.beastTarget)||targets.find(p=>!S().pets.owned[p.id])||targets[0];
+ const nav=`<div class="beast-tabs btnrow"><button class="btn beast-mobile-tab ${UI.beastMode==='capture'?'on':''}" data-do="beastmode" data-a="capture">Capture</button><button class="btn beast-mobile-tab ${UI.beastMode==='collection'?'on':''}" data-do="beastmode" data-a="collection">Collection</button><button class="btn ${UI.beastMode==='beasts'?'on':''}" data-do="beastmode" data-a="beasts">Beasts & expeditions</button><button class="btn ${UI.beastMode==='field'?'on':''}" data-do="beastmode" data-a="field">Fieldwork · wooden traps</button></div>`;if(UI.beastMode==='field')return nav+oldPage();
+ const lastReturn=[...S().pets.events].reverse().find(e=>e.kind==='capture'||e.kind==='return');
+ const status=j?`<p class="beast-trap-status"><b>Trap out:</b> ${esc(D.PET[j.species].name)} · ${D.BEAST_TRAPS[j.tier].name} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0,j.due-Date.now()))}</span> remaining. Returns automatically.</p>`:`<p class="dim">${lastReturn?esc(lastReturn.text):'No trap is out. One expedition at a time; your main task keeps running.'}</p>`;
+ const reason=Q.beastTrapReason(sel.id,tier),s=Q.beastSpec(sel.id),t=D.BEAST_TRAPS[tier];
+ return nav+`<div class="beast-workspace" data-mode="${UI.beastMode}"><div class="beast-main">${selected?activeCard(selected.id):'<section class="panel"><h2>Find your first companion</h2><p>Choose a species and send a trap. Your existing wooden-trap fieldwork is also available.</p></section>'}<section class="panel beast-expedition"><h3>Trap expedition</h3>${status}<div class="btnrow wrap">${Object.entries(D.BEAST_TRAPS).map(([k,v])=>`<button class="btn ${tier===k?'on':''}" data-do="beasttier" data-a="${k}">${v.name} · ${v.cost?`${v.cost} coins`:'1 Rune trap'} · ${v.hours}h</button>`).join('')}</div><p><b>${esc(sel.name)}</b> · ${s.rarity} · ${Math.round(Q.beastCaptureChance(sel.id,tier)*100)}% capture · ${S().pets.tracks[sel.id]||0}/5 tracks</p><p class="sm dim">A miss returns ${t.consolation} coins and one species track. After five misses the next expedition is certain and uses those five tracks.</p><button class="btn primary" data-do="beastsend" data-a="${sel.id}" data-b="${tier}" ${reason?'disabled':''}>${reason?esc(reason):'Send trap'}</button></section></div><section class="panel beast-list"><h3 class="beast-owned-heading">Companions ${Array.from({length:Math.ceil(owned.length/3)},(_,i)=>`<button class="btn sm" data-do="beastpage" data-a="owned" data-b="${i}">${i+1}</button>`).join('')}</h3><div class="beast-cards beast-owned">${owned.slice(UI.beastOwnedPage*3,UI.beastOwnedPage*3+3).map(p=>`<button class="beast-choice ${selected?.id===p.id?'on':''}" data-do="beastselect" data-a="${p.id}">${Q.petSprite(p,64)}<b>${esc(p.name)}</b><small>Bond ${Q.petLevel(p.id)}${p.id===S().pets.active?' · With you':''}</small></button>`).join('')}</div><h3 class="beast-targets-heading">Find a beast ${Array.from({length:Math.ceil(targets.length/4)},(_,i)=>`<button class="btn sm ${UI.beastTargetPage===i?'on':''}" data-do="beastpage" data-a="targets" data-b="${i}">${i+1}</button>`).join('')}</h3><div class="beast-cards beast-targets">${targets.slice(UI.beastTargetPage*4,UI.beastTargetPage*4+4).map(p=>{const sp=Q.beastSpec(p.id),got=!!S().pets.owned[p.id];return `<button class="beast-choice ${sel.id===p.id?'on':''}" data-do="beasttarget" data-a="${p.id}">${Q.petSprite(p,64,got?'':'sil')}<b>${esc(p.name)}</b><small>${got?'Befriended':`Hero ${sp.hero} · ${esc(D.TOWN[sp.town].name)}`} · ${sp.rarity}</small></button>`;}).join('')}</div></section></div>`;
+};
+Object.assign(UI.DO,{beastmode:a=>{UI.beastMode=a;UI.render(false);},beastpage:(a,b)=>{UI[a==='owned'?'beastOwnedPage':'beastTargetPage']=+b;UI.render(false);},beastselect:a=>{UI.beastSelected=a;if(innerWidth<=860)UI.beastMode='beasts';UI.render(false);},beasttarget:a=>{UI.beastTarget=a;UI.render(false);},beasttier:a=>{if(D.BEAST_TRAPS[a])UI.beastTier=a;UI.render(false);},beasttrain:a=>{UI.beastStatus=Q.trainBeast(a)?'Training complete':Q.beastTraining(a).reason;UI.render(false);},beastsend:(a,b)=>{Q.sendBeastTrap(a,b);UI.render(false);}});
+/* Quiet in-place countdowns; no bell entries or ready popups. */
+let seconds=0;Q.on('ui',()=>{if(UI.view!=='beastmastery'||++seconds%4)return;const btn=document.querySelector('[data-do="beasttrain"]');if(btn&&btn.disabled&&Q.beastTraining(btn.dataset.a).ok){UI.render(false);return;}document.querySelectorAll('[data-beast-due]').forEach(e=>e.textContent=Q.fmtTime(Math.max(0,+e.dataset.beastDue-Date.now())));});
+})();
+
+</script>
+<script>
+/* A playable farm, composed from the existing plot/animal controls and original code-drawn scenery. */
+(() => {
+const Q=window.DQ,D=Q.data,UI=Q.ui,A=Q.pixelArt,{esc,ico}=Q;
+if(A){A.farmEstateSprite=()=>{const s=A.Spr(320,180),grass=A.ramp('#6e9856'),soil=A.ramp('#775137'),path=A.ramp('#baa06c'),wood=A.R.wood;
+ s.rect(0,0,320,180,grass);s.rect(0,64,320,14,path);s.rect(150,60,16,120,path);
+ s.rect(12,90,126,78,soil);for(let y=96;y<168;y+=9)s.line(18,y,132,y,null,'#966845');
+ s.rect(179,89,127,78,A.ramp('#85a663'));for(let x=176;x<310;x+=12){s.rect(x,84,3,10,wood);s.rect(x,164,3,10,wood);}s.rect(176,89,134,2,wood);s.rect(176,168,134,2,wood);
+ s.rect(32,23,46,39,A.ramp('#b89365'));s.poly([[25,27],[55,5],[85,27]],A.ramp('#a4503d'));s.rect(47,40,15,22,wood);s.rect(37,33,6,7,A.ramp('#dfd4a4'));s.rect(67,33,6,7,A.ramp('#dfd4a4'));
+ s.ell(261,36,31,13,A.ramp('#689fa8'));s.ell(258,34,22,7,A.ramp('#82b5bd'));for(const x of [100,125,174,204]){s.rect(x,36,3,24,wood);s.ell(x+1,32,12,14,A.ramp('#56804b'));}return s;};}
+const original=UI.V.farming;UI.estateTab='seeds';UI.estateSection='fields';UI.estateFieldPage=0;UI.estatePenPage=0;
+UI.V.farming=()=>{
+ const h=original();if(!h.includes('farm-workspace'))return h;const tmp=document.createElement('template');tmp.innerHTML=h;
+ const fields=tmp.content.querySelector('.farm-task'),animals=tmp.content.querySelector('.farm-animals');if(!fields||!animals)return h;
+ const plots=fields.querySelector('.plots'),pens=animals.querySelector('.pens'),seeds=fields.querySelector('.seed-choices'),market=animals.querySelector('#livestock-market'),settings=fields.querySelector('#farm-settings');
+ const page=(list,index,size)=>{const items=[...list.children],pages=Math.max(1,Math.ceil(items.length/size)),p=Math.min(index,pages-1);items.forEach((e,i)=>{e.hidden=Math.floor(i/size)!==p;});return {p,pages};};
+ const buyPlot=plots.querySelector('.buyplot'),buyPen=pens.querySelector('.buypen');for(const b of [buyPlot,buyPen])if(b){b.remove();b.className='btn sm estate-expand';}
+ const fp=page(plots,UI.estateFieldPage,innerWidth<=860?4:innerWidth<=1440?6:12),pp=page(pens,UI.estatePenPage,innerWidth<=860?2:innerWidth<=1440?4:6);
+
+ const marketItems=[...(market?.querySelectorAll('.srow')||[])],mp=Math.min(UI.estateMarketPage||0,Math.max(0,Math.ceil(marketItems.length/(innerWidth<=860?3:4))-1));marketItems.forEach((e,i)=>e.hidden=Math.floor(i/(innerWidth<=860?3:4))!==mp);
+ const pager=(kind,p,n)=>n>1?`<div class="estate-pages" role="group" aria-label="${kind} pages"><button class="btn sm" data-do="estatepage" data-a="${kind}" data-b="${p-1}" ${p?'':'disabled'} aria-label="Previous ${kind} page">Prev</button><span>${p+1} / ${n}</span><button class="btn sm" data-do="estatepage" data-a="${kind}" data-b="${p+1}" ${p+1<n?'':'disabled'} aria-label="Next ${kind} page">Next</button></div>`:'';
+ const actionRows=[...fields.querySelectorAll('.farm-actions'),...animals.querySelectorAll('.farm-actions')].map((e,i)=>`<div class="estate-action-group" data-zone="${i?'pens':'fields'}">${e.outerHTML}</div>`).join('');
+ const trough=animals.querySelector('[data-b="trough"]')?.parentElement.outerHTML||'';
+ const routeCrop=D.CROP[UI.farmRoute],routeSeed=routeCrop&&!Q.have('seed_'+routeCrop.id)?`<div class="estate-route-target" data-farm-target="${routeCrop.id}">${Q.itemIco(D.ITEMS['crop_'+routeCrop.id])}<b>${esc(routeCrop.name)}</b><small>Farming ${routeCrop.lvl} · needs seeds before planting</small><button class="btn" data-do="route" data-a="seed_${routeCrop.id}">Get ${esc(routeCrop.name.toLowerCase())} seeds</button></div>`:'';
+ const bg=A?A.url('farm-estate',A.farmEstateSprite):'';
+ return `<div class="farm-estate" data-section="${UI.estateSection}"><section class="panel estate-controls"><div class="phead"><h2>Your farm</h2><small>Farming <b data-b="lvl:farming"></b></small></div><div class="estate-section-tabs btnrow"><button class="btn ${['fields','seeds'].includes(UI.estateSection)?'on':''}" data-do="estatesection" data-a="fields" aria-pressed="${['fields','seeds'].includes(UI.estateSection)}">${Q.itemIco(D.ITEMS.crop_wheat)}<span><b>Crops & fields</b><small>Sow · grow · harvest</small></span></button><button class="btn ${['pens','animals'].includes(UI.estateSection)?'on':''}" data-do="estatesection" data-a="pens" aria-pressed="${['pens','animals'].includes(UI.estateSection)}">${Q.animalSprite(D.ANIMAL.cow,32)}<span><b>Livestock & pasture</b><small>Feed · care · collect</small></span></button></div><div class="estate-mobile-tabs btnrow">${['fields','pens','seeds','animals'].map(k=>`<button class="btn sm ${UI.estateSection===k?'on':''}" data-do="estatesection" data-a="${k}" aria-pressed="${UI.estateSection===k}">${k==='animals'?Q.animalSprite(D.ANIMAL.cow,32):ico(({fields:'crop',pens:'barn',seeds:'seed'})[k])}${({fields:'Fields',pens:'Pens',seeds:'Seeds',animals:'Livestock'})[k]}</button>`).join('')}</div><div class="estate-actions">${actionRows}</div><div class="estate-trough" data-zone="pens">${trough}</div></section><div class="estate-layout"><section class="panel estate-land"><div class="estate-scenery" style="background-image:url('${bg}')" role="img" aria-label="Farmhouse, pond, tilled fields and fenced pasture"></div><div class="estate-zones"><div class="estate-fields"><h3><span>Fields · ${Q.S.farm.plots.length} plots</span>${pager('fields',fp.p,fp.pages)}${buyPlot?.outerHTML||''}</h3>${plots.outerHTML}</div><div class="estate-pasture"><h3><span>Pasture · ${Q.S.farm.pensBought} pens</span>${pager('pens',pp.p,pp.pages)}${buyPen?.outerHTML||''}</h3>${pens.outerHTML}</div></div></section><section class="panel estate-supplies"><h3 class="estate-supply-title">${UI.estateTab==='seeds'?'Seeds & planting':'Livestock market'}</h3><div class="btnrow estate-supply-tabs"><button class="btn ${UI.estateTab==='seeds'?'on':''}" data-do="estatetab" data-a="seeds">Seeds & planting</button><button class="btn ${UI.estateTab==='animals'?'on':''}" data-do="estatetab" data-a="animals">Livestock</button></div>${UI.estateTab==='seeds'?`${routeSeed}${seeds?.outerHTML||'<p>Buy seeds in the shop.</p>'}${settings?.outerHTML||''}<button class="btn" data-do="go" data-a="shop">Buy seeds</button>`:`${market?.outerHTML||''}${pager('market',mp,Math.ceil(marketItems.length/(innerWidth<=860?3:4)))}`}</section></div></div>`;
+};
+/* Only the changing workspace transitions; task progress and the surrounding HUD keep running. */
+const switchSection=a=>{
+ if(!['fields','pens','seeds','animals'].includes(a))return;
+ const previous=UI.estateSection,calm=Q.S.settings.reduceFx||matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const render=()=>{UI.estateSection=a;UI.estateTab=(a==='pens'||a==='animals')?'animals':'seeds';UI.render(false);const phone=innerWidth<=860,tabs=phone?'.estate-mobile-tabs':'.estate-section-tabs',focusTab=phone?a:(a==='pens'||a==='animals'?'pens':'fields');document.querySelector(tabs+' [data-a="'+focusTab+'"]')?.focus({preventScroll:true});};
+ UI.estateTransition?.skipTransition();
+ if(previous===a||calm||UI.view!=='farming'||document.hidden)return render();
+ document.documentElement.style.setProperty('--estate-enter-x',(a==='pens'||a==='animals'?'16px':'-16px'));
+ if(document.startViewTransition){
+  const t=document.startViewTransition(render);UI.estateTransition=t;
+  t.ready.catch(()=>{});t.finished.then(()=>{if(UI.estateTransition===t)UI.estateTransition=null;},()=>{if(UI.estateTransition===t)UI.estateTransition=null;});
+  return t.updateCallbackDone.catch(()=>{});
+ }
+ render();document.querySelector('.estate-layout')?.animate([{opacity:0,transform:'translateX('+(a==='pens'||a==='animals'?16:-16)+'px)'},{opacity:1,transform:'translateX(0)'}],{duration:300,easing:'cubic-bezier(.2,.7,.3,1)'});
+};
+Object.assign(UI.DO,{
+ farmmarket:a=>{if(!Q.townUnlocked('mossbarrow'))return Q.toast('The livestock trader is in Mossbarrow, past Grubnash',true);UI.estateMarketPage=Math.max(0,Math.floor(D.ANIMALS.findIndex(v=>v.id===(a||'hen'))/(innerWidth<=860?3:4)));return switchSection('animals');},
+ estatesection:switchSection,estatetab:a=>switchSection(a==='animals'?'pens':'fields'),
+ estatepage:(a,b)=>{const key={fields:'estateFieldPage',pens:'estatePenPage',market:'estateMarketPage'}[a];if(key)UI[key]=+b;UI.render(false);}
+});
+})();
+
+</script>
+<script>
+/* Context-preserving navigation and compact, illustrated UI refinements. */
+(() => {
+const Q=window.DQ,D=Q.data,UI=Q.ui,S=()=>Q.S,{esc,ico,fmt}=Q;
+const pagePx=v=>Q.toPage?Q.toPage(v):v;
+const calm=()=>S().settings.reduceFx||matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* Configure both recipe category axes before navigation; never start or unlock an activity implicitly. */
+const focus0=UI.focusTask;
+UI.focusTask=(page,id,tab,sk)=>{const r=D.RECIPES[id];if(r){const g=Q.recipeGroup(r);sk=r.skill;tab=g.g;UI.tab[sk+'sub']=g.s||null;UI.tab[sk+'ready']=false;}
+ UI.routePreview={page,id,skill:sk||D.NODE[(Object.keys(D.NODES).find(k=>D.NODE[k+':'+id])||'')+':'+id]?.skill};return focus0(page,id,tab,sk);};
+const locked0=UI.lockedPage;
+UI.lockedPage=sk=>{const h=locked0(sk),r=UI.routePreview;if(!r||r.skill!==sk||r.page!==UI.view)return h;
+ const recipe=D.RECIPES[r.id],node=Object.values(D.NODE).find(n=>n.id===r.id&&n.skill===sk);if(!recipe&&!node)return h;
+ const name=recipe?.name||node.name,art=recipe?Q.itemIco(D.ITEMS[Object.keys(recipe.out)[0]]):Q.artImage(node.kind||({fishing:'fish',mining:'mine',woodcutting:'wood',thieving:'thieve'}[sk]),r.id,64);
+ return h+`<section class="panel routed-locked" data-routed-task="${r.id}"><h3>${esc(name)}</h3>${art}<p>${esc(Q.unlockHow(sk))}</p><button class="btn" disabled>${esc(name)} · learn ${D.SK[sk].name} first</button></section>`;};
+UI.DO.route=id=>{const src=Q.sourceOf(id);if(!src)return;if(UI.view!==src.page)UI.returnTo={page:UI.view,label:({projects:'Town projects',quests:'Quests',character:'Inventory'})[UI.view]||D.SK[UI.view]?.name||'previous task'};
+ if(src.kind==='shop'){UI.shopSelected.buy=id;UI.shopTab='buy';UI.sel=id;UI.routeShopItem=id;}
+ if(src.kind==='farm'){UI.seed=id.replace(/^crop_|^seed_/,'');UI.farmRoute=UI.seed;UI.estateTab='seeds';UI.estateSection='seeds';const seeds=D.CROPS.filter(c=>Q.have('seed_'+c.id));UI.estateSeedPage=Math.max(0,Math.floor(seeds.findIndex(c=>c.id===UI.seed)/(innerWidth<=860?4:6)));}
+ if(src.kind==='animal'){UI.farmAnimal=D.ANIMALS.find(a=>a.prod===id)?.id;UI.estateTab='animals';UI.estateSection='animals';UI.estateMarketPage=Math.max(0,Math.floor(D.ANIMALS.findIndex(a=>a.id===UI.farmAnimal)/(innerWidth<=860?3:4)));}
+ if(src.id)UI.focusTask(src.page,src.id,D.RECIPES[src.id]?.tab,src.skill);else Q.go(src.page);
+ UI.routeSource={...src,item:id};UI.render(false);
+};
+/* Travel is explicit and visible. Once it completes, return to the selected task without starting it. */
+UI.DO.routetravel=town=>{const src=UI.routeSource;if(!src||!Q.townUnlocked(town))return;UI.travelReturn={...src};Q.go('map');UI.travelAnim(town);};
+const travel0=Q.travel;
+Q.travel=town=>{const out=travel0(town),r=UI.travelReturn;if(r&&S().town===town){UI.travelReturn=null;if(r.kind==='shop'){UI.shopSelected.buy=r.item;UI.shopTab='buy';UI.sel=r.item;}if(r.id)UI.focusTask(r.page,r.id,D.RECIPES[r.id]?.tab,r.skill);else Q.go(r.page);UI.routeSource=r;}return out;};
+const taskmap0=UI.DO.taskmap;
+UI.DO.taskmap=town=>{const page=UI.view,id=UI.taskChoice[page],node=Object.values(D.NODE).find(n=>n.id===id&&n.skill===page);UI.routeSource={page,id,skill:page,town,kind:node?.kind};if(Q.townUnlocked(town))return UI.DO.routetravel(town);return taskmap0(town);};
+/* A defeated creature has a short exit before the next silhouette arrives; no combat timing changes. */
+Q.on('beaststrike',()=>{const el=document.querySelector('.battle-companion');if(el&&!calm())el.animate([{transform:'translateX(0)'},{transform:'translateX(12px)',offset:.4},{transform:'translateX(0)'}],{duration:400});});
+Q.on('foedefeated',m=>{if(UI.view!=='combat'||Q.sim.on)return;const foe=document.getElementById('av-foe');if(!foe)return;const rect=foe.getBoundingClientRect(),layer=document.getElementById('toastlayer')||document.body;
+ const label=document.createElement('div');label.className='defeat-caption';label.textContent=m.name+' defeated';label.setAttribute('role','status');label.style.left=pagePx(rect.left+rect.width/2)+'px';label.style.top=pagePx(Math.max(120,rect.top-24))+'px';layer.appendChild(label);setTimeout(()=>label.remove(),1100);
+ if(calm())return;const ghost=foe.cloneNode(true);ghost.removeAttribute('id');ghost.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));ghost.className='foe-death-ghost';Object.assign(ghost.style,{left:pagePx(rect.left)+'px',top:pagePx(rect.top)+'px',width:pagePx(rect.width)+'px',height:pagePx(rect.height)+'px'});layer.appendChild(ghost);ghost.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(22px) rotate(8deg)'}],{duration:480,easing:'ease-in',fill:'forwards'});setTimeout(()=>ghost.remove(),510);
+ requestAnimationFrame(()=>{const next=document.getElementById('av-foe');if(next)next.animate([{opacity:0},{opacity:0,offset:.35},{opacity:1}],{duration:650});});
+});
+/* One Scholarship family card, with visible rank buttons and the selected rank's unchanged cost/action. */
+const research0=UI.V.research;UI.researchRanks={};
+UI.V.research=()=>{const h=research0();if(!h.includes('scholarship-grid'))return h;const box=document.createElement('template');box.innerHTML=h;const grid=box.content.querySelector('.scholarship-grid');if(!grid)return h;
+ const cards=[...grid.children],groups=new Map();D.TECHS.forEach((t,i)=>{const base=t.name.replace(/\s+(I|II|III|IV)$/,'');const key=t.br+':'+base;if(!groups.has(key))groups.set(key,[]);groups.get(key).push({t,card:cards[i]});});
+ grid.innerHTML='';for(const [key,rows]of groups){if(rows.length===1){if(rows[0].card)grid.appendChild(rows[0].card);continue;}
+ const selected=rows.find(x=>x.t.id===UI.researchRanks[key])||rows.find(x=>S().research.active.some(a=>a.id===x.t.id))||rows.find(x=>!Q.techDone(x.t.id))||rows[rows.length-1];const family=document.createElement('section');family.className='tech-family';family.innerHTML=`<div class="tech-ranks" role="group" aria-label="${esc(key.split(':')[1])} ranks">${rows.map(({t})=>`<button class="btn sm ${t.id===selected.t.id?'on':''}" data-do="researchrank" data-a="${esc(key)}" data-b="${t.id}">${Q.techDone(t.id)?'✓ ':''}${esc(t.name.match(/\b(I|II|III|IV)$/)?.[1]||t.name)} · Tier ${t.tier}</button>`).join('')}</div>`;if(selected.card)family.appendChild(selected.card);grid.appendChild(family);}
+ if(innerWidth<=860){const children=[...grid.children],page=Math.max(0,Math.min(UI.researchPhonePage||0,children.length-1));children.forEach((e,i)=>{e.hidden=i!==page;});const nav=document.createElement('div');nav.className='scholarship-phone-controls';nav.dataset.mode=UI.researchPhoneMode||'projects';nav.innerHTML=`<div class="btnrow"><button class="btn sm" data-do="researchphonemode" data-a="projects">Discoveries · Lv ${Q.lvl('research')}</button><button class="btn sm" data-do="researchphonemode" data-a="slots">Study slots ${S().research.active.length}/${Q.researchSlots()}</button></div><div class="btnrow"><button class="btn sm" data-do="researchphonepage" data-a="${page-1}" ${page?'':'disabled'}>Previous</button><span>${page+1} / ${children.length}</span><button class="btn sm" data-do="researchphonepage" data-a="${page+1}" ${page+1<children.length?'':'disabled'}>Next</button></div>`;grid.before(nav);}
+ return box.innerHTML;};
+UI.DO.skillpicker=()=>Q.modal({title:'Choose a skill',body:`<div class="phone-skill-picker">${D.SKILLS.filter(s=>s.group!=='combat').map(s=>`<button class="btn" data-do="pickphoneskill" data-a="${s.page}">${Q.artImage('skill',s.id,32)}<span>${esc(s.name)}</span></button>`).join('')}</div>`,actions:[{label:'Close'}]});UI.DO.pickphoneskill=page=>{Q.closeModal();Q.go(page);};
+UI.DO.researchphonemode=a=>{UI.researchPhoneMode=a;UI.render(false);};UI.DO.researchphonepage=a=>{UI.researchPhonePage=Math.max(0,+a);UI.render(false);};
+UI.DO.researchrank=(key,id)=>{UI.researchRanks[key]=id;UI.render(false);};
+/* Existing item requirement chips become direct routes, not dead text. */
+const render0=UI.render;
+UI.render=fresh=>{render0(fresh);document.documentElement.classList.toggle('compact-skill-navigation',innerWidth<=860&&UI.hubOf(UI.view).id==='skills');const view=document.getElementById('view');if(!view)return;
+ if(innerWidth<=860&&UI.hubOf(UI.view).id==='skills'){const bar=document.getElementById('routebar')||view;const btn=document.createElement('button');btn.className='btn sm mobile-skill-switch';btn.dataset.do='skillpicker';btn.textContent='Choose skill';bar.appendChild(btn);const combat=document.createElement('button');combat.className='btn sm mobile-combat-switch';combat.dataset.do='go';combat.dataset.a='combat';combat.textContent='Combat';bar.appendChild(combat);}
+ const yieldBox=view.querySelector('.scene-yield');if(yieldBox){yieldBox.closest('.activity-stage')?.appendChild(yieldBox);yieldBox.classList.add('yield-tray');}
+ if(UI.view==='combat'&&Q.beastActive()){const arena=view.querySelector('.encounter-arena');if(arena&&!arena.querySelector('.battle-companion')){const el=document.createElement('span'),id=Q.beastActive();el.className='battle-companion';el.innerHTML=Q.petSprite(D.PET[id],48)+`<small>${esc(D.PET[id].name)} · Bond ${Q.petLevel(id)}</small>`;arena.appendChild(el);}}
+ const src=UI.routeSource;if(src&&src.page===UI.view){const n=D.NODE[src.kind+':'+src.id],needs=src.town&&src.town!==S().town&&(src.kind==='shop'||src.kind==='fight'||(n&&!Q.nodeHere(n)));if(needs&&!view.querySelector('.route-travel')){const row=document.createElement('div');row.className='route-travel';row.innerHTML=`<span>${esc(D.ITEMS[src.item]?.name||src.name||'This activity')} · ${esc(D.TOWN[src.town].name)}</span><button class="btn primary" data-do="routetravel" data-a="${src.town}" ${Q.townUnlocked(src.town)?'':'disabled'}>${Q.townUnlocked(src.town)?'Travel & return to this task':'Road not open yet'}</button>`;view.prepend(row);}}
+ for(const e of view.querySelectorAll('[data-tip^="item:"]')){if(e.closest('button,a')||e.querySelector('button,a')||e.matches('input'))continue;const id=e.dataset.tip.slice(5);if(!Q.sourceOf(id))continue;e.classList.add('requirement-route');e.setAttribute('role','button');e.tabIndex=0;e.dataset.do='route';e.dataset.a=id;e.setAttribute('aria-label',`Obtain ${D.ITEMS[id]?.name||id}`);}
+ if(UI.view==='shop'&&UI.routeShopItem){UI.shopSelected.buy=UI.routeShopItem;UI.sel=UI.routeShopItem;}
+};
+})();
+
+</script>
+<script>
+/* Story scenes reuse quests, discoveries, choices, villagers and restored towns. No separate progression track. */
+(() => {
+const Q=window.DQ,D=Q.data,S=()=>Q.S,scenes=D.STORY_SCENES={};
+const done=id=>S().q[id]?.s==='done',accepted=id=>['active','ready','done'].includes(Q.questState(D.QM[id]));
+const add=(id,o)=>scenes[id]={id,...o};
+add('willowbrook_welcome',{title:'The broken bucket',town:'willowbrook',quest:'first_steps',eligible:()=>accepted('first_steps'),frames:()=>[
+ {speaker:'Elder Wren',shot:'well',text:'That rope used to wake the whole village. Now we hear the bucket knock against the stones, and nobody comes for water.'},
+ {speaker:'Elder Wren',shot:'gate',text:'Goblins broke the winch and took the bucket. Orrin wants to chase them. Mabel wants everyone fed first. For once, they are both right.'},
+ {speaker:'Elder Wren',shot:'well',text:'Bring five shrimp and five logs. We will start with a meal and sound timber. The full well repair is a village project; this first job gets you ready to help.'}
+]});
+add('willowbrook_promise',{title:'A place to start',town:'willowbrook',eligible:()=>done('first_steps'),choiceKey:'story_willowbrook',frames:()=>[
+ {speaker:'Mabel the Cook',shot:'kitchen',text:'You cannot eat a promise, so I have put the kettle on. Bring your catch to the fire. A full stomach makes even Orrin slightly less cross.'},
+ {speaker:'Elder Wren',shot:'well',text:S().projects.well?'The well turns again. You have given us somewhere to begin. What will you put your hands to next?':'We have a start, not a working well yet. The builders still need the rest of the timber and funds. Will you help here first, or take the road to Orrin?'}
+],choices:[
+ {id:'village',label:'Help Willowbrook first',effect:'Sets your next goal to the well, or the remaining village projects. The road stays open.',goal:()=>S().projects.well?'village':'well',response:'Then we will put that promise to work. When you hear the bucket rise again, you will know what your timber became.'},
+ {id:'road',label:'Deal with the goblin threat first',effect:'Keeps the goblin chief as your goal. Village projects remain available.',goal:()=> 'boss',response:'Find Orrin by the east gate. I will keep your place by the well. You do not have to do everything today.'}
+]});
+add('mabel_supper',{title:'An extra place at the table',town:'willowbrook',quest:'hungry_cook',eligible:()=>accepted('hungry_cook'),frames:()=>[
+ {speaker:'Mabel the Cook',shot:'kitchen',text:'The banquet is for the families whose fields were raided. Nobody is in much of a celebrating mood. That is why we are having it.'},
+ {speaker:'Mabel the Cook',shot:'kitchen',text:'Eight properly cooked shrimp. Keep the rest for your own journey. Bring me something warm, and I will make sure there is a place for everyone.'}
+]});
+add('orrin_gate',{title:'The notches on the gate',town:'willowbrook',quest:'goblin_menace',eligible:()=>accepted('goblin_menace'),frames:()=>[
+ {speaker:'Sergeant Orrin',shot:'gate',text:'One notch for every raid. I have nearly run out of gate. They take grain, hens, washing. Grubnash calls it a kingdom.'},
+ {speaker:'Sergeant Orrin',shot:'gate',text:'Drive six goblins off the east farms. Prepare first; the patrols will still be there. If you find orders from their chief, bring them to me before Mabel wraps fish in them.'}
+]});
+add('hillfort_orders',{title:'Before the hill fort',town:'willowbrook',quest:'chiefs_end',eligible:()=>accepted('chiefs_end'),frames:()=>[
+ {speaker:'Sergeant Orrin',shot:'gate',text:Q.choiceOf('goblin_satchel')==='orrin'?'That note you brought me was worth more than a sharpened sword. A deep breath, a stamp, then the war cry. Watch the order.':Q.choiceOf('goblin_satchel')==='buckle'?'I heard you sold a goblin buckle. Fair enough. Spend it on something between you and Grubnash’s axe.':'Grubnash has a hill fort and an audience. His war cry is meant to frighten you into a mistake. Read the field guide and take food.'},
+ {speaker:'Sergeant Orrin',shot:'gate',text:'I lost to him once. That is not an order to avenge me. Come back alive, and we will call it a better ending.'}
+]});
+add('well_water',{title:'The sound of water',town:'willowbrook',project:'well',eligible:()=>!!S().projects.well,frames:()=>[
+ {speaker:'Elder Wren',shot:'well',text:'The winch turns. Someone laughs when the first bucket comes up, as if we had forgotten what water sounds like.'},
+ {speaker:'Mabel the Cook',shot:'well',text:Q.choiceOf('story_willowbrook')==='village'?'You said you would start here. Tomorrow I will not have to send the children down to the stream. That is what keeping a promise looks like.':'You came back to it. The road is a fine thing, but it is good to have somewhere to come home to.'}
+]});
+add('inn_lights',{title:'A light left on',town:'willowbrook',project:'inn',eligible:()=>!!S().projects.inn,frames:()=>[
+ {speaker:'Mabel the Cook',shot:'kitchen',text:'The tables are scrubbed, the fire is lit and the door sticks exactly as it always did. It feels like ours again.'},
+ {speaker:'Elder Wren',shot:'wide',text:'A traveller asked whether the village was safe. For the first time in a while, I could offer a room instead of an apology.'}
+]});
+const regions={
+ mossbarrow:['Granny Bramble','The missing sound','You hear the sheep, the wind and a wheel turning somewhere behind the farms. Granny Bramble waits until you notice what is missing.','Our chapel bell ought to carry to the wood. It has been quiet since the theft. Help the farms, dear. When you have your feet under you, ask me about the bells.'],
+ saltmere:['Harbourmaster Ilsa','Everything leaves a wake','Saltmere smells of salt, pitch and dinners eaten in a hurry. Ilsa watches an empty berth while the tide pulls at its ropes.','Bells are heavy cargo. Whoever moved yours needed a cart, a crew and someone looking away. Barnacle has made a business of all three.'],
+ ironpeak:['Captain Hrod','What the mountain keeps','The pass narrows until the sky is a strip of white. Hrod taps the ice from his beard and holds the gate for you.','A beast can close a road. Someone paying to keep it closed is another matter. Get warm. Then we can talk about what Frostmaw guards.'],
+ gloomfen:['Gravewarden Lysa','Lanterns over the water','Each lantern has a name scratched into its handle. Lysa straightens one that the wind has turned towards the marsh.','People think the dead need silence. They need remembering. Morwenna has forgotten the difference. Walk carefully here.'],
+ emberfall:['Warden Ignis','A city still standing','Ash falls on a banner that has been mended so often there is hardly any original cloth left. Ignis brushes it clean.','Pyrrhax can burn a roof in a breath. We put another one up. That is the argument we have been having. I would like your help ending it.'],
+ skyreach:['Abbot Seren','The bridges between','A bell rope moves in the wind without making a sound. Across the ravine, a bridge waits for its missing middle.','We once thought the storms were angry with us. Now I think they are running from something. Listen to the quiet between them.'],
+ hollow:['The Last Herald','Where the bells went','No bird calls from the broken crown of the tower. Even your footsteps seem to arrive late. The Herald opens the last gate.','He bought bells because he could not bear the sound of a world carrying on without him. Remember the people who sent you. This is still their story.']
+};
+for(const [town,[speaker,title,text,reply]]of Object.entries(regions))add('arrival_'+town,{town,title,arrival:town,eligible:()=>!!S().towns[town]?.visited,frames:()=>[{speaker:'Narrator',shot:'wide',text},{speaker,shot:'gate',text:reply}]});
+for(const m of D.MONLIST.filter(m=>m.boss)){
+ const voice=D.BOSS_VOICES[m.id];if(!voice)continue;
+ add('victory_'+m.id,{title:m.id==='grubnash'?'The green is quiet':m.id==='hollowking'?'A world that answers':'After '+m.name,town:m.town,boss:m.id,eligible:()=>!!S().towns[m.town]?.boss,frames:()=>[
+  {speaker:voice[0],shot:'wide',text:voice[1]},
+  {speaker:voice[0],shot:m.id==='grubnash'?'well':'gate',text:m.id==='grubnash'?(S().projects.well?'The bucket is rising and children are crossing the green again. Beyond the gate, Mossbarrow’s fields lie under a strangely quiet sky.':'The hill fort is quiet. The well still needs its builders. Beyond the gate lies Mossbarrow; nobody will blame you for taking a moment here first.'):voice[2]}
+ ],...(m.id==='grubnash'?{choiceKey:'story_after_grubnash',choices:[
+  {id:'home',label:'Stay and help the village',effect:'Makes Willowbrook’s remaining projects your next goal. No road or quest is lost.',goal:()=> 'village',response:'Wren puts the kettle back on. The builders are waiting for a pair of hands, and now the road can wait for yours.'},
+  {id:'road',label:'Follow the road to Mossbarrow',effect:'Makes the next regional challenge your goal. Travel begins only when you choose it.',goal:()=> 'boss',response:'Orrin walks with you as far as the gate. “Bramble will feed you,” he says. “Try not to let her give you every job in the valley.”'}
+ ]}:{})});
+}
+for(const [id,p]of Object.entries(D.PROJECTS)){
+ const existing=Object.values(scenes).find(s=>s.project===id),voice=D.PROJECT_VOICES[id],speaker=voice?.[0]||'Narrator';
+ if(existing){const frames=existing.frames;existing.frames=()=>[...frames(),{speaker,shot:'wide',text:`${p.reward} This benefit is now permanent.`}];continue;}
+ add('restore_'+id,{title:p.name,town:p.town,project:id,eligible:()=>!!S().projects[id],frames:()=>[{speaker,shot:'wide',text:p.story},{speaker,shot:'wide',text:(voice?voice[1]+' ':'')+p.reward+' This benefit is now permanent.'}]});
+}
+/* Existing authored adventures become voiced storyboards; their objectives, gates and rewards stay authoritative. */
+for(const q of D.QUESTS.filter(q=>q.adventure))add('quest_'+q.id,{title:q.name,town:q.town,quest:q.id,eligible:()=>accepted(q.id),frames:()=>[{speaker:q.giver,shot:'wide',text:q.blurb},{speaker:q.giver,shot:'gate',text:q.choices?'There will be a decision to make when the work is done. Hear both sides before you give your answer.':q.obj.map(o=>o.label).join(' · ')}]});
+})();
+
+</script>
+<script>
+/* Player-paced storyboards over existing pixel towns. Choices use the existing save/journal/quest systems. */
+(() => {
+const Q=window.DQ,D=Q.data,UI=Q.ui,S=()=>Q.S,{esc,ico}=Q;
+const defs=D.STORY_SCENES,seen=id=>!!S().seen['story:'+id],quiet=()=>Q.forecasting||Q.sim?.on;
+let active=null,pending=null;
+/* Main-story quests are explicit; discoveries, projects and regional arrivals are quiet entries. */
+for(const q of D.QUESTS)if(q.id==='first_steps'||q.id==='goblin_menace'||q.obj.some(o=>o.ev==='boss'))q.main=true;
+Q.storyCinematic=s=>!!(s&&(s.id==='willowbrook_promise'||s.quest&&D.QM[s.quest]?.main||s.type==='quest'&&D.QM[s.source]?.main||s.boss&&D.QUESTS.some(q=>q.main&&q.obj.some(o=>o.ev==='boss'&&o.key===s.boss))));
+
+const text=v=>typeof v==='function'?v():v;
+Q.availableStories=()=>Object.values(defs).filter(s=>s.eligible());
+const choiceOf=s=>s.type==='discovery'?S().disc?.[s.source]?.choice:Q.choiceOf(s.choiceKey);
+const missing=c=>c.needItem&&!Q.have(c.needItem)?`Needs ${D.ITEMS[c.needItem].name}`:c.need&&Q.foods().reduce((n,id)=>n+Q.have(id),0)<c.need?`Needs ${c.need} cooked meals`:'';
+/* Standalone priorities are explicit, reversible goals; permanent adventure decisions keep their authored outcomes. */
+Q.chooseStory=(id,pick)=>{
+ if(quiet())return false;const s=defs[id],c=s?.choices?.find(c=>c.id===pick);
+ if(typeof s?.eligible!=='function'||!s.eligible()||!c||choiceOf(s)||missing(c))return false;
+ if(s.type==='discovery')return Q.chooseDiscovery(s.source,pick);
+ if(s.type==='quest'){
+  if(Q.questState(D.QM[s.source])!=='ready')return false;
+  UI.DO.qclaim(s.source,pick);return Q.questState(D.QM[s.source])==='done';
+ }
+ const before=JSON.parse(JSON.stringify(S()));S().choices=S().choices||{};S().choices[s.choiceKey]=pick;
+ if(c.goal){S().journey=c.goal();if(S().journey==='boss')S().journeyTarget=Q.regionBoss()?.id||S().journeyTarget;}
+ Q.journal('choice',`${s.title}: ${c.label}. ${c.effect}`,'flag');
+ if(!Q.save()){Q.S=before;Q.fxDirty();return false;}return true;
+};
+const close0=Q.closeModal;
+Q.closeModal=()=>{if(active){S().seen['story:'+active.id]=1;active=null;Q.save();}return close0();};
+const finish=()=>{if(!active)return;const id=active.id;S().seen['story:'+id]=1;Q.journal('story',`Remembered “${defs[id].title}”.`,'book');active=null;Q.save();Q.closeModal();};
+function draw(){
+ if(!active)return;const s=defs[active.id],frames=s.frames(),decision=active.index>=frames.length,chosen=choiceOf(s),c=s.choices?.find(c=>c.id===chosen),f=frames[Math.min(active.index,frames.length-1)];
+ const speaker=decision&&c?(s.type==='quest'?D.QM[s.source].giver:f.speaker):f.speaker;
+ const legacyDecision=s.type==='quest'&&Q.questState(D.QM[s.source])==='done'&&!chosen;
+ const body=decision?(legacyDecision?'This chapter was completed before its decision was recorded. Your earned progress and rewards are preserved.':c?text(c.response||c.text):'What will you do?'):text(f.text);
+ const portrait=speaker==='Narrator'?UI.portrait(64):Q.folkPortrait(speaker,64);
+ const choices=decision&&!chosen&&!legacyDecision?(s.choices||[]).map(c=>`<button class="story-choice btn" data-do="storychoose" data-a="${s.id}" data-b="${c.id}" ${missing(c)?'disabled':''}><b>${esc(c.label)}</b><small>${esc(missing(c)||text(c.effect)||'This choice will be remembered.')}</small></button>`).join(''):'';
+ const step=Math.min(active.index+1,frames.length+(s.choices?1:0)),total=frames.length+(s.choices?1:0);
+ const project=s.project&&D.PROJECTS[s.project],A=Q.pixelArt,art=project&&(project.art||s.project);
+ const restoration=project?`<div class="story-restoration"><div><span>Before restoration</span><img src="${A.url('story-before:'+art,()=>A.stagePiece(art,0))}" alt="${esc(project.name)} before repair"></div><span class="story-repair-arrow" aria-hidden="true">→</span><div><span>Restored</span><img src="${A.url('story-after:'+art,()=>A.stagePiece(art,4))}" alt="Restored ${esc(project.name)}"></div></div>`:'';
+ const m=active.modal,root=m.querySelector('.m-body');
+ root.innerHTML=`<section class="story-scene" data-scene="${s.id}" data-shot="${f.shot||'wide'}"><div class="story-stage" role="img" aria-label="${esc(D.TOWN[s.town].name)} · ${esc(s.title)}"><img class="story-landscape" src="${Q.sceneUrl(s.town)}" alt=""><span class="story-location">${esc(D.TOWN[s.town].name)}</span><img class="story-hero" src="${Q.heroFigureUrl(S().look)}" alt="Your hero"><span class="story-stage-person">${speaker==='Narrator'?'':Q.folkPortrait(speaker,96)}</span><span class="story-vignette"></span>${restoration}</div><div class="story-dialogue"><span class="story-portrait">${portrait}</span><div><span class="k">${esc(speaker)}</span><p class="story-line" tabindex="-1">${esc(body)}</p>${decision&&c?`<small class="story-remembered">Your decision: ${esc(c.label)}${c.effect?' · '+esc(text(c.effect)):''}</small>`:''}</div></div>${active.error?`<p class="story-error" role="alert">${esc(active.error)}</p>`:''}${choices?`<div class="story-choices" role="group" aria-label="Your decision">${choices}</div>`:''}<div class="story-controls"><button class="btn sm" data-do="storyskip">${decision&&!chosen&&!legacyDecision?'Decide later':'Skip scene'}</button><small>${step} / ${total} · your task keeps running</small>${choices?'':`<button class="btn primary" data-do="storynext">${decision||(!s.choices&&active.index===frames.length-1)?'Return to game':'Continue'}</button>`}</div></section>`;
+ const line=root.querySelector('.story-line');line.focus({preventScroll:true});
+}
+Q.openStory=id=>{
+ const s=defs[id];if(typeof s?.eligible!=='function'||!s.eligible()||quiet()||!Q.started)return false;
+ if(!Q.storyCinematic(s)){if(s.project){UI.restoredSite=s.project;UI.DO.openproject(s.project);}else if(s.type==='discovery')discovery0(s.source);else if(s.type==='quest')UI.openQuestChoice(s.source);else{UI.storyEntry=id;Q.go('journal');}return true;}
+ if(s.type==='quest'&&Q.questState(D.QM[s.source])==='ready'&&UI.view!=='quests'){UI.questTab='active';UI.tab.questSelected=s.source;Q.go('quests');}
+ Q.closeModal();if(pending===id)pending=null;const m=Q.modal({title:s.title,wide:true,body:'',actions:[]});m.classList.add('story-modal');m.dataset.story=id;
+ active={id,index:0,modal:m};draw();return true;
+};
+Object.assign(UI.DO,{
+ storyopen:id=>Q.openStory(id),storynext:()=>{if(!active)return;const s=defs[active.id];if(active.index>=s.frames().length-1&&!s.choices||active.index>=s.frames().length)return finish();active.index++;draw();},
+ storyskip:()=>finish(),storychoose:(id,pick)=>{if(!active||active.id!==id)return;if(Q.chooseStory(id,pick)){active.error=null;draw();UI.renderHud();UI.renderRail();if(UI.view==='overview')UI.render(false);}else{active.error=missing(defs[id].choices.find(c=>c.id===pick)||{})||Q.saveHealth||'This decision could not be saved. Nothing has been spent; please try again.';draw();}},
+ storyarchive:()=>Q.go('journal'),restorationdismiss:()=>{UI.restoredSite=null;UI.render(false);},storypage:a=>{UI.storyPage=Math.max(0,+a||0);UI.render(false);},
+ storysetting:()=>{S().settings.storyScenes=S().settings.storyScenes===false;pending=null;Q.save();UI.render(false);}
+});
+/* Story controls own their keys; Space must never pause the task behind the dialogue. */
+addEventListener('keydown',e=>{
+ if(!active)return;
+ const line=e.target.closest?.('.story-line'),buttons=[...active.modal.querySelectorAll('button')].filter(b=>!b.disabled&&b.offsetWidth);
+ if(line&&e.key==='Tab'){e.preventDefault();e.stopImmediatePropagation();(e.shiftKey?buttons[buttons.length-1]:buttons[0])?.focus();return;}
+ if(line&&(e.key===' '||e.key==='Enter')){e.preventDefault();e.stopImmediatePropagation();const s=defs[active.id];if(active.index>=s.frames().length&&!choiceOf(s)&&s.choices?.length)buttons[0]?.focus();else UI.DO.storynext();return;}
+ if(!['Tab','Escape'].includes(e.key))e.stopImmediatePropagation();
+},true);
+function offer(id){if(quiet()||!Q.started||S().settings.storyScenes===false||seen(id)||!defs[id]?.eligible()||!Q.storyCinematic(defs[id]))return;if(pending&&defs[pending]?.choices?.length&&!choiceOf(defs[pending]))return;pending=id;}
+/* Only a new major event can queue a scene; loading an advanced save never replays a backlog. */
+const start0=Q.startQuest;
+Q.startQuest=id=>{const before=D.QM[id]&&Q.questState(D.QM[id]);const r=start0(id);if(before==='new'&&['active','ready'].includes(Q.questState(D.QM[id]))){const scene=Object.values(defs).find(s=>s.quest===id);if(scene)offer(scene.id);}return r;};
+const claim0=Q.claimQuest;
+Q.claimQuest=(id,...args)=>{const before=D.QM[id]&&Q.questState(D.QM[id]),r=claim0(id,...args);if(before==='ready'&&Q.questState(D.QM[id])==='done'){if(id==='first_steps')offer('willowbrook_promise');else{const boss=D.QM[id]?.obj.find(o=>o.ev==='boss');if(boss)offer('victory_'+boss.key);}}return r;};
+const travel0=Q.travel;
+Q.travel=id=>{const first=!S().towns[id]?.visited,r=travel0(id);/* Arrival flavour stays in the journal, without a cutscene. */return r;};
+Q.on('project',id=>{if(S().projects[id]){const s=Object.values(defs).find(s=>s.project===id);UI.restoredSite=id;setTimeout(()=>{if(UI.view==='projects')UI.render(false);},150);}});
+const notify0=Q.notify;
+Q.notify=o=>{const r=notify0(o);/* The main quest claim owns the victory scene, preventing duplicate celebrations. */return r;};
+let ticks=0;
+Q.on('ui',()=>{if(++ticks%5||!pending||S().settings.storyScenes===false||quiet()||!Q.started||document.hidden||document.querySelector('.modal,.quest-reveal'))return;const id=pending;pending=null;if(!seen(id))Q.openStory(id);});
+/* Present existing consequential choices as scenes rather than introducing another decision system. */
+for(const [id,d]of Object.entries(D.DISCOVERIES).filter(([,d])=>d.choices))defs['discovery_'+id]={id:'discovery_'+id,title:d.name,town:d.place,type:'discovery',source:id,eligible:()=>Q.discovered(id),frames:()=>[{speaker:'Narrator',shot:'wide',text:d.text}],choices:d.choices.map(c=>({...c,effect:c.needItem?`Uses one ${D.ITEMS[c.needItem].name}. ${c.label}`:c.need?`Uses ${c.need} cooked meals. ${c.label}`:c.label}))};
+const discovery0=UI.openDiscovery;
+UI.openDiscovery=id=>defs['discovery_'+id]?Q.openStory('discovery_'+id):discovery0(id);
+for(const q of D.QUESTS.filter(q=>q.choices))defs['decision_'+q.id]={id:'decision_'+q.id,title:q.name,town:q.town,type:'quest',source:q.id,choiceKey:q.id,eligible:()=>['ready','done'].includes(Q.questState(q)),frames:()=>[{speaker:q.giver,shot:'wide',text:q.blurb}],choices:q.choices.map(c=>({...c,effect:q.id==='bl_ledger'?(c.id==='ilsa'?'Ilsa becomes your ally. Later: a warden’s greathelm.':'Mother Silt becomes your ally. Later: a smuggler’s knot.'):'Changes the story and its later acknowledgement.'}))};
+UI.openQuestChoice=id=>{const q=D.QM[id];if(!q)return;if(q.main)return Q.openStory('decision_'+id);UI.questTab='active';UI.tab.questSelected=id;Q.go('quests');};
+const quests0=UI.V.quests;
+UI.V.quests=()=>{const h=quests0(),q=D.QM[UI.tab.questSelected];if(!q||q.main||!q.choices||Q.questState(q)!=='ready'||Q.choiceOf(q.id)||h.includes('quest-reveal'))return h;const options=`<section class="inline-decision"><b>Choose how this chapter ends</b>${q.choices.map(c=>`<button class="btn" data-do="qclaim" data-a="${q.id}" data-b="${c.id}"><b>${esc(c.label)}</b><small>${esc(c.text)}</small></button>`).join('')}</section>`;return h.replace('<div class="qdetail">','<div class="qdetail">'+options);};
+const makeDiscovery0=Q.makeDiscovery;Q.makeDiscovery=(id,...a)=>{const r=makeDiscovery0(id,...a);if(r&&id==='goblin_satchel')offer('discovery_'+id);return r;};
+/* Home leads through the existing opening quests. It never accepts or changes goals on the player's behalf. */
+const next0=Q.journeyNext;
+Q.journeyNext=(id=S().journey||'boss')=>{
+ if(id==='boss'&&!S().towns.willowbrook.boss&&S().town==='willowbrook'&&S().q.first_steps?.s==='done'){
+  const step=(title,detail,action,a,b)=>({title,detail,action,a,b});
+  const gob=D.QM.goblin_menace,mabel=D.QM.hungry_cook;
+  if(Q.questState(gob)==='new')return step('Speak to Sergeant Orrin','The east farms need help. Accept his patrol before fighting so your victories count.','qstart',gob.id);
+  if(Q.questState(gob)==='ready')return step('Report to Sergeant Orrin','The patrol is complete. Hear what he learned about the hill fort and claim your reward.','qclaim',gob.id);
+  if(Q.questState(mabel)==='new')return step('Help Mabel prepare supper','Cook for the raided families, and keep spare meals for your own journey.','qstart',mabel.id);
+  if(Q.questState(mabel)==='ready')return step('Bring supper to Mabel','The kitchen is ready. Collect her thanks and your reward.','qclaim',mabel.id);
+  if(Q.questState(mabel)==='active'&&Q.have('raw_shrimp')>0)return step('Cook Mabel’s supper','Eight successful shrimp meals complete her request. Keep spare meals for the patrol.','journeytask','recipe','cook_shrimp');
+  if(Q.questState(gob)==='active'&&Q.combatLvl()>=5&&Q.foods().reduce((n,k)=>n+Q.have(k)*D.ITEMS[k].heal,0)>=Q.maxHp())return step('Patrol the east farms','Track goblins for Orrin. Their orders may explain what Grubnash is planning.','huntquest','goblin');
+ }
+ return next0(id);
+};
+const journal0=UI.V.journal;
+UI.V.journal=()=>{
+ const list=Q.availableStories(),pages=Math.max(1,Math.ceil(list.length/6)),page=Math.min(UI.storyPage||0,pages-1),choices=Object.entries(S().choices||{}).filter(([id])=>id.startsWith('story_'));
+ const entry=defs[UI.storyEntry],note=entry&&!Q.storyCinematic(entry)&&entry.eligible()?`<section class="panel story-note"><h2>${esc(entry.title)}</h2>${entry.frames().map(f=>`<p><b>${esc(f.speaker)}</b> · ${esc(text(f.text))}</p>`).join('')}</section>`:'';
+ const archive=`<section class="panel story-archive"><div class="phead"><h2>Story so far</h2><button class="btn sm" data-do="storysetting">Automatic scenes: ${S().settings.storyScenes===false?'off':'on'}</button></div><p class="sm dim">Replay without spending resources or changing a remembered decision. Unfinished decisions can be made here.</p><div class="story-chapters">${list.slice(page*6,page*6+6).map(s=>`<button class="btn story-chapter" data-do="storyopen" data-a="${s.id}"><b>${esc(s.title)}</b><small>${esc(D.TOWN[s.town].name)} · ${s.choices?.length&&!choiceOf(s)&&!(s.type==='quest'&&Q.questState(D.QM[s.source])==='done')?'Decision waiting':Q.storyCinematic(s)?(seen(s.id)?'Replay':'Watch scene'):'Read entry'}</small></button>`).join('')||'<p>Your story begins with Elder Wren’s first request.</p>'}</div>${pages>1?`<div class="btnrow"><button class="btn sm" data-do="storypage" data-a="${page-1}" ${page?'':'disabled'}>Previous</button><span>${page+1} / ${pages}</span><button class="btn sm" data-do="storypage" data-a="${page+1}" ${page+1<pages?'':'disabled'}>Next</button></div>`:''}${choices.map(([key,value])=>{const s=Object.values(defs).find(s=>s.choiceKey===key),c=s?.choices?.find(c=>c.id===value);return c?`<p class="story-choice-record">${esc(s.title)}: <b>${esc(c.label)}</b></p>`:'';}).join('')}</section>`;
+ return note+archive+(journal0?journal0():'');
+};
+const render0=UI.render;
+UI.render=fresh=>{render0(fresh);if(UI.view==='projects'&&UI.restoredSite&&S().projects[UI.restoredSite]&&D.PROJECTS[UI.restoredSite].town===S().town){const id=UI.restoredSite,p=D.PROJECTS[id],scene=Object.values(defs).find(s=>s.project===id),view=document.getElementById('view');if(!view.querySelector('.restoration-feedback'))view.insertAdjacentHTML('afterbegin',`<div class="restoration-feedback" role="status"><span>${ico('house')} <b>${esc(p.name)} restored</b> · ${esc(p.reward)}</span><button class="btn sm" data-do="restorationdismiss" aria-label="Dismiss restoration summary">×</button></div>`);view.querySelector('.site-spot[data-a="'+id+'"]')?.classList.add('restoration-highlight');}if(UI.view==='overview'){const h=document.querySelector('.journey .phead');if(h&&!h.querySelector('[data-do="storyarchive"]'))h.insertAdjacentHTML('beforeend',`<button class="btn sm" data-do="storyarchive">${ico('book')} Story so far</button>`);}};
+})();
+
+</script>
+<script>
+/* One settings navigation, composed from the original controls so all existing actions and save keys remain intact. */
+(() => {
+const Q=window.DQ,UI=Q.ui,{esc,ico}=Q;
+const source=UI.V.settings;
+const groups=[['display','Display','gear'],['audio','Audio','sound'],['gameplay','Gameplay','attack'],['saves','Saves & backups','save'],['help','Help & extras','book']];
+const legacy={Interface:'display','Interface size':'display',Lettering:'display',Backdrop:'display',Audio:'audio',Gameplay:'gameplay',Time:'gameplay','Help & learning':'gameplay','Save data':'saves',Shortcuts:'help',About:'help',Playtest:'help','Art showcase':'help'};
+const card=(title,body,cls='')=>`<section class="panel settings-card ${cls}"><div class="phead"><h2>${title}</h2></div><div class="stack">${body}</div></section>`;
+UI.V.settings=()=>{
+ const t=document.createElement('template');t.innerHTML=source();const panels=new Map(),used=new Set();
+ for(const p of t.content.querySelectorAll('section.panel')){const h=p.querySelector('h2');if(h&&!panels.has(h.textContent.trim()))panels.set(h.textContent.trim(),p);}
+ const get=name=>{used.add(name);return panels.get(name);};
+ const take=(p,selector)=>{const n=p?.querySelector(selector);if(!n)return '';const h=n.outerHTML;n.remove();return h;};
+ const body=p=>{if(!p)return '';p.querySelector(':scope>.phead')?.remove();return p.innerHTML;};
+ const iface=get('Interface'),audio=get('Audio'),game=get('Gameplay'),save=get('Save data'),about=get('About');
+ const themeBlock=iface?.querySelector('.seg [data-do="theme"]')?.closest('.seg')?.parentElement;
+ const themeHtml=themeBlock?.outerHTML||'';themeBlock?.remove();
+ const name=take(iface,'.nameedit'),dev=take(about,'[data-do="devtog"]');
+ const size=body(get('Interface size'));
+ const backdrop=body(get('Backdrop'));
+ const display=[card('Appearance',themeHtml+`<div class="settings-field"><h3>Interface size</h3>${size}<small class="dim">Size preference applies on desktop.</small></div><div class="settings-field"><h3>Backdrop</h3>${backdrop}</div>`),card('Lettering',body(get('Lettering')),'lettering-set'),card('Notifications & accessibility',body(iface))];
+ const volume=take(audio,'[data-do="set"][data-a="muted"]')+['masterVol','vol','musicVol','ambVol'].map(k=>take(audio,`label:has([data-in="${k}"])`)).join('');
+ const musicLabel=audio?.querySelector('[data-do="set"][data-a="music"] b');if(musicLabel)musicLabel.textContent='Music';
+ const layers=['music','ambience','sfx'].map(k=>take(audio,`[data-do="set"][data-a="${k}"]`)).join('');
+ const task=audio?.querySelector('[data-do="tasksound"]')?.closest('.seg')?.parentElement;const taskHtml=task?.outerHTML||'';task?.remove();
+ const filters=audio?.querySelector('[data-do="sndcat"]')?.closest('.stack.tight')?.parentElement;
+ filters?.querySelector(':scope>.k')?.remove();
+ if(filters)for(const b of filters.querySelectorAll('[data-do="sndcat"] b'))b.textContent=(b.textContent==='Rewards'?'Reward':b.textContent)+' sounds';
+ const audioCards=[card('Volume',volume),card('Music & effects',layers+taskHtml),card('Sound filters',(filters?.outerHTML||'')+'<p class="sm dim">These filters apply while sound effects are enabled.</p>')];
+ const lessons=get('Help & learning');const lessonText=lessons?.querySelector('p');if(lessonText)lessonText.textContent='Quick guides explain each skill when you first open it. Revisit them whenever you need.';
+ const story=`<button class="tog ${Q.S.settings.storyScenes!==false?'on':''}" data-do="storysetting"><span class="sw"></span><span><b>Automatic story scenes</b><small>Major events offer skippable scenes. Replay them in Home → Journal.</small></span></button>`;
+ const gameCards=[card('Combat & offline progress',body(game)),card('Your hero',name),card('Story & learning',story+body(lessons)),card('Play time',body(get('Time')))];
+ const danger=take(save,'[data-do="newgame"]'),backupList=save?.querySelector('.bklist')?.parentElement;
+ const backupHtml=backupList?.outerHTML||'<p class="dim">No automatic backups yet. Your recent backups on this device will appear here.</p>';backupList?.remove();
+ const autosave=save?.querySelector('.phead small')?.textContent||'';
+ const saveCards=[card('Backup & transfer',`<p class="sm dim">${esc(autosave)}</p>`+body(save)),card('Automatic backups',backupHtml),card('Start over','<p>Make a backup before starting a new hero.</p>'+danger,'settings-danger')];
+ const shortcuts=get('Shortcuts');shortcuts?.querySelector('.keys')?.insertAdjacentHTML('beforeend','<dt><kbd>L</kbd></dt><dd>Switch light/dark theme</dd>');
+ const tools=card('Testing & artwork',body(get('Playtest'))+body(get('Art showcase'))+dev);
+ const helpCards=[card('Keyboard shortcuts',body(shortcuts)),card('About Idlewick',body(about)),tools];
+ for(const[name,p]of panels)if(!used.has(name))helpCards.push(card(esc(name),body(p)));
+ const content={display,audio:audioCards,gameplay:gameCards,saves:saveCards,help:helpCards};
+ const old=UI.tab.settingsPanel,selected=groups.some(g=>g[0]===old)?old:Object.prototype.hasOwnProperty.call(legacy,old)?legacy[old]:'display';UI.tab.settingsPanel=selected;
+ return `<section class="panel settings-navigation"><h1>Settings</h1><nav aria-label="Settings categories">${groups.map(([id,label,ic])=>`<button class="btn ${selected===id?'on':''}" data-do="settingsgroup" data-a="${id}" aria-pressed="${selected===id}">${ico(ic)}${esc(label)}</button>`).join('')}</nav></section><div class="settings-workspace" data-settings-group="${selected}">${content[selected].join('')}</div>`;
+};
+/* The old after-hook made one tab per contributed panel; this renderer already supplies the grouped navigation. */
+UI.after.settings=()=>{};
+const render0=UI.render;UI.render=(...args)=>{const r=render0(...args);if(UI.view==='settings'){const nav=document.getElementById('subnav');if(nav?.querySelectorAll('.stab').length===1&&nav.querySelector('[data-a="settings"]'))nav.innerHTML='';}return r;};
+UI.DO.settingsgroup=id=>{if(groups.some(g=>g[0]===id)){UI.tab.settingsPanel=id;UI.render(false);document.querySelector('.settings-navigation [data-a="'+id+'"]')?.focus({preventScroll:true});}};
 })();
 
 </script>

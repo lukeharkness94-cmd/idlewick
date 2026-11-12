@@ -1,0 +1,133 @@
+{
+  "assumptions": "Seeded 30-minute real engine trials; fixed XP, appropriate bronze/iron gear, Power Strike and Brace, ordinary equal-defence target with inflated HP to remove overkill. No boss resistances or uniques. This is support DPS / hero DPS, not percentage of combined DPS.",
+  "rows": [
+    {
+      "hero": 15,
+      "melee": 12,
+      "species": "bond_wolf",
+      "heroDamage": 3325,
+      "beastDamage": 602.14,
+      "contributionPct": 18.11
+    },
+    {
+      "hero": 15,
+      "melee": 12,
+      "species": "bond_boar",
+      "heroDamage": 3371,
+      "beastDamage": 602.8,
+      "contributionPct": 17.88
+    },
+    {
+      "hero": 15,
+      "melee": 12,
+      "species": "bond_owl",
+      "heroDamage": 3371,
+      "beastDamage": 602.14,
+      "contributionPct": 17.86
+    },
+    {
+      "hero": 15,
+      "melee": 12,
+      "species": "bond_bear",
+      "heroDamage": 3371,
+      "beastDamage": 602.14,
+      "contributionPct": 17.86
+    },
+    {
+      "hero": 20,
+      "melee": 15,
+      "species": "bond_wolf",
+      "heroDamage": 4336,
+      "beastDamage": 719.95,
+      "contributionPct": 16.6
+    },
+    {
+      "hero": 20,
+      "melee": 15,
+      "species": "bond_boar",
+      "heroDamage": 4079,
+      "beastDamage": 719.4,
+      "contributionPct": 17.64
+    },
+    {
+      "hero": 20,
+      "melee": 15,
+      "species": "bond_owl",
+      "heroDamage": 4079,
+      "beastDamage": 720.72,
+      "contributionPct": 17.67
+    },
+    {
+      "hero": 20,
+      "melee": 15,
+      "species": "bond_bear",
+      "heroDamage": 4079,
+      "beastDamage": 721.05,
+      "contributionPct": 17.68
+    },
+    {
+      "hero": 25,
+      "melee": 17,
+      "species": "bond_wolf",
+      "heroDamage": 4568,
+      "beastDamage": 776.05,
+      "contributionPct": 16.99
+    },
+    {
+      "hero": 25,
+      "melee": 17,
+      "species": "bond_boar",
+      "heroDamage": 4465,
+      "beastDamage": 776.6,
+      "contributionPct": 17.39
+    },
+    {
+      "hero": 25,
+      "melee": 17,
+      "species": "bond_owl",
+      "heroDamage": 4465,
+      "beastDamage": 776.16,
+      "contributionPct": 17.38
+    },
+    {
+      "hero": 25,
+      "melee": 17,
+      "species": "bond_bear",
+      "heroDamage": 4465,
+      "beastDamage": 776.71,
+      "contributionPct": 17.4
+    },
+    {
+      "hero": 30,
+      "melee": 20,
+      "species": "bond_wolf",
+      "heroDamage": 4642,
+      "beastDamage": 770.44,
+      "contributionPct": 16.6
+    },
+    {
+      "hero": 30,
+      "melee": 20,
+      "species": "bond_boar",
+      "heroDamage": 4535,
+      "beastDamage": 770,
+      "contributionPct": 16.98
+    },
+    {
+      "hero": 30,
+      "melee": 20,
+      "species": "bond_owl",
+      "heroDamage": 4535,
+      "beastDamage": 771.54,
+      "contributionPct": 17.01
+    },
+    {
+      "hero": 30,
+      "melee": 20,
+      "species": "bond_bear",
+      "heroDamage": 4535,
+      "beastDamage": 769.12,
+      "contributionPct": 16.96
+    }
+  ]
+}

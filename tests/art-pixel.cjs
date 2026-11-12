@@ -9,9 +9,9 @@ const ctx = vm.createContext({ console, Math, Date, JSON, performance: { now: ()
   localStorage: { getItem: () => null, setItem() {}, removeItem() {} }, document: { querySelector: () => null, querySelectorAll: () => [], getElementById: () => null, createElement: el, body: el(), head: el(), addEventListener() {} } });
 ctx.window = ctx;
 const load = n => vm.runInContext(fs.readFileSync(path.join(root, 'js', n + '.js'), 'utf8'), ctx, { filename: n });
-['util', 'data', 'creatures_expanded', 'skill_expansion_data', 'data2', 'data3', 'economy', 'state'].forEach(load);
+['util', 'data', 'creatures_expanded', 'skill_expansion_data', 'data2', 'data3', 'economy', 'skills_new_data', 'beastmastery_data', 'state'].forEach(load);
 const Q = ctx.DQ; Q.ui = { V: {}, DO: {}, B: {}, homeSections: [] };
-['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_world'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
+['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_world', 'skills_new_art', 'beastmastery_art'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
 const A = Q.pixelArt, D = Q.data;
 let checks = 0; const check = (name, fn) => { fn(); checks++; console.log('PASS', name); };
 const colours = spr => spr.render();
@@ -66,5 +66,8 @@ check('no image files or painted-art scripts remain', () => {
   assert.ok(!fs.existsSync(path.join(root, 'assets/painted')) && !fs.existsSync(path.join(root, 'assets/art-completion')));
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8'); assert.ok(!/art_painted|painted_runtime|art_completion/.test(html)); assert.ok(/pixel_runtime\.js/.test(html));
   for (const f of fs.readdirSync(path.join(root, 'js'))) { const src = fs.readFileSync(path.join(root, 'js', f), 'utf8'); assert.ok(!/assets\/(painted|art-completion)/.test(src), f + ' references a removed image'); }
+});
+check('new beasts and evolved forms have distinct structural silhouettes', () => {
+ const keys=[];for(const id of Object.keys(D.BEAST_SPECIES)){const a=A.creatureSprite(id),b=A.creatureSprite('evolved:'+id);assert.ok(a&&b);assert.notEqual(a.render().map(Boolean).join(''),b.render().map(Boolean).join(''),id+' evolved shape');keys.push(a.render().join(','),b.render().join(','));}assert.equal(new Set(keys).size,8);
 });
 console.log(checks + ' pixel-art checks passed');

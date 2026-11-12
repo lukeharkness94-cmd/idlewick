@@ -251,6 +251,7 @@ DQ.optionalGoals = () => {
 DQ.finishProject = id => {
   const project = D.PROJECTS[id];
   if (!project || S().projects[id] || S().town !== project.town || !DQ.canAfford(DQ.projectNeed(id))) return false;
+  if (!Object.keys(DQ.projectNeed(id)).length) { completeProject(id); return true; }
   DQ.projectGive(id); return !!S().projects[id];
 };
 function completeProject(id) {
@@ -324,13 +325,13 @@ UI.projectsPanel = () => {
   const town = S().town, entries = DQ.projectsForTown(town);
   const id = entries.some(([key]) => key === UI.tab.projectChoice) ? UI.tab.projectChoice : (entries.find(([k]) => !S().projects[k]) || entries[0])[0], project = D.PROJECTS[id];
   UI.tab.projectChoice = id;
-  const done = S().projects[id], need = DQ.projectNeed(id), canFinish = !done && S().town === project.town && Object.keys(need).length && DQ.canAfford(need);
+  const done = S().projects[id], need = DQ.projectNeed(id), canFinish = !done && S().town === project.town && DQ.canAfford(need);
   const changes = (town==='willowbrook'?['first_steps', 'hungry_cook']:[]).filter(q => S().q[q] && S().q[q].s === 'done');
   const stage = DQ.projectStage(id), pct = Math.round(DQ.projectProgress(id) * 100), g = (S().projectGiven || {})[id] || {};
   const canGive = !done && Object.keys(need).some(k => held(k) > 0), voice = D.PROJECT_VOICES[id];
   const A = DQ.pixelArt, W = (A && A.SCENE_W) || 320, H = (A && A.SCENE_H) || 180, shown = new Set(entries.map(([k]) => k));
-  const spots = A && A.siteLayout ? A.siteLayout(town).filter(sp => shown.has(sp.id)).map(sp => { const st = DQ.projectStage(sp.id), p = D.PROJECTS[sp.id];
-    return `<button class="site-spot st${st} ${sp.id === id ? 'on' : ''}" style="left:${((sp.X - 5) / W * 100).toFixed(3)}%;top:${((sp.Y - 6) / H * 100).toFixed(3)}%;width:${(42 / W * 100).toFixed(3)}%;height:${(42 / H * 100).toFixed(3)}%" data-do="projectpick" data-a="${sp.id}" aria-pressed="${sp.id === id}" aria-label="${esc(p.name)}: ${esc(DQ.PROJECT_STAGES[st])}" data-tip="text:${esc(p.name)} · ${esc(DQ.PROJECT_STAGES[st])}"><span class="site-mark">${st >= 4 ? '✓' : st ? Math.round(DQ.projectProgress(sp.id) * 100) + '%' : '!'}</span></button>`; }).join('') : '';
+  const spots = A && A.siteLayout ? A.siteLayout(town).filter(sp => shown.has(sp.id)).map(sp => { const st = DQ.projectStage(sp.id), p = D.PROJECTS[sp.id], ready = st < 4 && DQ.canAfford(DQ.projectNeed(sp.id));
+    return `<button class="site-spot ${ready ? 'deliver-ready' : ''} st${st} ${sp.id === id ? 'on' : ''}" style="left:${((sp.X - 5) / W * 100).toFixed(3)}%;top:${((sp.Y - 6) / H * 100).toFixed(3)}%;width:${(42 / W * 100).toFixed(3)}%;height:${(42 / H * 100).toFixed(3)}%" data-do="projectpick" data-a="${sp.id}" aria-pressed="${sp.id === id}" aria-label="${esc(p.name)}: ${ready ? 'All materials ready to deliver' : esc(DQ.PROJECT_STAGES[st])}" data-tip="text:${esc(p.name)} · ${esc(DQ.PROJECT_STAGES[st])}"><span class="site-mark">${st >= 4 ? '✓' : ready ? (Object.keys(DQ.projectNeed(sp.id)).length ? '✓ Deliver all' : '✓ Complete') : st ? Math.round(DQ.projectProgress(sp.id) * 100) + '%' : '! Repair'}</span></button>`; }).join('') : '';
   const story = done ? `<p class="proj-story">${esc(project.story)}</p>${voice ? `<p class="villager-line"><b>${esc(voice[0])}:</b> “${esc(voice[1])}”</p>` : ''}`
     : `<p class="proj-story">${esc(project.before || (stage ? `Work is under way. ${voice ? voice[0] + ' comes by most days to see how it is going.' : ''}` : `It has stood like this for years.${voice ? ` ${voice[0]} is hoping someone will take it on.` : ''}`))} Once it is done: ${esc(project.story.charAt(0).toLowerCase() + project.story.slice(1))}</p>`;
   const lines = done ? '' : `<div class="proj-lines">${Object.entries(project.cost).map(([item, n]) => { const got = Math.min(n, g[item] || 0), left = n - got, have = held(item), name = item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase();

@@ -141,7 +141,7 @@ function announceQuests() {
   if (!fresh.length) return;
   fresh.forEach(q => S().seen['q:' + q.id] = 1);
   if (DQ.firstRun) return;
-  fresh.filter(q => q.main).forEach(q => { const s = D.SK[q.unlocks]; DQ.notify({ kind: 'unlock', key: 'mq:' + q.id, icon: q.unlocks, col: s.col, title: `Main quest: ${q.name}`, text: `Learn ${s.name}. Speak to ${q.giver} in ${D.TOWN[q.town].name}.`, action: { label: 'View quest', fn: () => { DQ.ui.questTab = 'available'; DQ.go('quests'); } }, sound: 'unlock', ttl: 14000, burst: true }); });
+  fresh.filter(q => q.main && D.SK[q.unlocks]).forEach(q => { const s = D.SK[q.unlocks]; DQ.notify({ kind: 'unlock', key: 'mq:' + q.id, icon: q.unlocks, col: s.col, title: `Main quest: ${q.name}`, text: `Learn ${s.name}. Speak to ${q.giver} in ${D.TOWN[q.town].name}.`, action: { label: 'View quest', fn: () => { DQ.ui.questTab = 'available'; DQ.go('quests'); } }, sound: 'unlock', ttl: 14000, burst: true }); });
   fresh = fresh.filter(q => !q.main); if (!fresh.length) { DQ.emit('quests'); return; }
   DQ.notify({ kind: 'quest', key: 'qnew', icon: 'quest', col: '#d8a64a', title: fresh.length === 1 ? 'New quest available' : `${fresh.length} new quests available`, text: fresh.length === 1 ? `${fresh[0].name}, from ${fresh[0].giver}.` : fresh.slice(0, 2).map(q => q.name).join(', ') + (fresh.length > 2 ? '…' : ''), action: { label: 'View quests', fn: () => DQ.go('quests') }, sound: 'notify', ttl: 10000 });
   DQ.emit('quests');
@@ -433,6 +433,7 @@ function combatRound() {
     if (dealt && U.stun && chance(.12)) { f.stun = 1; fxHit('stun'); }
     if (dealt && U.poison) { f.poison = Math.min(3, (f.poison || 0) + 1); fxHit('poison'); }
     if (dealt && U.curse && sty === 'magic') { f.curse = Math.min(3, (f.curse || 0) + 1); fxHit('curse'); }
+    if (DQ.beastHeroHit) dealt = DQ.beastHeroHit(dealt, m, f);
   }
   /* XP counts the damage the creature could actually take: overkill on weak creatures teaches nothing extra */
   const xpDealt = Math.min(dealt, Math.max(0, f.hp));
@@ -444,11 +445,12 @@ function combatRound() {
   DQ.sfx(sty === 'ranged' ? 'bow' : sty === 'magic' ? 'cast' : dealt ? 'hit' : 'miss');
   if (xpDealt) {
     let first = null;
-    DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, xpDealt * per); if (!i) first = [sk, x]; });
-    DQ.addXp('hitpoints', xpDealt * 1.33);
+    DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, xpDealt * per); f.heroXp = (f.heroXp || 0) + x; if (!i) first = [sk, x]; });
+    f.heroXp = (f.heroXp || 0) + DQ.addXp('hitpoints', xpDealt * 1.33);
     if (first) DQ.floatAt(document.getElementById('av-foe'), `${ico(first[0])}+${fmt(first[1])} XP`, D.SK[first[0]].col);
   }
   if (f.hp <= 0) return kill(m);
+  if (DQ.beastAttack) { f.hp -= DQ.beastAttack(f, m); if (f.hp <= 0) return kill(m); }
   /* the monster attacks on its own clock: faster weapons get more swings in between */
   f.mt = (f.mt || 0) + (DQ.act ? DQ.act.dur * D.PACE[DQ.act.pace || 'steady'].speed : 2000);
   const clock = U.slow ? 2300 : 2000; if (U.slow) fxHit('slow');
@@ -503,6 +505,8 @@ function monsterAttack(f, m, ps, sty) {
 const beastNote = (key, id) => { const B = S().beast; const T = B[key] = B[key] || {}; T[id] = (T[id] || 0) + 1; };
 function kill(m) {
   const f = DQ.fight;
+  if (DQ.beastVictory) DQ.beastVictory(f, m);
+  if (!DQ.sim.on && !DQ.forecasting) DQ.emit('foedefeated', m);
   if (f && !DQ.forecasting) { const wr = DQ.weakOf(m, f); if (f.lastEl && wr.weak.includes(f.lastEl)) beastNote('weakWins', m.id); } S().stats.kill++; if (DQ.act) DQ.act.count++;
   const c = Math.round(rnd(m.coins[0], m.coins[1]) * DQ.coinMult()); DQ.addCoins(c);
   const loot = c ? [`${fmt(c)} coins`] : [], got = [], drops = [];
@@ -565,6 +569,7 @@ function kill(m) {
     if (!DQ.sim.on) { DQ.log(`You encounter ${/^[AEIOU]/.test(next.name) ? 'an' : 'a'} ${next.name.toLowerCase()}.`); DQ.emit('encounter', next); }
   } else f.hp = m.hp;
   f.round = 0;
+  f.heroXp = 0; // Keep the companion cadence across consecutive encounters.
 }
 
 /* ---------- Dispatch ---------- */
@@ -740,7 +745,7 @@ DQ.resumeAfterLoad = () => {
   if (s) {
     try {
       let ok = false; const k = s.kind;
-      if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town; else ok = !!D.NODE[k + ':' + s.id] && DQ.nodeHere(D.NODE[k + ':' + s.id]);
+      if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town; else if (EXT[k]) ok = !EXT[k].check(s.id); else ok = !!D.NODE[k + ':' + s.id] && DQ.nodeHere(D.NODE[k + ':' + s.id]);
       if (ok) { DQ.act = { kind: k, id: s.id, area: s.area || null, target: s.target || null, questTarget: !!s.questTarget, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0, progress: s.progress || 0 }; DQ.act.dur = DQ.actDur(DQ.act); DQ.act.t0 -= DQ.act.progress; if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
     } catch (e) {}
     if (!DQ.act) S().act = null;

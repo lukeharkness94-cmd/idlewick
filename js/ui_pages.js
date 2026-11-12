@@ -136,7 +136,7 @@ UI.V.quests = () => {
     const s = st(q), p = S().q[q.id], t = D.TOWN[q.town], sk = q.main && D.SK[q.unlocks];
     const pct = p ? Math.round(q.obj.reduce((a, o, j) => a + Math.min(1, DQ.objProg(q, p, j) / o.n), 0) / q.obj.length * 100) : 0;
     const blk = s === 'locked' ? (DQ.advLvl() < q.adv ? `Hero level ${q.adv}` : (DQ.questBlockers(q)[0] || 'Not yet')) : '';
-    return `<button class="qrow ${s} ${q.main ? 'main' : ''} ${q.id === (selected && selected.id) ? 'on' : ''}" data-do="qselect" data-a="${q.id}" aria-pressed="${q.id === (selected && selected.id)}" style="${sk ? `--c:${sk.col}` : ''}"><span class="qr-face">${(DQ.folkPortrait && DQ.folkPortrait(q.giver, 40)) || ico(q.main ? 'star' : s === 'locked' ? 'lock' : 'quest')}${q.main ? `<i class="qr-main">${ico('star')}</i>` : ''}</span><span class="qr-t"><b>${esc(q.name)}</b><small>${s === 'locked' ? esc(String(blk).replace(/<[^>]+>/g, '')) : `${esc(q.giver)} · ${esc(t.name)}`}</small>${s === 'done' ? '' : `<span class="qrecs">${recChips(q, true)}</span>`}${s === 'active' || s === 'ready' ? `<span class="bar"><i style="width:${pct}%"></i></span>` : ''}</span><span class="state ${s}">${{ new: 'New', locked: 'Locked', active: pct + '%', ready: 'Ready', done: 'Done' }[s]}</span></button>`;
+    return `<button class="qrow ${s} ${q.main ? 'main' : ''} ${q.id === (selected && selected.id) ? 'on' : ''}" data-do="qselect" data-a="${q.id}" aria-pressed="${q.id === (selected && selected.id)}" style="${sk ? `--c:${sk.col}` : ''}"><span class="qr-face">${(DQ.folkPortrait && DQ.folkPortrait(q.giver, 40)) || ico(q.main ? 'star' : s === 'locked' ? 'lock' : 'quest')}${q.main ? `<i class="qr-main">${ico('star')}</i>` : ''}</span><span class="qr-t"><b>${esc(q.name)}</b><small>${s === 'locked' ? esc(String(blk).replace(/<[^>]+>/g, '')) : `${esc(q.giver)} · ${esc(t.name)}`}</small>${s === 'done' ? '' : `<span class="qrecs">${recChips(q, true)}</span>`}${s === 'active' || s === 'ready' ? `<span class="bar"><i style="width:${pct}%"></i></span>` : ''}</span><span class="state ${s}">${{ new: 'New', locked: 'Locked', active: pct + '%', ready: '✓ Claim reward', done: '✓ Completed' }[s]}</span></button>`;
   };
   const cards = selected ? [selected].map((q, i) => {
     const s = st(q), p = S().q[q.id], t = D.TOWN[q.town];
@@ -148,7 +148,7 @@ UI.V.quests = () => {
     /* reading order: name, where, the story (and anything said), what is needed, rewards, then the action */
     const say = q.say || q.intro ? `<p class="quest-say">“${esc(q.say || q.intro)}”</p>` : '';
     const actions = `<div class="quest-actions">${s === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>` : s === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Claim reward</button>` : s === 'active' ? `<button class="btn primary" data-do="questcontinue" data-a="${q.id}">Continue quest</button>` : ''}</div>`;
-    return `<section class="panel quest ${s} ${q.main ? 'main' : ''}" style="--i:${i};${sk ? `--c:${sk.col}` : ''}" id="q-${q.id}">${sk ? `<span class="mq-ribbon">${ico('star')} Main quest · Unlocks ${sk.name}</span>` : ''}<div class="phead quest-head" style="margin:0">${DQ.folkPortrait ? `<button class="quest-face" data-do="folkfrom" data-a="${esc(q.giver)}" data-tip="text:About ${esc(q.giver)}">${DQ.folkPortrait(q.giver, 96)}</button>` : ''}<div><h2>${q.name}</h2><small>${q.giver} · ${t.name}</small></div><span class="state ${s}">${{ new: 'Available', locked: 'Locked', active: 'In progress', ready: 'Ready', done: 'Complete' }[s]}</span></div>
+    return `<section class="panel quest ${s} ${q.main ? 'main' : ''}" style="--i:${i};${sk ? `--c:${sk.col}` : ''}" id="q-${q.id}">${sk ? `<span class="mq-ribbon">${ico('star')} Main quest · Unlocks ${sk.name}</span>` : ''}<div class="phead quest-head" style="margin:0">${DQ.folkPortrait ? `<button class="quest-face" data-do="folkfrom" data-a="${esc(q.giver)}" data-tip="text:About ${esc(q.giver)}">${DQ.folkPortrait(q.giver, 96)}</button>` : ''}<div><h2>${q.name}</h2><small>${q.giver} · ${t.name}</small></div><span class="state ${s}">${{ new: 'Available', locked: 'Locked', active: 'In progress', ready: '✓ Ready to claim', done: '✓ Completed' }[s]}</span></div>
       <div class="quest-story" id="quest-story-${q.id}"><p class="blurb">${q.blurb}</p>${say}</div>
       ${DQ.questImpact && DQ.questImpact(q.id) ? `<p class="quest-impact">Town change · ${esc(DQ.questImpact(q.id))}</p>` : ''}${req}${s === 'done' ? '' : `<div class="quest-rec"><span class="k">Recommended</span>${recChips(q)}</div>`}${s === 'locked' ? '' : `<div class="quest-objs"><div class="k">Required</div>${objs}</div>`}
       <div class="rewards"><span class="k">Rewards</span><div class="rws">${sk ? `<span class="rw unlockrw" style="--c:${sk.col}">${ico(q.unlocks)}Learn ${sk.name}</span>` : ''}${UI.rewards(q.reward)}</div></div>${actions}</section>`;
@@ -266,8 +266,17 @@ const DO = {
   eatat: a => { S().settings.eatAt = +a; UI.render(false); },
   eat: a => { DQ.eat(a); UI.upd(); },
   spell: a => { S().spell = a; UI.render(false); },
-  qstart: a => { DQ.startQuest(a); if (S().q[a] && DQ.toast) DQ.toast(`Accepted: ${D.QM[a].name}. It is now under Active.`); if (UI.view === 'quests') UI.render(false); }, /* stays on Available so several quests can be accepted in a row */
-  qclaim: a => { DQ.claimQuest(a); if (UI.view === 'quests') { UI.questTab = null; UI.render(false); } },
+  qstart: a => {
+    const q = D.QM[a]; if (!q || DQ.questState(q) !== 'new') return;
+    DQ.startQuest(a);
+    if (DQ.toast) DQ.toast(`Accepted: ${q.name}. It is now under Active.`);
+    if (!D.QUESTS.some(q => DQ.questState(q) === 'new')) {
+      UI.questTab = 'active'; UI.tab.questSelected = a;
+      if (UI.view !== 'quests') return DQ.go('quests');
+    }
+    if (UI.view === 'quests') UI.render(false);
+  }, /* Keep batch acceptance available; open the accepted quest once the list is exhausted. */
+  qclaim: (a, choice) => { DQ.claimQuest(a, choice); if (UI.view === 'quests') { UI.questTab = null; UI.render(false); } },
   qtab: a => { UI.questTab = a; UI.render(false); },
   questcontinue: id => {
     const q = D.QM[id], progress = S().q[id];

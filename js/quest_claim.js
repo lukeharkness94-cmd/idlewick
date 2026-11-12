@@ -6,11 +6,25 @@
 const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S, { esc, fmt, ico } = DQ;
 let reveal = null;
 const claim0 = UI.DO.qclaim;
-UI.DO.qclaim = a => {
+UI.DO.qclaim = (a, choice) => {
   const q = D.QM[a], ready = q && DQ.questState(q) === 'ready';
-  if (!ready || UI.view !== 'quests') return claim0(a);
-  claim0(a);
-  if (DQ.questState(q) === 'done') { reveal = { id: a, at: 0 }; UI.pageNotice = null; UI.render(false); if (UI.renderPageNotice) UI.renderPageNotice(); animate(); }
+  if (!ready || UI.view !== 'quests') return claim0(a, choice);
+  const card = document.querySelector('.qdetail > .quest'), rect = card && card.getBoundingClientRect(), tab = UI.questTab, selected = UI.tab.questSelected;
+  const render = UI.render;
+  // Claim updates state and HUD, but the surrounding quest list and selected card keep their identity.
+  UI.render = () => { UI.renderHud(); UI.renderRail(); };
+  try { claim0(a, choice); } finally { UI.render = render; UI.questTab = tab; UI.tab.questSelected = selected; }
+  if (DQ.questState(q) === 'done') {
+    // Quest/level events enqueue a redraw; this claim has already updated the surrounding UI in place.
+    if (UI._rt) { clearTimeout(UI._rt); UI._rt = 0; }
+    reveal = { id: a, at: 0, sel: selected, tab, height: rect ? rect.height / (DQ.zoom || 1) : 0 };
+    UI.pageNotice = null;
+    if (card) { const t = document.createElement('template'); t.innerHTML = html(); card.replaceWith(t.content.firstElementChild); }
+    else UI.render(false);
+    const row = document.querySelector('.qrow[data-a="' + a + '"]');
+    if (row) { row.classList.remove('ready'); row.classList.add('done'); const state = row.querySelector('.state'); if (state) { state.textContent = '✓ Completed'; state.className = 'state done'; } }
+    if (UI.renderPageNotice) UI.renderPageNotice(); animate();
+  }
 };
 UI.DO.qrevealdone = () => { reveal = null; UI.render(false); };
 const tiles = q => {
@@ -24,7 +38,7 @@ const tiles = q => {
 const html = () => {
   const q = D.QM[reveal.id]; if (!q) return '';
   const list = tiles(q), calm = S().settings.reduceFx;
-  return `<section class="panel quest-reveal ${calm ? 'calm' : ''}" aria-live="polite"><div class="qrv-head">${DQ.folkPortrait ? DQ.folkPortrait(q.giver, 96, 'qrv-face') : ''}<div><span class="k">Quest complete</span><h2>${esc(q.name)}</h2>${q.thanks ? `<p class="qrv-thanks">${esc(q.giver)}: “${esc(q.thanks)}”</p>` : `<p class="qrv-thanks">${esc(q.giver)} thanks you.</p>`}</div></div>
+  return `<section style="${reveal.height ? `height:${reveal.height}px;min-height:${reveal.height}px` : ''}" class="panel quest-reveal ${calm ? 'calm' : ''}" aria-live="polite"><div class="qrv-head">${DQ.folkPortrait ? DQ.folkPortrait(q.giver, 96, 'qrv-face') : ''}<div><span class="k">Quest complete</span><h2>${esc(q.name)}</h2>${q.thanks ? `<p class="qrv-thanks">${esc(q.giver)}: “${esc(q.thanks)}”</p>` : `<p class="qrv-thanks">${esc(q.giver)} thanks you.</p>`}</div></div>
     <div class="qrv-tiles">${list.map((t, i) => `<div class="qrv-tile ${t.cls || ''}" style="--c:${t.col};--i:${i}"><span class="qrv-art">${t.art}</span><b class="mono" ${t.n ? `data-count="${t.n}" data-unit="${esc(t.unit || '')}" data-pre="${t.pre ? 1 : ''}"` : ''}>${t.n ? (calm ? (t.pre ? fmt(t.n) + t.unit : fmt(t.n) + t.unit) : (t.pre ? '0' + t.unit : '0' + t.unit)) : '✦'}</b><small>${esc(t.label)}</small></div>`).join('')}</div>
     <div class="quest-actions"><button class="btn primary" data-do="qrevealdone">Continue</button></div></section>`;
 };

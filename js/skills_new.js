@@ -95,11 +95,6 @@ UI.V.beastmastery = () => {
       reason: [!seen ? `Reach ${t.name}` : '', lvlLock ? `Requires Beastmastery ${lvl}` : '', !traps ? 'Needs a wooden trap' : ''].filter(Boolean).join(' · '),
       short: !seen ? `Reach ${t.name}` : lvlLock ? `Lv ${lvl}` : '', caption: got ? `${esc(sig.name)} befriended` : `Befriend ${sig ? esc(sig.name) : 'a creature'}`, stateText: got ? '✓ Befriended · hides and feathers' : `${(DQ.befriendChance(t.id) * 100).toFixed(1)}% per trap`,
       info: `${got ? companionBtn(sig) : ''}<p>Lay traps around ${esc(t.name)}. ${got ? 'You have befriended its signature companion; traps now bring hides, feathers and other trophies.' : `Each trap has a ${(DQ.befriendChance(t.id) * 100).toFixed(1)}% chance to befriend <b>${sig ? esc(sig.name) : 'its companion'}</b>; otherwise it brings hides, feathers and other trophies.`}</p><p>${traps} wooden trap${traps === 1 ? '' : 's'} · about 1 in 4 breaks · 8s per trap</p>` }; });
-  const owned = (D.PETS || []).filter(p => S().pets.owned[p.id]);
-  const train = owned.map(p => { const lv = DQ.petLevel(p.id), cid = A && A.hasCreature(p.id) ? p.id : p.mon || p.id;
-    const on = S().pets.active === p.id;
-    return { id: p.id, name: `Train ${p.name}`, artKind: 'creature', artId: cid, caption: `Level ${lv} · ${esc(p.kind || 'Companion')}`, stateText: on ? '★ With you' : 'Not with you',
-      info: `${companionBtn(p)}<p>${esc(p.text || '')}</p><p>${(DQ.durFor('train', p.id) / 1000).toFixed(0)}s per session · Companion bonuses ×${DQ.beastMult().toFixed(2)}</p>` }; });
-  return UI.taskPanel('beastmastery', 'Beastmastery', 'train', [...train, ...lures], '');
+  return UI.taskPanel('beastmastery', 'Fieldwork', 'train', lures, '');
 };
 })();

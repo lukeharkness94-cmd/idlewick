@@ -26,11 +26,11 @@ DQ.newState = (name = 'Adventurer', look) => {
     q: {}, ach: {}, seen: {}, unlocked: {},
     unlockRules: 2,
     stats: { carve: 0, voyage: 0, train: 0, harvest: 0, collect: 0, pets: 0, furnish: 0, hired: 0, catch: 0, chop: 0, mine: 0, thieve: 0, cook: 0, burn: 0, smelt: 0, smith: 0, craft: 0, alch: 0, brew: 0, enchant: 0, kill: 0, earned: 0, deaths: 0, bought: 0, sold: 0, equipped: 0, tools: 0, rare: 0 },
-    settings: { masterVol: 1, ambience: true, ambVol: .45, theme: 'dark', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
+    settings: { masterVol: 1, ambience: true, ambVol: .45, theme: 'dark', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, storyScenes: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
     style: { melee: 'aggressive', ranged: 'offense', magic: 'offense' }, spell: 'spark',
     act: null, log: [], tut: { done: {}, hidden: false },
     gameTime: 0, farm: { plots: [{ crop: null }, { crop: null }, { crop: null }], plotsBought: 3, animals: [], pensBought: 2, feed: 0, autoReplant: true, last: 'potato', next: null },
-    pets: { owned: {}, active: null }, hunt: { area: null, target: null, encounters: 0 }, enchants: {}, house: { owned: false, rooms: {}, furn: {}, wall: [] }, workers: [], hire: { cands: [], at: -1e9 }, beast: { kills: {}, drops: {} },
+    pets: { owned: {}, active: null, tracks: {}, events: [], expedition: null, bondVersion: 1 }, hunt: { area: null, target: null, encounters: 0 }, enchants: {}, house: { owned: false, rooms: {}, furn: {}, wall: [] }, workers: [], hire: { cands: [], at: -1e9 }, beast: { kills: {}, drops: {} },
   };
 };
 DQ.S = DQ.newState();
@@ -46,6 +46,7 @@ const merge = (base, over) => {
 };
 const record = value => value && typeof value === 'object' && !Array.isArray(value);
 function candidateState(o) {
+  if (DQ.prepareBeastSave) o = DQ.prepareBeastSave(o);
   if (!record(o) || o.v !== 2 || !record(o.xp)) throw new Error('Unsupported save');
   const base = DQ.newState(); base.equip = {}; base.inv = {};
   function checkShape(value, expected) {
@@ -91,7 +92,7 @@ function candidateState(o) {
   }
   const validAction = a => {
     if (!record(a)) return false;
-    const known = a.kind === 'recipe' ? D.RECIPES[a.id] : a.kind === 'fight' ? D.MON[a.id] : a.kind === 'alch' ? D.ITEMS[a.id] : D.NODE[a.kind + ':' + a.id];
+    const known = a.kind === 'recipe' ? D.RECIPES[a.id] : a.kind === 'fight' ? D.MON[a.id] : a.kind === 'alch' ? D.ITEMS[a.id] : a.kind === 'sail' ? D.VOYAGE?.[a.id] : a.kind === 'train' ? (D.PET[a.id] || (String(a.id).startsWith('lure:') && D.TOWN[String(a.id).slice(5)])) : D.NODE[a.kind + ':' + a.id];
     return !!known && (!a.pace || !!D.PACE[a.pace]) && ['count', 'elapsed', 'progress', 'lvlTarget'].every(k => a[k] === undefined || (Number.isFinite(a[k]) && a[k] >= 0));
   };
   if (result.act && !validAction(result.act)) throw new Error('Invalid active task');
@@ -111,6 +112,7 @@ DQ.load = () => {
   } catch (e) { DQ.saveHealth = 'The saved hero could not be loaded. Keep a copy before starting again.'; return false; }
 };
 function migrate(S) {
+  if (DQ.migrateBeasts) DQ.migrateBeasts(S);
   /* Mossbarrow was added between Willowbrook and Saltmere: keep later roads open for older saves */
   const ids = D.TOWNS.map(t => t.id); let last = -1; ids.forEach((id, i) => { if (S.towns[id]) last = i; });
   for (let i = 0; i < last; i++) if (!S.towns[ids[i]]) S.towns[ids[i]] = { visited: false, boss: false };

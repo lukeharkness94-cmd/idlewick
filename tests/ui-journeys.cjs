@@ -8,7 +8,7 @@ const URL=process.env.IDLEWICK_URL||'http://127.0.0.1:8765/';
  const browser=await chromium.launch({headless:true,args:['--no-sandbox'],...(fs.existsSync('/usr/bin/chromium')?{executablePath:'/usr/bin/chromium'}:{})});
  const fresh=async(name='Journey')=>{const ctx=await browser.newContext({viewport:{width:1280,height:900}});const page=await ctx.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(URL);await page.locator('#t-new').click();await page.locator('#crname').fill(name);await page.locator('#cr-go').click();await page.waitForTimeout(700);
-  await page.evaluate(()=>{DQ.S.settings.muted=true;document.querySelectorAll('.note').forEach(n=>n.remove());});return {ctx,page,errors};};
+  await page.evaluate(()=>{DQ.S.settings.muted=true;DQ.S.settings.storyScenes=false; /* Story playback has its own suite. */document.querySelectorAll('.note').forEach(n=>n.remove());});return {ctx,page,errors};};
  const done=[];
  try{
   /* 1. Normal progression: first task through first useful upgrade */

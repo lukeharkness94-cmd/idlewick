@@ -67,7 +67,7 @@ const B = UI.B = {
   count: (e, a) => set(e, fmtK(DQ.have(a))),
   ing: (e, a, b) => { const n = DQ.have(a); set(e, `${fmtK(n)}/${b}`); e.classList.toggle('bad', n < +b); },
   fhp: e => { if (DQ.fight) e.style.width = clamp(DQ.fight.hp / D.MON[DQ.fight.id].hp * 100, 0, 100) + '%'; },
-  fhptxt: e => { if (DQ.fight) set(e, `${Math.max(0, DQ.fight.hp)} / ${D.MON[DQ.fight.id].hp} health`); },
+  fhptxt: e => { if (DQ.fight) set(e, `${Math.ceil(Math.max(0, DQ.fight.hp))} / ${D.MON[DQ.fight.id].hp} health`); },
   qbar: (e, a, b) => { const q = D.QM[a], st = S().q[a]; e.style.width = clamp(DQ.objProg(q, st, +b) / q.obj[b].n * 100, 0, 100) + '%'; },
   qtxt: (e, a, b) => { const q = D.QM[a], st = S().q[a]; set(e, `${fmt(DQ.objProg(q, st, +b))} / ${fmt(q.obj[b].n)}`); },
   qall: (e, a) => { const q = D.QM[a], st = S().q[a]; let d = 0, t = 0; q.obj.forEach((o, i) => { d += Math.min(o.n, DQ.objProg(q, st, i)); t += o.n; }); e.style.width = (d / t * 100) + '%'; },
@@ -181,7 +181,7 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
   const action = `<div class="activity-actions">${choice.away?`<button class="btn primary" data-do="taskmap" data-a="${choice.town}">View ${esc(D.TOWN[choice.town].name)}</button>`:''}<button class="btn primary task-primary" data-do="act" data-a="${kind}" data-b="${choice.id}" ${!running && choice.blocked ? 'disabled' : ''}>${running ? kind === 'fight' ? 'Retreat' : 'Stop' : choice.blackout ? 'Locked' : esc((verb?verb+' ':'')+choice.name.replace(/^(Cook|Bars|Weapons|Armour) · /,''))}</button>${DQ.planUnlocked && DQ.planUnlocked() ? `<button class="btn" data-do="queueadd" data-a="${kind}" data-b="${choice.id}" ${choice.locked||choice.away ? 'disabled' : ''}>Queue</button>` : ''}</div>`;
   const cards = `<section class="panel activity-choices"><div class="phead"><h2>${kind==='fight'?'Choose an opponent':kind==='recipe'?'Choose what to make':kind==='alch'?'Choose an item':({fish:'Fish catalogue',wood:'Trees',mine:'Ore deposits',thieve:'Targets',sail:'Islands',train:'Traps and companions'}[kind]||'Choose your spot')}</h2><small>${choices.some(c=>c.town)?`${choices.length} resources · all regions`:D.TOWN[S().town].name}</small></div>${UI.taskToolbar[key] || ''}<div class="illustrated-choices">${choices.filter(c=>c.visible!==false).map(c=>{
     const working=DQ.act&&DQ.act.kind===kind&&DQ.act.id===c.id;
-    return `<button class="illustrated-card ${working?'active':''} ${choice.id===c.id?'selected':''} ${c.locked?'locked':''} ${c.missing?'missing':''}" data-do="taskselect" data-a="${kind}" data-b="${c.id}" data-page="${key}" aria-pressed="${choice.id===c.id}" ${c.locked?`aria-disabled="true" data-tip="text:${esc(c.reason||'Not unlocked yet')}"`:''}>
+    return `<button data-task-id="${c.id}" class="illustrated-card ${working?'active':''} ${choice.id===c.id?'selected':''} ${c.locked?'locked':''} ${c.missing?'missing':''}" data-do="taskselect" data-a="${kind}" data-b="${c.id}" data-page="${key}" aria-pressed="${choice.id===c.id}" ${c.locked?`aria-disabled="true" data-tip="text:${esc(c.reason||'Not unlocked yet')}"`:''}>
       <span class="choice-art">${art(c,96)}</span>${!c.locked && DQ.gearMark ? (g => g && D.ITEMS[g] && D.ITEMS[g].slot ? DQ.gearMark(g) : '')(c.yieldId || (c.artKind === 'item' ? c.artId || c.id : null)) : ''}<b>${c.locked?'???':esc(c.name)}</b><small>${c.locked?`${ico('lock')}<span>${esc(c.short||String(c.reason||'Not unlocked yet').replace(/^Requires [A-Za-z ]+? (\d+)/,'Lv $1').replace(/^Requires /,''))}</span>`:c.caption||esc(c.reason||'')}</small>${c.locked?'':`<span class="choice-state">${working?'● Working':c.stateText?(choice.id===c.id&&!c.locked&&!c.missing?'✓ Selected · ':'')+c.stateText:c.locked?'Locked':c.away?'Travel required':choice.id===c.id?'✓ Selected':'Available'}</span>`}${working?`<span class="bar prog"><i data-prog="${kind}:${c.id}"></i></span>`:''}</button>`;
   }).join('') || '<p class="dim">No recipes match. Try another category.</p>'}</div></section>`;
   if(kind==='fight')return `<section class="panel encounter-controls"><div class="phead"><h2>${esc(choice.name)}</h2><small>Combat <b data-b="combat"></b></small></div>${action}<div class="task-summary">${choice.info||''}</div></section>${cards}`;
@@ -213,6 +213,7 @@ UI.V.gather = sk => {
 
 /* open a page with one card chosen, in its category, scrolled into view and briefly highlighted */
 UI.focusTask = (page, id, tab, sk) => {
+  if (DQ.data.RECIPES[id]) { const r = DQ.data.RECIPES[id], g = DQ.recipeGroup(r); sk = r.skill; tab = g.g; UI.tab[sk + 'sub'] = g.s || null; }
   if (tab) { UI.tab[sk || page] = tab; UI.tab[(sk || page) + 'ready'] = false; }
   UI.taskChoice[page] = id; UI.spot = { id, until: Date.now() + 2600 }; DQ.go(page);
   setTimeout(() => { const el = document.querySelector(`.illustrated-card[data-b="${id}"]`); if (!el) return;

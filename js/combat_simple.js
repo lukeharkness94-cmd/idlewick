@@ -65,7 +65,7 @@
     /* on shorter or narrower desktops the fight's own line (Fighting … / Retreat, or Selected … / Explore) joins the
        ready line so the stage keeps its height for the fighters */
     if (arena && ctl) { ctl.classList.add('stage-ctl'); ctl.insertAdjacentHTML('afterbegin', '<span class="step-n on">3</span>'); if (tight) { if (!ctl.querySelector('button')) { ctl.remove(); } else { const n = ctl.querySelector('.step-n'); if (n) n.remove(); ctl.classList.add('in-ready'); live.querySelector('.ready-line').appendChild(ctl); } arena.classList.add('no-ctl'); } else arena.appendChild(ctl); }
-    strip.insertAdjacentHTML('beforebegin', `<div class="combat-hud"><section class="panel hud-train"><div class="kit-head"><span class="k">Train</span></div></section>${abilPanel()}${foodPanel()}</div>`);
+    strip.insertAdjacentHTML('beforebegin', `<div class="combat-hud"><section class="panel hud-train"><div class="kit-head"><span class="k">Train</span></div></section>${foodPanel()}${abilPanel()}</div>`);
     const train = live.querySelector('.hud-train'); train.appendChild(strip);
     const w = strip.querySelector('.ss-weapon'); if (w) train.querySelector('.kit-head').appendChild(w);
   };
@@ -75,13 +75,11 @@
     const why = a => DQ.ability(a.id) ? 'In use' : a.needShield && !S().equip.shield ? 'Needs a shield' : a.style ? `${DQ.cap(a.style)} only` : 'Idle';
     const slotHtml = Array.from({ length: slots }, (_, i) => { const a = D.ABIL.find(x => x.id === on[i]);
       return a ? `<button class="ab-tile on ${DQ.ability(a.id) ? '' : 'idle'}" data-do="abil" data-a="${a.id}" aria-pressed="true" data-tip="text:${esc(a.name)}: ${esc(a.text)} Click to take it out of the slot.">${ico(a.ic)}<b>${esc(a.name)}</b><small>${esc(why(a))}</small></button>`
-        : `<span class="ab-tile empty">${ico('star')}<b>Empty</b><small>${spare.length ? 'Pick below' : 'Slot ' + (i + 1)}</small></span>`; }).join('');
-    const nextSlot = slots < 3 ? `<span class="ab-tile locked"><b>Slot ${slots + 1}</b><small>Combat 40</small></span>` : '';
-    const full = on.length >= slots;
-    const adds = spare.map(a => `<button class="ab-add" data-do="${full ? 'abilswap' : 'abil'}" data-a="${a.id}" aria-label="${full ? 'Swap in ' : 'Add '}${esc(a.name)}" data-tip="text:${esc(a.name)}: ${esc(a.text)}${full ? ' Replaces your last slot.' : ''}">${ico(a.ic)}<span>${esc(a.name)}</span></button>`).join('');
+        : `<button class="ab-tile empty" data-do="combatmore" data-a="abilities" aria-label="Choose ability for slot ${i+1}">${ico('star')}<b>Empty</b><small>${spare.length ? 'Choose an ability' : 'Slot ' + (i + 1)}</small></button>`; }).join('');
+    const nextSlot = slots < 3 ? `<small class="ab-future-slot">Third slot · Combat 40</small>` : '';
     const nxt = next ? (() => { const need = D.XPF[next.lvl] || 1, have = S().xp[next.skill] || 0; return `<div class="ab-next"><span>${ready.length ? 'Next' : 'First ability'}: <b>${esc(next.name)}</b> at ${esc(D.SK[next.skill].name)} ${next.lvl}</span><span class="bar"><i style="width:${Math.min(100, Math.round(have / need * 100))}%"></i></span></div>`; })() : '';
-    return `<section class="panel combat-abils"><div class="kit-head"><span class="k">Abilities <b class="mono">${on.length}/${slots}</b></span><button class="linkish" data-do="combatmore" data-a="abilities">All abilities</button></div>
-      <div class="ab-slots">${slotHtml}${nextSlot}</div>${adds ? `<div class="ab-adds"><span class="kit-sub">${full ? 'Swap in' : 'Add'}</span>${adds}</div>` : nxt}</section>`;
+    return `<section class="panel combat-abils"><div class="kit-head"><span class="k">Abilities <b class="mono">${on.length}/${slots}</b></span><button class="linkish" data-do="combatmore" data-a="abilities">Manage</button></div>
+      <div class="ab-slots">${slotHtml}</div>${nextSlot}${ready.length ? '' : nxt}</section>`;
   };
   const foodPanel = () => {
     const foods = (DQ.foods ? DQ.foods() : []).filter(id => DQ.have(id) > 0), heal = foodHeal(), at = S().settings.eatAt || 50;

@@ -26,7 +26,7 @@ DQ.fx = () => {
   f.dmg += f.trophy * Object.values(S().towns).filter(t => t.boss).length;
   const ap = S().pets.active && D.PET[S().pets.active];
   if (ap) {
-    const m = (1 + .25 * (DQ.petLevel(ap.id) - 1)) * (DQ.beastMult ? DQ.beastMult() : 1), b = ap.bonus;
+    const m = (1 + .25 * (Math.min(5, DQ.petLevel(ap.id)) - 1) + .05 * Math.max(0, DQ.petLevel(ap.id) - 5)) * (DQ.beastMult ? DQ.beastMult() : 1), b = ap.bonus;
     if (b.xpAll) f.xpAll += b.xpAll * m; if (b.coin) f.coin += b.coin * m; if (b.dmg) f.dmg += b.dmg * m; if (b.dr) f.dr += b.dr * m; if (b.heal) f.heal += b.heal * m; if (b.speed) f.speedAll += b.speed * m;
     Object.entries(b.xp || {}).forEach(([k, v]) => f.xp[k] = (f.xp[k] || 0) + v * m);
   }
@@ -43,10 +43,11 @@ DQ.packMax = () => DQ.PACK_SLOTS + DQ.fx().pack;
 DQ.coinMult = () => 1 + DQ.fx().coin + (DQ.uniqueFx && DQ.uniqueFx().fortune ? .05 : 0);
 
 /* ---------- Pets ---------- */
-DQ.awardPet = id => {
+DQ.awardPet = (id, options = {}) => {
   const p = D.PET[id], o = S().pets.owned; if (!p || o[id]) return false;
   o[id] = { aff: 0, found: Date.now() }; S().stats.pets = Object.keys(o).length;
   if (!S().pets.active) { S().pets.active = id; DQ.fxDirty(); }
+  if (options.quiet) { DQ.achDirty = true; return true; }
   const active = S().pets.active === id;
   DQ.notify({ kind: 'unlock', key: 'pet:' + id, icon: 'paw', col: p.col, title: `New creature: ${p.name}!`, text: `A ${p.kind.toLowerCase()} has joined your collection. ${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, sound: 'gem', burst: true, ttl: 14000,
     popup: (DQ.sim && DQ.sim.on) || DQ.forecasting ? null : { title: `A new companion: ${p.name}!`, body: `<div class="pet-pop" style="--c:${p.col}"><span class="pet-pop-art">${(() => { try { return DQ.petSprite ? DQ.petSprite(p, 128) : ''; } catch (e) { return ''; } })()}</span><p><b>${DQ.esc(p.name)}</b> the ${DQ.esc(p.kind.toLowerCase())} has joined you.</p><p class="pet-pop-fx">${DQ.esc(p.text)}.</p><p class="sm dim">${active ? 'They are your active companion now.' : 'Make them your companion to get this bonus.'}</p></div>`,
