@@ -33,7 +33,7 @@ DQ.newState = (name = 'Adventurer', look) => {
     pets: { owned: {}, active: null, tracks: {}, events: [], expedition: null, bondVersion: 1 }, hunt: { area: null, target: null, encounters: 0 }, enchants: {}, house: { owned: false, rooms: {}, furn: {}, wall: [] }, workers: [], hire: { cands: [], at: -1e9 }, beast: { kills: {}, drops: {} },
   };
 };
-DQ.S = DQ.newState();
+{ let cur = DQ.newState(); Object.defineProperty(DQ, 'S', { get: () => cur, set: v => { cur = v; if (DQ.xpAliases) DQ.xpAliases(v); }, configurable: true, enumerable: true }); }
 
 const merge = (base, over) => {
   if (!over || typeof over !== 'object') return base;
@@ -112,6 +112,12 @@ DQ.load = () => {
   } catch (e) { DQ.saveHealth = 'The saved hero could not be loaded. Keep a copy before starting again.'; return false; }
 };
 function migrate(S) {
+  /* Attack + Strength became Melee (Nov 2026): Melee takes the higher of the two; the lower still counts towards Hero level */
+  if (S.xp && (Object.prototype.hasOwnProperty.call(S.xp, 'attack') || Object.prototype.hasOwnProperty.call(S.xp, 'strength')) && !S.meleeMerged) {
+    const a = +S.xp.attack || 0, b = +S.xp.strength || 0; S.xp.melee = Math.max(+S.xp.melee || 0, a, b); S.xpLegacy = (S.xpLegacy || 0) + Math.min(a, b);
+    S.xpOld = { attack: a, strength: b }; delete S.xp.attack; delete S.xp.strength; S.meleeMerged = 1;
+  }
+  DQ.xpAliases(S);
   if (DQ.migrateBeasts) DQ.migrateBeasts(S);
   /* Mossbarrow was added between Willowbrook and Saltmere: keep later roads open for older saves */
   const ids = D.TOWNS.map(t => t.id); let last = -1; ids.forEach((id, i) => { if (S.towns[id]) last = i; });
@@ -119,7 +125,7 @@ function migrate(S) {
   if (!Array.isArray(S.farm.plots)) S.farm.plots = [];
   /* practical unlocks (Nov 2026): keep every skill an older save had already earned under the earlier rules. Runs once. */
   if (!S.unlockRules) {
-  const xpTotal = D.SKILLS.reduce((a, s) => a + ((S.xp || {})[s.id] || 0), 0) - D.XPF[10]; let hero = 1; while (hero < 99 && xpTotal >= D.advReq(hero + 1)) hero++;
+  const xpTotal = D.SKILLS.reduce((a, s) => a + ((S.xp || {})[s.id] || 0), 0) + (S.xpLegacy || 0) - D.XPF[10]; let hero = 1; while (hero < 99 && xpTotal >= D.advReq(hero + 1)) hero++;
   for (const [sk, before] of Object.entries(D.UNLOCK_BEFORE || {})) {
     if (S.unlocked[sk]) continue;
     const had = before.hero ? hero >= before.hero : Object.entries(before).every(([k, n]) => ((S.stats || {})[k] || 0) >= n);
@@ -171,17 +177,23 @@ addEventListener('storage', e => {
 });
 
 /* ---------- Levels ---------- */
-DQ.lvl = sk => D.lvlOf(DQ.S.xp[sk] || 0);
+DQ.skId = sk => (D.SKILL_ALIAS && D.SKILL_ALIAS[sk]) || sk;
+DQ.lvl = sk => D.lvlOf(DQ.S.xp[DQ.skId(sk)] || 0);
+/* old saves and code that still read xp.attack / xp.strength see Melee; the accessors are not saved */
+DQ.xpAliases = S => { if (!S || !S.xp) return; for (const k of ['attack', 'strength']) if (!Object.getOwnPropertyDescriptor(S.xp, k) || Object.getOwnPropertyDescriptor(S.xp, k).enumerable) {
+  if (Object.prototype.hasOwnProperty.call(S.xp, k)) delete S.xp[k];
+  Object.defineProperty(S.xp, k, { get() { return this.melee || 0; }, set(v) { this.melee = v; }, enumerable: false, configurable: true }); } };
+DQ.xpAliases(DQ.S);
 DQ.maxLvl = () => Math.max(...D.SKILLS.map(s => DQ.lvl(s.id)));
 DQ.totalLvl = () => D.SKILLS.reduce((a, s) => a + DQ.lvl(s.id), 0);
-DQ.totalXp = () => D.SKILLS.reduce((a, s) => a + (DQ.S.xp[s.id] || 0), 0) - D.XPF[10];
+DQ.totalXp = () => D.SKILLS.reduce((a, s) => a + (DQ.S.xp[s.id] || 0), 0) + (DQ.S.xpLegacy || 0) - D.XPF[10]; /* xpLegacy: the lower of an old save's Attack and Strength, so Hero level never drops */
 DQ.advLvl = () => { const t = DQ.totalXp(); let l = 1; while (l < 99 && t >= D.advReq(l + 1)) l++; return l; };
 DQ.advProgress = () => {
   const l = DQ.advLvl(), t = DQ.totalXp(); if (l >= 99) return { pct: 100, cur: t, next: t, need: 0 };
   const a = D.advReq(l), b = D.advReq(l + 1);
   return { pct: clamp((t - a) / (b - a) * 100, 0, 100), cur: t - a, next: b - a, need: b - t };
 };
-const COMBAT_SKILLS = new Set(['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic']);
+const COMBAT_SKILLS = new Set(['melee', 'attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic']);
 /* Early pace (Nov 2026 playtest: "level 6 after 4 minutes"): non-combat skills learn at 30% at level 1, rising evenly to
    the full rate at level 20. Combat keeps its own tuned opening (combat 8 at about 22 minutes, sim-opening.cjs). */
 D.EARLY_PACE = { from: .3, until: 20 };
@@ -209,13 +221,13 @@ DQ.unlockHow = sk => { const s=D.SK[sk]; if(s.actionReq)return DQ.actionProgress
 DQ.maxHp = () => DQ.lvl('hitpoints');
 DQ.combatLvl = () => {
   const L = DQ.lvl, base = .25 * (L('defence') + L('hitpoints'));
-  const m = .325 * (L('attack') + L('strength')), r = .325 * Math.floor(1.5 * L('ranged')), g = .325 * Math.floor(1.5 * L('magic'));
+  const m = .65 * L('melee'), r = .325 * Math.floor(1.5 * L('ranged')), g = .325 * Math.floor(1.5 * L('magic'));
   return Math.floor(base + Math.max(m, r, g));
 };
 /* Progress towards the next combat level: the formula evaluated with fractional skill levels, plus the cheapest single-skill route. */
-const combatFrom = L => { const base = .25 * (L.defence + L.hitpoints); return base + Math.max(.325 * (L.attack + L.strength), .325 * Math.floor(1.5 * L.ranged), .325 * Math.floor(1.5 * L.magic)); };
+const combatFrom = L => { const base = .25 * (L.defence + L.hitpoints); return base + Math.max(.65 * L.melee, .325 * Math.floor(1.5 * L.ranged), .325 * Math.floor(1.5 * L.magic)); };
 DQ.combatProgress = () => {
-  const ids = ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'], L = {}, F = {};
+  const ids = ['melee', 'defence', 'hitpoints', 'ranged', 'magic'], L = {}, F = {};
   ids.forEach(k => { L[k] = DQ.lvl(k); F[k] = L[k] + (L[k] >= 99 ? 0 : DQ.pctNext(k) / 100); });
   /* The bar follows the skill you are training (or else the cheapest route): how far that skill has come towards the XP
      that tips the combat level over, so the percentage and "N XP reaches combat X" always describe the same thing. Combat
@@ -229,11 +241,11 @@ DQ.combatProgress = () => {
 };
 /* Catch-up: while your combat level trails your Hero level, combat skills learn faster (+15% per level behind, up to +200%). */
 /* fractional combat level (skills' progress counted), so the catch-up bonus eases off smoothly instead of in steps */
-DQ.combatExact = () => { const L = {}; ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].forEach(k => { L[k] = DQ.lvl(k) + (DQ.lvl(k) >= 99 ? 0 : DQ.pctNext(k) / 100); }); return combatFrom(L); };
+DQ.combatExact = () => { const L = {}; ['melee', 'defence', 'hitpoints', 'ranged', 'magic'].forEach(k => { L[k] = DQ.lvl(k) + (DQ.lvl(k) >= 99 ? 0 : DQ.pctNext(k) / 100); }); return combatFrom(L); };
 DQ.combatCatchUp = () => Math.min(2, .15 * Math.max(0, DQ.advLvl() - DQ.combatExact()));
 /* the permanent XP bonus (skill and Hero levels, buffs), shown on skill chips; catch-up is shown on its own */
 DQ.xpBonusBase = sk => DQ.xpMult(sk) / (COMBAT_SKILLS.has(sk) ? 1 + DQ.combatCatchUp() : 1);
-DQ.pctNext = sk => { const l = DQ.lvl(sk); if (l >= 99) return 100; const a = D.XPF[l], b = D.XPF[l + 1]; return clamp((DQ.S.xp[sk] - a) / (b - a) * 100, 0, 100); };
+DQ.pctNext = sk => { sk = DQ.skId(sk); const l = DQ.lvl(sk); if (l >= 99) return 100; const a = D.XPF[l], b = D.XPF[l + 1]; return clamp((DQ.S.xp[sk] - a) / (b - a) * 100, 0, 100); };
 
 /* ---------- Items ---------- */
 DQ.pack = id => DQ.S.inv[id] || 0;

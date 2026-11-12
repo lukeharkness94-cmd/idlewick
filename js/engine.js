@@ -23,9 +23,12 @@ Object.values(D.ITEMS).filter(it => ['gear','ammo'].includes(it.type)).forEach(i
 (D.ANIMALS || []).forEach(a => indexUnlock('farming', a.lvl, 'Keep ' + a.name));
 
 /* ---------- Experience and levels ---------- */
+/* a fighting style behind your best one learns three times as fast until it reaches 70% of it, so picking up a bow or a
+   staff later in the game becomes useful within a session (Nov 2026) */
+DQ.catchUp = sk => { if (!['melee', 'ranged', 'magic'].includes(sk)) return 1; const best = Math.max(DQ.lvl('melee'), DQ.lvl('ranged'), DQ.lvl('magic')); return DQ.lvl(sk) < Math.floor(best * .7) ? 3 : 1; };
 DQ.addXp = (sk, base, o = {}) => {
-  if (!DQ.skillUnlocked(sk)) return 0;
-  const amt = o.raw ? base : base * DQ.xpMult(sk), before = DQ.lvl(sk), advB = DQ.advLvl();
+  sk = DQ.skId(sk); if (!DQ.skillUnlocked(sk)) return 0;
+  const amt = (o.raw ? base : base * DQ.xpMult(sk)) * DQ.catchUp(sk), before = DQ.lvl(sk), advB = DQ.advLvl();
   S().xp[sk] = Math.min(2e8, S().xp[sk] + amt);
   if (!DQ.sim.on) DQ.hist[DQ.hist.length - 1][sk] = (DQ.hist[DQ.hist.length - 1][sk] || 0) + amt;
   if (DQ.sim.on) DQ.sim.xp[sk] = (DQ.sim.xp[sk] || 0) + amt; else DQ.pulse(`[data-skill="${sk}"]`);
@@ -159,7 +162,7 @@ DQ.claimQuest = id => {
   if (short) { st.s = 'active'; DQ.emit('quests'); return DQ.toast(`You need ${short.n} ${itemName(short.key).toLowerCase()} to hand in`, true); }
   q.obj.forEach(o => { if (o.ev === 'deliver') DQ.take(o.key, o.n); });
   st.s = 'done'; const r = q.reward;
-  if (q.unlocks) { const s = D.SK[q.unlocks]; S().unlocked[q.unlocks] = true; DQ.sfx('unlock'); DQ.notify({ kind: 'unlock', key: 'unlock:' + s.id, icon: s.id, col: s.col, title: `${s.name} unlocked!`, text: `${q.giver} has taught you ${s.name.toLowerCase()}. ${s.blurb}`, action: { label: `Open ${s.name}`, fn: () => DQ.go(s.page) }, sound: false, ttl: 14000, burst: true }); DQ.emit('lvl'); }
+  if (q.unlocks && !S().unlocked[q.unlocks]) { const s = D.SK[q.unlocks]; S().unlocked[q.unlocks] = true; DQ.sfx('unlock'); DQ.notify({ kind: 'unlock', key: 'unlock:' + s.id, icon: s.id, col: s.col, title: `${s.name} unlocked!`, text: `${q.giver} has taught you ${s.name.toLowerCase()}. ${s.blurb}`, action: { label: `Open ${s.name}`, fn: () => DQ.go(s.page) }, sound: false, ttl: 14000, burst: true }); DQ.emit('lvl'); }
   Object.entries(r.xp || {}).forEach(([k, v]) => DQ.addXp(k, v, { raw: true }));
   DQ.addCoins(r.coins || 0); Object.entries(r.items || {}).forEach(([k, v]) => DQ.grant(k, v));
   DQ.log(`Quest complete: ${q.name}.`, 'quest');
@@ -212,7 +215,7 @@ DQ.successChance = (kind, n) => {
 DQ.recipeLvlOk = r => !!r && (DQ.lvl(r.skill) >= r.lvl || (r.skill === 'cooking' && !!r.burn && Object.keys(r.in || {}).some(k => /^raw_/.test(k) && DQ.have(k) > 0)));
 DQ.burnChance = r => { const gap = DQ.lvl('cooking') - r.lvl; return gap >= 0 ? clamp(.30 - gap * .025 - DQ.fx().burn, .01, .30) : clamp(.30 - gap * .04 - DQ.fx().burn, .01, .85); };
 DQ.canMake = r => Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n);
-const meleeSkill = () => ({ accurate: 'attack', aggressive: 'strength', defensive: 'defence' }[S().style.melee]);
+const meleeSkill = () => ({ accurate: 'melee', aggressive: 'melee', defensive: 'defence' }[S().style.melee]);
 
 DQ.startAct = (kind, id, o = {}) => {
   if (DQ.act && DQ.act.kind === kind && DQ.act.id === id && !o.quiet) return DQ.stopAct();
@@ -369,7 +372,7 @@ DQ.pstats = () => {
 const hitChance = (acc, def) => clamp(acc > def ? 1 - (def + 2) / (2 * (acc + 1)) : acc / (2 * (def + 1)), .05, .95);
 DQ.xpSplit = st => {
   const sty = S().style;
-  if (st === 'melee') return [[meleeSkill(), 4]];
+  if (st === 'melee') return S().style.melee === 'defensive' ? [['defence', 4]] : [['melee', 2]]; /* one Melee skill now does the work Attack and Strength shared, so it takes half the XP per hit: the same pace as before */
   const main = st === 'ranged' ? 'ranged' : 'magic';
   return sty[st] === 'defensive' ? [[main, 2], ['defence', 2]] : [[main, 4]];
 };

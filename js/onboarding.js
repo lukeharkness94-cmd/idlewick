@@ -36,7 +36,7 @@ DQ.initGuides=()=>{
   if(t.version===1)return;
   // Existing saves keep the lessons for skills they have not used yet.
   for(const skill of Object.keys(lessons)){
-    const used=skill==='combat'?['attack','strength','defence','ranged'].some(sk=>S().xp[sk]>0):S().xp[skill]>0;
+    const used=skill==='combat'?['melee','defence','ranged','magic'].some(sk=>S().xp[sk]>0):S().xp[skill]>0;
     if(used)t.done['lesson:'+skill]=true;
   }
   if(DQ.totalXp()>0||S().playtime>60000)t.done.intro=true;

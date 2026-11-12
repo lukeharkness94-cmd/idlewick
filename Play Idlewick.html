@@ -3576,6 +3576,7 @@ html.short .bp-art{width:56px;height:56px}
 .hfurn .need-tiles{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;width:100%}.hfurn .need-tile{grid-template-columns:auto minmax(0,1fr) auto;text-align:left}
 :is(#tip,#detailbox) .tt-list li:has(>.tt-l:only-child){grid-template-columns:minmax(0,1fr)!important}
 .battle-companion.placed{gap:0}.battle-companion.placed img{image-rendering:pixelated}.battle-companion.placed small{margin-top:-6px}
+.ss-fast{display:block;font:600 13px var(--f-ui);font-style:normal;color:var(--good)}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -4091,15 +4092,22 @@ D.SKILLS = [
   { id: 'cooking',     name: 'Cooking',     col: '#f2b44a', group: 'artisan', page: 'cooking',     unlock: 3,  blurb: 'Turn raw fish into food that heals you in a fight.' },
   { id: 'smithing',    name: 'Smithing',    col: '#e8703a', group: 'artisan', page: 'smithing',    unlock: 12, quest: 'mq_smithing',  blurb: 'Smelt ore into bars and hammer them into weapons and armour.' },
   { id: 'crafting',    name: 'Crafting',    col: '#d98ad1', group: 'artisan', page: 'crafting',    unlock: 15, quest: 'mq_crafting', blurb: 'Sew leather, cut jewellery, carve bows and staves.' },
-  { id: 'magic',       name: 'Magic',       col: '#7d89f5', group: 'artisan', page: 'magic',       unlock: 28, quest: 'mq_magic', blurb: 'Cast spells in battle and turn clutter into coins with alchemy.' },
+  { id: 'magic',       name: 'Magic',       col: '#7d89f5', group: 'artisan', page: 'magic',       unlock: 0,  blurb: 'Staffs and spells: levels as you fight with them. Also turns clutter into coins with alchemy.' },
   { id:'research', name:'Scholarship', col:'#b79862', group:'artisan', page:'research', unlock:16, blurb:'Study practical discoveries to earn Scholarship XP and permanent improvements.' },
-  { id: 'attack',      name: 'Attack',      col: '#df5b4a', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Hit more often with melee weapons.' },
-  { id: 'strength',    name: 'Strength',    col: '#3fb88f', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Hit harder with melee weapons.' },
+  { id: 'melee',       name: 'Melee',       col: '#df5b4a', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Swords, daggers and hammers: levels as you fight with them.' },
   { id: 'defence',     name: 'Defence',     col: '#5f93df', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Avoid blows and wear heavier armour.' },
-  { id: 'ranged',      name: 'Ranged',      col: '#b5d84b', group: 'combat',  page: 'combat',      unlock: 18, quest: 'mq_ranged', blurb: 'Loose arrows from a safe distance.' },
+  { id: 'ranged',      name: 'Ranged',      col: '#b5d84b', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Bows and arrows: levels as you fight with them.' },
   { id: 'hitpoints',   name: 'Health',   col: '#f0607a', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'How much punishment you can take.' },
 ];
 D.SK = Object.fromEntries(D.SKILLS.map(s => [s.id, s]));
+/* Melee replaced Attack and Strength (Nov 2026, from the player: you level the weapon family you fight with). Old ids still
+   resolve to it, so gear requirements, abilities, quests and old saves keep working. */
+D.SKILL_ALIAS = { attack: 'melee', strength: 'melee' }; D.SK.attack = D.SK.strength = D.SK.melee;
+/* quest and other XP rewards written for Attack and Strength pay Melee: half their sum, the same pace as before now that one
+   skill does the work of two. Runs once everything has loaded (quests are added by several files). */
+D.foldMelee = () => { const fold = xp => { if (!xp || (xp.attack == null && xp.strength == null)) return; xp.melee = (xp.melee || 0) + Math.round(((xp.attack || 0) + (xp.strength || 0)) / 2); delete xp.attack; delete xp.strength; };
+  (D.QUESTS || []).forEach(q => fold(q.reward && q.reward.xp)); };
+if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', () => D.foldMelee());
 D.GROUPS = { gather: 'Gathering', artisan: 'Artisan', combat: 'Combat' };
 
 /* ---------- Items ---------- */
@@ -4677,11 +4685,11 @@ D.QUESTS.unshift(
     [{ ev: 'deliver', key: 'cowhide', n: 8, label: 'Bring 8 cowhides to practise on' }, { ev: 'deliver', key: 'feather', n: 20, label: 'Bring 20 feathers for her quills' }, { ev: 'chop', key: 'birch', n: 10, label: 'Chop 10 birch logs for her frames' }],
     { xp: { crafting: 150 }, coins: 150, items: { cowhide: 6 } }),
   MQ('mq_ranged', 'ranged', 'mossbarrow', 'A Hunter’s Bow', 'Hunter Wynn', 18, null,
-    'Wynn will not take you after Old Tusk with only a sword. “A hunter strikes from a distance,” he says. Help him carve your first bow and fletch your first arrows, and he will teach you to shoot.',
+    'Wynn will not take you after Old Tusk with only a sword. “A hunter strikes from a distance,” he says. Help him carve your first bow and fletch your first arrows, and he will hand you a proper hunter’s bow and a quiver to go with it.',
     [{ ev: 'deliver', key: 'log_birch', n: 10, label: 'Bring 10 birch logs for the bow stave' }, { ev: 'deliver', key: 'feather', n: 40, label: 'Bring 40 feathers to fletch arrows' }, { ev: 'kill', key: 'boar', n: 6, label: 'Track down 6 wild boars as practice' }],
     { xp: { ranged: 150 }, items: { bow_normal: 1, arrow_bronze: 150 } }),
   MQ('mq_magic', 'magic', 'saltmere', 'The Drowned Library', 'Archivist Merrow', 28, null,
-    'A library sank with the old Saltmere harbour. Merrow has fished up the first pages of a spellbook, but smugglers stole the cover and the rest is still underwater. Recover them and she will teach you to read the old magic.',
+    'A library sank with the old Saltmere harbour. Merrow has fished up the first pages of a spellbook, but smugglers stole the cover and the rest is still underwater. Recover them and she will give you a staff and runes to practise the old magic properly.',
     [{ ev: 'catch', key: '*', n: 25, label: 'Fish up 25 catches (lost pages turn up in the nets)' }, { ev: 'kill', key: 'smuggler', n: 5, label: 'Take the spellbook cover back from 5 smugglers' }, { ev: 'deliver', key: 'gem_sapphire', n: 1, label: 'Bring a sapphire to focus your first spell' }],
     { xp: { magic: 150 }, coins: 300, items: { staff_normal: 1, rune: 60 } }),
 );
@@ -8540,7 +8548,7 @@ Object.assign(ICON, {
   bit: s => { s.ell(8, 8, 3, 3, R.gold); },
   mute: s => { s.rect(1, 6, 3, 4, R.wood); s.poly([[4, 6], [8, 3], [8, 13], [4, 10]], R.gold); const r = rp('#c8483c'); s.line(10, 5, 14, 10, r); s.line(14, 5, 10, 10, r); s.line(11, 5, 15, 10, r); s.line(15, 5, 11, 10, r); }
 });
-const ICON_ALIAS = { book: 'research', scroll: 'quest', compass: 'exploration', sword: 'attack', rod: 'fishing', glove: 'thieving', hoe: 'farming', hammer: 'smithing', bottle: 'herbalism', rune: 'enchanting', house: 'home', bank: 'bag', users: 'bag', paw: 'hunting', defence: 'defence', health: 'hitpoints' };
+const ICON_ALIAS = { book: 'research', scroll: 'quest', compass: 'exploration', sword: 'attack', melee: 'attack', rod: 'fishing', glove: 'thieving', hoe: 'farming', hammer: 'smithing', bottle: 'herbalism', rune: 'enchanting', house: 'home', bank: 'bag', users: 'bag', paw: 'hunting', defence: 'defence', health: 'hitpoints' };
 function iconSprite(id) { const k = ICON[id] ? id : ICON_ALIAS[id]; const f = ICON[k]; if (!f) return null; const s = Spr(16, 16); const out = f(s); return out && out.w ? out : s; }
 
 /* boss trophies: the boss itself mounted on a carved oak plaque with a brass nameplate (40 x 44) */
@@ -9203,7 +9211,7 @@ DQ.newState = (name = 'Adventurer', look) => {
     pets: { owned: {}, active: null, tracks: {}, events: [], expedition: null, bondVersion: 1 }, hunt: { area: null, target: null, encounters: 0 }, enchants: {}, house: { owned: false, rooms: {}, furn: {}, wall: [] }, workers: [], hire: { cands: [], at: -1e9 }, beast: { kills: {}, drops: {} },
   };
 };
-DQ.S = DQ.newState();
+{ let cur = DQ.newState(); Object.defineProperty(DQ, 'S', { get: () => cur, set: v => { cur = v; if (DQ.xpAliases) DQ.xpAliases(v); }, configurable: true, enumerable: true }); }
 
 const merge = (base, over) => {
   if (!over || typeof over !== 'object') return base;
@@ -9282,6 +9290,12 @@ DQ.load = () => {
   } catch (e) { DQ.saveHealth = 'The saved hero could not be loaded. Keep a copy before starting again.'; return false; }
 };
 function migrate(S) {
+  /* Attack + Strength became Melee (Nov 2026): Melee takes the higher of the two; the lower still counts towards Hero level */
+  if (S.xp && (Object.prototype.hasOwnProperty.call(S.xp, 'attack') || Object.prototype.hasOwnProperty.call(S.xp, 'strength')) && !S.meleeMerged) {
+    const a = +S.xp.attack || 0, b = +S.xp.strength || 0; S.xp.melee = Math.max(+S.xp.melee || 0, a, b); S.xpLegacy = (S.xpLegacy || 0) + Math.min(a, b);
+    S.xpOld = { attack: a, strength: b }; delete S.xp.attack; delete S.xp.strength; S.meleeMerged = 1;
+  }
+  DQ.xpAliases(S);
   if (DQ.migrateBeasts) DQ.migrateBeasts(S);
   /* Mossbarrow was added between Willowbrook and Saltmere: keep later roads open for older saves */
   const ids = D.TOWNS.map(t => t.id); let last = -1; ids.forEach((id, i) => { if (S.towns[id]) last = i; });
@@ -9289,7 +9303,7 @@ function migrate(S) {
   if (!Array.isArray(S.farm.plots)) S.farm.plots = [];
   /* practical unlocks (Nov 2026): keep every skill an older save had already earned under the earlier rules. Runs once. */
   if (!S.unlockRules) {
-  const xpTotal = D.SKILLS.reduce((a, s) => a + ((S.xp || {})[s.id] || 0), 0) - D.XPF[10]; let hero = 1; while (hero < 99 && xpTotal >= D.advReq(hero + 1)) hero++;
+  const xpTotal = D.SKILLS.reduce((a, s) => a + ((S.xp || {})[s.id] || 0), 0) + (S.xpLegacy || 0) - D.XPF[10]; let hero = 1; while (hero < 99 && xpTotal >= D.advReq(hero + 1)) hero++;
   for (const [sk, before] of Object.entries(D.UNLOCK_BEFORE || {})) {
     if (S.unlocked[sk]) continue;
     const had = before.hero ? hero >= before.hero : Object.entries(before).every(([k, n]) => ((S.stats || {})[k] || 0) >= n);
@@ -9341,17 +9355,23 @@ addEventListener('storage', e => {
 });
 
 /* ---------- Levels ---------- */
-DQ.lvl = sk => D.lvlOf(DQ.S.xp[sk] || 0);
+DQ.skId = sk => (D.SKILL_ALIAS && D.SKILL_ALIAS[sk]) || sk;
+DQ.lvl = sk => D.lvlOf(DQ.S.xp[DQ.skId(sk)] || 0);
+/* old saves and code that still read xp.attack / xp.strength see Melee; the accessors are not saved */
+DQ.xpAliases = S => { if (!S || !S.xp) return; for (const k of ['attack', 'strength']) if (!Object.getOwnPropertyDescriptor(S.xp, k) || Object.getOwnPropertyDescriptor(S.xp, k).enumerable) {
+  if (Object.prototype.hasOwnProperty.call(S.xp, k)) delete S.xp[k];
+  Object.defineProperty(S.xp, k, { get() { return this.melee || 0; }, set(v) { this.melee = v; }, enumerable: false, configurable: true }); } };
+DQ.xpAliases(DQ.S);
 DQ.maxLvl = () => Math.max(...D.SKILLS.map(s => DQ.lvl(s.id)));
 DQ.totalLvl = () => D.SKILLS.reduce((a, s) => a + DQ.lvl(s.id), 0);
-DQ.totalXp = () => D.SKILLS.reduce((a, s) => a + (DQ.S.xp[s.id] || 0), 0) - D.XPF[10];
+DQ.totalXp = () => D.SKILLS.reduce((a, s) => a + (DQ.S.xp[s.id] || 0), 0) + (DQ.S.xpLegacy || 0) - D.XPF[10]; /* xpLegacy: the lower of an old save's Attack and Strength, so Hero level never drops */
 DQ.advLvl = () => { const t = DQ.totalXp(); let l = 1; while (l < 99 && t >= D.advReq(l + 1)) l++; return l; };
 DQ.advProgress = () => {
   const l = DQ.advLvl(), t = DQ.totalXp(); if (l >= 99) return { pct: 100, cur: t, next: t, need: 0 };
   const a = D.advReq(l), b = D.advReq(l + 1);
   return { pct: clamp((t - a) / (b - a) * 100, 0, 100), cur: t - a, next: b - a, need: b - t };
 };
-const COMBAT_SKILLS = new Set(['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic']);
+const COMBAT_SKILLS = new Set(['melee', 'attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic']);
 /* Early pace (Nov 2026 playtest: "level 6 after 4 minutes"): non-combat skills learn at 30% at level 1, rising evenly to
    the full rate at level 20. Combat keeps its own tuned opening (combat 8 at about 22 minutes, sim-opening.cjs). */
 D.EARLY_PACE = { from: .3, until: 20 };
@@ -9379,13 +9399,13 @@ DQ.unlockHow = sk => { const s=D.SK[sk]; if(s.actionReq)return DQ.actionProgress
 DQ.maxHp = () => DQ.lvl('hitpoints');
 DQ.combatLvl = () => {
   const L = DQ.lvl, base = .25 * (L('defence') + L('hitpoints'));
-  const m = .325 * (L('attack') + L('strength')), r = .325 * Math.floor(1.5 * L('ranged')), g = .325 * Math.floor(1.5 * L('magic'));
+  const m = .65 * L('melee'), r = .325 * Math.floor(1.5 * L('ranged')), g = .325 * Math.floor(1.5 * L('magic'));
   return Math.floor(base + Math.max(m, r, g));
 };
 /* Progress towards the next combat level: the formula evaluated with fractional skill levels, plus the cheapest single-skill route. */
-const combatFrom = L => { const base = .25 * (L.defence + L.hitpoints); return base + Math.max(.325 * (L.attack + L.strength), .325 * Math.floor(1.5 * L.ranged), .325 * Math.floor(1.5 * L.magic)); };
+const combatFrom = L => { const base = .25 * (L.defence + L.hitpoints); return base + Math.max(.65 * L.melee, .325 * Math.floor(1.5 * L.ranged), .325 * Math.floor(1.5 * L.magic)); };
 DQ.combatProgress = () => {
-  const ids = ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'], L = {}, F = {};
+  const ids = ['melee', 'defence', 'hitpoints', 'ranged', 'magic'], L = {}, F = {};
   ids.forEach(k => { L[k] = DQ.lvl(k); F[k] = L[k] + (L[k] >= 99 ? 0 : DQ.pctNext(k) / 100); });
   /* The bar follows the skill you are training (or else the cheapest route): how far that skill has come towards the XP
      that tips the combat level over, so the percentage and "N XP reaches combat X" always describe the same thing. Combat
@@ -9399,11 +9419,11 @@ DQ.combatProgress = () => {
 };
 /* Catch-up: while your combat level trails your Hero level, combat skills learn faster (+15% per level behind, up to +200%). */
 /* fractional combat level (skills' progress counted), so the catch-up bonus eases off smoothly instead of in steps */
-DQ.combatExact = () => { const L = {}; ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].forEach(k => { L[k] = DQ.lvl(k) + (DQ.lvl(k) >= 99 ? 0 : DQ.pctNext(k) / 100); }); return combatFrom(L); };
+DQ.combatExact = () => { const L = {}; ['melee', 'defence', 'hitpoints', 'ranged', 'magic'].forEach(k => { L[k] = DQ.lvl(k) + (DQ.lvl(k) >= 99 ? 0 : DQ.pctNext(k) / 100); }); return combatFrom(L); };
 DQ.combatCatchUp = () => Math.min(2, .15 * Math.max(0, DQ.advLvl() - DQ.combatExact()));
 /* the permanent XP bonus (skill and Hero levels, buffs), shown on skill chips; catch-up is shown on its own */
 DQ.xpBonusBase = sk => DQ.xpMult(sk) / (COMBAT_SKILLS.has(sk) ? 1 + DQ.combatCatchUp() : 1);
-DQ.pctNext = sk => { const l = DQ.lvl(sk); if (l >= 99) return 100; const a = D.XPF[l], b = D.XPF[l + 1]; return clamp((DQ.S.xp[sk] - a) / (b - a) * 100, 0, 100); };
+DQ.pctNext = sk => { sk = DQ.skId(sk); const l = DQ.lvl(sk); if (l >= 99) return 100; const a = D.XPF[l], b = D.XPF[l + 1]; return clamp((DQ.S.xp[sk] - a) / (b - a) * 100, 0, 100); };
 
 /* ---------- Items ---------- */
 DQ.pack = id => DQ.S.inv[id] || 0;
@@ -10089,9 +10109,12 @@ Object.values(D.ITEMS).filter(it => ['gear','ammo'].includes(it.type)).forEach(i
 (D.ANIMALS || []).forEach(a => indexUnlock('farming', a.lvl, 'Keep ' + a.name));
 
 /* ---------- Experience and levels ---------- */
+/* a fighting style behind your best one learns three times as fast until it reaches 70% of it, so picking up a bow or a
+   staff later in the game becomes useful within a session (Nov 2026) */
+DQ.catchUp = sk => { if (!['melee', 'ranged', 'magic'].includes(sk)) return 1; const best = Math.max(DQ.lvl('melee'), DQ.lvl('ranged'), DQ.lvl('magic')); return DQ.lvl(sk) < Math.floor(best * .7) ? 3 : 1; };
 DQ.addXp = (sk, base, o = {}) => {
-  if (!DQ.skillUnlocked(sk)) return 0;
-  const amt = o.raw ? base : base * DQ.xpMult(sk), before = DQ.lvl(sk), advB = DQ.advLvl();
+  sk = DQ.skId(sk); if (!DQ.skillUnlocked(sk)) return 0;
+  const amt = (o.raw ? base : base * DQ.xpMult(sk)) * DQ.catchUp(sk), before = DQ.lvl(sk), advB = DQ.advLvl();
   S().xp[sk] = Math.min(2e8, S().xp[sk] + amt);
   if (!DQ.sim.on) DQ.hist[DQ.hist.length - 1][sk] = (DQ.hist[DQ.hist.length - 1][sk] || 0) + amt;
   if (DQ.sim.on) DQ.sim.xp[sk] = (DQ.sim.xp[sk] || 0) + amt; else DQ.pulse(`[data-skill="${sk}"]`);
@@ -10225,7 +10248,7 @@ DQ.claimQuest = id => {
   if (short) { st.s = 'active'; DQ.emit('quests'); return DQ.toast(`You need ${short.n} ${itemName(short.key).toLowerCase()} to hand in`, true); }
   q.obj.forEach(o => { if (o.ev === 'deliver') DQ.take(o.key, o.n); });
   st.s = 'done'; const r = q.reward;
-  if (q.unlocks) { const s = D.SK[q.unlocks]; S().unlocked[q.unlocks] = true; DQ.sfx('unlock'); DQ.notify({ kind: 'unlock', key: 'unlock:' + s.id, icon: s.id, col: s.col, title: `${s.name} unlocked!`, text: `${q.giver} has taught you ${s.name.toLowerCase()}. ${s.blurb}`, action: { label: `Open ${s.name}`, fn: () => DQ.go(s.page) }, sound: false, ttl: 14000, burst: true }); DQ.emit('lvl'); }
+  if (q.unlocks && !S().unlocked[q.unlocks]) { const s = D.SK[q.unlocks]; S().unlocked[q.unlocks] = true; DQ.sfx('unlock'); DQ.notify({ kind: 'unlock', key: 'unlock:' + s.id, icon: s.id, col: s.col, title: `${s.name} unlocked!`, text: `${q.giver} has taught you ${s.name.toLowerCase()}. ${s.blurb}`, action: { label: `Open ${s.name}`, fn: () => DQ.go(s.page) }, sound: false, ttl: 14000, burst: true }); DQ.emit('lvl'); }
   Object.entries(r.xp || {}).forEach(([k, v]) => DQ.addXp(k, v, { raw: true }));
   DQ.addCoins(r.coins || 0); Object.entries(r.items || {}).forEach(([k, v]) => DQ.grant(k, v));
   DQ.log(`Quest complete: ${q.name}.`, 'quest');
@@ -10278,7 +10301,7 @@ DQ.successChance = (kind, n) => {
 DQ.recipeLvlOk = r => !!r && (DQ.lvl(r.skill) >= r.lvl || (r.skill === 'cooking' && !!r.burn && Object.keys(r.in || {}).some(k => /^raw_/.test(k) && DQ.have(k) > 0)));
 DQ.burnChance = r => { const gap = DQ.lvl('cooking') - r.lvl; return gap >= 0 ? clamp(.30 - gap * .025 - DQ.fx().burn, .01, .30) : clamp(.30 - gap * .04 - DQ.fx().burn, .01, .85); };
 DQ.canMake = r => Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n);
-const meleeSkill = () => ({ accurate: 'attack', aggressive: 'strength', defensive: 'defence' }[S().style.melee]);
+const meleeSkill = () => ({ accurate: 'melee', aggressive: 'melee', defensive: 'defence' }[S().style.melee]);
 
 DQ.startAct = (kind, id, o = {}) => {
   if (DQ.act && DQ.act.kind === kind && DQ.act.id === id && !o.quiet) return DQ.stopAct();
@@ -10435,7 +10458,7 @@ DQ.pstats = () => {
 const hitChance = (acc, def) => clamp(acc > def ? 1 - (def + 2) / (2 * (acc + 1)) : acc / (2 * (def + 1)), .05, .95);
 DQ.xpSplit = st => {
   const sty = S().style;
-  if (st === 'melee') return [[meleeSkill(), 4]];
+  if (st === 'melee') return S().style.melee === 'defensive' ? [['defence', 4]] : [['melee', 2]]; /* one Melee skill now does the work Attack and Strength shared, so it takes half the XP per hit: the same pace as before */
   const main = st === 'ranged' ? 'ranged' : 'magic';
   return sty[st] === 'defensive' ? [[main, 2], ['defence', 2]] : [[main, 4]];
 };
@@ -11736,7 +11759,7 @@ const B = UI.B = {
   toNext: (e, a) => set(e, DQ.lvl(a) >= 99 ? 'Maxed' : `${fmt(D.XPF[DQ.lvl(a) + 1] - S().xp[a])} XP to ${DQ.lvl(a) + 1}`),
   xpbar: (e, a) => { const w = DQ.pctNext(a).toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; },
   xpline: (e, a) => set(e, `${fmt(S().xp[a])} XP`),
-  bonus: (e, a) => { const c = ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].includes(a) ? DQ.combatCatchUp() : 0; const ep = DQ.earlyPace ? DQ.earlyPace(a) : 1, bon = Math.round((DQ.xpBonusBase(a) / ep - 1) * 100); set(e, `${bon > 0 ? `+${bon}% XP` : 'Normal XP'}${ep < 1 ? ` · early levels ${Math.round(ep * 100)}% pace` : ''}${c > 0 ? ` · catch-up +${Math.round(c * 100)}%` : ''}`); },
+  bonus: (e, a) => { const c = ['melee', 'attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].includes(a) ? DQ.combatCatchUp() : 0; const ep = DQ.earlyPace ? DQ.earlyPace(a) : 1, bon = Math.round((DQ.xpBonusBase(a) / ep - 1) * 100); set(e, `${bon > 0 ? `+${bon}% XP` : 'Normal XP'}${ep < 1 ? ` · early levels ${Math.round(ep * 100)}% pace` : ''}${c > 0 ? ` · catch-up +${Math.round(c * 100)}%` : ''}`); },
   coins: e => set(e, fmt(S().coins)),
   combat: e => set(e, DQ.combatLvl()),
   combatbar: e => { const w = DQ.combatProgress().pct.toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; },
@@ -11818,7 +11841,7 @@ DQ.tips.item = id => {
 DQ.tips.skill = sk => {
   const s = D.SK[sk], l = DQ.lvl(sk); if (!DQ.skillUnlocked(sk)) return `<b>${s.name}</b><div class="bad">${DQ.unlockHow(sk)} to learn it.</div>${s.quest ? `<div class="dim">${D.QM[s.quest].giver}, ${D.TOWN[D.QM[s.quest].town].name}</div>` : ''}`;
   const perks = D.GATHER_SKILLS.includes(sk) ? D.PERKS.map(p => `<div class="${l >= p.lvl ? 'ok' : 'dim'}">${l >= p.lvl ? '✓' : '○'} ${p.lvl}: ${p.name} (${p.speed ? Math.round(p.speed * 100) + '% faster' : Math.round(p.dbl * 100) + '% double yield'})</div>`).join('') : '';
-  return `<b style="color:${s.col}">${s.name} ${l}</b><div>${fmt(S().xp[sk])} XP · +${Math.round((DQ.xpBonusBase(sk) - 1) * 100)}% XP bonus${['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].includes(sk) && DQ.combatCatchUp() > 0 ? ` · combat catch-up +${Math.round(DQ.combatCatchUp() * 100)}% while your combat level trails your Hero level` : ''}</div><div class="dim">Each skill level adds +0.5% XP, each Hero level +0.25%.</div>${perks}`;
+  return `<b style="color:${s.col}">${s.name} ${l}</b><div>${fmt(S().xp[sk])} XP · +${Math.round((DQ.xpBonusBase(sk) - 1) * 100)}% XP bonus${['melee', 'attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].includes(sk) && DQ.combatCatchUp() > 0 ? ` · combat catch-up +${Math.round(DQ.combatCatchUp() * 100)}% while your combat level trails your Hero level` : ''}</div><div class="dim">Each skill level adds +0.5% XP, each Hero level +0.25%.</div>${perks}`;
 };
 
 /* ---------- Page chrome ---------- */
@@ -11971,7 +11994,7 @@ UI.V.combat = () => {
   const met = preview && (f || (S().beast.kills[preview.id] || 0) > 0), pname = preview ? (met ? preview.name : 'Unknown creature') : '';
   const foe = preview ? `<div class="avatar foe-guide ${preview.boss ? 'boss' : ''}" id="av-foe" style="--c:${preview.col}" data-do="guide" data-a="${preview.id}" role="button" tabindex="0" aria-label="${esc(pname)}: open its field guide" data-tip="text:${esc(pname)} · open its field guide">${met && DQ.battleFoe ? DQ.battleFoe(preview) : DQ.monSprite(preview,192,met?'':'sil')}</div><div class="nm">${esc(pname)} <span class="lvchip">Lv ${preview.cl}</span></div><span class="bar hpb"><i ${f?'data-b="fhp"':'style="width:100%"'}></i></span><small class="mono" ${f?'data-b="fhptxt"':''}>${preview.hp} / ${preview.hp} health</small>`
     : `<div class="avatar idle" id="av-foe" style="--c:#4a5a5e">?</div><div class="empty-foe">Choose a target to start fighting.</div>`;
-  const cur = sty[st];
+  const cur = st === 'melee' && sty[st] === 'accurate' ? 'aggressive' : sty[st]; /* Melee is one skill now: the old Accurate focus reads as Offensive */
   const wname = S().equip.weapon ? D.ITEMS[S().equip.weapon].name : 'Bare hands';
   let bossCard = '';
   const bossDone = boss && S().towns[town] && S().towns[town].boss;
@@ -11989,15 +12012,15 @@ UI.V.combat = () => {
   /* Your fighter: combat level, weapon and every combat skill exactly once, each beside what it does for you now
      and the button that makes your fights train it. */
   const trainBtn = (value, label) => `<button type="button" class="choice-button ftr-train ${cur === value ? 'on' : ''}" data-do="style" data-a="${st}" data-b="${value}" aria-pressed="${cur === value}">${cur === value ? 'Training' : 'Train'}<small>${label}</small></button>`;
-  const trainFor = { attack: st === 'melee' ? trainBtn('accurate', 'Accurate') : '', strength: st === 'melee' ? trainBtn('aggressive', 'Aggressive') : '', defence: trainBtn('defensive', st === 'melee' ? 'Defensive' : `${st === 'ranged' ? 'Ranged' : 'Magic'} + Defence`), ranged: st === 'ranged' ? trainBtn('offense', 'Offensive') : '', magic: st === 'magic' ? trainBtn('offense', 'Offensive') : '' };
+  const trainFor = { melee: st === 'melee' ? trainBtn('aggressive', 'Offensive') : '', defence: trainBtn('defensive', st === 'melee' ? 'Defensive' : `${st === 'ranged' ? 'Ranged' : 'Magic'} + Defence`), ranged: st === 'ranged' ? trainBtn('offense', 'Offensive') : '', magic: st === 'magic' ? trainBtn('offense', 'Offensive') : '' };
   const offStyle = k => st !== k ? `<em>${k === 'ranged' ? 'With a bow and arrows' : k === 'magic' ? 'With a staff and runes' : 'With a melee weapon'}</em>` : '';
   const does = {
-    attack: `Chance to hit${offStyle('melee')}`, strength: `Max hit${st === 'melee' ? ` <b class="mono">${ps.max}</b>` : ''}${offStyle('melee')}`,
+    melee: `Hit chance and damage${st === 'melee' ? ` · max hit <b class="mono">${ps.max}</b>` : ''}${offStyle('melee')}`,
     defence: `Blocks <b class="mono">${Math.round(ps.red * 100)}%</b> of damage and dodges hits`, hitpoints: `Health <b class="mono" data-b="hptxt"></b>`,
     ranged: `Hit chance and damage${st === 'ranged' ? ` · max hit <b class="mono">${ps.max}</b>` : ''}${offStyle('ranged')}`, magic: `Spell accuracy${st === 'magic' ? ` · max hit <b class="mono">${ps.max}</b>` : ''}${offStyle('magic')}`
   };
   const lockedStyles = ['ranged', 'magic'].filter(k => !DQ.skillUnlocked(k));
-  const rows = ['attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].filter(k => !lockedStyles.includes(k)).map(k => `<div class="ftr-row ${(k === 'attack' || k === 'strength') && st !== 'melee' || (k === 'ranged' || k === 'magic') && st !== k ? 'idle' : ''}" style="--c:${D.SK[k].col}"><button class="ftr-skill" data-do="go" data-a="${D.SK[k].page}" data-tip="skill:${k}">${ico(k)}<span><b>${D.SK[k].name} <span class="mono" data-b="lvl:${k}"></span></b><span class="bar"><i data-b="xpbar:${k}"></i></span></span></button><span class="ftr-does">${does[k]}</span>${trainFor[k] || '<span></span>'}</div>`).join('');
+  const rows = ['melee', 'defence', 'hitpoints', 'ranged', 'magic'].filter(k => !lockedStyles.includes(k)).map(k => `<div class="ftr-row ${k === 'melee' && st !== 'melee' || (k === 'ranged' || k === 'magic') && st !== k ? 'idle' : ''}" style="--c:${D.SK[k].col}"><button class="ftr-skill" data-do="go" data-a="${D.SK[k].page}" data-tip="skill:${k}">${ico(k)}<span><b>${D.SK[k].name} <span class="mono" data-b="lvl:${k}"></span></b><span class="bar"><i data-b="xpbar:${k}"></i></span></span></button><span class="ftr-does">${does[k]}</span>${trainFor[k] || '<span></span>'}</div>`).join('');
   const lockNote = lockedStyles.length ? `<p class="style-note">${ico('lock')}<span>${lockedStyles.map(k => `<b>${D.SK[k].name}</b> is another fighting style (${k === 'ranged' ? 'bow and arrows' : 'staff and runes'}). ${esc(DQ.skillTeacher ? DQ.skillTeacher(k) : DQ.unlockHow(k))}.`).join(' ')}</span></p>` : '';
   const fighter = `<section class="panel fighter"><div class="ftr-head"><div class="cl-num" data-tip="text:Combat level is made from Defence, Health and your best fighting style. Train any of them to raise it. Monsters are tagged against it."><span class="k">Combat level</span><b class="mono" data-b="combat"></b></div>
     <div class="cl-prog"><div class="cl-prog-top"><b>Next level</b><small class="mono" data-b="combatnext"></small></div><span class="bar"><i data-b="combatbar"></i></span><small data-b="combatroute"></small><small class="cl-boost" data-b="combatboost"></small></div></div>
@@ -12014,8 +12037,8 @@ UI.V.combat = () => {
   const arenaCtl = `<div class="arena-ctl">${hunting ? `<span>${f ? `Fighting <b>${esc(f.name)}</b>${DQ.act.area && D.AREAS ? ` in ${esc((Object.values(D.AREAS).flat().find(x => x.id === DQ.act.area) || {}).name || '')}` : ''}` : 'Fighting'}</span><button class="btn" data-do="stop">Retreat</button>` : area ? `<span>Selected: <b>${esc(pname)}</b> · found in ${esc(area.name)}</span><button class="btn primary" data-do="huntarea" data-a="${area.id}">Explore ${esc(area.name)}</button>` : preview && preview.boss ? `<span>Selected: <b>${esc(preview.name)}</b></span>` : ''}</div>`;
   /* Fighting style, always beside the fight: the weapon decides melee, ranged or magic; these buttons choose what your
      fights train. The same buttons also sit in the full fighter panel below. */
-  const styleSk = { accurate: 'attack', aggressive: 'strength', defensive: 'defence', offense: st };
-  const styleBtns = Object.entries({ accurate: st === 'melee' && 'Accurate', aggressive: st === 'melee' && 'Aggressive', offense: st !== 'melee' && 'Offensive', defensive: 'Defensive' }).filter(([, l]) => l).map(([v, l]) => `<button type="button" class="choice-button ss-btn ${cur === v ? 'on' : ''}" data-do="style" data-a="${st}" data-b="${v}" aria-pressed="${cur === v}" data-tip="text:Your fights train ${esc(v === 'defensive' && st !== 'melee' ? `${D.SK[st].name} and Defence` : D.SK[styleSk[v]].name)}">${ico(styleSk[v])}<span>${l}<small>${v === 'defensive' && st !== 'melee' ? `${D.SK[st].name} + Defence` : D.SK[styleSk[v]].name} <b class="mono" data-b="lvl:${v === 'defensive' ? 'defence' : styleSk[v]}"></b></small><span class="bar ss-xp"><i data-b="xpbar:${v === 'defensive' ? 'defence' : styleSk[v]}"></i></span></span></button>`).join('');
+  const styleSk = { accurate: 'melee', aggressive: 'melee', defensive: 'defence', offense: st };
+  const styleBtns = Object.entries({ aggressive: st === 'melee' && 'Offensive', offense: st !== 'melee' && 'Offensive', defensive: 'Defensive' }).filter(([, l]) => l).map(([v, l]) => `<button type="button" class="choice-button ss-btn ${cur === v ? 'on' : ''}" data-do="style" data-a="${st}" data-b="${v}" aria-pressed="${cur === v}" data-tip="text:Your fights train ${esc(v === 'defensive' && st !== 'melee' ? `${D.SK[st].name} and Defence` : D.SK[styleSk[v]].name)}">${ico(styleSk[v])}<span>${l}<small>${v === 'defensive' && st !== 'melee' ? `${D.SK[st].name} + Defence` : D.SK[styleSk[v]].name} <b class="mono" data-b="lvl:${v === 'defensive' ? 'defence' : styleSk[v]}"></b></small>${v !== 'defensive' && DQ.catchUp && DQ.catchUp(styleSk[v]) > 1 ? '<em class="ss-fast" data-tip="text:A fighting style behind your best one learns three times as fast until it has nearly caught up.">Learning 3× faster</em>' : ''}<span class="bar ss-xp"><i data-b="xpbar:${v === 'defensive' ? 'defence' : styleSk[v]}"></i></span></span></button>`).join('');
   /* the combat skills live on the style buttons (level and progress), with Health, which every fight trains, and the
      combat level beside them; the level opens the details */
   const styleExtra = `<span class="ss-hp" data-tip="skill:hitpoints">${ico('hitpoints')}<span>Health<small>Every fight <b class="mono" data-b="lvl:hitpoints"></b></small><span class="bar ss-xp"><i data-b="xpbar:hitpoints"></i></span></span></span><button class="ss-cl" data-do="combatmore" data-a="skills" data-tip="text:Combat level, what each combat skill does and how close the next level is">${ico('attack')}<span>Combat <b class="mono" data-b="combat"></b><small>Details</small></span></button>`;
@@ -13295,10 +13318,9 @@ D.SKILL_GUIDE = {
   smithing: ['Smelt ore into bars, then forge weapons and armour.', ['Daggers, swords, warhammers and armour for melee', 'Bars also make arrows and jewellery', 'Sell what you make'], ['attack', 'defence']],
   crafting: ['Sew leather, carve bows and staves, and set jewellery.', ['Gear for ranged and magic fighters', 'Rings and amulets with bonuses', 'Woollen cloth for your house'], ['ranged', 'magic']],
   magic: ['Cast spells with a staff, and turn items into coins with alchemy.', ['Choose an element to hit monster weaknesses', 'Spells use Arcane runes', 'Alchemy turns spare items into coins'], []],
-  attack: ['Your chance to hit. Higher Attack means fewer misses.', ['Trained by fighting with the Accurate stance', 'Needed to wield better melee weapons', 'Counts towards your combat level'], []],
-  strength: ['How hard you hit. It sets your maximum hit.', ['Trained by fighting with the Aggressive stance', 'Raises your maximum hit', 'Counts towards your combat level'], []],
+  melee: ['Fighting up close with swords, daggers and hammers.', ['Trained by fighting with a melee weapon equipped', 'Better weapons need a higher Melee', 'Counts towards your combat level'], []],
   defence: ['How often monsters miss you, and which armour you can wear.', ['Trained by fighting with the Defensive stance', 'Better armour needs a higher Defence', 'Counts towards your combat level'], []],
-  ranged: ['Fighting from a distance with a bow and arrows.', ['Trained by fighting with a bow equipped', 'Arrows are used up as you shoot'], []],
+  ranged: ['Fighting from a distance with a bow and arrows.', ['Trained by fighting with a bow equipped', 'Arrows are used up as you shoot', 'Open from the start: the shop sells a shortbow'], []],
   hitpoints: ['Your health. The more you have, the longer you last in a fight.', ['Rises a little every time you deal damage', 'Food heals it, and it refills slowly when resting'], []],
 };
 const guideHtml = sk => {
@@ -15588,9 +15610,9 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
     : task('Catch shrimp to cook', 'Chickens peck back. Catch about a dozen shrimp, cook them, then train: with food in your pack the fights keep going while you are away.', 'fish', 'shrimp');
   /* an idle beginner keeps the starting focus (Strength) forever; point at the skill that is falling behind */
   if (DQ.combatLvl() < req && DQ.weaponStyle() === 'melee') {
-    const sk = ['attack', 'strength', 'defence'].map(k => [k, DQ.lvl(k)]).sort((a, b) => a[1] - b[1]), [low, lv] = sk[0], top = sk[2][1];
-    const want = { attack: 'accurate', strength: 'aggressive', defence: 'defensive' }[low];
-    if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. Your ${D.SK[low].name} (${lv}) is falling behind your ${D.SK[sk[2][0]].name} (${top}): ${low === 'attack' ? 'you miss more often' : low === 'defence' ? 'you take more damage' : 'your hits stay small'}. This switches your training focus and fights chickens.`, 'journeytrain', want, 'chicken');
+    const sk = ['melee', 'defence'].map(k => [k, DQ.lvl(k)]).sort((a, b) => a[1] - b[1]), [low, lv] = sk[0], top = sk[sk.length - 1][1];
+    const want = { melee: 'aggressive', defence: 'defensive' }[low];
+    if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. Your ${D.SK[low].name} (${lv}) is falling behind your ${D.SK[sk[sk.length - 1][0]].name} (${top}): ${low === 'defence' ? 'you take more damage' : 'you miss more often and your hits stay small'}. This switches your training focus and fights chickens.`, 'journeytrain', want, 'chicken');
   }
   if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Attack, Strength and Defence using the combat training focus.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
   /* Ready by level: let the battle forecast decide what, if anything, is missing. */
@@ -16400,7 +16422,7 @@ DQ.initGuides=()=>{
   if(t.version===1)return;
   // Existing saves keep the lessons for skills they have not used yet.
   for(const skill of Object.keys(lessons)){
-    const used=skill==='combat'?['attack','strength','defence','ranged'].some(sk=>S().xp[sk]>0):S().xp[skill]>0;
+    const used=skill==='combat'?['melee','defence','ranged','magic'].some(sk=>S().xp[sk]>0):S().xp[skill]>0;
     if(used)t.done['lesson:'+skill]=true;
   }
   if(DQ.totalXp()>0||S().playtime>60000)t.done.intro=true;
@@ -16724,7 +16746,7 @@ DQ.loadoutDelete = i => { DQ.loadouts().splice(i, 1); DQ.save && DQ.save(); };
 /* Copy build: what you are wearing and why, as plain text. Nothing from the save beyond the build itself. */
 DQ.buildText = () => {
   const st = S(), L = DQ.lvl, it = id => D.ITEMS[id], lines = [];
-  const style = DQ.weaponStyle(), main = style === 'melee' ? `Attack ${L('attack')} · Strength ${L('strength')}` : style === 'ranged' ? `Ranged ${L('ranged')}` : `Magic ${L('magic')}`;
+  const style = DQ.weaponStyle(), main = style === 'melee' ? `Melee ${L('melee')}` : style === 'ranged' ? `Ranged ${L('ranged')}` : `Magic ${L('magic')}`;
   lines.push(`Idlewick build · combat ${DQ.combatLvl()} (${main} · Defence ${L('defence')} · Health ${L('hitpoints')})`);
   for (const sl of GEAR) { const id = st.equip[sl]; if (!id) continue; const x = it(id), e = (st.enchants || {})[id]; lines.push(`- ${DQ.SLOT_NAMES ? DQ.SLOT_NAMES[sl] : sl}: ${x.name}${e ? ` +${e}` : ''}${x.unique ? ` — ${x.unique.name}: ${x.unique.text}` : ''}`); }
   if (st.ammo.id) lines.push(`- Ammunition: ${it(st.ammo.id).name}`);

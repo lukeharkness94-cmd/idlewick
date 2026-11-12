@@ -26,15 +26,22 @@ D.SKILLS = [
   { id: 'cooking',     name: 'Cooking',     col: '#f2b44a', group: 'artisan', page: 'cooking',     unlock: 3,  blurb: 'Turn raw fish into food that heals you in a fight.' },
   { id: 'smithing',    name: 'Smithing',    col: '#e8703a', group: 'artisan', page: 'smithing',    unlock: 12, quest: 'mq_smithing',  blurb: 'Smelt ore into bars and hammer them into weapons and armour.' },
   { id: 'crafting',    name: 'Crafting',    col: '#d98ad1', group: 'artisan', page: 'crafting',    unlock: 15, quest: 'mq_crafting', blurb: 'Sew leather, cut jewellery, carve bows and staves.' },
-  { id: 'magic',       name: 'Magic',       col: '#7d89f5', group: 'artisan', page: 'magic',       unlock: 28, quest: 'mq_magic', blurb: 'Cast spells in battle and turn clutter into coins with alchemy.' },
+  { id: 'magic',       name: 'Magic',       col: '#7d89f5', group: 'artisan', page: 'magic',       unlock: 0,  blurb: 'Staffs and spells: levels as you fight with them. Also turns clutter into coins with alchemy.' },
   { id:'research', name:'Scholarship', col:'#b79862', group:'artisan', page:'research', unlock:16, blurb:'Study practical discoveries to earn Scholarship XP and permanent improvements.' },
-  { id: 'attack',      name: 'Attack',      col: '#df5b4a', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Hit more often with melee weapons.' },
-  { id: 'strength',    name: 'Strength',    col: '#3fb88f', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Hit harder with melee weapons.' },
+  { id: 'melee',       name: 'Melee',       col: '#df5b4a', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Swords, daggers and hammers: levels as you fight with them.' },
   { id: 'defence',     name: 'Defence',     col: '#5f93df', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Avoid blows and wear heavier armour.' },
-  { id: 'ranged',      name: 'Ranged',      col: '#b5d84b', group: 'combat',  page: 'combat',      unlock: 18, quest: 'mq_ranged', blurb: 'Loose arrows from a safe distance.' },
+  { id: 'ranged',      name: 'Ranged',      col: '#b5d84b', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Bows and arrows: levels as you fight with them.' },
   { id: 'hitpoints',   name: 'Health',   col: '#f0607a', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'How much punishment you can take.' },
 ];
 D.SK = Object.fromEntries(D.SKILLS.map(s => [s.id, s]));
+/* Melee replaced Attack and Strength (Nov 2026, from the player: you level the weapon family you fight with). Old ids still
+   resolve to it, so gear requirements, abilities, quests and old saves keep working. */
+D.SKILL_ALIAS = { attack: 'melee', strength: 'melee' }; D.SK.attack = D.SK.strength = D.SK.melee;
+/* quest and other XP rewards written for Attack and Strength pay Melee: half their sum, the same pace as before now that one
+   skill does the work of two. Runs once everything has loaded (quests are added by several files). */
+D.foldMelee = () => { const fold = xp => { if (!xp || (xp.attack == null && xp.strength == null)) return; xp.melee = (xp.melee || 0) + Math.round(((xp.attack || 0) + (xp.strength || 0)) / 2); delete xp.attack; delete xp.strength; };
+  (D.QUESTS || []).forEach(q => fold(q.reward && q.reward.xp)); };
+if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', () => D.foldMelee());
 D.GROUPS = { gather: 'Gathering', artisan: 'Artisan', combat: 'Combat' };
 
 /* ---------- Items ---------- */
@@ -612,11 +619,11 @@ D.QUESTS.unshift(
     [{ ev: 'deliver', key: 'cowhide', n: 8, label: 'Bring 8 cowhides to practise on' }, { ev: 'deliver', key: 'feather', n: 20, label: 'Bring 20 feathers for her quills' }, { ev: 'chop', key: 'birch', n: 10, label: 'Chop 10 birch logs for her frames' }],
     { xp: { crafting: 150 }, coins: 150, items: { cowhide: 6 } }),
   MQ('mq_ranged', 'ranged', 'mossbarrow', 'A Hunter’s Bow', 'Hunter Wynn', 18, null,
-    'Wynn will not take you after Old Tusk with only a sword. “A hunter strikes from a distance,” he says. Help him carve your first bow and fletch your first arrows, and he will teach you to shoot.',
+    'Wynn will not take you after Old Tusk with only a sword. “A hunter strikes from a distance,” he says. Help him carve your first bow and fletch your first arrows, and he will hand you a proper hunter’s bow and a quiver to go with it.',
     [{ ev: 'deliver', key: 'log_birch', n: 10, label: 'Bring 10 birch logs for the bow stave' }, { ev: 'deliver', key: 'feather', n: 40, label: 'Bring 40 feathers to fletch arrows' }, { ev: 'kill', key: 'boar', n: 6, label: 'Track down 6 wild boars as practice' }],
     { xp: { ranged: 150 }, items: { bow_normal: 1, arrow_bronze: 150 } }),
   MQ('mq_magic', 'magic', 'saltmere', 'The Drowned Library', 'Archivist Merrow', 28, null,
-    'A library sank with the old Saltmere harbour. Merrow has fished up the first pages of a spellbook, but smugglers stole the cover and the rest is still underwater. Recover them and she will teach you to read the old magic.',
+    'A library sank with the old Saltmere harbour. Merrow has fished up the first pages of a spellbook, but smugglers stole the cover and the rest is still underwater. Recover them and she will give you a staff and runes to practise the old magic properly.',
     [{ ev: 'catch', key: '*', n: 25, label: 'Fish up 25 catches (lost pages turn up in the nets)' }, { ev: 'kill', key: 'smuggler', n: 5, label: 'Take the spellbook cover back from 5 smugglers' }, { ev: 'deliver', key: 'gem_sapphire', n: 1, label: 'Bring a sapphire to focus your first spell' }],
     { xp: { magic: 150 }, coins: 300, items: { staff_normal: 1, rune: 60 } }),
 );

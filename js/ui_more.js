@@ -14,10 +14,9 @@ D.SKILL_GUIDE = {
   smithing: ['Smelt ore into bars, then forge weapons and armour.', ['Daggers, swords, warhammers and armour for melee', 'Bars also make arrows and jewellery', 'Sell what you make'], ['attack', 'defence']],
   crafting: ['Sew leather, carve bows and staves, and set jewellery.', ['Gear for ranged and magic fighters', 'Rings and amulets with bonuses', 'Woollen cloth for your house'], ['ranged', 'magic']],
   magic: ['Cast spells with a staff, and turn items into coins with alchemy.', ['Choose an element to hit monster weaknesses', 'Spells use Arcane runes', 'Alchemy turns spare items into coins'], []],
-  attack: ['Your chance to hit. Higher Attack means fewer misses.', ['Trained by fighting with the Accurate stance', 'Needed to wield better melee weapons', 'Counts towards your combat level'], []],
-  strength: ['How hard you hit. It sets your maximum hit.', ['Trained by fighting with the Aggressive stance', 'Raises your maximum hit', 'Counts towards your combat level'], []],
+  melee: ['Fighting up close with swords, daggers and hammers.', ['Trained by fighting with a melee weapon equipped', 'Better weapons need a higher Melee', 'Counts towards your combat level'], []],
   defence: ['How often monsters miss you, and which armour you can wear.', ['Trained by fighting with the Defensive stance', 'Better armour needs a higher Defence', 'Counts towards your combat level'], []],
-  ranged: ['Fighting from a distance with a bow and arrows.', ['Trained by fighting with a bow equipped', 'Arrows are used up as you shoot'], []],
+  ranged: ['Fighting from a distance with a bow and arrows.', ['Trained by fighting with a bow equipped', 'Arrows are used up as you shoot', 'Open from the start: the shop sells a shortbow'], []],
   hitpoints: ['Your health. The more you have, the longer you last in a fight.', ['Rises a little every time you deal damage', 'Food heals it, and it refills slowly when resting'], []],
 };
 const guideHtml = sk => {

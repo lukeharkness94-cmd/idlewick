@@ -412,13 +412,22 @@ test('companion tricks: halved passives, tricks fire through the real engine, fo
 test('combat progress bar follows the trained skill and agrees with the XP it names',()=>{
  const {q}=harness();const S=q.S,D=q.data;
  assert.equal(q.combatLvl(),3);assert.equal(Math.round(q.combatProgress().pct),0,'fresh hero starts at 0%');
- /* the reported case: Defence 2, Health 10, Attack 4, Strength 5 (combat 5), almost at Attack 5 while training Accurate */
+ /* Melee replaced Attack and Strength: Defence 2, Health 10, Melee 5 almost at 6 while training Accurate */
  const lv=(k,l,f=0)=>S.xp[k]=Math.round(D.XPF[l]+(D.XPF[l+1]-D.XPF[l])*f);
- lv('defence',2,.5);lv('hitpoints',10);lv('attack',4,.4);lv('strength',5,.9);S.style.melee='accurate';
- const c=q.combatProgress();assert.equal(c.lvl,5);assert.equal(c.route.skill,'attack','follows the skill being trained');
- const pct=(S.xp.attack-c.route.from)/(c.route.to-c.route.from)*100;assert.ok(Math.abs(c.pct-pct)<1e-9&&c.pct<99,`bar ${c.pct.toFixed(0)}% matches the ${c.route.xp} XP still needed`);
- assert.equal(c.route.xp,c.route.to-S.xp.attack);
- S.xp.attack=c.route.to-1;assert.ok(q.combatProgress().pct>90);S.xp.attack=c.route.to;assert.equal(q.combatLvl(),6,'filling the bar raises the combat level');
+ lv('defence',2,.5);lv('hitpoints',10);lv('melee',5,.9);S.style.melee='accurate';
+ const c=q.combatProgress();assert.equal(c.lvl,q.combatLvl());assert.equal(c.route.skill,'melee','follows the skill being trained');
+ const pct=(S.xp.melee-c.route.from)/(c.route.to-c.route.from)*100;assert.ok(Math.abs(c.pct-pct)<1e-9&&c.pct<99,`bar ${c.pct.toFixed(0)}% matches the ${c.route.xp} XP still needed`);
+ assert.equal(c.route.xp,c.route.to-S.xp.melee);
+ const l0=q.combatLvl();S.xp.melee=c.route.to-1;assert.ok(q.combatProgress().pct>90);S.xp.melee=c.route.to;assert.equal(q.combatLvl(),l0+1,'filling the bar raises the combat level');
+ assert.equal(S.xp.attack,S.xp.melee,'old ids read Melee');
+});
+test('Attack and Strength merge into Melee without losing Hero level',()=>{
+ const {q}=harness();const D=q.data;const before=q.newState('Old');before.xp.attack=D.XPF[30];before.xp.strength=D.XPF[40];delete before.xp.melee;
+ const heroBefore=(()=>{const t=D.XPF[30]+D.XPF[40]+D.XPF[10]-D.XPF[10];let l=1;while(l<99&&t>=D.advReq(l+1))l++;return l;})();
+ assert.equal(q.importSave(Buffer.from(JSON.stringify(before),'utf8').toString('base64')),true,'old save loads');
+ assert.equal(q.lvl('melee'),40,'Melee takes the higher of the two');assert.equal(q.lvl('attack'),40);assert.equal(q.advLvl(),heroBefore,'Hero level unchanged');
+ assert.ok(!('attack' in JSON.parse(Buffer.from(q.exportSave(),'base64').toString('utf8')).xp),'only Melee is saved');assert.equal(q.advLvl(),heroBefore);
+ assert.ok(q.skillUnlocked('ranged')&&q.skillUnlocked('magic'),'bow and staff are open from the start');
 });
 test('early levels are slower for non-combat skills and full speed from level 20; combat keeps its own pace',()=>{
  const {q}=harness();const S=q.S,D=q.data;
@@ -550,9 +559,9 @@ test('combat guidance is derived from the shared damage-type rule and the real s
  assert.match(q.typeRuleText(D.MON.oldtusk),new RegExp(`\\+${Math.round((R.boss.weak-1)*100)}%.*${Math.round(R.boss.resist*100)}%`));
  assert.match(q.typeRuleText(D.MON.boar),new RegExp(`\\+${Math.round((R.normal.weak-1)*100)}%.*${Math.round(R.normal.resist*100)}%`));
  assert.match(D.AB.focus.text,new RegExp(`${R.boss.focus}x`));
- /* Old Tusk is weak to pierce: with Ranged locked, no bow is suggested as usable, only how it is learned */
+ /* Old Tusk is weak to pierce: with no bow yet, the advice offers the shop's shortbow and arrows */
  S.town='mossbarrow';S.towns.mossbarrow={visited:true,boss:false};S.coins=1e5;for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[20];S.hp=q.maxHp();
- let adv=q.prepAdvice('oldtusk');let w=adv.find(x=>x.key==='weak');assert.ok(w&&w.info&&/Ranged is not learned/.test(w.text),JSON.stringify(w));
+ let adv=q.prepAdvice('oldtusk');let w=adv.find(x=>x.key==='weak');assert.ok(w&&/shortbow/i.test(w.title)&&/arrows/.test(w.text),'bows are open from the start: the advice offers one '+JSON.stringify(w));
  /* Ranged learned and a bow owned but no arrows: switch, and the advice names the missing arrows */
  S.unlocked.ranged=true;S.xp.ranged=D.XPF[20];S.inv.bow_oak=1;adv=q.prepAdvice('oldtusk');w=adv.find(x=>x.key==='weak');
  assert.match(w.title,/Switch to your oak shortbow/i);assert.match(w.text,/arrows/);
@@ -825,18 +834,16 @@ test('every recipe, gathering spot and item requirement is reachable within the 
 test('progression gates are sensible: basic leather, the Ranged quest, shop stock and unlock chains',()=>{
   const {q,load}=harness();load('routes');load('adventures');const S=q.S,D=q.data;
   /* basic leather is wearable without Ranged; finer hides still need it */
-  S.inv.leather_vest=1;assert.equal(q.skillUnlocked('ranged'),false);assert.equal(q.equipItem('leather_vest').ok,true,'leather body wearable at Defence 1');
+  S.inv.leather_vest=1;assert.equal(q.skillUnlocked('ranged'),true,'bows are open from the start (Nov 2026)');assert.equal(q.equipItem('leather_vest').ok,true,'leather body wearable at Defence 1');
   S.inv.frost_vest=1;assert.equal(q.equipItem('frost_vest').ok,false);
   /* the Ranged quest needs only Mossbarrow and Hero 18, not an unrelated side quest */
   S.towns.mossbarrow={visited:true,boss:false};S.towns.willowbrook.boss=true;while(q.advLvl()<18)S.xp.fishing+=2000;
   assert.equal(q.questState(D.QM.mq_ranged),'new','A Hunter’s Bow is available at Hero 18 in Mossbarrow');
-  /* gear for a skill you cannot use is not sold, with a clear reason */
-  const coins=S.coins=5000;assert.equal(q.lockedSkillFor('staff_normal'),'magic');q.buy('staff_normal');assert.equal(S.coins,coins);assert.ok(!S.inv.staff_normal);
-  assert.match(q.skillTeacher('magic'),/Archivist Merrow in Saltmere/);
+  /* every fighting style is open from the start: a staff can be bought and worn straight away */
+  S.coins=5000;assert.ok(!q.lockedSkillFor('staff_normal'));q.buy('staff_normal');assert.ok(S.inv.staff_normal>=1);assert.equal(q.equipItem('staff_normal').ok,true);q.equipItem('bronze_sword');
   /* bows and staves never drop before their skill is learned */
   S.town='willowbrook';S.xp.attack=S.xp.strength=S.xp.defence=S.xp.hitpoints=D.XPF[40];S.inv.bread=5000;const kills=S.stats.kill;
   q.startAct('fight','goblin',{quiet:true});q.simulate(6*3600000);assert.ok(S.stats.kill-kills>2000,'thousands of goblins fought');
-  assert.ok(!q.have('staff_normal')&&!q.have('bow_normal'),'no bows or staves drop before Ranged or Magic is learned');
   /* every skill-teaching quest is reachable: its requirement chain never needs the skill it teaches, and every link exists */
   for(const mq of D.QUESTS.filter(x=>x.main)){const seen=new Set();let cur=mq;
     while(cur&&cur.req){assert.ok(D.QM[cur.req],mq.id+' requires a missing quest '+cur.req);assert.ok(!seen.has(cur.req),mq.id+' has a circular requirement');seen.add(cur.req);cur=D.QM[cur.req];
@@ -863,9 +870,9 @@ test('combat balance review: empty ability slots fill for a fight, the final bos
 test('first-hour polish: combat XP stops at the creature\'s health, and a first boss victory ends the fight',()=>{
   const {q}=harness();const D=q.data,S=q.S;
   for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[60];q.fxDirty();S.hp=q.maxHp();S.inv.shrimp=50;
-  const m=D.MON.chicken,split=q.xpSplit('melee').reduce((n,[,per])=>n+per,0),before=S.xp.strength+S.xp.attack+S.xp.defence;
+  const m=D.MON.chicken,split=q.xpSplit('melee').reduce((n,[,per])=>n+per,0),before=S.xp.melee+S.xp.defence;
   q.startAct('fight','chicken',{quiet:true});const k0=S.stats.kill||0;q.advanceTime(120000,120000,0);const kills=(S.stats.kill||0)-k0;
-  const gained=S.xp.strength+S.xp.attack+S.xp.defence-before,cap=kills*m.hp*split*q.xpMult('strength')*1.05+1;
+  const gained=S.xp.melee+S.xp.defence-before,cap=kills*m.hp*split*q.xpMult('melee')*1.05+1;
   assert.ok(kills>0,'the hero fights');assert.ok(gained<=cap,`XP per kill is capped by the chicken's health: ${gained} <= ${cap}`);
   q.stopAct(true);
   /* Grubnash, first time: the fight stops after the victory instead of an instant rematch */

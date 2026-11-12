@@ -503,3 +503,14 @@ Checked by `node tests/ux-roles.cjs` (browser) plus the existing suites.
 
 ## Beastmastery ranch (Nov 2026)
 Beastmastery opens on a ranch: each owned beast stands in its own pixel pen (`js/ranch_art.js`, `js/ranch.js`, "The ranch" block in css/style.css) with a bond badge, a hungry/napping/fully-bonded state and a "With you" flag. Pick a food on the shelf, select a pen, press Feed & train (`UI.DO.beastfeed`, engine `Q.trainBeast(id, food)`); the food flies to the pen and the bond rises. Tabs: Ranch, Trapper's shed (capture, previews, expeditions) and Fieldwork (wooden traps); the old page is reused for the last two. Pens are native-size images at whole-number 2x/3x; three columns by two rows on desktop, one pen per page on phones (the phone page scrolls by design). Engine rules in docs/beastmastery.md are unchanged. Tests: `tests/ranch.cjs`, `tests/beastmastery-ui.cjs`, `tests/ux-roles.cjs`.
+
+
+## Fighting styles: Melee, Ranged, Magic (Nov 2026, from the player)
+The player chooses how to fight by the weapon they hold, and that weapon family levels as they use it.
+- **Melee replaced Attack and Strength.** `D.SKILL_ALIAS` maps the old ids to `melee` (`DQ.skId`), `D.SK.attack/strength` point at Melee, and `S.xp.attack/strength` are non-saved accessors onto `S.xp.melee` (`DQ.xpAliases`, re-attached whenever `DQ.S` is assigned). Gear requirements, abilities and old code that say `attack`/`strength` keep working; new code should say `melee`. Gear *bonuses* (atk, str) are unchanged.
+- **Old saves:** `migrate` sets Melee to the higher of Attack and Strength and keeps the lower as `S.xpLegacy`, which still counts in `DQ.totalXp`, so Hero level never drops; combat level never drops either (`.65 × Melee`). Original values are kept in `S.xpOld`.
+- **Pace:** a melee hit pays 2 XP per damage to Melee (was 4 to one of two skills), so combat level rises as fast as when both were trained evenly. Quest rewards written for Attack/Strength pay Melee half their sum (`D.foldMelee`).
+- **Ranged and Magic are open from the start** (`unlock: 0`, no quest). Hunter Wynn's and Archivist Merrow's quests remain as stories that reward a bow/staff and ammunition. Shops sell bows and staffs from Willowbrook.
+- **Catch-up:** `DQ.catchUp(sk)` triples XP for a fighting style below 70% of your best one; the Train button says "Learning 3× faster".
+- Melee has two training buttons like the others: Offensive (Melee) and Defensive (Defence). A saved `accurate` focus reads as Offensive.
+- Evidence: `node scripts/sim-bosses.cjs` is unchanged within noise; regression covers the save merge.

@@ -272,7 +272,7 @@ Object.assign(ICON, {
   bit: s => { s.ell(8, 8, 3, 3, R.gold); },
   mute: s => { s.rect(1, 6, 3, 4, R.wood); s.poly([[4, 6], [8, 3], [8, 13], [4, 10]], R.gold); const r = rp('#c8483c'); s.line(10, 5, 14, 10, r); s.line(14, 5, 10, 10, r); s.line(11, 5, 15, 10, r); s.line(15, 5, 11, 10, r); }
 });
-const ICON_ALIAS = { book: 'research', scroll: 'quest', compass: 'exploration', sword: 'attack', rod: 'fishing', glove: 'thieving', hoe: 'farming', hammer: 'smithing', bottle: 'herbalism', rune: 'enchanting', house: 'home', bank: 'bag', users: 'bag', paw: 'hunting', defence: 'defence', health: 'hitpoints' };
+const ICON_ALIAS = { book: 'research', scroll: 'quest', compass: 'exploration', sword: 'attack', melee: 'attack', rod: 'fishing', glove: 'thieving', hoe: 'farming', hammer: 'smithing', bottle: 'herbalism', rune: 'enchanting', house: 'home', bank: 'bag', users: 'bag', paw: 'hunting', defence: 'defence', health: 'hitpoints' };
 function iconSprite(id) { const k = ICON[id] ? id : ICON_ALIAS[id]; const f = ICON[k]; if (!f) return null; const s = Spr(16, 16); const out = f(s); return out && out.w ? out : s; }
 
 /* boss trophies: the boss itself mounted on a carved oak plaque with a brass nameplate (40 x 44) */

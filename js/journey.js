@@ -206,9 +206,9 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
     : task('Catch shrimp to cook', 'Chickens peck back. Catch about a dozen shrimp, cook them, then train: with food in your pack the fights keep going while you are away.', 'fish', 'shrimp');
   /* an idle beginner keeps the starting focus (Strength) forever; point at the skill that is falling behind */
   if (DQ.combatLvl() < req && DQ.weaponStyle() === 'melee') {
-    const sk = ['attack', 'strength', 'defence'].map(k => [k, DQ.lvl(k)]).sort((a, b) => a[1] - b[1]), [low, lv] = sk[0], top = sk[2][1];
-    const want = { attack: 'accurate', strength: 'aggressive', defence: 'defensive' }[low];
-    if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. Your ${D.SK[low].name} (${lv}) is falling behind your ${D.SK[sk[2][0]].name} (${top}): ${low === 'attack' ? 'you miss more often' : low === 'defence' ? 'you take more damage' : 'your hits stay small'}. This switches your training focus and fights chickens.`, 'journeytrain', want, 'chicken');
+    const sk = ['melee', 'defence'].map(k => [k, DQ.lvl(k)]).sort((a, b) => a[1] - b[1]), [low, lv] = sk[0], top = sk[sk.length - 1][1];
+    const want = { melee: 'aggressive', defence: 'defensive' }[low];
+    if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. Your ${D.SK[low].name} (${lv}) is falling behind your ${D.SK[sk[sk.length - 1][0]].name} (${top}): ${low === 'defence' ? 'you take more damage' : 'you miss more often and your hits stay small'}. This switches your training focus and fights chickens.`, 'journeytrain', want, 'chicken');
   }
   if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Attack, Strength and Defence using the combat training focus.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
   /* Ready by level: let the battle forecast decide what, if anything, is missing. */

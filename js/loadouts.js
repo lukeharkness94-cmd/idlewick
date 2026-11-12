@@ -57,7 +57,7 @@ DQ.loadoutDelete = i => { DQ.loadouts().splice(i, 1); DQ.save && DQ.save(); };
 /* Copy build: what you are wearing and why, as plain text. Nothing from the save beyond the build itself. */
 DQ.buildText = () => {
   const st = S(), L = DQ.lvl, it = id => D.ITEMS[id], lines = [];
-  const style = DQ.weaponStyle(), main = style === 'melee' ? `Attack ${L('attack')} · Strength ${L('strength')}` : style === 'ranged' ? `Ranged ${L('ranged')}` : `Magic ${L('magic')}`;
+  const style = DQ.weaponStyle(), main = style === 'melee' ? `Melee ${L('melee')}` : style === 'ranged' ? `Ranged ${L('ranged')}` : `Magic ${L('magic')}`;
   lines.push(`Idlewick build · combat ${DQ.combatLvl()} (${main} · Defence ${L('defence')} · Health ${L('hitpoints')})`);
   for (const sl of GEAR) { const id = st.equip[sl]; if (!id) continue; const x = it(id), e = (st.enchants || {})[id]; lines.push(`- ${DQ.SLOT_NAMES ? DQ.SLOT_NAMES[sl] : sl}: ${x.name}${e ? ` +${e}` : ''}${x.unique ? ` — ${x.unique.name}: ${x.unique.text}` : ''}`); }
   if (st.ammo.id) lines.push(`- Ammunition: ${it(st.ammo.id).name}`);
