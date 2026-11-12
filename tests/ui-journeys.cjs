@@ -39,7 +39,7 @@ const URL=process.env.IDLEWICK_URL||'http://127.0.0.1:8765/';
    await page.evaluate(()=>{const S=DQ.S,D=DQ.data;S.stats.harvest=20;S.stats.craft=30;S.stats.smith=20;S.unlocked.farming=true;S.xp.farming=D.XPF[10];DQ.checkActionUnlocks();DQ.closeModal&&DQ.closeModal();DQ.closeModal&&DQ.closeModal();for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[20];S.inv.bronze_sword=1;S.inv.iron_body=1;DQ.equipItem('bronze_sword');DQ.equipItem('iron_body');DQ.go('brewery');});
    await page.waitForTimeout(200);const herb=await page.locator('.herb-goals').innerText();assert.match(herb,/Research Herbalism/);assert.match(herb,/Healing draught/);assert.match(herb,/Potion of Might/);
    await page.evaluate(()=>{DQ.closeModal&&DQ.closeModal();DQ.go('enchanting');});await page.waitForTimeout(200);
-   const ench=await page.locator('.ench-list').innerText();assert.match(ench,/best first/i);assert.match(ench,/sword/i);assert.match(ench,/runes .*held/);
+   const ench=await page.locator('.ench-list').innerText();assert.match(ench,/best first/i);assert.match(ench,/sword/i);assert.match(ench,/Arcane rune[\s\S]*(held|need)/);
    assert.deepEqual(errors,[]);await ctx.close();done.push('Herbalism and Enchanting: first goals, materials and a recommended first item (seeded)');}
 
   /* 4. A bestiary milestone (seeded: 9 Grubnash victories, then one more) */

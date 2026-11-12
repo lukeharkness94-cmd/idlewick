@@ -8,7 +8,7 @@ const left = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return s >= 60
 const plotArt = (p, st) => { const c = p.crop && D.CROP[p.crop]; return c ? DQ.plantSprite(Math.max(0, st), c.col, 64) : DQ.plantSprite(0, '#000', 64); };
 const plotLabel = (p, st) => { const c = p.crop && D.CROP[p.crop]; return !c ? 'Empty plot: plant a seed' : st === 3 ? `${c.name}: ready to harvest` : `${c.name}: growing, ${Math.floor(DQ.plotPct(p) * 100)}%`; };
 const stageOf = p => !p.crop ? -1 : DQ.plotRipe(p) ? 3 : DQ.plotPct(p) < .08 ? 0 : DQ.plotPct(p) < .45 ? 1 : 2;
-const costChips = cost => Object.entries(cost).map(([k, n]) => k === 'coins' ? `<span class="rw ${S().coins >= n ? '' : 'short'}" style="--c:#f3d58a">${ico('coin')}${fmt(n)}</span>` : `<span class="rw ${DQ.have(k) >= n ? '' : 'short'}" style="--c:${D.ITEMS[k].col}" data-tip="item:${k}">${ico(D.ITEMS[k].ic)}${fmtK(DQ.have(k))}/${n} ${D.ITEMS[k].name.toLowerCase()}</span>`).join('');
+const costChips = cost => UI.needTiles(cost);
 
 /* ---------- Live binders for the new pages ---------- */
 Object.assign(UI.B, {

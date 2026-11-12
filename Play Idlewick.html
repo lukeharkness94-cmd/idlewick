@@ -3553,18 +3553,27 @@ html.short .bp-art{width:56px;height:56px}
 .ench-pips{display:inline-flex;gap:3px}.ench-pips i{width:10px;height:10px;transform:rotate(45deg);border:1px solid #9d7ce8;background:transparent}.ench-pips i.on{background:#b48cff;box-shadow:0 0 6px #b48cff88}
 .ench-gains{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .ench-gain{display:inline-flex;align-items:baseline;gap:5px;padding:2px 9px;border-radius:999px;border:1px solid var(--line2);font-size:15px}.ench-gain small{font-size:13px;color:var(--mute)}.ench-gain i{font-style:normal;color:var(--mute)}.ench-gain .up{color:var(--good)}
-.ench-costs{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.ench-cost{display:inline-grid;grid-template-columns:auto auto;align-items:center;gap:8px;padding:5px 10px 5px 6px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2)}
-.ench-cost.ok{border-color:color-mix(in srgb,var(--good) 60%,var(--line))}.ench-cost.short{border-color:color-mix(in srgb,var(--bad) 70%,var(--line));background:color-mix(in srgb,var(--bad) 8%,var(--panel2))}
-.ec-art{position:relative;display:inline-grid;place-items:center;width:36px;height:36px}.ec-art .pxi,.ec-art img{width:32px;height:32px}
-.ec-n{position:absolute;right:-6px;bottom:-4px;font:700 13px var(--f-ui);padding:0 4px;border-radius:6px;background:var(--panel);border:1px solid var(--line2)}
-.ec-t{display:grid;line-height:1.2}.ec-t b{font-size:14px}.ec-t small{font-size:13px}.ench-cost.ok .ec-t small{color:var(--good)}.ench-cost.short .ec-t small{color:var(--bad)}
-.ench-cost .route-chip,.ench-cost [data-do="route"]{grid-column:1/-1}
-@media (max-width:860px){.ench-row{grid-template-columns:48px minmax(0,1fr)}.ench-costs,.ench-row>.btn{grid-column:1/-1;justify-content:flex-start}}
-.ench-costs{flex-wrap:nowrap}.ench-cost{grid-template-columns:auto auto auto}.ench-cost .route-chip,.ench-cost [data-do="route"]{grid-column:auto}.ench-cost>:last-child:not(.ec-t){align-self:center}
-@media (max-width:860px){.ench-costs{flex-wrap:wrap}}
-.ench-row>span.ench-costs{flex-direction:row;flex:none}.ench-row>span.ench-main{display:grid;flex:none}.ench-row>span.ench-item{flex:none}
-.ench-row .ec-art img{width:32px;height:32px}.ench-row .ench-item img{width:48px;height:48px}
+.need-tiles{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.need-tile{display:inline-grid;grid-template-columns:auto auto;align-items:center;gap:8px;padding:5px 10px 5px 6px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2)}
+.need-tile.ok{border-color:color-mix(in srgb,var(--good) 60%,var(--line))}.need-tile.short{border-color:color-mix(in srgb,var(--bad) 70%,var(--line));background:color-mix(in srgb,var(--bad) 8%,var(--panel2))}
+.nt-art{position:relative;display:inline-grid;place-items:center;width:36px;height:36px}.nt-art .pxi,.nt-art img{width:32px;height:32px}
+.nt-n{position:absolute;right:-6px;bottom:-4px;font:700 13px var(--f-ui);padding:0 4px;border-radius:6px;background:var(--panel);border:1px solid var(--line2)}
+.nt-t{display:grid;line-height:1.2}.nt-t b{font-size:14px}.nt-t small{font-size:13px}.need-tile.ok .nt-t small{color:var(--good)}.need-tile.short .nt-t small{color:var(--bad)}
+.need-tile .route-chip,.need-tile [data-do="route"]{grid-column:1/-1}
+@media (max-width:860px){.ench-row{grid-template-columns:48px minmax(0,1fr)}.need-tiles,.ench-row>.btn{grid-column:1/-1;justify-content:flex-start}}
+.need-tiles{flex-wrap:nowrap}.need-tile{grid-template-columns:auto auto auto}.need-tile .route-chip,.need-tile [data-do="route"]{grid-column:auto}.need-tile>:last-child:not(.nt-t){align-self:center}
+@media (max-width:860px){.need-tiles{flex-wrap:wrap}}
+.ench-row>span.need-tiles{flex-direction:row;flex:none}.ench-row>span.ench-main{display:grid;flex:none}.ench-row>span.ench-item{flex:none}
+.ench-row .nt-art img{width:32px;height:32px}.ench-row .ench-item img{width:48px;height:48px}
+
+.need-tiles{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.need-tile.compact{grid-template-columns:auto auto;gap:6px;padding:4px 8px 4px 4px}.need-tile.compact .nt-art{width:30px;height:30px}.need-tile.compact .nt-art .pxi,.need-tile.compact .nt-art img{width:26px;height:26px}
+.nt-c{font:600 13px var(--f-ui)}.need-tile.ok .nt-c{color:var(--good)}.need-tile.short .nt-c{color:var(--bad)}
+.nt-art .ic{width:28px;height:28px}
+.scholarship-grid .need-tiles{display:grid;grid-template-columns:minmax(0,1fr);gap:6px}.scholarship-grid .need-tile{grid-template-columns:auto minmax(0,1fr) auto}
+.need-tile .route-chip{justify-self:end}
+.nt-art .ic,.nt-art>svg{width:28px;height:28px}
+.hfurn .need-tiles{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;width:100%}.hfurn .need-tile{grid-template-columns:auto minmax(0,1fr) auto;text-align:left}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -11923,7 +11932,7 @@ UI.V.recipes = sk => {
     reason:lvlLock?`Requires ${D.SK[sk].name} ${r.lvl}`:miss.length?`Missing ${miss.join(', ')}`:'',
     stateText:lvlLock?`🔒 ${D.SK[sk].name} ${r.lvl} (you are ${DQ.lvl(sk)})`:miss.length?`Missing ${miss.length===1?miss[0]:miss.length+' materials'}`:'Ready to make',
     caption:r.burn&&!lvlLock&&DQ.lvl(sk)<r.lvl?`Level ${r.lvl} · ${Math.round(DQ.burnChance(r)*100)}% burn`:`Level ${r.lvl} · ${UI.statLine(it.b)||DQ.purposeOf&&DQ.purposeOf(outId)||`${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`}`,
-    info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}</p><div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>`<span class="ingredient ${DQ.have(id)>=n?'':'bad'}">${DQ.itemIco(D.ITEMS[id])}<span>${esc(D.ITEMS[id].name)} <b data-b="count:${id}"></b> / ${n}</span>${DQ.have(id)>=n||!UI.routeChip?'':UI.routeChip(id)}</span>`).join('')}</div>`};});
+    info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}</p><div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>UI.needTile(id,n,{live:true})).join('')}</div>`};});
   return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'||sk==='carpentry'?'Make':'Craft')+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress</h3>${UI.skillHero(sk)}</section>`;
 };
 
@@ -12045,6 +12054,26 @@ UI.homestead = () => {
     <div class="${ripe ? 'hot' : ''}">${ico('crop')}<b class="mono">${ripe}</b><small>ready to harvest</small></div><div>${ico('seed')}<b class="mono">${growing}</b><small>growing</small></div>
     <div class="${stored ? 'hot' : ''}">${ico('egg')}<b class="mono">${stored}</b><small>produce to collect</small></div><div>${ico('users')}<b class="mono">${w}</b><small>workers working</small></div></div></section>`;
 };
+})();
+
+</script>
+<script>
+/* Material tiles (Nov 2026, from the player: "more visual cues as opposed to just text", "use this logic wherever
+   anything needs materials"). One tile per thing a task needs: the item's picture with how many it takes, its name,
+   and what you hold: green with a tick when you have enough, red with how many are missing (and a route to get
+   more) when not. compact tiles drop the name to the tooltip so small cards stay on one screen. */
+(() => {
+const DQ = window.DQ, D = DQ.data, UI = DQ.ui, { esc, fmt, ico } = DQ, S = () => DQ.S;
+const k = n => n >= 1e4 ? (n / 1e3).toFixed(n >= 1e5 ? 0 : 1) + 'k' : fmt(n);
+UI.needTile = (id, n, o = {}) => {
+  const coins = id === 'coins', it = coins ? null : D.ITEMS[id]; if (!coins && !it) return '';
+  const have = coins ? S().coins : DQ.have(id), ok = have >= n, name = coins ? 'Coins' : it.name;
+  const art = coins ? ico('coin') : DQ.itemIco(it), route = ok || coins || !UI.routeChip || o.noRoute ? '' : UI.routeChip(id);
+  const held = o.live && !coins ? `<b data-b="count:${id}"></b>` : k(have);
+  const line = ok ? `✓ ${held} held` : coins ? `✗ need ${k(n - have)} more` : `✗ ${held} of ${k(n)} · need ${k(n - have)}`;
+  return `<span class="need-tile ${ok ? 'ok' : 'short'} ${o.compact ? 'compact' : ''}" ${coins ? `data-tip="text:${esc(`${fmt(n)} coins · you have ${fmt(have)}`)}"` : `data-tip="item:${id}"`}><span class="nt-art">${art}<b class="nt-n">${coins ? k(n) : '×' + k(n)}</b></span>${o.compact ? `<small class="nt-c">${ok ? '✓' : `${k(have)}/${k(n)}`}</small>` : `<span class="nt-t"><b>${esc(name)}</b><small>${line}</small></span>`}${route}</span>`;
+};
+UI.needTiles = (cost, o) => `<span class="need-tiles">${Object.entries(cost || {}).map(([id, n]) => UI.needTile(id, n, o)).join('')}</span>`;
 })();
 
 </script>
@@ -12791,7 +12820,7 @@ const left = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return s >= 60
 const plotArt = (p, st) => { const c = p.crop && D.CROP[p.crop]; return c ? DQ.plantSprite(Math.max(0, st), c.col, 64) : DQ.plantSprite(0, '#000', 64); };
 const plotLabel = (p, st) => { const c = p.crop && D.CROP[p.crop]; return !c ? 'Empty plot: plant a seed' : st === 3 ? `${c.name}: ready to harvest` : `${c.name}: growing, ${Math.floor(DQ.plotPct(p) * 100)}%`; };
 const stageOf = p => !p.crop ? -1 : DQ.plotRipe(p) ? 3 : DQ.plotPct(p) < .08 ? 0 : DQ.plotPct(p) < .45 ? 1 : 2;
-const costChips = cost => Object.entries(cost).map(([k, n]) => k === 'coins' ? `<span class="rw ${S().coins >= n ? '' : 'short'}" style="--c:#f3d58a">${ico('coin')}${fmt(n)}</span>` : `<span class="rw ${DQ.have(k) >= n ? '' : 'short'}" style="--c:${D.ITEMS[k].col}" data-tip="item:${k}">${ico(D.ITEMS[k].ic)}${fmtK(DQ.have(k))}/${n} ${D.ITEMS[k].name.toLowerCase()}</span>`).join('');
+const costChips = cost => UI.needTiles(cost);
 
 /* ---------- Live binders for the new pages ---------- */
 Object.assign(UI.B, {
@@ -14780,13 +14809,13 @@ DQ.brew = id => {
 };
 
 /* ---------- the Research page ---------- */
-const costChips = c => Object.entries(c).map(([k, n]) => { const ok = k === 'coins' ? S().coins >= n : DQ.have(k) >= n; return k === 'coins' ? `<span class="rw ${ok ? '' : 'short'}" style="--c:#f3d58a">${ico('coin')}${fmt(n)}</span>` : `<span class="rw ${ok ? '' : 'short'}" style="--c:${D.ITEMS[k].col}">${ico(D.ITEMS[k].ic)}${n}× ${esc(D.ITEMS[k].name)}</span>${ok || !UI.routeChip ? '' : UI.routeChip(k)}`; }).join('');
+const costChips = c => UI.needTiles(c);
 const dur = m => m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ' ' + m % 60 + 'm' : ''}` : `${m}m`;
 const techCard = t => {
   const why = DQ.techReason(t), br = BR[t.br], act = R().active.find(a => a.id === t.id);
   const state = why === 'done' ? 'done' : why === 'active' ? 'active' : why ? 'locked' : 'open';
   const foot = state === 'done' ? `<span class="tdone">${ico('check')} Researched</span>` : state === 'active' ? `<span class="tbar"><b>Studying</b><span class="bar"><i data-b="rbar:${t.id}"></i></span><small class="mono" data-b="rleft:${t.id}"></small></span>` : state === 'locked' ? `<span class="tlock">${ico('lock')} ${esc(why)}</span>` : `<button class="btn sm ${DQ.techCanAfford(t) && R().active.length < DQ.researchSlots() ? 'primary' : ''}" data-do="rstart" data-a="${t.id}" ${DQ.techCanAfford(t) && R().active.length < DQ.researchSlots() ? '' : 'disabled'}>Start · ${dur(t.mins)}</button>`;
-  return `<div class="tech ${state}" style="--c:${br[1]}"><div class="th"><b>${esc(t.name)}</b><small>${['', 'Tier I', 'Tier II', 'Tier III', 'Tier IV'][t.tier]}</small></div><p>${esc(t.desc)}</p><small class="study-reward">+${fmt(Math.round(DQ.researchXp(t)*DQ.xpMult('research')))} Scholarship XP · Level ${D.SCHOLAR_TIER[t.tier]}</small>${state === 'done' || state === 'active' ? '' : `<div class="rws">${costChips(t.cost)}</div>`}<div class="tf">${foot}</div>${state==='open'&&!DQ.techCanAfford(t)?'<small class="bad">More coins or materials needed</small>':state==='open'&&R().active.length>=DQ.researchSlots()?'<small>All study slots are busy</small>':''}</div>`;
+  return `<div class="tech ${state}" style="--c:${br[1]}"><div class="th"><b>${esc(t.name)}</b><small>${['', 'Tier I', 'Tier II', 'Tier III', 'Tier IV'][t.tier]}</small></div><p>${esc(t.desc)}</p><small class="study-reward">+${fmt(Math.round(DQ.researchXp(t)*DQ.xpMult('research')))} Scholarship XP · Level ${D.SCHOLAR_TIER[t.tier]}</small>${state === 'done' || state === 'active' ? '' : `<div class="rws">${costChips(t.cost)}</div>`}<div class="tf">${foot}</div>${state==='open'&&!DQ.techCanAfford(t)?'':state==='open'&&R().active.length>=DQ.researchSlots()?'<small>All study slots are busy</small>':''}</div>`;
 };
 UI.B.rbar = (e, id) => { const a = R().active.find(x => x.id === id), t = D.TECH[id]; if (a) { const w = (100 - a.left / (t.mins * MIN) * 100).toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; } };
 UI.B.rleft = (e, id) => { const a = R().active.find(x => x.id === id); UI.set(e, a ? `${DQ.fmtTime(Math.max(0, a.left))} left` : ''); };
@@ -14913,16 +14942,16 @@ UI.V.enchanting=()=>{const plan=DQ.enchantPlan(),best=plan.find(p=>p.rank<5),nam
  /* each row shows what it needs as pictures (Nov 2026, from the player): rank pips, stat changes as before→after chips,
     and the runes and gem as tiles that are green when you have enough and red, with how many are missing, when not */
  const pips=r=>`<span class="ench-pips" aria-label="Rank ${r} of 5">${[1,2,3,4,5].map(i=>`<i class="${i<=r?'on':''}"></i>`).join('')}</span>`;
- const cost=(id,n)=>{const it=D.ITEMS[id],have=DQ.have(id),ok=have>=n;return `<span class="ench-cost ${ok?'ok':'short'}" data-tip="item:${id}"><span class="ec-art">${DQ.itemIco(it)}<b class="ec-n">×${n}</b></span><span class="ec-t"><b>${esc(it.name)}</b><small>${ok?`✓ ${fmt(have)} held`:`✗ ${fmt(have)} of ${n} · need ${n-have} more`}</small></span>${ok||!UI.routeChip?'':UI.routeChip(id)}</span>`;};
+ const cost=(id,n)=>UI.needTile(id,n);
  const gains=p=>p.keys.map(k=>{const v=(p.it.b[k]||0)+p.rank;return `<span class="ench-gain"><small>${esc(names[k]||k)}</small><b>${v}</b><i>→</i><b class="up">${v+1}</b></span>`;}).join('');
  return `${hero('enchanting')}<section class="panel"><div class="phead"><h2>Enchant equipped gear</h2><small>Up to +5 per item</small></div><p class="hint">Each rank adds +1 to every bonus the item already has. You need Arcane runes (shop) and a gem (mining, nests, chests).</p><div class="ench-list">${plan.map(p=>{const pct=Math.round(p.gain*100),max=p.rank>=5;
-  return `<div class="ench-row ${p===best?'recommended':''} ${p.ready?'ready':''} ${max?'max':''}"><span class="ench-item">${DQ.itemIco(p.it)}</span><span class="ench-main"><span class="ench-name"><b>${esc(p.it.name)} +${p.rank}</b>${pips(p.rank)}${p===best?' <span class="tag">Best first</span>':''}</span>${max?'<small>Fully enchanted</small>':`<span class="ench-gains">${gains(p)}<small class="dim">about +${pct}% of its bonus</small></span>`}</span>${max?'':`<span class="ench-costs">${cost('rune',p.runes)}${p.need?cost(p.need,1):''}</span>`}<button class="btn ${p.ready?'primary':''}" data-do="enchant" data-a="${p.id}" ${max||!p.ready?'disabled':''}>${max?'Complete':p.ready?'Enchant':'Missing items'}</button></div>`;}).join('')||'<p>Equip a weapon or armour to enchant it.</p>'}</div></section>`;};
+  return `<div class="ench-row ${p===best?'recommended':''} ${p.ready?'ready':''} ${max?'max':''}"><span class="ench-item">${DQ.itemIco(p.it)}</span><span class="ench-main"><span class="ench-name"><b>${esc(p.it.name)} +${p.rank}</b>${pips(p.rank)}${p===best?' <span class="tag">Best first</span>':''}</span>${max?'<small>Fully enchanted</small>':`<span class="ench-gains">${gains(p)}<small class="dim">about +${pct}% of its bonus</small></span>`}</span>${max?'':`<span class="need-tiles ench-costs">${cost('rune',p.runes)}${p.need?cost(p.need,1):''}</span>`}<button class="btn ${p.ready?'primary':''}" data-do="enchant" data-a="${p.id}" ${max||!p.ready?'disabled':''}>${max?'Complete':p.ready?'Enchant':'Missing items'}</button></div>`;}).join('')||'<p>Equip a weapon or armour to enchant it.</p>'}</div></section>`;};
 Object.assign(UI.DO,{enchant:id=>{if(DQ.enchant(id))UI.render(false);}});
 const brewery=UI.V.brewery;
 /* Herbalism: a short path to the first useful potion, shown until Potion of Might is brewable */
 const herbGoals=()=>{const done=id=>DQ.techDone&&DQ.techDone(id),R=D.POTION_RECIPES.find(r=>r.id==='potion_heal'),M=D.POTION_RECIPES.find(r=>r.id==='potion_might');
  if(done('warbrew'))return '';
- const mats=r=>Object.entries(r.in).map(([k,n])=>`<span class="rw ${DQ.have(k)>=n?'':'short'}">${DQ.ico(D.ITEMS[k].ic)}${DQ.have(k)}/${n} ${esc(D.ITEMS[k].name)}</span>${DQ.have(k)<n&&UI.routeChip?UI.routeChip(k):''}`).join('')+`<span class="rw">${DQ.ico('coin')}${r.coins}</span>`;
+ const mats=r=>UI.needTiles(Object.assign({},r.in,{coins:r.coins}));
  const step=(on,doneNow,title,body,btn)=>`<li class="${doneNow?'done':on?'now':''}"><b>${doneNow?'✓ ':''}${title}</b><small>${body}</small>${on&&!doneNow&&btn?btn:''}</li>`;
  const r1=done('herbalism'),scholar=DQ.skillUnlocked('research');
  return `<section class="panel herb-goals"><div class="phead"><h2>First goals</h2><small>Herbalism</small></div><ol class="herb-path">

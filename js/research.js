@@ -122,13 +122,13 @@ DQ.brew = id => {
 };
 
 /* ---------- the Research page ---------- */
-const costChips = c => Object.entries(c).map(([k, n]) => { const ok = k === 'coins' ? S().coins >= n : DQ.have(k) >= n; return k === 'coins' ? `<span class="rw ${ok ? '' : 'short'}" style="--c:#f3d58a">${ico('coin')}${fmt(n)}</span>` : `<span class="rw ${ok ? '' : 'short'}" style="--c:${D.ITEMS[k].col}">${ico(D.ITEMS[k].ic)}${n}× ${esc(D.ITEMS[k].name)}</span>${ok || !UI.routeChip ? '' : UI.routeChip(k)}`; }).join('');
+const costChips = c => UI.needTiles(c);
 const dur = m => m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ' ' + m % 60 + 'm' : ''}` : `${m}m`;
 const techCard = t => {
   const why = DQ.techReason(t), br = BR[t.br], act = R().active.find(a => a.id === t.id);
   const state = why === 'done' ? 'done' : why === 'active' ? 'active' : why ? 'locked' : 'open';
   const foot = state === 'done' ? `<span class="tdone">${ico('check')} Researched</span>` : state === 'active' ? `<span class="tbar"><b>Studying</b><span class="bar"><i data-b="rbar:${t.id}"></i></span><small class="mono" data-b="rleft:${t.id}"></small></span>` : state === 'locked' ? `<span class="tlock">${ico('lock')} ${esc(why)}</span>` : `<button class="btn sm ${DQ.techCanAfford(t) && R().active.length < DQ.researchSlots() ? 'primary' : ''}" data-do="rstart" data-a="${t.id}" ${DQ.techCanAfford(t) && R().active.length < DQ.researchSlots() ? '' : 'disabled'}>Start · ${dur(t.mins)}</button>`;
-  return `<div class="tech ${state}" style="--c:${br[1]}"><div class="th"><b>${esc(t.name)}</b><small>${['', 'Tier I', 'Tier II', 'Tier III', 'Tier IV'][t.tier]}</small></div><p>${esc(t.desc)}</p><small class="study-reward">+${fmt(Math.round(DQ.researchXp(t)*DQ.xpMult('research')))} Scholarship XP · Level ${D.SCHOLAR_TIER[t.tier]}</small>${state === 'done' || state === 'active' ? '' : `<div class="rws">${costChips(t.cost)}</div>`}<div class="tf">${foot}</div>${state==='open'&&!DQ.techCanAfford(t)?'<small class="bad">More coins or materials needed</small>':state==='open'&&R().active.length>=DQ.researchSlots()?'<small>All study slots are busy</small>':''}</div>`;
+  return `<div class="tech ${state}" style="--c:${br[1]}"><div class="th"><b>${esc(t.name)}</b><small>${['', 'Tier I', 'Tier II', 'Tier III', 'Tier IV'][t.tier]}</small></div><p>${esc(t.desc)}</p><small class="study-reward">+${fmt(Math.round(DQ.researchXp(t)*DQ.xpMult('research')))} Scholarship XP · Level ${D.SCHOLAR_TIER[t.tier]}</small>${state === 'done' || state === 'active' ? '' : `<div class="rws">${costChips(t.cost)}</div>`}<div class="tf">${foot}</div>${state==='open'&&!DQ.techCanAfford(t)?'':state==='open'&&R().active.length>=DQ.researchSlots()?'<small>All study slots are busy</small>':''}</div>`;
 };
 UI.B.rbar = (e, id) => { const a = R().active.find(x => x.id === id), t = D.TECH[id]; if (a) { const w = (100 - a.left / (t.mins * MIN) * 100).toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; } };
 UI.B.rleft = (e, id) => { const a = R().active.find(x => x.id === id); UI.set(e, a ? `${DQ.fmtTime(Math.max(0, a.left))} left` : ''); };
