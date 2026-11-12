@@ -18,7 +18,7 @@ await p.evaluate(()=>{const Q=DQ;Q.S.settings.reduceFx=false;Q.S.town='willowbro
 // Farm routes keep the requested crop visible even before its seeds are owned.
 await p.evaluate(()=>{DQ.ui.DO.route('crop_cabbage');});assert.ok(await p.locator('[data-farm-target="cabbage"]').isVisible());await p.locator('[data-farm-target="cabbage"] [data-do="route"]').click();assert.equal(await p.evaluate(()=>DQ.ui.shopSelected.buy),'seed_cabbage');
 // Project markers distinguish an available repair from delivering the entire remaining cost.
-await p.evaluate(()=>{DQ.S.inv.log_normal=40;DQ.S.coins=10000;DQ.go('projects');});assert.ok(await p.locator('.site-spot.deliver-ready').count()>0);assert.match(await p.locator('.site-spot.deliver-ready').first().innerText(),/Deliver all|Complete/);
+await p.evaluate(()=>{DQ.S.inv.log_normal=40;DQ.S.coins=10000;DQ.go('projects');});assert.ok(await p.locator('.site-spot.deliver-ready').count()>0);assert.match(await p.locator('.site-spot.deliver-ready').first().getAttribute('data-tip'),/Ready to finish/);
 // Scholarship ranks share one family while keeping their distinct costs and actions.
 await p.evaluate(()=>DQ.go('research'));assert.ok(await p.locator('.tech-family .tech-ranks button').count()>0);await p.locator('[data-do="researchrank"][data-b="sharper2"]').click();assert.match(await p.locator('.tech-family').first().innerText(),/Sharper Tools II/);
 // Mobile farm sections fit without scrolling and retain planting/harvest/pen controls.

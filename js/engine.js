@@ -244,9 +244,9 @@ DQ.startAct = (kind, id, o = {}) => {
   }
   if (DQ.act) { DQ.act = null; DQ.fight = kind === 'fight' ? DQ.fight : null; }
   const pace = o.pace || S().defPace || 'steady', rule = o.rule || 'none';
-  DQ.act = { kind, id, t0: Date.now(), pace, rule, count: 0, elapsed: 0, progress: 0 }; DQ.act.dur = DQ.actDur(DQ.act);
+  DQ.act = { kind, id, t0: Date.now(), pace, rule, count: 0, elapsed: 0, progress: 0, limit: o.limit || 0 }; DQ.act.dur = DQ.actDur(DQ.act);
   const sk = DQ.actSkill(DQ.act); DQ.act.lvlTarget = sk ? Math.min(99, DQ.lvl(sk) + 1) : 0;
-  S().act = { kind, id, pace, rule, count: 0, elapsed: 0, lvlTarget: DQ.act.lvlTarget }; S().lastPace = pace;
+  S().act = { kind, id, pace, rule, count: 0, elapsed: 0, lvlTarget: DQ.act.lvlTarget, limit: o.limit || 0 }; S().lastPace = pace;
   if (!DQ.forecasting) { S().seen.firstTask = true; DQ.sfx('start'); DQ.log(DQ.actLabel() + '.'); DQ.emit('act'); } return true;
 };
 DQ.combatInterval = () => {
@@ -259,12 +259,12 @@ DQ.actDur = a => {
   if (a.kind === 'fight') d = DQ.combatInterval();
   return Math.round(d / D.PACE[a.pace || 'steady'].speed * DQ.buffMult('slow'));
 };
-DQ.stopAct = (silent, why) => {
+DQ.stopAct = (silent, why, done) => { /* done: a batch finished as planned, shown as good news, not a warning */
   if (!DQ.act) return;
   const stopped = DQ.act, stoppedPage = EXT[stopped.kind] ? EXT[stopped.kind].page : stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
   DQ.act = null; DQ.fight = null; S().act = null;
   if (why && !DQ.forecasting) setTimeout(() => { if (!DQ.act) DQ.advanceQueue(); }, 0);
-  if (!DQ.sim.on) { if (!silent) { DQ.log('You stop what you were doing.'); DQ.sfx('stop'); } if (why && (S().queue || []).length) why += ' Moving on to your next queued task.'; if (why) DQ.notify({ kind: 'warn', key: 'stopped', page: stoppedPage, icon: 'info', col: '#e5b04a', title: 'Task stopped', text: why, sound: 'stop', ttl: 9000 }); }
+  if (!DQ.sim.on) { if (!silent) { DQ.log('You stop what you were doing.'); DQ.sfx('stop'); } if (why && (S().queue || []).length) why += ' Moving on to your next queued task.'; if (why) DQ.notify(done ? { kind: 'info', key: 'stopped', page: stoppedPage, icon: 'check', col: '#5cc08a', title: 'Batch complete', text: why, sound: 'perk', ttl: 7000 } : { kind: 'warn', key: 'stopped', page: stoppedPage, icon: 'info', col: '#e5b04a', title: 'Task stopped', text: why, sound: 'stop', ttl: 9000 }); }
   if (!DQ.forecasting) DQ.emit('act');
 };
 
@@ -328,7 +328,9 @@ function recipeDone(r) {
     const x = DQ.addXp(r.skill, r.xp); floatXp(r.skill, x); floatItem(outId, r.out[outId] * dbl);
     S().stats[r.ev] += 1; DQ.qev(r.ev, outId, 1); DQ.petRoll('skill', r.skill); DQ.sfx({ cooking: 'sizzle', smithing: 'anvil', crafting: 'stitch' }[r.skill]);
   }
-  if (!DQ.canMake(r)) DQ.stopAct(false, `Finished: out of materials for ${r.name.toLowerCase()}.`);
+  const made = DQ.act ? DQ.act.count : 0;
+  if (DQ.act && DQ.act.limit && made >= DQ.act.limit) DQ.stopAct(false, `${made} ${r.name.toLowerCase()} made, as planned. Your pack is ready.`, true);
+  else if (!DQ.canMake(r)) DQ.stopAct(false, `${made} ${r.name.toLowerCase()} made: that was every ingredient you had.`, true);
 }
 DQ.alchSpell = () => [...D.ALCH].reverse().find(a => DQ.lvl('magic') >= a.lvl);
 function alchDone(id) {
@@ -746,7 +748,7 @@ DQ.resumeAfterLoad = () => {
     try {
       let ok = false; const k = s.kind;
       if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town; else if (EXT[k]) ok = !EXT[k].check(s.id); else ok = !!D.NODE[k + ':' + s.id] && DQ.nodeHere(D.NODE[k + ':' + s.id]);
-      if (ok) { DQ.act = { kind: k, id: s.id, area: s.area || null, target: s.target || null, questTarget: !!s.questTarget, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0, progress: s.progress || 0 }; DQ.act.dur = DQ.actDur(DQ.act); DQ.act.t0 -= DQ.act.progress; if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
+      if (ok) { DQ.act = { kind: k, id: s.id, area: s.area || null, target: s.target || null, questTarget: !!s.questTarget, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, limit: s.limit || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0, progress: s.progress || 0 }; DQ.act.dur = DQ.actDur(DQ.act); DQ.act.t0 -= DQ.act.progress; if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
     } catch (e) {}
     if (!DQ.act) S().act = null;
   }
