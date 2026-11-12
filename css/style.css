@@ -3490,3 +3490,5 @@ html.short .bp-art{width:56px;height:56px}
 .need-tile .route-chip{justify-self:end}
 .nt-art .ic,.nt-art>svg{width:28px;height:28px}
 .hfurn .need-tiles{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;width:100%}.hfurn .need-tile{grid-template-columns:auto minmax(0,1fr) auto;text-align:left}
+:is(#tip,#detailbox) .tt-list li:has(>.tt-l:only-child){grid-template-columns:minmax(0,1fr)!important}
+.battle-companion.placed{gap:0}.battle-companion.placed img{image-rendering:pixelated}.battle-companion.placed small{margin-top:-6px}
