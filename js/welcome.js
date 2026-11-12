@@ -33,7 +33,9 @@ UI.welcomeBody = (sum, gap) => {
   /* anything waiting for you */
   const ready = D.QUESTS.filter(q => DQ.questState(q) === 'ready').length, research = DQ.awayDone || [];
   const chips = [ready ? `<button class="wb-chip" data-do="returnpick" data-a="go" data-b="quests">${ico('quest')}<b class="wb-num">${ready}</b> quest reward${ready > 1 ? 's' : ''} to claim</button>` : '', research.length ? `<span class="wb-chip">${ico('research')}Research finished: ${research.map(esc).join(', ')}</span>` : ''].filter(Boolean).join('');
+  /* decisions straight after what you earned: they need an answer, everything below is optional */
+  const nDec = (S().inbox || []).length, decide = nDec || (DQ.eventResults || []).length ? `<div class="wb-sec wb-decide"><div class="wb-decide-h"><span class="k">${nDec ? `Decide · ${nDec} thing${nDec > 1 ? 's' : ''} happened while you were away` : 'Decided'}</span>${nDec ? '<small>Pick one choice for each. Each button says what it does.</small>' : ''}</div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></div>` : '';
   const extras = UI.returnExtras(sum);
-  return `<div class="wb">${banner}${earned}${chips ? `<div class="wb-chips">${chips}</div>` : ''}${nextCard}${opts ? `<div class="wb-sec"><span class="k">Other good options</span><div class="wb-opts">${opts}</div></div>` : ''}${extras}${capped ? `<p class="sm dim wb-fine">Full speed for the first 2 hours away, half speed after that, and nothing past 8 hours.</p>` : ''}</div>`;
+  return `<div class="wb">${banner}${earned}${decide}${chips ? `<div class="wb-chips">${chips}</div>` : ''}${nextCard}${opts ? `<div class="wb-sec"><span class="k">Other good options</span><div class="wb-opts">${opts}</div></div>` : ''}${extras}${capped ? `<p class="sm dim wb-fine">Full speed for the first 2 hours away, half speed after that, and nothing past 8 hours.</p>` : ''}</div>`;
 };
 })();

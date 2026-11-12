@@ -2979,7 +2979,7 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 /* Welcome back, at a glance (Nov 2026): pixel display numbers, picture tiles, one next-step card */
 .wb{display:grid;gap:14px}
 .wb .k{display:block;margin-bottom:6px}
-.wb-num,.wb-time{font-family:'Silkscreen',var(--f-mono);font-weight:700;letter-spacing:.02em}
+.wb-num,.wb-time{font-family:var(--f-ui);font-weight:700;font-variant-numeric:lining-nums tabular-nums;letter-spacing:0}
 .wb-banner{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 14px;border-radius:14px;background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--brass) 18%,transparent),transparent 60%),var(--panel2);border:1px solid color-mix(in srgb,var(--brass) 35%,var(--line))}
 .wb-face .portrait{border-radius:12px;border:2px solid var(--brass);overflow:hidden}
 .wb-hello .k{margin:0}
@@ -3486,6 +3486,22 @@ html.short .bp-art{width:56px;height:56px}
 @media (prefers-reduced-motion:reduce){:is(.pen-beast,.pen-want,.pen-zz){animation:none!important}}
 @media (max-width:860px){.ranch-layout{grid-template-columns:minmax(0,1fr)}.pen-grid{grid-template-columns:repeat(1,calc(96px * var(--k)));padding:10px}.ranch-sign{font-size:15px;left:8px;top:6px}.ranch-shelf{flex-wrap:wrap;margin:8px 8px 0}.rs-art{width:72px;height:72px}.ranch-sheet{padding:10px}}
 .pen-sign small{color:#5a3e1e}
+
+/* Decisions (Nov 2026): straight after what you earned, equal choices that say what they do, and the deal for offers */
+.wb-decide{padding:12px 14px;border-radius:14px;border:1px solid var(--brass);background:color-mix(in srgb,var(--brass) 8%,var(--panel))}
+.wb-decide-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:10px}.wb-decide-h .k{color:var(--brass-hi,#f3d58a);font-size:14px}.wb-decide-h small{font-size:14px;color:var(--mute)}
+.event .ev-t{font-size:17px}.event .ev-b p{margin:2px 0 10px;font-size:15px}
+.ev-ic{width:48px;height:48px}
+.ev-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.btn.ev-opt{display:grid;justify-items:start;justify-content:stretch;align-content:start;gap:3px;text-align:left;padding:9px 12px;max-width:none;height:auto;line-height:1.25;white-space:normal}
+.btn.ev-opt b{font-size:16px;font-weight:700}.btn.ev-opt small{font-size:14px;font-weight:500;opacity:1;color:var(--mute);white-space:normal}
+.btn.ev-opt:hover small{color:var(--ink)}
+.ev-deal{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;margin:0 0 10px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--ink) 5%,transparent);border:1px dashed var(--line)}
+.ev-deal .dl-art .pxi,.ev-deal .dl-art img{width:32px;height:32px}
+.dl-i{display:grid;gap:1px}.dl-i small{font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}.dl-i b{font-size:15px;font-variant-numeric:lining-nums tabular-nums}
+.dl-i.good b{color:var(--good,#7fd18b)}.dl-i.bad b{color:var(--bad,#e2574c)}
+.dl-afford{font-size:14px;color:var(--mute);margin-left:auto}.dl-afford.bad{color:var(--bad,#e2574c)}
+@media (max-width:640px){.wb-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.wb-tile{padding:6px 4px}.wb-tile .wb-art .pxi,.wb-tile .wb-art img{width:40px;height:40px}.wb-tile .wb-num{font-size:17px}.dl-afford{margin-left:0}.ev-opts{grid-template-columns:minmax(0,1fr)}}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -13021,7 +13037,22 @@ UI.eventResultHtml = r => { const tiles = [];
   if (r.hp) tiles.push(`<div class="evr-tile ${r.hp > 0 ? 'gain' : 'loss'}"><span class="evr-art">${ico('heart')}</span><b>${r.hp > 0 ? '+' : '−'}${Math.abs(r.hp)}</b><small>health</small></div>`);
   for (const b of r.buffs || []) tiles.push(`<div class="evr-tile loss"><span class="evr-art">${ico('clock')}</span><b>${esc(b)}</b><small>for a while</small></div>`);
   return `<div class="ev-result ${r.bad ? 'bad' : ''}" style="--c:${r.col}"><div class="evr-head"><span class="ev-ic">${ico(r.ic)}</span><div><b>${esc(r.title)}</b>${r.chose ? `<small class="dim"> · you chose: ${esc(r.chose)}</small>` : ''}</div></div><p class="evr-msg">${r.bad ? '✗' : '✓'} ${esc(r.msg)}</p>${tiles.length ? `<div class="evr-tiles">${tiles.map((t, i) => t.replace('class="evr-tile', `style="--i:${i}" class="evr-tile`)).join('')}</div>` : ''}</div>`; };
-UI.inboxHtml = () => { const L = S().inbox || []; return (DQ.eventResults || []).map(UI.eventResultHtml).join('') + L.map(e => `<div class="event" style="--c:${e.col}"><span class="ev-ic">${ico(e.ic)}</span><div class="ev-b"><b>${esc(e.title)}</b><p class="sm">${esc(e.text)}</p><div class="ev-opts">${e.opts.map(([k, l, sub], i) => `<button class="btn sm ev-opt ${i ? '' : 'primary'}" data-do="decide" data-a="${e.id}" data-b="${k}" ${sub ? `data-tip="text:${esc(sub)}"` : ''}><span>${esc(l)}</span>${sub ? `<small>${esc(sub)}</small>` : ''}</button>`).join('')}</div></div></div>`).join(''); };
+/* a decision card: what happened, then each choice as an equal button saying exactly what it does (no choice is
+   pre-highlighted as if recommended). Offers made in coins show what the item is worth to you, so you can tell a
+   good deal from a bad one (Nov 2026, from the player). */
+const dealHtml = e => { const it = D.ITEMS[e.item]; if (!it) return '';
+  const row = (k, v, cls = '') => `<span class="dl-i ${cls}"><small>${k}</small><b>${v}</b></span>`;
+  if (e.type === 'trader') { const shop = DQ.sellPrice(e.item) * e.n, offer = Math.round(it.val * 1.5 * e.n), diff = offer - shop;
+    return `<div class="ev-deal"><span class="dl-art">${DQ.itemIco(it)}</span>${row('Offer for ' + fmt(e.n), fmt(offer) + ' coins')}${row('Shop pays', fmt(shop) + ' coins')}${row('Verdict', diff > 0 ? `Good deal · +${fmt(diff)}` : diff < 0 ? `Poor deal · −${fmt(-diff)}` : 'Same as the shop', diff > 0 ? 'good' : diff < 0 ? 'bad' : '')}</div>`; }
+  if (e.type === 'rare') { const worth = DQ.sellPrice(e.item), buy = it.buy ? DQ.buyPrice(e.item) : 0, v = DQ.gearVerdict ? DQ.gearVerdict(e.item) : null, ce = DQ.canEquip(e.item), fair = buy ? e.price <= buy : false;
+    return `<div class="ev-deal"><span class="dl-art">${DQ.itemIco(it)}</span>${row('Price', fmt(e.price) + ' coins')}${buy ? row('Shop price', fmt(buy) + ' coins') : ''}${row('Sells back for', fmt(worth) + ' coins')}${(it.slot ? row('For you', !ce.ok && !ce.equipped ? esc(ce.why || 'Cannot wear it yet') : v === 'up' ? '▲ Better than yours' : v === 'down' ? '▼ Worse than yours' : v ? '✦ Unique effect' : 'No better than yours', v === 'up' ? 'good' : v === 'down' || !ce.ok ? 'bad' : '') : '')}${buy ? row('Verdict', fair ? 'Fair price' : `Costs ${fmt(e.price - buy)} over the shop`, fair ? 'good' : 'bad') : ''}<span class="dl-afford ${S().coins >= e.price ? '' : 'bad'}">You have ${fmt(S().coins)} coins</span></div>`; }
+  return ''; };
+const optSub = (e, k, sub) => { const it = D.ITEMS[e.item];
+  if (e.type === 'trader' && it && k === 'sell') return `Get ${fmt(Math.round(it.val * 1.5 * e.n))} coins for ${fmt(e.n)}`;
+  if (e.type === 'trader' && it && k === 'haggle') return `50%: ${fmt(Math.round(it.val * 2.2 * e.n))} coins · 50%: they leave`;
+  if (e.type === 'rare' && k === 'buy') return `Pay ${fmt(e.price)} coins`;
+  return sub || (['no', 'pass', 'decline'].includes(k) ? 'Nothing happens' : ''); };
+UI.inboxHtml = () => { const L = S().inbox || []; return (DQ.eventResults || []).map(UI.eventResultHtml).join('') + L.map(e => `<div class="event" style="--c:${e.col}"><span class="ev-ic">${ico(e.ic)}</span><div class="ev-b"><b class="ev-t">${esc(e.title)}</b><p>${esc(e.text)}</p>${dealHtml(e)}<div class="ev-opts" role="group" aria-label="Choose one">${e.opts.map(([k, l, sub]) => (sub = optSub(e, k, sub), 0) || `<button class="btn ev-opt" data-do="decide" data-a="${e.id}" data-b="${k}"><b>${esc(l)}</b><small>${esc(sub)}</small></button>`).join('')}</div></div></div>`).join(''); };
 UI.inboxPanel = () => (S().inbox || []).length || (DQ.eventResults || []).length ? `<section class="panel inboxp fancy"><div class="phead"><h2>Decisions waiting</h2><small>From your time away</small></div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></section>` : '';
 UI.returnExtras = sum => {
   const L = S().inbox || [], tips = [];
@@ -13030,9 +13061,9 @@ UI.returnExtras = sum => {
   const ore = Object.keys(sum.items || {}).find(id => id.startsWith('ore_')), sr = ore && D.RLIST.smithing.find(r => r.tab === 'Bars' && r.in[ore] && DQ.canMake(r) && DQ.lvl('smithing') >= r.lvl);
   if (sr && DQ.skillUnlocked('smithing')) tips.push(`<button class="btn sm" data-do="qquick" data-a="recipe" data-b="${sr.id}">${ico('smithing')} Queue smelting ${sr.name.toLowerCase()}</button>`);
   if (Object.keys({ ...S().inv, ...S().bank }).some(id => D.ITEMS[id].type === 'junk')) tips.push(`<button class="btn sm" data-do="sellall">${ico('coin')} Sell all junk</button>`);
-  return (L.length || (DQ.eventResults || []).length ? `<div class="k" style="margin:16px 0 8px">Decisions</div><div class="events" id="inboxbox">${UI.inboxHtml()}</div>` : '') + (tips.length ? `<div class="k" style="margin:16px 0 8px">What next?</div><div class="btnrow wrap">${tips.join('')}</div>` : '');
+  return (!UI.welcomeOwnsChips && (L.length || (DQ.eventResults || []).length) ? `<div class="k" style="margin:16px 0 8px">Decisions</div><div class="events" id="inboxbox">${UI.inboxHtml()}</div>` : '') + (tips.length ? `<div class="k" style="margin:16px 0 8px">What next?</div><div class="btnrow wrap">${tips.join('')}</div>` : '');
 };
-DQ.on('inbox', () => { $$('#inboxbox').forEach(b => b.innerHTML = UI.inboxHtml() || '<p class="sm dim" style="margin:0">All settled.</p>'); UI.renderHud(); if (UI.view === 'overview' && !(S().inbox || []).length && !document.querySelector('.modal #inboxbox')) UI.refresh(); });
+DQ.on('inbox', () => { $$('#inboxbox').forEach(b => b.innerHTML = UI.inboxHtml() || '<p class="sm dim" style="margin:0">All settled.</p>'); $$('.wb-decide-h').forEach(h => { const n = (S().inbox || []).length; h.innerHTML = `<span class="k">${n ? `Decide · ${n} still waiting` : 'All decided'}</span>${n ? '<small>Pick one choice for each. Each button says what it does.</small>' : ''}`; }); UI.renderHud(); if (UI.view === 'overview' && !(S().inbox || []).length && !document.querySelector('.modal #inboxbox')) UI.refresh(); });
 /* results stay until you move on: another page, or closing the welcome-back pop-up */
 { const go0 = DQ.go; DQ.go = (...a) => { if (a[0] !== UI.view) DQ.eventResults = []; return go0(...a); };
   const close0 = DQ.closeModal; DQ.closeModal = (...a) => { if (document.querySelector('.modal #inboxbox')) DQ.eventResults = []; return close0(...a); }; }
@@ -17482,8 +17513,10 @@ UI.welcomeBody = (sum, gap) => {
   /* anything waiting for you */
   const ready = D.QUESTS.filter(q => DQ.questState(q) === 'ready').length, research = DQ.awayDone || [];
   const chips = [ready ? `<button class="wb-chip" data-do="returnpick" data-a="go" data-b="quests">${ico('quest')}<b class="wb-num">${ready}</b> quest reward${ready > 1 ? 's' : ''} to claim</button>` : '', research.length ? `<span class="wb-chip">${ico('research')}Research finished: ${research.map(esc).join(', ')}</span>` : ''].filter(Boolean).join('');
+  /* decisions straight after what you earned: they need an answer, everything below is optional */
+  const nDec = (S().inbox || []).length, decide = nDec || (DQ.eventResults || []).length ? `<div class="wb-sec wb-decide"><div class="wb-decide-h"><span class="k">${nDec ? `Decide · ${nDec} thing${nDec > 1 ? 's' : ''} happened while you were away` : 'Decided'}</span>${nDec ? '<small>Pick one choice for each. Each button says what it does.</small>' : ''}</div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></div>` : '';
   const extras = UI.returnExtras(sum);
-  return `<div class="wb">${banner}${earned}${chips ? `<div class="wb-chips">${chips}</div>` : ''}${nextCard}${opts ? `<div class="wb-sec"><span class="k">Other good options</span><div class="wb-opts">${opts}</div></div>` : ''}${extras}${capped ? `<p class="sm dim wb-fine">Full speed for the first 2 hours away, half speed after that, and nothing past 8 hours.</p>` : ''}</div>`;
+  return `<div class="wb">${banner}${earned}${decide}${chips ? `<div class="wb-chips">${chips}</div>` : ''}${nextCard}${opts ? `<div class="wb-sec"><span class="k">Other good options</span><div class="wb-opts">${opts}</div></div>` : ''}${extras}${capped ? `<p class="sm dim wb-fine">Full speed for the first 2 hours away, half speed after that, and nothing past 8 hours.</p>` : ''}</div>`;
 };
 })();
 

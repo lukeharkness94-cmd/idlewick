@@ -95,6 +95,7 @@ const fs=require('node:fs');
   assert.equal(await page.locator('.encounter-arena [data-prog]').count(),0);
   await page.evaluate(()=>{DQ.ui.questTab='available';DQ.go('quests');DQ.ui.render(false);});
   for(let i=0;i<2;i++){
+   await page.evaluate(()=>{for(let k=0;k<4;k++)DQ.closeModal&&DQ.closeModal();}); /* a story scene may still be open from earlier steps */
    const accept=page.locator('#view [data-do="qstart"]').first();
    const id=await accept.getAttribute('data-a');await accept.click();await page.evaluate(()=>{for(let k=0;k<4;k++)DQ.closeModal&&DQ.closeModal();}); /* accepting a main quest opens its skippable story scene */
    assert.equal(await page.evaluate(()=>DQ.ui.questTab),'available');

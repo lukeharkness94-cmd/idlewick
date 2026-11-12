@@ -2895,7 +2895,7 @@ html.has-backdrop .sidebar .dock .dk-h{background:none!important}
 /* Welcome back, at a glance (Nov 2026): pixel display numbers, picture tiles, one next-step card */
 .wb{display:grid;gap:14px}
 .wb .k{display:block;margin-bottom:6px}
-.wb-num,.wb-time{font-family:'Silkscreen',var(--f-mono);font-weight:700;letter-spacing:.02em}
+.wb-num,.wb-time{font-family:var(--f-ui);font-weight:700;font-variant-numeric:lining-nums tabular-nums;letter-spacing:0}
 .wb-banner{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 14px;border-radius:14px;background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--brass) 18%,transparent),transparent 60%),var(--panel2);border:1px solid color-mix(in srgb,var(--brass) 35%,var(--line))}
 .wb-face .portrait{border-radius:12px;border:2px solid var(--brass);overflow:hidden}
 .wb-hello .k{margin:0}
@@ -3402,3 +3402,19 @@ html.short .bp-art{width:56px;height:56px}
 @media (prefers-reduced-motion:reduce){:is(.pen-beast,.pen-want,.pen-zz){animation:none!important}}
 @media (max-width:860px){.ranch-layout{grid-template-columns:minmax(0,1fr)}.pen-grid{grid-template-columns:repeat(1,calc(96px * var(--k)));padding:10px}.ranch-sign{font-size:15px;left:8px;top:6px}.ranch-shelf{flex-wrap:wrap;margin:8px 8px 0}.rs-art{width:72px;height:72px}.ranch-sheet{padding:10px}}
 .pen-sign small{color:#5a3e1e}
+
+/* Decisions (Nov 2026): straight after what you earned, equal choices that say what they do, and the deal for offers */
+.wb-decide{padding:12px 14px;border-radius:14px;border:1px solid var(--brass);background:color-mix(in srgb,var(--brass) 8%,var(--panel))}
+.wb-decide-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:10px}.wb-decide-h .k{color:var(--brass-hi,#f3d58a);font-size:14px}.wb-decide-h small{font-size:14px;color:var(--mute)}
+.event .ev-t{font-size:17px}.event .ev-b p{margin:2px 0 10px;font-size:15px}
+.ev-ic{width:48px;height:48px}
+.ev-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.btn.ev-opt{display:grid;justify-items:start;justify-content:stretch;align-content:start;gap:3px;text-align:left;padding:9px 12px;max-width:none;height:auto;line-height:1.25;white-space:normal}
+.btn.ev-opt b{font-size:16px;font-weight:700}.btn.ev-opt small{font-size:14px;font-weight:500;opacity:1;color:var(--mute);white-space:normal}
+.btn.ev-opt:hover small{color:var(--ink)}
+.ev-deal{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;margin:0 0 10px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--ink) 5%,transparent);border:1px dashed var(--line)}
+.ev-deal .dl-art .pxi,.ev-deal .dl-art img{width:32px;height:32px}
+.dl-i{display:grid;gap:1px}.dl-i small{font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}.dl-i b{font-size:15px;font-variant-numeric:lining-nums tabular-nums}
+.dl-i.good b{color:var(--good,#7fd18b)}.dl-i.bad b{color:var(--bad,#e2574c)}
+.dl-afford{font-size:14px;color:var(--mute);margin-left:auto}.dl-afford.bad{color:var(--bad,#e2574c)}
+@media (max-width:640px){.wb-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.wb-tile{padding:6px 4px}.wb-tile .wb-art .pxi,.wb-tile .wb-art img{width:40px;height:40px}.wb-tile .wb-num{font-size:17px}.dl-afford{margin-left:0}.ev-opts{grid-template-columns:minmax(0,1fr)}}
