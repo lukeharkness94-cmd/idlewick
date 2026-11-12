@@ -40,7 +40,8 @@ const FISH = {
 };
 function fish(s, sp, ox, oy, cooked) {
   const body = rp(cooked ? mix(sp.body, '#c87a30', .62) : sp.body), belly = rp(cooked ? mix(sp.belly, '#f0c070', .55) : sp.belly), fin = rp(cooked ? '#9a5a2a' : mix(sp.body, '#3a2448', .25));
-  const L = sp.len, H = sp.dep, x0 = ox + (15 - L) / 2 + 1, cy = oy + 8, x1 = x0 + L;
+  /* icons are 16 px: the longest fish are shortened a little and centred with their tail, so no nose or tail is cut off */
+  const e = ({ veil: 4, round: 1.6 })[sp.tail] || 1, L = ox ? sp.len : Math.min(sp.len, (14.6 - e) / 1.05), H = sp.dep, x0 = ox ? ox + (15 - L) / 2 + 1 : e + Math.max(0, (15 - (e + 1.05 * L)) / 2), cy = oy + 8, x1 = x0 + L;
   if (sp.tail === 'eel') { for (let i = 0; i <= L; i++) { const y = cy + Math.round(Math.sin(i / 2.2) * 1.6); s.dot(x0 + i, y, body); s.dot(x0 + i, y + 1, i % 3 ? body : belly); } s.fix(x1, cy, EYE); for (let i = 2; i < L; i += 4) s.fix(x0 + i, cy + Math.round(Math.sin(i / 2.2) * 1.6), sp.glow); return; }
   if (sp.ray) { /* rays: a diamond of wings and a whip tail; the wider the wings, the larger the ray */
     const W = sp.ray * (ox > 0 ? 1.9 : 1), cx = ox + 9 + (ox > 0 ? 6 : 0), H2 = sp.ray * (ox > 0 ? 1.1 : .75);

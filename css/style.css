@@ -3418,3 +3418,36 @@ html.short .bp-art{width:56px;height:56px}
 .dl-i.good b{color:var(--good,#7fd18b)}.dl-i.bad b{color:var(--bad,#e2574c)}
 .dl-afford{font-size:14px;color:var(--mute);margin-left:auto}.dl-afford.bad{color:var(--bad,#e2574c)}
 @media (max-width:640px){.wb-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.wb-tile{padding:6px 4px}.wb-tile .wb-art .pxi,.wb-tile .wb-art img{width:40px;height:40px}.wb-tile .wb-num{font-size:17px}.dl-afford{margin-left:0}.ev-opts{grid-template-columns:minmax(0,1fr)}}
+
+/* Livestock (Nov 2026, from the player): the market column is a third wider and holds every animal on one page */
+@media(min-width:861px){.farm-estate:is([data-section="pens"],[data-section="animals"]) .estate-layout{grid-template-columns:minmax(0,1fr) 430px}
+ .estate-supplies #livestock-market .srow{grid-template-columns:44px minmax(0,1fr) auto auto;gap:8px;min-width:0}.estate-supplies #livestock-market .srow .price{white-space:nowrap}}
+.estate-pasture .pen.emptypen b{color:var(--ink)!important}.estate-pasture .pen.emptypen small{color:var(--ink)!important;opacity:.8}.estate-pasture .pen.emptypen{opacity:1}
+@media(min-width:861px){.estate-supplies #livestock-market>h3{display:none}}
+.tech-family{display:flex;flex-direction:column}.tech-family>.tech{height:auto!important;min-height:0!important;flex:1 1 auto}
+
+/* level requirements in the shop */
+.req-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:3px}
+.req-chip{display:inline-flex;align-items:center;gap:3px;font:600 13px var(--f-ui);padding:1px 7px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.req-chip.ok{color:var(--good)}.req-chip.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,var(--line))}.req-chip .ic,.req-chip .pxi{width:13px;height:13px}
+.shop-req{margin:6px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:14px}.shop-req small{flex-basis:100%;color:var(--mute);font-size:14px}
+
+/* a finished project, shown in its card (the village never moves) */
+.project-card.done{border-color:color-mix(in srgb,var(--good) 55%,var(--line));box-shadow:inset 0 3px color-mix(in srgb,var(--good) 70%,transparent)}
+.proj-done-tag{display:inline-flex;align-items:center;gap:6px;margin:6px 0 0;padding:4px 12px;border-radius:999px;font-weight:700;color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent);border:1px solid color-mix(in srgb,var(--good) 45%,var(--line))}
+.restoration-feedback.rf-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;margin:4px 0 12px;padding:10px 12px;border-radius:12px;border:1px solid var(--good);background:color-mix(in srgb,var(--good) 12%,var(--panel));position:static;width:auto;max-width:none}
+.rf-card .rf-art img,.rf-card .rf-art .pxi{width:64px;height:64px;image-rendering:pixelated}.rf-card .rf-text{display:grid;gap:3px}.rf-card .rf-title{font-size:17px;color:var(--good);display:inline-flex;align-items:center;gap:6px}.rf-card .rf-benefit{font-size:15px}.rf-card .rf-x{align-self:start}
+@media (prefers-reduced-motion:no-preference){html:not(.calm) .rf-card{animation:rfIn .5s ease-out both}@keyframes rfIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}}
+
+/* page notices float over the content instead of pushing it down */
+#view>.page-notice{position:fixed!important;z-index:60;top:calc(var(--notice-top,96px));left:50%;transform:translateX(-50%);width:min(640px,calc(var(--vw100,100vw) - 32px));margin:0!important;box-shadow:0 12px 32px rgba(0,0,0,.35);grid-column:auto!important}
+@media (prefers-reduced-motion:no-preference){html:not(.calm) #view>.page-notice{animation:pnIn .25s ease-out both}@keyframes pnIn{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translateX(-50%)}}}
+@media (max-width:860px){#view>.page-notice{--notice-top:70px}}
+
+/* farm: counts on the section tabs; trough line inside the livestock action row */
+.est-count{display:inline-flex;align-items:baseline;gap:4px;margin-left:auto;padding:2px 9px;border-radius:999px;font:700 15px var(--f-ui);font-style:normal;color:#2a1a06!important;background:#f3d58a!important;border:1px solid #b8862f}
+.est-count i{font:600 13px var(--f-ui);font-style:normal}
+.estate-mobile-tabs .est-count{padding:0 6px;font-size:13px;margin-left:4px}
+.estate-trough-inline{display:inline-flex;align-items:center;margin-left:6px;font-size:15px}.estate-trough-inline>*{margin:0!important}
+.estate-pasture .pen:not(.emptypen) .pen-t>b{color:var(--ink)!important}
+.est-count i{color:#2a1a06!important}

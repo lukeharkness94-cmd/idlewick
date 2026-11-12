@@ -99,9 +99,14 @@ UI.travelAnim = to => {
 UI.itemSub = it => { const b = UI.statLine(it.b), r = Object.entries(it.req || {}).map(([sk, l]) => `<span class="${DQ.skillUnlocked(sk) && DQ.lvl(sk) >= l ? 'ok' : 'bad'}">${D.SK[sk].name} ${l}</span>`).join(' '); return [it.type === 'relic' ? `${esc(it.desc || '')} Keepsake: it cannot be sold.` : '', it.heal ? `Heals ${it.heal}` : '', it.type === 'tool' ? `${Math.round(D.TOOL_SPEED[it.tier] * 100)}% faster ${D.SK[it.toolSkill].name.toLowerCase()}` : '', b, r].filter(Boolean).join(' · '); };
 UI.shopSelected = {};
 UI.shopTabs = tab => `<div class="tabs">${[['buy','Buy'], ['rare','Rare wares'], ['sell','Sell']].map(([value, label]) => `<button class="tab ${tab === value ? 'on' : ''}" data-do="shoptab" data-a="${value}">${label}</button>`).join('')}</div>`;
+/* what an item asks of you before you can use it: gear requirements, a seed's Farming level (Nov 2026, from the player) */
+DQ.itemReqs = id => { const it = D.ITEMS[id]; if (!it) return []; const out = Object.entries(it.req || {}).filter(([sk]) => D.SK[sk]);
+  if (/^seed_/.test(id) && D.CROP && D.CROP[id.slice(5)]) out.push(['farming', D.CROP[id.slice(5)].lvl]);
+  return out.filter(([, l]) => l > 1).map(([sk, l]) => ({ sk, l, ok: DQ.lvl(sk) >= l })); };
+UI.reqChips = id => DQ.itemReqs(id).map(r => `<span class="req-chip ${r.ok ? 'ok' : 'bad'}">${r.ok ? '' : ico('lock')}${esc(D.SK[r.sk].name)} ${r.l}</span>`).join('');
 UI.shopPreview = id => {
   const it = D.ITEMS[id];
-  return `<div class="shop-item-preview"><span class="shop-item-art">${DQ.itemIco(it)}</span><div><h3>${esc(it.name)}</h3><p class="item-base-stats">${UI.statLine(it.b) || UI.itemSub(it)}</p><small>${DQ.have(id)} owned${it.slot ? ' · ' + DQ.SLOT_NAMES[it.slot] : ''}</small></div></div>`;
+  return `<div class="shop-item-preview"><span class="shop-item-art">${DQ.itemIco(it)}</span><div><h3>${esc(it.name)}</h3><p class="item-base-stats">${UI.statLine(it.b) || UI.itemSub(it)}</p><small>${DQ.have(id)} owned${it.slot ? ' · ' + DQ.SLOT_NAMES[it.slot] : ''}</small>${DQ.itemReqs(id).length ? `<p class="shop-req">${DQ.itemReqs(id).every(r => r.ok) ? 'Requires' : 'You need'} ${UI.reqChips(id)}${DQ.itemReqs(id).some(r => !r.ok) ? `<small>You can buy it now and ${it.slot ? 'wear' : 'use'} it once you reach ${DQ.itemReqs(id).filter(r => !r.ok).map(r => `${D.SK[r.sk].name} ${r.l} (you are ${DQ.lvl(r.sk)})`).join(' and ')}.</small>` : ''}</p>` : ''}</div></div>`;
 };
 UI.V.shop = () => {
   const tab = UI.shopTab, buying = tab === 'buy', qty = UI.shopQty;
@@ -113,7 +118,7 @@ UI.V.shop = () => {
   const owned = it ? DQ.have(id) : 0, tool = it && it.type === 'tool', count = tool ? 1 : qty;
   const cost = it ? (buying ? DQ.buyPrice(id) * count : DQ.sellPrice(id) * Math.min(count, owned)) : 0;
   const disabled = !it || (buying && (S().coins < cost || (tool && owned)));
-  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span>${DQ.gearMark ? DQ.gearMark(item) : ''}<b>${esc(D.ITEMS[item].name)}</b><span class="stock-price">${UI.money(buying?DQ.buyPrice(item):DQ.sellPrice(item))}</span>${buying?'':'<small>'+DQ.have(item)+' held</small>'}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
+  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span>${DQ.gearMark ? DQ.gearMark(item) : ''}<b>${esc(D.ITEMS[item].name)}</b><span class="stock-price">${UI.money(buying?DQ.buyPrice(item):DQ.sellPrice(item))}</span>${buying&&DQ.itemReqs(item).length?`<span class="req-chips">${UI.reqChips(item)}</span>`:''}${buying?'':'<small>'+DQ.have(item)+' held</small>'}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
     ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
       <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} ${disabled ? 'disabled' : ''}>${tool && owned && buying ? 'Already owned' : (buying ? 'Buy' : 'Sell')+' ×'+(buying?count:Math.min(count,owned))} ${tool && owned && buying ? '' : UI.money(cost)}</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all ${UI.money(DQ.sellPrice(id) * owned)}</button>` : ''}</div>
       ${buying && S().coins < cost ? `<p class="bad">Need ${UI.money(cost - S().coins)} more.</p>` : ''}
@@ -388,7 +393,11 @@ UI.renderPageNotice = () => {
   const view = $('#view'); if (!view) return;
   const old = view.querySelector('.page-notice'); if (old) old.remove();
   const notice = UI.pageNotice;
-  if (notice && notice.page === UI.view) view.insertAdjacentHTML('afterbegin', `<section class="panel page-notice" role="status"><div class="phead"><h2>${esc(notice.title)}</h2><button class="btn sm" data-do="dismissnotice">Dismiss</button></div><p>${esc(notice.text)}</p></section>`);
+  /* the Village shows a finished project in its own card; a banner above the scene would push it down */
+  /* notices float over the page (Nov 2026, from the player: nothing that appears may move the page); they fade
+     on their own after a while and can be dismissed */
+  clearTimeout(UI.pageNoticeTimer);
+  if (notice && notice.page === UI.view && UI.view !== 'projects') { notice.until = notice.until || Date.now() + 9000; UI.pageNoticeTimer = setTimeout(() => { if (UI.pageNotice === notice) UI.DO.dismissnotice(); }, Math.max(0, notice.until - Date.now())); view.insertAdjacentHTML('afterbegin', `<section class="panel page-notice" role="status"><div class="phead"><h2>${esc(notice.title)}</h2><button class="btn sm" data-do="dismissnotice">Dismiss</button></div><p>${esc(notice.text)}</p></section>`); }
 };
 UI.DO.dismissnotice = () => { UI.pageNotice = null; UI.renderPageNotice(); };
 UI.render = fresh => {

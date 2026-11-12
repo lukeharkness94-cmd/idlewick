@@ -54,7 +54,7 @@ UI.V.farming = () => {
   const nextPlot = D.PLOT_PRICES[F.plotsBought];
 
   const pens = Array.from({ length: F.pensBought }, (_, i) => {
-    const an = F.animals[i]; if (!an) return `<button class="pen emptypen" data-do="farmmarket" data-a="hen"><span>${ico('barn')}</span><b>Empty pen</b><small>${DQ.townUnlocked('mossbarrow') ? 'Buy an animal below' : 'The livestock trader is in Mossbarrow'}</small></button>`;
+    const an = F.animals[i]; if (!an) return `<button class="pen emptypen" data-do="farmmarket" data-a="hen"><span>${ico('barn')}</span><b>Empty pen</b><small>${DQ.townUnlocked('mossbarrow') ? 'Buy one from the market' : 'The livestock trader is in Mossbarrow'}</small></button>`;
     const A = D.ANIMAL[an.id], pr = D.ITEMS[A.prod];
     return `<div class="pen" data-i="${i}" data-b="pen:${i}" style="--c:${A.col}"><button class="pspr" data-do="petanimal" data-a="${i}" data-tip="text:Pet ${esc(an.name)}: makes them work 25% faster for 3 minutes">${DQ.animalSprite(A, 64, 'bob')}</button>
       <div class="pen-t"><b>${esc(an.name)}</b><small>${A.name} · makes ${pr.name.toLowerCase()} every ${left(DQ.animalPeriod(an))}</small><span class="bar pbar"><i></i></span><small><span class="pst mono"></span> ${pr.name.toLowerCase()} ready <span class="tag hungrytag">Hungry</span><span class="tag happytag">Happy</span></small></div>

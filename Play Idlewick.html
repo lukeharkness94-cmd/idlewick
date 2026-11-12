@@ -3502,6 +3502,39 @@ html.short .bp-art{width:56px;height:56px}
 .dl-i.good b{color:var(--good,#7fd18b)}.dl-i.bad b{color:var(--bad,#e2574c)}
 .dl-afford{font-size:14px;color:var(--mute);margin-left:auto}.dl-afford.bad{color:var(--bad,#e2574c)}
 @media (max-width:640px){.wb-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.wb-tile{padding:6px 4px}.wb-tile .wb-art .pxi,.wb-tile .wb-art img{width:40px;height:40px}.wb-tile .wb-num{font-size:17px}.dl-afford{margin-left:0}.ev-opts{grid-template-columns:minmax(0,1fr)}}
+
+/* Livestock (Nov 2026, from the player): the market column is a third wider and holds every animal on one page */
+@media(min-width:861px){.farm-estate:is([data-section="pens"],[data-section="animals"]) .estate-layout{grid-template-columns:minmax(0,1fr) 430px}
+ .estate-supplies #livestock-market .srow{grid-template-columns:44px minmax(0,1fr) auto auto;gap:8px;min-width:0}.estate-supplies #livestock-market .srow .price{white-space:nowrap}}
+.estate-pasture .pen.emptypen b{color:var(--ink)!important}.estate-pasture .pen.emptypen small{color:var(--ink)!important;opacity:.8}.estate-pasture .pen.emptypen{opacity:1}
+@media(min-width:861px){.estate-supplies #livestock-market>h3{display:none}}
+.tech-family{display:flex;flex-direction:column}.tech-family>.tech{height:auto!important;min-height:0!important;flex:1 1 auto}
+
+/* level requirements in the shop */
+.req-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:3px}
+.req-chip{display:inline-flex;align-items:center;gap:3px;font:600 13px var(--f-ui);padding:1px 7px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.req-chip.ok{color:var(--good)}.req-chip.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,var(--line))}.req-chip .ic,.req-chip .pxi{width:13px;height:13px}
+.shop-req{margin:6px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:14px}.shop-req small{flex-basis:100%;color:var(--mute);font-size:14px}
+
+/* a finished project, shown in its card (the village never moves) */
+.project-card.done{border-color:color-mix(in srgb,var(--good) 55%,var(--line));box-shadow:inset 0 3px color-mix(in srgb,var(--good) 70%,transparent)}
+.proj-done-tag{display:inline-flex;align-items:center;gap:6px;margin:6px 0 0;padding:4px 12px;border-radius:999px;font-weight:700;color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent);border:1px solid color-mix(in srgb,var(--good) 45%,var(--line))}
+.restoration-feedback.rf-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;margin:4px 0 12px;padding:10px 12px;border-radius:12px;border:1px solid var(--good);background:color-mix(in srgb,var(--good) 12%,var(--panel));position:static;width:auto;max-width:none}
+.rf-card .rf-art img,.rf-card .rf-art .pxi{width:64px;height:64px;image-rendering:pixelated}.rf-card .rf-text{display:grid;gap:3px}.rf-card .rf-title{font-size:17px;color:var(--good);display:inline-flex;align-items:center;gap:6px}.rf-card .rf-benefit{font-size:15px}.rf-card .rf-x{align-self:start}
+@media (prefers-reduced-motion:no-preference){html:not(.calm) .rf-card{animation:rfIn .5s ease-out both}@keyframes rfIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}}
+
+/* page notices float over the content instead of pushing it down */
+#view>.page-notice{position:fixed!important;z-index:60;top:calc(var(--notice-top,96px));left:50%;transform:translateX(-50%);width:min(640px,calc(var(--vw100,100vw) - 32px));margin:0!important;box-shadow:0 12px 32px rgba(0,0,0,.35);grid-column:auto!important}
+@media (prefers-reduced-motion:no-preference){html:not(.calm) #view>.page-notice{animation:pnIn .25s ease-out both}@keyframes pnIn{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translateX(-50%)}}}
+@media (max-width:860px){#view>.page-notice{--notice-top:70px}}
+
+/* farm: counts on the section tabs; trough line inside the livestock action row */
+.est-count{display:inline-flex;align-items:baseline;gap:4px;margin-left:auto;padding:2px 9px;border-radius:999px;font:700 15px var(--f-ui);font-style:normal;color:#2a1a06!important;background:#f3d58a!important;border:1px solid #b8862f}
+.est-count i{font:600 13px var(--f-ui);font-style:normal}
+.estate-mobile-tabs .est-count{padding:0 6px;font-size:13px;margin-left:4px}
+.estate-trough-inline{display:inline-flex;align-items:center;margin-left:6px;font-size:15px}.estate-trough-inline>*{margin:0!important}
+.estate-pasture .pen:not(.emptypen) .pen-t>b{color:var(--ink)!important}
+.est-count i{color:#2a1a06!important}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -7261,7 +7294,8 @@ const FISH = {
 };
 function fish(s, sp, ox, oy, cooked) {
   const body = rp(cooked ? mix(sp.body, '#c87a30', .62) : sp.body), belly = rp(cooked ? mix(sp.belly, '#f0c070', .55) : sp.belly), fin = rp(cooked ? '#9a5a2a' : mix(sp.body, '#3a2448', .25));
-  const L = sp.len, H = sp.dep, x0 = ox + (15 - L) / 2 + 1, cy = oy + 8, x1 = x0 + L;
+  /* icons are 16 px: the longest fish are shortened a little and centred with their tail, so no nose or tail is cut off */
+  const e = ({ veil: 4, round: 1.6 })[sp.tail] || 1, L = ox ? sp.len : Math.min(sp.len, (14.6 - e) / 1.05), H = sp.dep, x0 = ox ? ox + (15 - L) / 2 + 1 : e + Math.max(0, (15 - (e + 1.05 * L)) / 2), cy = oy + 8, x1 = x0 + L;
   if (sp.tail === 'eel') { for (let i = 0; i <= L; i++) { const y = cy + Math.round(Math.sin(i / 2.2) * 1.6); s.dot(x0 + i, y, body); s.dot(x0 + i, y + 1, i % 3 ? body : belly); } s.fix(x1, cy, EYE); for (let i = 2; i < L; i += 4) s.fix(x0 + i, cy + Math.round(Math.sin(i / 2.2) * 1.6), sp.glow); return; }
   if (sp.ray) { /* rays: a diamond of wings and a whip tail; the wider the wings, the larger the ray */
     const W = sp.ray * (ox > 0 ? 1.9 : 1), cx = ox + 9 + (ox > 0 ? 6 : 0), H2 = sp.ray * (ox > 0 ? 1.1 : .75);
@@ -12086,9 +12120,14 @@ UI.travelAnim = to => {
 UI.itemSub = it => { const b = UI.statLine(it.b), r = Object.entries(it.req || {}).map(([sk, l]) => `<span class="${DQ.skillUnlocked(sk) && DQ.lvl(sk) >= l ? 'ok' : 'bad'}">${D.SK[sk].name} ${l}</span>`).join(' '); return [it.type === 'relic' ? `${esc(it.desc || '')} Keepsake: it cannot be sold.` : '', it.heal ? `Heals ${it.heal}` : '', it.type === 'tool' ? `${Math.round(D.TOOL_SPEED[it.tier] * 100)}% faster ${D.SK[it.toolSkill].name.toLowerCase()}` : '', b, r].filter(Boolean).join(' · '); };
 UI.shopSelected = {};
 UI.shopTabs = tab => `<div class="tabs">${[['buy','Buy'], ['rare','Rare wares'], ['sell','Sell']].map(([value, label]) => `<button class="tab ${tab === value ? 'on' : ''}" data-do="shoptab" data-a="${value}">${label}</button>`).join('')}</div>`;
+/* what an item asks of you before you can use it: gear requirements, a seed's Farming level (Nov 2026, from the player) */
+DQ.itemReqs = id => { const it = D.ITEMS[id]; if (!it) return []; const out = Object.entries(it.req || {}).filter(([sk]) => D.SK[sk]);
+  if (/^seed_/.test(id) && D.CROP && D.CROP[id.slice(5)]) out.push(['farming', D.CROP[id.slice(5)].lvl]);
+  return out.filter(([, l]) => l > 1).map(([sk, l]) => ({ sk, l, ok: DQ.lvl(sk) >= l })); };
+UI.reqChips = id => DQ.itemReqs(id).map(r => `<span class="req-chip ${r.ok ? 'ok' : 'bad'}">${r.ok ? '' : ico('lock')}${esc(D.SK[r.sk].name)} ${r.l}</span>`).join('');
 UI.shopPreview = id => {
   const it = D.ITEMS[id];
-  return `<div class="shop-item-preview"><span class="shop-item-art">${DQ.itemIco(it)}</span><div><h3>${esc(it.name)}</h3><p class="item-base-stats">${UI.statLine(it.b) || UI.itemSub(it)}</p><small>${DQ.have(id)} owned${it.slot ? ' · ' + DQ.SLOT_NAMES[it.slot] : ''}</small></div></div>`;
+  return `<div class="shop-item-preview"><span class="shop-item-art">${DQ.itemIco(it)}</span><div><h3>${esc(it.name)}</h3><p class="item-base-stats">${UI.statLine(it.b) || UI.itemSub(it)}</p><small>${DQ.have(id)} owned${it.slot ? ' · ' + DQ.SLOT_NAMES[it.slot] : ''}</small>${DQ.itemReqs(id).length ? `<p class="shop-req">${DQ.itemReqs(id).every(r => r.ok) ? 'Requires' : 'You need'} ${UI.reqChips(id)}${DQ.itemReqs(id).some(r => !r.ok) ? `<small>You can buy it now and ${it.slot ? 'wear' : 'use'} it once you reach ${DQ.itemReqs(id).filter(r => !r.ok).map(r => `${D.SK[r.sk].name} ${r.l} (you are ${DQ.lvl(r.sk)})`).join(' and ')}.</small>` : ''}</p>` : ''}</div></div>`;
 };
 UI.V.shop = () => {
   const tab = UI.shopTab, buying = tab === 'buy', qty = UI.shopQty;
@@ -12100,7 +12139,7 @@ UI.V.shop = () => {
   const owned = it ? DQ.have(id) : 0, tool = it && it.type === 'tool', count = tool ? 1 : qty;
   const cost = it ? (buying ? DQ.buyPrice(id) * count : DQ.sellPrice(id) * Math.min(count, owned)) : 0;
   const disabled = !it || (buying && (S().coins < cost || (tool && owned)));
-  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span>${DQ.gearMark ? DQ.gearMark(item) : ''}<b>${esc(D.ITEMS[item].name)}</b><span class="stock-price">${UI.money(buying?DQ.buyPrice(item):DQ.sellPrice(item))}</span>${buying?'':'<small>'+DQ.have(item)+' held</small>'}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
+  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span>${DQ.gearMark ? DQ.gearMark(item) : ''}<b>${esc(D.ITEMS[item].name)}</b><span class="stock-price">${UI.money(buying?DQ.buyPrice(item):DQ.sellPrice(item))}</span>${buying&&DQ.itemReqs(item).length?`<span class="req-chips">${UI.reqChips(item)}</span>`:''}${buying?'':'<small>'+DQ.have(item)+' held</small>'}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
     ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
       <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} ${disabled ? 'disabled' : ''}>${tool && owned && buying ? 'Already owned' : (buying ? 'Buy' : 'Sell')+' ×'+(buying?count:Math.min(count,owned))} ${tool && owned && buying ? '' : UI.money(cost)}</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all ${UI.money(DQ.sellPrice(id) * owned)}</button>` : ''}</div>
       ${buying && S().coins < cost ? `<p class="bad">Need ${UI.money(cost - S().coins)} more.</p>` : ''}
@@ -12375,7 +12414,11 @@ UI.renderPageNotice = () => {
   const view = $('#view'); if (!view) return;
   const old = view.querySelector('.page-notice'); if (old) old.remove();
   const notice = UI.pageNotice;
-  if (notice && notice.page === UI.view) view.insertAdjacentHTML('afterbegin', `<section class="panel page-notice" role="status"><div class="phead"><h2>${esc(notice.title)}</h2><button class="btn sm" data-do="dismissnotice">Dismiss</button></div><p>${esc(notice.text)}</p></section>`);
+  /* the Village shows a finished project in its own card; a banner above the scene would push it down */
+  /* notices float over the page (Nov 2026, from the player: nothing that appears may move the page); they fade
+     on their own after a while and can be dismissed */
+  clearTimeout(UI.pageNoticeTimer);
+  if (notice && notice.page === UI.view && UI.view !== 'projects') { notice.until = notice.until || Date.now() + 9000; UI.pageNoticeTimer = setTimeout(() => { if (UI.pageNotice === notice) UI.DO.dismissnotice(); }, Math.max(0, notice.until - Date.now())); view.insertAdjacentHTML('afterbegin', `<section class="panel page-notice" role="status"><div class="phead"><h2>${esc(notice.title)}</h2><button class="btn sm" data-do="dismissnotice">Dismiss</button></div><p>${esc(notice.text)}</p></section>`); }
 };
 UI.DO.dismissnotice = () => { UI.pageNotice = null; UI.renderPageNotice(); };
 UI.render = fresh => {
@@ -12764,7 +12807,7 @@ UI.V.farming = () => {
   const nextPlot = D.PLOT_PRICES[F.plotsBought];
 
   const pens = Array.from({ length: F.pensBought }, (_, i) => {
-    const an = F.animals[i]; if (!an) return `<button class="pen emptypen" data-do="farmmarket" data-a="hen"><span>${ico('barn')}</span><b>Empty pen</b><small>${DQ.townUnlocked('mossbarrow') ? 'Buy an animal below' : 'The livestock trader is in Mossbarrow'}</small></button>`;
+    const an = F.animals[i]; if (!an) return `<button class="pen emptypen" data-do="farmmarket" data-a="hen"><span>${ico('barn')}</span><b>Empty pen</b><small>${DQ.townUnlocked('mossbarrow') ? 'Buy one from the market' : 'The livestock trader is in Mossbarrow'}</small></button>`;
     const A = D.ANIMAL[an.id], pr = D.ITEMS[A.prod];
     return `<div class="pen" data-i="${i}" data-b="pen:${i}" style="--c:${A.col}"><button class="pspr" data-do="petanimal" data-a="${i}" data-tip="text:Pet ${esc(an.name)}: makes them work 25% faster for 3 minutes">${DQ.animalSprite(A, 64, 'bob')}</button>
       <div class="pen-t"><b>${esc(an.name)}</b><small>${A.name} · makes ${pr.name.toLowerCase()} every ${left(DQ.animalPeriod(an))}</small><span class="bar pbar"><i></i></span><small><span class="pst mono"></span> ${pr.name.toLowerCase()} ready <span class="tag hungrytag">Hungry</span><span class="tag happytag">Happy</span></small></div>
@@ -14379,7 +14422,7 @@ UI.rarePage = () => {
   const selected = choices.find(c => c.key === UI.tab.rareChoice) || choices[0];
   const cost = selected.price * selected.count, affordable = S().coins >= cost;
   const disabled = selected.locked || selected.owned || !affordable;
-  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${esc(D.TOWN[S().town].name)}</small></div>${UI.shopTabs('rare')}<div class="illustrated-choices">${choices.map(c=>`<button class="illustrated-card ${c===selected?'selected':''}" data-do="rareselect" data-a="${c.key}" aria-pressed="${c===selected}"><span class="choice-art">${DQ.itemIco(D.ITEMS[c.id||(c.key.startsWith('cache:')?'treasure_chest':'potion_fortune')])}</span>${c.id && DQ.gearMark ? DQ.gearMark(c.id) : ''}<b>${esc(c.name)}</b><span class="stock-price">${UI.money(c.price)}</span>${c.owned||c.locked?'<small>'+(c.owned?'Owned':'Locked')+'</small>':''}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>Rare item</h2></div>
+  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${esc(D.TOWN[S().town].name)}</small></div>${UI.shopTabs('rare')}<div class="illustrated-choices">${choices.map(c=>`<button class="illustrated-card ${c===selected?'selected':''}" data-do="rareselect" data-a="${c.key}" aria-pressed="${c===selected}"><span class="choice-art">${DQ.itemIco(D.ITEMS[c.id||(c.key.startsWith('cache:')?'treasure_chest':'potion_fortune')])}</span>${c.id && DQ.gearMark ? DQ.gearMark(c.id) : ''}<b>${esc(c.name)}</b>${c.id&&DQ.itemReqs(c.id).length?`<span class="req-chips">${UI.reqChips(c.id)}</span>`:''}<span class="stock-price">${UI.money(c.price)}</span>${c.owned||c.locked?'<small>'+(c.owned?'Owned':'Locked')+'</small>':''}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>Rare item</h2></div>
     <div class="shop-workspace"><div class="shop-purchase">${selected.id ? UI.shopPreview(selected.id) : `<h3>${esc(selected.name)}</h3>`}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${selected.key.startsWith('mat:') ? '' : 'disabled'}>${[1,10,100].map(n => `<option value="${n}" ${selected.count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
     <div class="shop-action"><button class="btn primary" data-do="rarebuy" data-a="${selected.key}" ${disabled ? 'disabled' : ''}>${selected.owned ? 'Owned' : selected.locked ? 'Locked' : selected.key.startsWith('cache:') ? 'Open' : selected.key.startsWith('tonic:') ? 'Drink' : 'Buy'}${selected.key.startsWith('mat:')?' ×'+selected.count:''} ${UI.money(cost)}</button></div>
     ${selected.text ? `<p class="sm">${esc(selected.text)}</p>` : ''}${!affordable ? `<p class="bad sm">Need ${UI.money(cost - S().coins)} more.</p>` : ''}
@@ -15626,7 +15669,7 @@ UI.projectsPanel = () => {
       ${changes.length ? `<div class="village-changes">${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}</div>` : ''}</section>
     <section class="panel project-card ${done ? 'done' : ''}"><div class="phead"><div><small>${esc(D.TOWN[town].name)} · restoration</small><h2>${esc(project.name)}</h2></div>${pinButton(id)}</div>
       ${story}<p class="proj-benefit"><span class="k">${done ? 'Benefit, active' : 'Benefit'}</span> ${esc(project.reward)}</p>
-      ${done ? '<p class="ok">Restored</p>' : `<div class="proj-stage"><span class="k">${esc(DQ.PROJECT_STAGES[stage])}</span><span class="bar"><i style="width:${pct}%"></i></span><small>${pct}%</small></div>${lines}<div class="btnrow">${canFinish ? `<button class="btn primary" data-do="projectfinish" data-a="${id}">Complete project</button>` : canGive ? `<button class="btn primary" data-do="projectgive" data-a="${id}">Deliver all I can</button><button class="btn" data-do="projectnext" data-a="${id}">What next?</button>` : `<button class="btn primary" data-do="projectnext" data-a="${id}">Work on this project</button>`}</div>`}
+      ${done ? `<p class="proj-done-tag">${ico('check')} Restored</p>` : `<div class="proj-stage"><span class="k">${esc(DQ.PROJECT_STAGES[stage])}</span><span class="bar"><i style="width:${pct}%"></i></span><small>${pct}%</small></div>${lines}<div class="btnrow">${canFinish ? `<button class="btn primary" data-do="projectfinish" data-a="${id}">Complete project</button>` : canGive ? `<button class="btn primary" data-do="projectgive" data-a="${id}">Deliver all I can</button><button class="btn" data-do="projectnext" data-a="${id}">What next?</button>` : `<button class="btn primary" data-do="projectnext" data-a="${id}">Work on this project</button>`}</div>`}
     </section></div>`;
 };
 
@@ -17704,13 +17747,17 @@ UI.V.farming=()=>{
  const buyPlot=plots.querySelector('.buyplot'),buyPen=pens.querySelector('.buypen');for(const b of [buyPlot,buyPen])if(b){b.remove();b.className='btn sm estate-expand';}
  const fp=page(plots,UI.estateFieldPage,innerWidth<=860?4:innerWidth<=1440?6:12),pp=page(pens,UI.estatePenPage,innerWidth<=860?2:innerWidth<=1440?4:6);
 
- const marketItems=[...(market?.querySelectorAll('.srow')||[])],mp=Math.min(UI.estateMarketPage||0,Math.max(0,Math.ceil(marketItems.length/(innerWidth<=860?3:4))-1));marketItems.forEach((e,i)=>e.hidden=Math.floor(i/(innerWidth<=860?3:4))!==mp);
+ const marketItems=[...(market?.querySelectorAll('.srow')||[])],mp=Math.min(UI.estateMarketPage||0,Math.max(0,Math.ceil(marketItems.length/(innerWidth<=860?3:6))-1));marketItems.forEach((e,i)=>e.hidden=Math.floor(i/(innerWidth<=860?3:6))!==mp);
  const pager=(kind,p,n)=>n>1?`<div class="estate-pages" role="group" aria-label="${kind} pages"><button class="btn sm" data-do="estatepage" data-a="${kind}" data-b="${p-1}" ${p?'':'disabled'} aria-label="Previous ${kind} page">Prev</button><span>${p+1} / ${n}</span><button class="btn sm" data-do="estatepage" data-a="${kind}" data-b="${p+1}" ${p+1<n?'':'disabled'} aria-label="Next ${kind} page">Next</button></div>`:'';
- const actionRows=[...fields.querySelectorAll('.farm-actions'),...animals.querySelectorAll('.farm-actions')].map((e,i)=>`<div class="estate-action-group" data-zone="${i?'pens':'fields'}">${e.outerHTML}</div>`).join('');
  const trough=animals.querySelector('[data-b="trough"]')?.parentElement.outerHTML||'';
+ /* the trough line sits in the same row as the livestock buttons, so switching sections never moves the page (Nov 2026) */
+ const actionRows=[...fields.querySelectorAll('.farm-actions'),...animals.querySelectorAll('.farm-actions')].map((e,i)=>`<div class="estate-action-group" data-zone="${i?'pens':'fields'}">${i?e.outerHTML.replace(/<\/div>$/,`<span class="estate-trough-inline">${trough}</span></div>`):e.outerHTML}</div>`).join('');
+ /* the menu count, split by where it points: ripe crops or produce waiting in the pens */
+ const nRipe=Q.S.farm.plots.filter(Q.plotRipe).length,nProd=Q.S.farm.animals.filter(a=>a&&a.stored>0).length;
+ const cnt=(n,t)=>n?`<em class="est-count" aria-label="${n} ${t}">${n}<i>${t}</i></em>`:'';
  const routeCrop=D.CROP[UI.farmRoute],routeSeed=routeCrop&&!Q.have('seed_'+routeCrop.id)?`<div class="estate-route-target" data-farm-target="${routeCrop.id}">${Q.itemIco(D.ITEMS['crop_'+routeCrop.id])}<b>${esc(routeCrop.name)}</b><small>Farming ${routeCrop.lvl} · needs seeds before planting</small><button class="btn" data-do="route" data-a="seed_${routeCrop.id}">Get ${esc(routeCrop.name.toLowerCase())} seeds</button></div>`:'';
  const bg=A?A.url('farm-estate',A.farmEstateSprite):'';
- return `<div class="farm-estate" data-section="${UI.estateSection}"><section class="panel estate-controls"><div class="phead"><h2>Your farm</h2><small>Farming <b data-b="lvl:farming"></b></small></div><div class="estate-section-tabs btnrow"><button class="btn ${['fields','seeds'].includes(UI.estateSection)?'on':''}" data-do="estatesection" data-a="fields" aria-pressed="${['fields','seeds'].includes(UI.estateSection)}">${Q.itemIco(D.ITEMS.crop_wheat)}<span><b>Crops & fields</b><small>Sow · grow · harvest</small></span></button><button class="btn ${['pens','animals'].includes(UI.estateSection)?'on':''}" data-do="estatesection" data-a="pens" aria-pressed="${['pens','animals'].includes(UI.estateSection)}">${Q.animalSprite(D.ANIMAL.cow,32)}<span><b>Livestock & pasture</b><small>Feed · care · collect</small></span></button></div><div class="estate-mobile-tabs btnrow">${['fields','pens','seeds','animals'].map(k=>`<button class="btn sm ${UI.estateSection===k?'on':''}" data-do="estatesection" data-a="${k}" aria-pressed="${UI.estateSection===k}">${k==='animals'?Q.animalSprite(D.ANIMAL.cow,32):ico(({fields:'crop',pens:'barn',seeds:'seed'})[k])}${({fields:'Fields',pens:'Pens',seeds:'Seeds',animals:'Livestock'})[k]}</button>`).join('')}</div><div class="estate-actions">${actionRows}</div><div class="estate-trough" data-zone="pens">${trough}</div></section><div class="estate-layout"><section class="panel estate-land"><div class="estate-scenery" style="background-image:url('${bg}')" role="img" aria-label="Farmhouse, pond, tilled fields and fenced pasture"></div><div class="estate-zones"><div class="estate-fields"><h3><span>Fields · ${Q.S.farm.plots.length} plots</span>${pager('fields',fp.p,fp.pages)}${buyPlot?.outerHTML||''}</h3>${plots.outerHTML}</div><div class="estate-pasture"><h3><span>Pasture · ${Q.S.farm.pensBought} pens</span>${pager('pens',pp.p,pp.pages)}${buyPen?.outerHTML||''}</h3>${pens.outerHTML}</div></div></section><section class="panel estate-supplies"><h3 class="estate-supply-title">${UI.estateTab==='seeds'?'Seeds & planting':'Livestock market'}</h3><div class="btnrow estate-supply-tabs"><button class="btn ${UI.estateTab==='seeds'?'on':''}" data-do="estatetab" data-a="seeds">Seeds & planting</button><button class="btn ${UI.estateTab==='animals'?'on':''}" data-do="estatetab" data-a="animals">Livestock</button></div>${UI.estateTab==='seeds'?`${routeSeed}${seeds?.outerHTML||'<p>Buy seeds in the shop.</p>'}${settings?.outerHTML||''}<button class="btn" data-do="go" data-a="shop">Buy seeds</button>`:`${market?.outerHTML||''}${pager('market',mp,Math.ceil(marketItems.length/(innerWidth<=860?3:4)))}`}</section></div></div>`;
+ return `<div class="farm-estate" data-section="${UI.estateSection}"><section class="panel estate-controls"><div class="phead"><h2>Your farm</h2><small>Farming <b data-b="lvl:farming"></b></small></div><div class="estate-section-tabs btnrow"><button class="btn ${['fields','seeds'].includes(UI.estateSection)?'on':''}" data-do="estatesection" data-a="fields" aria-pressed="${['fields','seeds'].includes(UI.estateSection)}">${Q.itemIco(D.ITEMS.crop_wheat)}<span><b>Crops & fields</b><small>Sow · grow · harvest</small></span>${cnt(nRipe,'ripe')}</button><button class="btn ${['pens','animals'].includes(UI.estateSection)?'on':''}" data-do="estatesection" data-a="pens" aria-pressed="${['pens','animals'].includes(UI.estateSection)}">${Q.animalSprite(D.ANIMAL.cow,32)}<span><b>Livestock & pasture</b><small>Feed · care · collect</small></span>${cnt(nProd,'to collect')}</button></div><div class="estate-mobile-tabs btnrow">${['fields','pens','seeds','animals'].map(k=>`<button class="btn sm ${UI.estateSection===k?'on':''}" data-do="estatesection" data-a="${k}" aria-pressed="${UI.estateSection===k}">${k==='animals'?Q.animalSprite(D.ANIMAL.cow,32):ico(({fields:'crop',pens:'barn',seeds:'seed'})[k])}${({fields:'Fields',pens:'Pens',seeds:'Seeds',animals:'Livestock'})[k]}${k==='fields'&&nRipe||k==='pens'&&nProd?`<em class="est-count">${k==='fields'?nRipe:nProd}</em>`:''}</button>`).join('')}</div><div class="estate-actions">${actionRows}</div></section><div class="estate-layout"><section class="panel estate-land"><div class="estate-scenery" style="background-image:url('${bg}')" role="img" aria-label="Farmhouse, pond, tilled fields and fenced pasture"></div><div class="estate-zones"><div class="estate-fields"><h3><span>Fields · ${Q.S.farm.plots.length} plots</span>${pager('fields',fp.p,fp.pages)}${buyPlot?.outerHTML||''}</h3>${plots.outerHTML}</div><div class="estate-pasture"><h3><span>Pasture · ${Q.S.farm.pensBought} pens</span>${pager('pens',pp.p,pp.pages)}${buyPen?.outerHTML||''}</h3>${pens.outerHTML}</div></div></section><section class="panel estate-supplies"><h3 class="estate-supply-title">${UI.estateTab==='seeds'?'Seeds & planting':'Livestock market'}</h3><div class="btnrow estate-supply-tabs"><button class="btn ${UI.estateTab==='seeds'?'on':''}" data-do="estatetab" data-a="seeds">Seeds & planting</button><button class="btn ${UI.estateTab==='animals'?'on':''}" data-do="estatetab" data-a="animals">Livestock</button></div>${UI.estateTab==='seeds'?`${routeSeed}${seeds?.outerHTML||'<p>Buy seeds in the shop.</p>'}${settings?.outerHTML||''}<button class="btn" data-do="go" data-a="shop">Buy seeds</button>`:`${market?.outerHTML||''}${pager('market',mp,Math.ceil(marketItems.length/(innerWidth<=860?3:6)))}`}</section></div></div>`;
 };
 /* Only the changing workspace transitions; task progress and the surrounding HUD keep running. */
 const switchSection=a=>{
@@ -17728,11 +17775,13 @@ const switchSection=a=>{
  render();document.querySelector('.estate-layout')?.animate([{opacity:0,transform:'translateX('+(a==='pens'||a==='animals'?16:-16)+'px)'},{opacity:1,transform:'translateX(0)'}],{duration:300,easing:'cubic-bezier(.2,.7,.3,1)'});
 };
 Object.assign(UI.DO,{
- farmmarket:a=>{if(!Q.townUnlocked('mossbarrow'))return Q.toast('The livestock trader is in Mossbarrow, past Grubnash',true);UI.estateMarketPage=Math.max(0,Math.floor(D.ANIMALS.findIndex(v=>v.id===(a||'hen'))/(innerWidth<=860?3:4)));return switchSection('animals');},
+ farmmarket:a=>{if(!Q.townUnlocked('mossbarrow'))return Q.toast('The livestock trader is in Mossbarrow, past Grubnash',true);UI.estateMarketPage=Math.max(0,Math.floor(D.ANIMALS.findIndex(v=>v.id===(a||'hen'))/(innerWidth<=860?3:6)));return switchSection('animals');},
  estatesection:switchSection,estatetab:a=>switchSection(a==='animals'?'pens':'fields'),
  estatepage:(a,b)=>{const key={fields:'estateFieldPage',pens:'estatePenPage',market:'estateMarketPage'}[a];if(key)UI[key]=+b;UI.render(false);}
 });
 })();
+
+{const Q=window.DQ,UI=Q.ui;const go0=Q.go;Q.go=(v,...r)=>{if(v==='farming'&&UI.view!=='farming'&&Q.skillUnlocked&&Q.skillUnlocked('farming')){const F=Q.S.farm,ripe=F.plots.filter(Q.plotRipe).length,prod=F.animals.filter(a=>a&&a.stored>0).length,inPens=['pens','animals'].includes(UI.estateSection);if(inPens&&!prod&&ripe)UI.estateSection='fields';else if(!inPens&&!ripe&&prod)UI.estateSection='pens';}return go0(v,...r);};}
 
 </script>
 <script>
@@ -17973,7 +18022,8 @@ UI.V.journal=()=>{
  return note+archive+(journal0?journal0():'');
 };
 const render0=UI.render;
-UI.render=fresh=>{render0(fresh);if(UI.view==='projects'&&UI.restoredSite&&S().projects[UI.restoredSite]&&D.PROJECTS[UI.restoredSite].town===S().town){const id=UI.restoredSite,p=D.PROJECTS[id],scene=Object.values(defs).find(s=>s.project===id),view=document.getElementById('view');if(!view.querySelector('.restoration-feedback'))view.insertAdjacentHTML('afterbegin',`<div class="restoration-feedback" role="status"><span>${ico('house')} <b>${esc(p.name)}</b> · restored</span>${D.PROJECT_VOICES&&D.PROJECT_VOICES[id]?`<span class="rf-voice"><b>${esc(D.PROJECT_VOICES[id][0])}:</b> “${esc(D.PROJECT_VOICES[id][1])}”</span>`:''}<span class="rf-benefit"><b>Active now:</b> ${esc(p.reward)}</span><button class="btn sm" data-do="restorationdismiss" aria-label="Dismiss restoration summary">×</button></div>`);view.querySelector('.site-spot[data-a="'+id+'"]')?.classList.add('restoration-highlight');}if(UI.view==='overview'){const h=document.querySelector('.journey .phead');if(h&&!h.querySelector('[data-do="storyarchive"]'))h.insertAdjacentHTML('beforeend',`<button class="btn sm" data-do="storyarchive">${ico('book')} Story so far</button>`);}};
+UI.render=fresh=>{render0(fresh);if(UI.view==='projects'&&UI.restoredSite&&S().projects[UI.restoredSite]&&D.PROJECTS[UI.restoredSite].town===S().town){const id=UI.restoredSite,p=D.PROJECTS[id],scene=Object.values(defs).find(s=>s.project===id),view=document.getElementById('view');/* the summary lives inside the project card on the right, so the village and page never move (Nov 2026, from the player) */
+const card=view.querySelector('.project-card.done'),art=(p.art||id),A=Q.pixelArt;if(card&&!card.querySelector('.restoration-feedback'))card.querySelector('.phead')?.insertAdjacentHTML('afterend',`<div class="restoration-feedback rf-card" role="status">${A&&A.stagePiece?`<span class="rf-art">${A.img(A.url('rf-site:'+art+':4',()=>A.stagePiece(art,4)),32,32,64,'','')}</span>`:''}<span class="rf-text"><b class="rf-title">${ico('check')} ${esc(p.name)} · restored</b><span class="rf-benefit"><b>Active now:</b> ${esc(p.reward)}</span></span><button class="btn sm rf-x" data-do="restorationdismiss" aria-label="Dismiss restoration summary">×</button></div>`);view.querySelector('.site-spot[data-a="'+id+'"]')?.classList.add('restoration-highlight');}if(UI.view==='overview'){const h=document.querySelector('.journey .phead');if(h&&!h.querySelector('[data-do="storyarchive"]'))h.insertAdjacentHTML('beforeend',`<button class="btn sm" data-do="storyarchive">${ico('book')} Story so far</button>`);}};
 })();
 
 </script>
