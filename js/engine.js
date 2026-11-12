@@ -10,24 +10,12 @@ DQ.log = (m, k = '') => { if (DQ.sim.on) return; const L = S().log; L.unshift({ 
 const townIdx = () => D.TOWN[S().town].idx;
 const itemName = id => D.ITEMS[id].name;
 
-/* Include content added by later data files, especially farming and recipes. */
-const indexUnlock = (skill, level, label) => {
-  if (!skill || level <= 1) return;
-  const levels = D.UNL[skill] = D.UNL[skill] || {}, names = levels[level] = levels[level] || [];
-  if (!names.includes(label)) names.push(label);
-};
-Object.values(D.NODE).forEach(n => indexUnlock(n.skill, n.lvl, n.name));
-Object.values(D.RECIPES).forEach(r => indexUnlock(r.skill, r.lvl, r.name));
-Object.values(D.ITEMS).filter(it => ['gear','ammo'].includes(it.type)).forEach(it => Object.entries(it.req || {}).forEach(([sk, level]) => indexUnlock(sk, level, 'Equip: ' + it.name)));
-(D.CROPS || []).forEach(c => indexUnlock('farming', c.lvl, 'Grow ' + c.name));
-(D.ANIMALS || []).forEach(a => indexUnlock('farming', a.lvl, 'Keep ' + a.name));
-
 /* ---------- Experience and levels ---------- */
 DQ.addXp = (sk, base, o = {}) => {
   if (!DQ.skillUnlocked(sk)) return 0;
   const amt = o.raw ? base : base * DQ.xpMult(sk), before = DQ.lvl(sk), advB = DQ.advLvl();
   S().xp[sk] = Math.min(2e8, S().xp[sk] + amt);
-  if (!DQ.sim.on) DQ.hist[DQ.hist.length - 1][sk] = (DQ.hist[DQ.hist.length - 1][sk] || 0) + amt;
+  DQ.hist[DQ.hist.length - 1][sk] = (DQ.hist[DQ.hist.length - 1][sk] || 0) + amt;
   if (DQ.sim.on) DQ.sim.xp[sk] = (DQ.sim.xp[sk] || 0) + amt; else DQ.pulse(`[data-skill="${sk}"]`);
   const after = DQ.lvl(sk);
   if (after > before) onLevel(sk, before, after);
@@ -36,49 +24,33 @@ DQ.addXp = (sk, base, o = {}) => {
 };
 function unlockText(sk, from, to) {
   const list = []; for (let l = from + 1; l <= to; l++) ((D.UNL[sk] || {})[l] || []).forEach(n => list.push(n));
-  return list.length ? 'Unlocked: ' + list.join(', ') + '.' : '';
-}
-/* a level-up note opens what it unlocked: the new recipe in its own category, or the new gathering spot, highlighted */
-function levelAction(sk, from, to) {
-  const sd = D.SK[sk], recipe = (D.RLIST[sk] || []).filter(r => r.lvl > from && r.lvl <= to).sort((a, b) => b.lvl - a.lvl)[0];
-  const node = !recipe && Object.values(D.NODES || {}).flat().filter(n => n.skill === sk && n.lvl > from && n.lvl <= to && DQ.nodeHere(n)).sort((a, b) => b.lvl - a.lvl)[0];
-  const target = recipe || node;
-  if (target && DQ.ui && DQ.ui.focusTask) return { label: `Open ${target.name}`, fn: () => DQ.ui.focusTask(sd.page, target.id, recipe ? recipe.tab : null, sk) };
-  return { label: `Open ${sd.name}`, fn: () => DQ.go(sd.page) };
+  return list.length ? 'New: ' + list.slice(0, 3).join(', ') + (list.length > 3 ? ` +${list.length - 3} more` : '') : '';
 }
 function onLevel(sk, from, to) {
   const sd = D.SK[sk];
   if (sk === 'hitpoints') S().hp += to - from;
   const perks = D.PERKS.filter(p => p.lvl > from && p.lvl <= to);
-  const details = [unlockText(sk, from, to), ...perks.map(p => `${p.name}: ${p.speed ? `${Math.round(p.speed * 100)}% faster actions` : `${Math.round(p.dbl * 100)}% chance of double yield`}.`) ].filter(Boolean);
-  const unlockedDetails = details.slice();
-  if (!details.length) {
-    const next = Object.keys(D.UNL[sk] || {}).map(Number).filter(level => level > to).sort((a,b) => a-b)[0];
-    details.push(`Experience bonus is now +${Math.round(((DQ.xpBonusBase ? DQ.xpBonusBase(sk) : DQ.xpMult(sk)) - 1) * 100)}%.`);
-    if (next) details.push(`Next at level ${next}: ${D.UNL[sk][next].join(', ')}.`);
-  }
   if (DQ.sim.on) DQ.sim.levels.push([sk, to]);
-  else { DQ.log(`${sd.name} level ${to} reached.`, 'quest'); DQ.emit('levelup', sk, to); }
-  DQ.notify({ kind: 'level', key: 'lvl:' + sk, page: sd.page, skill: sk, from, to, unlocks: unlockedDetails, icon: sk, col: sd.col, title: `${sd.name} level ${to}!`, text: details.join(' '), action: levelAction(sk, from, to), sound: 'level', ttl: 14000, burst: true });
+  else {
+    DQ.log(`${sd.name} level ${to} reached.`, 'quest'); DQ.emit('levelup', sk, to);
+    const ut = unlockText(sk, from, to);
+    DQ.notify({ kind: 'level', key: 'lvl:' + sk, icon: sk, col: sd.col, title: `${sd.name} level ${to}`, text: ut || `Experience bonus is now +${Math.round((DQ.xpMult(sk) - 1) * 100)}%.`, sound: 'level', burst: true });
+    perks.forEach(p => DQ.notify({ kind: 'perk', key: 'perk:' + sk + p.lvl, icon: 'star', col: '#f3d58a', title: `Perk: ${p.name}`, text: `${sd.name} ${p.lvl}: ${p.speed ? `${Math.round(p.speed * 100)}% faster actions` : `${Math.round(p.dbl * 100)}% chance of double yield`}.`, sound: 'perk', ttl: 9000 }));
+  }
   DQ.achDirty = true; checkQuests(); DQ.emit('lvl');
 }
 function onAdv(from, to) {
-  const gains = [];
   if (DQ.sim.on) DQ.sim.adv = to;
   D.SKILLS.forEach(s => {
-    if (!s.quest && !s.actionReq && s.unlock > from && s.unlock <= to) {
-      S().unlocked[s.id] = true; gains.push(s.name);
+    if (!s.quest && s.unlock > from && s.unlock <= to) {
+      S().unlocked[s.id] = true;
       DQ.notify({ kind: 'unlock', key: 'unlock:' + s.id, icon: s.id, col: s.col, title: `${s.name} unlocked`, text: s.blurb, action: { label: `Open ${s.name}`, fn: () => DQ.go(s.page) }, sound: 'unlock', ttl: 12000, burst: true });
     }
   });
-  for (const [page, level, title, icon] of [
-    ['house', D.HOUSE.adv, 'Housing', 'house'],
-    ['hirelings', D.HIRE.adv, 'Workers', 'users']
-  ]) if (level > from && level <= to) { gains.push(title); DQ.notify({ kind: 'unlock', key: 'feature:' + page, page, icon, title: `${title} unlocked`, text: `You can now explore ${title.toLowerCase()} in World.`, action: { label: `Open ${title}`, fn: () => DQ.go(page) }, sound: 'unlock', ttl: 12000 }); }
   if (!DQ.sim.on) {
     DQ.log(`Hero level ${to} reached.`, 'quest');
+    DQ.notify({ kind: 'adv', key: 'adv', icon: 'star', col: '#d8a64a', title: `Hero level ${to}`, text: `All experience now earns +${((to - 1) * .25).toFixed(1).replace(".0", "")}% bonus.`, sound: false });
   }
-  DQ.notify({ kind: 'adv', key: 'adv', icon: 'star', col: '#d8a64a', title: `Hero level ${to}!`, text: (gains.length ? `Unlocked: ${gains.join(', ')}. ` : '') + `All experience now earns +${((to - 1) * .25).toFixed(1).replace(".0", "")}% bonus.`, sound: 'level', ttl: 14000, burst: true, from, to, gains: gains.slice() });
   DQ.achDirty = true; checkQuests(); DQ.emit('lvl');
 }
 DQ.addCoins = (n, o = {}) => {
@@ -86,10 +58,7 @@ DQ.addCoins = (n, o = {}) => {
   if (DQ.sim.on) DQ.sim.coins += n; else DQ.pulse('.stat.coins');
 };
 DQ.grant = (id, n = 1) => {
-  const it = D.ITEMS[id], seen = S().seen.items || (S().seen.items = {});
-  if (!Object.keys(seen).length) Object.keys({ ...S().inv, ...S().bank, ...S().equip }).forEach(k => { if (D.ITEMS[k]) seen[k] = 1; });
-  const fresh = !seen[id] && DQ.have(id) === 0; DQ.give(id, n);
-  if (fresh) { seen[id] = 1; if (!DQ.sim.on && !DQ.forecasting) { DQ.sfx('discover'); DQ.toast(`New item discovered: ${it.name}`); DQ.notify({ kind: 'discovery', key: 'discovery:' + id, icon: it.ic, col: it.col, title: 'New item discovered', text: it.name, sound: false }); } }
+  const it = D.ITEMS[id]; DQ.give(id, n);
   if (DQ.sim.on) DQ.sim.items[id] = (DQ.sim.items[id] || 0) + n;
   if (it.rare) { S().stats.rare++; DQ.notify({ kind: 'loot', key: 'rare:' + id, icon: it.ic, col: it.col, title: 'Rare find', text: `You found ${it.name}.`, sound: 'gem', burst: true, ttl: 9000 }); }
   return it;
@@ -110,7 +79,7 @@ function objDone(q, st, i) {
   const next = q.obj.findIndex((o, j) => j !== i && DQ.objProg(q, st, j) < o.n);
   if (next < 0) return; /* whole quest done: the 'ready to claim' notice covers it */
   const o = q.obj[next], kind = OBJ_KIND[o.ev], node = kind && D.NODE[kind + ':' + o.key];
-  const go = node && DQ.nodeHere(node) && DQ.skillUnlocked(node.skill) && DQ.lvl(node.skill) >= node.lvl;
+  const go = node && node.town === S().town && DQ.skillUnlocked(node.skill) && DQ.lvl(node.skill) >= node.lvl;
   const act = go ? { label: 'Start ' + (kind === 'mine' ? 'mining' : kind === 'wood' ? 'chopping' : 'fishing'), fn: () => DQ.startAct(kind, o.key) } : { label: 'View quest', fn: () => DQ.go('quests') };
   DQ.notify({ kind: 'quest', key: 'qo:' + q.id + ':' + i, icon: 'quest', col: '#d8a64a', title: `${q.name}: part done`, text: `${q.obj[i].label} is finished. Next: ${o.label}.`, action: act, sound: 'quest', ttl: 12000 });
 }
@@ -163,7 +132,7 @@ DQ.claimQuest = id => {
   Object.entries(r.xp || {}).forEach(([k, v]) => DQ.addXp(k, v, { raw: true }));
   DQ.addCoins(r.coins || 0); Object.entries(r.items || {}).forEach(([k, v]) => DQ.grant(k, v));
   DQ.log(`Quest complete: ${q.name}.`, 'quest');
-  DQ.notify({ kind: 'quest', key: 'qd:' + id, icon: 'quest', col: '#f3d58a', title: `Quest complete: ${q.name}`, thanks: !!q.thanks, text: (q.thanks ? `${q.giver}: “${q.thanks}” ` : '') + (DQ.titleNod ? DQ.titleNod(q) : '') + 'Rewards: ' + DQ.rewardText(r, q).join(' · '), sound: 'quest', burst: true, ttl: 10000 });
+  DQ.notify({ kind: 'quest', key: 'qd:' + id, icon: 'quest', col: '#f3d58a', title: `Quest complete: ${q.name}`, text: 'Rewards: ' + DQ.rewardText(r, q).join(' · '), sound: 'quest', burst: true, ttl: 10000 });
   DQ.achDirty = true; checkQuests(); DQ.emit('quests');
 };
 
@@ -185,13 +154,10 @@ DQ.checkAch = () => {
 
 /* ---------- Activities ---------- */
 const KIND_SKILL = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving', alch: 'magic' };
-/* Activity kinds added by later skills (Sailing's voyages, Beastmastery's training): each registers
-   { skill, page, label(a), dur(id), check(id) -> refusal text or '', done(a) } here (Nov 2026). */
-const EXT = DQ.KIND_EXT = DQ.KIND_EXT || {};
 DQ.actKey = a => a ? a.kind + ':' + a.id : '';
-DQ.actSkill = a => { a = a || DQ.act; if (!a) return null; if (EXT[a.kind]) return EXT[a.kind].skill; if (a.kind === 'recipe') return D.RECIPES[a.id].skill; if (a.kind === 'fight') { const st = DQ.weaponStyle(); return st === 'ranged' ? 'ranged' : st === 'magic' ? 'magic' : D.SK[meleeSkill()].id; } return KIND_SKILL[a.kind]; };
+DQ.actSkill = a => { a = a || DQ.act; if (!a) return null; if (a.kind === 'recipe') return D.RECIPES[a.id].skill; if (a.kind === 'fight') { const st = DQ.weaponStyle(); return st === 'ranged' ? 'ranged' : st === 'magic' ? 'magic' : D.SK[meleeSkill()].id; } return KIND_SKILL[a.kind]; };
 DQ.actLabel = a => {
-  a = a || DQ.act; if (!a) return ''; if (EXT[a.kind]) return EXT[a.kind].label(a);
+  a = a || DQ.act; if (!a) return '';
   if (a.kind === 'fish') return `Fishing ${D.NODE['fish:' + a.id].name.toLowerCase()}`;
   if (a.kind === 'wood') return `Cutting ${D.NODE['wood:' + a.id].name.toLowerCase()}`;
   if (a.kind === 'mine') return `Mining ${D.NODE['mine:' + a.id].name.toLowerCase()}`;
@@ -201,16 +167,12 @@ DQ.actLabel = a => {
   const r = D.RECIPES[a.id]; return { cooking: 'Cooking', smithing: 'Making', crafting: 'Crafting' }[r.skill] + ' ' + r.name.toLowerCase();
 };
 const baseDur = (kind, id) => kind === 'recipe' ? D.RECIPES[id].t : kind === 'alch' ? 2600 : kind === 'fight' ? 2000 : D.NODE[kind + ':' + id].t;
-DQ.durFor = (kind, id) => { if (EXT[kind]) return Math.round(EXT[kind].dur(id) * DQ.speedMult(EXT[kind].skill)); const sk = kind === 'recipe' ? D.RECIPES[id].skill : KIND_SKILL[kind]; return Math.round(baseDur(kind, id) * (sk ? DQ.speedMult(sk) : 1)); };
+DQ.durFor = (kind, id) => { const sk = kind === 'recipe' ? D.RECIPES[id].skill : KIND_SKILL[kind]; return Math.round(baseDur(kind, id) * (sk ? DQ.speedMult(sk) : 1)); };
 DQ.successChance = (kind, n) => {
   const L = DQ.lvl(n.skill);
   return kind === 'thieve' ? clamp(.5 + (L - n.lvl) * .016, .4, .95) : clamp(.58 + (L - n.lvl) * .012, .55, .96);
 };
-/* Cooking (Nov 2026): any fish you hold raw can be cooked, whatever your level; your Cooking level sets how often it
-   burns. At the recipe's level 30%, falling 2.5% per level above it to 1%; below the recipe's level 4% more per level
-   short, up to 85%. (Was 55% at level, falling 2% per level.) */
-DQ.recipeLvlOk = r => !!r && (DQ.lvl(r.skill) >= r.lvl || (r.skill === 'cooking' && !!r.burn && Object.keys(r.in || {}).some(k => /^raw_/.test(k) && DQ.have(k) > 0)));
-DQ.burnChance = r => { const gap = DQ.lvl('cooking') - r.lvl; return gap >= 0 ? clamp(.30 - gap * .025 - DQ.fx().burn, .01, .30) : clamp(.30 - gap * .04 - DQ.fx().burn, .01, .85); };
+DQ.burnChance = r => clamp(.55 - (DQ.lvl('cooking') - r.lvl) * .02 - DQ.fx().burn, .01, .55);
 DQ.canMake = r => Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n);
 const meleeSkill = () => ({ accurate: 'attack', aggressive: 'strength', defensive: 'defence' }[S().style.melee]);
 
@@ -219,7 +181,7 @@ DQ.startAct = (kind, id, o = {}) => {
   const bad = m => { if (!o.quiet) DQ.toast(m, true); return false; };
   if (kind === 'recipe') {
     const r = D.RECIPES[id]; if (!DQ.skillUnlocked(r.skill)) return bad(`${D.SK[r.skill].name} is not unlocked yet`);
-    if (!DQ.recipeLvlOk(r)) return bad(`Requires ${D.SK[r.skill].name} ${r.lvl}`);
+    if (DQ.lvl(r.skill) < r.lvl) return bad(`Requires ${D.SK[r.skill].name} ${r.lvl}`);
     if (!DQ.canMake(r)) return bad('You are missing materials');
   } else if (kind === 'alch') {
     if (!DQ.skillUnlocked('magic') || DQ.lvl('magic') < D.ALCH[0].lvl) return bad(`Alchemy needs Magic ${D.ALCH[0].lvl}`);
@@ -228,74 +190,58 @@ DQ.startAct = (kind, id, o = {}) => {
     const m = D.MON[id];
     if (m.town !== S().town) return bad(`${m.name} lives in ${D.TOWN[m.town].name}`);
     if (m.boss && DQ.combatLvl() < m.boss.req) return bad(`You need combat level ${m.boss.req} to challenge ${m.boss.short}`);
-    if (m.mini && DQ.combatLvl() < m.mini.req) return bad(`You need combat level ${m.mini.req} to challenge ${m.mini.short}`);
     const st = DQ.weaponStyle();
     if (st === 'ranged' && !(S().ammo.id && (S().ammo.n > 0 || DQ.have(S().ammo.id)))) return bad('Equip some arrows first');
     if (st === 'magic' && !pickSpell()) return bad('You need more Arcane runes for a spell');
     DQ.fight = { id, hp: m.hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 };
-  } else if (EXT[kind]) {
-    if (!DQ.skillUnlocked(EXT[kind].skill)) return bad(`${D.SK[EXT[kind].skill].name} is not unlocked yet`);
-    const why = EXT[kind].check(id); if (why) return bad(why);
   } else {
     const n = D.NODE[kind + ':' + id];
-    if (!DQ.nodeHere(n)) return bad(DQ.nodeRegional(n) ? `That is only found in ${D.TOWN[n.town].name}` : `Reach ${D.TOWN[n.town].name} once to discover it`);
+    if (n.town !== S().town) return bad(`That is found in ${D.TOWN[n.town].name}`);
     if (!DQ.skillUnlocked(n.skill)) return bad(`${D.SK[n.skill].name} is not unlocked yet`);
     if (DQ.lvl(n.skill) < n.lvl) return bad(`Requires ${D.SK[n.skill].name} ${n.lvl}`);
   }
   if (DQ.act) { DQ.act = null; DQ.fight = kind === 'fight' ? DQ.fight : null; }
   const pace = o.pace || S().defPace || 'steady', rule = o.rule || 'none';
-  DQ.act = { kind, id, t0: Date.now(), pace, rule, count: 0, elapsed: 0, progress: 0 }; DQ.act.dur = DQ.actDur(DQ.act);
+  DQ.act = { kind, id, t0: Date.now(), pace, rule, count: 0, elapsed: 0 }; DQ.act.dur = DQ.actDur(DQ.act);
   const sk = DQ.actSkill(DQ.act); DQ.act.lvlTarget = sk ? Math.min(99, DQ.lvl(sk) + 1) : 0;
   S().act = { kind, id, pace, rule, count: 0, elapsed: 0, lvlTarget: DQ.act.lvlTarget }; S().lastPace = pace;
-  if (!DQ.forecasting) { S().seen.firstTask = true; DQ.sfx('start'); DQ.log(DQ.actLabel() + '.'); DQ.emit('act'); } return true;
+  if (!DQ.forecasting) { DQ.sfx('start'); DQ.log(DQ.actLabel() + '.'); DQ.emit('act'); } return true;
 };
-DQ.combatInterval = () => {
-  const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword;
-  return Math.round(W.speed*(1-Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003))*(DQ.uniqueFx&&DQ.uniqueFx().swift?.9:1));
-};
-DQ.combatSpeedText = () => { const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword,ms=DQ.combatInterval(),lv=Math.round(Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003)*100),gale=DQ.uniqueFx&&DQ.uniqueFx().swift; return `${W.name}: ${(ms/1000).toFixed(2)}s per attack · ${lv}% faster from Combat level${gale?' · 10% faster from Gale':''}`; };
 DQ.actDur = a => {
   let d = DQ.durFor(a.kind, a.id);
-  if (a.kind === 'fight') d = DQ.combatInterval();
+  if (a.kind === 'fight') d = D.WTYPES[D.weaponType()].speed;
   return Math.round(d / D.PACE[a.pace || 'steady'].speed * DQ.buffMult('slow'));
 };
 DQ.stopAct = (silent, why) => {
-  if (!DQ.act) return;
-  const stopped = DQ.act, stoppedPage = EXT[stopped.kind] ? EXT[stopped.kind].page : stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
-  DQ.act = null; DQ.fight = null; S().act = null;
+  if (!DQ.act) return; DQ.act = null; DQ.fight = null; S().act = null;
   if (why && !DQ.forecasting) setTimeout(() => { if (!DQ.act) DQ.advanceQueue(); }, 0);
-  if (!DQ.sim.on) { if (!silent) { DQ.log('You stop what you were doing.'); DQ.sfx('stop'); } if (why && (S().queue || []).length) why += ' Moving on to your next queued task.'; if (why) DQ.notify({ kind: 'warn', key: 'stopped', page: stoppedPage, icon: 'info', col: '#e5b04a', title: 'Task stopped', text: why, sound: 'stop', ttl: 9000 }); }
+  if (!DQ.sim.on) { if (!silent) { DQ.log('You stop what you were doing.'); DQ.sfx('stop'); } if (why && (S().queue || []).length) why += ' Moving on to your next queued task.'; if (why) DQ.notify({ kind: 'warn', key: 'stopped', icon: 'info', col: '#e5b04a', title: 'Task stopped', text: why, sound: 'stop', ttl: 9000 }); }
   if (!DQ.forecasting) DQ.emit('act');
 };
 
-const extraCoins = () => D.ECONOMY.gatherCoinScale * (D.ECONOMY.gatherTownScale[townIdx()] || 1);
+const extraCoins = () => [1, 3, 8, 20, 50][townIdx()];
 function floatItem(id, n) { const it = D.ITEMS[id]; DQ.floatAt(document.querySelector('.card.active .own') || document.querySelector('.card.active') || document.querySelector('.nowp'), `${DQ.ico(it.ic)}+${n} ${it.name.toLowerCase()}`, it.col); }
 function floatXp(sk, x) { DQ.floatAt(document.querySelector('.card.active') || document.querySelector('.arena') || document.querySelector('.nowp'), `${DQ.ico(sk)}+${fmt(x)} XP`, D.SK[sk].col); }
 
 function gatherDone(kind, n) {
   const sk = n.skill;
-  /* Gathering completes through effort rather than an accuracy roll. */
+  if (!chance(DQ.riskFail(DQ.successChance(kind, n)))) return;
   const qty = 1 + (chance(DQ.dblChance(sk)) ? 1 : 0);
   DQ.grant(n.item, qty);
   const x = DQ.addXp(sk, n.xp); floatXp(sk, x); floatItem(n.item, qty); if (DQ.act) DQ.act.count += qty;
   const ev = { fish: 'catch', wood: 'chop', mine: 'mine' }[kind]; S().stats[ev] += qty; DQ.qev(ev, n.id, qty);
-  /* companion tricks (js/companions.js) */
-  const T = k => DQ.trick && DQ.trick(k);
-  if (T('fetch') && chance(1 / 40)) { fxHit('fetch'); DQ.grant(n.item, 1); DQ.trickNote(`fetched ${itemName(n.item).toLowerCase()}!`); }
-  if (kind === 'fish' && T('school') && chance(1 / 12)) { fxHit('school'); DQ.grant(n.item, 1); DQ.trickNote('spotted a school! +1'); }
-  if (T('echo') && chance(1 / 20)) { fxHit('echo'); DQ.grant(n.item, qty); DQ.trickNote('echo! +' + qty); }
   DQ.sfx(kind); DQ.petRoll('skill', sk); const k = extraCoins() * DQ.coinMult();
   if (kind === 'fish') {
-    if (chance(D.ECONOMY.fishPouchChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(8, 25) * k * (T('comb') ? 1.5 : 1))); if (T('comb')) fxHit('comb'); DQ.addCoins(c); DQ.floatAt(document.querySelector('.card.active'), `${ico('pouch')}+${c} coins`, '#f3d58a'); DQ.log(`You fish up a sodden coin pouch (${c} coins).`, 'good'); DQ.sfx('coin'); }
-    if (chance(D.ECONOMY.fishChestChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(120, 260) * k)); DQ.addCoins(c); DQ.grant(DQ.weighted(D.GEM_WEIGHTS)); S().stats.rare++; DQ.log(`You haul up a sunken chest! ${c} coins and a gem.`, 'good'); DQ.notify({ kind: 'loot', key: 'chest', icon: 'pouch', col: '#f3d58a', title: 'Sunken chest', text: `You found ${c} coins and a gem.`, sound: 'gem', burst: true }); }
+    if (chance(.018 * (1 + DQ.fx().find))) { const c = rnd(8, 25) * k; DQ.addCoins(c); DQ.floatAt(document.querySelector('.card.active'), `${ico('pouch')}+${c} coins`, '#f3d58a'); DQ.log(`You fish up a sodden coin pouch (${c} coins).`, 'good'); DQ.sfx('coin'); }
+    if (chance(.0025 * (1 + DQ.fx().find))) { const c = rnd(120, 260) * k; DQ.addCoins(c); DQ.grant(DQ.weighted(D.GEM_WEIGHTS)); S().stats.rare++; DQ.log(`You haul up a sunken chest! ${c} coins and a gem.`, 'good'); DQ.notify({ kind: 'loot', key: 'chest', icon: 'pouch', col: '#f3d58a', title: 'Sunken chest', text: `You found ${c} coins and a gem.`, sound: 'gem', burst: true }); }
   } else if (kind === 'wood') {
-    if (chance(D.ECONOMY.woodNestChance * (1 + DQ.fx().find) * (T('nuts') ? 2 : 1))) { if (T('nuts')) fxHit('nuts');
-      if (chance(.5)) { const c = Math.max(1, Math.round(rnd(15, 45) * k)); DQ.addCoins(c); DQ.log(`A bird's nest holds ${c} coins.`, 'good'); DQ.floatAt(document.querySelector('.card.active'), `${ico('nest')}+${c} coins`, '#f3d58a'); DQ.sfx('coin'); }
+    if (chance(.015 * (1 + DQ.fx().find))) {
+      if (chance(.5)) { const c = rnd(15, 45) * k; DQ.addCoins(c); DQ.log(`A bird's nest holds ${c} coins.`, 'good'); DQ.floatAt(document.querySelector('.card.active'), `${ico('nest')}+${c} coins`, '#f3d58a'); DQ.sfx('coin'); }
       else { const g = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g); DQ.log(`A bird's nest holds a ${itemName(g).toLowerCase()}.`, 'good'); DQ.sfx('gem'); }
     }
   } else if (kind === 'mine') {
-    if (chance(D.ECONOMY.mineGemChance * (1 + DQ.fx().find) * (T('seam') ? 2 : 1))) { if (T('seam')) fxHit('seam'); const g = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g); DQ.log(`You find an uncut ${itemName(g).toLowerCase()}!`, 'good'); DQ.floatAt(document.querySelector('.card.active .own'), `${ico('gem')}${itemName(g)}`, D.ITEMS[g].col); DQ.sfx('gem'); }
-    if (chance(D.ECONOMY.mineCoinChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(10, 30) * k)); DQ.addCoins(c); DQ.log(`You unearth old coins (${c}).`, 'good'); }
+    if (chance(.04 * (1 + DQ.fx().find))) { const g = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g); DQ.log(`You find an uncut ${itemName(g).toLowerCase()}!`, 'good'); DQ.floatAt(document.querySelector('.card.active .own'), `${ico('gem')}${itemName(g)}`, D.ITEMS[g].col); DQ.sfx('gem'); }
+    if (chance(.008 * (1 + DQ.fx().find))) { const c = rnd(10, 30) * k; DQ.addCoins(c); DQ.log(`You unearth old coins (${c}).`, 'good'); }
   }
 }
 function thieveDone(n) {
@@ -304,10 +250,8 @@ function thieveDone(n) {
     const x = DQ.addXp('thieving', n.xp); floatXp('thieving', x);
     DQ.floatAt(document.querySelector('.card.active .own') || document.querySelector('.card.active'), `${ico('coin')}+${c} coins`, '#f3d58a');
     S().stats.thieve++; DQ.qev('thieve', n.id); DQ.sfx('thieve');
-    if (DQ.trick && DQ.trick('echo') && chance(1 / 20)) { fxHit('echo'); DQ.addCoins(c); DQ.trickNote(`echo! +${c} coins`); }
-    if (n.loot && chance(Math.min(n.loot[1] * 2, n.loot[1] * (1 + Math.max(0, DQ.lvl('thieving') - n.lvl) * .02)))) { DQ.grant(n.loot[0]); DQ.log(`You also lift ${itemName(n.loot[0]).toLowerCase()}.`, 'good'); }
+    if (n.loot && chance(n.loot[1])) { DQ.grant(n.loot[0]); DQ.log(`You also lift ${itemName(n.loot[0]).toLowerCase()}.`, 'good'); }
   } else {
-    if (DQ.trick && DQ.trick('paws') && (S().gameTime || 0) - (S().pets.paws ?? -1e12) >= 60000) { S().pets.paws = S().gameTime || 0; fxHit('paws'); DQ.trickNote('covered for you!'); return; }
     const d = Math.max(1, Math.round(rnd(1, n.dmg) * DQ.pace().risk)); S().hp -= d; DQ.sfx('hurt');
     DQ.log(`You are caught! (${d} damage)`, 'bad'); DQ.floatAt(document.querySelector('.hud .hp'), `-${d} health`, '#e2574c');
     if (S().hp <= 0) return die(); autoEat();
@@ -318,13 +262,10 @@ function recipeDone(r) {
   Object.entries(r.in).forEach(([k, n]) => DQ.take(k, n));
   const outId = Object.keys(r.out)[0];
   if (DQ.act) DQ.act.count++;
-  const taster = DQ.trick && DQ.trick('taster'); if (taster && r.burn && DQ.act && DQ.act.count === 1) fxHit('taster');
-  if (r.burn && !(taster && DQ.act && DQ.act.count === 1) && chance(Math.min(.92, DQ.burnChance(r) * DQ.pace().risk * (taster ? .75 : 1)))) { DQ.grant('burnt'); S().stats.burn++; DQ.floatAt(document.querySelector('.card.active'), 'Burnt!', '#e2574c'); DQ.sfx('hurt'); }
+  if (r.burn && chance(Math.min(.9, DQ.burnChance(r) * DQ.pace().risk))) { DQ.grant('burnt'); S().stats.burn++; DQ.floatAt(document.querySelector('.card.active'), 'Burnt!', '#e2574c'); DQ.sfx('hurt'); }
   else {
     const dbl = chance(DQ.dblChance(r.skill)) ? 2 : 1;
     Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n * dbl));
-    if (DQ.trick && DQ.trick('bellows') && r.skill === 'smithing' && r.tab === 'Bars' && chance(.1)) { fxHit('bellows'); Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); DQ.trickNote('an extra bar!'); }
-    if (DQ.trick && DQ.trick('echo') && chance(1 / 20)) { fxHit('echo'); Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); DQ.trickNote('echo! a free one'); }
     const x = DQ.addXp(r.skill, r.xp); floatXp(r.skill, x); floatItem(outId, r.out[outId] * dbl);
     S().stats[r.ev] += 1; DQ.qev(r.ev, outId, 1); DQ.petRoll('skill', r.skill); DQ.sfx({ cooking: 'sizzle', smithing: 'anvil', crafting: 'stitch' }[r.skill]);
   }
@@ -343,10 +284,6 @@ function alchDone(id) {
 DQ.isEquipped = id => Object.values(S().equip).includes(id);
 
 /* ---------- Combat ---------- */
-/* every unique effect and companion trick counts its triggers here (transient, never saved): tests prove each one
-   fires in live play, offline catch-up and forecasts, and the arena shows the moment it happens */
-const fxHit = (k, n = 1) => { const H = DQ.effectHits = DQ.effectHits || {}; H[k] = (H[k] || 0) + n; };
-DQ.fxHit = fxHit;
 const pickSpell = () => {
   const sp = D.SPELLS.find(s => s.id === S().spell);
   const ok = s => s && DQ.lvl('magic') >= s.lvl && DQ.have('rune') >= s.runes;
@@ -360,7 +297,7 @@ DQ.pstats = () => {
   let acc, max, sp = null;
   if (st === 'ranged') { const e = L('ranged') + 8; acc = e * (64 + b.rng); max = Math.floor(2 + e * (64 + b.rngStr) / DMG_DIV); }
   else if (st === 'magic') { sp = pickSpell() || D.SPELLS[0]; const e = L('magic') + 8; acc = e * (64 + b.mag); max = sp.max + Math.floor(L('magic') / 10) + Math.floor(b.mag / 12); }
-  else { const k = (D.STYLE_TUNE && D.STYLE_TUNE.meleeLevel) || 1, e = L('attack') * k + 8 + (sty.melee === 'accurate' ? 3 : 0), es = L('strength') * k + 8 + (sty.melee === 'aggressive' ? 3 : 0); acc = e * (64 + b.atk); max = Math.floor(2 + es * (64 + b.str) / DMG_DIV); }
+  else { const e = L('attack') + 8 + (sty.melee === 'accurate' ? 3 : 0), es = L('strength') + 8 + (sty.melee === 'aggressive' ? 3 : 0); acc = e * (64 + b.atk); max = Math.floor(2 + es * (64 + b.str) / DMG_DIV); }
   const f = DQ.fx(), raw = max * (1 + f.dmg) * DQ.buffMult('weak'); max = Math.max(1, Math.round(raw));
   return { style: st, acc, max, maxRaw: raw, defRoll, red: Math.min(.75, b.def / (b.def + 320) + f.dr), spell: sp };
 };
@@ -396,7 +333,7 @@ function die() {
 DQ.splat = (side, text, kind, delay) => { if (!DQ.sim.on) DQ.emit('splat', side, text, kind, delay); };
 
 function combatRound() {
-  const f = DQ.fight, m = D.MON[f.id], ps = DQ.pstats(), A = DQ.ability, U = DQ.uniqueFx(); DQ.lastFoe = f.id; f.round++; f.pa = (f.pa || 0) + 1;
+  const f = DQ.fight, m = D.MON[f.id], ps = DQ.pstats(), A = DQ.ability; f.round++; f.pa = (f.pa || 0) + 1;
   const sty = ps.style, W = D.WTYPES[D.weaponType()], mhp = m.hp;
   if (sty === 'ranged') {
     if (S().ammo.n <= 0 && S().ammo.id && DQ.have(S().ammo.id)) { const n = Math.min(DQ.have(S().ammo.id), 500); DQ.take(S().ammo.id, n); S().ammo.n += n; }
@@ -415,54 +352,33 @@ function combatRound() {
     f.frozen = 0;
     const wr = DQ.weakOf(m, f), grounded = m.id === 'zephyrion' && f.pinned > 0;
     const weak = wr.weak.includes(dtype), resist = wr.resist.includes(dtype) && !(grounded && D.PHYSICAL.includes(dtype));
-    /* bosses are counter checks, not locks: a weakness helps a lot and a resistance hurts, but less than on ordinary
-       monsters, so preparation matters without guaranteeing the fight (scripts/sim-bosses.cjs COUNTER=1) */
-    let mult = weak ? DQ.typeMult(m, 'weak') : resist ? DQ.typeMult(m, 'resist') : 1; tag = weak ? 'weak' : resist ? 'resist' : '';
+    let mult = weak ? (A('focus') ? 2 : 1.5) : resist ? .5 : 1; tag = weak ? 'weak' : resist ? 'resist' : '';
     let acc = ps.acc * W.acc * (weak ? 1.1 : 1), max = ps.max * W.dmg * mult * (1 + DQ.beastBonus(m.id)), sure = false;
     if (A('aimed') && f.pa % 3 === 0) { sure = true; max *= 1.5; }
     if (A('power') && f.pa % 4 === 0) { max *= 2; tag = 'power'; }
     if (A('execute') && f.hp < mhp * .3) max *= 1.5;
-    /* unique gear (data.js unique.key) */
-    if (U.marked && f.pa <= 3) { sure = true; max *= 1.5; fxHit('marked'); }
-    if (U.fury) { max *= 1.1 + .3 * (1 - clamp(S().hp / DQ.maxHp(), 0, 1)); fxHit('fury'); } /* always +10%, up to +40% as health falls */
     const mDef = (m.def + 8) * (64 + m.def);
     if (sure || Math.random() < hitChance(acc, mDef)) dealt = rnd(1, Math.max(1, Math.round(max)));
     if (dealt && A('pin')) f.pinned = 2;
-    if (dealt && U.twin && chance(.2)) { dealt += rnd(1, Math.max(1, Math.round(max))); tag += ' twin'; fxHit('twin'); DQ.splat('foe', 'Twin cut', 'hit', 180); }
-    if (dealt && U.arc && sty === 'magic' && chance(.2)) { dealt += Math.max(1, Math.round(dealt * .5)); fxHit('arc'); DQ.splat('foe', 'Arc', 'hit', 180); }
-    if (dealt && U.stun && chance(.12)) { f.stun = 1; fxHit('stun'); }
-    if (dealt && U.poison) { f.poison = Math.min(3, (f.poison || 0) + 1); fxHit('poison'); }
-    if (dealt && U.curse && sty === 'magic') { f.curse = Math.min(3, (f.curse || 0) + 1); fxHit('curse'); }
   }
-  /* XP counts the damage the creature could actually take: overkill on weak creatures teaches nothing extra */
-  const xpDealt = Math.min(dealt, Math.max(0, f.hp));
   f.hp -= dealt; DQ.splat('foe', dealt, dealt ? 'hit ' + tag : 'miss', 0);
-  if (dealt && (U.lifesteal || U.sovereign)) { const before = S().hp; S().hp = Math.min(DQ.maxHp(), S().hp + Math.max(1, Math.round(dealt * (U.lifesteal ? .2 : .08)))); const h = Math.round(S().hp - before); if (h > 0) { fxHit(U.lifesteal ? 'lifesteal' : 'sovereign'); DQ.splat('you', '+' + h, 'heal', 300); } }
-  if (U.ember && sty === 'ranged') { const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(2, Math.round(ps.max * .25))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 300); fxHit('ember'); }
-  if (DQ.trick && DQ.trick('charge') && f.round === 1) { fxHit('charge'); const c = Math.max(1, Math.round(ps.max * W.dmg * .5)); f.hp -= c; DQ.splat('foe', c, 'hit power', 250); }
-  if (DQ.trick && DQ.trick('ember') && f.pa % 6 === 0) { fxHit('trickember'); const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(1, Math.round(ps.max * .5))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 320); }
   DQ.sfx(sty === 'ranged' ? 'bow' : sty === 'magic' ? 'cast' : dealt ? 'hit' : 'miss');
-  if (xpDealt) {
+  if (dealt) {
     let first = null;
-    DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, xpDealt * per); if (!i) first = [sk, x]; });
-    DQ.addXp('hitpoints', xpDealt * 1.33);
+    DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, dealt * per); if (!i) first = [sk, x]; });
+    DQ.addXp('hitpoints', dealt * 1.33);
     if (first) DQ.floatAt(document.getElementById('av-foe'), `${ico(first[0])}+${fmt(first[1])} XP`, D.SK[first[0]].col);
   }
   if (f.hp <= 0) return kill(m);
   /* the monster attacks on its own clock: faster weapons get more swings in between */
   f.mt = (f.mt || 0) + (DQ.act ? DQ.act.dur * D.PACE[DQ.act.pace || 'steady'].speed : 2000);
-  const clock = U.slow ? 2300 : 2000; if (U.slow) fxHit('slow');
-  while (f.mt >= clock && DQ.fight) { f.mt -= clock; if (monsterAttack(f, m, ps, sty) === 'dead') return; }
+  while (f.mt >= 2000 && DQ.fight) { f.mt -= 2000; if (monsterAttack(f, m, ps, sty) === 'dead') return; }
 }
 function monsterAttack(f, m, ps, sty) {
-  const A = DQ.ability, U = DQ.uniqueFx(); f.ma = (f.ma || 0) + 1;
-  if (f.poison) { const pd = f.poison * Math.max(1, Math.round(ps.max * .12)); f.hp -= pd; DQ.splat('foe', pd, 'hit poison', 300); fxHit('poisontick'); if (f.hp <= 0) { kill(m); return 'dead'; } }
-  if (f.stun) { f.stun = 0; DQ.splat('foe', 'Stunned', 'miss', 600); return; }
-  if (U.roar && !f.roared) { f.roared = 1; fxHit('roar'); DQ.splat('you', 'Roar!', 'miss', 600); return; }
-  const bm = m.boss || m.mini, special = bm && bm.special && f.ma % bm.special.every === 0, sp = special && bm.special;
-  if (special && A('bash') && f.ma - (f.lastBash || -99) >= 8) { f.lastBash = f.ma; if (!DQ.forecasting) beastNote('answered', m.id); DQ.splat('you', 'Bash!', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your shield bash interrupts ${sp.name}!`, 'good'); return; }
-  if (special && A('ward') && f.ma - (f.lastWard || -99) >= 6) { f.lastWard = f.ma; if (!DQ.forecasting) beastNote('answered', m.id); DQ.splat('you', 'Ward', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your ward absorbs ${sp.name}.`, 'good'); return; }
-  if (DQ.trick && DQ.trick('heckle') && !f.heckled && f.ma >= 2) { f.heckled = 1; fxHit('heckle'); DQ.splat('you', 'Oi!', 'miss', 600); if (!DQ.sim.on) DQ.trickNote('heckled it into missing!', document.getElementById('av-foe')); return; }
+  const A = DQ.ability; f.ma = (f.ma || 0) + 1;
+  const special = m.boss && m.boss.special && f.ma % m.boss.special.every === 0, sp = special && m.boss.special;
+  if (special && A('bash') && f.ma - (f.lastBash || -99) >= 8) { f.lastBash = f.ma; DQ.splat('you', 'Bash!', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your shield bash interrupts ${sp.name}!`, 'good'); return; }
+  if (special && A('ward') && f.ma - (f.lastWard || -99) >= 6) { f.lastWard = f.ma; DQ.splat('you', 'Ward', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your ward absorbs ${sp.name}.`, 'good'); return; }
   let acc = hitChance((m.att + 8) * (64 + m.att), ps.defRoll); if (f.pinned > 0) { acc *= .75; f.pinned--; }
   let taken = 0;
   if (special || Math.random() < acc) {
@@ -472,59 +388,34 @@ function monsterAttack(f, m, ps, sty) {
       if (m.id === 'oldtusk' && sty === 'ranged') taken *= .5;
       if (m.id === 'pyrrhax' && f.lastEl === 'frost') taken *= .5;
       if (A('brace')) taken *= .5;
-      if (U.bulwark) { taken *= .65; fxHit('bulwark'); } else if (U.sovereign) { taken *= .8; fxHit('sovereign'); }
-      if (DQ.trick && DQ.trick('cold')) { taken *= .8; fxHit('cold'); }
       if (m.id === 'frostmaw') f.frozen = 1;
       if (m.id === 'morwenna') f.hex = 4;
-    } else { if (A('kite')) taken *= .7; if (U.hide) { taken *= .85; fxHit('hide'); } }
-    if (f.curse) { taken *= 1 - .05 * f.curse; fxHit('cursed'); }
+    } else if (A('kite')) taken *= .7;
     taken = Math.max(1, Math.round(taken * (1 - ps.red) * ({ careful: .85, steady: 1, push: 1.25 }[(DQ.act && DQ.act.pace) || 'steady'])));
   }
   if (f.hex > 0) { f.hex--; taken += Math.max(1, Math.round(m.max * .25)); }
-  if (taken && U.thorns) { const t = Math.max(1, Math.round(taken * .35)); f.hp -= t; fxHit('thorns'); DQ.splat('foe', t, 'hit', 650); }
-  if (taken && U.riposte && chance(.2)) { const r = rnd(1, Math.max(1, ps.max)); f.hp -= r; fxHit('riposte'); DQ.splat('foe', r, 'hit', 700); }
   S().hp -= taken; DQ.splat('you', special ? taken + '!' : taken, taken ? 'hit' : 'miss', 900);
-  if (S().hp <= 0 && U.laststand && !f.last) { f.last = 1; S().hp = 1; fxHit('laststand'); DQ.splat('you', 'Last stand!', 'miss', 1000); }
   if (taken) setTimeout(() => DQ.sfx('hurt'), 900);
-  if (special && !DQ.sim.on) { DQ.log(`${m.name} unleashes ${sp.name}!`, 'bad'); DQ.emit('bossSpecial', m); }
-  if (!DQ.sim.on && (m.boss || m.mini) && (m.boss || m.mini).special) DQ.emit('bossTell', m, (f.ma + 1) % (m.boss || m.mini).special.every === 0);
+  if (special && !DQ.sim.on) DQ.log(`${m.name} unleashes ${sp.name}!`, 'bad');
   if (S().hp <= 0) { die(); return 'dead'; }
-  if (special && !DQ.forecasting) beastNote('answered', m.id);
-  if (f.hp <= 0) { kill(m); return 'dead'; }
   if (A('second') && !f.sw && S().hp < DQ.maxHp() * .3) { f.sw = 1; const h = Math.round(DQ.maxHp() * .3); S().hp += h; DQ.floatAt(document.querySelector('.hud .hp'), `Second wind +${h}`, '#5cc08a'); }
   autoEat();
-  /* Healing draught: an emergency drink once the food is gone and health is low, at most once per fight */
-  if (S().settings.autoEat && !f.drank && !DQ.foods().length && S().hp < DQ.maxHp() * .25 && DQ.have('potion_heal')) {
-    f.drank = 1; DQ.take('potion_heal', 1); const h = Math.min(Math.round(DQ.maxHp() * .4), DQ.maxHp() - S().hp); S().hp += h; fxHit('draught'); DQ.splat('you', 'Draught +' + h, 'heal', 950);
-  }
   if (DQ.act && DQ.act.pace === 'careful' && S().hp < DQ.maxHp() * .35 && !DQ.foods().length) { DQ.stopAct(false, 'You retreated at low health with no food left (Careful pace).'); return 'dead'; }
 }
-/* field-guide understanding (bestiary.js): wins whose finishing blow used a weak point, and boss specials you answered */
-const beastNote = (key, id) => { const B = S().beast; const T = B[key] = B[key] || {}; T[id] = (T[id] || 0) + 1; };
 function kill(m) {
-  const f = DQ.fight;
-  if (f && !DQ.forecasting) { const wr = DQ.weakOf(m, f); if (f.lastEl && wr.weak.includes(f.lastEl)) beastNote('weakWins', m.id); } S().stats.kill++; if (DQ.act) DQ.act.count++;
+  const f = DQ.fight; S().stats.kill++; if (DQ.act) DQ.act.count++;
   const c = Math.round(rnd(m.coins[0], m.coins[1]) * DQ.coinMult()); DQ.addCoins(c);
   const loot = c ? [`${fmt(c)} coins`] : [], got = [], drops = [];
-  const first = m.boss && !(S().towns[m.town] && S().towns[m.town].boss), firstMini = m.mini && !(S().minis && S().minis[m.id]);
-  if (DQ.uniqueFx().fortune) fxHit('fortune');
+  const first = m.boss && !(S().towns[m.town] && S().towns[m.town].boss);
   let extraCoins = 0;
   for (const [id, [a, b], p] of m.drops) {
-    const guaranteed = (first && m.boss.first === id) || (firstMini && m.mini.first === id);
-    /* weapons and armour for a skill you have not learned yet (bows before Ranged, staves before Magic) do not drop */
-    if (!guaranteed && D.ITEMS[id] && (D.ITEMS[id].type === 'gear' || D.ITEMS[id].type === 'ammo') && DQ.lockedSkillFor(id)) continue;
-    const uniq = !m.boss && D.ITEMS[id] && D.ITEMS[id].unique, found = S().uniqFound = S().uniqFound || {};
-    let pity = false;
-    if (uniq && !guaranteed && !found[id]) { const P = S().upity = S().upity || {}; P[id] = (P[id] || 0) + 1; pity = P[id] >= Math.ceil(2.5 / p); }
-    if (!(guaranteed || pity || chance(Math.min(1, p * DQ.buffMult('luck') * (DQ.uniqueFx().fortune ? 1.25 : 1))))) continue;
-    if (uniq) { const firstCopy = !found[id]; found[id] = 1; if (S().upity) delete S().upity[id];
-      if (firstCopy && !DQ.forecasting) { DQ.notify({ kind: 'unlock', key: 'unique:' + id, icon: D.ITEMS[id].ic, col: D.ITEMS[id].col, title: `Unique find: ${D.ITEMS[id].name}`, text: `${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}${D.UNIQUE_USE && D.UNIQUE_USE[D.ITEMS[id].unique.key] ? ` Good for ${D.UNIQUE_USE[D.ITEMS[id].unique.key]}.` : ''}`, action: { label: 'Inspect', fn: () => { DQ.ui.sel = id; DQ.ui.selFrom = 'pack'; DQ.go('character'); DQ.ui.render(false); } }, sound: 'unique', burst: true, ttl: 14000 }); S().freshUnique = id; if (DQ.journal) DQ.journal('loot', `${m.name} dropped ${D.ITEMS[id].name}. ${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, D.ITEMS[id].ic); } }
+    const guaranteed = first && m.boss.first === id;
+    if (!(guaranteed || chance(Math.min(1, p * DQ.buffMult('luck'))))) continue;
     const n = rnd(a, b), rar = D.rarityOf(guaranteed ? 0 : p); got.push(id);
-    if (id === 'coin_pouch') { const cc = Math.round(rnd(m.coins[0] + 5, m.coins[1] * 3 + 10) * DQ.coinMult() * (DQ.trick && DQ.trick('comb') ? 1.5 : 1)); if (DQ.trick && DQ.trick('comb')) fxHit('comb'); extraCoins += cc; drops.push({ id, n: cc, rar, coins: true }); loot.push(`a pouch of ${fmt(cc)} coins`); continue; }
+    if (id === 'coin_pouch') { const cc = Math.round(rnd(m.coins[0] + 5, m.coins[1] * 3 + 10) * DQ.coinMult()); extraCoins += cc; drops.push({ id, n: cc, rar, coins: true }); loot.push(`a pouch of ${fmt(cc)} coins`); continue; }
     if (id === 'treasure_chest') {
-      const cc = Math.round((rnd(m.coins[1] * 5, m.coins[1] * 12) + 50) * DQ.coinMult() * (1 + .01 * DQ.thiefLvl())); extraCoins += cc; const gem = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(gem); S().stats.rare++;
-      if (DQ.thiefLvl() >= 30) { const g2 = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(g2); drops.push({ id: g2, n: 1, rar: D.RARITY[2] }); }
-      const gl = (D.TOWN_GEAR[m.town] || []).filter(g => !DQ.lockedSkillFor(g)), gi = gl.length && chance(.35) ? DQ.pick(gl) : null; if (gi) DQ.grant(gi);
+      const cc = Math.round((rnd(m.coins[1] * 5, m.coins[1] * 12) + 50) * DQ.coinMult()); extraCoins += cc; const gem = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(gem); S().stats.rare++;
+      const gl = D.TOWN_GEAR[m.town] || [], gi = gl.length && chance(.35) ? DQ.pick(gl) : null; if (gi) DQ.grant(gi);
       drops.push({ id, n: cc, rar, coins: true }, { id: gem, n: 1, rar: D.RARITY[2] }); if (gi) drops.push({ id: gi, n: 1, rar: D.RARITY[3] });
       loot.push(`a treasure chest (${fmt(cc)} coins, ${itemName(gem).toLowerCase()}${gi ? ', ' + itemName(gi).toLowerCase() : ''})`);
       DQ.notify({ kind: 'loot', key: 'chest', icon: 'pouch', col: '#ffb84a', title: 'Treasure chest!', text: `${fmt(cc)} coins, a ${itemName(gem).toLowerCase()}${gi ? ' and ' + itemName(gi) : ''}.`, sound: 'gem', burst: true });
@@ -544,41 +435,22 @@ function kill(m) {
       const t = S().towns[m.town] || (S().towns[m.town] = { visited: true, boss: false }); t.boss = true; const next = D.TOWNS[D.TOWN[m.town].idx + 1];
       if (next && !S().towns[next.id]) S().towns[next.id] = { visited: false, boss: false };
       DQ.sfx('boss');
-      DQ.notify({ kind: 'boss', key: 'boss:' + m.id, icon: 'skull', col: '#f3d58a', title: `${m.boss.short} is defeated`, text: (next ? `The road to ${next.name} is open.` : 'The realm is safe. For now.') + (D.BOSS_VOICES && D.BOSS_VOICES[m.id] ? ` ${D.BOSS_VOICES[m.id][0]}: “${D.BOSS_VOICES[m.id][1]}”` : ''), action: next ? { label: 'Open the map', fn: () => DQ.go('map') } : null, sound: false, burst: true, ttl: 15000 });
+      DQ.notify({ kind: 'boss', key: 'boss:' + m.id, icon: 'skull', col: '#f3d58a', title: `${m.boss.short} is defeated`, text: next ? `The road to ${next.name} is open.` : 'The realm is safe. For now.', action: next ? { label: 'Open the map', fn: () => DQ.go('map') } : null, sound: false, burst: true, ttl: 15000 });
       DQ.log(`${m.name} falls. ${next ? 'The road to ' + next.name + ' opens.' : ''}`, 'quest');
       DQ.achDirty = true; DQ.fxDirty(); DQ.emit('travelunlock');
-      /* a first victory ends the fight: no instant rematch at whatever health is left (repeat fights for loot continue) */
-      if (!DQ.forecasting) { if (DQ.creatureGainXp) DQ.creatureGainXp(m); DQ.stopAct(true); return; }
     }
   }
-  /* a mini-boss: the first victory is recorded and noted, and ends the fight like a boss's */
-  if (firstMini) {
-    S().minis = S().minis || {}; S().minis[m.id] = true;
-    if (!DQ.sim.on && !DQ.forecasting) { DQ.sfx('boss'); DQ.notify({ kind: 'boss', key: 'mini:' + m.id, icon: 'skull', col: '#f3d58a', title: `${m.mini.short} is defeated`, text: m.mini.won || `${D.TOWN[m.town].name} breathes a little easier.`, burst: true }); DQ.log(`${m.name} falls.`, 'quest'); }
-    DQ.achDirty = true;
-    if (!DQ.forecasting) { if (DQ.creatureGainXp) DQ.creatureGainXp(m); DQ.stopAct(true); return; }
-  }
-  if (DQ.creatureGainXp) DQ.creatureGainXp(m);
-  const next = DQ.nextEncounter && DQ.nextEncounter(m);
-  if (next) {
-    DQ.act.id = next.id; S().act.id = next.id; f.id = next.id; f.hp = next.hp;
-    if (!DQ.sim.on) { DQ.log(`You encounter ${/^[AEIOU]/.test(next.name) ? 'an' : 'a'} ${next.name.toLowerCase()}.`); DQ.emit('encounter', next); }
-  } else f.hp = m.hp;
-  f.round = 0;
+  f.hp = m.hp; f.round = 0;
 }
 
 /* ---------- Dispatch ---------- */
 function complete() {
   const a = DQ.act; if (!a) return;
-  const beforeCount = a.count;
   if (a.kind === 'recipe') recipeDone(D.RECIPES[a.id]);
   else if (a.kind === 'alch') alchDone(a.id);
   else if (a.kind === 'fight') combatRound();
   else if (a.kind === 'thieve') thieveDone(D.NODE['thieve:' + a.id]);
-  else if (EXT[a.kind]) EXT[a.kind].done(a);
   else gatherDone(a.kind, D.NODE[a.kind + ':' + a.id]);
-  DQ.checkActionUnlocks?.();
-  if (!DQ.sim.on && a.kind !== 'fight') DQ.emit('workcycle', { kind: a.kind, id: a.id, quantity: a.count - beforeCount });
   if (DQ.act === a) { a.elapsed += a.dur; S().act && Object.assign(S().act, { count: a.count, elapsed: a.elapsed }); a.dur = DQ.actDur(a); DQ.checkRule(); }
 }
 
@@ -591,43 +463,18 @@ DQ.travel = id => {
 };
 
 /* ---------- Shop ---------- */
-/* gear for a skill you have not learned yet (Ranged, Magic) is not sold until you can use it */
-DQ.lockedSkillFor = id => { const it = D.ITEMS[id]; return it && it.req ? Object.keys(it.req).find(k => D.SK[k] && !DQ.skillUnlocked(k)) || null : null; };
-DQ.skillTeacher = sk => { const s = D.SK[sk]; if (!s) return ''; const q = s.quest && D.QM[s.quest];
-  return q ? `${q.giver} in ${D.TOWN[q.town].name} teaches it (“${q.name}”, from Hero ${q.adv})` : s.actionReq ? DQ.unlockHow(sk) : `It unlocks at Hero level ${s.unlock}`; };
-/* Thieving's purpose (Nov 2026). A trained thief haggles, picks locks and knows where the good stuff is:
-   - Silver tongue: every shop sells to you 0.15% cheaper and buys from you 0.2% dearer per Thieving level
-     (about 15% off and 20% more at 99);
-   - Lockpicking: treasure chests from creatures hold 1% more coins per Thieving level, with a second gem from 30,
-     and locked chests found while away can be picked safely (DQ.pickChance);
-   - Signature hauls: each target's special item turns up more often the further your level is above the target. */
-DQ.thiefLvl = () => DQ.skillUnlocked && DQ.skillUnlocked('thieving') ? DQ.lvl('thieving') : 0;
-DQ.buyPrice = id => { const it = D.ITEMS[id]; return it ? Math.max(1, Math.round(it.buy * (1 - .0015 * DQ.thiefLvl()))) : 0; };
-DQ.sellPrice = id => { const it = D.ITEMS[id]; return it ? Math.round((it.val || 0) * (1 + .002 * DQ.thiefLvl())) : 0; };
-DQ.pickChance = () => clamp(.45 + DQ.thiefLvl() * .01, .45, .97);
 DQ.buy = (id, qty = 1) => {
-  const it = D.ITEMS[id]; let price = DQ.buyPrice(id) * qty;
-  const lock = DQ.lockedSkillFor(id); if (lock) return DQ.toast(`Learn ${D.SK[lock].name} first. ${DQ.skillTeacher(lock)}.`, true);
-  if (it.type === 'tool') { if (DQ.have(id)) return DQ.toast('You already own that', true); qty = 1; price = DQ.buyPrice(id); }
+  const it = D.ITEMS[id]; let price = it.buy * qty;
+  if (it.type === 'tool') { if (DQ.have(id)) return DQ.toast('You already own that', true); qty = 1; price = it.buy; }
   if (S().coins < price) return DQ.toast('Not enough coins', true);
   S().coins -= price; DQ.give(id, qty); S().stats.bought += qty; if (it.type === 'tool') S().stats.tools++;
   DQ.sfx('buy'); DQ.achDirty = true; DQ.emit('shop'); return true;
 };
-/* Keepsakes (adventure relics and anything marked keepsake) belong to a story and can never be sold, from any screen. */
-DQ.sellable = id => { const it = D.ITEMS[id]; return !!it && it.type !== 'relic' && !it.keepsake; };
-DQ.KEEPSAKE_NOTE = 'Keepsake: part of an adventure, so it cannot be sold. It stays safe in your pack or bank.';
-DQ.sell = (id, qty, from) => {
-  const it = D.ITEMS[id], store = from === 'pack' ? S().inv : from === 'bank' ? S().bank : null;
-  if (!it || !Number.isFinite(qty) || qty <= 0) return;
-  if (!DQ.sellable(id)) { if (DQ.toast) DQ.toast(`${it.name} is a keepsake and cannot be sold`, true); return; }
-  qty = Math.min(Math.floor(qty), store ? store[id] || 0 : DQ.have(id));
-  if (!qty) return;
-  if (store) { store[id] -= qty; if (!store[id]) delete store[id]; DQ.invDirty = true; }
-  else DQ.take(id, qty);
-  const coins = DQ.sellPrice(id) * qty;
-  DQ.addCoins(coins); S().stats.sold += qty; DQ.sfx('sell'); DQ.achDirty = true; DQ.emit('shop'); return coins;
+DQ.sell = (id, qty) => {
+  const it = D.ITEMS[id]; qty = Math.min(qty, DQ.have(id) - (DQ.isEquipped(id) ? 0 : 0)); if (qty <= 0) return;
+  DQ.take(id, qty); const c = it.val * qty; DQ.addCoins(c); S().stats.sold += qty; DQ.sfx('sell'); DQ.achDirty = true; DQ.emit('shop'); return c;
 };
-DQ.sellJunk = () => { let c = 0; Object.keys({ ...S().inv, ...S().bank }).forEach(id => { if (D.ITEMS[id] && D.ITEMS[id].type === 'junk' && DQ.sellable(id)) c += DQ.sell(id, DQ.have(id)) || 0; }); return c; };
+DQ.sellJunk = () => { let c = 0; Object.keys({ ...S().inv, ...S().bank }).forEach(id => { if (D.ITEMS[id].type === 'junk') c += DQ.sell(id, DQ.have(id)) || 0; }); return c; };
 
 /* ---------- Offline and catch-up simulation ---------- */
 /* Time away: full speed for the first two hours, half speed after that, capped at 8 hours */
@@ -640,72 +487,23 @@ DQ.noteAway = (gap, eff) => {
   const t = st.tele = st.tele || { adv: {}, skill: {}, first: {}, away: [], sessions: 0 };
   t.away.push({ at: Date.now(), gap, eff }); if (t.away.length > 20) t.away.shift();
 };
-/* One elapsed-time budget drives live play, forecasts and offline catch-up. */
-DQ.advanceTime = (effectiveMs, realMs = effectiveMs, partial = 0) => {
-  let realLeft = Math.max(0, realMs), effectiveLeft = Math.max(0, effectiveMs), actions = 0;
-  let progress = DQ.act ? partial : 0;
-  while (realLeft > .001) {
-    const a = DQ.act, duration = a ? Math.max(1, DQ.actDur(a)) : Infinity;
-    const ratio = effectiveLeft / realLeft;
-    let step = Math.min(1000, realLeft);
-    if (a && ratio > 0) step = Math.min(step, Math.max(0, duration - progress) / ratio);
-    for (const buff of DQ.buffs ? DQ.buffs() : []) step = Math.min(step, buff.until - S().gameTime);
-    for (const research of S().research.active) step = Math.min(step, research.left);
-    step = Math.max(.001, step);
-    const worked = Math.min(effectiveLeft, step * ratio);
-    if (!a || a.kind !== 'fight') {
-      S().hp = Math.min(DQ.maxHp(), S().hp + Math.ceil(DQ.maxHp() / 50) * (1 + DQ.fx().regen) * worked / 3000);
+DQ.simulate = (ms, real) => {
+  const sim = DQ.sim = { on: true, xp: {}, items: {}, coins: 0, kills: 0, levels: [], notes: [], adv: null, ms, real: real || ms, advFrom: DQ.advLvl(), eaten: 0, died: false, label: DQ.act ? DQ.actLabel() : '' };
+  const hpRegen = ms2 => Math.ceil(DQ.maxHp() / 50) * (1 + DQ.fx().regen) * (ms2 / 3000);
+  DQ.advanceWorld(real || ms);
+  const a = DQ.act;
+  if (a) {
+    const n = Math.min(Math.floor(ms / a.dur), 60000); let i = 0;
+    for (; i < n && DQ.act; i++) {
+      complete();
+      if (DQ.act && DQ.act.kind !== 'fight') S().hp = Math.min(DQ.maxHp(), S().hp + hpRegen(a.dur));
     }
-    progress += a ? worked : 0;
-    DQ.advanceWorld(step);
-    realLeft = Math.max(0, realLeft - step);
-    effectiveLeft = Math.max(0, effectiveLeft - worked);
-    if (a && DQ.act === a && progress + .001 >= duration) {
-      a.dur = duration;
-      complete(); actions++;
-      progress = 0;
-    }
-    if (DQ.act !== a) progress = 0;
-    if (DQ.act) DQ.act.dur = DQ.actDur(DQ.act);
-  }
-  if (DQ.act) {
-    DQ.act.progress = progress;
-    DQ.act.t0 = Date.now() - progress;
-    if (S().act) S().act.progress = progress;
-  }
-  return actions;
-};
-DQ.simulate = (ms, real = ms) => {
-  const sim = DQ.sim = { on: true, xp: {}, items: {}, coins: 0, kills: 0, levels: [], notes: [], adv: null, ms, real, advFrom: DQ.advLvl(), eaten: 0, died: false, label: DQ.act ? DQ.actLabel() : '' };
-  try {
-    const partial = DQ.act ? DQ.act.progress || 0 : 0;
-    /* Real absences use the same two-hour taper shown to the player. */
-    if (real > OFFLINE_FULL && ms === DQ.offlineEff(real)) {
-      sim.actions = DQ.advanceTime(OFFLINE_FULL, OFFLINE_FULL, partial);
-      sim.actions += DQ.advanceTime(ms - OFFLINE_FULL, real - OFFLINE_FULL, DQ.act ? DQ.act.progress || 0 : 0);
-    } else sim.actions = DQ.advanceTime(ms, real, partial);
-    sim.stopped = !DQ.act;
-  } finally { sim.on = false; }
-  if (!DQ.forecasting) DQ.checkAch();
-  const summaries = new Map();
-  for (const note of sim.notes.filter(n => ['level', 'adv', 'unlock', 'boss'].includes(n.kind))) {
-    let n = { ...note };
-    const key = n.key || n.title, previous = summaries.get(key);
-    if (previous && n.kind === 'level') {
-      n.from = previous.from;
-      n.unlocks = [...new Set([...(previous.unlocks || []), ...(n.unlocks || [])])];
-      n.title = `${D.SK[n.skill].name} levels ${n.from + 1}–${n.to}!`;
-      if (n.unlocks.length) n.text = n.unlocks.join(' ');
-    }
-    /* several Hero levels while away become one card that still lists everything they unlocked */
-    if (previous && n.kind === 'adv') {
-      n.gains = [...new Set([...(previous.gains || []), ...(n.gains || [])])]; n.from = Number.isFinite(previous.from) ? previous.from : previous.to - 1;
-      n.title = `Hero levels ${n.from + 1}–${n.to}!`;
-      n.text = (n.gains.length ? `Unlocked: ${n.gains.join(', ')}. ` : '') + n.text.replace(/^Unlocked: [^.]*\. /, '');
-    }
-    summaries.set(key, n);
-  }
-  const keep = [...summaries.values()];
+    sim.actions = i; sim.stopped = !DQ.act;
+    if (DQ.act) DQ.act.t0 = Date.now() - Math.max(0, ms - n * a.dur) % a.dur;
+  } else S().hp = Math.min(DQ.maxHp(), S().hp + hpRegen(ms));
+  sim.on = false; if (!DQ.forecasting) DQ.checkAch();
+  /* Replay the more important notices once the summary is up */
+  const keep = sim.notes.filter(n => ['unlock', 'quest', 'boss', 'ach', 'loot'].includes(n.kind)).slice(0, 4);
   if (!DQ.forecasting) setTimeout(() => keep.forEach((n, i) => setTimeout(() => DQ.notify(Object.assign({}, n, { burst: false })), i * 700)), 900);
   if (!DQ.forecasting) DQ.emit('act'); return sim;
 };
@@ -728,8 +526,15 @@ DQ.tick = () => {
     const sum = DQ.simulate(eff, real); DQ.makeAwayEvents(sum, gap); if (gap > 30000) DQ.emit('welcome', sum, gap); return;
   }
   S().playtime += gap; DQ.sessMs = (DQ.sessMs || 0) + gap;
-  try { DQ.advanceTime(gap, gap, DQ.act ? DQ.act.progress || 0 : 0); errRun = 0; }
-  catch (e) { softFail(e); if (++errRun >= 3) DQ.stopAct(true, 'This task stopped after an error. Your hero is safe.'); }
+  const a = DQ.act;
+  if (a) {
+    /* a broken duration (NaN / 0) would freeze the task forever: repair it from the base values */
+    if (!(DQ.act.dur > 0) || !isFinite(DQ.act.dur)) { DQ.act.dur = Math.max(500, DQ.durFor(DQ.act.kind, DQ.act.id) || 2000); DQ.act.t0 = now; softFail('bad duration'); }
+    let g = 0; while (DQ.act && now >= DQ.act.t0 + DQ.act.dur && g++ < 4) { DQ.act.t0 += DQ.act.dur; try { complete(); errRun = 0; } catch (e) { softFail(e); if (++errRun >= 3 && DQ.act) DQ.stopAct(true, 'Something went wrong with this task, so it was stopped.'); } }
+    if (DQ.act && now > DQ.act.t0 + DQ.act.dur * 4) DQ.act.t0 = now;
+  }
+  regenAcc += gap; DQ.advanceWorld(gap);
+  if (regenAcc >= 3000) { regenAcc = 0; if (S().hp < DQ.maxHp() && !(DQ.act && DQ.act.kind === 'fight')) S().hp = Math.min(DQ.maxHp(), S().hp + Math.ceil(DQ.maxHp() / 50 * (1 + DQ.fx().regen))); }
   if ((uiAcc += gap) >= 250) { uiAcc = 0; DQ.emit('ui'); }
   if ((histAcc += gap) >= 5000) { histAcc = 0; DQ.hist.push({}); if (DQ.hist.length > 60) DQ.hist.shift(); }
   if ((achAcc += gap) >= 1500) { achAcc = 0; DQ.checkAch(); checkQuests(); }
@@ -740,8 +545,8 @@ DQ.resumeAfterLoad = () => {
   if (s) {
     try {
       let ok = false; const k = s.kind;
-      if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town; else ok = !!D.NODE[k + ':' + s.id] && DQ.nodeHere(D.NODE[k + ':' + s.id]);
-      if (ok) { DQ.act = { kind: k, id: s.id, area: s.area || null, target: s.target || null, questTarget: !!s.questTarget, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0, progress: s.progress || 0 }; DQ.act.dur = DQ.actDur(DQ.act); DQ.act.t0 -= DQ.act.progress; if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
+      if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town; else ok = !!D.NODE[k + ':' + s.id] && D.NODE[k + ':' + s.id].town === S().town;
+      if (ok) { DQ.act = { kind: k, id: s.id, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0 }; DQ.act.dur = DQ.actDur(DQ.act); if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
     } catch (e) {}
     if (!DQ.act) S().act = null;
   }

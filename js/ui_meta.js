@@ -32,7 +32,7 @@ const TEASERS = {
   const orig = UI.V[k], need = () => k === 'house' ? D.HOUSE.adv : D.HIRE.adv;
   UI.V[k] = () => DQ.advLvl() < need() ? UI.teaser(TEASERS[k]()) : orig();
 });
-/* planning (pace, stop rules, the queue) arrives at Hero level D.PLAN_ADV (8) */
+/* planning (pace, stop rules, the queue) arrives at Hero level 5 */
 const origPlan = UI.planHtml;
 UI.planHtml = () => DQ.planUnlocked() ? origPlan() : UI.teaser({ ic: 'clock', title: 'Task planning', adv: D.PLAN_ADV, col: '#8fc7ff', blurb: 'Tell your hero how to work, and what to do next.', bullets: ['Pace: careful, steady or pushing hard', 'Stop rules: for 30 minutes, until 200 done, until the next level', 'A queue, so the next task starts by itself, even while you are away'] });
 
@@ -54,8 +54,29 @@ UI.render = fresh => {
 DQ.on('ui', () => {
   const st = S(); if (!DQ.started || !st || !st.seenTabs || st.seenTabs.plan || !DQ.planUnlocked()) return;
   st.seenTabs.plan = 1;
-  DQ.notify({ kind: 'unlock', key: 'plan', icon: 'clock', col: '#8fc7ff', title: 'Task planning unlocked', text: 'Choose a pace, set stop rules and queue the next task. Tap the count on the Now card (top left), or the arrow on any card.', action: { label: 'Open plan', fn: () => UI.openPlan() }, sound: 'unlock', ttl: 14000 });
+  DQ.notify({ kind: 'unlock', key: 'plan', icon: 'clock', col: '#8fc7ff', title: 'Task planning unlocked', text: 'Choose a pace, set stop rules and queue the next task. Tap the task bar at the top, or the arrow on any card.', action: { label: 'Open plan', fn: () => UI.openPlan() }, sound: 'unlock', ttl: 14000 });
 });
+
+
+/* ---------- Quests: the carrot at the top ---------- */
+const oq = UI.V.quests;
+UI.V.quests = () => {
+  const st = q => DQ.questState(q), ready = D.QUESTS.filter(q => st(q) === 'ready');
+  if (!UI._qtInit) { UI._qtInit = 1; if (!D.QUESTS.some(q => st(q) === 'active' || st(q) === 'ready') && D.QUESTS.some(q => st(q) === 'new')) UI.questTab = 'available'; }
+  const html = oq();
+  let carrot = '';
+  if (ready.length) carrot = `<section class="panel carrot ready"><span class="cr-ic">${ico('star')}</span><div class="cr-b"><b>${ready.length} reward${ready.length > 1 ? 's' : ''} ready to claim</b><small>${ready.map(q => esc(q.name)).join(' · ')}</small></div><div class="cr-act">${ready.slice(0, 3).map(q => `<button class="btn primary sm" data-do="qclaim" data-a="${q.id}">Claim: ${esc(q.name)}</button>`).join('')}</div></section>`;
+  else {
+    const nx = D.QUESTS.find(q => q.main && st(q) !== 'done');
+    if (nx) {
+      const sk = D.SK[nx.unlocks], s = st(nx), blk = s === 'locked' ? DQ.questBlockers(nx) : [], tab = s === 'locked' ? 'upcoming' : s === 'new' ? 'available' : 'active';
+      carrot = `<section class="panel carrot" style="--c:${sk ? sk.col : '#d8a64a'}"><span class="cr-ic">${ico(nx.unlocks || 'star')}</span><div class="cr-b"><span class="k">Next main quest</span><b>${esc(nx.name)}${sk ? `: learn ${sk.name}` : ''}</b>
+        <small>${s === 'locked' ? blk.map(b => '✗ ' + esc(b)).join('  ·  ') : s === 'new' ? 'Ready to accept. Talk to ' + esc(nx.giver) + '.' : 'In progress. Keep going!'}</small></div><div class="cr-act"><button class="btn sm" data-do="qtab" data-a="${tab}">Show quest</button></div></section>`;
+    }
+  }
+  const i = html.indexOf('</section>') + '</section>'.length;
+  return html.slice(0, i) + carrot + html.slice(i);
+};
 
 
 /* ---------- Top bar task details and quest cues ---------- */
@@ -97,8 +118,10 @@ DQ.heroMarks = () => {
   return out;
 };
 UI.heroFigure = () => {
-  const pet = S().pets.active && D.PET[S().pets.active];
-  return `<div class="figure"><div class="fig-stage"><img class="fig-img" src="${DQ.heroFigureUrl(S().look)}" alt="Your hero, wearing what you have equipped" draggable="false">${pet ? `<span class="fig-pet" data-tip="text:${esc(pet.name)} the ${esc(pet.kind.toLowerCase())}">${DQ.petSprite(pet, 48)}</span>` : ''}</div></div>`;
+  const pet = S().pets.active && D.PET[S().pets.active], marks = DQ.heroMarks();
+  return `<div class="figure"><div class="fig-stage"><img class="fig-img" src="${DQ.heroFigureUrl(S().look)}" alt="Your hero, wearing what you have equipped" draggable="false">${pet ? `<span class="fig-pet" data-tip="text:${esc(pet.name)} the ${esc(pet.kind.toLowerCase())}">${DQ.petSprite(pet, 48)}</span>` : ''}</div>
+    <div class="fig-marks">${marks.length ? marks.map(m => `<span class="fig-mark" data-tip="text:${esc(m.sub)}">${ico(m.ic)}${esc(m.t)}</span>`).join('') : `<span class="fig-mark dim">Everyone starts in a plain tunic</span>`}</div>
+    <small class="fig-hint dim">Wear better gear to change how you look. Skill capes appear at skill level 30, 60 and 99, and medals at Hero level 10, 25, 50 and 75.</small></div>`;
 };
 
 /* ---------- Share sheet: a hero card as an image, or as text ---------- */
@@ -170,19 +193,22 @@ UI.skillHero = (sk, extra = '') => {
       <span class="bar big"><i data-b="xpbar:${sk}"></i></span><div class="sh-line mono"><span data-b="toNext:${sk}"></span><span data-b="eta:${sk}"></span></div></div>
     <div class="sk-side">${perks}</div>${extra}</section>`;
 };
+['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'cooking', 'smithing', 'crafting', 'magic'].forEach(p => {
+  const o = UI.V[p]; if (!o) return;
+  UI.V[p] = () => { const h = o(); return h.includes('locked-page') || !UI.skillGuide ? h : h + `<section class="panel guidep"><div class="phead"><h2>About ${D.SK[p].name}</h2><small>What it is and what it leads to</small></div>${UI.skillGuide(p)}</section>`; };
+});
+
 /* ---------- Mastery ---------- */
 UI.V.mastery = () => {
   const ranks = DQ.masteryTotal(), title = DQ.heroTitle();
-  const skills = D.SKILLS.filter(s => DQ.skillUnlocked(s.id));
-  const selected = skills.find(s => s.id === UI.tab.masterySkill) || skills[0];
-  const picker = `<label class="page-picker" for="mastery-skill">Skill${UI.choiceButtons(`<select id="mastery-skill" data-in="mastery-skill">${skills.map(s => `<option value="${s.id}" ${s === selected ? 'selected' : ''}>${s.name} · Level ${DQ.lvl(s.id)}</option>`).join('')}</select>`)}</label>`;
-  const rows = (selected ? [selected] : []).map(s => {
+  const rows = D.SKILLS.filter(s => DQ.skillUnlocked(s.id)).map(s => {
     const L = DQ.lvl(s.id), r = DQ.masteryRank(s.id), xp = S().xp[s.id] || 0;
     if (L < 99) { const pct = Math.min(1, xp / D.XPF[99]); return `<div class="msk locked" style="--c:${s.col}"><span class="ic">${ico(s.id)}</span><div class="mb"><b>${s.name}</b><small>Level ${L}. Mastery begins at 99.</small><span class="bar"><i style="width:${(pct * 100).toFixed(1)}%"></i></span></div><span class="mr mono">${(pct * 100).toFixed(0)}%</span></div>`; }
     const into = DQ.masteryXp(s.id) - r * DQ.masteryStep(), pct = r >= 10 ? 1 : into / DQ.masteryStep(), on = S().title === s.id;
     return `<div class="msk ${r ? 'got' : ''}" style="--c:${s.col}"><span class="ic">${ico(s.id)}</span><div class="mb"><b>${s.name}${r ? ` <em>${D.MASTERY_TITLES[r - 1]}</em>` : ''}</b><small>${r >= 10 ? 'Fully mastered.' : `${fmt(Math.ceil(DQ.masteryStep() - into))} xp to rank ${r + 1}`}</small><span class="bar"><i style="width:${(pct * 100).toFixed(1)}%"></i></span></div><span class="mr mono">Rank ${r}/10</span>${r ? `<button class="btn sm ${on ? 'primary' : ''}" data-do="wear" data-a="${on ? '' : s.id}">${on ? 'Wearing title' : 'Wear title'}</button>` : ''}</div>`;
   }).join('');
-  return `<section class="panel"><div class="phead"><h2>Mastery</h2><small>${ranks} ranks earned</small></div>${picker}<div class="mlist">${rows}</div>${title ? `<p>Wearing ${esc(title)}</p>` : ''}<section data-reference="true" id="mastery-help"><h3>How mastery works</h3><p>Keep training after level 99 to earn ranks and titles. Each rank adds 1% coins. There are 10 ranks per skill.</p></section></section>`;
+  return `<section class="panel shophead"><div><span class="k">Mastery</span><h2>${ranks} rank${ranks === 1 ? '' : 's'} earned</h2><small class="dim">Keep training a skill past level 99. Each of its 10 ranks gives you a title and +1% coins from everything you sell or find. ${ranks ? `You have <b>+${ranks}%</b> coins.` : ''}</small></div>${title ? `<div class="mtitle">${ico('trophy')}<b>${esc(title)}</b></div>` : ''}</section>
+    <section class="panel"><div class="phead"><h2>Skills</h2><small>Reach level 99 to begin</small></div><div class="mlist">${rows || '<p class="dim">Unlock a skill to see it here.</p>'}</div></section>`;
 };
 Object.assign(UI.DO, { wear: a => { DQ.setTitle(a || null); DQ.sfx('tab'); UI.render(false); } });
 DQ.on('title', () => UI.renderHud());
@@ -196,83 +222,61 @@ UI.toolsPanel = () => {
       <small>${D.SK[sk].name}${open ? ` ${DQ.lvl(sk)}` : ' (locked)'} · ${t ? `${pct}% faster` : 'normal speed'}</small><span class="pips" aria-label="Tier ${t} of 5">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= t ? 'on' : ''}"></i>`).join('')}</span></div>
       ${next ? `<button class="btn sm" data-do="go" data-a="shop" data-tip="text:${esc(next.name)}: ${fmt(next.buy)} coins. Opens the shop.">Upgrade ${DQ.fmtK ? DQ.fmtK(next.buy) : fmt(next.buy)}</button>` : '<span class="max">Best</span>'}</div>`;
   }).join('');
-  return `<section data-reference="true" class="panel toolsp" id="inventory-tools"><h3>Gathering tools</h3><p class="hint">Your best owned tool is used automatically.</p><div class="toolrows">${rows}</div></section>`;
+  return `<section class="panel toolsp"><div class="phead"><h2>Your tools</h2><small>The best one you own is used automatically</small></div><div class="toolrows">${rows}</div></section>`;
 };
 const origChar = UI.V.character;
-UI.V.character = () => { const h = origChar().replace('<div class="slots" id="packgrid">', '<div class="selbar" id="selbar"></div><div class="slots" id="packgrid">'), tail = '</section></div></div>', i = h.lastIndexOf(tail); return h; };
-/* Gathering tools have their own light view in the Hero section (Hero → Tools), so the inventory stays about items. */
-UI.V.tools = () => UI.toolsPanel();
+UI.V.character = () => { const h = origChar().replace('<div class="slots" id="packgrid">', '<div class="selbar" id="selbar"></div><div class="slots" id="packgrid">'), tail = '</section></div></div>', i = h.lastIndexOf(tail); return i < 0 ? h : h.slice(0, i + 10) + UI.toolsPanel() + h.slice(i + 10); };
 
 
 /* ---------- Item comparison in the item panel and in tooltips ---------- */
 const sg = n => (n > 0 ? '+' : n < 0 ? '\u2212' : '') + Math.abs(n);
 const arrow = d => d > 0 ? '\u25B2' : d < 0 ? '\u25BC' : '=';
 UI.compareHtml = id => {
-  const c = DQ.compareItem(id); if (!c) return '';
-  if (c.same) return `<div class="cmp"><span class="k">Currently equipped · ${esc(DQ.SLOT_NAMES[c.slot])}</span></div>`;
+  const c = DQ.compareItem(id); if (!c || c.same) return '';
   if (c.tool) return c.better ? `<div class="cmp"><span class="k">Compared with ${c.cur ? esc(c.cur.name) : 'no tool'}</span>${c.rows.map(r => `<div class="cmprow up"><span>${r.n}</span><b class="mono">${r.a}% \u2192 ${r.b}%</b><em>\u25B2 ${sg(r.d)}%</em></div>`).join('')}</div>` : `<div class="cmp"><span class="k">You already own a better or equal tool</span></div>`;
-  const combat = c.rows.filter(r => r.key && r.d !== 0);
-  const v = DQ.gearVerdict && DQ.gearVerdict(id), net = c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : null;
-  const verdict = v === 'up' || v === 'down' ? `<p class="gear-verdict ${v}"><span class="gear-cmp ${v}">${v === 'up' ? '▲' : '▼'}</span> ${v === 'up' ? 'Better overall' : 'Worse overall'}${net != null ? ` · stats ${sg(net)} in total` : ' · fills an empty slot'}</p>` : '';
-  return `<div class="cmp slot-comparison"><div class="k">${esc(DQ.SLOT_NAMES[c.slot])} · equipped ${c.cur ? esc(c.cur.name) : 'nothing'}</div>${verdict}
-    <table><thead><tr><th>Stat</th><th>Equipped</th><th>This item</th><th>Change</th></tr></thead><tbody>${c.itemRows.map(r => `<tr class="${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}"><th>${UI.statNames[r.key]}</th><td>${r.a}</td><td>${r.b}</td><td>${r.d ? sg(r.d) : '—'}</td></tr>`).join('')}</tbody></table>
-    ${c.styleChange ? `<p class="sm">Style ${c.styleChange[0]} → ${c.styleChange[1]}</p>` : ''}
-    ${combat.length ? `<section data-reference="true"><h3>Combat impact</h3>${combat.map(r => `<div class="cmprow"><span>${r.n}</span><b>${r.delta ? '' : r.a + ' → ' + r.b}</b><em>${sg(r.d)}${r.unit || ''}</em></div>`).join('')}</section>` : ''}
-    ${c.need.map(n => `<p class="bad sm">${esc(n)}</p>`).join('')}${c.unmet ? `<p class="bad sm">${esc(c.unmet)}</p>` : ''}</div>`;
+  const rows = c.rows.filter(r => r.key || r.d !== 0 || r.a || r.b);
+  return `<div class="cmp"><span class="k">If you equip this${c.cur ? `, instead of ${esc(c.cur.name)}` : ` (your ${c.slot} slot is empty)`}</span>
+    ${c.styleChange ? `<div class="cmprow"><span>Fighting style</span><b class="mono">${DQ.cap(c.styleChange[0])} \u2192 ${DQ.cap(c.styleChange[1])}</b><em></em></div>` : ''}
+    ${rows.map(r => `<div class="cmprow ${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}"><span>${r.n}</span><b class="mono">${r.delta ? '' : `${r.plus ? '+' : ''}${r.a}${r.unit || ''} \u2192 ${r.plus ? '+' : ''}${r.b}${r.unit || ''}`}</b><em>${arrow(r.d)} ${r.d ? sg(r.d) + (r.unit || '') : 'same'}</em></div>`).join('')}
+    ${c.need.map(n => `<div class="cmpnote bad">${esc(n)}</div>`).join('')}${c.unmet ? `<div class="cmpnote bad">${esc(c.unmet)}</div>` : ''}</div>`;
 };
 UI.compareLine = id => {
-  const c = DQ.compareItem(id); if (!c || c.tool) return '';
-  if (c.same) return '<span class="dim">Currently equipped</span>';
-  const v = DQ.gearVerdict && DQ.gearVerdict(id);
-  return `<span class="cmpline">${v === 'up' || v === 'down' ? `<span class="gear-cmp inline ${v}">${v === 'up' ? '▲' : '▼'}</span> ` : ''}vs ${c.cur ? esc(c.cur.name) : `empty ${DQ.SLOT_NAMES[c.slot].toLowerCase()} slot`}: ${c.itemRows.map(r => `<span class="${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}">${UI.statNames[r.key]} ${r.d ? sg(r.d) : '±0'}</span>`).join(' · ')}</span>`;
+  const c = DQ.compareItem(id); if (!c || c.same || c.tool) return '';
+  const parts = c.rows.filter(r => r.d !== 0).slice(0, 4).map(r => `<span class="${r.d > 0 ? 'up' : 'down'}">${arrow(r.d)} ${r.n} ${sg(r.d)}${r.unit || ''}</span>`);
+  return parts.length ? `<div class="cmpline">${parts.join(' ')}</div>` : `<div class="cmpline dim">No change to your stats</div>`;
 };
 const origDetail = UI.detail;
 UI.detail = (id, from) => {
   let h = origDetail(id, from); const ok = id && DQ.have(id), c = ok ? UI.compareHtml(id) : '';
   if (c) h = h.replace('<div class="btnrow wrap">', c + '<div class="btnrow wrap">');
   if (ok && D.ITEMS[id].flavour) h = h.replace('<div class="btnrow wrap">', `<p class="flavour">${esc(D.ITEMS[id].flavour)}</p><div class="btnrow wrap">`);
-  if (ok) { h = h.replace('<div class="detail">', `<div class="detail"><button class="dt-x iconb sm" data-do="desel" aria-label="Close">${ico('close')}</button>`);  }
+  if (ok) { h = h.replace('<div class="detail">', `<div class="detail"><button class="dt-x iconb sm" data-do="desel" aria-label="Close">${ico('close')}</button>`); if (D.ITEMS[id].slot) h = h.replace(/<\/div>$/, '<small class="dim dt-tip">Tip: double-click (or double-tap) an item to equip it.</small></div>'); }
   return h;
 };
 const origTip = DQ.tips.item;
-DQ.tips.item = id => { const h = origTip(id), it = D.ITEMS[id]; if (!h || !it || !(it.slot || it.type === 'tool') || S().equip[it.slot] === id) return h; const c = (UI.compareLine(id) || '') + ''; return c ? h.replace('<div class="dim">Worth', c + '<div class="dim">Worth') : h; };
+DQ.tips.item = id => { const h = origTip(id), it = D.ITEMS[id]; if (!h || !it || !(it.slot || it.type === 'tool') || S().equip[it.slot] === id) return h; const c = (UI.compareLine(id) || '') + (it.slot && DQ.have(id) && DQ.canEquip(id).ok ? '<div class="dim">Double-click to equip</div>' : ''); return c ? h.replace('<div class="dim">Worth', c + '<div class="dim">Worth') : h; };
 const tipBase = DQ.tips.item;
 DQ.tips.item = id => { const h = tipBase(id), f = D.ITEMS[id] && D.ITEMS[id].flavour; return f && h ? h.replace('<div class="dim">Worth', `<div class="flav">${esc(f)}</div><div class="dim">Worth`) : h; };
-/* unique effects: named in tooltips, and compared side by side when choosing gear */
-/* where a unique comes from: the creature once you have met it (otherwise only its region, to keep the mystery), the
-   honest first-copy guarantee from the engine's bad-luck protection, and what the effect is good for */
-UI.uniqueLine = (it, cls = '', full = false) => { if (!it || !it.unique) return ''; const use = D.UNIQUE_USE && D.UNIQUE_USE[it.unique.key], src = full && DQ.uniqueSource(it.id);
-  return `<div class="unique-fx ${cls}">${ico('star')}<b>${esc(it.unique.name)}</b> <span>${esc(it.unique.text)}</span>${full && use ? `<small class="unique-use">Good for ${esc(use)}. Its stats are modest, so ordinary gear can be stronger when the effect does not matter.</small>` : ''}${src ? `<small class="unique-src">${esc(src.text)}</small>` : ''}</div>`; };
-const tipUnique = DQ.tips.item;
-DQ.tips.item = id => { const h = tipUnique(id), it = D.ITEMS[id]; return h && it && it.unique ? h.replace('<div class="dim">Worth', `${UI.uniqueLine(it, '', true)}<div class="dim">Worth`) : h; };
-const cmpUnique = UI.compareHtml;
-UI.compareHtml = id => {
-  const h = cmpUnique(id), it = D.ITEMS[id]; if (!h || !it || !it.slot) return h;
-  const cur = D.ITEMS[S().equip[it.slot]]; if (!(it.unique || (cur && cur.unique)) || S().equip[it.slot] === id) return h;
-  const rows = `<div class="unique-compare"><div class="k">Effects</div><div><small>Equipped</small>${cur && cur.unique ? UI.uniqueLine(cur) : '<span class="dim">No special effect</span>'}</div><div><small>This item</small>${it.unique ? UI.uniqueLine(it) : '<span class="dim">No special effect</span>'}</div></div>`;
-  return h.replace(/<\/div>$/, rows + '</div>');
-};
 
 
 /* ---------- Picking an item: double-click or double-tap equips, and the details stay in reach ---------- */
 UI.selbarHtml = (id, from) => {
-  if (!id || !DQ.have(id)) return `<span class="sb-hint dim"></span>`;
+  if (!id || !DQ.have(id)) return `<span class="sb-hint dim">${ico('info')} Click an item to select it. Double-click to equip it.</span>`;
   const it = D.ITEMS[id], bank = from === 'bank', n = bank ? (S().bank[id] || 0) : (S().inv[id] || 0), can = it.slot ? DQ.canEquip(id) : null;
-  const line = it.slot ? `<span>${UI.statLine(it.b)}</span>${UI.compareLine(id)}` : it.heal ? `<span class="dim">Heals ${it.heal} health</span>` : `<span class="dim">${esc(DQ.cap(it.type))}</span>`;
+  const line = it.slot ? (UI.compareLine(id) || '<span class="dim">No change to your stats</span>') : it.heal ? `<span class="dim">Heals ${it.heal} health</span>` : `<span class="dim">${esc(DQ.cap(it.type))}</span>`;
   const b = [];
-  if (it.slot) b.push(can.equipped ? '<span class="spare-explanation">Already equipped · spare copy</span>' : `<button class="btn sm ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
+  if (it.slot) b.push(`<button class="btn sm ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
   if (it.heal) b.push(`<button class="btn sm primary" data-do="eat" data-a="${id}">Eat</button>`);
   b.push(bank ? `<button class="btn sm" data-do="withdraw" data-a="${id}" data-b="${n > 1 ? 'all' : 1}">${n > 1 ? 'Take all' : 'Take'}</button>` : `<button class="btn sm" data-do="deposit" data-a="${id}" data-b="all">Bank</button>`);
-  if (!DQ.sellable(id)) b.push(`<span class="keepsake-note" data-tip="text:${esc(DQ.KEEPSAKE_NOTE)}">${ico('lock')} Keepsake</span>`);
-  else b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell ${UI.money(it.val || 0)}</button>`);
-  if (n > 1 && DQ.sellable(id)) b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all ${UI.money((it.val || 0) * n)}</button>`);
+  if (it.val > 0 || it.type === 'junk') b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="1">Sell (${fmt(it.val)})</button>`);
   return `<span class="sb-ic" style="--c:${it.col}">${DQ.itemIco(it)}</span><span class="sb-n"><b style="color:${it.col}">${esc(it.name)}</b> <small class="mono dim">x${fmt(n)}</small><span class="sb-l">${line}</span></span><span class="sb-b">${b.join('')}</span>`;
 };
 const syncSheet = () => {
   const open = !!(UI.sel && DQ.have(UI.sel) && ['character', 'bank'].includes(UI.view)), d = $('#detailbox'), sb = $('#selbar');
   if (d) d.classList.toggle('empty', !open); document.body.classList.toggle('has-sheet', open);
   if (sb) sb.innerHTML = UI.selbarHtml(open ? UI.sel : null, UI.selFrom);
-  /* The item sheet keeps actions in reach without moving the page. */
+  /* on phones the details open as a sheet: keep the selected item in view above it */
+  if (open && innerWidth <= 860) requestAnimationFrame(() => { const s = $('.slot.sel'), dd = $('#detailbox'); if (!s || !dd) return; const over = s.getBoundingClientRect().bottom - (dd.getBoundingClientRect().top - 12); if (over > 0) scrollBy({ top: over + 8 }); });
 };
 const origSel = UI.DO.sel; let lastTap = { id: null, t: 0 };
 UI.DO.sel = (a, b, el) => {
@@ -303,12 +307,4 @@ const origBank = UI.V.bank;
 UI.V.bank = () => origBank().replace('<div class="slots big" id="bankgrid">', '<div class="selbar" id="selbar"></div><div class="slots big" id="bankgrid">');
 const origSettings = UI.V.settings;
 UI.V.settings = () => origSettings().replace(/<\/div>\s*$/, UI.timePanel() + UI.playtestPanel() + '</div>').replace('<label class="nameedit">', UI.themeControl() + '<label class="nameedit">');
-/* Settings have one category at a time instead of a wall of controls. */
-UI.after.settings = () => {
-  const view = $('#view'), panels = [...view.querySelectorAll('section.panel')].filter(panel => panel.querySelector('h2'));
-  const names = panels.map(panel => panel.querySelector('h2').textContent);
-  const selected = names.includes(UI.tab.settingsPanel) ? UI.tab.settingsPanel : names[0];
-  panels.forEach((panel, i) => { panel.hidden = names[i] !== selected; });
-  view.insertAdjacentHTML('afterbegin', `<label class="panel page-picker" for="settings-category">Settings${UI.choiceButtons(`<select id="settings-category" data-in="settings-category">${names.map(name => `<option value="${esc(name)}" ${name === selected ? 'selected' : ''}>${esc(name)}</option>`).join('')}</select>`)}</label>`);
-};
 })();

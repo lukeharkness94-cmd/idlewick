@@ -44,24 +44,10 @@ D.WEAK = {
   voidknight: WR(['aether', 'crush'], ['slash', 'stab']), shade: WR(['aether', 'fire'], ['stab', 'slash', 'crush', 'pierce']), horror: WR(['fire', 'pierce'], ['aether']),
   hollowking: WR([], []),
 };
-/* Regional additions use their anatomy and habitat for learnable counters. */
-for(const [id,shape] of Object.entries(D.EXTRA_CREATURES||{})){
- const m=D.MON[id],physical={beast:'stab',winged:'pierce',clawed:'crush',humanoid:'slash',spectral:'aether'}[shape.body];
- const element={ironpeak:'fire',gloomfen:'fire',emberfall:'frost',saltmere:'storm',skyreach:'pierce',hollow:'aether'}[m.town];
- D.WEAK[id]=WR([...new Set([physical,element].filter(Boolean))],shape.body==='clawed'?['slash']:m.town==='emberfall'?['fire']:m.town==='ironpeak'?['frost']:[]);
-}
 D.STUDY_KILLS = 3;   // kills needed to learn a regular creature's weaknesses
 
 /* ---------- Abilities: slot two (three from combat level 40). They trigger on their own. ---------- */
 const AB = (id, name, ic, skill, lvl, style, text, extra) => Object.assign({ id, name, ic, skill, lvl, style, text }, extra || {});
-/* Damage-type rules, one table for the engine and every piece of advice (plan.js DQ.typeMult / DQ.typeRuleText).
-   Bosses are counter checks, not locks: weaknesses help and resistances hurt, but less than on ordinary creatures. */
-/* Style parity (owner-approved melee rebalance, Nov 2026). Combat level counts Attack + Strength for melee but 1.5x
-   Ranged or Magic, so at equal combat level an archer's or mage's level is 4/3 of a fighter's Attack and Strength.
-   Melee therefore uses 4/3 of Attack and Strength as its effective levels for hitting and damage (engine pstats),
-   keeping Attack = accuracy and Strength = damage. Evidence: PARITY=1 node scripts/sim-bosses.cjs. */
-D.STYLE_TUNE = { meleeLevel: 4 / 3 };
-D.TYPE_RULES = { normal: { weak: 1.5, focus: 2, resist: .5 }, boss: { weak: 1.3, focus: 1.6, resist: .7 } };
 D.ABIL = [
   AB('power', 'Power Strike', 'strength', 'strength', 8, 'melee', 'Every 4th attack hits for double damage.'),
   AB('bash', 'Shield Bash', 'shield', 'defence', 12, 'melee', 'Interrupts a boss special attack. Needs a shield. Ready every 8 attacks.', { needShield: true }),
@@ -71,7 +57,7 @@ D.ABIL = [
   AB('aimed', 'Aimed Shot', 'ranged', 'ranged', 5, 'ranged', 'Every 3rd shot always hits for 1.5x damage.'),
   AB('pin', 'Pin Down', 'arrow_ammo', 'ranged', 25, 'ranged', 'Hits pin the monster: 25% less accurate for 2 attacks, and flying monsters are grounded.'),
   AB('kite', 'Keep Distance', 'bow', 'ranged', 40, 'ranged', 'Enemy normal attacks deal 30% less damage.'),
-  AB('focus', 'Elemental Focus', 'magic', 'magic', 10, 'magic', `Spells that hit a weakness deal ${D.TYPE_RULES.normal.focus}x instead of ${D.TYPE_RULES.normal.weak}x (against bosses ${D.TYPE_RULES.boss.focus}x instead of ${D.TYPE_RULES.boss.weak}x).`),
+  AB('focus', 'Elemental Focus', 'magic', 'magic', 10, 'magic', 'Weaknesses take 2x damage instead of 1.5x.'),
   AB('ward', 'Arcane Ward', 'ring_logo', 'magic', 30, 'magic', 'Absorbs a boss special attack. Ready every 6 attacks.'),
 ];
 D.AB = Object.fromEntries(D.ABIL.map(a => [a.id, a]));
@@ -87,7 +73,7 @@ D.BOSSMECH = {
   zephyrion: { mech: 'airborne', text: 'Stays in the air: melee barely reaches him unless he is pinned to the ground.', counters: ['Bow with Pin Down grounds him', 'Storm spells and arrows', 'Brace for Thunder dive'] },
   hollowking: { mech: 'phases', text: 'Changes form twice. Above two thirds health he is weak to crush, then to aether and fire, then to pierce.', counters: ['A warhammer for phase one', 'Magic for phase two', 'A bow for the final phase', 'Elemental Focus and Ward'] },
 };
-D.HOLLOW_PHASES = [WR(['crush'], ['aether', 'fire', 'frost', 'storm']), WR(['aether', 'fire'], ['stab', 'slash', 'crush', 'pierce']), WR(['pierce'], ['stab', 'slash', 'crush'])];
+D.HOLLOW_PHASES = [WR(['crush'], ['aether', 'fire', 'frost', 'storm']), WR(['aether', 'fire'], ['stab', 'slash', 'crush', 'pierce']), WR(['pierce'], ['stab', 'slash', 'crush', 'aether'])];
 
 /* ---------- Pace for idle tasks ---------- */
 D.PACE = {
@@ -96,40 +82,4 @@ D.PACE = {
   push: { name: 'Push', speed: 1.2, risk: 1.6, text: '20% faster, but more burns, failed attempts and damage taken. Pushing while away can cause injuries.' },
 };
 D.STOP_RULES = [['none', 'Until I stop it'], ['time:30', 'For 30 minutes'], ['time:60', 'For 1 hour'], ['time:120', 'For 2 hours'], ['count:50', 'Until 50 done'], ['count:200', 'Until 200 done'], ['count:1000', 'Until 1,000 done'], ['level', 'Until the next level']];
-})();
-
-/* ---------- Practical skill unlocks (Nov 2026 brief) ----------
-   Unlocks use the existing actionReq system, extended with a few requirement kinds (state.js DQ.actionProgress):
-   stats (personal action records: catch, chop, harvest, craft, smith, kill), hero, combat, skill:<id>, tool:<skill>
-   (any owned tool of that skill, checked), own:<item> (checked, kept), use:<item> (consumed when you learn the skill),
-   visit:<town>, beasts (different creatures studied). D.UNLOCK_BEFORE keeps every skill older saves had already earned.
-   Revert one skill by restoring its old rule from D.UNLOCK_BEFORE. */
-(() => {
-const D = window.DQ.data, set = (id, req) => { const s = D.SK[id]; if (!s) return; s.actionReq = req; delete s.unlock; };
-D.UNLOCK_BEFORE = { cooking: { hero: 3 }, mining: { hero: 6 }, farming: { hero: 10 }, research: { hero: 16 }, hunting: { kill: 10 }, herbalism: { harvest: 20 }, exploration: { catch: 25, chop: 25 } };
-set('cooking', { catch: 5, chop: 5 });
-set('mining', { 'tool:mining': 1 });
-set('farming', { hero: 5, chop: 15, 'use:seed_potato': 5 });
-set('research', { hero: 12, beasts: 8 });
-set('hunting', { chop: 20, 'own:wooden_trap': 3, combat: 8 });
-set('herbalism', { harvest: 20, 'skill:farming': 10 });
-set('exploration', { catch: 25, chop: 25, 'visit:mossbarrow': 1 });
-/* starter routes that no longer ask for the skill they unlock */
-const mp = D.QM.miners_pick; if (mp) { mp.adv = 3; mp.blurb = 'Brannoc’s old mine is full of rats and its props are rotten. Clear the rats and bring timber, and he will hand you his spare pickaxe so you can learn Mining.'; mp.obj = [{ ev: 'chop', key: 'normal', n: 10, label: 'Chop 10 logs for new pit props' }, { ev: 'kill', key: 'rat', n: 4, label: 'Clear 4 rats from the old mine' }]; }
-const mc = D.QM.mq_crafting; if (mc) { mc.adv = 8; D.SK.crafting.unlock = 8; mc.obj = mc.obj.map(o => o.ev === 'chop' && o.key === 'birch' ? { ev: 'chop', key: 'normal', n: 15, label: 'Chop 15 logs for her frames' } : o); }
-})();
-
-(() => {
-const D = window.DQ.data, add = r => { r.t = r.t || 2400; D.RECIPES[r.id] = r; D.RLIST[r.skill].push(r); return r; };
-/* Make your own gathering tools (Nov 2026): Smithing forges pickaxes, axes and hoes; Crafting makes rods and thief
-   gloves. Inputs cost about the tool's sale value (the shop sells at three times that), so making is the cheaper route
-   for a skilled player without becoming a money loop. */
-D.TOOL_MAKE = { bars: ['bar_iron', 'bar_steel', 'bar_mithril', 'bar_adamant', 'bar_rune'], smith: [16, 31, 51, 71, 86], logs: ['log_normal', 'log_oak', 'log_willow', 'log_maple', 'log_yew'], rodLvl: [10, 26, 46, 61, 76], hides: ['cowhide', 'frost_pelt', 'bogscale', 'drakehide', 'wyrm_scale'], gloveLvl: [8, 30, 50, 70, 85] };
-for (let t = 1; t <= 5; t++) {
-  const T = D.TOOL_MAKE, bar = T.bars[t - 1], bv = D.ITEMS[bar].val, need = id => Math.max(2, Math.ceil(D.ITEMS[id].val * .9 / bv));
-  for (const k of ['pick', 'axe', 'hoe']) { const id = `tool_${k}_${t}`; add({ id: 'smith_' + id, skill: 'smithing', tab: 'Tools', name: D.ITEMS[id].name, lvl: T.smith[t - 1], xp: Math.round(30 * Math.pow(2.1, t)), t: 3000, in: { [bar]: need(id), [T.logs[t - 1]]: 2 }, out: { [id]: 1 }, ev: 'smith' }); }
-  const rod = `tool_rod_${t}`, gl = `tool_gloves_${t}`, hv = D.ITEMS[T.hides[t - 1]].val;
-  add({ id: 'craft_' + rod, skill: 'crafting', tab: 'Tools', name: D.ITEMS[rod].name, lvl: T.rodLvl[t - 1], xp: Math.round(28 * Math.pow(2.1, t)), t: 3000, in: { [T.logs[t - 1]]: 3, string: 2, [bar]: Math.max(1, Math.ceil(D.ITEMS[rod].val * .7 / bv)) }, out: { [rod]: 1 }, ev: 'craft' });
-  add({ id: 'craft_' + gl, skill: 'crafting', tab: 'Tools', name: D.ITEMS[gl].name, lvl: T.gloveLvl[t - 1], xp: Math.round(28 * Math.pow(2.1, t)), t: 3000, in: { [T.hides[t - 1]]: Math.max(2, Math.ceil(D.ITEMS[gl].val * .9 / hv)), string: 2 }, out: { [gl]: 1 }, ev: 'craft' });
-}
 })();

@@ -21,8 +21,7 @@ DQ.weighted = list => { let t = list.reduce((a, x) => a + x[1], 0), r = Math.ran
 /* tiny event bus */
 const subs = {};
 DQ.on = (ev, fn) => { (subs[ev] = subs[ev] || []).push(fn); };
-// Trial fights must not redraw the live UI or notify gameplay listeners.
-DQ.emit = (ev, ...a) => { if (DQ.forecasting) return; (subs[ev] || []).forEach(f => f(...a)); };
+DQ.emit = (ev, ...a) => { (subs[ev] || []).forEach(f => f(...a)); };
 
 /* ---------- Icons (24x24 stroke glyphs) ---------- */
 const ICONS = {

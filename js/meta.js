@@ -105,12 +105,7 @@ DQ.compareItem = id => {
   }
   if (!it.slot) return null;
   const slot = it.slot, curId = slot === 'ammo' ? st.ammo.id : st.equip[slot], saved = { equip: Object.assign({}, st.equip), ammo: Object.assign({}, st.ammo) };
-  const current = curId ? D.ITEMS[curId] : null;
-  const itemRows = Object.keys(BONUS_NAMES).filter(k => (it.b && it.b[k]) || (current && current.b && current.b[k])).map(k => ({
-    key: k, n: BONUS_NAMES[k], a: (current && current.b && current.b[k]) || 0, b: (it.b && it.b[k]) || 0,
-    d: ((it.b && it.b[k]) || 0) - ((current && current.b && current.b[k]) || 0)
-  }));
-  if (curId === id) return { same: true, slot, cur: it, rows: [], itemRows };
+  if (curId === id) return { same: true, cur: it, rows: [] };
   const read = () => ({ b: Object.assign({}, DQ.bonus()), p: DQ.pstats(), style: DQ.weaponStyle(), speed: (D.WTYPES[D.weaponType()] || { speed: 2000 }).speed });
   let A, B;
   try {
@@ -129,52 +124,8 @@ DQ.compareItem = id => {
   if (slot === 'weapon' && B.style === 'ranged' && !(st.ammo.id && (st.ammo.n > 0 || DQ.have(st.ammo.id)))) need.push('Needs arrows equipped');
   if (slot === 'weapon' && B.style === 'magic' && DQ.have('rune') < 1) need.push('Needs Arcane runes');
   const can = DQ.canEquip(id);
-  return { slot, cur: current, rows, itemRows, styleChange: A.style !== B.style ? [A.style, B.style] : null, need, unmet: can.ok ? '' : can.why };
+  return { slot, cur: curId ? D.ITEMS[curId] : null, rows, styleChange: A.style !== B.style ? [A.style, B.style] : null, need, unmet: can.ok ? '' : can.why };
 };
-
-/* Upgrade marker wherever gear appears (backpack, bank, shop, recipes, tooltips, item panel): better or worse than
-   what is worn in that slot. Every slot, weapons included, adds up the stat changes against the equipped item: if the
-   gains outweigh the losses it is an upgrade (green), if the losses outweigh the gains it is worse (red), and an even
-   trade shows nothing. (Weapons used to follow the damage-per-second estimate, which marked a sword with more Attack
-   and Strength as worse; the player reads the stat table, so the arrow now agrees with it.) Uniques whose stats are
-   lower show their effect marker instead of a down arrow, because the effect is the point. */
-DQ.gearVerdict = id => {
-  const it = D.ITEMS[id]; if (!it || !it.slot || it.slot === 'ammo' || it.type === 'tool') return null;
-  if (S().equip[it.slot] === id || !DQ.canEquip(id).ok) return null;
-  const c = DQ.compareItem(id); if (!c || c.same) return null;
-  const d = c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : 1;
-  if (d > 0) return 'up';
-  if (d < 0) return it.unique ? 'unique' : 'down';
-  return it.unique && !(c.cur && c.cur.unique) ? 'unique' : null;
-};
-DQ.gearNet = id => { const c = DQ.compareItem(id); return c && !c.same && !c.tool && c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : null; };
-DQ.gearMark = id => { const v = DQ.gearVerdict(id); return v ? `<span class="gear-cmp ${v}" aria-label="${v === 'up' ? 'Better than equipped' : v === 'down' ? 'Worse than equipped' : 'Unique effect'}">${v === 'up' ? '▲' : v === 'down' ? '▼' : '✦'}</span>` : ''; };
-
-/* ---------- Recommended levels for quests (Nov 2026) ----------
-   So players can tell which quest to tackle first: the Hero level the quest opens at, the Combat level of the
-   strongest creature it sends you to fight (its creature level), and the highest skill level any of its gathering or
-   making steps needs. Worked out from the objectives, so new quests get it for free. */
-const NODE_EV = { catch: 'fish', chop: 'wood', mine: 'mine', thieve: 'thieve' };
-DQ.questRec = q => {
-  if (!q) return null; let combat = 0, skill = null;
-  const need = (sk, lvl) => { if (sk && lvl > 1 && (!skill || lvl > skill.lvl)) skill = { sk, lvl }; };
-  for (const o of q.obj || []) {
-    if (['kill', 'boss', 'guide'].includes(o.ev)) { const m = D.MON[o.key]; if (m && m.cl) combat = Math.max(combat, m.cl); continue; }
-    if (o.key === '*' || !o.key) continue;
-    if (NODE_EV[o.ev]) { const n = (D.NODES[NODE_EV[o.ev]] || []).find(x => x.id === o.key); if (n) need(n.skill, n.lvl); continue; }
-    if (o.ev === 'harvest') { const c = D.CROP && D.CROP[o.key]; if (c) need('farming', c.lvl); continue; }
-    if (['cook', 'smelt', 'smith', 'craft'].includes(o.ev)) { const r = (Array.isArray(D.RECIPES) ? D.RECIPES : Object.values(D.RECIPES)).find(r => r.id === o.key || r.id.endsWith('_' + o.key) || (r.out && r.out[o.key])); if (r) need(r.skill, r.lvl); }
-  }
-  /* adventures are found rather than given, so they carry no Hero level of their own: use their region's first */
-  const floor = (D.QUESTS || []).filter(x => x.town === q.town && x.adv > 1).reduce((m, x) => Math.min(m, x.adv), Infinity);
-  return { hero: Math.max(q.adv || 1, q.town === 'willowbrook' || floor === Infinity ? 1 : floor), combat, skill };
-};
-/* one number for ordering a quest list: whichever recommendation is highest, on the Hero scale */
-DQ.questRecScore = q => { const r = DQ.questRec(q); return r ? Math.max(r.hero, r.combat, r.skill ? r.skill.lvl : 0) : 0; };
-DQ.questRecParts = q => { const r = DQ.questRec(q); if (!r) return []; const out = [{ k: 'hero', n: 'Hero', lvl: r.hero, ok: DQ.advLvl() >= r.hero }];
-  if (r.combat) out.push({ k: 'combat', n: 'Combat', lvl: r.combat, ok: DQ.combatLvl() >= r.combat });
-  if (r.skill && D.SK[r.skill.sk]) out.push({ k: r.skill.sk, n: D.SK[r.skill.sk].name, lvl: r.skill.lvl, ok: DQ.lvl(r.skill.sk) >= r.skill.lvl });
-  return out; };
 
 /* ---------- The playtest report: plain text, easy to paste ---------- */
 const hm = ms => { ms = Math.max(0, ms); const m = Math.round(ms / 60000); return m < 60 ? `${m}m` : `${Math.floor(m / 60)}h ${m % 60}m`; };

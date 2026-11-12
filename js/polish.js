@@ -10,6 +10,18 @@ const DQ = window.DQ, D = DQ.data, UI = DQ.ui, { $, $$, ico, fmt, esc } = DQ;
 const S = () => DQ.S;
 const SAVE_KEY = 'dashboard-quest-save-v2', BK_KEY = 'dashboard-quest-backups';
 
+/* ---------- Pages that share a tab get a small switch at the top ---------- */
+const LABEL = { house: 'House', hirelings: 'Workers', achievements: 'Achievements', mastery: 'Mastery', settings: 'Settings', balance: 'Balance sheet' };
+const seg = (g, cur) => {
+  const pages = g.pages.filter(p => p !== 'balance' || S().settings.dev || cur === 'balance');
+  if (pages.length < 2) return '';
+  return `<div class="seg groupseg" role="tablist">${pages.map(p => { const ts = UI.tabState ? UI.tabState(p) : null; return `<button class="${cur === p ? 'on' : ''}" data-do="go" data-a="${p}" role="tab">${ts && ts.lock ? ico('lock') : ''}${LABEL[p]}${ts && ts.lock ? ` <small>Hero ${ts.lock}</small>` : ''}</button>`; }).join('')}</div>`;
+};
+UI.GROUPS.forEach(g => g.pages.forEach(p => {
+  const orig = UI.V[p]; if (!orig) return;
+  UI.V[p] = () => seg(g, p) + orig();
+}));
+
 /* ---------- Sound by category, and vibration on touch devices ---------- */
 const CAT = { tab: 'ui', click: 'ui', error: 'ui', equip: 'ui', buy: 'ui', sell: 'ui', coin: 'ui', start: 'ui', stop: 'ui', travel: 'ui',
   hit: 'combat', miss: 'combat', hurt: 'combat', eat: 'combat', boss: 'combat', death: 'combat',
@@ -24,20 +36,20 @@ DQ.sfx = name => {
 };
 
 /* ---------- Save safety: rolling backups and files ---------- */
-const readBk = () => { try { return JSON.parse(DQ.storage.getItem(BK_KEY)) || []; } catch (e) { return []; } };
+const readBk = () => { try { return JSON.parse(localStorage.getItem(BK_KEY)) || []; } catch (e) { return []; } };
 DQ.backup = reason => {
   try {
     if (!DQ.S || !DQ.S.xp) return false;
     const L = readBk(); L.unshift({ t: Date.now(), reason: reason || 'auto', hero: DQ.advLvl(), name: DQ.S.name, data: JSON.stringify(DQ.S) });
     while (L.length > 3) L.pop();
-    DQ.storage.setItem(BK_KEY, JSON.stringify(L)); return true;
-  } catch (e) { try { const L = readBk().slice(0, 1); DQ.storage.setItem(BK_KEY, JSON.stringify(L)); } catch (e2) {} return false; }
+    localStorage.setItem(BK_KEY, JSON.stringify(L)); return true;
+  } catch (e) { try { const L = readBk().slice(0, 1); localStorage.setItem(BK_KEY, JSON.stringify(L)); } catch (e2) {} return false; }
 };
 DQ.backups = () => readBk().map(b => ({ t: b.t, reason: b.reason, hero: b.hero, name: b.name }));
 DQ.restoreBackup = i => {
   const b = readBk()[i]; if (!b) return false;
   DQ.backup('before restore');
-  try { const o = DQ.validateSave(JSON.parse(b.data)); if (!DQ.importSave(btoa(unescape(encodeURIComponent(JSON.stringify(o)))))) return false; } catch (e) { return false; }
+  try { const o = JSON.parse(b.data); localStorage.setItem(SAVE_KEY, JSON.stringify(o)); DQ.S = null; } catch (e) { return false; }
   return true;
 };
 const importSave0 = DQ.importSave;
@@ -100,7 +112,7 @@ UI.returnExtras = sum => {
   let h = returnExtras0(sum); const bits = [];
   if ((DQ.awayDone || []).length) bits.push(`Research finished: <b>${DQ.awayDone.map(esc).join(', ')}</b>`);
   const ready = D.QUESTS.filter(q => DQ.questState(q) === 'ready').length; if (ready) bits.push(`<b>${ready}</b> quest reward${ready > 1 ? 's' : ''} ready to claim`);
-  return h + (bits.length && !UI.welcomeOwnsChips ? `<p class="sm" style="margin:14px 0 0">${bits.join('<br>')}</p>` : '');
+  return h + (bits.length ? `<p class="sm" style="margin:14px 0 0">${bits.join('<br>')}</p>` : '');
 };
 DQ.on('welcome', (sum, gap) => {
   const xp = Object.entries(sum.xp || {}).sort((a, b) => b[1] - a[1]).slice(0, 3), items = Object.entries(sum.items || {}).sort((a, b) => ((D.ITEMS[b[0]] || {}).val || 0) * b[1] - ((D.ITEMS[a[0]] || {}).val || 0) * a[1]).slice(0, 3);
@@ -111,7 +123,7 @@ const awayCard = () => {
   const a = S().lastAway; if (!a || a.gone || Date.now() - a.at > 12 * 3600e3) return '';
   const chips = [...a.xp.map(([k, v]) => `<span class="rw" style="--c:${D.SK[k].col}">${ico(k)}${fmt(v)} XP</span>`), a.coins ? `<span class="rw" style="--c:#f3d58a">${ico('coin')}${fmt(a.coins)}</span>` : '', a.kills ? `<span class="rw" style="--c:#e0564f">${ico('attack')}${fmt(a.kills)} defeated</span>` : '', ...a.items.map(([id, n]) => D.ITEMS[id] ? `<span class="rw" style="--c:${D.ITEMS[id].col}">${ico(D.ITEMS[id].ic)}${fmt(n)}× ${esc(D.ITEMS[id].name)}</span>` : '')].join('');
   const extra = [a.levels ? `${a.levels} level-up${a.levels > 1 ? 's' : ''}` : '', a.research.length ? `research finished: ${a.research.map(esc).join(', ')}` : '', a.stopped ? 'your task stopped early' : '', a.died ? 'you were defeated' : ''].filter(Boolean).join(' · ');
-  return `<section data-reference="true" class="panel awaycard"><h3>Your last time away · ${DQ.fmtTime(a.gap)}</h3><div class="phead"><div><span class="k">While you were away</span><h2>${DQ.fmtTime(a.gap)} away, counted as ${DQ.fmtTime(a.eff)}</h2></div><span class="btnrow"><button class="btn sm" data-do="go" data-a="journal">Journal</button><button class="btn sm" data-do="awaydismiss">Dismiss</button></span></div>
+  return `<section class="panel awaycard"><div class="phead"><div><span class="k">While you were away</span><h2>${DQ.fmtTime(a.gap)} away, counted as ${DQ.fmtTime(a.eff)}</h2></div><button class="btn sm" data-do="awaydismiss">Dismiss</button></div>
     <div class="rws">${chips || '<span class="dim sm">Nothing happened. Start a task before you leave and it keeps going.</span>'}</div>${extra ? `<p class="sm dim" style="margin:8px 0 0">${extra}</p>` : ''}</section>`;
 };
 
@@ -122,7 +134,42 @@ const bkCard = () => {
   return `<section class="panel carrot" style="--c:#8fc7ff"><span class="cr-ic">${ico('save')}</span><div class="cr-b"><span class="k">Keep your hero safe</span><b>${S().exportedAt ? 'It has been a while since your last backup' : 'Your game is only stored in this browser'}</b><small>Download a backup file. It takes a second and works on any device.</small></div><div class="cr-act"><button class="btn primary sm" data-do="dlsave">Download backup</button><button class="btn sm" data-do="bklater">Later</button></div></section>`;
 };
 
-UI.homeNotices = () => awayCard() + bkCard();
+/* ---------- First steps: one idea at a time ---------- */
+const STEPS = [
+  { id: 'task', t: 'Start your first task', s: 'Fishing and woodcutting give your first XP. Your hero keeps going on their own.', ok: () => DQ.totalXp() > 0, go: 'fishing', hub: 'skills', btn: 'Open Fishing' },
+  { id: 'quest', t: 'Accept a quest', s: 'Quests pay rewards and teach new skills. The quest log has your first one.', ok: () => D.QUESTS.some(q => !['new', 'locked'].includes(DQ.questState(q))), go: 'quests', hub: 'quests', btn: 'Open quests' },
+  { id: 'fight', t: 'Fight a monster', s: 'Combat raises your combat level and drops loot. Pick a monster in Fight.', ok: () => Object.values(S().beast.kills).some(v => v > 0), go: 'combat', hub: 'combat', btn: 'Open Fight' },
+  { id: 'tool', t: 'Buy a better tool', s: 'Better tools make gathering faster. The Shop sells them for coins.', ok: () => D.TOOLS.some(([k, sk]) => DQ.toolTier(sk) > 0), go: 'shop', hub: 'shop', btn: 'Open the shop' },
+  { id: 'boss', t: 'Defeat the first boss', s: 'Beating a town boss opens the road to the next town.', ok: () => !!(S().towns[D.TOWNS[0].id] || {}).boss, go: 'combat', hub: 'combat', btn: 'Open Fight' },
+];
+const guideState = () => {
+  const st = S(); if (!st || !st.seenTabs) return null;
+  if (st.seenTabs.guideOff || DQ.advLvl() >= 10) return null;
+  const done = STEPS.map(s => { try { return !!s.ok(); } catch (e) { return false; } }), cur = done.indexOf(false);
+  return cur < 0 ? null : { done, cur, step: STEPS[cur] };
+};
+const guideCard = () => {
+  const g = guideState(); if (!g || DQ.totalXp() === 0) return '';
+  return `<section class="panel carrot guide" style="--c:#d8a64a"><span class="cr-ic">${ico('star')}</span><div class="cr-b"><span class="k">First steps · ${g.cur + 1} of ${STEPS.length}</span><b>${g.step.t}</b><small>${g.step.s}</small>
+    <span class="gdots">${g.done.map((d, i) => `<i class="${d ? 'on' : i === g.cur ? 'cur' : ''}"></i>`).join('')}</span></div><div class="cr-act"><button class="btn primary sm" data-do="go" data-a="${g.step.go}">${g.step.btn}</button><button class="btn sm" data-do="guideoff" data-tip="text:Hide these first steps">Skip</button></div></section>`;
+};
+let gAcc = 0, gDone = null;
+DQ.on('ui', () => {
+  if (!DQ.started || ++gAcc % 15) return; const st = S(); if (!st || !st.seenTabs) return;
+  if (st.seenTabs.guideOff) return;
+  const done = STEPS.map(s => { try { return !!s.ok(); } catch (e) { return false; } });
+  if (gDone) done.forEach((d, i) => { if (d && !gDone[i]) { const n = done.indexOf(false); DQ.toast(n < 0 ? 'You know the basics. The rest is yours to find.' : `Done: ${STEPS[i].t}. Next: ${STEPS[n].t}`); if (n < 0) st.seenTabs.guideOff = 1; if (UI.view === 'overview') UI.render(false); UI.upd(); } });
+  gDone = done;
+});
+const hubdot0 = UI.B.hubdot;
+UI.B.hubdot = (e, h) => { hubdot0(e, h); const g = guideState(); const nudge = !!g && g.step.hub === h && UI.hubOf(UI.view).id !== h && !e.classList.contains('num'); e.classList.toggle('nudge', nudge); };
+
+/* ---------- Home: calmer. Banners first, then Up next ---------- */
+const overview0 = UI.V.overview;
+UI.V.overview = () => {
+  const h = overview0(), extra = guideCard() + awayCard() + bkCard();
+  return extra ? h.replace('<section class="panel upnext">', extra + '<section class="panel upnext">') : h;
+};
 
 /* ---------- The bell: recent activity, and a dot when something skipped the corner ---------- */
 UI.B.belldot = e => { const n = DQ.noteMissed || 0; e.hidden = !n; UI.set(e, n > 9 ? '9+' : String(n)); };

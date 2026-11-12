@@ -7,7 +7,7 @@ const GT = () => S().gameTime || 0;
 /* ---------- Combined bonuses from house furniture, the active pet and trophies ---------- */
 let fxCache = null;
 DQ.fxDirty = () => { fxCache = null; };
-DQ.petLevel = id => { const p = S().pets.owned[id]; if (!p) return 0; const modern=Number.isFinite(p.xp),x=modern?p.xp:(p.aff||0),levels=modern?(D.CREATURE_LEVELS||D.PET_LEVELS):D.PET_LEVELS;let l=1;levels.forEach((t,i)=>{if(x>=t)l=i+1;});return l; };
+DQ.petLevel = id => { const p = S().pets.owned[id]; if (!p) return 0; const m = p.aff || 0; let l = 1; D.PET_LEVELS.forEach((t, i) => { if (m >= t) l = i + 1; }); return l; };
 DQ.fx = () => {
   if (fxCache) return fxCache;
   const f = { regen: 0, xpAll: 0, coin: 0, burn: 0, heal: 0, pack: 0, dr: 0, gather: 0, grow: 0, animal: 0, plots: 0, workers: 0, wspeed: 0, wage: 0, trophy: 0, dmg: 0, speedAll: 0, find: 0, dbl: 0, study: 0, xp: {}, speed: {} };
@@ -18,40 +18,28 @@ DQ.fx = () => {
       if (k.startsWith('xp_')) f.xp[k.slice(3)] = (f.xp[k.slice(3)] || 0) + v; else if (k.startsWith('speed_')) f.speed[k.slice(6)] = (f.speed[k.slice(6)] || 0) + v; else f[k] += v; });
   });
   if (DQ.techFx) DQ.techFx(f);
-  if (S().projects && S().projects.well) f.regen += .1;
-  if (S().projects && S().projects.inn) f.heal += .05;
-  for(const [id,p] of Object.entries(D.PROJECTS||{}))if(S().projects[id]&&p.fx)for(const [key,value] of Object.entries(p.fx)){
-    if(key.startsWith('speed_'))f.speed[key.slice(6)]=(f.speed[key.slice(6)]||0)+value; else if(key.startsWith('xp_'))f.xp[key.slice(3)]=(f.xp[key.slice(3)]||0)+value; else f[key]=(f[key]||0)+value;
-  }
   f.dmg += f.trophy * Object.values(S().towns).filter(t => t.boss).length;
   const ap = S().pets.active && D.PET[S().pets.active];
   if (ap) {
-    const m = (1 + .25 * (DQ.petLevel(ap.id) - 1)) * (DQ.beastMult ? DQ.beastMult() : 1), b = ap.bonus;
+    const m = 1 + .25 * (DQ.petLevel(ap.id) - 1), b = ap.bonus;
     if (b.xpAll) f.xpAll += b.xpAll * m; if (b.coin) f.coin += b.coin * m; if (b.dmg) f.dmg += b.dmg * m; if (b.dr) f.dr += b.dr * m; if (b.heal) f.heal += b.heal * m; if (b.speed) f.speedAll += b.speed * m;
     Object.entries(b.xp || {}).forEach(([k, v]) => f.xp[k] = (f.xp[k] || 0) + v * m);
   }
   return (fxCache = f);
 };
 const GATHER = ['fishing', 'woodcutting', 'mining', 'thieving', 'farming'];
-/* wooden traps you hold are your first hunting gear: +5% Hunting XP each, up to three */
-DQ.extraXp = sk => { const f = DQ.fx(); return 1 + f.xpAll + (f.xp[sk] || 0) + (sk === 'hunting' ? .05 * Math.min(3, DQ.have('wooden_trap')) : 0); };
+DQ.extraXp = sk => { const f = DQ.fx(); return 1 + f.xpAll + (f.xp[sk] || 0); };
 DQ.extraSpeed = sk => { const f = DQ.fx(); return f.speedAll + (f.speed[sk] || 0) + (GATHER.includes(sk) ? f.gather : 0); };
-/* a worn skilling charm (amulet slot) strengthens its one skill: faster gathering, or more XP when making */
-DQ.charmFor = sk => { const a = S().equip.amulet, it = a && D.ITEMS[a]; return it && it.charm && it.charm.skill === sk ? it.charm : null; };
-{ const sp0 = DQ.extraSpeed, xp0 = DQ.extraXp; DQ.extraSpeed = sk => sp0(sk) + ((DQ.charmFor(sk) || {}).speed || 0); DQ.extraXp = sk => xp0(sk) + ((DQ.charmFor(sk) || {}).xp || 0); }
 DQ.packMax = () => DQ.PACK_SLOTS + DQ.fx().pack;
-DQ.coinMult = () => 1 + DQ.fx().coin + (DQ.uniqueFx && DQ.uniqueFx().fortune ? .05 : 0);
+DQ.coinMult = () => 1 + DQ.fx().coin;
 
 /* ---------- Pets ---------- */
 DQ.awardPet = id => {
   const p = D.PET[id], o = S().pets.owned; if (!p || o[id]) return false;
   o[id] = { aff: 0, found: Date.now() }; S().stats.pets = Object.keys(o).length;
   if (!S().pets.active) { S().pets.active = id; DQ.fxDirty(); }
-  const active = S().pets.active === id;
-  DQ.notify({ kind: 'unlock', key: 'pet:' + id, icon: 'paw', col: p.col, title: `New creature: ${p.name}!`, text: `A ${p.kind.toLowerCase()} has joined your collection. ${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, sound: 'gem', burst: true, ttl: 14000,
-    popup: (DQ.sim && DQ.sim.on) || DQ.forecasting ? null : { title: `A new companion: ${p.name}!`, body: `<div class="pet-pop" style="--c:${p.col}"><span class="pet-pop-art">${(() => { try { return DQ.petSprite ? DQ.petSprite(p, 128) : ''; } catch (e) { return ''; } })()}</span><p><b>${DQ.esc(p.name)}</b> the ${DQ.esc(p.kind.toLowerCase())} has joined you.</p><p class="pet-pop-fx">${DQ.esc(p.text)}.</p><p class="sm dim">${active ? 'They are your active companion now.' : 'Make them your companion to get this bonus.'}</p></div>`,
-      actions: [...(active ? [] : [{ label: 'Make active', primary: true, fn: () => { DQ.setPet(id); DQ.ui.render && DQ.ui.render(false); } }]), { label: 'Meet them', primary: active, fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, { label: 'Close' }] } });
-  DQ.log(`A new creature joins you: ${p.name} the ${p.kind.toLowerCase()}!`, 'quest'); DQ.emit('pets'); DQ.achDirty = true; return true;
+  DQ.notify({ kind: 'loot', key: 'pet:' + id, icon: 'paw', col: p.col, title: `New pet: ${p.name}!`, text: `A ${p.kind.toLowerCase()} has decided to follow you. ${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, sound: 'gem', burst: true, ttl: 14000 });
+  DQ.log(`A new pet joins you: ${p.name} the ${p.kind.toLowerCase()}!`, 'quest'); DQ.emit('pets'); DQ.achDirty = true; return true;
 };
 DQ.petRoll = (type, key) => {
   for (const p of D.PETS) {
@@ -93,12 +81,10 @@ DQ.harvest = (i, o = {}) => {
   DQ.grant('crop_' + c.id, n); p.crop = null;
   if (o.by) { o.by.xp += c.hxp * .6; o.by.made['crop_' + c.id] = (o.by.made['crop_' + c.id] || 0) + n; }
   else {
-    const x = DQ.addXp('farming', c.hxp); S().stats.harvest++; DQ.checkActionUnlocks?.(); DQ.qev('harvest', c.id); DQ.petRoll('harvest');
+    const x = DQ.addXp('farming', c.hxp); S().stats.harvest++; DQ.qev('harvest', c.id); DQ.petRoll('harvest');
     DQ.floatAt(document.querySelector(`.plot[data-i="${i}"]`), `${DQ.ico('crop')}+${n} ${c.name.toLowerCase()} · +${fmt(x)} XP`, c.col); DQ.sfx('fish');
   }
-  /* Your chosen seed is replanted when you have one; otherwise the harvested crop, as before. Workers keep their own crop. */
-  const next = !o.by && F.next && D.CROP[F.next] && DQ.have('seed_' + F.next) && DQ.lvl('farming') >= D.CROP[F.next].lvl ? F.next : c.id;
-  if (F.autoReplant || o.by) DQ.plant(i, next, { quiet: true, by: o.by });
+  if (F.autoReplant || o.by) DQ.plant(i, c.id, { quiet: true, by: o.by });
   DQ.emit('farm'); return true;
 };
 DQ.harvestAll = () => { let n = 0; S().farm.plots.forEach((p, i) => { if (DQ.harvest(i)) n++; }); if (!n) DQ.toast('Nothing is ready to harvest yet'); };
@@ -118,15 +104,6 @@ DQ.buyAnimal = id => {
   if (S().coins < a.price) return DQ.toast('Not enough coins', true);
   S().coins -= a.price; F.animals.push({ id, t: 0, stored: 0, happy: 0, name: DQ.pick(['Clover', 'Daisy', 'Pickle', 'Muffin', 'Bramble', 'Nutmeg', 'Turnip', 'Poppy', 'Sprout', 'Hazel', 'Beans', 'Fern']) });
   DQ.sfx('buy'); DQ.log(`You buy a ${a.name.toLowerCase()}.`); DQ.emit('farm');
-};
-/* Selling an animal frees its pen for another (Nov 2026): anything it has stored is collected first, and the livestock
-   trader pays half what it cost. */
-DQ.animalSellPrice = i => { const a = S().farm.animals[i]; return a && D.ANIMAL[a.id] ? Math.floor(D.ANIMAL[a.id].price / 2) : 0; };
-DQ.sellAnimal = i => {
-  const F = S().farm, a = F.animals[i]; if (!a) return false; const A = D.ANIMAL[a.id], price = DQ.animalSellPrice(i);
-  if (a.stored) DQ.collect(i);
-  F.animals.splice(i, 1); DQ.addCoins(price); DQ.sfx('coin');
-  DQ.log(`You sell ${a.name} the ${A.name.toLowerCase()} for ${fmt(price)} coins. The pen is free.`); DQ.emit('farm'); return true;
 };
 DQ.buyPen = () => {
   const F = S().farm, price = D.PEN_PRICES[F.pensBought]; if (price === undefined) return DQ.toast('Your barn is as big as it gets', true);
@@ -237,6 +214,8 @@ DQ.advanceWorld = dt => {
     const d = DQ.workerDur(w); if (!d) return; w.t += dt; let g = 0;
     while (w.t >= d && g++ < 6000) { w.t -= d; workStep(w); }
   });
+  const ap = s.pets.active && s.pets.owned[s.pets.active];
+  if (ap) { const lv = DQ.petLevel(s.pets.active); ap.aff = (ap.aff || 0) + dt / 60000; if (DQ.petLevel(s.pets.active) > lv) { DQ.fxDirty(); const p = D.PET[s.pets.active]; DQ.notify({ kind: 'perk', key: 'bond', icon: 'heart', col: p.col, title: `${p.name}: bond level ${DQ.petLevel(p.id)}`, text: `Your bond grows stronger. Their bonus is now ${Math.round((1 + .25 * (DQ.petLevel(p.id) - 1)) * 100)}% as strong.`, sound: 'perk' }); } }
   if ((petAcc += dt) > 2000) { petAcc = 0; DQ.fxDirty(); }
 };
 })();

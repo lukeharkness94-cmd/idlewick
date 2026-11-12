@@ -5,9 +5,9 @@ const DQ = window.DQ, D = DQ.data;
 /* ---------- Weapons: plain names for starter gear, grander ones as the metal improves ---------- */
 const T = ['bronze', 'iron', 'steel', 'mithril', 'adamant', 'rune', 'astral'];
 const WEAPON_NAMES = {
-  sword: ['Bronze Shortsword', "Soldier's Blade", "Knight's Longsword", 'Skyforged Saber', 'Emerald Reaver', 'Glacier Fang', 'Starsunder'],
-  dagger: ['Bronze Knife', 'Alley Knife', 'Quickfang', 'Whisperblade', "Viper's Kiss", 'Frostbite', 'Nightglint'],
-  hammer: ['Bronze Mallet', "Smith's Maul", 'Siegebreaker', 'Thunderhead', 'Earthshaker', 'Avalanche', 'Worldbreaker'],
+  sword: ['Wooden Sword', "Soldier's Blade", "Knight's Longsword", 'Skyforged Saber', 'Emerald Reaver', 'Glacier Fang', 'Starsunder'],
+  dagger: ['Rough Dagger', 'Alley Knife', 'Quickfang', 'Whisperblade', "Viper's Kiss", 'Frostbite', 'Nightglint'],
+  hammer: ['Wooden Mallet', "Smith's Maul", 'Siegebreaker', 'Thunderhead', 'Earthshaker', 'Avalanche', 'Worldbreaker'],
 };
 const W = {};
 T.forEach((t, i) => Object.entries(WEAPON_NAMES).forEach(([k, names]) => { W[`${t}_${k}`] = names[i]; }));

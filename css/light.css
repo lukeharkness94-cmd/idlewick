@@ -34,7 +34,7 @@
 :root[data-theme="light"] .seg button.on{background:#fffcf3;color:var(--brass-hi);box-shadow:0 1px 3px #6a532044}
 :root[data-theme="light"] .tab.on{background:#fffcf3;color:var(--brass-hi)}
 :root[data-theme="light"] .stab.on{background:#fffcf3;color:var(--ink);border-color:var(--brass)}
-:root[data-theme="light"] #hud .h-stop:hover{color:var(--ink)}
+:root[data-theme="light"] .h-stop:hover{color:#fff}
 
 /* ---------- Cards that were painted dark ---------- */
 :root[data-theme="light"] .arena{background:linear-gradient(180deg,#efe6cf,#e4d9bd)}
@@ -106,23 +106,3 @@
 :root[data-theme="light"] .dg-row{background:color-mix(in srgb,var(--c) 9%,#fffaf0)}
 :root[data-theme="light"] .belldot{color:#fff8e8;background:#8a5a08}
 :root[data-theme="light"] .bell-row .n-ic{color:color-mix(in srgb,var(--c) 40%,#241c0e)}
-
-/* Daylight keeps the same carved edges without heavy dark shadows. */
-:root[data-theme="light"] { --button-shadow:#83693b33; }
-:root[data-theme="light"] .btn,
-:root[data-theme="light"] .choice-button,
-:root[data-theme="light"] .stab,
-:root[data-theme="light"] .tab,
-:root[data-theme="light"] .seed-choice { background:linear-gradient(180deg,#fffdf5,var(--panel2)); box-shadow:inset 0 1px 0 #fff,inset 0 -2px 0 #b49a6526,0 2px 0 var(--button-shadow); }
-:root[data-theme="light"] .choice-button.on,
-:root[data-theme="light"] .stab.on,
-:root[data-theme="light"] .tab.on,
-:root[data-theme="light"] .seed-choice.on { background:linear-gradient(180deg,#fff4d1,#ead8ad); border-color:var(--brass); box-shadow:inset 3px 0 0 var(--brass),inset 0 1px 0 #fff,0 2px 0 var(--button-shadow); }
-:root[data-theme="light"] .btn.primary { background:linear-gradient(180deg,#f6d991,#ddb25e); box-shadow:inset 0 1px 0 #fff9,inset 0 -2px 0 #ad7d36,0 2px 0 var(--button-shadow); }
-:root[data-theme="light"] .btn:active:not(:disabled),
-:root[data-theme="light"] .choice-button:active:not(:disabled),
-:root[data-theme="light"] .stab:active,
-:root[data-theme="light"] .tab:active,
-:root[data-theme="light"] .seed-choice:active { box-shadow:inset 0 2px 3px #83693b44; }
-/* The light arena surface must not reset the landscape to a repeating image. */
-:root[data-theme="light"] .encounter-arena { background-size:cover; background-repeat:no-repeat; background-position:center; }

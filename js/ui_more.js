@@ -32,13 +32,24 @@ UI.skillHero = (sk, extra = '') => {
   return h.slice(0, i) + `<div class="sh-level"><span class="lvbig"><span class="k">Level</span><b class="mono" data-b="lvl:${sk}"></b></span><div class="lvbar"><span class="bar big"><i data-b="xpbar:${sk}"></i></span><div class="sh-line mono"><span data-b="toNext:${sk}"></span><span data-b="eta:${sk}"></span></div></div></div>` + guideHtml(sk) + h.slice(i);
 };
 const origTip = DQ.tips.skill;
-DQ.tips.skill = sk => { const g = D.SKILL_GUIDE[sk]; return (DQ.tips.rail ? DQ.tips.rail(sk) : origTip(sk)) + (g ? `<div class="dim" style="margin-top:6px">${g[0]}</div>` : ''); };
+DQ.tips.skill = sk => { const g = D.SKILL_GUIDE[sk]; return origTip(sk) + (g ? `<div class="dim" style="margin-top:4px">${g[0]}</div>` : ''); };
 UI.B.eta = (e, sk) => {
   const rate = DQ.hist.slice(-12).reduce((a, b) => a + (b[sk] || 0), 0) / (Math.min(12, DQ.hist.length) * 5000);
   const L = DQ.lvl(sk); if (L >= 99) return UI.set(e, '');
   const need = D.XPF[L + 1] - S().xp[sk];
   UI.set(e, rate > 0 ? `level ${L + 1} in about ${DQ.fmtTime(need / rate)}` : 'train it to see time to next level');
 };
+
+/* ---------- Level-up banner: a short celebration at the top of the screen ---------- */
+const bq = []; let showing = false;
+DQ.on('levelup', (sk, lvl) => { bq.push([sk, lvl]); if (!showing) nextBanner(); });
+function nextBanner() {
+  const n = bq.shift(); if (!n) { showing = false; return; } showing = true;
+  const [sk, lvl] = n, s = D.SK[sk], el = document.createElement('div'); el.className = 'lvlban'; el.style.setProperty('--c', s.col);
+  el.innerHTML = `<span class="lb-ic">${ico(sk, 'lg')}</span><span><small>Level up!</small><b>${s.name} <span class="mono">${lvl}</span></b></span>`;
+  $('#fx').appendChild(el); DQ.burstEl(el, s.col, 26);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => { el.remove(); nextBanner(); }, 350); }, bq.length ? 1300 : 2400);
+}
 
 /* ---------- Pinned quests ---------- */
 const PAGE_OF = { catch: 'fishing', chop: 'woodcutting', mine: 'mining', thieve: 'thieving', cook: 'cooking', smelt: 'smithing', smith: 'smithing', craft: 'crafting', harvest: 'farming', collect: 'farming', pet: 'farming', visit: 'map' };
@@ -63,7 +74,7 @@ UI.renderPins = () => {
     const q = D.QM[id], st = DQ.questState(q), p = S().q[id], i = q.obj.findIndex((o, j) => DQ.objProg(q, p, j) < o.n), o = q.obj[Math.max(0, i)];
     const sk = q.main && D.SK[q.unlocks];
     const btn = st === 'new' ? `<button class="btn sm primary" data-do="qstart" data-a="${id}">Accept</button>` : st === 'ready' ? `<button class="btn sm primary" data-do="qclaim" data-a="${id}">Claim</button>` : `<button class="btn sm" data-do="go" data-a="${DQ.objPage(q, o)}">Go ${ico('arrow')}</button>`;
-    return `<div class="pin ${q.main ? 'main' : ''} ${st}" style="${sk ? `--c:${sk.col}` : ''}"><button class="pin-t" data-do="openquest" data-a="${id}">${q.main ? ico('star') : ico('quest')}<b>${q.name}</b>${suggest ? '<small>Suggested</small>' : ''}</button>
+    return `<div class="pin ${q.main ? 'main' : ''} ${st}" style="${sk ? `--c:${sk.col}` : ''}"><button class="pin-t" data-do="openquest" data-a="${id}" data-tip="text:Open in the quest log">${q.main ? ico('star') : ico('quest')}<b>${q.name}</b>${suggest ? '<small>Suggested</small>' : ''}</button>
       <div class="pin-o"><span class="sm">${st === 'ready' ? 'All done! Claim your reward.' : st === 'new' ? `${q.giver}, ${D.TOWN[q.town].name}${sk ? ` · teaches ${sk.name}` : ''}` : o.label}</span>${st === 'active' ? `<span class="pin-p"><span class="bar"><i data-b="qbar:${id}:${i}"></i></span><small class="mono" data-b="qtxt:${id}:${i}"></small></span>` : ''}</div>
       ${btn}${suggest ? '' : `<button class="pin-x" data-do="unpin" data-a="${id}" aria-label="Unpin" data-tip="text:Unpin">${ico('close')}</button>`}</div>`;
   }).join('')}</div>`;

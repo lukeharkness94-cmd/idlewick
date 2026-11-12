@@ -27,7 +27,6 @@ D.SKILLS = [
   { id: 'smithing',    name: 'Smithing',    col: '#e8703a', group: 'artisan', page: 'smithing',    unlock: 12, quest: 'mq_smithing',  blurb: 'Smelt ore into bars and hammer them into weapons and armour.' },
   { id: 'crafting',    name: 'Crafting',    col: '#d98ad1', group: 'artisan', page: 'crafting',    unlock: 15, quest: 'mq_crafting', blurb: 'Sew leather, cut jewellery, carve bows and staves.' },
   { id: 'magic',       name: 'Magic',       col: '#7d89f5', group: 'artisan', page: 'magic',       unlock: 28, quest: 'mq_magic', blurb: 'Cast spells in battle and turn clutter into coins with alchemy.' },
-  { id:'research', name:'Scholarship', col:'#b79862', group:'artisan', page:'research', unlock:16, blurb:'Study practical discoveries to earn Scholarship XP and permanent improvements.' },
   { id: 'attack',      name: 'Attack',      col: '#df5b4a', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Hit more often with melee weapons.' },
   { id: 'strength',    name: 'Strength',    col: '#3fb88f', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Hit harder with melee weapons.' },
   { id: 'defence',     name: 'Defence',     col: '#5f93df', group: 'combat',  page: 'combat',      unlock: 0,  blurb: 'Avoid blows and wear heavier armour.' },
@@ -67,25 +66,10 @@ const FISH = [
   ['carp', 'Carp', '#d9a050', 'mossbarrow', 12, 25, 2200, 12, 55, 6, 12],
   ['pike', 'Pike', '#8fae6a', 'mossbarrow', 16, 40, 2300, 16, 65, 6, 14],
   ['skyfin', 'Skyfin', '#9fd8ff', 'skyreach', 88, 140, 3600, 90, 260, 24, 520],
-  /* Nov 2026 additions: fill the long stretches between catches; ordinary ones work from any town once discovered */
-  ['minnow', 'Minnow', '#b8c4a8', 'willowbrook', 3, 14, 2000, 3, 34, 3, 4],
-  ['perch', 'Perch', '#a8b45a', 'willowbrook', 7, 24, 2150, 7, 44, 4, 6],
-  ['bream', 'Bream', '#c8b888', 'mossbarrow', 22, 55, 2450, 20, 75, 8, 16],
-  ['mackerel', 'Mackerel', '#4a8a9a', 'saltmere', 26, 62, 2500, 23, 82, 8, 19],
-  ['flounder', 'Flounder', '#9a8a64', 'saltmere', 33, 76, 2650, 28, 96, 10, 29],
-  ['catfish', 'Catfish', '#6a6a58', 'mossbarrow', 38, 86, 2750, 35, 110, 11, 42],
-  ['char', 'Arctic char', '#e8704a', 'ironpeak', 44, 94, 2900, 42, 128, 13, 64],
-  ['grayling', 'Grayling', '#9a9aac', 'ironpeak', 56, 105, 3000, 52, 145, 15, 96],
-  ['bogpuffer', 'Bog puffer', '#8a9a52', 'gloomfen', 66, 112, 3050, 66, 165, 17, 152],
-  ['bogray', 'Bog ray', '#6a7a64', 'gloomfen', 70, 115, 3100, 70, 180, 18, 184],
-  ['cinderfish', 'Cinderfish', '#d8603a', 'emberfall', 79, 118, 3300, 78, 215, 21, 272],
-  ['basaltjaw', 'Basaltjaw', '#5a5a64', 'emberfall', 86, 132, 3500, 86, 240, 23, 368],
-  ['stormray', 'Storm ray', '#7a9ac8', 'skyreach', 92, 150, 3700, 92, 270, 25, 480],
-  ['ghostfin', 'Ghostfin', '#d8e0f4', 'hollow', 98, 170, 3900, 97, 300, 27, 608],
-  ['voideel', 'Void eel', '#8a5ad8', 'hollow', 95, 160, 3800, 96, 290, 26, 560],
+  ['voideel', 'Void eel', '#8a5ad8', 'hollow', 95, 160, 3800, 96, 290, 26, 700],
 ];
 const WOOD = [
-  ['normal', 'Logs', 'Tree', '#a07a4f', 'willowbrook', 1, 18, 2200, 3],
+  ['normal', 'Logs', 'Tree', '#a07a4f', 'willowbrook', 1, 25, 2200, 3],
   ['oak', 'Oak logs', 'Oak tree', '#b58a52', 'willowbrook', 15, 38, 2400, 8],
   ['willow', 'Willow logs', 'Willow tree', '#9db86a', 'saltmere', 30, 68, 2600, 18],
   ['maple', 'Maple logs', 'Maple tree', '#c9703f', 'ironpeak', 45, 100, 2800, 40],
@@ -94,15 +78,6 @@ const WOOD = [
   ['birch', 'Birch logs', 'Birch tree', '#e6dcc4', 'mossbarrow', 8, 30, 2300, 5],
   ['elder', 'Elder logs', 'Elder tree', '#c9e0a8', 'skyreach', 88, 320, 3800, 360],
   ['gloomwood', 'Gloomwood logs', 'Gloomwood tree', '#5a4a7a', 'hollow', 95, 380, 4000, 480],
-  ['hazel', 'Hazel logs', 'Hazel tree', '#b89a6a', 'willowbrook', 5, 24, 2250, 3],
-  ['ash', 'Ash logs', 'Ash tree', '#cfc0a0', 'mossbarrow', 22, 50, 2500, 10],
-  ['palm', 'Palm logs', 'Palm tree', '#c8a868', 'saltmere', 27, 60, 2550, 12],
-  ['cedar', 'Cedar logs', 'Cedar tree', '#b0603a', 'ironpeak', 40, 88, 2750, 26],
-  ['pine', 'Pine logs', 'Pine tree', '#9a7a52', 'ironpeak', 52, 130, 3000, 48],
-  ['mangrove', 'Mangrove logs', 'Mangrove tree', '#7a5a3a', 'gloomfen', 67, 210, 3400, 120],
-  ['cinderbark', 'Cinderbark logs', 'Cinderbark tree', '#4a3430', 'emberfall', 80, 275, 3700, 224],
-  ['windpine', 'Windpine logs', 'Windpine tree', '#a8b8c8', 'skyreach', 92, 345, 3900, 336],
-  ['wraithbark', 'Wraithbark logs', 'Wraithbark tree', '#c8c8d8', 'hollow', 98, 400, 4100, 448],
 ];
 const ORES = [
   ['copper', 'Copper', '#cf8a52', 'willowbrook', 1, 17, 2200, 6],
@@ -116,18 +91,6 @@ const ORES = [
   ['silver', 'Silver', '#d6dde4', 'mossbarrow', 20, 40, 2600, 35],
   ['astralite', 'Astralite', '#e2d4ff', 'skyreach', 90, 150, 4800, 900],
   ['voidstone', 'Voidstone', '#6a4aa8', 'hollow', 97, 180, 5200, 1300],
-  /* minerals for skilling charms (Crafting): each strengthens one non-combat skill */
-  ['flint', 'Flint', '#8a8a86', 'willowbrook', 4, 15, 2150, 4],
-  ['quartz', 'Quartz', '#e8eef4', 'willowbrook', 10, 24, 2300, 7],
-  ['amber', 'Amber', '#e8a030', 'mossbarrow', 18, 34, 2500, 13],
-  ['jet', 'Jet', '#2a2a34', 'saltmere', 26, 44, 2700, 21],
-  ['jade', 'Jade', '#5ab87a', 'saltmere', 35, 56, 2900, 36],
-  ['bloodstone', 'Bloodstone', '#3a6a4a', 'ironpeak', 46, 70, 3100, 60],
-  ['moonstone', 'Moonstone', '#d8e0ff', 'ironpeak', 58, 84, 3400, 96],
-  ['bogiron', 'Bog iron', '#9a5a2a', 'gloomfen', 64, 92, 3600, 128],
-  ['obsidian', 'Obsidian', '#2a2238', 'emberfall', 78, 115, 4100, 304],
-  ['skyglass', 'Skyglass', '#bfe6ff', 'skyreach', 91, 146, 4700, 608],
-  ['nullite', 'Nullite', '#3a2a5a', 'hollow', 99, 185, 5300, 1120],
 ];
 const THIEF = [
   ['villager', 'Villager', 'willowbrook', 1, 8, 2000, 3, 9, 2, null],
@@ -252,20 +215,6 @@ farmCook('cheese_pie', 'Cheese and onion pie', '#e8c070', 35, 110, 15, { crop_wh
 farmCook('berry_cake', 'Strawberry cake', '#f08aa0', 45, 140, 18, { crop_wheat: 2, egg: 1, milk: 1, crop_strawberry: 2 }, 140);
 farmCook('pumpkin_pie', 'Pumpkin pie', '#ef8a3a', 55, 170, 20, { crop_pumpkin: 1, crop_wheat: 1, egg: 1 }, 180);
 farmCook('honey_roast', 'Honey truffle roast', '#c8782a', 70, 230, 26, { honey: 1, truffle: 1, crop_potato: 2 }, 320);
-/* Fish suppers (Nov 2026): one new fish and one crop, so farming and fishing feed each other. They heal about four
-   more than the fish alone and sell for roughly their ingredients, so they are a preparation choice, not a money loop. */
-[['perch_stew', 'Perch and onion stew', 'perch', 'onion', 'bowl'], ['bream_greens', 'Bream with greens', 'bream', 'cabbage', 'plate'],
- ['mackerel_pie', 'Mackerel pie', 'mackerel', 'wheat', 'pie'], ['flounder_supper', 'Flounder supper', 'flounder', 'potato', 'plate2'],
- ['catfish_pot', 'Catfish pumpkin pot', 'catfish', 'pumpkin', 'pot'], ['char_goldleaf', 'Goldleaf char', 'char', 'goldleaf', 'wrap'],
- ['grayling_sunbloom', 'Sunbloom grayling', 'grayling', 'sunbloom', 'skewer'], ['puffer_broth', 'Marsh puffer broth', 'bogpuffer', 'onion', 'bowl2'],
- ['ray_wraps', 'Bog ray wraps', 'bogray', 'cabbage', 'wrap2'], ['cinder_roast', 'Ember-roast cinderfish', 'cinderfish', 'pumpkin', 'pan'],
- ['basalt_melon', 'Basaltjaw and melon', 'basaltjaw', 'moonmelon', 'platter'], ['storm_skewers', 'Storm ray skewers', 'stormray', 'starfruit', 'skewer2'],
- ['ghostfin_supper', 'Ghostfin supper', 'ghostfin', 'moonmelon', 'pie2']
-].forEach(([id, name, f, crop, vessel]) => {
-  const F = FISH.find(x => x[0] === f), lvl = Math.min(99, F[7] + 3), cropVal = (ITEMS['crop_' + crop] || { val: 5 }).val;
-  farmCook(id, name, F[2], lvl, Math.round(F[8] * 1.25), F[9] + 4, { [f]: 1, ['crop_' + crop]: 1 }, F[10] + cropVal + 2);
-  ITEMS[id].dish = { vessel, fish: F[2], crop: (ITEMS['crop_' + crop] || {}).col || '#8ab060' };
-});
 
 /* Gear: melee */
 const PIECES = [['weapon', 'dagger', 'dagger', 1, 0, .6], ['weapon', 'hammer', 'warhammer', 3, 3, 1.1], ['weapon', 'sword', 'sword', 2, 0, .8], ['head', 'helm', 'full helm', 2, 2, .5], ['shield', 'shield', 'kiteshield', 3, 4, .8], ['legs', 'legs', 'platelegs', 3, 6, 1], ['body', 'body', 'platebody', 5, 8, 1.4]];
@@ -278,7 +227,7 @@ TIERS.forEach((t, i) => PIECES.forEach(([slot, key, label, bars, off, f]) => {
   else b.def = Math.round(P * { head: .35, shield: .55, legs: .6, body: .9 }[slot]);
   const id = `${t.id}_${key}`, val = Math.round(t.base * f);
   mk(id, { name: `${t.name} ${label}`, ic: PIECE_IC[key] || PIECE_IC[slot], wtype: slot === 'weapon' ? key : undefined, col: t.col, val, type: 'gear', slot, style: slot === 'weapon' ? 'melee' : undefined, req: { [slot === 'weapon' ? 'attack' : 'defence']: t.equip }, b, tier: i });
-  addR({ id: 'smith_' + id, skill: 'smithing', tab: slot === 'weapon' ? 'Weapons' : 'Armour', name: `${t.name} ${label}`, lvl: Math.min(99, t.bar + off), /* skills cap at 99: the astral platebody (bar 90 + 10) was uncraftable */ xp: Math.round(bars * 12.5 * (1 + i * .25)), t: 3000, in: { ['bar_' + t.id]: bars }, out: { [id]: 1 }, ev: 'smith' });
+  addR({ id: 'smith_' + id, skill: 'smithing', tab: slot === 'weapon' ? 'Weapons' : 'Armour', name: `${t.name} ${label}`, lvl: t.bar + off, xp: Math.round(bars * 12.5 * (1 + i * .25)), t: 3000, in: { ['bar_' + t.id]: bars }, out: { [id]: 1 }, ev: 'smith' });
 }));
 
 /* Gear: leather (ranged armour) */
@@ -291,7 +240,7 @@ const LEATHER = [
 const LPIECES = [['head', 'coif', 'coif', 2, 0, .35, 'helm'], ['legs', 'chaps', 'chaps', 3, 3, .6, 'legs'], ['body', 'vest', 'body', 4, 6, .9, 'body']];
 LEATHER.forEach((t, i) => LPIECES.forEach(([slot, key, label, n, off, f, ic]) => {
   const id = `${t.id}_${key}`;
-  mk(id, { name: `${t.name} ${label}`, ic, col: t.col, val: Math.round(t.base * (f + .4)), type: 'gear', slot, req: i === 0 ? { defence: 1 } : { ranged: t.equip }, b: { def: Math.round(t.P * f * .8), rng: Math.round(t.P * f * .45) }, tier: i, lth: 1 }); /* basic leather is everyone's first armour; finer hides need Ranged */
+  mk(id, { name: `${t.name} ${label}`, ic, col: t.col, val: Math.round(t.base * (f + .4)), type: 'gear', slot, req: { ranged: t.equip }, b: { def: Math.round(t.P * f * .8), rng: Math.round(t.P * f * .45) }, tier: i, lth: 1 });
   addR({ id: 'craft_' + id, skill: 'crafting', tab: 'Leather', name: `${t.name} ${label}`, lvl: t.craft + off, xp: t.xp * n, t: 2600, in: { [t.hide]: n }, out: { [id]: 1 }, ev: 'craft' });
 }));
 
@@ -332,42 +281,6 @@ JEW.forEach(([g, rl, al, rb, ab], i) => {
 
 mk('cloth', { name: 'Woollen cloth', ic: 'hide', col: '#efe8d8', val: 30, type: 'resource' });
 addR({ id: 'craft_cloth', skill: 'crafting', tab: 'Leather', name: 'Woollen cloth', lvl: 12, xp: 25, t: 2200, in: { wool: 2 }, out: { cloth: 1 }, ev: 'craft' });
-/* Hunting preparation (Nov 2026): leather string from a cowhide, then wooden traps. Held traps are your first hunting gear. */
-mk('string', { name: 'Leather string', ic: 'bit', col: '#c8a070', val: 3, type: 'craft', sub: 'Cut from cowhide. Ties traps and strings bows.' });
-mk('wooden_trap', { name: 'Wooden trap', ic: 'bit', col: '#a8784a', val: 9, type: 'craft', trap: true, sub: 'Starting hunting gear: each one held adds 5% Hunting XP (up to three).' });
-addR({ id: 'craft_string', skill: 'crafting', tab: 'Leather', name: 'Leather string', lvl: 1, xp: 6, t: 1800, in: { cowhide: 1 }, out: { string: 3 }, ev: 'craft' });
-addR({ id: 'craft_trap', skill: 'crafting', tab: 'Leather', name: 'Wooden trap', lvl: 2, xp: 12, t: 2400, in: { log_normal: 2, string: 1 }, out: { wooden_trap: 1 }, ev: 'craft' });
-/* Wooden shields (Nov 2026): a lighter alternative to metal kiteshields. About 60% of the defence of the metal shield at
-   the same requirement, plus a ranged or magic bonus, so archers and casters have a reason to carry one. */
-D.WOOD_SHIELDS = [
-  ['hazel', 'Hazel buckler', 5, 1, { def: 1, rng: 1 }], ['ash', 'Ash round shield', 24, 12, { def: 3, mag: 2 }],
-  ['palm', 'Palm wicker shield', 29, 15, { def: 4, rng: 3 }], ['cedar', 'Cedar heater', 42, 25, { def: 7, mag: 4 }],
-  ['pine', 'Pine tower shield', 54, 32, { def: 9, rng: 5 }], ['mangrove', 'Mangrove ward', 69, 42, { def: 12, mag: 7 }],
-  ['cinderbark', 'Cinderbark shield', 82, 50, { def: 17, rng: 9 }], ['windpine', 'Windpine aegis', 93, 56, { def: 20, mag: 11 }],
-  ['wraithbark', 'Wraithbark bulwark', 99, 60, { def: 22, rng: 8, mag: 8 }]
-];
-D.WOOD_SHIELDS.forEach(([log, name, lvl, dreq, b], i) => {
-  const id = log + '_shield', val = Math.round(14 * Math.pow(1.62, i) + lvl * 2);
-  mk(id, { name, ic: 'shield', col: (WOOD.find(w => w[0] === log) || [])[3] || '#a07a4f', val, type: 'gear', slot: 'shield', req: { defence: dreq }, b, tier: i, wood: true });
-  addR({ id: 'craft_' + id, skill: 'crafting', tab: 'Shields', name, lvl, xp: Math.round(20 + lvl * 2.2), t: 2800, in: { ['log_' + log]: 4, string: 2 }, out: { [id]: 1 }, ev: 'craft' });
-});
-/* Skilling charms: amulets that make one non-combat skill faster (gathering) or more rewarding (making). A real
-   alternative to combat amulets in the same slot, which saved preparations make easy to swap. */
-D.CHARMS = [
-  ['flint', 'Flint charm', 'woodcutting', 'speed', .05], ['quartz', 'Quartz charm', 'fishing', 'speed', .05],
-  ['amber', 'Amber charm', 'farming', 'xp', .06], ['jet', 'Jet charm', 'thieving', 'speed', .05],
-  ['jade', 'Jade charm', 'cooking', 'xp', .06], ['bloodstone', 'Bloodstone charm', 'mining', 'speed', .06],
-  ['moonstone', 'Moonstone charm', 'research', 'xp', .07], ['bogiron', 'Bog-iron charm', 'smithing', 'xp', .07],
-  ['obsidian', 'Obsidian charm', 'crafting', 'xp', .07], ['skyglass', 'Skyglass charm', 'herbalism', 'xp', .08],
-  ['nullite', 'Nullite charm', 'hunting', 'xp', .08], ['silver', 'Silver charm', 'exploration', 'xp', .06]
-];
-D.CHARMS.forEach(([ore, name, skill, kind, amt]) => {
-  const o = ORES.find(x => x[0] === ore), lvl = Math.min(99, o[4] + 2), id = ore + '_charm';
-  mk(id, { name, ic: 'amulet', col: o[2], val: Math.round(o[7] * 4 + 10), type: 'gear', slot: 'amulet', b: {}, charm: { skill, [kind]: amt }, sub: `${kind === 'speed' ? `${Math.round(amt * 100)}% faster` : `+${Math.round(amt * 100)}% XP in`} ${skill === 'research' ? 'Scholarship' : skill.charAt(0).toUpperCase() + skill.slice(1)} while worn` });
-  addR({ id: 'craft_' + id, skill: 'crafting', tab: 'Jewellery', name, lvl, xp: Math.round(15 + lvl * 1.8), t: 2600, in: { ['ore_' + ore]: 3, string: 1, ...(ore === 'nullite' ? { ore_voidstone: 1 } : {}) }, out: { [id]: 1 }, ev: 'craft' });
-});
-/* older materials stay useful: wolf pelts line the pine tower shield; gloomwood braces the wraithbark bulwark */
-D.RECIPES.craft_pine_shield.in.wolf_pelt = 1; D.RECIPES.craft_wraithbark_shield.in.log_gloomwood = 2;
 
 /* Boss trophies */
 mk('chief_helm', { name: "Grubnash's war-helm", ic: 'helm', col: '#8fbf6a', val: 600, type: 'gear', slot: 'head', req: { defence: 5 }, b: { def: 14, str: 3 }, rare: 1 });
@@ -413,41 +326,39 @@ mon('chicken', 'Chicken', 'willowbrook', 1, 3, 1, 1, 1, [0, 3], '#e8d8a0', [['fe
 mon('rat', 'Giant rat', 'willowbrook', 3, 5, 1, 2, 2, [0, 2], '#a6998a', []);
 mon('goblin', 'Goblin', 'willowbrook', 5, 7, 2, 3, 2, [3, 14], '#6fb35e', [['rune', [1, 3], .08]]);
 mon('cow', 'Cow', 'willowbrook', 8, 10, 2, 3, 4, [0, 5], '#d6c2a4', [['cowhide', [1, 1], 1]]);
-/* Bosses 2-8 retuned Nov 2026 with field-guide counters (scripts/sim-bosses.cjs COUNTER=1): fully prepared ~75-95% at the requirement. */
-/* First boss, tuned Nov 2026 (scripts/sim-opening.cjs): a beginner reaches combat 8 in ~21 minutes; prepared (bronze armour, ~15 cooked fish) wins about two times in three. */
-mon('grubnash', 'Grubnash the Goblin Chief', 'willowbrook', 12, 32, 4, 7, 6, [80, 160], '#8fbf6a', [['cowhide', [2, 3], .5], ['chief_helm', [1, 1], .12]], { req: 8, first: 'chief_helm', special: { every: 4, mult: 1.8, name: 'War cry' }, short: 'Grubnash' });
+mon('grubnash', 'Grubnash the Goblin Chief', 'willowbrook', 16, 45, 5, 10, 8, [80, 160], '#8fbf6a', [['cowhide', [2, 3], .5], ['chief_helm', [1, 1], .12]], { req: 10, first: 'chief_helm', special: { every: 4, mult: 1.8, name: 'War cry' }, short: 'Grubnash' });
 mon('boar', 'Wild boar', 'mossbarrow', 10, 14, 3, 9, 8, [2, 10], '#9a6a4a', [['boar_tusk', [1, 1], .5]]);
 mon('wolf', 'Grey wolf', 'mossbarrow', 13, 18, 3, 12, 10, [0, 4], '#9aa0a8', [['wolf_pelt', [1, 1], .7]]);
 mon('scarecrow', 'Haunted scarecrow', 'mossbarrow', 16, 22, 4, 14, 14, [5, 20], '#d9b860', [['seed_wheat', [1, 3], .25], ['seed_pumpkin', [1, 1], .05]]);
-mon('oldtusk', 'Old Tusk the Boar King', 'mossbarrow', 26, 96, 6, 18, 16, [150, 300], '#b07a4a', [['boar_tusk', [2, 4], 1], ['tusk_charm', [1, 1], .12]], { req: 18, first: 'tusk_charm', special: { every: 4, mult: 1.6, name: 'Trampling charge' }, short: 'Old Tusk' });
+mon('oldtusk', 'Old Tusk the Boar King', 'mossbarrow', 26, 70, 6, 18, 16, [150, 300], '#b07a4a', [['boar_tusk', [2, 4], 1], ['tusk_charm', [1, 1], .12]], { req: 18, first: 'tusk_charm', special: { every: 4, mult: 1.6, name: 'Trampling charge' }, short: 'Old Tusk' });
 mon('crab', 'Rock crab', 'saltmere', 12, 18, 3, 9, 14, [0, 8], '#d9825a', [['gem_sapphire', [1, 1], .03]]);
 mon('bandit', 'Bandit', 'saltmere', 18, 26, 5, 16, 14, [14, 40], '#b08a6a', [['rune', [2, 5], .15], ['gem_sapphire', [1, 1], .03]]);
 mon('smuggler', 'Smuggler', 'saltmere', 22, 32, 6, 20, 18, [20, 60], '#8aa0b0', [['rune', [2, 6], .15], ['feather', [3, 8], .3]]);
 mon('pirate', 'Pirate', 'saltmere', 28, 42, 8, 26, 24, [35, 95], '#c46a4a', [['gem_emerald', [1, 1], .03], ['old_bone', [1, 1], .3]]);
-mon('barnacle', 'Captain Barnacle', 'saltmere', 36, 100, 10, 28, 26, [250, 500], '#6fc7d8', [['gem_emerald', [1, 2], .5], ['barnacle_cutlass', [1, 1], .12]], { req: 25, first: 'barnacle_cutlass', special: { every: 4, mult: 1.7, name: 'Cannon volley' }, short: 'Barnacle' });
+mon('barnacle', 'Captain Barnacle', 'saltmere', 36, 100, 9, 28, 26, [250, 500], '#6fc7d8', [['gem_emerald', [1, 2], .5], ['barnacle_cutlass', [1, 1], .12]], { req: 25, first: 'barnacle_cutlass', special: { every: 4, mult: 1.7, name: 'Cannon volley' }, short: 'Barnacle' });
 mon('bat', 'Cave bat', 'ironpeak', 30, 30, 5, 25, 18, [10, 30], '#7a6a8a', []);
 mon('icewolf', 'Ice wolf', 'ironpeak', 38, 42, 8, 36, 32, [0, 10], '#bfe0f0', [['frost_pelt', [1, 1], .8]]);
 mon('raider', 'Dwarf raider', 'ironpeak', 42, 50, 9, 40, 40, [60, 150], '#c0a070', [['ore_coal', [2, 5], .3], ['gem_ruby', [1, 1], .03]]);
 mon('troll', 'Mountain troll', 'ironpeak', 48, 70, 12, 46, 44, [80, 200], '#8a9a78', [['troll_bone', [1, 1], .7], ['gem_ruby', [1, 1], .04]]);
-mon('frostmaw', 'Frostmaw the Ice Troll', 'ironpeak', 56, 298, 21, 46, 42, [600, 1100], '#bfe6ff', [['frost_pelt', [3, 5], 1], ['frostmaw_pendant', [1, 1], .1]], { req: 45, first: 'frostmaw_pendant', special: { every: 4, mult: 1.8, name: 'Glacier slam' }, short: 'Frostmaw' });
+mon('frostmaw', 'Frostmaw the Ice Troll', 'ironpeak', 56, 150, 14, 46, 42, [600, 1100], '#bfe6ff', [['frost_pelt', [3, 5], 1], ['frostmaw_pendant', [1, 1], .1]], { req: 45, first: 'frostmaw_pendant', special: { every: 4, mult: 1.8, name: 'Glacier slam' }, short: 'Frostmaw' });
 mon('zombie', 'Bog zombie', 'gloomfen', 52, 80, 12, 50, 40, [60, 150], '#7a9a6a', [['old_bone', [1, 1], .8]]);
 mon('skeleton', 'Marsh skeleton', 'gloomfen', 56, 90, 14, 56, 54, [70, 170], '#cfd6d4', [['old_bone', [1, 2], .9], ['gem_ruby', [1, 1], .04]]);
 mon('bogsnapper', 'Bogsnapper', 'gloomfen', 62, 110, 16, 62, 60, [0, 30], '#5f8a4a', [['bogscale', [1, 1], .8]]);
 mon('wraith', 'Fen wraith', 'gloomfen', 68, 120, 18, 70, 62, [150, 320], '#9b87e0', [['rune', [6, 14], .4], ['gem_diamond', [1, 1], .02]]);
-mon('morwenna', 'Morwenna the Bog Witch', 'gloomfen', 76, 300, 25, 62, 58, [1500, 2600], '#b79cff', [['bogscale', [3, 6], 1], ['gem_diamond', [1, 2], .5], ['witch_staff', [1, 1], .1]], { req: 65, first: 'witch_staff', special: { every: 4, mult: 1.8, name: 'Hex' }, short: 'Morwenna' });
+mon('morwenna', 'Morwenna the Bog Witch', 'gloomfen', 76, 230, 19, 62, 58, [1500, 2600], '#b79cff', [['bogscale', [3, 6], 1], ['gem_diamond', [1, 2], .5], ['witch_staff', [1, 1], .1]], { req: 65, first: 'witch_staff', special: { every: 4, mult: 1.8, name: 'Hex' }, short: 'Morwenna' });
 mon('imp', 'Fire imp', 'emberfall', 64, 90, 15, 62, 56, [80, 200], '#ff8a4a', [['rune', [4, 10], .35]]);
 mon('hound', 'Lava hound', 'emberfall', 72, 130, 20, 72, 66, [120, 300], '#e0573f', [['ember_core', [1, 1], .03]]);
 mon('drake', 'Ember drake', 'emberfall', 80, 170, 25, 82, 78, [200, 480], '#58c27e', [['drakehide', [1, 1], .85], ['gem_diamond', [1, 1], .04]]);
 mon('emberlord', 'Cinder knight', 'emberfall', 86, 220, 30, 88, 84, [300, 650], '#c88a5a', [['ember_core', [1, 1], .06], ['gem_diamond', [1, 1], .05]]);
-mon('pyrrhax', 'Pyrrhax the Ember Wyrm', 'emberfall', 98, 709, 35, 82, 78, [6000, 9000], '#ff6a3a', [['wyrm_scale', [1, 1], 1], ['ember_core', [2, 4], 1], ['emberfang_bow', [1, 1], .1]], { req: 85, first: 'emberfang_bow', special: { every: 4, mult: 1.7, name: 'Wyrmfire' }, short: 'Pyrrhax' });
+mon('pyrrhax', 'Pyrrhax the Ember Wyrm', 'emberfall', 98, 420, 32, 82, 78, [6000, 9000], '#ff6a3a', [['wyrm_scale', [1, 1], 1], ['ember_core', [2, 4], 1], ['emberfang_bow', [1, 1], .1]], { req: 85, first: 'emberfang_bow', special: { every: 4, mult: 1.7, name: 'Wyrmfire' }, short: 'Pyrrhax' });
 mon('hawk', 'Storm hawk', 'skyreach', 88, 200, 28, 90, 80, [300, 700], '#9fd8ff', [['feather', [10, 30], .8], ['gem_diamond', [1, 1], .05]]);
 mon('golem', 'Sky golem', 'skyreach', 94, 260, 32, 96, 100, [400, 900], '#c8c0a8', [['ore_astralite', [1, 2], .3]]);
 mon('wyvern', 'Cloud wyvern', 'skyreach', 100, 300, 36, 100, 95, [500, 1100], '#e2d4ff', [['drakehide', [1, 2], .6], ['ember_core', [1, 1], .08]]);
-mon('zephyrion', 'Zephyrion the Storm Roc', 'skyreach', 110, 613, 54, 92, 88, [10000, 15000], '#bfe8ff', [['ore_astralite', [3, 6], 1], ['storm_feather', [1, 1], .1]], { req: 95, first: 'storm_feather', special: { every: 4, mult: 1.6, name: 'Thunder dive' }, short: 'Zephyrion' });
+mon('zephyrion', 'Zephyrion the Storm Roc', 'skyreach', 110, 520, 36, 92, 88, [10000, 15000], '#bfe8ff', [['ore_astralite', [3, 6], 1], ['storm_feather', [1, 1], .1]], { req: 95, first: 'storm_feather', special: { every: 4, mult: 1.6, name: 'Thunder dive' }, short: 'Zephyrion' });
 mon('voidknight', 'Void knight', 'hollow', 104, 320, 38, 104, 104, [700, 1500], '#6a4aa8', [['ore_voidstone', [1, 1], .3]]);
 mon('shade', 'Hollow shade', 'hollow', 108, 340, 40, 110, 100, [800, 1700], '#3a2a5a', [['rune', [20, 40], .5]]);
 mon('horror', 'Abyssal horror', 'hollow', 112, 380, 42, 112, 108, [1000, 2000], '#8a3a6a', [['gem_diamond', [1, 2], .2], ['wyrm_scale', [1, 1], .03]]);
-mon('hollowking', 'The Hollow King', 'hollow', 126, 935, 50, 104, 100, [25000, 40000], '#b08aff', [['ore_voidstone', [3, 6], 1], ['hollow_crown', [1, 1], .1]], { req: 97, first: 'hollow_crown', special: { every: 4, mult: 1.6, name: 'Crown of sorrow' }, short: 'The Hollow King' });
+mon('hollowking', 'The Hollow King', 'hollow', 126, 700, 42, 104, 100, [25000, 40000], '#b08aff', [['ore_voidstone', [3, 6], 1], ['hollow_crown', [1, 1], .1]], { req: 105, first: 'hollow_crown', special: { every: 4, mult: 1.6, name: 'Crown of sorrow' }, short: 'The Hollow King' });
 
 /* ---------- Combat loot: every monster also rolls on its town's loot table ---------- */
 mk('coin_pouch', { name: 'Coin pouch', ic: 'pouch', col: '#f3d58a', val: 0, type: 'container' });
@@ -475,40 +386,6 @@ Object.entries(TOWN_LOOT).forEach(([town, L]) => {
   });
 });
 
-/* ---------- Unique gear (Nov 2026): a signature effect instead of bigger numbers ----------
-   Each unique carries `unique: { key, name, text }`; the combat engine reads the keys of equipped items (DQ.uniqueFx).
-   New uniques have modest stats for their level, so wearing one is a choice, not an automatic upgrade. They drop rarely
-   from one regional monster, with a bad-luck guarantee on the first copy (engine.js kill). Boss trophies gain effects too. */
-const U = (key, name, text) => ({ key, name, text });
-Object.entries({
-  chief_helm: U('roar', 'Battle roar', 'The first enemy attack of every fight misses.'),
-  tusk_charm: U('hide', 'Thick hide', 'Normal enemy attacks deal 15% less damage.'),
-  barnacle_cutlass: U('riposte', 'Riposte', 'When you are hit, 20% chance to strike straight back for up to your max hit.'),
-  frostmaw_pendant: U('slow', 'Frostbite', 'Enemies wait 15% longer between attacks.'),
-  witch_staff: U('curse', 'Bog hex', 'Each spell that lands weakens the enemy: 5% softer hits per stack, up to 15%.'),
-  emberfang_bow: U('ember', 'Ember arrows', 'Every shot adds fire damage of up to a quarter of your max hit; more against fire-weak foes, less against fire-resistant ones.'),
-  storm_feather: U('swift', 'Gale', 'You attack 10% faster.'),
-  hollow_crown: U('sovereign', 'Crown of sorrow', 'Heal 8% of the damage you deal; boss specials hit 20% softer.')
-}).forEach(([id, u]) => { if (ITEMS[id]) ITEMS[id].unique = u; });
-const uq = (id, o) => mk(id, Object.assign({ type: 'gear', rare: 1 }, o));
-uq('leechfang', { name: 'Leechfang', ic: 'dagger', col: '#9a3a4a', val: 400, slot: 'weapon', wtype: 'dagger', style: 'melee', req: { attack: 12 }, b: { atk: 10, str: 5 }, unique: U('lifesteal', 'Leech', 'Heal 20% of the damage you deal.'), flavour: 'The wolves of Mossbarrow carry it off from careless travellers. It never quite stops being warm.' });
-uq('wyrdwood_bow', { name: 'Wyrdwood longbow', ic: 'bow', col: '#6a8a4a', val: 450, slot: 'weapon', style: 'ranged', req: { ranged: 18 }, b: { rng: 11 }, unique: U('marked', "Hunter's mark", 'The first three shots of every fight always hit, for 50% more damage.'), flavour: 'Cut from a tree the scarecrows guard. It hums when it finds its mark.' });
-uq('thornback_buckler', { name: 'Thornback buckler', ic: 'shield', col: '#c87a5a', val: 500, slot: 'shield', req: { defence: 15 }, b: { def: 7 }, unique: U('thorns', 'Thorns', 'Enemies take 35% of the damage they deal to you.'), flavour: 'A rock crab shell, spines and all, strapped to a board.' });
-uq('vipers_kiss', { name: "Viper's kiss", ic: 'sword', col: '#5aa86a', val: 900, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 20 }, b: { atk: 13, str: 10 }, unique: U('poison', 'Venom', 'Each hit adds a poison stack (up to 3). Whenever the enemy attacks, each stack deals 12% of your max hit.'), flavour: 'A coast-road bandit’s favourite. The groove along the blade is not decoration.' });
-uq('gale_sabre', { name: 'Gale sabre', ic: 'sword', col: '#8fd0e0', val: 1400, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 28 }, b: { atk: 20, str: 16 }, unique: U('twin', 'Twin cut', 'Each hit has a 20% chance to strike again for a full second hit.'), flavour: 'Pirates swear it was forged in a storm. It is certainly light enough.' });
-uq('wardens_greathelm', { name: "Warden's greathelm", ic: 'helm', col: '#7a8aa0', val: 1500, slot: 'head', req: { defence: 25 }, b: { def: 9 }, unique: U('bulwark', 'Bulwark', 'Boss special attacks hit 35% softer.'), flavour: 'Saltmere’s harbour wardens wore these on the sea wall. This one was given, not found.' });
-uq('smugglers_knot', { name: "Smuggler's knot", ic: 'ring', col: '#b89a5a', val: 1500, slot: 'ring', b: {}, unique: U('fortune', "Smuggler's luck", '+25% chance of item drops and +5% coins. No combat stats.'), flavour: 'A ring of tarred rope. Mother Silt’s people will know you by it.' });
-uq('thunderclap_maul', { name: 'Thunderclap maul', ic: 'hammer', col: '#c8b860', val: 4000, slot: 'weapon', wtype: 'hammer', style: 'melee', req: { attack: 40 }, b: { atk: 24, str: 38 }, unique: U('stun', 'Thunderclap', 'Hits have a 12% chance to stun: the enemy loses its next attack.'), flavour: 'Trolls use it to crack ice. It cracks most things.' });
-uq('stormcaller_staff', { name: 'Stormcaller staff', ic: 'staff', col: '#9ab8ff', val: 3500, slot: 'weapon', style: 'magic', req: { magic: 40 }, b: { mag: 25 }, unique: U('arc', 'Arc', '20% chance for a spell to arc and hit again for half damage.'), flavour: 'Raiders stole it from a weather-witch. The weather has not forgiven them.' });
-uq('berserkers_torc', { name: "Berserker's torc", ic: 'amulet', col: '#c86a3a', val: 6000, slot: 'amulet', b: { str: 6 }, unique: U('fury', 'Fury', 'Deal 10% more damage, rising to 40% more as your health falls.'), flavour: 'Pulled from the fen with its owner still attached. He did not want to let go.' });
-uq('salamander_coat', { name: 'Salamander coat', ic: 'body', col: '#e0703a', val: 20000, slot: 'body', req: { defence: 70 }, b: { def: 40 }, lth: 1, unique: U('laststand', 'Last stand', 'Once per fight, a blow that would defeat you leaves you at 1 health instead.'), flavour: 'Drake leather that remembers being on fire, and refuses to do it again.' });
-/* what each signature effect is good for: shown with the item so a find can suggest a plan */
-D.UNIQUE_USE = { lifesteal: 'long fights when food is short', marked: 'a fast opening against tough targets', thorns: 'enemies that hit often', poison: 'long boss fights', twin: 'quick kills and steady damage', bulwark: 'bosses with heavy special attacks', fortune: 'farming drops and coins rather than hard fights', stun: 'bosses whose attacks you would rather skip', arc: 'magic users who want more damage', fury: 'bold play at low health', laststand: 'a safety net in a fight you might lose', roar: 'blunting the opening blow', hide: 'enemies that land many small hits', riposte: 'trading blows with hard hitters', slow: 'fights where fewer enemy attacks matter most', curse: 'mages in long fights', ember: 'fire-weak enemies, with a bow', swift: 'more attacks in every fight', sovereign: 'sustained boss fights' };
-/* rare drops from one regional monster each (first copy guaranteed after about 2.5x the expected number of defeats) */
-[['wolf', 'leechfang', 1 / 150], ['scarecrow', 'wyrdwood_bow', 1 / 150], ['crab', 'thornback_buckler', 1 / 160], ['bandit', 'vipers_kiss', 1 / 180], ['pirate', 'gale_sabre', 1 / 200],
- ['troll', 'thunderclap_maul', 1 / 220], ['raider', 'stormcaller_staff', 1 / 220], ['zombie', 'berserkers_torc', 1 / 250], ['drake', 'salamander_coat', 1 / 260]]
-  .forEach(([mon, id, p]) => { if (D.MON[mon]) D.MON[mon].drops.push([id, [1, 1], p]); });
-
 /* ---------- Shops ---------- */
 const metal = (...ts) => ts.flatMap(i => PIECES.map(p => `${TIERS[i].id}_${p[1]}`));
 const bows = (...ws) => ws.flatMap(i => [`bow_${BW[i][0]}`, `staff_${BW[i][0]}`]);
@@ -531,7 +408,7 @@ Object.values(ITEMS).forEach(it => { if (!it.buy) it.buy = Math.max(1, Math.ceil
 /* ---------- Quests ---------- */
 const Q = (id, town, name, giver, adv, req, blurb, obj, reward) => ({ id, town, name, giver, adv, req, blurb, obj, reward });
 D.QUESTS = [
-  Q('first_steps', 'willowbrook', 'First Steps', 'Elder Wren', 1, null, 'Goblins smashed the winch on the village well and ran off with the bucket. Elder Wren needs timber for a new winch, and you need something in your belly before you go after them. Catch some shrimp and chop a few logs.',
+  Q('first_steps', 'willowbrook', 'First Steps', 'Elder Wren', 1, null, 'Every adventurer starts with a full belly and a wood stack. Catch some shrimp and chop a few logs.',
     [{ ev: 'catch', key: 'shrimp', n: 5, label: 'Catch 5 shrimp' }, { ev: 'chop', key: 'normal', n: 5, label: 'Chop 5 logs' }], { xp: { fishing: 80, woodcutting: 80 }, coins: 60 }),
   Q('goblin_menace', 'willowbrook', 'Goblin Menace', 'Sergeant Orrin', 1, null, 'Goblins keep raiding the east farms. Thin their numbers.',
     [{ ev: 'kill', key: 'goblin', n: 6, label: 'Defeat 6 goblins' }], { xp: { strength: 250, hitpoints: 120 }, coins: 120 }),
@@ -539,7 +416,7 @@ D.QUESTS = [
     [{ ev: 'cook', key: 'shrimp', n: 8, label: 'Cook 8 shrimp' }], { xp: { cooking: 350 }, coins: 150 }),
   Q('miners_pick', 'willowbrook', "A Miner's Pick", 'Old Brannoc', 6, null, 'Brannoc lost his pickaxe and his patience. Show him how it is done.',
     [{ ev: 'mine', key: 'copper', n: 6, label: 'Mine 6 copper ore' }, { ev: 'mine', key: 'tin', n: 6, label: 'Mine 6 tin ore' }], { xp: { mining: 300 }, coins: 150, items: { tool_pick_1: 1 } }),
-  Q('chiefs_end', 'willowbrook', "The Chief's Last Stand", 'Sergeant Orrin', 6, 'goblin_menace', 'Grubnash leads the goblins from a hill fort. End it. You need combat level 8 to face him.',
+  Q('chiefs_end', 'willowbrook', "The Chief's Last Stand", 'Sergeant Orrin', 6, 'goblin_menace', 'Grubnash leads the goblins from a hill fort. End it. You need combat level 10 to face him.',
     [{ ev: 'boss', key: 'grubnash', n: 1, label: 'Defeat Grubnash the Goblin Chief' }], { xp: { attack: 800, strength: 800, defence: 400 }, coins: 400 }),
 
   Q('seeds_of_hope', 'mossbarrow', 'Seeds of Hope', 'Granny Bramble', 10, null, 'Granny Bramble lends you a corner of her farm. Show her you can grow something.',
@@ -591,7 +468,7 @@ D.QUESTS = [
     [{ ev: 'harvest', key: 'starfruit', n: 15, label: 'Harvest 15 starfruit' }, { ev: 'catch', key: 'skyfin', n: 20, label: 'Catch 20 skyfin' }], { xp: { farming: 150000, fishing: 100000 }, coins: 30000 }),
   Q('storm_breaker', 'skyreach', 'Stormbreaker', 'Abbot Seren', 82, 'cloud_harvest', 'Zephyrion has torn the bridges from the sky. You need combat level 95.',
     [{ ev: 'boss', key: 'zephyrion', n: 1, label: 'Defeat Zephyrion the Storm Roc' }], { xp: { attack: 200000, strength: 200000, defence: 200000 }, coins: 80000 }),
-  Q('crownfall', 'hollow', 'Crownfall', 'The Last Herald', 88, 'storm_breaker', 'The Hollow King waits on a drowned throne. End the long sorrow. You need combat level 97.',
+  Q('crownfall', 'hollow', 'Crownfall', 'The Last Herald', 88, 'storm_breaker', 'The Hollow King waits on a drowned throne. End the long sorrow. You need combat level 105.',
     [{ ev: 'kill', key: 'voidknight', n: 20, label: 'Defeat 20 void knights' }, { ev: 'boss', key: 'hollowking', n: 1, label: 'Defeat the Hollow King' }], { xp: { attack: 400000, strength: 400000, defence: 400000, hitpoints: 200000 }, coins: 250000 }),
   Q('wyrm_slayer', 'emberfall', 'Wyrmslayer', 'Warden Ignis', 75, 'drakehide_deal', 'Pyrrhax has burned every banner in the realm. End it. You need combat level 85.',
     [{ ev: 'boss', key: 'pyrrhax', n: 1, label: 'Defeat Pyrrhax the Ember Wyrm' }], { xp: { attack: 100000, strength: 100000, defence: 100000, hitpoints: 60000 }, coins: 40000 }),
@@ -611,7 +488,7 @@ D.QUESTS.unshift(
     'Hettie has sewn every coat in Mossbarrow for fifty years, but her hands have stiffened. Bring her the makings of one last lesson and she will teach you to sew leather, string bows and set gems, so the village is not left in rags.',
     [{ ev: 'deliver', key: 'cowhide', n: 8, label: 'Bring 8 cowhides to practise on' }, { ev: 'deliver', key: 'feather', n: 20, label: 'Bring 20 feathers for her quills' }, { ev: 'chop', key: 'birch', n: 10, label: 'Chop 10 birch logs for her frames' }],
     { xp: { crafting: 150 }, coins: 150, items: { cowhide: 6 } }),
-  MQ('mq_ranged', 'ranged', 'mossbarrow', 'A Hunter’s Bow', 'Hunter Wynn', 18, null,
+  MQ('mq_ranged', 'ranged', 'mossbarrow', 'A Hunter’s Bow', 'Hunter Wynn', 18, 'boar_hunt',
     'Wynn will not take you after Old Tusk with only a sword. “A hunter strikes from a distance,” he says. Help him carve your first bow and fletch your first arrows, and he will teach you to shoot.',
     [{ ev: 'deliver', key: 'log_birch', n: 10, label: 'Bring 10 birch logs for the bow stave' }, { ev: 'deliver', key: 'feather', n: 40, label: 'Bring 40 feathers to fletch arrows' }, { ev: 'kill', key: 'boar', n: 6, label: 'Track down 6 wild boars as practice' }],
     { xp: { ranged: 150 }, items: { bow_normal: 1, arrow_bronze: 150 } }),
@@ -619,113 +496,6 @@ D.QUESTS.unshift(
     'A library sank with the old Saltmere harbour. Merrow has fished up the first pages of a spellbook, but smugglers stole the cover and the rest is still underwater. Recover them and she will teach you to read the old magic.',
     [{ ev: 'catch', key: '*', n: 25, label: 'Fish up 25 catches (lost pages turn up in the nets)' }, { ev: 'kill', key: 'smuggler', n: 5, label: 'Take the spellbook cover back from 5 smugglers' }, { ev: 'deliver', key: 'gem_sapphire', n: 1, label: 'Bring a sapphire to focus your first spell' }],
     { xp: { magic: 150 }, coins: 300, items: { staff_normal: 1, rune: 60 } }),
-);
-/* ---------- Town quests that carry each region to its boss (Nov 2026) ----------
-   Every town keeps an open quest within a few Hero levels from arrival to its boss, so there is always a reason to
-   continue. Existing places, creatures, gathering spots and recipes only; rewards in line with each region's neighbours.
-   `thanks` is said when the quest is claimed (journal and claim note). */
-const TQ = (id, town, name, giver, adv, req, blurb, obj, reward, thanks) => ({ ...Q(id, town, name, giver, adv, req, blurb, obj, reward), thanks });
-const k = (key, n, label) => ({ ev: 'kill', key, n, label }), act = (ev, key, n, label) => ({ ev, key, n, label });
-D.QUESTS.push(
-  /* Willowbrook: between the first quests and Grubnash */
-  TQ('wb_granary', 'willowbrook', 'Rats in the Granary', 'Mabel the Cook', 5, 'hungry_cook', 'Something has been at the winter grain, and Mabel has found tiny teeth marks on her best pie dish. Clear the granary and bake the village something to celebrate.',
-    [k('rat', 12, 'Clear 12 rats from the granary'), act('cook', 'baked_potato', 5, 'Bake 5 potatoes for the clean-up crew')], { xp: { attack: 400, cooking: 300 }, coins: 140 },
-    'Not one sack lost. You can have the first slice of everything this week.'),
-  TQ('wb_tattercaps', 'willowbrook', 'Tattercaps in the Lane', 'Elder Wren', 8, 'first_steps', 'Little hooded tattercaps have been pulling washing off lines and leading rilljaws into the reed ponds. Elder Wren suspects the goblins taught them.',
-    [k('tattercap', 6, 'Shoo 6 tattercaps out of the lanes'), k('rilljaw', 6, 'Drive 6 rilljaws back into deep water')], { xp: { strength: 600, defence: 400 }, coins: 220 },
-    'They always did copy the worst of us. With Grubnash gone, perhaps they will copy you instead.'),
-
-  /* Mossbarrow: after Old Tusk, on to Saltmere */
-  TQ('mb_silver', 'mossbarrow', 'The Silver Seam', 'Old Brannoc', 20, 'miners_pick', 'Brannoc followed a rumour to a silver seam above Mossbarrow and came back with a sore back and no silver. He would like to be proved right.',
-    [act('mine', 'silver', 15, 'Mine 15 silver ore'), act('catch', 'pike', 15, 'Catch 15 pike for the miners’ supper')], { xp: { mining: 1800, fishing: 1200 }, coins: 650 },
-    'Told them. Fifty years I have been telling them.'),
-  TQ('mb_bellhares', 'mossbarrow', 'Under the Bellhare Moon', 'Granny Bramble', 23, 'seeds_of_hope', 'At the bellhare moon the rootbound wake and the hares ring through the fields. Granny Bramble wants the harvest in before they trample it.',
-    [k('bellhare', 8, 'Calm 8 bellhares'), k('rootbound', 8, 'Put 8 rootbound back to sleep'), act('harvest', 'strawberry', 10, 'Bring in 10 strawberries before the moon')], { xp: { defence: 2000, farming: 1800 }, coins: 900 },
-    'Every berry in and not a hare hurt. My mother never managed that, and she had three dogs.'),
-
-  /* Saltmere: past Barnacle, towards Ironpeak */
-  TQ('sm_wreckers', 'saltmere', 'The Wreck Divers', 'Harbourmaster Ilsa', 30, 'captains_bane', 'With Barnacle gone, wrecklings have crawled out of the old hulks to pick over what is left. Ilsa wants the harbour floor safe enough to salvage.',
-    [k('wreckling', 10, 'Clear 10 wrecklings from the hulks'), act('catch', 'salmon', 20, 'Catch 20 salmon for the salvage crew')], { xp: { attack: 3500, fishing: 2500 }, coins: 1400 },
-    'Half of Saltmere is down there. Now we can go and get it back.'),
-  TQ('sm_fleet', 'saltmere', 'Iron for the Fleet', 'Smith Tolla', 33, 'forged_in_salt', 'The new fishing fleet needs fittings, and Tolla needs a second pair of hands at the forge and willow for the hulls.',
-    [act('smelt', 'bar_iron', 20, 'Smelt 20 iron bars'), act('smith', '*', 15, 'Smith 15 fittings at any anvil'), act('chop', 'willow', 20, 'Chop 20 willow logs for the hulls')], { xp: { smithing: 4000, woodcutting: 2500 }, coins: 1800 },
-    'First new boat in ten years. We are naming it after you. Well, after your hammer.'),
-
-  /* Ironpeak: Hero 34 to 47, the long climb to Frostmaw */
-  TQ('ip_chimes', 'ironpeak', 'Chimes in the Pass', 'Captain Hrod', 34, 'trollbane', 'Something rings in the high pass at night. The watch say it is chimehorns calling the ice wolves down. Captain Hrod says it is your turn on watch.',
-    [k('chimehorn', 12, 'Silence 12 chimehorns'), k('icewolf', 10, 'Turn back 10 ice wolves')], { xp: { attack: 7000, defence: 5000 }, coins: 2200 },
-    'Quiet at last. Frostmaw will notice. Good. Let it come down to us for a change.'),
-  TQ('ip_gold', 'ironpeak', 'Gold for the Hall', 'Foreman Dagna', 37, 'deep_vein', 'The great hall’s doors were once gilded. Dagna means to see them gleam again before Frostmaw is driven off, so the mountain knows who it belongs to.',
-    [act('mine', 'gold', 25, 'Mine 25 gold ore'), act('smelt', 'bar_gold', 10, 'Smelt 10 gold bars')], { xp: { mining: 9000, smithing: 6000 }, coins: 3000 },
-    'There. Now it looks like a hall worth defending.'),
-  TQ('ip_raiders', 'ironpeak', 'Raiders at the Gate', 'Captain Hrod', 40, 'ip_chimes', 'Raiders have learned that the watch is stretched thin. Hold the gate, and keep the watch fed while you do.',
-    [k('raider', 15, 'Repel 15 raiders'), act('cook', 'lobster', 20, 'Cook 20 lobsters for the watch')], { xp: { strength: 12000, cooking: 6000 }, coins: 3800 },
-    'The gate held. And for once the watch is not complaining about the food.'),
-  TQ('ip_frostpelt', 'ironpeak', 'Furs for the Long Night', 'Hearthkeeper Brunn', 43, 'frozen_catch', 'Winter on the peak is worst just before Frostmaw wakes. Brunn needs warm coats for the watch and fuel for the hearths.',
-    [k('icewolf', 15, 'Gather pelts from 15 ice wolves'), act('craft', '*', 8, 'Craft 8 pieces of warm gear'), act('chop', 'maple', 20, 'Chop 20 maple logs for the hearths')], { xp: { crafting: 9000, woodcutting: 7000 }, coins: 4200 },
-    'Every hearth lit and every guard in fur. Now we can wait out anything. Even a dragon.'),
-  TQ('ip_longnight', 'ironpeak', 'Before the Long Night', 'Captain Hrod', 46, 'ip_raiders', 'The trolls and rimewings always come down before Frostmaw. Thin them out, and the watch will stand with you when the dragon comes.',
-    [k('troll', 15, 'Drive back 15 trolls'), k('rimewing', 8, 'Bring down 8 rimewings'), act('deliver', 'swordfish', 10, 'Stock the watch with 10 cooked swordfish')], { xp: { attack: 15000, hitpoints: 8000 }, coins: 5000 },
-    'The mountain is ready. Now so are you. Frostmaw is waiting at the top.'),
-
-  /* Gloomfen: Hero 60 to 68, towards Morwenna */
-  TQ('gf_lanterns', 'gloomfen', 'Lanterns over the Bog', 'Boatwright Sorrel', 60, 'yew_planks', 'Candletoads swallow the marsh lights, and murkbells ring travellers off the path. Sorrel wants the route lit and safe for the boats.',
-    [k('candletoad', 15, 'Clear 15 candletoads from the lantern posts'), k('murkbell', 10, 'Silence 10 murkbells'), act('chop', 'yew', 30, 'Chop 30 yew logs for new posts')], { xp: { defence: 30000, woodcutting: 25000 }, coins: 6500 },
-    'A light every twenty paces. Nobody drowns on my route again.'),
-  TQ('gf_rivets', 'gloomfen', 'Adamant Rivets', 'Boatwright Sorrel', 62, 'gf_lanterns', 'Bog water eats ordinary nails. Sorrel’s new boats need adamant rivets, and nobody in Gloomfen can smelt it.',
-    [act('mine', 'adamant', 15, 'Mine 15 adamant ore'), act('smelt', 'bar_adamant', 10, 'Smelt 10 adamant bars')], { xp: { mining: 35000, smithing: 30000 }, coins: 7500 },
-    'These will outlast the boat. They might outlast the bog.'),
-  TQ('gf_reeds', 'gloomfen', 'The Reed Stalkers', 'Gravewarden Lysa', 64, 'bone_collector', 'Reedstalkers and bogsnappers guard the path to Morwenna’s hut. Lysa will not let you go up it alone until they are dealt with.',
-    [k('reedstalker', 15, 'Clear 15 reedstalkers'), k('bogsnapper', 15, 'Drive off 15 bogsnappers')], { xp: { attack: 40000, strength: 30000 }, coins: 8500 },
-    'The path is open. So is her door. She knows you are coming.'),
-  TQ('gf_wraithlight', 'gloomfen', 'Wraithlight', 'Mother Alder', 67, 'swamp_supper', 'Wraiths gather where Morwenna’s lanterns burn. Mother Alder says a hunter who eats well and walks in the light will not be taken.',
-    [k('wraith', 15, 'Put 15 wraiths to rest'), k('siltmarionette', 8, 'Cut the strings of 8 silt marionettes'), act('cook', 'monkfish', 30, 'Cook 30 monkfish for the road')], { xp: { hitpoints: 30000, cooking: 30000 }, coins: 9500 },
-    'Now you smell of supper, not fear. The wraiths hate that.'),
-
-  /* Emberfall: Hero 77 to 86, towards Pyrrhax */
-  TQ('ef_glass', 'emberfall', 'Ash and Glass', 'Magmasmith Kael', 77, 'forge_of_embers', 'Glassbacks have been grazing on the runite seams, leaving shards that ruin a forge. Kael wants the seams cleared and worked.',
-    [k('glassback', 12, 'Drive off 12 glassbacks'), act('mine', 'runite', 15, 'Mine 15 runite ore')], { xp: { defence: 90000, mining: 70000 }, coins: 16000 },
-    'Clean ore at last. Now I can forge you something worthy of the wyrm.'),
-  TQ('ef_hounds', 'emberfall', 'Hounds of the Caldera', 'Warden Ignis', 80, 'drakehide_deal', 'Hounds run the caldera rim in packs, and the cinderlooms weave their dens out of living flame. The wardens cannot reach Pyrrhax while they hold the rim.',
-    [k('hound', 25, 'Break up 25 hounds'), k('cinderloom', 12, 'Unravel 12 cinderlooms')], { xp: { strength: 120000, hitpoints: 60000 }, coins: 19000 },
-    'The rim is ours. From up there you can hear the wyrm breathing.'),
-  TQ('ef_anglers', 'emberfall', 'The Angler’s Lantern', 'Quartermaster Vess', 83, 'shark_feast', 'Anglerfish hunt by the light of the lava pools. Vess wants a stock of them salted for the wardens’ last march.',
-    [act('catch', 'anglerfish', 30, 'Catch 30 anglerfish'), act('cook', 'anglerfish', 30, 'Cook 30 anglerfish')], { xp: { fishing: 110000, cooking: 110000 }, coins: 21000 },
-    'Enough for every warden. Nobody faces a dragon on an empty stomach in my watch.'),
-  TQ('ef_furnace', 'emberfall', 'The Furnace Heart', 'Warden Ignis', 86, 'ef_hounds', 'Emberlords stoke the furnace that keeps Pyrrhax warm, and furnacemites carry the coals. Put out the furnace and the wyrm will come out angry and cold.',
-    [k('emberlord', 15, 'Defeat 15 emberlords'), k('furnacemite', 10, 'Scatter 10 furnacemites'), act('smith', '*', 10, 'Smith 10 pieces at the cooling anvils')], { xp: { attack: 150000, smithing: 90000 }, coins: 24000 },
-    'Cold for the first time in a hundred years. Go now, before it warms again.'),
-
-  /* Skyreach: Hero 84 to 95, towards Zephyrion */
-  TQ('sr_feathers', 'skyreach', 'Feathers of the Gale', 'Brother Aldous', 84, 'cloud_harvest', 'The monks fletch their prayer flags from hawk feathers and hang them from elder poles. Both have been scarce since the storms began.',
-    [k('hawk', 25, 'Gather feathers from 25 hawks'), act('chop', 'elder', 25, 'Chop 25 elder logs for flag poles')], { xp: { ranged: 180000, woodcutting: 140000 }, coins: 30000 },
-    'The flags fly again. Listen. The wind sounds kinder already.'),
-  TQ('sr_astral', 'skyreach', 'Star Iron', 'Abbot Seren', 87, null, 'Astralite falls on the high terraces after every storm. The monastery bells cracked in the last one, and Seren wants them recast in star iron.',
-    [act('mine', 'astralite', 25, 'Mine 25 astralite'), act('smelt', 'bar_astral', 10, 'Smelt 10 astral bars')], { xp: { mining: 200000, smithing: 160000 }, coins: 34000 },
-    'Listen to them ring. High and clear, and the whole mountain listening. Star iron remembers where it fell from.'),
-  TQ('sr_golems', 'skyreach', 'Golems of the Stair', 'Abbot Seren', 90, 'sr_astral', 'The stone golems that guard the thousand steps no longer know friend from foe, and prismkites dazzle anyone who climbs. The way to Zephyrion runs through them.',
-    [k('golem', 20, 'Still 20 golems'), k('prismkite', 12, 'Ground 12 prismkites')], { xp: { defence: 240000, strength: 200000 }, coins: 40000 },
-    'The stair is clear. At the top, the storm has a name.'),
-  TQ('sr_thunder', 'skyreach', 'Thunder in the Loom', 'Brother Aldous', 92, 'sr_feathers', 'Thunderlooms weave the storm out of cloud, and wyverns ride it. Unpick both, and Zephyrion will have to fight without its weather.',
-    [k('thunderloom', 15, 'Unpick 15 thunderlooms'), k('wyvern', 15, 'Bring down 15 wyverns')], { xp: { attack: 280000, hitpoints: 140000 }, coins: 46000 },
-    'Blue sky. I had almost forgotten the colour.'),
-  TQ('sr_hermit', 'skyreach', 'The Hermit’s Riddle', 'Abbot Seren', 95, 'sr_golems', 'Gale hermits know the way into Zephyrion’s eyrie, but they only answer those who bring the mountain’s gifts.',
-    [k('galehermit', 10, 'Win the answers of 10 gale hermits'), act('harvest', 'starfruit', 20, 'Bring 20 starfruit as gifts'), act('catch', 'skyfin', 40, 'Catch 40 skyfin as gifts')], { xp: { farming: 220000, fishing: 220000 }, coins: 52000 },
-    'The hermits have answered. Up, they say, and into the wind. It has been waiting for someone to argue with.'),
-
-  /* The Hollow Crown: Hero 90 to 98, towards the Hollow King */
-  TQ('hc_echoes', 'hollow', 'Echoes in the Dark', 'The Last Herald', 90, null, 'Echohusks repeat the last words of everyone the Hollow King has taken, and shades follow the voices. The Herald wants them quiet so the names can be written down.',
-    [k('echohusk', 20, 'Silence 20 echohusks'), k('shade', 15, 'Disperse 15 shades')], { xp: { defence: 350000, hitpoints: 200000 }, coins: 80000 },
-    'Every name, written down at last. Now someone will remember them.'),
-  TQ('hc_foundations', 'hollow', 'Voidstone Foundations', 'The Last Herald', 93, 'hc_echoes', 'The road into the Crown is falling into the dark. Voidstone and gloomwood are the only things that hold there.',
-    [act('mine', 'voidstone', 25, 'Mine 25 voidstone'), act('chop', 'gloomwood', 25, 'Chop 25 gloomwood logs')], { xp: { mining: 320000, woodcutting: 320000 }, coins: 90000 },
-    'A road that will still be here tomorrow. That is more than this place has had in a long time.'),
-  TQ('hc_threads', 'hollow', 'Threads of the Saint', 'The Last Herald', 95, 'hc_echoes', 'Threadsaints stitch the Hollow King’s court together and pale orbits keep it lit. Cut the threads and put out the lights.',
-    [k('threadsaint', 12, 'Cut the threads of 12 threadsaints'), k('paleorbit', 15, 'Put out 15 pale orbits'), act('catch', 'voideel', 30, 'Catch 30 void eels for the long watch')], { xp: { attack: 450000, fishing: 300000 }, coins: 110000 },
-    'The court is coming apart. He will have to face you himself now.'),
-  TQ('hc_bloom', 'hollow', 'The Last Bloom', 'The Last Herald', 98, 'hc_threads', 'Nullblooms open wherever the King’s horrors walk, and each one swallows a little more of the world. Close them, and the realm stops shrinking.',
-    [k('horror', 15, 'Defeat 15 horrors'), k('nullbloom', 10, 'Close 10 nullblooms')], { xp: { strength: 500000, hitpoints: 300000 }, coins: 130000 },
-    'Look. Where the last bloom closed, something green is coming up through the stone. I had forgotten that things could grow here.'),
 );
 D.QM = Object.fromEntries(D.QUESTS.map(q => [q.id, q]));
 D.SKILLS.forEach(s => { if (s.quest) s.questName = D.QM[s.quest].name; });
@@ -766,8 +536,6 @@ ach('dbl_xp', 'Quick Study', 'Reach level 50 in any skill.', 50, () => DQ.maxLvl
 /* ---------- Unlock index: what appears at each skill level ---------- */
 D.UNL = {};
 const unl = (sk, l, name) => { if (l <= 1) return; ((D.UNL[sk] = D.UNL[sk] || {})[l] = D.UNL[sk][l] || []).push(name); };
-/* what Thieving is for: shown on level-up like any other unlock */
-[[5, 'Silver tongue: better prices in every shop'], [20, 'Lockpicking: richer treasure chests'], [25, 'Pick the locks on chests found while away'], [30, 'Lockpicking: a second gem in treasure chests']].forEach(([l, n]) => unl('thieving', l, n));
 Object.values(D.NODE).forEach(n => unl(n.skill, n.lvl, n.name));
 Object.values(D.RECIPES).forEach(r => unl(r.skill, r.lvl, r.name));
 Object.values(ITEMS).forEach(it => { if (it.type === 'gear' || it.type === 'ammo') Object.entries(it.req || {}).forEach(([sk, l]) => unl(sk, l, 'Equip: ' + it.name)); });

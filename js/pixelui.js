@@ -1,4 +1,4 @@
-/* Idlewick: turns the interface pixel-art. Icons are painted on native 48px grids, the hero portrait
+/* Idlewick: turns the interface pixel-art. Icons are rasterised to 16x16 masks, the hero portrait
    and town scenes become pixel images. */
 (() => {
 const DQ = window.DQ, D = DQ.data, UI = DQ.ui;
@@ -31,12 +31,21 @@ UI.portrait = (px = 48, cls = '') => {
   return `<span class="portrait pxport ${cls}" style="width:${px}px;height:${px}px"><img class="px" src="${DQ.heroUrl(L, pal.p, pal.m)}" width="${Math.max(24, Math.round(px * .8 / 24) * 24)}" height="${Math.max(24, Math.round(px * .8 / 24) * 24)}" alt="" draggable="false"></span>`;
 };
 
-/* ---------- Detailed pixel icons at the normal interface size ---------- */
+/* ---------- Icons as crisp 16x16 pixel masks ---------- */
 DQ.pixelInit = () => {
   if (DQ.pxIcons) return;
-  const rules = Object.keys(DQ.ICONS).map(k => `.pxi-${k}{-webkit-mask:none;mask:none;background:transparent url(${DQ.uiIconUrl(k)}) center/contain no-repeat}`);
-  const st = document.createElement('style'); st.textContent = rules.join('\n'); document.head.appendChild(st);
-  DQ.pxIcons = true;
+  try {
+    const rules = [];
+    for (const [k, d] of Object.entries(DQ.ICONS)) {
+      const c = document.createElement('canvas'); c.width = c.height = 24; const x = c.getContext('2d');
+      x.lineWidth = 2.2; x.lineCap = 'round'; x.lineJoin = 'round'; x.strokeStyle = '#000'; x.stroke(new Path2D(d));
+      const im = x.getImageData(0, 0, 24, 24); for (let i = 3; i < im.data.length; i += 4) im.data[i] = im.data[i] > 96 ? 255 : 0; x.setTransform(1, 0, 0, 1, 0, 0); x.putImageData(im, 0, 0);
+      const big = document.createElement('canvas'); big.width = big.height = 96; const bx = big.getContext('2d'); bx.imageSmoothingEnabled = false; bx.drawImage(c, 0, 0, 96, 96);
+      const u = big.toDataURL(); rules.push(`.pxi-${k}{-webkit-mask-image:url(${u});mask-image:url(${u})}`);
+    }
+    const st = document.createElement('style'); st.textContent = rules.join('\n'); document.head.appendChild(st);
+    DQ.pxIcons = true;
+  } catch (e) { DQ.pxIcons = false; }
   prerenderScenes();
 };
 
