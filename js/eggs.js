@@ -45,7 +45,7 @@ Q.hatchDue = () => {
     const job = Q.beastJob && Q.beastJob(id), cur = S().pets.active;
     if (job && Q.popupQueue && Q.beastCompare && cur) { award0(id, { quiet: true }); stamp(e); if (Q.migrateBeasts) Q.migrateBeasts(S());
       Q.popupQueue({ title: 'An egg hatched', body: `<div class="beast-arrival"><div class="ba-art">${Q.petSprite(p, 96)}</div><div><h3>${esc(p.name)} · ${esc(job.role)}</h3><p>${esc(p.text || '')}</p><p>${Q.beastCompare(id)}</p></div></div>`,
-        actions: [{ label: cur !== id ? `Keep ${D.PET[cur] ? D.PET[cur].name : 'current'}` : 'Later' }, { label: 'Bring along', primary: true, fn: () => Q.setPet(id) }] }); Q.emit('pets'); }
+        actions: [{ label: cur !== id ? `Keep ${D.PET[cur] ? D.PET[cur].name : 'current'}` : 'Later' }, { label: 'Make companion', primary: true, fn: () => Q.setPet(id) }] }); Q.emit('pets'); }
     else { award0(id, {}); stamp(e); if (Q.migrateBeasts) Q.migrateBeasts(S()); } }
   if (UI.view === 'beastmastery' && UI.render) UI.render(false); return ready.length;
 };

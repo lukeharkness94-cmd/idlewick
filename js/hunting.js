@@ -63,7 +63,7 @@ DQ.creatureAbilities=(id)=>{const p=D.PET[id],lv=DQ.petLevel(id);return [
 ].map(a=>({...a,open:lv>=a.lv,creature:p}));};
 DQ.creatureGainXp=m=>{const id=S().pets.active,o=id&&S().pets.owned[id],p=id&&D.PET[id];if(!o||!p)return;
   const before=DQ.petLevel(id);if(!Number.isFinite(o.xp))o.xp=D.CREATURE_LEVELS[Math.max(0,before-1)]||0;o.xp+=Math.max(1,1+m.cl/8);const after=DQ.petLevel(id);
-  if(after>before){DQ.fxDirty();const unlocked=DQ.creatureAbilities(id).filter(a=>a.lv===after)[0];DQ.notify({kind:'unlock',key:'creature:'+id,title:`${p.name} reached level ${after}!`,text:unlocked?`Ability unlocked: ${unlocked.name} — ${unlocked.text}`:'Their companion bonus is stronger.',icon:'paw',col:p.col,sound:'perk',burst:true});DQ.emit('pets');}
+  if(after>before){DQ.fxDirty();const unlocked=DQ.creatureAbilities(id).filter(a=>a.lv===after)[0];DQ.notify({kind:'unlock',key:'creature:'+id,title:`${p.name} reached level ${after}!`,text:unlocked?`Ability unlocked: ${unlocked.name} — ${unlocked.text}`:'Beast bonuses are stronger.',icon:'paw',col:p.col,sound:'perk',burst:true});DQ.emit('pets');}
 };
 
 UI.areaPanel=town=>{

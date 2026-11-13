@@ -23,7 +23,7 @@ const penHtml = (p, k, sel) => {
   const id = p.id, st = stateOf(id), lv = Q.petLevel(id), o = S().pets.owned[id], active = S().pets.active === id, food = chosenFood();
   const note = st.k === 'nap' ? `Napping · ready in <span data-beast-due="${st.until}">${Q.fmtTime(Math.max(0, st.until - Date.now()))}</span>` : esc(st.text);
   const base = D.BOND_XP[lv - 1], next = D.BOND_XP[lv] || base, pct = lv >= MAX ? 100 : Math.max(0, Math.min(100, 100 * (o.bondXp - base) / (next - base)));
-  return `<div class="pen-cell"><button class="pen ps-${st.k} ${sel ? 'sel' : ''} ${active ? 'active' : ''}" data-id="${id}" data-do="beastselect" data-a="${id}" aria-pressed="${sel}" aria-label="${esc(p.name)}, bond ${lv}. ${active ? 'With you. ' : ''}${esc(st.k === 'nap' ? 'Napping' : st.text)}" style="--k:${k};width:${96 * k}px;height:${64 * k}px">
+  return `<div class="pen-cell"><button class="pen ps-${st.k} ${sel ? 'sel' : ''} ${active ? 'active' : ''}" data-id="${id}" data-do="beastselect" data-a="${id}" aria-pressed="${sel}" aria-label="${esc(p.name)}, bond ${lv}. ${active ? 'Companion. ' : ''}${esc(st.k === 'nap' ? 'Napping' : st.text)}" style="--k:${k};width:${96 * k}px;height:${64 * k}px">
       <img class="pen-back" src="${A.penBackUrl(id, p.col)}" width="${96 * k}" height="${64 * k}" alt="" draggable="false">
       <span class="pen-beast">${Q.petSprite(p, 32 * k)}</span>
       <img class="pen-front" src="${A.penFrontUrl()}" width="${96 * k}" height="${64 * k}" alt="" draggable="false">

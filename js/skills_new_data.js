@@ -65,5 +65,5 @@ D.VOYAGE = Object.fromEntries(D.VOYAGES.map(v => [v.id, v]));
 const unl = (sk, l, name) => { if (l <= 1) return; ((D.UNL[sk] = D.UNL[sk] || {})[l] = D.UNL[sk][l] || []).push(name); };
 for (const v of D.VOYAGES) unl('sailing', v.lvl, `Voyage to ${v.name}`);
 [[5, 'Sea legs: Fishing 0.3% faster per Sailing level']].forEach(([l, n]) => unl('sailing', l, n));
-[[10, 'Lay traps in Mossbarrow'], [20, 'Lay traps in Saltmere'], [30, 'Lay traps in Ironpeak Hold'], [40, 'Lay traps in Gloomfen'], [50, 'Lay traps in Emberfall'], [60, 'Lay traps in Skyreach'], [70, 'Lay traps in the Hollow'], [10, 'Companion bonuses +5%'], [25, 'Farm animals produce faster'], [30, 'Companion bonuses +15%'], [50, 'Companion bonuses +25%'], [75, 'Companion bonuses +37%'], [99, 'Companion bonuses +50%']].forEach(([l, n]) => unl('beastmastery', l, n));
+[[10, 'Lay traps in Mossbarrow'], [20, 'Lay traps in Saltmere'], [30, 'Lay traps in Ironpeak Hold'], [40, 'Lay traps in Gloomfen'], [50, 'Lay traps in Emberfall'], [60, 'Lay traps in Skyreach'], [70, 'Lay traps in the Hollow'], [10, 'Beast bonuses +5%'], [25, 'Farm animals produce faster'], [30, 'Beast bonuses +15%'], [50, 'Beast bonuses +25%'], [75, 'Beast bonuses +37%'], [99, 'Beast bonuses +50%']].forEach(([l, n]) => unl('beastmastery', l, n));
 })();

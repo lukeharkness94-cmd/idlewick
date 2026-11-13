@@ -52,7 +52,7 @@ DQ.awardPet = (id, options = {}) => {
   DQ.notify({ kind: 'unlock', key: 'pet:' + id, icon: 'paw', col: p.col, title: `${p.name} hatched`, text: `${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.colTab = 'eggs'; DQ.go('collection'); } }, sound: 'gem', burst: true, ttl: 14000,
     popup: (DQ.sim && DQ.sim.on) || DQ.forecasting ? null : { title: `${p.name} hatched`, body: `<div class="pet-pop" style="--c:${p.col}"><span class="pet-pop-art">${(() => { try { return DQ.petSprite ? DQ.petSprite(p, 128) : ''; } catch (e) { return ''; } })()}</span><p><b>${DQ.esc(p.name)}</b> the ${DQ.esc(p.kind.toLowerCase())} is at your ranch.</p><p class="pet-pop-fx">${DQ.esc(p.text)}.</p><p class="sm dim">${active ? 'Your companion now.' : 'Only your companion gives its bonus.'}</p></div>`,
       actions: [...(active ? [] : [{ label: 'Make companion', primary: true, fn: () => { DQ.setPet(id); DQ.ui.render && DQ.ui.render(false); } }]), { label: 'Meet them', primary: active, fn: () => { DQ.ui.colTab = 'eggs'; DQ.go('collection'); } }, { label: 'Close' }] } });
-  DQ.log(`A new creature joins you: ${p.name} the ${p.kind.toLowerCase()}!`, 'quest'); DQ.emit('pets'); DQ.achDirty = true; return true;
+  DQ.log(`${p.name} the ${p.kind.toLowerCase()} hatched.`, 'quest'); DQ.emit('pets'); DQ.achDirty = true; return true;
 };
 DQ.petRoll = (type, key) => {
   for (const p of D.PETS) {

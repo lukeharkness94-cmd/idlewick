@@ -10,7 +10,7 @@ const JOBS = {
   crit: { role: 'Striker', what: 'critical hits', short: 'more critical hits', fit: 'Best when you fight steadily with a sword, bow or staff: every fight lands a few more heavy hits.' },
   coin: { role: 'Provider', what: 'coins from kills', short: 'more coins from kills', fit: 'Best when coins are your bottleneck: shop gear, restorations and boats all cost them.' },
   xpAll: { role: 'Scholar', what: 'XP from everything', short: 'more XP from everything', fit: 'Best for long sessions: it speeds every skill, not just combat.' },
-  boss: { role: 'Bossbreaker', what: 'damage against bosses', short: 'more damage against bosses', fit: 'Best before a boss: it only helps in boss fights, so train something else with a different companion.' }
+  boss: { role: 'Bossbreaker', what: 'damage against bosses', short: 'more damage against bosses', fit: 'Best before a boss: it only helps in boss fights, so train with a different companion.' }
 };
 const pct = v => `${+(v * 100).toFixed(1)}%`;
 Q.beastJob = id => { const sp = Q.beastSpec(id); return sp && JOBS[sp.passive] ? JOBS[sp.passive] : null; };
@@ -18,8 +18,8 @@ Q.beastJob = id => { const sp = Q.beastSpec(id); return sp && JOBS[sp.passive] ?
 const gives = id => { const sp = Q.beastSpec(id), j = Q.beastJob(id); if (!sp || !j) return null; return { now: sp.base, max: sp.base + .03, job: j, sp }; };
 const same = (a, b) => a && b && a === b;
 Q.beastCompare = id => { const g = gives(id), cur = S().pets.active, cg = cur && cur !== id ? gives(cur) : null; if (!g) return '';
-  if (!cg) return cur === id ? 'This is the companion with you now.' : cur ? `${esc(D.PET[cur] ? D.PET[cur].name : 'Your companion')} is with you. This beast would replace it.` : 'You have no companion with you yet, so it would start helping at once.';
-  return same(g.job.role, cg.job.role) ? `Same job as your ${esc(D.PET[cur].name)} (${esc(cg.job.role)}): ${pct(g.max)} at Bond 10 against ${pct(cg.max)}. Only one companion helps at a time.`
+  if (!cg) return cur === id ? 'Your companion.' : cur ? `${esc(D.PET[cur] ? D.PET[cur].name : 'Your companion')} is your companion. This beast would replace it.` : 'No companion yet: it would start helping at once.';
+  return same(g.job.role, cg.job.role) ? `Same job as your ${esc(D.PET[cur].name)} (${esc(cg.job.role)}): ${pct(g.max)} at Bond 10 against ${pct(cg.max)}. Only your companion helps.`
     : `Different job from your ${esc(D.PET[cur].name)}: a ${esc(g.job.role.toLowerCase())} (${pct(g.now)} ${esc(g.job.what)}) instead of a ${esc(cg.job.role.toLowerCase())} (${pct(cg.now)} ${esc(cg.job.what)}). Swap whenever your goal changes.`; };
 const previewHtml = id => { const g = gives(id), got = !!S().pets.owned[id]; if (!g) return '';
   const p = D.PET[id], tr = S().pets.tracks[id] || 0;
@@ -44,7 +44,7 @@ const resolve0 = Q.resolveBeastTrap;
 Q.resolveBeastTrap = function (...a) { const before = new Set(Object.keys(S().pets.owned)), r = resolve0.apply(this, a);
   if (r && !Q.forecasting) for (const id of Object.keys(S().pets.owned)) if (!before.has(id) && Q.beastJob(id) && Q.popupQueue) {
     const p = D.PET[id], cur = S().pets.active;
-    Q.popupQueue({ title: 'A new companion', body: `<div class="beast-arrival"><div class="ba-art">${Q.petSprite(p, 96)}</div><div><h3>${esc(p.name)} · ${esc(Q.beastJob(id).role)}</h3><p>${esc(D.PET[id].text || '')}</p><p>${Q.beastCompare(id)}</p></div></div>`,
-      actions: [{ label: cur && cur !== id ? `Keep ${D.PET[cur] ? D.PET[cur].name : 'current'}` : 'Later' }, { label: 'Bring along', primary: true, fn: () => Q.setPet(id) }] }); }
+    Q.popupQueue({ title: 'An egg hatched', body: `<div class="beast-arrival"><div class="ba-art">${Q.petSprite(p, 96)}</div><div><h3>${esc(p.name)} · ${esc(Q.beastJob(id).role)}</h3><p>${esc(D.PET[id].text || '')}</p><p>${Q.beastCompare(id)}</p></div></div>`,
+      actions: [{ label: cur && cur !== id ? `Keep ${D.PET[cur] ? D.PET[cur].name : 'current'}` : 'Later' }, { label: 'Make companion', primary: true, fn: () => Q.setPet(id) }] }); }
   return r; };
 })();

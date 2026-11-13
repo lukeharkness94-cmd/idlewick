@@ -41,11 +41,11 @@ DQ.befriendChance = town => Math.min(.25, .03 + DQ.lvl('beastmastery') * .0015 +
 const lureLoot = town => { const out = []; for (const m of D.MONLIST.filter(m => m.town === town && !m.boss && !m.mini)) for (const [k] of m.drops || []) { const it = D.ITEMS[k]; if (it && !it.slot && it.type !== 'container' && !it.unique && !out.includes(k)) out.push(k); } return out.length ? out : ['feather']; };
 const trainCheck = id => {
   if (String(id).startsWith('lure:')) { const town = id.slice(5); if (!D.TOWN[town]) return 'There is no such region'; if (!DQ.townUnlocked(town) || !(S().towns[town] && S().towns[town].visited)) return `Reach ${D.TOWN[town].name} first`; if (DQ.lvl('beastmastery') < DQ.lureLvl(town)) return `Requires Beastmastery ${DQ.lureLvl(town)}`; if (DQ.have('wooden_trap') < 1) return 'You need a wooden trap (Crafting makes them)'; return ''; }
-  return !D.PET[id] ? 'There is no such companion' : !S().pets.owned[id] ? 'You have not found that companion yet' : '';
+  return !D.PET[id] ? 'There is no such beast' : !S().pets.owned[id] ? 'You have not hatched that beast yet' : '';
 };
 DQ.KIND_EXT.train = {
   skill: 'beastmastery', page: 'beastmastery',
-  label: a => String(a.id).startsWith('lure:') ? `Laying traps in ${D.TOWN[a.id.slice(5)].name}` : `Training ${(D.PET[a.id] || {}).name || 'a companion'}`,
+  label: a => String(a.id).startsWith('lure:') ? `Laying traps in ${D.TOWN[a.id.slice(5)].name}` : `Training ${(D.PET[a.id] || {}).name || 'a beast'}`,
   dur: id => String(id).startsWith('lure:') ? 8000 : 6000,
   check: trainCheck,
   done: a => {
@@ -66,7 +66,7 @@ DQ.KIND_EXT.train = {
     o.xp += 2 + L / 15;
     const x = DQ.addXp('beastmastery', Math.round(6 * (5 + L * .35) + before * 4)); S().stats.train = (S().stats.train || 0) + 1; DQ.qev('train', a.id);
     const after = DQ.petLevel(a.id);
-    if (after > before) { DQ.fxDirty(); if (!DQ.sim.on) DQ.notify({ kind: 'unlock', key: 'creature:' + a.id, title: `${p.name} reached level ${after}!`, text: 'Their companion bonus is stronger.', icon: 'paw', col: p.col, sound: 'perk', burst: true }); DQ.emit('pets'); }
+    if (after > before) { DQ.fxDirty(); if (!DQ.sim.on) DQ.notify({ kind: 'unlock', key: 'creature:' + a.id, title: `${p.name} reached level ${after}!`, text: 'Beast bonuses are stronger.', icon: 'paw', col: p.col, sound: 'perk', burst: true }); DQ.emit('pets'); }
     if (!DQ.sim.on) floatAt(`+${fmt(Math.round(x))} XP · ♥`, '#d08a5a');
   }
 };
@@ -86,15 +86,15 @@ UI.V.sailing = () => {
   return UI.taskPanel('sailing', 'Sailing', 'sail', choices, 'Sail to');
 };
 /* one clear way to choose who comes with you: only one companion at a time gives its bonus */
-const companionBtn = p => S().pets.active === p.id ? `<p class="comp-on">★ ${esc(p.name)} is with you: their bonus is active.</p>` : `<div class="btnrow"><button class="btn primary" data-do="setpet" data-a="${p.id}">Take ${esc(p.name)} as your companion</button></div><p class="sm dim">Only the companion with you gives its bonus${S().pets.active && D.PET[S().pets.active] ? ` (now ${esc(D.PET[S().pets.active].name)})` : ''}.</p>`;
+const companionBtn = p => S().pets.active === p.id ? `<p class="comp-on">★ ${esc(p.name)} is your companion.</p>` : `<div class="btnrow"><button class="btn primary" data-do="setpet" data-a="${p.id}">Make companion</button></div><p class="sm dim">Only your companion gives its bonus${S().pets.active && D.PET[S().pets.active] ? ` (now ${esc(D.PET[S().pets.active].name)})` : ''}.</p>`;
 UI.V.beastmastery = () => {
   const L = DQ.lvl('beastmastery'), traps = DQ.have('wooden_trap');
   /* trap lines: one card per region, its signature companion as the picture (silhouette until befriended) */
   const lures = D.TOWNS.map(t => { const sig = DQ.signatureOf(t.id), lvl = DQ.lureLvl(t.id), seen = S().towns[t.id] && S().towns[t.id].visited, lvlLock = L < lvl, got = sig && S().pets.owned[sig.id];
     return { id: 'lure:' + t.id, name: seen ? `Lay traps · ${t.name}` : '???', artKind: 'creature', artId: sig ? (A && A.hasCreature(sig.id) ? sig.id : sig.mon) : 'chicken', locked: lvlLock || !seen, blackout: !seen, blocked: lvlLock || !seen || !traps,
       reason: [!seen ? `Reach ${t.name}` : '', lvlLock ? `Requires Beastmastery ${lvl}` : '', !traps ? 'Needs a wooden trap' : ''].filter(Boolean).join(' · '),
-      short: !seen ? `Reach ${t.name}` : lvlLock ? `Lv ${lvl}` : '', caption: got ? `${esc(sig.name)} befriended` : `Befriend ${sig ? esc(sig.name) : 'a creature'}`, stateText: got ? '✓ Befriended · hides and feathers' : `${(DQ.befriendChance(t.id) * 100).toFixed(1)}% per trap`,
-      info: `${got ? companionBtn(sig) : ''}<p>Lay traps around ${esc(t.name)}. ${got ? 'You have this region’s wild beast. Traps now bring loot only.' : `Each trap has a ${(DQ.befriendChance(t.id) * 100).toFixed(1)}% chance to befriend <b>${sig ? esc(sig.name) : 'its companion'}</b>; otherwise it brings hides, feathers and other trophies.`}</p><p>${traps} wooden trap${traps === 1 ? '' : 's'} · about 1 in 4 breaks · 8s per trap</p>` }; });
+      short: !seen ? `Reach ${t.name}` : lvlLock ? `Lv ${lvl}` : '', caption: got ? `${esc(sig.name)} hatched` : `${sig ? esc(sig.name) : 'Wild'} egg`, stateText: got ? '✓ Hatched · loot only' : `${(DQ.befriendChance(t.id) * 100).toFixed(1)}% per trap`,
+      info: `${got ? companionBtn(sig) : ''}<p>Lay traps around ${esc(t.name)}. ${got ? 'You have this region’s wild beast. Traps now bring loot only.' : `Each trap has a ${(DQ.befriendChance(t.id) * 100).toFixed(1)}% chance of <b>${sig ? esc(sig.name) : 'the wild beast'}</b>’s egg; otherwise loot.`}</p><p>${traps} wooden trap${traps === 1 ? '' : 's'} · about 1 in 4 breaks · 8s per trap</p>` }; });
   return UI.taskPanel('beastmastery', 'Fieldwork', 'train', lures, '');
 };
 })();
