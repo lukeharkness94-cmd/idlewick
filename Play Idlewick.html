@@ -3686,6 +3686,8 @@ html.short .bp-art{width:56px;height:56px}
 html.lw-1600 .guide-book{grid-template-columns:200px minmax(0,1fr) 340px}
 @media (max-width:860px){.guide-book{display:flex;flex-direction:column;height:auto}.guide-book>.panel{max-height:none;width:100%}.guide-index{flex-direction:row;flex-wrap:wrap}.gi-group{width:100%}.gi{grid-template-columns:22px auto auto}.gi .bar{display:none}.guide-page{order:2}.guide-album{order:3}}
 
+
+.abils .tech-note{grid-column:1/-1;margin:0 0 4px}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -4663,27 +4665,27 @@ Object.entries(TOWN_LOOT).forEach(([town, L]) => {
    from one regional monster, with a bad-luck guarantee on the first copy (engine.js kill). Boss trophies gain effects too. */
 const U = (key, name, text) => ({ key, name, text });
 Object.entries({
-  chief_helm: U('roar', 'Battle roar', 'The first enemy attack of every fight misses.'),
-  tusk_charm: U('hide', 'Thick hide', 'Normal enemy attacks deal 15% less damage.'),
-  barnacle_cutlass: U('riposte', 'Riposte', 'When you are hit, 20% chance to strike straight back for up to your max hit.'),
-  frostmaw_pendant: U('slow', 'Frostbite', 'Enemies wait 15% longer between attacks.'),
-  witch_staff: U('curse', 'Bog hex', 'Each spell that lands weakens the enemy: 5% softer hits per stack, up to 15%.'),
-  emberfang_bow: U('ember', 'Ember arrows', 'Every shot adds fire damage of up to a quarter of your max hit; more against fire-weak foes, less against fire-resistant ones.'),
-  storm_feather: U('swift', 'Gale', 'You attack 10% faster.'),
-  hollow_crown: U('sovereign', 'Crown of sorrow', 'Heal 8% of the damage you deal; boss specials hit 20% softer.')
+  chief_helm: U('roar', 'Battle roar', 'First enemy attack each fight misses'),
+  tusk_charm: U('hide', 'Thick hide', 'Normal attacks: −15% damage taken'),
+  barnacle_cutlass: U('riposte', 'Riposte', 'When hit: 20% chance to counter for up to max hit'),
+  frostmaw_pendant: U('slow', 'Frostbite', 'Enemies attack 15% slower'),
+  witch_staff: U('curse', 'Bog hex', 'Spell hits: enemy −5% damage per stack (max 15%)'),
+  emberfang_bow: U('ember', 'Ember arrows', 'Each shot: + fire damage up to 25% of max hit'),
+  storm_feather: U('swift', 'Gale', '+10% attack speed'),
+  hollow_crown: U('sovereign', 'Crown of sorrow', '8% lifesteal · boss specials −20%')
 }).forEach(([id, u]) => { if (ITEMS[id]) ITEMS[id].unique = u; });
 const uq = (id, o) => mk(id, Object.assign({ type: 'gear', rare: 1 }, o));
-uq('leechfang', { name: 'Leechfang', ic: 'dagger', col: '#9a3a4a', val: 400, slot: 'weapon', wtype: 'dagger', style: 'melee', req: { attack: 12 }, b: { atk: 10, str: 5 }, unique: U('lifesteal', 'Leech', 'Heal 20% of the damage you deal.'), flavour: 'The wolves of Mossbarrow carry it off from careless travellers. It never quite stops being warm.' });
-uq('wyrdwood_bow', { name: 'Wyrdwood longbow', ic: 'bow', col: '#6a8a4a', val: 450, slot: 'weapon', style: 'ranged', req: { ranged: 14 }, b: { rng: 11 }, unique: U('marked', "Hunter's mark", 'The first three shots of every fight always hit, for 50% more damage.'), flavour: 'Cut from a tree the scarecrows guard. It hums when it finds its mark.' });
-uq('thornback_buckler', { name: 'Thornback buckler', ic: 'shield', col: '#c87a5a', val: 500, slot: 'shield', req: { defence: 15 }, b: { def: 7 }, unique: U('thorns', 'Thorns', 'Enemies take 35% of the damage they deal to you.'), flavour: 'A rock crab shell, spines and all, strapped to a board.' });
-uq('vipers_kiss', { name: "Viper's kiss", ic: 'sword', col: '#5aa86a', val: 900, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 20 }, b: { atk: 13, str: 10 }, unique: U('poison', 'Venom', 'Each hit adds a poison stack (up to 3). Whenever the enemy attacks, each stack deals 12% of your max hit.'), flavour: 'A coast-road bandit’s favourite. The groove along the blade is not decoration.' });
-uq('gale_sabre', { name: 'Gale sabre', ic: 'sword', col: '#8fd0e0', val: 1400, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 28 }, b: { atk: 20, str: 16 }, unique: U('twin', 'Twin cut', 'Each hit has a 20% chance to strike again for a full second hit.'), flavour: 'Pirates swear it was forged in a storm. It is certainly light enough.' });
-uq('wardens_greathelm', { name: "Warden's greathelm", ic: 'helm', col: '#7a8aa0', val: 1500, slot: 'head', req: { defence: 25 }, b: { def: 9 }, unique: U('bulwark', 'Bulwark', 'Boss special attacks hit 35% softer.'), flavour: 'Saltmere’s harbour wardens wore these on the sea wall. This one was given, not found.' });
-uq('smugglers_knot', { name: "Smuggler's knot", ic: 'ring', col: '#b89a5a', val: 1500, slot: 'ring', b: {}, unique: U('fortune', "Smuggler's luck", '+25% chance of item drops and +5% coins. No combat stats.'), flavour: 'A ring of tarred rope. Mother Silt’s people will know you by it.' });
-uq('thunderclap_maul', { name: 'Thunderclap maul', ic: 'hammer', col: '#c8b860', val: 4000, slot: 'weapon', wtype: 'hammer', style: 'melee', req: { attack: 40 }, b: { atk: 24, str: 38 }, unique: U('stun', 'Thunderclap', 'Hits have a 12% chance to stun: the enemy loses its next attack.'), flavour: 'Trolls use it to crack ice. It cracks most things.' });
-uq('stormcaller_staff', { name: 'Stormcaller staff', ic: 'staff', col: '#9ab8ff', val: 3500, slot: 'weapon', style: 'magic', req: { magic: 30 }, b: { mag: 25 }, unique: U('arc', 'Arc', '20% chance for a spell to arc and hit again for half damage.'), flavour: 'Raiders stole it from a weather-witch. The weather has not forgiven them.' });
-uq('berserkers_torc', { name: "Berserker's torc", ic: 'amulet', col: '#c86a3a', val: 6000, slot: 'amulet', b: { str: 6 }, unique: U('fury', 'Fury', 'Deal 10% more damage, rising to 40% more as your health falls.'), flavour: 'Pulled from the fen with its owner still attached. He did not want to let go.' });
-uq('salamander_coat', { name: 'Salamander coat', ic: 'body', col: '#e0703a', val: 20000, slot: 'body', req: { defence: 70 }, b: { def: 40 }, lth: 1, unique: U('laststand', 'Last stand', 'Once per fight, a blow that would defeat you leaves you at 1 health instead.'), flavour: 'Drake leather that remembers being on fire, and refuses to do it again.' });
+uq('leechfang', { name: 'Leechfang', ic: 'dagger', col: '#9a3a4a', val: 400, slot: 'weapon', wtype: 'dagger', style: 'melee', req: { attack: 12 }, b: { atk: 10, str: 5 }, unique: U('lifesteal', 'Leech', '20% lifesteal'), flavour: 'The wolves of Mossbarrow carry it off from careless travellers. It never quite stops being warm.' });
+uq('wyrdwood_bow', { name: 'Wyrdwood longbow', ic: 'bow', col: '#6a8a4a', val: 450, slot: 'weapon', style: 'ranged', req: { ranged: 14 }, b: { rng: 11 }, unique: U('marked', "Hunter's mark", 'First 3 shots each fight: sure hit, +50% damage'), flavour: 'Cut from a tree the scarecrows guard. It hums when it finds its mark.' });
+uq('thornback_buckler', { name: 'Thornback buckler', ic: 'shield', col: '#c87a5a', val: 500, slot: 'shield', req: { defence: 15 }, b: { def: 7 }, unique: U('thorns', 'Thorns', 'Reflects 35% of damage taken'), flavour: 'A rock crab shell, spines and all, strapped to a board.' });
+uq('vipers_kiss', { name: "Viper's kiss", ic: 'sword', col: '#5aa86a', val: 900, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 20 }, b: { atk: 13, str: 10 }, unique: U('poison', 'Venom', 'On hit: poison stack (max 3) · each deals 12% of max hit per enemy attack'), flavour: 'A coast-road bandit’s favourite. The groove along the blade is not decoration.' });
+uq('gale_sabre', { name: 'Gale sabre', ic: 'sword', col: '#8fd0e0', val: 1400, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 28 }, b: { atk: 20, str: 16 }, unique: U('twin', 'Twin cut', '20% chance: hit twice'), flavour: 'Pirates swear it was forged in a storm. It is certainly light enough.' });
+uq('wardens_greathelm', { name: "Warden's greathelm", ic: 'helm', col: '#7a8aa0', val: 1500, slot: 'head', req: { defence: 25 }, b: { def: 9 }, unique: U('bulwark', 'Bulwark', 'Boss specials: −35% damage'), flavour: 'Saltmere’s harbour wardens wore these on the sea wall. This one was given, not found.' });
+uq('smugglers_knot', { name: "Smuggler's knot", ic: 'ring', col: '#b89a5a', val: 1500, slot: 'ring', b: {}, unique: U('fortune', "Smuggler's luck", '+25% drop chance · +5% coins'), flavour: 'A ring of tarred rope. Mother Silt’s people will know you by it.' });
+uq('thunderclap_maul', { name: 'Thunderclap maul', ic: 'hammer', col: '#c8b860', val: 4000, slot: 'weapon', wtype: 'hammer', style: 'melee', req: { attack: 40 }, b: { atk: 24, str: 38 }, unique: U('stun', 'Thunderclap', '12% chance on hit: stun (enemy skips an attack)'), flavour: 'Trolls use it to crack ice. It cracks most things.' });
+uq('stormcaller_staff', { name: 'Stormcaller staff', ic: 'staff', col: '#9ab8ff', val: 3500, slot: 'weapon', style: 'magic', req: { magic: 30 }, b: { mag: 25 }, unique: U('arc', 'Arc', '20% chance: extra hit for half damage'), flavour: 'Raiders stole it from a weather-witch. The weather has not forgiven them.' });
+uq('berserkers_torc', { name: "Berserker's torc", ic: 'amulet', col: '#c86a3a', val: 6000, slot: 'amulet', b: { str: 6 }, unique: U('fury', 'Fury', '+10% damage, up to +40% at low health'), flavour: 'Pulled from the fen with its owner still attached. He did not want to let go.' });
+uq('salamander_coat', { name: 'Salamander coat', ic: 'body', col: '#e0703a', val: 20000, slot: 'body', req: { defence: 70 }, b: { def: 40 }, lth: 1, unique: U('laststand', 'Last stand', 'Survive one fatal blow per fight on 1 health'), flavour: 'Drake leather that remembers being on fire, and refuses to do it again.' });
 /* what each signature effect is good for: shown with the item so a find can suggest a plan */
 D.UNIQUE_USE = { lifesteal: 'long fights when food is short', marked: 'a fast opening against tough targets', thorns: 'enemies that hit often', poison: 'long boss fights', twin: 'quick kills and steady damage', bulwark: 'bosses with heavy special attacks', fortune: 'farming drops and coins rather than hard fights', stun: 'bosses whose attacks you would rather skip', arc: 'magic users who want more damage', fury: 'bold play at low health', laststand: 'a safety net in a fight you might lose', roar: 'blunting the opening blow', hide: 'enemies that land many small hits', riposte: 'trading blows with hard hitters', slow: 'fights where fewer enemy attacks matter most', curse: 'mages in long fights', ember: 'fire-weak enemies, with a bow', swift: 'more attacks in every fight', sovereign: 'sustained boss fights' };
 /* rare drops from one regional monster each (first copy guaranteed after about 2.5x the expected number of defeats) */
@@ -5177,34 +5179,34 @@ const AB = (id, name, ic, skill, lvl, style, text, extra) => Object.assign({ id,
 D.STYLE_TUNE = { meleeLevel: 4 / 3, level: 4 / 3 };
 D.TYPE_RULES = { normal: { weak: 1.5, focus: 2, resist: .5 }, boss: { weak: 1.3, focus: 1.6, resist: .7 } };
 D.ABIL = [
-  AB('power', 'Power Strike', 'strength', 'strength', 8, 'melee', 'Every 4th attack hits for double damage.'),
-  AB('bash', 'Shield Bash', 'shield', 'defence', 12, 'melee', 'Interrupts a boss special attack. Needs a shield. Ready every 8 attacks.', { needShield: true }),
-  AB('brace', 'Brace', 'defence', 'defence', 20, null, 'Boss special attacks deal half damage.'),
-  AB('second', 'Second Wind', 'heart', 'hitpoints', 20, null, 'Once per fight, heal 30% of your health when it drops below 30%.'),
-  AB('execute', 'Executioner', 'attack', 'attack', 35, 'melee', '+50% damage against monsters below 30% health.'),
-  AB('aimed', 'Aimed Shot', 'ranged', 'ranged', 4, 'ranged', 'Every 3rd shot always hits for 1.5x damage.'),
-  AB('pin', 'Pin Down', 'arrow_ammo', 'ranged', 18, 'ranged', 'Hits pin the monster: 25% less accurate for 2 attacks, and flying monsters are grounded.'),
-  AB('kite', 'Keep Distance', 'bow', 'ranged', 30, 'ranged', 'Enemy normal attacks deal 30% less damage.'),
-  AB('focus', 'Elemental Focus', 'magic', 'magic', 8, 'magic', `Spells that hit a weakness deal ${D.TYPE_RULES.normal.focus}x instead of ${D.TYPE_RULES.normal.weak}x (against bosses ${D.TYPE_RULES.boss.focus}x instead of ${D.TYPE_RULES.boss.weak}x).`),
-  AB('ward', 'Arcane Ward', 'ring_logo', 'magic', 22, 'magic', 'Absorbs a boss special attack. Ready every 6 attacks.'),
+  AB('power', 'Power Strike', 'strength', 'strength', 8, 'melee', 'Every 4th attack: 2× damage'),
+  AB('bash', 'Shield Bash', 'shield', 'defence', 12, 'melee', 'Blocks a boss special · 8-attack cooldown · needs a shield', { needShield: true }),
+  AB('brace', 'Brace', 'defence', 'defence', 20, null, 'Boss specials: −50% damage'),
+  AB('second', 'Second Wind', 'heart', 'hitpoints', 20, null, 'Below 30% health: heal 30%, once per fight'),
+  AB('execute', 'Executioner', 'attack', 'attack', 35, 'melee', '+50% damage to targets below 30% health'),
+  AB('aimed', 'Aimed Shot', 'ranged', 'ranged', 4, 'ranged', 'Every 3rd shot: sure hit, 1.5× damage'),
+  AB('pin', 'Pin Down', 'arrow_ammo', 'ranged', 18, 'ranged', 'On hit: target −25% accuracy for 2 attacks · grounds flyers'),
+  AB('kite', 'Keep Distance', 'bow', 'ranged', 30, 'ranged', 'Normal attacks: −30% damage taken'),
+  AB('focus', 'Elemental Focus', 'magic', 'magic', 8, 'magic', `Weakness hits: ${D.TYPE_RULES.normal.focus}× (bosses ${D.TYPE_RULES.boss.focus}×)`),
+  AB('ward', 'Arcane Ward', 'ring_logo', 'magic', 22, 'magic', 'Blocks a boss special · 6-attack cooldown'),
   /* levels 60 to 95 (Nov 2026): the combat skills used to unlock nothing after 60 while the last bosses need 74 to 85 */
-  AB('cleave', 'Cleave', 'attack', 'melee', 70, 'melee', 'Every 5th attack strikes twice.'),
-  AB('bloodlust', 'Bloodlust', 'strength', 'melee', 90, 'melee', 'Each hit in a row adds 5% damage, up to 25%. A miss resets it.'),
-  AB('volley', 'Volley', 'arrow_ammo', 'ranged', 70, 'ranged', 'Every 4th shot looses a second arrow.'),
-  AB('deadeye', 'Deadeye', 'bow', 'ranged', 90, 'ranged', 'Your shots never deal less than half your max hit.'),
-  AB('overcharge', 'Overcharge', 'magic', 'magic', 70, 'magic', 'Every 5th spell deals double damage.'),
-  AB('echo', 'Spell Echo', 'ring_logo', 'magic', 90, 'magic', 'Spells have a 20% chance to strike again for half damage.'),
-  AB('fortress', 'Fortress', 'shield', 'defence', 80, null, 'Enemy normal attacks deal 15% less damage.'),
-  AB('unbreakable', 'Unbreakable', 'defence', 'defence', 95, null, 'Once per fight, a blow that would defeat you leaves you on 1 health.'),
+  AB('cleave', 'Cleave', 'attack', 'melee', 70, 'melee', 'Every 5th attack: hits twice'),
+  AB('bloodlust', 'Bloodlust', 'strength', 'melee', 90, 'melee', '+5% damage per hit in a row (max +25%) · resets on a miss'),
+  AB('volley', 'Volley', 'arrow_ammo', 'ranged', 70, 'ranged', 'Every 4th shot: hits twice'),
+  AB('deadeye', 'Deadeye', 'bow', 'ranged', 90, 'ranged', 'Minimum hit: half your max hit'),
+  AB('overcharge', 'Overcharge', 'magic', 'magic', 70, 'magic', 'Every 5th spell: 2× damage'),
+  AB('echo', 'Spell Echo', 'ring_logo', 'magic', 90, 'magic', '20% chance: extra hit for half damage'),
+  AB('fortress', 'Fortress', 'shield', 'defence', 80, null, 'Normal attacks: −15% damage taken'),
+  AB('unbreakable', 'Unbreakable', 'defence', 'defence', 95, null, 'Survive one fatal blow per fight on 1 health'),
 ];
 /* Techniques: passive, always on once learned (no slot). fx: dmg and acc apply to that fighting style; dr is damage taken;
    special is boss special attacks; free is the chance a spell costs no runes. */
 const TQ = (skill, lvl, name, text, fx) => ({ skill, lvl, name, text, fx });
 D.TECHNIQUES = [
   TQ('melee', 65, 'Heavy Hands', '+3% melee damage', { dmg: .03 }), TQ('melee', 75, 'Keen Edge', '+4% melee accuracy', { acc: .04 }), TQ('melee', 80, 'Battle Rhythm', '+3% melee damage', { dmg: .03 }), TQ('melee', 85, 'Follow Through', '+4% melee accuracy', { acc: .04 }), TQ('melee', 95, 'Weapon Master', '+4% melee damage and accuracy', { dmg: .04, acc: .04 }),
-  TQ('ranged', 65, 'Steady Draw', '+3% ranged damage', { dmg: .03 }), TQ('ranged', 75, 'Hawk Eye', '+4% ranged accuracy', { acc: .04 }), TQ('ranged', 80, 'Heavy Draw', '+3% ranged damage', { dmg: .03 }), TQ('ranged', 85, 'Fletcher’s Thrift', '15% chance a shot uses no arrow', { free: .15 }), TQ('ranged', 95, 'Marksman', '+4% ranged damage and accuracy', { dmg: .04, acc: .04 }),
-  TQ('magic', 65, 'Deep Channel', '+3% spell damage', { dmg: .03 }), TQ('magic', 75, 'Clear Mind', '+4% spell accuracy', { acc: .04 }), TQ('magic', 80, 'Kindled Runes', '+3% spell damage', { dmg: .03 }), TQ('magic', 85, 'Runic Thrift', '15% chance a spell uses no runes', { free: .15 }), TQ('magic', 95, 'Archmage', '+4% spell damage and accuracy', { dmg: .04, acc: .04 }),
-  TQ('defence', 65, 'Hardened', '2% less damage taken', { dr: .02 }), TQ('defence', 75, 'Stalwart', '2% less damage taken', { dr: .02 }), TQ('defence', 85, 'Set Feet', 'Boss special attacks deal 8% less', { special: .08 }), TQ('defence', 90, 'Immovable', '2% less damage taken', { dr: .02 }),
+  TQ('ranged', 65, 'Steady Draw', '+3% ranged damage', { dmg: .03 }), TQ('ranged', 75, 'Hawk Eye', '+4% ranged accuracy', { acc: .04 }), TQ('ranged', 80, 'Heavy Draw', '+3% ranged damage', { dmg: .03 }), TQ('ranged', 85, 'Fletcher’s Thrift', '15% chance: free shot', { free: .15 }), TQ('ranged', 95, 'Marksman', '+4% ranged damage and accuracy', { dmg: .04, acc: .04 }),
+  TQ('magic', 65, 'Deep Channel', '+3% spell damage', { dmg: .03 }), TQ('magic', 75, 'Clear Mind', '+4% spell accuracy', { acc: .04 }), TQ('magic', 80, 'Kindled Runes', '+3% spell damage', { dmg: .03 }), TQ('magic', 85, 'Runic Thrift', '15% chance: free cast', { free: .15 }), TQ('magic', 95, 'Archmage', '+4% spell damage and accuracy', { dmg: .04, acc: .04 }),
+  TQ('defence', 65, 'Hardened', '−2% damage taken', { dr: .02 }), TQ('defence', 75, 'Stalwart', '−2% damage taken', { dr: .02 }), TQ('defence', 85, 'Set Feet', 'Boss specials: −8% damage', { special: .08 }), TQ('defence', 90, 'Immovable', '−2% damage taken', { dr: .02 }),
 ];
 D.ABIL.forEach(a => { const sk = (D.SKILL_ALIAS && D.SKILL_ALIAS[a.skill]) || a.skill; ((D.UNL[sk] = D.UNL[sk] || {})[a.lvl] = D.UNL[sk][a.lvl] || []).push('Ability: ' + a.name); });
 D.TECHNIQUES.forEach(t => { ((D.UNL[t.skill] = D.UNL[t.skill] || {})[t.lvl] = D.UNL[t.skill][t.lvl] || []).push(`Technique: ${t.name} (${t.text})`); });
@@ -11888,9 +11890,9 @@ DQ.mastTick = a => {
    progress to the next field-guide entry. The selected task also shows five pips. Details live in the tooltip and on
    the field guide page. DQ.studyBar is shared with creatures (js/where.js). */
 DQ.ENTRY_NAMES = ['Notes', 'Quicker hands', 'Keen eye', 'Second nature', 'Mastered'];
-DQ.entryPerk = (kind, star) => { const y = YIELD_KINDS.includes(kind); return star === 1 ? 'what it is for, and 2% faster' : star === 3 && y ? '6% faster and a 5% chance of an extra one' : star === 5 && y ? '10% faster and a 10% chance of an extra one' : `${star * 2}% faster`; };
+DQ.entryPerk = (kind, star) => { const y = YIELD_KINDS.includes(kind); return star === 1 ? 'Uses shown · 2% faster' : star === 3 && y ? '6% faster · 5% double' : star === 5 && y ? '10% faster · 10% double' : `${star * 2}% faster`; };
 DQ.studyBar = (pct, full, tip) => `<i class="study-bar ${full ? 'full' : ''}" style="--p:${Math.max(0, Math.min(100, Math.round(pct)))}%" ${tip ? `data-tip="text:${DQ.esc(tip)}"` : ''} aria-hidden="true"></i>`;
-DQ.mastTip = (kind, id) => { const m = DQ.mastInfo(kind, id); return m.next ? `Field guide: entry ${m.stars} of ${STEPS.length}. Next, ${DQ.ENTRY_NAMES[m.stars]} (${DQ.entryPerk(kind, m.stars + 1)}), after ${DQ.fmt(m.next - m.n)} more.` : `Field guide: every entry filled in. ${m.speed}% faster${m.extra ? `, ${m.extra}% chance of an extra one` : ''}.`; };
+DQ.mastTip = (kind, id) => { const m = DQ.mastInfo(kind, id); return m.next ? `Field guide ${m.stars}/${STEPS.length} · next: ${DQ.entryPerk(kind, m.stars + 1)} in ${DQ.fmt(m.next - m.n)}` : `Field guide complete · ${m.speed}% faster${m.extra ? ` · ${m.extra}% double` : ''}`; };
 DQ.mastBadge = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''; const m = DQ.mastInfo(kind, id); return m.n ? DQ.studyBar(m.pct, !m.next) : ''; };
 DQ.mastLine = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''; const m = DQ.mastInfo(kind, id);
   return `<div class="mast-line ${m.next ? '' : 'max'}" data-tip="text:${DQ.esc(DQ.mastTip(kind, id))}" role="img" aria-label="${DQ.esc(DQ.mastTip(kind, id))}"><span class="mast-pips">${Array.from({ length: STEPS.length }, (_, i) => `<i class="${i < m.stars ? 'on' : ''}"></i>`).join('')}</span><span class="bar"><i style="width:${m.pct}%"></i></span></div>`; };
@@ -12085,7 +12087,7 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
   const cards = `<section class="panel activity-choices"><div class="phead"><h2>${kind==='fight'?'Choose an opponent':kind==='recipe'?'Choose what to make':kind==='alch'?'Choose an item':({fish:'Fish catalogue',wood:'Trees',mine:'Ore deposits',thieve:'Targets',sail:'Islands',train:'Traps and companions'}[kind]||'Choose your spot')}</h2><small>${choices.some(c=>c.town)?`${choices.length} resources · all regions`:D.TOWN[S().town].name}</small></div>${UI.taskToolbar[key] || ''}<div class="illustrated-choices">${choices.filter(c=>c.visible!==false).map(c=>{
     const working=DQ.act&&DQ.act.kind===kind&&DQ.act.id===c.id;
     return `<button data-task-id="${c.id}" class="illustrated-card ${working?'active':''} ${choice.id===c.id?'selected':''} ${c.locked?'locked':''} ${c.missing?'missing':''}" data-do="taskselect" data-a="${kind}" data-b="${c.id}" data-page="${key}" aria-pressed="${choice.id===c.id}" ${c.locked?`aria-disabled="true" data-tip="text:${esc(c.reason||'Not unlocked yet')}"`:''}>
-      <span class="choice-art">${art(c,96)}</span>${!c.locked && DQ.mastBadge ? DQ.mastBadge(kind, c.id) : ''}${!c.locked && DQ.gearMark ? (g => g && D.ITEMS[g] && D.ITEMS[g].slot ? DQ.gearMark(g) : '')(c.yieldId || (c.artKind === 'item' ? c.artId || c.id : null)) : ''}<b>${c.locked?'???':esc(c.name)}</b><small>${c.locked?`${ico('lock')}<span>${esc(c.short||String(c.reason||'Not unlocked yet').replace(/^Requires [A-Za-z ]+? (\d+)/,'Lv $1').replace(/^Requires /,''))}</span>`:c.caption||esc(c.reason||'')}</small>${c.locked?'':`<span class="choice-state">${working?'● Working':c.stateText?(choice.id===c.id&&!c.locked&&!c.missing?'✓ Selected · ':'')+c.stateText:c.locked?'Locked':c.away?'Travel required':choice.id===c.id?'✓ Selected':'Available'}</span>`}${working?`<span class="bar prog"><i data-prog="${kind}:${c.id}"></i></span>`:''}</button>`;
+      <span class="choice-art">${art(c,96)}</span>${!c.locked && DQ.mastBadge ? DQ.mastBadge(kind, c.id) : ''}${!c.locked && DQ.gearMark ? (g => g && D.ITEMS[g] && D.ITEMS[g].slot ? DQ.gearMark(g) : '')(c.yieldId || (c.artKind === 'item' ? c.artId || c.id : null)) : ''}<b>${c.locked?'???':esc(c.name)}</b><small>${c.locked?`${ico('lock')}<span>${esc(c.short||String(c.reason||'Not unlocked yet').replace(/^Requires [A-Za-z ]+? (\d+)/,'Lv $1').replace(/^Requires /,''))}</span>`:c.caption||esc(c.reason||'')}</small>${c.locked?'':`<span class="choice-state">${working?'● Working':c.stateText?c.stateText:c.locked?'Locked':c.away?'Travel required':''}</span>`}${working?`<span class="bar prog"><i data-prog="${kind}:${c.id}"></i></span>`:''}</button>`;
   }).join('') || '<p class="dim">No recipes match. Try another category.</p>'}</div></section>`;
   if(kind==='fight')return `<section class="panel encounter-controls"><div class="phead"><h2>${esc(choice.name)}</h2><small>Combat <b data-b="combat"></b></small></div>${action}<div class="task-summary">${choice.info||''}</div></section>${cards}`;
   const stage = `<section class="panel activity-stage ${running?'working':''}" style="--c:${D.SK[key]?.col||'var(--brass)'};--work-beat:${Math.max(900,Math.min(1700,(DQ.act?.dur||3600)/3))}ms"><div class="activity-scene ${kind} skill-${key}" data-kind="${kind}" data-task="${choice.id}" style="--landscape:url('${DQ.districtUrl ? DQ.districtUrl(S().town, kind, key, choice) : DQ.sceneUrl ? DQ.sceneUrl(S().town) : ''}')"><span class="scene-target">${art(choice, choice.artKind==='item' ? 48 : kind==='wood' ? 144 : kind==='train' ? 64 : 96)}</span>${choice.yieldId&&kind!=='fish'?`<span class="scene-yield"><small>Produces</small>${DQ.itemIco(D.ITEMS[choice.yieldId])}</span>`:''}${running?`<span class="scene-worker" aria-hidden="true"><img class="px" src="${DQ.heroWorkFigureUrl?DQ.heroWorkFigureUrl(S().look):DQ.heroFigureUrl(S().look)}" width="72" height="96" alt=""></span><span class="action-tool" aria-hidden="true">${(t => t ? DQ.itemIco(D.ITEMS[t]) : ico({wood:'woodcutting',mine:'mining',fish:'rod',thieve:'glove',recipe:{cooking:'cooking',smithing:'hammer',crafting:'crafting'}[key],alch:'staff'}[kind]||key))((k => { const n = k && DQ.toolTier(key); return n && D.ITEMS[`tool_${k}_${n}`] ? `tool_${k}_${n}` : null; })(DQ.toolKey && DQ.toolKey(key)))}</span><span class="work-atmosphere" aria-hidden="true"><i></i><i></i><i></i><i></i></span>`:''}</div>
@@ -12107,8 +12109,8 @@ UI.V.gather = sk => {
     return {id:n.id,name:n.name,artKind:kind,yieldId:n.item,town:n.town,away,inspectable:true,
       locked:levelLocked||townLocked,blocked:levelLocked||away,reason:requirements.join(' · '),
       short:[levelLocked?`Lv ${n.lvl}`:'',townLocked?`Reach ${town.name}`:''].filter(Boolean).join(' · '),
-      caption:`Level ${n.lvl} · ${regional?`Only in ${esc(town.name)}`:DQ.nodeDiscovered(n)?'Any town':`Found in ${esc(town.name)}`}`,
-      info:`${kind==='thieve'&&UI.thiefPerks?UI.thiefPerks():''}<p>${(n.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor(kind,n.id)/1000).toFixed(1)}s per ${kind==='wood'||kind==='mine'?'resource':kind==='fish'?'catch':'attempt'} · ${kind==='wood'||kind==='mine'?'3 steady strikes · never misses':kind==='fish'?'Guaranteed catch':Math.round(DQ.successChance(kind,n)*100)+'% success'}</p><p>${n.item?`<b class="mono" data-b="count:${n.item}"></b> ${esc(D.ITEMS[n.item].name.toLowerCase())} held`:`${n.cmin}–${n.cmax} coins · ${n.dmg} damage if caught`}</p>`};
+      caption:`Lv ${n.lvl}${regional||!DQ.nodeDiscovered(n)?` · ${esc(town.name)}`:''}`,
+      info:`${kind==='thieve'&&UI.thiefPerks?UI.thiefPerks():''}<p>${(n.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor(kind,n.id)/1000).toFixed(1)}s${kind==='thieve'?' · '+Math.round(DQ.successChance(kind,n)*100)+'% success':''}</p><p>${n.item?`<b class="mono" data-b="count:${n.item}"></b> held`:`${n.cmin}–${n.cmax} coins · ${n.dmg} damage if caught`}</p>`};
   });
   if(!UI.taskChoice[sk]&&!DQ.act)UI.taskChoice[sk]=choices.find(c=>!c.blocked)?.id;
   return UI.taskPanel(sk,D.SK[sk].name,kind,choices,{fish:'Fish',wood:'Chop',mine:'Mine',thieve:'Pickpocket'}[kind])+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress &amp; tools</h3>${UI.skillHero(sk,UI.toolLine(sk))}</section>`;
@@ -12150,7 +12152,7 @@ UI.V.recipes = sk => {
     return {id:r.id,name:r.name,artKind:'item',artId:outId,visible:inG(r,g,subs.length>1?sub:null)&&(!only||DQ.canMake(r)),locked:lvlLock,missing:!lvlLock&&miss.length>0,blocked:lvlLock||miss.length>0,
     reason:lvlLock?`Requires ${D.SK[sk].name} ${r.lvl}`:miss.length?`Missing ${miss.join(', ')}`:'',
     stateText:lvlLock?`🔒 ${D.SK[sk].name} ${r.lvl} (you are ${DQ.lvl(sk)})`:miss.length?`Missing ${miss.length===1?miss[0]:miss.length+' materials'}`:'Ready to make',
-    caption:r.burn&&!lvlLock&&DQ.lvl(sk)<r.lvl?`Level ${r.lvl} · ${Math.round(DQ.burnChance(r)*100)}% burn`:`Level ${r.lvl} · ${UI.statLine(it.b)||DQ.purposeOf&&DQ.purposeOf(outId)||`${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`}`,
+    caption:r.burn&&!lvlLock&&DQ.lvl(sk)<r.lvl?`Lv ${r.lvl} · ${Math.round(DQ.burnChance(r)*100)}% burn`:`Lv ${r.lvl} · ${UI.statLine(it.b)||DQ.purposeOf&&DQ.purposeOf(outId)||`${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`}`,
     info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}</p><div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>UI.needTile(id,n,{live:true})).join('')}</div>`};});
   return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'||sk==='carpentry'?'Make':'Craft')+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress</h3>${UI.skillHero(sk)}</section>`;
 };
@@ -12220,7 +12222,7 @@ UI.V.combat = () => {
     <div class="cl-prog"><div class="cl-prog-top"><b>Next level</b><small class="mono" data-b="combatnext"></small></div><span class="bar"><i data-b="combatbar"></i></span><small data-b="combatroute"></small><small class="cl-boost" data-b="combatboost"></small></div></div>
     <div class="ftr-weapon">${ico(st === 'ranged' ? 'bow' : st === 'magic' ? 'staff' : 'sword')}<div><div class="ftr-wname"><b>${esc(wname)}</b> <span class="tag">${st}</span></div>${UI.weaponLine()}${(t => t ? `<small class="dim">Speed: ${esc(t)}</small>` : '')(DQ.combatSpeedText().split(' · ').slice(1).join(' · '))}${st === 'ranged' ? `<div class="sm dim">Ammo: <span data-b="ammo"></span></div>` : ''}${st === 'magic' ? `<div class="sm dim">Spell: <b>${ps.spell.name}</b> · Runes: <span class="mono" data-b="runes"></span></div>` : ''}</div></div>
     <div class="ftr-rows" role="group" aria-label="Combat skills and training focus">${rows}</div>${lockNote}</section>`;
-  const choices = mons.map(m => ({ id: m.id, name: m.name, artKind: 'creature', caption: `Level ${m.cl}${m.boss ? ' · Boss' : ''}`, blocked: !!m.boss && DQ.combatLvl() < m.boss.req, locked: !!m.boss && DQ.combatLvl() < m.boss.req, reason: m.boss ? `Combat level ${m.boss.req} required` : '', info: `<p>Level ${m.cl} · ${m.hp} health${m.boss ? ' · Boss' : ''}. Food available restores ${fmt(DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0))} health.</p>` }));
+  const choices = mons.map(m => ({ id: m.id, name: m.name, artKind: 'creature', caption: `Lv ${m.cl}${m.boss ? ' · Boss' : ''}`, blocked: !!m.boss && DQ.combatLvl() < m.boss.req, locked: !!m.boss && DQ.combatLvl() < m.boss.req, reason: m.boss ? `Combat level ${m.boss.req} required` : '', info: `<p>Level ${m.cl} · ${m.hp} health${m.boss ? ' · Boss' : ''}. Food available restores ${fmt(DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0))} health.</p>` }));
   const controls = UI.areaPanel ? UI.areaPanel(town) : UI.taskPanel('combat', 'Combat', 'fight', choices, 'Fight');
   const battle = `<section class="panel arena encounter-arena" style="--landscape:url('${DQ.sceneUrl ? DQ.sceneUrl(town) : ''}');background-image:linear-gradient(color-mix(in srgb,var(--panel) 45%,transparent),color-mix(in srgb,var(--panel) 70%,transparent)),var(--landscape)"><div class="side"><div class="splats" id="sp-you"></div><div class="avatar you" id="av-you">${DQ.battleHero ? DQ.battleHero() : `<img class="px encounter-hero" src="${DQ.heroFigureUrl(S().look)}" width="144" height="204" alt="Your equipped hero">`}</div><div class="nm">${esc(S().name)} <span class="lvchip you">Combat ${DQ.combatLvl()}</span></div><span class="bar hpb"><i data-b="hpbar"></i></span><small class="mono" data-b="hptxt"></small></div>
       <div class="mid"><span class="vs">vs</span>${f ? `<span class="bar prog" aria-label="Next attack" style="--c:var(--brass)"><i data-prog="fight:${f.id}"></i></span>` : `<small class="dim">Preview</small>`}</div>
@@ -12812,7 +12814,7 @@ const collectibleWild=new Set(['lanternmoth','thimblefox','tideglass','snowcoil'
 D.PETS.forEach(p=>p.collectible=true);
 D.MONLIST.filter(m=>!m.boss).forEach((m,i)=>{
   const id='wild_'+m.id;if(D.PET[id])return;const [key,val]=bonusKinds[i%bonusKinds.length],bonus={[key]:val};
-  const p={id,name:m.name,kind:'Signature wild companion',spr:'quad',mon:m.id,col:m.col,collectible:collectibleWild.has(m.id),src:{type:'hunt',mon:m.id},bonus,text:key==='dmg'?'+2% damage':key==='dr'?'2% less damage taken':key==='coin'?'+3% coins':key==='xpAll'?'+2% XP':'Every task is 2% faster'};
+  const p={id,name:m.name,kind:'Wild companion',spr:'quad',mon:m.id,col:m.col,collectible:collectibleWild.has(m.id),src:{type:'hunt',mon:m.id},bonus,text:key==='dmg'?'+2% damage':key==='dr'?'−2% damage taken':key==='coin'?'+3% coins':key==='xpAll'?'+2% XP':'+2% task speed'};
   D.PETS.push(p);D.PET[id]=p;
 });
 DQ.collectiblePets=()=>D.PETS.filter(p=>p.collectible||S().pets.owned[p.id]);
@@ -13607,8 +13609,8 @@ Object.assign(UI.DO, {
   /* queueing asks how long, as plain buttons, so a chain is planned in one go: "200 oak logs, then planks" */
   queueadd: (a, b) => { if (!DQ.planUnlocked()) return DQ.toast(`The task queue unlocks at Hero level ${D.PLAN_ADV}`, true);
     const Q = S().queue || [], slots = DQ.queueSlots(), full = Q.length >= slots, label = DQ.actLabel({ kind: a, id: b });
-    const m = DQ.modal({ title: `Queue: ${label}`, body: `<p class="sm">${DQ.act ? `It starts when <b>${esc(DQ.actLabel())}</b> finishes or runs out of supplies, even while you are away.` : 'Nothing is running, so it starts now.'}</p>
-      <div class="k">How long?</div><div class="chips rules queue-rules">${D.STOP_RULES.map(([k, n]) => `<button class="chip" data-do="queuepick" data-a="${a}" data-b="${b}" data-c="${k}" ${full ? 'disabled' : ''}>${k === 'none' ? 'Until supplies run out' : n}</button>`).join('')}</div>
+    const m = DQ.modal({ title: `Queue: ${label}`, body: `<p class="sm">${DQ.act ? `Starts after <b>${esc(DQ.actLabel())}</b>.` : 'Starts now.'}</p>
+      <div class="k">How long?</div><div class="chips rules queue-rules">${D.STOP_RULES.map(([k, n]) => `<button class="chip" data-do="queuepick" data-a="${a}" data-b="${b}" data-c="${k}" ${full ? 'disabled' : ''}>${k === 'none' && a === 'recipe' ? 'Until supplies run out' : n}</button>`).join('')}</div>
       <p class="hint">Queue <b class="mono">${Q.length} / ${slots}</b>${full ? ' · full: remove one in the task plan first' : ''}${Q.length ? ` · already waiting: ${Q.map(t => esc(DQ.actLabel(t))).join(', ')}` : ''}</p>`, actions: [{ label: 'Cancel' }] }); m.classList.add('queuemodal'); },
   queuepick: (a, b, t) => { DQ.closeModal(); DQ.queueAdd(a, b, (t && t.dataset && t.dataset.c) || 'time:30'); },
   qquick: (a, b) => { DQ.queueAdd(a, b, 'none'); DQ.closeModal(); },
@@ -16951,11 +16953,11 @@ const NODE_SK = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 
 const studyQ = m => D.QUESTS.find(q => S().q[q.id] && ['active', 'new'].includes(S().q[q.id].s) && q.obj.some((o, j) => o.ev === 'guide' && o.key === m.id && Q.objProg(q, S().q[q.id], j) < o.n));
 /* ---------- one shape for everything in the book ---------- */
 const creature = m => { const r = Q.research(m), R = D.RESEARCH.ranks, seen = r.rank > 0, sq = studyQ(m), prev = r.rank ? r.T[Math.min(r.rank, r.T.length) - 1] : 0;
-  return { key: m.id, kind: 'creature', name: seen || sq ? m.name : 'Not met yet', known: seen, quest: sq, filled: r.rank, total: R.length, n: r.kills, pct: r.next ? Math.max(0, Math.min(100, (r.kills - prev) / Math.max(1, r.next - prev) * 100)) : 100, left: r.next ? r.need : 0,
+  return { key: m.id, kind: 'creature', name: seen || sq ? m.name : '???', known: seen, quest: sq, filled: r.rank, total: R.length, n: r.kills, pct: r.next ? Math.max(0, Math.min(100, (r.kills - prev) / Math.max(1, r.next - prev) * 100)) : 100, left: r.next ? r.need : 0,
     art: size => Q.monSprite(m, size, seen || sq ? '' : 'sil'), sub: seen ? `Level ${m.cl}${m.boss ? ' boss' : m.mini ? ' challenge' : ''} · ${fmt(r.kills)} defeated` : `${D.TOWN[m.town].name}`,
     ladder: R.map((x, i) => ({ name: x[1], text: x[2], at: r.T[i], done: r.rank > i })), unit: 'defeated', m }; };
 const material = (kind, x, sk) => { const m = Q.mastInfo(kind, x.id), open = Q.lvl(sk) >= x.lvl || m.n > 0, itemId = kind === 'recipe' ? Object.keys(x.out)[0] : x.item, it = D.ITEMS[itemId];
-  const art = size => { try { if (kind !== 'fish' && kind !== 'recipe') return `<span class="${open ? '' : 'blackout'}">${Q.artImage(kind, x.id, size, open ? '' : 'sil', x.name)}</span>`; } catch (e) {} return `<span class="guide-item ${open ? '' : 'blackout'}" style="--art-size:${Math.min(64, size)}px">${it ? Q.itemIco(it) : ico('book')}</span>`; };
+  const art = size => { try { if (kind !== 'fish' && kind !== 'recipe') return `<span class="${open ? '' : 'blackout'}">${Q.artImage(kind, x.id, size, open ? '' : 'sil', x.name)}</span>`; } catch (e) {} return `<span class="activity-item-art guide-item ${open ? '' : 'blackout'}" style="--art-size:${size >= 96 ? 64 : size >= 64 ? 48 : 32}px">${it ? Q.itemIco(it) : ico('book')}</span>`; };
   return { key: x.id, kind, sk, name: open ? x.name : '???', known: m.n > 0, locked: !open, need: `${D.SK[sk].name} ${x.lvl}`, filled: m.stars, total: 5, n: m.n, pct: m.pct, left: m.next ? m.next - m.n : 0, art,
     sub: open ? `${D.SK[sk].name} ${x.lvl}${m.n ? ` · ${fmt(m.n)} ${VERB[kind]}` : ''}` : `${D.SK[sk].name} ${x.lvl}`, itemId,
     ladder: Q.ENTRY_NAMES.map((nm, i) => ({ name: nm, text: Q.entryPerk(kind, i + 1), at: D.MASTERY_STEPS[i], done: m.stars > i })), unit: VERB[kind] }; };
@@ -17193,32 +17195,32 @@ UI.V.character = () => { const h = char0(), lo = UI.loadoutPanel(), i = h.lastIn
 (() => {
 const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S;
 D.TRICKS = {
-  biscuit: { key: 'fetch', name: 'Fetch', text: '1 in 40 gathering actions brings back an extra resource' },
-  toast: { key: 'riser', name: 'Early riser', text: 'crops ripen 10% sooner' },
-  bubbles: { key: 'school', name: 'School spotter', text: '1 in 12 catches is doubled' },
-  acorn: { key: 'nuts', name: 'Nut stash', text: "bird's nests are twice as common" },
-  nugget: { key: 'seam', name: 'Seam sense', text: 'gems from mining are twice as common' },
-  whiskers: { key: 'paws', name: 'Light paws', text: 'the first failed pickpocket each minute does no damage' },
-  cinder: { key: 'bellows', name: 'Bellows', text: '1 in 10 smelts makes a second bar' },
-  quill: { key: 'night', name: 'Night study', text: 'research progresses 10% faster' },
-  pudding: { key: 'taster', name: 'Taster', text: 'never burns the first dish of a cooking session, and burns are 25% rarer' },
-  gobbo: { key: 'heckle', name: 'Heckle', text: 'once per fight, makes the enemy lose its second attack' },
-  tusky: { key: 'charge', name: 'Charge', text: 'opens every fight with a free hit for half your max hit' },
-  bill: { key: 'comb', name: 'Beachcomber', text: 'coin pouches from fishing and fighting are 50% larger' },
-  frostling: { key: 'cold', name: 'Cold shoulder', text: 'boss special attacks hit 20% softer' },
-  bogwisp: { key: 'wisp', name: "Will-o'-wisp", text: 'every bestiary entry reveals one stage early' },
-  wyrmling: { key: 'ember', name: 'Ember breath', text: 'every 6th attack adds a small fire hit' },
-  stormchick: { key: 'tailwind', name: 'Tailwind', text: 'the first 10 actions of each non-combat task are 25% faster' },
-  hollowling: { key: 'echo', name: 'Echo', text: '1 in 20 gathering, crafting or thieving actions repeats for free' }
+  biscuit: { key: 'fetch', name: 'Fetch', text: '1 in 40 gathers: +1 resource' },
+  toast: { key: 'riser', name: 'Early riser', text: 'crops grow 10% faster' },
+  bubbles: { key: 'school', name: 'School spotter', text: '1 in 12 catches: double' },
+  acorn: { key: 'nuts', name: 'Nut stash', text: "2× bird's nests" },
+  nugget: { key: 'seam', name: 'Seam sense', text: '2× mining gems' },
+  whiskers: { key: 'paws', name: 'Light paws', text: 'first failed pickpocket each minute: no damage' },
+  cinder: { key: 'bellows', name: 'Bellows', text: '1 in 10 smelts: +1 bar' },
+  quill: { key: 'night', name: 'Night study', text: '+10% research speed' },
+  pudding: { key: 'taster', name: 'Taster', text: 'first dish never burns · −25% burn chance' },
+  gobbo: { key: 'heckle', name: 'Heckle', text: 'enemy skips its 2nd attack each fight' },
+  tusky: { key: 'charge', name: 'Charge', text: 'opening hit each fight: half your max hit' },
+  bill: { key: 'comb', name: 'Beachcomber', text: '+50% coin pouches' },
+  frostling: { key: 'cold', name: 'Cold shoulder', text: 'boss specials: −20% damage' },
+  bogwisp: { key: 'wisp', name: "Will-o'-wisp", text: 'field guide entries unlock one stage early' },
+  wyrmling: { key: 'ember', name: 'Ember breath', text: 'every 6th attack: + fire hit' },
+  stormchick: { key: 'tailwind', name: 'Tailwind', text: 'first 10 actions of a task: +25% speed' },
+  hollowling: { key: 'echo', name: 'Echo', text: '1 in 20 actions: free repeat' }
 };
 /* half of the old passive, described in words */
 const pct = v => `${Math.round(v * 1000) / 10}%`;
-const describe = b => [b.xpAll && `+${pct(b.xpAll)} XP to every skill`, ...Object.entries(b.xp || {}).map(([k, v]) => `+${pct(v)} ${D.SK[k] ? D.SK[k].name : k} XP`), b.coin && `+${pct(b.coin)} coins`, b.dmg && `+${pct(b.dmg)} damage`, b.dr && `${pct(b.dr)} less damage taken`, b.heal && `food heals ${pct(b.heal)} more`, b.speed && `every task ${pct(b.speed)} faster`].filter(Boolean).join(', ');
+const describe = b => [b.xpAll && `+${pct(b.xpAll)} XP`, ...Object.entries(b.xp || {}).map(([k, v]) => `+${pct(v)} ${D.SK[k] ? D.SK[k].name : k} XP`), b.coin && `+${pct(b.coin)} coins`, b.dmg && `+${pct(b.dmg)} damage`, b.dr && `−${pct(b.dr)} damage taken`, b.heal && `+${pct(b.heal)} food healing`, b.speed && `+${pct(b.speed)} task speed`].filter(Boolean).join(', ');
 for (const [id, t] of Object.entries(D.TRICKS)) {
   const p = D.PET[id]; if (!p || p.trickDone) continue;
   const half = {}; for (const [k, v] of Object.entries(p.bonus)) half[k] = typeof v === 'number' ? v / 2 : Object.fromEntries(Object.entries(v).map(([s, x]) => [s, x / 2]));
   p.bonus = half; p.trick = t; p.trickDone = true;
-  p.text = `${t.name}: ${t.text}. Also ${describe(half)}`;
+  p.text = `${t.name}: ${t.text} · ${describe(half)}`;
 }
 DQ.trick = key => { const id = S() && S().pets && S().pets.active, t = id && D.TRICKS[id]; return !!t && t.key === key && !!D.PET[id]; };
 DQ.trickNote = (text, where) => {
@@ -18956,11 +18958,11 @@ const sheet = id => { const p = D.PET[id], o = S().pets.owned[id], lv = Q.petLev
   const next = D.BOND_XP[lv] || D.BOND_XP[MAX - 1], base = D.BOND_XP[lv - 1], pct = lv >= MAX ? 100 : Math.min(100, 100 * (o.bondXp - base) / (next - base));
   const foodName = food ? D.ITEMS[food].name.toLowerCase() : 'cooked food';
   return `<section class="panel ranch-sheet"><div class="rs-head"><span class="rs-art">${Q.petSprite(p, 96)}</span><div><span class="k">${active ? 'With you' : 'Resting in its pen'}${job ? ' · ' + esc(job.role) : ''} · Bond ${lv}/${MAX}</span><h2>${esc(o.evolved && Q.beastSpec(id) ? Q.beastSpec(id).evolution : p.name)}</h2></div></div>
-    <p class="rs-passive"><b>Gives you:</b> ${esc(Q.beastPassiveText(id))}</p>
+    <p class="rs-passive">${esc(Q.beastPassiveText(id))}</p>
     <div class="bar" role="progressbar" aria-label="Bond progress" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
     <small class="rs-xp">${lv >= MAX ? 'Bond complete' : `${fmt(o.bondXp)} / ${fmt(next)} bond XP`}</small>
     <div class="beast-milestones">${D.BOND_MILESTONES.map(n => `<span class="tag ${lv >= n ? 'ok' : ''}" data-tip="text:Bond ${n}: ${n === 10 ? 'evolution and final passive upgrade' : 'passive upgrade'}">${lv >= n ? '✓' : '◇'} ${n}</span>`).join('')}</div>
-    <p class="sm dim rs-cost">${lv >= MAX ? 'This bond is complete.' : `A session uses ${t.coins} coins and 2 ${esc(foodName)} for +${t.xp} bond XP, then it naps for 45 minutes. Wins share 25% of your combat XP.`}</p>
+    <p class="sm dim rs-cost">${lv >= MAX ? 'This bond is complete.' : `${t.coins} coins + 2 ${esc(foodName)} → +${t.xp} bond XP · 45 min nap`}</p>
     <div class="btnrow wrap"><button class="btn primary" data-do="beastfeed" data-a="${id}" ${t.ok ? '' : 'disabled'}>${t.ok ? `Feed & train · +${t.xp} bond XP` : esc(t.reason)}</button>${active ? `<span class="rs-with">★ With you</span>` : `<button class="btn" data-do="setpet" data-a="${id}">Bring along</button>`}</div></section>`; };
 const shedTeaser = () => { const j = S().pets.expedition; return `<section class="panel ranch-shedcard"><span class="k">Trapper</span><p>${j ? `<b>Trap out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'No trap is out. Send one and it brings back an egg.'}</p><button class="btn" data-do="beastmode" data-a="shed">Open the shed</button><button class="linkish ranch-eggs-link" data-do="eggways">Where do eggs come from?</button></section>`; };
 const ranch = () => {
@@ -19031,9 +19033,9 @@ Q.awardPet = (id, options = {}) => {
   const kind = Q.eggKind(id), now = Date.now();
   Q.eggs().push({ id, found: now, due: now + kind.ms });
   if (!(Q.sim && Q.sim.on) && !Q.forecasting) Q.sfx && Q.sfx('gem');
-  Q.notify({ kind: 'unlock', key: 'egg:' + id, icon: 'paw', col: kind.col, title: `You found an egg!`, text: `${kind.name}. ${Q.eggSource(id)}. It hatches at your ranch in ${Q.fmtTime(kind.ms)}.`, sound: false, burst: true, ttl: 12000,
+  Q.notify({ kind: 'unlock', key: 'egg:' + id, icon: 'paw', col: kind.col, title: `You found an egg!`, text: `${kind.name} · hatches in ${Q.fmtTime(kind.ms)}`, sound: false, burst: true, ttl: 12000,
     action: { label: 'See the hatchery', fn: () => { UI.beastMode = 'beasts'; Q.go('beastmastery'); } },
-    popup: (Q.sim && Q.sim.on) || Q.forecasting ? null : { title: 'You found an egg!', body: `<div class="pet-pop egg-pop" style="--c:${kind.col}"><span class="pet-pop-art egg-wobble">${Q.eggImg(id, 96)}</span><p><b>${esc(kind.name)}</b></p><p class="pet-pop-fx">${esc(Q.eggSource(id))}.</p><p class="sm dim">It is keeping warm in the hatchery at your ranch and hatches in ${Q.fmtTime(kind.ms)}, whether you are playing or not.</p></div>`,
+    popup: (Q.sim && Q.sim.on) || Q.forecasting ? null : { title: 'You found an egg!', body: `<div class="pet-pop egg-pop" style="--c:${kind.col}"><span class="pet-pop-art egg-wobble">${Q.eggImg(id, 96)}</span><p><b>${esc(kind.name)}</b></p><p class="pet-pop-fx">${esc(Q.eggSource(id))}.</p><p class="sm dim">Hatches at your ranch in ${Q.fmtTime(kind.ms)}.</p></div>`,
       actions: [{ label: 'See the hatchery', fn: () => { UI.beastMode = 'beasts'; Q.go('beastmastery'); } }, { label: 'Close', primary: true }] } });
   Q.log && Q.log(`You found a ${kind.name.toLowerCase()}. It will hatch in ${Q.fmtTime(kind.ms)}.`, 'quest'); Q.emit('pets'); return true;
 };
@@ -19076,8 +19078,8 @@ const page0 = UI.V.beastmastery;
 if (page0) UI.V.beastmastery = () => { const h = page0(); const eggs = UI.hatcheryHtml(); if (!eggs) return h;
   return h.includes('class="ranch-side">') ? h.replace('class="ranch-side">', 'class="ranch-side">' + eggs) : h; };
 /* one plain explanation of the three ways, as a pop-up (reference, not an action) and above the two finding pages */
-const WAYS = [['Lucky finds', 'Working at any skill, harvesting, or beating a boss can turn up an egg. The odds and your tries are in Hero → Collection.'], ['The trapper', 'Pay for a trap and it comes back by itself in 1 to 4 hours, with an egg or with tracks. Your own task keeps running.'], ['Wooden traps', 'A task you do yourself: lay your crafted traps in a region for loot, Beastmastery XP and a chance at that region’s wild egg.']];
-UI.DO.eggways = () => Q.modal({ title: 'Where eggs come from', body: `<div class="egg-ways">${WAYS.map(([t, d], i) => `<div class="egg-way"><b>${i + 1}. ${t}</b><p>${d}</p></div>`).join('')}<p class="sm dim">Every egg hatches at your ranch by itself: wild eggs in 10 minutes, speckled eggs in 30, royal eggs from bosses in an hour.</p></div>`, actions: [{ label: 'Open the collection log', fn: () => { UI.colTab = 'eggs'; Q.go('collection'); } }, { label: 'Close', primary: true }] });
+const WAYS = [['Lucky finds', 'Rare drop from any skill, harvest or boss. Odds: Guide → Collection.'], ['The trapper', 'Paid trap, back in 1–4 hours with an egg or tracks. Runs alongside your task.'], ['Wooden traps', 'A task: loot, Beastmastery XP and a chance at the region’s wild egg.']];
+UI.DO.eggways = () => Q.modal({ title: 'Where eggs come from', body: `<div class="egg-ways">${WAYS.map(([t, d], i) => `<div class="egg-way"><b>${i + 1}. ${t}</b><p>${d}</p></div>`).join('')}<p class="sm dim">Hatch times: wild 10 min · speckled 30 min · royal 1 hour.</p></div>`, actions: [{ label: 'Open the collection log', fn: () => { UI.colTab = 'eggs'; Q.go('collection'); } }, { label: 'Close', primary: true }] });
 /* the rail count for Beastmastery never counted eggs before; a waiting egg is not an action, so it still does not */
 })();
 
@@ -19094,18 +19096,18 @@ const stat = k => (Array.isArray(k) ? k : [k]).reduce((n, x) => n + (S().stats[x
 const oneIn = p => p >= 1 ? 'Guaranteed' : `1 in ${fmt(Math.max(2, Math.round(1 / p)))}`;
 /* a companion's source: where, the odds per try, and tries so far */
 Q.petOdds = id => { const p = D.PET[id], s = p.src || {}, spec = (D.BEAST_SPECIES || {})[id];
-  if (s.type === 'skill') { const st = SK_STAT[s.skill] || ['', 'actions']; return { where: `${D.SK[s.skill].name}: any task`, p: s.chance, per: 'action', tries: st[0] ? stat(st[0]) : 0, unit: st[1], go: D.SK[s.skill].page || s.skill }; }
-  if (s.type === 'harvest') return { where: 'Farming: harvesting any crop', p: s.chance, per: 'harvest', tries: S().stats.harvest || 0, unit: 'harvests', go: 'farming' };
-  if (s.type === 'boss') return { where: `Defeat ${D.MON[s.mon].name}`, p: s.chance, per: 'victory', tries: S().beast.kills[s.mon] || 0, unit: 'victories', go: 'combat' };
-  if (s.type === 'shop') return { where: `For sale in ${D.TOWN[s.town].name}`, price: s.price, go: 'bestiary' };
-  if (s.type === 'hunt') { const m = D.MON[s.mon]; return { where: `Defeat ${m.name.toLowerCase()}s in ${D.TOWN[m.town].name}, or lay wooden traps there`, p: Math.max(.008, .05 - m.cl * .00035), per: 'defeat', tries: S().beast.kills[m.id] || 0, unit: 'defeated', go: 'combat' }; }
-  if (spec) return { where: `The trapper, from Hero level ${spec.hero}`, trap: true, tracks: (S().pets.tracks || {})[id] || 0, go: 'beastmastery' };
+  if (s.type === 'skill') { const st = SK_STAT[s.skill] || ['', 'actions']; return { where: D.SK[s.skill].name, p: s.chance, per: 'action', tries: st[0] ? stat(st[0]) : 0, unit: st[1], go: D.SK[s.skill].page || s.skill }; }
+  if (s.type === 'harvest') return { where: 'Farming', p: s.chance, per: 'harvest', tries: S().stats.harvest || 0, unit: 'harvests', go: 'farming' };
+  if (s.type === 'boss') return { where: D.MON[s.mon].name, p: s.chance, per: 'victory', tries: S().beast.kills[s.mon] || 0, unit: 'victories', go: 'combat' };
+  if (s.type === 'shop') return { where: `Shop · ${D.TOWN[s.town].name}`, price: s.price, go: 'bestiary' };
+  if (s.type === 'hunt') { const m = D.MON[s.mon]; return { where: `${m.name} · ${D.TOWN[m.town].name}, or wooden traps`, p: Math.max(.008, .05 - m.cl * .00035), per: 'defeat', tries: S().beast.kills[m.id] || 0, unit: 'defeated', go: 'combat' }; }
+  if (spec) return { where: `Trapper · Hero ${spec.hero}`, trap: true, tracks: (S().pets.tracks || {})[id] || 0, go: 'beastmastery' };
   return { where: 'Unknown' }; };
 const meter = (tries, p) => { const exp = Math.max(1, Math.round(1 / p)), pct = Math.min(100, Math.round(tries / exp * 100)); return `<span class="col-meter ${tries > exp ? 'over' : ''}"><span class="bar"><i style="width:${pct}%"></i></span></span>`; };
 const petRow = p => { const own = S().pets.owned[p.id], egg = Q.eggOf && Q.eggOf(p.id), o = Q.petOdds(p.id), kind = Q.eggKind ? Q.eggKind(p.id) : { name: 'Egg' };
   const art = own ? Q.petSprite(p, 48) : `<span class="${egg ? 'egg-wobble' : 'col-unk'}">${Q.eggImg ? Q.eggImg(p.id, 48) : ''}</span>`;
   const state = own ? `<span class="tag ok">✓ Hatched</span>` : egg ? `<span class="tag warn">In the hatchery · <span data-beast-due="${egg.due}">${Q.fmtTime(Math.max(0, egg.due - Date.now()))}</span></span>` : '';
-  const odds = o.price ? `${fmt(o.price)} coins` : o.trap ? `Trap odds shown at the trapper · ${o.tracks}/5 tracks` : o.p ? `${oneIn(o.p)} per ${o.per}` : '';
+  const odds = o.price ? `${fmt(o.price)} coins` : o.trap ? `${o.tracks}/5 tracks` : o.p ? `${oneIn(o.p)} per ${o.per}` : '';
   const tries = !own && !egg && o.p ? `<small class="col-tries"><b class="mono">${fmt(o.tries)}</b> ${o.unit} so far${meter(o.tries, o.p)}</small>` : '';
   return `<article class="col-row ${own ? 'got' : egg ? 'egg' : ''}" style="--c:${p.col}"><span class="col-art">${art}</span><div class="col-t"><b>${own ? esc(p.name) : esc(kind.name)}</b><small>${own ? esc(p.text) : esc(o.where)}</small></div><div class="col-o">${state || `<b>${odds}</b>`}${tries}</div></article>`; };
 const dropRows = () => { const out = [];
@@ -19118,9 +19120,9 @@ const workRows = () => { const E = D.ECONOMY || {}, rows = [['fishing', 'Sunken 
 UI.colTab = 'eggs';
 UI.V.collection = () => { const pets = Q.collectiblePets ? Q.collectiblePets() : D.PETS, own = pets.filter(p => S().pets.owned[p.id]).length, tab = UI.colTab;
   const order = p => (S().pets.owned[p.id] ? 0 : Q.eggOf && Q.eggOf(p.id) ? -1 : 1);
-  const body = tab === 'eggs' ? `<p class="col-note">Every companion arrives as an egg and hatches at your ranch. Each try is its own roll: the bar compares your tries with the average needed.</p><div class="col-list">${pets.slice().sort((a, b) => order(a) - order(b)).map(petRow).join('')}</div>`
-    : tab === 'drops' ? `<p class="col-note">Rare gear from bosses and challenges. The first victory over each always gives its marked reward.</p><div class="col-list">${dropRows()}</div>`
-    : `<p class="col-note">Lucky finds while you work.</p><div class="col-list">${workRows()}</div>`;
+  const body = tab === 'eggs' ? `<p class="col-note">Bar: your tries against the average needed.</p><div class="col-list">${pets.slice().sort((a, b) => order(a) - order(b)).map(petRow).join('')}</div>`
+    : tab === 'drops' ? `<div class="col-list">${dropRows()}</div>`
+    : `<div class="col-list">${workRows()}</div>`;
   return `<section class="panel shophead col-head"><div><span class="k">Collection log</span><h2>${own} of ${pets.length} companions hatched</h2></div><div class="tabs">${[['eggs', 'Companion eggs'], ['drops', 'Rare drops'], ['work', 'Lucky finds']].map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="coltab" data-a="${k}">${n}</button>`).join('')}</div></section><section class="panel col-panel">${body}</section>`; };
 UI.DO.coltab = a => { UI.colTab = a; UI.render(false); };
 })();

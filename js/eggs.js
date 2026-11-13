@@ -23,9 +23,9 @@ Q.awardPet = (id, options = {}) => {
   const kind = Q.eggKind(id), now = Date.now();
   Q.eggs().push({ id, found: now, due: now + kind.ms });
   if (!(Q.sim && Q.sim.on) && !Q.forecasting) Q.sfx && Q.sfx('gem');
-  Q.notify({ kind: 'unlock', key: 'egg:' + id, icon: 'paw', col: kind.col, title: `You found an egg!`, text: `${kind.name}. ${Q.eggSource(id)}. It hatches at your ranch in ${Q.fmtTime(kind.ms)}.`, sound: false, burst: true, ttl: 12000,
+  Q.notify({ kind: 'unlock', key: 'egg:' + id, icon: 'paw', col: kind.col, title: `You found an egg!`, text: `${kind.name} · hatches in ${Q.fmtTime(kind.ms)}`, sound: false, burst: true, ttl: 12000,
     action: { label: 'See the hatchery', fn: () => { UI.beastMode = 'beasts'; Q.go('beastmastery'); } },
-    popup: (Q.sim && Q.sim.on) || Q.forecasting ? null : { title: 'You found an egg!', body: `<div class="pet-pop egg-pop" style="--c:${kind.col}"><span class="pet-pop-art egg-wobble">${Q.eggImg(id, 96)}</span><p><b>${esc(kind.name)}</b></p><p class="pet-pop-fx">${esc(Q.eggSource(id))}.</p><p class="sm dim">It is keeping warm in the hatchery at your ranch and hatches in ${Q.fmtTime(kind.ms)}, whether you are playing or not.</p></div>`,
+    popup: (Q.sim && Q.sim.on) || Q.forecasting ? null : { title: 'You found an egg!', body: `<div class="pet-pop egg-pop" style="--c:${kind.col}"><span class="pet-pop-art egg-wobble">${Q.eggImg(id, 96)}</span><p><b>${esc(kind.name)}</b></p><p class="pet-pop-fx">${esc(Q.eggSource(id))}.</p><p class="sm dim">Hatches at your ranch in ${Q.fmtTime(kind.ms)}.</p></div>`,
       actions: [{ label: 'See the hatchery', fn: () => { UI.beastMode = 'beasts'; Q.go('beastmastery'); } }, { label: 'Close', primary: true }] } });
   Q.log && Q.log(`You found a ${kind.name.toLowerCase()}. It will hatch in ${Q.fmtTime(kind.ms)}.`, 'quest'); Q.emit('pets'); return true;
 };
@@ -68,7 +68,7 @@ const page0 = UI.V.beastmastery;
 if (page0) UI.V.beastmastery = () => { const h = page0(); const eggs = UI.hatcheryHtml(); if (!eggs) return h;
   return h.includes('class="ranch-side">') ? h.replace('class="ranch-side">', 'class="ranch-side">' + eggs) : h; };
 /* one plain explanation of the three ways, as a pop-up (reference, not an action) and above the two finding pages */
-const WAYS = [['Lucky finds', 'Working at any skill, harvesting, or beating a boss can turn up an egg. The odds and your tries are in Hero → Collection.'], ['The trapper', 'Pay for a trap and it comes back by itself in 1 to 4 hours, with an egg or with tracks. Your own task keeps running.'], ['Wooden traps', 'A task you do yourself: lay your crafted traps in a region for loot, Beastmastery XP and a chance at that region’s wild egg.']];
-UI.DO.eggways = () => Q.modal({ title: 'Where eggs come from', body: `<div class="egg-ways">${WAYS.map(([t, d], i) => `<div class="egg-way"><b>${i + 1}. ${t}</b><p>${d}</p></div>`).join('')}<p class="sm dim">Every egg hatches at your ranch by itself: wild eggs in 10 minutes, speckled eggs in 30, royal eggs from bosses in an hour.</p></div>`, actions: [{ label: 'Open the collection log', fn: () => { UI.colTab = 'eggs'; Q.go('collection'); } }, { label: 'Close', primary: true }] });
+const WAYS = [['Lucky finds', 'Rare drop from any skill, harvest or boss. Odds: Guide → Collection.'], ['The trapper', 'Paid trap, back in 1–4 hours with an egg or tracks. Runs alongside your task.'], ['Wooden traps', 'A task: loot, Beastmastery XP and a chance at the region’s wild egg.']];
+UI.DO.eggways = () => Q.modal({ title: 'Where eggs come from', body: `<div class="egg-ways">${WAYS.map(([t, d], i) => `<div class="egg-way"><b>${i + 1}. ${t}</b><p>${d}</p></div>`).join('')}<p class="sm dim">Hatch times: wild 10 min · speckled 30 min · royal 1 hour.</p></div>`, actions: [{ label: 'Open the collection log', fn: () => { UI.colTab = 'eggs'; Q.go('collection'); } }, { label: 'Close', primary: true }] });
 /* the rail count for Beastmastery never counted eggs before; a waiting egg is not an action, so it still does not */
 })();

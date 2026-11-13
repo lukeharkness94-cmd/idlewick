@@ -51,7 +51,7 @@ const collectibleWild=new Set(['lanternmoth','thimblefox','tideglass','snowcoil'
 D.PETS.forEach(p=>p.collectible=true);
 D.MONLIST.filter(m=>!m.boss).forEach((m,i)=>{
   const id='wild_'+m.id;if(D.PET[id])return;const [key,val]=bonusKinds[i%bonusKinds.length],bonus={[key]:val};
-  const p={id,name:m.name,kind:'Signature wild companion',spr:'quad',mon:m.id,col:m.col,collectible:collectibleWild.has(m.id),src:{type:'hunt',mon:m.id},bonus,text:key==='dmg'?'+2% damage':key==='dr'?'2% less damage taken':key==='coin'?'+3% coins':key==='xpAll'?'+2% XP':'Every task is 2% faster'};
+  const p={id,name:m.name,kind:'Wild companion',spr:'quad',mon:m.id,col:m.col,collectible:collectibleWild.has(m.id),src:{type:'hunt',mon:m.id},bonus,text:key==='dmg'?'+2% damage':key==='dr'?'−2% damage taken':key==='coin'?'+3% coins':key==='xpAll'?'+2% XP':'+2% task speed'};
   D.PETS.push(p);D.PET[id]=p;
 });
 DQ.collectiblePets=()=>D.PETS.filter(p=>p.collectible||S().pets.owned[p.id]);

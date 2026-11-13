@@ -31,9 +31,9 @@ DQ.mastTick = a => {
    progress to the next field-guide entry. The selected task also shows five pips. Details live in the tooltip and on
    the field guide page. DQ.studyBar is shared with creatures (js/where.js). */
 DQ.ENTRY_NAMES = ['Notes', 'Quicker hands', 'Keen eye', 'Second nature', 'Mastered'];
-DQ.entryPerk = (kind, star) => { const y = YIELD_KINDS.includes(kind); return star === 1 ? 'what it is for, and 2% faster' : star === 3 && y ? '6% faster and a 5% chance of an extra one' : star === 5 && y ? '10% faster and a 10% chance of an extra one' : `${star * 2}% faster`; };
+DQ.entryPerk = (kind, star) => { const y = YIELD_KINDS.includes(kind); return star === 1 ? 'Uses shown · 2% faster' : star === 3 && y ? '6% faster · 5% double' : star === 5 && y ? '10% faster · 10% double' : `${star * 2}% faster`; };
 DQ.studyBar = (pct, full, tip) => `<i class="study-bar ${full ? 'full' : ''}" style="--p:${Math.max(0, Math.min(100, Math.round(pct)))}%" ${tip ? `data-tip="text:${DQ.esc(tip)}"` : ''} aria-hidden="true"></i>`;
-DQ.mastTip = (kind, id) => { const m = DQ.mastInfo(kind, id); return m.next ? `Field guide: entry ${m.stars} of ${STEPS.length}. Next, ${DQ.ENTRY_NAMES[m.stars]} (${DQ.entryPerk(kind, m.stars + 1)}), after ${DQ.fmt(m.next - m.n)} more.` : `Field guide: every entry filled in. ${m.speed}% faster${m.extra ? `, ${m.extra}% chance of an extra one` : ''}.`; };
+DQ.mastTip = (kind, id) => { const m = DQ.mastInfo(kind, id); return m.next ? `Field guide ${m.stars}/${STEPS.length} · next: ${DQ.entryPerk(kind, m.stars + 1)} in ${DQ.fmt(m.next - m.n)}` : `Field guide complete · ${m.speed}% faster${m.extra ? ` · ${m.extra}% double` : ''}`; };
 DQ.mastBadge = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''; const m = DQ.mastInfo(kind, id); return m.n ? DQ.studyBar(m.pct, !m.next) : ''; };
 DQ.mastLine = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''; const m = DQ.mastInfo(kind, id);
   return `<div class="mast-line ${m.next ? '' : 'max'}" data-tip="text:${DQ.esc(DQ.mastTip(kind, id))}" role="img" aria-label="${DQ.esc(DQ.mastTip(kind, id))}"><span class="mast-pips">${Array.from({ length: STEPS.length }, (_, i) => `<i class="${i < m.stars ? 'on' : ''}"></i>`).join('')}</span><span class="bar"><i style="width:${m.pct}%"></i></span></div>`; };

@@ -3602,3 +3602,5 @@ html.short .bp-art{width:56px;height:56px}
 html.lw-1600 .guide-book{grid-template-columns:200px minmax(0,1fr) 340px}
 @media (max-width:860px){.guide-book{display:flex;flex-direction:column;height:auto}.guide-book>.panel{max-height:none;width:100%}.guide-index{flex-direction:row;flex-wrap:wrap}.gi-group{width:100%}.gi{grid-template-columns:22px auto auto}.gi .bar{display:none}.guide-page{order:2}.guide-album{order:3}}
 
+
+.abils .tech-note{grid-column:1/-1;margin:0 0 4px}

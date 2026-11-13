@@ -27,7 +27,7 @@ const assert=require('node:assert/strict');
   }
   /* every desktop page: the window itself never scrolls; Quests is a list beside the selected quest */
   await p.setViewportSize({width:1440,height:780});
-  for(const page of ['overview','activity','journal','quests','people','combat','bestiary','map','exploration','projects','house','hirelings','character','tools','bank','skillsummary','mastery','achievements','shop','hunting','magic','brewery','enchanting','research','settings']){
+  for(const page of ['overview','activity','journal','quests','people','combat','bestiary','map','exploration','projects','house','hirelings','character','tools','bank','skillsummary','mastery','achievements','collection','shop','hunting','magic','brewery','enchanting','research','settings']){
    await p.evaluate(v=>{DQ.go(v);DQ.closeModal&&DQ.closeModal();},page);
    assert.ok(await p.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1),`${page}: the window does not scroll`);
   }

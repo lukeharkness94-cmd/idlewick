@@ -558,7 +558,7 @@ test('combat guidance is derived from the shared damage-type rule and the real s
  assert.equal(q.typeMult(D.MON.oldtusk,'weak'),R.boss.weak);assert.equal(q.typeMult(D.MON.boar,'weak'),R.normal.weak);
  assert.match(q.typeRuleText(D.MON.oldtusk),new RegExp(`\\+${Math.round((R.boss.weak-1)*100)}%.*${Math.round(R.boss.resist*100)}%`));
  assert.match(q.typeRuleText(D.MON.boar),new RegExp(`\\+${Math.round((R.normal.weak-1)*100)}%.*${Math.round(R.normal.resist*100)}%`));
- assert.match(D.AB.focus.text,new RegExp(`${R.boss.focus}x`));
+ assert.match(D.AB.focus.text,new RegExp(`${R.boss.focus}×`));
  /* Old Tusk is weak to pierce: with no bow yet, the advice offers the shop's shortbow and arrows */
  S.town='mossbarrow';S.towns.mossbarrow={visited:true,boss:false};S.coins=1e5;for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[20];S.hp=q.maxHp();
  let adv=q.prepAdvice('oldtusk');let w=adv.find(x=>x.key==='weak');assert.ok(w&&/shortbow/i.test(w.title)&&/arrows/.test(w.text),'bows are open from the start: the advice offers one '+JSON.stringify(w));
@@ -862,7 +862,7 @@ test('combat balance review: empty ability slots fill for a fight, the final bos
   /* the Hollow King: each of melee (crush), magic (aether) and ranged (pierce) has a weak phase and a phase it is not resisted in */
   const P=D.HOLLOW_PHASES;for(const t of ['crush','aether','pierce']){assert.ok(P.some(p=>p.weak.includes(t)),t+' has a weak phase');assert.ok(P.some(p=>!p.resist.includes(t)),t+' is not resisted in every phase');}
   /* Fury is noticeable at full health */
-  assert.match(D.ITEMS.berserkers_torc.unique.text,/10% more damage/);
+  assert.match(D.ITEMS.berserkers_torc.unique.text,/\+10% damage/);
   /* advice names a clearly better owned piece */
   S.inv.bronze_body=1;q.equipItem('bronze_body');S.inv.steel_body=1;S.hp=q.maxHp();const steelOk=q.canEquip('steel_body').ok;
   const adv=q.prepAdvice('goblin');if(steelOk)assert.ok(adv.some(a=>a.key==='upgrade'&&/steel/.test(a.title)),'advice: '+JSON.stringify(adv.map(a=>a.title)));

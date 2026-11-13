@@ -42,11 +42,11 @@ const sheet = id => { const p = D.PET[id], o = S().pets.owned[id], lv = Q.petLev
   const next = D.BOND_XP[lv] || D.BOND_XP[MAX - 1], base = D.BOND_XP[lv - 1], pct = lv >= MAX ? 100 : Math.min(100, 100 * (o.bondXp - base) / (next - base));
   const foodName = food ? D.ITEMS[food].name.toLowerCase() : 'cooked food';
   return `<section class="panel ranch-sheet"><div class="rs-head"><span class="rs-art">${Q.petSprite(p, 96)}</span><div><span class="k">${active ? 'With you' : 'Resting in its pen'}${job ? ' · ' + esc(job.role) : ''} · Bond ${lv}/${MAX}</span><h2>${esc(o.evolved && Q.beastSpec(id) ? Q.beastSpec(id).evolution : p.name)}</h2></div></div>
-    <p class="rs-passive"><b>Gives you:</b> ${esc(Q.beastPassiveText(id))}</p>
+    <p class="rs-passive">${esc(Q.beastPassiveText(id))}</p>
     <div class="bar" role="progressbar" aria-label="Bond progress" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
     <small class="rs-xp">${lv >= MAX ? 'Bond complete' : `${fmt(o.bondXp)} / ${fmt(next)} bond XP`}</small>
     <div class="beast-milestones">${D.BOND_MILESTONES.map(n => `<span class="tag ${lv >= n ? 'ok' : ''}" data-tip="text:Bond ${n}: ${n === 10 ? 'evolution and final passive upgrade' : 'passive upgrade'}">${lv >= n ? '✓' : '◇'} ${n}</span>`).join('')}</div>
-    <p class="sm dim rs-cost">${lv >= MAX ? 'This bond is complete.' : `A session uses ${t.coins} coins and 2 ${esc(foodName)} for +${t.xp} bond XP, then it naps for 45 minutes. Wins share 25% of your combat XP.`}</p>
+    <p class="sm dim rs-cost">${lv >= MAX ? 'This bond is complete.' : `${t.coins} coins + 2 ${esc(foodName)} → +${t.xp} bond XP · 45 min nap`}</p>
     <div class="btnrow wrap"><button class="btn primary" data-do="beastfeed" data-a="${id}" ${t.ok ? '' : 'disabled'}>${t.ok ? `Feed & train · +${t.xp} bond XP` : esc(t.reason)}</button>${active ? `<span class="rs-with">★ With you</span>` : `<button class="btn" data-do="setpet" data-a="${id}">Bring along</button>`}</div></section>`; };
 const shedTeaser = () => { const j = S().pets.expedition; return `<section class="panel ranch-shedcard"><span class="k">Trapper</span><p>${j ? `<b>Trap out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'No trap is out. Send one and it brings back an egg.'}</p><button class="btn" data-do="beastmode" data-a="shed">Open the shed</button><button class="linkish ranch-eggs-link" data-do="eggways">Where do eggs come from?</button></section>`; };
 const ranch = () => {

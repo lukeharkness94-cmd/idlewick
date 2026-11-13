@@ -150,8 +150,8 @@ Object.assign(UI.DO, {
   /* queueing asks how long, as plain buttons, so a chain is planned in one go: "200 oak logs, then planks" */
   queueadd: (a, b) => { if (!DQ.planUnlocked()) return DQ.toast(`The task queue unlocks at Hero level ${D.PLAN_ADV}`, true);
     const Q = S().queue || [], slots = DQ.queueSlots(), full = Q.length >= slots, label = DQ.actLabel({ kind: a, id: b });
-    const m = DQ.modal({ title: `Queue: ${label}`, body: `<p class="sm">${DQ.act ? `It starts when <b>${esc(DQ.actLabel())}</b> finishes or runs out of supplies, even while you are away.` : 'Nothing is running, so it starts now.'}</p>
-      <div class="k">How long?</div><div class="chips rules queue-rules">${D.STOP_RULES.map(([k, n]) => `<button class="chip" data-do="queuepick" data-a="${a}" data-b="${b}" data-c="${k}" ${full ? 'disabled' : ''}>${k === 'none' ? 'Until supplies run out' : n}</button>`).join('')}</div>
+    const m = DQ.modal({ title: `Queue: ${label}`, body: `<p class="sm">${DQ.act ? `Starts after <b>${esc(DQ.actLabel())}</b>.` : 'Starts now.'}</p>
+      <div class="k">How long?</div><div class="chips rules queue-rules">${D.STOP_RULES.map(([k, n]) => `<button class="chip" data-do="queuepick" data-a="${a}" data-b="${b}" data-c="${k}" ${full ? 'disabled' : ''}>${k === 'none' && a === 'recipe' ? 'Until supplies run out' : n}</button>`).join('')}</div>
       <p class="hint">Queue <b class="mono">${Q.length} / ${slots}</b>${full ? ' · full: remove one in the task plan first' : ''}${Q.length ? ` · already waiting: ${Q.map(t => esc(DQ.actLabel(t))).join(', ')}` : ''}</p>`, actions: [{ label: 'Cancel' }] }); m.classList.add('queuemodal'); },
   queuepick: (a, b, t) => { DQ.closeModal(); DQ.queueAdd(a, b, (t && t.dataset && t.dataset.c) || 'time:30'); },
   qquick: (a, b) => { DQ.queueAdd(a, b, 'none'); DQ.closeModal(); },

@@ -522,3 +522,15 @@ The player chooses how to fight by the weapon they hold, and that weapon family 
 
 ## One scale for fighting styles (Nov 2026)
 Melee, Ranged and Magic now share combat-level weight, effective level (`D.STYLE_TUNE.level`) and XP per hit; bow, staff, spell, ability, robe and Alchemy levels were rescaled to the sword tiers. Evidence and numbers: docs/combat-balance.md. Gear bonus labels: Accuracy (`atk`) and Power (`str`).
+
+
+## "Five more minutes" update (Dec 2026)
+From the player's request to build all five retention recommendations, plus follow-ups in the same session.
+- Challenges: ten new mini-bosses (two per region, Saltmere to Skyreach) in `js/minibosses.js`, tuned on the ladder (`node scripts/sim-bosses.cjs`): 99-100% at the requirement with region gear, 5-10 food per win.
+- Combat levels 60-95: eight abilities, nineteen techniques, a fourth slot at Combat 70. The Hollow King's health went from 935 to 1065 (pre-scale) so he stays the final test: 66% at the requirement, 91% at +3.
+- Field guide for everything, mastery counts (`S.mast`), album layout, thin progress bars. Up to 10% faster and 10% double on a task done 1,500 times.
+- Eggs and the hatchery; Beastmastery tabs renamed (Ranch · beasts and eggs / Trapper · send for an egg / Wooden traps · search a region) with one "Where do eggs come from?" pop-up.
+- Collection log under the new Guide top-menu entry.
+- The task queue already existed behind the plan button; it is now a visible Queue button with duration choices, shows in the Now card, opens at Hero 3 and advances during offline catch-up when a task runs out of supplies.
+- Chunky pixels restored (Scale2x off). First wording pass to RPG shorthand: abilities, techniques, unique gear, companion tricks, choice cards, ranch, eggs, collection. Quest text, tutorials and tooltips were not rewritten.
+- Not done: no new economy simulation for mastery beyond the bound above; no human playtest.
