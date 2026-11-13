@@ -64,7 +64,7 @@
     const dash = document.querySelector('#view .combat-dashboard'); if (!dash || dash.dataset.d) return;
     const live = dash.querySelector('.combat-live'), strip = live && live.querySelector('.style-strip'), arena = live && live.querySelector('.encounter-arena'), ctl = live && live.querySelector('.arena-ctl'), tg = dash.querySelector('.combat-targets');
     if (!live || !strip) return; dash.dataset.d = '1'; dash.classList.add('combat-d');
-    if (tg) { tg.insertAdjacentHTML('afterbegin', '<div class="step-h"><span class="step-n">1</span>Choose</div>'); tg.insertAdjacentHTML('beforeend', bossBtn()); }
+    if (tg) { tg.insertAdjacentHTML('afterbegin', '<div class="step-h"><span class="step-n">1</span>Where to fight</div>'); tg.insertAdjacentHTML('beforeend', bossBtn()); }
     const tight = /\b(short|lw-1600)\b/.test(document.documentElement.className) && innerWidth > 860;
     live.insertAdjacentHTML('afterbegin', readyLine(tight));
     /* on shorter or narrower desktops the fight's own line (Fighting … / Retreat, or Selected … / Explore) joins the

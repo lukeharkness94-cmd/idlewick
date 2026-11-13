@@ -514,3 +514,7 @@ The player chooses how to fight by the weapon they hold, and that weapon family 
 - **Catch-up:** `DQ.catchUp(sk)` triples XP for a fighting style below 70% of your best one; the Train button says "Learning 3× faster".
 - Melee has two training buttons like the others: Offensive (Melee) and Defensive (Defence). A saved `accurate` focus reads as Offensive.
 - Evidence: `node scripts/sim-bosses.cjs` is unchanged within noise; regression covers the save merge.
+
+
+## Combat: Where to fight (Nov 2026)
+`js/where.js` replaces `UI.areaPanel` (the earlier versions in hunting.js and minibosses.js are superseded). The 260px column shows, without scrolling: the quest target row (Track / Challenge), each area as a card with creature portraits and odds, the challenges as tiles, and the boss foot from combat_simple.js. Clicking a portrait sets `UI.taskChoice.combat` so the stage and the Ready check show that creature before you explore. Rarity words live in each portrait's tooltip and aria-label.

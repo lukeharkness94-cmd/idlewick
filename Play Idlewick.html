@@ -3577,6 +3577,36 @@ html.short .bp-art{width:56px;height:56px}
 :is(#tip,#detailbox) .tt-list li:has(>.tt-l:only-child){grid-template-columns:minmax(0,1fr)!important}
 .battle-companion.placed{gap:0}.battle-companion.placed img{image-rendering:pixelated}.battle-companion.placed small{margin-top:-6px}
 .ss-fast{display:block;font:600 13px var(--f-ui);font-style:normal;color:var(--good)}
+
+/* Where to fight: compact destination cards, nothing scrolls */
+.where{display:grid;gap:8px;align-content:start}
+.wh-quest{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;border:1px solid var(--brass);background:color-mix(in srgb,var(--brass) 10%,var(--panel2))}
+.wh-quest img{width:32px;height:32px}.wh-quest span{display:grid;line-height:1.2;min-width:0}.wh-quest small{font-size:13px;color:var(--brass-hi,#f3d58a)}.wh-quest b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wh-areas{display:grid;gap:8px}
+.where .wh-area{display:grid;gap:6px;padding:8px;border-radius:10px}
+.where .wh-area.selected{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 30%,transparent)}
+.wh-area-h{display:flex;align-items:center;justify-content:space-between;gap:6px}.wh-area-h>div{display:grid;line-height:1.2;min-width:0}.wh-area-h b{font-size:16px}.wh-area-h small{font-size:13px;color:var(--mute)}
+.where .wh-heads{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important}
+.where .wh-heads>.wh-head{display:grid!important;justify-items:center;gap:0;width:auto!important;min-height:0!important;padding:3px 0 2px!important;border:1px solid transparent;border-radius:8px;background:color-mix(in srgb,var(--ink) 5%,transparent);cursor:pointer;color:inherit;font:inherit}
+.where .wh-heads>.wh-head img,.where .wh-heads>.wh-head .painted-sprite{width:32px!important;height:32px!important}
+.where .wh-head small{font:600 13px var(--f-ui);color:var(--mute)}
+.where .wh-head:hover,.where .wh-head:focus-visible{border-color:color-mix(in srgb,var(--brass) 55%,var(--line))}
+.where .wh-head.on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 16%,transparent)}.where .wh-head.on small{color:var(--ink)}
+.where .wh-head.quest{box-shadow:inset 0 -3px var(--brass)}
+.wh-minis-h{margin-top:2px}
+.wh-minis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.wh-mini{display:grid;justify-items:center;text-align:center;gap:2px;padding:6px;border-radius:10px;border:1px solid color-mix(in srgb,var(--brass) 45%,var(--line));background:color-mix(in srgb,var(--brass) 7%,var(--panel2))}
+.wh-mini.on,.wh-mini.quest{border-color:var(--brass)}.wh-mini.done{border-color:color-mix(in srgb,var(--good) 45%,var(--line));background:var(--panel2)}
+.wh-mini-art{padding:0;border:0;background:none;cursor:pointer;line-height:0}.wh-mini-art img{width:48px;height:48px}
+.wh-mini b{font-size:15px;line-height:1.15}.wh-mini small{font-size:13px;color:var(--mute)}.wh-mini small.bad{color:var(--warn)}
+.wh-mini .btn{width:100%;margin-top:2px}
+@media(min-width:861px){
+ .combat-d .combat-targets{overflow:hidden!important}
+ .combat-d .where>.phead,.combat-d .where>[data-reference]{display:none}
+ .combat-d .where{padding:8px}
+ html.short .combat-d .wh-mini-art img{width:32px;height:32px}
+}
+@media(min-width:861px){html:not(.short) .combat-d .where .wh-heads>.wh-head img{width:40px!important;height:40px!important}}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -17028,7 +17058,7 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
     const dash = document.querySelector('#view .combat-dashboard'); if (!dash || dash.dataset.d) return;
     const live = dash.querySelector('.combat-live'), strip = live && live.querySelector('.style-strip'), arena = live && live.querySelector('.encounter-arena'), ctl = live && live.querySelector('.arena-ctl'), tg = dash.querySelector('.combat-targets');
     if (!live || !strip) return; dash.dataset.d = '1'; dash.classList.add('combat-d');
-    if (tg) { tg.insertAdjacentHTML('afterbegin', '<div class="step-h"><span class="step-n">1</span>Choose</div>'); tg.insertAdjacentHTML('beforeend', bossBtn()); }
+    if (tg) { tg.insertAdjacentHTML('afterbegin', '<div class="step-h"><span class="step-n">1</span>Where to fight</div>'); tg.insertAdjacentHTML('beforeend', bossBtn()); }
     const tight = /\b(short|lw-1600)\b/.test(document.documentElement.className) && innerWidth > 860;
     live.insertAdjacentHTML('afterbegin', readyLine(tight));
     /* on shorter or narrower desktops the fight's own line (Fighting … / Retreat, or Selected … / Explore) joins the
@@ -17060,6 +17090,33 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
   UI.DO.abilswap = id => { const on = S().abilities || []; if (on.length >= DQ.abilSlots()) DQ.toggleAbility(on[on.length - 1]); if (DQ.toggleAbility(id)) DQ.sfx && DQ.sfx('equip'); UI.render(false); };
   const render = UI.render;
   UI.render = fresh => { render(fresh); addBar(); refresh(); };
+})();
+
+</script>
+<script>
+/* Where to fight (Nov 2026, from the player: the place you fight matters more than abilities, on one screen, no scroll).
+   Every destination in the town is one compact card: the two hunting areas with the creatures you can meet there as
+   portraits (their odds beneath; click one to see it on the stage before you go), the challenges as picture tiles,
+   and a single quest row. Nothing here scrolls: tests/ui-fit.cjs checks the column at 1280 x 720. */
+(() => {
+const DQ = window.DQ, D = DQ.data, UI = DQ.ui, { esc, ico } = DQ, S = () => DQ.S;
+const fighting = () => DQ.act && DQ.act.kind === 'fight' ? DQ.act : null;
+const questMon = () => { const id = DQ.questHuntTarget ? DQ.questHuntTarget() : null, m = id && D.MON[id]; return m && m.town === S().town && !m.boss ? id : null; };
+const rarity = pct => pct >= 45 ? 'Common' : pct >= 20 ? 'Uncommon' : 'Rare';
+UI.areaPanel = town => {
+  const f = fighting(), active = f && f.area, qt = questMon(), areas = D.AREAS[town] || [], focus = DQ.combatFocus ? DQ.combatFocus() : null;
+  const minis = D.MONLIST.filter(m => m.mini && m.town === town), qm = qt && D.MON[qt];
+  const quest = qm ? `<div class="wh-quest"><span class="wh-q-art">${DQ.monSprite(qm, 32)}</span><span><small>Quest target</small><b>${esc(qm.name)}</b></span><button class="btn sm primary" data-do="huntquest" data-a="${qt}">${qm.mini ? 'Challenge' : 'Track'}</button></div>` : '';
+  const head = (x) => { const m = x.monster, met = (S().beast.kills[x.id] || 0) > 0, nm = met ? m.name : 'Unknown creature', on = focus && focus.id === x.id;
+    return `<button type="button" class="wh-head enc-row ${on ? 'on' : ''} ${qt === x.id ? 'quest' : ''}" data-do="huntpreview" data-a="${x.id}" aria-pressed="${!!on}" aria-label="${esc(nm)}, level ${m.cl}, ${rarity(x.pct)}, ${x.pct}% of encounters. Show it on the stage." data-tip="text:${esc(nm)} · level ${m.cl} · ${rarity(x.pct)} (${x.pct}%)${qt === x.id ? ' · quest target' : ''}">${DQ.monSprite(m, 32, met ? '' : 'sil')}<small>${x.pct}%</small></button>`; };
+  const cards = areas.map(a => { const odds = DQ.encounterOdds(a), on = active === a.id, lv = odds.map(x => x.monster.cl);
+    return `<article class="area-card wh-area ${on ? 'selected' : ''}"><div class="wh-area-h"><div><b>${esc(a.name)}</b><small>Level ${Math.min(...lv)}–${Math.max(...lv)}${on ? ' · exploring' : ''}</small></div><button class="btn sm ${on ? '' : 'primary'}" data-do="huntarea" data-a="${a.id}">${on ? 'Retreat' : 'Explore'}</button></div><div class="wh-heads encounter-list" role="group" aria-label="Creatures in ${esc(a.name)}">${odds.map(head).join('')}</div></article>`; }).join('');
+  const tiles = minis.map(m => { const ok = DQ.combatLvl() >= m.mini.req, done = S().minis && S().minis[m.id], on = f && f.id === m.id, d = DQ.dangerOf ? DQ.dangerOf(m) : null;
+    return `<article class="wh-mini ${done ? 'done' : ''} ${on ? 'on' : ''} ${qt === m.id ? 'quest' : ''}" style="--c:${m.col}"><button type="button" class="wh-mini-art" data-do="huntpreview" data-a="${m.id}" aria-label="${esc(m.name)}: show it on the stage" data-tip="text:${esc(m.name)} · level ${m.cl}${d ? ' · ' + esc(d.label) : ''}">${DQ.monSprite(m, 48)}</button><b>${esc(m.name)}</b><small class="${ok ? 'ok' : 'bad'}">${done ? '✓ Defeated' : ok ? `Level ${m.cl}` : `Needs combat ${m.mini.req}`}</small><button class="btn sm ${ok && !on && !done ? 'primary' : ''}" ${ok ? `data-do="act" data-a="fight" data-b="${m.id}"` : 'disabled'}>${on ? 'Retreat' : done ? 'Again' : 'Challenge'}</button></article>`; }).join('');
+  return `<section class="panel activity-choices hunt-areas where"><div class="phead"><div><span class="k">Hunting</span><h2>Choose an area</h2></div><small>${esc(D.TOWN[town].name)}</small></div>
+    ${quest}<div class="wh-areas">${cards}</div>${tiles ? `<div class="wh-minis-h k">Challenges</div><div class="wh-minis">${tiles}</div>` : ''}</section>`;
+};
+UI.DO.huntpreview = id => { if (!D.MON[id]) return; UI.taskChoice.combat = id; UI.render(false); };
 })();
 
 </script>

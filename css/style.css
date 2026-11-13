@@ -3493,3 +3493,33 @@ html.short .bp-art{width:56px;height:56px}
 :is(#tip,#detailbox) .tt-list li:has(>.tt-l:only-child){grid-template-columns:minmax(0,1fr)!important}
 .battle-companion.placed{gap:0}.battle-companion.placed img{image-rendering:pixelated}.battle-companion.placed small{margin-top:-6px}
 .ss-fast{display:block;font:600 13px var(--f-ui);font-style:normal;color:var(--good)}
+
+/* Where to fight: compact destination cards, nothing scrolls */
+.where{display:grid;gap:8px;align-content:start}
+.wh-quest{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;border:1px solid var(--brass);background:color-mix(in srgb,var(--brass) 10%,var(--panel2))}
+.wh-quest img{width:32px;height:32px}.wh-quest span{display:grid;line-height:1.2;min-width:0}.wh-quest small{font-size:13px;color:var(--brass-hi,#f3d58a)}.wh-quest b{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wh-areas{display:grid;gap:8px}
+.where .wh-area{display:grid;gap:6px;padding:8px;border-radius:10px}
+.where .wh-area.selected{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 30%,transparent)}
+.wh-area-h{display:flex;align-items:center;justify-content:space-between;gap:6px}.wh-area-h>div{display:grid;line-height:1.2;min-width:0}.wh-area-h b{font-size:16px}.wh-area-h small{font-size:13px;color:var(--mute)}
+.where .wh-heads{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important}
+.where .wh-heads>.wh-head{display:grid!important;justify-items:center;gap:0;width:auto!important;min-height:0!important;padding:3px 0 2px!important;border:1px solid transparent;border-radius:8px;background:color-mix(in srgb,var(--ink) 5%,transparent);cursor:pointer;color:inherit;font:inherit}
+.where .wh-heads>.wh-head img,.where .wh-heads>.wh-head .painted-sprite{width:32px!important;height:32px!important}
+.where .wh-head small{font:600 13px var(--f-ui);color:var(--mute)}
+.where .wh-head:hover,.where .wh-head:focus-visible{border-color:color-mix(in srgb,var(--brass) 55%,var(--line))}
+.where .wh-head.on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 16%,transparent)}.where .wh-head.on small{color:var(--ink)}
+.where .wh-head.quest{box-shadow:inset 0 -3px var(--brass)}
+.wh-minis-h{margin-top:2px}
+.wh-minis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.wh-mini{display:grid;justify-items:center;text-align:center;gap:2px;padding:6px;border-radius:10px;border:1px solid color-mix(in srgb,var(--brass) 45%,var(--line));background:color-mix(in srgb,var(--brass) 7%,var(--panel2))}
+.wh-mini.on,.wh-mini.quest{border-color:var(--brass)}.wh-mini.done{border-color:color-mix(in srgb,var(--good) 45%,var(--line));background:var(--panel2)}
+.wh-mini-art{padding:0;border:0;background:none;cursor:pointer;line-height:0}.wh-mini-art img{width:48px;height:48px}
+.wh-mini b{font-size:15px;line-height:1.15}.wh-mini small{font-size:13px;color:var(--mute)}.wh-mini small.bad{color:var(--warn)}
+.wh-mini .btn{width:100%;margin-top:2px}
+@media(min-width:861px){
+ .combat-d .combat-targets{overflow:hidden!important}
+ .combat-d .where>.phead,.combat-d .where>[data-reference]{display:none}
+ .combat-d .where{padding:8px}
+ html.short .combat-d .wh-mini-art img{width:32px;height:32px}
+}
+@media(min-width:861px){html:not(.short) .combat-d .where .wh-heads>.wh-head img{width:40px!important;height:40px!important}}

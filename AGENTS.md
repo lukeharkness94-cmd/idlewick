@@ -52,3 +52,5 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 
 
 - Fighting styles (Nov 2026): the combat skills are Melee, Ranged, Magic, Defence and Health; each weapon family levels as you fight with it, all three are open from the start, and a style behind your best learns 3× faster (`DQ.catchUp`). Attack and Strength no longer exist as skills (old ids alias to `melee`; see HANDOFF.md). Do not re-lock Ranged or Magic behind quests or split Melee again.
+
+- Where to fight (Nov 2026, `js/where.js`): the combat Choose column is headed "Where to fight" and never scrolls. Each hunting area is one compact card (name, level range, Explore/Retreat, and its creatures as 32–40px portraits with their odds; clicking a portrait previews that creature on the stage via `UI.DO.huntpreview`, the field guide stays on the Ready line's Guide button), challenges are two picture tiles, the quest target is one row, the boss sits at the foot. Do not restore per-creature rows or a scrolling list; `tests/ui-fit.cjs` checks the fullest town at 1280 × 720.

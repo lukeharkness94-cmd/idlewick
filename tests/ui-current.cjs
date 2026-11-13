@@ -61,7 +61,7 @@ const fs=require('node:fs');
      assert.match(await page.locator('.ftr-weapon').textContent(),/s per attack/);
      assert.ok(await page.locator('.encounter-arena').evaluate(el=>getComputedStyle(el).backgroundRepeat.split(',').every(value=>value.trim()==='no-repeat')));
      assert.equal(await page.locator('.combat-col .combat-supplies').count(),1);assert.equal(await page.locator('.combat-col .fighter .ftr-row').count()>=4,true);assert.equal(await page.locator('.combat-side .battle-brief').count(),1);assert.equal(await page.locator('.tiledesc').count(),0);
-     assert.equal(await page.locator('.combat-live .lootp').count(),0);if(width===1440&&theme==='dark'){await page.evaluate(()=>{for(let i=0;i<3;i++)DQ.closeModal();});await page.locator('.encounter-list .enc-row').first().click();assert.match(await page.locator('.modal').innerText(),/Field guide/);await page.evaluate(()=>DQ.closeModal());}
+     assert.equal(await page.locator('.combat-live .lootp').count(),0);if(width===1440&&theme==='dark'){await page.evaluate(()=>{for(let i=0;i<3;i++)DQ.closeModal();});const head=page.locator('.encounter-list .enc-row').nth(1),hid=await head.getAttribute('data-a');await head.click();assert.equal(await page.evaluate(()=>DQ.combatFocus().id),hid,'a creature portrait previews it on the stage');await page.locator('.ready-line [data-do="guide"], [data-do="guide"]').first().click();assert.match(await page.locator('.modal').innerText(),/Field guide/);await page.evaluate(()=>DQ.closeModal());}
     }
    }
    assert.ok(await page.locator('#hud [aria-label="Settings"]').isVisible());
@@ -110,7 +110,7 @@ const fs=require('node:fs');
   })),'every enemy has a battle-ready model');
   await page.evaluate(()=>DQ.go('combat'));
   assert.ok(await page.locator('.area-card').count()>=2,'combat offers town areas');
-  assert.ok((await page.locator('.hunt-areas').innerText()).includes('Common'),'areas expose encounter rarity');
+  assert.match(await page.locator('.hunt-areas').innerText(),/\d+%/,'areas expose encounter odds');assert.match(await page.locator('.wh-head').first().getAttribute('aria-label'),/Common|Uncommon|Rare/,'and name the rarity');
   await page.locator('.area-card [data-do="huntarea"]').first().click();
   assert.equal(await page.evaluate(()=>DQ.act?.kind),'fight');
   assert.ok(await page.evaluate(()=>!!DQ.act?.area),'expedition persists its selected area');
