@@ -303,7 +303,7 @@ UI.V.combat = () => {
   /* Your fighter: combat level, weapon and every combat skill exactly once, each beside what it does for you now
      and the button that makes your fights train it. */
   const trainBtn = (value, label) => `<button type="button" class="choice-button ftr-train ${cur === value ? 'on' : ''}" data-do="style" data-a="${st}" data-b="${value}" aria-pressed="${cur === value}">${cur === value ? 'Training' : 'Train'}<small>${label}</small></button>`;
-  const trainFor = { melee: st === 'melee' ? trainBtn('aggressive', 'Offensive') : '', defence: trainBtn('defensive', st === 'melee' ? 'Defensive' : `${st === 'ranged' ? 'Ranged' : 'Magic'} + Defence`), ranged: st === 'ranged' ? trainBtn('offense', 'Offensive') : '', magic: st === 'magic' ? trainBtn('offense', 'Offensive') : '' };
+  const trainFor = { melee: st === 'melee' ? trainBtn('aggressive', 'Offensive') : '', defence: trainBtn('defensive', 'Defensive'), ranged: st === 'ranged' ? trainBtn('offense', 'Offensive') : '', magic: st === 'magic' ? trainBtn('offense', 'Offensive') : '' };
   const offStyle = k => st !== k ? `<em>${k === 'ranged' ? 'With a bow and arrows' : k === 'magic' ? 'With a staff and runes' : 'With a melee weapon'}</em>` : '';
   const does = {
     melee: `Hit chance and damage${st === 'melee' ? ` · max hit <b class="mono">${ps.max}</b>` : ''}${offStyle('melee')}`,

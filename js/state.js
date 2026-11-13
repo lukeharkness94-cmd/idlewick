@@ -221,11 +221,10 @@ DQ.unlockHow = sk => { const s=D.SK[sk]; if(s.actionReq)return DQ.actionProgress
 DQ.maxHp = () => DQ.lvl('hitpoints');
 DQ.combatLvl = () => {
   const L = DQ.lvl, base = .25 * (L('defence') + L('hitpoints'));
-  const m = .65 * L('melee'), r = .325 * Math.floor(1.5 * L('ranged')), g = .325 * Math.floor(1.5 * L('magic'));
-  return Math.floor(base + Math.max(m, r, g));
+  return Math.floor(base + .65 * Math.max(L('melee'), L('ranged'), L('magic'))); /* every fighting style counts the same */
 };
 /* Progress towards the next combat level: the formula evaluated with fractional skill levels, plus the cheapest single-skill route. */
-const combatFrom = L => { const base = .25 * (L.defence + L.hitpoints); return base + Math.max(.65 * L.melee, .325 * Math.floor(1.5 * L.ranged), .325 * Math.floor(1.5 * L.magic)); };
+const combatFrom = L => { const base = .25 * (L.defence + L.hitpoints); return base + .65 * Math.max(L.melee, L.ranged, L.magic); };
 DQ.combatProgress = () => {
   const ids = ['melee', 'defence', 'hitpoints', 'ranged', 'magic'], L = {}, F = {};
   ids.forEach(k => { L[k] = DQ.lvl(k); F[k] = L[k] + (L[k] >= 99 ? 0 : DQ.pctNext(k) / 100); });

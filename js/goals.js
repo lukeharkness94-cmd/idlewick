@@ -36,7 +36,7 @@ DQ.goals = () => {
   /* 2. Combat: next weapon and armour tier you can equip, and the boss of your frontier town */
   const att = DQ.lvl('attack'), def = DQ.lvl('defence');
   const nt = D.TIERS.find(t => t.equip > att), na = D.TIERS.find(t => t.equip > def);
-  if (nt) { const p = lvlProg('attack', nt.equip); add({ id: 'gear:atk', cat: 'Combat', icon: 'sword', col: nt.col, title: `${nt.name} weapons`, sub: `Attack ${att} → ${nt.equip}`, pct: p.pct, eta: etaXp('attack', p.need), go: 'combat' }); }
+  if (nt) { const p = lvlProg('attack', nt.equip); add({ id: 'gear:atk', cat: 'Combat', icon: 'sword', col: nt.col, title: `${nt.name} weapons`, sub: `Melee ${att} → ${nt.equip}`, pct: p.pct, eta: etaXp('attack', p.need), go: 'combat' }); }
   if (na) { const p = lvlProg('defence', na.equip); add({ id: 'gear:def', cat: 'Combat', icon: 'shield', col: na.col, title: `${na.name} armour`, sub: `Defence ${def} → ${na.equip}`, pct: p.pct, eta: etaXp('defence', p.need), go: 'combat' }); }
   const front = D.TOWNS.find(t => DQ.townUnlocked(t.id) && !(S().towns[t.id] && S().towns[t.id].boss));
   if (front) {

@@ -4399,7 +4399,7 @@ LEATHER.forEach((t, i) => LPIECES.forEach(([slot, key, label, n, off, f, ic]) =>
 }));
 
 /* Bows, staves, arrows */
-const BW = [['normal', 'Shortbow', 'Apprentice staff', 1, 5, 6, 5, 20, 30], ['oak', 'Oak shortbow', 'Oak staff', 15, 20, 12, 11, 34, 80], ['willow', 'Willow shortbow', 'Willow staff', 30, 35, 20, 19, 60, 200], ['maple', 'Maple shortbow', 'Maple staff', 45, 50, 30, 29, 90, 520], ['yew', 'Yew shortbow', 'Yew staff', 60, 65, 42, 41, 140, 1400], ['magic', 'Magic shortbow', 'Magic staff', 75, 80, 56, 55, 200, 4000], ['elder', 'Elder shortbow', 'Elder staff', 88, 90, 72, 70, 280, 12000]];
+const BW = [['normal', 'Shortbow', 'Apprentice staff', 1, 5, 6, 5, 20, 30], ['oak', 'Oak shortbow', 'Oak staff', 10, 20, 12, 11, 34, 80], ['willow', 'Willow shortbow', 'Willow staff', 20, 35, 20, 19, 60, 200], ['maple', 'Maple shortbow', 'Maple staff', 30, 50, 30, 29, 90, 520], ['yew', 'Yew shortbow', 'Yew staff', 40, 65, 42, 41, 140, 1400], ['magic', 'Magic shortbow', 'Magic staff', 50, 80, 56, 55, 200, 4000], ['elder', 'Elder shortbow', 'Elder staff', 60, 90, 72, 70, 280, 12000]];
 BW.forEach(([w, bname, sname, equip, craft, rng, mag, xp, val], i) => {
   const wc = WOOD.find(x => x[0] === w)[3];
   mk('bow_' + w, { name: bname, ic: 'bow', col: wc, val, type: 'gear', slot: 'weapon', style: 'ranged', req: { ranged: equip }, b: { rng }, tier: i });
@@ -4416,9 +4416,9 @@ TIERS.forEach((t, i) => {
 /* Robes (shop and boss only) */
 const ROBES = [
   { id: 'apprentice', name: 'Apprentice', col: '#7f8cff', req: 1, P: 3, base: 40 },
-  { id: 'adept', name: 'Adept', col: '#5f93df', req: 20, P: 7, base: 160 },
-  { id: 'mystic', name: 'Mystic', col: '#9b87e0', req: 40, P: 13, base: 520 },
-  { id: 'archmage', name: 'Archmage', col: '#d98ad1', req: 60, P: 21, base: 1700 },
+  { id: 'adept', name: 'Adept', col: '#5f93df', req: 15, P: 7, base: 160 },
+  { id: 'mystic', name: 'Mystic', col: '#9b87e0', req: 30, P: 13, base: 520 },
+  { id: 'archmage', name: 'Archmage', col: '#d98ad1', req: 45, P: 21, base: 1700 },
 ];
 ROBES.forEach((r, i) => [['head', 'hood', .4, 'helm'], ['body', 'robe top', 1, 'body'], ['legs', 'robe bottom', .7, 'legs']].forEach(([slot, label, f, ic]) =>
   mk(`robe_${r.id}_${slot}`, { name: `${r.name} ${label}`, ic, col: r.col, val: Math.round(r.base * f), type: 'gear', slot, req: { magic: r.req }, b: { def: Math.round(r.P * f * .5), mag: Math.round(r.P * f * 1.3) }, tier: i })));
@@ -4476,8 +4476,8 @@ D.RECIPES.craft_pine_shield.in.wolf_pelt = 1; D.RECIPES.craft_wraithbark_shield.
 mk('chief_helm', { name: "Grubnash's war-helm", ic: 'helm', col: '#8fbf6a', val: 600, type: 'gear', slot: 'head', req: { defence: 5 }, b: { def: 14, str: 3 }, rare: 1 });
 mk('barnacle_cutlass', { name: "Barnacle's cutlass", ic: 'sword', col: '#6fc7d8', val: 2400, type: 'gear', slot: 'weapon', style: 'melee', req: { attack: 22 }, b: { atk: 26, str: 24 }, rare: 1 });
 mk('frostmaw_pendant', { name: 'Frostmaw pendant', ic: 'amulet', col: '#bfe6ff', val: 6000, type: 'gear', slot: 'amulet', b: { atk: 7, str: 7, def: 8, rng: 5, mag: 5 }, rare: 1 });
-mk('witch_staff', { name: "Morwenna's bog staff", ic: 'staff', col: '#b79cff', val: 14000, type: 'gear', slot: 'weapon', style: 'magic', req: { magic: 50 }, b: { mag: 58 }, rare: 1 });
-mk('emberfang_bow', { name: 'Emberfang bow', ic: 'bow', col: '#ff8a4a', val: 45000, type: 'gear', slot: 'weapon', style: 'ranged', req: { ranged: 70 }, b: { rng: 84 }, rare: 1 });
+mk('witch_staff', { name: "Morwenna's bog staff", ic: 'staff', col: '#b79cff', val: 14000, type: 'gear', slot: 'weapon', style: 'magic', req: { magic: 38 }, b: { mag: 58 }, rare: 1 });
+mk('emberfang_bow', { name: 'Emberfang bow', ic: 'bow', col: '#ff8a4a', val: 45000, type: 'gear', slot: 'weapon', style: 'ranged', req: { ranged: 52 }, b: { rng: 84 }, rare: 1 });
 
 /* Tools: tier 0 is free and always owned */
 D.TOOL_TIERS = ['Basic', 'Reinforced', 'Steel-tipped', 'Mithril', 'Adamant', 'Runic'];
@@ -4489,12 +4489,12 @@ D.TOOLS.forEach(([k, sk, ic, label]) => { for (let t = 1; t <= 5; t++) mk(`tool_
 /* ---------- Spells ---------- */
 D.SPELLS = [
   { id: 'spark', name: 'Spark', lvl: 1, max: 4, runes: 1 },
-  { id: 'frost', name: 'Frost Bolt', lvl: 15, max: 9, runes: 2 },
-  { id: 'fire', name: 'Fire Surge', lvl: 35, max: 16, runes: 3 },
-  { id: 'storm', name: 'Storm Lance', lvl: 55, max: 25, runes: 4 },
-  { id: 'aether', name: 'Aether Blast', lvl: 75, max: 36, runes: 5 },
+  { id: 'frost', name: 'Frost Bolt', lvl: 12, max: 9, runes: 2 },
+  { id: 'fire', name: 'Fire Surge', lvl: 26, max: 16, runes: 3 },
+  { id: 'storm', name: 'Storm Lance', lvl: 42, max: 25, runes: 4 },
+  { id: 'aether', name: 'Aether Blast', lvl: 56, max: 36, runes: 5 },
 ];
-D.ALCH = [{ id: 'low', name: 'Low Alchemy', lvl: 21, mult: 1.5, runes: 2, xp: 31 }, { id: 'high', name: 'High Alchemy', lvl: 55, mult: 2, runes: 3, xp: 65 }];
+D.ALCH = [{ id: 'low', name: 'Low Alchemy', lvl: 16, mult: 1.5, runes: 2, xp: 31 }, { id: 'high', name: 'High Alchemy', lvl: 40, mult: 2, runes: 3, xp: 65 }];
 
 /* ---------- Towns ---------- */
 D.TOWNS = [
@@ -4595,14 +4595,14 @@ Object.entries({
 }).forEach(([id, u]) => { if (ITEMS[id]) ITEMS[id].unique = u; });
 const uq = (id, o) => mk(id, Object.assign({ type: 'gear', rare: 1 }, o));
 uq('leechfang', { name: 'Leechfang', ic: 'dagger', col: '#9a3a4a', val: 400, slot: 'weapon', wtype: 'dagger', style: 'melee', req: { attack: 12 }, b: { atk: 10, str: 5 }, unique: U('lifesteal', 'Leech', 'Heal 20% of the damage you deal.'), flavour: 'The wolves of Mossbarrow carry it off from careless travellers. It never quite stops being warm.' });
-uq('wyrdwood_bow', { name: 'Wyrdwood longbow', ic: 'bow', col: '#6a8a4a', val: 450, slot: 'weapon', style: 'ranged', req: { ranged: 18 }, b: { rng: 11 }, unique: U('marked', "Hunter's mark", 'The first three shots of every fight always hit, for 50% more damage.'), flavour: 'Cut from a tree the scarecrows guard. It hums when it finds its mark.' });
+uq('wyrdwood_bow', { name: 'Wyrdwood longbow', ic: 'bow', col: '#6a8a4a', val: 450, slot: 'weapon', style: 'ranged', req: { ranged: 14 }, b: { rng: 11 }, unique: U('marked', "Hunter's mark", 'The first three shots of every fight always hit, for 50% more damage.'), flavour: 'Cut from a tree the scarecrows guard. It hums when it finds its mark.' });
 uq('thornback_buckler', { name: 'Thornback buckler', ic: 'shield', col: '#c87a5a', val: 500, slot: 'shield', req: { defence: 15 }, b: { def: 7 }, unique: U('thorns', 'Thorns', 'Enemies take 35% of the damage they deal to you.'), flavour: 'A rock crab shell, spines and all, strapped to a board.' });
 uq('vipers_kiss', { name: "Viper's kiss", ic: 'sword', col: '#5aa86a', val: 900, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 20 }, b: { atk: 13, str: 10 }, unique: U('poison', 'Venom', 'Each hit adds a poison stack (up to 3). Whenever the enemy attacks, each stack deals 12% of your max hit.'), flavour: 'A coast-road bandit’s favourite. The groove along the blade is not decoration.' });
 uq('gale_sabre', { name: 'Gale sabre', ic: 'sword', col: '#8fd0e0', val: 1400, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 28 }, b: { atk: 20, str: 16 }, unique: U('twin', 'Twin cut', 'Each hit has a 20% chance to strike again for a full second hit.'), flavour: 'Pirates swear it was forged in a storm. It is certainly light enough.' });
 uq('wardens_greathelm', { name: "Warden's greathelm", ic: 'helm', col: '#7a8aa0', val: 1500, slot: 'head', req: { defence: 25 }, b: { def: 9 }, unique: U('bulwark', 'Bulwark', 'Boss special attacks hit 35% softer.'), flavour: 'Saltmere’s harbour wardens wore these on the sea wall. This one was given, not found.' });
 uq('smugglers_knot', { name: "Smuggler's knot", ic: 'ring', col: '#b89a5a', val: 1500, slot: 'ring', b: {}, unique: U('fortune', "Smuggler's luck", '+25% chance of item drops and +5% coins. No combat stats.'), flavour: 'A ring of tarred rope. Mother Silt’s people will know you by it.' });
 uq('thunderclap_maul', { name: 'Thunderclap maul', ic: 'hammer', col: '#c8b860', val: 4000, slot: 'weapon', wtype: 'hammer', style: 'melee', req: { attack: 40 }, b: { atk: 24, str: 38 }, unique: U('stun', 'Thunderclap', 'Hits have a 12% chance to stun: the enemy loses its next attack.'), flavour: 'Trolls use it to crack ice. It cracks most things.' });
-uq('stormcaller_staff', { name: 'Stormcaller staff', ic: 'staff', col: '#9ab8ff', val: 3500, slot: 'weapon', style: 'magic', req: { magic: 40 }, b: { mag: 25 }, unique: U('arc', 'Arc', '20% chance for a spell to arc and hit again for half damage.'), flavour: 'Raiders stole it from a weather-witch. The weather has not forgiven them.' });
+uq('stormcaller_staff', { name: 'Stormcaller staff', ic: 'staff', col: '#9ab8ff', val: 3500, slot: 'weapon', style: 'magic', req: { magic: 30 }, b: { mag: 25 }, unique: U('arc', 'Arc', '20% chance for a spell to arc and hit again for half damage.'), flavour: 'Raiders stole it from a weather-witch. The weather has not forgiven them.' });
 uq('berserkers_torc', { name: "Berserker's torc", ic: 'amulet', col: '#c86a3a', val: 6000, slot: 'amulet', b: { str: 6 }, unique: U('fury', 'Fury', 'Deal 10% more damage, rising to 40% more as your health falls.'), flavour: 'Pulled from the fen with its owner still attached. He did not want to let go.' });
 uq('salamander_coat', { name: 'Salamander coat', ic: 'body', col: '#e0703a', val: 20000, slot: 'body', req: { defence: 70 }, b: { def: 40 }, lth: 1, unique: U('laststand', 'Last stand', 'Once per fight, a blow that would defeat you leaves you at 1 health instead.'), flavour: 'Drake leather that remembers being on fire, and refuses to do it again.' });
 /* what each signature effect is good for: shown with the item so a find can suggest a plan */
@@ -5090,7 +5090,10 @@ const AB = (id, name, ic, skill, lvl, style, text, extra) => Object.assign({ id,
    Ranged or Magic, so at equal combat level an archer's or mage's level is 4/3 of a fighter's Attack and Strength.
    Melee therefore uses 4/3 of Attack and Strength as its effective levels for hitting and damage (engine pstats),
    keeping Attack = accuracy and Strength = damage. Evidence: PARITY=1 node scripts/sim-bosses.cjs. */
-D.STYLE_TUNE = { meleeLevel: 4 / 3 };
+/* One scale for all three styles (Nov 2026): Ranged and Magic use the same 4/3 effective level, the same combat-level weight
+   and the same XP per hit as Melee, so a level means the same thing whichever weapon family you train. Before this a bow or
+   staff hero needed 1.5 to 4 times the fighting to reach each boss requirement (scripts/sim-bosses.cjs, EFFORT=1). */
+D.STYLE_TUNE = { meleeLevel: 4 / 3, level: 4 / 3 };
 D.TYPE_RULES = { normal: { weak: 1.5, focus: 2, resist: .5 }, boss: { weak: 1.3, focus: 1.6, resist: .7 } };
 D.ABIL = [
   AB('power', 'Power Strike', 'strength', 'strength', 8, 'melee', 'Every 4th attack hits for double damage.'),
@@ -5098,11 +5101,11 @@ D.ABIL = [
   AB('brace', 'Brace', 'defence', 'defence', 20, null, 'Boss special attacks deal half damage.'),
   AB('second', 'Second Wind', 'heart', 'hitpoints', 20, null, 'Once per fight, heal 30% of your health when it drops below 30%.'),
   AB('execute', 'Executioner', 'attack', 'attack', 35, 'melee', '+50% damage against monsters below 30% health.'),
-  AB('aimed', 'Aimed Shot', 'ranged', 'ranged', 5, 'ranged', 'Every 3rd shot always hits for 1.5x damage.'),
-  AB('pin', 'Pin Down', 'arrow_ammo', 'ranged', 25, 'ranged', 'Hits pin the monster: 25% less accurate for 2 attacks, and flying monsters are grounded.'),
-  AB('kite', 'Keep Distance', 'bow', 'ranged', 40, 'ranged', 'Enemy normal attacks deal 30% less damage.'),
-  AB('focus', 'Elemental Focus', 'magic', 'magic', 10, 'magic', `Spells that hit a weakness deal ${D.TYPE_RULES.normal.focus}x instead of ${D.TYPE_RULES.normal.weak}x (against bosses ${D.TYPE_RULES.boss.focus}x instead of ${D.TYPE_RULES.boss.weak}x).`),
-  AB('ward', 'Arcane Ward', 'ring_logo', 'magic', 30, 'magic', 'Absorbs a boss special attack. Ready every 6 attacks.'),
+  AB('aimed', 'Aimed Shot', 'ranged', 'ranged', 4, 'ranged', 'Every 3rd shot always hits for 1.5x damage.'),
+  AB('pin', 'Pin Down', 'arrow_ammo', 'ranged', 18, 'ranged', 'Hits pin the monster: 25% less accurate for 2 attacks, and flying monsters are grounded.'),
+  AB('kite', 'Keep Distance', 'bow', 'ranged', 30, 'ranged', 'Enemy normal attacks deal 30% less damage.'),
+  AB('focus', 'Elemental Focus', 'magic', 'magic', 8, 'magic', `Spells that hit a weakness deal ${D.TYPE_RULES.normal.focus}x instead of ${D.TYPE_RULES.normal.weak}x (against bosses ${D.TYPE_RULES.boss.focus}x instead of ${D.TYPE_RULES.boss.weak}x).`),
+  AB('ward', 'Arcane Ward', 'ring_logo', 'magic', 22, 'magic', 'Absorbs a boss special attack. Ready every 6 attacks.'),
 ];
 D.AB = Object.fromEntries(D.ABIL.map(a => [a.id, a]));
 
@@ -9429,11 +9432,10 @@ DQ.unlockHow = sk => { const s=D.SK[sk]; if(s.actionReq)return DQ.actionProgress
 DQ.maxHp = () => DQ.lvl('hitpoints');
 DQ.combatLvl = () => {
   const L = DQ.lvl, base = .25 * (L('defence') + L('hitpoints'));
-  const m = .65 * L('melee'), r = .325 * Math.floor(1.5 * L('ranged')), g = .325 * Math.floor(1.5 * L('magic'));
-  return Math.floor(base + Math.max(m, r, g));
+  return Math.floor(base + .65 * Math.max(L('melee'), L('ranged'), L('magic'))); /* every fighting style counts the same */
 };
 /* Progress towards the next combat level: the formula evaluated with fractional skill levels, plus the cheapest single-skill route. */
-const combatFrom = L => { const base = .25 * (L.defence + L.hitpoints); return base + Math.max(.65 * L.melee, .325 * Math.floor(1.5 * L.ranged), .325 * Math.floor(1.5 * L.magic)); };
+const combatFrom = L => { const base = .25 * (L.defence + L.hitpoints); return base + .65 * Math.max(L.melee, L.ranged, L.magic); };
 DQ.combatProgress = () => {
   const ids = ['melee', 'defence', 'hitpoints', 'ranged', 'magic'], L = {}, F = {};
   ids.forEach(k => { L[k] = DQ.lvl(k); F[k] = L[k] + (L[k] >= 99 ? 0 : DQ.pctNext(k) / 100); });
@@ -10478,9 +10480,9 @@ DQ.pstats = () => {
   const st = DQ.weaponStyle(), b = DQ.bonus(), L = DQ.lvl, sty = S().style;
   const defStance = (st === 'melee' && sty.melee === 'defensive') || (st !== 'melee' && sty[st] === 'defensive');
   const defRoll = (L('defence') + 8 + (defStance ? 3 : 0)) * (64 + b.def);
-  let acc, max, sp = null;
-  if (st === 'ranged') { const e = L('ranged') + 8; acc = e * (64 + b.rng); max = Math.floor(2 + e * (64 + b.rngStr) / DMG_DIV); }
-  else if (st === 'magic') { sp = pickSpell() || D.SPELLS[0]; const e = L('magic') + 8; acc = e * (64 + b.mag); max = sp.max + Math.floor(L('magic') / 10) + Math.floor(b.mag / 12); }
+  let acc, max, sp = null; const KS = (D.STYLE_TUNE && D.STYLE_TUNE.level) || 1;
+  if (st === 'ranged') { const e = L('ranged') * KS + 8; acc = e * (64 + b.rng); max = Math.floor(2 + e * (64 + b.rngStr) / DMG_DIV); }
+  else if (st === 'magic') { sp = pickSpell() || D.SPELLS[0]; const e = L('magic') * KS + 8; acc = e * (64 + b.mag); max = sp.max + Math.floor(L('magic') * KS / 10) + Math.floor(b.mag / 12); }
   else { const k = (D.STYLE_TUNE && D.STYLE_TUNE.meleeLevel) || 1, e = L('attack') * k + 8 + (sty.melee === 'accurate' ? 3 : 0), es = L('strength') * k + 8 + (sty.melee === 'aggressive' ? 3 : 0); acc = e * (64 + b.atk); max = Math.floor(2 + es * (64 + b.str) / DMG_DIV); }
   const f = DQ.fx(), raw = max * (1 + f.dmg) * DQ.buffMult('weak'); max = Math.max(1, Math.round(raw));
   return { style: st, acc, max, maxRaw: raw, defRoll, red: Math.min(.75, b.def / (b.def + 320) + f.dr), spell: sp };
@@ -10490,7 +10492,7 @@ DQ.xpSplit = st => {
   const sty = S().style;
   if (st === 'melee') return S().style.melee === 'defensive' ? [['defence', 4]] : [['melee', 2]]; /* one Melee skill now does the work Attack and Strength shared, so it takes half the XP per hit: the same pace as before */
   const main = st === 'ranged' ? 'ranged' : 'magic';
-  return sty[st] === 'defensive' ? [[main, 2], ['defence', 2]] : [[main, 4]];
+  return sty[st] === 'defensive' ? [['defence', 4]] : [[main, 2]]; /* the same pace as Melee */
 };
 DQ.foods = () => D.FISH_IDS.filter(id => DQ.have(id)).concat(DQ.have('bread') ? ['bread'] : []).sort((a, b) => D.ITEMS[a].heal - D.ITEMS[b].heal);
 DQ.eat = (id, auto) => {
@@ -11466,7 +11468,7 @@ DQ.goals = () => {
   /* 2. Combat: next weapon and armour tier you can equip, and the boss of your frontier town */
   const att = DQ.lvl('attack'), def = DQ.lvl('defence');
   const nt = D.TIERS.find(t => t.equip > att), na = D.TIERS.find(t => t.equip > def);
-  if (nt) { const p = lvlProg('attack', nt.equip); add({ id: 'gear:atk', cat: 'Combat', icon: 'sword', col: nt.col, title: `${nt.name} weapons`, sub: `Attack ${att} → ${nt.equip}`, pct: p.pct, eta: etaXp('attack', p.need), go: 'combat' }); }
+  if (nt) { const p = lvlProg('attack', nt.equip); add({ id: 'gear:atk', cat: 'Combat', icon: 'sword', col: nt.col, title: `${nt.name} weapons`, sub: `Melee ${att} → ${nt.equip}`, pct: p.pct, eta: etaXp('attack', p.need), go: 'combat' }); }
   if (na) { const p = lvlProg('defence', na.equip); add({ id: 'gear:def', cat: 'Combat', icon: 'shield', col: na.col, title: `${na.name} armour`, sub: `Defence ${def} → ${na.equip}`, pct: p.pct, eta: etaXp('defence', p.need), go: 'combat' }); }
   const front = D.TOWNS.find(t => DQ.townUnlocked(t.id) && !(S().towns[t.id] && S().towns[t.id].boss));
   if (front) {
@@ -11617,7 +11619,7 @@ DQ.questLinks = (kind, id) => {
 };
 
 /* ---------- Item comparison: what changes if you equip this? ---------- */
-const BONUS_NAMES = { atk: 'Attack', str: 'Strength', def: 'Defence', rng: 'Ranged', rngStr: 'Arrow strength', mag: 'Magic' };
+const BONUS_NAMES = { atk: 'Accuracy', str: 'Power', def: 'Defence', rng: 'Ranged', rngStr: 'Arrow power', mag: 'Magic' };
 DQ.compareItem = id => {
   const it = D.ITEMS[id]; if (!it) return null; const st = S();
   if (it.type === 'tool') {
@@ -12042,7 +12044,7 @@ UI.V.combat = () => {
   /* Your fighter: combat level, weapon and every combat skill exactly once, each beside what it does for you now
      and the button that makes your fights train it. */
   const trainBtn = (value, label) => `<button type="button" class="choice-button ftr-train ${cur === value ? 'on' : ''}" data-do="style" data-a="${st}" data-b="${value}" aria-pressed="${cur === value}">${cur === value ? 'Training' : 'Train'}<small>${label}</small></button>`;
-  const trainFor = { melee: st === 'melee' ? trainBtn('aggressive', 'Offensive') : '', defence: trainBtn('defensive', st === 'melee' ? 'Defensive' : `${st === 'ranged' ? 'Ranged' : 'Magic'} + Defence`), ranged: st === 'ranged' ? trainBtn('offense', 'Offensive') : '', magic: st === 'magic' ? trainBtn('offense', 'Offensive') : '' };
+  const trainFor = { melee: st === 'melee' ? trainBtn('aggressive', 'Offensive') : '', defence: trainBtn('defensive', 'Defensive'), ranged: st === 'ranged' ? trainBtn('offense', 'Offensive') : '', magic: st === 'magic' ? trainBtn('offense', 'Offensive') : '' };
   const offStyle = k => st !== k ? `<em>${k === 'ranged' ? 'With a bow and arrows' : k === 'magic' ? 'With a staff and runes' : 'With a melee weapon'}</em>` : '';
   const does = {
     melee: `Hit chance and damage${st === 'melee' ? ` · max hit <b class="mono">${ps.max}</b>` : ''}${offStyle('melee')}`,
@@ -12333,7 +12335,7 @@ UI.V.character = () => {
   return `<div class="tabs character-mobile-tabs"><button class="tab ${UI.tab.characterPanel === 'equipment' ? '' : 'on'}" data-do="tab" data-a="characterPanel" data-b="pack">Backpack</button><button class="tab ${UI.tab.characterPanel === 'equipment' ? 'on' : ''}" data-do="tab" data-a="characterPanel" data-b="equipment">Equipment</button></div><div class="chargrid character-layout ${UI.tab.characterPanel === 'equipment' ? 'show-equipment' : ''}"><section class="panel paper"><div class="phead"><h2>Equipment</h2><small class="mono">Hero ${DQ.advLvl()} · Combat ${DQ.combatLvl()}</small></div>
       <div class="doll paper-doll" role="group" aria-label="Equipment around your hero"><div class="dollc">${UI.heroFigure()}</div>${SLOT_LAYOUT.map(sl => `<div class="ds ds-${sl}">${equipCell(sl)}</div>`).join('')}</div>
       <section data-reference="true" class="equipment-stats" id="equipment-stats"><h3 id="equipment-stats-toggle">Combat stats <span class="mono">Max hit ${ps.max}</span></h3>
-        <div class="bonuses">${[['Attack', b.atk, 'attack'], ['Strength', b.str, 'strength'], ['Defence', b.def, 'defence'], ['Ranged', b.rng, 'ranged'], ['Arrows', b.rngStr, 'ranged'], ['Magic', b.mag, 'magic']].map(([n, v, sk]) => `<div style="--c:${D.SK[sk].col}">${ico(sk)}<span>${n}</span><b class="mono">+${v}</b></div>`).join('')}</div>
+        <div class="bonuses">${[['Accuracy', b.atk, 'attack'], ['Power', b.str, 'strength'], ['Defence', b.def, 'defence'], ['Ranged', b.rng, 'ranged'], ['Arrows', b.rngStr, 'ranged'], ['Magic', b.mag, 'magic']].map(([n, v, sk]) => `<div style="--c:${D.SK[sk].col}">${ico(sk)}<span>${n}</span><b class="mono">+${v}</b></div>`).join('')}</div>
         <div class="statlist"><div><span>Fighting style</span><b>${DQ.cap(ps.style)}</b></div><div><span>Damage reduction</span><b class="mono">${Math.round(ps.red * 100)}%</b></div><div><span>Total level</span><b class="mono" data-b="totlvl"></b></div></div>
       </section>
       <section data-reference="true" class="equipment-appearance" id="equipment-appearance"><h3 id="equipment-appearance-toggle">Appearance &amp; sharing</h3>${marks.length ? `<div class="fig-marks">${marks.map(mark => `<span class="fig-mark" data-tip="text:${esc(mark.sub)}">${ico(mark.ic)}${esc(mark.t)}</span>`).join('')}</div>` : ''}<p class="hint">Skill capes appear at levels 30, 60 and 99. Medals appear at Hero levels 10, 25, 50 and 75.</p><button class="btn sm" data-do="share">${ico('star')}Share hero</button></section></section>
@@ -15644,7 +15646,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
     const want = { melee: 'aggressive', defence: 'defensive' }[low];
     if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. Your ${D.SK[low].name} (${lv}) is falling behind your ${D.SK[sk[sk.length - 1][0]].name} (${top}): ${low === 'defence' ? 'you take more damage' : 'you miss more often and your hits stay small'}. This switches your training focus and fights chickens.`, 'journeytrain', want, 'chicken');
   }
-  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Attack, Strength and Defence using the combat training focus.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
+  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Melee and Defence using the combat training focus.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
   /* Ready by level: let the battle forecast decide what, if anything, is missing. */
   const f = DQ.bossForecast ? DQ.bossForecast('grubnash') : null;
   if (f && f.winRate >= .75) return task('Challenge Grubnash', `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current gear and food.`, 'fight', 'grubnash');
@@ -16077,7 +16079,7 @@ D.DISCOVERIES = {
 D.DISCOVERIES.goblin_satchel = { name: 'A goblin’s satchel', place: 'willowbrook', text: 'One of the goblins drops a scruffy satchel. Inside: a brass buckle, a half-eaten turnip and a note in big angry letters: “ALL GOBLINS TO THE HILL FORT. PRACTISE WAR CRY. — GRUBNASH”.',
   when: (ev, key) => ev === 'kill' && key === 'goblin' && T() === 'willowbrook', rate: 1 / 3, pity: 4,
   choices: [
-    { id: 'orrin', label: 'Take the note to Sergeant Orrin (+60 Attack and Defence XP)', text: 'Orrin reads it twice, then shows you how goblins telegraph a war cry: a deep breath, a stamp, then the shout. You will see it coming now.', reward: { xp: { attack: 60, defence: 60 } } },
+    { id: 'orrin', label: 'Take the note to Sergeant Orrin (+60 Melee and Defence XP)', text: 'Orrin reads it twice, then shows you how goblins telegraph a war cry: a deep breath, a stamp, then the shout. You will see it coming now.', reward: { xp: { attack: 60, defence: 60 } } },
     { id: 'buckle', label: 'Sell the brass buckle (+40 coins)', text: 'The smith gives you a fair price for the buckle, enough to put towards a piece of armour.', reward: { coins: 40 } }
   ] };
 const total = () => Object.keys(D.DISCOVERIES).length;
@@ -16429,7 +16431,7 @@ const lessons={
   crafting:{title:'Crafting',text:'Start with Basics: cut leather string from a cowhide. Armour is grouped by hide, Wood by bows, staves and shields; Charms help your other skills.',towards:'Hides, logs, minerals and gems → armour, bows, staves, shields, charms and tools.',goal:'Use cowhide for leather gear, or logs for your first bow.',art:['item','leather_vest']},
   magic:{title:'Magic',text:'Equip a staff to cast spells during combat. Alchemy turns spare items into coins; both use Arcane runes.',towards:'Runes and staves → elemental attacks and stronger combat options; Alchemy → coins.',goal:'Check your runes before casting, and choose a spell suited to the enemy.',art:['item','rune']},
   combat:{title:'Combat',text:'Creatures appear at the listed rates.',towards:'Encounters → combat skills, creature discoveries, companions and loot → bosses that open new towns.',goal:'Explore the Meadow Path. Bring food, choose a training focus, and watch for a creature that might join you.',art:['creature','chicken']},
-  ranged:{title:'Ranged combat',text:'Bows use equipped arrows. Ranged accuracy and arrow strength work together; both appear in gear comparisons.',towards:'Crafted bows + arrows → safer preparation for enemies weak to ranged attacks.',goal:'Equip a bow and arrows in Inventory, then choose an easy opponent.',art:['item','bow_normal']}
+  ranged:{title:'Ranged combat',text:'Bows use equipped arrows. Ranged accuracy and arrow power work together; both appear in gear comparisons.',towards:'Crafted bows + arrows → safer preparation for enemies weak to ranged attacks.',goal:'Equip a bow and arrows in Inventory, then choose an easy opponent.',art:['item','bow_normal']}
 };
 Object.assign(lessons,{
  hunting:{title:'Hunting',text:'Every creature you meet adds to your field knowledge.',towards:'Victories → Hunting XP, field knowledge and signature companion encounters.',goal:'Explore the Meadow Path and study the creatures you meet.',art:['skill','hunting']},

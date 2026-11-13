@@ -614,13 +614,13 @@ test('bestiary understanding: optional objectives with a fair alternative, rewar
  S.beast.answered={};S.beast.kills.frostmaw=3;assert.ok(q.understood('frostmaw'),'or three victories');
  const o=JSON.parse(JSON.stringify(S));delete o.beast.weakWins;delete o.beast.answered;assert.ok(q.validateSave(o),'older saves without the counters load');
 });
-test('melee parity: at equal combat level a fighter hits about as hard as an archer',()=>{
+test('style parity: at the same level a fighter and an archer have the same combat level and hit about as hard',()=>{
  const {q}=harness();const S=q.S,D=q.data;assert.ok(Math.abs(D.STYLE_TUNE.meleeLevel-4/3)<1e-9);
  const at=(style,L)=>{for(const k of Object.keys(S.xp))S.xp[k]=0;S.xp.defence=D.XPF[L];S.xp.hitpoints=D.XPF[L];S.equip={};S.ammo={id:null,n:0};
   if(style==='melee'){S.xp.attack=D.XPF[L];S.xp.strength=D.XPF[L];S.inv.mithril_sword=1;q.equipItem('mithril_sword');}
-  else{S.unlocked.ranged=true;S.xp.ranged=D.XPF[Math.round(L*4/3)];S.inv.bow_maple=1;q.equipItem('bow_maple');S.inv.arrow_mithril=50;q.equipItem('arrow_mithril');}
+  else{S.unlocked.ranged=true;S.xp.ranged=D.XPF[L];S.inv.bow_maple=1;q.equipItem('bow_maple');S.inv.arrow_mithril=50;q.equipItem('arrow_mithril');}
   q.fxDirty();return {cl:q.combatLvl(),ps:q.pstats()};};
- const m=at('melee',45),r=at('ranged',45);assert.ok(Math.abs(m.cl-r.cl)<=1,'same combat level');
+ const m=at('melee',45),r=at('ranged',45);assert.equal(m.cl,r.cl,'same combat level');assert.ok(Math.abs(D.STYLE_TUNE.level-4/3)<1e-9);
  const ratio=(m.ps.max*m.ps.acc)/(r.ps.max*r.ps.acc);assert.ok(ratio>.75&&ratio<1.35,`melee/ranged max*accuracy ratio ${ratio.toFixed(2)}`);
 });
 test('saved preparations: items conserved, missing and locked shown honestly, previous restored, build text private',()=>{

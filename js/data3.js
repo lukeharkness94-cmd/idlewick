@@ -60,7 +60,10 @@ const AB = (id, name, ic, skill, lvl, style, text, extra) => Object.assign({ id,
    Ranged or Magic, so at equal combat level an archer's or mage's level is 4/3 of a fighter's Attack and Strength.
    Melee therefore uses 4/3 of Attack and Strength as its effective levels for hitting and damage (engine pstats),
    keeping Attack = accuracy and Strength = damage. Evidence: PARITY=1 node scripts/sim-bosses.cjs. */
-D.STYLE_TUNE = { meleeLevel: 4 / 3 };
+/* One scale for all three styles (Nov 2026): Ranged and Magic use the same 4/3 effective level, the same combat-level weight
+   and the same XP per hit as Melee, so a level means the same thing whichever weapon family you train. Before this a bow or
+   staff hero needed 1.5 to 4 times the fighting to reach each boss requirement (scripts/sim-bosses.cjs, EFFORT=1). */
+D.STYLE_TUNE = { meleeLevel: 4 / 3, level: 4 / 3 };
 D.TYPE_RULES = { normal: { weak: 1.5, focus: 2, resist: .5 }, boss: { weak: 1.3, focus: 1.6, resist: .7 } };
 D.ABIL = [
   AB('power', 'Power Strike', 'strength', 'strength', 8, 'melee', 'Every 4th attack hits for double damage.'),
@@ -68,11 +71,11 @@ D.ABIL = [
   AB('brace', 'Brace', 'defence', 'defence', 20, null, 'Boss special attacks deal half damage.'),
   AB('second', 'Second Wind', 'heart', 'hitpoints', 20, null, 'Once per fight, heal 30% of your health when it drops below 30%.'),
   AB('execute', 'Executioner', 'attack', 'attack', 35, 'melee', '+50% damage against monsters below 30% health.'),
-  AB('aimed', 'Aimed Shot', 'ranged', 'ranged', 5, 'ranged', 'Every 3rd shot always hits for 1.5x damage.'),
-  AB('pin', 'Pin Down', 'arrow_ammo', 'ranged', 25, 'ranged', 'Hits pin the monster: 25% less accurate for 2 attacks, and flying monsters are grounded.'),
-  AB('kite', 'Keep Distance', 'bow', 'ranged', 40, 'ranged', 'Enemy normal attacks deal 30% less damage.'),
-  AB('focus', 'Elemental Focus', 'magic', 'magic', 10, 'magic', `Spells that hit a weakness deal ${D.TYPE_RULES.normal.focus}x instead of ${D.TYPE_RULES.normal.weak}x (against bosses ${D.TYPE_RULES.boss.focus}x instead of ${D.TYPE_RULES.boss.weak}x).`),
-  AB('ward', 'Arcane Ward', 'ring_logo', 'magic', 30, 'magic', 'Absorbs a boss special attack. Ready every 6 attacks.'),
+  AB('aimed', 'Aimed Shot', 'ranged', 'ranged', 4, 'ranged', 'Every 3rd shot always hits for 1.5x damage.'),
+  AB('pin', 'Pin Down', 'arrow_ammo', 'ranged', 18, 'ranged', 'Hits pin the monster: 25% less accurate for 2 attacks, and flying monsters are grounded.'),
+  AB('kite', 'Keep Distance', 'bow', 'ranged', 30, 'ranged', 'Enemy normal attacks deal 30% less damage.'),
+  AB('focus', 'Elemental Focus', 'magic', 'magic', 8, 'magic', `Spells that hit a weakness deal ${D.TYPE_RULES.normal.focus}x instead of ${D.TYPE_RULES.normal.weak}x (against bosses ${D.TYPE_RULES.boss.focus}x instead of ${D.TYPE_RULES.boss.weak}x).`),
+  AB('ward', 'Arcane Ward', 'ring_logo', 'magic', 22, 'magic', 'Absorbs a boss special attack. Ready every 6 attacks.'),
 ];
 D.AB = Object.fromEntries(D.ABIL.map(a => [a.id, a]));
 

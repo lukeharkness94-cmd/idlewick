@@ -210,7 +210,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
     const want = { melee: 'aggressive', defence: 'defensive' }[low];
     if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. Your ${D.SK[low].name} (${lv}) is falling behind your ${D.SK[sk[sk.length - 1][0]].name} (${top}): ${low === 'defence' ? 'you take more damage' : 'you miss more often and your hits stay small'}. This switches your training focus and fights chickens.`, 'journeytrain', want, 'chicken');
   }
-  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Attack, Strength and Defence using the combat training focus.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
+  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Melee and Defence using the combat training focus.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
   /* Ready by level: let the battle forecast decide what, if anything, is missing. */
   const f = DQ.bossForecast ? DQ.bossForecast('grubnash') : null;
   if (f && f.winRate >= .75) return task('Challenge Grubnash', `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current gear and food.`, 'fight', 'grubnash');

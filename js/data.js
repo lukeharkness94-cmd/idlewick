@@ -303,7 +303,7 @@ LEATHER.forEach((t, i) => LPIECES.forEach(([slot, key, label, n, off, f, ic]) =>
 }));
 
 /* Bows, staves, arrows */
-const BW = [['normal', 'Shortbow', 'Apprentice staff', 1, 5, 6, 5, 20, 30], ['oak', 'Oak shortbow', 'Oak staff', 15, 20, 12, 11, 34, 80], ['willow', 'Willow shortbow', 'Willow staff', 30, 35, 20, 19, 60, 200], ['maple', 'Maple shortbow', 'Maple staff', 45, 50, 30, 29, 90, 520], ['yew', 'Yew shortbow', 'Yew staff', 60, 65, 42, 41, 140, 1400], ['magic', 'Magic shortbow', 'Magic staff', 75, 80, 56, 55, 200, 4000], ['elder', 'Elder shortbow', 'Elder staff', 88, 90, 72, 70, 280, 12000]];
+const BW = [['normal', 'Shortbow', 'Apprentice staff', 1, 5, 6, 5, 20, 30], ['oak', 'Oak shortbow', 'Oak staff', 10, 20, 12, 11, 34, 80], ['willow', 'Willow shortbow', 'Willow staff', 20, 35, 20, 19, 60, 200], ['maple', 'Maple shortbow', 'Maple staff', 30, 50, 30, 29, 90, 520], ['yew', 'Yew shortbow', 'Yew staff', 40, 65, 42, 41, 140, 1400], ['magic', 'Magic shortbow', 'Magic staff', 50, 80, 56, 55, 200, 4000], ['elder', 'Elder shortbow', 'Elder staff', 60, 90, 72, 70, 280, 12000]];
 BW.forEach(([w, bname, sname, equip, craft, rng, mag, xp, val], i) => {
   const wc = WOOD.find(x => x[0] === w)[3];
   mk('bow_' + w, { name: bname, ic: 'bow', col: wc, val, type: 'gear', slot: 'weapon', style: 'ranged', req: { ranged: equip }, b: { rng }, tier: i });
@@ -320,9 +320,9 @@ TIERS.forEach((t, i) => {
 /* Robes (shop and boss only) */
 const ROBES = [
   { id: 'apprentice', name: 'Apprentice', col: '#7f8cff', req: 1, P: 3, base: 40 },
-  { id: 'adept', name: 'Adept', col: '#5f93df', req: 20, P: 7, base: 160 },
-  { id: 'mystic', name: 'Mystic', col: '#9b87e0', req: 40, P: 13, base: 520 },
-  { id: 'archmage', name: 'Archmage', col: '#d98ad1', req: 60, P: 21, base: 1700 },
+  { id: 'adept', name: 'Adept', col: '#5f93df', req: 15, P: 7, base: 160 },
+  { id: 'mystic', name: 'Mystic', col: '#9b87e0', req: 30, P: 13, base: 520 },
+  { id: 'archmage', name: 'Archmage', col: '#d98ad1', req: 45, P: 21, base: 1700 },
 ];
 ROBES.forEach((r, i) => [['head', 'hood', .4, 'helm'], ['body', 'robe top', 1, 'body'], ['legs', 'robe bottom', .7, 'legs']].forEach(([slot, label, f, ic]) =>
   mk(`robe_${r.id}_${slot}`, { name: `${r.name} ${label}`, ic, col: r.col, val: Math.round(r.base * f), type: 'gear', slot, req: { magic: r.req }, b: { def: Math.round(r.P * f * .5), mag: Math.round(r.P * f * 1.3) }, tier: i })));
@@ -380,8 +380,8 @@ D.RECIPES.craft_pine_shield.in.wolf_pelt = 1; D.RECIPES.craft_wraithbark_shield.
 mk('chief_helm', { name: "Grubnash's war-helm", ic: 'helm', col: '#8fbf6a', val: 600, type: 'gear', slot: 'head', req: { defence: 5 }, b: { def: 14, str: 3 }, rare: 1 });
 mk('barnacle_cutlass', { name: "Barnacle's cutlass", ic: 'sword', col: '#6fc7d8', val: 2400, type: 'gear', slot: 'weapon', style: 'melee', req: { attack: 22 }, b: { atk: 26, str: 24 }, rare: 1 });
 mk('frostmaw_pendant', { name: 'Frostmaw pendant', ic: 'amulet', col: '#bfe6ff', val: 6000, type: 'gear', slot: 'amulet', b: { atk: 7, str: 7, def: 8, rng: 5, mag: 5 }, rare: 1 });
-mk('witch_staff', { name: "Morwenna's bog staff", ic: 'staff', col: '#b79cff', val: 14000, type: 'gear', slot: 'weapon', style: 'magic', req: { magic: 50 }, b: { mag: 58 }, rare: 1 });
-mk('emberfang_bow', { name: 'Emberfang bow', ic: 'bow', col: '#ff8a4a', val: 45000, type: 'gear', slot: 'weapon', style: 'ranged', req: { ranged: 70 }, b: { rng: 84 }, rare: 1 });
+mk('witch_staff', { name: "Morwenna's bog staff", ic: 'staff', col: '#b79cff', val: 14000, type: 'gear', slot: 'weapon', style: 'magic', req: { magic: 38 }, b: { mag: 58 }, rare: 1 });
+mk('emberfang_bow', { name: 'Emberfang bow', ic: 'bow', col: '#ff8a4a', val: 45000, type: 'gear', slot: 'weapon', style: 'ranged', req: { ranged: 52 }, b: { rng: 84 }, rare: 1 });
 
 /* Tools: tier 0 is free and always owned */
 D.TOOL_TIERS = ['Basic', 'Reinforced', 'Steel-tipped', 'Mithril', 'Adamant', 'Runic'];
@@ -393,12 +393,12 @@ D.TOOLS.forEach(([k, sk, ic, label]) => { for (let t = 1; t <= 5; t++) mk(`tool_
 /* ---------- Spells ---------- */
 D.SPELLS = [
   { id: 'spark', name: 'Spark', lvl: 1, max: 4, runes: 1 },
-  { id: 'frost', name: 'Frost Bolt', lvl: 15, max: 9, runes: 2 },
-  { id: 'fire', name: 'Fire Surge', lvl: 35, max: 16, runes: 3 },
-  { id: 'storm', name: 'Storm Lance', lvl: 55, max: 25, runes: 4 },
-  { id: 'aether', name: 'Aether Blast', lvl: 75, max: 36, runes: 5 },
+  { id: 'frost', name: 'Frost Bolt', lvl: 12, max: 9, runes: 2 },
+  { id: 'fire', name: 'Fire Surge', lvl: 26, max: 16, runes: 3 },
+  { id: 'storm', name: 'Storm Lance', lvl: 42, max: 25, runes: 4 },
+  { id: 'aether', name: 'Aether Blast', lvl: 56, max: 36, runes: 5 },
 ];
-D.ALCH = [{ id: 'low', name: 'Low Alchemy', lvl: 21, mult: 1.5, runes: 2, xp: 31 }, { id: 'high', name: 'High Alchemy', lvl: 55, mult: 2, runes: 3, xp: 65 }];
+D.ALCH = [{ id: 'low', name: 'Low Alchemy', lvl: 16, mult: 1.5, runes: 2, xp: 31 }, { id: 'high', name: 'High Alchemy', lvl: 40, mult: 2, runes: 3, xp: 65 }];
 
 /* ---------- Towns ---------- */
 D.TOWNS = [
@@ -499,14 +499,14 @@ Object.entries({
 }).forEach(([id, u]) => { if (ITEMS[id]) ITEMS[id].unique = u; });
 const uq = (id, o) => mk(id, Object.assign({ type: 'gear', rare: 1 }, o));
 uq('leechfang', { name: 'Leechfang', ic: 'dagger', col: '#9a3a4a', val: 400, slot: 'weapon', wtype: 'dagger', style: 'melee', req: { attack: 12 }, b: { atk: 10, str: 5 }, unique: U('lifesteal', 'Leech', 'Heal 20% of the damage you deal.'), flavour: 'The wolves of Mossbarrow carry it off from careless travellers. It never quite stops being warm.' });
-uq('wyrdwood_bow', { name: 'Wyrdwood longbow', ic: 'bow', col: '#6a8a4a', val: 450, slot: 'weapon', style: 'ranged', req: { ranged: 18 }, b: { rng: 11 }, unique: U('marked', "Hunter's mark", 'The first three shots of every fight always hit, for 50% more damage.'), flavour: 'Cut from a tree the scarecrows guard. It hums when it finds its mark.' });
+uq('wyrdwood_bow', { name: 'Wyrdwood longbow', ic: 'bow', col: '#6a8a4a', val: 450, slot: 'weapon', style: 'ranged', req: { ranged: 14 }, b: { rng: 11 }, unique: U('marked', "Hunter's mark", 'The first three shots of every fight always hit, for 50% more damage.'), flavour: 'Cut from a tree the scarecrows guard. It hums when it finds its mark.' });
 uq('thornback_buckler', { name: 'Thornback buckler', ic: 'shield', col: '#c87a5a', val: 500, slot: 'shield', req: { defence: 15 }, b: { def: 7 }, unique: U('thorns', 'Thorns', 'Enemies take 35% of the damage they deal to you.'), flavour: 'A rock crab shell, spines and all, strapped to a board.' });
 uq('vipers_kiss', { name: "Viper's kiss", ic: 'sword', col: '#5aa86a', val: 900, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 20 }, b: { atk: 13, str: 10 }, unique: U('poison', 'Venom', 'Each hit adds a poison stack (up to 3). Whenever the enemy attacks, each stack deals 12% of your max hit.'), flavour: 'A coast-road bandit’s favourite. The groove along the blade is not decoration.' });
 uq('gale_sabre', { name: 'Gale sabre', ic: 'sword', col: '#8fd0e0', val: 1400, slot: 'weapon', wtype: 'sword', style: 'melee', req: { attack: 28 }, b: { atk: 20, str: 16 }, unique: U('twin', 'Twin cut', 'Each hit has a 20% chance to strike again for a full second hit.'), flavour: 'Pirates swear it was forged in a storm. It is certainly light enough.' });
 uq('wardens_greathelm', { name: "Warden's greathelm", ic: 'helm', col: '#7a8aa0', val: 1500, slot: 'head', req: { defence: 25 }, b: { def: 9 }, unique: U('bulwark', 'Bulwark', 'Boss special attacks hit 35% softer.'), flavour: 'Saltmere’s harbour wardens wore these on the sea wall. This one was given, not found.' });
 uq('smugglers_knot', { name: "Smuggler's knot", ic: 'ring', col: '#b89a5a', val: 1500, slot: 'ring', b: {}, unique: U('fortune', "Smuggler's luck", '+25% chance of item drops and +5% coins. No combat stats.'), flavour: 'A ring of tarred rope. Mother Silt’s people will know you by it.' });
 uq('thunderclap_maul', { name: 'Thunderclap maul', ic: 'hammer', col: '#c8b860', val: 4000, slot: 'weapon', wtype: 'hammer', style: 'melee', req: { attack: 40 }, b: { atk: 24, str: 38 }, unique: U('stun', 'Thunderclap', 'Hits have a 12% chance to stun: the enemy loses its next attack.'), flavour: 'Trolls use it to crack ice. It cracks most things.' });
-uq('stormcaller_staff', { name: 'Stormcaller staff', ic: 'staff', col: '#9ab8ff', val: 3500, slot: 'weapon', style: 'magic', req: { magic: 40 }, b: { mag: 25 }, unique: U('arc', 'Arc', '20% chance for a spell to arc and hit again for half damage.'), flavour: 'Raiders stole it from a weather-witch. The weather has not forgiven them.' });
+uq('stormcaller_staff', { name: 'Stormcaller staff', ic: 'staff', col: '#9ab8ff', val: 3500, slot: 'weapon', style: 'magic', req: { magic: 30 }, b: { mag: 25 }, unique: U('arc', 'Arc', '20% chance for a spell to arc and hit again for half damage.'), flavour: 'Raiders stole it from a weather-witch. The weather has not forgiven them.' });
 uq('berserkers_torc', { name: "Berserker's torc", ic: 'amulet', col: '#c86a3a', val: 6000, slot: 'amulet', b: { str: 6 }, unique: U('fury', 'Fury', 'Deal 10% more damage, rising to 40% more as your health falls.'), flavour: 'Pulled from the fen with its owner still attached. He did not want to let go.' });
 uq('salamander_coat', { name: 'Salamander coat', ic: 'body', col: '#e0703a', val: 20000, slot: 'body', req: { defence: 70 }, b: { def: 40 }, lth: 1, unique: U('laststand', 'Last stand', 'Once per fight, a blow that would defeat you leaves you at 1 health instead.'), flavour: 'Drake leather that remembers being on fire, and refuses to do it again.' });
 /* what each signature effect is good for: shown with the item so a find can suggest a plan */

@@ -518,3 +518,7 @@ The player chooses how to fight by the weapon they hold, and that weapon family 
 
 ## Combat: Where to fight (Nov 2026)
 `js/where.js` replaces `UI.areaPanel` (the earlier versions in hunting.js and minibosses.js are superseded). The 260px column shows, without scrolling: the quest target row (Track / Challenge), each area as a card with creature portraits and odds, the challenges as tiles, and the boss foot from combat_simple.js. Clicking a portrait sets `UI.taskChoice.combat` so the stage and the Ready check show that creature before you explore. Rarity words live in each portrait's tooltip and aria-label.
+
+
+## One scale for fighting styles (Nov 2026)
+Melee, Ranged and Magic now share combat-level weight, effective level (`D.STYLE_TUNE.level`) and XP per hit; bow, staff, spell, ability, robe and Alchemy levels were rescaled to the sword tiers. Evidence and numbers: docs/combat-balance.md. Gear bonus labels: Accuracy (`atk`) and Power (`str`).

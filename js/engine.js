@@ -362,9 +362,9 @@ DQ.pstats = () => {
   const st = DQ.weaponStyle(), b = DQ.bonus(), L = DQ.lvl, sty = S().style;
   const defStance = (st === 'melee' && sty.melee === 'defensive') || (st !== 'melee' && sty[st] === 'defensive');
   const defRoll = (L('defence') + 8 + (defStance ? 3 : 0)) * (64 + b.def);
-  let acc, max, sp = null;
-  if (st === 'ranged') { const e = L('ranged') + 8; acc = e * (64 + b.rng); max = Math.floor(2 + e * (64 + b.rngStr) / DMG_DIV); }
-  else if (st === 'magic') { sp = pickSpell() || D.SPELLS[0]; const e = L('magic') + 8; acc = e * (64 + b.mag); max = sp.max + Math.floor(L('magic') / 10) + Math.floor(b.mag / 12); }
+  let acc, max, sp = null; const KS = (D.STYLE_TUNE && D.STYLE_TUNE.level) || 1;
+  if (st === 'ranged') { const e = L('ranged') * KS + 8; acc = e * (64 + b.rng); max = Math.floor(2 + e * (64 + b.rngStr) / DMG_DIV); }
+  else if (st === 'magic') { sp = pickSpell() || D.SPELLS[0]; const e = L('magic') * KS + 8; acc = e * (64 + b.mag); max = sp.max + Math.floor(L('magic') * KS / 10) + Math.floor(b.mag / 12); }
   else { const k = (D.STYLE_TUNE && D.STYLE_TUNE.meleeLevel) || 1, e = L('attack') * k + 8 + (sty.melee === 'accurate' ? 3 : 0), es = L('strength') * k + 8 + (sty.melee === 'aggressive' ? 3 : 0); acc = e * (64 + b.atk); max = Math.floor(2 + es * (64 + b.str) / DMG_DIV); }
   const f = DQ.fx(), raw = max * (1 + f.dmg) * DQ.buffMult('weak'); max = Math.max(1, Math.round(raw));
   return { style: st, acc, max, maxRaw: raw, defRoll, red: Math.min(.75, b.def / (b.def + 320) + f.dr), spell: sp };
@@ -374,7 +374,7 @@ DQ.xpSplit = st => {
   const sty = S().style;
   if (st === 'melee') return S().style.melee === 'defensive' ? [['defence', 4]] : [['melee', 2]]; /* one Melee skill now does the work Attack and Strength shared, so it takes half the XP per hit: the same pace as before */
   const main = st === 'ranged' ? 'ranged' : 'magic';
-  return sty[st] === 'defensive' ? [[main, 2], ['defence', 2]] : [[main, 4]];
+  return sty[st] === 'defensive' ? [['defence', 4]] : [[main, 2]]; /* the same pace as Melee */
 };
 DQ.foods = () => D.FISH_IDS.filter(id => DQ.have(id)).concat(DQ.have('bread') ? ['bread'] : []).sort((a, b) => D.ITEMS[a].heal - D.ITEMS[b].heal);
 DQ.eat = (id, auto) => {

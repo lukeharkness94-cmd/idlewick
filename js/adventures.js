@@ -41,7 +41,7 @@ D.DISCOVERIES = {
 D.DISCOVERIES.goblin_satchel = { name: 'A goblin’s satchel', place: 'willowbrook', text: 'One of the goblins drops a scruffy satchel. Inside: a brass buckle, a half-eaten turnip and a note in big angry letters: “ALL GOBLINS TO THE HILL FORT. PRACTISE WAR CRY. — GRUBNASH”.',
   when: (ev, key) => ev === 'kill' && key === 'goblin' && T() === 'willowbrook', rate: 1 / 3, pity: 4,
   choices: [
-    { id: 'orrin', label: 'Take the note to Sergeant Orrin (+60 Attack and Defence XP)', text: 'Orrin reads it twice, then shows you how goblins telegraph a war cry: a deep breath, a stamp, then the shout. You will see it coming now.', reward: { xp: { attack: 60, defence: 60 } } },
+    { id: 'orrin', label: 'Take the note to Sergeant Orrin (+60 Melee and Defence XP)', text: 'Orrin reads it twice, then shows you how goblins telegraph a war cry: a deep breath, a stamp, then the shout. You will see it coming now.', reward: { xp: { attack: 60, defence: 60 } } },
     { id: 'buckle', label: 'Sell the brass buckle (+40 coins)', text: 'The smith gives you a fair price for the buckle, enough to put towards a piece of armour.', reward: { coins: 40 } }
   ] };
 const total = () => Object.keys(D.DISCOVERIES).length;

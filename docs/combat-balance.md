@@ -58,3 +58,10 @@ The climb from Grubnash (level 12, challenge from Combat 8) to Old Tusk (level 2
 | The Rookmother | 22 | Combat 16 | Diving strike every 3rd attack (x1.4) | pierce, storm / crush | Iron platebody |
 
 `node scripts/sim-bosses.cjs` (ladder now includes mini-bosses, marked ·) at the requirement with region melee gear: Grubnash 100% (1.3 food/kill), Gnarlroot 100% (7.8), Rookmother 100% (9.2), Old Tusk 100% (8.6). Each is a real food-and-preparation step without being a wall. Quests: Roots in the Orchard (Granny Bramble, Hero 12) and The Rookmother (Hunter Wynn, Hero 15).
+
+## One scale for all three styles (Nov 2026)
+Ranged and Magic used to count 1.5x in the combat level, earn 4 XP per damage (Melee 2) and have gear, spells and abilities at 1.5x the sword levels. Measured as fighting needed to reach each boss requirement, a bow or staff hero needed 1.0x (Grubnash), 1.7x (Barnacle), 2.5x (Morwenna), 4.3x (Pyrrhax) and 2.5x (Hollow King) the damage dealt of a sword hero, and could only reach combat 97 with every skill at 98-99.
+
+Now all three use the same combat-level weight (0.65 per level), the same 4/3 effective level, and the same XP per hit (2 offensive, or 4 Defence when defensive). Bows and staves equip at the sword tiers (1, 10, 20, 30, 40, 50, 60); spells at Magic 1, 12, 26, 42, 56; Alchemy at 16 and 40; Aimed Shot 4, Pin Down 18, Keep Distance 30, Elemental Focus 8, Arcane Ward 22; robes 1, 15, 30, 45. Existing Ranged and Magic levels are kept, so those heroes only get stronger.
+
+`PARITY=1 node scripts/sim-bosses.cjs` (same level in every skill, shield for everyone since nothing is two-handed, weaknesses removed): ranged and magic win 100% at every boss, melee 86-100% (Frostmaw 86%, Pyrrhax 91%). Melee is slightly behind but has no running cost; arrows and runes do. The melee ladder is unchanged. Gear bonuses are now labelled Accuracy and Power.

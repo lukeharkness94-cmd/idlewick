@@ -50,7 +50,7 @@ const run = (boss, extra, useCounter) => {
 const counter = boss => {
   const S = q.S, w = D.WEAK[boss.id] || { weak: [] }, tier = D.TOWN[boss.town].idx;
   const el = w.weak.find(t => Object.values(D.SPELL_EL).includes(t)) || (boss.id === 'hollowking' ? 'aether' : null);
-  const L = q.lvl('attack'), C = Math.min(99, Math.round(L * (+process.env.CSCALE || 1)));
+  const L = q.lvl('attack'), C = Math.min(99, Math.round(L * (+process.env.CSCALE || 1))); /* one scale for every style now: CSCALE is no longer needed */
   const region = new Set([...(D.TOWN_GEAR[boss.town] || []), ...(D.TOWN_GEAR[D.TOWNS[Math.max(0, tier - 1)].id] || []), ...['arrow_bronze', 'arrow_iron', 'arrow_steel', 'arrow_mithril', 'arrow_adamant', 'arrow_rune', 'arrow_astral'].slice(0, tier + 1)]);
   const pick = re => Object.keys(D.ITEMS).filter(id => re.test(id) && region.has(id)).map(id => { S.inv[id] = 1; const ok = q.canEquip(id).ok; delete S.inv[id]; return ok ? id : null; }).filter(Boolean).pop();
   if (el && !w.weak.includes('pierce') || boss.id === 'hollowking') {
@@ -129,7 +129,7 @@ const parity = boss => {
   for (const style of ['melee', 'ranged', 'magic']) {
     q.S = q.newState(); const S = q.S; S.settings.notify = false; S.town = town; D.TOWNS.slice(0, tier + 1).forEach(t => { S.towns[t.id] = { visited: true, boss: t.id !== town }; });
     /* the levels that make exactly this combat level for this style */
-    let L = 10; const set = n => { S.xp.defence = D.XPF[n]; S.xp.hitpoints = D.XPF[n]; if (style === 'melee') { S.xp.attack = D.XPF[n]; S.xp.strength = D.XPF[n]; } else { S.unlocked[style] = true; S.xp[style] = D.XPF[Math.min(99, Math.round(n * 4 / 3))]; } };
+    let L = 10; const set = n => { S.xp.defence = D.XPF[n]; S.xp.hitpoints = D.XPF[n]; if (style === 'melee') { S.xp.attack = D.XPF[n]; S.xp.strength = D.XPF[n]; } else { S.unlocked[style] = true; S.xp[style] = D.XPF[n]; } };
     while (L < 99) { set(L); q.fxDirty(); if (q.combatLvl() >= req) break; L++; }
     const pick = re => Object.keys(D.ITEMS).filter(id => re.test(id) && region.has(id)).map(id => { S.inv[id] = 1; const ok = q.canEquip(id).ok; delete S.inv[id]; return ok ? id : null; }).filter(Boolean);
     for (const slot of ['head', 'body', 'legs']) { const best = pick(new RegExp(`_${({ head: 'helm', body: 'body', legs: 'legs' })[slot]}$`)).filter(id => !/robe_/.test(id)).sort((a, b) => (D.ITEMS[b].b.def || 0) - (D.ITEMS[a].b.def || 0))[0]; if (best) { S.inv[best] = 1; q.equipItem(best); } }
@@ -138,8 +138,8 @@ const parity = boss => {
     if (style === 'ranged') { wpn = pick(/^bow_/).pop(); const ar = pick(/^arrow_/).pop(); S.inv[ar] = 5000; q.equipItem(ar); }
     if (style === 'magic') { wpn = pick(/^staff_/).pop(); S.inv.rune = 99999; const sp = D.SPELLS.filter(x => q.lvl('magic') >= x.lvl).pop(); S.spell = sp.id; }
     S.inv[wpn] = 1; q.equipItem(wpn);
-    if (style !== 'melee') S.inv.shield = 0;
-    if (!S.equip.shield && style === 'melee') { const sh = pick(/_shield$/).sort((a, b) => D.ITEMS[b].b.def - D.ITEMS[a].b.def)[0]; if (sh) { S.inv[sh] = 1; q.equipItem(sh); } }
+    /* nothing in the game is two-handed: an archer or mage can carry a shield too */
+    if (!S.equip.shield && !process.env.NOSHIELD) { const sh = pick(/_shield$/).sort((a, b) => D.ITEMS[b].b.def - D.ITEMS[a].b.def)[0]; if (sh) { S.inv[sh] = 1; q.equipItem(sh); } }
     S.abilities = (style === 'melee' ? ['power', 'brace', 'bash', 'second'] : style === 'ranged' ? ['aimed', 'brace', 'pin', 'kite'] : ['brace', 'ward', 'focus', 'second']).filter(a => q.abilUnlocked(D.AB[a])).slice(0, q.abilSlots());
     const f = D.FISH_IDS.filter(id => { const r = Object.values(D.RECIPES).find(r => r.out && r.out[id]); return !r || r.lvl <= L; }).sort((a, b) => D.ITEMS[b].heal - D.ITEMS[a].heal)[0]; S.inv[f] = 15; S.hp = q.maxHp(); q.fxDirty();
     const ps = q.pstats(), interval = q.combatInterval(), dps = ps.max / 2 * (q.weaponStyle() === 'magic' ? 1 : 1) / (interval / 1000);

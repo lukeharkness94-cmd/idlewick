@@ -95,7 +95,7 @@ DQ.questLinks = (kind, id) => {
 };
 
 /* ---------- Item comparison: what changes if you equip this? ---------- */
-const BONUS_NAMES = { atk: 'Attack', str: 'Strength', def: 'Defence', rng: 'Ranged', rngStr: 'Arrow strength', mag: 'Magic' };
+const BONUS_NAMES = { atk: 'Accuracy', str: 'Power', def: 'Defence', rng: 'Ranged', rngStr: 'Arrow power', mag: 'Magic' };
 DQ.compareItem = id => {
   const it = D.ITEMS[id]; if (!it) return null; const st = S();
   if (it.type === 'tool') {
