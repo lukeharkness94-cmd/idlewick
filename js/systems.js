@@ -49,9 +49,9 @@ DQ.awardPet = (id, options = {}) => {
   if (!S().pets.active) { S().pets.active = id; DQ.fxDirty(); }
   if (options.quiet) { DQ.achDirty = true; return true; }
   const active = S().pets.active === id;
-  DQ.notify({ kind: 'unlock', key: 'pet:' + id, icon: 'paw', col: p.col, title: `New creature: ${p.name}!`, text: `A ${p.kind.toLowerCase()} has joined your collection. ${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, sound: 'gem', burst: true, ttl: 14000,
+  DQ.notify({ kind: 'unlock', key: 'pet:' + id, icon: 'paw', col: p.col, title: `New creature: ${p.name}!`, text: `A ${p.kind.toLowerCase()} has joined your collection. ${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.colTab = 'eggs'; DQ.go('collection'); } }, sound: 'gem', burst: true, ttl: 14000,
     popup: (DQ.sim && DQ.sim.on) || DQ.forecasting ? null : { title: `A new companion: ${p.name}!`, body: `<div class="pet-pop" style="--c:${p.col}"><span class="pet-pop-art">${(() => { try { return DQ.petSprite ? DQ.petSprite(p, 128) : ''; } catch (e) { return ''; } })()}</span><p><b>${DQ.esc(p.name)}</b> the ${DQ.esc(p.kind.toLowerCase())} has joined you.</p><p class="pet-pop-fx">${DQ.esc(p.text)}.</p><p class="sm dim">${active ? 'They are your active companion now.' : 'Make them your companion to get this bonus.'}</p></div>`,
-      actions: [...(active ? [] : [{ label: 'Make active', primary: true, fn: () => { DQ.setPet(id); DQ.ui.render && DQ.ui.render(false); } }]), { label: 'Meet them', primary: active, fn: () => { DQ.ui.beastTab = 'pets'; DQ.go('bestiary'); } }, { label: 'Close' }] } });
+      actions: [...(active ? [] : [{ label: 'Make active', primary: true, fn: () => { DQ.setPet(id); DQ.ui.render && DQ.ui.render(false); } }]), { label: 'Meet them', primary: active, fn: () => { DQ.ui.colTab = 'eggs'; DQ.go('collection'); } }, { label: 'Close' }] } });
   DQ.log(`A new creature joins you: ${p.name} the ${p.kind.toLowerCase()}!`, 'quest'); DQ.emit('pets'); DQ.achDirty = true; return true;
 };
 DQ.petRoll = (type, key) => {
