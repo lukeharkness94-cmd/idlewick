@@ -98,9 +98,9 @@ UI.abilityPanel = () => {
   const list = tab === 'future' ? future : ready;
   return `<section class="panel abilp"><div class="phead"><h2>Abilities</h2><small class="mono">${on.length} / ${slots} slots</small></div>
     <div class="abil-slots">${slotRow}</div>
-    <div class="tabs abil-tabs" role="tablist"><button class="tab ${tab === 'ready' ? 'on' : ''}" role="tab" aria-selected="${tab === 'ready'}" data-do="tab" data-a="abil" data-b="ready">Ready to use <b class="mono">${ready.length}</b></button><button class="tab ${tab === 'future' ? 'on' : ''}" role="tab" aria-selected="${tab === 'future'}" data-do="tab" data-a="abil" data-b="future">Future <b class="mono">${future.length}</b></button></div>
-    <div class="abils">${list.length ? list.map(card).join('') : `<p class="dim sm">${tab === 'ready' ? 'No abilities yet. Train combat skills: the Future tab shows when each one unlocks.' : 'Every ability is unlocked.'}</p>`}</div>
-    <p class="hint">A third slot opens at combat level 40.</p></section>`;
+    <div class="tabs abil-tabs" role="tablist"><button class="tab ${tab === 'ready' ? 'on' : ''}" role="tab" aria-selected="${tab === 'ready'}" data-do="tab" data-a="abil" data-b="ready">Ready to use <b class="mono">${ready.length}</b></button><button class="tab ${tab === 'future' ? 'on' : ''}" role="tab" aria-selected="${tab === 'future'}" data-do="tab" data-a="abil" data-b="future">Future <b class="mono">${future.length}</b></button><button class="tab ${tab === 'tech' ? 'on' : ''}" role="tab" aria-selected="${tab === 'tech'}" data-do="tab" data-a="abil" data-b="tech">Techniques <b class="mono">${(D.TECHNIQUES || []).filter(t => DQ.lvl(t.skill) >= t.lvl).length}/${(D.TECHNIQUES || []).length}</b></button></div>
+    <div class="abils">${tab === 'tech' ? `<p class="dim sm tech-note">Techniques are always on once learned. They need no slot.</p>` + (D.TECHNIQUES || []).map(t => { const got = DQ.lvl(t.skill) >= t.lvl; return `<div class="abil tech ${got ? 'on' : 'locked'}">${ico(got ? t.skill : 'lock')}<span><b>${esc(t.name)}</b><small>${esc(t.text)} · ${got ? 'Learned' : `${D.SK[t.skill].name} ${t.lvl}`}</small></span></div>`; }).join('') : list.length ? list.map(card).join('') : `<p class="dim sm">${tab === 'ready' ? 'No abilities yet. Train combat skills: the Future tab shows when each one unlocks.' : 'Every ability is unlocked.'}</p>`}</div>
+    <p class="hint">${slots < 3 ? 'A third slot opens at combat level 40.' : slots < 4 ? 'A fourth slot opens at combat level 70.' : 'All four slots are open.'}</p></section>`;
 };
 UI.forecastResults = {};
 const showForecast = (id, text) => {
@@ -147,7 +147,13 @@ Object.assign(UI.DO, {
   setpace: a => { if (!DQ.act) return; DQ.act.pace = a; S().act.pace = a; S().lastPace = a; DQ.act.dur = DQ.actDur(DQ.act); DQ.sfx('tab'); replan(); },
   setrule: a => { if (!DQ.act) return; DQ.act.rule = a; S().act.rule = a; DQ.act.count = 0; DQ.act.elapsed = 0; const sk = DQ.actSkill(DQ.act); DQ.act.lvlTarget = sk ? DQ.lvl(sk) + 1 : 0; S().act.lvlTarget = DQ.act.lvlTarget; DQ.sfx('tab'); replan(); },
   defpace: a => { S().defPace = a; DQ.sfx('tab'); replan(); },
-  queueadd: (a, b) => DQ.queueAdd(a, b, 'time:30'),
+  /* queueing asks how long, as plain buttons, so a chain is planned in one go: "200 oak logs, then planks" */
+  queueadd: (a, b) => { if (!DQ.planUnlocked()) return DQ.toast(`The task queue unlocks at Hero level ${D.PLAN_ADV}`, true);
+    const Q = S().queue || [], slots = DQ.queueSlots(), full = Q.length >= slots, label = DQ.actLabel({ kind: a, id: b });
+    const m = DQ.modal({ title: `Queue: ${label}`, body: `<p class="sm">${DQ.act ? `It starts when <b>${esc(DQ.actLabel())}</b> finishes or runs out of supplies, even while you are away.` : 'Nothing is running, so it starts now.'}</p>
+      <div class="k">How long?</div><div class="chips rules queue-rules">${D.STOP_RULES.map(([k, n]) => `<button class="chip" data-do="queuepick" data-a="${a}" data-b="${b}" data-c="${k}" ${full ? 'disabled' : ''}>${k === 'none' ? 'Until supplies run out' : n}</button>`).join('')}</div>
+      <p class="hint">Queue <b class="mono">${Q.length} / ${slots}</b>${full ? ' · full: remove one in the task plan first' : ''}${Q.length ? ` · already waiting: ${Q.map(t => esc(DQ.actLabel(t))).join(', ')}` : ''}</p>`, actions: [{ label: 'Cancel' }] }); m.classList.add('queuemodal'); },
+  queuepick: (a, b, t) => { DQ.closeModal(); DQ.queueAdd(a, b, (t && t.dataset && t.dataset.c) || 'time:30'); },
   qquick: (a, b) => { DQ.queueAdd(a, b, 'none'); DQ.closeModal(); },
   qdel: a => { S().queue.splice(+a, 1); DQ.emit('queue'); },
   qup: a => { const Q = S().queue, i = +a; if (i > 0) { [Q[i - 1], Q[i]] = [Q[i], Q[i - 1]]; DQ.emit('queue'); } },

@@ -454,7 +454,7 @@ mon('zephyrion', 'Zephyrion the Storm Roc', 'skyreach', 110, 613, 54, 92, 88, [1
 mon('voidknight', 'Void knight', 'hollow', 104, 320, 38, 104, 104, [700, 1500], '#6a4aa8', [['ore_voidstone', [1, 1], .3]]);
 mon('shade', 'Hollow shade', 'hollow', 108, 340, 40, 110, 100, [800, 1700], '#3a2a5a', [['rune', [20, 40], .5]]);
 mon('horror', 'Abyssal horror', 'hollow', 112, 380, 42, 112, 108, [1000, 2000], '#8a3a6a', [['gem_diamond', [1, 2], .2], ['wyrm_scale', [1, 1], .03]]);
-mon('hollowking', 'The Hollow King', 'hollow', 126, 935, 50, 104, 100, [25000, 40000], '#b08aff', [['ore_voidstone', [3, 6], 1], ['hollow_crown', [1, 1], .1]], { req: 97, first: 'hollow_crown', special: { every: 4, mult: 1.6, name: 'Crown of sorrow' }, short: 'The Hollow King' });
+mon('hollowking', 'The Hollow King', 'hollow', 126, 1065, 50, 104, 100, [25000, 40000], '#b08aff', [['ore_voidstone', [3, 6], 1], ['hollow_crown', [1, 1], .1]], { req: 97, first: 'hollow_crown', special: { every: 4, mult: 1.6, name: 'Crown of sorrow' }, short: 'The Hollow King' });
 
 /* ---------- Combat loot: every monster also rolls on its town's loot table ---------- */
 mk('coin_pouch', { name: 'Coin pouch', ic: 'pouch', col: '#f3d58a', val: 0, type: 'container' });
@@ -780,6 +780,8 @@ Object.values(D.RECIPES).forEach(r => unl(r.skill, r.lvl, r.name));
 Object.values(ITEMS).forEach(it => { if (it.type === 'gear' || it.type === 'ammo') Object.entries(it.req || {}).forEach(([sk, l]) => unl(sk, l, 'Equip: ' + it.name)); });
 D.SPELLS.forEach(s => unl('magic', s.lvl, s.name + ' spell'));
 D.ALCH.forEach(a => unl('magic', a.lvl, a.name));
+/* gear written for the old Attack and Strength skills unlocks under Melee */
+for (const old of ['attack', 'strength']) { for (const [l, names] of Object.entries(D.UNL[old] || {})) names.forEach(n => unl('melee', +l, n)); delete D.UNL[old]; }
 
 /* Perks: small passive bonuses at level milestones */
 D.PERKS = [{ lvl: 10, name: 'Steady Hands', speed: .04 }, { lvl: 30, name: 'Practised Rhythm', speed: .04 }, { lvl: 50, name: 'Second Nature', speed: .04 }, { lvl: 70, name: 'Fluid Motion', speed: .04 }, { lvl: 90, name: 'Mastery', speed: .04 }, { lvl: 99, name: 'Overflowing Yield', dbl: .1 }];

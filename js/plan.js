@@ -11,7 +11,9 @@ DQ.buffs = () => (S().buffs || []).filter(b => b.until > GT());
 DQ.buffMult = type => DQ.buffs().filter(b => b.type === type).reduce((a, b) => a * b.mult, 1);
 
 /* ---------- Abilities and weaknesses ---------- */
-DQ.abilSlots = () => DQ.combatLvl() >= 40 ? 3 : 2;
+DQ.abilSlots = () => DQ.combatLvl() >= 70 ? 4 : DQ.combatLvl() >= 40 ? 3 : 2;
+/* techniques (data3 D.TECH): passives learned by level, summed for a fighting style */
+DQ.tech = sty => { const o = { dmg: 0, acc: 0, dr: 0, special: 0, free: 0 }; for (const t of D.TECHNIQUES || []) { if (DQ.lvl(t.skill) < t.lvl) continue; if (t.skill !== 'defence' && t.skill !== sty) continue; for (const k in t.fx) o[k] += t.fx[k]; } return o; };
 DQ.abilUnlocked = a => DQ.skillUnlocked(a.skill) && DQ.lvl(a.skill) >= a.lvl;
 DQ.ability = id => {
   const a = D.AB[id]; if (!a || !(S().abilities || []).includes(id) || !DQ.abilUnlocked(a)) return false;
@@ -30,7 +32,7 @@ DQ.toggleAbility = id => {
    special attacks are built around it). Never replaces a choice; removing an ability yourself turns this off. */
 DQ.fillAbilities = () => {
   const st = S(), on = st.abilities = st.abilities || [], free = DQ.abilSlots() - on.length; if (free <= 0 || st.settings.autoAbil === false) return [];
-  const sty = DQ.weaponStyle(), order = ['brace', sty === 'melee' ? 'power' : sty === 'ranged' ? 'aimed' : 'focus', sty === 'melee' && st.equip.shield ? 'bash' : null, 'second', sty === 'ranged' ? 'pin' : sty === 'magic' ? 'ward' : 'execute', sty === 'ranged' ? 'kite' : null];
+  const sty = DQ.weaponStyle(), order = ['brace', sty === 'melee' ? 'power' : sty === 'ranged' ? 'aimed' : 'focus', sty === 'melee' && st.equip.shield ? 'bash' : null, 'second', sty === 'ranged' ? 'pin' : sty === 'magic' ? 'ward' : 'execute', sty === 'ranged' ? 'kite' : null, sty === 'melee' ? 'cleave' : sty === 'ranged' ? 'volley' : 'overcharge', 'fortress', sty === 'melee' ? 'bloodlust' : sty === 'ranged' ? 'deadeye' : 'echo', 'unbreakable'];
   const added = [];
   for (const id of order) { if (added.length >= free) break; const a = id && D.AB[id]; if (!a || on.includes(id) || !DQ.abilUnlocked(a) || (a.style && a.style !== sty)) continue; on.push(id); added.push(a.name); }
   return added;
@@ -60,7 +62,7 @@ DQ.matchup = m => {
     if (mech === 'freeze') out.push(dt === 'fire' ? ['good', 'Your fire breaks the freeze.'] : ['bad', 'Each slam freezes you for one attack.']);
     if (mech === 'hex') out.push(A('ward') && st === 'magic' ? ['good', 'Arcane Ward can absorb the Hex.'] : ['bad', 'Nothing blocks the Hex: bring food.']);
     if (mech === 'flames') out.push(dt === 'frost' ? ['good', 'Frost dampens Wyrmfire by half.'] : ['bad', 'Wyrmfire burns at full strength.']);
-    if (mech === 'airborne') out.push(st === 'ranged' && A('pin') ? ['good', 'Pin Down grounds it.'] : st === 'melee' ? ['bad', 'Melee only reaches it when it is pinned.'] : ['info', 'Pin Down (Ranged 25) would ground it.']);
+    if (mech === 'airborne') out.push(st === 'ranged' && A('pin') ? ['good', 'Pin Down grounds it.'] : st === 'melee' ? ['bad', 'Melee only reaches it when it is pinned.'] : ['info', `Pin Down (Ranged ${D.AB.pin.lvl}) would ground it.`]);
     if (mech === 'enrage') out.push(['info', 'It enrages below half health. Finish it fast or Brace.']);
     if (A('bash') && st === 'melee' && S().equip.shield) out.push(['good', 'Shield Bash interrupts a special every 8 attacks.']);
     if (A('ward') && st === 'magic' && mech !== 'hex') out.push(['good', 'Arcane Ward absorbs a special every 6 attacks.']);

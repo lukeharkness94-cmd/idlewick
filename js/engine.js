@@ -266,7 +266,8 @@ DQ.stopAct = (silent, why, done) => { /* done: a batch finished as planned, show
   if (!DQ.act) return;
   const stopped = DQ.act, stoppedPage = EXT[stopped.kind] ? EXT[stopped.kind].page : stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
   DQ.act = null; DQ.fight = null; S().act = null;
-  if (why && !DQ.forecasting) setTimeout(() => { if (!DQ.act) DQ.advanceQueue(); }, 0);
+  /* while catching up on time away the next queued task starts at once; live, it waits for the current call to finish */
+  if (why && !DQ.forecasting) { if (DQ.sim.on) { if (!DQ.act && DQ.advanceQueue) DQ.advanceQueue(); } else setTimeout(() => { if (!DQ.act) DQ.advanceQueue(); }, 0); }
   if (!DQ.sim.on) { if (!silent) { DQ.log('You stop what you were doing.'); DQ.sfx('stop'); } if (why && (S().queue || []).length) why += ' Moving on to your next queued task.'; if (why) DQ.notify(done ? { kind: 'info', key: 'stopped', page: stoppedPage, icon: 'check', col: '#5cc08a', title: 'Batch complete', text: why, sound: 'perk', ttl: 7000 } : { kind: 'warn', key: 'stopped', page: stoppedPage, icon: 'info', col: '#e5b04a', title: 'Task stopped', text: why, sound: 'stop', ttl: 9000 }); }
   if (!DQ.forecasting) DQ.emit('act');
 };
@@ -278,7 +279,7 @@ function floatXp(sk, x) { DQ.floatAt(document.querySelector('.card.active') || d
 function gatherDone(kind, n) {
   const sk = n.skill;
   /* Gathering completes through effort rather than an accuracy roll. */
-  const qty = 1 + (chance(DQ.dblChance(sk)) ? 1 : 0);
+  const qty = 1 + (chance(DQ.dblChance(sk)) ? 1 : 0) + (DQ.mastExtra && chance(DQ.mastExtra(kind, n.id)) ? 1 : 0);
   DQ.grant(n.item, qty);
   const x = DQ.addXp(sk, n.xp); floatXp(sk, x); floatItem(n.item, qty); if (DQ.act) DQ.act.count += qty;
   const ev = { fish: 'catch', wood: 'chop', mine: 'mine' }[kind]; S().stats[ev] += qty; DQ.qev(ev, n.id, qty);
@@ -324,7 +325,7 @@ function recipeDone(r) {
   const taster = DQ.trick && DQ.trick('taster'); if (taster && r.burn && DQ.act && DQ.act.count === 1) fxHit('taster');
   if (r.burn && !(taster && DQ.act && DQ.act.count === 1) && chance(Math.min(.92, DQ.burnChance(r) * DQ.pace().risk * (taster ? .75 : 1)))) { DQ.grant('burnt'); S().stats.burn++; DQ.floatAt(document.querySelector('.card.active'), 'Burnt!', '#e2574c'); DQ.sfx('hurt'); }
   else {
-    const dbl = chance(DQ.dblChance(r.skill)) ? 2 : 1;
+    const dbl = chance(DQ.dblChance(r.skill) + (DQ.mastExtra ? DQ.mastExtra('recipe', r.id) : 0)) ? 2 : 1;
     Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n * dbl));
     if (DQ.trick && DQ.trick('bellows') && r.skill === 'smithing' && r.tab === 'Bars' && chance(.1)) { fxHit('bellows'); Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); DQ.trickNote('an extra bar!'); }
     if (DQ.trick && DQ.trick('echo') && chance(1 / 20)) { fxHit('echo'); Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); DQ.trickNote('echo! a free one'); }
@@ -366,8 +367,9 @@ DQ.pstats = () => {
   if (st === 'ranged') { const e = L('ranged') * KS + 8; acc = e * (64 + b.rng); max = Math.floor(2 + e * (64 + b.rngStr) / DMG_DIV); }
   else if (st === 'magic') { sp = pickSpell() || D.SPELLS[0]; const e = L('magic') * KS + 8; acc = e * (64 + b.mag); max = sp.max + Math.floor(L('magic') * KS / 10) + Math.floor(b.mag / 12); }
   else { const k = (D.STYLE_TUNE && D.STYLE_TUNE.meleeLevel) || 1, e = L('attack') * k + 8 + (sty.melee === 'accurate' ? 3 : 0), es = L('strength') * k + 8 + (sty.melee === 'aggressive' ? 3 : 0); acc = e * (64 + b.atk); max = Math.floor(2 + es * (64 + b.str) / DMG_DIV); }
-  const f = DQ.fx(), raw = max * (1 + f.dmg) * DQ.buffMult('weak'); max = Math.max(1, Math.round(raw));
-  return { style: st, acc, max, maxRaw: raw, defRoll, red: Math.min(.75, b.def / (b.def + 320) + f.dr), spell: sp };
+  const T = DQ.tech ? DQ.tech(st) : { dmg: 0, acc: 0, dr: 0, special: 0, free: 0 }; acc *= 1 + T.acc;
+  const f = DQ.fx(), raw = max * (1 + f.dmg + T.dmg) * DQ.buffMult('weak'); max = Math.max(1, Math.round(raw));
+  return { style: st, acc, max, maxRaw: raw, defRoll, red: Math.min(.75, b.def / (b.def + 320) + f.dr + T.dr), spell: sp, tech: T };
 };
 const hitChance = (acc, def) => clamp(acc > def ? 1 - (def + 2) / (2 * (acc + 1)) : acc / (2 * (def + 1)), .05, .95);
 DQ.xpSplit = st => {
@@ -406,10 +408,10 @@ function combatRound() {
   if (sty === 'ranged') {
     if (S().ammo.n <= 0 && S().ammo.id && DQ.have(S().ammo.id)) { const n = Math.min(DQ.have(S().ammo.id), 500); DQ.take(S().ammo.id, n); S().ammo.n += n; }
     if (S().ammo.n <= 0) return DQ.stopAct(false, 'Out of arrows. Craft or buy more.');
-    S().ammo.n--; if (S().ammo.n <= 0 && !DQ.have(S().ammo.id)) { S().ammo = { id: null, n: 0 }; delete S().equip.ammo; }
+    if (!(ps.tech && ps.tech.free && chance(ps.tech.free))) S().ammo.n--; if (S().ammo.n <= 0 && !DQ.have(S().ammo.id)) { S().ammo = { id: null, n: 0 }; delete S().equip.ammo; }
   } else if (sty === 'magic') {
     const sp = pickSpell(); if (!sp) return DQ.stopAct(false, 'Out of Arcane runes. Buy more from the shop.');
-    ps.spell = sp; ps.max = Math.round((sp.max + Math.floor(DQ.lvl('magic') / 10) + Math.floor(DQ.bonus().mag / 12)) * (1 + DQ.fx().dmg) * DQ.buffMult('weak')); DQ.take('rune', sp.runes);
+    ps.spell = sp; ps.max = Math.round((sp.max + Math.floor(DQ.lvl('magic') * ((D.STYLE_TUNE && D.STYLE_TUNE.level) || 1) / 10) + Math.floor(DQ.bonus().mag / 12)) * (1 + DQ.fx().dmg + (ps.tech ? ps.tech.dmg : 0)) * DQ.buffMult('weak')); if (!(ps.tech && ps.tech.free && chance(ps.tech.free))) DQ.take('rune', sp.runes);
   }
   const dtype = sty === 'magic' ? D.SPELL_EL[ps.spell.id] : W.dtype; f.lastEl = dtype;
   /* Hollow King changes form */
@@ -427,11 +429,17 @@ function combatRound() {
     if (A('aimed') && f.pa % 3 === 0) { sure = true; max *= 1.5; }
     if (A('power') && f.pa % 4 === 0) { max *= 2; tag = 'power'; }
     if (A('execute') && f.hp < mhp * .3) max *= 1.5;
+    if (A('overcharge') && f.pa % 5 === 0) { max *= 2; tag = 'power'; }
+    if (A('bloodlust')) max *= 1 + .05 * Math.min(5, f.streak || 0);
     /* unique gear (data.js unique.key) */
     if (U.marked && f.pa <= 3) { sure = true; max *= 1.5; fxHit('marked'); }
     if (U.fury) { max *= 1.1 + .3 * (1 - clamp(S().hp / DQ.maxHp(), 0, 1)); fxHit('fury'); } /* always +10%, up to +40% as health falls */
     const mDef = (m.def + 8) * (64 + m.def);
     if (sure || Math.random() < hitChance(acc, mDef)) dealt = rnd(1, Math.max(1, Math.round(max)));
+    if (dealt && A('deadeye')) dealt = Math.max(dealt, Math.ceil(max / 2));
+    f.streak = dealt ? (f.streak || 0) + 1 : 0;
+    if (dealt && ((A('cleave') && f.pa % 5 === 0) || (A('volley') && f.pa % 4 === 0))) { dealt += rnd(1, Math.max(1, Math.round(max))); tag += ' twin'; DQ.splat('foe', A('cleave') ? 'Cleave' : 'Volley', 'hit', 180); }
+    if (dealt && A('echo') && chance(.2)) { dealt += Math.max(1, Math.round(dealt * .5)); DQ.splat('foe', 'Echo', 'hit', 180); }
     if (dealt && A('pin')) f.pinned = 2;
     if (dealt && U.twin && chance(.2)) { dealt += rnd(1, Math.max(1, Math.round(max))); tag += ' twin'; fxHit('twin'); DQ.splat('foe', 'Twin cut', 'hit', 180); }
     if (dealt && U.arc && sty === 'magic' && chance(.2)) { dealt += Math.max(1, Math.round(dealt * .5)); fxHit('arc'); DQ.splat('foe', 'Arc', 'hit', 180); }
@@ -479,11 +487,12 @@ function monsterAttack(f, m, ps, sty) {
       if (m.id === 'oldtusk' && sty === 'ranged') taken *= .5;
       if (m.id === 'pyrrhax' && f.lastEl === 'frost') taken *= .5;
       if (A('brace')) taken *= .5;
+      if (ps.tech && ps.tech.special) taken *= 1 - ps.tech.special;
       if (U.bulwark) { taken *= .65; fxHit('bulwark'); } else if (U.sovereign) { taken *= .8; fxHit('sovereign'); }
       if (DQ.trick && DQ.trick('cold')) { taken *= .8; fxHit('cold'); }
       if (m.id === 'frostmaw') f.frozen = 1;
       if (m.id === 'morwenna') f.hex = 4;
-    } else { if (A('kite')) taken *= .7; if (U.hide) { taken *= .85; fxHit('hide'); } }
+    } else { if (A('kite')) taken *= .7; if (A('fortress')) taken *= .85; if (U.hide) { taken *= .85; fxHit('hide'); } }
     if (f.curse) { taken *= 1 - .05 * f.curse; fxHit('cursed'); }
     taken = Math.max(1, Math.round(taken * (1 - ps.red) * ({ careful: .85, steady: 1, push: 1.25 }[(DQ.act && DQ.act.pace) || 'steady'])));
   }
@@ -491,6 +500,7 @@ function monsterAttack(f, m, ps, sty) {
   if (taken && U.thorns) { const t = Math.max(1, Math.round(taken * .35)); f.hp -= t; fxHit('thorns'); DQ.splat('foe', t, 'hit', 650); }
   if (taken && U.riposte && chance(.2)) { const r = rnd(1, Math.max(1, ps.max)); f.hp -= r; fxHit('riposte'); DQ.splat('foe', r, 'hit', 700); }
   S().hp -= taken; DQ.splat('you', special ? taken + '!' : taken, taken ? 'hit' : 'miss', 900);
+  if (S().hp <= 0 && A('unbreakable') && !f.unbroken) { f.unbroken = 1; S().hp = 1; DQ.splat('you', 'Unbreakable!', 'miss', 1000); }
   if (S().hp <= 0 && U.laststand && !f.last) { f.last = 1; S().hp = 1; fxHit('laststand'); DQ.splat('you', 'Last stand!', 'miss', 1000); }
   if (taken) setTimeout(() => DQ.sfx('hurt'), 900);
   if (special && !DQ.sim.on) { DQ.log(`${m.name} unleashes ${sp.name}!`, 'bad'); DQ.emit('bossSpecial', m); }
@@ -587,6 +597,7 @@ function complete() {
   else if (a.kind === 'thieve') thieveDone(D.NODE['thieve:' + a.id]);
   else if (EXT[a.kind]) EXT[a.kind].done(a);
   else gatherDone(a.kind, D.NODE[a.kind + ':' + a.id]);
+  if (a.count > beforeCount && DQ.mastTick) DQ.mastTick(a);
   DQ.checkActionUnlocks?.();
   if (!DQ.sim.on && a.kind !== 'fight') DQ.emit('workcycle', { kind: a.kind, id: a.id, quantity: a.count - beforeCount });
   if (DQ.act === a) { a.elapsed += a.dur; S().act && Object.assign(S().act, { count: a.count, elapsed: a.elapsed }); a.dur = DQ.actDur(a); DQ.checkRule(); }

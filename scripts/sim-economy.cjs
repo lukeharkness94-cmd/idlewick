@@ -20,7 +20,7 @@ function boot() {
   /* pre-tuning comparison: the engine still reads D.ECONOMY, so supply the original gathering values */
   if (noEconomy) ctx.DQ.data.ECONOMY = { version: 0, gatherCoinScale: 1, gatherTownScale: [1, 3, 8, 20, 50, 50, 50, 50], fishPouchChance: .008, fishChestChance: .001, woodNestChance: .008, mineGemChance: .04, mineCoinChance: .004 };
   const q = ctx.DQ; q.notify = q.pulse = q.floatAt = q.flash = q.burstAt = q.burstEl = q.toast = q.go = () => {};
-  ['engine', 'systems', 'plan', 'meta'].forEach(load);
+  ['engine', 'systems', 'plan', 'meta', 'mastery'].forEach(load);
   q.ui = { V: {}, DO: {}, B: {}, homeSections: [], render() {}, tabState: () => null }; q.tips = { item: () => '' }; q.goals = () => [];
   ['research', 'journey'].forEach(load);
   q.S = q.newState(); q.fxDirty(); return q;

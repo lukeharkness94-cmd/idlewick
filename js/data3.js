@@ -76,7 +76,27 @@ D.ABIL = [
   AB('kite', 'Keep Distance', 'bow', 'ranged', 30, 'ranged', 'Enemy normal attacks deal 30% less damage.'),
   AB('focus', 'Elemental Focus', 'magic', 'magic', 8, 'magic', `Spells that hit a weakness deal ${D.TYPE_RULES.normal.focus}x instead of ${D.TYPE_RULES.normal.weak}x (against bosses ${D.TYPE_RULES.boss.focus}x instead of ${D.TYPE_RULES.boss.weak}x).`),
   AB('ward', 'Arcane Ward', 'ring_logo', 'magic', 22, 'magic', 'Absorbs a boss special attack. Ready every 6 attacks.'),
+  /* levels 60 to 95 (Nov 2026): the combat skills used to unlock nothing after 60 while the last bosses need 74 to 85 */
+  AB('cleave', 'Cleave', 'attack', 'melee', 70, 'melee', 'Every 5th attack strikes twice.'),
+  AB('bloodlust', 'Bloodlust', 'strength', 'melee', 90, 'melee', 'Each hit in a row adds 5% damage, up to 25%. A miss resets it.'),
+  AB('volley', 'Volley', 'arrow_ammo', 'ranged', 70, 'ranged', 'Every 4th shot looses a second arrow.'),
+  AB('deadeye', 'Deadeye', 'bow', 'ranged', 90, 'ranged', 'Your shots never deal less than half your max hit.'),
+  AB('overcharge', 'Overcharge', 'magic', 'magic', 70, 'magic', 'Every 5th spell deals double damage.'),
+  AB('echo', 'Spell Echo', 'ring_logo', 'magic', 90, 'magic', 'Spells have a 20% chance to strike again for half damage.'),
+  AB('fortress', 'Fortress', 'shield', 'defence', 80, null, 'Enemy normal attacks deal 15% less damage.'),
+  AB('unbreakable', 'Unbreakable', 'defence', 'defence', 95, null, 'Once per fight, a blow that would defeat you leaves you on 1 health.'),
 ];
+/* Techniques: passive, always on once learned (no slot). fx: dmg and acc apply to that fighting style; dr is damage taken;
+   special is boss special attacks; free is the chance a spell costs no runes. */
+const TQ = (skill, lvl, name, text, fx) => ({ skill, lvl, name, text, fx });
+D.TECHNIQUES = [
+  TQ('melee', 65, 'Heavy Hands', '+3% melee damage', { dmg: .03 }), TQ('melee', 75, 'Keen Edge', '+4% melee accuracy', { acc: .04 }), TQ('melee', 80, 'Battle Rhythm', '+3% melee damage', { dmg: .03 }), TQ('melee', 85, 'Follow Through', '+4% melee accuracy', { acc: .04 }), TQ('melee', 95, 'Weapon Master', '+4% melee damage and accuracy', { dmg: .04, acc: .04 }),
+  TQ('ranged', 65, 'Steady Draw', '+3% ranged damage', { dmg: .03 }), TQ('ranged', 75, 'Hawk Eye', '+4% ranged accuracy', { acc: .04 }), TQ('ranged', 80, 'Heavy Draw', '+3% ranged damage', { dmg: .03 }), TQ('ranged', 85, 'Fletcher’s Thrift', '15% chance a shot uses no arrow', { free: .15 }), TQ('ranged', 95, 'Marksman', '+4% ranged damage and accuracy', { dmg: .04, acc: .04 }),
+  TQ('magic', 65, 'Deep Channel', '+3% spell damage', { dmg: .03 }), TQ('magic', 75, 'Clear Mind', '+4% spell accuracy', { acc: .04 }), TQ('magic', 80, 'Kindled Runes', '+3% spell damage', { dmg: .03 }), TQ('magic', 85, 'Runic Thrift', '15% chance a spell uses no runes', { free: .15 }), TQ('magic', 95, 'Archmage', '+4% spell damage and accuracy', { dmg: .04, acc: .04 }),
+  TQ('defence', 65, 'Hardened', '2% less damage taken', { dr: .02 }), TQ('defence', 75, 'Stalwart', '2% less damage taken', { dr: .02 }), TQ('defence', 85, 'Set Feet', 'Boss special attacks deal 8% less', { special: .08 }), TQ('defence', 90, 'Immovable', '2% less damage taken', { dr: .02 }),
+];
+D.ABIL.forEach(a => { const sk = (D.SKILL_ALIAS && D.SKILL_ALIAS[a.skill]) || a.skill; ((D.UNL[sk] = D.UNL[sk] || {})[a.lvl] = D.UNL[sk][a.lvl] || []).push('Ability: ' + a.name); });
+D.TECHNIQUES.forEach(t => { ((D.UNL[t.skill] = D.UNL[t.skill] || {})[t.lvl] = D.UNL[t.skill][t.lvl] || []).push(`Technique: ${t.name} (${t.text})`); });
 D.AB = Object.fromEntries(D.ABIL.map(a => [a.id, a]));
 
 /* ---------- Boss mechanics: what each boss does and what beats it ---------- */

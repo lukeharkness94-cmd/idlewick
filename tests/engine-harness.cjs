@@ -28,7 +28,7 @@ function harness(desktopStorage) {
   ['util', 'data', 'data2', 'data3', 'economy', 'state', 'audio'].forEach(load);
   const q = context.DQ;
   q.notify = q.pulse = q.floatAt = q.flash = q.burstAt = q.burstEl = q.toast = q.go = () => {};
-  ['engine', 'systems', 'plan', 'meta'].forEach(load);
+  ['engine', 'systems', 'plan', 'meta', 'mastery'].forEach(load);
   q.ui = ui; q.tips = { item: () => '' }; q.goals = () => [];
   ['research', 'journey', 'onboarding'].forEach(load);
   q.S = q.newState(); q.fxDirty();

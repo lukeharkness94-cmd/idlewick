@@ -21,7 +21,7 @@ DQ.setTitle = sk => { S().title = sk && DQ.masteryRank(sk) ? sk : null; DQ.emit(
 DQ.heroTitle = () => { const sk = S().title; return sk && DQ.masteryRank(sk) ? DQ.masteryTitle(sk) : ''; };
 
 /* ---------- Plan unlock (pace, stop rules, queue) ---------- */
-D.PLAN_ADV = 8;
+D.PLAN_ADV = 3;
 DQ.planUnlocked = () => DQ.advLvl() >= D.PLAN_ADV;
 const addQ = DQ.queueAdd;
 DQ.queueAdd = (...a) => {

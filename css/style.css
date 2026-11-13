@@ -3523,3 +3523,82 @@ html.short .bp-art{width:56px;height:56px}
  html.short .combat-d .wh-mini-art img{width:32px;height:32px}
 }
 @media(min-width:861px){html:not(.short) .combat-d .where .wh-heads>.wh-head img{width:40px!important;height:40px!important}}
+
+/* ---------- Field-guide progress (js/mastery.js): one thin brass bar on the thing itself, pips on the selected task ---------- */
+.illustrated-card,.where .wh-heads>.wh-head{position:relative}
+.study-bar{position:absolute;left:6px;right:6px;bottom:3px;height:3px;border-radius:2px;background:color-mix(in srgb,var(--ink) 14%,transparent);overflow:hidden;pointer-events:none}
+.study-bar::after{content:"";position:absolute;inset:0;width:var(--p,0%);background:var(--brass);border-radius:2px}
+.study-bar.full::after{width:100%}
+.where .wh-heads>.wh-head .study-bar{left:4px;right:4px;bottom:1px;height:2px}
+.mast-line{display:flex;align-items:center;gap:8px;margin:8px 0 0;height:8px;max-width:260px}
+.mast-pips{display:flex;gap:3px}.mast-pips i{width:8px;height:8px;border-radius:50%;background:color-mix(in srgb,var(--ink) 18%,transparent)}.mast-pips i.on{background:var(--brass)}
+.mast-line .bar{flex:1;height:4px}.mast-line .bar i{background:var(--brass)}
+.mast-line.max .bar{display:none}
+/* the queue shows in the Now card: "Now · then Oak planks +1" (no extra line) */
+.now .now-k{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.now .now-next{font-style:normal;color:var(--brass,#d8a64a)}
+.now.here .now-k i+.now-next{display:none}
+.queue-rules{margin:6px 0 10px}
+
+/* ---------- Eggs, the hatchery and the collection log ---------- */
+.egg-art{image-rendering:pixelated}
+@keyframes egg-wobble{0%,86%,100%{transform:rotate(0)}89%{transform:rotate(-7deg)}93%{transform:rotate(6deg)}97%{transform:rotate(-3deg)}}
+.egg-wobble{display:inline-block;transform-origin:50% 90%;animation:egg-wobble 3.4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.egg-wobble{animation:none}} html.calm .egg-wobble{animation:none}
+.ranch-hatchery .hatch-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+.hatch-egg{display:grid;justify-items:center;gap:3px;min-width:104px;text-align:center}
+.hatch-egg b{font-size:14px}.hatch-egg small{font-size:14px}.hatch-egg .bar{width:88px;height:6px}
+.col-panel{display:flex;flex-direction:column;min-height:0}
+.col-note{margin:0 0 10px;font-size:14px;color:var(--ink-dim,inherit)}
+.col-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:8px;overflow:auto;min-height:0;max-height:calc(var(--vh100,100vh) - 330px);padding-right:4px}
+.col-row{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 12px;border:1px solid color-mix(in srgb,var(--c,var(--brass)) 35%,transparent);border-radius:10px;background:color-mix(in srgb,var(--c,var(--brass)) 7%,transparent)}
+.col-row.got{border-color:color-mix(in srgb,#5cc08a 55%,transparent)}
+.col-art{display:grid;place-items:center;width:56px;height:56px}
+.col-art .col-unk img,.col-art.col-unk img,.col-art.col-unk .item-art{filter:brightness(0) opacity(.55)}
+.col-art.col-stars{color:#e0b040;font-size:15px;letter-spacing:-1px}
+.col-t{display:grid;gap:2px;min-width:0}.col-t b{font-size:16px}.col-t small{font-size:14px;color:var(--ink-dim,inherit)}
+.col-o{display:grid;gap:3px;justify-items:end;text-align:right}.col-o b{font-size:14px}.col-o small{font-size:14px}
+.col-tries{display:grid;justify-items:end;gap:3px}
+.col-meter .bar{display:block;width:120px;height:6px}.col-meter.over .bar i{background:#e5b04a}
+@media (max-width:860px){.col-list{grid-template-columns:1fr;max-height:none}.col-row{grid-template-columns:48px minmax(0,1fr)}.col-o{grid-column:1/-1;justify-items:start;text-align:left}}
+
+.egg-ways{display:grid;gap:10px}.egg-way{padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--brass) 9%,transparent)}.egg-way p{margin:4px 0 0}
+.ranch-eggs-link{display:block;margin-top:8px;font-size:14px}
+
+/* ---------- The field guide as an album (js/guide_materials.js): index, picture tiles, the selected page ---------- */
+.guide-book{display:grid;grid-template-columns:230px minmax(0,1fr) 390px;gap:12px;align-items:start;height:calc(var(--vh100,100vh) - 190px);min-height:420px}
+.guide-book>.panel{margin:0;max-height:100%;overflow:auto}
+.guide-index{display:flex;flex-direction:column;gap:4px}
+.gi-group{margin:10px 0 2px;font:600 13px var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.gi{display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:2px 8px;padding:6px 8px;border:1px solid transparent;border-radius:8px;background:none;color:inherit;text-align:left;cursor:pointer}
+.gi svg,.gi img{width:22px;height:22px}.gi b{font:500 16px var(--f-ui);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gi em{font-style:normal;font-size:13px;color:var(--mute)}
+.gi .bar{grid-column:1/-1;height:3px}.gi .bar i{background:var(--brass)}
+.gi:hover{border-color:var(--line)}.gi.on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 14%,transparent)}
+.gi-eggs{margin-top:12px}
+.ga-k{margin:10px 0 6px}
+.ga-near,.ga-all{display:grid;gap:8px}
+.ga-near{grid-template-columns:repeat(auto-fill,minmax(132px,1fr))}.ga-all{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
+.gt{position:relative;display:grid;justify-items:center;align-content:start;gap:4px;padding:8px 6px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:inherit;cursor:pointer;min-width:0}
+.gt b{font:500 14px var(--f-ui);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gt-art{display:grid;place-items:center;height:52px}.ga-near .gt-art{height:68px}
+.gt.unk{background:none;border-style:dashed}.gt.unk b{color:var(--mute)}
+.gt.full{border-color:var(--brass)}
+.gt:hover{border-color:color-mix(in srgb,var(--brass) 60%,var(--line))}.gt.on{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 45%,transparent)}
+.gt-pips{display:flex;gap:2px}.gt-pips i{width:5px;height:5px;border-radius:50%;background:color-mix(in srgb,var(--ink) 16%,transparent)}.gt-pips i.on{background:var(--brass)}
+.gt .study-bar{bottom:4px}
+.gt-q{position:absolute;top:4px;right:4px}.gt-q svg,.gt-q img{width:16px;height:16px}
+.guide-item{display:grid;place-items:center}
+.gp-head{display:grid;grid-template-columns:104px minmax(0,1fr);gap:12px;align-items:center}.gp-art{display:grid;place-items:center;width:104px;height:104px}
+.gp-head h2{margin:2px 0}.gp-head small{font-size:14px;color:var(--mute)}
+.guide-ladder{list-style:none;margin:14px 0;padding:0;display:grid;gap:6px}
+.guide-ladder li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;padding:8px 10px;border-radius:9px;border:1px solid transparent}
+.gl-dot{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);font:600 13px var(--f-ui);color:var(--mute)}
+.guide-ladder b{display:block;font:500 16px var(--f-ui)}.guide-ladder small{display:block;font-size:14px;color:var(--mute)}
+.guide-ladder li.done .gl-dot{background:var(--brass);border-color:var(--brass);color:#2a1c08}
+.guide-ladder li.next{border-color:color-mix(in srgb,var(--brass) 55%,var(--line));background:color-mix(in srgb,var(--brass) 9%,transparent)}
+.guide-ladder li.later{opacity:.62}
+.gl-prog{display:flex;align-items:center;gap:8px;margin-top:6px}.gl-prog .bar{flex:1;height:6px}.gl-prog .bar i{background:var(--brass)}.gl-prog em{font-style:normal;font-size:13px}
+.gl-at{font-style:normal;font-size:13px;color:var(--mute)}
+html.lw-1600 .guide-book{grid-template-columns:200px minmax(0,1fr) 340px}
+@media (max-width:860px){.guide-book{display:flex;flex-direction:column;height:auto}.guide-book>.panel{max-height:none;width:100%}.guide-index{flex-direction:row;flex-wrap:wrap}.gi-group{width:100%}.gi{grid-template-columns:22px auto auto}.gi .bar{display:none}.guide-page{order:2}.guide-album{order:3}}
+

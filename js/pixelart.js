@@ -69,8 +69,10 @@ const toCanvas = (s, o) => { const c = document.createElement('canvas'); c.width
 /* Higher pixel count, same design (Nov 2026): small sprites (up to 64 px) are drawn, then doubled twice with Scale2x
    (EPX), a pixel-art upscaler that keeps every colour and shape but smooths stair-step edges and diagonals into 4x
    the pixels. Layout keeps the original (logical) size: logicalOf(url) tells the snapper what it was. */
-const HIRES = 4, logical = new Map();
+/* Dec 2026, from the player: back to the original chunky pixels. SMOOTH = true restores the Scale2x pass. */
+const SMOOTH = false, HIRES = SMOOTH ? 4 : 1, logical = new Map();
 const scale2x = c => {
+  if (!SMOOTH) return c;
   const w = c.width, h = c.height, src = new Uint32Array(c.getContext('2d').getImageData(0, 0, w, h).data.buffer);
   const o = document.createElement('canvas'); o.width = w * 2; o.height = h * 2; const od = o.getContext('2d').createImageData(w * 2, h * 2), dst = new Uint32Array(od.data.buffer);
   const at = (x, y) => src[Math.min(h - 1, Math.max(0, y)) * w + Math.min(w - 1, Math.max(0, x))];

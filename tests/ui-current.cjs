@@ -39,7 +39,7 @@ const fs=require('node:fs');
    DQ.fxDirty();DQ.ui.renderHud();DQ.ui.renderRail();
    document.querySelectorAll('.note').forEach(el=>el.remove());
   });
-  const hubs={overview:'home',activity:'home',shop:'shop',map:'world',projects:'village',achievements:'hero',bestiary:'combat',skillsummary:'hero',mastery:'hero',brewery:'skills',bank:'hero',house:'village',hirelings:'village',people:'quests',research:'skills',settings:'settings',fishing:'skills',woodcutting:'skills',character:'hero',quests:'quests',combat:'combat',mining:'skills',thieving:'skills',cooking:'skills',smithing:'skills',crafting:'skills',magic:'skills',farming:'skills',hunting:'skills',enchanting:'skills',exploration:'world'};
+  const hubs={overview:'home',activity:'home',shop:'shop',map:'world',projects:'village',achievements:'guide',bestiary:'guide',skillsummary:'hero',mastery:'hero',brewery:'skills',bank:'hero',house:'village',hirelings:'village',people:'quests',research:'skills',settings:'settings',fishing:'skills',woodcutting:'skills',character:'hero',quests:'quests',combat:'combat',mining:'skills',thieving:'skills',cooking:'skills',smithing:'skills',crafting:'skills',magic:'skills',farming:'skills',hunting:'skills',enchanting:'skills',exploration:'world'};
   for(const width of [390,1440,1920,2560,3440])for(const theme of ['dark','light']){
    await page.setViewportSize({width,height:1000});
    await page.evaluate(theme=>{DQ.S.settings.theme=theme;DQ.applyTheme();},theme);
