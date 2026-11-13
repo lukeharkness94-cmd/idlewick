@@ -534,3 +534,5 @@ From the player's request to build all five retention recommendations, plus foll
 - The task queue already existed behind the plan button; it is now a visible Queue button with duration choices, shows in the Now card, opens at Hero 3 and advances during offline catch-up when a task runs out of supplies.
 - Chunky pixels restored (Scale2x off). First wording pass to RPG shorthand: abilities, techniques, unique gear, companion tricks, choice cards, ranch, eggs, collection. Quest text, tutorials and tooltips were not rewritten.
 - Not done: no new economy simulation for mastery beyond the bound above; no human playtest.
+
+- Wording pass 2 (Dec 2026): skill guides and first-time lessons, long tooltips, item and skill tooltips, hints, quest empty states, Home next-step lines and preparation advice now use RPG shorthand. Quest stories (blurbs, thanks, lore, legends) were deliberately left as written. `tests/regression.cjs` no longer requires lessons to be long.

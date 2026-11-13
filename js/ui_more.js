@@ -5,19 +5,19 @@ const S = () => DQ.S;
 
 /* ---------- What each skill is for ---------- */
 D.SKILL_GUIDE = {
-  fishing: ['Catch fish at the fishing spots in each town.', ['Cook your catch into food that heals you in fights', 'Sell fish for coins', 'Better spots unlock as you level and travel'], ['cooking']],
-  woodcutting: ['Chop trees for logs.', ['Carve logs into bows and staves', 'Build house furniture', 'Fuel for quests and sell for coins'], ['crafting']],
-  mining: ['Dig ore from rocks, and sometimes gems.', ['Smelt ore into metal bars', 'Gems are set into rings and amulets', 'Sell ore for coins'], ['smithing', 'crafting']],
-  thieving: ['Pickpocket townsfolk and raid stalls.', ['A quick way to earn coins', 'Getting caught hurts, so bring food', 'Better gloves make you faster'], []],
-  farming: ['Grow crops and raise animals on your homestead.', ['Crops and animal produce make the best food', 'Crops grow even while you do other things', 'Pet animals to make them work faster'], ['cooking']],
-  cooking: ['Cook raw fish and farm produce into food.', ['Food heals you in combat and while thieving', 'Higher levels burn less', 'Cooked food sells for more'], ['hitpoints']],
-  smithing: ['Smelt ore into bars, then forge weapons and armour.', ['Daggers, swords, warhammers and armour for melee', 'Bars also make arrows and jewellery', 'Sell what you make'], ['attack', 'defence']],
-  crafting: ['Sew leather, carve bows and staves, and set jewellery.', ['Gear for ranged and magic fighters', 'Rings and amulets with bonuses', 'Woollen cloth for your house'], ['ranged', 'magic']],
-  magic: ['Cast spells with a staff, and turn items into coins with alchemy.', ['Choose an element to hit monster weaknesses', 'Spells use Arcane runes', 'Alchemy turns spare items into coins'], []],
-  melee: ['Fighting up close with swords, daggers and hammers.', ['Trained by fighting with a melee weapon equipped', 'Better weapons need a higher Melee', 'Counts towards your combat level'], []],
-  defence: ['How often monsters miss you, and which armour you can wear.', ['Trained by fighting with the Defensive stance', 'Better armour needs a higher Defence', 'Counts towards your combat level'], []],
-  ranged: ['Fighting from a distance with a bow and arrows.', ['Trained by fighting with a bow equipped', 'Arrows are used up as you shoot', 'Open from the start: the shop sells a shortbow'], []],
-  hitpoints: ['Your health. The more you have, the longer you last in a fight.', ['Rises a little every time you deal damage', 'Food heals it, and it refills slowly when resting'], []],
+  fishing: ['Catch fish.', ['Cook into healing food', 'Sell for coins'], ['cooking']],
+  woodcutting: ['Chop logs.', ['Bows, staves, shields', 'Furniture and planks'], ['crafting']],
+  mining: ['Mine ore and gems.', ['Smelt into bars', 'Gems for jewellery and enchanting'], ['smithing', 'crafting']],
+  thieving: ['Pickpocket for coins.', ['Failing costs health', 'Cheaper shops, richer chests'], []],
+  farming: ['Grow crops, raise animals.', ['Best food ingredients', 'Grows while you do other things'], ['cooking']],
+  cooking: ['Cook food.', ['Food heals in combat', 'Higher level: fewer burns'], ['hitpoints']],
+  smithing: ['Smelt bars, forge gear.', ['Melee weapons and armour', 'Arrows and tools'], ['attack', 'defence']],
+  crafting: ['Leather, bows, staves, jewellery.', ['Ranged and Magic gear', 'Rings and amulets'], ['ranged', 'magic']],
+  magic: ['Spells with a staff. Alchemy for coins.', ['Elements hit weaknesses', 'Uses Arcane runes'], []],
+  melee: ['Swords, daggers, hammers.', ['Levels as you fight with them', 'Unlocks melee weapons'], []],
+  defence: ['Enemies miss more. Unlocks armour.', ['Levels in the Defensive stance'], []],
+  ranged: ['Bows and arrows.', ['Levels as you fight with a bow', 'Uses arrows'], []],
+  hitpoints: ['Max health.', ['Levels as you deal damage', 'Food and resting restore it'], []],
 };
 const guideHtml = sk => {
   const g = D.SKILL_GUIDE[sk]; if (!g) return '';

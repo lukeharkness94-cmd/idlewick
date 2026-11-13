@@ -164,7 +164,7 @@ DQ.on('equip', () => {});
    Skill pages: a compact header, then the spots/recipes you came to use, then the "about this skill" guide. */
 UI.skillHero = (sk, extra = '') => {
   const s = D.SK[sk], l = DQ.lvl(sk);
-  const perks = D.GATHER_SKILLS.includes(sk) ? `<div class="perks"><span class="k">Perks</span>${D.PERKS.map(p => `<span class="perk ${l >= p.lvl ? 'on' : ''}" data-tip="text:${p.name} at ${s.name} ${p.lvl}: ${p.speed ? Math.round(p.speed * 100) + '% faster' : Math.round(p.dbl * 100) + '% chance of double yield'}">${p.lvl}</span>`).join('')}</div>` : '';
+  const perks = D.GATHER_SKILLS.includes(sk) ? `<div class="perks"><span class="k">Perks</span>${D.PERKS.map(p => `<span class="perk ${l >= p.lvl ? 'on' : ''}" data-tip="text:${p.name} at ${s.name} ${p.lvl}: ${p.speed ? Math.round(p.speed * 100) + '% speed' : Math.round(p.dbl * 100) + '% double'}">${p.lvl}</span>`).join('')}</div>` : '';
   return `<section class="panel skillhero compact" style="--c:${s.col};--sc:${s.col}"><div class="big sm">${ico(sk)}</div>
     <div class="sk-main"><div class="sk-top"><h2>${s.name}</h2><b class="mono sk-lv" data-b="lvl:${sk}"></b><span class="chipx" data-tip="skill:${sk}"><span data-b="bonus:${sk}"></span></span></div>
       <span class="bar big"><i data-b="xpbar:${sk}"></i></span><div class="sh-line mono"><span data-b="toNext:${sk}"></span><span data-b="eta:${sk}"></span></div></div>
@@ -196,7 +196,7 @@ UI.toolsPanel = () => {
       <small>${D.SK[sk].name}${open ? ` ${DQ.lvl(sk)}` : ' (locked)'} · ${t ? `${pct}% faster` : 'normal speed'}</small><span class="pips" aria-label="Tier ${t} of 5">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= t ? 'on' : ''}"></i>`).join('')}</span></div>
       ${next ? `<button class="btn sm" data-do="go" data-a="shop" data-tip="text:${esc(next.name)}: ${fmt(next.buy)} coins. Opens the shop.">Upgrade ${DQ.fmtK ? DQ.fmtK(next.buy) : fmt(next.buy)}</button>` : '<span class="max">Best</span>'}</div>`;
   }).join('');
-  return `<section data-reference="true" class="panel toolsp" id="inventory-tools"><h3>Gathering tools</h3><p class="hint">Your best owned tool is used automatically.</p><div class="toolrows">${rows}</div></section>`;
+  return `<section data-reference="true" class="panel toolsp" id="inventory-tools"><h3>Gathering tools</h3><p class="hint">Best tool is used automatically.</p><div class="toolrows">${rows}</div></section>`;
 };
 const origChar = UI.V.character;
 UI.V.character = () => { const h = origChar().replace('<div class="slots" id="packgrid">', '<div class="selbar" id="selbar"></div><div class="slots" id="packgrid">'), tail = '</section></div></div>', i = h.lastIndexOf(tail); return h; };

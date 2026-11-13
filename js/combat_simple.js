@@ -49,7 +49,7 @@
   const foodPill = (heal, tight) => { let e = null; try { e = DQ.expedition && DQ.expedition(); } catch (x) { e = null; }
     if (!heal) return `<button class="rl-i warn" data-do="planfood" data-a="60" data-tip="text:Plan food for a longer trip">! No food</button>`;
     if (!e || e.unknown) return `<button class="rl-i ok" data-do="planfood" data-a="60">✓ Food ${tight ? heal + ' hp' : heal + ' health'}</button>`;
-    const low = e.minutes < 30; return `<button class="rl-i ${low ? 'warn' : 'ok'}" data-do="planfood" data-a="60" data-tip="text:About ${esc(DQ.expeditionSpan(e.minutes))} of food against ${esc(e.m.name)}. Click to plan a longer trip.">${low ? '!' : '✓'} Food ${tight ? '' : 'lasts '}≈ ${esc(DQ.expeditionSpan(e.minutes))}</button>`; };
+    const low = e.minutes < 30; return `<button class="rl-i ${low ? 'warn' : 'ok'}" data-do="planfood" data-a="60" data-tip="text:Food lasts ≈ ${esc(DQ.expeditionSpan(e.minutes))} vs ${esc(e.m.name)} · click to plan">${low ? '!' : '✓'} Food ${tight ? '' : 'lasts '}≈ ${esc(DQ.expeditionSpan(e.minutes))}</button>`; };
   const readyLine = (tight = false) => {
     const m = focus(), d = m && DQ.dangerOf ? DQ.dangerOf(m) : null, heal = foodHeal(), slots = ['head', 'body', 'legs', 'shield', 'weapon', 'amulet', 'ring'], worn = slots.filter(k => S().equip[k]).length;
     const ok = d && d.key === 'easy' && heal > 0, t = ok ? 'ok' : d && d.key !== 'easy' && d.key !== 'fair' ? 'bad' : 'warn';
@@ -79,7 +79,7 @@
     const next = D.ABIL.filter(a => !DQ.abilUnlocked(a)).sort((x, y) => (x.lvl - DQ.lvl(x.skill)) - (y.lvl - DQ.lvl(y.skill)))[0];
     const why = a => DQ.ability(a.id) ? 'In use' : a.needShield && !S().equip.shield ? 'Needs a shield' : a.style ? `${DQ.cap(a.style)} only` : 'Idle';
     const slotHtml = Array.from({ length: slots }, (_, i) => { const a = D.ABIL.find(x => x.id === on[i]);
-      return a ? `<button class="ab-tile on ${DQ.ability(a.id) ? '' : 'idle'}" data-do="abil" data-a="${a.id}" aria-pressed="true" data-tip="text:${esc(a.name)}: ${esc(a.text)} Click to take it out of the slot.">${ico(a.ic)}<b>${esc(a.name)}</b><small>${esc(why(a))}</small></button>`
+      return a ? `<button class="ab-tile on ${DQ.ability(a.id) ? '' : 'idle'}" data-do="abil" data-a="${a.id}" aria-pressed="true" data-tip="text:${esc(a.name)}: ${esc(a.text)} · click to remove">${ico(a.ic)}<b>${esc(a.name)}</b><small>${esc(why(a))}</small></button>`
         : `<button class="ab-tile empty" data-do="combatmore" data-a="abilities" aria-label="Choose ability for slot ${i+1}">${ico('star')}<b>Empty</b><small>${spare.length ? 'Choose an ability' : 'Slot ' + (i + 1)}</small></button>`; }).join('');
     const nextSlot = slots < 3 ? `<small class="ab-future-slot">Third slot · Combat 40</small>` : '';
     const nxt = next ? (() => { const need = D.XPF[next.lvl] || 1, have = S().xp[next.skill] || 0; return `<div class="ab-next"><span>${ready.length ? 'Next' : 'First ability'}: <b>${esc(next.name)}</b> at ${esc(D.SK[next.skill].name)} ${next.lvl}</span><span class="bar"><i style="width:${Math.min(100, Math.round(have / need * 100))}%"></i></span></div>`; })() : '';

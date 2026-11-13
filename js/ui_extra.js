@@ -56,7 +56,7 @@ UI.V.farming = () => {
   const pens = Array.from({ length: F.pensBought }, (_, i) => {
     const an = F.animals[i]; if (!an) return `<button class="pen emptypen" data-do="farmmarket" data-a="hen"><span>${ico('barn')}</span><b>Empty pen</b><small>${DQ.townUnlocked('mossbarrow') ? 'Buy one from the market' : 'The livestock trader is in Mossbarrow'}</small></button>`;
     const A = D.ANIMAL[an.id], pr = D.ITEMS[A.prod];
-    return `<div class="pen" data-i="${i}" data-b="pen:${i}" style="--c:${A.col}"><button class="pspr" data-do="petanimal" data-a="${i}" data-tip="text:Pet ${esc(an.name)}: makes them work 25% faster for 3 minutes">${DQ.animalSprite(A, 64, 'bob')}</button>
+    return `<div class="pen" data-i="${i}" data-b="pen:${i}" style="--c:${A.col}"><button class="pspr" data-do="petanimal" data-a="${i}" data-tip="text:Pet ${esc(an.name)}: +25% speed for 3 min">${DQ.animalSprite(A, 64, 'bob')}</button>
       <div class="pen-t"><b>${esc(an.name)}</b><small>${A.name} · makes ${pr.name.toLowerCase()} every ${left(DQ.animalPeriod(an))}</small><span class="bar pbar"><i></i></span><small><span class="pst mono"></span> ${pr.name.toLowerCase()} ready <span class="tag hungrytag">Hungry</span><span class="tag happytag">Happy</span></small></div>
       <button class="btn sm" data-do="collect" data-a="${i}">Collect</button><button class="btn sm pen-sell" data-do="sellanimal" data-a="${i}" data-tip="text:Sell to free this pen · ${fmt(DQ.animalSellPrice(i))} coins">Sell</button></div>`;
   }).join('');
@@ -132,10 +132,10 @@ UI.V.bestiary = () => {
     body = D.TOWNS.map(t => `<div class="sgroup"><div class="k">${DQ.townUnlocked(t.id) ? t.name : '???'}</div><div class="beasts">${D.MONLIST.filter(m => m.town === t.id).map(m => {
       const k = B.kills[m.id] || 0, known = k > 0, st = DQ.beastStars(m.id);
       const kn = m.drops.filter(([id]) => B.drops[m.id + ':' + id]), unk = m.drops.length - kn.length;
-      const drops = kn.map(([id]) => `<span class="itm sm" style="--c:${D.ITEMS[id].col}" data-tip="item:${id}">${ico(D.ITEMS[id].ic)}</span>`).join('') + (unk ? `<small class="dim unkn" data-tip="text:This monster can drop ${unk} more item${unk > 1 ? 's' : ''} you have not found yet. Keep defeating it. On the Combat page, hover it to see its drops by rarity.">${unk} drop${unk > 1 ? 's' : ''} not found yet</small>` : '');
+      const drops = kn.map(([id]) => `<span class="itm sm" style="--c:${D.ITEMS[id].col}" data-tip="item:${id}">${ico(D.ITEMS[id].ic)}</span>`).join('') + (unk ? `<small class="dim unkn" data-tip="text:${unk} undiscovered drop${unk > 1 ? 's' : ''}">${unk} drop${unk > 1 ? 's' : ''} not found yet</small>` : '');
       return `<div class="beast ${known ? '' : 'unk'} ${m.boss ? 'bossb' : ''}" style="--c:${m.col}">${DQ.monSprite(m, 72, known ? 'bob' : 'sil')}<div><b>${known ? esc(m.name) : '???'}</b><small>${known ? `Lv ${m.cl} · ${m.hp} health · max ${m.max}` : 'Defeat one to learn more'}</small><small class="mono">${fmt(k)} defeated <span class="stars">${'★'.repeat(st)}${'☆'.repeat(3 - st)}</span></small>${known ? `<div class="drops">${drops || '<small class="dim">No drops</small>'}</div>` : ''}</div></div>`;
     }).join('')}</div></div>`).join('');
-    body = `<p class="hint" style="margin-top:0">Stars at 10, 50 and 250 defeats. Each star adds 4% damage against that monster.</p>${body}`;
+    body = `<p class="hint" style="margin-top:0">Stars at 10 / 50 / 250 defeats: +4% damage each.</p>${body}`;
   } else {
     const act = S().pets.active, collection=DQ.collectiblePets?DQ.collectiblePets():D.PETS;
     const chosenPet = collection.find(p=>p.id===UI.tab.petChoice) || collection.find(p=>p.id===act) || collection[0];

@@ -191,26 +191,26 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (S().towns.willowbrook.boss) return DQ.regionNext();
   if (S().town !== 'willowbrook') return step('Return to Willowbrook', 'Grubnash awaits outside the village.', 'journeytravel', 'willowbrook');
   const first = D.QM.first_steps, firstState = DQ.questState(first);
-  if (firstState === 'new') return step('Meet Elder Wren', 'Goblins have broken Willowbrook’s well. Elder Wren’s first job for you: a little food and a little timber.', 'qstart', first.id);
+  if (firstState === 'new') return step('Meet Elder Wren', 'Goblins broke the well. Elder Wren needs food and timber.', 'qstart', first.id);
   if (firstState === 'ready') return step('Claim First Steps', 'Collect your XP and coins from Elder Wren. Her broken well is waiting on timber, and Grubnash on you.', 'qclaim', first.id);
   if (firstState === 'active') {
     const p = S().q[first.id], index = first.obj.findIndex((o, i) => DQ.objProg(first, p, i) < o.n);
-    if (index >= 0) return index === 0 ? task('Catch five shrimp', 'Food first: shrimp keep you on your feet when the goblins come. Five, plus five logs for Elder Wren’s broken well, completes First Steps.', 'fish', 'shrimp') : task('Chop five logs', 'Elder Wren needs timber to mend the well’s winch. Five logs finishes First Steps.', 'wood', 'normal');
+    if (index >= 0) return index === 0 ? task('Catch five shrimp', 'First Steps: 5 shrimp and 5 logs.', 'fish', 'shrimp') : task('Chop five logs', 'First Steps: 5 logs for the well.', 'wood', 'normal');
   }
   if (bossQuest && DQ.questState(bossQuest) === 'new') return step('Accept the Grubnash quest', 'Make your boss victory count toward the village quest and its rewards.', 'qstart', bossQuest.id);
-  if (!DQ.skillUnlocked('cooking')) return (S().stats.catch || 0) < 5 ? task('Learn Cooking', 'Food keeps you standing in a fight. Catch five fish and chop five logs for a cooking fire.', 'fish', 'shrimp') : task('Learn Cooking', 'Chop five logs for a cooking fire, then cook your catch.', 'wood', 'normal');
+  if (!DQ.skillUnlocked('cooking')) return (S().stats.catch || 0) < 5 ? task('Learn Cooking', 'Unlock: catch 5 fish, chop 5 logs.', 'fish', 'shrimp') : task('Learn Cooking', 'Chop five logs for a cooking fire, then cook your catch.', 'wood', 'normal');
   const food = DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0), req = D.MON.grubnash.boss.req;
   /* never send a beginner to fight with nothing to eat: chickens peck back, and a knock-out ends the session's training */
   if (DQ.combatLvl() < req && food < DQ.maxHp()) return DQ.have('raw_shrimp') >= 12 || (DQ.act && DQ.act.kind === 'recipe' && DQ.have('raw_shrimp') > 0)
-    ? task('Cook food for training', `Chickens peck back. You have ${fmt(DQ.have('raw_shrimp'))} raw shrimp; cooked, they keep you on your feet so fights are not cut short.`, 'recipe', 'cook_shrimp')
-    : task('Catch shrimp to cook', 'Chickens peck back. Catch about a dozen shrimp, cook them, then train: with food in your pack the fights keep going while you are away.', 'fish', 'shrimp');
+    ? task('Cook food for training', `Cook your ${fmt(DQ.have('raw_shrimp'))} raw shrimp before training.`, 'recipe', 'cook_shrimp')
+    : task('Catch shrimp to cook', 'Catch and cook about 12 shrimp before training.', 'fish', 'shrimp');
   /* an idle beginner keeps the starting focus (Strength) forever; point at the skill that is falling behind */
   if (DQ.combatLvl() < req && DQ.weaponStyle() === 'melee') {
     const sk = ['melee', 'defence'].map(k => [k, DQ.lvl(k)]).sort((a, b) => a[1] - b[1]), [low, lv] = sk[0], top = sk[sk.length - 1][1];
     const want = { melee: 'aggressive', defence: 'defensive' }[low];
-    if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. Your ${D.SK[low].name} (${lv}) is falling behind your ${D.SK[sk[sk.length - 1][0]].name} (${top}): ${low === 'defence' ? 'you take more damage' : 'you miss more often and your hits stay small'}. This switches your training focus and fights chickens.`, 'journeytrain', want, 'chicken');
+    if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. ${D.SK[low].name} ${lv} trails ${D.SK[sk[sk.length - 1][0]].name} ${top}: ${low === 'defence' ? 'more damage taken' : 'more misses, smaller hits'}. Switches focus and fights chickens.`, 'journeytrain', want, 'chicken');
   }
-  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Melee and Defence using the combat training focus.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
+  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Melee and Defence.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
   /* Ready by level: let the battle forecast decide what, if anything, is missing. */
   const f = DQ.bossForecast ? DQ.bossForecast('grubnash') : null;
   if (f && f.winRate >= .75) return task('Challenge Grubnash', `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current gear and food.`, 'fight', 'grubnash');
