@@ -65,3 +65,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   - **Combat past 60** (`js/data3.js`): abilities at 70/80/90/95 and passive techniques (`D.TECHNIQUES`, `DQ.tech`) every 5 levels to 95; a fourth ability slot at Combat 70.
   - **Queue**: the Queue button asks how long as plain buttons; the Now card shows "then …". Unlocks at Hero 3.
   - **Wording**: write for people who have played RPGs: "+10% attack speed", "Boss specials: −50% damage", "Lv 15". No explanatory sentences where a stat line will do; longer detail belongs in a tooltip or pop-up.
+  - **Beast vocabulary**: a *beast* is any animal you own or could own; your *companion* is the one with you (only it gives its bonus); "creature" means something you fight. Buttons say "Make companion". Each ranch sheet shows the journey (`UI.beastJourney`): egg, hatched, bond, evolved.
+  - **Field guide kinds**: besides fish/wood/mine/thieve/recipe, `S.mast` counts `crop:`, `animal:`, `brew:`, `sail:` and `train:`; any new repeatable activity needs a topic in `js/guide_materials.js` and a truthful perk in `DQ.entryPerk`. Within 10% of the next entry the bar gets `.near` (a gentle breathe); add no other cue.
+  - **Tests**: see "Current test list" in HANDOFF.md; `tests/regression.cjs` covers save round-trips for eggs, field-guide entries and the queue.

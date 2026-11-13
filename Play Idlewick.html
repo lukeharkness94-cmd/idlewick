@@ -3688,6 +3688,20 @@ html.lw-1600 .guide-book{grid-template-columns:200px minmax(0,1fr) 340px}
 
 
 .abils .tech-note{grid-column:1/-1;margin:0 0 4px}
+
+/* nearly there (within 10% of the next entry): the same brass bar breathes; nothing new is added */
+@keyframes study-near{0%,100%{opacity:1}50%{opacity:.45}}
+.study-bar.near::after,.mast-line.near .bar i{animation:study-near 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.study-bar.near::after,.mast-line.near .bar i{animation:none}} html.calm .study-bar.near::after,html.calm .mast-line.near .bar i{animation:none}
+/* a beast's journey on its ranch sheet: egg, hatched, bond, evolved */
+.beast-journey{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:10px 0 8px;padding:0;position:relative}
+.beast-journey::before{content:"";position:absolute;left:12%;right:12%;top:13px;height:2px;background:color-mix(in srgb,var(--ink) 16%,transparent)}
+.beast-journey li{display:grid;justify-items:center;gap:3px;position:relative;opacity:.5}
+.beast-journey li.on{opacity:1}
+.bj-ic{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--panel2);border:1px solid var(--line)}
+.beast-journey li.on .bj-ic{border-color:var(--brass)}
+.bj-ic svg,.bj-ic img{width:16px;height:16px}
+.beast-journey small{font-size:13px;text-align:center;line-height:1.2}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -5302,7 +5316,7 @@ const DQ = window.DQ, D = DQ.data;
 for (const s of [
   { id: 'carpentry', name: 'Carpentry', col: '#c08a4a', group: 'artisan', page: 'carpentry', actionReq: { 'own:tool_handsaw': 1 }, blurb: 'Saw logs into planks for furniture, town projects and boats.' },
   { id: 'sailing', name: 'Sailing', col: '#3f8fc8', group: 'gather', page: 'sailing', actionReq: { 'visit:saltmere': 1, 'own:boat_skiff': 1 }, blurb: 'Sail from Saltmere to far islands and bring back what you find.' },
-  { id: 'beastmastery', name: 'Beastmastery', col: '#d08a5a', group: 'gather', page: 'beastmastery', actionReq: { 'own:wooden_trap': 3, combat: 10 }, blurb: 'Lay traps to befriend wild companions, and train them into stronger allies.' }
+  { id: 'beastmastery', name: 'Beastmastery', col: '#d08a5a', group: 'gather', page: 'beastmastery', actionReq: { 'own:wooden_trap': 3, combat: 10 }, blurb: 'Hatch beasts, keep them at your ranch and bond with one as your companion.' }
 ]) { D.SKILLS.push(s); D.SK[s.id] = s; }
 const icons = DQ.ICONS || {}; for (const k of ['carpentry', 'sailing', 'beastmastery', 'plank', 'boat', 'island']) if (!(k in icons)) icons[k] = 'M4 12h16';
 
@@ -11048,9 +11062,9 @@ DQ.awardPet = (id, options = {}) => {
   if (!S().pets.active) { S().pets.active = id; DQ.fxDirty(); }
   if (options.quiet) { DQ.achDirty = true; return true; }
   const active = S().pets.active === id;
-  DQ.notify({ kind: 'unlock', key: 'pet:' + id, icon: 'paw', col: p.col, title: `New creature: ${p.name}!`, text: `A ${p.kind.toLowerCase()} has joined your collection. ${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.colTab = 'eggs'; DQ.go('collection'); } }, sound: 'gem', burst: true, ttl: 14000,
-    popup: (DQ.sim && DQ.sim.on) || DQ.forecasting ? null : { title: `A new companion: ${p.name}!`, body: `<div class="pet-pop" style="--c:${p.col}"><span class="pet-pop-art">${(() => { try { return DQ.petSprite ? DQ.petSprite(p, 128) : ''; } catch (e) { return ''; } })()}</span><p><b>${DQ.esc(p.name)}</b> the ${DQ.esc(p.kind.toLowerCase())} has joined you.</p><p class="pet-pop-fx">${DQ.esc(p.text)}.</p><p class="sm dim">${active ? 'They are your active companion now.' : 'Make them your companion to get this bonus.'}</p></div>`,
-      actions: [...(active ? [] : [{ label: 'Make active', primary: true, fn: () => { DQ.setPet(id); DQ.ui.render && DQ.ui.render(false); } }]), { label: 'Meet them', primary: active, fn: () => { DQ.ui.colTab = 'eggs'; DQ.go('collection'); } }, { label: 'Close' }] } });
+  DQ.notify({ kind: 'unlock', key: 'pet:' + id, icon: 'paw', col: p.col, title: `${p.name} hatched`, text: `${p.text}.`, action: { label: 'Meet them', fn: () => { DQ.ui.colTab = 'eggs'; DQ.go('collection'); } }, sound: 'gem', burst: true, ttl: 14000,
+    popup: (DQ.sim && DQ.sim.on) || DQ.forecasting ? null : { title: `${p.name} hatched`, body: `<div class="pet-pop" style="--c:${p.col}"><span class="pet-pop-art">${(() => { try { return DQ.petSprite ? DQ.petSprite(p, 128) : ''; } catch (e) { return ''; } })()}</span><p><b>${DQ.esc(p.name)}</b> the ${DQ.esc(p.kind.toLowerCase())} is at your ranch.</p><p class="pet-pop-fx">${DQ.esc(p.text)}.</p><p class="sm dim">${active ? 'Your companion now.' : 'Only your companion gives its bonus.'}</p></div>`,
+      actions: [...(active ? [] : [{ label: 'Make companion', primary: true, fn: () => { DQ.setPet(id); DQ.ui.render && DQ.ui.render(false); } }]), { label: 'Meet them', primary: active, fn: () => { DQ.ui.colTab = 'eggs'; DQ.go('collection'); } }, { label: 'Close' }] } });
   DQ.log(`A new creature joins you: ${p.name} the ${p.kind.toLowerCase()}!`, 'quest'); DQ.emit('pets'); DQ.achDirty = true; return true;
 };
 DQ.petRoll = (type, key) => {
@@ -11864,25 +11878,28 @@ DQ.playtestReport = () => {
 (() => {
 const DQ = window.DQ, D = DQ.data, S = () => DQ.S;
 const STEPS = D.MASTERY_STEPS = [25, 100, 300, 750, 1500];
-const YIELD_KINDS = ['fish', 'wood', 'mine', 'recipe'];
+const YIELD_KINDS = ['fish', 'wood', 'mine', 'recipe', 'crop'];
+/* what an entry speeds up, by kind; potions have no timer, so their entries are a chance of a second bottle */
+const SPEED_WORD = { crop: 'faster growth', animal: 'faster produce', sail: 'faster voyage' };
 const key = (kind, id) => kind + ':' + id;
 DQ.mastCount = (kind, id) => ((S().mast || {})[key(kind, id)]) || 0;
 DQ.mastStars = (kind, id) => { const n = DQ.mastCount(kind, id); let s = 0; while (s < STEPS.length && n >= STEPS[s]) s++; return s; };
-DQ.mastSpeed = (kind, id) => kind === 'fight' ? 0 : .02 * DQ.mastStars(kind, id);
-DQ.mastExtra = (kind, id) => { if (!YIELD_KINDS.includes(kind)) return 0; const s = DQ.mastStars(kind, id); return s >= 5 ? .1 : s >= 3 ? .05 : 0; };
+DQ.mastSpeed = (kind, id) => kind === 'fight' || kind === 'brew' ? 0 : .02 * DQ.mastStars(kind, id);
+DQ.mastExtra = (kind, id) => { if (kind === 'brew') return .02 * DQ.mastStars(kind, id); if (!YIELD_KINDS.includes(kind)) return 0; const s = DQ.mastStars(kind, id); return s >= 5 ? .1 : s >= 3 ? .05 : 0; };
 DQ.mastInfo = (kind, id) => { const n = DQ.mastCount(kind, id), stars = DQ.mastStars(kind, id), next = STEPS[stars] || null, prev = stars ? STEPS[stars - 1] : 0;
-  return { n, stars, next, pct: next ? Math.round((n - prev) / (next - prev) * 100) : 100, speed: Math.round(DQ.mastSpeed(kind, id) * 100), extra: Math.round(DQ.mastExtra(kind, id) * 100), yields: YIELD_KINDS.includes(kind) }; };
+  return { n, stars, next, pct: next ? Math.round((n - prev) / (next - prev) * 100) : 100, speed: Math.round(DQ.mastSpeed(kind, id) * 100), extra: Math.round(DQ.mastExtra(kind, id) * 100), yields: YIELD_KINDS.includes(kind) || kind === 'brew' }; };
 DQ.mastPerk = (kind, star) => star === 3 && YIELD_KINDS.includes(kind) ? '2% faster and a 5% chance of an extra one' : star === 5 && YIELD_KINDS.includes(kind) ? '2% faster and a 10% chance of an extra one' : '2% faster';
 DQ.mastTotal = () => Object.keys(S().mast || {}).reduce((t, k) => { const i = k.indexOf(':'); return t + DQ.mastStars(k.slice(0, i), k.slice(i + 1)); }, 0);
-DQ.mastTick = a => {
+DQ.mastName = (kind, id) => kind === 'crop' ? (D.CROP[id] || {}).name : kind === 'animal' ? (D.ANIMAL[id] || {}).name : kind === 'brew' ? (D.ITEMS[id] || {}).name : (DQ.actLabel ? DQ.actLabel({ kind, id }) : id);
+DQ.mastTick = (a, n = 1) => {
   if (!a || a.kind === 'fight' || a.kind === 'alch') return;
   const M = S().mast = S().mast || {}, k = key(a.kind, a.id), before = DQ.mastStars(a.kind, a.id);
-  M[k] = (M[k] || 0) + 1;
+  M[k] = (M[k] || 0) + n;
   const after = DQ.mastStars(a.kind, a.id);
   if (after > before && !DQ.sim.on && !DQ.forecasting) {
-    const name = DQ.actLabel ? DQ.actLabel({ kind: a.kind, id: a.id }) : a.id;
+    const name = DQ.mastName(a.kind, a.id) || a.id;
     DQ.sfx && DQ.sfx('perk');
-    DQ.notify({ kind: 'info', key: 'mast:' + k, icon: 'book', col: '#f3d58a', title: `Field guide: ${name}`, text: `Entry ${after} of ${STEPS.length}, ${DQ.ENTRY_NAMES[after - 1]}: ${DQ.entryPerk(a.kind, after)}.`, sound: false, ttl: 7000, action: { label: 'Open the page', fn: () => { DQ.ui.guideTopic = a.kind === 'recipe' ? 'recipe:' + D.RECIPES[a.id].skill : a.kind; DQ.go('bestiary'); } } });
+    DQ.notify({ kind: 'info', key: 'mast:' + k, icon: 'book', col: '#f3d58a', title: `Field guide: ${name}`, text: `Entry ${after} of ${STEPS.length}, ${DQ.ENTRY_NAMES[after - 1]}: ${DQ.entryPerk(a.kind, after)}.`, sound: false, ttl: 7000, action: { label: 'Open the page', fn: () => { DQ.ui.guideTopic = a.kind === 'recipe' ? 'recipe:' + D.RECIPES[a.id].skill : a.kind; (DQ.ui.guideSel = DQ.ui.guideSel || {})[DQ.ui.guideTopic] = a.id; DQ.go('bestiary'); } } });
   }
 };
 /* ---------- how it shows (Dec 2026, from the player: visible without more text, systems or colours) ----------
@@ -11890,12 +11907,18 @@ DQ.mastTick = a => {
    progress to the next field-guide entry. The selected task also shows five pips. Details live in the tooltip and on
    the field guide page. DQ.studyBar is shared with creatures (js/where.js). */
 DQ.ENTRY_NAMES = ['Notes', 'Quicker hands', 'Keen eye', 'Second nature', 'Mastered'];
-DQ.entryPerk = (kind, star) => { const y = YIELD_KINDS.includes(kind); return star === 1 ? 'Uses shown · 2% faster' : star === 3 && y ? '6% faster · 5% double' : star === 5 && y ? '10% faster · 10% double' : `${star * 2}% faster`; };
-DQ.studyBar = (pct, full, tip) => `<i class="study-bar ${full ? 'full' : ''}" style="--p:${Math.max(0, Math.min(100, Math.round(pct)))}%" ${tip ? `data-tip="text:${DQ.esc(tip)}"` : ''} aria-hidden="true"></i>`;
+DQ.entryPerk = (kind, star) => { if (kind === 'brew') return `${star * 2}% double`; const y = YIELD_KINDS.includes(kind), w = SPEED_WORD[kind] || 'faster'; return `${star === 1 ? 'Uses shown · ' : ''}${star * 2}% ${w}${y && star >= 5 ? ' · 10% double' : y && star >= 3 ? ' · 5% double' : ''}`; };
+DQ.studyBar = (pct, full, tip) => `<i class="study-bar ${full ? 'full' : pct >= 90 ? 'near' : ''}" style="--p:${Math.max(0, Math.min(100, Math.round(pct)))}%" ${tip ? `data-tip="text:${DQ.esc(tip)}"` : ''} aria-hidden="true"></i>`;
 DQ.mastTip = (kind, id) => { const m = DQ.mastInfo(kind, id); return m.next ? `Field guide ${m.stars}/${STEPS.length} · next: ${DQ.entryPerk(kind, m.stars + 1)} in ${DQ.fmt(m.next - m.n)}` : `Field guide complete · ${m.speed}% faster${m.extra ? ` · ${m.extra}% double` : ''}`; };
 DQ.mastBadge = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''; const m = DQ.mastInfo(kind, id); return m.n ? DQ.studyBar(m.pct, !m.next) : ''; };
 DQ.mastLine = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''; const m = DQ.mastInfo(kind, id);
-  return `<div class="mast-line ${m.next ? '' : 'max'}" data-tip="text:${DQ.esc(DQ.mastTip(kind, id))}" role="img" aria-label="${DQ.esc(DQ.mastTip(kind, id))}"><span class="mast-pips">${Array.from({ length: STEPS.length }, (_, i) => `<i class="${i < m.stars ? 'on' : ''}"></i>`).join('')}</span><span class="bar"><i style="width:${m.pct}%"></i></span></div>`; };
+  return `<div class="mast-line ${m.next ? (m.pct >= 90 ? 'near' : '') : 'max'}" data-tip="text:${DQ.esc(DQ.mastTip(kind, id))}" role="img" aria-label="${DQ.esc(DQ.mastTip(kind, id))}"><span class="mast-pips">${Array.from({ length: STEPS.length }, (_, i) => `<i class="${i < m.stars ? 'on' : ''}"></i>`).join('')}</span><span class="bar"><i style="width:${m.pct}%"></i></span></div>`; };
+/* crops and livestock are not tasks: their entries fill as you harvest and collect, and speed up growth and produce */
+const grow0 = DQ.growDur; if (grow0) DQ.growDur = c => Math.round(grow0(c) * (1 - DQ.mastSpeed('crop', c.id)));
+const period0 = DQ.animalPeriod; if (period0) DQ.animalPeriod = a => period0(a) * (1 - DQ.mastSpeed('animal', a.id));
+const harvest0 = DQ.harvest; if (harvest0) DQ.harvest = (i, o = {}) => { const p = S().farm.plots[i], cid = p && p.crop, ok = harvest0(i, o);
+  if (ok && cid && !o.by) { DQ.mastTick({ kind: 'crop', id: cid }); if (DQ.chance(DQ.mastExtra('crop', cid))) DQ.grant('crop_' + cid, 1); } return ok; };
+const collect0 = DQ.collect; if (collect0) DQ.collect = (i, o = {}) => { const a = S().farm.animals[i], id = a && a.id, n = collect0(i, o); if (n && id && !o.by) DQ.mastTick({ kind: 'animal', id }, n); return n; };
 /* the task itself gets faster */
 const dur0 = DQ.durFor;
 DQ.durFor = (kind, id) => { const d = dur0(kind, id), s = DQ.mastSpeed(kind, id); return s ? Math.max(200, Math.round(d * (1 - s))) : d; };
@@ -12814,7 +12837,7 @@ const collectibleWild=new Set(['lanternmoth','thimblefox','tideglass','snowcoil'
 D.PETS.forEach(p=>p.collectible=true);
 D.MONLIST.filter(m=>!m.boss).forEach((m,i)=>{
   const id='wild_'+m.id;if(D.PET[id])return;const [key,val]=bonusKinds[i%bonusKinds.length],bonus={[key]:val};
-  const p={id,name:m.name,kind:'Wild companion',spr:'quad',mon:m.id,col:m.col,collectible:collectibleWild.has(m.id),src:{type:'hunt',mon:m.id},bonus,text:key==='dmg'?'+2% damage':key==='dr'?'−2% damage taken':key==='coin'?'+3% coins':key==='xpAll'?'+2% XP':'+2% task speed'};
+  const p={id,name:m.name,kind:'Wild beast',spr:'quad',mon:m.id,col:m.col,collectible:collectibleWild.has(m.id),src:{type:'hunt',mon:m.id},bonus,text:key==='dmg'?'+2% damage':key==='dr'?'−2% damage taken':key==='coin'?'+3% coins':key==='xpAll'?'+2% XP':'+2% task speed'};
   D.PETS.push(p);D.PET[id]=p;
 });
 DQ.collectiblePets=()=>D.PETS.filter(p=>p.collectible||S().pets.owned[p.id]);
@@ -13168,7 +13191,7 @@ UI.V.beastmastery = () => {
     return { id: 'lure:' + t.id, name: seen ? `Lay traps · ${t.name}` : '???', artKind: 'creature', artId: sig ? (A && A.hasCreature(sig.id) ? sig.id : sig.mon) : 'chicken', locked: lvlLock || !seen, blackout: !seen, blocked: lvlLock || !seen || !traps,
       reason: [!seen ? `Reach ${t.name}` : '', lvlLock ? `Requires Beastmastery ${lvl}` : '', !traps ? 'Needs a wooden trap' : ''].filter(Boolean).join(' · '),
       short: !seen ? `Reach ${t.name}` : lvlLock ? `Lv ${lvl}` : '', caption: got ? `${esc(sig.name)} befriended` : `Befriend ${sig ? esc(sig.name) : 'a creature'}`, stateText: got ? '✓ Befriended · hides and feathers' : `${(DQ.befriendChance(t.id) * 100).toFixed(1)}% per trap`,
-      info: `${got ? companionBtn(sig) : ''}<p>Lay traps around ${esc(t.name)}. ${got ? 'You have befriended its signature companion; traps now bring hides, feathers and other trophies.' : `Each trap has a ${(DQ.befriendChance(t.id) * 100).toFixed(1)}% chance to befriend <b>${sig ? esc(sig.name) : 'its companion'}</b>; otherwise it brings hides, feathers and other trophies.`}</p><p>${traps} wooden trap${traps === 1 ? '' : 's'} · about 1 in 4 breaks · 8s per trap</p>` }; });
+      info: `${got ? companionBtn(sig) : ''}<p>Lay traps around ${esc(t.name)}. ${got ? 'You have this region’s wild beast. Traps now bring loot only.' : `Each trap has a ${(DQ.befriendChance(t.id) * 100).toFixed(1)}% chance to befriend <b>${sig ? esc(sig.name) : 'its companion'}</b>; otherwise it brings hides, feathers and other trophies.`}</p><p>${traps} wooden trap${traps === 1 ? '' : 's'} · about 1 in 4 breaks · 8s per trap</p>` }; });
   return UI.taskPanel('beastmastery', 'Fieldwork', 'train', lures, '');
 };
 })();
@@ -16949,27 +16972,35 @@ UI.render=fresh=>{
 (() => {
 const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S, { esc, ico, fmt } = Q;
 if (!Q.mastInfo) return;
-const NODE_SK = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' }, VERB = { fish: 'caught', wood: 'cut', mine: 'mined', thieve: 'picked', recipe: 'made' };
+const NODE_SK = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' }, VERB = { fish: 'caught', wood: 'cut', mine: 'mined', thieve: 'picked', recipe: 'made', crop: 'harvested', animal: 'collected', brew: 'brewed', sail: 'voyages', train: 'traps laid' };
+const PAGE = { crop: 'farming', animal: 'farming', brew: 'brewery', sail: 'sailing', train: 'beastmastery' };
 const studyQ = m => D.QUESTS.find(q => S().q[q.id] && ['active', 'new'].includes(S().q[q.id].s) && q.obj.some((o, j) => o.ev === 'guide' && o.key === m.id && Q.objProg(q, S().q[q.id], j) < o.n));
 /* ---------- one shape for everything in the book ---------- */
 const creature = m => { const r = Q.research(m), R = D.RESEARCH.ranks, seen = r.rank > 0, sq = studyQ(m), prev = r.rank ? r.T[Math.min(r.rank, r.T.length) - 1] : 0;
   return { key: m.id, kind: 'creature', name: seen || sq ? m.name : '???', known: seen, quest: sq, filled: r.rank, total: R.length, n: r.kills, pct: r.next ? Math.max(0, Math.min(100, (r.kills - prev) / Math.max(1, r.next - prev) * 100)) : 100, left: r.next ? r.need : 0,
     art: size => Q.monSprite(m, size, seen || sq ? '' : 'sil'), sub: seen ? `Level ${m.cl}${m.boss ? ' boss' : m.mini ? ' challenge' : ''} · ${fmt(r.kills)} defeated` : `${D.TOWN[m.town].name}`,
     ladder: R.map((x, i) => ({ name: x[1], text: x[2], at: r.T[i], done: r.rank > i })), unit: 'defeated', m }; };
-const material = (kind, x, sk) => { const m = Q.mastInfo(kind, x.id), open = Q.lvl(sk) >= x.lvl || m.n > 0, itemId = kind === 'recipe' ? Object.keys(x.out)[0] : x.item, it = D.ITEMS[itemId];
-  const art = size => { try { if (kind !== 'fish' && kind !== 'recipe') return `<span class="${open ? '' : 'blackout'}">${Q.artImage(kind, x.id, size, open ? '' : 'sil', x.name)}</span>`; } catch (e) {} return `<span class="activity-item-art guide-item ${open ? '' : 'blackout'}" style="--art-size:${size >= 96 ? 64 : size >= 64 ? 48 : 32}px">${it ? Q.itemIco(it) : ico('book')}</span>`; };
-  return { key: x.id, kind, sk, name: open ? x.name : '???', known: m.n > 0, locked: !open, need: `${D.SK[sk].name} ${x.lvl}`, filled: m.stars, total: 5, n: m.n, pct: m.pct, left: m.next ? m.next - m.n : 0, art,
-    sub: open ? `${D.SK[sk].name} ${x.lvl}${m.n ? ` · ${fmt(m.n)} ${VERB[kind]}` : ''}` : `${D.SK[sk].name} ${x.lvl}`, itemId,
+const material = (kind, x, sk, o = {}) => { const m = Q.mastInfo(kind, x.id), lvl = o.lvl != null ? o.lvl : x.lvl, open = (o.open != null ? o.open : Q.lvl(sk) >= lvl) || m.n > 0, itemId = o.itemId || (kind === 'recipe' ? Object.keys(x.out)[0] : x.item), it = D.ITEMS[itemId], need = o.need || `${D.SK[sk].name} ${lvl}`;
+  const art = size => { try { if (o.art) return `<span class="${open ? '' : 'blackout'}">${o.art(size)}</span>`; if (kind === 'wood' || kind === 'mine' || kind === 'thieve') return `<span class="${open ? '' : 'blackout'}">${Q.artImage(kind, x.id, size, open ? '' : 'sil', x.name)}</span>`; } catch (e) {} return `<span class="activity-item-art guide-item ${open ? '' : 'blackout'}" style="--art-size:${size >= 96 ? 64 : size >= 64 ? 48 : 32}px">${it ? Q.itemIco(it) : ico('book')}</span>`; };
+  return { key: x.id, kind, sk, name: open ? (o.name || x.name) : '???', known: m.n > 0, locked: !open, need, filled: m.stars, total: 5, n: m.n, pct: m.pct, left: m.next ? m.next - m.n : 0, art,
+    sub: `${need}${m.n ? ` · ${fmt(m.n)} ${VERB[kind]}` : ''}`, itemId,
     ladder: Q.ENTRY_NAMES.map((nm, i) => ({ name: nm, text: Q.entryPerk(kind, i + 1), at: D.MASTERY_STEPS[i], done: m.stars > i })), unit: VERB[kind] }; };
 const topics = () => { const t = [];
   for (const town of D.TOWNS) if (S().towns[town.id] && S().towns[town.id].visited) t.push({ id: 'c:' + town.id, group: 'Creatures', name: town.name, ic: 'attack', items: () => D.MONLIST.filter(m => m.town === town.id).sort((a, b) => a.cl - b.cl).map(creature) });
   for (const [kind, sk] of Object.entries(NODE_SK)) if ((D.NODES[kind] || []).length && Q.skillUnlocked(sk)) t.push({ id: kind, group: 'Gathering', name: D.SK[sk].name, ic: sk, items: () => [...D.NODES[kind]].sort((a, b) => a.lvl - b.lvl).map(x => material(kind, x, sk)) });
   const seen = new Set(); for (const r of Object.values(D.RECIPES)) if (!seen.has(r.skill) && D.SK[r.skill] && Q.skillUnlocked(r.skill)) { seen.add(r.skill); const sk = r.skill; t.push({ id: 'recipe:' + sk, group: 'Making', name: D.SK[sk].name, ic: sk, items: () => Object.values(D.RECIPES).filter(x => x.skill === sk).sort((a, b) => a.lvl - b.lvl).map(x => material('recipe', x, sk)) }); }
+  /* everything else you repeat: crops, livestock, potions, voyages and trap lines */
+  if (Q.skillUnlocked('farming')) { t.push({ id: 'crop', group: 'Growing', name: 'Crops', ic: 'farming', items: () => [...D.CROPS].sort((a, b) => a.lvl - b.lvl).map(c => material('crop', c, 'farming', { itemId: 'crop_' + c.id })) });
+    t.push({ id: 'animal', group: 'Growing', name: 'Livestock', ic: 'farming', items: () => [...D.ANIMALS].sort((a, b) => a.lvl - b.lvl).map(a => material('animal', a, 'farming', { itemId: a.prod })) }); }
+  if (D.POTION_RECIPES && Q.skillUnlocked('herbalism')) t.push({ id: 'brew', group: 'Making', name: 'Potions', ic: 'herbalism', items: () => D.POTION_RECIPES.map(r => material('brew', { id: r.id, name: (D.ITEMS[r.id] || {}).name || r.id }, 'herbalism', { itemId: r.id, lvl: 1, open: !!(Q.canBrew && Q.canBrew(r)), need: 'Research its recipe' })) });
+  if (D.VOYAGES && Q.skillUnlocked('sailing')) t.push({ id: 'sail', group: 'Gathering', name: 'Sailing', ic: 'sailing', items: () => [...D.VOYAGES].sort((a, b) => a.lvl - b.lvl).map(v => material('sail', v, 'sailing', { art: size => Q.artImage('skill', 'sailing', Math.min(64, size), '', v.name) })) });
+  if (Q.lureLvl && Q.skillUnlocked('beastmastery')) t.push({ id: 'train', group: 'Gathering', name: 'Trap lines', ic: 'beastmastery', items: () => D.TOWNS.map(tw => material('train', { id: 'lure:' + tw.id, name: tw.name }, 'beastmastery', { lvl: Q.lureLvl(tw.id), open: Q.lvl('beastmastery') >= Q.lureLvl(tw.id) && !!(S().towns[tw.id] && S().towns[tw.id].visited), art: size => Q.artImage('skill', 'beastmastery', Math.min(64, size), '', tw.name) })) });
+  const order = ['Creatures', 'Gathering', 'Growing', 'Making']; t.sort((x, y) => order.indexOf(x.group) - order.indexOf(y.group));
   return t; };
 /* ---------- the three parts ---------- */
 const tile = (e, sel, big) => `<button class="gt ${sel ? 'on' : ''} ${e.filled >= e.total ? 'full' : ''} ${e.known ? '' : 'unk'} ${e.quest ? 'quest' : ''}" data-do="guidepick" data-a="${esc(e.key)}" aria-pressed="${!!sel}" ${e.locked ? `data-tip="text:${esc(e.need)}"` : ''} aria-label="${esc(e.name)}, ${e.filled} of ${e.total} entries">${e.quest ? `<i class="gt-q">${ico('quest')}</i>` : ''}<span class="gt-art">${e.art(big ? 64 : 48)}</span><b>${esc(e.name)}</b>${e.known ? Q.studyBar(e.filled >= e.total ? 100 : e.pct, e.filled >= e.total) : ''}<span class="gt-pips" aria-hidden="true">${Array.from({ length: e.total }, (_, i) => `<i class="${i < e.filled ? 'on' : ''}"></i>`).join('')}</span></button>`;
 const pageOf = e => { const nextI = e.ladder.findIndex(l => !l.done), sq = e.quest;
-  const rows = e.ladder.map((l, i) => `<li class="${l.done ? 'done' : i === nextI ? 'next' : 'later'}"><span class="gl-dot" aria-hidden="true">${l.done ? '✓' : i + 1}</span><div><b>${esc(l.name)}</b><small>${esc(l.text)}</small>${i === nextI && e.known ? `<span class="gl-prog"><span class="bar"><i style="width:${e.pct}%"></i></span><em class="mono">${fmt(e.n)} / ${fmt(l.at)}</em></span>` : ''}</div>${l.done || (i === nextI && e.known) ? '' : `<em class="gl-at mono">${fmt(l.at)}</em>`}</li>`).join('');
+  const rows = e.ladder.map((l, i) => `<li class="${l.done ? 'done' : i === nextI ? 'next' : 'later'}"><span class="gl-dot" aria-hidden="true">${l.done ? '✓' : i + 1}</span><div><b>${l.done || i === nextI ? esc(l.name) : '???'}</b>${l.done || i === nextI ? `<small>${esc(l.text)}</small>` : ''}${i === nextI && e.known ? `<span class="gl-prog"><span class="bar"><i style="width:${e.pct}%"></i></span><em class="mono">${fmt(e.n)} / ${fmt(l.at)}</em></span>` : ''}</div>${l.done || (i === nextI && e.known) ? '' : `<em class="gl-at mono">${fmt(l.at)}</em>`}</li>`).join('');
   const act = e.kind === 'creature' ? `<button class="btn primary" data-do="guide" data-a="${e.key}">${sq ? `Read it for ${esc(sq.giver)}` : 'Read the full page'}</button>` : e.locked ? `<span class="tag">${ico('lock')} ${esc(e.need)}</span>` : `<button class="btn primary" data-do="guidemat" data-a="${e.kind}" data-b="${esc(e.key)}">Go there</button>`;
   return `<section class="panel guide-page ${e.filled >= e.total ? 'full' : ''}"><div class="gp-head"><span class="gp-art">${e.art(96)}</span><div><span class="k">${e.filled} of ${e.total} entries</span><h2>${esc(e.name)}</h2><small>${esc(e.sub)}</small></div></div>${sq ? `<p class="study-tag">${ico('quest')}${esc(sq.giver)} asks you to read this</p>` : ''}<ol class="guide-ladder">${rows}</ol><div class="btnrow">${act}</div></section>`; };
 const page0 = UI.V.bestiary;
@@ -16981,7 +17012,7 @@ UI.V.bestiary = () => { if (UI.beastTab === 'pets') return page0();
   const fill = t => { const it = t.items(); return [it.reduce((n, e) => n + e.filled, 0), it.reduce((n, e) => n + e.total, 0)]; };
   let group = ''; const index = T.map(t => { const [a, b] = fill(t), head = t.group !== group ? `<span class="gi-group">${group = t.group}</span>` : ''; return `${head}<button class="gi ${t.id === topic.id ? 'on' : ''}" data-do="guidetopic" data-a="${t.id}" aria-pressed="${t.id === topic.id}">${ico(t.ic)}<b>${esc(t.name)}</b><em class="mono">${a}/${b}</em><span class="bar"><i style="width:${b ? a / b * 100 : 0}%"></i></span></button>`; }).join('');
   const [a, b] = fill(topic), rest = items.filter(e => !near.includes(e));
-  return `<div class="guide-book"><nav class="panel guide-index" aria-label="Field guide topics"><span class="k">Field guide</span>${index}<button class="btn sm gi-eggs" data-do="go" data-a="collection">Companion eggs</button></nav>
+  return `<div class="guide-book"><nav class="panel guide-index" aria-label="Field guide topics"><span class="k">Field guide</span>${index}<button class="btn sm gi-eggs" data-do="go" data-a="collection">Beast eggs</button></nav>
     <section class="panel guide-album"><div class="phead"><div><span class="k">${esc(topic.group)}</span><h2>${esc(topic.name)}</h2></div><small class="mono">${a} of ${b} entries</small></div>
       ${near.length ? `<div class="k ga-k">Closest to a new entry</div><div class="ga-near">${near.map(e => tile(e, e === sel, true)).join('')}</div><div class="k ga-k">Everything else</div>` : ''}<div class="ga-all">${rest.map(e => tile(e, e === sel)).join('')}</div></section>
     ${sel ? pageOf(sel) : ''}</div>`; };
@@ -16990,7 +17021,9 @@ UI.DO.guidepick = a => { UI.guideSel[UI.guideTopic] = a; UI.render(false); };
 /* older links that named a region still land on it */
 UI.DO.guidetown = id => { UI.guideTopic = 'c:' + id; UI.render(false); };
 /* a material's page takes you to it, selected, like any other route */
-UI.DO.guidemat = (kind, id) => { const sk = kind === 'recipe' ? D.RECIPES[id].skill : NODE_SK[kind]; if (!sk) return; UI.taskChoice[sk] = id; Q.go(D.SK[sk].page || sk); };
+UI.DO.guidemat = (kind, id) => { if (PAGE[kind]) { if (kind === 'animal' && UI.tab) UI.tab.farmSection = 'livestock'; return Q.go(PAGE[kind]); } const sk = kind === 'recipe' ? D.RECIPES[id].skill : NODE_SK[kind]; if (!sk) return; UI.taskChoice[sk] = id; Q.go(D.SK[sk].page || sk); };
+/* brewing fills a potion's page; its entries are a chance of a second bottle */
+const brew0 = Q.brew; if (brew0) Q.brew = id => { const ok = brew0(id); if (ok) { Q.mastTick({ kind: 'brew', id }); if (Q.chance(Q.mastExtra('brew', id))) { Q.give(id, 1); Q.toast && Q.toast('A second bottle!'); } } return ok; };
 })();
 
 </script>
@@ -18172,7 +18205,7 @@ Q.migrateBeasts=st=>{
 const ensure=()=>{const p=S().pets;if(p.bondVersion!==1||Object.values(p.owned).some(o=>!Number.isFinite(o.bondXp)))Q.migrateBeasts(S());return p;};
 Q.petLevel=id=>{const o=S().pets.owned[id];return !o?0:Number.isFinite(o.bondXp)?Q.beastLevelFrom(o.bondXp):oldLevel(id);};
 Q.beastPassive=(id,level=Q.petLevel(id))=>{const s=Q.beastSpec(id);if(!s)return null;const lv=Math.max(1,Math.min(MAX,level)),step=D.BOND_MILESTONES.filter(n=>n<=lv).length;return {key:s.passive,value:s.base+step*D.BOND_PASSIVE_STEP,steps:step,level:lv};};
-Q.beastPassiveText=id=>{const p=D.PET[id],b=Q.beastPassive(id);if(!p||!b)return '';if(b.key==='legacy')return `${p.text||'Signature companion bonus'} · bond multiplier ×${(1+.25*(Math.min(5,b.level)-1)+Math.max(0,b.level-5)*.05).toFixed(2)}`;return `+${+(b.value*100).toFixed(1)}% ${({crit:'critical-hit chance',coin:'coin find',xpAll:'XP gain',boss:'damage against bosses'})[b.key]}${b.level===MAX&&b.key==='crit'?' · critical hits strike twice':''}`;};
+Q.beastPassiveText=id=>{const p=D.PET[id],b=Q.beastPassive(id);if(!p||!b)return '';if(b.key==='legacy')return `${p.text||'Beast bonus'} · bond multiplier ×${(1+.25*(Math.min(5,b.level)-1)+Math.max(0,b.level-5)*.05).toFixed(2)}`;return `+${+(b.value*100).toFixed(1)}% ${({crit:'critical-hit chance',coin:'coin find',xpAll:'XP gain',boss:'damage against bosses'})[b.key]}${b.level===MAX&&b.key==='crit'?' · critical hits strike twice':''}`;};
 Q.beastActive=()=>{const id=S().pets.active;return id&&D.PET[id]&&S().pets.owned[id]?id:null;};
 /* Existing signature bonuses stop their old multiplier at five, then grow gently. New species use only their one passive. */
 const fx0=Q.fx;let beastFxCache=null;
@@ -18241,7 +18274,7 @@ const petSprite0=Q.petSprite;
 Q.petSprite=(p,size=48,cls='')=>S().pets.owned[p.id]?.evolved&&Q.pixelArt?.hasCreature('evolved:'+p.id)?Q.artImage('creature','evolved:'+p.id,size,cls,Q.beastSpec(p.id).evolution):petSprite0(p,size,cls);
 const return0=UI.returnExtras;
 UI.returnExtras=sum=>{const rows=Object.entries(sum.beasts||{}).map(([id,b])=>`<li>${esc(D.PET[id]?.name||id)}: +${fmt(b.xp)} bond XP${b.to>b.from?` · bond ${b.from} → ${b.to}`:''}</li>`),events=(sum.beastEvents||[]).filter(e=>['capture','return','evolution','milestone'].includes(e.kind));return (return0?return0(sum):'')+((rows.length||events.length)?`<section class="beast-return"><h3>Your beasts grew too</h3><ul>${rows.join('')}${events.map(e=>`<li>${esc(e.text)}</li>`).join('')}</ul></section>`:'');};
-const activeCard=id=>{const p=D.PET[id],o=S().pets.owned[id],lv=Q.petLevel(id),next=D.BOND_XP[lv]||D.BOND_XP[MAX-1],xp=finite(o.bondXp),base=D.BOND_XP[lv-1],pct=lv===MAX?100:Math.min(100,100*(xp-base)/(next-base)),t=Q.beastTraining(id);return `<section class="panel beast-focus"><div class="beast-portrait">${Q.petSprite(p,96)}</div><div><span class="k">${S().pets.active===id?'With you':'Resting companion'} · Bond ${lv}/${MAX}</span><h2>${esc(o.evolved?Q.beastSpec(id).evolution:p.name)}</h2><p><b>Passive:</b> ${esc(Q.beastPassiveText(id))}</p><div class="bar" role="progressbar" aria-label="Bond progress" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div><small>${lv===MAX?'Bond complete':`${fmt(xp)} / ${fmt(next)} bond XP`}</small><div class="beast-milestones">${D.BOND_MILESTONES.map(n=>`<span class="tag ${lv>=n?'ok':''}" data-tip="text:Bond ${n}: ${n===10?'evolves · final upgrade':'passive upgrade'}">${lv>=n?'✓':'◇'} ${n}</span>`).join('')}</div><p class="sm dim">Wins share 25% of your earned combat XP. Training uses 2 ${esc(D.ITEMS[t.food]?.name||'cooked food')} and ${t.coins} coins; ready again in 45 minutes. No decay.</p><div class="btnrow wrap">${S().pets.active!==id?`<button class="btn" data-do="setpet" data-a="${id}">Bring along</button>`:''}<button class="btn primary" data-do="beasttrain" data-a="${id}" ${t.ok?'':'disabled'}>${t.ok?`Train · +${t.xp} bond XP`:esc(t.reason)}</button></div></div></section>`;};
+const activeCard=id=>{const p=D.PET[id],o=S().pets.owned[id],lv=Q.petLevel(id),next=D.BOND_XP[lv]||D.BOND_XP[MAX-1],xp=finite(o.bondXp),base=D.BOND_XP[lv-1],pct=lv===MAX?100:Math.min(100,100*(xp-base)/(next-base)),t=Q.beastTraining(id);return `<section class="panel beast-focus"><div class="beast-portrait">${Q.petSprite(p,96)}</div><div><span class="k">${S().pets.active===id?'With you':'In its pen'} · Bond ${lv}/${MAX}</span><h2>${esc(o.evolved?Q.beastSpec(id).evolution:p.name)}</h2><p><b>Passive:</b> ${esc(Q.beastPassiveText(id))}</p><div class="bar" role="progressbar" aria-label="Bond progress" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div><small>${lv===MAX?'Bond complete':`${fmt(xp)} / ${fmt(next)} bond XP`}</small><div class="beast-milestones">${D.BOND_MILESTONES.map(n=>`<span class="tag ${lv>=n?'ok':''}" data-tip="text:Bond ${n}: ${n===10?'evolves · final upgrade':'passive upgrade'}">${lv>=n?'✓':'◇'} ${n}</span>`).join('')}</div><p class="sm dim">Wins share 25% of your earned combat XP. Training uses 2 ${esc(D.ITEMS[t.food]?.name||'cooked food')} and ${t.coins} coins; ready again in 45 minutes. No decay.</p><div class="btnrow wrap">${S().pets.active!==id?`<button class="btn" data-do="setpet" data-a="${id}">Bring along</button>`:''}<button class="btn primary" data-do="beasttrain" data-a="${id}" ${t.ok?'':'disabled'}>${t.ok?`Train · +${t.xp} bond XP`:esc(t.reason)}</button></div></div></section>`;};
 UI.beastMode='beasts';UI.beastOwnedPage=0;UI.beastTargetPage=0;
 const oldPage=UI.V.beastmastery;
 UI.V.beastmastery=()=>{ensure();if(!Q.skillUnlocked('beastmastery'))return oldPage();const owned=D.PETS.filter(p=>S().pets.owned[p.id]),selected=owned.find(p=>p.id===UI.beastSelected)||owned.find(p=>p.id===S().pets.active)||owned[0],j=S().pets.expedition,tier=UI.beastTier||'basic',targets=Q.beastTargets(),sel=targets.find(p=>p.id===UI.beastTarget)||targets.find(p=>!S().pets.owned[p.id])||targets[0];
@@ -18249,7 +18282,7 @@ UI.V.beastmastery=()=>{ensure();if(!Q.skillUnlocked('beastmastery'))return oldPa
  const lastReturn=[...S().pets.events].reverse().find(e=>e.kind==='capture'||e.kind==='return');
  const status=j?`<p class="beast-trap-status"><b>Trap out:</b> ${esc(D.PET[j.species].name)} · ${D.BEAST_TRAPS[j.tier].name} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0,j.due-Date.now()))}</span> remaining. Returns automatically.</p>`:`<p class="dim">${lastReturn?esc(lastReturn.text):'No trap is out. One expedition at a time; your main task keeps running.'}</p>`;
  const reason=Q.beastTrapReason(sel.id,tier),s=Q.beastSpec(sel.id),t=D.BEAST_TRAPS[tier];
- return nav+`<div class="beast-workspace" data-mode="${UI.beastMode}"><div class="beast-main">${selected?activeCard(selected.id):'<section class="panel"><h2>Find your first companion</h2><p>Every beast starts as an egg. Choose a species and send a trap: it comes back by itself while you do other things.</p></section>'}<section class="panel beast-expedition"><h3>Send a trap for an egg</h3>${status}<div class="btnrow wrap">${Object.entries(D.BEAST_TRAPS).map(([k,v])=>`<button class="btn ${tier===k?'on':''}" data-do="beasttier" data-a="${k}">${v.name} · ${v.cost?`${v.cost} coins`:'1 Rune trap'} · ${v.hours}h</button>`).join('')}</div><p><b>${esc(sel.name)}</b> · ${s.rarity} · ${Math.round(Q.beastCaptureChance(sel.id,tier)*100)}% capture · ${S().pets.tracks[sel.id]||0}/5 tracks</p><p class="sm dim">A miss returns ${t.consolation} coins and one species track. After five misses the next expedition is certain and uses those five tracks.</p><button class="btn primary" data-do="beastsend" data-a="${sel.id}" data-b="${tier}" ${reason?'disabled':''}>${reason?esc(reason):'Send trap'}</button></section></div><section class="panel beast-list"><h3 class="beast-owned-heading">Companions ${Array.from({length:Math.ceil(owned.length/3)},(_,i)=>`<button class="btn sm" data-do="beastpage" data-a="owned" data-b="${i}">${i+1}</button>`).join('')}</h3><div class="beast-cards beast-owned">${owned.slice(UI.beastOwnedPage*3,UI.beastOwnedPage*3+3).map(p=>`<button class="beast-choice ${selected?.id===p.id?'on':''}" data-do="beastselect" data-a="${p.id}">${Q.petSprite(p,64)}<b>${esc(p.name)}</b><small>Bond ${Q.petLevel(p.id)}${p.id===S().pets.active?' · With you':''}</small></button>`).join('')}</div><h3 class="beast-targets-heading">Find a beast ${Array.from({length:Math.ceil(targets.length/4)},(_,i)=>`<button class="btn sm ${UI.beastTargetPage===i?'on':''}" data-do="beastpage" data-a="targets" data-b="${i}">${i+1}</button>`).join('')}</h3><div class="beast-cards beast-targets">${targets.slice(UI.beastTargetPage*4,UI.beastTargetPage*4+4).map(p=>{const sp=Q.beastSpec(p.id),got=!!S().pets.owned[p.id];return `<button class="beast-choice ${sel.id===p.id?'on':''}" data-do="beasttarget" data-a="${p.id}">${Q.petSprite(p,64,got?'':'sil')}<b>${esc(p.name)}</b><small>${got?'Befriended':`Hero ${sp.hero} · ${esc(D.TOWN[sp.town].name)}`} · ${sp.rarity}</small></button>`;}).join('')}</div></section></div>`;
+ return nav+`<div class="beast-workspace" data-mode="${UI.beastMode}"><div class="beast-main">${selected?activeCard(selected.id):'<section class="panel"><h2>Hatch your first beast</h2><p>Every beast starts as an egg. Choose a species and send a trap: it comes back by itself while you do other things.</p></section>'}<section class="panel beast-expedition"><h3>Send a trap for an egg</h3>${status}<div class="btnrow wrap">${Object.entries(D.BEAST_TRAPS).map(([k,v])=>`<button class="btn ${tier===k?'on':''}" data-do="beasttier" data-a="${k}">${v.name} · ${v.cost?`${v.cost} coins`:'1 Rune trap'} · ${v.hours}h</button>`).join('')}</div><p><b>${esc(sel.name)}</b> · ${s.rarity} · ${Math.round(Q.beastCaptureChance(sel.id,tier)*100)}% capture · ${S().pets.tracks[sel.id]||0}/5 tracks</p><p class="sm dim">A miss returns ${t.consolation} coins and one species track. After five misses the next expedition is certain and uses those five tracks.</p><button class="btn primary" data-do="beastsend" data-a="${sel.id}" data-b="${tier}" ${reason?'disabled':''}>${reason?esc(reason):'Send trap'}</button></section></div><section class="panel beast-list"><h3 class="beast-owned-heading">Beasts ${Array.from({length:Math.ceil(owned.length/3)},(_,i)=>`<button class="btn sm" data-do="beastpage" data-a="owned" data-b="${i}">${i+1}</button>`).join('')}</h3><div class="beast-cards beast-owned">${owned.slice(UI.beastOwnedPage*3,UI.beastOwnedPage*3+3).map(p=>`<button class="beast-choice ${selected?.id===p.id?'on':''}" data-do="beastselect" data-a="${p.id}">${Q.petSprite(p,64)}<b>${esc(p.name)}</b><small>Bond ${Q.petLevel(p.id)}${p.id===S().pets.active?' · With you':''}</small></button>`).join('')}</div><h3 class="beast-targets-heading">Find a beast ${Array.from({length:Math.ceil(targets.length/4)},(_,i)=>`<button class="btn sm ${UI.beastTargetPage===i?'on':''}" data-do="beastpage" data-a="targets" data-b="${i}">${i+1}</button>`).join('')}</h3><div class="beast-cards beast-targets">${targets.slice(UI.beastTargetPage*4,UI.beastTargetPage*4+4).map(p=>{const sp=Q.beastSpec(p.id),got=!!S().pets.owned[p.id];return `<button class="beast-choice ${sel.id===p.id?'on':''}" data-do="beasttarget" data-a="${p.id}">${Q.petSprite(p,64,got?'':'sil')}<b>${esc(p.name)}</b><small>${got?'Befriended':`Hero ${sp.hero} · ${esc(D.TOWN[sp.town].name)}`} · ${sp.rarity}</small></button>`;}).join('')}</div></section></div>`;
 };
 Object.assign(UI.DO,{beastmode:a=>{UI.beastMode=a;UI.render(false);},beastpage:(a,b)=>{UI[a==='owned'?'beastOwnedPage':'beastTargetPage']=+b;UI.render(false);},beastselect:a=>{UI.beastSelected=a;if(innerWidth<=860)UI.beastMode='beasts';UI.render(false);},beasttarget:a=>{UI.beastTarget=a;UI.render(false);},beasttier:a=>{if(D.BEAST_TRAPS[a])UI.beastTier=a;UI.render(false);},beasttrain:a=>{UI.beastStatus=Q.trainBeast(a)?'Training complete':Q.beastTraining(a).reason;UI.render(false);},beastsend:(a,b)=>{Q.sendBeastTrap(a,b);UI.render(false);}});
 /* Quiet in-place countdowns; no bell entries or ready popups. */
@@ -18943,7 +18976,7 @@ const penHtml = (p, k, sel) => {
       <img class="pen-back" src="${A.penBackUrl(id, p.col)}" width="${96 * k}" height="${64 * k}" alt="" draggable="false">
       <span class="pen-beast">${Q.petSprite(p, 32 * k)}</span>
       <img class="pen-front" src="${A.penFrontUrl()}" width="${96 * k}" height="${64 * k}" alt="" draggable="false">
-      ${active ? `<span class="pen-flag">★ With you</span>` : ''}
+      ${active ? `<span class="pen-flag">★ Companion</span>` : ''}
       ${st.k === 'ready' && food ? `<span class="pen-bowl" aria-hidden="true">${Q.itemIco(D.ITEMS[food])}</span>` : ''}
       ${st.k === 'nap' ? `<span class="pen-zz" aria-hidden="true">Zz</span>` : ''}
       ${st.k === 'ready' ? `<span class="pen-want" aria-hidden="true">♥</span>` : ''}
@@ -18957,13 +18990,14 @@ const shelf = () => { const f = foodsHeld(), cur = chosenFood();
 const sheet = id => { const p = D.PET[id], o = S().pets.owned[id], lv = Q.petLevel(id), st = stateOf(id), t = st.t, job = Q.beastJob && Q.beastJob(id), active = S().pets.active === id, food = chosenFood();
   const next = D.BOND_XP[lv] || D.BOND_XP[MAX - 1], base = D.BOND_XP[lv - 1], pct = lv >= MAX ? 100 : Math.min(100, 100 * (o.bondXp - base) / (next - base));
   const foodName = food ? D.ITEMS[food].name.toLowerCase() : 'cooked food';
-  return `<section class="panel ranch-sheet"><div class="rs-head"><span class="rs-art">${Q.petSprite(p, 96)}</span><div><span class="k">${active ? 'With you' : 'Resting in its pen'}${job ? ' · ' + esc(job.role) : ''} · Bond ${lv}/${MAX}</span><h2>${esc(o.evolved && Q.beastSpec(id) ? Q.beastSpec(id).evolution : p.name)}</h2></div></div>
+  return `<section class="panel ranch-sheet"><div class="rs-head"><span class="rs-art">${Q.petSprite(p, 96)}</span><div><span class="k">${active ? 'Companion' : 'In its pen'}${job ? ' · ' + esc(job.role) : ''} · Bond ${lv}/${MAX}</span><h2>${esc(o.evolved && Q.beastSpec(id) ? Q.beastSpec(id).evolution : p.name)}</h2></div></div>
+    ${UI.beastJourney ? UI.beastJourney(id) : ''}
     <p class="rs-passive">${esc(Q.beastPassiveText(id))}</p>
     <div class="bar" role="progressbar" aria-label="Bond progress" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
     <small class="rs-xp">${lv >= MAX ? 'Bond complete' : `${fmt(o.bondXp)} / ${fmt(next)} bond XP`}</small>
     <div class="beast-milestones">${D.BOND_MILESTONES.map(n => `<span class="tag ${lv >= n ? 'ok' : ''}" data-tip="text:Bond ${n}: ${n === 10 ? 'evolves · final upgrade' : 'passive upgrade'}">${lv >= n ? '✓' : '◇'} ${n}</span>`).join('')}</div>
     <p class="sm dim rs-cost">${lv >= MAX ? 'This bond is complete.' : `${t.coins} coins + 2 ${esc(foodName)} → +${t.xp} bond XP · 45 min nap`}</p>
-    <div class="btnrow wrap"><button class="btn primary" data-do="beastfeed" data-a="${id}" ${t.ok ? '' : 'disabled'}>${t.ok ? `Feed & train · +${t.xp} bond XP` : esc(t.reason)}</button>${active ? `<span class="rs-with">★ With you</span>` : `<button class="btn" data-do="setpet" data-a="${id}">Bring along</button>`}</div></section>`; };
+    <div class="btnrow wrap"><button class="btn primary" data-do="beastfeed" data-a="${id}" ${t.ok ? '' : 'disabled'}>${t.ok ? `Feed & train · +${t.xp} bond XP` : esc(t.reason)}</button>${active ? `<span class="rs-with">★ Companion</span>` : `<button class="btn" data-do="setpet" data-a="${id}">Make companion</button>`}</div></section>`; };
 const shedTeaser = () => { const j = S().pets.expedition; return `<section class="panel ranch-shedcard"><span class="k">Trapper</span><p>${j ? `<b>Trap out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'No trap is out. Send one and it brings back an egg.'}</p><button class="btn" data-do="beastmode" data-a="shed">Open the shed</button><button class="linkish ranch-eggs-link" data-do="eggways">Where do eggs come from?</button></section>`; };
 const ranch = () => {
   const list = owned(), k = K(), per = PER(), pages = Math.max(1, Math.ceil(list.length / per)); UI.beastPenPage = Math.min(UI.beastPenPage, pages - 1);
@@ -18971,7 +19005,7 @@ const ranch = () => {
   const slice = list.slice(UI.beastPenPage * per, UI.beastPenPage * per + per);
   const cells = slice.map(p => penHtml(p, k, sel && p.id === sel.id)).join('') + (phone() ? '' : Array.from({ length: Math.max(0, per - slice.length) }, () => emptyPen(k)).join(''));
   const nav = pages > 1 ? `<div class="pen-pages" role="group" aria-label="Pens">${Array.from({ length: pages }, (_, i) => `<button class="btn sm ${i === UI.beastPenPage ? 'on' : ''}" data-do="beastpenpage" data-a="${i}">${phone() ? (i + 1) + ' of ' + pages : i + 1}</button>`).join('')}</div>` : '';
-  const board = `<section class="ranch-board" style="--k:${k}"><div class="ranch-strip" style="background-image:url(${A.ranchStripUrl()});--k:${k}" role="img" aria-label="Your ranch"><h2 class="ranch-sign">Your menagerie</h2></div>
+  const board = `<section class="ranch-board" style="--k:${k}"><div class="ranch-strip" style="background-image:url(${A.ranchStripUrl()});--k:${k}" role="img" aria-label="Your ranch"><h2 class="ranch-sign">Your ranch</h2></div>
     ${list.length ? `<div class="pen-grid">${cells}</div>${nav}` : `<div class="ranch-empty"><p><b>The pens are empty.</b> Every beast starts as an egg. Send a trap from the shed to bring home your first.</p><button class="btn primary" data-do="beastmode" data-a="shed">Open the Trapper's shed</button></div>`}${list.length ? shelf() : ''}</section>`;
   return `<div class="ranch-layout"><div class="ranch-main">${board}</div><div class="ranch-side">${sel ? sheet(sel.id) : ''}${shedTeaser()}</div></div>`; };
 UI.V.beastmastery = () => {
@@ -19039,6 +19073,12 @@ Q.awardPet = (id, options = {}) => {
       actions: [{ label: 'See the hatchery', fn: () => { UI.beastMode = 'beasts'; Q.go('beastmastery'); } }, { label: 'Close', primary: true }] } });
   Q.log && Q.log(`You found a ${kind.name.toLowerCase()}. It will hatch in ${Q.fmtTime(kind.ms)}.`, 'quest'); Q.emit('pets'); return true;
 };
+/* each beast remembers its egg, so the ranch can show its journey: egg, hatched, bond, evolved */
+const stamp = e => { const o = S().pets.owned[e.id]; if (o) o.egg = { found: e.found, hatched: Date.now() }; };
+UI.beastJourney = id => { const o = S().pets.owned[id]; if (!o) return ''; const lv = Q.petLevel ? Q.petLevel(id) : 1, spec = Q.beastSpec && Q.beastSpec(id), kind = Q.eggKind(id);
+  const day = t => t > 1e11 ? new Date(t).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '';
+  const steps = [[true, Q.eggImg(id, 16), kind.name, Q.eggSource(id) + (o.egg && day(o.egg.found) ? ' · ' + day(o.egg.found) : '')], [true, ico('paw'), 'Hatched', day((o.egg && o.egg.hatched) || o.found)], [lv >= 2, ico('heart'), `Bond ${lv}/10`, 'Feed, train and win fights together'], [!!o.evolved, ico('star'), spec && o.evolved ? spec.evolution : 'Evolves', 'At Bond 10']];
+  return `<ol class="beast-journey" aria-label="Its journey">${steps.map(([on, ic, t, tip]) => `<li class="${on ? 'on' : ''}" data-tip="text:${esc(tip || t)}"><span class="bj-ic">${ic}</span><small>${esc(t)}</small></li>`).join('')}</ol>`; };
 /* hatching: once an egg's time has passed, the original award runs (pop-up, pen, first companion goes with you) */
 Q.hatchDue = () => {
   if ((Q.sim && Q.sim.on) || Q.forecasting || !Q.S || !Q.S.pets) return 0;
@@ -19047,10 +19087,10 @@ Q.hatchDue = () => {
   for (const e of ready) { const id = e.id, p = D.PET[id]; if (!p || S().pets.owned[id]) continue;
     /* a bonded beast hatches with the comparison against your current companion (js/companion_choice.js) */
     const job = Q.beastJob && Q.beastJob(id), cur = S().pets.active;
-    if (job && Q.popupQueue && Q.beastCompare && cur) { award0(id, { quiet: true }); if (Q.migrateBeasts) Q.migrateBeasts(S());
+    if (job && Q.popupQueue && Q.beastCompare && cur) { award0(id, { quiet: true }); stamp(e); if (Q.migrateBeasts) Q.migrateBeasts(S());
       Q.popupQueue({ title: 'An egg hatched', body: `<div class="beast-arrival"><div class="ba-art">${Q.petSprite(p, 96)}</div><div><h3>${esc(p.name)} · ${esc(job.role)}</h3><p>${esc(p.text || '')}</p><p>${Q.beastCompare(id)}</p></div></div>`,
         actions: [{ label: cur !== id ? `Keep ${D.PET[cur] ? D.PET[cur].name : 'current'}` : 'Later' }, { label: 'Bring along', primary: true, fn: () => Q.setPet(id) }] }); Q.emit('pets'); }
-    else { award0(id, {}); if (Q.migrateBeasts) Q.migrateBeasts(S()); } }
+    else { award0(id, {}); stamp(e); if (Q.migrateBeasts) Q.migrateBeasts(S()); } }
   if (UI.view === 'beastmastery' && UI.render) UI.render(false); return ready.length;
 };
 let tick = 0; Q.on('ui', () => { if (++tick % 3 === 0) Q.hatchDue(); });
@@ -19123,7 +19163,7 @@ UI.V.collection = () => { const pets = Q.collectiblePets ? Q.collectiblePets() :
   const body = tab === 'eggs' ? `<p class="col-note">Bar: your tries against the average needed.</p><div class="col-list">${pets.slice().sort((a, b) => order(a) - order(b)).map(petRow).join('')}</div>`
     : tab === 'drops' ? `<div class="col-list">${dropRows()}</div>`
     : `<div class="col-list">${workRows()}</div>`;
-  return `<section class="panel shophead col-head"><div><span class="k">Collection log</span><h2>${own} of ${pets.length} companions hatched</h2></div><div class="tabs">${[['eggs', 'Companion eggs'], ['drops', 'Rare drops'], ['work', 'Lucky finds']].map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="coltab" data-a="${k}">${n}</button>`).join('')}</div></section><section class="panel col-panel">${body}</section>`; };
+  return `<section class="panel shophead col-head"><div><span class="k">Collection log</span><h2>${own} of ${pets.length} beasts hatched</h2></div><div class="tabs">${[['eggs', 'Beast eggs'], ['drops', 'Rare drops'], ['work', 'Lucky finds']].map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="coltab" data-a="${k}">${n}</button>`).join('')}</div></section><section class="panel col-panel">${body}</section>`; };
 UI.DO.coltab = a => { UI.colTab = a; UI.render(false); };
 })();
 

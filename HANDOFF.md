@@ -536,3 +536,27 @@ From the player's request to build all five retention recommendations, plus foll
 - Not done: no new economy simulation for mastery beyond the bound above; no human playtest.
 
 - Wording pass 2 (Dec 2026): skill guides and first-time lessons, long tooltips, item and skill tooltips, hints, quest empty states, Home next-step lines and preparation advice now use RPG shorthand. Quest stories (blurbs, thanks, lore, legends) were deliberately left as written. `tests/regression.cjs` no longer requires lessons to be long.
+
+
+## LittleBird "resume and finish the retention batch" prompt: what was already done and what it added (Dec 2026)
+The prompt assumed an interrupted session. Checked item by item against `main`:
+1. Two failing tests (top menu count, companion role): already fixed before the prompt; suite was green.
+2. Beastmastery clean-up: eggs and renamed tabs existed. **Added**: one vocabulary (a *beast* is any of them; your *companion* is the one with you; "creature" is only used for things you fight), "Make companion" instead of "Bring along", and each beast's journey on its ranch sheet (egg and where it came from, hatched, bond, evolved; `UI.beastJourney`, the egg dates are kept in `S.pets.owned[id].egg`).
+3. Field guide build-out: fish, trees, ores, pockets and recipes existed. **Added** crops and livestock (counted on harvest and collect; faster growth and produce), potions (a chance of a second bottle, since brewing has no timer), voyages and trap lines. Later entries on a page read "???" until reached.
+4. Navigation: the album (index, picture tiles, ladder page) existed and stacks on phones. No change.
+5. Quiet progress: the thin brass bar existed. **Added** the "nearly there" cue: within 10% of the next entry the same bar breathes (off with reduced motion).
+6. Wording: two passes existed. No change beyond the new strings.
+7. Top menu audit: done earlier; the decision is recorded below.
+Final requirements: chunky pixels everywhere (Scale2x stays off; the only new art is the 16 px egg and ten 32 px challenge sprites, drawn in code); both themes checked; **added** save tests for eggs, field-guide entries and the queue to `tests/regression.cjs` (108 checks).
+
+### Top menu decision
+Menu: Home, Quests, World, Village, Hero, **Guide**, Shop. Left rail: Now card, Combat, every skill.
+- Test applied: does the system need fast, frequent access, and does promoting it encourage continued play?
+- **Guide promoted.** The field guide used to be a tab under Combat (two clicks, and invisible to someone who mostly fishes). It now covers every repeatable thing in the game and is the one place that answers "what am I close to?". That is exactly the hook that brings a player back, so it passes both halves of the test. Collection and Achievements moved in beside it for the same reason, which also took Hero from seven tabs to five.
+- **Shop stays** (used constantly). **Hero stays** (inventory and equipment are the most opened pages after skills). **Village and World stay**: less frequent, but they are destinations rather than tabs of something else.
+- **Not promoted**: Beastmastery (it is a skill, so it sits with skills in the rail), Settings (utility), Bank (a tab of Hero; reached from the backpack).
+- Cost: seven entries instead of six. `tests/ui-audit.cjs` checks they fit at every tested width; the phone bottom bar holds eight.
+- Menu counts still show available actions only, so Guide carries no badge.
+
+### Current test list
+`node tests/regression.cjs` (108), `tests/story.cjs`, `tests/beastmastery.cjs`, `tests/art-pixel.cjs`, `tests/desktop-storage.cjs`; with a preview server and `IDLEWICK_URL`: `ui-fit`, `ui-current`, `ui-audit`, `ux-roles`, `ui-journeys`, `ui-adventure`, `ui-effects`, `ui-farming`, `ux-update`, `beastmastery-ui`, `ranch`. `tests/story-ui.cjs` has a known, older failure at the `bl_ledger` step.

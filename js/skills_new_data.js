@@ -12,7 +12,7 @@ const DQ = window.DQ, D = DQ.data;
 for (const s of [
   { id: 'carpentry', name: 'Carpentry', col: '#c08a4a', group: 'artisan', page: 'carpentry', actionReq: { 'own:tool_handsaw': 1 }, blurb: 'Saw logs into planks for furniture, town projects and boats.' },
   { id: 'sailing', name: 'Sailing', col: '#3f8fc8', group: 'gather', page: 'sailing', actionReq: { 'visit:saltmere': 1, 'own:boat_skiff': 1 }, blurb: 'Sail from Saltmere to far islands and bring back what you find.' },
-  { id: 'beastmastery', name: 'Beastmastery', col: '#d08a5a', group: 'gather', page: 'beastmastery', actionReq: { 'own:wooden_trap': 3, combat: 10 }, blurb: 'Lay traps to befriend wild companions, and train them into stronger allies.' }
+  { id: 'beastmastery', name: 'Beastmastery', col: '#d08a5a', group: 'gather', page: 'beastmastery', actionReq: { 'own:wooden_trap': 3, combat: 10 }, blurb: 'Hatch beasts, keep them at your ranch and bond with one as your companion.' }
 ]) { D.SKILLS.push(s); D.SK[s.id] = s; }
 const icons = DQ.ICONS || {}; for (const k of ['carpentry', 'sailing', 'beastmastery', 'plank', 'boat', 'island']) if (!(k in icons)) icons[k] = 'M4 12h16';
 

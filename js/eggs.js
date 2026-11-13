@@ -29,6 +29,12 @@ Q.awardPet = (id, options = {}) => {
       actions: [{ label: 'See the hatchery', fn: () => { UI.beastMode = 'beasts'; Q.go('beastmastery'); } }, { label: 'Close', primary: true }] } });
   Q.log && Q.log(`You found a ${kind.name.toLowerCase()}. It will hatch in ${Q.fmtTime(kind.ms)}.`, 'quest'); Q.emit('pets'); return true;
 };
+/* each beast remembers its egg, so the ranch can show its journey: egg, hatched, bond, evolved */
+const stamp = e => { const o = S().pets.owned[e.id]; if (o) o.egg = { found: e.found, hatched: Date.now() }; };
+UI.beastJourney = id => { const o = S().pets.owned[id]; if (!o) return ''; const lv = Q.petLevel ? Q.petLevel(id) : 1, spec = Q.beastSpec && Q.beastSpec(id), kind = Q.eggKind(id);
+  const day = t => t > 1e11 ? new Date(t).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) : '';
+  const steps = [[true, Q.eggImg(id, 16), kind.name, Q.eggSource(id) + (o.egg && day(o.egg.found) ? ' · ' + day(o.egg.found) : '')], [true, ico('paw'), 'Hatched', day((o.egg && o.egg.hatched) || o.found)], [lv >= 2, ico('heart'), `Bond ${lv}/10`, 'Feed, train and win fights together'], [!!o.evolved, ico('star'), spec && o.evolved ? spec.evolution : 'Evolves', 'At Bond 10']];
+  return `<ol class="beast-journey" aria-label="Its journey">${steps.map(([on, ic, t, tip]) => `<li class="${on ? 'on' : ''}" data-tip="text:${esc(tip || t)}"><span class="bj-ic">${ic}</span><small>${esc(t)}</small></li>`).join('')}</ol>`; };
 /* hatching: once an egg's time has passed, the original award runs (pop-up, pen, first companion goes with you) */
 Q.hatchDue = () => {
   if ((Q.sim && Q.sim.on) || Q.forecasting || !Q.S || !Q.S.pets) return 0;
@@ -37,10 +43,10 @@ Q.hatchDue = () => {
   for (const e of ready) { const id = e.id, p = D.PET[id]; if (!p || S().pets.owned[id]) continue;
     /* a bonded beast hatches with the comparison against your current companion (js/companion_choice.js) */
     const job = Q.beastJob && Q.beastJob(id), cur = S().pets.active;
-    if (job && Q.popupQueue && Q.beastCompare && cur) { award0(id, { quiet: true }); if (Q.migrateBeasts) Q.migrateBeasts(S());
+    if (job && Q.popupQueue && Q.beastCompare && cur) { award0(id, { quiet: true }); stamp(e); if (Q.migrateBeasts) Q.migrateBeasts(S());
       Q.popupQueue({ title: 'An egg hatched', body: `<div class="beast-arrival"><div class="ba-art">${Q.petSprite(p, 96)}</div><div><h3>${esc(p.name)} · ${esc(job.role)}</h3><p>${esc(p.text || '')}</p><p>${Q.beastCompare(id)}</p></div></div>`,
         actions: [{ label: cur !== id ? `Keep ${D.PET[cur] ? D.PET[cur].name : 'current'}` : 'Later' }, { label: 'Bring along', primary: true, fn: () => Q.setPet(id) }] }); Q.emit('pets'); }
-    else { award0(id, {}); if (Q.migrateBeasts) Q.migrateBeasts(S()); } }
+    else { award0(id, {}); stamp(e); if (Q.migrateBeasts) Q.migrateBeasts(S()); } }
   if (UI.view === 'beastmastery' && UI.render) UI.render(false); return ready.length;
 };
 let tick = 0; Q.on('ui', () => { if (++tick % 3 === 0) Q.hatchDue(); });

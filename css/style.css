@@ -3604,3 +3604,17 @@ html.lw-1600 .guide-book{grid-template-columns:200px minmax(0,1fr) 340px}
 
 
 .abils .tech-note{grid-column:1/-1;margin:0 0 4px}
+
+/* nearly there (within 10% of the next entry): the same brass bar breathes; nothing new is added */
+@keyframes study-near{0%,100%{opacity:1}50%{opacity:.45}}
+.study-bar.near::after,.mast-line.near .bar i{animation:study-near 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.study-bar.near::after,.mast-line.near .bar i{animation:none}} html.calm .study-bar.near::after,html.calm .mast-line.near .bar i{animation:none}
+/* a beast's journey on its ranch sheet: egg, hatched, bond, evolved */
+.beast-journey{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:10px 0 8px;padding:0;position:relative}
+.beast-journey::before{content:"";position:absolute;left:12%;right:12%;top:13px;height:2px;background:color-mix(in srgb,var(--ink) 16%,transparent)}
+.beast-journey li{display:grid;justify-items:center;gap:3px;position:relative;opacity:.5}
+.beast-journey li.on{opacity:1}
+.bj-ic{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--panel2);border:1px solid var(--line)}
+.beast-journey li.on .bj-ic{border-color:var(--brass)}
+.bj-ic svg,.bj-ic img{width:16px;height:16px}
+.beast-journey small{font-size:13px;text-align:center;line-height:1.2}

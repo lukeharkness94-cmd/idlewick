@@ -941,4 +941,37 @@ test('the new skills unlock from things you make, and each has a purpose: planks
   S.inv.wooden_trap=200;assert.ok(q.startAct('train','lure:'+town,{quiet:true}));q.simulate(60*60000);q.stopAct(true);
   assert.ok(S.pets.owned[sig.id],'an hour of traps befriends the region’s companion');assert.ok(S.inv.wooden_trap<200,'traps wear out');
 });
+test('field-guide entries: counts fill them, each makes that one task faster, and the save keeps them',()=>{
+  const {q}=harness();const S=q.S,D=q.data;
+  assert.equal(q.mastStars('fish','shrimp'),0);const d0=q.durFor('fish','shrimp');
+  S.mast={'fish:shrimp':25};assert.equal(q.mastStars('fish','shrimp'),1);assert.ok(q.durFor('fish','shrimp')<d0,'one entry: faster');
+  S.mast['fish:shrimp']=1500;assert.equal(q.mastStars('fish','shrimp'),5);assert.equal(q.mastExtra('fish','shrimp'),.1);assert.ok(Math.abs(q.durFor('fish','shrimp')/d0-.9)<.02,'five entries: 10% faster');
+  assert.equal(q.mastSpeed('brew','potion_might'),0,'potions have no timer');S.mast['brew:potion_might']=100;assert.equal(q.mastExtra('brew','potion_might'),.04);
+  /* doing the task counts it; a fight does not */
+  S.mast={};assert.ok(q.startAct('fish','shrimp',{quiet:true}));q.simulate(5*60000);q.stopAct(true);assert.ok(S.mast['fish:shrimp']>10,'catches are counted');
+  assert.equal(Object.keys(S.mast).some(k=>k.startsWith('fight:')),false);
+  /* crops count on harvest and then grow faster */
+  S.unlocked.farming=true;S.xp.farming=D.XPF[10];const c=D.CROPS[0],g0=q.growDur(c);S.mast['crop:'+c.id]=300;assert.ok(q.growDur(c)<g0,'studied crops grow faster');
+  /* round trip */
+  S.mast['wood:oak']=42;const snap=q.exportSave();S.mast={};assert.ok(q.importSave(snap));assert.equal(q.S.mast['wood:oak'],42,'entries survive export and import');
+  const old=JSON.parse(JSON.stringify(q.S));delete old.mast;assert.ok(q.validateSave(old),'saves from before the field guide load');q.S=old;assert.equal(q.mastStars('wood','oak'),0);
+});
+test('queue: the next task starts by itself, also while away, and the save keeps the queue',()=>{
+  const {q}=harness();const S=q.S,D=q.data;S.xp.woodcutting=D.XPF[20];S.xp.fishing=D.XPF[20];for(const k of Object.keys(S.xp))S.xp[k]=Math.max(S.xp[k],D.XPF[12]);
+  assert.ok(q.planUnlocked(),'the queue is open by Hero 3');
+  assert.ok(q.startAct('fish','shrimp',{quiet:true,rule:'count:5'}));q.queueAdd('wood','normal','count:5');assert.equal(S.queue.length,1);
+  const snap=q.exportSave();
+  q.simulate(10*60000);assert.equal(S.queue.length,0,'the queued task was taken');assert.ok((S.stats.chop||0)>=5,'and it ran');
+  assert.ok(q.importSave(snap));assert.equal(q.S.queue.length,1,'a saved queue comes back');assert.equal(q.S.queue[0].kind,'wood');
+});
+test('eggs: a beast arrives as an egg, hatches once its time has passed, and saves with or without eggs load',()=>{
+  const {q,load}=harness();load('eggs');const S=q.S,D=q.data;
+  assert.equal(q.awardPet('bubbles'),true);assert.ok(!S.pets.owned.bubbles,'not owned yet');assert.equal(S.pets.eggs.length,1);assert.equal(q.awardPet('bubbles'),false,'no second egg for the same beast');
+  assert.equal(q.eggKind('gobbo').k,'royal');assert.equal(q.eggKind('wild_thimblefox').k,'wild');assert.equal(q.eggKind('bubbles').k,'speckled');
+  assert.equal(q.hatchDue(),0,'not before its time');
+  const snap=q.exportSave();assert.ok(q.importSave(snap),'a save with an egg loads');assert.equal(q.S.pets.eggs.length,1);
+  q.S.pets.eggs[0].due=Date.now()-1;assert.equal(q.hatchDue(),1);assert.ok(q.S.pets.owned.bubbles,'hatched');assert.equal(q.S.pets.eggs.length,0);assert.ok(q.S.pets.owned.bubbles.egg.hatched,'its journey is remembered');
+  assert.equal(q.awardPet('biscuit',{hatched:true}),true);assert.ok(q.S.pets.owned.biscuit,'fixtures can skip the egg');
+  const old=JSON.parse(JSON.stringify(q.S));delete old.pets.eggs;assert.ok(q.validateSave(old),'saves from before eggs load');q.S=old;assert.equal(q.eggs().length,0);
+});
 console.log(tests+' regression checks passed');

@@ -36,6 +36,6 @@ UI.V.collection = () => { const pets = Q.collectiblePets ? Q.collectiblePets() :
   const body = tab === 'eggs' ? `<p class="col-note">Bar: your tries against the average needed.</p><div class="col-list">${pets.slice().sort((a, b) => order(a) - order(b)).map(petRow).join('')}</div>`
     : tab === 'drops' ? `<div class="col-list">${dropRows()}</div>`
     : `<div class="col-list">${workRows()}</div>`;
-  return `<section class="panel shophead col-head"><div><span class="k">Collection log</span><h2>${own} of ${pets.length} companions hatched</h2></div><div class="tabs">${[['eggs', 'Companion eggs'], ['drops', 'Rare drops'], ['work', 'Lucky finds']].map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="coltab" data-a="${k}">${n}</button>`).join('')}</div></section><section class="panel col-panel">${body}</section>`; };
+  return `<section class="panel shophead col-head"><div><span class="k">Collection log</span><h2>${own} of ${pets.length} beasts hatched</h2></div><div class="tabs">${[['eggs', 'Beast eggs'], ['drops', 'Rare drops'], ['work', 'Lucky finds']].map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="coltab" data-a="${k}">${n}</button>`).join('')}</div></section><section class="panel col-panel">${body}</section>`; };
 UI.DO.coltab = a => { UI.colTab = a; UI.render(false); };
 })();
