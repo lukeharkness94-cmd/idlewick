@@ -3740,6 +3740,26 @@ html.lw-1600 .guide-book{grid-template-columns:200px minmax(0,1fr) 340px}
 #worldcard{display:grid;gap:8px}.wc-ch .btn small{color:inherit;opacity:.78}
 .wb-museum p{margin:4px 0 0}
 @media (max-width:860px){#worldcard{left:10px;right:10px;bottom:84px;max-width:none}}
+
+/* ---------- Whole-number pixel scales (Dec 2026, from the player: everything in the chunky pixel look) ----------
+   A sprite shown at an uneven size (1.25x, 2.87x, 6.3x) loses its square pixels, so these are pinned to exact
+   multiples of the size they were drawn at. The shrunk map picture now shows a 1x crop instead of dropping pixels. */
+.encounter-arena .avatar .rig-torso img{width:144px!important;height:192px!important;object-fit:fill!important}
+@media(max-width:860px){.encounter-arena .avatar .rig-torso img{width:96px!important;height:128px!important}}
+.pet-pop-art img,.pet-pop-art .egg-art{width:96px!important;height:96px!important;max-width:none!important}
+.qr-face .folk-face{width:32px!important;height:32px!important}
+.story-hero{width:96px!important;height:128px!important}
+.story-stage-person .folk-face{width:96px!important;height:96px!important}
+.story-portrait .folk-face{width:64px!important;height:64px!important}
+.towninfo img.pxscene{width:100%!important;height:300px!important;object-fit:none!important;object-position:center 62%!important}
+@media(max-width:860px){.story-hero{width:48px!important;height:64px!important}.story-stage-person .folk-face{width:64px!important;height:64px!important}}
+/* backgrounds at whole-number scales: the fight backdrop is its town scene at 3x (like the activity scenes), cropped to
+   the middle rather than shrunk to fit; the farm scenery at 4x; the ranch banner at exactly its pen scale */
+.encounter-arena{background-size:cover,1920px 1080px!important;background-position:center,center 66%!important;background-repeat:no-repeat!important}
+.estate-scenery{background-size:960px 540px!important;background-position:-20px -78px!important}
+.ranch-strip{background-size:auto calc(30px * var(--k))!important}
+/* the map's town picture: a 2x window onto the middle of the town */
+.towninfo img.pxscene{width:1280px!important;height:720px!important;max-width:none!important;object-fit:fill!important;margin:-200px 0 -220px calc(50% - 640px)!important;clip-path:inset(200px 0 220px 0)}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -5579,7 +5599,10 @@ const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const OUTLINES = ['#1a1310', '#1c1410', '#120c08'];
 
 /* source canvas (w x h, small pixel art) -> canvas (2w x 2h) */
-DQ.hiRes = (src, opt = {}) => {
+/* Dec 2026, from the player: every sprite uses the original chunky pixels. This pass (Scale2x, thinned outlines, extra
+   shading) is switched off: DQ.hiRes hands back the sprite exactly as drawn. HIRES_ON = true restores it. */
+const HIRES_ON = false;
+DQ.hiResSmooth = (src, opt = {}) => {
   const w = src.width, h = src.height, W = w * 2, H = h * 2;
   const sd = src.getContext('2d').getImageData(0, 0, w, h).data;
   /* palette ids so comparisons are cheap and exact */
@@ -5634,6 +5657,7 @@ DQ.hiRes = (src, opt = {}) => {
   }
   cx.putImageData(im, 0, 0); return cv;
 };
+DQ.hiRes = HIRES_ON ? DQ.hiResSmooth : src => src;
 })();
 
 </script>

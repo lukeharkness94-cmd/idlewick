@@ -8,7 +8,10 @@ const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const OUTLINES = ['#1a1310', '#1c1410', '#120c08'];
 
 /* source canvas (w x h, small pixel art) -> canvas (2w x 2h) */
-DQ.hiRes = (src, opt = {}) => {
+/* Dec 2026, from the player: every sprite uses the original chunky pixels. This pass (Scale2x, thinned outlines, extra
+   shading) is switched off: DQ.hiRes hands back the sprite exactly as drawn. HIRES_ON = true restores it. */
+const HIRES_ON = false;
+DQ.hiResSmooth = (src, opt = {}) => {
   const w = src.width, h = src.height, W = w * 2, H = h * 2;
   const sd = src.getContext('2d').getImageData(0, 0, w, h).data;
   /* palette ids so comparisons are cheap and exact */
@@ -63,4 +66,5 @@ DQ.hiRes = (src, opt = {}) => {
   }
   cx.putImageData(im, 0, 0); return cv;
 };
+DQ.hiRes = HIRES_ON ? DQ.hiResSmooth : src => src;
 })();

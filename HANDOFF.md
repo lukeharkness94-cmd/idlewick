@@ -588,3 +588,7 @@ Built in the brief's order: museum, hidden recipes, towers, events, audio. All o
 - No human playtest of any of it.
 
 **Test list**: as before, plus `tests/world-life.cjs`. `tests/regression.cjs` is now 116 checks (T1-T8 at the end).
+
+
+## Chunky pixels everywhere (Dec 2026)
+The player still saw the smoother style in places. Two causes: `js/hires.js` (an older hi-res pass: Scale2x, thin outlines, extra shading) was still applied to the 24px sprites, `pixel.js` icons and the hero gear figure; and several pictures were shown at uneven sizes (fight backdrop 2.19×, farm strip 3.39×, ranch banner 3.87×, map town picture 0.85×, quest-row faces 1.25×, story hero 3.63×, hatch pop-up 2.87×). The pass is now off and each is pinned to a whole-number scale, cropped rather than squeezed. Fighters were already exact (6×). The Village page's town scene still fits its panel at a fractional scale: a whole 2× would not fit on one screen at common window sizes and would hide clickable buildings at the edges.
