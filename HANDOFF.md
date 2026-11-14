@@ -598,3 +598,9 @@ The player still saw the smoother style in places. Two causes: `js/hires.js` (an
 - The welcome-back summary opened scrolled to its bottom: `DQ.modal` focused the first primary button in the body (the next-step button, low down) and the browser scrolled to it. It now focuses the pop-up's own action button without scrolling and resets the scroll.
 - The skill column kept fixed row heights (31-48px), leaving 180-380px empty below it on most screens. `UI.fitDock` now shares the height between rows (34-64px), on render and resize. Phones are unchanged.
 - New test: `tests/return-and-rail.cjs` (five window sizes).
+
+
+## Nov 14, 2026: combat layout E and a UI-wide cleanup
+
+- Combat was redone as layout E: one header bar (target and level, danger/food/gear chips, Guide/Details/Loot, one primary button), the fight on its area backdrop with nothing overlaid, and three even panels below (Fighting style, Food, Abilities). See AGENTS.md.
+- A screenshot sweep of every page at 1440 × 900, 1280 × 720 and 390 × 844 in both themes led to these fixes: Home "Nearly there" panel; Skill levels card grid with next unlocks; Workers bed picture no longer overlaps its text; House fits 1280 × 720 (compact cottage, two-column rooms, one-row trophy wall, "10 wins" captions, free Parlour says "Build (free)"); Inventory fits 1280 × 720 (right column holds details, preparations and appearance; category tabs wrap; Max hit sits right of Combat stats); Herbalism first-goal button keeps its own width and its copy is shorter.

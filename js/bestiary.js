@@ -152,7 +152,7 @@ UI.slayerHtml = m => {
 UI.trophyWallHtml = () => {
   const bosses = D.MONLIST.filter(m => m.boss), W = S().house.wall || [];
   return `<section class="panel trophy-wall"><div class="phead"><h2>${ico('trophy')} Trophy wall</h2><small>${W.length} of ${bosses.length} hung</small></div><div class="trophies">${bosses.map(m => { const got = DQ.trophyEarned(m.id), on = W.includes(m.id), k = S().beast.kills[m.id] || 0;
-    return `<div class="trophy ${got ? '' : 'tro-locked'} ${on ? 'hung' : ''}">${DQ.trophyArt ? DQ.trophyArt(m.id, 88) : ''}<b>${got || k ? esc(m.boss.short || m.name) : '???'}</b>${got ? `<button class="btn sm ${on ? '' : 'primary'}" data-do="trophy" data-a="${m.id}">${on ? 'Take down' : 'Hang'}</button>` : `<small>${k ? `${fmt(10 - k)} more victories` : 'Defeat this boss 10 times'}</small>`}</div>`; }).join('')}</div></section>`;
+    return `<div class="trophy ${got ? '' : 'tro-locked'} ${on ? 'hung' : ''}">${DQ.trophyArt ? DQ.trophyArt(m.id, 88) : ''}<b>${got || k ? esc(m.boss.short || m.name) : '???'}</b>${got ? `<button class="btn sm ${on ? '' : 'primary'}" data-do="trophy" data-a="${m.id}">${on ? 'Take down' : 'Hang'}</button>` : `<small title="Defeat this boss 10 times">${k ? `${fmt(10 - k)} more wins` : '10 wins'}</small>`}</div>`; }).join('')}</div></section>`;
 };
 Object.assign(UI.DO, {
   beasttitle: a => { DQ.setTitle(a || null); UI.renderHud && UI.renderHud(); if (UI.guideOpen && document.querySelector('.gladder')) UI.openGuide(UI.guideOpen); },

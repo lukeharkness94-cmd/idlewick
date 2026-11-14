@@ -3763,3 +3763,67 @@ html.lw-1600 .guide-book{grid-template-columns:200px minmax(0,1fr) 340px}
 #view .combat-x .combat-food .eat-step span{margin-right:auto}
 @media (max-width:860px){#view .combat-x .encounter-arena{min-height:320px!important}}
 #view .combat-x .cx-styles .ss-btn{grid-column:auto!important;grid-row:auto!important}
+@media (min-width:861px){html.lw-1600 #view .combat-x .cx-styles{grid-template-columns:1fr!important}html.lw-1600 #view .combat-x .cx-styles .ss-btn{min-height:0!important;padding:5px 10px!important}html.lw-1600 #view .combat-x .cx-styles .ss-btn>span{grid-template-columns:auto 1fr;column-gap:8px;align-items:baseline}html.lw-1600 #view .combat-x .cx-styles .ss-btn>span .bar,html.lw-1600 #view .combat-x .cx-styles .ss-btn>span .ss-fast{grid-column:1/-1}html.lw-1600 #view .combat-x .cx-styles .ss-btn small{text-align:right}}
+/* Home: nearest unlocks once every skill is open */
+.close-to .close-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.close-card{display:grid;grid-template-columns:32px minmax(0,1fr);gap:10px;align-items:center;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb,var(--panel2) 85%,transparent);color:var(--ink);cursor:pointer;font:inherit}
+.close-card:hover,.close-card:focus-visible{border-color:var(--brass)}
+.close-card>span{display:grid;gap:2px;min-width:0}
+.close-card b{font:600 16px var(--f-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.close-card small{color:var(--mute);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.close-card .study-bar{position:static;display:block;margin-top:4px}
+@media (max-width:860px){.close-to .close-grid{grid-template-columns:1fr}}
+/* Workers: the room picture is 72px, its column matches */
+.worker-beds .wb-next{grid-template-columns:72px minmax(0,1fr) auto}
+/* Skill levels: a grid of cards, every skill on one screen */
+#view .skl{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+#view .skrow{grid-template-columns:32px minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:10px;row-gap:4px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--panel2) 70%,transparent);font-size:16px}
+#view .skrow>img,#view .skrow>.ic,#view .skrow>svg{grid-row:1/3}
+#view .skrow>b{font-size:16px}
+#view .skrow>.bar{grid-column:2/4;width:auto}
+#view .skrow.locked small{grid-column:2/4;text-align:left}
+#view .skrow:hover{border-color:var(--brass)}
+/* House: all eight trophies in one row */
+#view .trophy-wall .trophies{grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}
+#view .trophy-wall .trophy{padding:8px 4px}
+#view .trophy-wall .trophy b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+@media (max-width:860px){#view .trophy-wall .trophies{grid-template-columns:repeat(4,minmax(0,1fr))}}
+/* Herbalism first goals: the step's button keeps its own width */
+#view .herb-path li .btn{justify-self:start;align-self:flex-start;width:auto}
+#view .skrow{grid-template-rows:auto auto auto;align-content:start}
+#view .skrow>img,#view .skrow>.ic,#view .skrow>svg{grid-row:1/4;align-self:center}
+#view .skrow small.sk-next{grid-column:2/4;text-align:left;color:var(--mute);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (min-width:861px){#view>.panel:has(> .skl){flex:0 1 auto!important}}
+html.short #view .trophy-wall .trophy-art{width:40px!important;height:44px!important}
+html.short #view .trophy-wall .trophy{padding:6px 4px;gap:2px}
+/* House on short windows: the cottage sits beside its title and the rooms take two columns */
+@media (min-width:861px){
+  html.short .house-hero{display:grid;grid-template-columns:96px minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;row-gap:6px;text-align:left;align-items:center;padding:10px 12px}
+  html.short .house-hero .cottage-art{width:96px;height:80px;grid-row:1/3}
+  html.short .house-hero .rws{justify-content:flex-start}
+  html.short .house-rooms{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  html.short .house-rooms>.k{grid-column:1/-1}
+  html.short .hroom{display:flex!important;flex-direction:column;align-items:flex-start;padding:6px 10px;min-width:0}
+  html.short .hroom small{white-space:nowrap}
+  html.short .hroom b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  html.short .hroom .hroom-art{display:none}
+}
+/* Inventory: backpack categories wrap instead of hiding under a sideways scroll; item details line up with the backpack */
+#packfilter-select,#bankfilter-select{flex-wrap:wrap!important;overflow:visible!important}
+@media (min-width:861px){
+  .character-layout>.col>#detailbox,.character-layout>.col>#detailbox.empty{position:static!important;top:auto}
+  html.short .equipment-appearance .hint{display:none}
+  html.short .equipment-appearance{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+  html.short .equipment-appearance>h3{flex:1 1 100%;margin:0}
+  html.short .equipment-appearance .fig-marks{display:contents}
+  html.short .equipment-stats .stat-grid>*,html.short .equipment-stats .stat-tile{min-height:0;padding-top:4px;padding-bottom:4px}
+}
+#equipment-stats-toggle{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+#equipment-stats-toggle .mono{font:500 14px var(--f-ui);color:var(--mute);text-transform:none;letter-spacing:0}
+@media (min-width:861px){
+  #view .character-layout>.col>#detailbox{grid-row:1!important}
+  #view .character-layout>.col>.loadouts{grid-column:2!important;grid-row:2!important}
+  #view .character-layout>.col>section:not(#detailbox):not(.loadouts):not(.appearance-side){grid-row:1 / span 3}
+  #view .character-layout>.col>.appearance-side{grid-column:2;grid-row:3;margin:0;border-top:0;padding-top:12px}
+}
+@media (min-width:861px){html.short #view .paper-doll{grid-template-rows:repeat(4,52px);gap:6px;margin-bottom:6px}}

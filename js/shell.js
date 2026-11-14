@@ -181,7 +181,7 @@ UI.V.overview = () => {
 };
 UI.V.skillsummary = () => `<section class="panel"><div class="phead"><h2>Your skills</h2><small>Total level <b data-b="totlvl"></b></small></div><div class="skl">${D.SKILLS.map(skill => {
   const locked = !DQ.skillUnlocked(skill.id);
-  return `<button class="skrow ${locked ? 'locked' : ''}" data-do="go" data-a="${skill.page}" style="--c:${skill.col}">${locked ? ico('lock') : DQ.artImage('skill',skill.id,32,'skill-emblem',skill.name)}<span>${skill.name}</span>${locked ? `<small>${esc(DQ.unlockHow(skill.id))}</small>` : `<b class="mono" data-b="lvl:${skill.id}"></b><span class="bar"><i data-b="xpbar:${skill.id}"></i></span>`}</button>`;
+  return `<button class="skrow ${locked ? 'locked' : ''}" data-do="go" data-a="${skill.page}" style="--c:${skill.col}">${locked ? ico('lock') : DQ.artImage('skill',skill.id,32,'skill-emblem',skill.name)}<span>${skill.name}</span>${locked ? `<small>${esc(DQ.unlockHow(skill.id))}</small>` : `<b class="mono" data-b="lvl:${skill.id}"></b><span class="bar"><i data-b="xpbar:${skill.id}"></i></span>${(nx => nx ? `<small class="sk-next">Lv ${nx.lvl} · ${esc(nx.what)}</small>` : '')(UI.nextUnlock && UI.nextUnlock(skill.id))}`}</button>`;
 }).join('')}</div></section>`;
 UI.V.activity = () => `${UI.inboxPanel()}<section class="panel"><div class="phead"><h2>Activity</h2><small class="mono" id="xph"></small></div><div id="chart"></div><ul class="log" id="loglist"></ul></section>`;
 let gAcc = 0;
@@ -242,3 +242,5 @@ DQ.on('act', () => UI.packWarn(true));
   addEventListener('resize', () => requestAnimationFrame(fit));
   UI.fitDock = fit;
 })();
+/* Inventory on desktop: Appearance & sharing sits under Preparations in the right column, so the equipment column fits short windows */
+(() => { const UI = window.DQ.ui; const r0 = UI.render; UI.render = (...a) => { const r = r0(...a); try { if (UI.view === 'character' && innerWidth > 860) { const ap = document.getElementById('equipment-appearance'), col = document.querySelector('#view .character-layout>.col'); if (ap && col && ap.parentElement !== col) { ap.classList.add('panel', 'appearance-side'); col.appendChild(ap); } } } catch (e) {} return r; }; })();

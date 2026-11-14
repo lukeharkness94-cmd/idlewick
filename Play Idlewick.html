@@ -3847,6 +3847,70 @@ html.lw-1600 .guide-book{grid-template-columns:200px minmax(0,1fr) 340px}
 #view .combat-x .combat-food .eat-step span{margin-right:auto}
 @media (max-width:860px){#view .combat-x .encounter-arena{min-height:320px!important}}
 #view .combat-x .cx-styles .ss-btn{grid-column:auto!important;grid-row:auto!important}
+@media (min-width:861px){html.lw-1600 #view .combat-x .cx-styles{grid-template-columns:1fr!important}html.lw-1600 #view .combat-x .cx-styles .ss-btn{min-height:0!important;padding:5px 10px!important}html.lw-1600 #view .combat-x .cx-styles .ss-btn>span{grid-template-columns:auto 1fr;column-gap:8px;align-items:baseline}html.lw-1600 #view .combat-x .cx-styles .ss-btn>span .bar,html.lw-1600 #view .combat-x .cx-styles .ss-btn>span .ss-fast{grid-column:1/-1}html.lw-1600 #view .combat-x .cx-styles .ss-btn small{text-align:right}}
+/* Home: nearest unlocks once every skill is open */
+.close-to .close-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.close-card{display:grid;grid-template-columns:32px minmax(0,1fr);gap:10px;align-items:center;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb,var(--panel2) 85%,transparent);color:var(--ink);cursor:pointer;font:inherit}
+.close-card:hover,.close-card:focus-visible{border-color:var(--brass)}
+.close-card>span{display:grid;gap:2px;min-width:0}
+.close-card b{font:600 16px var(--f-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.close-card small{color:var(--mute);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.close-card .study-bar{position:static;display:block;margin-top:4px}
+@media (max-width:860px){.close-to .close-grid{grid-template-columns:1fr}}
+/* Workers: the room picture is 72px, its column matches */
+.worker-beds .wb-next{grid-template-columns:72px minmax(0,1fr) auto}
+/* Skill levels: a grid of cards, every skill on one screen */
+#view .skl{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+#view .skrow{grid-template-columns:32px minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:10px;row-gap:4px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--panel2) 70%,transparent);font-size:16px}
+#view .skrow>img,#view .skrow>.ic,#view .skrow>svg{grid-row:1/3}
+#view .skrow>b{font-size:16px}
+#view .skrow>.bar{grid-column:2/4;width:auto}
+#view .skrow.locked small{grid-column:2/4;text-align:left}
+#view .skrow:hover{border-color:var(--brass)}
+/* House: all eight trophies in one row */
+#view .trophy-wall .trophies{grid-template-columns:repeat(8,minmax(0,1fr));gap:8px}
+#view .trophy-wall .trophy{padding:8px 4px}
+#view .trophy-wall .trophy b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+@media (max-width:860px){#view .trophy-wall .trophies{grid-template-columns:repeat(4,minmax(0,1fr))}}
+/* Herbalism first goals: the step's button keeps its own width */
+#view .herb-path li .btn{justify-self:start;align-self:flex-start;width:auto}
+#view .skrow{grid-template-rows:auto auto auto;align-content:start}
+#view .skrow>img,#view .skrow>.ic,#view .skrow>svg{grid-row:1/4;align-self:center}
+#view .skrow small.sk-next{grid-column:2/4;text-align:left;color:var(--mute);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (min-width:861px){#view>.panel:has(> .skl){flex:0 1 auto!important}}
+html.short #view .trophy-wall .trophy-art{width:40px!important;height:44px!important}
+html.short #view .trophy-wall .trophy{padding:6px 4px;gap:2px}
+/* House on short windows: the cottage sits beside its title and the rooms take two columns */
+@media (min-width:861px){
+  html.short .house-hero{display:grid;grid-template-columns:96px minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;row-gap:6px;text-align:left;align-items:center;padding:10px 12px}
+  html.short .house-hero .cottage-art{width:96px;height:80px;grid-row:1/3}
+  html.short .house-hero .rws{justify-content:flex-start}
+  html.short .house-rooms{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  html.short .house-rooms>.k{grid-column:1/-1}
+  html.short .hroom{display:flex!important;flex-direction:column;align-items:flex-start;padding:6px 10px;min-width:0}
+  html.short .hroom small{white-space:nowrap}
+  html.short .hroom b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  html.short .hroom .hroom-art{display:none}
+}
+/* Inventory: backpack categories wrap instead of hiding under a sideways scroll; item details line up with the backpack */
+#packfilter-select,#bankfilter-select{flex-wrap:wrap!important;overflow:visible!important}
+@media (min-width:861px){
+  .character-layout>.col>#detailbox,.character-layout>.col>#detailbox.empty{position:static!important;top:auto}
+  html.short .equipment-appearance .hint{display:none}
+  html.short .equipment-appearance{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+  html.short .equipment-appearance>h3{flex:1 1 100%;margin:0}
+  html.short .equipment-appearance .fig-marks{display:contents}
+  html.short .equipment-stats .stat-grid>*,html.short .equipment-stats .stat-tile{min-height:0;padding-top:4px;padding-bottom:4px}
+}
+#equipment-stats-toggle{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+#equipment-stats-toggle .mono{font:500 14px var(--f-ui);color:var(--mute);text-transform:none;letter-spacing:0}
+@media (min-width:861px){
+  #view .character-layout>.col>#detailbox{grid-row:1!important}
+  #view .character-layout>.col>.loadouts{grid-column:2!important;grid-row:2!important}
+  #view .character-layout>.col>section:not(#detailbox):not(.loadouts):not(.appearance-side){grid-row:1 / span 3}
+  #view .character-layout>.col>.appearance-side{grid-column:2;grid-row:3;margin:0;border-top:0;padding-top:12px}
+}
+@media (min-width:861px){html.short #view .paper-doll{grid-template-rows:repeat(4,52px);gap:6px;margin-bottom:6px}}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -13679,13 +13743,13 @@ UI.V.house = () => {
   /* One screen: the cottage, your bonuses and the rooms on the left; every piece of furniture in the chosen room as a
      card on the right, each with its level, what the next level gives, the cost and one button. */
   const room = D.ROOMS.find(r => r.id === UI.tab.houseRoom) || D.ROOMS[0], built = H.rooms[room.id];
-  const roomBtns = D.ROOMS.map(r => { const b = H.rooms[r.id], n = r.furn.reduce((a, fu) => a + (H.furn[fu.id] || 0), 0); return `<button class="hroom ${r === room ? 'on' : ''} ${b ? '' : 'unbuilt'}" data-do="houseroom" data-a="${r.id}" aria-pressed="${r === room}"><b>${esc(r.name)}</b><small>${b ? `${n} / ${r.furn.length * 3} upgrades` : `Build · ${fmt(r.price)} coins`}</small></button>`; }).join('');
+  const roomBtns = D.ROOMS.map(r => { const b = H.rooms[r.id], n = r.furn.reduce((a, fu) => a + (H.furn[fu.id] || 0), 0); return `<button class="hroom ${r === room ? 'on' : ''} ${b ? '' : 'unbuilt'}" data-do="houseroom" data-a="${r.id}" aria-pressed="${r === room}"><b>${esc(r.name)}</b><small>${b ? `${n} / ${r.furn.length * 3} upgrades` : `${r.price ? `Build · ${fmt(r.price)} coins` : 'Build · free'}`}</small></button>`; }).join('');
   const furnCard = fu => {
     const t = H.furn[fu.id] || 0, vals = Object.values(fu.fx)[0], nextCost = fu.costs[t], can = built && t < 3 && DQ.canAfford(nextCost);
     return `<div class="hfurn ${t ? 'placed' : ''}"><span class="hf-art">${DQ.furnIco ? DQ.furnIco(fu.id, fu.ic) : ico(fu.ic)}</span><b>${esc(fu.name)}</b><span class="pips">${[1, 2, 3].map(n => `<i class="${t >= n ? 'on' : ''}"></i>`).join('')}</span><small class="hf-now">${t ? esc(fu.label(vals[t - 1])) : 'Not placed yet'}</small>${t < 3 ? `<small class="hf-next">${t ? 'Next' : 'Place'}: ${esc(fu.label(vals[t]))}</small><div class="rws">${costChips(nextCost)}</div><button class="btn sm ${can ? 'primary' : ''}" data-do="furnish" data-a="${fu.id}" ${can ? '' : 'disabled'}>${!built ? 'Build the room first' : t ? 'Upgrade' : 'Place'}</button>` : '<small class="ok">Fully upgraded</small>'}</div>`;
   };
   return `<div class="house-layout"><aside class="house-side"><section class="panel house-hero">${(DQ.cottageArt && DQ.cottageArt()) || houseArt()}<h2>Your home</h2>${sum ? `<div class="rws">${sum}</div>` : '<p class="dim sm">Place furniture to earn lasting bonuses.</p>'}</section><nav class="panel house-rooms" aria-label="Rooms"><span class="k">Rooms</span>${roomBtns}</nav></aside>
-    <section class="panel house-room"><div class="phead"><div><h2>${esc(room.name)}</h2><small>${esc(room.blurb)}</small></div>${built ? '<span class="state ok">Built</span>' : `<button class="btn ${S().coins >= room.price ? 'primary' : ''}" data-do="buildroom" data-a="${room.id}">Build for ${fmt(room.price)} coins</button>`}</div><div class="hfurn-grid">${room.furn.map(furnCard).join('')}</div></section></div>`;
+    <section class="panel house-room"><div class="phead"><div><h2>${esc(room.name)}</h2><small>${esc(room.blurb)}</small></div>${built ? '<span class="state ok">Built</span>' : `<button class="btn ${S().coins >= room.price ? 'primary' : ''}" data-do="buildroom" data-a="${room.id}">${room.price ? `Build for ${fmt(room.price)} coins` : 'Build (free)'}</button>`}</div><div class="hfurn-grid">${room.furn.map(furnCard).join('')}</div></section></div>`;
 };
 UI.DO.houseroom = a => { UI.tab.houseRoom = a; UI.render(false); };
 
@@ -14821,7 +14885,7 @@ UI.V.overview = () => {
 };
 UI.V.skillsummary = () => `<section class="panel"><div class="phead"><h2>Your skills</h2><small>Total level <b data-b="totlvl"></b></small></div><div class="skl">${D.SKILLS.map(skill => {
   const locked = !DQ.skillUnlocked(skill.id);
-  return `<button class="skrow ${locked ? 'locked' : ''}" data-do="go" data-a="${skill.page}" style="--c:${skill.col}">${locked ? ico('lock') : DQ.artImage('skill',skill.id,32,'skill-emblem',skill.name)}<span>${skill.name}</span>${locked ? `<small>${esc(DQ.unlockHow(skill.id))}</small>` : `<b class="mono" data-b="lvl:${skill.id}"></b><span class="bar"><i data-b="xpbar:${skill.id}"></i></span>`}</button>`;
+  return `<button class="skrow ${locked ? 'locked' : ''}" data-do="go" data-a="${skill.page}" style="--c:${skill.col}">${locked ? ico('lock') : DQ.artImage('skill',skill.id,32,'skill-emblem',skill.name)}<span>${skill.name}</span>${locked ? `<small>${esc(DQ.unlockHow(skill.id))}</small>` : `<b class="mono" data-b="lvl:${skill.id}"></b><span class="bar"><i data-b="xpbar:${skill.id}"></i></span>${(nx => nx ? `<small class="sk-next">Lv ${nx.lvl} · ${esc(nx.what)}</small>` : '')(UI.nextUnlock && UI.nextUnlock(skill.id))}`}</button>`;
 }).join('')}</div></section>`;
 UI.V.activity = () => `${UI.inboxPanel()}<section class="panel"><div class="phead"><h2>Activity</h2><small class="mono" id="xph"></small></div><div id="chart"></div><ul class="log" id="loglist"></ul></section>`;
 let gAcc = 0;
@@ -14882,6 +14946,8 @@ DQ.on('act', () => UI.packWarn(true));
   addEventListener('resize', () => requestAnimationFrame(fit));
   UI.fitDock = fit;
 })();
+/* Inventory on desktop: Appearance & sharing sits under Preparations in the right column, so the equipment column fits short windows */
+(() => { const UI = window.DQ.ui; const r0 = UI.render; UI.render = (...a) => { const r = r0(...a); try { if (UI.view === 'character' && innerWidth > 860) { const ap = document.getElementById('equipment-appearance'), col = document.querySelector('#view .character-layout>.col'); if (ap && col && ap.parentElement !== col) { ap.classList.add('panel', 'appearance-side'); col.appendChild(ap); } } } catch (e) {} return r; }; })();
 
 </script>
 <script>
@@ -15474,7 +15540,7 @@ UI.slayerHtml = m => {
 UI.trophyWallHtml = () => {
   const bosses = D.MONLIST.filter(m => m.boss), W = S().house.wall || [];
   return `<section class="panel trophy-wall"><div class="phead"><h2>${ico('trophy')} Trophy wall</h2><small>${W.length} of ${bosses.length} hung</small></div><div class="trophies">${bosses.map(m => { const got = DQ.trophyEarned(m.id), on = W.includes(m.id), k = S().beast.kills[m.id] || 0;
-    return `<div class="trophy ${got ? '' : 'tro-locked'} ${on ? 'hung' : ''}">${DQ.trophyArt ? DQ.trophyArt(m.id, 88) : ''}<b>${got || k ? esc(m.boss.short || m.name) : '???'}</b>${got ? `<button class="btn sm ${on ? '' : 'primary'}" data-do="trophy" data-a="${m.id}">${on ? 'Take down' : 'Hang'}</button>` : `<small>${k ? `${fmt(10 - k)} more victories` : 'Defeat this boss 10 times'}</small>`}</div>`; }).join('')}</div></section>`;
+    return `<div class="trophy ${got ? '' : 'tro-locked'} ${on ? 'hung' : ''}">${DQ.trophyArt ? DQ.trophyArt(m.id, 88) : ''}<b>${got || k ? esc(m.boss.short || m.name) : '???'}</b>${got ? `<button class="btn sm ${on ? '' : 'primary'}" data-do="trophy" data-a="${m.id}">${on ? 'Take down' : 'Hang'}</button>` : `<small title="Defeat this boss 10 times">${k ? `${fmt(10 - k)} more wins` : '10 wins'}</small>`}</div>`; }).join('')}</div></section>`;
 };
 Object.assign(UI.DO, {
   beasttitle: a => { DQ.setTitle(a || null); UI.renderHud && UI.renderHud(); if (UI.guideOpen && document.querySelector('.gladder')) UI.openGuide(UI.guideOpen); },
@@ -15723,7 +15789,14 @@ DQ.tips.rail=sk=>{const s=D.SK[sk];if(!s)return '';const lock=!DQ.skillUnlocked(
   if(lock)return head+`<p class="tt-p">${esc(DQ.unlockHow(sk))}</p>`;
   const L=DQ.lvl(sk),need=L>=99?0:Math.max(0,D.XPF[L+1]-(S().xp[sk]||0)),nx=UI.nextUnlock&&UI.nextUnlock(sk);
   return head+`<div class="tt-xp"><span class="bar"><i style="width:${DQ.pctNext(sk).toFixed(1)}%;background:${s.col}"></i></span><small>${L>=99?'Maximum level':`${fmt(need)} XP to level ${L+1}`}</small></div>${nx?`<div class="tt-k">At level ${nx.lvl}</div><ul class="tt-list">${String(nx.what).split(', ').slice(0,4).map(n=>`<li><span class="tt-pic blackout">${nextArt(sk,n)}</span><span class="tt-l">Something new</span></li>`).join('')}</ul>`:''}`;};
-UI.unlocksAheadPanel=()=>{const statSkill={harvest:'farming',craft:'crafting',smith:'smithing',cook:'cooking',mine:'mining'},blocked=x=>{const [k,a]=x.stat.split(':'),need=k==='skill'?a:statSkill[k]||(k==='own'||k==='use'?(Object.values(D.RECIPES).find(r=>r.out[a])||{}).skill:null);return need&&!DQ.skillUnlocked(need)&&x.have<x.need?2:0;},near=sk=>-DQ.actionProgress(sk.id).reduce((a,x)=>a+(1-Math.min(1,x.have/x.need))*(x.kind==='level'?1.5:1)+blocked(x),0),all=D.SKILLS.filter(s=>s.actionReq&&!DQ.skillUnlocked(s.id)).sort((a,b)=>near(b)-near(a)),locked=UI.view==='overview'?all.slice(0,2):all,more=all.length-locked.length;return `<section class="panel unlock-roadmap"><div class="phead"><div><span class="k">Progression</span><h2>${locked.length?'Unlocks ahead':'Action skills discovered'}</h2></div><button class="btn sm" data-do="go" data-a="skillsummary">All skills</button></div>${locked.length?`<p class="hint">${more?`Your two nearest. ${more} more in All skills.`:'Complete their requirements in any order.'}</p><div class="unlock-grid">${locked.map(sk=>`<article style="--c:${sk.col}"><div class="unlock-title">${ico('lock')}<span><b>${esc(sk.name)}</b><small>${esc(sk.blurb)}</small></span></div>${reqHtml(sk)}</article>`).join('')}</div>`:'<p>Every action-earned skill is unlocked. Their next levels remain visible in the Skills menu.</p>'}</section>`;};
+UI.unlocksAheadPanel=()=>{const statSkill={harvest:'farming',craft:'crafting',smith:'smithing',cook:'cooking',mine:'mining'},blocked=x=>{const [k,a]=x.stat.split(':'),need=k==='skill'?a:statSkill[k]||(k==='own'||k==='use'?(Object.values(D.RECIPES).find(r=>r.out[a])||{}).skill:null);return need&&!DQ.skillUnlocked(need)&&x.have<x.need?2:0;},near=sk=>-DQ.actionProgress(sk.id).reduce((a,x)=>a+(1-Math.min(1,x.have/x.need))*(x.kind==='level'?1.5:1)+blocked(x),0),all=D.SKILLS.filter(s=>s.actionReq&&!DQ.skillUnlocked(s.id)).sort((a,b)=>near(b)-near(a)),locked=UI.view==='overview'?all.slice(0,2):all,more=all.length-locked.length;if(!locked.length&&UI.closeToPanel)return UI.closeToPanel();return `<section class="panel unlock-roadmap"><div class="phead"><div><span class="k">Progression</span><h2>${locked.length?'Unlocks ahead':'Action skills discovered'}</h2></div><button class="btn sm" data-do="go" data-a="skillsummary">All skills</button></div>${locked.length?`<p class="hint">${more?`Your two nearest. ${more} more in All skills.`:'Complete their requirements in any order.'}</p><div class="unlock-grid">${locked.map(sk=>`<article style="--c:${sk.col}"><div class="unlock-title">${ico('lock')}<span><b>${esc(sk.name)}</b><small>${esc(sk.blurb)}</small></span></div>${reqHtml(sk)}</article>`).join('')}</div>`:'<p>Every action-earned skill is unlocked. Their next levels remain visible in the Skills menu.</p>'}</section>`;};
+/* once every skill is open, Home shows what is nearest: the next level that opens something, and the field guide entries nearly earned */
+UI.closeToPanel=()=>{const KS={fish:'fishing',wood:'woodcutting',mine:'mining',thieve:'thieving',crop:'farming',animal:'farming',brew:'herbalism',sail:'sailing',train:'beastmastery'},emb=sk=>{const x=D.SKILLS.find(s=>s.id===sk);return x?DQ.artImage('skill',x.id,32,'skill-emblem',x.name):ico('book');};
+ const lv=D.SKILLS.filter(sk=>DQ.skillUnlocked(sk.id)&&UI.nextUnlock).map(sk=>{const nx=UI.nextUnlock(sk.id);if(!nx)return null;const L=DQ.lvl(sk.id),a=D.XPF[L]||0,b=D.XPF[nx.lvl]||0,xp=S().xp[sk.id]||0;return{sk,nx,pct:b>a?Math.round((xp-a)/(b-a)*100):0};}).filter(Boolean).sort((a,b)=>b.pct-a.pct||a.nx.lvl-b.nx.lvl).slice(0,3);
+ const ms=Object.keys(S().mast||{}).map(k=>{const i=k.indexOf(':'),kind=k.slice(0,i),id=k.slice(i+1);if(kind==='fight'||kind==='alch')return null;const m=DQ.mastInfo(kind,id);if(!m.next)return null;const sk=kind==='recipe'?(D.RECIPES&&D.RECIPES[id]||{}).skill:KS[kind];return{kind,id,m,sk,name:DQ.mastName(kind,id)||id};}).filter(Boolean).sort((a,b)=>b.m.pct-a.m.pct).slice(0,3);
+ if(!lv.length&&!ms.length)return '';
+ const card=(sk,title,line,pct,go,tip)=>`<button class="close-card" data-do="go" data-a="${go}" title="${esc(tip)}">${emb(sk)}<span><b>${esc(title)}</b><small>${esc(line)}</small>${DQ.studyBar?DQ.studyBar(pct,false,tip):''}</span></button>`;
+ return `<section class="panel close-to"><div class="phead"><div><span class="k">Close to</span><h2>Nearly there</h2></div><button class="btn sm" data-do="go" data-a="skillsummary">All skills</button></div><div class="close-grid">${lv.map(x=>card(x.sk.id,`${x.sk.name} Lv ${x.nx.lvl}`,x.nx.what,x.pct,x.sk.page,`${x.sk.name} Lv ${x.nx.lvl}: ${x.nx.what}`)).join('')}${ms.map(x=>card(x.sk,x.name,`${DQ.ENTRY_NAMES[x.m.stars]} · ${x.m.next-x.m.n} more`,x.m.pct,'bestiary',`Field guide: ${DQ.entryPerk(x.kind,x.m.stars+1)}`)).join('')}</div></section>`;};
 UI.homeSections.push(UI.unlocksAheadPanel);
 DQ.on('lvl',()=>DQ.checkActionUnlocks());DQ.on('quests',()=>DQ.checkActionUnlocks());
 {const r0=UI.render;UI.render=f=>{try{DQ.checkActionUnlocks();}catch(e){}return r0(f);};}
@@ -15762,10 +15835,10 @@ const herbGoals=()=>{const done=id=>DQ.techDone&&DQ.techDone(id),R=D.POTION_RECI
  const mats=r=>UI.needTiles(Object.assign({},r.in,{coins:r.coins}));
  const step=(on,doneNow,title,body,btn)=>`<li class="${doneNow?'done':on?'now':''}"><b>${doneNow?'✓ ':''}${title}</b><small>${body}</small>${on&&!doneNow&&btn?btn:''}</li>`;
  const r1=done('herbalism'),scholar=DQ.skillUnlocked('research');
- return `<section class="panel herb-goals"><div class="phead"><h2>First goals</h2><small>Herbalism</small></div><ol class="herb-path">
+ return `<section class="panel herb-goals"><div class="phead"><h2>First goals</h2></div><ol class="herb-path">
   ${step(true,r1,'Research Herbalism',scholar?'In Scholarship: 900 coins and 10 onions.':`Learn Scholarship first: ${DQ.unlockHow('research')}.`,scholar?'<button class="btn sm" data-do="go" data-a="research">Open Scholarship</button>':'')}
-  ${step(r1,DQ.have('potion_heal')>0,'Brew a Healing draught',`Restores 40% of your health. In a fight it is drunk for you once your food runs out and health is low (once per fight): a safety net for a hard boss. <span class="rws">${mats(R)}</span>`)}
-  ${step(r1,false,'Next: War Brewing → Potion of Might','+15% damage for 20 minutes. Worth brewing for a boss you keep losing to, not for everyday fights. Research it in Scholarship (Tier II).')}
+  ${step(r1,DQ.have('potion_heal')>0,'Brew a Healing draught',`Heals 40%. Drunk for you once per fight when food runs out and health is low. <span class="rws">${mats(R)}</span>`)}
+  ${step(r1,false,'Next: War Brewing → Potion of Might','+15% damage for 20 min. For a boss you keep losing to. Scholarship, Tier II.')}
  </ol></section>`;};
 UI.V.brewery=()=>DQ.skillUnlocked('herbalism')?`${hero('herbalism')}${herbGoals()}${brewery()}`:UI.lockedPage('herbalism');
 })();
