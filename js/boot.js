@@ -31,7 +31,7 @@ function showTitle() {
   $('#t-mute').onclick = () => { go(); DQ.setMuted(!DQ.S.settings.muted); $('#t-mute').innerHTML = ico(DQ.S.settings.muted ? 'mute' : 'sound'); };
   if (has) { $('#t-cont').onclick = () => { go(); start(false); }; $('#t-cont').focus(); }
   $('#t-new').onclick = () => { go(); DQ.sfx('click'); create(); };
-  if (!has) $('#t-new').focus();
+  if (!has) $('#t-new').focus({ preventScroll: true, focusVisible: false });
 }
 
 function create() {

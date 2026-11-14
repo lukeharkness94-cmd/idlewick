@@ -3850,3 +3850,111 @@ button.sk-goal:hover b,.sh-next-btn:hover b{color:var(--brass);text-decoration:u
   .notice-badge{font-size:13px!important;min-width:20px;height:20px}
   .dk .notice-badge,#skilldock .dk .notice-badge{font-size:13px!important;min-width:18px;height:18px}
 }
+
+/* ===================== Finish layer (Nov 2026, js/finish.js) =====================
+   One consistent set of motion and material details. Transform and opacity only, so nothing shifts the layout;
+   all of it is off under html.calm (Settings > Reduce effects) and prefers-reduced-motion. */
+:root{--ease-out:cubic-bezier(.2,.8,.2,1);--ease-spring:cubic-bezier(.34,1.4,.64,1);--glow:color-mix(in srgb,var(--brass) 55%,transparent)}
+::selection{background:color-mix(in srgb,var(--brass) 45%,transparent);color:var(--ink)}
+*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--brass) 45%,var(--line2)) transparent}
+*::-webkit-scrollbar{width:8px;height:8px}*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--brass) 40%,var(--line2));border-radius:8px;border:2px solid transparent;background-clip:padding-box}
+*::-webkit-scrollbar-thumb:hover{background:color-mix(in srgb,var(--brass) 70%,var(--line2));background-clip:padding-box}
+
+/* pages arrive */
+@keyframes finIn{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
+#view.fin-enter [style*="--fin-i"]{animation:finIn .34s var(--ease-out) both;animation-delay:calc(var(--fin-i) * 45ms)}
+
+/* the sliding ink under the top menu and the page tabs */
+#topnav,#subnav .subnav{position:relative}
+.fin-ink{position:absolute;left:0;top:0;height:3px;border-radius:3px;pointer-events:none;z-index:2;opacity:0;
+  background:linear-gradient(90deg,transparent,var(--brass-hi) 18%,var(--brass-hi) 82%,transparent);box-shadow:0 0 10px var(--glow);
+  transition:transform .42s var(--ease-out),width .42s var(--ease-out),opacity .2s}
+@media (min-width:861px){.tnav.on{box-shadow:none}}
+#subnav .stab.on{box-shadow:inset 0 1px 0 #fff2,inset 0 -2px 0 color-mix(in srgb,var(--brass) 35%,transparent),0 2px 0 var(--button-shadow)}
+
+/* buttons: a light catch on the main button, a soft lift on hover, a firm press */
+.btn.primary{position:relative;overflow:hidden;isolation:isolate}
+.btn.primary::after{content:'';position:absolute;inset:-2px;z-index:-1;pointer-events:none;background:linear-gradient(105deg,transparent 35%,#fff7 50%,transparent 65%);transform:translateX(-110%)}
+.btn.primary:hover:not(:disabled)::after{transform:translateX(110%);transition:transform .75s var(--ease-out)}
+.btn:not(:disabled),.stab,.tnav,.illustrated-card{will-change:auto}
+.btn{transition:border-color .15s,background .15s,box-shadow .15s,translate .15s var(--ease-out)}
+.btn:hover:not(:disabled){translate:0 -1px}
+.btn:active:not(:disabled){translate:0 0;transition-duration:.05s}
+.btn:disabled{filter:saturate(.4);opacity:.7;cursor:not-allowed}
+.tnav{transition:background .2s,color .2s,translate .15s}
+.tnav:hover:not(.on){background:color-mix(in srgb,var(--brass) 7%,transparent)}
+.tnav:active{translate:0 1px}
+.tnav .ic{transition:translate .25s var(--ease-spring)}
+.tnav:hover .ic,.tnav.on .ic{translate:0 -2px}
+
+/* choice cards: lift toward you, the picture rises a little, the chosen one glows */
+.illustrated-card{transition:translate .2s var(--ease-out),box-shadow .2s,border-color .2s}
+.illustrated-card .choice-art img{transition:translate .3s var(--ease-spring)}
+.illustrated-card:hover:not(.locked){translate:0 -3px;box-shadow:0 10px 22px -12px #000c,0 0 0 1px color-mix(in srgb,var(--brass) 55%,transparent)}
+.illustrated-card:hover:not(.locked) .choice-art img{translate:0 -2px}
+.illustrated-card.locked:hover{translate:0 -1px}
+.illustrated-card:active:not(.locked){translate:0 -1px;transition-duration:.06s}
+@keyframes finGlow{0%,100%{box-shadow:0 0 0 1px var(--brass),0 0 10px -4px var(--glow)}50%{box-shadow:0 0 0 1px var(--brass-hi),0 0 22px -4px var(--glow)}}
+.illustrated-card.selected{animation:finGlow 3.4s ease-in-out infinite}
+
+/* the task you are doing: a slow light runs along its progress bar */
+@keyframes finGlint{from{background-position:-40% 0,0 0}to{background-position:140% 0,0 0}}
+.bar.prog>i{background-color:var(--c,var(--brass));background-image:linear-gradient(90deg,transparent,#ffffff55,transparent),linear-gradient(180deg,#ffffff22,transparent 60%);background-size:30% 100%,100% 100%;background-repeat:no-repeat;animation:finGlint 1.8s linear infinite}
+
+
+/* pop-ups and tooltips arrive instead of appearing */
+@keyframes finCard{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.modal{backdrop-filter:blur(2px)}
+.modal .m-card{animation:finCard .28s var(--ease-out) both}
+#tip{translate:0 4px;transition:opacity .14s,translate .18s var(--ease-out)}
+#tip.on{translate:0 0}
+
+/* the skill rail answers the pointer; the skill you are training breathes */
+.dk{transition:background .2s,translate .18s var(--ease-out)}
+.dk:hover{translate:2px 0}
+@keyframes finBreath{0%,100%{box-shadow:inset 3px 0 0 var(--c,var(--brass))}50%{box-shadow:inset 3px 0 0 var(--c,var(--brass)),inset 0 0 18px -8px var(--c,var(--brass))}}
+.dk.working{animation:finBreath 2.8s ease-in-out infinite}
+
+html.calm #view.fin-enter [style*="--fin-i"],html.calm .illustrated-card.selected,html.calm .bar.prog>i,html.calm .modal .m-card,html.calm .dk{animation:none!important}
+html.calm .fin-ink{transition:none}
+@media (prefers-reduced-motion:reduce){
+  #view.fin-enter [style*="--fin-i"],.illustrated-card.selected,.bar.prog>i,.modal .m-card,.dk{animation:none!important}
+  .fin-ink,.illustrated-card,.illustrated-card .choice-art img,.btn.primary::after,.tnav .ic,.dk{transition:none!important}
+  .illustrated-card:hover,.btn:hover,.dk:hover,.tnav:hover .ic,.tnav.on .ic,.illustrated-card:hover .choice-art img{translate:none!important}
+}
+/* coins rolling up: a warm glint on the number while it counts */
+.h-coin b{transition:color .3s,text-shadow .3s}
+.h-coin b.fin-roll{color:var(--brass-hi);text-shadow:0 0 10px var(--glow)}
+/* item tiles, quest rows, creature portraits and equipment slots answer the pointer the same way as cards */
+.slot,.eq,.qrow,.wh-head,.ab-tile,.ftr-skill,.food-tile,.close-card,.skrow,.unlock-step{transition:translate .18s var(--ease-out),box-shadow .18s,border-color .18s,background .18s}
+.slot:hover,.eq:hover,.wh-head:hover,.ab-tile:hover,.close-card:hover,.skrow:hover{translate:0 -2px;box-shadow:0 8px 16px -10px #000b,0 0 0 1px color-mix(in srgb,var(--brass) 50%,transparent)}
+.qrow:hover{translate:2px 0}
+.slot:active,.eq:active,.wh-head:active,.ab-tile:active,.close-card:active,.skrow:active{translate:0 0;transition-duration:.05s}
+.slot img,.eq img,.wh-head img{transition:translate .28s var(--ease-spring)}
+.slot:hover img,.wh-head:hover img{translate:0 -1px}
+/* a tile you just picked settles with a soft ring */
+@keyframes finPick{from{box-shadow:0 0 0 0 var(--glow)}to{box-shadow:0 0 0 8px transparent}}
+.slot.sel,.slot.on,.qrow.on,.wh-head.on{animation:finPick .5s var(--ease-out)}
+html.calm .slot,html.calm .eq,html.calm .qrow,html.calm .wh-head,html.calm .ab-tile,html.calm .close-card,html.calm .skrow{transition:none}
+html.calm .slot:hover,html.calm .eq:hover,html.calm .wh-head:hover,html.calm .ab-tile:hover,html.calm .close-card:hover,html.calm .skrow:hover,html.calm .qrow:hover{translate:none}
+@media (prefers-reduced-motion:reduce){.slot,.eq,.qrow,.wh-head,.ab-tile,.close-card,.skrow{transition:none}.slot:hover,.eq:hover,.wh-head:hover,.ab-tile:hover,.close-card:hover,.skrow:hover,.qrow:hover{translate:none}.slot.sel,.slot.on,.qrow.on,.wh-head.on{animation:none}}
+/* title: the logo, the line under it and the menu arrive in turn; the first button invites a click */
+@keyframes finRise{from{opacity:0;translate:0 10px}to{opacity:1;translate:0 0}}
+.logo p{animation:finRise .6s var(--ease-out) .35s both}
+.tmenu{animation:finRise .6s var(--ease-out) .55s both}
+@keyframes finInvite{0%,100%{box-shadow:inset 0 1px 0 #fff8,0 0 0 0 transparent}50%{box-shadow:inset 0 1px 0 #fff8,0 0 26px -2px var(--glow)}}
+.tbtn{transition:border-color .2s,translate .2s var(--ease-out),filter .2s}
+.tbtn:hover{transform:none;translate:0 -2px}.tbtn:active{transform:none;translate:0 1px}
+.tbtn.primary{animation:finInvite 2.6s ease-in-out 1.2s infinite}
+.tbtn.primary:hover{filter:brightness(1.07)}
+.tbtn:focus-visible{outline:2px solid var(--brass-hi);outline-offset:3px}
+.tbtn:focus:not(:focus-visible){outline:none}
+html.calm .logo p,html.calm .tmenu,html.calm .tbtn.primary{animation:none}
+@media (prefers-reduced-motion:reduce){.logo p,.tmenu,.tbtn.primary{animation:none}.tbtn:hover,.tbtn:active{translate:none}}
+/* the ink never widens the page, even mid-slide on a resized window */
+.fin-ink{max-width:100%}
+@media (min-width:861px){#topnav,#subnav .subnav{overflow-x:clip;overflow-clip-margin:6px}}
+/* one entrance, not two: the staggered finish replaces the older whole-block rise */
+#view.enter>*{animation:none}
+html.calm #view.enter>*{animation:none}

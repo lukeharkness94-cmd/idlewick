@@ -620,3 +620,8 @@ Rules collected from AGENTS.md and the player's messages, checked on 39 pages ×
 - Text under 13px on desktop: menu count badges (10–11px), tags, theme toggle, mastery and level numbers raised to 13px.
 - The title logo's raw `7vw` now uses `--vw100`.
 - No dropdowns, disclosures, stray fonts or fractional sprite scales were found.
+
+
+## Nov 2026: finish layer (polish pass)
+
+`js/finish.js` and the "Finish layer" CSS block add page entrances (staggered, merged with the existing `.view.enter`), a sliding brass ink under the top menu and page tabs (updated in the same frame as the render so a resized window never overflows), button lift/press and a sheen on primary buttons, card and tile lift with a selected-card glow, a light running along the active task's progress bar, a breathing rail row for the skill being trained, pop-up and tooltip entrances, coin roll-up on gains, themed scrollbars and selection, and a staged title screen with an inviting first button (no blue focus ring on load). All transform/opacity, off under Reduce effects and reduced-motion. Recorded before/after tours: the same scripted path on the previous and new builds.
