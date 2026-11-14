@@ -22,7 +22,7 @@ function boot() {
   const q = ctx.DQ; q.notify = q.pulse = q.floatAt = q.flash = q.burstAt = q.burstEl = q.toast = q.go = () => {};
   ['engine', 'systems', 'plan', 'meta', 'mastery'].forEach(load);
   q.ui = { V: {}, DO: {}, B: {}, homeSections: [], render() {}, tabState: () => null }; q.tips = { item: () => '' }; q.goals = () => [];
-  ['research', 'journey'].forEach(load);
+  ['research', 'journey', ...(process.env.NO_PERKS ? [] : ['skill_perks'])].forEach(load);
   q.S = q.newState(); q.fxDirty(); return q;
 }
 const q = boot(), D = q.data, S = q.S; S.settings.notify = false;

@@ -3911,6 +3911,22 @@ html.short #view .trophy-wall .trophy{padding:6px 4px;gap:2px}
   #view .character-layout>.col>.appearance-side{grid-column:2;grid-row:3;margin:0;border-top:0;padding-top:12px}
 }
 @media (min-width:861px){html.short #view .paper-doll{grid-template-rows:repeat(4,52px);gap:6px;margin-bottom:6px}}
+/* Skill goals (js/skill_perks.js): the next unlock and the flourish chance, quietly under the action */
+.sk-goal{display:flex;gap:6px;align-items:baseline;margin:2px 0;font-size:14px;min-width:0}
+.sk-goal>span{color:var(--mute);white-space:nowrap}
+.sk-goal>b{color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flo-chance,.sh-flo{color:var(--brass);white-space:nowrap}
+.sh-next{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:14px;margin-top:4px}
+.sh-next .sh-next-k{color:var(--mute)}
+.sh-next b{font-weight:600}
+.skillhero>.sh-next{grid-column:2/-1;margin-top:0}
+button.sk-goal,.sh-next-btn{background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+button.sk-goal:hover b,.sh-next-btn:hover b{color:var(--brass);text-decoration:underline}
+.pk-now{margin:0 0 6px;font-weight:600}.pk-flo{margin:0 0 10px;color:var(--mute)}.pk-flo b{color:var(--brass)}
+.pk-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px;max-height:520px;overflow:auto}
+.pk{display:grid;grid-template-columns:52px minmax(0,1fr);column-gap:8px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;opacity:.6}
+.pk b{grid-row:1/3;align-self:center;color:var(--mute)}.pk span{font-weight:600}.pk small{color:var(--mute);font-size:14px}
+.pk.got{opacity:1}.pk.got b{color:var(--good,#5cc08a)}.pk.next{opacity:1;border-color:var(--brass)}.pk.next b{color:var(--brass)}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -12492,7 +12508,7 @@ UI.V.gather = sk => {
       locked:levelLocked||townLocked,blocked:levelLocked||away,reason:requirements.join(' · '),
       short:[levelLocked?`Lv ${n.lvl}`:'',townLocked?`Reach ${town.name}`:''].filter(Boolean).join(' · '),
       caption:`Lv ${n.lvl}${regional||!DQ.nodeDiscovered(n)?` · ${esc(town.name)}`:''}`,
-      info:`${kind==='thieve'&&UI.thiefPerks?UI.thiefPerks():''}<p>${(n.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor(kind,n.id)/1000).toFixed(1)}s${kind==='thieve'?' · '+Math.round(DQ.successChance(kind,n)*100)+'% success':''}</p><p>${n.item?`<b class="mono" data-b="count:${n.item}"></b> held`:`${n.cmin}–${n.cmax} coins · ${n.dmg} damage if caught`}</p>`};
+      info:`${kind==='thieve'&&UI.thiefPerks?UI.thiefPerks():''}<p>${(n.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor(kind,n.id)/1000).toFixed(1)}s${kind==='thieve'?' · '+Math.round(DQ.successChance(kind,n)*100)+'% success':''}${UI.floLine?UI.floLine(sk):''}</p>${UI.goalLine?UI.goalLine(sk):''}<p>${n.item?`<b class="mono" data-b="count:${n.item}"></b> held`:`${n.cmin}–${n.cmax} coins · ${n.dmg} damage if caught`}</p>`};
   });
   if(!UI.taskChoice[sk]&&!DQ.act)UI.taskChoice[sk]=choices.find(c=>!c.blocked)?.id;
   return UI.taskPanel(sk,D.SK[sk].name,kind,choices,{fish:'Fish',wood:'Chop',mine:'Mine',thieve:'Pickpocket'}[kind])+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress &amp; tools</h3>${UI.skillHero(sk,UI.toolLine(sk))}</section>`;
@@ -12535,7 +12551,7 @@ UI.V.recipes = sk => {
     reason:lvlLock?`Requires ${D.SK[sk].name} ${r.lvl}`:miss.length?`Missing ${miss.join(', ')}`:'',
     stateText:lvlLock?`🔒 ${D.SK[sk].name} ${r.lvl} (you are ${DQ.lvl(sk)})`:miss.length?`Missing ${miss.length===1?miss[0]:miss.length+' materials'}`:'Ready to make',
     caption:r.burn&&!lvlLock&&DQ.lvl(sk)<r.lvl?`Lv ${r.lvl} · ${Math.round(DQ.burnChance(r)*100)}% burn`:`Lv ${r.lvl} · ${UI.statLine(it.b)||DQ.purposeOf&&DQ.purposeOf(outId)||`${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`}`,
-    info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}</p><div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>UI.needTile(id,n,{live:true})).join('')}</div>`};});
+    info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}${UI.floLine?UI.floLine(sk):''}</p>${UI.goalLine?UI.goalLine(sk):''}<div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>UI.needTile(id,n,{live:true})).join('')}</div>`};});
   return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'||sk==='carpentry'?'Make':'Craft')+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress</h3>${UI.skillHero(sk)}</section>`;
 };
 
@@ -13637,7 +13653,7 @@ UI.V.sailing = () => {
   const choices = D.VOYAGES.map(v => { const lvlLock = L < v.lvl, boatLock = tier < v.boat;
     return { id: v.id, name: v.name, artKind: 'island', locked: lvlLock, blocked: lvlLock || boatLock, reason: [lvlLock ? `Requires Sailing ${v.lvl}` : '', boatLock ? `Needs a ${boatName(v.boat).toLowerCase()} or larger` : ''].filter(Boolean).join(' · '),
       short: lvlLock ? `Lv ${v.lvl}` : boatLock ? boatName(v.boat) : '', caption: `Level ${v.lvl} · ${boatName(v.boat)}`, stateText: boatLock && !lvlLock ? `Needs a ${boatName(v.boat).toLowerCase()}` : '',
-      info: `<p>${esc(v.blurb)}</p><p class="sm dim">${tier ? `Your largest boat: ${esc(boatName(tier))}.` : 'You have no boat yet.'} Carpentry builds bigger boats for farther islands.</p><p>${(v.xp * DQ.xpMult('sailing')).toFixed(0)} XP · ${(DQ.durFor('sail', v.id) / 1000).toFixed(0)}s voyage · ${fmt(v.coins[0])}–${fmt(v.coins[1])} coins</p><div class="voy-loot">${v.loot.map(([k, , p]) => `<span class="voy-item" data-tip="item:${k}">${DQ.itemIco(D.ITEMS[k])}<small>${Math.round(p * 100)}%</small></span>`).join('')}</div>` }; });
+      info: `<p>${esc(v.blurb)}</p><p class="sm dim">${tier ? `Your largest boat: ${esc(boatName(tier))}.` : 'You have no boat yet.'} Carpentry builds bigger boats for farther islands.</p><p>${(v.xp * DQ.xpMult('sailing')).toFixed(0)} XP · ${(DQ.durFor('sail', v.id) / 1000).toFixed(0)}s voyage · ${fmt(v.coins[0])}–${fmt(v.coins[1])} coins${UI.floLine ? UI.floLine('sailing') : ''}</p>${UI.goalLine ? UI.goalLine('sailing') : ''}<div class="voy-loot">${v.loot.map(([k, , p]) => `<span class="voy-item" data-tip="item:${k}">${DQ.itemIco(D.ITEMS[k])}<small>${Math.round(p * 100)}%</small></span>`).join('')}</div>` }; });
   return UI.taskPanel('sailing', 'Sailing', 'sail', choices, 'Sail to');
 };
 /* one clear way to choose who comes with you: only one companion at a time gives its bonus */
@@ -14790,6 +14806,9 @@ UI.markNow = () => { const n = $('#nowcard .now'); if (n) n.classList.toggle('he
 
 /* ---------- The skills menu: a second menu, always in reach, so the things people open most are one click away ---------- */
 /* what the next level of a skill opens, for the left-menu tooltip */
+/* what the next level brings, without spoiling locked content: perks by name, everything else as "something new" */
+UI.unlockShort = nx => { if (!nx) return ''; const all = String(nx.what).split(/, (?![^()]*\))/), perks = all.filter(x => /\(.+\)$/.test(x) && !/^Technique:/.test(x)), other = all.length - perks.length;
+  return [...perks, other ? (other === 1 ? 'Something new' : `${other} new things`) : ''].filter(Boolean).join(' · '); };
 UI.nextUnlock = sk => { const L = DQ.lvl(sk), u = D.UNL && D.UNL[sk]; if (!u) return null; const lvl = Object.keys(u).map(Number).filter(l => l > L).sort((a, b) => a - b)[0]; return lvl ? { lvl, what: [].concat(u[lvl]).join(', ') } : null; };
 UI.renderDock = () => {
   const el = $('#skilldock'); if (!el) return;
@@ -14885,7 +14904,7 @@ UI.V.overview = () => {
 };
 UI.V.skillsummary = () => `<section class="panel"><div class="phead"><h2>Your skills</h2><small>Total level <b data-b="totlvl"></b></small></div><div class="skl">${D.SKILLS.map(skill => {
   const locked = !DQ.skillUnlocked(skill.id);
-  return `<button class="skrow ${locked ? 'locked' : ''}" data-do="go" data-a="${skill.page}" style="--c:${skill.col}">${locked ? ico('lock') : DQ.artImage('skill',skill.id,32,'skill-emblem',skill.name)}<span>${skill.name}</span>${locked ? `<small>${esc(DQ.unlockHow(skill.id))}</small>` : `<b class="mono" data-b="lvl:${skill.id}"></b><span class="bar"><i data-b="xpbar:${skill.id}"></i></span>${(nx => nx ? `<small class="sk-next">Lv ${nx.lvl} · ${esc(nx.what)}</small>` : '')(UI.nextUnlock && UI.nextUnlock(skill.id))}`}</button>`;
+  return `<button class="skrow ${locked ? 'locked' : ''}" data-do="go" data-a="${skill.page}" style="--c:${skill.col}">${locked ? ico('lock') : DQ.artImage('skill',skill.id,32,'skill-emblem',skill.name)}<span>${skill.name}</span>${locked ? `<small>${esc(DQ.unlockHow(skill.id))}</small>` : `<b class="mono" data-b="lvl:${skill.id}"></b><span class="bar"><i data-b="xpbar:${skill.id}"></i></span>${(nx => nx ? `<small class="sk-next">Lv ${nx.lvl} · ${esc(UI.unlockShort(nx))}</small>` : '')(UI.nextUnlock && UI.nextUnlock(skill.id))}`}</button>`;
 }).join('')}</div></section>`;
 UI.V.activity = () => `${UI.inboxPanel()}<section class="panel"><div class="phead"><h2>Activity</h2><small class="mono" id="xph"></small></div><div id="chart"></div><ul class="log" id="loglist"></ul></section>`;
 let gAcc = 0;
@@ -15648,7 +15667,7 @@ DQ.startResearch = id => {
 DQ.researchTick = dt => {
   const A = R().active; if (!A.length) return;
   for (let i = A.length - 1; i >= 0; i--) {
-    A[i].left -= dt; if (A[i].left > 0) continue;
+    A[i].left -= dt * (DQ.researchRate ? DQ.researchRate() : 1); if (A[i].left > 0) continue;
     const t = D.TECH[A[i].id]; A.splice(i, 1); if(!t.repeatable)R().done[t.id] = 1; DQ.addXp('research',DQ.researchXp(t)); if (DQ.sim.on) (DQ.awayDone = DQ.awayDone || []).push(t.name); DQ.fxDirty(); DQ.syncPlots && DQ.syncPlots(); DQ.achDirty = true;
     DQ.log(`Research complete: ${t.name}.`, 'quest');
     if (!DQ.forecasting) DQ.notify({ kind: 'unlock', key: 'tech:' + t.id, icon: 'rune', col: BR[t.br][1], title: 'Research complete', text: `${t.name}. ${t.desc}`, action: { label: 'Open Scholarship', fn: () => DQ.go('research') }, sound: 'unlock', ttl: 12000 });
@@ -15788,7 +15807,7 @@ DQ.tips.rail=sk=>{const s=D.SK[sk];if(!s)return '';const lock=!DQ.skillUnlocked(
   if(lock&&s.quest){const q=D.QM[s.quest];return head+`<div class="tt-k">Taught by a quest</div><ul class="tt-list"><li><span class="tt-pic">${ico('quest')}</span><span class="tt-l">${esc(q.name)}<small>${esc(q.giver)}, ${esc(D.TOWN[q.town].name)}${DQ.advLvl()<q.adv?` · from Hero ${q.adv}`:''}</small></span></li></ul>`;}
   if(lock)return head+`<p class="tt-p">${esc(DQ.unlockHow(sk))}</p>`;
   const L=DQ.lvl(sk),need=L>=99?0:Math.max(0,D.XPF[L+1]-(S().xp[sk]||0)),nx=UI.nextUnlock&&UI.nextUnlock(sk);
-  return head+`<div class="tt-xp"><span class="bar"><i style="width:${DQ.pctNext(sk).toFixed(1)}%;background:${s.col}"></i></span><small>${L>=99?'Maximum level':`${fmt(need)} XP to level ${L+1}`}</small></div>${nx?`<div class="tt-k">At level ${nx.lvl}</div><ul class="tt-list">${String(nx.what).split(', ').slice(0,4).map(n=>`<li><span class="tt-pic blackout">${nextArt(sk,n)}</span><span class="tt-l">Something new</span></li>`).join('')}</ul>`:''}`;};
+  return head+`<div class="tt-xp"><span class="bar"><i style="width:${DQ.pctNext(sk).toFixed(1)}%;background:${s.col}"></i></span><small>${L>=99?'Maximum level':`${fmt(need)} XP to level ${L+1}`}</small></div>${nx?`<div class="tt-k">At level ${nx.lvl}</div><ul class="tt-list">${String(nx.what).split(/, (?![^()]*\))/).slice(0,4).map(n=>/\(.+\)$/.test(n)&&!/^Technique:/.test(n)?`<li><span class="tt-pic">${ico('star')}</span><span class="tt-l">${esc(n)}</span></li>`:`<li><span class="tt-pic blackout">${nextArt(sk,n)}</span><span class="tt-l">Something new</span></li>`).join('')}</ul>`:''}`;};
 UI.unlocksAheadPanel=()=>{const statSkill={harvest:'farming',craft:'crafting',smith:'smithing',cook:'cooking',mine:'mining'},blocked=x=>{const [k,a]=x.stat.split(':'),need=k==='skill'?a:statSkill[k]||(k==='own'||k==='use'?(Object.values(D.RECIPES).find(r=>r.out[a])||{}).skill:null);return need&&!DQ.skillUnlocked(need)&&x.have<x.need?2:0;},near=sk=>-DQ.actionProgress(sk.id).reduce((a,x)=>a+(1-Math.min(1,x.have/x.need))*(x.kind==='level'?1.5:1)+blocked(x),0),all=D.SKILLS.filter(s=>s.actionReq&&!DQ.skillUnlocked(s.id)).sort((a,b)=>near(b)-near(a)),locked=UI.view==='overview'?all.slice(0,2):all,more=all.length-locked.length;if(!locked.length&&UI.closeToPanel)return UI.closeToPanel();return `<section class="panel unlock-roadmap"><div class="phead"><div><span class="k">Progression</span><h2>${locked.length?'Unlocks ahead':'Action skills discovered'}</h2></div><button class="btn sm" data-do="go" data-a="skillsummary">All skills</button></div>${locked.length?`<p class="hint">${more?`Your two nearest. ${more} more in All skills.`:'Complete their requirements in any order.'}</p><div class="unlock-grid">${locked.map(sk=>`<article style="--c:${sk.col}"><div class="unlock-title">${ico('lock')}<span><b>${esc(sk.name)}</b><small>${esc(sk.blurb)}</small></span></div>${reqHtml(sk)}</article>`).join('')}</div>`:'<p>Every action-earned skill is unlocked. Their next levels remain visible in the Skills menu.</p>'}</section>`;};
 /* once every skill is open, Home shows what is nearest: the next level that opens something, and the field guide entries nearly earned */
 UI.closeToPanel=()=>{const KS={fish:'fishing',wood:'woodcutting',mine:'mining',thieve:'thieving',crop:'farming',animal:'farming',brew:'herbalism',sail:'sailing',train:'beastmastery'},emb=sk=>{const x=D.SKILLS.find(s=>s.id===sk);return x?DQ.artImage('skill',x.id,32,'skill-emblem',x.name):ico('book');};
@@ -15796,7 +15815,7 @@ UI.closeToPanel=()=>{const KS={fish:'fishing',wood:'woodcutting',mine:'mining',t
  const ms=Object.keys(S().mast||{}).map(k=>{const i=k.indexOf(':'),kind=k.slice(0,i),id=k.slice(i+1);if(kind==='fight'||kind==='alch')return null;const m=DQ.mastInfo(kind,id);if(!m.next)return null;const sk=kind==='recipe'?(D.RECIPES&&D.RECIPES[id]||{}).skill:KS[kind];return{kind,id,m,sk,name:DQ.mastName(kind,id)||id};}).filter(Boolean).sort((a,b)=>b.m.pct-a.m.pct).slice(0,3);
  if(!lv.length&&!ms.length)return '';
  const card=(sk,title,line,pct,go,tip)=>`<button class="close-card" data-do="go" data-a="${go}" title="${esc(tip)}">${emb(sk)}<span><b>${esc(title)}</b><small>${esc(line)}</small>${DQ.studyBar?DQ.studyBar(pct,false,tip):''}</span></button>`;
- return `<section class="panel close-to"><div class="phead"><div><span class="k">Close to</span><h2>Nearly there</h2></div><button class="btn sm" data-do="go" data-a="skillsummary">All skills</button></div><div class="close-grid">${lv.map(x=>card(x.sk.id,`${x.sk.name} Lv ${x.nx.lvl}`,x.nx.what,x.pct,x.sk.page,`${x.sk.name} Lv ${x.nx.lvl}: ${x.nx.what}`)).join('')}${ms.map(x=>card(x.sk,x.name,`${DQ.ENTRY_NAMES[x.m.stars]} · ${x.m.next-x.m.n} more`,x.m.pct,'bestiary',`Field guide: ${DQ.entryPerk(x.kind,x.m.stars+1)}`)).join('')}</div></section>`;};
+ return `<section class="panel close-to"><div class="phead"><div><span class="k">Close to</span><h2>Nearly there</h2></div><button class="btn sm" data-do="go" data-a="skillsummary">All skills</button></div><div class="close-grid">${lv.map(x=>card(x.sk.id,`${x.sk.name} Lv ${x.nx.lvl}`,UI.unlockShort(x.nx),x.pct,x.sk.page,`${x.sk.name} Lv ${x.nx.lvl}: ${UI.unlockShort(x.nx)}`)).join('')}${ms.map(x=>card(x.sk,x.name,`${DQ.ENTRY_NAMES[x.m.stars]} · ${x.m.next-x.m.n} more`,x.m.pct,'bestiary',`Field guide: ${DQ.entryPerk(x.kind,x.m.stars+1)}`)).join('')}</div></section>`;};
 UI.homeSections.push(UI.unlocksAheadPanel);
 DQ.on('lvl',()=>DQ.checkActionUnlocks());DQ.on('quests',()=>DQ.checkActionUnlocks());
 {const r0=UI.render;UI.render=f=>{try{DQ.checkActionUnlocks();}catch(e){}return r0(f);};}
@@ -19819,6 +19838,152 @@ if (A && A.CREATURE_SPECS) A.CREATURE_SPECS.ev_hart = () => { const s = A.Spr(32
   for (const [a, b, e, f] of [[25, 6, 23, 0], [23, 3, 20, 1], [27, 6, 29, 0], [29, 3, 32, 1], [24, 2, 25, 0]]) s.line(a, b, e, f, null, '#f4e8c0'); s.poly([[6, 16], [3, 13], [5, 18]], c);
   for (const [x, y] of [[4, 8], [10, 5], [18, 6], [2, 22]]) s.fix(x, y, '#ffffff'); return s; };
 UI.DO.towerfight = id => { if (Q.startAct('fight', id)) { UI.taskChoice.combat = id; Q.go('combat'); } else UI.render(false); };
+})();
+
+</script>
+<script>
+/* Idlewick: every level of every skill matters (Nov 2026).
+   1. Signature perks: each skill has its own ranked perks, placed so that no skill goes more than five
+      levels without something new, and a capstone at 99. They show in the level-up note, Skill levels,
+      Home's "Nearly there" and the skill page, because they are written into D.UNL like any other unlock.
+   2. Flourishes: every hands-on action has a small chance of a named lucky moment ("Big one!",
+      "Masterwork!") that repeats its experience and its output. Perks raise the chance.
+   Effects are small and data-driven: add rows to LINES, not code. Economy evidence: docs/economy-evidence.md. */
+(() => {
+const DQ = window.DQ, D = DQ.data, UI = DQ.ui || {}, S = () => DQ.S;
+const chance = p => Math.random() < p;
+
+/* ---------- signature perks: [name, effect per rank] lines, ranks placed in turn ---------- */
+const LINES = {
+  fishing:      [['Patient angler', { dbl: .01 }], ['Sharp eye', { find: .05 }], ['Lucky line', { fl: .005 }]],
+  woodcutting:  [['Clean cuts', { dbl: .01 }], ['Nest finder', { find: .05 }], ['Woodsman’s rhythm', { speed: .01 }]],
+  mining:       [['Rich seams', { dbl: .01 }], ['Gem sense', { find: .05 }], ['Miner’s luck', { fl: .005 }]],
+  thieving:     [['Deep pockets', { coin: .01 }], ['Quick fingers', { speed: .01 }], ['Clean lifts', { fl: .005 }]],
+  farming:      [['Green thumb', { grow: .02 }], ['Herdsman', { animal: .02 }], ['Good soil', { xp: .02 }]],
+  cooking:      [['Steady flame', { burn: .01 }], ['Hearty portions', { heal: .02 }], ['Chef’s touch', { fl: .005 }]],
+  smithing:     [['Hot forge', { speed: .01 }], ['Thrifty hammer', { dbl: .01 }], ['Masterwork', { fl: .005 }]],
+  crafting:     [['Nimble needle', { speed: .01 }], ['Spare scraps', { dbl: .01 }], ['Inspiration', { fl: .005 }]],
+  magic:        [['Arcane focus', { xp: .01 }]],
+  research:     [['Quick study', { rate: .02 }], ['Broad learning', { xpAll: .005 }]],
+  melee:        [['Weapon drill', { xp: .01 }]],
+  defence:      [['Guard drill', { xp: .01 }]],
+  ranged:       [['Eagle eye', { xp: .01 }]],
+  hitpoints:    [['Vigour', { regen: .05 }], ['Hardy', { xp: .01 }]],
+  hunting:      [['Tracker', { study: .05 }], ['Keen hunter', { xp: .02 }], ['Field dressing', { coin: .003 }]],
+  exploration:  [['Wayfinder', { find: .03 }], ['Curious mind', { xpAll: .003 }], ['Fortune’s road', { coin: .003 }]],
+  herbalism:    [['Steady pour', { brew: .03 }], ['Herb lore', { grow: .01 }], ['Apothecary', { xp: .02 }]],
+  enchanting:   [['Runic edge', { dmg: .002 }], ['Warding', { dr: .002 }]],
+  carpentry:    [['True grain', { dbl: .01 }], ['Sharp plane', { speed: .01 }], ['Joiner’s luck', { fl: .005 }]],
+  sailing:      [['Fair winds', { speed: .01 }], ['Salvager', { coin: .005 }], ['Sea legs', { fl: .005 }]],
+  beastmastery: [['Gentle hands', { xp: .02 }], ['Herd sense', { animal: .01 }], ['Kindred', { fl: .005 }]]
+};
+/* the flourish each hands-on skill can roll, and the word it shows */
+D.FLOURISH = { fishing: 'Big one!', woodcutting: 'Clean fell!', mining: 'Rich vein!', thieving: 'Clean lift!', cooking: 'Perfect dish!', smithing: 'Masterwork!', crafting: 'Inspired!', magic: 'Surge!', carpentry: 'True grain!', sailing: 'Fair wind!', beastmastery: 'Breakthrough!' };
+D.FLOURISH_BASE = .02;
+const GAP = 5, ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+const pct = v => { const n = Math.round(v * 1000) / 10; return (Number.isInteger(n) ? n : n.toFixed(1)) + '%'; };
+DQ.perkText = (fx, sk) => Object.entries(fx).map(([k, v]) => {
+  const n = D.SK[sk] ? D.SK[sk].name : '';
+  return { xp: `+${pct(v)} ${n} XP`, speed: `+${pct(v)} ${n} speed`, dbl: `+${pct(v)} double yield`, fl: `+${pct(v)} flourish`, find: `+${pct(v)} lucky finds`, coin: `+${pct(v)} coins`, grow: `+${pct(v)} crop growth`, animal: `+${pct(v)} livestock`, burn: `−${pct(v)} burn`, heal: `+${pct(v)} food healing`, regen: `+${pct(v)} health regen`, dr: `+${pct(v)} damage reduction`, dmg: `+${pct(v)} damage`, study: `+${pct(v)} creature study`, xpAll: `+${pct(v)} all XP`, rate: `+${pct(v)} research speed`, brew: `+${pct(v)} double brew` }[k] || `${k} +${pct(v)}`;
+}).join(', ');
+
+/* Scholarship's real level gates belong in its unlock list too */
+const unl = (sk, l, name) => { const lv = D.UNL[sk] = D.UNL[sk] || {}; (lv[l] = lv[l] || []).includes(name) || lv[l].push(name); };
+(D.SCHOLAR_TIER || []).forEach((l, i) => { if (l > 1) unl('research', l, `Tier ${['', 'I', 'II', 'III', 'IV'][i]} studies`); });
+unl('research', 20, 'Second study slot');
+
+/* place each skill's ranks so no stretch is longer than GAP levels, then a capstone at 99 */
+D.SKILL_PERKS = {};
+const STYLES = ['melee', 'ranged', 'magic'], levelsOf = k => new Set(Object.keys(D.UNL[k] || {}).map(Number));
+const STYLE_BASE = new Set([...levelsOf('melee')].filter(l => STYLES.every(k => levelsOf(k).has(l))));
+for (const [sk, lines] of Object.entries(LINES)) {
+  if (!D.SK[sk]) continue;
+  /* Melee, Ranged and Magic share one scale: their perks sit at the same levels (where any of the three is quiet) */
+  const had = STYLES.includes(sk) ? STYLE_BASE : levelsOf(sk), list = [], ranks = lines.map(() => 0);
+  let last = 1, turn = 0;
+  for (let l = 2; l <= 98; l++) {
+    if (had.has(l)) { last = l; continue; }
+    if (l - last >= GAP) { const i = turn++ % lines.length; ranks[i]++; list.push({ lvl: l, line: i, name: `${lines[i][0]} ${ROMAN[ranks[i]] || ranks[i]}`, fx: lines[i][1] }); last = l; }
+  }
+  const cap = {}; Object.entries(lines[0][1]).forEach(([k, v]) => cap[k] = v * 3);
+  list.push({ lvl: 99, line: 0, name: `${D.SK[sk].name} mastery`, fx: cap, cap: true });
+  D.SKILL_PERKS[sk] = list;
+  list.forEach(p => unl(sk, p.lvl, `${p.name} (${DQ.perkText(p.fx, sk)})`));
+}
+
+/* the sum of a skill's perks at its current level; cached by level */
+const cache = {};
+DQ.skillPerkFx = sk => {
+  const L = DQ.skillUnlocked && !DQ.skillUnlocked(sk) ? 0 : DQ.lvl(sk), c = cache[sk];
+  if (c && c.L === L) return c.fx;
+  const fx = {}; (D.SKILL_PERKS[sk] || []).forEach(p => { if (L >= p.lvl) Object.entries(p.fx).forEach(([k, v]) => fx[k] = (fx[k] || 0) + v); });
+  cache[sk] = { L, fx }; return fx;
+};
+const own = (sk, k) => DQ.skillPerkFx(sk)[k] || 0;
+const GLOBAL = ['find', 'coin', 'grow', 'animal', 'burn', 'heal', 'regen', 'dr', 'dmg', 'study', 'xpAll'];
+
+/* plug into the existing effect hooks */
+const xp0 = DQ.extraXp; DQ.extraXp = sk => (xp0 ? xp0(sk) : 1) + own(sk, 'xp');
+const sp0 = DQ.extraSpeed; DQ.extraSpeed = sk => (sp0 ? sp0(sk) : 0) + own(sk, 'speed');
+const dbl0 = DQ.dblChance; DQ.dblChance = sk => dbl0(sk) + own(sk, 'dbl');
+const fx0 = DQ.fx;
+DQ.fx = () => { const f = fx0(); if (!f._skillPerks) { f._skillPerks = true; for (const sk of Object.keys(D.SKILL_PERKS)) { const p = DQ.skillPerkFx(sk); for (const k of GLOBAL) if (p[k]) f[k] = (f[k] || 0) + p[k]; } } return f; };
+DQ.on && DQ.on('lvl', () => DQ.fxDirty && DQ.fxDirty());
+DQ.researchRate = () => 1 + own('research', 'rate');
+const brew0 = DQ.brew;
+if (brew0) DQ.brew = id => { const ok = brew0(id); if (ok && chance(own('herbalism', 'brew'))) { DQ.give(id, 1); if (!DQ.sim.on) DQ.toast(`Steady pour: a second ${(D.ITEMS[id] || { name: 'potion' }).name.toLowerCase()}`); } return ok; };
+
+/* ---------- flourishes ---------- */
+DQ.flourishChance = sk => D.FLOURISH[sk] ? D.FLOURISH_BASE + own(sk, 'fl') : 0;
+let lastXp = null, seq = 0, seenSeq = 0;
+const add0 = DQ.addXp; DQ.addXp = (sk, base, o) => { const amt = add0(sk, base, o); lastXp = { sk: DQ.skId ? DQ.skId(sk) : sk, amt, seq: ++seq }; return amt; };
+const calm = () => (S().settings && S().settings.reduceFx) || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const card = () => document.querySelector('.card.active') || document.querySelector('.activity-stage') || document.querySelector('.nowp');
+const extraOutput = a => {
+  if (['fish', 'wood', 'mine'].includes(a.kind)) { const n = D.NODE[a.kind + ':' + a.id]; if (n && n.item) { DQ.grant(n.item, 1); return `+1 ${D.ITEMS[n.item].name.toLowerCase()}`; } }
+  if (a.kind === 'recipe') { const r = D.RECIPES[a.id]; if (r && r.out) { Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); const k = Object.keys(r.out)[0]; return `+${r.out[k]} ${D.ITEMS[k].name.toLowerCase()}`; } }
+  if (a.kind === 'thieve') { const n = D.NODE['thieve:' + a.id]; if (n) { const c = Math.round((n.cmin + Math.random() * (n.cmax - n.cmin)) * DQ.coinMult()); DQ.addCoins(c); return `+${c} coins`; } }
+  if (a.kind === 'sail' && D.VOYAGE && D.VOYAGE[a.id]) { const v = D.VOYAGE[a.id], c = Math.round((v.coins[0] + Math.random() * (v.coins[1] - v.coins[0])) * DQ.coinMult()); DQ.addCoins(c); return `+${c} coins`; }
+  return '';
+};
+DQ.flourish = a => {
+  const sk = DQ.actSkill(a); if (!sk || !D.FLOURISH[sk] || !lastXp || lastXp.sk !== sk || !(lastXp.amt > 0) || lastXp.seq <= seenSeq) return false;
+  const base = lastXp.amt; lastXp = null;
+  const x = add0(sk, base, { raw: true }), gift = extraOutput(a);
+  const F = S().flourish = S().flourish || {}; F[sk] = (F[sk] || 0) + 1;
+  if (!DQ.sim.on) {
+    const el = card(); DQ.floatAt(el, `✦ ${D.FLOURISH[sk]} ${gift ? gift + ' · ' : ''}+${DQ.fmt(x)} XP`, '#f3d58a');
+    if (el && !calm() && DQ.burstEl) DQ.burstEl(el, '#f3d58a', 18);
+    DQ.sfx && DQ.sfx('gem'); DQ.emit && DQ.emit('flourish', sk);
+  }
+  return true;
+};
+const tick0 = DQ.mastTick;
+/* only XP earned since the last finished action counts, so a burnt dish never flourishes */
+DQ.mastTick = (a, ...rest) => { const r = tick0 ? tick0(a, ...rest) : undefined; if (a && a.kind !== 'fight' && !DQ.forecasting && chance(DQ.flourishChance(DQ.actSkill(a)))) DQ.flourish(a); seenSeq = seq; return r; };
+
+/* ---------- the skill page says what is next ---------- */
+UI.floLine = sk => D.FLOURISH[sk] ? ` · <span class="flo-chance" title="${DQ.esc(`${(DQ.flourishChance(sk) * 100).toFixed(1)}% chance each action of “${D.FLOURISH[sk]}”: its XP and output again`)}">✦ ${(DQ.flourishChance(sk) * 100).toFixed(1)}%</span>` : '';
+UI.goalLine = sk => { const nx = UI.nextUnlock && UI.nextUnlock(sk); if (!nx) return ''; const short = UI.unlockShort ? UI.unlockShort(nx) : nx.what;
+  return `<button class="sk-goal" data-do="perktrack" data-a="${sk}" title="${DQ.esc(`${D.SK[sk].name} Lv ${nx.lvl}: ${short} · every perk`)}"><span>Next · Lv ${nx.lvl}</span> <b>${DQ.esc(short)}</b></button>`; };
+/* the whole ladder of a skill's perks: earned, next and ahead (reference detail, so it lives in a pop-up) */
+UI.DO = UI.DO || {};
+UI.DO.perktrack = sk => {
+  const s = D.SK[sk], L = DQ.lvl(sk), list = D.SKILL_PERKS[sk] || [], now = DQ.skillPerkFx(sk), next = list.find(p => p.lvl > L);
+  const rows = list.map(p => `<li class="pk ${L >= p.lvl ? 'got' : p === next ? 'next' : ''}"><b class="mono">Lv ${p.lvl}</b><span>${DQ.esc(p.name)}</span><small>${DQ.esc(DQ.perkText(p.fx, sk))}</small></li>`).join('');
+  const fl = D.FLOURISH[sk] ? `<p class="pk-flo">✦ <b>${DQ.esc(D.FLOURISH[sk])}</b> ${(DQ.flourishChance(sk) * 100).toFixed(1)}% each action: its XP and output again${(S().flourish || {})[sk] ? ` · ${DQ.fmt(S().flourish[sk])} so far` : ''}</p>` : '';
+  DQ.modal({ title: `${s.name} perks`, wide: true, body: `<p class="pk-now">${Object.keys(now).length ? `Now: ${DQ.esc(DQ.perkText(now, sk))}` : 'None yet'}</p>${fl}<ol class="pk-list">${rows}</ol>` });
+};
+if (UI && UI.skillHero) {
+  const hero0 = UI.skillHero;
+  UI.skillHero = (sk, extra = '') => {
+    const h = hero0(sk, extra), i = h.lastIndexOf('</section>'), nx = UI.nextUnlock && UI.nextUnlock(sk), fl = (S().flourish || {})[sk] || 0;
+    if (i < 0 || (!nx && !D.FLOURISH[sk])) return h;
+    const next = nx ? `<button class="sh-next-btn" data-do="perktrack" data-a="${sk}"><span class="sh-next-k">Next · Lv ${nx.lvl}</span> <b>${DQ.esc(UI.unlockShort ? UI.unlockShort(nx) : nx.what)}</b></button>` : '';
+    const flo = D.FLOURISH[sk] ? `<span class="sh-flo" title="${DQ.esc(`Each action: ${(DQ.flourishChance(sk) * 100).toFixed(1)}% chance of “${D.FLOURISH[sk]}”, which repeats its XP and output`)}">✦ ${(DQ.flourishChance(sk) * 100).toFixed(1)}%${fl ? ` · ${DQ.fmt(fl)}` : ''}</span>` : '';
+    return h.slice(0, i) + `<div class="sh-next">${next}${flo}</div>` + h.slice(i);
+  };
+}
 })();
 
 </script>

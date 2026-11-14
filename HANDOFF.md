@@ -604,3 +604,10 @@ The player still saw the smoother style in places. Two causes: `js/hires.js` (an
 
 - Combat was redone as layout E: one header bar (target and level, danger/food/gear chips, Guide/Details/Loot, one primary button), the fight on its area backdrop with nothing overlaid, and three even panels below (Fighting style, Food, Abilities). See AGENTS.md.
 - A screenshot sweep of every page at 1440 × 900, 1280 × 720 and 390 × 844 in both themes led to these fixes: Home "Nearly there" panel; Skill levels card grid with next unlocks; Workers bed picture no longer overlaps its text; House fits 1280 × 720 (compact cottage, two-column rooms, one-row trophy wall, "10 wins" captions, free Parlour says "Build (free)"); Inventory fits 1280 × 720 (right column holds details, preparations and appearance; category tabs wrap; Max hit sits right of Combat stats); Herbalism first-goal button keeps its own width and its copy is shorter.
+
+
+## Nov 2026: every skill made rewarding (skill perks and flourishes)
+
+- Audit: Hunting, Exploration, Herbalism and Enchanting levels did nothing; Farming, Thieving, Woodcutting, Sailing, Carpentry and Beastmastery had 10 to 19 level stretches with nothing new; only Fishing, Woodcutting and Mining had surprises.
+- `js/skill_perks.js`: signature perks for all 21 skills (no gap over five levels, capstone at 99), Scholarship's tier and slot gates added to its unlock list, flourishes for the eleven hands-on skills, "Next · Lv N" under each action and in skill headers, and a per-skill perk track pop-up.
+- Evidence: `node scripts/sim-economy.cjs 24` (deterministic) 588,099 → 622,131 coins at 24 h (+6%), hero 65 → 66; `NO_PERKS=1` reproduces the old numbers. `node scripts/sim-bosses.cjs` matches `NO_PERKS=1` exactly after Health and Defence perks were kept to regen and XP (food-healing and damage-reduction perks had lifted the Hollow King from 66% to 79%).

@@ -1068,4 +1068,40 @@ test('T8 balance: a tower boss falls to a hero at the recommended level and not 
   assert.ok(T.rec>D.MON[D.TOWN.ironpeak.boss].boss.req,'the tower is harder than the road');
   for(const t of D.TOWNS)assert.ok(!Object.keys(D.MON[t.boss].drops).some(d=>/star_shard/.test(d)));assert.ok(!Object.values(D.RECIPES).some(r=>!r.secret&&r.in.star_shard),'event materials are only for hidden recipes');
 });
+
+/* ---------- Skill perks and flourishes (Nov 2026, js/skill_perks.js) ---------- */
+const perked=()=>{const h=harness();h.load('skill_perks');h.q.S=h.q.newState();h.q.fxDirty();return h;};
+test('P1 every skill unlocks something at least every five levels, with a capstone at 99',()=>{
+  const {q}=perked(),D=q.data;
+  for(const s of D.SKILLS){const lv=Object.keys(D.UNL[s.id]||{}).map(Number).sort((a,b)=>a-b);let last=1;for(const l of lv){assert.ok(l-last<=5,`${s.name}: ${last} to ${l}`);last=l;}
+    assert.ok(lv.includes(99),`${s.name} has something at 99`);assert.ok((D.SKILL_PERKS[s.id]||[]).some(p=>p.cap&&p.lvl===99),`${s.name} has a capstone`);}
+});
+test('P2 Melee, Ranged and Magic perks sit at the same levels with the same strength',()=>{
+  const {q}=perked(),P=q.data.SKILL_PERKS,lv=k=>P[k].map(p=>p.lvl).join(),sum=k=>P[k].reduce((a,p)=>a+Object.values(p.fx)[0],0);
+  assert.equal(lv('melee'),lv('ranged'));assert.equal(lv('melee'),lv('magic'));assert.equal(sum('melee'),sum('ranged'));assert.equal(sum('melee'),sum('magic'));
+});
+test('P3 perks reach the game through the existing effect hooks, only once earned',()=>{
+  const {q}=perked(),D=q.data,S=q.S;const d1=q.dblChance('mining'),f1=q.fx().find;
+  S.unlocked.mining=true;S.xp.mining=D.XPF[52];q.fxDirty();const got=k=>D.SKILL_PERKS.mining.filter(p=>p.lvl<=52).reduce((a,p)=>a+(p.fx[k]||0),0);
+  assert.ok(got('dbl')>0&&got('find')>0,'Mining 52 has earned double-ore and lucky-find perks');
+  assert.ok(Math.abs(q.dblChance('mining')-d1-got('dbl'))<1e-9,'Rich seams: double ore');
+  assert.ok(Math.abs(q.fx().find-f1-got('find'))<1e-9,'Gem sense: lucky finds');
+  assert.ok(q.flourishChance('mining')>D.FLOURISH_BASE,'Miner’s luck raises the flourish chance');
+  assert.equal(q.flourishChance('defence'),0,'no flourish for a skill without hands-on actions');
+});
+test('P4 a flourish repeats the action’s XP and output; burnt food and forecasts never flourish',()=>{
+  const a=perked().q,b=perked().q;b.data.FLOURISH_BASE=1;
+  for(const q of [a,b]){q.data.FLOURISH_BASE=q===b?1:0;q.startAct('fish','shrimp',{quiet:true,rule:'count:5'});q.simulate(30000);}
+  assert.ok(a.have('raw_shrimp')>0);assert.equal(b.have('raw_shrimp'),a.have('raw_shrimp')*2,'twice the catch');
+  assert.ok(Math.abs(b.S.xp.fishing-a.S.xp.fishing*2)<1e-6,'twice the XP');assert.equal(b.S.flourish.fishing,5,'counted');
+  const c=perked().q;c.data.FLOURISH_BASE=1;c.S.unlocked.cooking=true;c.S.inv.raw_shrimp=5;c.burnChance=()=>1;c.startAct('recipe','cook_shrimp',{quiet:true});c.simulate(30000);
+  assert.equal((c.S.flourish||{}).cooking||0,0,'a burnt dish is not a flourish');
+  const f=perked().q;f.data.FLOURISH_BASE=1;f.forecasting=true;f.startAct('fish','shrimp',{quiet:true,rule:'count:3'});f.simulate(20000);f.forecasting=false;
+  assert.equal((f.S.flourish||{}).fishing||0,0,'forecasts stay plain');
+});
+test('P5 saves keep flourish counts and older saves without them still load',()=>{
+  const {q}=perked();q.S.flourish={mining:12};const snap=q.exportSave();
+  const r=perked().q;assert.ok(r.importSave(snap));assert.equal(r.S.flourish.mining,12);
+  const old=JSON.parse(JSON.stringify(r.S));delete old.flourish;assert.ok(r.validateSave(old));
+});
 console.log(tests+' regression checks passed');

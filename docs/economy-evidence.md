@@ -175,3 +175,8 @@ Galleon   carpentry 85  reaches tier 5 islands · materials worth 8530 coins
 ```
 
 Sailing XP runs at roughly 75–110% of Fishing at the same level while the haul is worth about Fishing's value early and mid, less late. Plank sawing adds 1.6k–46k coins an hour of value over selling logs (it costs the logs and the time), so Carpentry pays mainly through what planks build. sim-economy milestones are unchanged: its simulated player does not train these skills.
+
+
+## Skill perks and flourishes (Nov 2026)
+
+`node scripts/sim-economy.cjs 24` with and without `NO_PERKS=1`: 24 h coins 588,099 → 622,131 (+6%), hero 65 → 66, first hour 3,992 → 4,850 coins. Boss ladder (`sim-bosses.cjs`) identical with and without perks.

@@ -3827,3 +3827,19 @@ html.short #view .trophy-wall .trophy{padding:6px 4px;gap:2px}
   #view .character-layout>.col>.appearance-side{grid-column:2;grid-row:3;margin:0;border-top:0;padding-top:12px}
 }
 @media (min-width:861px){html.short #view .paper-doll{grid-template-rows:repeat(4,52px);gap:6px;margin-bottom:6px}}
+/* Skill goals (js/skill_perks.js): the next unlock and the flourish chance, quietly under the action */
+.sk-goal{display:flex;gap:6px;align-items:baseline;margin:2px 0;font-size:14px;min-width:0}
+.sk-goal>span{color:var(--mute);white-space:nowrap}
+.sk-goal>b{color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flo-chance,.sh-flo{color:var(--brass);white-space:nowrap}
+.sh-next{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:14px;margin-top:4px}
+.sh-next .sh-next-k{color:var(--mute)}
+.sh-next b{font-weight:600}
+.skillhero>.sh-next{grid-column:2/-1;margin-top:0}
+button.sk-goal,.sh-next-btn{background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+button.sk-goal:hover b,.sh-next-btn:hover b{color:var(--brass);text-decoration:underline}
+.pk-now{margin:0 0 6px;font-weight:600}.pk-flo{margin:0 0 10px;color:var(--mute)}.pk-flo b{color:var(--brass)}
+.pk-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px;max-height:520px;overflow:auto}
+.pk{display:grid;grid-template-columns:52px minmax(0,1fr);column-gap:8px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;opacity:.6}
+.pk b{grid-row:1/3;align-self:center;color:var(--mute)}.pk span{font-weight:600}.pk small{color:var(--mute);font-size:14px}
+.pk.got{opacity:1}.pk.got b{color:var(--good,#5cc08a)}.pk.next{opacity:1;border-color:var(--brass)}.pk.next b{color:var(--brass)}

@@ -87,7 +87,7 @@ DQ.startResearch = id => {
 DQ.researchTick = dt => {
   const A = R().active; if (!A.length) return;
   for (let i = A.length - 1; i >= 0; i--) {
-    A[i].left -= dt; if (A[i].left > 0) continue;
+    A[i].left -= dt * (DQ.researchRate ? DQ.researchRate() : 1); if (A[i].left > 0) continue;
     const t = D.TECH[A[i].id]; A.splice(i, 1); if(!t.repeatable)R().done[t.id] = 1; DQ.addXp('research',DQ.researchXp(t)); if (DQ.sim.on) (DQ.awayDone = DQ.awayDone || []).push(t.name); DQ.fxDirty(); DQ.syncPlots && DQ.syncPlots(); DQ.achDirty = true;
     DQ.log(`Research complete: ${t.name}.`, 'quest');
     if (!DQ.forecasting) DQ.notify({ kind: 'unlock', key: 'tech:' + t.id, icon: 'rune', col: BR[t.br][1], title: 'Research complete', text: `${t.name}. ${t.desc}`, action: { label: 'Open Scholarship', fn: () => DQ.go('research') }, sound: 'unlock', ttl: 12000 });

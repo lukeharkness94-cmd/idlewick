@@ -205,7 +205,7 @@ UI.V.gather = sk => {
       locked:levelLocked||townLocked,blocked:levelLocked||away,reason:requirements.join(' · '),
       short:[levelLocked?`Lv ${n.lvl}`:'',townLocked?`Reach ${town.name}`:''].filter(Boolean).join(' · '),
       caption:`Lv ${n.lvl}${regional||!DQ.nodeDiscovered(n)?` · ${esc(town.name)}`:''}`,
-      info:`${kind==='thieve'&&UI.thiefPerks?UI.thiefPerks():''}<p>${(n.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor(kind,n.id)/1000).toFixed(1)}s${kind==='thieve'?' · '+Math.round(DQ.successChance(kind,n)*100)+'% success':''}</p><p>${n.item?`<b class="mono" data-b="count:${n.item}"></b> held`:`${n.cmin}–${n.cmax} coins · ${n.dmg} damage if caught`}</p>`};
+      info:`${kind==='thieve'&&UI.thiefPerks?UI.thiefPerks():''}<p>${(n.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor(kind,n.id)/1000).toFixed(1)}s${kind==='thieve'?' · '+Math.round(DQ.successChance(kind,n)*100)+'% success':''}${UI.floLine?UI.floLine(sk):''}</p>${UI.goalLine?UI.goalLine(sk):''}<p>${n.item?`<b class="mono" data-b="count:${n.item}"></b> held`:`${n.cmin}–${n.cmax} coins · ${n.dmg} damage if caught`}</p>`};
   });
   if(!UI.taskChoice[sk]&&!DQ.act)UI.taskChoice[sk]=choices.find(c=>!c.blocked)?.id;
   return UI.taskPanel(sk,D.SK[sk].name,kind,choices,{fish:'Fish',wood:'Chop',mine:'Mine',thieve:'Pickpocket'}[kind])+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress &amp; tools</h3>${UI.skillHero(sk,UI.toolLine(sk))}</section>`;
@@ -248,7 +248,7 @@ UI.V.recipes = sk => {
     reason:lvlLock?`Requires ${D.SK[sk].name} ${r.lvl}`:miss.length?`Missing ${miss.join(', ')}`:'',
     stateText:lvlLock?`🔒 ${D.SK[sk].name} ${r.lvl} (you are ${DQ.lvl(sk)})`:miss.length?`Missing ${miss.length===1?miss[0]:miss.length+' materials'}`:'Ready to make',
     caption:r.burn&&!lvlLock&&DQ.lvl(sk)<r.lvl?`Lv ${r.lvl} · ${Math.round(DQ.burnChance(r)*100)}% burn`:`Lv ${r.lvl} · ${UI.statLine(it.b)||DQ.purposeOf&&DQ.purposeOf(outId)||`${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`}`,
-    info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}</p><div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>UI.needTile(id,n,{live:true})).join('')}</div>`};});
+    info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}${UI.floLine?UI.floLine(sk):''}</p>${UI.goalLine?UI.goalLine(sk):''}<div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>UI.needTile(id,n,{live:true})).join('')}</div>`};});
   return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'||sk==='carpentry'?'Make':'Craft')+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress</h3>${UI.skillHero(sk)}</section>`;
 };
 
