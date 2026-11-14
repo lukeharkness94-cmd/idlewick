@@ -224,3 +224,21 @@ DQ.on('ui', () => UI.packWarn(false));
 DQ.on('overflow', () => UI.packWarn(true));
 DQ.on('act', () => UI.packWarn(true));
 })();
+/* The skill column fills the window (Dec 2026, from the player: "the skills menu down the left doesn't adapt to the
+   height of the screen"). Rows share the height from the top of the list to the bottom of the window, between 34 and
+   64 page pixels each; text and emblems keep their size, only the row gets taller. Measured in page pixels (the page
+   is zoomed), and again on resize and whenever the dock is redrawn. */
+(() => {
+  const DQ = window.DQ, UI = DQ.ui;
+  const fit = () => {
+    const el = document.getElementById('skilldock'); if (!el || innerWidth <= 860) { if (el) el.style.removeProperty('--dk-h'); document.documentElement.classList.remove('dock-fit'); return; }
+    const rows = el.querySelectorAll('.dk'), head = el.querySelector('.dk-h'); if (!rows.length) return;
+    const z = DQ.zoom || 1, top = el.getBoundingClientRect().top / z, bottom = innerHeight / z - 14, gap = parseFloat(getComputedStyle(el).rowGap) || 3;
+    const avail = bottom - top - (head ? head.getBoundingClientRect().height / z : 0) - gap * rows.length;
+    const h = Math.max(34, Math.min(64, Math.floor(avail / rows.length)));
+    el.style.setProperty('--dk-h', h + 'px'); document.documentElement.classList.add('dock-fit');
+  };
+  const render0 = UI.renderDock; UI.renderDock = () => { render0(); requestAnimationFrame(fit); };
+  addEventListener('resize', () => requestAnimationFrame(fit));
+  UI.fitDock = fit;
+})();

@@ -592,3 +592,9 @@ Built in the brief's order: museum, hidden recipes, towers, events, audio. All o
 
 ## Chunky pixels everywhere (Dec 2026)
 The player still saw the smoother style in places. Two causes: `js/hires.js` (an older hi-res pass: Scale2x, thin outlines, extra shading) was still applied to the 24px sprites, `pixel.js` icons and the hero gear figure; and several pictures were shown at uneven sizes (fight backdrop 2.19×, farm strip 3.39×, ranch banner 3.87×, map town picture 0.85×, quest-row faces 1.25×, story hero 3.63×, hatch pop-up 2.87×). The pass is now off and each is pinned to a whole-number scale, cropped rather than squeezed. Fighters were already exact (6×). The Village page's town scene still fits its panel at a fractional scale: a whole 2× would not fit on one screen at common window sizes and would hide clickable buildings at the edges.
+
+
+## Return screen and skill column (Dec 2026)
+- The welcome-back summary opened scrolled to its bottom: `DQ.modal` focused the first primary button in the body (the next-step button, low down) and the browser scrolled to it. It now focuses the pop-up's own action button without scrolling and resets the scroll.
+- The skill column kept fixed row heights (31-48px), leaving 180-380px empty below it on most screens. `UI.fitDock` now shares the height between rows (34-64px), on render and resize. Phones are unchanged.
+- New test: `tests/return-and-rail.cjs` (five window sizes).

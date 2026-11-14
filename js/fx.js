@@ -311,7 +311,9 @@ DQ.modal = o => {
     if (modalEl === m) DQ.closeModal();
   });
   m.addEventListener('pointerdown', e => { if (e.target === m && !o.sticky) DQ.closeModal(); });
-  const f = $('.btn.primary', m) || $('.btn', m); if (f) f.focus();
+  /* focus a button for the keyboard without scrolling to it: a long pop-up (the welcome back) always opens at its top */
+  const f = $('.m-act .btn.primary', m) || $('.btn.primary', m) || $('.btn', m); if (f) f.focus({ preventScroll: true });
+  m.scrollTop = 0; $$('.m-card, .m-body', m).forEach(el => { el.scrollTop = 0; });
   return m;
 };
 addEventListener('keydown', e => {

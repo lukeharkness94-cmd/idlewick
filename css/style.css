@@ -3676,3 +3676,6 @@ html.lw-1600 .guide-book{grid-template-columns:200px minmax(0,1fr) 340px}
 .ranch-strip{background-size:auto calc(30px * var(--k))!important}
 /* the map's town picture: a 2x window onto the middle of the town */
 .towninfo img.pxscene{width:1280px!important;height:720px!important;max-width:none!important;object-fit:fill!important;margin:-200px 0 -220px calc(50% - 640px)!important;clip-path:inset(200px 0 220px 0)}
+/* the skill column shares the window's height (js/shell.js fit): each row is --dk-h tall, content centred */
+@media (min-width:861px){html.dock-fit .sidebar .dock{max-height:none!important;overflow:visible!important}
+ html.dock-fit .sidebar .dock .dk{height:var(--dk-h)!important;min-height:0!important;max-height:none!important;padding-top:0!important;padding-bottom:0!important;align-content:center}}
