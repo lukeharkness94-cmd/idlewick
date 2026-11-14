@@ -3653,6 +3653,6 @@ html.lw-1600 .guide-book{grid-template-columns:200px minmax(0,1fr) 340px}
 .wc-ch{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.wc-ch .btn{display:grid;text-align:left}.wc-ch .btn small{font-size:13px;opacity:.85}
 .wc-x{background:none;border:0;color:inherit;font-size:22px;cursor:pointer;align-self:start}
 .wc-pill{display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--c,var(--brass));border-radius:999px;background:var(--panel);color:inherit;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4)}.wc-pill svg,.wc-pill img{width:18px;height:18px}.wc-pill span{font-size:14px;color:var(--mute)}
-.damaged-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px;border-color:#e5b04a}.damaged-row .btn{display:grid;text-align:left}.damaged-row .btn small{font-size:13px}
+#worldcard{display:grid;gap:8px}.wc-ch .btn small{color:inherit;opacity:.78}
 .wb-museum p{margin:4px 0 0}
 @media (max-width:860px){#worldcard{left:10px;right:10px;bottom:84px;max-width:none}}

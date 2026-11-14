@@ -27,21 +27,21 @@ UI.V.tower = () => { const town = S().town, T = (D.TOWERS || {})[town]; if (!T) 
 /* ---------- the event card: a small card over the page (never a modal), choices as buttons, "Later" tucks it away ---------- */
 const WS = () => Q.worldState; let tucked = false;
 const cardHost = () => { let el = document.getElementById('worldcard'); if (!el) { el = document.createElement('div'); el.id = 'worldcard'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); } return el; };
-UI.worldCard = () => { if (typeof document === 'undefined' || !Q.S) return; const el = cardHost(), W = WS(), ev = W.active, r = W.result;
-  if (!ev && !r) { el.innerHTML = ''; el.className = ''; tucked = false; return; }
-  if (r && !ev) { el.className = 'show result'; el.innerHTML = `<div class="wc" style="--c:${r.col}"><span class="wc-ic">${ico(r.ic)}</span><div class="wc-b"><b>${esc(r.title)}</b><p>${esc(r.msg)}</p></div><button class="wc-x" data-do="worldclose" aria-label="Close">×</button></div>`; return; }
-  if (tucked || ev.doing) { const d = ev.doing; el.className = 'show pill'; el.innerHTML = `<button class="wc-pill" style="--c:${ev.def.col}" data-do="${d ? (d.fight ? 'go' : d.go ? 'go' : 'worldopen') : 'worldopen'}" data-a="${d ? (d.fight ? 'combat' : d.go || '') : ''}">${ico(ev.def.ic)}<b>${esc(ev.title)}</b>${d && d.need ? `<span class="mono">${ev.count}/${d.need}</span>` : d ? '<span>under way</span>' : '<span>waiting</span>'}</button>`; return; }
-  el.className = 'show'; el.innerHTML = `<div class="wc" style="--c:${ev.def.col}"><span class="wc-ic">${ico(ev.def.ic)}</span><div class="wc-b"><b>${esc(ev.title)}</b><p>${esc(ev.text)}</p><div class="wc-ch">${Q.worldChoices().map(c => `<button class="btn ${c.can && !c.can() ? '' : 'primary'}" data-do="worldchoose" data-a="${c.id}" ${c.can && !c.can() ? 'disabled' : ''}>${esc(c.label)}${c.sub ? `<small>${esc(c.sub)}</small>` : ''}</button>`).join('')}<button class="linkish" data-do="worldlater">Later</button></div></div></div>`; };
+UI.worldCard = () => { if (typeof document === 'undefined' || !Q.S) return; const el = cardHost(), W = WS(), ev = W.active, r = W.result, dm = damageHtml();
+  if (!ev && !r) { el.innerHTML = dm; el.className = dm ? 'show' : ''; tucked = false; return; }
+  if (r && !ev) { el.className = 'show result'; el.innerHTML = dm + `<div class="wc" style="--c:${r.col}"><span class="wc-ic">${ico(r.ic)}</span><div class="wc-b"><b>${esc(r.title)}</b><p>${esc(r.msg)}</p></div><button class="wc-x" data-do="worldclose" aria-label="Close">×</button></div>`; return; }
+  if (tucked || ev.doing) { const d = ev.doing; el.className = 'show pill'; el.innerHTML = dm + `<button class="wc-pill" style="--c:${ev.def.col}" data-do="${d ? (d.fight ? 'go' : d.go ? 'go' : 'worldopen') : 'worldopen'}" data-a="${d ? (d.fight ? 'combat' : d.go || '') : ''}">${ico(ev.def.ic)}<b>${esc(ev.title)}</b>${d && d.need ? `<span class="mono">${ev.count}/${d.need}</span>` : d ? '<span>under way</span>' : '<span>waiting</span>'}</button>`; return; }
+  el.className = 'show'; el.innerHTML = dm + `<div class="wc" style="--c:${ev.def.col}"><span class="wc-ic">${ico(ev.def.ic)}</span><div class="wc-b"><b>${esc(ev.title)}</b><p>${esc(ev.text)}</p><div class="wc-ch">${Q.worldChoices().map(c => `<button class="btn ${c.can && !c.can() ? '' : 'primary'}" data-do="worldchoose" data-a="${c.id}" ${c.can && !c.can() ? 'disabled' : ''}>${esc(c.label)}${c.sub ? `<small>${esc(c.sub)}</small>` : ''}</button>`).join('')}<button class="linkish" data-do="worldlater">Later</button></div></div></div>`; };
 UI.DO.worldchoose = a => { Q.worldChoose(a); UI.worldCard(); UI.render && UI.render(false); };
 UI.DO.worldlater = () => { tucked = true; UI.worldCard(); };
 UI.DO.worldopen = () => { tucked = false; UI.worldCard(); };
 UI.DO.worldclose = () => { WS().result = null; UI.worldCard(); };
 Q.on('world', () => { if (WS().active && !WS().active.doing && !WS().result) tucked = tucked && !!WS().active; UI.worldCard(); });
-/* ---------- damaged buildings: a row on the Village page, one Repair button each ---------- */
-const projects0 = UI.V.projects;
-if (projects0) UI.V.projects = () => { const dmg = Object.keys(S().damaged || {}).filter(id => D.PROJECTS[id] && D.PROJECTS[id].town === S().town); const h = projects0(); if (!dmg.length) return h;
-  return `<section class="panel damaged-row"><span class="k">Damaged · no bonus until repaired</span>${dmg.map(id => `<button class="btn ${S().coins >= Q.repairCost(id) ? 'primary' : ''}" data-do="repair" data-a="${id}">Repair ${esc(D.PROJECTS[id].name.replace(/^\w+ the /, 'the '))}<small>${fmt(Q.repairCost(id))} coins</small></button>`).join('')}</section>` + h; };
+/* ---------- damaged buildings: on the Village page only, as a card over the page (it moves nothing), one Repair each ---------- */
+const damageHtml = () => { if (UI.view !== 'projects' || !Q.S) return ''; const dmg = Object.keys(S().damaged || {}).filter(id => D.PROJECTS[id] && D.PROJECTS[id].town === S().town); if (!dmg.length) return '';
+  return `<div class="wc damaged-row" style="--c:#e5b04a"><span class="wc-ic">${ico('house')}</span><div class="wc-b"><b>Damaged</b><p>No bonus until repaired.</p><div class="wc-ch">${dmg.map(id => `<button class="btn ${S().coins >= Q.repairCost(id) ? 'primary' : ''}" data-do="repair" data-a="${id}">${esc(D.PROJECTS[id].name.replace(/^\w+ the /, '').replace(/^./, c => c.toUpperCase()))}<small>${fmt(Q.repairCost(id))} coins</small></button>`).join('')}</div></div></div>`; };
 UI.DO.repair = id => { Q.repair(id); UI.render(false); };
+const render0 = UI.render; UI.render = f => { render0(f); try { UI.worldCard(); } catch (e) {} };
 /* ---------- welcome back: new museum entries from the time away, as one line ---------- */
 const wb0 = UI.welcomeBody;
 if (wb0) UI.welcomeBody = (sum, gap) => { const fresh = Q.museumScan ? Q.museumScan({ quiet: true }) : [], h = wb0(sum, gap); if (!fresh.length) return h;

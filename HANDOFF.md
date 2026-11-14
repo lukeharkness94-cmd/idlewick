@@ -560,3 +560,31 @@ Menu: Home, Quests, World, Village, Hero, **Guide**, Shop. Left rail: Now card, 
 
 ### Current test list
 `node tests/regression.cjs` (108), `tests/story.cjs`, `tests/beastmastery.cjs`, `tests/art-pixel.cjs`, `tests/desktop-storage.cjs`; with a preview server and `IDLEWICK_URL`: `ui-fit`, `ui-current`, `ui-audit`, `ux-roles`, `ui-journeys`, `ui-adventure`, `ui-effects`, `ui-farming`, `ux-update`, `beastmastery-ui`, `ranch`. `tests/story-ui.cjs` has a known, older failure at the `bl_ledger` step.
+
+
+## World Life update (Dec 2026)
+Built in the brief's order: museum, hidden recipes, towers, events, audio. All optional.
+
+**What exists**
+- Museum: five wings with small permanent bonuses (+1% XP, +2% coins, +2% lucky finds, +1% damage, +1% task speed). A welcome-back line lists entries added while away.
+- Hidden recipes (6): Thornweave vest, Tidewalker greaves, Stargazer's hood; Hunter's feast (+20% damage to bosses, 10 min), Stonebread (-15% damage taken, 15 min), Lantern tea (+10% task speed, 20 min). New buff types `boss` and `guard` in the engine. New material: star shard (fallen-star event only).
+- Towers (8): five floors each (the region's four toughest creatures, grown, then a unique boss with its own sprite). Prizes are keepsakes with an existing unique effect on a stronger or different slot.
+- Events (10): raid, merchant, bard, fallen star, shrine, lost traveller, rare sighting (the Moonlit Hart), festival, bandits, villager's errand.
+- Audio: per-village layers by restoration tier; festival layers; combat handover; the four volume sliders already existed.
+
+**Decisions and deviations from the brief**
+- *Reputation*: the game has no reputation system and AGENTS.md forbids a second currency, so the lost traveller and errand pay coins, a recipe or a rumour, and the festival gives +10% XP for 20 minutes instead of doubled reputation.
+- *Beast attack*: choosing "Bar the doors" (or losing the fight) damages 2-3 buildings; leaving the card unanswered is harmless, as the brief's "ignored events resolve harmlessly" requires.
+- *Capturing the rare beast* adds a museum curiosity and coins, not a companion: every companion arrives as an egg, and a ninth route would break that rule.
+- *Audio is synthesised* (no sound files, matching the code-drawn art rule). "Market chatter" and "children" are stylised tones, not recordings. Whether they read as intended needs a human ear; automated tests only check the state machine.
+- *Tower prizes reuse existing unique effects* (lifesteal, thorns, stun and so on) rather than adding eight new mechanics.
+- *Art style*: the brief says "painted pixel-art"; the standing rule is chunky code-drawn pixels with Scale2x off, and that is what was used.
+
+**Balance evidence** (`TOWERS=1 node scripts/sim-bosses.cjs`, plain sword hero, region gear, 15 food): tower bosses at the recommended level win 75-100%; ten levels under, 1-53% (Gloomfen and Skyreach are the soft ones at about 50%). Floors below the boss are 84-100% at the recommended level.
+
+**Known gaps**
+- A damaged building still shows its restored art and tick on the village scene; the damage shows only in the Repair card and the paused bonus.
+- No economy simulation for event income (events are at most one per 30 minutes and pay roughly one to two creatures' worth of coins scaled by region).
+- No human playtest of any of it.
+
+**Test list**: as before, plus `tests/world-life.cjs`. `tests/regression.cjs` is now 116 checks (T1-T8 at the end).
