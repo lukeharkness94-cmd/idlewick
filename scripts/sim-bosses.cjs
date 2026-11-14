@@ -20,17 +20,18 @@ const q = ctx.DQ; q.notify = q.pulse = q.floatAt = q.flash = q.burstAt = q.burst
 q.ui = { V: {}, DO: {}, B: {}, homeSections: [], render() {}, tabState: () => null }; q.tips = { item: () => '' }; q.goals = () => [];
 ['research', 'journey'].forEach(load);
 /* the same gameplay systems the shipped page composes on top: field guide, enchantments, adventures, companion tricks */
-for (const n of ['lore', 'hunting', 'minibosses', 'bestiary', 'skill_expansion', 'adventures', 'companions']) { try { load(n); } catch (e) { console.error('sim-bosses: could not load ' + n + ': ' + e.message); process.exit(1); } }
+for (const n of ['secret_recipes', 'lore', 'hunting', 'minibosses', 'towers', 'museum', 'bestiary', 'skill_expansion', 'adventures', 'companions']) { try { load(n); } catch (e) { console.error('sim-bosses: could not load ' + n + ': ' + e.message); process.exit(1); } }
 const D = q.data;
 if (process.env.MELEE_K) D.STYLE_TUNE.meleeLevel = +process.env.MELEE_K;
 const cookLvl = id => { const r = Object.values(D.RECIPES).find(r => r.out && r.out[id]); return r ? r.lvl : 1; };
 const run = (boss, extra, useCounter) => {
   q.S = q.newState(); const S = q.S; S.settings.notify = false; q.fxDirty();
-  const req = (boss.boss || boss.mini).req + extra; let L = 1;
+  const req = (boss.tower ? D.TOWERS[boss.tower.town].rec : (boss.boss || boss.mini).req) + extra; let L = 1;
   const setL = n => ['attack', 'strength', 'defence', 'hitpoints'].forEach(k => { S.xp[k] = D.XPF[Math.max(10, n)] || 0; });
   while (L < 99) { setL(L); if (q.combatLvl() >= req) break; L++; }
   if (q.lvl('hitpoints') < 10) S.xp.hitpoints = D.XPF[10];
   if (process.env.MAGIC) { S.unlocked.magic = true; S.xp.magic = D.XPF[+process.env.MAGIC]; }
+  if (boss.tower) S.towers = { [boss.tower.town]: boss.tower.floor - 1 };
   S.town = boss.town; D.TOWNS.slice(0, D.TOWN[boss.town].idx + 1).forEach(t => { S.towns[t.id] = { visited: true, boss: t.id !== boss.town }; });
   const gear = (D.TOWN_GEAR[boss.town] || []).concat(D.TOWN_GEAR[D.TOWNS[Math.max(0, D.TOWN[boss.town].idx - 1)].id] || []);
   const slots = {};
@@ -166,7 +167,11 @@ if (process.env.COUNTER) {
 }
 console.log('boss          req  combat lv  hp  food (heal)          win%  food/kill  time   +3 levels');
 /* mini-bosses (js/minibosses.js) sit on the same ladder, in level order with the bosses */
-for (const b of D.MONLIST.filter(m => m.boss || m.mini).sort((x, y) => x.cl - y.cl)) {
+/* TOWERS=1: every tower floor at the tower's recommended combat level, and 10 levels under it */
+if (process.env.TOWERS) { console.log('tower floor                      rec  win% at rec  food/kill  win% 10 under');
+  for (const T of Object.values(D.TOWERS)) for (const id of T.floors) { const b = D.MON[id], a = run(b, 0), u = run(b, -10); console.log(`${(T.town + ' ' + b.tower.floor + (b.tower.floor === T.floors.length ? ' boss' : '')).padEnd(32)} ${String(T.rec).padEnd(4)} ${String(a.win).padEnd(12)} ${String(a.fpk).padEnd(10)} ${u.win}`); }
+  process.exit(0); }
+for (const b of D.MONLIST.filter(m => (m.boss || m.mini) && !m.tower).sort((x, y) => x.cl - y.cl)) {
   const a = run(b, 0), c = run(b, 3);
   console.log(`${(b.mini ? '·' + b.id : b.id).padEnd(13)} ${String((b.boss || b.mini).req).padEnd(4)} ${String(a.combat).padEnd(6)} ${String(a.L).padEnd(3)} ${String(a.hp).padEnd(3)} ${(a.food + ' (' + a.heal + ')').padEnd(20)} ${String(a.win).padEnd(5)} ${String(a.fpk).padEnd(10)} ${a.t.padEnd(6)} ${c.win}%  ${process.env.GEAR ? a.gear : ""}`);
 }

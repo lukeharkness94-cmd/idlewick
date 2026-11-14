@@ -23,6 +23,7 @@ DQ.mastTick = (a, n = 1) => {
   const M = S().mast = S().mast || {}, k = key(a.kind, a.id), before = DQ.mastStars(a.kind, a.id);
   M[k] = (M[k] || 0) + n;
   const after = DQ.mastStars(a.kind, a.id);
+  if (after > before && DQ.recipeOnStudy && !DQ.forecasting) DQ.recipeOnStudy(a.kind, a.id, after);
   if (after > before && !DQ.sim.on && !DQ.forecasting) {
     const name = DQ.mastName(a.kind, a.id) || a.id;
     DQ.sfx && DQ.sfx('perk');

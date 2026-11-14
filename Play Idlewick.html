@@ -3702,6 +3702,44 @@ html.lw-1600 .guide-book{grid-template-columns:200px minmax(0,1fr) 340px}
 .beast-journey li.on .bj-ic{border-color:var(--brass)}
 .bj-ic svg,.bj-ic img{width:16px;height:16px}
 .beast-journey small{font-size:13px;text-align:center;line-height:1.2}
+
+/* ---------- World Life: Museum and Trial tower (js/world_ui.js) ---------- */
+.museum,.tower-page{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;align-items:start;height:calc(var(--vh100,100vh) - 190px);min-height:400px}
+.museum>.panel,.tower-page>.panel{margin:0;max-height:100%;overflow:auto}
+.mu-wing{padding:6px 0 14px}.mu-wing+.mu-wing{border-top:1px solid var(--line);padding-top:12px}
+.mu-head{display:grid;grid-template-columns:auto auto minmax(60px,1fr) auto;gap:10px;align-items:center;margin-bottom:8px}
+.mu-head h3{margin:0}.mu-head .bar{height:5px}.mu-head .bar i{background:var(--brass)}.mu-head .mono{font-size:14px;color:var(--mute)}
+.mu-tiles{display:flex;flex-wrap:wrap;gap:6px}
+.mu-t{display:grid;place-items:center;width:60px;height:60px;border:1px dashed var(--line);border-radius:8px;background:none;cursor:pointer;padding:0}
+.mu-t.on{border-style:solid;background:var(--panel2)}.mu-t.sel{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 45%,transparent)}
+.mu-t:not(.on) img,.mu-t:not(.on) .item-art{filter:brightness(0) opacity(.45)}
+.mu-ic svg,.mu-ic img{width:28px;height:28px}.mu-ic.unk{opacity:.35}
+.mu-card{display:grid;gap:6px;justify-items:start}.mu-big{display:grid;place-items:center;width:104px;height:104px}.mu-big img{width:96px;height:96px}.mu-card h2{margin:0}.mu-card p{margin:0}
+.tw-ladder{list-style:none;margin:10px 0;padding:0;display:grid;gap:6px}
+.tw-floor{display:grid;grid-template-columns:30px 56px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.tw-floor.later{opacity:.6;border-style:dashed;background:none}.tw-floor.next{border-color:var(--brass)}.tw-floor.top{background:color-mix(in srgb,var(--brass) 9%,transparent)}
+.tw-n{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);font:600 14px var(--f-ui)}.tw-floor.done .tw-n{background:var(--brass);border-color:var(--brass);color:#2a1c08}
+.tw-art{display:grid;place-items:center;height:52px}.tw-floor b{display:block;font:500 16px var(--f-ui)}.tw-floor small{font-size:14px;color:var(--mute)}
+.tw-side{display:grid;gap:8px;justify-items:center;text-align:center}.tw-side h3{margin:0}.tw-boss{display:grid;place-items:center;height:104px}
+.tw-prize{display:grid;grid-template-columns:56px minmax(0,1fr);gap:10px;align-items:center;text-align:left;padding:10px;border:1px solid var(--line);border-radius:10px;width:100%}.tw-prize.got{border-color:var(--brass)}
+.tw-prize b{display:block}.tw-prize small{display:block;font-size:14px}
+.tw-all{display:flex;gap:5px;margin-top:6px}.tw-dot{width:10px;height:10px;border-radius:50%;border:1px solid var(--line)}.tw-dot.part{background:color-mix(in srgb,var(--brass) 45%,transparent)}.tw-dot.on{background:var(--brass);border-color:var(--brass)}
+@media (max-width:860px){.museum,.tower-page{display:flex;flex-direction:column;height:auto}.museum>.panel,.tower-page>.panel{max-height:none;width:100%}.mu-card,.tw-side{order:-1}.mu-t{width:52px;height:52px}}
+
+/* ---------- World events: a card over the page, bottom left; never a modal ---------- */
+#worldcard{position:fixed;left:calc(196px + 16px);bottom:18px;z-index:380;max-width:440px;pointer-events:none}
+#worldcard.show{pointer-events:auto}
+.wc{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;padding:14px 16px;border:1px solid var(--c,var(--brass));border-radius:12px;background:var(--panel);box-shadow:0 10px 30px rgba(0,0,0,.45);animation:wc-in .35s ease-out}
+@keyframes wc-in{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.wc{animation:none}} html.calm .wc{animation:none}
+.wc-ic{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:color-mix(in srgb,var(--c) 22%,transparent)}.wc-ic svg,.wc-ic img{width:26px;height:26px}
+.wc-b b{font:600 17px var(--f-display)}.wc-b p{margin:4px 0 10px}
+.wc-ch{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.wc-ch .btn{display:grid;text-align:left}.wc-ch .btn small{font-size:13px;opacity:.85}
+.wc-x{background:none;border:0;color:inherit;font-size:22px;cursor:pointer;align-self:start}
+.wc-pill{display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--c,var(--brass));border-radius:999px;background:var(--panel);color:inherit;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4)}.wc-pill svg,.wc-pill img{width:18px;height:18px}.wc-pill span{font-size:14px;color:var(--mute)}
+.damaged-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px;border-color:#e5b04a}.damaged-row .btn{display:grid;text-align:left}.damaged-row .btn small{font-size:13px}
+.wb-museum p{margin:4px 0 0}
+@media (max-width:860px){#worldcard{left:10px;right:10px;bottom:84px;max-width:none}}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -5391,9 +5429,9 @@ meal('lantern_tea', 'Lantern tea', '#e8c860', 140, { buff: 'slow', mult: .9, min
 D.ITEMS.star_shard = { id: 'star_shard', name: 'Star shard', ic: 'gem', col: '#cfc4ff', val: 300, type: 'resource', sub: 'From a fallen star. Stargazer’s hood needs three.' };
 /* id, skill, tab, level, xp, materials, where it is found (shown once known), the rumour (shown as ???) */
 D.SECRET_RECIPES = [
-  { id: 'thornweave_vest', skill: 'crafting', tab: 'Armour', lvl: 28, xp: 180, in: { leather: 6, log_oak: 4, wolf_pelt: 2 }, found: 'A scrap of pattern, dropped by a thimblefox', rumour: 'The foxes of Mossbarrow have been at somebody’s sewing.', drop: ['thimblefox', 1 / 60] },
-  { id: 'tidewalker_greaves', skill: 'smithing', tab: 'Armour', lvl: 34, xp: 260, in: { bar_steel: 4, leather: 3 }, found: 'Chalked on a wall, three floors up the Saltmere tower', rumour: 'Somebody climbed the Saltmere tower in the wet and came down dry.', tower: ['saltmere', 3] },
-  { id: 'stargazer_hood', skill: 'crafting', tab: 'Armour', lvl: 45, xp: 420, in: { cloth: 4, star_shard: 3, sapphire: 1 }, found: 'It came to you while the star was still warm', rumour: 'They say starlight can be sewn, if you catch it falling.', event: 'star' },
+  { id: 'thornweave_vest', skill: 'crafting', tab: 'Armour', lvl: 28, xp: 180, in: { cowhide: 6, log_oak: 4, wolf_pelt: 2 }, found: 'A scrap of pattern, dropped by a thimblefox', rumour: 'The foxes of Mossbarrow have been at somebody’s sewing.', drop: ['thimblefox', 1 / 60] },
+  { id: 'tidewalker_greaves', skill: 'smithing', tab: 'Armour', lvl: 34, xp: 260, in: { bar_steel: 4, cowhide: 3 }, found: 'Chalked on a wall, three floors up the Saltmere tower', rumour: 'Somebody climbed the Saltmere tower in the wet and came down dry.', tower: ['saltmere', 3] },
+  { id: 'stargazer_hood', skill: 'crafting', tab: 'Armour', lvl: 45, xp: 420, in: { cloth: 4, star_shard: 3, gem_sapphire: 1 }, found: 'It came to you while the star was still warm', rumour: 'They say starlight can be sewn, if you catch it falling.', event: 'star' },
   { id: 'hunters_feast', skill: 'cooking', tab: 'Farmhouse', lvl: 30, xp: 150, in: { salmon: 2, crop_onion: 2, crop_potato: 2 }, found: 'A traveller’s thanks, written on the back of a map', rumour: 'A hunter’s supper that makes big things fall over faster.', event: 'traveller' },
   { id: 'stonebread', skill: 'cooking', tab: 'Farmhouse', lvl: 22, xp: 110, in: { bread: 2, ore_coal: 1 }, found: 'A miner’s note, wedged in an iron seam', rumour: 'Ironpeak miners bake something you could build a wall with.', study: ['mine', 'iron', 3] },
   { id: 'lantern_tea', skill: 'cooking', tab: 'Farmhouse', lvl: 12, xp: 60, in: { crop_cabbage: 2, feather: 1 }, found: 'Traded for a story with a travelling merchant', rumour: 'The merchants drink something that keeps them walking all night.', event: 'merchant' },
@@ -9742,7 +9780,7 @@ function applyVolumes() {
   sfxG.gain.setTargetAtTime(s.sfx ? s.vol * .8 : 0, t, .05);
   musG.gain.setTargetAtTime(s.music ? s.musicVol * .55 : 0, t, .3);
   /* ambience sits under everything, and dips during fights so combat reads clearly */
-  if (ambG) ambG.gain.setTargetAtTime(s.ambience === false ? 0 : (s.ambVol ?? .45) * .6 * (DQ.act && DQ.act.kind === 'fight' ? .5 : 1), t, .8);
+  if (ambG) ambG.gain.setTargetAtTime(s.ambience === false ? 0 : (s.ambVol ?? .45) * .6 * (DQ.act && DQ.act.kind === 'fight' ? .25 : 1), t, .8);
 }
 function tone(f, dur, o = {}) {
   if (!ctx) return; const t = ctx.currentTime + (o.at || 0);
@@ -9862,17 +9900,33 @@ function musicStep() {
   musicTimer = setTimeout(musicStep, mode.battle?rnd(2100,2900):rnd(4200,6200));
 }
 /* ---------- Nature ambience: a soft procedural bed per region plus occasional details ---------- */
-const AMB = {
-  willowbrook: { bed: ['lowpass', 520, .05], events: [['bird', 3, 8]] },
-  mossbarrow: { bed: ['lowpass', 620, .055], events: [['bird', 4, 10], ['cricket', 6, 14]] },
-  saltmere: { bed: ['lowpass', 780, .06], swell: 7, events: [['gull', 8, 18]] },
-  ironpeak: { bed: ['bandpass', 1300, .035], whistle: true, events: [['drip', 5, 11]] },
-  gloomfen: { bed: ['lowpass', 380, .05], events: [['frog', 3, 7], ['cricket', 4, 9]] },
-  emberfall: { bed: ['lowpass', 260, .06], events: [['crackle', 1, 3]] },
-  skyreach: { bed: ['highpass', 2200, .02], events: [['chime', 6, 14], ['bird', 9, 18]] },
-  hollow: { bed: ['lowpass', 300, .04], drone: true, events: [['whisper', 8, 16]] }
+/* Data-driven (Dec 2026, World Life): one definition per village. `bed` is the place itself (river, forest, sea, wind);
+   `nature` are its own sounds at any time; `tiers` are what the people add as the village is restored. A broken village
+   is wind, crows and the odd hammer; a restored one has chatter, children, crafters and a bell. Adding a village or a
+   tier is a row here, not code. Each entry is [sound, shortest gap, longest gap] in seconds. */
+const D = DQ.data || {};
+D.AMBIENCE = {
+  willowbrook: { bed: ['lowpass', 520, .05], nature: [['bird', 4, 10]], tiers: { ruined: [['wind', 6, 14], ['crow', 9, 20], ['hammer', 18, 40]], mending: [['hammer', 7, 16], ['saw', 10, 22], ['chatter', 12, 26]], restored: [['chatter', 4, 10], ['children', 9, 20], ['anvil', 8, 18], ['bell', 40, 80]] } },
+  mossbarrow: { bed: ['lowpass', 620, .055], nature: [['bird', 4, 10], ['cricket', 6, 14]], tiers: { ruined: [['wind', 7, 15], ['crow', 8, 18], ['creak', 12, 26]], mending: [['saw', 8, 18], ['hammer', 9, 20], ['chatter', 14, 28]], restored: [['chatter', 5, 11], ['children', 10, 22], ['saw', 9, 20], ['cowbell', 12, 26]] } },
+  saltmere: { bed: ['lowpass', 780, .06], swell: 7, nature: [['gull', 8, 18]], tiers: { ruined: [['wind', 6, 13], ['creak', 8, 18], ['gull', 14, 30]], mending: [['hammer', 8, 18], ['creak', 10, 20], ['chatter', 13, 26]], restored: [['chatter', 4, 10], ['shipbell', 14, 30], ['market', 8, 18], ['children', 12, 24]] } },
+  ironpeak: { bed: ['bandpass', 1300, .035], whistle: true, nature: [['drip', 5, 11]], tiers: { ruined: [['wind', 4, 10], ['crow', 12, 26], ['rockfall', 16, 36]], mending: [['hammer', 6, 14], ['anvil', 10, 22], ['chatter', 15, 30]], restored: [['anvil', 4, 10], ['chatter', 6, 14], ['bellows', 8, 18], ['bell', 45, 90]] } },
+  gloomfen: { bed: ['lowpass', 380, .05], nature: [['frog', 3, 7], ['cricket', 4, 9]], tiers: { ruined: [['wind', 8, 16], ['crow', 7, 15], ['creak', 10, 22]], mending: [['hammer', 9, 20], ['creak', 9, 20], ['chatter', 15, 30]], restored: [['chatter', 6, 13], ['shipbell', 18, 36], ['children', 14, 28], ['market', 10, 22]] } },
+  emberfall: { bed: ['lowpass', 260, .06], nature: [['crackle', 1, 3]], tiers: { ruined: [['wind', 6, 14], ['rockfall', 12, 28], ['crow', 14, 30]], mending: [['anvil', 7, 16], ['bellows', 9, 20], ['chatter', 14, 28]], restored: [['anvil', 3, 8], ['bellows', 6, 13], ['chatter', 6, 14], ['bell', 40, 80]] } },
+  skyreach: { bed: ['highpass', 2200, .02], nature: [['chime', 6, 14], ['bird', 9, 18]], tiers: { ruined: [['wind', 4, 9], ['crow', 14, 30]], mending: [['hammer', 9, 20], ['chime', 8, 16], ['chatter', 15, 30]], restored: [['chatter', 7, 15], ['bell', 18, 36], ['children', 14, 28], ['chime', 5, 11]] } },
+  hollow: { bed: ['lowpass', 300, .04], drone: true, nature: [['whisper', 8, 16]], tiers: { ruined: [['wind', 7, 15]], mending: [['hammer', 12, 26], ['whisper', 10, 20]], restored: [['chatter', 10, 22], ['bell', 30, 60]] } },
 };
-let ambTown = null, ambNodes = [], ambLoop = null;
+D.AMBIENCE_FESTIVAL = [['children', 3, 7], ['market', 3, 8], ['pipe', 2, 5], ['chatter', 2, 6]];
+/* how restored a village is: its finished, undamaged projects */
+DQ.restorationTier = town => { const st = DQ.S, P = Object.entries((DQ.data || {}).PROJECTS || {}).filter(([, p]) => p.town === town); if (!st || !P.length) return 'mending';
+  const f = P.filter(([id]) => st.projects[id] && !(st.damaged || {})[id]).length / P.length; return f < .34 ? 'ruined' : f < .75 ? 'mending' : 'restored'; };
+/* the whole audio state as plain data (no AudioContext needed): what should be playing, and how loud the village is */
+DQ.ambiencePlan = (town, tier, o = {}) => { const A = D.AMBIENCE[town] || D.AMBIENCE.willowbrook, calm = !!o.calm;
+  const layers = o.combat ? [] : [...A.nature, ...(A.tiers[tier] || []), ...(o.festival ? D.AMBIENCE_FESTIVAL : [])].map(([n, lo, hi]) => [n, calm ? lo * 2 : lo, calm ? hi * 2 : hi]);
+  return { town, tier, bed: A.bed, layers, duck: o.combat ? .25 : 1, key: `${town}|${tier}|${o.festival ? 1 : 0}` }; };
+DQ.audioState = () => { const st = DQ.S; if (!st) return null; const town = st.town || 'willowbrook', combat = !!(DQ.act && DQ.act.kind === 'fight'), on = st.settings.ambience !== false && !st.settings.muted;
+  const plan = DQ.ambiencePlan(town, DQ.restorationTier(town), { combat, festival: !!(DQ.worldFestival && DQ.worldFestival()), calm: !!st.settings.reduceFx });
+  return Object.assign(plan, { mode: combat ? 'combat' : 'village', music: combat ? 'combat' : town, ambienceOn: on, volumes: { master: st.settings.muted ? 0 : (st.settings.masterVol ?? 1), music: st.settings.music ? st.settings.musicVol : 0, ambience: st.settings.ambience === false ? 0 : (st.settings.ambVol ?? .45) * plan.duck, effects: st.settings.sfx ? st.settings.vol : 0 } }); };
+let ambTown = null, ambKey = null, ambNodes = [], ambLoop = null;
 /* ambience timers forget themselves once they fire, so a long session never accumulates thousands of stale ids */
 const ambTimers = new Set(), later = (fn, ms) => { const id = setTimeout(() => { ambTimers.delete(id); fn(); }, ms); ambTimers.add(id); };
 const ambTone = (f, dur, o = {}) => tone(f, dur, Object.assign({ dest: ambG }, o));
@@ -9880,6 +9934,21 @@ const AMB_EVENT = {
   bird: () => { const b = 2200 + Math.random() * 1400, n = 2 + Math.floor(Math.random() * 3); for (let i = 0; i < n; i++) ambTone(b * (1 + Math.random() * .12), .09, { v: .05, at: i * .13, to: b * (1.25 + Math.random() * .2) }); },
   cricket: () => { for (let i = 0; i < 6; i++) ambTone(4300 + Math.random() * 200, .03, { v: .02, at: i * .07, type: 'square' }); },
   gull: () => { ambTone(1500, .35, { v: .04, to: 900, type: 'triangle' }); ambTone(1450, .3, { v: .03, at: .4, to: 850, type: 'triangle' }); },
+  wind: () => { if (!ctx) return; const t = ctx.currentTime, n = ctx.sampleRate * 3, b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); for (let k = 0; k < n; k++) d[k] = Math.random() * 2 - 1; const src = ctx.createBufferSource(); src.buffer = b; const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 2; f.frequency.setValueAtTime(300, t); f.frequency.linearRampToValueAtTime(700 + Math.random() * 500, t + 1.4); f.frequency.linearRampToValueAtTime(260, t + 3); const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.09, t + 1.2); g.gain.linearRampToValueAtTime(0, t + 3); src.connect(f); f.connect(g); g.connect(ambG); src.start(t); },
+  crow: () => { const n = 2 + Math.floor(Math.random() * 2); for (let i = 0; i < n; i++) ambTone(620 + Math.random() * 60, .22, { v: .035, at: i * .34, to: 480, type: 'sawtooth' }); },
+  hammer: () => { const n = 2 + Math.floor(Math.random() * 3); for (let i = 0; i < n; i++) { ambTone(190, .07, { v: .06, at: i * .42, type: 'square', to: 120 }); ambTone(1700, .04, { v: .02, at: i * .42 }); } },
+  saw: () => { for (let i = 0; i < 4; i++) ambTone(240 + (i % 2) * 70, .2, { v: .022, at: i * .26, type: 'sawtooth', to: 200 + (i % 2) * 60 }); },
+  anvil: () => { const n = 1 + Math.floor(Math.random() * 3); for (let i = 0; i < n; i++) { ambTone(2100, .5, { v: .035, at: i * .5 }); ambTone(3150, .35, { v: .018, at: i * .5 }); } },
+  bellows: () => { if (!ctx) return; const t = ctx.currentTime, n = ctx.sampleRate * 1.4, b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); for (let k = 0; k < n; k++) d[k] = Math.random() * 2 - 1; const src = ctx.createBufferSource(); src.buffer = b; const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 500; const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.07, t + .6); g.gain.linearRampToValueAtTime(0, t + 1.4); src.connect(f); f.connect(g); g.connect(ambG); src.start(t); },
+  chatter: () => { const n = 5 + Math.floor(Math.random() * 6); for (let i = 0; i < n; i++) { const f = 170 + Math.random() * 190; ambTone(f, .11 + Math.random() * .08, { v: .02, at: i * (.12 + Math.random() * .1), type: 'triangle', to: f * (.85 + Math.random() * .35) }); } },
+  children: () => { const n = 4 + Math.floor(Math.random() * 4); for (let i = 0; i < n; i++) { const f = 700 + Math.random() * 500; ambTone(f, .09, { v: .022, at: i * .11, type: 'triangle', to: f * 1.3 }); } },
+  market: () => { for (let i = 0; i < 3; i++) ambTone(2600 + Math.random() * 900, .12, { v: .02, at: i * .09 }); ambTone(210, .12, { v: .02, at: .4, type: 'triangle' }); },
+  bell: () => { [0, 1.4].forEach(at => { ambTone(392, 2.6, { v: .04, at }); ambTone(784, 2, { v: .016, at }); ambTone(1178, 1.4, { v: .008, at }); }); },
+  shipbell: () => { [0, .28].forEach(at => { ambTone(1240, .9, { v: .03, at }); ambTone(2480, .5, { v: .012, at }); }); },
+  cowbell: () => { ambTone(560, .25, { v: .03, type: 'square' }); ambTone(845, .2, { v: .014, type: 'square', at: .02 }); },
+  creak: () => { ambTone(150, .7, { v: .03, type: 'sawtooth', to: 210 }); ambTone(190, .5, { v: .02, type: 'sawtooth', at: .75, to: 140 }); },
+  rockfall: () => { for (let i = 0; i < 6; i++) ambTone(90 + Math.random() * 80, .1, { v: .05, at: i * (.08 + Math.random() * .1), type: 'square', to: 60 }); },
+  pipe: () => { const sc = [72, 74, 76, 79, 81, 84]; for (let i = 0; i < 5; i++) ambTone(mtof(sc[Math.floor(Math.random() * sc.length)]), .2, { v: .022, at: i * .2, type: 'triangle' }); },
   drip: () => ambTone(1600 + Math.random() * 900, .12, { v: .05, to: 700 }),
   frog: () => { const f = 140 + Math.random() * 60; for (let i = 0; i < 2; i++) ambTone(f, .12, { v: .07, at: i * .18, type: 'square', to: f * .8 }); },
   crackle: () => { if (!ctx) return; for (let i = 0; i < 4; i++) { const t = ctx.currentTime + Math.random() * .6, src = ctx.createBufferSource(), n = Math.floor(ctx.sampleRate * .02), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); for (let k = 0; k < n; k++) d[k] = (Math.random() * 2 - 1) * (1 - k / n); src.buffer = b; const g = ctx.createGain(); g.gain.value = .08 + Math.random() * .08; src.connect(g); g.connect(ambG); src.start(t); } },
@@ -9891,8 +9960,8 @@ function stopAmbience(fade = 1.5) {
   if (!ctx) { ambNodes = []; return; }
   const t = ctx.currentTime; ambNodes.forEach(n => { try { if (n.gain) n.gain.setTargetAtTime(0, t, fade / 3); if (n.stop) n.stop(t + fade + .2); } catch (e) {} }); ambNodes = [];
 }
-function startAmbience(town) {
-  if (!ctx) return; stopAmbience(); ambTown = town; const A = AMB[town] || AMB.willowbrook, t = ctx.currentTime;
+function startAmbience(town, plan) {
+  if (!ctx) return; stopAmbience(); ambTown = town; ambKey = plan.key; const A = D.AMBIENCE[town] || D.AMBIENCE.willowbrook, t = ctx.currentTime;
   /* the bed: looped soft noise through a filter, breathing slowly */
   const len = ctx.sampleRate * 3, buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0); let last = 0;
   for (let i = 0; i < len; i++) { last = (last + .02 * (Math.random() * 2 - 1)) / 1.02; d[i] = last * 3.5; }
@@ -9903,15 +9972,18 @@ function startAmbience(town) {
   breathe();
   if (A.drone) { [55, 55.4].forEach(fr => { const o = ctx.createOscillator(), og = ctx.createGain(); o.type = 'sine'; o.frequency.value = fr; og.gain.setValueAtTime(0, t); og.gain.setTargetAtTime(.025, t, 2); o.connect(og); og.connect(ambG); o.start(t); ambNodes.push(o, og); }); }
   /* details: each on its own loose timer so nothing repeats on a beat */
-  A.events.forEach(([name, lo, hi]) => { const next = () => { if (ambTown !== town) return; if (ctx.state === 'running' && S().ambience !== false && !(DQ.act && DQ.act.kind === 'fight')) try { AMB_EVENT[name](); } catch (e) {} later(next, (lo + Math.random() * (hi - lo)) * 1000); }; later(next, (lo + Math.random() * (hi - lo)) * 1000); });
+  plan.layers.forEach(([name, lo, hi]) => { const next = () => { if (ambTown !== town) return; if (ctx.state === 'running' && S().ambience !== false && !(DQ.act && DQ.act.kind === 'fight')) try { AMB_EVENT[name](); } catch (e) {} later(next, (lo + Math.random() * (hi - lo)) * 1000); }; later(next, (lo + Math.random() * (hi - lo)) * 1000); });
 }
 /* follows the current town (crossfading on travel) and the ambience setting */
 /* read-only counters for long-session checks */
-DQ.audioStats = () => ({ ambienceTimers: ambTimers.size, ambienceNodes: ambNodes.length, town: ambTown, state: ctx ? ctx.state : 'none' });
+DQ.audioStats = () => ({ ambienceTimers: ambTimers.size, ambienceNodes: ambNodes.length, town: ambTown, key: ambKey, state: ctx ? ctx.state : 'none' });
 DQ.ambienceRefresh = () => {
   if (!ctx) return; applyVolumes();
-  const want = S().ambience === false ? null : (DQ.S.town || 'willowbrook');
-  if (want !== ambTown) { if (want) startAmbience(want); else { stopAmbience(); ambTown = null; } }
+  const st = DQ.audioState(), want = S().ambience === false ? null : st.town;
+  /* the layers follow the village, its restoration tier and festivals; a fight only ducks them (no restart, so no stacking) */
+  const plan = want && DQ.ambiencePlan(want, st.tier, { festival: !!(DQ.worldFestival && DQ.worldFestival()), calm: !!S().reduceFx });
+  if (!want) { if (ambTown) { stopAmbience(); ambTown = null; ambKey = null; } }
+  else if (plan.key !== ambKey) startAmbience(want, plan);
 };
 const ambWatch = () => { if (!ambLoop) ambLoop = setInterval(() => { if (ctx && !document.hidden) DQ.ambienceRefresh(); }, 2000); };
 
@@ -11951,6 +12023,7 @@ DQ.mastTick = (a, n = 1) => {
   const M = S().mast = S().mast || {}, k = key(a.kind, a.id), before = DQ.mastStars(a.kind, a.id);
   M[k] = (M[k] || 0) + n;
   const after = DQ.mastStars(a.kind, a.id);
+  if (after > before && DQ.recipeOnStudy && !DQ.forecasting) DQ.recipeOnStudy(a.kind, a.id, after);
   if (after > before && !DQ.sim.on && !DQ.forecasting) {
     const name = DQ.mastName(a.kind, a.id) || a.id;
     DQ.sfx && DQ.sfx('perk');
@@ -13223,38 +13296,38 @@ prize('windcaller_bow', { name: 'Windcaller bow', ic: 'bow', col: '#bfe8ff', slo
 prize('shadow_mantle', { name: 'Shadow mantle', ic: 'body', col: '#6a5a9a', slot: 'body', req: { defence: 60 }, b: { def: 62 }, unique: U('laststand', 'Borrowed time', 'Survive one fatal blow per fight on 1 health'), flavour: 'It fits better than it should.' });
 /* town, the tower, its boss, the prize, a colour for the boss and its special */
 D.TOWERS = {
-  willowbrook: { name: 'The Old Granary', boss: ['tw_squeak', 'Old Squeak, King of Rats', '#9a8a70', 'Swarm'], prize: 'squeaks_crown' },
-  mossbarrow: { name: 'Watchtower in the Wood', boss: ['tw_greenknight', 'The Green Knight', '#4a8a4a', 'Great cleave'], prize: 'greenwood_blade' },
-  saltmere: { name: 'The Old Lighthouse', boss: ['tw_keeper', 'The Keeper of the Lamp', '#e0c860', 'Blinding beam'], prize: 'lamplight_staff' },
-  ironpeak: { name: 'Frostspire', boss: ['tw_rimebeard', 'Jarl Rimebeard', '#a8c8e0', 'Avalanche'], prize: 'rimebeards_bulwark' },
-  gloomfen: { name: 'The Sunken Belfry', boss: ['tw_abbot', 'The Drowned Abbot', '#6a9a8a', 'Last rites'], prize: 'abbots_censer' },
-  emberfall: { name: 'The Cinder Stack', boss: ['tw_ashka', 'Forge-Mother Ashka', '#e0703a', 'Quench'], prize: 'ashkas_hammer' },
+  willowbrook: { name: 'The Old Granary', boss: ['tw_squeak', 'Old Squeak, King of Rats', '#9a8a70', 'Swarm'], prize: 'squeaks_crown', up: 3 },
+  mossbarrow: { name: 'Watchtower in the Wood', boss: ['tw_greenknight', 'The Green Knight', '#4a8a4a', 'Great cleave'], prize: 'greenwood_blade', up: 5 },
+  saltmere: { name: 'The Old Lighthouse', boss: ['tw_keeper', 'The Keeper of the Lamp', '#e0c860', 'Blinding beam'], prize: 'lamplight_staff', up: 5 },
+  ironpeak: { name: 'Frostspire', boss: ['tw_rimebeard', 'Jarl Rimebeard', '#a8c8e0', 'Avalanche'], prize: 'rimebeards_bulwark', up: 10 },
+  gloomfen: { name: 'The Sunken Belfry', boss: ['tw_abbot', 'The Drowned Abbot', '#6a9a8a', 'Last rites'], prize: 'abbots_censer', up: 6 },
+  emberfall: { name: 'The Cinder Stack', boss: ['tw_ashka', 'Forge-Mother Ashka', '#e0703a', 'Quench'], prize: 'ashkas_hammer', up: 10 },
   skyreach: { name: 'Bell Tower of the Winds', boss: ['tw_bellringer', 'The Last Bellringer', '#d8d0b0', 'Great peal'], prize: 'windcaller_bow' },
-  hollow: { name: 'The Hollow Spire', boss: ['tw_shadow', 'The King’s Shadow', '#7a6ab0', 'Eclipse'], prize: 'shadow_mantle' },
+  hollow: { name: 'The Hollow Spire', boss: ['tw_shadow', 'The King’s Shadow', '#7a6ab0', 'Eclipse'], prize: 'shadow_mantle', up: 11, hp: 1.15, max: 1.02 },
 };
 D.TOWER_FLOORS = 5;
-const HP = [2.0, 2.3, 2.6, 3.0], MAX = [1.1, 1.18, 1.26, 1.34];
+const HP = [1.6, 1.9, 2.2, 2.5], MAX = [1.05, 1.1, 1.15, 1.2];
 for (const [town, T] of Object.entries(D.TOWERS)) {
   if (!D.TOWN[town]) { delete D.TOWERS[town]; continue; }
   const local = D.MONLIST.filter(m => m.town === town && !m.boss && !m.mini).sort((a, b) => a.cl - b.cl).slice(-4), boss = D.MON[D.TOWN[town].boss];
-  T.town = town; T.floors = []; T.rec = Math.min(118, boss.boss.req + 8);
+  T.town = town; T.floors = []; T.rec = Math.min(110, boss.boss.req + (T.up == null ? 8 : T.up)); /* tuned on node scripts/sim-bosses.cjs with TOWERS=1 */
   const add = (id, name, floor, base, hp, max, k, col, extra) => { const m = { id, name, town, cl: base.cl + floor * 2, hp: Math.round(base.hp * hp), max: Math.max(1, Math.round(base.max * max)), att: Math.round(base.att * k), def: Math.round(base.def * k), coins: [base.coins[0] * 3, base.coins[1] * 4], col, drops: extra.drops || [], tower: { town, floor }, mini: Object.assign({ short: name, req: 0 }, extra.mini || {}) }; D.MON[id] = m; D.MONLIST.push(m); T.floors.push(id); return m; };
   local.forEach((b, i) => add(`tw_${town}_${i + 1}`, `${b.name} of the tower`, i + 1, b, HP[i], MAX[i], 1.08 + i * .03, b.col, { art: b.id, mini: { won: `Floor ${i + 1} of ${T.name} is clear.` }, drops: [['coin_pouch', [1, 2], .5], ['treasure_chest', [1, 1], .06 + i * .02]] }).base = b.id);
   const [bid, bname, bcol, sp] = T.boss;
-  add(bid, bname, 5, boss, 1.5, 1.22, 1.12, bcol, { drops: [[T.prize, [1, 1], 0], ['treasure_chest', [1, 1], .5], ['coin_pouch', [2, 4], 1]], mini: { short: bname.replace(/^The /, 'the '), first: T.prize, special: { every: 3, mult: 1.5, name: sp }, won: `${T.name} is yours. ${D.ITEMS[T.prize].name} was waiting at the top.` } });
+  add(bid, bname, local.length + 1, boss, T.hp || 1.4, T.max || 1.15, 1.1, bcol, { drops: [[T.prize, [1, 1], 0], ['treasure_chest', [1, 1], .5], ['coin_pouch', [2, 4], 1]], mini: { short: bname.replace(/^The /, 'the '), first: T.prize, special: { every: 3, mult: 1.5, name: sp }, won: `${T.name} is yours. ${D.ITEMS[T.prize].name} was waiting at the top.` } });
   D.WEAK[bid] = { weak: [], resist: [] }; local.forEach((b, i) => { D.WEAK[`tw_${town}_${i + 1}`] = D.WEAK[b.id] || { weak: [], resist: [] }; });
   if (D.LORE) D.LORE[bid] = { note: `Waits at the top of ${T.name}. Every third blow is its ${sp.toLowerCase()}. No weakness that anyone has found.`, legend: `Nobody asked it to guard the place. Nobody has managed to ask it to stop.` };
 }
 /* ---------- rules ---------- */
 DQ.towerFloor = town => ((S().towers || {})[town]) || 0;
-DQ.towerNext = town => { const T = D.TOWERS[town]; return T && DQ.towerFloor(town) < D.TOWER_FLOORS ? D.MON[T.floors[DQ.towerFloor(town)]] : null; };
-DQ.towerDone = town => DQ.towerFloor(town) >= D.TOWER_FLOORS;
+DQ.towerNext = town => { const T = D.TOWERS[town]; return T && DQ.towerFloor(town) < T.floors.length ? D.MON[T.floors[DQ.towerFloor(town)]] : null; };
+DQ.towerDone = town => !!D.TOWERS[town] && DQ.towerFloor(town) >= D.TOWERS[town].floors.length;
 const start0 = DQ.startAct;
 DQ.startAct = (kind, id, o = {}) => { const m = kind === 'fight' && D.MON[id];
   if (m && m.tower && m.tower.floor > DQ.towerFloor(m.tower.town) + 1 && !(DQ.act && DQ.act.kind === kind && DQ.act.id === id)) { if (!o.quiet) DQ.toast(`Clear floor ${DQ.towerFloor(m.tower.town) + 1} first`, true); return false; }
   return start0(kind, id, o); };
 (DQ.killHooks = DQ.killHooks || []).push(m => { if (!m.tower) return; const T = S().towers = S().towers || {}; if (m.tower.floor > (T[m.tower.town] || 0)) { T[m.tower.town] = m.tower.floor;
-    if (DQ.journal) DQ.journal('tower', m.tower.floor >= D.TOWER_FLOORS ? `Climbed ${D.TOWERS[m.tower.town].name} and beat ${m.name}.` : `Cleared floor ${m.tower.floor} of ${D.TOWERS[m.tower.town].name}.`, 'trophy');
+    if (DQ.journal) DQ.journal('tower', m.tower.floor >= D.TOWERS[m.tower.town].floors.length ? `Climbed ${D.TOWERS[m.tower.town].name} and beat ${m.name}.` : `Cleared floor ${m.tower.floor} of ${D.TOWERS[m.tower.town].name}.`, 'trophy');
     for (const r of D.SECRET_RECIPES || []) if (r.tower && r.tower[0] === m.tower.town && r.tower[1] === m.tower.floor) DQ.learnRecipe(r.id); } });
 /* ---------- art: floors reuse the creature they grew from; each boss is its own drawing ---------- */
 const A = DQ.pixelArt;
@@ -14463,19 +14536,19 @@ const HUBS = [
   { id: 'home', name: 'Home', ic: 'home', pages: ['overview', 'activity', 'journal'] },
   { id: 'quests', name: 'Quests', ic: 'quest', pages: ['quests', 'people'] },
   { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'magic', 'brewery', 'enchanting', 'research', 'carpentry', 'sailing', 'beastmastery'] },
-  { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat'] },
+  { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'tower'] },
   { id: 'world', name: 'World', ic: 'map', pages: ['map', 'exploration'] },
   { id: 'village', name: 'Village', ic: 'house', pages: ['projects', 'house', 'hirelings'] },
   { id: 'hero', name: 'Hero', ic: 'bag', pages: ['character', 'tools', 'bank', 'skillsummary', 'mastery'] },
   /* Guide (Dec 2026): the field guide now covers everything you work with, so it sits beside Hero with the collection log
      and achievements: the three places that show what you are close to earning */
-  { id: 'guide', name: 'Guide', ic: 'book', pages: ['bestiary', 'collection', 'achievements'] },
+  { id: 'guide', name: 'Guide', ic: 'book', pages: ['bestiary', 'museum', 'collection', 'achievements'] },
   { id: 'shop', name: 'Shop', ic: 'shop', pages: ['shop'] },
 ];
 /* The page menu along the top bar (desktop). Combat and every skill live down the left; phones keep the bottom bar. */
 const TOP = ['home', 'quests', 'world', 'village', 'hero', 'guide', 'shop'];
 const UTILITIES = { id: 'settings', name: 'Settings', pages: ['settings', 'balance'] };
-const TAB = { collection:['Collection','star'], carpentry:['Carpentry','carpentry'], sailing:['Sailing','sailing'], beastmastery:['Beastmastery','beastmastery'], hunting:['Hunting','paw'], exploration:['Exploration','map'], enchanting:['Enchanting','rune'], brewery: ['Herbalism', 'bottle'], overview: ['Home', 'home'], skillsummary: ['Skill levels', 'star'], tools: ['Tools', 'mining'], activity: ['Activity', 'clock'], journal: ['Journal', 'book'], projects: ['Town projects', 'house'], combat: ['Fight', 'attack'], bestiary: ['Field guide', 'book'], map: ['Map', 'map'], quests: ['Quests', 'quest'], people: ['People', 'users'], shop: ['Shop', 'shop'], character: ['Inventory & equipment', 'bag'], bank: ['Bank', 'bank'], house: ['House', 'house'], hirelings: ['Workers', 'users'], achievements: ['Achievements', 'trophy'], mastery: ['Mastery', 'trophy'], research: ['Scholarship', 'book'], settings: ['Settings', 'gear'] };
+const TAB = { museum:['Museum','trophy'], tower:['Trial tower','shield'], collection:['Collection','star'], carpentry:['Carpentry','carpentry'], sailing:['Sailing','sailing'], beastmastery:['Beastmastery','beastmastery'], hunting:['Hunting','paw'], exploration:['Exploration','map'], enchanting:['Enchanting','rune'], brewery: ['Herbalism', 'bottle'], overview: ['Home', 'home'], skillsummary: ['Skill levels', 'star'], tools: ['Tools', 'mining'], activity: ['Activity', 'clock'], journal: ['Journal', 'book'], projects: ['Town projects', 'house'], combat: ['Fight', 'attack'], bestiary: ['Field guide', 'book'], map: ['Map', 'map'], quests: ['Quests', 'quest'], people: ['People', 'users'], shop: ['Shop', 'shop'], character: ['Inventory & equipment', 'bag'], bank: ['Bank', 'bank'], house: ['House', 'house'], hirelings: ['Workers', 'users'], achievements: ['Achievements', 'trophy'], mastery: ['Mastery', 'trophy'], research: ['Scholarship', 'book'], settings: ['Settings', 'gear'] };
 UI.hubOf = p => HUBS.find(h => h.pages.includes(p)) || (UTILITIES.pages.includes(p) ? UTILITIES : HUBS[0]);
 const lastIn = {};
 const hubDefault = h => {
@@ -17196,7 +17269,7 @@ const material = (kind, x, sk, o = {}) => { const m = Q.mastInfo(kind, x.id), lv
 const topics = () => { const t = [];
   for (const town of D.TOWNS) if (S().towns[town.id] && S().towns[town.id].visited) t.push({ id: 'c:' + town.id, group: 'Creatures', name: town.name, ic: 'attack', items: () => D.MONLIST.filter(m => m.town === town.id && !m.tower).sort((a, b) => a.cl - b.cl).map(creature) });
   for (const [kind, sk] of Object.entries(NODE_SK)) if ((D.NODES[kind] || []).length && Q.skillUnlocked(sk)) t.push({ id: kind, group: 'Gathering', name: D.SK[sk].name, ic: sk, items: () => [...D.NODES[kind]].sort((a, b) => a.lvl - b.lvl).map(x => material(kind, x, sk)) });
-  const seen = new Set(); for (const r of Object.values(D.RECIPES)) if (!seen.has(r.skill) && D.SK[r.skill] && Q.skillUnlocked(r.skill)) { seen.add(r.skill); const sk = r.skill; t.push({ id: 'recipe:' + sk, group: 'Making', name: D.SK[sk].name, ic: sk, items: () => Object.values(D.RECIPES).filter(x => x.skill === sk).sort((a, b) => a.lvl - b.lvl).map(x => material('recipe', x, sk)) }); }
+  const seen = new Set(); for (const r of Object.values(D.RECIPES)) if (!seen.has(r.skill) && D.SK[r.skill] && Q.skillUnlocked(r.skill)) { seen.add(r.skill); const sk = r.skill; t.push({ id: 'recipe:' + sk, group: 'Making', name: D.SK[sk].name, ic: sk, items: () => Object.values(D.RECIPES).filter(x => x.skill === sk && (!x.secret || (Q.recipeKnown && Q.recipeKnown(x.secret)))).sort((a, b) => a.lvl - b.lvl).map(x => material('recipe', x, sk)) }); }
   /* everything else you repeat: crops, livestock, potions, voyages and trap lines */
   if (Q.skillUnlocked('farming')) { t.push({ id: 'crop', group: 'Growing', name: 'Crops', ic: 'farming', items: () => [...D.CROPS].sort((a, b) => a.lvl - b.lvl).map(c => material('crop', c, 'farming', { itemId: 'crop_' + c.id })) });
     t.push({ id: 'animal', group: 'Growing', name: 'Livestock', ic: 'farming', items: () => [...D.ANIMALS].sort((a, b) => a.lvl - b.lvl).map(a => material('animal', a, 'farming', { itemId: a.prod })) }); }
@@ -19373,6 +19446,159 @@ UI.V.collection = () => { const pets = Q.collectiblePets ? Q.collectiblePets() :
     : `<div class="col-list">${workRows()}</div>`;
   return `<section class="panel shophead col-head"><div><span class="k">Collection log</span><h2>${own} of ${pets.length} beasts hatched</h2></div><div class="tabs">${[['eggs', 'Beast eggs'], ['drops', 'Rare drops'], ['work', 'Lucky finds']].map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="coltab" data-a="${k}">${n}</button>`).join('')}</div></section><section class="panel col-panel">${body}</section>`; };
 UI.DO.coltab = a => { UI.colTab = a; UI.render(false); };
+})();
+
+</script>
+<script>
+/* World events (Dec 2026, World Life). Now and then, while you are playing, something happens and asks for a decision.
+   Rules, from the brief: only during active play (the clock here counts time with the game open and visible, and lives
+   in memory, so nothing can queue up while the game is closed); never in the first 15 minutes of a session; one at a
+   time; 30 to 60 minutes apart; no countdown pressure (an unanswered event ends harmlessly after 12 minutes of play).
+   Everything is data: D.WORLD_EVENTS. An event is { id, title, ic, col, ok(), make() -> text and details,
+   choices(ev) -> [{ id, label, sub, can, run(ev) -> message | { doing } }], lapse(ev) -> message }.
+   Outcomes go to the adventure journal. Buildings can be damaged (S.damaged), never destroyed; repair is cheap. */
+(() => {
+const DQ = window.DQ, D = DQ.data, S = () => DQ.S, { rnd, pick, chance, fmt } = DQ;
+const MIN = 60000, FIRST = 15 * MIN, GAP = [30 * MIN, 60 * MIN], LAPSE = 12 * MIN;
+const W = DQ.worldState = { played: 0, next: 0, active: null, result: null, fired: 0 };
+const span = () => GAP[0] + Math.random() * (GAP[1] - GAP[0]);
+const reset = () => { W.played = 0; W.next = Math.max(FIRST, 20 * MIN + Math.random() * 20 * MIN); W.active = null; W.result = null; };
+reset();
+const tIdx = () => D.TOWN[S().town].idx, scale = n => Math.round(n * Math.pow(tIdx() + 1, 1.5));
+const topCreature = () => D.MONLIST.filter(m => m.town === S().town && !m.boss && !m.mini).sort((a, b) => b.cl - a.cl)[0];
+const restored = () => Object.entries(D.PROJECTS || {}).filter(([id, p]) => p.town === S().town && S().projects[id] && !(S().damaged || {})[id]);
+const cooked = () => (DQ.foods ? DQ.foods() : []).filter(id => DQ.have(id) > 0);
+const stack = () => Object.entries(S().inv || {}).filter(([id, n]) => D.ITEMS[id] && n >= 10 && ['resource', 'raw', 'food'].includes(D.ITEMS[id].type) && DQ.sellable(id) && !D.ITEMS[id].secret).sort((a, b) => b[1] - a[1])[0];
+const pay = n => { if (S().coins < n) return false; S().coins -= n; return true; };
+const journal = (ev, msg) => { if (DQ.journal) DQ.journal('event', `${ev.title}: ${msg}`, ev.ic); DQ.log && DQ.log(`${ev.title}: ${msg}`, 'quest'); };
+/* a creature made for one event: the town's toughest regular creature, grown, fought like any other */
+const foe = (id, name, hp, max, col) => { const b = topCreature(); const m = D.MON[id] = { id, name, town: S().town, cl: b.cl + 4, hp: Math.round(b.hp * hp), max: Math.max(1, Math.round(b.max * max)), att: b.att, def: b.def, coins: [b.coins[0] * 3, b.coins[1] * 4], col: col || b.col, drops: [['treasure_chest', [1, 1], .25]], event: true, base: b.id };
+  D.WEAK[id] = D.WEAK[b.id] || { weak: [], resist: [] }; const A = DQ.pixelArt; if (A && A.CREATURE_SPECS && !A.CREATURE_SPECS[id + ':own'] && A.CREATURE_SPECS[b.id] && id !== 'ev_hart') A.CREATURE_SPECS[id] = A.CREATURE_SPECS[b.id]; return m; };
+for (const id of ['ev_raider', 'ev_bandits', 'ev_hart']) D.MON[id] = { id, name: 'Something', town: 'willowbrook', cl: 1, hp: 5, max: 1, att: 1, def: 1, coins: [0, 0], col: '#888', drops: [], event: true };
+DQ.damageBuildings = n => { const list = restored(); const hit = []; S().damaged = S().damaged || {}; for (let i = 0; i < n && list.length; i++) { const [id] = list.splice(rnd(0, list.length - 1), 1)[0]; S().damaged[id] = Date.now(); hit.push(id); } if (hit.length && DQ.fxDirty) DQ.fxDirty(); return hit; };
+DQ.repairCost = id => { const p = D.PROJECTS[id]; return Math.max(20, Math.round(((p && p.cost.coins) || 100) * .15)); };
+DQ.repair = id => { if (!(S().damaged || {})[id]) return false; if (!pay(DQ.repairCost(id))) { DQ.toast('Not enough coins', true); return false; } delete S().damaged[id]; DQ.fxDirty(); DQ.sfx && DQ.sfx('anvil'); if (DQ.journal) DQ.journal('event', `Repaired: ${D.PROJECTS[id].name.replace(/^\w+ the /, 'the ')}.`, 'house'); DQ.emit('world'); return true; };
+D.WORLD_EVENTS = [
+  { id: 'raid', title: 'Something is coming', ic: 'attack', col: '#e0564f', ok: () => restored().length > 0 && !!topCreature(),
+    make: () => { const m = foe('ev_raider', `Rampaging ${topCreature().name.toLowerCase()}`, 2.2, 1.2); return { mon: m.id, text: `A ${topCreature().name.toLowerCase()}, bigger than it has any right to be, is heading for ${D.TOWN[S().town].name}.` }; },
+    choices: ev => [{ id: 'fight', label: 'Fight it', sub: `Lv ${D.MON[ev.mon].cl}`, run: e => ({ fight: e.mon, won: () => { const c = scale(120); DQ.addCoins(c); return `You drove it off. The town paid ${fmt(c)} coins.`; }, lost: () => { const h = DQ.damageBuildings(rnd(2, 3)); return h.length ? `It got past you. ${h.length} building${h.length > 1 ? 's are' : ' is'} damaged.` : 'It got past you, and found nothing worth breaking.'; } }) },
+      { id: 'hide', label: 'Bar the doors', sub: '2–3 buildings damaged', run: () => { const h = DQ.damageBuildings(rnd(2, 3)); return `It took its temper out on ${h.map(id => D.PROJECTS[id].name.replace(/^\w+ the /, 'the ')).join(', ')}. Repairs are cheap.`; } }],
+    lapse: () => 'The watch saw it off before it reached the gate.' },
+  { id: 'merchant', title: 'A travelling merchant', ic: 'shop', col: '#f3d58a', ok: () => true,
+    make: () => { const rec = DQ.recipeFromEvent && DQ.recipeFromEvent('merchant'); return { rec, gem: DQ.weighted(D.GEM_WEIGHTS), text: 'A merchant has stopped to water her mule. She has a few things you will not see in the shop.' }; },
+    choices: ev => [...(ev.rec ? [{ id: 'rec', label: `Trade for a recipe`, sub: `${fmt(scale(150))} coins`, can: () => S().coins >= scale(150), run: e => { pay(scale(150)); DQ.learnRecipe(e.rec); return `She wrote it out for you: ${D.ITEMS[e.rec].name}.`; } }] : []),
+      { id: 'gem', label: `Buy a ${D.ITEMS[ev.gem].name.toLowerCase()}`, sub: `${fmt(Math.round(D.ITEMS[ev.gem].val * 1.2))} coins`, can: () => S().coins >= Math.round(D.ITEMS[ev.gem].val * 1.2), run: e => { pay(Math.round(D.ITEMS[e.gem].val * 1.2)); DQ.give(e.gem, 1); return `Bought a ${D.ITEMS[e.gem].name.toLowerCase()}.`; } },
+      { id: 'no', label: 'Wave her on', run: () => 'She tips her hat and moves on.' }],
+    lapse: () => 'She moved on down the road.' },
+  { id: 'bard', title: 'A wandering bard', ic: 'sound', col: '#c8a0e8', ok: () => true, make: () => ({ cost: scale(60), text: 'A bard has set up by the well and is tuning something with too many strings.' }),
+    choices: ev => [{ id: 'pay', label: 'Pay for a song', sub: `${fmt(ev.cost)} coins · +8% task speed, 20 min`, can: () => S().coins >= ev.cost, run: e => { pay(e.cost); DQ.addBuff('slow', .92, 20 * MIN, 'The bard’s song', '+8% task speed'); DQ.museumCurio && DQ.museumCurio('bard'); return 'The whole town works to the tune.'; } }, { id: 'no', label: 'Walk on', run: () => 'You catch the chorus anyway.' }],
+    lapse: () => 'The bard packed up at dusk.' },
+  { id: 'star', title: 'A fallen star', ic: 'gem', col: '#cfc4ff', ok: () => DQ.skillUnlocked('mining'), make: () => { DQ.hearRecipe && DQ.hearRecipe('stargazer_hood'); return { need: 10, text: 'Something bright came down in the hills. It is still warm, and it will not stay that way.' }; },
+    choices: ev => [{ id: 'mine', label: 'Go and mine it', sub: `Mine ${ev.need} ore while it is warm`, run: e => ({ count: 'mine', need: e.need, go: 'mining', won: () => { const n = 1 + Math.floor(DQ.lvl('mining') / 35); DQ.give('star_shard', n); DQ.museumCurio && DQ.museumCurio('star'); if (S().inv.star_shard >= 3 || chance(.35)) DQ.learnRecipe && DQ.learnRecipe('stargazer_hood'); return `You chipped out ${n} star shard${n > 1 ? 's' : ''}.`; } }) }, { id: 'no', label: 'Let it cool', run: () => 'By morning it is only a stone.' }],
+    lapse: () => 'It cooled before anyone reached it.' },
+  { id: 'shrine', title: 'A wayside shrine', ic: 'star', col: '#8ad0c0', ok: () => !!stack(), make: () => { const [id] = stack(); return { item: id, text: 'An old shrine by the road, with a bowl worn smooth. People leave things. Sometimes it answers.' }; },
+    choices: ev => [{ id: 'offer', label: `Offer 10 ${D.ITEMS[ev.item].name.toLowerCase()}`, sub: 'A blessing, or nothing', can: () => DQ.have(ev.item) >= 10, run: e => { DQ.take(e.item, 10); if (chance(.6)) { DQ.addBuff('xp', 1.1, 30 * MIN, 'Shrine’s blessing', '+10% XP'); DQ.museumCurio && DQ.museumCurio('shrine'); return 'Warmth, like sun on your back. +10% XP for 30 minutes.'; } return 'The bowl is empty when you look again. Nothing else happens.'; } }, { id: 'no', label: 'Leave it be', run: () => 'You nod to it anyway.' }],
+    lapse: () => 'The road carried you past.' },
+  { id: 'traveller', title: 'A lost traveller', ic: 'map', col: '#8fc7ff', ok: () => true, make: () => ({ text: 'A traveller with the wrong map and no supper asks if this is the road to anywhere.' }),
+    choices: ev => [{ id: 'feed', label: 'Share your food', sub: '3 cooked food', can: () => cooked().reduce((n, id) => n + DQ.have(id), 0) >= 3, run: () => { let left = 3; for (const id of cooked()) { const n = Math.min(left, DQ.have(id)); DQ.take(id, n); left -= n; if (!left) break; } const c = scale(90); DQ.addCoins(c); const rec = DQ.recipeFromEvent && DQ.recipeFromEvent('traveller'); if (rec) DQ.learnRecipe(rec); return rec ? `They ate, thanked you with ${fmt(c)} coins, and wrote a recipe on the back of the map.` : `They ate and pressed ${fmt(c)} coins on you.`; } },
+      { id: 'point', label: 'Point the way', run: () => { const c = scale(20); DQ.addCoins(c); return `A few coins for your trouble: ${fmt(c)}.`; } }],
+    lapse: () => 'Somebody else set them right.' },
+  { id: 'hart', title: 'A rare sighting', ic: 'paw', col: '#e8f0ff', ok: () => !!topCreature(), make: () => { const m = foe('ev_hart', 'The Moonlit Hart', 1.8, .9, '#e8f0ff'); return { mon: m.id, text: 'A white hart at the treeline, watching you. Hunters go a lifetime without seeing it.' }; },
+    choices: ev => [{ id: 'track', label: 'Track it', sub: `Lv ${D.MON[ev.mon].cl}`, run: e => ({ fight: e.mon, won: () => { DQ.museumCurio && DQ.museumCurio('hart'); const c = scale(150); DQ.addCoins(c); return `You caught up with it, once. It left ${fmt(c)} coins’ worth of silver hair on the thorns.`; }, lost: () => 'It was gone between one blink and the next.' }) }, { id: 'no', label: 'Just watch', run: () => 'It watches back, then is not there.' }],
+    lapse: () => 'It slipped away.' },
+  { id: 'festival', title: 'Festival day', ic: 'star', col: '#f0c060', ok: () => restored().length >= 2, make: () => ({ text: `${D.TOWN[S().town].name} has hung out the ribbons. Nobody is quite sure what the festival is for.` }),
+    choices: () => [{ id: 'join', label: 'Join in', sub: '+10% XP, 20 min', run: () => { DQ.addBuff('xp', 1.1, 20 * MIN, 'Festival', '+10% XP'); W.festival = W.played + 20 * MIN; DQ.museumCurio && DQ.museumCurio('festival'); DQ.ambienceRefresh && DQ.ambienceRefresh(); return 'Music, pies, and a great deal of dancing.'; } }, { id: 'no', label: 'Work through it', run: () => 'You can hear it from here.' }],
+    lapse: () => 'The ribbons came down at sunset.' },
+  { id: 'bandits', title: 'Bandits on the road', ic: 'sword', col: '#d8503f', ok: () => !!topCreature(), make: () => { const m = foe('ev_bandits', 'Road bandits', 2.4, 1.15, '#8a5a4a'); return { mon: m.id, text: 'Three of them, a cart across the road, and a toll that changes each time they say it.' }; },
+    choices: ev => [{ id: 'fight', label: 'Clear the road', sub: `Lv ${D.MON[ev.mon].cl} · good loot`, run: e => ({ fight: e.mon, won: () => { const c = scale(220); DQ.addCoins(c); DQ.give('treasure_chest', 1); return `They ran. ${fmt(c)} coins and a chest were in the cart.`; }, lost: () => 'You left them to it.' }) }, { id: 'no', label: 'Go around', run: () => 'A longer walk, and nothing lost.' }],
+    lapse: () => 'They got bored and left.' },
+  { id: 'errand', title: 'A villager’s errand', ic: 'users', col: '#b8d08a', ok: () => !!stack(), make: () => { const [id, n] = stack(), want = Math.min(20, Math.floor(n / 2)); const giver = (D.QUESTS.find(q => q.town === S().town) || {}).giver || 'A villager'; return { item: id, want, giver, text: `${giver} is ${want} ${D.ITEMS[id].name.toLowerCase()} short and looking hopeful.` }; },
+    choices: ev => [{ id: 'give', label: `Hand over ${ev.want}`, sub: 'Paid double', can: () => DQ.have(ev.item) >= ev.want, run: e => { DQ.take(e.item, e.want); const c = Math.max(10, D.ITEMS[e.item].val * e.want * 2); DQ.addCoins(c); const un = (D.SECRET_RECIPES || []).find(r => !DQ.recipeHeard(r.id)); if (un) DQ.hearRecipe(un.id); return `${e.giver} paid ${fmt(c)} coins${un ? ' and passed on a rumour' : ''}.`; } }, { id: 'no', label: 'Not today', run: () => 'They will manage.' }],
+    lapse: () => 'They found it elsewhere.' },
+];
+D.WORLD_EVENT = Object.fromEntries(D.WORLD_EVENTS.map(e => [e.id, e]));
+const finish = (msg, bad) => { const ev = W.active; if (!ev) return; journal(ev.def, msg); W.result = { title: ev.def.title, ic: ev.def.ic, col: ev.def.col, msg, bad: !!bad, until: W.played + 20000 }; W.active = null; W.next = W.played + span(); if (ev.def.id === 'recipes') 0; DQ.emit('world'); };
+DQ.worldFire = id => { if (W.active || !DQ.S) return false; const pool = D.WORLD_EVENTS.filter(e => (!id || e.id === id) && e.ok()); if (!pool.length) return false; const def = pick(pool), data = def.make(); W.active = Object.assign({ def, at: W.played, title: def.title }, data); W.result = null; W.fired++; if (!(DQ.sim && DQ.sim.on)) DQ.sfx && DQ.sfx('perk'); DQ.emit('world'); return true; };
+DQ.worldChoices = () => W.active && !W.active.doing ? W.active.def.choices(W.active) : [];
+DQ.worldChoose = cid => { const ev = W.active; if (!ev || ev.doing) return false; const c = ev.def.choices(ev).find(x => x.id === cid); if (!c || (c.can && !c.can())) return false;
+  const r = c.run(ev); if (typeof r === 'string') { finish(r); return true; }
+  ev.doing = r; ev.count = 0;
+  if (r.fight) { if (!DQ.startAct('fight', r.fight, { quiet: true })) { finish(r.lost ? r.lost() : 'You could not get there in time.', true); return true; } if (DQ.go) DQ.go('combat'); }
+  else if (r.go && DQ.go) DQ.go(r.go);
+  DQ.emit('world'); return true; };
+(DQ.killHooks = DQ.killHooks || []).push(m => { const ev = W.active; if (ev && ev.doing && ev.doing.fight === m.id && !(DQ.sim && DQ.sim.on)) { const msg = ev.doing.won(); ev.doing = null; finish(msg); setTimeout(() => { if (DQ.act && DQ.act.kind === 'fight' && DQ.act.id === m.id) DQ.stopAct(true); }, 0); } });
+/* the fight was lost or abandoned; or ore was mined for the star */
+DQ.on && DQ.on('act', () => { const ev = W.active; if (ev && ev.doing && ev.doing.fight && !(DQ.act && DQ.act.kind === 'fight' && DQ.act.id === ev.doing.fight)) { const msg = ev.doing.lost(); finish(msg, true); } });
+DQ.on && DQ.on('workcycle', o => { const ev = W.active; if (ev && ev.doing && ev.doing.count === o.kind) { ev.count += o.quantity || 1; if (ev.count >= ev.doing.need) finish(ev.doing.won()); else DQ.emit('world'); } });
+/* the clock: only time with the game open and visible counts; dt is capped so a sleeping tab adds nothing */
+DQ.worldTick = dt => { if (!DQ.S || (DQ.sim && DQ.sim.on) || DQ.forecasting) return; W.played += Math.max(0, Math.min(dt, 5000));
+  if (W.result && W.played > W.result.until) { W.result = null; DQ.emit('world'); }
+  if (W.active) { if (W.played - W.active.at > LAPSE) { const ev = W.active; if (ev.doing && ev.doing.fight) return; finish(ev.def.lapse(ev)); } return; }
+  if (W.played >= W.next) { if (!DQ.worldFire()) W.next = W.played + 5 * MIN; } };
+DQ.worldFestival = () => !!W.festival && W.played < W.festival;
+DQ.worldReset = reset;
+let last = Date.now(); DQ.on && DQ.on('ui', () => { const now = Date.now(), dt = now - last; last = now; if (typeof document !== 'undefined' && document.hidden) return; DQ.worldTick(dt); });
+})();
+
+</script>
+<script>
+/* World Life pages (Dec 2026): the Museum (Guide → Museum) and the Trial tower (Combat → Trial tower). Rules live in
+   js/museum.js and js/towers.js; this file only draws them. */
+(() => {
+const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S, { esc, ico, fmt } = Q;
+/* ---------- Museum: wings as rows of picture tiles; a finished wing shows its bonus as earned ---------- */
+const art = (e, known) => { try { if (e.mon) return Q.monSprite(D.MON[e.mon], 48, known ? '' : 'sil'); if (e.pet) return known ? (e.evolved && Q.pixelArt && Q.pixelArt.hasCreature('evolved:' + e.pet) ? Q.artImage('creature', 'evolved:' + e.pet, 48, '', e.name) : Q.petSprite(D.PET[e.pet], 48)) : `<span class="col-unk">${Q.eggImg ? Q.eggImg(e.pet, 48) : ''}</span>`; if (e.item) return `<span class="activity-item-art ${known ? '' : 'blackout'}" style="--art-size:32px">${Q.itemIco(D.ITEMS[e.item])}</span>`; } catch (x) {} return `<span class="mu-ic ${known ? '' : 'unk'}">${ico(e.ic || 'star')}</span>`; };
+UI.museumSel = null;
+UI.V.museum = () => { if (!Q.museumProgress) return ''; Q.museumScan({ quiet: true });
+  const P = Q.museumProgress(), tot = P.reduce((n, p) => n + p.got, 0), all = P.reduce((n, p) => n + p.total, 0);
+  let sel = null; for (const p of P) for (const e of p.list) if (e.key === UI.museumSel) sel = { e, p };
+  const wings = P.map(p => `<section class="mu-wing ${p.done ? 'done' : ''}"><div class="mu-head"><h3>${esc(p.wing.name)}</h3><span class="mono">${p.got} / ${p.total}</span><span class="bar"><i style="width:${p.total ? p.got / p.total * 100 : 0}%"></i></span><span class="tag ${p.done ? 'ok' : ''}" data-tip="text:Permanent bonus for completing this wing">${p.done ? '✓ ' : ''}${esc(p.wing.gives)}</span></div>
+    <div class="mu-tiles">${p.list.map(e => { const k = Q.museumHas(e.key); return `<button class="mu-t ${k ? 'on' : ''} ${sel && sel.e.key === e.key ? 'sel' : ''}" data-do="museumpick" data-a="${esc(e.key)}" aria-label="${k ? esc(e.name) : 'Not found yet'}">${art(e, k)}</button>`; }).join('')}</div></section>`).join('');
+  const card = sel ? (() => { const k = Q.museumHas(sel.e.key), when = (S().museum.got || {})[sel.e.key]; return `<aside class="panel mu-card"><span class="mu-big">${art(sel.e, k)}</span><span class="k">${esc(sel.p.wing.name)}</span><h2>${k ? esc(sel.e.name) : '???'}</h2><p>${k ? esc(sel.e.text || '') : 'Not found yet.'}</p>${k && when > 1e11 ? `<small class="dim">Added ${new Date(when).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</small>` : ''}</aside>`; })()
+    : `<aside class="panel mu-card"><span class="k">Museum</span><h2>${tot} of ${all}</h2><p>Everything you have met, hatched, found and beaten. A finished wing gives its bonus for good.</p></aside>`;
+  return `<div class="museum"><section class="panel mu-main">${wings}</section>${card}</div>`; };
+UI.DO.museumpick = a => { UI.museumSel = UI.museumSel === a ? null : a; UI.render(false); };
+/* ---------- Trial tower: the floors as a ladder, the boss and its prize at the top ---------- */
+UI.V.tower = () => { const town = S().town, T = (D.TOWERS || {})[town]; if (!T) return `<section class="panel"><h2>No tower here</h2></section>`;
+  const cleared = Q.towerFloor(town), next = Q.towerNext(town), boss = D.MON[T.floors[T.floors.length - 1]], prize = D.ITEMS[T.prize], cl = Q.combatLvl(), fighting = Q.act && Q.act.kind === 'fight' && D.MON[Q.act.id] && D.MON[Q.act.id].tower;
+  const tone = cl >= T.rec ? 'ok' : cl >= T.rec - 6 ? 'warn' : 'bad';
+  const rows = T.floors.map((id, i) => { const m = D.MON[id], done = i < cleared, cur = i === cleared, top = i === T.floors.length - 1;
+    return `<li class="tw-floor ${done ? 'done' : cur ? 'next' : 'later'} ${top ? 'top' : ''}"><span class="tw-n">${done ? '✓' : i + 1}</span><span class="tw-art">${Q.monSprite(m, 48, done || cur ? '' : 'sil')}</span><div><b>${done || cur ? esc(m.name) : '???'}</b><small>Lv ${m.cl}${top ? ' · boss' : ''}</small></div>${cur ? `<button class="btn primary" data-do="towerfight" data-a="${id}">${fighting && Q.act.id === id ? 'Fighting…' : top ? 'Challenge' : 'Climb'}</button>` : done ? `<button class="btn sm" data-do="towerfight" data-a="${id}">Again</button>` : ''}</li>`; }).reverse().join('');
+  return `<div class="tower-page"><section class="panel tw-main"><div class="phead"><div><span class="k">Trial tower · ${esc(D.TOWN[town].name)}</span><h2>${esc(T.name)}</h2></div><span class="tag ${tone}" data-tip="text:Optional. Recommended Combat ${T.rec}; yours is ${cl}.">Combat ${T.rec} · you ${cl}</span></div><ol class="tw-ladder">${rows}</ol><p class="hint">Optional · progress is kept · losing costs nothing</p></section>
+    <aside class="panel tw-side"><span class="k">At the top</span><span class="tw-boss">${Q.monSprite(boss, 96, cleared >= T.floors.length - 1 ? '' : 'sil')}</span><h3>${cleared >= T.floors.length - 1 ? esc(boss.name) : '???'}</h3>
+      <div class="tw-prize ${Q.towerDone(town) ? 'got' : ''}" data-tip="item:${T.prize}"><span class="activity-item-art" style="--art-size:48px">${Q.itemIco(prize)}</span><div><b>${esc(prize.name)}</b><small>${esc(prize.unique.text)}</small><small class="dim">${Q.towerDone(town) ? '✓ Won' : 'First victory'}</small></div></div>
+      <div class="tw-all">${Object.values(D.TOWERS).map(x => `<span class="tw-dot ${Q.towerDone(x.town) ? 'on' : Q.towerFloor(x.town) ? 'part' : ''}" data-tip="text:${esc(D.TOWN[x.town].name)}: ${Q.towerFloor(x.town)}/${x.floors.length}"></span>`).join('')}</div></aside></div>`; };
+/* ---------- the event card: a small card over the page (never a modal), choices as buttons, "Later" tucks it away ---------- */
+const WS = () => Q.worldState; let tucked = false;
+const cardHost = () => { let el = document.getElementById('worldcard'); if (!el) { el = document.createElement('div'); el.id = 'worldcard'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); } return el; };
+UI.worldCard = () => { if (typeof document === 'undefined' || !Q.S) return; const el = cardHost(), W = WS(), ev = W.active, r = W.result;
+  if (!ev && !r) { el.innerHTML = ''; el.className = ''; tucked = false; return; }
+  if (r && !ev) { el.className = 'show result'; el.innerHTML = `<div class="wc" style="--c:${r.col}"><span class="wc-ic">${ico(r.ic)}</span><div class="wc-b"><b>${esc(r.title)}</b><p>${esc(r.msg)}</p></div><button class="wc-x" data-do="worldclose" aria-label="Close">×</button></div>`; return; }
+  if (tucked || ev.doing) { const d = ev.doing; el.className = 'show pill'; el.innerHTML = `<button class="wc-pill" style="--c:${ev.def.col}" data-do="${d ? (d.fight ? 'go' : d.go ? 'go' : 'worldopen') : 'worldopen'}" data-a="${d ? (d.fight ? 'combat' : d.go || '') : ''}">${ico(ev.def.ic)}<b>${esc(ev.title)}</b>${d && d.need ? `<span class="mono">${ev.count}/${d.need}</span>` : d ? '<span>under way</span>' : '<span>waiting</span>'}</button>`; return; }
+  el.className = 'show'; el.innerHTML = `<div class="wc" style="--c:${ev.def.col}"><span class="wc-ic">${ico(ev.def.ic)}</span><div class="wc-b"><b>${esc(ev.title)}</b><p>${esc(ev.text)}</p><div class="wc-ch">${Q.worldChoices().map(c => `<button class="btn ${c.can && !c.can() ? '' : 'primary'}" data-do="worldchoose" data-a="${c.id}" ${c.can && !c.can() ? 'disabled' : ''}>${esc(c.label)}${c.sub ? `<small>${esc(c.sub)}</small>` : ''}</button>`).join('')}<button class="linkish" data-do="worldlater">Later</button></div></div></div>`; };
+UI.DO.worldchoose = a => { Q.worldChoose(a); UI.worldCard(); UI.render && UI.render(false); };
+UI.DO.worldlater = () => { tucked = true; UI.worldCard(); };
+UI.DO.worldopen = () => { tucked = false; UI.worldCard(); };
+UI.DO.worldclose = () => { WS().result = null; UI.worldCard(); };
+Q.on('world', () => { if (WS().active && !WS().active.doing && !WS().result) tucked = tucked && !!WS().active; UI.worldCard(); });
+/* ---------- damaged buildings: a row on the Village page, one Repair button each ---------- */
+const projects0 = UI.V.projects;
+if (projects0) UI.V.projects = () => { const dmg = Object.keys(S().damaged || {}).filter(id => D.PROJECTS[id] && D.PROJECTS[id].town === S().town); const h = projects0(); if (!dmg.length) return h;
+  return `<section class="panel damaged-row"><span class="k">Damaged · no bonus until repaired</span>${dmg.map(id => `<button class="btn ${S().coins >= Q.repairCost(id) ? 'primary' : ''}" data-do="repair" data-a="${id}">Repair ${esc(D.PROJECTS[id].name.replace(/^\w+ the /, 'the '))}<small>${fmt(Q.repairCost(id))} coins</small></button>`).join('')}</section>` + h; };
+UI.DO.repair = id => { Q.repair(id); UI.render(false); };
+/* ---------- welcome back: new museum entries from the time away, as one line ---------- */
+const wb0 = UI.welcomeBody;
+if (wb0) UI.welcomeBody = (sum, gap) => { const fresh = Q.museumScan ? Q.museumScan({ quiet: true }) : [], h = wb0(sum, gap); if (!fresh.length) return h;
+  const line = `<div class="wb-sec wb-museum"><span class="k">Museum</span><p>${ico('book')} ${fresh.length} new ${fresh.length === 1 ? 'entry' : 'entries'}: ${fresh.slice(0, 3).map(f => esc(f.entry.name)).join(', ')}${fresh.length > 3 ? '…' : ''}</p></div>`;
+  return h.includes('<div class="wb-sec wb-decide') ? h.replace('<div class="wb-sec wb-decide', line + '<div class="wb-sec wb-decide') : h + line; };
+/* the Moonlit Hart: its own drawing */
+const A = Q.pixelArt;
+if (A && A.CREATURE_SPECS) A.CREATURE_SPECS.ev_hart = () => { const s = A.Spr(32, 32), c = A.ramp('#e8f0ff'), dk = A.ramp('#a8b8d8'), ant = A.ramp('#f4e8c0');
+  for (const x of [8, 12, 19, 23]) { s.rect(x, 21, 2, 8, x > 15 ? dk : c); s.fix(x, 29, '#6a7890'); s.fix(x + 1, 29, '#6a7890'); }
+  s.ell(15, 18, 9, 4.6, c); s.ell(13, 16, 6, 2, A.ramp('#ffffff')); s.poly([[21, 16], [24, 8], [27, 9], [25, 18]], c); s.ell(26, 8, 3.4, 2.6, c); s.poly([[28, 8], [32, 10], [28, 11]], c); s.fix(31, 10, '#3a4a6a'); s.fix(27, 7, '#3a5a9a');
+  for (const [a, b, e, f] of [[25, 6, 23, 0], [23, 3, 20, 1], [27, 6, 29, 0], [29, 3, 32, 1], [24, 2, 25, 0]]) s.line(a, b, e, f, null, '#f4e8c0'); s.poly([[6, 16], [3, 13], [5, 18]], c);
+  for (const [x, y] of [[4, 8], [10, 5], [18, 6], [2, 22]]) s.fix(x, y, '#ffffff'); return s; };
+UI.DO.towerfight = id => { if (Q.startAct('fight', id)) { UI.taskChoice.combat = id; Q.go('combat'); } else UI.render(false); };
 })();
 
 </script>

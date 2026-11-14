@@ -17,38 +17,38 @@ prize('windcaller_bow', { name: 'Windcaller bow', ic: 'bow', col: '#bfe8ff', slo
 prize('shadow_mantle', { name: 'Shadow mantle', ic: 'body', col: '#6a5a9a', slot: 'body', req: { defence: 60 }, b: { def: 62 }, unique: U('laststand', 'Borrowed time', 'Survive one fatal blow per fight on 1 health'), flavour: 'It fits better than it should.' });
 /* town, the tower, its boss, the prize, a colour for the boss and its special */
 D.TOWERS = {
-  willowbrook: { name: 'The Old Granary', boss: ['tw_squeak', 'Old Squeak, King of Rats', '#9a8a70', 'Swarm'], prize: 'squeaks_crown' },
-  mossbarrow: { name: 'Watchtower in the Wood', boss: ['tw_greenknight', 'The Green Knight', '#4a8a4a', 'Great cleave'], prize: 'greenwood_blade' },
-  saltmere: { name: 'The Old Lighthouse', boss: ['tw_keeper', 'The Keeper of the Lamp', '#e0c860', 'Blinding beam'], prize: 'lamplight_staff' },
-  ironpeak: { name: 'Frostspire', boss: ['tw_rimebeard', 'Jarl Rimebeard', '#a8c8e0', 'Avalanche'], prize: 'rimebeards_bulwark' },
-  gloomfen: { name: 'The Sunken Belfry', boss: ['tw_abbot', 'The Drowned Abbot', '#6a9a8a', 'Last rites'], prize: 'abbots_censer' },
-  emberfall: { name: 'The Cinder Stack', boss: ['tw_ashka', 'Forge-Mother Ashka', '#e0703a', 'Quench'], prize: 'ashkas_hammer' },
+  willowbrook: { name: 'The Old Granary', boss: ['tw_squeak', 'Old Squeak, King of Rats', '#9a8a70', 'Swarm'], prize: 'squeaks_crown', up: 3 },
+  mossbarrow: { name: 'Watchtower in the Wood', boss: ['tw_greenknight', 'The Green Knight', '#4a8a4a', 'Great cleave'], prize: 'greenwood_blade', up: 5 },
+  saltmere: { name: 'The Old Lighthouse', boss: ['tw_keeper', 'The Keeper of the Lamp', '#e0c860', 'Blinding beam'], prize: 'lamplight_staff', up: 5 },
+  ironpeak: { name: 'Frostspire', boss: ['tw_rimebeard', 'Jarl Rimebeard', '#a8c8e0', 'Avalanche'], prize: 'rimebeards_bulwark', up: 10 },
+  gloomfen: { name: 'The Sunken Belfry', boss: ['tw_abbot', 'The Drowned Abbot', '#6a9a8a', 'Last rites'], prize: 'abbots_censer', up: 6 },
+  emberfall: { name: 'The Cinder Stack', boss: ['tw_ashka', 'Forge-Mother Ashka', '#e0703a', 'Quench'], prize: 'ashkas_hammer', up: 10 },
   skyreach: { name: 'Bell Tower of the Winds', boss: ['tw_bellringer', 'The Last Bellringer', '#d8d0b0', 'Great peal'], prize: 'windcaller_bow' },
-  hollow: { name: 'The Hollow Spire', boss: ['tw_shadow', 'The King’s Shadow', '#7a6ab0', 'Eclipse'], prize: 'shadow_mantle' },
+  hollow: { name: 'The Hollow Spire', boss: ['tw_shadow', 'The King’s Shadow', '#7a6ab0', 'Eclipse'], prize: 'shadow_mantle', up: 11, hp: 1.15, max: 1.02 },
 };
 D.TOWER_FLOORS = 5;
-const HP = [2.0, 2.3, 2.6, 3.0], MAX = [1.1, 1.18, 1.26, 1.34];
+const HP = [1.6, 1.9, 2.2, 2.5], MAX = [1.05, 1.1, 1.15, 1.2];
 for (const [town, T] of Object.entries(D.TOWERS)) {
   if (!D.TOWN[town]) { delete D.TOWERS[town]; continue; }
   const local = D.MONLIST.filter(m => m.town === town && !m.boss && !m.mini).sort((a, b) => a.cl - b.cl).slice(-4), boss = D.MON[D.TOWN[town].boss];
-  T.town = town; T.floors = []; T.rec = Math.min(118, boss.boss.req + 8);
+  T.town = town; T.floors = []; T.rec = Math.min(110, boss.boss.req + (T.up == null ? 8 : T.up)); /* tuned on node scripts/sim-bosses.cjs with TOWERS=1 */
   const add = (id, name, floor, base, hp, max, k, col, extra) => { const m = { id, name, town, cl: base.cl + floor * 2, hp: Math.round(base.hp * hp), max: Math.max(1, Math.round(base.max * max)), att: Math.round(base.att * k), def: Math.round(base.def * k), coins: [base.coins[0] * 3, base.coins[1] * 4], col, drops: extra.drops || [], tower: { town, floor }, mini: Object.assign({ short: name, req: 0 }, extra.mini || {}) }; D.MON[id] = m; D.MONLIST.push(m); T.floors.push(id); return m; };
   local.forEach((b, i) => add(`tw_${town}_${i + 1}`, `${b.name} of the tower`, i + 1, b, HP[i], MAX[i], 1.08 + i * .03, b.col, { art: b.id, mini: { won: `Floor ${i + 1} of ${T.name} is clear.` }, drops: [['coin_pouch', [1, 2], .5], ['treasure_chest', [1, 1], .06 + i * .02]] }).base = b.id);
   const [bid, bname, bcol, sp] = T.boss;
-  add(bid, bname, 5, boss, 1.5, 1.22, 1.12, bcol, { drops: [[T.prize, [1, 1], 0], ['treasure_chest', [1, 1], .5], ['coin_pouch', [2, 4], 1]], mini: { short: bname.replace(/^The /, 'the '), first: T.prize, special: { every: 3, mult: 1.5, name: sp }, won: `${T.name} is yours. ${D.ITEMS[T.prize].name} was waiting at the top.` } });
+  add(bid, bname, local.length + 1, boss, T.hp || 1.4, T.max || 1.15, 1.1, bcol, { drops: [[T.prize, [1, 1], 0], ['treasure_chest', [1, 1], .5], ['coin_pouch', [2, 4], 1]], mini: { short: bname.replace(/^The /, 'the '), first: T.prize, special: { every: 3, mult: 1.5, name: sp }, won: `${T.name} is yours. ${D.ITEMS[T.prize].name} was waiting at the top.` } });
   D.WEAK[bid] = { weak: [], resist: [] }; local.forEach((b, i) => { D.WEAK[`tw_${town}_${i + 1}`] = D.WEAK[b.id] || { weak: [], resist: [] }; });
   if (D.LORE) D.LORE[bid] = { note: `Waits at the top of ${T.name}. Every third blow is its ${sp.toLowerCase()}. No weakness that anyone has found.`, legend: `Nobody asked it to guard the place. Nobody has managed to ask it to stop.` };
 }
 /* ---------- rules ---------- */
 DQ.towerFloor = town => ((S().towers || {})[town]) || 0;
-DQ.towerNext = town => { const T = D.TOWERS[town]; return T && DQ.towerFloor(town) < D.TOWER_FLOORS ? D.MON[T.floors[DQ.towerFloor(town)]] : null; };
-DQ.towerDone = town => DQ.towerFloor(town) >= D.TOWER_FLOORS;
+DQ.towerNext = town => { const T = D.TOWERS[town]; return T && DQ.towerFloor(town) < T.floors.length ? D.MON[T.floors[DQ.towerFloor(town)]] : null; };
+DQ.towerDone = town => !!D.TOWERS[town] && DQ.towerFloor(town) >= D.TOWERS[town].floors.length;
 const start0 = DQ.startAct;
 DQ.startAct = (kind, id, o = {}) => { const m = kind === 'fight' && D.MON[id];
   if (m && m.tower && m.tower.floor > DQ.towerFloor(m.tower.town) + 1 && !(DQ.act && DQ.act.kind === kind && DQ.act.id === id)) { if (!o.quiet) DQ.toast(`Clear floor ${DQ.towerFloor(m.tower.town) + 1} first`, true); return false; }
   return start0(kind, id, o); };
 (DQ.killHooks = DQ.killHooks || []).push(m => { if (!m.tower) return; const T = S().towers = S().towers || {}; if (m.tower.floor > (T[m.tower.town] || 0)) { T[m.tower.town] = m.tower.floor;
-    if (DQ.journal) DQ.journal('tower', m.tower.floor >= D.TOWER_FLOORS ? `Climbed ${D.TOWERS[m.tower.town].name} and beat ${m.name}.` : `Cleared floor ${m.tower.floor} of ${D.TOWERS[m.tower.town].name}.`, 'trophy');
+    if (DQ.journal) DQ.journal('tower', m.tower.floor >= D.TOWERS[m.tower.town].floors.length ? `Climbed ${D.TOWERS[m.tower.town].name} and beat ${m.name}.` : `Cleared floor ${m.tower.floor} of ${D.TOWERS[m.tower.town].name}.`, 'trophy');
     for (const r of D.SECRET_RECIPES || []) if (r.tower && r.tower[0] === m.tower.town && r.tower[1] === m.tower.floor) DQ.learnRecipe(r.id); } });
 /* ---------- art: floors reuse the creature they grew from; each boss is its own drawing ---------- */
 const A = DQ.pixelArt;

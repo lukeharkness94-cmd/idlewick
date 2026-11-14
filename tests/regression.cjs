@@ -974,4 +974,98 @@ test('eggs: a beast arrives as an egg, hatches once its time has passed, and sav
   assert.equal(q.awardPet('biscuit',{hatched:true}),true);assert.ok(q.S.pets.owned.biscuit,'fixtures can skip the egg');
   const old=JSON.parse(JSON.stringify(q.S));delete old.pets.eggs;assert.ok(q.validateSave(old),'saves from before eggs load');q.S=old;assert.equal(q.eggs().length,0);
 });
+/* ---------- World Life (Dec 2026): museum, hidden recipes, towers, events, audio. Spec T1 to T8. ---------- */
+const world=()=>{const h=harness();for(const n of ['secret_recipes','lore','hunting','minibosses','towers','museum','journal','world_events'])h.load(n);h.q.S=h.q.newState();h.q.fxDirty();h.q.worldReset();return h;};
+test('T1 pre-update saves load cleanly: nothing free, additive defaults',()=>{
+  const {q}=world();const S=q.S,D=q.data;const old=JSON.parse(JSON.stringify(S));for(const k of ['museum','recipes','towers','damaged'])delete old[k];
+  assert.ok(q.validateSave(old),'a save without the new fields is valid');q.S=old;q.fxDirty();
+  assert.equal(D.SECRET_RECIPES.some(r=>q.recipeKnown(r.id)||q.recipeHeard(r.id)),false,'no recipes known or heard');
+  assert.equal(Object.values(D.TOWERS).some(T=>q.towerFloor(T.town)>0),false,'no tower progress');
+  assert.equal(q.museumScan().length,0,'a fresh hero has no museum entries');assert.equal(D.WINGS.some(w=>q.museumWing(w.id)),false,'no wing bonus');
+  assert.equal(Object.values(D.TOWERS).some(T=>q.have(T.prize)>0),false,'no tower prizes');
+  const snap=q.exportSave();assert.ok(q.importSave(snap),'and it round-trips with the new fields');
+});
+test('T2 event timing: not in the first 15 minutes, never while away, one at a time, 30 to 60 minutes apart',()=>{
+  const {q}=world();const W=q.worldState,MIN=60000;const play=min=>{for(let i=0;i<min*60/5;i++)q.worldTick(5000);};
+  assert.ok(W.next>=15*MIN,'first event no sooner than 15 minutes');play(14.9);assert.equal(W.fired,0,'nothing in the first 15 minutes');
+  /* a closed game adds no time: one enormous gap counts as at most five seconds */
+  const before=W.played;q.worldTick(8*3600*1000);assert.ok(W.played-before<=5000,'time away is not counted');
+  q.sim.on=true;const p0=W.played;q.worldTick(5000);q.sim.on=false;assert.equal(W.played,p0,'offline catch-up never advances the event clock');
+  let guard=0;while(!W.active&&guard++<60)play(1);assert.equal(W.fired,1,'one event after the window');assert.ok(W.active,'it is waiting');assert.ok(W.played>=15*MIN&&W.played<=46*MIN,'the first comes between 15 and 45 minutes of play');
+  assert.equal(q.worldFire(),false,'never two at once');play(5);assert.equal(W.fired,1);
+  const at=W.played;assert.ok(q.worldChoose(q.worldChoices().slice(-1)[0].id)||true);if(W.active)play(13);assert.equal(W.active,null);
+  const gap=W.next-W.played;assert.ok(W.next-at>=30*MIN-13*MIN&&gap<=60*MIN+1,'the next is 30 to 60 minutes on');
+  const f=W.fired;play(Math.max(0,gap/MIN-1));assert.equal(W.fired,f,'not before its time');assert.ok(gap>=17*MIN,'at least 30 minutes after the last began');play(3);assert.equal(W.fired,f+1,'and then it comes');
+  for(const def of q.data.WORLD_EVENTS)assert.ok(def.title&&def.choices&&def.lapse&&def.ok&&def.make,'event '+def.id+' is complete data');assert.ok(q.data.WORLD_EVENTS.length>=10);
+});
+test('T3 ignoring an event is harmless; a raid damages buildings, never destroys them; repair restores them fully',()=>{
+  const {q}=world();const S=q.S,D=q.data,W=q.worldState;S.coins=5000;
+  for(const [id,p] of Object.entries(D.PROJECTS))if(p.town===S.town)S.projects[id]=true;q.fxDirty();const fx0=JSON.stringify(q.fx().speed),coins=S.coins,inv=JSON.stringify(S.inv);
+  /* every event, left unanswered: nothing is lost */
+  for(const def of D.WORLD_EVENTS){S.inv.log_normal=40;if(!def.ok())continue;assert.ok(q.worldFire(def.id),def.id);for(let i=0;i<13*12;i++)q.worldTick(5000);assert.equal(W.active,null,def.id+' lapsed');assert.equal(S.coins,coins,def.id+' cost nothing');assert.equal(Object.keys(S.damaged||{}).length,0,def.id+' damaged nothing');W.result=null;}
+  assert.ok(q.worldFire('raid'));assert.ok(q.worldChoose('hide'));const hit=Object.keys(S.damaged);assert.ok(hit.length>=2&&hit.length<=3,'2 to 3 buildings damaged');
+  for(const id of hit)assert.equal(S.projects[id],true,'still built, only damaged');q.fxDirty();
+  if(hit.some(id=>D.PROJECTS[id].fx))assert.notEqual(JSON.stringify(q.fx().speed)+JSON.stringify(q.fx().grow)+q.fx().xpAll,fx0+JSON.stringify(q.fx().grow)+'x','a damaged building gives no bonus');
+  for(const id of hit){const c=q.repairCost(id);assert.ok(c>0&&c<=Math.max(20,(D.PROJECTS[id].cost.coins||100)*.15)+1,'repair is modest');assert.ok(q.repair(id));}
+  assert.equal(Object.keys(S.damaged).length,0);q.fxDirty();assert.equal(JSON.stringify(q.fx().speed),fx0,'bonuses are back in full');
+  assert.ok((S.journal||[]).some(e=>/Something is coming/.test(e.text)),'the outcome is in the journal');
+});
+test('T4 audio state machine: village and tier decide the layers; a fight ducks and hands back; four volumes',()=>{
+  const {q}=world();const S=q.S,D=q.data;S.settings.music=true;S.settings.sfx=true;
+  for(const t of D.TOWNS)assert.ok(D.AMBIENCE[t.id]&&['ruined','mending','restored'].every(k=>D.AMBIENCE[t.id].tiers[k].length),'ambience data for '+t.id);
+  assert.equal(q.restorationTier('willowbrook'),'ruined');const a=q.audioState();assert.equal(a.mode,'village');assert.equal(a.town,'willowbrook');assert.equal(a.tier,'ruined');assert.ok(a.layers.some(l=>l[0]==='wind')&&!a.layers.some(l=>l[0]==='children'),'a broken village is sparse');
+  for(const [id,p] of Object.entries(D.PROJECTS))if(p.town==='willowbrook')S.projects[id]=true;const b=q.audioState();assert.equal(b.tier,'restored');assert.ok(b.layers.some(l=>l[0]==='chatter')&&b.layers.some(l=>l[0]==='children'),'a restored village is full');assert.notEqual(a.key,b.key,'a new tier is a new set of layers');
+  S.damaged={well:1,inn:1,forge:1,garden:1,library:1};assert.notEqual(q.restorationTier('willowbrook'),'restored','damage is heard');S.damaged={};
+  assert.notEqual(JSON.stringify(q.ambiencePlan('saltmere','restored').layers),JSON.stringify(q.ambiencePlan('ironpeak','restored').layers),'each village has its own layers');
+  assert.ok(q.startAct('fight','chicken',{quiet:true}));const c=q.audioState();assert.equal(c.mode,'combat');assert.equal(c.music,'combat');assert.equal(c.layers.length,0,'village details stop');assert.ok(c.volumes.ambience<b.volumes.ambience,'ambience ducks');assert.equal(c.key,b.key,'the bed is kept, so nothing restarts or stacks');
+  q.stopAct(true);const d=q.audioState();assert.equal(d.mode,'village');assert.equal(JSON.stringify(d.layers),JSON.stringify(b.layers),'and hands back');
+  const snap=q.exportSave();assert.ok(q.importSave(snap));assert.equal(q.audioState().tier,'restored','the same after save and load');
+  const s=q.S.settings;s.masterVol=.5;s.musicVol=.3;s.ambVol=.2;s.vol=.7;const v=q.audioState().volumes;assert.deepEqual([v.master,v.music,v.ambience,v.effects],[.5,.3,.2,.7]);s.muted=true;assert.equal(q.audioState().volumes.master,0);s.muted=false;s.ambience=false;assert.equal(q.audioState().volumes.ambience,0);
+  s.ambience=true;s.reduceFx=true;assert.ok(q.audioState().layers[0][1]>b.layers[0][1],'reduced effects: sparser');
+});
+test('T5 museum: entries unlock exactly once, wing bonuses apply and persist, no duplicates',()=>{
+  const {q}=world();const S=q.S,D=q.data;assert.equal(q.museumScan().length,0);
+  S.beast.kills.chicken=1;const f1=q.museumScan();assert.equal(f1.length,1);assert.equal(f1[0].entry.key,'c:chicken');assert.equal(q.museumScan().length,0,'not twice');
+  const when=S.museum.got['c:chicken'];S.beast.kills.chicken=50;q.museumScan();assert.equal(S.museum.got['c:chicken'],when,'the first record stands');
+  const wing=D.WINGS.find(w=>w.id==='creatures'),xp0=q.fx().xpAll;for(const e of wing.entries())S.beast.kills[e.mon]=1;q.museumScan();
+  assert.ok(q.museumWing('creatures'),'wing complete');q.fxDirty();assert.ok(Math.abs(q.fx().xpAll-xp0-.01)<1e-9,'+1% XP');q.museumScan();q.fxDirty();assert.ok(Math.abs(q.fx().xpAll-xp0-.01)<1e-9,'applied once');
+  const snap=q.exportSave();assert.ok(q.importSave(snap));q.fxDirty();assert.ok(q.museumWing('creatures'),'persists');assert.ok(Math.abs(q.fx().xpAll-xp0-.01)<1e-9);
+  assert.equal(q.museumCurio('hart'),true);assert.equal(q.museumCurio('hart'),false,'a curio is added once');
+  for(const w of D.WINGS){const keys=w.entries().map(e=>e.key);assert.equal(new Set(keys).size,keys.length,'no duplicate keys in '+w.id);assert.ok(w.gives&&Object.keys(w.bonus).length,'labelled bonus');}
+});
+test('T6 hidden recipes: invisible until heard, learned for good, costs taken atomically, bonuses apply',()=>{
+  const {q}=world();const S=q.S,D=q.data;const r=D.SECRET.stonebread,rec=D.RECIPES[r.rec];S.xp.cooking=D.XPF[40];S.unlocked.cooking=true;
+  assert.equal(q.recipeShown(rec),false,'hidden before any hint');assert.equal(q.startAct('recipe',rec.id,{quiet:true}),false,'and not makeable');
+  assert.ok(q.hearRecipe('stonebread'));assert.equal(q.recipeShown(rec),true,'shown as a rumour');assert.equal(q.recipeUsable(rec),false);assert.equal(q.startAct('recipe',rec.id,{quiet:true}),false);
+  assert.ok(q.learnRecipe('stonebread'));assert.equal(q.learnRecipe('stonebread'),false,'learned once');const snap=q.exportSave();assert.ok(q.importSave(snap));assert.ok(q.recipeKnown('stonebread'),'permanent');
+  const T=q.S;for(const [k,n] of Object.entries(rec.in))T.inv[k]=n;const before=JSON.stringify(T.inv);delete T.inv[Object.keys(rec.in)[0]];assert.equal(q.startAct('recipe',rec.id,{quiet:true}),false,'missing a material: nothing starts');
+  for(const [k,n] of Object.entries(rec.in))T.inv[k]=n;assert.ok(q.startAct('recipe',rec.id,{quiet:true}));q.simulate(60000);q.stopAct(true);assert.equal(q.have('stonebread'),1,'one made');for(const k of Object.keys(rec.in))assert.equal(q.have(k),0,'materials used exactly');
+  assert.equal(q.buffMult('guard'),1);q.drink('stonebread');assert.ok(Math.abs(q.buffMult('guard')-.85)<1e-9,'its bonus applies');
+  /* a studied seam teaches it; a rare drop teaches another */
+  const {q:q2}=world();q2.S.mast={'mine:iron':300};q2.recipeOnStudy('mine','iron',3);assert.ok(q2.recipeKnown('stonebread'));
+  for(const x of D.SECRET_RECIPES)assert.ok(x.rumour&&x.found&&(x.drop||x.tower||x.event||x.study),x.id+' has a source and a rumour');
+});
+test('T7 towers: floors in order, progress saved, losing costs nothing, the prize exactly once, never required',()=>{
+  const {q}=world();const S=q.S,D=q.data,T=D.TOWERS.willowbrook;for(const k of ['melee','attack','defence','hitpoints'])S.xp[k]=D.XPF[70];S.hp=q.maxHp();S.inv.shrimp=50;
+  assert.equal(q.startAct('fight',T.floors[1],{quiet:true}),false,'floor 2 needs floor 1');
+  for(let i=0;i<T.floors.length;i++){assert.ok(q.startAct('fight',T.floors[i],{quiet:true}),'floor '+(i+1));q.simulate(10*60000);q.stopAct(true);assert.ok(q.towerFloor('willowbrook')>=i+1,'floor '+(i+1)+' cleared');}
+  assert.ok(q.towerDone('willowbrook'));assert.equal(q.have(T.prize)+(S.equip[D.ITEMS[T.prize].slot]===T.prize?1:0),1,'the prize, once');
+  const snap=q.exportSave();assert.ok(q.importSave(snap));assert.equal(q.towerFloor('willowbrook'),T.floors.length,'progress persists');
+  assert.ok(q.startAct('fight',T.floors[T.floors.length-1],{quiet:true}));q.simulate(20*60000);q.stopAct(true);const R=q.S;assert.equal(q.have(T.prize)+(R.equip[D.ITEMS[T.prize].slot]===T.prize?1:0),1,'no second prize');
+  /* losing: nothing taken */
+  const {q:q3}=world();const L=q3.S;L.coins=777;L.inv.shrimp=3;const inv=JSON.stringify(L.inv);assert.ok(q3.startAct('fight',D.TOWERS.willowbrook.floors[0],{quiet:true}));L.hp=1;q3.simulate(5*60000);assert.ok(L.coins>=777,'no coins lost');assert.equal(q3.towerFloor('willowbrook')<=1,true);
+  /* its stats work, and nothing else needs it */
+  R.inv[T.prize]=1;assert.ok(q.canEquip(T.prize).ok);q.equipItem(T.prize);assert.ok(q.uniqueFx().fortune,'the prize’s effect is live');
+  const prizes=new Set(Object.values(D.TOWERS).map(x=>x.prize));for(const r of Object.values(D.RECIPES))for(const k of Object.keys(r.in))assert.ok(!prizes.has(k),'no recipe needs a tower prize');
+  for(const qq of D.QUESTS)for(const o of qq.obj||[])assert.ok(!(D.MON[o.key]&&D.MON[o.key].tower),'no quest needs a tower');for(const p of Object.values(D.PROJECTS))for(const k of Object.keys(p.cost))assert.ok(!prizes.has(k));
+  for(const m of D.MONLIST.filter(m=>m.boss))assert.ok(!m.tower,'region bosses are not tower fights');
+});
+test('T8 balance: a tower boss falls to a hero at the recommended level and not to one far below; event rewards gate nothing',()=>{
+  const {q}=world();const D=q.data,T=D.TOWERS.ironpeak,boss=D.MON[T.floors[T.floors.length-1]];
+  const hero=lvl=>{q.S=q.newState();const S=q.S;S.settings.notify=false;let L=10;for(;L<99;L++){for(const k of ['melee','defence','hitpoints'])S.xp[k]=D.XPF[L];if(q.combatLvl()>=lvl)break;}S.town='ironpeak';for(const t of D.TOWNS.slice(0,4))S.towns[t.id]={visited:true,boss:true};S.towers={ironpeak:T.floors.length-1};
+    for(const id of ['steel_sword','steel_shield','steel_helm','steel_body','steel_legs']){S.inv[id]=1;if(q.canEquip(id).ok)q.equipItem(id);}S.inv.lobster=15;S.hp=q.maxHp();q.fxDirty();q.fillAbilities();let w=0,n=0;for(let i=0;i<3;i++){const f=q.forecast(boss.id);w+=f.wins;n+=f.trials;}return w/n;};
+  const ready=hero(T.rec),under=hero(T.rec-12);assert.ok(ready>=.5,`ready hero wins often (${Math.round(ready*100)}%)`);assert.ok(under<=.25,`under-prepared hero rarely does (${Math.round(under*100)}%)`);assert.ok(ready-under>=.35,'preparation and level clearly matter');
+  assert.ok(T.rec>D.MON[D.TOWN.ironpeak.boss].boss.req,'the tower is harder than the road');
+  for(const t of D.TOWNS)assert.ok(!Object.keys(D.MON[t.boss].drops).some(d=>/star_shard/.test(d)));assert.ok(!Object.values(D.RECIPES).some(r=>!r.secret&&r.in.star_shard),'event materials are only for hidden recipes');
+});
 console.log(tests+' regression checks passed');

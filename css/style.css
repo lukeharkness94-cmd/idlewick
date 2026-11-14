@@ -3618,3 +3618,41 @@ html.lw-1600 .guide-book{grid-template-columns:200px minmax(0,1fr) 340px}
 .beast-journey li.on .bj-ic{border-color:var(--brass)}
 .bj-ic svg,.bj-ic img{width:16px;height:16px}
 .beast-journey small{font-size:13px;text-align:center;line-height:1.2}
+
+/* ---------- World Life: Museum and Trial tower (js/world_ui.js) ---------- */
+.museum,.tower-page{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;align-items:start;height:calc(var(--vh100,100vh) - 190px);min-height:400px}
+.museum>.panel,.tower-page>.panel{margin:0;max-height:100%;overflow:auto}
+.mu-wing{padding:6px 0 14px}.mu-wing+.mu-wing{border-top:1px solid var(--line);padding-top:12px}
+.mu-head{display:grid;grid-template-columns:auto auto minmax(60px,1fr) auto;gap:10px;align-items:center;margin-bottom:8px}
+.mu-head h3{margin:0}.mu-head .bar{height:5px}.mu-head .bar i{background:var(--brass)}.mu-head .mono{font-size:14px;color:var(--mute)}
+.mu-tiles{display:flex;flex-wrap:wrap;gap:6px}
+.mu-t{display:grid;place-items:center;width:60px;height:60px;border:1px dashed var(--line);border-radius:8px;background:none;cursor:pointer;padding:0}
+.mu-t.on{border-style:solid;background:var(--panel2)}.mu-t.sel{border-color:var(--brass);box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 45%,transparent)}
+.mu-t:not(.on) img,.mu-t:not(.on) .item-art{filter:brightness(0) opacity(.45)}
+.mu-ic svg,.mu-ic img{width:28px;height:28px}.mu-ic.unk{opacity:.35}
+.mu-card{display:grid;gap:6px;justify-items:start}.mu-big{display:grid;place-items:center;width:104px;height:104px}.mu-big img{width:96px;height:96px}.mu-card h2{margin:0}.mu-card p{margin:0}
+.tw-ladder{list-style:none;margin:10px 0;padding:0;display:grid;gap:6px}
+.tw-floor{display:grid;grid-template-columns:30px 56px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.tw-floor.later{opacity:.6;border-style:dashed;background:none}.tw-floor.next{border-color:var(--brass)}.tw-floor.top{background:color-mix(in srgb,var(--brass) 9%,transparent)}
+.tw-n{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;border:1px solid var(--line);font:600 14px var(--f-ui)}.tw-floor.done .tw-n{background:var(--brass);border-color:var(--brass);color:#2a1c08}
+.tw-art{display:grid;place-items:center;height:52px}.tw-floor b{display:block;font:500 16px var(--f-ui)}.tw-floor small{font-size:14px;color:var(--mute)}
+.tw-side{display:grid;gap:8px;justify-items:center;text-align:center}.tw-side h3{margin:0}.tw-boss{display:grid;place-items:center;height:104px}
+.tw-prize{display:grid;grid-template-columns:56px minmax(0,1fr);gap:10px;align-items:center;text-align:left;padding:10px;border:1px solid var(--line);border-radius:10px;width:100%}.tw-prize.got{border-color:var(--brass)}
+.tw-prize b{display:block}.tw-prize small{display:block;font-size:14px}
+.tw-all{display:flex;gap:5px;margin-top:6px}.tw-dot{width:10px;height:10px;border-radius:50%;border:1px solid var(--line)}.tw-dot.part{background:color-mix(in srgb,var(--brass) 45%,transparent)}.tw-dot.on{background:var(--brass);border-color:var(--brass)}
+@media (max-width:860px){.museum,.tower-page{display:flex;flex-direction:column;height:auto}.museum>.panel,.tower-page>.panel{max-height:none;width:100%}.mu-card,.tw-side{order:-1}.mu-t{width:52px;height:52px}}
+
+/* ---------- World events: a card over the page, bottom left; never a modal ---------- */
+#worldcard{position:fixed;left:calc(196px + 16px);bottom:18px;z-index:380;max-width:440px;pointer-events:none}
+#worldcard.show{pointer-events:auto}
+.wc{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;padding:14px 16px;border:1px solid var(--c,var(--brass));border-radius:12px;background:var(--panel);box-shadow:0 10px 30px rgba(0,0,0,.45);animation:wc-in .35s ease-out}
+@keyframes wc-in{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.wc{animation:none}} html.calm .wc{animation:none}
+.wc-ic{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:color-mix(in srgb,var(--c) 22%,transparent)}.wc-ic svg,.wc-ic img{width:26px;height:26px}
+.wc-b b{font:600 17px var(--f-display)}.wc-b p{margin:4px 0 10px}
+.wc-ch{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.wc-ch .btn{display:grid;text-align:left}.wc-ch .btn small{font-size:13px;opacity:.85}
+.wc-x{background:none;border:0;color:inherit;font-size:22px;cursor:pointer;align-self:start}
+.wc-pill{display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid var(--c,var(--brass));border-radius:999px;background:var(--panel);color:inherit;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4)}.wc-pill svg,.wc-pill img{width:18px;height:18px}.wc-pill span{font-size:14px;color:var(--mute)}
+.damaged-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px;border-color:#e5b04a}.damaged-row .btn{display:grid;text-align:left}.damaged-row .btn small{font-size:13px}
+.wb-museum p{margin:4px 0 0}
+@media (max-width:860px){#worldcard{left:10px;right:10px;bottom:84px;max-width:none}}
