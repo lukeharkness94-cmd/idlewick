@@ -37,7 +37,7 @@ function showTitle() {
 function create() {
   const look = { skin: D.LOOKS.skin[0], hair: D.LOOKS.hair[1], tunic: D.LOOKS.tunic[0], face: 'bright' }, keep = DQ.S.settings;
   const previous = DQ.S;
-  DQ.S = DQ.newState('', look); DQ.S.settings = keep; DQ.S.journal = [{ t: Date.now(), kind: 'begin', icon: 'candle', town: 'willowbrook', text: 'A new hero arrives in Willowbrook with an empty pack and a long road ahead.' }]; DQ.applyTheme();
+  DQ.S = DQ.newState('', look); DQ.S.settings = keep; DQ.S.journal = [{ t: Date.now(), kind: 'begin', icon: 'candle', town: 'willowbrook', text: 'You come home to Willowbrook with an empty pack and Wren’s letter in your pocket.' }]; DQ.applyTheme();
   /* faces: three distinct pixel designs, shown as small portraits */
   const faceRow = () => DQ.HERO_FACES && DQ.pixelArt ? `<div><span class="k">Face</span><div class="sws faces">${DQ.HERO_FACES.map(f => `<button class="swatch face-swatch ${look.face === f ? 'on' : ''}" data-k="face" data-c="${f}" aria-label="Face: ${f}"><img class="pxa" src="${DQ.heroBustUrl(Object.assign({}, look, { face: f }))}" width="32" height="32" alt=""></button>`).join('')}</div></div>` : '';
   const sw = (k) => D.LOOKS[k].map((c, i) => `<button class="swatch ${look[k] === c ? 'on' : ''}" data-k="${k}" data-c="${c}" style="background:${c}" aria-label="${k} ${i + 1}"></button>`).join('');
@@ -69,6 +69,8 @@ function start(isNew) {
     setTimeout(() => { const q = D.QUESTS.filter(x => DQ.questState(x) === 'new'); q.forEach(x => S.seen['q:' + x.id] = 1); }, 100);
   } else DQ.firstRun = false;
   DQ.save();
+  /* a new hero hears why they are here (js/intro.js) */
+  if (isNew && DQ.playIntro && DQ.introWanted && DQ.introWanted()) DQ.playIntro();
 }
 
 function ready() { DQ.injectSprite(); DQ.pixelInit(); DQ.fxInit(); showTitle(); }
