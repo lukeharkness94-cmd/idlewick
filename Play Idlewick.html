@@ -5374,6 +5374,56 @@ for (const v of D.VOYAGES) unl('sailing', v.lvl, `Voyage to ${v.name}`);
 
 </script>
 <script>
+/* Hidden recipes (Dec 2026, World Life). Armour and food that no shop sells and no ordinary loot table holds. A recipe
+   is found (a rare drop, an event, a tower floor, a villager, a seam of ore) and then known for good: S.recipes.known.
+   Before that it is invisible, unless you have heard of it (S.recipes.heard): then the crafting menu shows "???" and
+   the rumour. Everything is data: add a row to D.SECRET_RECIPES and, if it should be findable, a source. */
+(() => {
+const DQ = window.DQ, D = DQ.data, S = () => DQ.S;
+const gear = (id, name, ic, col, slot, req, b, unique, flavour, val) => { D.ITEMS[id] = { id, name, ic, col, val, type: 'gear', slot, req, b, unique, flavour, rare: 1, secret: 1 }; };
+const meal = (id, name, col, val, drink) => { D.ITEMS[id] = { id, name, ic: 'bread', col, val, type: 'potion', drink, secret: 1 }; };
+gear('thornweave_vest', 'Thornweave vest', 'body', '#7a9a4a', 'body', { defence: 20 }, { def: 14, rng: 4 }, { key: 'thorns', name: 'Thorns', text: 'Reflects 35% of damage taken' }, 'Bramble stitched into boiled hide. It bites back.', 900);
+gear('tidewalker_greaves', 'Tidewalker greaves', 'legs', '#5a9ab8', 'legs', { defence: 25 }, { def: 15 }, { key: 'hide', name: 'Thick hide', text: 'Normal attacks: −15% damage taken' }, 'Sharkskin over steel, cut for wading.', 1600);
+gear('stargazer_hood', 'Stargazer’s hood', 'helm', '#b8a8f0', 'head', { defence: 35 }, { def: 12, mag: 10 }, { key: 'swift', name: 'Gale', text: '+10% attack speed' }, 'Lined with something that fell out of the sky.', 4200);
+meal('hunters_feast', 'Hunter’s feast', '#c86a3a', 260, { buff: 'boss', mult: 1.2, mins: 10, name: 'Feast', text: '+20% damage to bosses for 10 minutes' });
+meal('stonebread', 'Stonebread', '#a89a80', 180, { buff: 'guard', mult: .85, mins: 15, name: 'Stonebread', text: '−15% damage taken for 15 minutes' });
+meal('lantern_tea', 'Lantern tea', '#e8c860', 140, { buff: 'slow', mult: .9, mins: 20, name: 'Lantern tea', text: '+10% task speed for 20 minutes' });
+D.ITEMS.star_shard = { id: 'star_shard', name: 'Star shard', ic: 'gem', col: '#cfc4ff', val: 300, type: 'resource', sub: 'From a fallen star. Stargazer’s hood needs three.' };
+/* id, skill, tab, level, xp, materials, where it is found (shown once known), the rumour (shown as ???) */
+D.SECRET_RECIPES = [
+  { id: 'thornweave_vest', skill: 'crafting', tab: 'Armour', lvl: 28, xp: 180, in: { leather: 6, log_oak: 4, wolf_pelt: 2 }, found: 'A scrap of pattern, dropped by a thimblefox', rumour: 'The foxes of Mossbarrow have been at somebody’s sewing.', drop: ['thimblefox', 1 / 60] },
+  { id: 'tidewalker_greaves', skill: 'smithing', tab: 'Armour', lvl: 34, xp: 260, in: { bar_steel: 4, leather: 3 }, found: 'Chalked on a wall, three floors up the Saltmere tower', rumour: 'Somebody climbed the Saltmere tower in the wet and came down dry.', tower: ['saltmere', 3] },
+  { id: 'stargazer_hood', skill: 'crafting', tab: 'Armour', lvl: 45, xp: 420, in: { cloth: 4, star_shard: 3, sapphire: 1 }, found: 'It came to you while the star was still warm', rumour: 'They say starlight can be sewn, if you catch it falling.', event: 'star' },
+  { id: 'hunters_feast', skill: 'cooking', tab: 'Farmhouse', lvl: 30, xp: 150, in: { salmon: 2, crop_onion: 2, crop_potato: 2 }, found: 'A traveller’s thanks, written on the back of a map', rumour: 'A hunter’s supper that makes big things fall over faster.', event: 'traveller' },
+  { id: 'stonebread', skill: 'cooking', tab: 'Farmhouse', lvl: 22, xp: 110, in: { bread: 2, ore_coal: 1 }, found: 'A miner’s note, wedged in an iron seam', rumour: 'Ironpeak miners bake something you could build a wall with.', study: ['mine', 'iron', 3] },
+  { id: 'lantern_tea', skill: 'cooking', tab: 'Farmhouse', lvl: 12, xp: 60, in: { crop_cabbage: 2, feather: 1 }, found: 'Traded for a story with a travelling merchant', rumour: 'The merchants drink something that keeps them walking all night.', event: 'merchant' },
+].filter(r => D.ITEMS[r.id] && Object.keys(r.in).every(k => D.ITEMS[k]));
+for (const r of D.SECRET_RECIPES) {
+  const rec = { id: 'secret_' + r.id, skill: r.skill, tab: r.tab, name: D.ITEMS[r.id].name, lvl: r.lvl, xp: r.xp, t: 3200, in: r.in, out: { [r.id]: 1 }, ev: r.skill === 'cooking' ? 'cook' : r.skill === 'smithing' ? 'smith' : 'craft', secret: r.id };
+  D.RECIPES[rec.id] = rec; (D.RLIST[r.skill] = D.RLIST[r.skill] || []).push(rec); r.rec = rec.id;
+}
+D.SECRET = Object.fromEntries(D.SECRET_RECIPES.map(r => [r.id, r]));
+const book = () => { const st = S(); if (!st.recipes || typeof st.recipes !== 'object') st.recipes = { known: {}, heard: {} }; st.recipes.known = st.recipes.known || {}; st.recipes.heard = st.recipes.heard || {}; return st.recipes; };
+DQ.recipeKnown = id => !!book().known[id];
+DQ.recipeHeard = id => !!book().heard[id] || DQ.recipeKnown(id);
+/* is this ordinary recipe row usable or visible? (ordinary recipes: always) */
+DQ.recipeShown = r => !r.secret || DQ.recipeHeard(r.secret);
+DQ.recipeUsable = r => !r.secret || DQ.recipeKnown(r.secret);
+DQ.hearRecipe = id => { const r = D.SECRET[id]; if (!r || DQ.recipeHeard(id) || DQ.forecasting) return false; book().heard[id] = Date.now();
+  if (!(DQ.sim && DQ.sim.on)) DQ.notify({ kind: 'info', key: 'rumour:' + id, icon: 'book', col: '#b8a8f0', title: 'A rumour', text: r.rumour, sound: false, ttl: 8000 });
+  if (DQ.journal) DQ.journal('recipe', `Heard a rumour: ${r.rumour}`, 'book'); return true; };
+DQ.learnRecipe = (id, quiet) => { const r = D.SECRET[id]; if (!r || DQ.recipeKnown(id) || DQ.forecasting) return false; book().known[id] = Date.now(); book().heard[id] = book().heard[id] || Date.now();
+  const it = D.ITEMS[id];
+  if (!quiet && !(DQ.sim && DQ.sim.on)) DQ.notify({ kind: 'unlock', key: 'recipe:' + id, icon: 'book', col: it.col, title: `Recipe found: ${it.name}`, text: `${r.found}. Make it in ${D.SK[r.skill].name}.`, sound: 'gem', burst: true, ttl: 12000 });
+  if (DQ.journal) DQ.journal('recipe', `Recipe found: ${it.name}. ${r.found}.`, 'book'); DQ.emit && DQ.emit('recipes'); return true; };
+/* the sources that are plain rules: a creature's rare drop (with a rumour after ten defeats), and a studied seam */
+DQ.recipeOnKill = m => { for (const r of D.SECRET_RECIPES) { if (!r.drop || r.drop[0] !== m.id || DQ.recipeKnown(r.id)) continue; if ((S().beast.kills[m.id] || 0) >= 10) DQ.hearRecipe(r.id); if (DQ.chance(r.drop[1])) DQ.learnRecipe(r.id); } };
+DQ.recipeOnStudy = (kind, id, stars) => { for (const r of D.SECRET_RECIPES) { if (!r.study || r.study[0] !== kind || r.study[1] !== id) continue; if (stars >= 1) DQ.hearRecipe(r.id); if (stars >= r.study[2]) DQ.learnRecipe(r.id); } };
+DQ.recipeFromEvent = key => { const r = D.SECRET_RECIPES.find(x => x.event === key && !DQ.recipeKnown(x.id)); return r ? r.id : null; };
+})();
+
+</script>
+<script>
 /* Beast bonds: additive content. Existing companion IDs, bonuses and tricks remain valid. */
 (() => {
 const D = window.DQ.data;
@@ -10460,6 +10510,7 @@ DQ.startAct = (kind, id, o = {}) => {
   if (kind === 'recipe') {
     const r = D.RECIPES[id]; if (!DQ.skillUnlocked(r.skill)) return bad(`${D.SK[r.skill].name} is not unlocked yet`);
     if (!DQ.recipeLvlOk(r)) return bad(`Requires ${D.SK[r.skill].name} ${r.lvl}`);
+    if (DQ.recipeUsable && !DQ.recipeUsable(r)) return bad('You have not found this recipe');
     if (!DQ.canMake(r)) return bad('You are missing materials');
   } else if (kind === 'alch') {
     if (!DQ.skillUnlocked('magic') || DQ.lvl('magic') < D.ALCH[0].lvl) return bad(`Alchemy needs Magic ${D.ALCH[0].lvl}`);
@@ -10662,7 +10713,7 @@ function combatRound() {
     /* bosses are counter checks, not locks: a weakness helps a lot and a resistance hurts, but less than on ordinary
        monsters, so preparation matters without guaranteeing the fight (scripts/sim-bosses.cjs COUNTER=1) */
     let mult = weak ? DQ.typeMult(m, 'weak') : resist ? DQ.typeMult(m, 'resist') : 1; tag = weak ? 'weak' : resist ? 'resist' : '';
-    let acc = ps.acc * W.acc * (weak ? 1.1 : 1), max = ps.max * W.dmg * mult * (1 + DQ.beastBonus(m.id)), sure = false;
+    let acc = ps.acc * W.acc * (weak ? 1.1 : 1), max = ps.max * W.dmg * mult * (1 + DQ.beastBonus(m.id)) * (m.boss || m.mini ? DQ.buffMult('boss') : 1), sure = false;
     if (A('aimed') && f.pa % 3 === 0) { sure = true; max *= 1.5; }
     if (A('power') && f.pa % 4 === 0) { max *= 2; tag = 'power'; }
     if (A('execute') && f.hp < mhp * .3) max *= 1.5;
@@ -10731,6 +10782,7 @@ function monsterAttack(f, m, ps, sty) {
       if (m.id === 'morwenna') f.hex = 4;
     } else { if (A('kite')) taken *= .7; if (A('fortress')) taken *= .85; if (U.hide) { taken *= .85; fxHit('hide'); } }
     if (f.curse) { taken *= 1 - .05 * f.curse; fxHit('cursed'); }
+    taken *= DQ.buffMult('guard');
     taken = Math.max(1, Math.round(taken * (1 - ps.red) * ({ careful: .85, steady: 1, push: 1.25 }[(DQ.act && DQ.act.pace) || 'steady'])));
   }
   if (f.hex > 0) { f.hex--; taken += Math.max(1, Math.round(m.max * .25)); }
@@ -10794,6 +10846,8 @@ function kill(m) {
   if (!DQ.sim.on) { DQ.log(`You defeat ${m.boss ? '' : 'the '}${m.name}.${loot.length ? ' ' + loot.join(', ') : ''}`, 'good'); DQ.floatAt(document.getElementById('av-foe'), loot.slice(0, 2).join(' · ') || 'Defeated', '#f3d58a'); DQ.emit('slain'); }
   else DQ.sim.kills++;
   DQ.qev('kill', m.id); DQ.recordKill(m, got);
+  /* World Life hooks (hidden recipes, towers, the museum, events): never in forecasts */
+  if (!DQ.forecasting) { for (const h of DQ.killHooks || []) h(m); if (DQ.recipeOnKill) DQ.recipeOnKill(m); if (DQ.museumScan && (m.boss || m.mini || (S().beast.kills[m.id] || 0) <= 1)) DQ.museumScan(); }
   if (m.boss) {
     DQ.qev('boss', m.id); DQ.petRoll('boss', m.id);
     if (first) {
@@ -11031,9 +11085,10 @@ DQ.fx = () => {
       if (k.startsWith('xp_')) f.xp[k.slice(3)] = (f.xp[k.slice(3)] || 0) + v; else if (k.startsWith('speed_')) f.speed[k.slice(6)] = (f.speed[k.slice(6)] || 0) + v; else f[k] += v; });
   });
   if (DQ.techFx) DQ.techFx(f);
-  if (S().projects && S().projects.well) f.regen += .1;
-  if (S().projects && S().projects.inn) f.heal += .05;
-  for(const [id,p] of Object.entries(D.PROJECTS||{}))if(S().projects[id]&&p.fx)for(const [key,value] of Object.entries(p.fx)){
+  /* a damaged building (js/world_events.js) gives nothing until it is repaired */
+  if (S().projects && S().projects.well && !(S().damaged || {}).well) f.regen += .1;
+  if (S().projects && S().projects.inn && !(S().damaged || {}).inn) f.heal += .05;
+  for(const [id,p] of Object.entries(D.PROJECTS||{}))if(S().projects[id]&&p.fx&&!(S().damaged||{})[id])for(const [key,value] of Object.entries(p.fx)){
     if(key.startsWith('speed_'))f.speed[key.slice(6)]=(f.speed[key.slice(6)]||0)+value; else if(key.startsWith('xp_'))f.xp[key.slice(3)]=(f.xp[key.slice(3)]||0)+value; else f[key]=(f[key]||0)+value;
   }
   f.dmg += f.trophy * Object.values(S().towns).filter(t => t.boss).length;
@@ -11926,6 +11981,60 @@ DQ.durFor = (kind, id) => { const d = dur0(kind, id), s = DQ.mastSpeed(kind, id)
 
 </script>
 <script>
+/* The museum (Dec 2026, World Life): the field guide's collection hub. Five wings, each a list of things met, tamed,
+   found or beaten. An entry is recorded once, the first time its condition is true (S.museum.got[key] = when), so it
+   can never unlock twice; a finished wing gives one small permanent bonus (S.museum.wings). Everything is data:
+   D.WINGS. Entries are read from what the save already knows, so nothing here can be granted for free. */
+(() => {
+const DQ = window.DQ, D = DQ.data, S = () => DQ.S;
+const lore = id => { const L = (D.LORE || {})[id]; return L ? (L.note || '').split('. ')[0] + '.' : ''; };
+const held = id => DQ.have(id) > 0 || ((S().bank || {})[id] || 0) > 0;
+D.WINGS = [
+  { id: 'creatures', name: 'Hall of Creatures', bonus: { xpAll: .01 }, gives: '+1% XP',
+    entries: () => D.MONLIST.filter(m => !m.boss && !m.mini).map(m => ({ key: 'c:' + m.id, name: m.name, text: lore(m.id), mon: m.id, have: () => (S().beast.kills[m.id] || 0) > 0 })) },
+  { id: 'beasts', name: 'The Menagerie', bonus: { coin: .02 }, gives: '+2% coins',
+    entries: () => (DQ.collectiblePets ? DQ.collectiblePets() : D.PETS).flatMap(p => [{ key: 'b:' + p.id, name: p.name, text: p.text, pet: p.id, have: () => !!S().pets.owned[p.id] }]
+      .concat((D.BEAST_SPECIES || {})[p.id] ? [{ key: 'e:' + p.id, name: D.BEAST_SPECIES[p.id].evolution, text: `${p.name}, at Bond 10.`, pet: p.id, evolved: true, have: () => !!(S().pets.owned[p.id] && S().pets.owned[p.id].evolved) }] : [])) },
+  { id: 'relics', name: 'Relic Room', bonus: { find: .02 }, gives: '+2% lucky finds',
+    entries: () => Object.values(D.ITEMS).filter(it => it.type === 'relic').map(it => ({ key: 'r:' + it.id, name: it.name, text: it.desc || '', item: it.id, have: () => held(it.id) || Object.entries(D.PROJECTS || {}).some(([pid, p]) => p.relic === it.id && S().projects[pid]) })) },
+  { id: 'trophies', name: 'Trophy Hall', bonus: { dmg: .01 }, gives: '+1% damage',
+    entries: () => D.MONLIST.filter(m => m.boss || m.mini).sort((a, b) => a.cl - b.cl).map(m => ({ key: 't:' + m.id, name: m.name, text: (m.mini && m.mini.won) || lore(m.id), mon: m.id, tower: !!m.tower, have: () => (S().beast.kills[m.id] || 0) > 0 })) },
+  { id: 'curios', name: 'Curiosities', bonus: { speedAll: .01 }, gives: '+1% task speed',
+    entries: () => (D.CURIOS || []).map(c => ({ key: 'x:' + c.id, name: c.name, text: c.text, ic: c.ic, have: () => !!((S().museum || {}).curios || {})[c.id] })) },
+];
+/* things that only an event or a secret can add (js/world_events.js, js/secret_recipes.js) */
+D.CURIOS = [
+  { id: 'hart', name: 'The Moonlit Hart', ic: 'paw', text: 'White as frost, and gone before you can blink. You were quicker, once.' },
+  { id: 'star', name: 'A fallen star', ic: 'gem', text: 'Still warm. It hums if you hold it to your ear.' },
+  { id: 'shrine', name: 'The wayside shrine', ic: 'star', text: 'It answered. Nobody else will believe you.' },
+  { id: 'festival', name: 'Festival ribbon', ic: 'star', text: 'Everybody danced. Even the smith.' },
+  { id: 'bard', name: 'The bard’s song', ic: 'sound', text: 'You still catch yourself humming it.' },
+  { id: 'recipes', name: 'A cook’s secret', ic: 'book', text: 'The first recipe that nobody sold you.' },
+];
+const M = () => { const st = S(); if (!st.museum || typeof st.museum !== 'object') st.museum = { got: {}, wings: {}, curios: {} }; st.museum.got = st.museum.got || {}; st.museum.wings = st.museum.wings || {}; st.museum.curios = st.museum.curios || {}; return st.museum; };
+DQ.museumCurio = id => { if (DQ.forecasting || !(D.CURIOS || []).some(c => c.id === id)) return false; if (M().curios[id]) return false; M().curios[id] = Date.now(); DQ.museumScan(); return true; };
+DQ.museumHas = key => !!M().got[key];
+DQ.museumWing = id => !!M().wings[id];
+/* record whatever has newly become true. quiet: say nothing (first run on an old save, or catching up after time away) */
+DQ.museumScan = (o = {}) => {
+  if (DQ.forecasting || !DQ.S || !DQ.S.beast) return []; const first = !S().museum, mu = M(), fresh = [], quiet = o.quiet || first || (DQ.sim && DQ.sim.on);
+  for (const w of D.WINGS) { const list = w.entries(); let all = list.length > 0;
+    for (const e of list) { if (mu.got[e.key]) continue; if (e.have()) { mu.got[e.key] = Date.now(); fresh.push({ wing: w, entry: e }); } else all = false; }
+    if (all && !mu.wings[w.id]) { mu.wings[w.id] = Date.now(); if (DQ.fxDirty) DQ.fxDirty();
+      if (!quiet) DQ.notify({ kind: 'unlock', key: 'wing:' + w.id, icon: 'trophy', col: '#f3d58a', title: `${w.name} complete`, text: `${w.gives}, for good.`, sound: 'gem', burst: true, ttl: 12000 });
+      if (DQ.journal) DQ.journal('museum', `${w.name} complete: ${w.gives}.`, 'trophy'); } }
+  if (fresh.length && !quiet) { const f = fresh[0]; DQ.notify({ kind: 'info', key: 'museum', icon: 'book', col: '#f3d58a', title: `Museum: ${f.entry.name}`, text: fresh.length > 1 ? `and ${fresh.length - 1} more, in the ${f.wing.name}.` : `New in the ${f.wing.name}.`, sound: false, ttl: 6000, action: { label: 'See it', fn: () => DQ.go('museum') } }); }
+  if (fresh.length && DQ.fxDirty) DQ.fxDirty();
+  return fresh;
+};
+/* wing bonuses */
+const fx0 = DQ.fx;
+DQ.fx = () => { const f = fx0(); if (!f._museum) { f._museum = true; const got = (S().museum || {}).wings || {}; for (const w of D.WINGS) if (got[w.id]) for (const [k, v] of Object.entries(w.bonus)) f[k] = (f[k] || 0) + v; } return f; };
+DQ.museumProgress = () => D.WINGS.map(w => { const list = w.entries(); return { wing: w, list, got: list.filter(e => DQ.museumHas(e.key)).length, total: list.length, done: DQ.museumWing(w.id) }; });
+})();
+
+</script>
+<script>
 /* Idlewick: UI core. Navigation, HUD, binders, tooltips, portrait, overview, skill pages, combat. */
 (() => {
 const DQ = window.DQ, D = DQ.data, { $, $$, ico, fmt, fmtK, esc, clamp } = DQ;
@@ -12163,7 +12272,7 @@ UI.V.recipes = sk => {
   /* Categories by material, then by type (Nov 2026): Smithing groups by metal (weapons / armour), Crafting by what you
      make (armour by hide, wood by bows / staves / shields). Each chip says how many are ready, or the level it opens at. */
   /* every list in level order, so new additions never trail at the end */
-  const list=D.RLIST[sk].slice().sort((a,b)=>a.lvl-b.lvl||a.name.localeCompare(b.name)),grp=r=>DQ.recipeGroup(r),order=['Fish','Fish suppers','Farmhouse','Smelting','Bronze','Iron','Steel','Mithril','Adamant','Rune','Astral','Basics','Armour','Wood','Arrows','Jewellery','Charms','Tools'],groups=[...new Set(list.map(r=>grp(r).g))].sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
+  const list=D.RLIST[sk].filter(r=>!DQ.recipeShown||DQ.recipeShown(r)).sort((a,b)=>a.lvl-b.lvl||a.name.localeCompare(b.name)),grp=r=>DQ.recipeGroup(r),order=['Fish','Fish suppers','Farmhouse','Smelting','Bronze','Iron','Steel','Mithril','Adamant','Rune','Astral','Basics','Armour','Wood','Arrows','Jewellery','Charms','Tools'],groups=[...new Set(list.map(r=>grp(r).g))].sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
   const g=UI.tab[sk]=groups.includes(UI.tab[sk])?UI.tab[sk]:(groups.find(x=>list.some(r=>grp(r).g===x&&DQ.recipeLvlOk(r)&&DQ.canMake(r)))||groups[0]);
   const subs=[...new Set(list.filter(r=>grp(r).g===g).map(r=>grp(r).s).filter(Boolean))],sub=UI.tab[sk+'sub']=subs.includes(UI.tab[sk+'sub'])?UI.tab[sk+'sub']:subs[0],only=UI.tab[sk+'ready'];
   const inG=(r,x,y)=>grp(r).g===x&&(!y||grp(r).s===y),chip=(x,y,on,act,b)=>{const rs=list.filter(r=>inG(r,x,y)),ready=rs.filter(r=>DQ.recipeLvlOk(r)&&DQ.canMake(r)).length,min=Math.min(...rs.map(r=>r.lvl)),locked=DQ.lvl(sk)<min&&!rs.some(r=>DQ.recipeLvlOk(r));
@@ -12171,7 +12280,7 @@ UI.V.recipes = sk => {
     return `<button class="chip rc-chip ${on?'on':''} ${locked?'locked':''}" data-do="tab" data-a="${act}" data-b="${esc(b)}" aria-pressed="${on}">${art}${locked?ico('lock'):''}<span>${esc(y||x)}</span><small>${locked?`Lv ${min}`:ready?`${ready} ready`:''}</small></button>`;};
   UI.taskToolbar[sk]=`<div class="recipe-categories" role="group" aria-label="Category">${groups.map(x=>chip(x,null,x===g,sk,x)).join('')}<span class="filter-sep" aria-hidden="true"></span><button class="filter-toggle ${only?'on':''}" role="switch" aria-checked="${only?'true':'false'}" data-do="readyonly" data-a="${sk}"><span class="ft-track" aria-hidden="true"><span class="ft-knob"></span></span><span>Ready to make</span><b>${only?'On':'Off'}</b></button></div>${subs.length>1?`<div class="recipe-categories recipe-sub" role="group" aria-label="Type">${subs.map(y=>chip(g,y,y===sub,sk+'sub',y)).join('')}</div>`:''}`;
   const missingOf=r=>Object.entries(r.in).filter(([id,n])=>DQ.have(id)<n).map(([id,n])=>`${n-DQ.have(id)} ${D.ITEMS[id].name.toLowerCase()}`);
-  const choices=list.map(r=>{const outId=Object.keys(r.out)[0],it=D.ITEMS[outId],lvlLock=!DQ.skillUnlocked(sk)||!DQ.recipeLvlOk(r),miss=lvlLock?[]:missingOf(r);
+  const choices=list.map(r=>{if(r.secret&&DQ.recipeUsable&&!DQ.recipeUsable(r))return {id:r.id,name:'???',artKind:'item',artId:Object.keys(r.out)[0],visible:inG(r,g,subs.length>1?sub:null)&&!only,locked:true,blocked:true,short:'A rumour',reason:D.SECRET[r.secret].rumour};const outId=Object.keys(r.out)[0],it=D.ITEMS[outId],lvlLock=!DQ.skillUnlocked(sk)||!DQ.recipeLvlOk(r),miss=lvlLock?[]:missingOf(r);
     return {id:r.id,name:r.name,artKind:'item',artId:outId,visible:inG(r,g,subs.length>1?sub:null)&&(!only||DQ.canMake(r)),locked:lvlLock,missing:!lvlLock&&miss.length>0,blocked:lvlLock||miss.length>0,
     reason:lvlLock?`Requires ${D.SK[sk].name} ${r.lvl}`:miss.length?`Missing ${miss.join(', ')}`:'',
     stateText:lvlLock?`🔒 ${D.SK[sk].name} ${r.lvl} (you are ${DQ.lvl(sk)})`:miss.length?`Missing ${miss.length===1?miss[0]:miss.length+' materials'}`:'Ready to make',
@@ -13076,7 +13185,7 @@ if (A && A.CREATURE_SPECS) {
 }
 
 /* ---------- the Challenges strip on the hunting panel ---------- */
-const minisHere = town => D.MONLIST.filter(m => m.mini && m.town === town);
+const minisHere = town => D.MONLIST.filter(m => m.mini && !m.tower && m.town === town);
 const area0 = UI.areaPanel;
 if (area0) UI.areaPanel = town => {
   const h = area0(town), list = minisHere(town); if (!list.length) return h;
@@ -13091,6 +13200,105 @@ if (area0) UI.areaPanel = town => {
 /* quest tracking: a mini-boss target is fought directly (it is never in a random encounter) */
 const hq0 = UI.DO.huntquest;
 if (hq0) UI.DO.huntquest = id => { if (D.MON[id] && D.MON[id].mini) { DQ.startAct('fight', id); UI.render(false); return; } hq0(id); };
+})();
+
+</script>
+<script>
+/* Trial towers (Dec 2026, World Life): one per town, five floors, a unique boss at the top with a signature reward.
+   Never required: nothing else in the game checks them. Floors are ordinary fights (the same preparation, food,
+   abilities and companion), climbed in order; the highest floor cleared is saved in S.towers[town] and losing costs
+   nothing. Everything is data: D.TOWERS. Floors 1 to 4 are the region's toughest creatures grown stronger; floor 5 is
+   the tower's own boss. Loaded after hunting.js and minibosses.js so wild beasts and saves are unchanged. */
+(() => {
+const DQ = window.DQ, D = DQ.data, S = () => DQ.S;
+const U = (key, name, text) => ({ key, name, text });
+const prize = (id, o) => { D.ITEMS[id] = Object.assign({ id, type: 'gear', rare: 1, tower: 1, val: 0, keepsake: true }, o); };
+prize('squeaks_crown', { name: 'Squeak’s crown', ic: 'helm', col: '#e8c860', slot: 'head', req: { defence: 5 }, b: { def: 6 }, unique: U('fortune', 'Rat king’s luck', '+25% drop chance · +5% coins'), flavour: 'Bent tin and a great deal of confidence.' });
+prize('greenwood_blade', { name: 'Greenwood greatsword', ic: 'sword', col: '#5aa86a', slot: 'weapon', wtype: 'sword', style: 'melee', req: { melee: 20 }, b: { atk: 24, str: 22 }, unique: U('lifesteal', 'Sap', '20% lifesteal'), flavour: 'It is still growing.' });
+prize('lamplight_staff', { name: 'Lamplight staff', ic: 'staff', col: '#f0d880', slot: 'weapon', wtype: 'staff', style: 'magic', req: { magic: 22 }, b: { mag: 30 }, unique: U('arc', 'Beam', '20% chance: extra hit for half damage'), flavour: 'The lamp at its head has never needed oil.' });
+prize('rimebeards_bulwark', { name: 'Rimebeard’s bulwark', ic: 'shield', col: '#a8d0e8', slot: 'shield', req: { defence: 40 }, b: { def: 28 }, unique: U('thorns', 'Frostbite', 'Reflects 35% of damage taken'), flavour: 'Cold enough to stick to.' });
+prize('abbots_censer', { name: 'Abbot’s censer', ic: 'amulet', col: '#8ab8a0', slot: 'amulet', b: { def: 8, mag: 8 }, unique: U('slow', 'Incense', 'Enemies attack 15% slower'), flavour: 'The smoke goes down, not up.' });
+prize('ashkas_hammer', { name: 'Ashka’s hammer', ic: 'hammer', col: '#f08a3a', slot: 'weapon', wtype: 'hammer', style: 'melee', req: { melee: 50 }, b: { atk: 44, str: 64 }, unique: U('stun', 'Ringing blow', '12% chance on hit: stun (enemy skips an attack)'), flavour: 'She made everything else with it first.' });
+prize('windcaller_bow', { name: 'Windcaller bow', ic: 'bow', col: '#bfe8ff', slot: 'weapon', style: 'ranged', req: { ranged: 55 }, b: { rng: 92 }, unique: U('marked', 'First wind', 'First 3 shots each fight: sure hit, +50% damage'), flavour: 'Strung with a note from the great bell.' });
+prize('shadow_mantle', { name: 'Shadow mantle', ic: 'body', col: '#6a5a9a', slot: 'body', req: { defence: 60 }, b: { def: 62 }, unique: U('laststand', 'Borrowed time', 'Survive one fatal blow per fight on 1 health'), flavour: 'It fits better than it should.' });
+/* town, the tower, its boss, the prize, a colour for the boss and its special */
+D.TOWERS = {
+  willowbrook: { name: 'The Old Granary', boss: ['tw_squeak', 'Old Squeak, King of Rats', '#9a8a70', 'Swarm'], prize: 'squeaks_crown' },
+  mossbarrow: { name: 'Watchtower in the Wood', boss: ['tw_greenknight', 'The Green Knight', '#4a8a4a', 'Great cleave'], prize: 'greenwood_blade' },
+  saltmere: { name: 'The Old Lighthouse', boss: ['tw_keeper', 'The Keeper of the Lamp', '#e0c860', 'Blinding beam'], prize: 'lamplight_staff' },
+  ironpeak: { name: 'Frostspire', boss: ['tw_rimebeard', 'Jarl Rimebeard', '#a8c8e0', 'Avalanche'], prize: 'rimebeards_bulwark' },
+  gloomfen: { name: 'The Sunken Belfry', boss: ['tw_abbot', 'The Drowned Abbot', '#6a9a8a', 'Last rites'], prize: 'abbots_censer' },
+  emberfall: { name: 'The Cinder Stack', boss: ['tw_ashka', 'Forge-Mother Ashka', '#e0703a', 'Quench'], prize: 'ashkas_hammer' },
+  skyreach: { name: 'Bell Tower of the Winds', boss: ['tw_bellringer', 'The Last Bellringer', '#d8d0b0', 'Great peal'], prize: 'windcaller_bow' },
+  hollow: { name: 'The Hollow Spire', boss: ['tw_shadow', 'The King’s Shadow', '#7a6ab0', 'Eclipse'], prize: 'shadow_mantle' },
+};
+D.TOWER_FLOORS = 5;
+const HP = [2.0, 2.3, 2.6, 3.0], MAX = [1.1, 1.18, 1.26, 1.34];
+for (const [town, T] of Object.entries(D.TOWERS)) {
+  if (!D.TOWN[town]) { delete D.TOWERS[town]; continue; }
+  const local = D.MONLIST.filter(m => m.town === town && !m.boss && !m.mini).sort((a, b) => a.cl - b.cl).slice(-4), boss = D.MON[D.TOWN[town].boss];
+  T.town = town; T.floors = []; T.rec = Math.min(118, boss.boss.req + 8);
+  const add = (id, name, floor, base, hp, max, k, col, extra) => { const m = { id, name, town, cl: base.cl + floor * 2, hp: Math.round(base.hp * hp), max: Math.max(1, Math.round(base.max * max)), att: Math.round(base.att * k), def: Math.round(base.def * k), coins: [base.coins[0] * 3, base.coins[1] * 4], col, drops: extra.drops || [], tower: { town, floor }, mini: Object.assign({ short: name, req: 0 }, extra.mini || {}) }; D.MON[id] = m; D.MONLIST.push(m); T.floors.push(id); return m; };
+  local.forEach((b, i) => add(`tw_${town}_${i + 1}`, `${b.name} of the tower`, i + 1, b, HP[i], MAX[i], 1.08 + i * .03, b.col, { art: b.id, mini: { won: `Floor ${i + 1} of ${T.name} is clear.` }, drops: [['coin_pouch', [1, 2], .5], ['treasure_chest', [1, 1], .06 + i * .02]] }).base = b.id);
+  const [bid, bname, bcol, sp] = T.boss;
+  add(bid, bname, 5, boss, 1.5, 1.22, 1.12, bcol, { drops: [[T.prize, [1, 1], 0], ['treasure_chest', [1, 1], .5], ['coin_pouch', [2, 4], 1]], mini: { short: bname.replace(/^The /, 'the '), first: T.prize, special: { every: 3, mult: 1.5, name: sp }, won: `${T.name} is yours. ${D.ITEMS[T.prize].name} was waiting at the top.` } });
+  D.WEAK[bid] = { weak: [], resist: [] }; local.forEach((b, i) => { D.WEAK[`tw_${town}_${i + 1}`] = D.WEAK[b.id] || { weak: [], resist: [] }; });
+  if (D.LORE) D.LORE[bid] = { note: `Waits at the top of ${T.name}. Every third blow is its ${sp.toLowerCase()}. No weakness that anyone has found.`, legend: `Nobody asked it to guard the place. Nobody has managed to ask it to stop.` };
+}
+/* ---------- rules ---------- */
+DQ.towerFloor = town => ((S().towers || {})[town]) || 0;
+DQ.towerNext = town => { const T = D.TOWERS[town]; return T && DQ.towerFloor(town) < D.TOWER_FLOORS ? D.MON[T.floors[DQ.towerFloor(town)]] : null; };
+DQ.towerDone = town => DQ.towerFloor(town) >= D.TOWER_FLOORS;
+const start0 = DQ.startAct;
+DQ.startAct = (kind, id, o = {}) => { const m = kind === 'fight' && D.MON[id];
+  if (m && m.tower && m.tower.floor > DQ.towerFloor(m.tower.town) + 1 && !(DQ.act && DQ.act.kind === kind && DQ.act.id === id)) { if (!o.quiet) DQ.toast(`Clear floor ${DQ.towerFloor(m.tower.town) + 1} first`, true); return false; }
+  return start0(kind, id, o); };
+(DQ.killHooks = DQ.killHooks || []).push(m => { if (!m.tower) return; const T = S().towers = S().towers || {}; if (m.tower.floor > (T[m.tower.town] || 0)) { T[m.tower.town] = m.tower.floor;
+    if (DQ.journal) DQ.journal('tower', m.tower.floor >= D.TOWER_FLOORS ? `Climbed ${D.TOWERS[m.tower.town].name} and beat ${m.name}.` : `Cleared floor ${m.tower.floor} of ${D.TOWERS[m.tower.town].name}.`, 'trophy');
+    for (const r of D.SECRET_RECIPES || []) if (r.tower && r.tower[0] === m.tower.town && r.tower[1] === m.tower.floor) DQ.learnRecipe(r.id); } });
+/* ---------- art: floors reuse the creature they grew from; each boss is its own drawing ---------- */
+const A = DQ.pixelArt;
+if (A && A.CREATURE_SPECS) {
+  const { Spr, ramp, mix } = A, rp = c => ramp(c);
+  for (const T of Object.values(D.TOWERS)) T.floors.slice(0, 4).forEach(id => { const b = D.MON[id].base; if (A.CREATURE_SPECS[b]) A.CREATURE_SPECS[id] = A.CREATURE_SPECS[b]; });
+  A.CREATURE_SPECS.tw_squeak = () => { const s = Spr(32, 32), fur = rp('#9a8a70'), dk = rp('#6a5a48'), pink = rp('#e0a0a0'), gold = rp('#e8c860');
+    s.line(6, 26, 1, 22, pink); s.line(1, 22, 3, 17, pink); s.ell(15, 22, 9, 7, fur); s.ell(13, 19, 5, 3, rp(mix('#9a8a70', '#ffffff', .2))); s.ell(16, 26, 6, 2.4, rp('#d8c8b0'));
+    s.rect(9, 27, 4, 3, dk); s.rect(18, 27, 4, 3, dk); s.ell(23, 14, 5.4, 4.6, fur); s.poly([[27, 13], [32, 16], [27, 17]], fur); s.fix(31, 16, '#e0a0a0');
+    s.ell(20, 9, 2.4, 2.6, pink); s.ell(25, 8, 2.4, 2.6, pink); s.fix(26, 13, '#1a1a1a'); s.fix(27, 12, '#ffffff'); for (const y of [15, 17]) s.line(28, y, 31, y + 1, null, '#d8c8b0');
+    s.rect(20, 5, 7, 2, gold); for (const x of [20, 23, 26]) s.rect(x, 3, 1, 2, gold); s.fix(23, 6, '#e0403a'); return s; };
+  A.CREATURE_SPECS.tw_greenknight = () => { const s = Spr(32, 32), ar = rp('#4a8a4a'), dk = rp('#2c5a30'), leaf = rp('#8ac860'), steel = rp('#c8d0c8');
+    s.rect(10, 26, 4, 5, dk); s.rect(17, 26, 4, 5, ar); s.poly([[8, 13], [23, 13], [22, 26], [9, 26]], ar); s.rect(9, 13, 3, 12, rp('#6aaa60')); s.rect(19, 14, 4, 12, dk);
+    s.ell(15, 8, 4.6, 4.8, ar); s.rect(12, 8, 7, 1, rp('#1a2a1a')); s.poly([[13, 3], [15, -1], [17, 3]], leaf); s.ell(8, 14, 3, 2.4, leaf); s.ell(23, 14, 3, 2.4, leaf);
+    s.line(23, 16, 27, 20, ar); s.line(27, 22, 27, 2, null, '#c8d0c8'); s.line(28, 21, 28, 4, null, '#8a9890'); s.rect(25, 21, 5, 1, rp('#8a6a2a')); s.line(8, 16, 4, 21, ar); s.ell(4, 22, 3.4, 4.4, dk); s.ell(4, 22, 1.6, 2.4, leaf);
+    for (const [x, y] of [[12, 17], [16, 20], [19, 16]]) s.fix(x, y, '#a8e070'); return s; };
+  A.CREATURE_SPECS.tw_keeper = () => { const s = Spr(32, 32), coat = rp('#3a4a60'), dk = rp('#242e3c'), skin = rp('#d8c8a8'), glow = rp('#f4e08a'), brass = rp('#b8923a');
+    s.poly([[9, 13], [21, 13], [24, 30], [6, 30]], coat); s.poly([[17, 13], [21, 13], [24, 30], [19, 30]], dk); s.ell(15, 9, 4, 4.2, skin); s.poly([[10, 13], [15, 20], [20, 13]], rp('#e8e8e8'));
+    s.rect(10, 4, 10, 3, dk); s.rect(8, 6, 14, 1, dk); s.fix(13, 9, '#1a1a1a'); s.fix(17, 9, '#1a1a1a'); s.line(20, 16, 26, 12, coat);
+    s.rect(24, 5, 6, 8, brass); s.ell(27, 9, 2.2, 2.6, glow); s.fix(27, 9, '#ffffff'); s.rect(25, 3, 4, 2, brass); for (const [a, b] of [[30, 6], [31, 9], [30, 12]]) s.line(29, 9, a + 1, b, null, '#fff4b0');
+    s.line(9, 16, 5, 22, coat); return s; };
+  A.CREATURE_SPECS.tw_rimebeard = () => { const s = Spr(32, 32), fur = rp('#8a7a6a'), ice = rp('#a8d0e8'), dk = rp('#4a5a6a'), skin = rp('#d8b8a0'), steel = rp('#b8c4cc');
+    s.rect(9, 26, 5, 5, dk); s.rect(18, 26, 5, 5, dk); s.poly([[6, 12], [26, 12], [25, 27], [7, 27]], fur); s.rect(7, 12, 3, 14, rp('#a89a88')); s.ell(16, 12, 10, 3, rp('#e8eef4'));
+    s.ell(16, 8, 4.6, 4.4, skin); s.poly([[11, 9], [16, 20], [21, 9]], ice); s.poly([[13, 11], [16, 18], [19, 11]], rp('#e8f4fa')); s.rect(11, 3, 10, 3, steel); s.poly([[10, 4], [7, -1], [12, 3]], rp('#e0d4c0')); s.poly([[22, 4], [25, -1], [20, 3]], rp('#e0d4c0'));
+    s.fix(14, 8, '#6ac8ff'); s.fix(18, 8, '#6ac8ff'); s.line(26, 15, 30, 20, fur); s.line(29, 26, 29, 6, null, '#6a5a4a'); s.poly([[26, 4], [32, 6], [32, 12], [26, 12]], ice); s.line(6, 15, 2, 21, fur); return s; };
+  A.CREATURE_SPECS.tw_abbot = () => { const s = Spr(32, 32), robe = rp('#3a5a52'), dk = rp('#223832'), bone = rp('#c8d4c0'), weed = rp('#3a8a5a'), gold = rp('#b8a04a');
+    s.poly([[8, 12], [22, 12], [26, 31], [4, 31]], robe); s.poly([[17, 12], [22, 12], [26, 31], [19, 31]], dk); s.ell(15, 8, 4.4, 4.6, bone); s.rect(13, 8, 2, 2, rp('#101814')); s.rect(16, 8, 2, 2, rp('#101814')); s.fix(13, 8, '#9af0d0'); s.fix(17, 8, '#9af0d0');
+    s.poly([[10, 5], [15, -1], [20, 5]], gold); s.line(15, 0, 15, 4, null, '#e8d880'); s.line(13, 2, 17, 2, null, '#e8d880'); s.line(12, 12, 18, 12, null, '#b8a04a');
+    s.line(22, 15, 27, 12, robe); s.line(28, 30, 28, 3, null, '#8a7a4a'); s.ell(28, 3, 2, 2, gold); s.line(8, 15, 4, 20, robe); for (const [x, y] of [[9, 20], [14, 26], [20, 22]]) s.line(x, y, x - 1, y + 4, null, '#3a8a5a'); s.ell(6, 28, 2, 1, weed); return s; };
+  A.CREATURE_SPECS.tw_ashka = () => { const s = Spr(32, 32), skin = rp('#8a4a3a'), apron = rp('#5a3a2a'), hot = rp('#ffb040'), iron = rp('#5a5a62'), hair = rp('#e0602a');
+    s.rect(10, 26, 5, 5, apron); s.rect(18, 26, 5, 5, apron); s.poly([[7, 12], [25, 12], [24, 27], [8, 27]], skin); s.poly([[10, 14], [22, 14], [21, 27], [11, 27]], apron); s.rect(11, 15, 2, 11, rp('#7a5238'));
+    s.ell(16, 8, 4.6, 4.6, skin); s.poly([[11, 6], [13, 0], [16, 4], [19, 0], [21, 6]], hair); s.fix(14, 8, '#ffd060'); s.fix(18, 8, '#ffd060'); s.line(13, 11, 19, 11, null, '#3a1a10');
+    s.line(25, 14, 29, 10, skin); s.line(29, 24, 29, 4, null, '#6a4a2a'); s.rect(25, 2, 7, 5, iron); s.rect(25, 2, 7, 1, rp('#8a8a94')); s.rect(31, 3, 1, 3, hot);
+    s.line(7, 14, 3, 20, skin); s.ell(3, 22, 2.4, 2.4, hot); s.fix(3, 22, '#ffffff'); for (const [x, y] of [[2, 18], [5, 17], [1, 25]]) s.fix(x, y, '#ffd060'); return s; };
+  A.CREATURE_SPECS.tw_bellringer = () => { const s = Spr(32, 32), robe = rp('#b8a888'), dk = rp('#8a7a5a'), skin = rp('#e0c8a8'), brass = rp('#c8a04a'), sky = rp('#bfe8ff');
+    s.poly([[8, 12], [20, 12], [23, 31], [5, 31]], robe); s.poly([[16, 12], [20, 12], [23, 31], [18, 31]], dk); s.ell(14, 8, 4.2, 4.4, skin); s.ell(14, 5, 4.6, 2.2, robe); s.fix(13, 8, '#3a5a8a'); s.fix(16, 8, '#3a5a8a'); s.line(12, 11, 16, 11, null, '#8a6a4a');
+    s.line(8, 20, 20, 20, null, '#6a5a3a'); s.line(20, 15, 25, 9, robe); s.line(26, 9, 26, 12, null, '#6a5a3a'); s.poly([[22, 13], [30, 13], [32, 23], [20, 23]], brass); s.rect(20, 23, 12, 2, rp('#9a7a2a')); s.rect(22, 14, 2, 8, rp('#f0d070')); s.fix(26, 26, '#6a5a20'); s.fix(26, 27, '#6a5a20');
+    for (const [a, b, c, d] of [[19, 5, 22, 3], [27, 4, 30, 2], [3, 9, 6, 7], [2, 16, 5, 15]]) s.line(a, b, c, d, null, '#bfe8ff'); s.line(8, 15, 4, 21, robe); return s; };
+  A.CREATURE_SPECS.tw_shadow = () => { const s = Spr(32, 32), sh = rp('#3a2e5a'), dk = rp('#1e1830'), glow = rp('#b08aff'), crown = rp('#7a6ab0');
+    s.poly([[9, 12], [23, 12], [28, 31], [20, 28], [16, 31], [12, 28], [4, 31]], sh); s.poly([[17, 12], [23, 12], [28, 31], [20, 28]], dk); s.ell(16, 8, 4.8, 5, dk); s.fix(14, 8, '#d8c0ff'); s.fix(18, 8, '#d8c0ff'); s.fix(14, 9, '#b08aff'); s.fix(18, 9, '#b08aff');
+    s.rect(11, 3, 11, 2, crown); for (const x of [11, 14, 16, 18, 21]) s.rect(x, x === 16 ? 0 : 1, 1, x === 16 ? 3 : 2, crown); s.fix(16, 1, '#e8d8ff');
+    s.line(23, 15, 28, 11, sh); s.line(29, 28, 29, 2, null, '#5a4a8a'); s.poly([[27, 2], [29, -1], [31, 2], [29, 6]], glow); s.line(9, 15, 4, 19, sh); s.ell(3, 20, 2, 2, glow);
+    for (const [x, y] of [[8, 24], [14, 22], [22, 25], [12, 18]]) s.fix(x, y, '#7a6ab0'); return s; };
+}
 })();
 
 </script>
@@ -16986,7 +17194,7 @@ const material = (kind, x, sk, o = {}) => { const m = Q.mastInfo(kind, x.id), lv
     sub: `${need}${m.n ? ` · ${fmt(m.n)} ${VERB[kind]}` : ''}`, itemId,
     ladder: Q.ENTRY_NAMES.map((nm, i) => ({ name: nm, text: Q.entryPerk(kind, i + 1), at: D.MASTERY_STEPS[i], done: m.stars > i })), unit: VERB[kind] }; };
 const topics = () => { const t = [];
-  for (const town of D.TOWNS) if (S().towns[town.id] && S().towns[town.id].visited) t.push({ id: 'c:' + town.id, group: 'Creatures', name: town.name, ic: 'attack', items: () => D.MONLIST.filter(m => m.town === town.id).sort((a, b) => a.cl - b.cl).map(creature) });
+  for (const town of D.TOWNS) if (S().towns[town.id] && S().towns[town.id].visited) t.push({ id: 'c:' + town.id, group: 'Creatures', name: town.name, ic: 'attack', items: () => D.MONLIST.filter(m => m.town === town.id && !m.tower).sort((a, b) => a.cl - b.cl).map(creature) });
   for (const [kind, sk] of Object.entries(NODE_SK)) if ((D.NODES[kind] || []).length && Q.skillUnlocked(sk)) t.push({ id: kind, group: 'Gathering', name: D.SK[sk].name, ic: sk, items: () => [...D.NODES[kind]].sort((a, b) => a.lvl - b.lvl).map(x => material(kind, x, sk)) });
   const seen = new Set(); for (const r of Object.values(D.RECIPES)) if (!seen.has(r.skill) && D.SK[r.skill] && Q.skillUnlocked(r.skill)) { seen.add(r.skill); const sk = r.skill; t.push({ id: 'recipe:' + sk, group: 'Making', name: D.SK[sk].name, ic: sk, items: () => Object.values(D.RECIPES).filter(x => x.skill === sk).sort((a, b) => a.lvl - b.lvl).map(x => material('recipe', x, sk)) }); }
   /* everything else you repeat: crops, livestock, potions, voyages and trap lines */
@@ -17511,7 +17719,7 @@ const questMon = () => { const id = DQ.questHuntTarget ? DQ.questHuntTarget() : 
 const rarity = pct => pct >= 45 ? 'Common' : pct >= 20 ? 'Uncommon' : 'Rare';
 UI.areaPanel = town => {
   const f = fighting(), active = f && f.area, qt = questMon(), areas = D.AREAS[town] || [], focus = DQ.combatFocus ? DQ.combatFocus() : null;
-  const minis = D.MONLIST.filter(m => m.mini && m.town === town), qm = qt && D.MON[qt];
+  const minis = D.MONLIST.filter(m => m.mini && !m.tower && m.town === town), qm = qt && D.MON[qt];
   const quest = qm ? `<div class="wh-quest"><span class="wh-q-art">${DQ.monSprite(qm, 32)}</span><span><small>Quest target</small><b>${esc(qm.name)}</b></span><button class="btn sm primary" data-do="huntquest" data-a="${qt}">${qm.mini ? 'Challenge' : 'Track'}</button></div>` : '';
   const head = (x) => { const m = x.monster, met = (S().beast.kills[x.id] || 0) > 0, nm = met ? m.name : 'Unknown creature', on = focus && focus.id === x.id;
     return `<button type="button" class="wh-head enc-row ${on ? 'on' : ''} ${qt === x.id ? 'quest' : ''}" data-do="huntpreview" data-a="${x.id}" aria-pressed="${!!on}" aria-label="${esc(nm)}, level ${m.cl}, ${rarity(x.pct)}, ${x.pct}% of encounters. Show it on the stage." data-tip="text:${esc(nm)} · level ${m.cl} · ${rarity(x.pct)} (${x.pct}%)${qt === x.id ? ' · quest target' : ''}${met ? (r => ` · field guide ${r.rank}/${r.T.length}${r.next ? `, next entry after ${r.need} more` : ''}`)(DQ.research(m)) : ''}">${DQ.monSprite(m, 32, met ? '' : 'sil')}<small>${x.pct}%</small>${(() => { if (!met || !DQ.studyBar) return ''; const r = DQ.research(m), prev = r.rank ? r.T[Math.min(r.rank, r.T.length) - 1] : 0; return DQ.studyBar(r.next ? (r.kills - prev) / Math.max(1, r.next - prev) * 100 : 100, !r.next); })()}</button>`; };
@@ -19151,7 +19359,7 @@ const petRow = p => { const own = S().pets.owned[p.id], egg = Q.eggOf && Q.eggOf
   const tries = !own && !egg && o.p ? `<small class="col-tries"><b class="mono">${fmt(o.tries)}</b> ${o.unit} so far${meter(o.tries, o.p)}</small>` : '';
   return `<article class="col-row ${own ? 'got' : egg ? 'egg' : ''}" style="--c:${p.col}"><span class="col-art">${art}</span><div class="col-t"><b>${own ? esc(p.name) : esc(kind.name)}</b><small>${own ? esc(p.text) : esc(o.where)}</small></div><div class="col-o">${state || `<b>${odds}</b>`}${tries}</div></article>`; };
 const dropRows = () => { const out = [];
-  for (const m of D.MONLIST.filter(m => m.boss || m.mini).sort((a, b) => a.cl - b.cl)) { const kills = S().beast.kills[m.id] || 0, met = kills > 0 || Q.combatLvl() >= (m.boss || m.mini).req;
+  for (const m of D.MONLIST.filter(m => (m.boss || m.mini) && !m.tower).sort((a, b) => a.cl - b.cl)) { const kills = S().beast.kills[m.id] || 0, met = kills > 0 || Q.combatLvl() >= (m.boss || m.mini).req;
     for (const [id, , p] of m.drops) { const it = D.ITEMS[id]; if (!it || p >= .2 || !(it.slot || it.unique || it.rare)) continue; const found = !!(S().beast.drops || {})[m.id + ':' + id];
       out.push(`<article class="col-row ${found ? 'got' : ''}" style="--c:${it.col}"><span class="col-art ${found || met ? '' : 'col-unk'}">${Q.itemIco(it)}</span><div class="col-t"><b>${found || met ? esc(it.name) : '???'}</b><small>${met ? esc(m.name) : `A challenge in ${esc(D.TOWN[m.town].name)}`}</small></div><div class="col-o">${found ? `<span class="tag ok">✓ Found</span>` : `<b>${oneIn(p)} per victory</b><small class="col-tries"><b class="mono">${fmt(kills)}</b> victories so far${meter(kills, p)}</small>`}</div></article>`); } }
   return out.join(''); };

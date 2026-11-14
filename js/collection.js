@@ -24,7 +24,7 @@ const petRow = p => { const own = S().pets.owned[p.id], egg = Q.eggOf && Q.eggOf
   const tries = !own && !egg && o.p ? `<small class="col-tries"><b class="mono">${fmt(o.tries)}</b> ${o.unit} so far${meter(o.tries, o.p)}</small>` : '';
   return `<article class="col-row ${own ? 'got' : egg ? 'egg' : ''}" style="--c:${p.col}"><span class="col-art">${art}</span><div class="col-t"><b>${own ? esc(p.name) : esc(kind.name)}</b><small>${own ? esc(p.text) : esc(o.where)}</small></div><div class="col-o">${state || `<b>${odds}</b>`}${tries}</div></article>`; };
 const dropRows = () => { const out = [];
-  for (const m of D.MONLIST.filter(m => m.boss || m.mini).sort((a, b) => a.cl - b.cl)) { const kills = S().beast.kills[m.id] || 0, met = kills > 0 || Q.combatLvl() >= (m.boss || m.mini).req;
+  for (const m of D.MONLIST.filter(m => (m.boss || m.mini) && !m.tower).sort((a, b) => a.cl - b.cl)) { const kills = S().beast.kills[m.id] || 0, met = kills > 0 || Q.combatLvl() >= (m.boss || m.mini).req;
     for (const [id, , p] of m.drops) { const it = D.ITEMS[id]; if (!it || p >= .2 || !(it.slot || it.unique || it.rare)) continue; const found = !!(S().beast.drops || {})[m.id + ':' + id];
       out.push(`<article class="col-row ${found ? 'got' : ''}" style="--c:${it.col}"><span class="col-art ${found || met ? '' : 'col-unk'}">${Q.itemIco(it)}</span><div class="col-t"><b>${found || met ? esc(it.name) : '???'}</b><small>${met ? esc(m.name) : `A challenge in ${esc(D.TOWN[m.town].name)}`}</small></div><div class="col-o">${found ? `<span class="tag ok">✓ Found</span>` : `<b>${oneIn(p)} per victory</b><small class="col-tries"><b class="mono">${fmt(kills)}</b> victories so far${meter(kills, p)}</small>`}</div></article>`); } }
   return out.join(''); };

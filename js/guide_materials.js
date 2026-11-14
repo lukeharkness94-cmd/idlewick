@@ -20,7 +20,7 @@ const material = (kind, x, sk, o = {}) => { const m = Q.mastInfo(kind, x.id), lv
     sub: `${need}${m.n ? ` · ${fmt(m.n)} ${VERB[kind]}` : ''}`, itemId,
     ladder: Q.ENTRY_NAMES.map((nm, i) => ({ name: nm, text: Q.entryPerk(kind, i + 1), at: D.MASTERY_STEPS[i], done: m.stars > i })), unit: VERB[kind] }; };
 const topics = () => { const t = [];
-  for (const town of D.TOWNS) if (S().towns[town.id] && S().towns[town.id].visited) t.push({ id: 'c:' + town.id, group: 'Creatures', name: town.name, ic: 'attack', items: () => D.MONLIST.filter(m => m.town === town.id).sort((a, b) => a.cl - b.cl).map(creature) });
+  for (const town of D.TOWNS) if (S().towns[town.id] && S().towns[town.id].visited) t.push({ id: 'c:' + town.id, group: 'Creatures', name: town.name, ic: 'attack', items: () => D.MONLIST.filter(m => m.town === town.id && !m.tower).sort((a, b) => a.cl - b.cl).map(creature) });
   for (const [kind, sk] of Object.entries(NODE_SK)) if ((D.NODES[kind] || []).length && Q.skillUnlocked(sk)) t.push({ id: kind, group: 'Gathering', name: D.SK[sk].name, ic: sk, items: () => [...D.NODES[kind]].sort((a, b) => a.lvl - b.lvl).map(x => material(kind, x, sk)) });
   const seen = new Set(); for (const r of Object.values(D.RECIPES)) if (!seen.has(r.skill) && D.SK[r.skill] && Q.skillUnlocked(r.skill)) { seen.add(r.skill); const sk = r.skill; t.push({ id: 'recipe:' + sk, group: 'Making', name: D.SK[sk].name, ic: sk, items: () => Object.values(D.RECIPES).filter(x => x.skill === sk).sort((a, b) => a.lvl - b.lvl).map(x => material('recipe', x, sk)) }); }
   /* everything else you repeat: crops, livestock, potions, voyages and trap lines */

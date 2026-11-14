@@ -205,7 +205,7 @@ if (A && A.CREATURE_SPECS) {
 }
 
 /* ---------- the Challenges strip on the hunting panel ---------- */
-const minisHere = town => D.MONLIST.filter(m => m.mini && m.town === town);
+const minisHere = town => D.MONLIST.filter(m => m.mini && !m.tower && m.town === town);
 const area0 = UI.areaPanel;
 if (area0) UI.areaPanel = town => {
   const h = area0(town), list = minisHere(town); if (!list.length) return h;

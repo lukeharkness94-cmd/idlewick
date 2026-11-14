@@ -223,6 +223,7 @@ DQ.startAct = (kind, id, o = {}) => {
   if (kind === 'recipe') {
     const r = D.RECIPES[id]; if (!DQ.skillUnlocked(r.skill)) return bad(`${D.SK[r.skill].name} is not unlocked yet`);
     if (!DQ.recipeLvlOk(r)) return bad(`Requires ${D.SK[r.skill].name} ${r.lvl}`);
+    if (DQ.recipeUsable && !DQ.recipeUsable(r)) return bad('You have not found this recipe');
     if (!DQ.canMake(r)) return bad('You are missing materials');
   } else if (kind === 'alch') {
     if (!DQ.skillUnlocked('magic') || DQ.lvl('magic') < D.ALCH[0].lvl) return bad(`Alchemy needs Magic ${D.ALCH[0].lvl}`);
@@ -425,7 +426,7 @@ function combatRound() {
     /* bosses are counter checks, not locks: a weakness helps a lot and a resistance hurts, but less than on ordinary
        monsters, so preparation matters without guaranteeing the fight (scripts/sim-bosses.cjs COUNTER=1) */
     let mult = weak ? DQ.typeMult(m, 'weak') : resist ? DQ.typeMult(m, 'resist') : 1; tag = weak ? 'weak' : resist ? 'resist' : '';
-    let acc = ps.acc * W.acc * (weak ? 1.1 : 1), max = ps.max * W.dmg * mult * (1 + DQ.beastBonus(m.id)), sure = false;
+    let acc = ps.acc * W.acc * (weak ? 1.1 : 1), max = ps.max * W.dmg * mult * (1 + DQ.beastBonus(m.id)) * (m.boss || m.mini ? DQ.buffMult('boss') : 1), sure = false;
     if (A('aimed') && f.pa % 3 === 0) { sure = true; max *= 1.5; }
     if (A('power') && f.pa % 4 === 0) { max *= 2; tag = 'power'; }
     if (A('execute') && f.hp < mhp * .3) max *= 1.5;
@@ -494,6 +495,7 @@ function monsterAttack(f, m, ps, sty) {
       if (m.id === 'morwenna') f.hex = 4;
     } else { if (A('kite')) taken *= .7; if (A('fortress')) taken *= .85; if (U.hide) { taken *= .85; fxHit('hide'); } }
     if (f.curse) { taken *= 1 - .05 * f.curse; fxHit('cursed'); }
+    taken *= DQ.buffMult('guard');
     taken = Math.max(1, Math.round(taken * (1 - ps.red) * ({ careful: .85, steady: 1, push: 1.25 }[(DQ.act && DQ.act.pace) || 'steady'])));
   }
   if (f.hex > 0) { f.hex--; taken += Math.max(1, Math.round(m.max * .25)); }
@@ -557,6 +559,8 @@ function kill(m) {
   if (!DQ.sim.on) { DQ.log(`You defeat ${m.boss ? '' : 'the '}${m.name}.${loot.length ? ' ' + loot.join(', ') : ''}`, 'good'); DQ.floatAt(document.getElementById('av-foe'), loot.slice(0, 2).join(' · ') || 'Defeated', '#f3d58a'); DQ.emit('slain'); }
   else DQ.sim.kills++;
   DQ.qev('kill', m.id); DQ.recordKill(m, got);
+  /* World Life hooks (hidden recipes, towers, the museum, events): never in forecasts */
+  if (!DQ.forecasting) { for (const h of DQ.killHooks || []) h(m); if (DQ.recipeOnKill) DQ.recipeOnKill(m); if (DQ.museumScan && (m.boss || m.mini || (S().beast.kills[m.id] || 0) <= 1)) DQ.museumScan(); }
   if (m.boss) {
     DQ.qev('boss', m.id); DQ.petRoll('boss', m.id);
     if (first) {

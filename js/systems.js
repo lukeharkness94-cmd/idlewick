@@ -18,9 +18,10 @@ DQ.fx = () => {
       if (k.startsWith('xp_')) f.xp[k.slice(3)] = (f.xp[k.slice(3)] || 0) + v; else if (k.startsWith('speed_')) f.speed[k.slice(6)] = (f.speed[k.slice(6)] || 0) + v; else f[k] += v; });
   });
   if (DQ.techFx) DQ.techFx(f);
-  if (S().projects && S().projects.well) f.regen += .1;
-  if (S().projects && S().projects.inn) f.heal += .05;
-  for(const [id,p] of Object.entries(D.PROJECTS||{}))if(S().projects[id]&&p.fx)for(const [key,value] of Object.entries(p.fx)){
+  /* a damaged building (js/world_events.js) gives nothing until it is repaired */
+  if (S().projects && S().projects.well && !(S().damaged || {}).well) f.regen += .1;
+  if (S().projects && S().projects.inn && !(S().damaged || {}).inn) f.heal += .05;
+  for(const [id,p] of Object.entries(D.PROJECTS||{}))if(S().projects[id]&&p.fx&&!(S().damaged||{})[id])for(const [key,value] of Object.entries(p.fx)){
     if(key.startsWith('speed_'))f.speed[key.slice(6)]=(f.speed[key.slice(6)]||0)+value; else if(key.startsWith('xp_'))f.xp[key.slice(3)]=(f.xp[key.slice(3)]||0)+value; else f[key]=(f[key]||0)+value;
   }
   f.dmg += f.trophy * Object.values(S().towns).filter(t => t.boss).length;
