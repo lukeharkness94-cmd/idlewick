@@ -3679,3 +3679,87 @@ html.lw-1600 .guide-book{grid-template-columns:200px minmax(0,1fr) 340px}
 /* the skill column shares the window's height (js/shell.js fit): each row is --dk-h tall, content centred */
 @media (min-width:861px){html.dock-fit .sidebar .dock{max-height:none!important;overflow:visible!important}
  html.dock-fit .sidebar .dock .dk{height:var(--dk-h)!important;min-height:0!important;max-height:none!important;padding-top:0!important;padding-bottom:0!important;align-content:center}}
+
+/* =================== Combat, layout E (Dec 2026). Scoped by #view so earlier combat rules cannot reach it. ===================
+   Desktop: Where to fight (260px) | header bar, the fight (fills the height), three equal panels.
+   Phone: header, fight, where to fight, then the three panels. */
+#view .combat-x{display:grid!important;grid-template-columns:260px minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;grid-auto-rows:auto!important;gap:14px!important;align-items:stretch!important;min-height:0}
+#view .combat-x>.combat-col,#view .combat-x>.combat-side,#view .combat-x .combat-live>.combat-col{display:none!important}
+#view .combat-x>.combat-targets{grid-column:1!important;grid-row:1!important;display:flex!important;flex-direction:column!important;gap:10px!important;min-height:0;overflow:hidden!important;padding:0!important;margin:0!important}
+#view .combat-x>.combat-live{grid-column:2!important;grid-row:1!important;display:flex!important;flex-direction:column!important;gap:10px!important;min-height:0!important;min-width:0}
+#view .combat-x .step-h{display:block;margin:0;font:600 15px var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+#view .combat-x .step-n{display:none!important}
+/* the boss sits straight under the challenges, the same width, never pinned to the bottom */
+#view .combat-x .boss-foot{position:static!important;margin:0!important;display:grid!important;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;padding:8px 12px!important;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:inherit;text-align:left;cursor:pointer}
+#view .combat-x .boss-foot img{width:32px;height:32px}
+#view .combat-x .boss-foot small{display:block;font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
+#view .combat-x .boss-foot b{display:block;font:500 16px var(--f-ui)}
+#view .combat-x .boss-foot .bf-go{font-size:14px;color:var(--mute)}
+#view .combat-x .boss-foot.tone-ok{border-color:color-mix(in srgb,var(--good,#5cc08a) 60%,var(--line))}#view .combat-x .boss-foot.tone-ok .bf-go{color:var(--good,#5cc08a)}
+/* header bar: what, how dangerous, food and gear, reference buttons, the one main button */
+#view .combat-x .cx-head{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:12px!important;padding:8px 10px 8px 16px!important;margin:0!important;min-height:58px;border:1px solid var(--line);border-radius:12px;background:var(--panel);flex:none!important;position:static!important}
+#view .combat-x .cx-head.tone-ok{border-color:color-mix(in srgb,var(--good,#5cc08a) 45%,var(--line))}#view .combat-x .cx-head.tone-bad{border-color:color-mix(in srgb,#e2574c 55%,var(--line))}#view .combat-x .cx-head.tone-warn{border-color:color-mix(in srgb,#e5b04a 50%,var(--line))}
+#view .combat-x .cx-title{position:static!important;display:grid!important;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:8px;align-items:center;justify-content:start;min-width:0;padding:0!important;margin:0!important;background:none!important;border:0!important;box-shadow:none!important;flex:0 1 auto}
+#view .combat-x .cx-title small{grid-column:1/-1;font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+#view .combat-x .cx-title b{font:500 19px var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#view .combat-x .cx-chips{display:flex;flex-wrap:nowrap;gap:6px;min-width:0;flex:0 1 auto}
+#view .combat-x .cx-chips .rl-i{white-space:nowrap}
+#view .combat-x .cx-tools{display:flex;gap:6px;margin-left:auto;flex:none}
+#view .combat-x .cx-tools .btn{display:inline-flex;align-items:center;gap:6px}#view .combat-x .cx-tools .btn .ic{width:16px;height:16px}
+#view .combat-x .cx-go{flex:none;min-width:120px;white-space:nowrap}
+/* the fight */
+#view .combat-x .encounter-arena{flex:1 1 auto!important;min-height:200px!important;height:auto!important;margin:0!important;border-radius:12px}
+#view .combat-x .encounter-arena.cx-stage{background-size:cover,1920px 1080px!important;background-position:center,center bottom!important;background-repeat:no-repeat!important}
+/* three equal panels */
+#view .combat-x .combat-hud{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;flex:none!important;margin:0!important;align-items:stretch!important}
+#view .combat-x .combat-hud>.panel{display:flex!important;flex-direction:column!important;gap:8px!important;padding:12px 14px!important;margin:0!important;min-height:0!important;height:auto!important;overflow:visible!important;min-width:0}
+#view .combat-x .combat-hud .kit-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin:0!important;min-height:30px}
+#view .combat-x .combat-hud .kit-head .k{font:600 14px var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+#view .combat-x .combat-hud .kit-head .k b{color:var(--ink);font-size:15px}#view .combat-x .combat-hud .kit-head .k small{font-size:13px;text-transform:none;letter-spacing:0}
+#view .combat-x .hud-train .ss-weapon{display:inline-flex!important;align-items:center;gap:8px;padding:2px 4px!important;border:0!important;background:none!important;color:inherit;min-width:0;text-align:right}
+#view .combat-x .hud-train .ss-weapon .ic{width:22px;height:22px;flex:none}
+#view .combat-x .hud-train .ss-weapon span{display:grid;min-width:0}#view .combat-x .hud-train .ss-weapon b{font:500 15px var(--f-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#view .combat-x .hud-train .ss-weapon small{font-size:13px;color:var(--mute)}
+#view .combat-x .style-strip{display:flex!important;flex-direction:column!important;gap:8px!important;padding:0!important;margin:0!important;border:0!important;background:none!important;box-shadow:none!important;flex:1;min-height:0}
+#view .combat-x .cx-styles{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));grid-auto-flow:column;gap:8px}
+#view .combat-x .cx-styles .ss-btn{display:grid!important;grid-template-columns:24px minmax(0,1fr);align-items:center;gap:8px;padding:8px 10px!important;min-height:58px!important;height:auto!important;width:auto!important;text-align:left;border-radius:10px;margin:0!important}
+#view .combat-x .cx-styles .ss-btn .ic{width:22px;height:22px}
+#view .combat-x .cx-styles .ss-btn>span{display:grid;gap:2px;min-width:0;font:500 16px var(--f-ui)}
+#view .combat-x .cx-styles .ss-btn small{font-size:14px;color:var(--mute)}#view .combat-x .cx-styles .ss-btn.on small{color:inherit}
+#view .combat-x .cx-styles .ss-btn .bar{height:4px;width:100%}
+#view .combat-x .cx-styles .ss-fast{font-size:13px;font-style:normal;color:var(--good,#5cc08a)}
+#view .combat-x .cx-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
+#view .combat-x .cx-stats>*{display:flex!important;align-items:center;gap:8px;padding:6px 10px!important;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:inherit;font:500 15px var(--f-ui);min-width:0;margin:0!important;height:auto!important;text-align:left}
+#view .combat-x .cx-stats .ic{width:20px;height:20px;flex:none}
+#view .combat-x .cx-stats span>span,#view .combat-x .cx-stats>span>span{display:grid;gap:3px;flex:1;min-width:0}#view .combat-x .cx-stats .bar{height:4px}
+#view .combat-x .cx-stats .ss-cl span{display:grid}#view .combat-x .cx-stats .ss-cl small{font-size:13px;color:var(--mute)}
+#view .combat-x .combat-food .food-tiles{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(118px,1fr))!important;gap:6px!important;align-content:start;flex:1}
+#view .combat-x .combat-food .food-tile{display:grid!important;grid-template-columns:28px minmax(0,1fr);align-items:center;gap:6px;padding:6px 8px!important;margin:0!important;width:auto!important;text-align:left}
+#view .combat-x .combat-food .food-tile b{font:500 15px var(--f-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#view .combat-x .combat-food .food-tile small{font-size:13px;color:var(--mute)}
+#view .combat-x .combat-food .eat-step{display:flex!important;align-items:center;justify-content:flex-start;gap:8px;margin:auto 0 0!important}
+#view .combat-x .combat-food .food-none{margin:0;color:var(--mute)}
+#view .combat-x .combat-abils .ab-slots{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;flex:1;align-content:start}
+#view .combat-x .combat-abils .ab-tile{display:grid!important;grid-template-columns:24px minmax(0,1fr);grid-template-rows:auto auto;column-gap:8px;align-items:center;text-align:left;padding:6px 10px!important;margin:0!important;min-height:48px;width:auto!important;height:auto!important}
+#view .combat-x .combat-abils .ab-tile .ic{grid-row:1/3;width:22px;height:22px}#view .combat-x .combat-abils .ab-tile b{font:500 15px var(--f-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#view .combat-x .combat-abils .ab-tile small{font-size:13px;color:var(--mute)}
+#view .combat-x .combat-abils .ab-future-slot,#view .combat-x .combat-abils .ab-next{margin-top:auto;font-size:14px;color:var(--mute)}
+#view .combat-x .combat-abils .linkish{font-size:15px}
+/* narrower desktops: the chips keep one line by dropping the words around them, the tools become icons */
+@media (min-width:861px){html.lw-1600 #view .combat-x .cx-tools .btn{font-size:0;gap:0;padding:6px 8px}html.lw-1600 #view .combat-x .cx-tools .btn .ic{width:18px;height:18px}
+ html.lw-1600 #view .combat-x .cx-head{gap:8px!important}html.lw-1600 #view .combat-x .cx-go{min-width:0}}
+/* phones: header, fight, where to fight, then the panels, one column */
+@media (max-width:860px){#view .combat-x{display:flex!important;flex-direction:column!important;gap:12px!important}
+ #view .combat-x>.combat-live{display:contents!important}
+ #view .combat-x .cx-head{order:1;flex-wrap:wrap!important;padding:10px 12px!important}#view .combat-x .cx-chips{flex-wrap:wrap;order:3;width:100%}#view .combat-x .cx-tools{order:4;margin-left:0}#view .combat-x .cx-go{order:2;margin-left:auto;min-width:0}
+ #view .combat-x .encounter-arena{order:2;min-height:260px!important;flex:none!important}
+ #view .combat-x>.combat-targets{order:3;overflow:visible!important}
+ #view .combat-x .combat-hud{order:4;grid-template-columns:1fr!important}}
+#view .combat-x .combat-hud>.panel>*{width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important;justify-content:stretch;justify-items:stretch;text-align:left}
+#view .combat-x .combat-hud .kit-head{justify-content:space-between!important;text-align:left!important}
+#view .combat-x .combat-hud .kit-head .tog{margin-left:auto}
+#view .combat-x .cx-styles{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-flow:row!important;width:100%!important;justify-items:stretch!important}
+#view .combat-x .cx-styles .ss-btn,#view .combat-x .cx-stats>*,#view .combat-x .combat-food .food-tile,#view .combat-x .combat-abils .ab-tile{width:100%!important;max-width:none!important;justify-self:stretch!important;box-sizing:border-box}
+#view .combat-x .cx-stats{width:100%!important}
+#view .combat-x .combat-food .food-tiles{width:100%!important;justify-content:stretch!important;justify-items:stretch!important;grid-template-columns:repeat(auto-fill,minmax(130px,1fr))!important}
+#view .combat-x .combat-food .eat-step{justify-content:flex-start!important;width:100%}
+#view .combat-x .combat-food .eat-step span{margin-right:auto}
+@media (max-width:860px){#view .combat-x .encounter-arena{min-height:320px!important}}
+#view .combat-x .cx-styles .ss-btn{grid-column:auto!important;grid-row:auto!important}
