@@ -625,3 +625,9 @@ Rules collected from AGENTS.md and the player's messages, checked on 39 pages ×
 ## Nov 2026: finish layer (polish pass)
 
 `js/finish.js` and the "Finish layer" CSS block add page entrances (staggered, merged with the existing `.view.enter`), a sliding brass ink under the top menu and page tabs (updated in the same frame as the render so a resized window never overflows), button lift/press and a sheen on primary buttons, card and tile lift with a selected-card glow, a light running along the active task's progress bar, a breathing rail row for the skill being trained, pop-up and tooltip entrances, coin roll-up on gains, themed scrollbars and selection, and a staged title screen with an inviting first button (no blue focus ring on load). All transform/opacity, off under Reduce effects and reduced-motion. Recorded before/after tours: the same scripted path on the previous and new builds.
+
+
+## Nov 2026: the opening and the game's voice
+
+- `js/intro.js`: the new-hero opening (bells, empty towns, Wren's letter with a P.S. about Orrin, "There was no prophecy, just a letter and a very long walk", the road of towns ending in a bell). Skip only after the first click; replay from the Journal; `tests/intro.cjs`.
+- Voice pass, on the player's direction (names stay fantasy, the tone gets plainer and funnier): town descriptions, the flat one-line quests and the boss quests, the thank-you lines with an epic register, region arrival scenes, the late-game legends, achievements and project lines. Each tower keeper has its own legend (they shared one). The early writing already had the target voice and was kept.

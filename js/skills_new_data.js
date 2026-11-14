@@ -55,7 +55,7 @@ D.VOYAGES = [
   ['coral_reach', 'Coral Reach', 40, 3, 50, 165, [120, 300], [['raw_swordfish', [2, 4], .7], ['raw_lobster', [2, 5], .6], ['gem_emerald', [1, 1], .2]], 'A reef you can walk along at low tide, if you are quick.'],
   ['spice_atoll', 'Spice Atoll', 52, 3, 58, 225, [160, 380], [['seed_goldleaf', [1, 3], .5], ['seed_pumpkin', [2, 4], .5], ['cloth', [2, 4], .5]], 'Traders who swap rare seeds for good cloth and better stories.'],
   ['storm_spire', 'Storm Spire', 64, 4, 66, 310, [240, 520], [['raw_stormray', [1, 3], .6], ['ore_skyglass', [1, 3], .4], ['gem_ruby', [1, 1], .25]], 'A needle of rock that lightning visits every evening.'],
-  ['sunken_crown', 'Sunken Crown', 78, 4, 74, 440, [400, 900], [['raw_monkfish', [2, 4], .6], ['gem_diamond', [1, 1], .15], ['treasure_chest', [1, 1], .08]], 'The drowned palace of a kingdom older than the Hollow.'],
+  ['sunken_crown', 'Sunken Crown', 78, 4, 74, 440, [400, 900], [['raw_monkfish', [2, 4], .6], ['gem_diamond', [1, 1], .15], ['treasure_chest', [1, 1], .08]], 'A sunken palace, older than anything else on the coast and twice as damp.'],
   ['worlds_edge', 'World’s Edge', 90, 5, 84, 620, [700, 1500], [['raw_voideel', [1, 3], .6], ['ore_astralite', [1, 2], .4], ['seed_starfruit', [1, 2], .3]], 'Where the map stops and the sea goes on.']
 ].map(([id, name, lvl, boat, secs, xp, coins, loot, blurb]) => ({ id, name, lvl, boat, t: secs * 1000, xp: Math.round(secs * (6 + lvl * .42)), coins, loot: loot.filter(([k]) => D.ITEMS[k]), blurb }));
 /* voyage XP is about 75–110% of Fishing's at the same level (scripts/sim-new-skills.cjs), since the haul is half the reward */

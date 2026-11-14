@@ -143,14 +143,14 @@ vary('bl_ring', {
 });
 /* earlier choices echo later */
 vary('chiefs_end', {
-  blurb: () => `Grubnash leads the goblins from a hill fort. End it. You need combat level 8 to face him.${DQ.choiceOf('goblin_satchel') === 'orrin' ? ' Orrin taps the note you brought him: “He telegraphs the war cry. Watch for the stamp.”' : ''}`
+  blurb: () => `Grubnash runs the goblins from a hill fort and calls himself a king. He is not a king. You need combat level 8 to face him.${DQ.choiceOf('goblin_satchel') === 'orrin' ? ' Orrin taps the note you brought him: “He telegraphs the war cry. Watch for the stamp.”' : ''}`
 });
 const lateThanks = {
   frostmaw_hunt: () => `The pass is open. ${qdone('bl_ring') ? 'Hrod shows you a crate of stolen bells from Frostmaw’s den, packed for someone further up the mountain. Someone who pays in voidstone.' : 'Hrod says the troll was guarding something deeper in the ice.'}`,
-  witchs_bane: () => `The dead lie still. ${qdone('bl_ring') ? 'In Morwenna’s hut, a letter in the same hand as the ledger’s last page: “Bells and lights, all of them. The crown must have silence.”' : 'Lysa finds a letter sealed with a faceless crown.'}`,
-  wyrm_slayer: () => `Pyrrhax is ash. ${DQ.choiceOf('ashen_anvil') === 'quench' ? 'The anvil you woke rings once, all by itself, as the wyrm falls.' : DQ.choiceOf('ashen_anvil') === 'citadel' ? 'Magmasmith Kael’s apprentices hammer a banner from the wyrm’s scales, with your name on it.' : 'The citadel bells ring for the first time in a year.'}`,
+  witchs_bane: () => `The graves stay shut, and the gravediggers can finally take a holiday. ${qdone('bl_ring') ? 'In Morwenna’s hut, a letter in the same hand as the ledger’s last page: “Bells and lights, all of them. The crown must have silence.”' : 'Lysa finds a letter sealed with a faceless crown.'}`,
+  wyrm_slayer: () => `Pyrrhax is down, and for once the smoke is somebody else’s problem. ${DQ.choiceOf('ashen_anvil') === 'quench' ? 'The anvil you woke rings once, all by itself, as the wyrm falls.' : DQ.choiceOf('ashen_anvil') === 'citadel' ? 'Magmasmith Kael’s apprentices hammer a banner from the wyrm’s scales, with your name on it.' : 'The citadel bells ring for the first time in a year.'}`,
   storm_breaker: () => 'The sky bridges hold again. Abbot Seren says the storms were only ever fleeing something: a silence spreading from the Hollow Crown.',
-  crownfall: () => `The Hollow King is gone, and the faceless crown with him. ${qdone('bl_ring') ? 'Somewhere far behind you, Mossbarrow’s bell is ringing, and every bell he bought rings with it.' : 'Light comes back to the drowned throne.'}`
+  crownfall: () => `The Hollow King is gone, and the faceless crown with him. Mind the step on the way out. ${qdone('bl_ring') ? 'Somewhere far behind you, Mossbarrow’s bell is ringing, and every bell he bought rings with it.' : 'Light comes back to the drowned throne.'}`
 };
 for (const [id, f] of Object.entries(lateThanks)) vary(id, { thanks: f });
 /* the anvil remembers: Kael pays the citadel path, the quenched anvil forges cores */

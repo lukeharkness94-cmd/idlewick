@@ -14,7 +14,7 @@ D.PROJECTS = {
 };
 /* A villager's reaction when a project is finished. Short, warm and in their own voice. */
 D.PROJECT_VOICES = {
-  well: ['Elder Wren', 'Cold, clear water. I had forgotten the sound of the bucket.'],
+  well: ['Elder Wren', 'Cold, clear water. And a bucket! An actual bucket!'],
   inn: ['Mabel the Cook', 'Sit, eat. The first bowl is always on the house for whoever fixed my sign.'],
   forge: ['Old Brannoc', 'Hear that? The anvil sings again. Bring me ore whenever you like.'],
   garden: ['Granny Bramble', 'Onions in rows, potatoes in hills. The bees will find us by morning.'],
@@ -37,7 +37,7 @@ const regionalProjects = [
  ['gloomfen','lanterns','Restore the marsh lanterns','Lanterns mark a safe path through the marsh.',{coins:2500,log_maple:30,bar_iron:15},{dr:.03},'Monsters deal 3% less damage.'],
  ['emberfall','cistern','Repair the cooling cistern','Fresh water reaches the citadel courtyards again.',{coins:5000,log_yew:30,bar_steel:15},{heal:.05},'Food restores 5% more health.'],
  ['skyreach','bridge','Repair the monastery bridge','Pilgrims can cross between the monastery peaks.',{coins:9000,log_magic:25,bar_mithril:12},{gather:.03},'Gathering is 3% faster.'],
- ['hollow','refuge','Rebuild the travellers’ refuge','A welcoming refuge stands among the fallen kingdom’s ruins.',{coins:15000,log_elder:25,bar_adamant:12},{xpAll:.03},'+3% XP to every skill.']
+ ['hollow','refuge','Rebuild the travellers’ refuge','A warm refuge stands among the ruins of the old court.',{coins:15000,log_elder:25,bar_adamant:12},{xpAll:.03},'+3% XP to every skill.']
 ];
 for(const [town,id,name,story,cost,fx,reward] of regionalProjects)D.PROJECTS[id]={town,name,story,cost,reward:reward+' Resting health recovery is 2% faster.',fx:Object.assign({regen:.02},fx)};
 /* Every region restores six places, like Willowbrook (Nov 2026). The five below each town's first project use that
@@ -83,9 +83,9 @@ const moreProjects = {
  hollow: [
   ['hollow_camp','camp','Pitch the waystation','Tents and a warm fire for travellers among the ruins.',{coins:20000,log_wraithbark:30,cloth:20},{heal:.03},'Food restores 3% more health.',['A weary traveller','A fire! I could weep.']],
   ['hollow_watch','watchfire','Light the watchfires','Beacons burn along the old walls through the long night.',{coins:25000,log_elder:30,bar_adamant:15},{dr:.01},'Monsters deal 1% less damage.',['A Hollow scout','We see them coming now. That is half the battle.']],
-  ['hollow_archive','archive','Dig out the old archive','Scrolls of the fallen kingdom are recovered and read again.',{coins:30000,log_wraithbark:40,ore_nullite:10},{xp_research:.05},'+5% Scholarship XP.',['Archivist Pell','The kingdom kept wonderful records. And terrible secrets.']],
+  ['hollow_archive','archive','Dig out the old archive','The old court’s records are dried out and read again. Most of them are complaints.',{coins:30000,log_wraithbark:40,ore_nullite:10},{xp_research:.05},'+5% Scholarship XP.',['Archivist Pell','The kingdom kept wonderful records. And terrible secrets.']],
   ['hollow_garden','gravegarden','Tend the memorial garden','Pale flowers grow over the old graves, and nobody walks past in fear.',{coins:36000,crop_moonmelon:15,ore_voidstone:10},{regen:.05},'Resting health recovery is 5% faster.',['A mourner','My grandmother is here somewhere. Now she has flowers.']],
-  ['hollow_throne','throne','Restore the throne hall','Banners hang again in the great hall of the fallen kingdom.',{coins:45000,bar_rune:12,log_elder:40},{coin:.02},'+2% coins from every source.',['The last steward','It is not a kingdom again. But it is a home.']]]
+  ['hollow_throne','throne','Restore the throne hall','Banners hang again in the great hall.',{coins:45000,bar_rune:12,log_elder:40},{coin:.02},'+2% coins from every source.',['The last steward','It isn’t a kingdom again. It’s a home. Mind the puddle.']]]
 };
 for (const [town, list] of Object.entries(moreProjects)) for (const [id, art, name, story, cost, fx, reward, voice] of list) { D.PROJECTS[id] = { town, art, name, story, cost, fx, reward }; D.PROJECT_VOICES[id] = voice; }
 /* Carpentry (Nov 2026): from Saltmere on, restoration is built with sawn planks rather than raw logs; Willowbrook and
@@ -142,7 +142,7 @@ D.BOSS_VOICES = {
   morwenna: ['Gravewarden Lysa', 'The dead are sleeping. I might sleep too, for the first time in a month.', 'Lysa planted marsh-lilies over Morwenna’s hut. They are already blooming.'],
   pyrrhax: ['Warden Ignis', 'The banners can fly again. We will need to sew new ones; he burned all the old ones.', 'Emberfall’s new banners arrived. One of them has a very flattering picture of you.'],
   zephyrion: ['Abbot Seren', 'The sky bridges hold. The monks are already arguing about who crosses first.', 'The monks finished the first new sky bridge and named it after you, then argued about the spelling.'],
-  hollowking: ['The Last Herald', 'The crown is empty, and the silence with it. Go home. They will want to hear it from you.', 'Every bell in the realm rang at noon today, for no reason anyone could name.']
+  hollowking: ['The Last Herald', 'The crown is empty and the bells are going home. So should you. They will want to hear it from you, probably several times.', 'Every bell on the road rang at noon today. Nobody had to ask why.']
 };
 const destinations = { boss: 'Defeat Grubnash', house: 'Build my first home', well: D.PROJECTS.well.name, inn: D.PROJECTS.inn.name, village: 'Restore Willowbrook' };
 const nextVillageProject = () => DQ.projectsForTown('willowbrook').map(([id]) => id).find(id => !S().projects[id]);

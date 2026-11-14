@@ -4027,3 +4027,4 @@ html.calm .in-shot.on,html.calm .in-cap p,html.calm .in-letter p,html.calm .in-r
 html.calm .in-scene.stack.s0{display:none}html.calm .in-scene.stack.s1{opacity:1}
 html.calm .in-skip.on{opacity:1}
 @media (prefers-reduced-motion:reduce){#intro *,#intro{animation:none!important;transition:none!important}.in-shot.on,.in-cap p,.in-letter p,.in-road li{opacity:1;translate:0 0}.in-scene.stack.s0{display:none}.in-scene.stack.s1{opacity:1}.in-skip.on{opacity:1}}
+.in-letter p.ps{font-size:21px;color:#6a5434;margin-top:10px}

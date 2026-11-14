@@ -4,6 +4,17 @@
    nothing. Everything is data: D.TOWERS. Floors 1 to 4 are the region's toughest creatures grown stronger; floor 5 is
    the tower's own boss. Loaded after hunting.js and minibosses.js so wild beasts and saves are unchanged. */
 (() => {
+/* each tower keeper gets its own legend, in the same dry voice as the field guide */
+const TOWER_LEGEND = {
+  tw_squeak: 'Old Squeak has eaten through three granary doors, two cats and one very confident terrier. The crown is a thimble. Nobody has told him.',
+  tw_greenknight: 'The Green Knight challenges every traveller to a duel, then insists on a rematch. He has never once said where he gets the leaves.',
+  tw_keeper: 'The Keeper has kept the lamp lit for ninety years without a single day off. He would like one now, please, and is prepared to fight about it.',
+  tw_rimebeard: 'Jarl Rimebeard climbed Frostspire to prove a point. Nobody remembers the point. He has refused to come down until someone does.',
+  tw_abbot: 'The Drowned Abbot still holds services every evening. Attendance is poor, and the hymns are mostly bubbles.',
+  tw_ashka: 'Forge-Mother Ashka trained every smith in Emberfall and approved of none of them. She would like a word about your posture.',
+  tw_bellringer: 'The Last Bellringer was told to ring until the storms stopped. The storms stopped years ago. Nobody told him that either.',
+  tw_shadow: 'The King’s Shadow does everything the King does, a moment late and slightly better. It has never been invited to dinner.'
+};
 const DQ = window.DQ, D = DQ.data, S = () => DQ.S;
 const U = (key, name, text) => ({ key, name, text });
 const prize = (id, o) => { D.ITEMS[id] = Object.assign({ id, type: 'gear', rare: 1, tower: 1, val: 0, keepsake: true }, o); };
@@ -37,7 +48,7 @@ for (const [town, T] of Object.entries(D.TOWERS)) {
   const [bid, bname, bcol, sp] = T.boss;
   add(bid, bname, local.length + 1, boss, T.hp || 1.4, T.max || 1.15, 1.1, bcol, { drops: [[T.prize, [1, 1], 0], ['treasure_chest', [1, 1], .5], ['coin_pouch', [2, 4], 1]], mini: { short: bname.replace(/^The /, 'the '), first: T.prize, special: { every: 3, mult: 1.5, name: sp }, won: `${T.name} is yours. ${D.ITEMS[T.prize].name} was waiting at the top.` } });
   D.WEAK[bid] = { weak: [], resist: [] }; local.forEach((b, i) => { D.WEAK[`tw_${town}_${i + 1}`] = D.WEAK[b.id] || { weak: [], resist: [] }; });
-  if (D.LORE) D.LORE[bid] = { note: `Waits at the top of ${T.name}. Every third blow is its ${sp.toLowerCase()}. No weakness that anyone has found.`, legend: `Nobody asked it to guard the place. Nobody has managed to ask it to stop.` };
+  if (D.LORE) D.LORE[bid] = { note: `Waits at the top of ${T.name}. Every third blow is its ${sp.toLowerCase()}. No weakness that anyone has found.`, legend: TOWER_LEGEND[bid] || `Nobody asked it to guard the place. Nobody has managed to ask it to stop.` };
 }
 /* ---------- rules ---------- */
 DQ.towerFloor = town => ((S().towers || {})[town]) || 0;

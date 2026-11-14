@@ -4042,6 +4042,76 @@ html.calm .logo p,html.calm .tmenu,html.calm .tbtn.primary{animation:none}
 /* one entrance, not two: the staggered finish replaces the older whole-block rise */
 #view.enter>*{animation:none}
 html.calm #view.enter>*{animation:none}
+
+/* ===================== The opening (js/intro.js) ===================== */
+#intro{position:fixed;inset:0;z-index:400;background:#05080b;color:#efe6d2;overflow:hidden;cursor:pointer;animation:inFade .9s ease both;user-select:none}
+#intro.out{animation:inOut .7s ease forwards}
+@keyframes inFade{from{opacity:0}}@keyframes inOut{to{opacity:0}}
+.in-stage,.in-shot{position:absolute;inset:0}
+.in-shot{opacity:0;transition:opacity 1.1s ease}
+.in-shot.on{opacity:1}.in-shot.off{opacity:0}
+.in-scene{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}
+.in-scene img{flex:none;max-width:none;image-rendering:pixelated}
+.in-scene.pan img{animation:inPan 16s ease-in-out both}
+@keyframes inPan{from{translate:var(--pan) 0}to{translate:calc(var(--pan) * -1) 0}}
+.in-scene.stack{opacity:0;animation:inStack 9s ease both}
+.in-scene.stack.s0{animation-delay:0s}.in-scene.stack.s1{animation-delay:4s}
+@keyframes inStack{0%{opacity:0}12%{opacity:1}55%{opacity:1}70%{opacity:0}100%{opacity:0}}
+.in-scene.stack.s1{animation-name:inStackLast}
+@keyframes inStackLast{0%{opacity:0}15%{opacity:1}100%{opacity:1}}
+.in-scene.dark img{animation:inPan 16s ease-in-out both,inDim 6s ease forwards}
+@keyframes inDim{to{filter:grayscale(.75) brightness(.45) contrast(1.05)}}
+.in-scene.dawn img{filter:sepia(.25) saturate(1.15) brightness(1.05)}
+/* everything behind the words sits under a soft vignette so the caption always reads */
+.in-shot::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse farthest-corner at 50% 40%,transparent 55%,#05080b88 100%),linear-gradient(180deg,transparent 58%,#05080be6 100%)}
+.shot-letter::after,.shot-road::after,.shot-title::after{display:none}
+.in-bellwrap{position:absolute;left:50%;top:18%;translate:-50% 0;z-index:2}
+.in-bell{width:128px;height:128px;filter:drop-shadow(0 0 24px #f3d58a88);animation:inSwing 3.2s ease-in-out infinite;transform-origin:50% 8%}
+@keyframes inSwing{0%,100%{rotate:-7deg}50%{rotate:7deg}}
+.in-walk{position:absolute;left:50%;bottom:22%;translate:-50% 0;z-index:2}
+.in-hero{width:192px;height:256px;filter:drop-shadow(0 10px 12px #000a);animation:inBob 1.1s ease-in-out infinite}
+@keyframes inBob{0%,100%{translate:0 0}50%{translate:0 -4px}}
+/* the caption */
+.in-cap{position:absolute;left:50%;bottom:9%;translate:-50% 0;width:min(1100px,calc(100% - 64px));display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;z-index:3;pointer-events:none}
+.in-cap p{margin:0;font:400 31px/1.45 var(--f-body);color:#f4ead6;text-shadow:0 2px 0 #000,0 0 24px #000;opacity:0;translate:0 10px;transition:opacity .9s ease,translate .9s var(--ease-out,ease)}
+.in-cap p.on{opacity:1;translate:0 0}
+.in-cap p:not(:last-child){opacity:.45}
+/* Wren's letter */
+.shot-letter{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 45%,#1a2026,#05080b 75%)}
+.in-paper{width:min(780px,calc(100% - 48px));padding:52px 64px;background:linear-gradient(180deg,#efe2c2,#e2cfa5);color:#3a2b18;border-radius:3px;box-shadow:0 30px 60px -20px #000,inset 0 0 60px #b8946044;rotate:-1.2deg}
+.in-letter p{margin:0 0 16px;font:italic 400 27px/1.5 var(--f-body);opacity:0;animation:inInk 1.4s ease forwards}
+.in-letter p.date{font-size:18px;font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:#7a6440;margin-bottom:22px}
+.in-letter p.dear{font-style:normal;font-weight:600}
+.in-letter p.sign{text-align:right;font-weight:600;margin:20px 0 0}
+@keyframes inInk{from{opacity:0;filter:blur(2px)}to{opacity:1;filter:none}}
+/* the road */
+.shot-road{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 50%,#121a20,#05080b 70%)}
+.in-road ol{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:0;width:min(1100px,calc(var(--vw100,100vw) - 80px))}
+.in-road li{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:14px;opacity:0;animation:inStep .7s ease forwards;animation-delay:calc(var(--i) * .45s + .4s)}
+.in-road li::before{content:'';position:absolute;top:9px;right:50%;width:100%;height:2px;background:linear-gradient(90deg,#d8a64a55,#d8a64a);z-index:-1}
+.in-road li:first-child::before{display:none}
+.in-road li i{width:20px;height:20px;border-radius:50%;background:#2a3238;border:2px solid #d8a64a99}
+.in-road li.here i{background:#d8a64a;box-shadow:0 0 18px #f3d58a}
+.in-road li span{font:600 20px var(--f-body);color:#f3d58a;min-height:72px;display:grid;place-items:start center}
+.in-road li.end .in-bell{width:64px;height:64px;animation:inSwing 2.6s ease-in-out infinite}
+@keyframes inStep{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
+/* the title */
+.shot-title{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 60%,#1b2a2f,#05080b 70%)}
+.in-title{display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}
+.in-title .logo h1{font-size:76px}
+.in-title p{margin:0;font:400 22px var(--f-body);color:#cfc3a8}
+.in-title .tbtn{min-width:260px;animation:finRise .6s var(--ease-out,ease) .4s both,finInvite 2.6s ease-in-out 1.6s infinite}
+/* skip: only after the first click */
+.in-skip{position:absolute;top:22px;right:26px;z-index:5;background:#0008;border:1px solid #f3d58a55;color:#f3d58a;font:600 16px var(--f-ui);padding:8px 16px;border-radius:999px;cursor:pointer;opacity:0;translate:0 -6px;transition:opacity .4s,translate .4s,border-color .2s}
+.in-skip.on{opacity:1;translate:0 0}.in-skip:hover{border-color:#f3d58a}
+.in-replay{display:flex;justify-content:flex-end;margin:0 0 10px}
+@media (max-width:860px){.in-cap p{font-size:20px}.in-paper{padding:26px 24px}.in-letter p{font-size:17px}.in-title .logo h1{font-size:52px}.in-road li span{font-size:15px}.in-road li i{width:14px;height:14px}.in-road li::before{top:6px}.in-hero{width:144px;height:192px}}
+html.calm #intro *,html.calm #intro{animation:none!important;transition:none!important}
+html.calm .in-shot.on,html.calm .in-cap p,html.calm .in-letter p,html.calm .in-road li{opacity:1;translate:0 0}
+html.calm .in-scene.stack.s0{display:none}html.calm .in-scene.stack.s1{opacity:1}
+html.calm .in-skip.on{opacity:1}
+@media (prefers-reduced-motion:reduce){#intro *,#intro{animation:none!important;transition:none!important}.in-shot.on,.in-cap p,.in-letter p,.in-road li{opacity:1;translate:0 0}.in-scene.stack.s0{display:none}.in-scene.stack.s1{opacity:1}.in-skip.on{opacity:1}}
+.in-letter p.ps{font-size:21px;color:#6a5434;margin-top:10px}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -4934,13 +5004,13 @@ D.ALCH = [{ id: 'low', name: 'Low Alchemy', lvl: 16, mult: 1.5, runes: 2, xp: 31
 /* ---------- Towns ---------- */
 D.TOWNS = [
   { id: 'willowbrook', name: 'Willowbrook', tag: 'Farming hamlet', col: '#82b957', x: 100, y: 400, boss: 'grubnash', blurb: 'Thatched roofs, reed ponds and one very loud goblin problem. A gentle place to learn your trade.' },
-  { id: 'mossbarrow', name: 'Mossbarrow', tag: 'Market village', col: '#b8864f', x: 215, y: 290, boss: 'oldtusk', blurb: 'Hedgerows, haystacks and the best market for seeds and livestock in the realm. Something huge roots in the woods.' },
+  { id: 'mossbarrow', name: 'Mossbarrow', tag: 'Market village', col: '#b8864f', x: 215, y: 290, boss: 'oldtusk', blurb: 'Hedgerows, haystacks and the best seed and livestock market for miles. Something very large has been digging up the woods, and it isn’t a badger.' },
   { id: 'saltmere', name: 'Saltmere', tag: 'Harbour town', col: '#4fb3c8', x: 345, y: 200, boss: 'barnacle', blurb: 'Gulls, rope and tar. Smugglers work the docks, and the fish run fat in the cold water.' },
   { id: 'ironpeak', name: 'Ironpeak Hold', tag: 'Dwarven mountain hold', col: '#a7b4c0', x: 480, y: 325, boss: 'frostmaw', blurb: 'A hold of hammers cut into the mountain. Rich veins, frozen tarns and hungry trolls.' },
-  { id: 'gloomfen', name: 'Gloomfen', tag: 'Haunted marsh', col: '#9b87e0', x: 600, y: 165, boss: 'morwenna', blurb: 'Lantern light on black water. The dead walk here, and the witch of the fen walks with them.' },
-  { id: 'emberfall', name: 'Emberfall Citadel', tag: 'Volcanic stronghold', col: '#e8703a', x: 720, y: 335, boss: 'pyrrhax', blurb: 'A citadel on a living volcano. Only the finest adventurers come back from the Wyrm.' },
-  { id: 'skyreach', name: 'Skyreach', tag: 'Monastery in the clouds', col: '#9fd8ff', x: 815, y: 150, boss: 'zephyrion', blurb: 'Rope bridges between floating peaks. The monks guard secrets older than the realm.' },
-  { id: 'hollow', name: 'The Hollow Crown', tag: 'Fallen kingdom', col: '#8a5ad8', x: 905, y: 335, boss: 'hollowking', blurb: 'A drowned throne room under a violet sky. The last road ends here.' },
+  { id: 'gloomfen', name: 'Gloomfen', tag: 'Haunted marsh', col: '#9b87e0', x: 600, y: 165, boss: 'morwenna', blurb: 'Lanterns on black water and boardwalks that creak. The dead won’t stay buried, and everybody blames the witch out on the fen.' },
+  { id: 'emberfall', name: 'Emberfall Citadel', tag: 'Volcanic stronghold', col: '#e8703a', x: 720, y: 335, boss: 'pyrrhax', blurb: 'A fortress town on the side of a volcano that hasn’t finished. The dragon on top sets fire to anything that gets close, including the fire brigade.' },
+  { id: 'skyreach', name: 'Skyreach', tag: 'Monastery in the clouds', col: '#9fd8ff', x: 815, y: 150, boss: 'zephyrion', blurb: 'Rope bridges between peaks so high they sit above the clouds. The monks look after the bridges, the bees and a library nobody is allowed to return books to late.' },
+  { id: 'hollow', name: 'The Hollow Crown', tag: 'Fallen kingdom', col: '#8a5ad8', x: 905, y: 335, boss: 'hollowking', blurb: 'The flooded ruins of an old royal court, under a sky the wrong shade of purple. The road ends here, and so, it turns out, do the bells.' },
 ];
 D.TOWN = Object.fromEntries(D.TOWNS.map((t, i) => (t.idx = i, [t.id, t])));
 
@@ -5071,67 +5141,67 @@ const Q = (id, town, name, giver, adv, req, blurb, obj, reward) => ({ id, town, 
 D.QUESTS = [
   Q('first_steps', 'willowbrook', 'First Steps', 'Elder Wren', 1, null, 'Goblins smashed the winch on the village well and ran off with the bucket. Elder Wren needs timber for a new winch, and you need something in your belly before you go after them. Catch some shrimp and chop a few logs.',
     [{ ev: 'catch', key: 'shrimp', n: 5, label: 'Catch 5 shrimp' }, { ev: 'chop', key: 'normal', n: 5, label: 'Chop 5 logs' }], { xp: { fishing: 80, woodcutting: 80 }, coins: 60 }),
-  Q('goblin_menace', 'willowbrook', 'Goblin Menace', 'Sergeant Orrin', 1, null, 'Goblins keep raiding the east farms. Thin their numbers.',
+  Q('goblin_menace', 'willowbrook', 'Goblin Menace', 'Sergeant Orrin', 1, null, 'Goblins keep raiding the east farms. They have taken grain, two hens and most of Orrin’s patience. Send a few of them home.',
     [{ ev: 'kill', key: 'goblin', n: 6, label: 'Defeat 6 goblins' }], { xp: { strength: 250, hitpoints: 120 }, coins: 120 }),
-  Q('hungry_cook', 'willowbrook', 'The Hungry Cook', 'Mabel the Cook', 3, null, 'Mabel has a banquet tonight and an empty larder. Bring her cooked shrimp.',
+  Q('hungry_cook', 'willowbrook', 'The Hungry Cook', 'Mabel the Cook', 3, null, 'Mabel has a banquet tonight, forty guests and a larder containing one onion. Bring her cooked shrimp before she starts cooking the onion.',
     [{ ev: 'cook', key: 'shrimp', n: 8, label: 'Cook 8 shrimp' }], { xp: { cooking: 350 }, coins: 150 }),
   Q('miners_pick', 'willowbrook', "A Miner's Pick", 'Old Brannoc', 6, null, 'Brannoc lost his pickaxe and his patience. Show him how it is done.',
     [{ ev: 'mine', key: 'copper', n: 6, label: 'Mine 6 copper ore' }, { ev: 'mine', key: 'tin', n: 6, label: 'Mine 6 tin ore' }], { xp: { mining: 300 }, coins: 150, items: { tool_pick_1: 1 } }),
-  Q('chiefs_end', 'willowbrook', "The Chief's Last Stand", 'Sergeant Orrin', 6, 'goblin_menace', 'Grubnash leads the goblins from a hill fort. End it. You need combat level 8 to face him.',
+  Q('chiefs_end', 'willowbrook', "The Chief's Last Stand", 'Sergeant Orrin', 6, 'goblin_menace', 'Grubnash runs the goblins from a hill fort and calls himself a king. He is not a king. You need combat level 8 to face him.',
     [{ ev: 'boss', key: 'grubnash', n: 1, label: 'Defeat Grubnash the Goblin Chief' }], { xp: { attack: 800, strength: 800, defence: 400 }, coins: 400 }),
 
-  Q('seeds_of_hope', 'mossbarrow', 'Seeds of Hope', 'Granny Bramble', 10, null, 'Granny Bramble lends you a corner of her farm. Show her you can grow something.',
+  Q('seeds_of_hope', 'mossbarrow', 'Seeds of Hope', 'Granny Bramble', 10, null, 'Granny Bramble lends you a corner of her farm. Show her you can grow something other than excuses.',
     [{ ev: 'harvest', key: 'potato', n: 10, label: 'Harvest 10 potatoes' }], { xp: { farming: 300 }, coins: 200, items: { seed_onion: 6, feed: 20 } }),
-  Q('egg_hunt', 'mossbarrow', 'Egg Hunt', 'Granny Bramble', 11, 'seeds_of_hope', 'The market wants eggs and the hens want feeding. Look after a hen or two.',
+  Q('egg_hunt', 'mossbarrow', 'Egg Hunt', 'Granny Bramble', 11, 'seeds_of_hope', 'The market wants eggs, the hens want feeding, and nobody wants to argue with the hens. Look after one or two.',
     [{ ev: 'collect', key: 'egg', n: 10, label: 'Collect 10 eggs' }, { ev: 'pet', key: '*', n: 5, label: 'Pet your animals 5 times' }], { xp: { farming: 600 }, coins: 400 }),
-  Q('boar_hunt', 'mossbarrow', 'Tusks and Trouble', 'Hunter Wynn', 7, null, 'Boars are tearing up the fields. Wynn wants them gone before planting.',
+  Q('boar_hunt', 'mossbarrow', 'Tusks and Trouble', 'Hunter Wynn', 7, null, 'Boars are tearing up the fields faster than anyone can plant them. Wynn wants them gone before the turnips take it personally.',
     [{ ev: 'kill', key: 'boar', n: 10, label: 'Defeat 10 wild boars' }, { ev: 'kill', key: 'wolf', n: 6, label: 'Defeat 6 grey wolves' }], { xp: { attack: 500, defence: 500 }, coins: 300 }),
-  Q('king_of_the_wood', 'mossbarrow', 'King of the Wood', 'Hunter Wynn', 10, 'boar_hunt', 'Old Tusk has ruled the woods for forty winters. You need combat level 18 to face him.',
+  Q('king_of_the_wood', 'mossbarrow', 'King of the Wood', 'Hunter Wynn', 10, 'boar_hunt', 'Old Tusk has run these woods for forty winters and has never once said sorry. You need combat level 18 to face him.',
     [{ ev: 'boss', key: 'oldtusk', n: 1, label: 'Defeat Old Tusk the Boar King' }], { xp: { attack: 1500, strength: 1500, defence: 1000 }, coins: 700 }),
-  Q('crab_cull', 'saltmere', 'Crab Cull', 'Harbourmaster Ilsa', 8, null, 'Rock crabs are chewing the pier posts. Clear them out.',
+  Q('crab_cull', 'saltmere', 'Crab Cull', 'Harbourmaster Ilsa', 8, null, 'Rock crabs are eating the pier, one post at a time. Ilsa would like a pier with legs. Clear them out.',
     [{ ev: 'kill', key: 'crab', n: 10, label: 'Defeat 10 rock crabs' }], { xp: { defence: 700, hitpoints: 300 }, coins: 250 }),
-  Q('quick_fingers', 'saltmere', 'Quick Fingers', 'Whisper', 9, 'mq_thieving', 'The dock rats need a lesson in generosity. Practise your light touch.',
+  Q('quick_fingers', 'saltmere', 'Quick Fingers', 'Whisper', 9, 'mq_thieving', 'The dock rats (the two-legged kind) need a lesson in sharing. Practise your light touch.',
     [{ ev: 'thieve', key: '*', n: 15, label: 'Steal successfully 15 times' }], { xp: { thieving: 600 }, coins: 300 }),
-  Q('salt_cod', 'saltmere', 'The Salt Cod Supper', 'Chef Piers', 10, null, 'The harbour feast needs twenty plates and Piers has nobody to cook.',
+  Q('salt_cod', 'saltmere', 'The Salt Cod Supper', 'Chef Piers', 10, null, 'The harbour feast needs twenty plates of salt cod. Piers has the cod, the salt and the plates. What he hasn’t got is a cook.',
     [{ ev: 'cook', key: '*', n: 20, label: 'Cook 20 fish' }], { xp: { cooking: 900 }, coins: 350 }),
-  Q('forged_in_salt', 'saltmere', 'Forged in Salt', 'Smith Tolla', 11, 'mq_smithing', 'Tolla needs bars and nails, in that order.',
+  Q('forged_in_salt', 'saltmere', 'Forged in Salt', 'Smith Tolla', 11, 'mq_smithing', 'Tolla needs bars and nails, in that order, and she will tell you about the order more than once.',
     [{ ev: 'smelt', key: '*', n: 15, label: 'Smelt 15 bars' }, { ev: 'smith', key: '*', n: 8, label: 'Smith 8 items' }], { xp: { smithing: 1200 }, coins: 500 }),
-  Q('captains_bane', 'saltmere', "Captain's Bane", 'Harbourmaster Ilsa', 16, 'crab_cull', 'Captain Barnacle is shaking down every ship in the bay. You need combat level 25.',
+  Q('captains_bane', 'saltmere', "Captain's Bane", 'Harbourmaster Ilsa', 16, 'crab_cull', 'Captain Barnacle is charging every ship in the bay a fee for, as far as anyone can tell, being near Captain Barnacle. You need combat level 25.',
     [{ ev: 'boss', key: 'barnacle', n: 1, label: 'Defeat Captain Barnacle' }], { xp: { attack: 2500, strength: 2500, defence: 2500 }, coins: 1000 }),
 
-  Q('deep_vein', 'ironpeak', 'The Deep Vein', 'Foreman Dagna', 22, null, 'The old vein runs deep and the coal runs out. Dagna needs ore, and plenty.',
+  Q('deep_vein', 'ironpeak', 'The Deep Vein', 'Foreman Dagna', 22, null, 'The old vein runs deep and the coal keeps running out. Dagna needs ore, plenty of it, and ideally not a speech about it.',
     [{ ev: 'mine', key: 'coal', n: 20, label: 'Mine 20 coal' }, { ev: 'mine', key: 'gold', n: 8, label: 'Mine 8 gold ore' }], { xp: { mining: 2500 }, coins: 700 }),
-  Q('frozen_catch', 'ironpeak', 'Frozen Catch', 'Hearthkeeper Brunn', 24, null, 'The hold eats lobster at midwinter. Catch and cook enough to feed three hundred dwarves.',
+  Q('frozen_catch', 'ironpeak', 'Frozen Catch', 'Hearthkeeper Brunn', 24, null, 'The hold eats lobster at midwinter. All of it. Catch and cook enough for three hundred hungry dwarves and one very picky cook.',
     [{ ev: 'catch', key: 'lobster', n: 12, label: 'Catch 12 lobsters' }, { ev: 'cook', key: 'lobster', n: 12, label: 'Cook 12 lobsters' }], { xp: { fishing: 3000, cooking: 3000 }, coins: 900 }),
-  Q('dwarven_steel', 'ironpeak', 'Dwarven Steel', 'Smith Grotta', 26, 'mq_smithing', 'Prove yourself at the forge and the dwarves will call you kin.',
+  Q('dwarven_steel', 'ironpeak', 'Dwarven Steel', 'Smith Grotta', 26, 'mq_smithing', 'Prove yourself at the forge and the dwarves will call you kin. They will also start asking you to help them move house.',
     [{ ev: 'smelt', key: 'bar_steel', n: 10, label: 'Smelt 10 steel bars' }, { ev: 'smith', key: '*', n: 10, label: 'Smith 10 items' }], { xp: { smithing: 3500 }, coins: 1000 }),
-  Q('trollbane', 'ironpeak', 'Trollbane', 'Captain Hrod', 30, null, 'Trolls are coming down from the high passes. Hrod wants them sent back.',
+  Q('trollbane', 'ironpeak', 'Trollbane', 'Captain Hrod', 30, null, 'Trolls are coming down from the high passes to eat the carts. Hrod wants them sent back up, and the carts left alone.',
     [{ ev: 'kill', key: 'troll', n: 12, label: 'Defeat 12 mountain trolls' }], { xp: { strength: 4000, hitpoints: 2000 }, coins: 1200 }),
-  Q('frostmaw_hunt', 'ironpeak', 'The Frostmaw Hunt', 'Captain Hrod', 32, 'trollbane', 'Frostmaw sits on the pass and nothing gets through. You need combat level 45.',
+  Q('frostmaw_hunt', 'ironpeak', 'The Frostmaw Hunt', 'Captain Hrod', 32, 'trollbane', 'Frostmaw has sat down in the middle of the pass and nothing gets through, including the post. You need combat level 45.',
     [{ ev: 'boss', key: 'frostmaw', n: 1, label: 'Defeat Frostmaw the Ice Troll' }], { xp: { attack: 6000, strength: 6000, defence: 6000 }, coins: 2500 }),
 
-  Q('yew_planks', 'gloomfen', 'Lanterns and Yew', 'Boatwright Sorrel', 50, null, 'The fen boats are rotting. Sorrel needs strong yew and a strong back.',
+  Q('yew_planks', 'gloomfen', 'Lanterns and Yew', 'Boatwright Sorrel', 50, null, 'The fen boats are rotting faster than Sorrel can bail. She needs strong yew and a strong back, and she has noticed yours.',
     [{ ev: 'chop', key: 'yew', n: 25, label: 'Chop 25 yew logs' }], { xp: { woodcutting: 20000 }, coins: 3000 }),
-  Q('bone_collector', 'gloomfen', 'Bone Collector', 'Gravewarden Lysa', 52, null, 'The dead will not stay put. Lay them down again.',
+  Q('bone_collector', 'gloomfen', 'Bone Collector', 'Gravewarden Lysa', 52, null, 'The dead in the marsh keep getting back up, which is bad for business and worse for the graveyard. Put them back down.',
     [{ ev: 'kill', key: 'zombie', n: 20, label: 'Defeat 20 bog zombies' }, { ev: 'kill', key: 'skeleton', n: 20, label: 'Defeat 20 marsh skeletons' }], { xp: { defence: 15000, hitpoints: 6000 }, coins: 3500 }),
-  Q('swamp_supper', 'gloomfen', 'Swamp Supper', 'Mother Alder', 54, null, 'Mother Alder swears monkfish cures anything. Catch it, cook it, hope for the best.',
+  Q('swamp_supper', 'gloomfen', 'Swamp Supper', 'Mother Alder', 54, null, 'Mother Alder swears monkfish cures anything, including the things it causes. Catch it, cook it, hope for the best.',
     [{ ev: 'catch', key: 'monkfish', n: 25, label: 'Catch 25 monkfish' }, { ev: 'cook', key: 'monkfish', n: 25, label: 'Cook 25 monkfish' }], { xp: { fishing: 20000, cooking: 20000 }, coins: 4000 }),
-  Q('witchs_bane', 'gloomfen', "Witch's Bane", 'Gravewarden Lysa', 58, 'bone_collector', 'Morwenna is the reason the dead walk. Lysa has run out of prayers. You need combat level 65.',
+  Q('witchs_bane', 'gloomfen', "Witch's Bane", 'Gravewarden Lysa', 58, 'bone_collector', 'Morwenna is the reason the dead keep walking. Lysa has tried asking nicely, then asking firmly, then a strongly worded note. You need combat level 65.',
     [{ ev: 'boss', key: 'morwenna', n: 1, label: 'Defeat Morwenna the Bog Witch' }], { xp: { attack: 30000, strength: 30000, defence: 30000 }, coins: 8000 }),
 
-  Q('forge_of_embers', 'emberfall', 'Forge of Embers', 'Magmasmith Kael', 64, null, 'Runite hides in the lava tubes. Kael will pay well for it.',
+  Q('forge_of_embers', 'emberfall', 'Forge of Embers', 'Magmasmith Kael', 64, null, 'Runite hides in the lava tubes, which is where Kael would also hide if runite were worth that much. He will pay well for it.',
     [{ ev: 'mine', key: 'runite', n: 10, label: 'Mine 10 runite ore' }], { xp: { mining: 60000, smithing: 20000 }, coins: 9000 }),
-  Q('shark_feast', 'emberfall', 'Shark Feast', 'Quartermaster Vess', 66, null, 'The garrison will eat well tonight if you do.',
+  Q('shark_feast', 'emberfall', 'Shark Feast', 'Quartermaster Vess', 66, null, 'The garrison eats well tonight, or the garrison eats you. Bring sharks.',
     [{ ev: 'catch', key: 'shark', n: 30, label: 'Catch 30 sharks' }, { ev: 'cook', key: 'shark', n: 30, label: 'Cook 30 sharks' }], { xp: { fishing: 60000, cooking: 60000 }, coins: 12000 }),
-  Q('drakehide_deal', 'emberfall', 'The Drakehide Deal', 'Quartermaster Vess', 70, 'mq_crafting', 'Drakehide armour is the finest a ranger can wear. Bring in the hides.',
+  Q('drakehide_deal', 'emberfall', 'The Drakehide Deal', 'Quartermaster Vess', 70, 'mq_crafting', 'Drakehide armour is the finest a ranger can wear, and the drakes are strongly against it. Bring in the hides.',
     [{ ev: 'kill', key: 'drake', n: 25, label: 'Defeat 25 ember drakes' }, { ev: 'craft', key: '*', n: 10, label: 'Craft 10 items' }], { xp: { ranged: 80000, crafting: 40000 }, coins: 15000 }),
-  Q('cloud_harvest', 'skyreach', 'Cloud Harvest', 'Brother Aldous', 78, null, 'The monks tend gardens above the clouds. Help them bring in the starfruit.',
+  Q('cloud_harvest', 'skyreach', 'Cloud Harvest', 'Brother Aldous', 78, null, 'The monks keep gardens above the clouds, where the weeding is easy and the falling is not. Help them bring in the starfruit.',
     [{ ev: 'harvest', key: 'starfruit', n: 15, label: 'Harvest 15 starfruit' }, { ev: 'catch', key: 'skyfin', n: 20, label: 'Catch 20 skyfin' }], { xp: { farming: 150000, fishing: 100000 }, coins: 30000 }),
-  Q('storm_breaker', 'skyreach', 'Stormbreaker', 'Abbot Seren', 82, 'cloud_harvest', 'Zephyrion has torn the bridges from the sky. You need combat level 95.',
+  Q('storm_breaker', 'skyreach', 'Stormbreaker', 'Abbot Seren', 82, 'cloud_harvest', 'Zephyrion has been tearing the bridges down for fun, and the monks are running out of rope and patience. You need combat level 95.',
     [{ ev: 'boss', key: 'zephyrion', n: 1, label: 'Defeat Zephyrion the Storm Roc' }], { xp: { attack: 200000, strength: 200000, defence: 200000 }, coins: 80000 }),
-  Q('crownfall', 'hollow', 'Crownfall', 'The Last Herald', 88, 'storm_breaker', 'The Hollow King waits on a drowned throne. End the long sorrow. You need combat level 97.',
+  Q('crownfall', 'hollow', 'Crownfall', 'The Last Herald', 88, 'storm_breaker', 'The Hollow King sits in his flooded throne room with every missing bell on the road. Go and get them back. You need combat level 97.',
     [{ ev: 'kill', key: 'voidknight', n: 20, label: 'Defeat 20 void knights' }, { ev: 'boss', key: 'hollowking', n: 1, label: 'Defeat the Hollow King' }], { xp: { attack: 400000, strength: 400000, defence: 400000, hitpoints: 200000 }, coins: 250000 }),
-  Q('wyrm_slayer', 'emberfall', 'Wyrmslayer', 'Warden Ignis', 75, 'drakehide_deal', 'Pyrrhax has burned every banner in the realm. End it. You need combat level 85.',
+  Q('wyrm_slayer', 'emberfall', 'Wyrmslayer', 'Warden Ignis', 75, 'drakehide_deal', 'Pyrrhax has burned every banner Emberfall has ever sewn, and the seamstresses have had enough. You need combat level 85.',
     [{ ev: 'boss', key: 'pyrrhax', n: 1, label: 'Defeat Pyrrhax the Ember Wyrm' }], { xp: { attack: 100000, strength: 100000, defence: 100000, hitpoints: 60000 }, coins: 40000 }),
 ];
 /* ---------- Main quests: each one teaches a new skill ---------- */
@@ -5216,7 +5286,7 @@ D.QUESTS.push(
   TQ('gf_reeds', 'gloomfen', 'The Reed Stalkers', 'Gravewarden Lysa', 64, 'bone_collector', 'Reedstalkers and bogsnappers guard the path to Morwenna’s hut. Lysa will not let you go up it alone until they are dealt with.',
     [k('reedstalker', 15, 'Clear 15 reedstalkers'), k('bogsnapper', 15, 'Drive off 15 bogsnappers')], { xp: { attack: 40000, strength: 30000 }, coins: 8500 },
     'The path is open. So is her door. She knows you are coming.'),
-  TQ('gf_wraithlight', 'gloomfen', 'Wraithlight', 'Mother Alder', 67, 'swamp_supper', 'Wraiths gather where Morwenna’s lanterns burn. Mother Alder says a hunter who eats well and walks in the light will not be taken.',
+  TQ('gf_wraithlight', 'gloomfen', 'Wraithlight', 'Mother Alder', 67, 'swamp_supper', 'Wraiths drift around Morwenna’s lanterns. Mother Alder’s advice: eat well, keep to the light and never follow anyone who glows.',
     [k('wraith', 15, 'Put 15 wraiths to rest'), k('siltmarionette', 8, 'Cut the strings of 8 silt marionettes'), act('cook', 'monkfish', 30, 'Cook 30 monkfish for the road')], { xp: { hitpoints: 30000, cooking: 30000 }, coins: 9500 },
     'Now you smell of supper, not fear. The wraiths hate that.'),
 
@@ -5261,7 +5331,7 @@ D.QUESTS.push(
   TQ('hc_threads', 'hollow', 'Threads of the Saint', 'The Last Herald', 95, 'hc_echoes', 'Threadsaints stitch the Hollow King’s court together and pale orbits keep it lit. Cut the threads and put out the lights.',
     [k('threadsaint', 12, 'Cut the threads of 12 threadsaints'), k('paleorbit', 15, 'Put out 15 pale orbits'), act('catch', 'voideel', 30, 'Catch 30 void eels for the long watch')], { xp: { attack: 450000, fishing: 300000 }, coins: 110000 },
     'The court is coming apart. He will have to face you himself now.'),
-  TQ('hc_bloom', 'hollow', 'The Last Bloom', 'The Last Herald', 98, 'hc_threads', 'Nullblooms open wherever the King’s horrors walk, and each one swallows a little more of the world. Close them, and the realm stops shrinking.',
+  TQ('hc_bloom', 'hollow', 'The Last Bloom', 'The Last Herald', 98, 'hc_threads', 'Nullblooms open wherever the King’s creatures walk, and the ground around each one goes grey and dead. Close them and things might grow here again.',
     [k('horror', 15, 'Defeat 15 horrors'), k('nullbloom', 10, 'Close 10 nullblooms')], { xp: { strength: 500000, hitpoints: 300000 }, coins: 130000 },
     'Look. Where the last bloom closed, something green is coming up through the stone. I had forgotten that things could grow here.'),
 );
@@ -5290,7 +5360,7 @@ cnt('alch', 'Alchemist', 'Cast alchemy', [25, 250, 2500], 'magic');
 [1000, 100000, 10000000].forEach((g, i) => ach(`earn_${g}`, ['Pocket Change', 'Well Off', 'Tycoon'][i], `Earn ${DQ.fmt(g)} coins in total.`, g, () => S().stats.earned, [100, 2000, 50000][i], 'coin'));
 [10, 25, 50, 75, 99].forEach((g, i) => ach(`adv_${g}`, ['Rising Hero', 'Seasoned Hero', 'Veteran', 'Legend', 'Paragon'][i], `Reach Hero level ${g}.`, g, () => DQ.advLvl(), [200, 1000, 6000, 20000, 100000][i], 'star'));
 D.TOWNS.forEach((t, i) => ach(`boss_${t.boss}`, `${D.MON[t.boss].boss.short} Falls`, `Defeat ${D.MON[t.boss].name}.`, 1, () => (S().towns[t.id] && S().towns[t.id].boss) ? 1 : 0, [300, 800, 1500, 6000, 20000, 100000, 200000, 500000][i], 'skull'));
-ach('visit_all', 'Well Travelled', 'Visit every town in the realm.', D.TOWNS.length, () => Object.values(S().towns).filter(t => t.visited).length, 5000, 'map');
+ach('visit_all', 'Well Travelled', 'Visit every town on the road.', D.TOWNS.length, () => Object.values(S().towns).filter(t => t.visited).length, 5000, 'map');
 [1, 5, 10, D.QUESTS.length].forEach((g, i) => ach(`quests_${g}`, ['First Errand', 'Odd Jobs', 'Hired Hand', 'Questmaster'][i], `Complete ${g} quest${g > 1 ? 's' : ''}.`, g, () => Object.values(S().q).filter(q => q.s === 'done').length, [100, 600, 2500, 25000][i], 'quest'));
 ach('first_buy', 'Open for Business', 'Buy something from a shop.', 1, () => S().stats.bought, 50, 'shop');
 ach('first_sell', 'Fair Trade', 'Sell an item.', 1, () => S().stats.sold, 25, 'coin');
@@ -5379,7 +5449,7 @@ for(const [id,name,town,cl,hp,max,att,def,coins,col,body,mark,drops] of rows){
 const D=window.DQ.data;
 for(const s of [
  {id:'hunting',name:'Hunting',col:'#c47a45',group:'gather',page:'hunting',actionReq:{kill:10},blurb:'Track wild creatures, learn their habitats and raise bonded companions.'},
- {id:'exploration',name:'Exploration',col:'#55a99a',group:'gather',page:'exploration',actionReq:{catch:25,chop:25},blurb:'Chart roads, habitats and hidden places throughout the realm.'},
+ {id:'exploration',name:'Exploration',col:'#55a99a',group:'gather',page:'exploration',actionReq:{catch:25,chop:25},blurb:'Map roads, habitats and hidden places up and down the old road.'},
  {id:'herbalism',name:'Herbalism',col:'#70ad62',group:'artisan',page:'brewery',actionReq:{harvest:20},blurb:'Turn gathered plants into remedies and powerful potions.'},
  {id:'enchanting',name:'Enchanting',col:'#a77be8',group:'artisan',page:'enchanting',actionReq:{craft:30,smith:20},blurb:'Bind runes and gems into equipment to strengthen its bonuses.'}
 ]){D.SKILLS.push(s);D.SK[s.id]=s;}
@@ -5449,7 +5519,7 @@ D.ROOMS = [
     F('noticeboard', 'Job board', 'scroll', { wspeed: [.1, .2, .3] }, v => `Workers work ${Math.round(v * 100)}% faster`, [{ coins: 2500, log_oak: 20 }, { coins: 18000, log_maple: 30 }, { coins: 90000, log_yew: 40 }]),
     F('strongbox', 'Strongbox', 'coin', { wage: [.15, .3, .45] }, v => `Wages ${Math.round(v * 100)}% cheaper`, [{ coins: 3000, bar_iron: 15 }, { coins: 20000, bar_steel: 25 }, { coins: 100000, bar_adamant: 20 }]),
   ] },
-  { id: 'trophy', name: 'Trophy hall', price: 40000, blurb: 'Show the realm what you have defeated.', furn: [
+  { id: 'trophy', name: 'Trophy hall', price: 40000, blurb: 'Show visitors what you have beaten. Visitors may not want to see.', furn: [
     F('mounts', 'Boss mounts', 'skull', { trophy: [.01, .015, .02] }, v => `+${(v * 100).toFixed(1)}% damage per boss defeated`, [{ coins: 5000, boar_tusk: 10 }, { coins: 30000, troll_bone: 20 }, { coins: 150000, wyrm_scale: 1 }]),
     F('display', 'Display case', 'gem', { coin: [.03, .06, .1] }, v => `+${Math.round(v * 100)}% coins found`, [{ coins: 5000, gem_sapphire: 3 }, { coins: 30000, gem_ruby: 3 }, { coins: 150000, gem_diamond: 5 }]),
     F('banner', 'Hall banners', 'flag', { xpAll: [.02, .04, .06] }, v => `+${Math.round(v * 100)}% XP to every skill`, [{ coins: 4000, cloth: 10 }, { coins: 25000, cloth: 25, gem_emerald: 2 }, { coins: 120000, cloth: 50, ember_core: 2 }]),
@@ -5699,7 +5769,7 @@ D.VOYAGES = [
   ['coral_reach', 'Coral Reach', 40, 3, 50, 165, [120, 300], [['raw_swordfish', [2, 4], .7], ['raw_lobster', [2, 5], .6], ['gem_emerald', [1, 1], .2]], 'A reef you can walk along at low tide, if you are quick.'],
   ['spice_atoll', 'Spice Atoll', 52, 3, 58, 225, [160, 380], [['seed_goldleaf', [1, 3], .5], ['seed_pumpkin', [2, 4], .5], ['cloth', [2, 4], .5]], 'Traders who swap rare seeds for good cloth and better stories.'],
   ['storm_spire', 'Storm Spire', 64, 4, 66, 310, [240, 520], [['raw_stormray', [1, 3], .6], ['ore_skyglass', [1, 3], .4], ['gem_ruby', [1, 1], .25]], 'A needle of rock that lightning visits every evening.'],
-  ['sunken_crown', 'Sunken Crown', 78, 4, 74, 440, [400, 900], [['raw_monkfish', [2, 4], .6], ['gem_diamond', [1, 1], .15], ['treasure_chest', [1, 1], .08]], 'The drowned palace of a kingdom older than the Hollow.'],
+  ['sunken_crown', 'Sunken Crown', 78, 4, 74, 440, [400, 900], [['raw_monkfish', [2, 4], .6], ['gem_diamond', [1, 1], .15], ['treasure_chest', [1, 1], .08]], 'A sunken palace, older than anything else on the coast and twice as damp.'],
   ['worlds_edge', 'World’s Edge', 90, 5, 84, 620, [700, 1500], [['raw_voideel', [1, 3], .6], ['ore_astralite', [1, 2], .4], ['seed_starfruit', [1, 2], .3]], 'Where the map stops and the sea goes on.']
 ].map(([id, name, lvl, boat, secs, xp, coins, loot, blurb]) => ({ id, name, lvl, boat, t: secs * 1000, xp: Math.round(secs * (6 + lvl * .42)), coins, loot: loot.filter(([k]) => D.ITEMS[k]), blurb }));
 /* voyage XP is about 75–110% of Fishing's at the same level (scripts/sim-new-skills.cjs), since the haul is half the reward */
@@ -5862,10 +5932,10 @@ D.LORE = {
   golem: L('Living stone shaped like a cloud. Crushing blows and aether break it.', "Skyreach's founders carved the golems as bridges. The golems promptly decided they would rather be doormen."),
   wyvern: L('A smaller cousin of the dragons that hunts on the wing. Frost and arrows ground it.', 'A wyvern will follow a stormfront for weeks just to sit on it. Weather scholars call this unscientific.'),
   zephyrion: L('Stays in the air. Pin him with a bow, or melee will barely reach him.', "Zephyrion rides the storm like a pony. Its wingbeats can be heard three valleys away; its shadow can be felt in two. Sailors say it keeps the weather in a nest, and that the eggs are very upset."),
-  voidknight: L('A hollow armour animated by something that has no name. Aether and crushing blows break it.', 'The Void knights swore fealty to a king who no longer exists. They continue to raise a banner for him anyway.'),
-  shade: L('A darkness with a shape. Ordinary weapons barely scratch it; fire and aether sting.', 'Shades are what is left when a name is forgotten. They hum, and the tune is a little too familiar.'),
+  voidknight: L('An empty suit of armour that still walks its rounds. Aether and crushing blows break it.', 'The Void knights promised to serve a king who no longer has a kingdom. They still turn up every morning and salute the furniture.'),
+  shade: L('A patch of dark that moves on its own. Ordinary weapons barely scratch it; fire and aether sting.', 'Shades are what is left when a name is forgotten. They hum, and the tune is a little too familiar.'),
   horror: L('Too many eyes and not enough patience. Fire and piercing arrows hurt it.', 'Scholars who study the Abyssal horrors have filed hundreds of reports. All of them end with the word "anyway".'),
-  hollowking: L('Changes form twice. Crush first, then aether and fire, then pierce.', 'The Hollow King wore a crown of every title he ever claimed, until the weight made him forget the rest. He rules a realm of shadows from a throne he cannot leave, and his court is polite, patient and endless. He has been waiting for you, specifically.'),
+  hollowking: L('Changes form twice. Crush first, then aether and fire, then pierce.', 'The Hollow King collected titles, then crowns, then bells, because he couldn’t stand the thought of the world carrying on without him. He hasn’t left his throne in years. His court still brings him tea. He has been waiting for you, specifically.'),
 };
 })();
 
@@ -13591,6 +13661,17 @@ if (hq0) UI.DO.huntquest = id => { if (D.MON[id] && D.MON[id].mini) { DQ.startAc
    nothing. Everything is data: D.TOWERS. Floors 1 to 4 are the region's toughest creatures grown stronger; floor 5 is
    the tower's own boss. Loaded after hunting.js and minibosses.js so wild beasts and saves are unchanged. */
 (() => {
+/* each tower keeper gets its own legend, in the same dry voice as the field guide */
+const TOWER_LEGEND = {
+  tw_squeak: 'Old Squeak has eaten through three granary doors, two cats and one very confident terrier. The crown is a thimble. Nobody has told him.',
+  tw_greenknight: 'The Green Knight challenges every traveller to a duel, then insists on a rematch. He has never once said where he gets the leaves.',
+  tw_keeper: 'The Keeper has kept the lamp lit for ninety years without a single day off. He would like one now, please, and is prepared to fight about it.',
+  tw_rimebeard: 'Jarl Rimebeard climbed Frostspire to prove a point. Nobody remembers the point. He has refused to come down until someone does.',
+  tw_abbot: 'The Drowned Abbot still holds services every evening. Attendance is poor, and the hymns are mostly bubbles.',
+  tw_ashka: 'Forge-Mother Ashka trained every smith in Emberfall and approved of none of them. She would like a word about your posture.',
+  tw_bellringer: 'The Last Bellringer was told to ring until the storms stopped. The storms stopped years ago. Nobody told him that either.',
+  tw_shadow: 'The King’s Shadow does everything the King does, a moment late and slightly better. It has never been invited to dinner.'
+};
 const DQ = window.DQ, D = DQ.data, S = () => DQ.S;
 const U = (key, name, text) => ({ key, name, text });
 const prize = (id, o) => { D.ITEMS[id] = Object.assign({ id, type: 'gear', rare: 1, tower: 1, val: 0, keepsake: true }, o); };
@@ -13624,7 +13705,7 @@ for (const [town, T] of Object.entries(D.TOWERS)) {
   const [bid, bname, bcol, sp] = T.boss;
   add(bid, bname, local.length + 1, boss, T.hp || 1.4, T.max || 1.15, 1.1, bcol, { drops: [[T.prize, [1, 1], 0], ['treasure_chest', [1, 1], .5], ['coin_pouch', [2, 4], 1]], mini: { short: bname.replace(/^The /, 'the '), first: T.prize, special: { every: 3, mult: 1.5, name: sp }, won: `${T.name} is yours. ${D.ITEMS[T.prize].name} was waiting at the top.` } });
   D.WEAK[bid] = { weak: [], resist: [] }; local.forEach((b, i) => { D.WEAK[`tw_${town}_${i + 1}`] = D.WEAK[b.id] || { weak: [], resist: [] }; });
-  if (D.LORE) D.LORE[bid] = { note: `Waits at the top of ${T.name}. Every third blow is its ${sp.toLowerCase()}. No weakness that anyone has found.`, legend: `Nobody asked it to guard the place. Nobody has managed to ask it to stop.` };
+  if (D.LORE) D.LORE[bid] = { note: `Waits at the top of ${T.name}. Every third blow is its ${sp.toLowerCase()}. No weakness that anyone has found.`, legend: TOWER_LEGEND[bid] || `Nobody asked it to guard the place. Nobody has managed to ask it to stop.` };
 }
 /* ---------- rules ---------- */
 DQ.towerFloor = town => ((S().towers || {})[town]) || 0;
@@ -15566,7 +15647,7 @@ DQ.recordKill = (m, drops) => {
 const cnt = rank => () => DQ.researchTotals().byRank[rank];
 [['field_notes', 'Field Notes', 'Learn the vitals of 5 monsters.', 5, cnt(3), 400], ['naturalist', 'Naturalist', 'Learn the full drop table of 10 monsters.', 10, cnt(4), 1500],
  ['lorekeeper', 'Lorekeeper', 'Write up the field notes of 10 monsters.', 10, cnt(5), 6000], ['legend_hunter', 'Legend Hunter', 'Uncover the legend of 5 monsters.', 5, cnt(6), 20000],
- ['beast_master', 'Beast Master', 'Uncover the legend of every monster in the realm.', D.MONLIST.length, cnt(6), 150000]]
+ ['beast_master', 'Beast Master', 'Uncover the legend of every monster.', D.MONLIST.length, cnt(6), 150000]]
   .forEach(([id, name, desc, goal, val, coins]) => D.ACH.push({ id, name, desc, goal, val, coins, ic: 'book' }));
 
 /* ---------- the monsters page, as a field guide ---------- */
@@ -16409,7 +16490,7 @@ D.PROJECTS = {
 };
 /* A villager's reaction when a project is finished. Short, warm and in their own voice. */
 D.PROJECT_VOICES = {
-  well: ['Elder Wren', 'Cold, clear water. I had forgotten the sound of the bucket.'],
+  well: ['Elder Wren', 'Cold, clear water. And a bucket! An actual bucket!'],
   inn: ['Mabel the Cook', 'Sit, eat. The first bowl is always on the house for whoever fixed my sign.'],
   forge: ['Old Brannoc', 'Hear that? The anvil sings again. Bring me ore whenever you like.'],
   garden: ['Granny Bramble', 'Onions in rows, potatoes in hills. The bees will find us by morning.'],
@@ -16432,7 +16513,7 @@ const regionalProjects = [
  ['gloomfen','lanterns','Restore the marsh lanterns','Lanterns mark a safe path through the marsh.',{coins:2500,log_maple:30,bar_iron:15},{dr:.03},'Monsters deal 3% less damage.'],
  ['emberfall','cistern','Repair the cooling cistern','Fresh water reaches the citadel courtyards again.',{coins:5000,log_yew:30,bar_steel:15},{heal:.05},'Food restores 5% more health.'],
  ['skyreach','bridge','Repair the monastery bridge','Pilgrims can cross between the monastery peaks.',{coins:9000,log_magic:25,bar_mithril:12},{gather:.03},'Gathering is 3% faster.'],
- ['hollow','refuge','Rebuild the travellers’ refuge','A welcoming refuge stands among the fallen kingdom’s ruins.',{coins:15000,log_elder:25,bar_adamant:12},{xpAll:.03},'+3% XP to every skill.']
+ ['hollow','refuge','Rebuild the travellers’ refuge','A warm refuge stands among the ruins of the old court.',{coins:15000,log_elder:25,bar_adamant:12},{xpAll:.03},'+3% XP to every skill.']
 ];
 for(const [town,id,name,story,cost,fx,reward] of regionalProjects)D.PROJECTS[id]={town,name,story,cost,reward:reward+' Resting health recovery is 2% faster.',fx:Object.assign({regen:.02},fx)};
 /* Every region restores six places, like Willowbrook (Nov 2026). The five below each town's first project use that
@@ -16478,9 +16559,9 @@ const moreProjects = {
  hollow: [
   ['hollow_camp','camp','Pitch the waystation','Tents and a warm fire for travellers among the ruins.',{coins:20000,log_wraithbark:30,cloth:20},{heal:.03},'Food restores 3% more health.',['A weary traveller','A fire! I could weep.']],
   ['hollow_watch','watchfire','Light the watchfires','Beacons burn along the old walls through the long night.',{coins:25000,log_elder:30,bar_adamant:15},{dr:.01},'Monsters deal 1% less damage.',['A Hollow scout','We see them coming now. That is half the battle.']],
-  ['hollow_archive','archive','Dig out the old archive','Scrolls of the fallen kingdom are recovered and read again.',{coins:30000,log_wraithbark:40,ore_nullite:10},{xp_research:.05},'+5% Scholarship XP.',['Archivist Pell','The kingdom kept wonderful records. And terrible secrets.']],
+  ['hollow_archive','archive','Dig out the old archive','The old court’s records are dried out and read again. Most of them are complaints.',{coins:30000,log_wraithbark:40,ore_nullite:10},{xp_research:.05},'+5% Scholarship XP.',['Archivist Pell','The kingdom kept wonderful records. And terrible secrets.']],
   ['hollow_garden','gravegarden','Tend the memorial garden','Pale flowers grow over the old graves, and nobody walks past in fear.',{coins:36000,crop_moonmelon:15,ore_voidstone:10},{regen:.05},'Resting health recovery is 5% faster.',['A mourner','My grandmother is here somewhere. Now she has flowers.']],
-  ['hollow_throne','throne','Restore the throne hall','Banners hang again in the great hall of the fallen kingdom.',{coins:45000,bar_rune:12,log_elder:40},{coin:.02},'+2% coins from every source.',['The last steward','It is not a kingdom again. But it is a home.']]]
+  ['hollow_throne','throne','Restore the throne hall','Banners hang again in the great hall.',{coins:45000,bar_rune:12,log_elder:40},{coin:.02},'+2% coins from every source.',['The last steward','It isn’t a kingdom again. It’s a home. Mind the puddle.']]]
 };
 for (const [town, list] of Object.entries(moreProjects)) for (const [id, art, name, story, cost, fx, reward, voice] of list) { D.PROJECTS[id] = { town, art, name, story, cost, fx, reward }; D.PROJECT_VOICES[id] = voice; }
 /* Carpentry (Nov 2026): from Saltmere on, restoration is built with sawn planks rather than raw logs; Willowbrook and
@@ -16537,7 +16618,7 @@ D.BOSS_VOICES = {
   morwenna: ['Gravewarden Lysa', 'The dead are sleeping. I might sleep too, for the first time in a month.', 'Lysa planted marsh-lilies over Morwenna’s hut. They are already blooming.'],
   pyrrhax: ['Warden Ignis', 'The banners can fly again. We will need to sew new ones; he burned all the old ones.', 'Emberfall’s new banners arrived. One of them has a very flattering picture of you.'],
   zephyrion: ['Abbot Seren', 'The sky bridges hold. The monks are already arguing about who crosses first.', 'The monks finished the first new sky bridge and named it after you, then argued about the spelling.'],
-  hollowking: ['The Last Herald', 'The crown is empty, and the silence with it. Go home. They will want to hear it from you.', 'Every bell in the realm rang at noon today, for no reason anyone could name.']
+  hollowking: ['The Last Herald', 'The crown is empty and the bells are going home. So should you. They will want to hear it from you, probably several times.', 'Every bell on the road rang at noon today. Nobody had to ask why.']
 };
 const destinations = { boss: 'Defeat Grubnash', house: 'Build my first home', well: D.PROJECTS.well.name, inn: D.PROJECTS.inn.name, village: 'Restore Willowbrook' };
 const nextVillageProject = () => DQ.projectsForTown('willowbrook').map(([id]) => id).find(id => !S().projects[id]);
@@ -17142,14 +17223,14 @@ vary('bl_ring', {
 });
 /* earlier choices echo later */
 vary('chiefs_end', {
-  blurb: () => `Grubnash leads the goblins from a hill fort. End it. You need combat level 8 to face him.${DQ.choiceOf('goblin_satchel') === 'orrin' ? ' Orrin taps the note you brought him: “He telegraphs the war cry. Watch for the stamp.”' : ''}`
+  blurb: () => `Grubnash runs the goblins from a hill fort and calls himself a king. He is not a king. You need combat level 8 to face him.${DQ.choiceOf('goblin_satchel') === 'orrin' ? ' Orrin taps the note you brought him: “He telegraphs the war cry. Watch for the stamp.”' : ''}`
 });
 const lateThanks = {
   frostmaw_hunt: () => `The pass is open. ${qdone('bl_ring') ? 'Hrod shows you a crate of stolen bells from Frostmaw’s den, packed for someone further up the mountain. Someone who pays in voidstone.' : 'Hrod says the troll was guarding something deeper in the ice.'}`,
-  witchs_bane: () => `The dead lie still. ${qdone('bl_ring') ? 'In Morwenna’s hut, a letter in the same hand as the ledger’s last page: “Bells and lights, all of them. The crown must have silence.”' : 'Lysa finds a letter sealed with a faceless crown.'}`,
-  wyrm_slayer: () => `Pyrrhax is ash. ${DQ.choiceOf('ashen_anvil') === 'quench' ? 'The anvil you woke rings once, all by itself, as the wyrm falls.' : DQ.choiceOf('ashen_anvil') === 'citadel' ? 'Magmasmith Kael’s apprentices hammer a banner from the wyrm’s scales, with your name on it.' : 'The citadel bells ring for the first time in a year.'}`,
+  witchs_bane: () => `The graves stay shut, and the gravediggers can finally take a holiday. ${qdone('bl_ring') ? 'In Morwenna’s hut, a letter in the same hand as the ledger’s last page: “Bells and lights, all of them. The crown must have silence.”' : 'Lysa finds a letter sealed with a faceless crown.'}`,
+  wyrm_slayer: () => `Pyrrhax is down, and for once the smoke is somebody else’s problem. ${DQ.choiceOf('ashen_anvil') === 'quench' ? 'The anvil you woke rings once, all by itself, as the wyrm falls.' : DQ.choiceOf('ashen_anvil') === 'citadel' ? 'Magmasmith Kael’s apprentices hammer a banner from the wyrm’s scales, with your name on it.' : 'The citadel bells ring for the first time in a year.'}`,
   storm_breaker: () => 'The sky bridges hold again. Abbot Seren says the storms were only ever fleeing something: a silence spreading from the Hollow Crown.',
-  crownfall: () => `The Hollow King is gone, and the faceless crown with him. ${qdone('bl_ring') ? 'Somewhere far behind you, Mossbarrow’s bell is ringing, and every bell he bought rings with it.' : 'Light comes back to the drowned throne.'}`
+  crownfall: () => `The Hollow King is gone, and the faceless crown with him. Mind the step on the way out. ${qdone('bl_ring') ? 'Somewhere far behind you, Mossbarrow’s bell is ringing, and every bell he bought rings with it.' : 'Light comes back to the drowned throne.'}`
 };
 for (const [id, f] of Object.entries(lateThanks)) vary(id, { thanks: f });
 /* the anvil remembers: Kael pays the citadel path, the quenched anvil forges cores */
@@ -19078,7 +19159,7 @@ add('hillfort_orders',{title:'Before the hill fort',town:'willowbrook',quest:'ch
  {speaker:'Sergeant Orrin',shot:'gate',text:'I lost to him once. That is not an order to avenge me. Come back alive, and we will call it a better ending.'}
 ]});
 add('well_water',{title:'The sound of water',town:'willowbrook',project:'well',eligible:()=>!!S().projects.well,frames:()=>[
- {speaker:'Elder Wren',shot:'well',text:'The winch turns. Someone laughs when the first bucket comes up, as if we had forgotten what water sounds like.'},
+ {speaker:'Elder Wren',shot:'well',text:'The winch turns. Someone cheers when the first bucket comes up, then someone else cheers louder, and now it’s a competition.'},
  {speaker:'Mabel the Cook',shot:'well',text:Q.choiceOf('story_willowbrook')==='village'?'You said you would start here. Tomorrow I will not have to send the children down to the stream. That is what keeping a promise looks like.':'You came back to it. The road is a fine thing, but it is good to have somewhere to come home to.'}
 ]});
 add('inn_lights',{title:'A light left on',town:'willowbrook',project:'inn',eligible:()=>!!S().projects.inn,frames:()=>[
@@ -19086,13 +19167,13 @@ add('inn_lights',{title:'A light left on',town:'willowbrook',project:'inn',eligi
  {speaker:'Elder Wren',shot:'wide',text:'A traveller asked whether the village was safe. For the first time in a while, I could offer a room instead of an apology.'}
 ]});
 const regions={
- mossbarrow:['Granny Bramble','The missing sound','You hear the sheep, the wind and a wheel turning somewhere behind the farms. Granny Bramble waits until you notice what is missing.','Our chapel bell ought to carry to the wood. It has been quiet since the theft. Help the farms, dear. When you have your feet under you, ask me about the bells.'],
+ mossbarrow:['Granny Bramble','The missing sound','You hear the sheep, the wind and a wheel turning somewhere behind the farms. Granny Bramble waits until you notice what is missing.','Our chapel bell used to carry all the way to the wood. Now the only thing that carries is Farmer Cobb, and only when he’s shouting. Help the farms, dear. When you’ve found your feet, ask me about the bells.'],
  saltmere:['Harbourmaster Ilsa','Everything leaves a wake','Saltmere smells of salt, pitch and dinners eaten in a hurry. Ilsa watches an empty berth while the tide pulls at its ropes.','Bells are heavy cargo. Whoever moved yours needed a cart, a crew and someone looking away. Barnacle has made a business of all three.'],
- ironpeak:['Captain Hrod','What the mountain keeps','The pass narrows until the sky is a strip of white. Hrod taps the ice from his beard and holds the gate for you.','A beast can close a road. Someone paying to keep it closed is another matter. Get warm. Then we can talk about what Frostmaw guards.'],
- gloomfen:['Gravewarden Lysa','Lanterns over the water','Each lantern has a name scratched into its handle. Lysa straightens one that the wind has turned towards the marsh.','People think the dead need silence. They need remembering. Morwenna has forgotten the difference. Walk carefully here.'],
+ ironpeak:['Captain Hrod','What the mountain keeps','The pass narrows until the sky is a strip of white. Hrod taps the ice from his beard and holds the gate for you.','A troll can close a road. A troll being paid to keep it closed is another matter. Get warm first. Your eyebrows have frozen.'],
+ gloomfen:['Gravewarden Lysa','Lanterns over the water','Each lantern has a name scratched into its handle. Lysa straightens one that the wind has turned towards the marsh.','People think the dead need silence. They need remembering, and a lid that stays on. Morwenna has forgotten both. Walk carefully, and don’t answer if the water says your name.'],
  emberfall:['Warden Ignis','A city still standing','Ash falls on a banner that has been mended so often there is hardly any original cloth left. Ignis brushes it clean.','Pyrrhax can burn a roof in a breath. We put another one up. That is the argument we have been having. I would like your help ending it.'],
- skyreach:['Abbot Seren','The bridges between','A bell rope moves in the wind without making a sound. Across the ravine, a bridge waits for its missing middle.','We once thought the storms were angry with us. Now I think they are running from something. Listen to the quiet between them.'],
- hollow:['The Last Herald','Where the bells went','No bird calls from the broken crown of the tower. Even your footsteps seem to arrive late. The Herald opens the last gate.','He bought bells because he could not bear the sound of a world carrying on without him. Remember the people who sent you. This is still their story.']
+ skyreach:['Abbot Seren','The bridges between','A bell rope moves in the wind without making a sound. Across the ravine, a bridge waits for its missing middle.','We used to think the storms were angry with us. Now I think they’re running from something. Also, mind the third plank on every bridge. Nobody knows why it’s always the third.'],
+ hollow:['The Last Herald','Where the bells went','No birds up here. Even your footsteps seem to arrive a moment late, as if they had to think about it. The Herald opens the last gate.','He bought bells because he could not bear the sound of a world carrying on without him. Remember the people who sent you. This is still their story.']
 };
 for(const [town,[speaker,title,text,reply]]of Object.entries(regions))add('arrival_'+town,{town,title,arrival:town,eligible:()=>!!S().towns[town]?.visited,frames:()=>[{speaker:'Narrator',shot:'wide',text},{speaker,shot:'gate',text:reply}]});
 for(const m of D.MONLIST.filter(m=>m.boss)){
@@ -19193,7 +19274,7 @@ Q.on('project',id=>{if(S().projects[id]){const s=Object.values(defs).find(s=>s.p
 const notify0=Q.notify;
 Q.notify=o=>{const r=notify0(o);/* The main quest claim owns the victory scene, preventing duplicate celebrations. */return r;};
 let ticks=0;
-Q.on('ui',()=>{if(++ticks%5||!pending||S().settings.storyScenes===false||quiet()||!Q.started||document.hidden||document.querySelector('.modal,.quest-reveal'))return;const id=pending;pending=null;if(!seen(id))Q.openStory(id);});
+Q.on('ui',()=>{if(++ticks%5||!pending||S().settings.storyScenes===false||quiet()||!Q.started||document.hidden||document.querySelector('.modal,.quest-reveal,#intro'))return;const id=pending;pending=null;if(!seen(id))Q.openStory(id);});
 /* Present existing consequential choices as scenes rather than introducing another decision system. */
 for(const [id,d]of Object.entries(D.DISCOVERIES).filter(([,d])=>d.choices))defs['discovery_'+id]={id:'discovery_'+id,title:d.name,town:d.place,type:'discovery',source:id,eligible:()=>Q.discovered(id),frames:()=>[{speaker:'Narrator',shot:'wide',text:d.text}],choices:d.choices.map(c=>({...c,effect:c.needItem?`Uses one ${D.ITEMS[c.needItem].name}. ${c.label}`:c.need?`Uses ${c.need} cooked meals. ${c.label}`:c.label}))};
 const discovery0=UI.openDiscovery;
@@ -20231,6 +20312,140 @@ addEventListener('resize', () => { try { inks(); } catch (e) {} });
 
 </script>
 <script>
+/* Idlewick: the opening (Nov 2026). A full-screen story for a new hero, played once after the character is made:
+   why the towns are quiet (the noon bells went missing), who you are (someone Wren wrote to), and what you do
+   (mend one town, and the road to the next opens). Built from the game's own pixel art at whole-number scales.
+   It moves on by itself; a click or key hurries it along, and only after that first click does Skip appear.
+   Reduced motion keeps the words and drops the pans. Replay from Home > Journal. Recorded in S.seen.intro. */
+(() => {
+const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S, esc = DQ.esc;
+const calm = () => document.documentElement.classList.contains('calm') || (S() && S().settings && S().settings.reduceFx) || matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* the script: one entry per shot; each line is shown in turn */
+const SCRIPT = name => [
+  { shot: 'town', town: 'willowbrook', bell: true, lines: [
+    'Every town on the old road had a bell.',
+    'It rang once, at noon. The market opened, the kettles went on, and somebody always wandered over to the well to complain about the weather.'] },
+  { shot: 'towns', towns: ['mossbarrow', 'saltmere'], lines: [
+    'Nobody thought much about the bells. You don’t, with things that work. Ask anyone over fifty about their knees.'] },
+  { shot: 'dark', town: 'saltmere', lines: [
+    'Then the bells started to go missing. A town would have its bell at supper, and by breakfast there would just be a rope, swinging a bit guiltily.',
+    'Nobody saw who took them. Several people saw nothing, very carefully.'] },
+  { shot: 'dark', town: 'willowbrook', lines: [
+    'Without the bell, the market stopped meeting. Without the market, the roads stopped mattering.',
+    'Fields went wild. Goblins moved into the east farms and called it a kingdom. Smugglers took the harbour and called it business.',
+    'People did what people do. They packed up and left. A few left notes. Most just took the good pans.'] },
+  { shot: 'letter', letter: [
+    'Willowbrook, early spring',
+    `Dear ${name},`,
+    'The well is broken and someone has taken the bucket. Who steals a bucket? Goblins, apparently.',
+    'Half the houses on the green are empty, and Mabel is feeding the rest of us out of sheer stubbornness.',
+    'I can’t pay much. There is a bed, a rod, an axe, and more work than one person ought to take on. I am told that is what friends are for.',
+    'You grew up here. Come home. Bring boots.',
+    '— Wren',
+    'P.S. Orrin says hello. He doesn’t, but he would if he were nicer.'] },
+  { shot: 'hero', town: 'willowbrook', lines: [
+    'You are not a knight. Nobody chose you. There was no prophecy, just a letter and a very long walk.',
+    'You can learn to fish, cut timber, cook a decent meal and hold your ground when it matters. It turns out that is enough to start.'] },
+  { shot: 'road', lines: [
+    'Mend one town, and the road to the next one opens.',
+    'Somewhere at the end of that road is whoever has the bells. You would like a word.'] },
+  { shot: 'title' }
+];
+
+const pageSize = () => { const r = getComputedStyle(document.documentElement); return { w: parseFloat(r.getPropertyValue('--vw100')) || innerWidth, h: parseFloat(r.getPropertyValue('--vh100')) || innerHeight }; };
+/* a town scene at the smallest whole-number scale that covers the screen; the spare width becomes the pan */
+const sceneHtml = (town, cls = '') => {
+  const url = DQ.sceneUrl ? DQ.sceneUrl(town) : DQ.backdropUrl && DQ.backdropUrl(town + ':0'); if (!url) return '';
+  const { w, h } = pageSize(), k = Math.max(1, Math.ceil(Math.max(w / 640, h / 360))), sw = 640 * k, pan = Math.max(0, Math.round((sw - w) / 2));
+  return `<div class="in-scene ${cls}" style="--pan:${Math.min(pan, 120)}px"><img class="pxa" src="${url}" width="${sw}" height="${360 * k}" alt="" draggable="false"></div>`;
+};
+const bellHtml = () => { const u = DQ.gearIconUrl && DQ.gearIconUrl('millers_bell'); return u ? `<img class="pxa in-bell" src="${u}" width="128" height="128" alt="" draggable="false">` : ''; };
+const heroHtml = () => { const u = DQ.heroFigureUrl && DQ.heroFigureUrl(S().look); return u ? `<img class="pxa in-hero" src="${u}" width="192" height="256" alt="" draggable="false">` : ''; };
+const roadHtml = () => {
+  const n = D.TOWNS.length, first = D.TOWNS[0];
+  const dots = D.TOWNS.map((t, i) => `<li style="--i:${i}" class="${i === 0 ? 'here' : i === n - 1 ? 'end' : ''}"><i></i><span>${i === 0 ? esc(first.name) : i === n - 1 ? bellHtml() : ''}</span></li>`).join('');
+  return `<div class="in-road"><ol>${dots}</ol></div>`;
+};
+const shotHtml = f => {
+  if (f.shot === 'town') return sceneHtml(f.town, 'pan') + (f.bell ? `<div class="in-bellwrap">${bellHtml()}</div>` : '');
+  if (f.shot === 'towns') return f.towns.map((t, i) => sceneHtml(t, `pan stack s${i}`)).join('');
+  if (f.shot === 'dark') return sceneHtml(f.town, 'pan dark');
+  if (f.shot === 'hero') return sceneHtml(f.town, 'dawn') + `<div class="in-walk">${heroHtml()}</div>`;
+  if (f.shot === 'road') return roadHtml();
+  if (f.shot === 'letter') return `<div class="in-paper"><div class="in-letter">${f.letter.map((l, i) => `<p class="${i === 0 ? 'date' : i === 1 ? 'dear' : /^— /.test(l) ? 'sign' : /^P\.S\./.test(l) ? 'ps' : ''}" style="--i:${i}">${esc(l)}</p>`).join('')}</div></div>`;
+  if (f.shot === 'title') return `<div class="in-title"><div class="logo">${DQ.ico('candle')}<h1>Idlewick</h1></div><p>Your work carries on while you’re away.</p><button class="tbtn primary" data-in="begin"><span>Begin</span></button></div>`;
+  return '';
+};
+
+DQ.introSeen = () => !!(S() && S().seen && S().seen.intro);
+DQ.playIntro = (opts = {}) => {
+  if (document.getElementById('intro')) return;
+  const name = (S().name || 'friend').trim() || 'friend', script = SCRIPT(name), quick = calm();
+  const el = document.createElement('div'); el.id = 'intro'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'The story so far');
+  el.innerHTML = `<div class="in-stage"></div><div class="in-cap" aria-live="polite"></div><button class="in-skip" data-in="skip" hidden>Skip intro ›</button>`;
+  document.body.appendChild(el);
+  const stage = el.querySelector('.in-stage'), cap = el.querySelector('.in-cap'), skip = el.querySelector('.in-skip');
+  let fi = -1, li = 0, timer = 0, touched = false, ended = false;
+  const readTime = t => Math.max(2400, Math.min(6500, 900 + t.split(/\s+/).length * 270));
+  const showShot = () => {
+    const f = script[fi], olds = [...stage.querySelectorAll('.in-shot')];
+    const shot = document.createElement('div'); shot.className = `in-shot shot-${f.shot}`; shot.innerHTML = shotHtml(f); stage.appendChild(shot);
+    requestAnimationFrame(() => shot.classList.add('on'));
+    olds.forEach(old => { old.classList.remove('on'); old.classList.add('off'); setTimeout(() => old.remove(), 1200); });
+    if (f.bell && DQ.sfx) DQ.sfx('bell');
+    cap.innerHTML = ''; li = 0;
+  };
+  const showLine = () => {
+    const f = script[fi]; clearTimeout(timer);
+    if (f.shot === 'title') { cap.innerHTML = ''; const b = el.querySelector('[data-in="begin"]'); if (b) setTimeout(() => b.focus({ preventScroll: true }), 50); skip.hidden = true; return; }
+    if (f.shot === 'letter') { const total = f.letter.reduce((a, l) => a + readTime(l) * .55, 0); el.querySelectorAll('.in-letter p').forEach((p, i) => p.style.animationDelay = `${i * (quick ? 0 : 1.1)}s`); timer = setTimeout(next, quick ? 9000 : total + 1500); li = f.letter.length; return; }
+    const t = f.lines[li]; const p = document.createElement('p'); p.textContent = t; cap.appendChild(p); requestAnimationFrame(() => p.classList.add('on'));
+    while (cap.children.length > 2) cap.firstElementChild.remove();
+    timer = setTimeout(advance, readTime(t));
+  };
+  const next = () => { if (fi >= script.length - 1) return; fi++; showShot(); setTimeout(showLine, fi === 0 ? 900 : 650); };
+  const advance = () => { const f = script[fi]; if (!f || f.shot === 'title') return; if (f.lines && li < f.lines.length - 1) { li++; showLine(); } else next(); };
+  const finish = () => {
+    if (ended) return; ended = true; clearTimeout(timer);
+    S().seen = S().seen || {}; S().seen.intro = 1; if (DQ.save) DQ.save();
+    el.classList.add('out'); setTimeout(() => { el.remove(); if (opts.onDone) opts.onDone(); }, quick ? 0 : 700);
+    document.removeEventListener('keydown', onKey, true);
+  };
+  const touch = () => { if (!touched) { touched = true; skip.hidden = false; requestAnimationFrame(() => skip.classList.add('on')); } };
+  el.addEventListener('click', e => {
+    const b = e.target.closest('[data-in]');
+    if (b && b.dataset.in === 'skip') return finish();
+    if (b && b.dataset.in === 'begin') { DQ.sfx && DQ.sfx('click'); return finish(); }
+    touch(); advance();
+  });
+  const onKey = e => {
+    if (!document.getElementById('intro')) return;
+    e.stopPropagation();
+    if (e.key === 'Escape') { if (touched) finish(); else touch(); e.preventDefault(); return; }
+    if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowRight') { e.preventDefault(); if (script[fi] && script[fi].shot === 'title') return finish(); touch(); advance(); }
+  };
+  document.addEventListener('keydown', onKey, true);
+  next();
+};
+
+/* a new hero sees it once; automated browsers skip it unless a test asks (localStorage idlewick.intro = 1) */
+DQ.introWanted = () => {
+  if (DQ.introSeen() || (S().settings && S().settings.storyScenes === false)) return false;
+  let forced = false; try { forced = localStorage.getItem('idlewick.intro') === '1'; } catch (e) {}
+  return forced || !navigator.webdriver;
+};
+
+/* replay from the Journal */
+if (UI && UI.V && UI.V.journal) {
+  const j0 = UI.V.journal;
+  UI.V.journal = (...a) => `<div class="in-replay"><button class="btn sm" data-do="introreplay">${DQ.ico('candle')} Watch the opening again</button></div>` + j0(...a);
+  UI.DO.introreplay = () => DQ.playIntro();
+}
+})();
+
+</script>
+<script>
 /* Idlewick: title screen, character creation and startup. */
 (() => {
 const DQ = window.DQ, D = DQ.data, { $, $$, ico, esc } = DQ;
@@ -20270,7 +20485,7 @@ function showTitle() {
 function create() {
   const look = { skin: D.LOOKS.skin[0], hair: D.LOOKS.hair[1], tunic: D.LOOKS.tunic[0], face: 'bright' }, keep = DQ.S.settings;
   const previous = DQ.S;
-  DQ.S = DQ.newState('', look); DQ.S.settings = keep; DQ.S.journal = [{ t: Date.now(), kind: 'begin', icon: 'candle', town: 'willowbrook', text: 'A new hero arrives in Willowbrook with an empty pack and a long road ahead.' }]; DQ.applyTheme();
+  DQ.S = DQ.newState('', look); DQ.S.settings = keep; DQ.S.journal = [{ t: Date.now(), kind: 'begin', icon: 'candle', town: 'willowbrook', text: 'You come home to Willowbrook with an empty pack and Wren’s letter in your pocket.' }]; DQ.applyTheme();
   /* faces: three distinct pixel designs, shown as small portraits */
   const faceRow = () => DQ.HERO_FACES && DQ.pixelArt ? `<div><span class="k">Face</span><div class="sws faces">${DQ.HERO_FACES.map(f => `<button class="swatch face-swatch ${look.face === f ? 'on' : ''}" data-k="face" data-c="${f}" aria-label="Face: ${f}"><img class="pxa" src="${DQ.heroBustUrl(Object.assign({}, look, { face: f }))}" width="32" height="32" alt=""></button>`).join('')}</div></div>` : '';
   const sw = (k) => D.LOOKS[k].map((c, i) => `<button class="swatch ${look[k] === c ? 'on' : ''}" data-k="${k}" data-c="${c}" style="background:${c}" aria-label="${k} ${i + 1}"></button>`).join('');
@@ -20302,6 +20517,8 @@ function start(isNew) {
     setTimeout(() => { const q = D.QUESTS.filter(x => DQ.questState(x) === 'new'); q.forEach(x => S.seen['q:' + x.id] = 1); }, 100);
   } else DQ.firstRun = false;
   DQ.save();
+  /* a new hero hears why they are here (js/intro.js) */
+  if (isNew && DQ.playIntro && DQ.introWanted && DQ.introWanted()) DQ.playIntro();
 }
 
 function ready() { DQ.injectSprite(); DQ.pixelInit(); DQ.fxInit(); showTitle(); }

@@ -69,9 +69,9 @@ D.LORE = {
   golem: L('Living stone shaped like a cloud. Crushing blows and aether break it.', "Skyreach's founders carved the golems as bridges. The golems promptly decided they would rather be doormen."),
   wyvern: L('A smaller cousin of the dragons that hunts on the wing. Frost and arrows ground it.', 'A wyvern will follow a stormfront for weeks just to sit on it. Weather scholars call this unscientific.'),
   zephyrion: L('Stays in the air. Pin him with a bow, or melee will barely reach him.', "Zephyrion rides the storm like a pony. Its wingbeats can be heard three valleys away; its shadow can be felt in two. Sailors say it keeps the weather in a nest, and that the eggs are very upset."),
-  voidknight: L('A hollow armour animated by something that has no name. Aether and crushing blows break it.', 'The Void knights swore fealty to a king who no longer exists. They continue to raise a banner for him anyway.'),
-  shade: L('A darkness with a shape. Ordinary weapons barely scratch it; fire and aether sting.', 'Shades are what is left when a name is forgotten. They hum, and the tune is a little too familiar.'),
+  voidknight: L('An empty suit of armour that still walks its rounds. Aether and crushing blows break it.', 'The Void knights promised to serve a king who no longer has a kingdom. They still turn up every morning and salute the furniture.'),
+  shade: L('A patch of dark that moves on its own. Ordinary weapons barely scratch it; fire and aether sting.', 'Shades are what is left when a name is forgotten. They hum, and the tune is a little too familiar.'),
   horror: L('Too many eyes and not enough patience. Fire and piercing arrows hurt it.', 'Scholars who study the Abyssal horrors have filed hundreds of reports. All of them end with the word "anyway".'),
-  hollowking: L('Changes form twice. Crush first, then aether and fire, then pierce.', 'The Hollow King wore a crown of every title he ever claimed, until the weight made him forget the rest. He rules a realm of shadows from a throne he cannot leave, and his court is polite, patient and endless. He has been waiting for you, specifically.'),
+  hollowking: L('Changes form twice. Crush first, then aether and fire, then pierce.', 'The Hollow King collected titles, then crowns, then bells, because he couldn’t stand the thought of the world carrying on without him. He hasn’t left his throne in years. His court still brings him tea. He has been waiting for you, specifically.'),
 };
 })();

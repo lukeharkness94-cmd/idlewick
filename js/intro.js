@@ -11,29 +11,31 @@ const calm = () => document.documentElement.classList.contains('calm') || (S() &
 const SCRIPT = name => [
   { shot: 'town', town: 'willowbrook', bell: true, lines: [
     'Every town on the old road had a bell.',
-    'It rang once, at noon. The market opened, kettles went on, and somebody always wandered over to the well.'] },
+    'It rang once, at noon. The market opened, the kettles went on, and somebody always wandered over to the well to complain about the weather.'] },
   { shot: 'towns', towns: ['mossbarrow', 'saltmere'], lines: [
-    'Nobody thought much about the bells. You don’t, with things that work.'] },
+    'Nobody thought much about the bells. You don’t, with things that work. Ask anyone over fifty about their knees.'] },
   { shot: 'dark', town: 'saltmere', lines: [
-    'Then they started to go missing. A town would have its bell at supper, and by morning the rope would be hanging empty.',
-    'Nobody saw who took them.'] },
+    'Then the bells started to go missing. A town would have its bell at supper, and by breakfast there would just be a rope, swinging a bit guiltily.',
+    'Nobody saw who took them. Several people saw nothing, very carefully.'] },
   { shot: 'dark', town: 'willowbrook', lines: [
     'Without the bell, the market stopped meeting. Without the market, the roads stopped mattering.',
-    'Fields went wild. Goblins moved into the east farms. Smugglers took the harbour.',
-    'People did what people do. They packed up, and they left.'] },
+    'Fields went wild. Goblins moved into the east farms and called it a kingdom. Smugglers took the harbour and called it business.',
+    'People did what people do. They packed up and left. A few left notes. Most just took the good pans.'] },
   { shot: 'letter', letter: [
     'Willowbrook, early spring',
     `Dear ${name},`,
-    'The well is broken and someone has taken the bucket. Half the houses on the green are empty, and the rest could use a hand.',
-    'I can’t pay much. There is a bed, a rod, an axe, and more work than one person ought to take on.',
-    'You grew up here. I would like it very much if you came home.',
-    '— Wren'] },
+    'The well is broken and someone has taken the bucket. Who steals a bucket? Goblins, apparently.',
+    'Half the houses on the green are empty, and Mabel is feeding the rest of us out of sheer stubbornness.',
+    'I can’t pay much. There is a bed, a rod, an axe, and more work than one person ought to take on. I am told that is what friends are for.',
+    'You grew up here. Come home. Bring boots.',
+    '— Wren',
+    'P.S. Orrin says hello. He doesn’t, but he would if he were nicer.'] },
   { shot: 'hero', town: 'willowbrook', lines: [
-    'You are not a knight. Nobody chose you. You can learn to fish, cut timber, cook a decent meal and hold your ground when it matters.',
-    'It turns out that is enough to start.'] },
+    'You are not a knight. Nobody chose you. There was no prophecy, just a letter and a very long walk.',
+    'You can learn to fish, cut timber, cook a decent meal and hold your ground when it matters. It turns out that is enough to start.'] },
   { shot: 'road', lines: [
     'Mend one town, and the road to the next one opens.',
-    'Somewhere at the end of that road is whoever has the bells.'] },
+    'Somewhere at the end of that road is whoever has the bells. You would like a word.'] },
   { shot: 'title' }
 ];
 
@@ -57,7 +59,7 @@ const shotHtml = f => {
   if (f.shot === 'dark') return sceneHtml(f.town, 'pan dark');
   if (f.shot === 'hero') return sceneHtml(f.town, 'dawn') + `<div class="in-walk">${heroHtml()}</div>`;
   if (f.shot === 'road') return roadHtml();
-  if (f.shot === 'letter') return `<div class="in-paper"><div class="in-letter">${f.letter.map((l, i) => `<p class="${i === 0 ? 'date' : i === 1 ? 'dear' : i === f.letter.length - 1 ? 'sign' : ''}" style="--i:${i}">${esc(l)}</p>`).join('')}</div></div>`;
+  if (f.shot === 'letter') return `<div class="in-paper"><div class="in-letter">${f.letter.map((l, i) => `<p class="${i === 0 ? 'date' : i === 1 ? 'dear' : /^— /.test(l) ? 'sign' : /^P\.S\./.test(l) ? 'ps' : ''}" style="--i:${i}">${esc(l)}</p>`).join('')}</div></div>`;
   if (f.shot === 'title') return `<div class="in-title"><div class="logo">${DQ.ico('candle')}<h1>Idlewick</h1></div><p>Your work carries on while you’re away.</p><button class="tbtn primary" data-in="begin"><span>Begin</span></button></div>`;
   return '';
 };

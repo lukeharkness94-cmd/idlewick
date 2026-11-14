@@ -44,7 +44,7 @@ DQ.recordKill = (m, drops) => {
 const cnt = rank => () => DQ.researchTotals().byRank[rank];
 [['field_notes', 'Field Notes', 'Learn the vitals of 5 monsters.', 5, cnt(3), 400], ['naturalist', 'Naturalist', 'Learn the full drop table of 10 monsters.', 10, cnt(4), 1500],
  ['lorekeeper', 'Lorekeeper', 'Write up the field notes of 10 monsters.', 10, cnt(5), 6000], ['legend_hunter', 'Legend Hunter', 'Uncover the legend of 5 monsters.', 5, cnt(6), 20000],
- ['beast_master', 'Beast Master', 'Uncover the legend of every monster in the realm.', D.MONLIST.length, cnt(6), 150000]]
+ ['beast_master', 'Beast Master', 'Uncover the legend of every monster.', D.MONLIST.length, cnt(6), 150000]]
   .forEach(([id, name, desc, goal, val, coins]) => D.ACH.push({ id, name, desc, goal, val, coins, ic: 'book' }));
 
 /* ---------- the monsters page, as a field guide ---------- */

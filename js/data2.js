@@ -60,7 +60,7 @@ D.ROOMS = [
     F('noticeboard', 'Job board', 'scroll', { wspeed: [.1, .2, .3] }, v => `Workers work ${Math.round(v * 100)}% faster`, [{ coins: 2500, log_oak: 20 }, { coins: 18000, log_maple: 30 }, { coins: 90000, log_yew: 40 }]),
     F('strongbox', 'Strongbox', 'coin', { wage: [.15, .3, .45] }, v => `Wages ${Math.round(v * 100)}% cheaper`, [{ coins: 3000, bar_iron: 15 }, { coins: 20000, bar_steel: 25 }, { coins: 100000, bar_adamant: 20 }]),
   ] },
-  { id: 'trophy', name: 'Trophy hall', price: 40000, blurb: 'Show the realm what you have defeated.', furn: [
+  { id: 'trophy', name: 'Trophy hall', price: 40000, blurb: 'Show visitors what you have beaten. Visitors may not want to see.', furn: [
     F('mounts', 'Boss mounts', 'skull', { trophy: [.01, .015, .02] }, v => `+${(v * 100).toFixed(1)}% damage per boss defeated`, [{ coins: 5000, boar_tusk: 10 }, { coins: 30000, troll_bone: 20 }, { coins: 150000, wyrm_scale: 1 }]),
     F('display', 'Display case', 'gem', { coin: [.03, .06, .1] }, v => `+${Math.round(v * 100)}% coins found`, [{ coins: 5000, gem_sapphire: 3 }, { coins: 30000, gem_ruby: 3 }, { coins: 150000, gem_diamond: 5 }]),
     F('banner', 'Hall banners', 'flag', { xpAll: [.02, .04, .06] }, v => `+${Math.round(v * 100)}% XP to every skill`, [{ coins: 4000, cloth: 10 }, { coins: 25000, cloth: 25, gem_emerald: 2 }, { coins: 120000, cloth: 50, ember_core: 2 }]),
