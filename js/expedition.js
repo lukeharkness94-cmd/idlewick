@@ -45,9 +45,9 @@ UI.DO.planfood = len => {
   const need = e.unknown ? null : Math.ceil(e.perMin * min), short = need == null ? 0 : Math.max(0, need - e.have), src = source();
   const chips = LENGTHS.map(([m, l]) => `<button class="chip ${m === min ? 'on' : ''}" data-do="planfood" data-a="${m}" aria-pressed="${m === min}">${esc(l)}</button>`).join('');
   const verdict = e.unknown ? `<p>No estimate yet: pick a creature in this area and the plan will use your real gear.</p>`
-    : need === 0 ? `<p class="ok">${esc(e.m.name)} barely scratches you. Your food is not a concern for ${esc(span(min))}.</p>`
-    : short === 0 ? `<p class="ok">You carry <b>${fmt(e.have)}</b> meals; ${esc(span(min))} of ${esc(e.m.name)} needs about <b>${fmt(need)}</b>. You are ready.</p>`
-    : `<p>${esc(span(min))} of ${esc(e.m.name)} needs about <b>${fmt(need)}</b> meals. You carry <b>${fmt(e.have)}</b>: <b>${fmt(short)} more</b> to be safe.</p>`;
+    : need === 0 ? `<p class="ok">${esc(DQ.monName(e.m))} barely scratches you. Your food is not a concern for ${esc(span(min))}.</p>`
+    : short === 0 ? `<p class="ok">You carry <b>${fmt(e.have)}</b> meals; ${esc(span(min))} of ${esc(DQ.monName(e.m))} needs about <b>${fmt(need)}</b>. You are ready.</p>`
+    : `<p>${esc(span(min))} of ${esc(DQ.monName(e.m))} needs about <b>${fmt(need)}</b> meals. You carry <b>${fmt(e.have)}</b>: <b>${fmt(short)} more</b> to be safe.</p>`;
   let act = '';
   if (short > 0 && src) {
     const can = Math.floor(src.held / src.per), n = Math.min(short, can), name = D.ITEMS[src.out].name.toLowerCase();

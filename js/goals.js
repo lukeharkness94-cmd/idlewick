@@ -28,7 +28,7 @@ DQ.goals = () => {
     const L = DQ.lvl(s.id), U = D.UNL[s.id] || {}, next = Object.keys(U).map(Number).filter(l => l > L).sort((a, b) => a - b)[0];
     if (next) {
       const p = lvlProg(s.id, next), names = U[next], node = Object.values(D.NODE).find(n => n.skill === s.id && n.lvl === next);
-      add({ id: 'unl:' + s.id, cat: 'Skills', icon: s.id, col: s.col, title: names[0].replace(/^Equip: /, '') + (names.length > 1 ? ` +${names.length - 1}` : ''), sub: `${s.name} ${L} → ${next}${where(node)}`, pct: p.pct, eta: etaXp(s.id, p.need), go: s.page, big: true, hint: `Train ${s.name} to see how long` });
+      add({ id: 'unl:' + s.id, cat: 'Skills', icon: s.id, col: s.col, title: DQ.ui && DQ.ui.unlockShort ? DQ.ui.unlockShort({ what: names.join(', ') }) : 'Something new', sub: `${s.name} ${L} → ${next}${where(node)}`, pct: p.pct, eta: etaXp(s.id, p.need), go: s.page, big: true, hint: `Train ${s.name} to see how long` });
     }
     const perk = D.GATHER_SKILLS.includes(s.id) && D.PERKS.find(pk => pk.lvl > L);
     if (perk) { const p = lvlProg(s.id, perk.lvl); add({ id: 'perk:' + s.id, cat: 'Skills', icon: 'star', col: s.col, title: `Perk: ${perk.name}`, sub: `${s.name} ${perk.lvl} · ${perk.speed ? Math.round(perk.speed * 100) + '% faster' : Math.round(perk.dbl * 100) + '% double yield'}`, pct: p.pct, eta: etaXp(s.id, p.need), go: s.page, minor: true, hint: `Train ${s.name} to see how long` }); }

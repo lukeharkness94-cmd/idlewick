@@ -13,7 +13,7 @@ Q.petOdds = id => { const p = D.PET[id], s = p.src || {}, spec = (D.BEAST_SPECIE
   if (s.type === 'harvest') return { where: 'Farming', p: s.chance, per: 'harvest', tries: S().stats.harvest || 0, unit: 'harvests', go: 'farming' };
   if (s.type === 'boss') return { where: D.MON[s.mon].name, p: s.chance, per: 'victory', tries: S().beast.kills[s.mon] || 0, unit: 'victories', go: 'combat' };
   if (s.type === 'shop') return { where: `Shop · ${D.TOWN[s.town].name}`, price: s.price, go: 'bestiary' };
-  if (s.type === 'hunt') { const m = D.MON[s.mon]; return { where: `${m.name} · ${D.TOWN[m.town].name}, or wooden traps`, p: Math.max(.008, .05 - m.cl * .00035), per: 'defeat', tries: S().beast.kills[m.id] || 0, unit: 'defeated', go: 'combat' }; }
+  if (s.type === 'hunt') { const m = D.MON[s.mon]; return { where: `${DQ.monName ? DQ.monName(m) : m.name} · ${D.TOWN[m.town].name}, or wooden traps`, p: Math.max(.008, .05 - m.cl * .00035), per: 'defeat', tries: S().beast.kills[m.id] || 0, unit: 'defeated', go: 'combat' }; }
   if (spec) return { where: `Trapper · Hero ${spec.hero}`, trap: true, tracks: (S().pets.tracks || {})[id] || 0, go: 'beastmastery' };
   return { where: 'Unknown' }; };
 const meter = (tries, p) => { const exp = Math.max(1, Math.round(1 / p)), pct = Math.min(100, Math.round(tries / exp * 100)); return `<span class="col-meter ${tries > exp ? 'over' : ''}"><span class="bar"><i style="width:${pct}%"></i></span></span>`; };

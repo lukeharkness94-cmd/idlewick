@@ -458,7 +458,7 @@ kbd{font:600 12.5px var(--f-mono);padding:2px 8px;border-radius:6px;background:v
 .title-in{position:relative;display:flex;flex-direction:column;align-items:center;gap:34px;padding:16px;width:100%}
 .logo{text-align:center;animation:enter .9s cubic-bezier(.2,.7,.2,1) backwards}
 .logo svg{width:64px;height:64px;color:var(--brass);filter:drop-shadow(0 0 18px #d8a64a88)}
-.logo h1{font-size:clamp(40px,7vw,76px);letter-spacing:.05em;color:var(--brass-hi);text-shadow:0 4px 30px #000,0 0 40px #d8a64a44;line-height:1.05}
+.logo h1{font-size:clamp(40px,calc(var(--vw100,100vw) * .07),76px);letter-spacing:.05em;color:var(--brass-hi);text-shadow:0 4px 30px #000,0 0 40px #d8a64a44;line-height:1.05}
 .logo p{color:var(--mute);font-size:19px;margin-top:6px}
 .tmenu{display:flex;flex-direction:column;gap:12px;width:min(420px,100%);animation:enter .9s .25s cubic-bezier(.2,.7,.2,1) backwards}
 .tbtn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 24px;border-radius:12px;border:1px solid var(--line2);background:linear-gradient(180deg,#1f2d34e6,#162027e6);font:700 21px var(--f-display);letter-spacing:.04em;transition:transform .15s,border-color .2s,filter .2s;backdrop-filter:blur(4px)}
@@ -3927,6 +3927,13 @@ button.sk-goal:hover b,.sh-next-btn:hover b{color:var(--brass);text-decoration:u
 .pk{display:grid;grid-template-columns:52px minmax(0,1fr);column-gap:8px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;opacity:.6}
 .pk b{grid-row:1/3;align-self:center;color:var(--mute)}.pk span{font-weight:600}.pk small{color:var(--mute);font-size:14px}
 .pk.got{opacity:1}.pk.got b{color:var(--good,#5cc08a)}.pk.next{opacity:1;border-color:var(--brass)}.pk.next b{color:var(--brass)}
+/* Readability floor (the player's type rule: no visible text under 13px in the 1920 design). tests/ui-rules.cjs R5 */
+@media (min-width:861px){
+  .seg button,.tag,.tz-row,.tz-row b,.mr.mono,.n.mono{font-size:13px!important}
+  .hubdot.num{font-size:13px!important;line-height:17px!important;padding:0 5px}
+  .notice-badge{font-size:13px!important;min-width:20px;height:20px}
+  .dk .notice-badge,#skilldock .dk .notice-badge{font-size:13px!important;min-width:18px;height:18px}
+}
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
    Everything here is scoped to :root[data-theme="light"], so the dark theme (style.css) is never touched.
@@ -10610,7 +10617,7 @@ function onLevel(sk, from, to) {
   if (!details.length) {
     const next = Object.keys(D.UNL[sk] || {}).map(Number).filter(level => level > to).sort((a,b) => a-b)[0];
     details.push(`Experience bonus is now +${Math.round(((DQ.xpBonusBase ? DQ.xpBonusBase(sk) : DQ.xpMult(sk)) - 1) * 100)}%.`);
-    if (next) details.push(`Next at level ${next}: ${D.UNL[sk][next].join(', ')}.`);
+    if (next) details.push(`Next at level ${next}: ${DQ.ui && DQ.ui.unlockShort ? DQ.ui.unlockShort({ what: D.UNL[sk][next].join(', ') }) : 'something new'}.`);
   }
   if (DQ.sim.on) DQ.sim.levels.push([sk, to]);
   else { DQ.log(`${sd.name} level ${to} reached.`, 'quest'); DQ.emit('levelup', sk, to); }
@@ -11912,7 +11919,7 @@ DQ.goals = () => {
     const L = DQ.lvl(s.id), U = D.UNL[s.id] || {}, next = Object.keys(U).map(Number).filter(l => l > L).sort((a, b) => a - b)[0];
     if (next) {
       const p = lvlProg(s.id, next), names = U[next], node = Object.values(D.NODE).find(n => n.skill === s.id && n.lvl === next);
-      add({ id: 'unl:' + s.id, cat: 'Skills', icon: s.id, col: s.col, title: names[0].replace(/^Equip: /, '') + (names.length > 1 ? ` +${names.length - 1}` : ''), sub: `${s.name} ${L} → ${next}${where(node)}`, pct: p.pct, eta: etaXp(s.id, p.need), go: s.page, big: true, hint: `Train ${s.name} to see how long` });
+      add({ id: 'unl:' + s.id, cat: 'Skills', icon: s.id, col: s.col, title: DQ.ui && DQ.ui.unlockShort ? DQ.ui.unlockShort({ what: names.join(', ') }) : 'Something new', sub: `${s.name} ${L} → ${next}${where(node)}`, pct: p.pct, eta: etaXp(s.id, p.need), go: s.page, big: true, hint: `Train ${s.name} to see how long` });
     }
     const perk = D.GATHER_SKILLS.includes(s.id) && D.PERKS.find(pk => pk.lvl > L);
     if (perk) { const p = lvlProg(s.id, perk.lvl); add({ id: 'perk:' + s.id, cat: 'Skills', icon: 'star', col: s.col, title: `Perk: ${perk.name}`, sub: `${s.name} ${perk.lvl} · ${perk.speed ? Math.round(perk.speed * 100) + '% faster' : Math.round(perk.dbl * 100) + '% double yield'}`, pct: p.pct, eta: etaXp(s.id, p.need), go: s.page, minor: true, hint: `Train ${s.name} to see how long` }); }
@@ -16660,7 +16667,7 @@ DQ.returnChoices = () => {
     out.push({ title: `Closest restoration: ${p.name.toLowerCase()}`, text: `Still needed: ${miss.join(', ')}.`, action: 'openproject', a: id, art: 'project:' + id });
   }
   const near = D.SKILLS.filter(sk => DQ.skillUnlocked(sk.id) && D.UNL[sk.id]).map(sk => { const L = DQ.lvl(sk.id), nextLvl = Object.keys(D.UNL[sk.id]).map(Number).find(l => l > L); return nextLvl === L + 1 ? { sk, nextLvl, pct: DQ.pctNext(sk.id), what: D.UNL[sk.id][nextLvl] } : null; }).filter(Boolean).sort((a, b) => b.pct - a.pct)[0];
-  if (near && near.pct >= 50) out.push({ title: `${near.sk.name} ${near.nextLvl} is close`, text: `${Math.round(near.pct)}% of the way there; it unlocks ${[].concat(near.what).join(', ').toLowerCase()}.`, action: 'go', a: near.sk.page, art: 'skill:' + near.sk.id });
+  if (near && near.pct >= 50) out.push({ title: `${near.sk.name} ${near.nextLvl} is close`, text: `${Math.round(near.pct)}% of the way there; next: ${(UI.unlockShort ? UI.unlockShort({ what: [].concat(near.what).join(', ') }) : 'something new')}.`, action: 'go', a: near.sk.page, art: 'skill:' + near.sk.id });
   return out;
 };
 UI.returnChoices = () => { const L = DQ.returnChoices(); return L.length ? `<div class="k" style="margin:14px 0 6px">Other good options</div><div class="return-choices">${L.map(x => `<div><b>${esc(x.title)}</b><small>${esc(x.text)}</small><button class="btn sm" data-do="returnpick" data-a="${x.action}" data-b="${x.a}">Open</button></div>`).join('')}</div>` : ''; };
@@ -16758,11 +16765,13 @@ const PAGE = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'th
 const VERB = { fish: 'Fish', wood: 'Chop', mine: 'Mine', thieve: 'Steal', recipe: 'Make', farm: 'Grow', animal: 'Raise', fight: 'Hunt', shop: 'Buy' };
 
 /* Where an item comes from, cheapest/earliest source first. Null when it has no single obvious source. */
+/* a creature you have not defeated stays unnamed everywhere (the player's rule: locked things are blacked out) */
+DQ.monName = m => !m ? '' : (m.boss || m.mini || m.tower || (S().beast.kills[m.id] || 0) > 0 || (DQ.fight && DQ.fight.mon && DQ.fight.mon.id === m.id)) ? m.name : 'Unknown creature';
 DQ.sourceOf = id => {
   const it = D.ITEMS[id]; if (!it) return null;
   for (const kind of ['fish', 'wood', 'mine', 'thieve']) {
     const nodes = (D.NODES[kind] || []).filter(n => n.item === id).sort((a, b) => a.lvl - b.lvl);
-    if (nodes.length) { const n = nodes.find(x => DQ.nodeHere(x)) || nodes[0]; return { kind, id: n.id, page: PAGE[kind], skill: n.skill, lvl: n.lvl, town: n.town, name: n.name }; }
+    if (nodes.length) { const n = nodes.find(x => DQ.nodeHere(x)) || nodes[0]; return { kind, id: n.id, page: PAGE[kind], skill: n.skill, lvl: n.lvl, town: n.town, name: DQ.skillUnlocked(n.skill) && DQ.lvl(n.skill) >= n.lvl ? n.name : '???' }; }
   }
   if (id.startsWith('crop_')) return { kind: 'farm', page: 'farming', skill: 'farming', name: it.name };
   const animal = (D.ANIMALS || []).find(a => a.prod === id); if (animal) return { kind: 'animal', page: 'farming', skill: 'farming', name: animal.name };
@@ -16771,7 +16780,7 @@ DQ.sourceOf = id => {
   const shops = Object.entries(D.SHOPS || {}).filter(([, list]) => list.includes(id)).map(([town]) => town);
   if (shops.length) return { kind: 'shop', page: 'shop', town: shops.includes(S().town) ? S().town : shops[0], name: 'Shop' };
   const mon = D.MONLIST.filter(m => !m.boss && (m.drops || []).some(d => d[0] === id)).sort((a, b) => a.cl - b.cl)[0];
-  if (mon) return { kind: 'fight', id: mon.id, page: 'combat', town: mon.town, name: mon.name };
+  if (mon) return { kind: 'fight', id: mon.id, page: 'combat', town: mon.town, name: DQ.monName(mon) };
   return null;
 };
 const where = src => {
@@ -17953,7 +17962,7 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
   const foodPill = (heal, tight) => { let e = null; try { e = DQ.expedition && DQ.expedition(); } catch (x) { e = null; }
     if (!heal) return `<button class="rl-i warn" data-do="planfood" data-a="60" data-tip="text:Plan food for a longer trip">! No food</button>`;
     if (!e || e.unknown) return `<button class="rl-i ok" data-do="planfood" data-a="60">✓ Food ${tight ? heal + ' hp' : heal + ' health'}</button>`;
-    const low = e.minutes < 30; return `<button class="rl-i ${low ? 'warn' : 'ok'}" data-do="planfood" data-a="60" data-tip="text:Food lasts ≈ ${esc(DQ.expeditionSpan(e.minutes))} vs ${esc(e.m.name)} · click to plan">${low ? '!' : '✓'} Food ${tight ? '' : 'lasts '}≈ ${esc(DQ.expeditionSpan(e.minutes))}</button>`; };
+    const low = e.minutes < 30; return `<button class="rl-i ${low ? 'warn' : 'ok'}" data-do="planfood" data-a="60" data-tip="text:Food lasts ≈ ${esc(DQ.expeditionSpan(e.minutes))} vs ${esc(DQ.monName(e.m))} · click to plan">${low ? '!' : '✓'} Food ${tight ? '' : 'lasts '}≈ ${esc(DQ.expeditionSpan(e.minutes))}</button>`; };
   /* ---------- Layout E (Dec 2026, from the player: "the combat screen looks poor again"). One header bar names what you
      are fighting or looking at, with its danger, your food and gear, the reference buttons and the one main button
      (Explore, Retreat or Challenge). Under it the fight, on a calm backdrop of the area itself, and under that three
@@ -19205,9 +19214,9 @@ UI.DO.planfood = len => {
   const need = e.unknown ? null : Math.ceil(e.perMin * min), short = need == null ? 0 : Math.max(0, need - e.have), src = source();
   const chips = LENGTHS.map(([m, l]) => `<button class="chip ${m === min ? 'on' : ''}" data-do="planfood" data-a="${m}" aria-pressed="${m === min}">${esc(l)}</button>`).join('');
   const verdict = e.unknown ? `<p>No estimate yet: pick a creature in this area and the plan will use your real gear.</p>`
-    : need === 0 ? `<p class="ok">${esc(e.m.name)} barely scratches you. Your food is not a concern for ${esc(span(min))}.</p>`
-    : short === 0 ? `<p class="ok">You carry <b>${fmt(e.have)}</b> meals; ${esc(span(min))} of ${esc(e.m.name)} needs about <b>${fmt(need)}</b>. You are ready.</p>`
-    : `<p>${esc(span(min))} of ${esc(e.m.name)} needs about <b>${fmt(need)}</b> meals. You carry <b>${fmt(e.have)}</b>: <b>${fmt(short)} more</b> to be safe.</p>`;
+    : need === 0 ? `<p class="ok">${esc(DQ.monName(e.m))} barely scratches you. Your food is not a concern for ${esc(span(min))}.</p>`
+    : short === 0 ? `<p class="ok">You carry <b>${fmt(e.have)}</b> meals; ${esc(span(min))} of ${esc(DQ.monName(e.m))} needs about <b>${fmt(need)}</b>. You are ready.</p>`
+    : `<p>${esc(span(min))} of ${esc(DQ.monName(e.m))} needs about <b>${fmt(need)}</b> meals. You carry <b>${fmt(e.have)}</b>: <b>${fmt(short)} more</b> to be safe.</p>`;
   let act = '';
   if (short > 0 && src) {
     const can = Math.floor(src.held / src.per), n = Math.min(short, can), name = D.ITEMS[src.out].name.toLowerCase();
@@ -19660,7 +19669,7 @@ Q.petOdds = id => { const p = D.PET[id], s = p.src || {}, spec = (D.BEAST_SPECIE
   if (s.type === 'harvest') return { where: 'Farming', p: s.chance, per: 'harvest', tries: S().stats.harvest || 0, unit: 'harvests', go: 'farming' };
   if (s.type === 'boss') return { where: D.MON[s.mon].name, p: s.chance, per: 'victory', tries: S().beast.kills[s.mon] || 0, unit: 'victories', go: 'combat' };
   if (s.type === 'shop') return { where: `Shop · ${D.TOWN[s.town].name}`, price: s.price, go: 'bestiary' };
-  if (s.type === 'hunt') { const m = D.MON[s.mon]; return { where: `${m.name} · ${D.TOWN[m.town].name}, or wooden traps`, p: Math.max(.008, .05 - m.cl * .00035), per: 'defeat', tries: S().beast.kills[m.id] || 0, unit: 'defeated', go: 'combat' }; }
+  if (s.type === 'hunt') { const m = D.MON[s.mon]; return { where: `${DQ.monName ? DQ.monName(m) : m.name} · ${D.TOWN[m.town].name}, or wooden traps`, p: Math.max(.008, .05 - m.cl * .00035), per: 'defeat', tries: S().beast.kills[m.id] || 0, unit: 'defeated', go: 'combat' }; }
   if (spec) return { where: `Trapper · Hero ${spec.hero}`, trap: true, tracks: (S().pets.tracks || {})[id] || 0, go: 'beastmastery' };
   return { where: 'Unknown' }; };
 const meter = (tries, p) => { const exp = Math.max(1, Math.round(1 / p)), pct = Math.min(100, Math.round(tries / exp * 100)); return `<span class="col-meter ${tries > exp ? 'over' : ''}"><span class="bar"><i style="width:${pct}%"></i></span></span>`; };

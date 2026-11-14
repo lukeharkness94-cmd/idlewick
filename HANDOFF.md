@@ -611,3 +611,12 @@ The player still saw the smoother style in places. Two causes: `js/hires.js` (an
 - Audit: Hunting, Exploration, Herbalism and Enchanting levels did nothing; Farming, Thieving, Woodcutting, Sailing, Carpentry and Beastmastery had 10 to 19 level stretches with nothing new; only Fishing, Woodcutting and Mining had surprises.
 - `js/skill_perks.js`: signature perks for all 21 skills (no gap over five levels, capstone at 99), Scholarship's tier and slot gates added to its unlock list, flourishes for the eleven hands-on skills, "Next · Lv N" under each action and in skill headers, and a per-skill perk track pop-up.
 - Evidence: `node scripts/sim-economy.cjs 24` (deterministic) 588,099 → 622,131 coins at 24 h (+6%), hero 65 → 66; `NO_PERKS=1` reproduces the old numbers. `node scripts/sim-bosses.cjs` matches `NO_PERKS=1` exactly after Health and Defence perks were kept to regen and XP (food-healing and damage-reduction perks had lifted the Hollow King from 66% to 79%).
+
+
+## Nov 2026: the player's UI rules, checked everywhere (`tests/ui-rules.cjs`)
+
+Rules collected from AGENTS.md and the player's messages, checked on 39 pages × early/mid saves × both themes × desktop/phone. Fixed what it found:
+- Spoilers: the level-up note ("Next at level N: …"), Home's suggested goals, the "X is close" line, "How to get it" tooltips (unreached spots now "???", unmet creatures "Unknown creature"), the Collection's wild-egg sources and the combat Food chip all named hidden things. They now use `UI.unlockShort` (perks by name, everything else "Something new") and `DQ.monName`.
+- Text under 13px on desktop: menu count badges (10–11px), tags, theme toggle, mastery and level numbers raised to 13px.
+- The title logo's raw `7vw` now uses `--vw100`.
+- No dropdowns, disclosures, stray fonts or fractional sprite scales were found.

@@ -58,7 +58,7 @@ function onLevel(sk, from, to) {
   if (!details.length) {
     const next = Object.keys(D.UNL[sk] || {}).map(Number).filter(level => level > to).sort((a,b) => a-b)[0];
     details.push(`Experience bonus is now +${Math.round(((DQ.xpBonusBase ? DQ.xpBonusBase(sk) : DQ.xpMult(sk)) - 1) * 100)}%.`);
-    if (next) details.push(`Next at level ${next}: ${D.UNL[sk][next].join(', ')}.`);
+    if (next) details.push(`Next at level ${next}: ${DQ.ui && DQ.ui.unlockShort ? DQ.ui.unlockShort({ what: D.UNL[sk][next].join(', ') }) : 'something new'}.`);
   }
   if (DQ.sim.on) DQ.sim.levels.push([sk, to]);
   else { DQ.log(`${sd.name} level ${to} reached.`, 'quest'); DQ.emit('levelup', sk, to); }

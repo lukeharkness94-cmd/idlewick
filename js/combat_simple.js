@@ -49,7 +49,7 @@
   const foodPill = (heal, tight) => { let e = null; try { e = DQ.expedition && DQ.expedition(); } catch (x) { e = null; }
     if (!heal) return `<button class="rl-i warn" data-do="planfood" data-a="60" data-tip="text:Plan food for a longer trip">! No food</button>`;
     if (!e || e.unknown) return `<button class="rl-i ok" data-do="planfood" data-a="60">✓ Food ${tight ? heal + ' hp' : heal + ' health'}</button>`;
-    const low = e.minutes < 30; return `<button class="rl-i ${low ? 'warn' : 'ok'}" data-do="planfood" data-a="60" data-tip="text:Food lasts ≈ ${esc(DQ.expeditionSpan(e.minutes))} vs ${esc(e.m.name)} · click to plan">${low ? '!' : '✓'} Food ${tight ? '' : 'lasts '}≈ ${esc(DQ.expeditionSpan(e.minutes))}</button>`; };
+    const low = e.minutes < 30; return `<button class="rl-i ${low ? 'warn' : 'ok'}" data-do="planfood" data-a="60" data-tip="text:Food lasts ≈ ${esc(DQ.expeditionSpan(e.minutes))} vs ${esc(DQ.monName(e.m))} · click to plan">${low ? '!' : '✓'} Food ${tight ? '' : 'lasts '}≈ ${esc(DQ.expeditionSpan(e.minutes))}</button>`; };
   /* ---------- Layout E (Dec 2026, from the player: "the combat screen looks poor again"). One header bar names what you
      are fighting or looking at, with its danger, your food and gear, the reference buttons and the one main button
      (Explore, Retreat or Challenge). Under it the fight, on a calm backdrop of the area itself, and under that three

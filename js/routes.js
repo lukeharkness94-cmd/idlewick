@@ -8,11 +8,13 @@ const PAGE = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'th
 const VERB = { fish: 'Fish', wood: 'Chop', mine: 'Mine', thieve: 'Steal', recipe: 'Make', farm: 'Grow', animal: 'Raise', fight: 'Hunt', shop: 'Buy' };
 
 /* Where an item comes from, cheapest/earliest source first. Null when it has no single obvious source. */
+/* a creature you have not defeated stays unnamed everywhere (the player's rule: locked things are blacked out) */
+DQ.monName = m => !m ? '' : (m.boss || m.mini || m.tower || (S().beast.kills[m.id] || 0) > 0 || (DQ.fight && DQ.fight.mon && DQ.fight.mon.id === m.id)) ? m.name : 'Unknown creature';
 DQ.sourceOf = id => {
   const it = D.ITEMS[id]; if (!it) return null;
   for (const kind of ['fish', 'wood', 'mine', 'thieve']) {
     const nodes = (D.NODES[kind] || []).filter(n => n.item === id).sort((a, b) => a.lvl - b.lvl);
-    if (nodes.length) { const n = nodes.find(x => DQ.nodeHere(x)) || nodes[0]; return { kind, id: n.id, page: PAGE[kind], skill: n.skill, lvl: n.lvl, town: n.town, name: n.name }; }
+    if (nodes.length) { const n = nodes.find(x => DQ.nodeHere(x)) || nodes[0]; return { kind, id: n.id, page: PAGE[kind], skill: n.skill, lvl: n.lvl, town: n.town, name: DQ.skillUnlocked(n.skill) && DQ.lvl(n.skill) >= n.lvl ? n.name : '???' }; }
   }
   if (id.startsWith('crop_')) return { kind: 'farm', page: 'farming', skill: 'farming', name: it.name };
   const animal = (D.ANIMALS || []).find(a => a.prod === id); if (animal) return { kind: 'animal', page: 'farming', skill: 'farming', name: animal.name };
@@ -21,7 +23,7 @@ DQ.sourceOf = id => {
   const shops = Object.entries(D.SHOPS || {}).filter(([, list]) => list.includes(id)).map(([town]) => town);
   if (shops.length) return { kind: 'shop', page: 'shop', town: shops.includes(S().town) ? S().town : shops[0], name: 'Shop' };
   const mon = D.MONLIST.filter(m => !m.boss && (m.drops || []).some(d => d[0] === id)).sort((a, b) => a.cl - b.cl)[0];
-  if (mon) return { kind: 'fight', id: mon.id, page: 'combat', town: mon.town, name: mon.name };
+  if (mon) return { kind: 'fight', id: mon.id, page: 'combat', town: mon.town, name: DQ.monName(mon) };
   return null;
 };
 const where = src => {
