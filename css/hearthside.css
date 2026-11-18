@@ -205,3 +205,14 @@ body{background-color:var(--ground)}
 .commission-requirements-title{margin-top:18px;font-size:17px}
 @media(max-width:860px){.visual-shop .shop-stock .commission-ranks{grid-template-columns:1fr!important}}
 @media(min-width:861px){.activity-choices .illustrated-choices{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important}}
+
+/* Comparable catalogue cards have one footprint; their panel never stretches them. */
+:root{--catalogue-card-width:300px;--catalogue-card-height:210px}
+#view .illustrated-choices{grid-template-columns:repeat(auto-fill,minmax(min(100%,var(--catalogue-card-width)),var(--catalogue-card-width)))!important;grid-auto-rows:var(--catalogue-card-height)!important;gap:12px!important;justify-content:start;align-content:start}
+#view .illustrated-choices .illustrated-card{box-sizing:border-box;width:100%!important;height:var(--catalogue-card-height)!important;min-height:var(--catalogue-card-height)!important;max-height:var(--catalogue-card-height)!important;display:flex!important;flex-direction:column;align-items:center;justify-content:center;padding:12px!important;gap:8px!important;grid-column:auto!important}
+#view .illustrated-choices .illustrated-card :is(b,small,.choice-state,.stock-price){white-space:nowrap;overflow-wrap:normal;word-break:normal}
+#view .illustrated-choices .illustrated-card>.choice-art{height:64px!important;min-height:64px!important;width:100%!important;flex:none}
+#view .illustrated-choices .illustrated-card>b{font-size:17px!important;line-height:1.3}
+#view .illustrated-choices .illustrated-card>small,#view .illustrated-choices .illustrated-card>.choice-state{font-size:15px!important;line-height:1.3}
+@media(max-width:380px){.shop-upgrade-header .shop-categories{grid-template-columns:1fr!important}.shop-upgrade-header .tool-families{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:380px){.visual-shop>.shop-stock{padding:6px!important}#view .illustrated-choices{padding:2px!important}#view .illustrated-choices .illustrated-card{padding:8px!important}}
