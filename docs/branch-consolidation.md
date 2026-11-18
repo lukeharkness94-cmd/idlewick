@@ -12,3 +12,5 @@ The owner authorised consolidation into main. Starting main: 5f9fcc1 (14 Novembe
 Historical snapshots are merged with the current source winning intentionally, not by blindly accepting old file replacements. Both original commit trees remain accessible through the merged history. No new audio composition or sound-engine update is claimed by this consolidation.
 
 Required gate: rebuild Play Idlewick.html; regression, ui-fit and ui-current pass on the consolidated tree before pushing main. Also exercise shop/source navigation, rank prerequisites, art coverage and desktop storage. No human-playtest or native/Steam readiness claim.
+
+Verification completed: rebuilt standalone; 122 regression checks, 8 artwork checks, desktop storage, sequential shop purchase rules, eight-layout shop journeys, passive tooltip/source navigation, full ui-fit and full ui-current pass. Working source matches the approved 155b424 build; consolidation adds documentation and history only.
