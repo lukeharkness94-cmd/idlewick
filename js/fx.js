@@ -12,7 +12,8 @@ DQ.fxInit = () => {
   document.addEventListener('pointerdown', e => {
     if (calm() || e.button) return;
     const inter = e.target.closest('button,[data-do],a,.slot');
-    ripple(e.clientX, e.clientY, !!inter);
+    // Pointer coordinates are viewport pixels; the effects layer inherits the UI zoom.
+    ripple(DQ.toPage(e.clientX), DQ.toPage(e.clientY), !!inter);
     if (inter && !inter.closest('.rail,.hud')) DQ.sfx('click');
   }, { passive: true });
   initTips();
@@ -20,22 +21,23 @@ DQ.fxInit = () => {
 
 /* ---------- click ripple ---------- */
 function ring(x, y, size, dur, delay, col, bw) {
-  const d = document.createElement('div');
-  d.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:${size}px;height:${size}px;margin:${-size / 2}px 0 0 ${-size / 2}px;border-radius:50%;border:${bw}px solid ${col}`;
+  const d = document.createElement('div'); d.className = 'tap-fx tap-ring';
+  d.style.cssText = `position:absolute;box-sizing:border-box;left:${x}px;top:${y}px;width:${size}px;height:${size}px;margin:${-size / 2}px 0 0 ${-size / 2}px;border-radius:50%;border:${bw}px solid ${col}`;
   fxEl.appendChild(d);
-  const a = d.animate([{ transform: 'scale(.1)', opacity: .9 }, { transform: 'scale(1)', opacity: 0 }], { duration: dur, delay, easing: 'cubic-bezier(.15,.7,.2,1)', fill: 'both' });
+  const a = d.animate([{ transform: 'scale(.1)', opacity: .9 }, { transform: 'scale(1)', opacity: 0 }], { duration: dur, delay, easing: 'cubic-bezier(.2,.45,.35,1)', fill: 'both' });
   a.onfinish = () => d.remove();
 }
 function ripple(x, y, big) {
-  ring(x, y, big ? 130 : 70, 620, 0, '#d8a64a', 2);
-  ring(x, y, big ? 78 : 40, 460, 80, '#f3d58a', 1.5);
+  ring(x, y, big ? 96 : 56, 380, 0, '#d8a64a', 2);
+  ring(x, y, big ? 58 : 32, 320, 35, '#f3d58a', 1.5);
   if (!big) return;
-  for (let i = 0; i < 8; i++) {
-    const s = document.createElement('div'), sz = 3 + Math.random() * 4;
-    s.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:${sz}px;height:${sz}px;background:${i % 3 ? '#f3d58a' : '#d8a64a'};transform:rotate(45deg)`;
+  for (let i = 0; i < 4; i++) {
+    const s = document.createElement('div'), sz = 3 + Math.random() * 3;
+    s.className = 'tap-fx tap-spark';
+    s.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:${sz}px;height:${sz}px;margin:${-sz / 2}px;background:${i % 3 ? '#f3d58a' : '#d8a64a'};transform:rotate(45deg)`;
     fxEl.appendChild(s);
-    const ang = i / 8 * 6.283 + Math.random() * .6, dist = 26 + Math.random() * 36;
-    const a = s.animate([{ transform: 'translate(0,0) rotate(45deg) scale(1)', opacity: 1 }, { transform: `translate(${Math.cos(ang) * dist}px,${Math.sin(ang) * dist + 8}px) rotate(200deg) scale(0)`, opacity: 0 }], { duration: 480 + Math.random() * 200, easing: 'cubic-bezier(.1,.7,.3,1)', fill: 'both' });
+    const ang = i / 4 * 6.283 + Math.random() * .6, dist = 26 + Math.random() * 36;
+    const a = s.animate([{ transform: 'translate(0,0) rotate(45deg) scale(1)', opacity: 1 }, { transform: `translate(${Math.cos(ang) * dist}px,${Math.sin(ang) * dist + 8}px) rotate(200deg) scale(0)`, opacity: 0 }], { duration: 360 + Math.random() * 80, easing: 'cubic-bezier(.2,.45,.35,1)', fill: 'both' });
     a.onfinish = () => s.remove();
   }
 }
@@ -122,18 +124,16 @@ DQ.notificationPage = o => {
   return 'overview';
 };
 /* Menu counts describe current decisions, never unread history. */
-DQ.actionCount = page => {
+DQ.actionTargets = page => {
   const s = DQ.S, D = DQ.data;
-  if (page === 'activity') return (s.inbox || []).length;
-  if (page === 'quests') return D.QUESTS.filter(q => ['new', 'ready'].includes(DQ.questState(q))).length;
-  if (page === 'projects') return Object.entries(D.PROJECTS || {}).filter(([id, p]) => p.town === s.town && !s.projects[id] && (DQ.projectNeed ? (n => DQ.canAfford(n) || Object.keys(n).some(k => k !== 'coins' && DQ.have(k) > 0))(DQ.projectNeed(id)) : DQ.canAfford(p.cost))).length;
-  if (page === 'farming' && DQ.skillUnlocked('farming')) return s.farm.plots.filter(DQ.plotRipe).length + s.farm.animals.filter(a => a.stored > 0).length;
-  if (page === 'research' && DQ.scholarOpen && DQ.scholarOpen() && DQ.researchSlots) {
-    const free = DQ.researchSlots() - (s.research?.active || []).length;
-    return Math.max(0, Math.min(free, D.TECHS.filter(t => !DQ.techReason(t) && DQ.techCanAfford(t)).length));
-  }
-  return 0;
+  // Home and Activity are summaries/history, not duplicate quest-action menus.
+  if(page==='quests')return D.QUESTS.filter(q=>['new','ready'].includes(DQ.questState(q))).sort((a,b)=>(DQ.questState(b)==='ready')-(DQ.questState(a)==='ready')).map(q=>({page,id:q.id,kind:DQ.questState(q)==='ready'?'quest-ready':'quest-new'}));
+  if(page==='projects')return Object.entries(D.PROJECTS||{}).filter(([id,p])=>p.town===s.town&&!s.projects[id]&&(DQ.projectNeed?(n=>DQ.canAfford(n)||Object.keys(n).some(k=>k!=='coins'&&DQ.have(k)>0))(DQ.projectNeed(id)):DQ.canAfford(p.cost))).map(([id])=>({page,id}));
+  if(page==='farming'&&DQ.skillUnlocked('farming'))return [...s.farm.plots.map((p,i)=>DQ.plotRipe(p)?{page,id:i,kind:'crop'}:null),...s.farm.animals.map((a,i)=>a.stored>0?{page,id:i,kind:'animal'}:null)].filter(Boolean);
+  if(page==='research'&&DQ.scholarOpen?.()&&DQ.researchSlots){const free=Math.max(0,DQ.researchSlots()-(s.research?.active||[]).length);return D.TECHS.filter(t=>!DQ.techReason(t)&&DQ.techCanAfford(t)).slice(0,free).map(t=>({page,id:t.id}));}
+  return [];
 };
+DQ.actionCount = page => DQ.actionTargets(page).length;
 DQ.noticeCount = pages => [...new Set(Array.isArray(pages) ? pages : [pages])].reduce((n, page) => n + DQ.actionCount(page), 0);
 DQ.markNoticesRead = page => {
   // Discard legacy unread badges; actions remain visible until resolved.
@@ -298,6 +298,7 @@ const nextPopup = () => { if (!popups.length) return; if (document.querySelector
 DQ.popupQueue = o => { popups.push(o); if (popups.length === 1) setTimeout(nextPopup, 250); };
 const closeQueued = () => { if (popups.length) setTimeout(nextPopup, 350); };
 DQ.modal = o => {
+  DQ.hideTip?.();
   DQ.closeModal(); modalTrigger = document.activeElement;
   const m = document.createElement('div'); m.className = 'modal';
   m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
@@ -335,7 +336,7 @@ function initTips() {
   const show = (t, x, y) => {
     const v = t.dataset.tip; const i = v.indexOf(':'), kind = v.slice(0, i), arg = v.slice(i + 1);
     let html = kind === 'text' ? esc(arg) : (DQ.tips[kind] ? DQ.tips[kind](arg, t) : ''); if (!html) return hide();
-    tipEl.innerHTML = html; tipEl.classList.add('on'); place(x, y, t);
+    tipEl.innerHTML = html; tipEl.classList.add('on'); t.setAttribute('aria-describedby', [t.getAttribute('aria-describedby'), 'tip'].filter(Boolean).join(' ')); place(x, y, t);
   };
   const place = (x, y, t) => {
     const r = tipEl.getBoundingClientRect(), tr = t.getBoundingClientRect(); let px = x + 16, py = y + 18;
@@ -344,7 +345,7 @@ function initTips() {
     if (py + r.height > innerHeight - 8) py = (x === null ? tr.top - r.height - 8 : y - r.height - 14); if (py < 8) py = 8;
     tipEl.style.transform = `translate(${DQ.toPage(px)}px,${DQ.toPage(py)}px)`;
   };
-  const hide = () => { clearTimeout(tipTimer); tipTarget = null; tipEl.classList.remove('on'); };
+  const hide = () => { clearTimeout(tipTimer); if(tipTarget){const ids=(tipTarget.getAttribute('aria-describedby')||'').split(' ').filter(x=>x&&x!=='tip');if(ids.length)tipTarget.setAttribute('aria-describedby',ids.join(' '));else tipTarget.removeAttribute('aria-describedby');} tipTarget = null; tipEl.classList.remove('on'); };
   document.addEventListener('mouseover', e => {
     const t = e.target.closest('[data-tip]'); if (t === tipTarget) return; hide();
     if (!t || !DQ.S.settings.tips) return; tipTarget = t;
@@ -355,6 +356,15 @@ function initTips() {
   document.addEventListener('pointerdown', hide, { passive: true });
   document.addEventListener('focusin', e => { const t = e.target.closest && e.target.closest('[data-tip]'); if (t && DQ.S.settings.tips) { tipTarget = t; show(t, null, null); } });
   document.addEventListener('focusout', hide);
+  // Keyboard focus exposes static information too. On touch, hold an action for information;
+  // releasing after a hold never also buys, equips or starts that action.
+  DQ.prepareTips = root => { if(!root)return;root.querySelectorAll('[data-tip]').forEach(t=>{if(!t.matches('button,a,input,[tabindex]')&&!t.closest('button,a'))t.tabIndex=0;}); };
+  let held=null,holdTimer=0,heldAt=0,origin=null;
+  document.addEventListener('pointerdown', e=>{if(e.pointerType!=='touch')return;const t=e.target.closest?.('[data-tip]');if(!t||!DQ.S.settings.tips)return;origin=[e.clientX,e.clientY];holdTimer=setTimeout(()=>{tipTarget=t;show(t,null,null);held=t;heldAt=Date.now();},480);},{passive:true});
+  document.addEventListener('pointermove',e=>{if(origin&&Math.hypot(e.clientX-origin[0],e.clientY-origin[1])>10){clearTimeout(holdTimer);origin=null;}},{passive:true});
+  for(const ev of ['pointerup','pointercancel'])document.addEventListener(ev,()=>{clearTimeout(holdTimer);origin=null;},{passive:true});
+  document.addEventListener('click',e=>{if(held&&Date.now()-heldAt<1200&&held.contains(e.target)){e.preventDefault();e.stopImmediatePropagation();held=null;}},true);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();});
   DQ.hideTip = hide;
 }
 })();

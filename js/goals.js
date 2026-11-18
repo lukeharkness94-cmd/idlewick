@@ -56,7 +56,7 @@ DQ.goals = () => {
   mq.slice(0, 2).forEach(q => {
     const st = DQ.questState(q), sk = D.SK[q.unlocks], p = S().q[q.id];
     if (st === 'locked') { const b = DQ.questBlockers(q); const advBlock = DQ.advLvl() < q.adv && b.length === 1; add({ id: 'mq:' + q.id, cat: 'Quests', icon: q.unlocks, col: sk.col, title: `Learn ${sk.name}`, sub: b[0], pct: advBlock ? clamp(DQ.totalXp() / D.advReq(q.adv), 0, 1) : .1, go: 'quests', minor: !advBlock }); }
-    else if (st === 'new') add({ id: 'mq:' + q.id, cat: 'Quests', icon: q.unlocks, col: sk.col, title: `Learn ${sk.name}`, sub: `Accept “${q.name}” from ${q.giver}`, pct: 1, go: 'quests', ready: true, big: true, act: { label: 'Accept', do: 'qstart', a: q.id } });
+    else if (st === 'new') add({ id: 'mq:' + q.id, cat: 'Quests', icon: q.unlocks, col: sk.col, title: `Learn ${sk.name}`, sub: `Accept “${q.name}” from ${q.giver}`, pct: 1, go: 'quests', ready: true, big: true, act: { label: 'Accept quest', do: 'qstart', a: q.id } });
     else { const tot = q.obj.reduce((a, o, i) => a + Math.min(1, DQ.objProg(q, p, i) / o.n), 0) / q.obj.length; add({ id: 'mq:' + q.id, cat: 'Quests', icon: q.unlocks, col: sk.col, title: `Learn ${sk.name}`, sub: st === 'ready' ? 'Quest complete: claim it!' : q.obj.find((o, i) => DQ.objProg(q, p, i) < o.n).label, pct: st === 'ready' ? 1 : tot, go: 'quests', ready: st === 'ready', big: true, act: st === 'ready' ? { label: 'Claim', do: 'qclaim', a: q.id } : null }); }
   });
   /* 5. Tools for skills you have been training */

@@ -1,0 +1,567 @@
+{
+  "assumptions": "Seeded region gear, recommended combat target before ranged/magic XP, fifteen best unlocked meals (thirty in packed), 72 deterministic trials per profile. No claim of normal progression or human testing. Profiles are independent, not additive.",
+  "fortune": {
+    "before": {
+      "minutes": 30,
+      "coins": 500,
+      "materialSaleValue": 100
+    },
+    "after": {
+      "bottles": 3,
+      "minutes": 180,
+      "coins": 500,
+      "materialSaleValue": 100
+    },
+    "research": {
+      "coins": 45000,
+      "materials": {
+        "coins": 45000,
+        "gem_sapphire": 5
+      },
+      "minutes": 120
+    },
+    "tonic": {
+      "mossbarrowPrice": 580,
+      "minutes": 30,
+      "onePerGameHours": 6
+    }
+  },
+  "towers": [
+    {
+      "town": "willowbrook",
+      "legacy": {
+        "combat": 11,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 3.5833333333333335,
+        "food": "herring",
+        "weapon": "bronze_hammer"
+      },
+      "unprepared": {
+        "combat": 11,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 2.5555555555555554,
+        "food": "herring",
+        "weapon": "bronze_hammer"
+      },
+      "brace": {
+        "combat": 11,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 2.5555555555555554,
+        "food": "herring",
+        "weapon": "bronze_hammer"
+      },
+      "guard": {
+        "combat": 11,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 1.7361111111111112,
+        "food": "herring",
+        "weapon": "bronze_hammer"
+      },
+      "striker": {
+        "combat": 11,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 1.9583333333333333,
+        "food": "herring",
+        "weapon": "bronze_hammer"
+      },
+      "broth": {
+        "combat": 11,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 1.8055555555555556,
+        "food": "herring",
+        "weapon": "bronze_hammer"
+      },
+      "counter": {
+        "combat": 11,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 2.5555555555555554,
+        "food": "herring",
+        "weapon": "bronze_hammer"
+      },
+      "packed": {
+        "combat": 11,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 2.5555555555555554,
+        "food": "herring",
+        "weapon": "bronze_hammer"
+      }
+    },
+    {
+      "town": "mossbarrow",
+      "legacy": {
+        "combat": 23,
+        "wins": 71,
+        "trials": 72,
+        "mealsPerWin": 6.366197183098592,
+        "food": "bream",
+        "weapon": "iron_hammer"
+      },
+      "unprepared": {
+        "combat": 23,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 4.458333333333333,
+        "food": "bream",
+        "weapon": "iron_hammer"
+      },
+      "brace": {
+        "combat": 23,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 2.7777777777777777,
+        "food": "bream",
+        "weapon": "iron_hammer"
+      },
+      "guard": {
+        "combat": 23,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 2.1805555555555554,
+        "food": "bream",
+        "weapon": "iron_hammer"
+      },
+      "striker": {
+        "combat": 23,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 2.486111111111111,
+        "food": "bream",
+        "weapon": "iron_hammer"
+      },
+      "broth": {
+        "combat": 23,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 2.0833333333333335,
+        "food": "bream",
+        "weapon": "iron_hammer"
+      },
+      "counter": {
+        "combat": 23,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 3.8333333333333335,
+        "food": "bream",
+        "weapon": "bronze_hammer"
+      },
+      "packed": {
+        "combat": 23,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 2.7777777777777777,
+        "food": "bream",
+        "weapon": "iron_hammer"
+      }
+    },
+    {
+      "town": "saltmere",
+      "legacy": {
+        "combat": 31,
+        "wins": 67,
+        "trials": 72,
+        "mealsPerWin": 10.074626865671641,
+        "food": "salmon",
+        "weapon": "iron_hammer"
+      },
+      "unprepared": {
+        "combat": 31,
+        "wins": 47,
+        "trials": 72,
+        "mealsPerWin": 11.936170212765957,
+        "food": "salmon",
+        "weapon": "iron_hammer"
+      },
+      "brace": {
+        "combat": 31,
+        "wins": 62,
+        "trials": 72,
+        "mealsPerWin": 9.741935483870968,
+        "food": "salmon",
+        "weapon": "iron_hammer"
+      },
+      "guard": {
+        "combat": 31,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 7.305555555555555,
+        "food": "salmon",
+        "weapon": "iron_hammer"
+      },
+      "striker": {
+        "combat": 31,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 7.583333333333333,
+        "food": "salmon",
+        "weapon": "iron_hammer"
+      },
+      "broth": {
+        "combat": 31,
+        "wins": 70,
+        "trials": 72,
+        "mealsPerWin": 8.657142857142857,
+        "food": "salmon",
+        "weapon": "iron_hammer"
+      },
+      "counter": {
+        "combat": 31,
+        "wins": 62,
+        "trials": 72,
+        "mealsPerWin": 9.741935483870968,
+        "food": "salmon",
+        "weapon": "iron_hammer"
+      },
+      "packed": {
+        "combat": 31,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 10.472222222222221,
+        "food": "salmon",
+        "weapon": "iron_hammer"
+      }
+    },
+    {
+      "town": "ironpeak",
+      "legacy": {
+        "combat": 55,
+        "wins": 23,
+        "trials": 72,
+        "mealsPerWin": 13.826086956521738,
+        "food": "swordfish",
+        "weapon": "steel_hammer"
+      },
+      "unprepared": {
+        "combat": 55,
+        "wins": 5,
+        "trials": 72,
+        "mealsPerWin": 13.8,
+        "food": "swordfish",
+        "weapon": "steel_hammer"
+      },
+      "brace": {
+        "combat": 55,
+        "wins": 48,
+        "trials": 72,
+        "mealsPerWin": 12.666666666666666,
+        "food": "swordfish",
+        "weapon": "steel_hammer"
+      },
+      "guard": {
+        "combat": 55,
+        "wins": 67,
+        "trials": 72,
+        "mealsPerWin": 11.208955223880597,
+        "food": "swordfish",
+        "weapon": "steel_hammer"
+      },
+      "striker": {
+        "combat": 55,
+        "wins": 68,
+        "trials": 72,
+        "mealsPerWin": 11.441176470588236,
+        "food": "swordfish",
+        "weapon": "steel_hammer"
+      },
+      "broth": {
+        "combat": 55,
+        "wins": 64,
+        "trials": 72,
+        "mealsPerWin": 11.4375,
+        "food": "swordfish",
+        "weapon": "steel_hammer"
+      },
+      "counter": {
+        "combat": 55,
+        "wins": 48,
+        "trials": 72,
+        "mealsPerWin": 12.666666666666666,
+        "food": "swordfish",
+        "weapon": "steel_hammer"
+      },
+      "packed": {
+        "combat": 55,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 15.527777777777779,
+        "food": "swordfish",
+        "weapon": "steel_hammer"
+      }
+    },
+    {
+      "town": "gloomfen",
+      "legacy": {
+        "combat": 71,
+        "wins": 46,
+        "trials": 72,
+        "mealsPerWin": 12.369565217391305,
+        "food": "monkfish",
+        "weapon": "mithril_hammer"
+      },
+      "unprepared": {
+        "combat": 71,
+        "wins": 28,
+        "trials": 72,
+        "mealsPerWin": 12.821428571428571,
+        "food": "monkfish",
+        "weapon": "mithril_hammer"
+      },
+      "brace": {
+        "combat": 71,
+        "wins": 48,
+        "trials": 72,
+        "mealsPerWin": 12.166666666666666,
+        "food": "monkfish",
+        "weapon": "mithril_hammer"
+      },
+      "guard": {
+        "combat": 71,
+        "wins": 64,
+        "trials": 72,
+        "mealsPerWin": 11,
+        "food": "monkfish",
+        "weapon": "mithril_hammer"
+      },
+      "striker": {
+        "combat": 71,
+        "wins": 58,
+        "trials": 72,
+        "mealsPerWin": 11.068965517241379,
+        "food": "monkfish",
+        "weapon": "mithril_hammer"
+      },
+      "broth": {
+        "combat": 71,
+        "wins": 52,
+        "trials": 72,
+        "mealsPerWin": 12.23076923076923,
+        "food": "monkfish",
+        "weapon": "mithril_hammer"
+      },
+      "counter": {
+        "combat": 71,
+        "wins": 69,
+        "trials": 72,
+        "mealsPerWin": 11.202898550724637,
+        "food": "monkfish",
+        "weapon": "mithril_sword"
+      },
+      "packed": {
+        "combat": 71,
+        "wins": 71,
+        "trials": 72,
+        "mealsPerWin": 17.154929577464788,
+        "food": "monkfish",
+        "weapon": "mithril_hammer"
+      }
+    },
+    {
+      "town": "emberfall",
+      "legacy": {
+        "combat": 95,
+        "wins": 18,
+        "trials": 72,
+        "mealsPerWin": 14,
+        "food": "cinderfish",
+        "weapon": "adamant_hammer"
+      },
+      "unprepared": {
+        "combat": 95,
+        "wins": 3,
+        "trials": 72,
+        "mealsPerWin": 15,
+        "food": "cinderfish",
+        "weapon": "adamant_hammer"
+      },
+      "brace": {
+        "combat": 95,
+        "wins": 23,
+        "trials": 72,
+        "mealsPerWin": 13.565217391304348,
+        "food": "cinderfish",
+        "weapon": "adamant_hammer"
+      },
+      "guard": {
+        "combat": 95,
+        "wins": 52,
+        "trials": 72,
+        "mealsPerWin": 13.115384615384615,
+        "food": "cinderfish",
+        "weapon": "adamant_hammer"
+      },
+      "striker": {
+        "combat": 95,
+        "wins": 47,
+        "trials": 72,
+        "mealsPerWin": 12.808510638297872,
+        "food": "cinderfish",
+        "weapon": "adamant_hammer"
+      },
+      "broth": {
+        "combat": 95,
+        "wins": 50,
+        "trials": 72,
+        "mealsPerWin": 13.84,
+        "food": "cinderfish",
+        "weapon": "adamant_hammer"
+      },
+      "counter": {
+        "combat": 95,
+        "wins": 23,
+        "trials": 72,
+        "mealsPerWin": 13.565217391304348,
+        "food": "cinderfish",
+        "weapon": "adamant_hammer"
+      },
+      "packed": {
+        "combat": 95,
+        "wins": 70,
+        "trials": 72,
+        "mealsPerWin": 20.985714285714284,
+        "food": "cinderfish",
+        "weapon": "adamant_hammer"
+      }
+    },
+    {
+      "town": "skyreach",
+      "legacy": {
+        "combat": 103,
+        "wins": 43,
+        "trials": 72,
+        "mealsPerWin": 12.372093023255815,
+        "food": "skyfin",
+        "weapon": "rune_hammer"
+      },
+      "unprepared": {
+        "combat": 103,
+        "wins": 6,
+        "trials": 72,
+        "mealsPerWin": 14.333333333333334,
+        "food": "skyfin",
+        "weapon": "rune_hammer"
+      },
+      "brace": {
+        "combat": 103,
+        "wins": 28,
+        "trials": 72,
+        "mealsPerWin": 13.5,
+        "food": "skyfin",
+        "weapon": "rune_hammer"
+      },
+      "guard": {
+        "combat": 103,
+        "wins": 56,
+        "trials": 72,
+        "mealsPerWin": 11.928571428571429,
+        "food": "skyfin",
+        "weapon": "rune_hammer"
+      },
+      "striker": {
+        "combat": 103,
+        "wins": 53,
+        "trials": 72,
+        "mealsPerWin": 12.547169811320755,
+        "food": "skyfin",
+        "weapon": "rune_hammer"
+      },
+      "broth": {
+        "combat": 103,
+        "wins": 48,
+        "trials": 72,
+        "mealsPerWin": 13.354166666666666,
+        "food": "skyfin",
+        "weapon": "rune_hammer"
+      },
+      "counter": {
+        "combat": 103,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 10.25,
+        "food": "skyfin",
+        "weapon": "rune_dagger"
+      },
+      "packed": {
+        "combat": 103,
+        "wins": 71,
+        "trials": 72,
+        "mealsPerWin": 18.704225352112676,
+        "food": "skyfin",
+        "weapon": "rune_hammer"
+      }
+    },
+    {
+      "town": "hollow",
+      "legacy": {
+        "combat": 108,
+        "wins": 63,
+        "trials": 72,
+        "mealsPerWin": 12.079365079365079,
+        "food": "stormray",
+        "weapon": "astral_hammer"
+      },
+      "unprepared": {
+        "combat": 108,
+        "wins": 23,
+        "trials": 72,
+        "mealsPerWin": 13.652173913043478,
+        "food": "stormray",
+        "weapon": "astral_hammer"
+      },
+      "brace": {
+        "combat": 108,
+        "wins": 63,
+        "trials": 72,
+        "mealsPerWin": 12.158730158730158,
+        "food": "stormray",
+        "weapon": "astral_hammer"
+      },
+      "guard": {
+        "combat": 108,
+        "wins": 71,
+        "trials": 72,
+        "mealsPerWin": 8.56338028169014,
+        "food": "stormray",
+        "weapon": "astral_hammer"
+      },
+      "striker": {
+        "combat": 108,
+        "wins": 68,
+        "trials": 72,
+        "mealsPerWin": 9.044117647058824,
+        "food": "stormray",
+        "weapon": "astral_hammer"
+      },
+      "broth": {
+        "combat": 108,
+        "wins": 71,
+        "trials": 72,
+        "mealsPerWin": 10.183098591549296,
+        "food": "stormray",
+        "weapon": "astral_hammer"
+      },
+      "counter": {
+        "combat": 108,
+        "wins": 63,
+        "trials": 72,
+        "mealsPerWin": 12.158730158730158,
+        "food": "stormray",
+        "weapon": "astral_hammer"
+      },
+      "packed": {
+        "combat": 108,
+        "wins": 72,
+        "trials": 72,
+        "mealsPerWin": 12.875,
+        "food": "stormray",
+        "weapon": "astral_hammer"
+      }
+    }
+  ]
+}

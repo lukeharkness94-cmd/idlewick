@@ -64,10 +64,7 @@ const nightHtml = () => {
 
 /* ---------- 8. boss tells: a warning beat before the special, a nudge when it lands ---------- */
 DQ.on('bossTell', (m, next) => { const foe = document.getElementById('av-foe'); if (!foe) return; foe.classList.toggle('tell', !!next); });
-DQ.on('bossSpecial', () => {
-  const arena = document.querySelector('.encounter-arena'); if (!arena || S().settings.reduceFx) return;
-  arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake'); setTimeout(() => arena.classList.remove('shake'), 420);
-});
+// Boss impacts use the existing fighter recoil, damage numbers and special tell. Keep the arena still.
 
 /* ---------- 9. villagers notice your title (once each) ---------- */
 DQ.titleNod = q => {

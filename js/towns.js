@@ -192,6 +192,21 @@ function sceneFor(town, stages = {}, extras = {}) {
     ell(mix(T.ground, '#3a2a1a', sg >= 4 ? .12 : .3), X + 16, Y + 31, 17, 3);
     ell('rgba(30,40,24,.28)', X + 16, Y + 31, 12, 2);
     put(stagePiece(pj.art || id, sg), X, Y);
+    if (sg >= 4) {
+      /* Completed sites are used, rather than simply painted intact. Keep regional ground/architecture. */
+      const local = seeded(town+':'+id+':inhabited');
+      folk(P, X - 5, Y + 33, local); folk(P, X + 28, Y + 36, local);
+      const workshop = /forge|smith|workshop|mill/.test(id);
+      if (workshop) {
+        f('#795438', X + 28, Y + 25, 10, 3); f('#4b3932', X + 29, Y + 28, 2, 6); f('#4b3932', X + 35, Y + 28, 2, 6);
+        f('#acbac0', X + 30, Y + 23, 5, 2); f('#e9d39b', X + 31, Y + 22, 2, 1);
+      } else if (/well|garden|kitchen|inn/.test(id)) {
+        f('#946d43', X - 6, Y + 30, 6, 4); f('#d9bd73', X - 7, Y + 29, 8, 1);
+        f('#6c9156', X + 30, Y + 29, 3, 4); f('#d8a4a0', X + 30, Y + 28, 2, 2);
+      } else {
+        f('#927047', X + 28, Y + 30, 6, 5); f('#d8bd86', X + 28, Y + 31, 6, 1);
+      }
+    }
     if (sg > 0 && sg < 4) { folk(P, X - 4, Y + 32, rnd); f('#a8845a', X - 1, Y + 24, 1, 6); }
   });
   /* the front: a quay with your boats at Saltmere, otherwise the meadow's edge (where your traps are laid) */

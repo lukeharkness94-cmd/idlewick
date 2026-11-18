@@ -37,16 +37,16 @@ DQ.fillAbilities = () => {
   for (const id of order) { if (added.length >= free) break; const a = id && D.AB[id]; if (!a || on.includes(id) || !DQ.abilUnlocked(a) || (a.style && a.style !== sty)) continue; on.push(id); added.push(a.name); }
   return added;
 };
-DQ.weakKnown = m => m.boss || (S().beast.kills[m.id] || 0) >= D.STUDY_KILLS;
+DQ.weakKnown = m => m.boss || m.tower || (S().beast.kills[m.id] || 0) >= D.STUDY_KILLS;
 DQ.weakOf = (m, f) => {
   if (m.id === 'hollowking') { const ph = f ? f.phase || 0 : 0; return D.HOLLOW_PHASES[ph]; }
   return D.WEAK[m.id] || { weak: [], resist: [] };
 };
 DQ.myDtype = () => { const wt = D.weaponType(); if (wt === 'staff') { const sp = D.SPELLS.find(s => s.id === S().spell) || D.SPELLS[0]; return D.SPELL_EL[sp.id]; } return D.WTYPES[wt].dtype; };
 /* the shared damage-type rule (data3.js D.TYPE_RULES): what the engine applies and what every hint says */
-DQ.typeMult = (m, kind) => { const R = D.TYPE_RULES[m && m.boss ? 'boss' : 'normal']; return kind === 'resist' ? R.resist : DQ.ability && DQ.ability('focus') ? R.focus : R.weak; };
+DQ.typeMult = (m, kind) => { const R = D.TYPE_RULES[m && (m.boss || m.tower) ? 'boss' : 'normal']; return kind === 'resist' ? R.resist : DQ.ability && DQ.ability('focus') ? R.focus : R.weak; };
 const pctUp = x => `+${Math.round((x - 1) * 100)}%`;
-DQ.typeRuleText = m => { const R = D.TYPE_RULES[m && m.boss ? 'boss' : 'normal']; return `Weak points take ${pctUp(R.weak)} damage (${pctUp(R.focus)} for spells with Elemental Focus); resisted types deal ${Math.round(R.resist * 100)}%.${m && m.boss ? ' Bosses shrug off weaknesses and resistances more than ordinary creatures.' : ''}`; };
+DQ.typeRuleText = m => { const R = D.TYPE_RULES[m && (m.boss || m.tower) ? 'boss' : 'normal']; return `Weak points take ${pctUp(R.weak)} damage (${pctUp(R.focus)} for spells with Elemental Focus); resisted types deal ${Math.round(R.resist * 100)}%.${m && (m.boss || m.tower) ? ' Bosses shrug off weaknesses and resistances more than ordinary creatures.' : ''}`; };
 /* How your current build matches up against a monster: used by the boss intel panel */
 DQ.matchup = m => {
   const dt = DQ.myDtype(), wr = DQ.weakOf(m), out = [];

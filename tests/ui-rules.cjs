@@ -48,7 +48,7 @@ const SETUP = {
     if (vw < 800 && theme === 'light') continue;
     const p = await b.newPage({ viewport: { width: vw, height: vh } }); const errs = [];
     p.on('pageerror', e => errs.push(e.message));
-    await p.goto(URL); await p.locator('#t-new').click(); await p.locator('#crname').fill('Rulecheck'); await p.locator('#cr-go').click(); await p.waitForTimeout(700);
+    if(process.env.INTEGRATION_CANDIDATE)await p.addInitScript(()=>window.__IDLEWICK_INTEGRATION_TEST__=true);await p.goto(URL); await p.locator('#t-new').click(); await p.locator('#crname').fill('Rulecheck'); await p.locator('#cr-go').click(); await p.waitForTimeout(700);
     await p.evaluate(`(${SETUP[save].toString()})()`); await p.evaluate(t => DQ.setTheme(t), theme);
     for (const pg of PAGES) {
       const tag = `${save}/${theme}/${vw}/${pg}`;
@@ -79,6 +79,10 @@ const SETUP = {
         /* proper names shown by design (places, bosses, challenges, tower floors, quests, towns) may contain a creature's name */
         const proper = [...Object.values(D.AREAS || {}).flat().map(a => a && a.name), ...D.MONLIST.filter(m => m.boss || m.mini || m.tower).map(m => m.name), ...D.QUESTS.map(q => q.name), ...D.TOWNS.map(t => t.name)].filter(Boolean).sort((a, b) => b.length - a.length);
         const strip = t => proper.reduce((acc, n) => acc.split(n).join('·'), t);
+        // Required inputs are explicitly named (owner, 17 Nov); undiscovered outputs stay concealed.
+        const needed=new Set([...root.querySelectorAll('[data-do="route"]')].map(e=>e.dataset.a));
+        if(pageSkill)Object.values(D.RECIPES).filter(x=>x.skill===pageSkill.id).forEach(x=>Object.keys(x.in||{}).forEach(id=>needed.add(id)));
+        for(const id of needed){if(D.ITEMS[id])hidden.delete(D.ITEMS[id].name);Object.values(D.NODE).filter(n=>n.item===id).forEach(n=>hidden.delete(n.name));}
         const text = strip(root.innerText);
         const tips0 = [...root.querySelectorAll('[title],[data-tip],[aria-label]')].map(e => [e.getAttribute('title'), (e.getAttribute('data-tip') || '').startsWith('text:') ? e.getAttribute('data-tip').slice(5) : '', e.getAttribute('aria-label')].join(' ')).join('\n'), tips = strip(tips0);
         for (const [name, why] of hidden) {

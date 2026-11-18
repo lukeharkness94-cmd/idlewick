@@ -16,12 +16,15 @@ const fs=require('node:fs');
    await page.evaluate(theme=>{DQ.S.settings.theme=theme;DQ.applyTheme();},theme);
    const entrance=await page.evaluate(()=>{
     const style=selector=>getComputedStyle(document.querySelector(selector));
-    return {name:style('#crname').color,back:style('#cr-back').color,begin:style('#cr-go').color,form:style('#crname').fontFamily,logo:style('.logo h1').fontFamily,overflow:document.documentElement.scrollWidth>innerWidth};
+    return {name:style('#crname').color,nameBg:style('#crname').backgroundColor,back:style('#cr-back').color,backBg:style('#cr-back').backgroundColor,begin:style('#cr-go').color,primary:getComputedStyle(document.documentElement).getPropertyValue('--brass').trim(),form:style('#crname').fontFamily,logo:style('.logo h1').fontFamily,overflow:document.documentElement.scrollWidth>innerWidth};
    });
-   assert.equal(entrance.name,'rgb(233, 228, 213)',`${theme} entrance name contrast`);
-   assert.equal(entrance.back,'rgb(233, 228, 213)',`${theme} entrance Back contrast`);
-   assert.equal(entrance.begin,'rgb(27, 20, 5)',`${theme} primary button contrast`);
-   assert.match(entrance.form,/Alegreya/); /* Storybook lettering (default) uses the Alegreya book serif */assert.match(entrance.logo,/Pixelify Sans/);
+   const rgb=c=>c.startsWith('#')?c.slice(1).match(/../g).map(x=>parseInt(x,16)):c.match(/[\d.]+/g).slice(0,3).map(Number);
+   const lum=c=>rgb(c).map(x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4;}).reduce((a,x,i)=>a+x*[.2126,.7152,.0722][i],0);
+   const contrast=(a,b)=>{const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+   assert.ok(contrast(entrance.name,entrance.nameBg)>=4.5,`${theme} entrance name contrast`);
+   assert.ok(contrast(entrance.back,entrance.backBg)>=4.5,`${theme} entrance Back contrast`);
+   assert.ok(contrast(entrance.begin,entrance.primary)>=4.5,`${theme} primary button contrast`);
+   assert.match(entrance.form,/Alegreya/); /* Hearthside uses the bundled Alegreya Sans reading face. */assert.match(entrance.logo,/Pixelify Sans/);
    assert.equal(entrance.overflow,false);
   }
   if(process.env.ENTRANCE_PREVIEW){await page.setViewportSize({width:738,height:800});await page.screenshot({path:process.env.ENTRANCE_PREVIEW});}
@@ -70,7 +73,7 @@ const fs=require('node:fs');
   {const r=await page.evaluate(()=>{const S=DQ.S,D=DQ.data;delete (S.newSkills||{}).herbalism;S.stats.harvest=20;S.unlocked.herbalism=true;DQ.notify({kind:'unlock',key:'unlock:herbalism',title:'Herbalism unlocked',text:'',icon:'herbalism'});DQ.ui.renderDock();
     const badge=!!document.querySelector('#skilldock .dk[data-a="'+D.SK.herbalism.page+'"] .dk-new');DQ.go(D.SK.herbalism.page);DQ.ui.renderDock();const after=!!document.querySelector('#skilldock .dk[data-a="'+D.SK.herbalism.page+'"] .dk-new');
     S.inv.bronze_sword=1;DQ.equipItem('bronze_sword');DQ.go('fishing');DQ.startAct('fish','shrimp',{quiet:true});DQ.ui.render(true);const gear=document.querySelectorAll('.activity-scene .scene-gear').length;DQ.stopAct();
-    DQ.ui.tab.quests='available';DQ.go('quests');const card=document.querySelector('.quest');const order=card?['.phead','.quest-story','.rewards','.quest-actions'].map(k=>{const e=card.querySelector(k);return e?[...card.querySelectorAll('*')].indexOf(e):-1;}):[];
+    DQ.ui.tab.quests='available';DQ.go('quests');const card=document.querySelector('.quest');const order=card?[':scope > h2','.quest-story','.rewards','.quest-actions'].map(k=>{const e=card.querySelector(k);return e?[...card.querySelectorAll('*')].indexOf(e):-1;}):[];
     DQ.go('map');const left=document.querySelector('.explore-left')?.innerText||'';for(let i=0;i<5;i++)DQ.closeModal&&DQ.closeModal();document.querySelectorAll('.note').forEach(n=>n.remove());return {badge,after,gear,order,left};});
    assert.ok(r.badge,'New badge shows after an unlock');assert.ok(!r.after,'New badge clears once the page is opened');assert.equal(r.gear,0,'no weapon in work scenes');
    assert.ok(r.order.every((v,i,a)=>v>=0&&(!i||v>a[i-1])),'quest card reads name, story, rewards, action: '+r.order);assert.match(r.left,/quests/);assert.match(r.left,/Exploration/);}

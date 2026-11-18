@@ -7,6 +7,7 @@ const DQ = window.DQ, D = DQ.data, UI = DQ.ui, { esc, fmt, ico } = DQ, S = () =>
 const k = n => n >= 1e4 ? (n / 1e3).toFixed(n >= 1e5 ? 0 : 1) + 'k' : fmt(n);
 UI.needTile = (id, n, o = {}) => {
   const coins = id === 'coins', it = coins ? null : D.ITEMS[id]; if (!coins && !it) return '';
+  if(!coins&&DQ.itemDiscovered&&!DQ.itemDiscovered(id)){const source=DQ.ingredientDiscovery(id),route=o.noRoute?'':UI.routeChip(id);return `<span class="need-tile short unknown-ingredient" data-tip="text:${esc('You need '+it.name+'. Find it through '+source.label+'.')}"><span class="nt-art">${DQ.itemIco(it)}<b class="nt-n">×${k(n)}</b></span><span class="nt-t"><b>${esc(it.name)}</b><small>Not found yet · ${esc(source.label)}</small></span>${route}</span>`;}
   const have = coins ? S().coins : DQ.have(id), ok = have >= n, name = coins ? 'Coins' : it.name;
   const art = coins ? ico('coin') : DQ.itemIco(it), route = ok || coins || !UI.routeChip || o.noRoute ? '' : UI.routeChip(id);
   const held = o.live && !coins ? `<b data-b="count:${id}"></b>` : k(have);

@@ -73,7 +73,18 @@ const subnav = () => {
   const bar = $('.subnav', el), on = $('.stab.on', el); if (bar && on) bar.scrollLeft = on.offsetLeft - bar.clientWidth / 2 + on.offsetWidth / 2;
   if (bar) { const fade = () => { bar.classList.toggle('fade-l', bar.scrollLeft > 4); bar.classList.toggle('fade-r', bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 4); }; fade(); bar.addEventListener('scroll', fade, { passive: true }); }
 };
-UI.DO.hub = a => { const h = HUBS.find(x => x.id === a); DQ.go(hubDefault(h)); };
+UI.openMenuAction = target => {
+  if(!target)return false;
+  if(target.page==='quests'){UI.questTab=target.kind==='quest-ready'?'active':'available';UI.tab.questSelected=target.id;}
+  if(target.page==='projects')UI.tab.projectChoice=target.id;
+  if(target.page==='research')UI.tab.researchChoice=target.id;
+  if(target.page==='shop'&&target.kind==='tool'){UI.shopTab='buy';UI.shopCategory='tools';UI.shopToolFamily=target.family;UI.shopSelected.buy=target.id;}
+  if(target.page==='farming'){const animal=target.kind==='animal';UI.estateSection=animal?'pens':'fields';UI.estateTab=animal?'animals':'seeds';UI.tab.farmSection=animal?'livestock':'crops';if(animal)UI.estatePenPage=Math.floor(target.id/(innerWidth<=860?2:innerWidth<=1440?4:6));else UI.estateFieldPage=Math.floor(target.id/(innerWidth<=860?4:innerWidth<=1440?6:12));}
+  DQ.go(target.page);return true;
+};
+const menuTarget=pages=>pages.flatMap(page=>DQ.actionTargets?.(page)||[])[0];
+UI.DO.hub = a => { const h=HUBS.find(x=>x.id===a);if(!h)return;const target=menuTarget(h.pages);if(!UI.openMenuAction(target))DQ.go(hubDefault(h)); };
+const go0=UI.DO.go;UI.DO.go=(page,b,el)=>{if(el?.matches('.dk,.stab')&&UI.openMenuAction(menuTarget([page])))return;return go0(page,b,el);};
 const prevRender = UI.render;
 UI.render = fresh => {
   prevRender(fresh); lastIn[UI.hubOf(UI.view).id] = UI.view; subnav(); UI.renderDock(); UI.renderPins(); UI.packWarn(true); UI.upd();
@@ -90,10 +101,16 @@ UI.markNow = () => { const n = $('#nowcard .now'); if (n) n.classList.toggle('he
 UI.unlockShort = nx => { if (!nx) return ''; const all = String(nx.what).split(/, (?![^()]*\))/), perks = all.filter(x => /\(.+\)$/.test(x) && !/^Technique:/.test(x)), other = all.length - perks.length;
   return [...perks, other ? (other === 1 ? 'Something new' : `${other} new things`) : ''].filter(Boolean).join(' · '); };
 UI.nextUnlock = sk => { const L = DQ.lvl(sk), u = D.UNL && D.UNL[sk]; if (!u) return null; const lvl = Object.keys(u).map(Number).filter(l => l > L).sort((a, b) => a - b)[0]; return lvl ? { lvl, what: [].concat(u[lvl]).join(', ') } : null; };
+// Stable progression order: starter activities, early making, then linked and regional unlocks.
+const dockOrder=['fishing','woodcutting','cooking','mining','farming','crafting','smithing','hunting','carpentry','beastmastery','exploration','thieving','research','herbalism','magic','enchanting','sailing'];
+UI.skillDockOrder=()=>D.SKILLS.filter(s=>s.group!=='combat').sort((a,b)=>{
+ const starter=s=>!s.quest&&!s.actionReq&&s.unlock<=1;
+ return Number(starter(b))-Number(starter(a))||(dockOrder.indexOf(a.id)<0?999:dockOrder.indexOf(a.id))-(dockOrder.indexOf(b.id)<0?999:dockOrder.indexOf(b.id));
+});
 UI.renderDock = () => {
   const el = $('#skilldock'); if (!el) return;
   const cur = UI.view, ap = DQ.act && DQ.actPage ? DQ.actPage() : null;
-  el.innerHTML = `<div class="dk-h">Skills</div>` + D.SKILLS.filter(s => s.group !== 'combat').map(s => {
+  el.innerHTML = `<div class="dk-h">Skills</div>` + UI.skillDockOrder().map(s => {
     const lock = !DQ.skillUnlocked(s.id);
     const lv=DQ.lvl(s.id),need=lv>=99?0:Math.max(0,D.XPF[lv+1]-(S().xp[s.id]||0));
     const pop = UI.levelPop[s.id], popping = pop && Date.now() - pop < 1600;
@@ -139,16 +156,15 @@ UI.renderPins = () => {
   const project = UI.projectPinHtml ? UI.projectPinHtml() : '';
   if (UI.view === 'quests') { box.innerHTML = project; UI.upd(); return; }
   const pins = (S().pins || []).filter(id => D.QM[id] && DQ.questState(D.QM[id]) !== 'done'); S().pins = pins;
-  const ids = pins.filter(id => {
-    const q = D.QM[id]; if (DQ.questState(q) !== 'active') return false;
-    const objective = q.obj.find((o, j) => DQ.objProg(q, S().q[id], j) < o.n);
-    return objective && DQ.objPage(q, objective) === UI.view;
-  });
-  if (!ids.length || UI.view === 'overview') { box.innerHTML = project; UI.upd(); return; }
+  const eligible=pins.filter(id=>['active','ready'].includes(DQ.questState(D.QM[id])));
+  // Keep one useful objective visible across ordinary navigation, preferring this activity's pin.
+  const relevant=eligible.find(id=>{const q=D.QM[id],o=q.obj.find((o,j)=>DQ.objProg(q,S().q[id],j)<o.n);return o&&DQ.objPage(q,o)===UI.view;});
+  const ids=relevant?[relevant]:eligible.slice(0,1);
+  if (!ids.length) { box.innerHTML=project;UI.upd();return; }
   box.innerHTML = project + `<div class="pinstrip">${ids.map(id => {
     const q = D.QM[id], st = DQ.questState(q), p = S().q[id], i = Math.max(0, q.obj.findIndex((o, j) => DQ.objProg(q, p, j) < o.n)), o = q.obj[i], sk = q.main && D.SK[q.unlocks];
-    const act = st === 'new' ? `data-do="qstart" data-a="${id}"` : st === 'ready' ? `data-do="qclaim" data-a="${id}"` : `data-do="questcontinue" data-a="${q.id}"`;
-    return `<button class="pinchip ${st}" style="${sk ? `--c:${sk.col}` : ''}" ${act} data-tip="text:${esc(q.name)}: ${esc(o.label)}">${ico(q.main ? 'star' : 'quest')}<span class="pc-t"><b>${q.name}</b><small>${o.label}</small></span><span class="pc-p"><span class="bar"><i data-b="qbar:${id}:${i}"></i></span></span>${ico('arrow')}</button>`;
+    const act = st === 'new' ? `data-do="qstart" data-a="${id}"` : st === 'ready' ? `data-do="openquest" data-a="${id}"` : `data-do="questcontinue" data-a="${q.id}"`;
+    return `<button class="pinchip ${st}" style="${sk ? `--c:${sk.col}` : ''}" ${act} data-tip="text:${esc(q.name)}: ${esc(o.label)}">${ico(q.main ? 'star' : 'quest')}<span class="pc-t"><b>${q.name}</b><small>${st==='ready'?'Ready to return to '+esc(q.giver):esc(o.label)}</small></span><span class="pc-p"><span class="bar"><i data-b="qbar:${id}:${i}"></i></span><small class="mono" data-b="qtxt:${id}:${i}"></small></span>${ico('arrow')}</button>`;
   }).join('')}</div>`;
   UI.upd();
 };
@@ -236,13 +252,17 @@ DQ.on('act', () => UI.packWarn(true));
   const fit = () => {
     const el = document.getElementById('skilldock'); if (!el || innerWidth <= 860) { if (el) el.style.removeProperty('--dk-h'); document.documentElement.classList.remove('dock-fit'); return; }
     const rows = el.querySelectorAll('.dk'), head = el.querySelector('.dk-h'); if (!rows.length) return;
-    const z = DQ.zoom || 1, top = el.getBoundingClientRect().top / z, bottom = innerHeight / z - 14, gap = parseFloat(getComputedStyle(el).rowGap) || 3;
+    const z = DQ.zoom || 1, top = el.getBoundingClientRect().top / z, bottom = innerHeight / z - 18, gap = parseFloat(getComputedStyle(el).rowGap) || 3;
     const avail = bottom - top - (head ? head.getBoundingClientRect().height / z : 0) - gap * rows.length;
     const h = Math.max(34, Math.min(64, Math.floor(avail / rows.length)));
     el.style.setProperty('--dk-h', h + 'px'); document.documentElement.classList.add('dock-fit');
   };
-  const render0 = UI.renderDock; UI.renderDock = () => { render0(); requestAnimationFrame(fit); };
+  const render0 = UI.renderDock;
+  UI.renderDock = () => { render0(); requestAnimationFrame(fit); };
   addEventListener('resize', () => requestAnimationFrame(fit));
+  // Task wording and local fonts can change the space above the dock after it was drawn.
+  for (const id of ['nowcard','combatnav']) { const box=document.getElementById(id);if(box)new ResizeObserver(()=>requestAnimationFrame(fit)).observe(box); }
+  document.fonts?.ready.then(()=>requestAnimationFrame(fit));
   UI.fitDock = fit;
 })();
 /* Inventory on desktop: Appearance & sharing sits under Preparations in the right column, so the equipment column fits short windows */

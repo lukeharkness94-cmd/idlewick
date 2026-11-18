@@ -15,13 +15,13 @@ const potion = (id, name, col, val, drink) => { D.ITEMS[id] = Object.assign({ id
 potion('potion_heal', 'Healing draught', '#e2574c', 40, { heal: .4, text: 'Heals 40% of your health at once. In a fight it is drunk for you once your food runs out and health drops below 25% (once per fight)' });
 potion('potion_haste', 'Potion of Haste', '#5fd0ff', 120, { buff: 'slow', mult: .85, mins: 20, name: 'Haste', text: 'Tasks are 15% faster for 20 minutes' });
 potion('potion_might', 'Potion of Might', '#ff8a3a', 150, { buff: 'weak', mult: 1.15, mins: 20, name: 'Might', text: 'You hit 15% harder for 20 minutes' });
-potion('potion_fortune', 'Potion of Fortune', '#5cc08a', 400, { buff: 'luck', mult: 1.5, mins: 30, name: 'Fortune', text: 'Rare drops are 50% more likely for 30 minutes' });
+potion('potion_fortune', 'Potion of Fortune', '#5cc08a', 400, { buff: 'luck', mult: 1.5, mins: 60, name: 'Fortune', text: 'Rare drops are 50% more likely for 60 minutes' });
 potion('potion_scholar', "Scholar's tonic", '#c07aff', 600, { buff: 'xp', mult: 1.1, mins: 20, name: 'Scholar', text: '+10% XP from everything for 20 minutes' });
 D.POTION_RECIPES = [
   { id: 'potion_heal', tech: 'herbalism', in: { crop_onion: 2, crop_cabbage: 1 }, coins: 30 },
   { id: 'potion_haste', tech: 'quickening', in: { crop_goldleaf: 2, feather: 6 }, coins: 150 },
   { id: 'potion_might', tech: 'warbrew', in: { crop_sunbloom: 2, bar_iron: 1 }, coins: 200 },
-  { id: 'potion_fortune', tech: 'fortune', in: { crop_moonmelon: 1, gem_sapphire: 1 }, coins: 500 },
+  { id: 'potion_fortune', yield: 3, tech: 'fortune', in: { crop_moonmelon: 1, gem_sapphire: 1 }, coins: 500 },
   { id: 'potion_scholar', tech: 'scholar', in: { crop_starfruit: 1, gem_emerald: 1 }, coins: 800 },
 ];
 
@@ -54,7 +54,7 @@ D.TECHS = [
   T('herbalism', 'alch', 1, 'Herbalism', 'Unlocks the Healing draught in the Brewery.', {}, { coins: 900, crop_onion: 10 }, 15),
   T('quickening', 'alch', 2, 'Quickening', 'Unlocks the Potion of Haste.', {}, { coins: 6000, feather: 20 }, 45, ['herbalism']),
   T('warbrew', 'alch', 2, 'War Brewing', 'Unlocks the Potion of Might.', {}, { coins: 6000, bar_iron: 10 }, 45, ['herbalism']),
-  T('fortune', 'alch', 3, 'Fortune Lore', 'Unlocks the Potion of Fortune.', {}, { coins: 45000, gem_sapphire: 5 }, 120, ['quickening']),
+  T('fortune', 'alch', 3, 'Fortune Lore', 'Brew 3 Potions of Fortune per batch: 3 hours of +50% drops.', {}, { coins: 45000, gem_sapphire: 5 }, 120, ['quickening']),
   T('scholar', 'alch', 4, 'Scholar’s Tonic', "Unlocks Scholar's tonic.", {}, { coins: 150000, gem_diamond: 2 }, 180, ['fortune']),
 
   T('routes1', 'trade', 2, 'Trade Routes I', '+3% coins from every source.', { coin: .03 }, { coins: 4000, bar_bronze: 20 }, 40),
@@ -91,7 +91,7 @@ DQ.researchTick = dt => {
     const t = D.TECH[A[i].id]; A.splice(i, 1); if(!t.repeatable)R().done[t.id] = 1; DQ.addXp('research',DQ.researchXp(t)); if (DQ.sim.on) (DQ.awayDone = DQ.awayDone || []).push(t.name); DQ.fxDirty(); DQ.syncPlots && DQ.syncPlots(); DQ.achDirty = true;
     DQ.log(`Research complete: ${t.name}.`, 'quest');
     if (!DQ.forecasting) DQ.notify({ kind: 'unlock', key: 'tech:' + t.id, icon: 'rune', col: BR[t.br][1], title: 'Research complete', text: `${t.name}. ${t.desc}`, action: { label: 'Open Scholarship', fn: () => DQ.go('research') }, sound: 'unlock', ttl: 12000 });
-    DQ.emit('research');
+    DQ.qev('study',t.id); DQ.emit('research');
   }
 };
 const adv = DQ.advanceWorld;
@@ -118,7 +118,7 @@ DQ.canBrew = r => DQ.techDone(r.tech);
 DQ.brew = id => {
   const r = D.POTION_RECIPES.find(x => x.id === id); if (!r || !DQ.canBrew(r)) return;
   if (S().coins < r.coins || !Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n)) return DQ.toast('You are missing coins or ingredients', true);
-  S().coins -= r.coins; Object.entries(r.in).forEach(([k, n]) => DQ.take(k, n)); DQ.give(id, 1); DQ.sfx('sizzle'); DQ.emit('shop'); return true;
+  S().coins -= r.coins; Object.entries(r.in).forEach(([k, n]) => DQ.take(k, n)); DQ.give(id, r.yield || 1); DQ.sfx('sizzle'); DQ.emit('shop'); return true;
 };
 
 /* ---------- the Research page ---------- */
@@ -128,7 +128,7 @@ const techCard = t => {
   const why = DQ.techReason(t), br = BR[t.br], act = R().active.find(a => a.id === t.id);
   const state = why === 'done' ? 'done' : why === 'active' ? 'active' : why ? 'locked' : 'open';
   const foot = state === 'done' ? `<span class="tdone">${ico('check')} Researched</span>` : state === 'active' ? `<span class="tbar"><b>Studying</b><span class="bar"><i data-b="rbar:${t.id}"></i></span><small class="mono" data-b="rleft:${t.id}"></small></span>` : state === 'locked' ? `<span class="tlock">${ico('lock')} ${esc(why)}</span>` : `<button class="btn sm ${DQ.techCanAfford(t) && R().active.length < DQ.researchSlots() ? 'primary' : ''}" data-do="rstart" data-a="${t.id}" ${DQ.techCanAfford(t) && R().active.length < DQ.researchSlots() ? '' : 'disabled'}>Start · ${dur(t.mins)}</button>`;
-  return `<div class="tech ${state}" style="--c:${br[1]}"><div class="th"><b>${esc(t.name)}</b><small>${['', 'Tier I', 'Tier II', 'Tier III', 'Tier IV'][t.tier]}</small></div><p>${esc(t.desc)}</p><small class="study-reward">+${fmt(Math.round(DQ.researchXp(t)*DQ.xpMult('research')))} Scholarship XP · Level ${D.SCHOLAR_TIER[t.tier]}</small>${state === 'done' || state === 'active' ? '' : `<div class="rws">${costChips(t.cost)}</div>`}<div class="tf">${foot}</div>${state==='open'&&!DQ.techCanAfford(t)?'':state==='open'&&R().active.length>=DQ.researchSlots()?'<small>All study slots are busy</small>':''}</div>`;
+  return `<div class="tech ${state}" data-study="${t.id}" style="--c:${br[1]}"><div class="th"><b>${esc(t.name)}</b><small>${['', 'Tier I', 'Tier II', 'Tier III', 'Tier IV'][t.tier]}</small></div><p>${esc(t.desc)}</p><small class="study-reward">+${fmt(Math.round(DQ.researchXp(t)*DQ.xpMult('research')))} Scholarship XP · Level ${D.SCHOLAR_TIER[t.tier]}</small>${state === 'done' || state === 'active' ? '' : `<div class="rws">${costChips(t.cost)}</div>`}<div class="tf">${foot}</div>${state==='open'&&!DQ.techCanAfford(t)?'':state==='open'&&R().active.length>=DQ.researchSlots()?'<small>All study slots are busy</small>':''}</div>`;
 };
 UI.B.rbar = (e, id) => { const a = R().active.find(x => x.id === id), t = D.TECH[id]; if (a) { const w = (100 - a.left / (t.mins * MIN) * 100).toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; } };
 UI.B.rleft = (e, id) => { const a = R().active.find(x => x.id === id); UI.set(e, a ? `${DQ.fmtTime(Math.max(0, a.left))} left` : ''); };
@@ -139,7 +139,7 @@ const researchPage = (potions = false) => {
 
   const unlocked = D.POTION_RECIPES.filter(DQ.canBrew);
   const selectedPotion = unlocked.find(r => r.id === UI.tab.potionChoice) || unlocked[0];
-  const brewery = `<section class="panel brewery"><div class="phead"><h2>${ico('bottle')} Brewery</h2><small>${unlocked.length ? 'Brew potions, then drink them from your backpack' : 'Research Herbalism to open it'}</small></div>${unlocked.length ? `<label class="page-picker" for="potion-choice">Potion${UI.choiceButtons(`<select id="potion-choice" data-in="potion-choice">${unlocked.map(r=>`<option value="${r.id}" ${r === selectedPotion ? 'selected' : ''}>${esc(D.ITEMS[r.id].name)}</option>`).join('')}</select>`)}</label><div class="srows">${[selectedPotion].map(r => { const it = D.ITEMS[r.id], ok = S().coins >= r.coins && Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n); return `<div class="srow ${ok ? '' : 'cant'}">${UI.itm(r.id, DQ.have(r.id))}<div class="sr-t"><b>${esc(it.name)}</b><small>${esc(it.drink.text)}</small><span class="rws">${costChips(Object.assign({ coins: r.coins }, r.in))}</span></div><span class="btnrow"><button class="btn sm ${ok ? 'primary' : ''}" data-do="brew" data-a="${r.id}" ${ok ? '' : 'disabled'}>Brew</button>${DQ.have(r.id) ? `<button class="btn sm" data-do="drink" data-a="${r.id}">Drink (${DQ.have(r.id)})</button>` : ''}</span></div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing to brew yet.</p>'}</section>`;
+  const brewery = `<section class="panel brewery"><div class="phead"><h2>${ico('bottle')} Brewery</h2><small>${unlocked.length ? 'Brew potions, then drink them from your backpack' : 'Research Herbalism to open it'}</small></div>${unlocked.length ? `<label class="page-picker" for="potion-choice">Potion${UI.choiceButtons(`<select id="potion-choice" data-in="potion-choice">${unlocked.map(r=>`<option value="${r.id}" ${r === selectedPotion ? 'selected' : ''}>${esc(D.ITEMS[r.id].name)}</option>`).join('')}</select>`)}</label><div class="srows">${[selectedPotion].map(r => { const it = D.ITEMS[r.id], ok = S().coins >= r.coins && Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n); return `<div class="srow ${ok ? '' : 'cant'}">${UI.itm(r.id, DQ.have(r.id))}<div class="sr-t"><b>${esc(it.name)}</b><small>${esc(it.drink.text)}${r.yield ? ` · Makes ${r.yield} bottles per batch` : ''}</small><span class="rws">${costChips(Object.assign({ coins: r.coins }, r.in))}</span></div><span class="btnrow"><button class="btn sm ${ok ? 'primary' : ''}" data-do="brew" data-a="${r.id}" ${ok ? '' : 'disabled'}>Brew</button>${DQ.have(r.id) ? `<button class="btn sm" data-do="drink" data-a="${r.id}">Drink (${DQ.have(r.id)})</button>` : ''}</span></div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing to brew yet.</p>'}</section>`;
   const selected = D.TECH[UI.tab.researchChoice] || D.TECHS.find(t => !DQ.techReason(t) && DQ.techCanAfford(t)) || D.TECHS[0];
   if (potions) return brewery;
   return `${UI.skillHero('research')}<section class="panel scholarship-overview"><div class="phead"><h2>Discoveries</h2><small>${done} / ${D.TECHS.filter(t=>!t.repeatable).length} complete</small></div><p>Complete a project to earn Scholarship XP and its permanent benefit. Tier II opens at level 10, Tier III at 20 and Tier IV at 30. A second slot opens at Scholarship 20 (or Hero 40). Field notes are repeatable.</p><section data-reference="true" id="active-research"><h3>Study slots · ${A.length} / ${slots}</h3><div class="aslots">${activeRows}</div></section></section><div class="scholarship-grid">${D.TECHS.map(techCard).join('')}</div>`;

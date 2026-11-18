@@ -63,7 +63,10 @@ UI.render = (...a) => {
   const r = render0(...a);
   try {
     /* the page's own fresh render (ui_pages.js adds .enter) now arrives panel by panel instead of as one block */
-    const v = document.getElementById('view'); if (v && v.classList.contains('enter')) { if (lastView !== null) enter(); lastView = UI.view; }
+    const v = document.getElementById('view');
+    // An encounter or HUD refresh is not navigation. Never replay a page entrance during combat.
+    if (v && UI.view !== lastView) { if (lastView !== null) enter(); lastView = UI.view; }
+    else if (v) { clearTimeout(enterTimer); v.classList.remove('fin-enter'); }
     inks();
   } catch (e) {}
   return r;

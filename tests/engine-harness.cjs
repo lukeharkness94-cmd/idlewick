@@ -2,7 +2,7 @@
 const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
-function harness(desktopStorage) {
+function harness(desktopStorage, options = {}) {
   const storage = new Map(), listeners = {}, ui = { V: {}, DO: {}, B: {}, homeSections: [], homeAfterCurrent: [], tabState: () => null, render() {}, detail() {}, selbarHtml() {} };
   let denied = false, seed = 7;
   const math = Object.create(Math);
@@ -24,8 +24,9 @@ function harness(desktopStorage) {
     document: { querySelector: () => null, querySelectorAll: () => [], getElementById: () => null, createElement: element, body: element(), addEventListener() {} }
   });
   context.window = context;
+  context.__IDLEWICK_INTEGRATION_TEST__ = !!options.integrationCandidate;
   const load = name => vm.runInContext(fs.readFileSync(path.join(__dirname, '../js', name + '.js'), 'utf8'), context, { filename: name });
-  ['util', 'data', 'data2', 'data3', 'economy', 'state', 'audio'].forEach(load);
+  (options.dataModules || ['util', 'data', 'data2', 'data3', 'economy', 'state', 'audio']).forEach(load);
   const q = context.DQ;
   q.notify = q.pulse = q.floatAt = q.flash = q.burstAt = q.burstEl = q.toast = q.go = () => {};
   ['engine', 'systems', 'plan', 'meta', 'mastery'].forEach(load);

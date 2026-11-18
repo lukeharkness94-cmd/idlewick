@@ -1,0 +1,145 @@
+/* Hearthside Journal: one material language and clear action hierarchy across the existing game. */
+:root{--ground:#18251f;--panel:#23352b;--panel2:#2c4034;--line:#425a4a;--line2:#61745f;--ink:#f1ebdf;--mute:#c0cbbb;--brass:#d7b16a;--brass-hi:#f4d69e;--brass-lo:#946638;--good:#8ac8a3;--bad:#f29286;--warn:#e8c27d;--hs-action-ink:#211b12;--hs-paper-shadow:rgba(0,0,0,.13);--backdrop-wash:rgba(24,37,31,.94)}
+:root[data-theme="light"]{--ground:#e9e2d4;--panel:#fbf7ee;--panel2:#f1eadb;--line:#d8cdb9;--line2:#baac92;--ink:#2e3028;--mute:#606355;--brass:#91652c;--brass-hi:#785121;--brass-lo:#bb945a;--good:#386747;--bad:#a33f35;--warn:#865d20;--hs-action-ink:#fff9ef;--hs-paper-shadow:rgba(73,51,24,.07);--backdrop-wash:rgba(233,226,212,.94)}
+:root.type-hearthside{--f-display:'Cinzel','Alegreya SC',Georgia,serif;--f-body:'Alegreya Sans',system-ui,sans-serif;--f-ui:'Alegreya Sans',system-ui,sans-serif;--f-mono:'Alegreya Sans',system-ui,sans-serif}
+.type-sample-hearthside b{font-family:'Cinzel',serif}.type-sample-hearthside span{font-family:'Alegreya Sans',sans-serif}
+:root.type-hearthside body{font-size:17px;font-weight:400}
+:root.type-hearthside :is(button,input,textarea){font-weight:500;font-variant-numeric:lining-nums tabular-nums}
+:root.type-hearthside :is(h1,h2,h3){font-weight:500;letter-spacing:.015em}
+:root.type-hearthside .mono{font-variant-numeric:lining-nums tabular-nums;font-weight:500}
+:root.type-hearthside :is(b,strong){font-weight:700}
+body{background-color:var(--ground)}
+.panel,:root[data-theme="light"] .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 2px 4px var(--hs-paper-shadow)}
+.hud,:root[data-theme="light"] .hud{background:var(--panel);border-color:var(--line);box-shadow:none}
+#pagebar{gap:10px}
+:root.type-hearthside :is(.btn,.tab,.stab,.tnav,.choice-button){font-size:16px;letter-spacing:0}
+.btn,:root[data-theme="light"] .btn{background:linear-gradient(180deg,var(--panel),var(--panel2));border-color:var(--line2);color:var(--ink);border-radius:6px;box-shadow:0 2px 0 color-mix(in srgb,var(--line2) 50%,transparent);text-shadow:none}
+.btn.primary,:root[data-theme="light"] .btn.primary{background:linear-gradient(180deg,var(--brass),color-mix(in srgb,var(--brass) 88%,#392612));border-color:var(--brass);color:var(--hs-action-ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 2px 0 color-mix(in srgb,var(--brass-hi) 60%,var(--ground));text-shadow:none}
+.btn.on,:root[data-theme="light"] .btn.on,.tab.on,.stab.on{background:var(--panel2);color:var(--ink);border-color:var(--brass);box-shadow:inset 3px 0 var(--brass)}
+.btn.danger,:root[data-theme="light"] .btn.danger{background:var(--panel);border-color:color-mix(in srgb,var(--bad) 60%,var(--line));color:var(--bad)}
+:is(.btn,.choice-button):disabled{filter:none;opacity:.68}
+#topnav .tnav{background:transparent;color:var(--mute);box-shadow:none;border-color:transparent;border-radius:6px}
+#topnav .tnav.on{background:var(--panel2);color:var(--ink);border-color:var(--line);box-shadow:inset 0 -2px var(--brass)}
+#subnav .stab{background:transparent;border-color:transparent;box-shadow:none;color:var(--mute)}
+#subnav .stab.on{background:var(--panel);color:var(--ink);border-color:var(--line);box-shadow:inset 0 -2px var(--brass)}
+.sidebar{background:var(--panel);border-radius:10px}
+#skilldock .dk,#combatnav .dk{background:transparent!important;border-color:transparent!important;box-shadow:none!important;border-radius:5px}
+#skilldock .dk.on,#combatnav .dk.on{background:var(--panel2)!important;border-color:transparent!important;box-shadow:inset 3px 0 var(--brass)!important}
+#skilldock .dk.locked{opacity:1;color:var(--mute)}
+#skilldock .dk .dk-n{color:inherit}
+#skilldock .dk:hover,#combatnav .dk:hover{background:var(--panel2)!important;translate:0;transform:none}
+#skilldock .dk .bar{height:3px;background:color-mix(in srgb,var(--mute) 14%,var(--panel))}
+#nowcard :is(.now-card,.now-empty){background:var(--panel2);border-color:var(--line);box-shadow:none}
+.notice-badge{background:var(--brass);color:var(--hs-action-ink);box-shadow:none}
+.bar{background:color-mix(in srgb,var(--mute) 16%,var(--panel));box-shadow:none}
+.illustrated-card,.card,.slot,.eq{border-radius:7px;box-shadow:none}
+.illustrated-card,:root[data-theme="light"] .illustrated-card{background:var(--panel2);border-color:var(--line)}
+.illustrated-card.selected{border-color:var(--brass);box-shadow:inset 0 -3px var(--brass)}
+.illustrated-card:not(.locked):hover{border-color:var(--line2)}
+:root.type-hearthside .activity-caption h2{font-size:26px;font-weight:500}
+.activity-stage{border-color:var(--line2)}
+.activity-state{font-variant-numeric:tabular-nums}
+.qrow{background:transparent;border-color:var(--line);box-shadow:none;border-radius:6px}
+.qrow.on{background:var(--panel2);border-color:var(--brass);box-shadow:inset 3px 0 var(--brass)}
+.qrow.ready{border-color:color-mix(in srgb,var(--good) 60%,var(--line))}
+.quest-journal .quest-voice{font-family:var(--f-body);font-size:20px;line-height:1.5;border-left:3px solid var(--brass);color:var(--ink)}
+.quest-journal h2{font-size:27px;line-height:1.25}
+.journal-kicker,.journal-objective-head{color:var(--mute)}
+.quest-actions{border-top:1px solid var(--line);padding-top:12px}
+.qrec{background:var(--panel2);border-color:var(--line);font-family:var(--f-ui)}
+.qrec.ok,:root[data-theme="light"] .qrec.ok{color:var(--good)}
+.qrec.short,:root[data-theme="light"] .qrec.short{color:var(--warn)}
+.need-tile{background:var(--panel2);border-color:var(--line)}
+.need-tile.enough{border-color:color-mix(in srgb,var(--good) 40%,var(--line))}
+.shop-upgrade-header{box-shadow:none}
+.tool-families .btn,.shop-categories .btn{box-shadow:none}
+#view .combat-x .cx-head,#view .combat-x .boss-foot{background:var(--panel);border-color:var(--line2)}
+#view .combat-x :is(.hud-train,.combat-food,.combat-abils){background:var(--panel);border-color:var(--line)}
+#view .combat-x .combat-equipped{background:var(--panel);border-color:var(--line)}
+.combat-equipped .paper-doll .eq.empty{background:transparent;border-style:dashed}
+#tip,.m-card,:root[data-theme="light"] .m-card{background:var(--panel);color:var(--ink);border-color:var(--line2);border-radius:10px}
+.m-card,:root[data-theme="light"] .m-card{box-shadow:0 16px 50px rgba(0,0,0,.23)}
+.note,:root[data-theme="light"] .note{background:var(--panel);color:var(--ink);border-color:var(--line2);box-shadow:0 6px 24px var(--hs-paper-shadow)}
+.settings-navigation .btn{box-shadow:none}
+.settings-card h2{font-size:20px}
+.letter-opts{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+/* Home is one live chapter with its next action, then a quiet village and optional reference. */
+.hs-home{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(240px,1fr);gap:16px;min-height:0;flex:1}
+.hs-home-heading{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.hs-home-heading h1{font-size:28px}
+.hs-home-heading p{margin:4px 0 0;color:var(--mute)}
+.hs-home-primary{display:flex;flex-direction:column;gap:14px;min-width:0;min-height:0}
+.hs-home-primary>.journey{margin:0;border-left:3px solid var(--brass);display:flex;flex-direction:column;gap:12px;min-height:0;flex:1}
+.hs-home-primary .journey>.phead{margin:0}
+.hs-home-primary .journey .journey-why{margin:0;font-size:18px;line-height:1.45}
+.hs-home-primary .journey .journey-done{margin:0;color:var(--good)}
+.hs-home-primary .journey .btnrow{margin:0}
+.hs-home-primary .journey .destination-line{margin-top:auto}
+.hs-home-primary .journey .journey-pause{font-size:14px;line-height:1.4;color:var(--mute);margin:0}
+.hs-chapter-person{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.hs-chapter-person .folk-face{width:64px!important;height:64px!important;flex:none;background:var(--panel2);border-radius:50%}
+.hs-chapter-person small{display:block;font-size:14px}
+.hs-chapter-person h3{font-size:19px;margin:3px 0}
+.hs-chapter-steps{display:grid;gap:0;margin:0}
+.hs-chapter-step{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.hs-chapter-step>span{display:flex;align-items:center;gap:8px}
+.hs-chapter-step .ic{width:20px;height:20px;color:var(--good)}
+.hs-home-side{display:flex;flex-direction:column;gap:14px;min-height:0;min-width:0}
+.hs-town-card{margin:0;overflow:hidden;padding:0;flex:none}
+.hs-town-card .pxscene{display:block;max-width:100%;width:100%;height:188px;object-fit:cover;object-position:center 65%}
+.hs-town-caption{padding:14px;display:grid;gap:9px}
+.hs-town-caption h2{font-size:20px}
+.hs-town-caption p{font-size:16px;margin:0;color:var(--mute)}
+.hs-home-reference{display:flex;flex-direction:column;gap:12px;min-height:0;overflow:auto}
+.hs-home-reference>.panel{margin:0;flex:none}
+.hs-home-reference .upnext #goalbox{display:flex;flex-direction:column;gap:8px}
+.hs-home-reference .g-card{min-height:0}
+.hs-home .inbox{grid-column:1/-1}
+.hs-home .also-goals{margin:0}
+.hs-home .also-goals ul{margin:4px 0 0}
+.hs-home .also-goals li:nth-child(n+3){display:none}
+@media(min-width:861px){
+ #view:has(>.hs-home){overflow:hidden!important}
+ .hs-home{grid-template-rows:auto minmax(0,1fr)}
+ html.short .hs-home{gap:10px;grid-template-columns:minmax(0,1.5fr) minmax(230px,1fr)}
+ html.short .hs-home-heading h1{font-size:24px}
+ html.short .hs-home-primary>.journey{padding:14px;gap:9px}
+ html.short .hs-chapter-person{padding-bottom:8px;gap:8px}
+ html.short .hs-chapter-person .folk-face{width:48px!important;height:48px!important}
+ html.short .hs-chapter-step{padding:7px 0}
+ html.short .hs-town-card .pxscene{height:132px}
+ html.short .hs-town-caption{padding:10px}
+ .hs-home-reference .upnext{display:none}
+}
+@media(max-width:860px){
+ .hs-home{display:flex;flex-direction:column;gap:14px}
+ .hs-home-heading{align-items:flex-start}
+ .hs-home-heading h1{font-size:25px}
+ .hs-home-heading>small{display:none}
+ .hs-home-reference{overflow:visible}
+ .hs-home-side{gap:14px}
+ .hs-home-primary>.journey{flex:none}
+ #skilldock .dk{background:var(--panel)!important}
+}
+@media(pointer:coarse){.hs-home .btn{min-height:44px}}
+/* The candle-lit entrance keeps its night sky, with the same readable paper controls as the game. */
+#title .logo h1,#title .logo>.ic{color:#f4d69e}
+#title .logo p,#title .ver{color:#c0cbbb}
+#title .create{background:var(--panel);border-color:var(--line2);backdrop-filter:none}
+#title .create input{background:var(--panel2);color:var(--ink);border-color:var(--line2)}
+#title .tbtn{background:var(--panel2);color:var(--ink);border-color:var(--line2);text-shadow:none}
+#title .tbtn.primary{background:var(--brass);color:var(--hs-action-ink);border-color:var(--brass)}
+#title .tbtn.primary small{color:inherit}
+.hs-home-reference .unlock-grid{grid-template-columns:1fr}
+.hs-town-card .pxscene{position:static;inset:auto;height:188px!important;aspect-ratio:auto;object-fit:cover}
+@media(min-width:861px){html.short .hs-town-card .pxscene{height:132px!important}}
+.quest-actions .hs-continue{width:auto!important;height:auto!important;min-height:44px;max-width:100%;padding:9px 15px!important;gap:9px;white-space:normal}
+.quest-actions .hs-continue span{font-family:var(--f-ui);font-size:16px}
+.hs-home-primary .journey .hs-completion-hint{color:var(--mute)}
+.illustrated-card.locked,.illustrated-card.blocked{opacity:1}
+.hs-home-reference .unlock-grid{grid-auto-rows:auto;gap:8px}
+.hs-home-reference .unlock-grid>article{height:auto;min-height:0;padding:10px}
+.hs-home-reference .unlock-title{margin-bottom:6px}
+.hs-home-reference .unlock-step{padding:5px 0}
+/* Routine acknowledgements rise at the bottom instead of covering the control that was just redrawn. */
+.hearthside .toast.at-btn{left:50%!important;top:auto!important;bottom:20px;transform:translateX(-50%);animation-name:toast}

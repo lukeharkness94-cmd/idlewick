@@ -119,7 +119,7 @@ function food(p,id){
  const pumpkin=id==='pumpkin_pie',c=pumpkin?'#d59346':'#e2c66e';p.poly([[8,27],[22,15],[40,24],[37,35],[10,35]],'#b1804e');p.poly([[9,26],[23,17],[39,24],[33,29]],c);p.line(11,29,36,30,'#efd394');if(pumpkin){p.line(16,24,29,23,'#a36f38');p.line(22,19,29,28,'#a36f38');}else for(const [x,y]of [[17,25],[27,22],[30,27]])p.ellipse(x,y,2,1,'#bd9d51');
 }
 function tool(p,it){
- const [,kind,tierText]=it.id.match(/^tool_(\w+)_(\d)$/),t=Number(tierText),c=['','#a58d70','#9ca9b0','#83b2ae','#8c8bc3','#c5b36c'][t];
+ const [,kind,tierText]=it.id.match(/^tool_(\w+)_(\d(?:\.5)?)$/),t=Math.ceil(Number(tierText)),c=['','#a58d70','#9ca9b0','#83b2ae','#8c8bc3','#c5b36c'][t];
  if(kind==='gloves'){for(const x of [9,27]){p.poly([[x,24],[x,16],[x+3,15],[x+4,9],[x+7,9],[x+8,13],[x+11,12],[x+12,28],[x+8,35],[x+2,34]],c);p.rect(x+1,33,10,5+t,lo(c));if(t>1)p.rect(x-1,22,14,3,hi(c));if(t>3)p.poly([[x+10,28],[x+15,22],[x+13,34]],c);for(let j=0;j<t;j++)p.dot(x+2+j*2,36,CREAM);}return;}
  p.line(11,42,32,12,'#866340');p.line(12,42,33,12,'#c09b62');p.rect(10,38,5,4,lo(c));
  if(kind==='rod'){p.line(32,12,38,5,c);p.line(38,5,43,13,hi(c));p.line(43,13,41,35,'#c5c6b1');p.line(41,35,37,38,c);p.line(37,38,35,35,c);if(t>1){p.ellipse(20,32,2+t/2,2+t/2,lo(c));p.ellipse(20,32,2,2,hi(c));}if(t>2)p.ellipse(34,10,3,3,hi(c));if(t>3)p.poly([[34,5],[37,0],[40,6]],c);if(t===5)star(p,30,6,'#e6d4a0',3);}

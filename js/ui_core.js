@@ -6,6 +6,13 @@ const UI = DQ.ui = { view: 'overview', tab: {}, V: {}, after: {}, sel: null, res
 const set = (e, v) => { v = String(v); if (e.textContent !== v) e.textContent = v; };
 const itm = (id, n) => { const it = D.ITEMS[id]; return `<span class="itm ${it.rare ? 'rare' : ''}" style="--c:${it.col}" data-tip="item:${id}">${DQ.itemIco(it)}${n ? `<b class="mono">${fmtK(n)}</b>` : ''}</span>`; };
 UI.itm = itm; UI.set = set;
+/* Shared destination imagery: navigation uses icons, with words in accessible labels/tooltips. */
+UI.activityIcon = page => {
+ const sk=D.SK[page]||D.SKILLS.find(s=>s.page===page);
+ const art=sk&&DQ.artImage?DQ.artImage('skill',sk.id,32,'',sk.name):ico(({combat:'attack',shop:'shop',map:'world',quests:'quest',overview:'home',character:'bag',skillsummary:'star',bestiary:'book',mastery:'trophy',projects:'town'})[page]||'arrow');
+ return `<span class="route-art" aria-hidden="true">${art}</span>`;
+};
+UI.objectiveIcon = (q,o) => UI.activityIcon(o.guildPage||({carve:'carpentry',sail:'sailing',train:'beastmastery',study:'research',brew:'brewery',guildfight:'combat',guildheal:'combat'})[o.ev]||DQ.objPage(q,o));
 UI.money = amount => `<span class="money" role="img" aria-label="${fmt(amount)} coins"><span class="money-icon" aria-hidden="true">${ico('coin')}</span><span aria-hidden="true">${fmt(amount)}</span></span>`;
 /* Render existing choice definitions as visible buttons, never native dropdowns.
    The select is parsed in an inert template only; it never enters the page. */
@@ -78,7 +85,7 @@ const B = UI.B = {
   town: e => set(e, D.TOWN[S().town].name),
   playtime: e => set(e, DQ.fmtTime(S().playtime)),
 };
-DQ.actPage = () => { const a = DQ.act; if (!a) return null; if (DQ.KIND_EXT && DQ.KIND_EXT[a.kind]) return DQ.KIND_EXT[a.kind].page; if (a.kind === 'fight') return 'combat'; if (a.kind === 'alch') return 'magic'; if (a.kind === 'recipe') return D.RECIPES[a.id].skill; return { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' }[a.kind]; };
+DQ.actPage = () => { const a = DQ.act; if (!a) return null; if (DQ.KIND_EXT && DQ.KIND_EXT[a.kind]) return DQ.KIND_EXT[a.kind].pageFor?.(a.id) || DQ.KIND_EXT[a.kind].page; if (a.kind === 'fight') return 'combat'; if (a.kind === 'alch') return 'magic'; if (a.kind === 'recipe') return D.RECIPES[a.id].skill; return { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' }[a.kind]; };
 UI.upd = () => { $$('[data-b]').forEach(e => { const [k, a, b] = e.dataset.b.split(':'); if (B[k]) B[k](e, a, b); }); };
 let progEls = [];
 UI.collectProg = () => { progEls = $$('[data-prog]'); for (const el of progEls) if (!el.dataset.ring) { el.style.width='100%'; el.style.transformOrigin='left'; el.style.transform=`scaleX(${progOf(el.dataset.prog)})`; } };
@@ -125,7 +132,8 @@ DQ.tips.item = id => {
   const bonus = UI.statLine(it.b);
   let extra = '';
   if (it.heal) extra += `<div class="ok">+${it.heal} health</div>`;
-  if (it.type === 'tool') extra += `<div>${Math.round(D.TOOL_SPEED[it.tier] * 100)}% faster ${D.SK[it.toolSkill].name.toLowerCase()}</div>`;
+  if(it.type==='tool'&&!it.toolSkill&&it.sub)extra+=`<div>${esc(it.sub)}</div>`;
+  if (it.type === 'tool' && it.toolSkill) extra += `<div>${Math.round(D.TOOL_SPEED[it.tier] * 100)}% faster ${D.SK[it.toolSkill].name.toLowerCase()}</div>`;
   const own = DQ.have(id);
   return `<b style="color:${it.col}">${esc(it.name)}${it.rare ? ' ★' : ''}</b><em>${kind}</em>${bonus ? `<div class="stat-l">${bonus}</div>` : ''}${extra}${reqLine(it)}<div class="dim">Worth ${fmt(it.val)} coins${own ? ` · You have ${fmt(own)}` : ''}</div>`;
 };
@@ -143,7 +151,7 @@ UI.skillHero = (sk, extra = '') => {
 };
 UI.toolLine = sk => {
   const k = DQ.toolKey(sk); if (!k) return '';
-  const t = DQ.toolTier(sk), nx = t < 5 ? D.ITEMS[`tool_${k}_${t + 1}`] : null, spd = Math.round((1 - DQ.speedMult(sk)) * 100);
+  const t = DQ.toolTier(sk), nx = D.ITEMS[`tool_${k}_${D.TOOL_ORDER.find(n=>n>t)}`] || null, spd = Math.round((1 - DQ.speedMult(sk)) * 100);
   return `<div class="toolline"><span>${ico(D.TOOLS.find(x => x[0] === k)[2])} <b>${t ? D.ITEMS[`tool_${k}_${t}`].name : D.TOOL_TIERS[0] + ' ' + D.TOOLS.find(x => x[0] === k)[3].toLowerCase()}</b> · ${spd}% faster</span>${nx ? `<button class="btn sm" data-do="go" data-a="shop">Next: ${nx.name} (${fmt(nx.buy)})</button>` : '<span class="dim">Best tool owned</span>'}</div>`;
 };
 UI.lockedPage = sk => {
@@ -156,7 +164,7 @@ UI.lockedPage = sk => {
 
   if (s.quest) {
     const q = D.QM[s.quest], st = DQ.questState(q), blk = DQ.questBlockers(q), t = D.TOWN[q.town];
-    const btn = st === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept the quest</button>` : st === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Finish the quest</button>` : `<button class="btn" data-do="openquest" data-a="${q.id}">Open in quest log</button>`;
+    const btn = st === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>` : st === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Finish the quest</button>` : `<button class="btn" data-do="openquest" data-a="${q.id}">Open in quest log</button>`;
     return `<section class="panel locked-page fancy" style="--c:${s.col}"><div class="big">${ico(sk)}</div><span class="mq-ribbon">${ico('star')} Main quest</span><h2>Learn ${s.name}</h2><p>${s.blurb}</p>
       <div class="mq-box"><h3>${q.name}</h3><small>${q.giver} · ${t.name}</small><p class="blurb">${q.blurb}</p>
       ${st === 'locked' ? `<div class="reqs">${blk.map(b => `<div class="bad">✗ ${b}</div>`).join('')}</div>` : `<div class="mq-objs">${q.obj.map((o, j) => `<div class="obj"><span>${o.label}</span><span class="mono" ${S().q[q.id] ? `data-b="qtxt:${q.id}:${j}"` : ''}>${S().q[q.id] ? '' : '0 / ' + o.n}</span><span class="bar"><i ${S().q[q.id] ? `data-b="qbar:${q.id}:${j}"` : ''}></i></span></div>`).join('')}</div>`}
@@ -175,9 +183,9 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
   if (!choice) return `<section class="panel"><h2>${esc(title)}</h2><p>No tasks here yet. Visit another town to find more.</p><button class="btn" data-do="go" data-a="map">World map</button></section>`;
   UI.taskChoice[key] = choice.id;
   /* locked content stays blacked out everywhere: name and art hidden, only the requirement shown (Nov 2026) */
-  if (choice.locked) choice = Object.assign({}, choice, { name: '???', blackout: true, blocked: true, info: `<p class="locked-why">${ico('lock')} ${esc(choice.reason || 'Not unlocked yet')}</p>` });
+  if (choice.locked) choice = Object.assign({}, choice, { name: '???', blackout: true, blocked: true, info: `<p class="locked-why">${ico('lock')} ${esc(choice.reason || 'Not unlocked yet')}</p>${choice.discoverItem?`<button class="btn" data-do="route" data-a="${choice.discoverItem}">Find this ingredient</button>`:''}` });
   const running = DQ.act && DQ.act.kind === kind && DQ.act.id === choice.id;
-  const art = (c, size=96) => `<span class="${c.locked || c.blackout ? 'blackout' : ''}">${c.artKind === 'item' ? `<span class="activity-item-art" style="--art-size:${size}px">${DQ.itemIco(D.ITEMS[c.artId || c.id])}</span>` : DQ.artImage(c.artKind || (kind==='fight'?'creature':kind),c.artId || c.id,size,c.locked&&['fight','thieve'].includes(kind)?'sil':'',c.locked||c.blackout?'Locked':c.name)}</span>`;
+  const art = (c, size=96) => `<span class="${c.locked || c.blackout ? 'blackout' : ''}" ${c.locked||c.blackout?'aria-hidden="true"':''}>${c.artKind === 'item' ? `<span class="activity-item-art" style="--art-size:${size}px">${DQ.itemIco(D.ITEMS[c.artId || c.id])}</span>` : DQ.artImage(c.artKind || (kind==='fight'?'creature':kind),c.artId || c.id,size,c.locked&&['fight','thieve'].includes(kind)?'sil':'',c.locked||c.blackout?'Locked':c.name)}</span>`;
   const action = `<div class="activity-actions">${choice.away?`<button class="btn primary" data-do="taskmap" data-a="${choice.town}">View ${esc(D.TOWN[choice.town].name)}</button>`:''}<button class="btn primary task-primary" data-do="act" data-a="${kind}" data-b="${choice.id}" ${!running && choice.blocked ? 'disabled' : ''}>${running ? kind === 'fight' ? 'Retreat' : 'Stop' : choice.blackout ? 'Locked' : esc((verb?verb+' ':'')+choice.name.replace(/^(Cook|Bars|Weapons|Armour) · /,''))}</button>${DQ.planUnlocked && DQ.planUnlocked() ? `<button class="btn" data-do="queueadd" data-a="${kind}" data-b="${choice.id}" ${choice.locked||choice.away ? 'disabled' : ''}>Queue</button>` : ''}</div>`;
   const cards = `<section class="panel activity-choices"><div class="phead"><h2>${kind==='fight'?'Choose an opponent':kind==='recipe'?'Choose what to make':kind==='alch'?'Choose an item':({fish:'Fish catalogue',wood:'Trees',mine:'Ore deposits',thieve:'Targets',sail:'Islands',train:'Trap lines'}[kind]||'Choose your spot')}</h2><small>${choices.some(c=>c.town)?`${choices.length} resources · all regions`:D.TOWN[S().town].name}</small></div>${UI.taskToolbar[key] || ''}<div class="illustrated-choices">${choices.filter(c=>c.visible!==false).map(c=>{
     const working=DQ.act&&DQ.act.kind===kind&&DQ.act.id===c.id;
@@ -215,7 +223,7 @@ UI.V.gather = sk => {
 UI.focusTask = (page, id, tab, sk) => {
   if (DQ.data.RECIPES[id]) { const r = DQ.data.RECIPES[id], g = DQ.recipeGroup(r); sk = r.skill; tab = g.g; UI.tab[sk + 'sub'] = g.s || null; }
   if (tab) { UI.tab[sk || page] = tab; UI.tab[(sk || page) + 'ready'] = false; }
-  UI.taskChoice[page] = id; UI.spot = { id, until: Date.now() + 2600 }; DQ.go(page);
+  UI.taskChoice[page] = id; UI.spot = { id, until: Date.now() + 2600 }; if (UI.view === page) UI.render(false); else DQ.go(page);
   setTimeout(() => { const el = document.querySelector(`.illustrated-card[data-b="${id}"]`); if (!el) return;
     el.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); el.focus({ preventScroll: true }); }, 80);
 };
@@ -225,7 +233,7 @@ UI.focusTask = (page, id, tab, sk) => {
 const METAL_BAR={Bronze:'bar_bronze',Iron:'bar_iron',Steel:'bar_steel',Mithril:'bar_mithril',Adamant:'bar_adamant',Rune:'bar_rune',Astral:'bar_astral',Smelting:'ore_copper'},METAL={bronze:'Bronze',iron:'Iron',steel:'Steel',mithril:'Mithril',adamant:'Adamant',rune:'Rune',astral:'Astral'},HIDE={leather:'Leather',frost:'Frostpelt',bog:'Bogscale',drake:'Drakehide'};
 DQ.recipeGroup = r => {
   const out=Object.keys(r.out)[0],it=D.ITEMS[out]||{},m=out.split('_')[0];
-  if(r.skill==='smithing'){ if(r.id.startsWith('smelt_'))return {g:'Smelting'}; if(r.tab==='Tools')return {g:'Tools'}; return {g:METAL[m]||'Other',s:it.slot==='weapon'?'Weapons':'Armour'}; }
+  if(r.skill==='smithing'){ if(r.id.startsWith('smelt_')||it.ic==='bar')return {g:'Smelting'}; if(r.tab==='Tools')return {g:'Tools'}; return {g:METAL[m]||D.TIERS[it.tier]?.name||'Other',s:it.slot==='weapon'?'Weapons':'Armour'}; }
   if(r.skill==='crafting'){ if(r.tab==='Tools')return {g:'Tools'}; if(it.charm)return {g:'Charms'}; if(r.tab==='Jewellery')return {g:'Jewellery'}; if(r.tab==='Arrows')return {g:'Arrows'};
     if(it.slot&&HIDE[m]&&it.slot!=='weapon')return {g:'Armour',s:HIDE[m]}; if(r.tab==='Bows')return {g:'Wood',s:'Bows'}; if(r.tab==='Staves')return {g:'Wood',s:'Staves'}; if(r.tab==='Shields'||it.wood)return {g:'Wood',s:'Shields'}; return {g:'Basics'}; }
   if(r.skill==='cooking'){ if(it.dish)return {g:'Fish suppers'}; if(r.tab==='Farmhouse')return {g:'Farmhouse'}; const b=r.lvl<=25?'Level 1–25':r.lvl<=50?'Level 26–50':r.lvl<=75?'Level 51–75':'Level 76–99'; return {g:'Fish',s:b}; }
@@ -236,35 +244,36 @@ UI.V.recipes = sk => {
      make (armour by hide, wood by bows / staves / shields). Each chip says how many are ready, or the level it opens at. */
   /* every list in level order, so new additions never trail at the end */
   const list=D.RLIST[sk].filter(r=>!DQ.recipeShown||DQ.recipeShown(r)).sort((a,b)=>a.lvl-b.lvl||a.name.localeCompare(b.name)),grp=r=>DQ.recipeGroup(r),order=['Fish','Fish suppers','Farmhouse','Smelting','Bronze','Iron','Steel','Mithril','Adamant','Rune','Astral','Basics','Armour','Wood','Arrows','Jewellery','Charms','Tools'],groups=[...new Set(list.map(r=>grp(r).g))].sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
-  const g=UI.tab[sk]=groups.includes(UI.tab[sk])?UI.tab[sk]:(groups.find(x=>list.some(r=>grp(r).g===x&&DQ.recipeLvlOk(r)&&DQ.canMake(r)))||groups[0]);
+  const g=UI.tab[sk]=groups.includes(UI.tab[sk])?UI.tab[sk]:(groups.find(x=>list.some(r=>grp(r).g===x&&DQ.recipeLvlOk(r)&&DQ.recipeDiscovered(r)&&DQ.canMake(r)))||groups[0]);
   const subs=[...new Set(list.filter(r=>grp(r).g===g).map(r=>grp(r).s).filter(Boolean))],sub=UI.tab[sk+'sub']=subs.includes(UI.tab[sk+'sub'])?UI.tab[sk+'sub']:subs[0],only=UI.tab[sk+'ready'];
-  const inG=(r,x,y)=>grp(r).g===x&&(!y||grp(r).s===y),chip=(x,y,on,act,b)=>{const rs=list.filter(r=>inG(r,x,y)),ready=rs.filter(r=>DQ.recipeLvlOk(r)&&DQ.canMake(r)).length,min=Math.min(...rs.map(r=>r.lvl)),locked=DQ.lvl(sk)<min&&!rs.some(r=>DQ.recipeLvlOk(r));
-    const metalBar=!y&&sk==='smithing'&&METAL_BAR[x],pic=metalBar&&D.ITEMS[metalBar]?metalBar:x==='Tools'&&sk==='smithing'?'tool_pick_1':Object.keys((rs[0]||{out:{}}).out)[0],art=pic&&D.ITEMS[pic]?`<span class="rc-art ${locked?'blackout':''}">${DQ.itemIco(D.ITEMS[pic])}</span>`:'';
+  const inG=(r,x,y)=>grp(r).g===x&&(!y||grp(r).s===y),chip=(x,y,on,act,b)=>{const rs=list.filter(r=>inG(r,x,y)),ready=rs.filter(r=>DQ.recipeLvlOk(r)&&DQ.recipeDiscovered(r)&&DQ.canMake(r)).length,min=Math.min(...rs.map(r=>r.lvl)),locked=(DQ.lvl(sk)<min&&!rs.some(r=>DQ.recipeLvlOk(r)))||rs.every(r=>!DQ.recipeDiscovered(r));
+    const metalBar=!y&&sk==='smithing'&&METAL_BAR[x],pic=metalBar&&D.ITEMS[metalBar]?metalBar:x==='Tools'&&sk==='smithing'?'tool_pick_1':Object.keys((rs[0]||{out:{}}).out)[0],art=pic&&D.ITEMS[pic]?`<span class="rc-art ${locked||rs[0]&&!DQ.recipeDiscovered(rs[0])?'blackout':''}">${DQ.itemIco(D.ITEMS[pic])}</span>`:'';
     return `<button class="chip rc-chip ${on?'on':''} ${locked?'locked':''}" data-do="tab" data-a="${act}" data-b="${esc(b)}" aria-pressed="${on}">${art}${locked?ico('lock'):''}<span>${esc(y||x)}</span><small>${locked?`Lv ${min}`:ready?`${ready} ready`:''}</small></button>`;};
   UI.taskToolbar[sk]=`<div class="recipe-categories" role="group" aria-label="Category">${groups.map(x=>chip(x,null,x===g,sk,x)).join('')}<span class="filter-sep" aria-hidden="true"></span><button class="filter-toggle ${only?'on':''}" role="switch" aria-checked="${only?'true':'false'}" data-do="readyonly" data-a="${sk}"><span class="ft-track" aria-hidden="true"><span class="ft-knob"></span></span><span>Ready to make</span><b>${only?'On':'Off'}</b></button></div>${subs.length>1?`<div class="recipe-categories recipe-sub" role="group" aria-label="Type">${subs.map(y=>chip(g,y,y===sub,sk+'sub',y)).join('')}</div>`:''}`;
   const missingOf=r=>Object.entries(r.in).filter(([id,n])=>DQ.have(id)<n).map(([id,n])=>`${n-DQ.have(id)} ${D.ITEMS[id].name.toLowerCase()}`);
-  const choices=list.map(r=>{if(r.secret&&DQ.recipeUsable&&!DQ.recipeUsable(r))return {id:r.id,name:'???',artKind:'item',artId:Object.keys(r.out)[0],visible:inG(r,g,subs.length>1?sub:null)&&!only,locked:true,blocked:true,short:'A rumour',reason:D.SECRET[r.secret].rumour};const outId=Object.keys(r.out)[0],it=D.ITEMS[outId],lvlLock=!DQ.skillUnlocked(sk)||!DQ.recipeLvlOk(r),miss=lvlLock?[]:missingOf(r);
-    return {id:r.id,name:r.name,artKind:'item',artId:outId,visible:inG(r,g,subs.length>1?sub:null)&&(!only||DQ.canMake(r)),locked:lvlLock,missing:!lvlLock&&miss.length>0,blocked:lvlLock||miss.length>0,
-    reason:lvlLock?`Requires ${D.SK[sk].name} ${r.lvl}`:miss.length?`Missing ${miss.join(', ')}`:'',
-    stateText:lvlLock?`🔒 ${D.SK[sk].name} ${r.lvl} (you are ${DQ.lvl(sk)})`:miss.length?`Missing ${miss.length===1?miss[0]:miss.length+' materials'}`:'Ready to make',
+  const choices=list.map(r=>{if(r.secret&&DQ.recipeUsable&&!DQ.recipeUsable(r))return {id:r.id,name:'???',artKind:'item',artId:Object.keys(r.out)[0],visible:inG(r,g,subs.length>1?sub:null)&&!only,locked:true,blocked:true,short:'A rumour',reason:D.SECRET[r.secret].rumour};const outId=Object.keys(r.out)[0],it=D.ITEMS[outId],discovery=DQ.recipeDiscovery(r),undiscovered=!!discovery,gate=DQ.recipeGate?.(r)||'',complete=!!r.once&&DQ.itemDiscovered(outId),lvlLock=!complete&&(!DQ.skillUnlocked(sk)||!DQ.recipeLvlOk(r)||undiscovered||!!gate),miss=lvlLock||complete?[]:missingOf(r);
+    return {id:r.id,name:r.name,artKind:'item',artId:outId,visible:inG(r,g,subs.length>1?sub:null)&&(!only||DQ.canMake(r)),locked:lvlLock,missing:!lvlLock&&miss.length>0,blocked:complete||lvlLock||miss.length>0,
+    discoverItem:undiscovered?discovery.item:null,short:undiscovered?'Needs '+D.ITEMS[discovery.item].name:undefined,reason:complete?'Completed · kept permanently':undiscovered?discovery.reason:gate?gate:lvlLock?`Requires ${D.SK[sk].name} ${r.lvl}`:miss.length?`Missing ${miss.join(', ')}`:'',
+    stateText:complete?'✓ Completed · kept':gate?gate:lvlLock?`🔒 ${D.SK[sk].name} ${r.lvl} (you are ${DQ.lvl(sk)})`:miss.length?`Missing ${miss.length===1?miss[0]:miss.length+' materials'}`:'Ready to make',
     caption:r.burn&&!lvlLock&&DQ.lvl(sk)<r.lvl?`Lv ${r.lvl} · ${Math.round(DQ.burnChance(r)*100)}% burn`:`Lv ${r.lvl} · ${UI.statLine(it.b)||DQ.purposeOf&&DQ.purposeOf(outId)||`${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`}`,
-    info:`<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}${UI.floLine?UI.floLine(sk):''}</p>${UI.goalLine?UI.goalLine(sk):''}<div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>UI.needTile(id,n,{live:true})).join('')}</div>`};});
+    info:`${UI.recipeGateLinks?UI.recipeGateLinks(r):''}${r.note?`<p>${esc(r.note)}</p>`:''}<p>${(r.xp*DQ.xpMult(sk)).toFixed(1)} XP · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s per attempt${r.burn?` · ${Math.round(DQ.burnChance(r)*100)}% burn chance`:''}${UI.floLine?UI.floLine(sk):''}</p>${UI.goalLine?UI.goalLine(sk):''}<div class="recipe-ingredients">${Object.entries(r.in).map(([id,n])=>UI.needTile(id,n,{live:true})).join('')}</div>`};});
   return UI.taskPanel(sk,D.SK[sk].name,'recipe',choices,sk==='cooking'?'Cook':sk==='smithing'||sk==='carpentry'?'Make':'Craft')+`<section data-reference="true" class="panel reference-panel" id="${sk}-progress"><h3>Skill progress</h3>${UI.skillHero(sk)}</section>`;
 };
 
 /* ---------- Magic page ---------- */
 UI.V.magic = () => {
-  const tab = UI.tab.magic || 'Alchemy', level = DQ.lvl('magic'), alchemy = DQ.alchSpell();
+  const tab=UI.tab.magic==='Spellbook'?'Spellbook':'Alchemy',level=DQ.lvl('magic'),alchemy=DQ.alchSpell();
+  const header=`<div class="magic-heading">${UI.skillHero('magic')}<div class="tabs magic-tabs">${['Alchemy','Spellbook'].map(t=>`<button class="tab ${t===tab?'on':''}" data-do="tab" data-a="magic" data-b="${t}">${t==='Alchemy'?ico('coin'):ico('magic')} ${t}</button>`).join('')}</div></div>`;
   let body;
-  if (tab === 'Alchemy') {
-    const ids = Object.keys({ ...S().inv, ...S().bank }).filter(id => D.ITEMS[id].val >= 8 && !DQ.isEquipped(id) && D.ITEMS[id].type !== 'food' && id !== 'rune').sort((a, b) => D.ITEMS[b].val - D.ITEMS[a].val);
-    const choices = ids.map(id => ({ id, name: D.ITEMS[id].name, artKind: 'item', blocked: !alchemy || DQ.have('rune') < alchemy.runes, reason: 'Not enough Arcane runes.', info: alchemy ? `<p>${fmt(Math.round(D.ITEMS[id].val * alchemy.mult))} coins per cast · ${alchemy.runes} runes used · <b data-b="runes"></b> runes held · <b data-b="count:${id}"></b> items held</p>` : '' }));
-    body = !alchemy ? `<section class="panel"><p>Alchemy opens at Magic ${D.ALCH[0].lvl}. Equip a staff and fight to train Magic.</p><button class="btn" data-do="go" data-a="combat">Combat</button></section>` : choices.length ? UI.taskPanel('magic', 'Alchemy', 'alch', choices, 'Cast') : '<section class="panel"><p>You have nothing worth transmuting right now.</p></section>';
-  } else {
-    const spell = D.SPELLS.find(sp => sp.id === S().spell) || D.SPELLS[0];
-    body = `<section class="panel"><div class="phead"><h2>Combat magic</h2><small>Magic level ${level}</small></div><div class="task-controls"><label for="combat-spell">Spell${UI.choiceButtons(`<select id="combat-spell" data-in="combat-spell">${D.SPELLS.map(sp => `<option value="${sp.id}" ${sp === spell ? 'selected' : ''} ${level < sp.lvl ? 'disabled' : ''}>${sp.name} · Level ${sp.lvl}</option>`).join('')}</select>`)}</label><button class="btn primary" data-do="go" data-a="combat">Combat</button></div><p class="sm">Max hit ${spell.max} · ${spell.runes} runes per cast. Spells are cast automatically with a staff.</p></section>`;
+  if(tab==='Alchemy'){
+    const ids=Object.keys({...S().inv,...S().bank}).filter(id=>D.ITEMS[id].val>=8&&!DQ.isEquipped(id)&&D.ITEMS[id].type!=='food'&&id!=='rune').sort((a,b)=>D.ITEMS[b].val-D.ITEMS[a].val);
+    const choices=ids.map(id=>({id,name:D.ITEMS[id].name,artKind:'item',artId:id,blocked:!alchemy||DQ.have('rune')<alchemy.runes,caption:`${DQ.have(id)} held`,reason:'Find the missing casting supplies.',info:alchemy?`<div class="alchemy-outcome"><span>1 item →</span><b>${UI.money(Math.round(D.ITEMS[id].val*alchemy.mult))}</b></div><p class="sm">${esc(alchemy.name)} · consumes the selected item. Equipped gear stays safe.</p>${UI.needTiles({[id]:1,rune:alchemy.runes})}`:''}));
+    body=!alchemy?`<section class="panel magic-empty"><h2>Alchemy opens at Magic ${D.ALCH[0].lvl}</h2><p>Train Magic in combat with a staff. Alchemy turns spare items into coins.</p><button class="btn primary" data-do="tab" data-a="magic" data-b="Spellbook">Prepare a combat spell</button></section>`:choices.length?UI.taskPanel('magic','Alchemy','alch',choices,'Transmute'):`<section class="panel magic-empty"><h2>No spare items to transmute</h2><p>Gather or make an item worth at least 8 coins. Food, equipped gear and runes are excluded.</p><button class="btn" data-do="go" data-a="character">Open inventory</button></section>`;
+  }else{
+    const spell=D.SPELLS.find(sp=>sp.id===S().spell&&sp.lvl<=level)||D.SPELLS[0],el=D.DTYPES[D.SPELL_EL[spell.id]],staff=DQ.weaponStyle()==='magic',owned=Object.keys({...S().inv,...S().bank}).find(id=>D.ITEMS[id].style==='magic'&&DQ.canEquip(id).ok),runename=DQ.itemDiscovered('rune')?'Arcane runes':'Casting supplies';
+    body=`<div class="magic-spellbook"><section class="panel magic-spell-focus"><div class="magic-emblem">${DQ.artImage('skill','magic',64)}</div><span class="k">Selected combat spell</span><h2>${esc(spell.name)}</h2><p>${esc(el.name)} · base max hit ${spell.max}</p><p>Cast automatically in combat with a staff.</p>${UI.needTiles({rune:spell.runes})}<div class="magic-readiness"><span class="${staff?'ok':'warn'}">${staff?'✓ Staff equipped':'Staff required'}</span><span class="${DQ.have('rune')>=spell.runes?'ok':'warn'}">${DQ.have('rune')>=spell.runes?'✓ '+runename+' ready':'Casting supplies needed'}</span></div><div class="btnrow">${!staff?`<button class="btn" data-do="${owned?'equip':'route'}" data-a="${owned||'staff_normal'}">${owned?'Equip your staff':'Find a staff'}</button>`:''}<button class="btn primary" data-do="go" data-a="combat">Open Combat</button></div></section><section class="panel magic-spell-choices"><div class="phead"><h2>Choose a spell</h2><small>Selection does not start a fight</small></div><div class="spells">${D.SPELLS.map(sp=>{const locked=level<sp.lvl,element=D.DTYPES[D.SPELL_EL[sp.id]];return `<button class="spell ${sp.id===spell.id?'on':''} ${locked?'locked':''}" data-do="spell" data-a="${sp.id}" aria-pressed="${sp.id===spell.id}" ${locked?'disabled':''}>${ico(locked?'lock':element.ic)}<b>${locked?'???':esc(sp.name)}</b><small>${locked?'Magic '+sp.lvl:`${esc(element.name)} · ${sp.runes} ${DQ.itemDiscovered('rune')?'runes':'casting supplies'} per cast`}</small></button>`;}).join('')}</div></section></div>`;
   }
-  return `<div class="tabs magic-tabs">${['Alchemy', 'Spellbook'].map(t => `<button class="tab ${t === tab ? 'on' : ''}" data-do="tab" data-a="magic" data-b="${t}">${t}</button>`).join('')}</div>${body}<section data-reference="true" class="panel reference-panel" id="magic-progress"><h3>Skill progress</h3>${UI.skillHero('magic')}</section>`;
+  return `<div class="magic-workshop">${header}<div class="magic-body">${body}</div></div>`;
 };
 
 /* ---------- Combat page ---------- */
@@ -329,7 +338,7 @@ UI.V.combat = () => {
   /* Fighting style, always beside the fight: the weapon decides melee, ranged or magic; these buttons choose what your
      fights train. The same buttons also sit in the full fighter panel below. */
   const styleSk = { accurate: 'melee', aggressive: 'melee', defensive: 'defence', offense: st };
-  const styleBtns = Object.entries({ aggressive: st === 'melee' && 'Offensive', offense: st !== 'melee' && 'Offensive', defensive: 'Defensive' }).filter(([, l]) => l).map(([v, l]) => `<button type="button" class="choice-button ss-btn ${cur === v ? 'on' : ''}" data-do="style" data-a="${st}" data-b="${v}" aria-pressed="${cur === v}" data-tip="text:Your fights train ${esc(v === 'defensive' && st !== 'melee' ? `${D.SK[st].name} and Defence` : D.SK[styleSk[v]].name)}">${ico(styleSk[v])}<span>${l}<small>${v === 'defensive' && st !== 'melee' ? `${D.SK[st].name} + Defence` : D.SK[styleSk[v]].name} <b class="mono" data-b="lvl:${v === 'defensive' ? 'defence' : styleSk[v]}"></b></small>${v !== 'defensive' && DQ.catchUp && DQ.catchUp(styleSk[v]) > 1 ? '<em class="ss-fast" data-tip="text:3× XP until it nears your best style">Learning 3× faster</em>' : ''}<span class="bar ss-xp"><i data-b="xpbar:${v === 'defensive' ? 'defence' : styleSk[v]}"></i></span></span></button>`).join('');
+  const styleBtns = Object.entries({ aggressive: st === 'melee' && 'Offensive', offense: st !== 'melee' && 'Offensive', defensive: 'Defensive' }).filter(([, l]) => l).map(([v, l]) => `<button type="button" class="choice-button ss-btn ${cur === v ? 'on' : ''}" data-do="style" data-a="${st}" data-b="${v}" aria-pressed="${cur === v}" data-tip="text:Your fights train ${esc(v === 'defensive' && st !== 'melee' ? `${D.SK[st].name} and Defence` : D.SK[styleSk[v]].name)}">${ico(styleSk[v])}<span>Train<small>${v === 'defensive' && st !== 'melee' ? `${D.SK[st].name} + Defence` : D.SK[styleSk[v]].name} <b class="mono" data-b="lvl:${v === 'defensive' ? 'defence' : styleSk[v]}"></b></small>${v !== 'defensive' && DQ.catchUp && DQ.catchUp(styleSk[v]) > 1 ? '<em class="ss-fast" data-tip="text:3× XP until it nears your best style">Learning 3× faster</em>' : ''}<span class="bar ss-xp"><i data-b="xpbar:${v === 'defensive' ? 'defence' : styleSk[v]}"></i></span></span></button>`).join('');
   /* the combat skills live on the style buttons (level and progress), with Health, which every fight trains, and the
      combat level beside them; the level opens the details */
   const styleExtra = `<span class="ss-hp" data-tip="skill:hitpoints">${ico('hitpoints')}<span>Health<small>Every fight <b class="mono" data-b="lvl:hitpoints"></b></small><span class="bar ss-xp"><i data-b="xpbar:hitpoints"></i></span></span></span><button class="ss-cl" data-do="combatmore" data-a="skills" data-tip="text:Combat level breakdown">${ico('attack')}<span>Combat <b class="mono" data-b="combat"></b><small>Details</small></span></button>`;

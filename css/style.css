@@ -1824,7 +1824,7 @@ h3 { font-size:17px; }
 /* shop: every item at one modest size (tools, gear, food and seeds alike), from sources at twice that resolution */
 .visual-shop .illustrated-card .choice-art{height:84px;min-height:84px}
 .visual-shop .illustrated-card .choice-art > .item-art,.visual-shop .illustrated-card .choice-art > img,.visual-shop .illustrated-card .choice-art > .painted-sprite{width:72px!important;height:72px!important;max-width:72px;max-height:72px;object-fit:contain}
-.visual-shop .shop-task .item-art,.visual-shop .shop-task .painted-image,.visual-shop .shop-task .painted-sprite{width:80px!important;height:80px!important;object-fit:contain}
+.visual-shop .shop-item-art .item-art,.visual-shop .shop-item-art .painted-image,.visual-shop .shop-item-art .painted-sprite{width:80px!important;height:80px!important;object-fit:contain}
 .visual-shop .illustrated-card{height:auto;min-height:172px;gap:6px}
 /* tighter cards across the board: content-sized height, smaller art well, less padding */
 .illustrated-card{height:auto;min-height:0;padding:8px 8px 9px;gap:4px}
@@ -2084,7 +2084,7 @@ body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)
 #av-foe.tell::before{content:"!";position:absolute;top:6px;left:50%;transform:translateX(-50%);font:700 26px var(--f-body);color:#ffd060;text-shadow:0 2px 0 #000a;animation:tell-pulse .7s ease-in-out infinite;z-index:4}
 #av-foe{position:relative}
 @keyframes tell-pulse{0%,100%{opacity:.6;transform:translate(-50%,0) scale(1)}50%{opacity:1;transform:translate(-50%,-3px) scale(1.15)}}
-.encounter-arena.shake{animation:arena-shake .38s linear}
+.encounter-arena.shake{animation:none}
 @keyframes arena-shake{0%,100%{transform:translate(0)}20%{transform:translate(-4px,2px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,1px)}80%{transform:translate(2px,-1px)}}
 /* door note and the night-time home */
 .door-note{margin-top:14px;padding:12px 16px;background:#f3e6c4;color:#3a2a1a;border-radius:4px;transform:rotate(-1deg);box-shadow:0 4px 10px #0006;font-style:italic;max-width:420px}
@@ -4056,3 +4056,288 @@ html.calm .in-skip.on{opacity:1}
 .in-frame.over~*,.shot-town .in-frame.over{}
 #intro .in-cap{text-shadow:0 2px 0 #000,0 0 18px #000,0 0 36px #000}
 @media (max-width:860px){.in-frame.pan{-webkit-mask-image:linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent);mask-image:linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent)}}
+
+/* Connected supplies and finite jobs: existing brass, cards and text sizes. */
+.local-project-payoff{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}.local-project-payoff small{flex-basis:100%;font-size:14px}.local-picture{height:64px;display:flex;align-items:center}.local-picture img{width:64px;height:64px;image-rendering:pixelated}.worker-job-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}.worker-job-controls input{width:100px;min-height:36px;font:inherit}.worker-job-status,.worker-request{padding:8px;border-left:3px solid var(--brass);margin:8px 0}.worker-request{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.worker-request small{flex-basis:100%}.worker-ingredients{display:flex;flex-wrap:wrap;gap:5px}.worker-guide-rate{display:block}.tower-preparation{padding:10px 12px;border-left:3px solid var(--brass);background:var(--panel);margin-bottom:10px}.tower-preparation p{margin:5px 0 0}.guide-discovery{padding:8px;border-left:3px solid var(--brass);font-size:14px}.shop-task>small{display:block;margin-top:8px}
+@media(min-width:861px){.shop-task:has(.local-picture){overflow:auto}.worker-job-controls .btn{padding:7px 10px}html.short .tower-preparation{padding:6px 10px}html.short .tower-preparation p{font-size:14px}html.short .tw-floor{padding-top:7px;padding-bottom:7px}}
+@media(max-width:860px){.worker-job-controls{gap:5px}.worker-job-controls label{flex-basis:100%}.local-project-payoff{gap:5px}.tower-preparation{padding:8px}}
+.local-stock .illustrated-choices{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))!important;align-content:start}.local-stock .illustrated-card{min-height:200px}.local-stock .illustrated-card small{line-height:1.3}.worker-job-status{font-size:14px}.worker-request{padding:6px 8px}.worker-request small{font-size:14px}
+@media(min-width:861px){html.short .worker{padding:10px}html.short .worker-request{margin:5px 0}html.short .worker-job-controls{margin:5px 0}html.short .worker .page-picker{margin:5px 0}html.short .worker>small{font-size:14px}}
+@media(max-width:860px){.local-stock .illustrated-choices{grid-template-columns:repeat(2,minmax(0,1fr))!important}.local-stock .illustrated-card{min-height:180px}}
+.worker-support{display:flex;flex-direction:column;gap:12px;min-width:0}.worker-planner h3{margin:0 0 7px}.worker-planner>small{font-size:14px;display:block}.worker-planner .worker-job-controls{align-items:center}.worker-support .worker-board{margin:0}.worker-planner .worker-request{margin:5px 0}
+@media(min-width:861px){html.short .worker-support{gap:8px}html.short .worker-planner{padding:10px}html.short .worker-support .worker-board{padding:10px}html.short .worker-support .cand{padding:8px}html.short .worker-support .worker-board .page-picker{margin:6px 0}}
+
+/* Magic has one selected action and one choice area; no detached progress panel below it. */
+.magic-workshop{display:flex;flex-direction:column;gap:12px;height:100%;min-height:0;flex:1}.magic-heading{display:flex;flex-direction:column;gap:8px;flex:none}.magic-heading .panel{margin:0}.magic-heading .magic-tabs{margin:0}.magic-body{min-height:0;flex:1}.magic-body>.activity-workspace{height:100%;min-height:0}.magic-spellbook{display:grid;grid-template-columns:minmax(280px,.9fr) minmax(0,1.4fr);gap:16px;height:100%;min-height:0}.magic-spell-focus{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-height:0}.magic-spell-focus h2,.magic-spell-focus p{margin:0}.magic-emblem{width:64px;height:64px}.magic-emblem img{width:64px;height:64px;image-rendering:pixelated}.magic-readiness{display:flex;flex-wrap:wrap;gap:8px;font-size:14px}.magic-spell-choices{min-height:0;overflow:auto}.magic-spell-choices .spells{grid-template-columns:repeat(2,minmax(0,1fr))}.magic-empty{height:100%;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px}.alchemy-outcome{display:flex;align-items:center;gap:10px;margin:8px 0}.alchemy-outcome b{font-size:22px}.magic-body .activity-caption .need-tiles{margin-top:8px}.unknown-ingredient .nt-art{filter:none}
+@media(min-width:861px){html.short .magic-workshop{gap:8px}html.short .magic-heading{gap:5px}html.short .magic-emblem{display:none}html.short .magic-spell-focus{gap:6px;padding:12px}.magic-spellbook .spell{min-height:80px}.magic-workshop .activity-choices{min-height:0}}
+@media(max-width:860px){.magic-workshop{height:auto}.magic-spellbook{display:flex;flex-direction:column;height:auto}.magic-spell-choices{overflow:visible}.magic-spell-choices .spells{grid-template-columns:1fr 1fr}.magic-spell-focus{gap:8px}.magic-empty{min-height:220px}.magic-body>.activity-workspace{height:auto}}
+.magic-heading .perk{font-size:13px;min-width:24px}.magic-heading .perks{gap:5px}
+
+/* Short-lived tap feedback stays on compositor transforms at the display refresh rate. */
+.tap-fx{will-change:transform,opacity;pointer-events:none}
+
+/* Main quests: one stable conversation, speaker left and player-paced dialogue right. */
+.story-modal .story-conversation{display:grid;grid-template-columns:240px minmax(0,1fr);gap:24px;min-height:340px}
+.story-conversation .story-speaker{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;border-radius:12px;background:var(--panel2);padding:16px}
+.story-conversation .story-location{position:static;font-size:15px;text-align:center}
+.story-talker{display:grid;place-items:center;width:192px;height:192px;flex:none;transform-origin:bottom center}
+.story-talker :is(img,.portrait){width:192px!important;height:192px!important;max-width:none;image-rendering:pixelated;object-fit:contain}
+.story-conversation .story-dialogue{align-items:stretch;padding:20px;min-width:0}
+.story-conversation .story-copy{display:flex;flex-direction:column;gap:12px;width:100%}
+.story-conversation .story-line{flex:1;min-height:130px;cursor:pointer;font-size:22px;line-height:1.5;margin:0;border-radius:6px}
+.story-conversation .story-line:focus-visible{outline:2px solid var(--brass);outline-offset:5px}
+.story-conversation .story-controls{grid-column:1/-1;min-height:44px}
+.story-conversation .story-controls small{text-align:center}
+.story-conversation .story-choices{grid-template-columns:1fr}
+@media(max-width:860px){
+ .story-modal .story-conversation{grid-template-columns:104px minmax(0,1fr);gap:10px;min-height:300px}
+ .story-conversation .story-speaker{padding:4px;gap:12px;justify-content:flex-start}
+ .story-conversation .story-location{padding:5px;font-size:13px}
+ .story-talker,.story-talker :is(img,.portrait){width:96px!important;height:96px!important}
+ .story-conversation .story-dialogue{padding:12px}
+ .story-conversation .story-line{font-size:18px;line-height:1.4;min-height:180px}
+ .story-conversation .story-controls{gap:8px}
+ .story-conversation .story-choices{grid-template-columns:1fr}
+}
+
+/* Quest journal: a compact story index beside a readable chapter. */
+.journal-header{gap:18px}.journal-header h2{font-size:24px;margin:3px 0}.journal-header small{font-size:14px;color:var(--mute)}
+.quest-journal-layout{grid-template-columns:minmax(285px,340px) minmax(0,1fr);gap:0;border:1px solid var(--line2);border-radius:12px;background:var(--panel);overflow:hidden}
+.quest-journal-layout>.qlist{padding:16px!important;border-right:1px solid var(--line2);background:var(--panel2);gap:8px}
+.quest-journal-layout>.qdetail{padding:0!important}
+.journal-section{font:600 14px var(--f-display);letter-spacing:.06em;color:var(--brass-hi);display:flex;justify-content:space-between;margin:10px 0 6px;flex:none}
+.journal-section small{font:500 14px var(--f-ui);color:var(--mute)}
+.quest-journal-layout .qrow{grid-template-columns:40px minmax(0,1fr) auto;padding:10px 8px;border-radius:7px;gap:8px;background:transparent}
+.quest-journal-layout .qr-t b{white-space:normal;font-size:17px}
+.quest-journal-layout .qr-t small{font-size:14px}
+.qr-objective{font:500 14px/1.3 var(--f-body);color:var(--mute);overflow-wrap:anywhere}
+.quest-journal-layout .qrow .state{font-size:13px;align-self:start;padding-top:2px}
+.quest-journal-layout .qrow.ready .qr-objective{color:var(--good)}
+.quest-journal-layout .quest-journal{padding:24px 28px;margin:0;border:0;border-radius:0;box-shadow:none;min-height:100%;display:flex;flex-direction:column;gap:14px;position:relative}
+.journal-kicker{display:flex;justify-content:space-between;gap:14px;align-items:center}
+.journal-kicker .state{font:600 14px var(--f-ui)}
+.quest-journal>h2{font:600 29px/1.2 var(--f-display);margin:0}
+.journal-giver{display:flex;gap:14px;align-items:center;flex:none}
+.journal-giver>div{display:flex;flex-direction:column;gap:4px}
+.journal-giver b{font:600 19px var(--f-body)}
+.journal-giver small{font:500 15px var(--f-body);color:var(--mute)}
+.journal-giver .quest-face{padding:0}.journal-giver .folk-face{width:64px!important;height:64px!important;max-width:none}
+.quest-journal .quest-story{margin:0;display:flex;flex-direction:column;gap:12px}
+.quest-voice{font:500 22px/1.4 var(--f-body);margin:0;border-left:3px solid var(--brass);padding:0 0 0 18px}
+.quest-journal .blurb{font:500 18px/1.4 var(--f-body);color:var(--mute)}
+.journal-reading{display:flex;flex-direction:column;gap:12px;min-height:0}
+.journal-objective-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:5px}
+.quest-journal .quest-objs{border-block:1px solid var(--line);padding:12px 0}
+.quest-journal .obj{font-size:17px;padding:7px 0}.quest-journal .obj .mono{font-size:15px}
+.quest-journal .quest-actions{margin-top:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:6px;flex:none}
+.quest-journal .pinbtn{position:static;font-size:15px;min-height:38px;padding:6px 12px;cursor:pointer}
+.quest-journal .rewards{margin:0}.quest-journal .rewards .rws{margin-top:6px}
+.journal-empty p{margin:12px 0}
+@media(min-width:861px){
+ .quest-journal-layout>.qdetail{overflow:hidden!important;display:flex;flex-direction:column}
+ .quest-journal-layout .quest-journal{height:100%;min-height:0}
+ .quest-journal .journal-reading{overflow-y:auto;scrollbar-width:thin;padding-right:6px;flex:1}
+ html.short .quest-journal-layout .quest-journal{padding:16px 20px;gap:10px}
+ html.short .quest-journal>h2{font-size:25px}
+ html.short .quest-voice{font-size:21px}
+ html.short .journal-giver .folk-face{width:64px!important;height:64px!important}
+}
+@media(max-width:860px){
+ .quest-journal-layout{grid-template-columns:minmax(0,1fr)}
+ .quest-journal-layout>.qlist{max-height:250px;overflow-y:auto;border-right:0;border-bottom:1px solid var(--line2)}
+ .quest-journal-layout .quest-journal{padding:18px;gap:14px}
+ .quest-journal>h2{font-size:25px}.quest-voice{font-size:21px}
+ .journal-header{align-items:flex-start}.journal-header .tabs{flex-wrap:wrap}
+ .journal-kicker{align-items:flex-start;flex-wrap:wrap}
+ .quest-journal .quest-actions{position:sticky;bottom:0;background:var(--panel);padding:12px 0 4px}
+}
+.folk-personality{display:flex;flex-direction:column;gap:8px;margin:18px 0;font:500 17px/1.4 var(--f-body)}
+.folk-personality p{margin:0}.folk-personality p:first-child{font-style:italic;color:var(--mute)}
+.quest-journal .inline-decision{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.quest-journal .inline-decision>b{grid-column:1/-1;font:600 16px var(--f-body)}
+.quest-journal .inline-decision .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:6px;white-space:normal}
+.quest-journal .inline-decision small{font-size:14px;color:var(--mute);font-weight:500}
+@media(max-width:860px){.quest-journal .inline-decision{grid-template-columns:1fr}}
+
+/* Trial towers: the approved cutaway, with one fixed encounter/action panel. */
+.tower-cutaway.tower-page{display:flex;height:auto;min-height:0;align-items:stretch}
+.tower-cutaway>.tw-main{display:flex;flex-direction:column;gap:0;width:100%;padding:0;overflow:hidden;max-height:none;margin:0}
+.tc-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 24px;border-bottom:1px solid var(--line);flex:none}
+.tc-header h2{font-size:27px;margin:4px 0 0}.tc-standing{display:flex;flex-direction:column;align-items:flex-end;gap:8px}.tc-standing>b{font:600 16px var(--f-ui);color:var(--good)}
+.tc-interior{display:grid;grid-template-columns:minmax(250px,.85fr) minmax(0,1.15fr);gap:36px;padding:30px 32px 20px;min-height:0;flex:1;align-items:stretch}
+.tc-building{--timber:color-mix(in srgb,var(--panel) 55%,var(--tower-material,#805d39));display:flex;flex-direction:column;min-height:0;border:8px solid var(--timber);border-top:0;background:var(--timber);position:relative;margin:26px 8px 8px;box-shadow:10px 10px color-mix(in srgb,var(--timber) 45%,transparent)}
+.tc-roof{position:absolute;height:32px;top:-32px;left:-20px;right:-20px;background:var(--timber);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.tc-rooms{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;min-height:0;flex:1}
+.tower-cutaway .tw-floor{display:flex;flex:1;min-height:60px;padding:0;gap:0;border:0;border-radius:0;border-bottom:6px solid var(--timber);background:var(--panel2)}
+.tower-cutaway .tw-floor.later{opacity:1;background:color-mix(in srgb,var(--panel) 65%,var(--timber));border-style:solid}
+.tc-room{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:0;padding:8px 16px;border:0;border-radius:0;background:transparent;color:var(--ink);text-align:left;cursor:pointer;isolation:isolate}
+.tc-room:hover{background:color-mix(in srgb,var(--brass) 9%,transparent)}
+.tc-room.selected{box-shadow:inset 4px 0 var(--brass);background:color-mix(in srgb,var(--brass) 15%,var(--panel2))}
+.tc-room:focus-visible{outline:2px solid var(--brass-hi);outline-offset:-3px}
+.tc-room-label{z-index:1}.tc-room-label b{font:600 17px var(--f-body)}.tc-room-label small{display:block;font-size:14px;color:var(--mute)}
+.tw-floor.done .tc-room-label b{color:var(--good)}.tw-floor.later .tc-room-label{color:var(--mute)}
+.tc-room-label .ic{width:16px;height:16px;vertical-align:middle}
+.tc-room-window{position:absolute;left:46%;top:18%;width:18px;height:28px;background:color-mix(in srgb,var(--brass) 18%,transparent);border:4px solid var(--timber);z-index:-1}
+.tw-floor.done .tc-room-window{background:color-mix(in srgb,var(--brass) 65%,var(--panel2))}
+.tc-foundation{text-align:center;padding:5px;font:500 14px var(--f-body);color:var(--mute);flex:none}
+.tc-creature{display:inline-grid;place-items:center;flex:none;transform-origin:center bottom}
+.tc-room-creature{width:64px;height:64px;z-index:1}
+.tc-alive{animation:tower-breathe var(--breath,3s) ease-in-out var(--phase,0s) infinite;will-change:transform}
+@keyframes tower-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.tc-featured-creature.tc-alive{animation-name:tower-breathe-large}
+@keyframes tower-breathe-large{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.tc-focus{display:flex;flex-direction:column;min-width:0;min-height:0;gap:16px;padding:0 8px}
+.tc-encounter{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-height:0;flex:1}
+.tc-featured-creature{width:192px;height:192px;align-self:center;min-height:0}
+.tc-focus h3{font:600 25px/1.2 var(--f-display);margin:0}.tc-focus small{font-size:15px;color:var(--mute)}
+.tc-flavour{font:500 18px/1.4 var(--f-body);color:var(--mute);margin:0}
+.tc-preparation{border-block:1px solid var(--line);padding:12px 0;width:100%;font:500 17px/1.4 var(--f-body)}
+.tc-preparation p{margin:6px 0 0}.tc-preparation b{font-weight:600}
+.tc-action{display:flex;gap:10px;flex-wrap:wrap;flex:none;padding-top:4px}
+.tc-footer{border-top:1px solid var(--line);padding:12px 16px;text-align:center;font:500 14px var(--f-ui);color:var(--mute);flex:none}
+@media(min-width:861px){
+ #view:has(>.tower-cutaway){display:flex;flex-direction:column;overflow:hidden}
+ #view>.tower-cutaway{flex:1;min-height:0}
+ .tc-encounter{overflow-y:auto;scrollbar-width:thin;padding-right:6px}
+ html.short .tc-header{padding:12px 20px}.tc-header .tag{font-size:14px}
+ html.short .tc-header h2{font-size:24px}
+ html.short .tc-interior{padding:18px 24px 14px;gap:26px}
+ html.short .tc-featured-creature{width:128px;height:128px}
+ html.short .tc-featured-creature img{width:128px!important;height:128px!important}
+ html.short .tc-room-creature{width:32px;height:32px}
+ html.short .tc-room-creature img{width:32px!important;height:32px!important}
+ html.short .tc-room{padding:4px 14px}.tc-room-creature img{max-width:none}
+ html.short .tower-cutaway .tw-floor{min-height:48px}
+ html.short .tc-focus{gap:10px}html.short .tc-focus h3{font-size:22px}
+ html.short .tc-footer{padding:9px 12px}
+}
+@media(max-width:860px){
+ .tower-cutaway.tower-page{display:flex;height:auto}.tower-cutaway>.tw-main{order:0;overflow:visible}
+ .tc-header{padding:16px;align-items:flex-start}.tc-header h2{font-size:23px}.tc-standing{gap:6px;max-width:130px}.tc-standing>b{font-size:14px}.tc-standing .tag{font-size:13px;text-align:center;white-space:normal}
+ .tc-interior{grid-template-columns:1fr;padding:18px;gap:22px}
+ .tc-building{height:330px;margin:28px 12px 4px}.tower-cutaway .tw-floor{min-height:0}
+ .tc-room{padding:4px 12px}.tc-room-creature,.tc-room-creature img{width:32px!important;height:32px!important}
+ .tc-featured-creature,.tc-featured-creature img{width:96px!important;height:96px!important}
+ .tc-focus{padding:0}.tc-action{position:sticky;bottom:66px;background:var(--panel);padding:10px 0}
+ .tc-focus h3{font-size:23px}
+}
+html.calm .tc-alive{animation:none;will-change:auto}
+@media(prefers-reduced-motion:reduce){.tc-alive{animation:none!important;will-change:auto}}
+/* Item comparison tooltips share the interface's readable text floor. */
+#tip :is(em,.stat-l,.dim,.cmpline){font-size:13px}
+/* Optional mastery guilds share the story journal, with existing ranks one tab away. */
+.guild-header{display:flex;align-items:center;justify-content:space-between;gap:16px}.guild-header h2{margin:4px 0;font-size:25px}
+.guild-layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:14px;min-height:0}
+.guild-list{display:flex;flex-direction:column;gap:7px;min-height:0;margin:0}
+.guild-row{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:12px;align-items:center;text-align:left;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px;flex:none;cursor:pointer}
+.guild-row.on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 10%,var(--panel2))}.guild-row>span{display:flex;flex-direction:column;gap:4px}.guild-row b{font:600 17px var(--f-body)}.guild-row small{font:500 14px var(--f-body);color:var(--mute)}
+.guild-detail{display:flex;flex-direction:column;gap:16px;margin:0;min-height:0}.guild-detail>h2{font-size:28px;margin:0}.guild-detail .journal-giver img{width:96px!important;height:96px!important}
+.guild-reading{display:flex;flex-direction:column;gap:16px;min-height:0;flex:1}.guild-how{font:500 17px/1.4 var(--f-body);color:var(--mute);margin:0}
+.guild-gate{padding:12px;border-left:3px solid var(--brass);background:var(--panel2);font:500 17px var(--f-body);margin:0}.guild-gate p{margin:4px 0}
+.guild-objectives{border-top:1px solid var(--line);padding-top:14px}.guild-objectives h3{font-size:21px;margin:6px 0 10px}.guild-objectives>.sm{margin:12px 0 0;font-size:14px}.guild-objectives .obj{font-size:17px}
+.guild-actions{display:flex;flex-wrap:wrap;gap:10px;flex:none;margin-top:auto;min-height:38px}.guild-seal{display:flex;align-items:center;gap:20px;padding:20px;background:var(--panel2);border:1px solid var(--brass);border-radius:9px}.guild-seal h3{font-size:23px;margin:6px 0}.guild-seal p{font-size:17px;margin:0}
+@media(min-width:861px){#view:has(>.guild-layout){display:flex;flex-direction:column;overflow:hidden}#view>.guild-header{flex:none}#view>.guild-layout{flex:1}.guild-list,.guild-reading{overflow-y:auto;scrollbar-width:thin}.guild-detail{overflow:hidden}.guild-header .tabs{flex-wrap:wrap}html.short .guild-detail{gap:10px;padding:16px}html.short .guild-detail>h2{font-size:25px}html.short .guild-detail .journal-giver img{width:64px!important;height:64px!important}}
+@media(max-width:860px){.guild-header{flex-wrap:wrap}.guild-layout{grid-template-columns:1fr}.guild-list{max-height:270px;overflow-y:auto}.guild-detail{padding:18px}.guild-detail>h2{font-size:25px}.guild-actions{position:sticky;bottom:66px;background:var(--panel);padding:10px 0}.guild-seal{flex-wrap:wrap}}
+/* Navigation shortcuts: recognise the destination, without repeated Go/Make/Find captions. */
+.route-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:40px;min-height:40px;padding:4px;border-radius:8px;vertical-align:middle}
+.route-art{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex:none}
+.route-art .ic{width:28px;height:28px}.route-art img{width:32px!important;height:32px!important;max-width:none}
+.route-chip.route-icon{margin-left:6px;padding:3px}.route-icon:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.quest-actions>.route-icon{min-width:48px;min-height:44px}.returnbar .route-art{width:24px;height:24px}.returnbar .route-art img{width:16px!important;height:16px!important}
+.unlock-step>small{display:flex;align-items:center;justify-content:center;flex:none}
+@media(pointer:coarse){.route-icon{min-width:44px;min-height:44px}}
+/* Quiet, icon-led stages: one real hunt or trap cycle, without arrow chains. */
+.hunt-stages{display:flex;gap:12px;list-style:none;padding:0;margin:12px 0;flex:none}
+.hunt-stages>li{display:grid;grid-template-columns:32px minmax(0,1fr) 16px;gap:5px;align-items:center;flex:1;min-width:0;color:var(--mute)}
+.stage-glyph{display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--line);border-radius:50%;background:var(--panel2)}
+.stage-glyph .ic{width:22px;height:22px}.stage-label{font:600 15px var(--f-ui);overflow-wrap:anywhere}.stage-check .ic{width:16px;height:16px;color:var(--good)}
+.stage-track{height:3px;background:var(--line);grid-column:1/-1;overflow:hidden;border-radius:2px}.stage-track i{display:block;width:100%;height:100%;background:var(--brass);transform:scaleX(0);transform-origin:left;transition:transform .15s linear}
+.hunt-stages .current .stage-glyph{border-color:var(--brass);box-shadow:0 0 12px -4px var(--brass)}.hunt-stages .current .stage-label{color:var(--ink)}.hunt-stages .done .stage-glyph{border-color:var(--good)}.hunt-stages .done .stage-track i{background:var(--good)}
+html.calm .stage-track i{transition:none}@media(prefers-reduced-motion:reduce){.stage-track i{transition:none}}
+.route-icon .ic{width:28px;height:28px}
+@media(max-width:860px){.hunt-stages{gap:8px}.hunt-stages>li{grid-template-columns:28px minmax(0,1fr);gap:4px}.stage-glyph{width:28px;height:28px}.stage-label{font-size:14px}.stage-check{display:none}}
+.hunt-stages>li{grid-template-columns:minmax(0,1fr);justify-items:center;position:relative}
+.stage-glyph{width:40px;height:40px}.stage-glyph img{width:32px!important;height:32px!important;max-width:none}.stage-label{text-align:center;overflow-wrap:normal}.stage-track{width:100%}.stage-check{display:grid!important;place-items:center;position:absolute;left:calc(50% + 9px);top:-2px;background:var(--panel);border-radius:50%}
+/* Candidate hunting/shop integration: existing activity layouts, a compact ladder and real readiness cues. */
+.hunt-mode-tabs,.shop-categories,.tool-families{display:flex;flex-wrap:wrap;gap:8px;flex:none}
+.field-gear,.field-focus{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.field-tool{display:flex;align-items:center;gap:5px;padding:5px;border:1px solid var(--line);border-radius:8px}.field-tool.on{border-color:var(--brass)}.field-tool img{width:32px!important;height:32px!important}.field-tool small{font-size:14px}
+.shop-upgrade-header{display:flex;flex-direction:column;gap:12px;margin:0}.shop-upgrade-header .phead{margin:0}.shop-upgrade-header h2{font-size:24px}.shop-upgrade-header small{font-size:14px}
+.shop-upgrade-header .upgrade-cue{justify-self:end;margin:0;font-size:13px;min-width:20px;height:20px}
+.tool-upgrade-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;min-height:0;align-content:start}.tool-upgrade{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;margin:0;padding:15px;min-height:275px}.tool-upgrade.ready{border-color:var(--good)}.tool-upgrade h3{font-size:20px;margin:0}.tool-upgrade p{font-size:16px;margin:0}.tool-upgrade-art{height:64px;display:grid;place-items:center}.tool-upgrade-art img{width:64px!important;height:64px!important}.tool-upgrade>.btn{margin-top:auto}.tool-upgrade>small{font-size:14px}.tool-upgrade .upgrade-cost{width:100%}.tool-upgrade .need-tiles{display:flex;justify-content:center}.tool-upgrade .need-tile{max-width:100%;font-size:14px}
+.shop-mat-price{display:inline-flex;gap:6px;flex-wrap:wrap}.shop-mat-price>span{display:inline-flex;gap:3px;align-items:center}.shop-mat-price img{width:16px!important;height:16px!important}.shop-mat-price .ic{width:16px;height:16px}.shop-mat-price b{font-size:14px}
+@media(min-width:861px){#view:has(>.tool-upgrade-grid){display:flex;flex-direction:column;overflow:hidden}.tool-upgrade-grid{overflow-y:auto;scrollbar-width:thin;flex:1}.tool-upgrade{min-height:270px}html.short .shop-upgrade-header{gap:8px;padding:12px}html.short .tool-upgrade{padding:12px;gap:8px}}
+@media(max-width:860px){.tool-upgrade-grid{grid-template-columns:1fr}.tool-families .btn{font-size:15px}.tool-upgrade{min-height:250px}.shop-upgrade-header .phead{flex-wrap:wrap}.shop-categories .btn{font-size:15px}}
+@media(min-width:861px){#view>.activity-workspace:has(.skill-hunting){grid-template-columns:minmax(360px,480px) minmax(0,1fr)}#view>.activity-workspace:has(.skill-hunting) .activity-caption{padding:12px}#view>.activity-workspace:has(.skill-hunting) .task-summary p{margin:6px 0}html.short #view>.activity-workspace:has(.skill-hunting) .activity-scene{height:160px}}
+/* Shop navigation and purchase controls occupy the same slots on every shelf. */
+.shop-upgrade-header{flex:none;margin:0}.shop-upgrade-header>.phead{min-height:30px}.shop-upgrade-header .shop-categories,.shop-upgrade-header .tool-families{margin:0}
+.shop-upgrade-header .shop-categories .btn{width:180px}.shop-upgrade-header .tool-families .btn{width:190px}.shop-upgrade-header :is(.shop-categories,.tool-families) .btn{display:grid;grid-template-columns:32px minmax(0,1fr) 32px;gap:8px;text-align:left;min-height:44px;white-space:nowrap}
+.shop-upgrade-header .upgrade-cue :is(img,.ic){width:16px!important;height:16px!important;max-width:none}
+.shop-detail-body{min-height:0}.shop-detail-actions{flex:none;border-top:1px solid var(--line);padding-top:10px}.shop-detail-actions .shop-action{margin:0;display:flex;gap:8px;flex-wrap:nowrap}.shop-detail-actions .shop-action>.btn{min-height:48px;flex:1;white-space:nowrap}.shop-quantity-slot{min-height:64px;display:flex;align-items:center}.shop-quantity-slot .shop-controls{margin:0}.shop-tools .shop-item-preview{min-height:100px}
+@media(min-width:861px){#view:has(>.shop-upgrade-header){display:flex!important;flex-direction:column;gap:12px;overflow:hidden}#view:has(>.shop-upgrade-header)>.visual-shop{flex:1 1 auto!important;min-height:0}#view:has(>.shop-upgrade-header)>.visual-shop>.shop-task{display:flex;flex-direction:column;align-self:stretch!important;height:100%;max-height:100%;overflow:hidden!important}#view:has(>.shop-upgrade-header) .shop-detail-body{flex:1;overflow-y:auto;scrollbar-width:thin}#view:has(>.shop-upgrade-header) .shop-detail-actions{height:136px;display:grid;grid-template-rows:64px 48px;gap:8px}#view:has(>.shop-upgrade-header) .shop-detail-body .shop-workspace{display:block}}
+@media(max-width:860px){.shop-upgrade-header :is(.shop-categories,.tool-families) .btn{width:auto;min-width:0;grid-template-columns:24px minmax(0,1fr) 24px;white-space:normal}.shop-upgrade-header .tool-families{display:grid;grid-template-columns:1fr 1fr}.shop-upgrade-header .shop-categories{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.shop-detail-actions{background:var(--panel);padding-bottom:8px}.shop-detail-body{overflow:visible}.shop-task:has(.shop-detail-body){overflow:visible}}
+/* Starting preference, never a class lock. */
+#title .create:has(.cr-weapons){width:min(720px,100%)}
+.cr-weapons{grid-column:1/-1;border:0;padding:0;margin:0;min-width:0}.cr-weapons legend{font:600 18px var(--f-body);margin-bottom:8px}.cr-kit-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.cr-kit-options .btn{display:flex;flex-direction:column;gap:5px;padding:10px;white-space:normal;min-width:0}.cr-kit-options img{width:32px!important;height:32px!important}.cr-kit-options small{font:500 14px/1.3 var(--f-body)}.cr-weapons p{font:500 14px/1.4 var(--f-body);margin:8px 0;color:var(--mute)}.cr-kit-options .on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 18%,var(--panel))}
+@media(max-width:600px){#title .create:has(.cr-weapons){grid-template-columns:1fr}.cr-kit-options .btn{padding:6px}.cr-kit-options small{font-size:13px}}
+/* Shared skill workspaces keep their actions visible beside their reference lists. */
+.cross-tabs{flex:none;margin:0 0 10px}.cross-refit{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}.cross-refit>span:first-child{display:flex;align-items:center;gap:8px;flex:1}.cross-refit img{width:32px!important;height:32px!important}.refit-panel p{font-size:15px}
+.cx-chips [data-do="combatgear"]{display:inline-flex;align-items:center;gap:4px}.cx-chips [data-do="combatgear"] img{width:16px!important;height:16px!important}
+.combat-gear{display:flex;flex-direction:column;gap:16px;min-width:0}.combat-gear-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.combat-gear-slots .btn{display:grid;grid-template-columns:32px minmax(0,1fr);gap:4px 8px;white-space:normal;text-align:left;min-width:0;padding:10px}.combat-gear-slots .btn>img,.combat-gear-slots .btn>.ic{grid-row:1/3;width:32px!important;height:32px!important}.combat-gear-slots small{font-size:13px;overflow-wrap:anywhere}.combat-gear-options{display:flex;flex-direction:column;gap:8px;max-height:270px;overflow-y:auto}.combat-gear-item{display:flex;align-items:center;gap:12px;padding:8px;border:1px solid var(--line);border-radius:8px}.combat-gear-item>img{width:48px!important;height:48px!important}.combat-gear-item>div{display:flex;flex-direction:column;gap:4px;flex:1}.combat-gear-item small{font-size:14px}
+@media(max-width:860px){.combat-gear-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.combat-gear-item{flex-wrap:wrap}.combat-gear-item>div{min-width:140px}.cross-refit{align-items:flex-start}.cross-refit>span:first-child{min-width:170px}}
+.plots .plot{position:relative}.plot-plan.btn{position:absolute;right:4px;top:4px;min-width:28px;min-height:28px;padding:3px}.plot-plan .ic{width:16px!important;height:16px!important}
+.collection-titles{display:flex;flex-direction:column;gap:8px;margin-top:18px}.collection-titles h3{margin:0}.collection-titles small{font-size:13px}
+
+/* Gear choices lead with their purpose; ordinary stat totals are only one part of the decision. */
+.gear-purpose{display:block;color:var(--mute);font-size:14px;line-height:1.4;margin:6px 0}
+.gear-special{border-inline-start:3px solid var(--brass);padding:8px;margin:8px 0;background:color-mix(in srgb,var(--brass) 9%,var(--panel))}
+.prize-property{display:block;color:var(--ink);font-size:16px;line-height:1.35;margin-top:5px}
+.combat-gear-item>div{min-width:0}.combat-gear-item .cmpline{display:block;font-size:14px}.combat-gear-item>.btn{max-width:210px;white-space:normal}
+[data-tip][tabindex="0"]:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+
+/* Combat's spare lower-left space is an always-visible loadout. Slot choice opens owned alternatives. */
+#view .combat-x .combat-equipped{flex:none;margin: auto 0 0!important;padding:10px!important;background:var(--panel);border:1px solid var(--line2);border-radius:12px}
+.combat-equipped h3{font:600 14px var(--f-ui);margin:0 0 7px;color:var(--ink)}
+.combat-equipped-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.combat-equipped-slot{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;height:56px;padding:3px 0;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--ink);font:500 13px var(--f-ui)}
+.combat-equipped-slot>img,.combat-equipped-slot>.ic{width:32px!important;height:32px!important;flex:none}
+.combat-equipped-slot.empty>.ic{opacity:.5}.combat-equipped-slot:hover,.combat-equipped-slot:focus-visible{border-color:var(--brass)}
+.equipped-ammo{position:absolute;right:2px;top:1px;font:600 13px var(--f-mono);background:var(--panel);border-radius:3px;padding:0 2px}
+@media(max-width:860px){#view .combat-x .combat-equipped{margin-top:0!important}.combat-equipped-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Shop readiness uses the same actionable-count badge as the main navigation. */
+.shop-upgrade-header :is(.shop-categories,.tool-families) .btn:focus-visible{outline:2px solid var(--brass);outline-offset:-2px;box-shadow:none}
+@media(min-width:861px){
+ html.short #view .combat-x>.combat-targets{gap:6px!important}
+ html.short #view .combat-x>.combat-targets>.step-h{display:none}
+ html.short #view .combat-x .combat-equipped{padding:6px!important}
+ html.short .combat-equipped h3{margin-bottom:4px}
+ html.short .combat-equipped-grid{gap:3px}
+ html.short .combat-equipped-slot{height:38px;padding:2px 0}
+ html.short .combat-equipped-slot>span{display:none}
+ html.short #view .combat-x .wh-mini{grid-template-columns:32px minmax(0,1fr);gap:3px;padding:5px;align-items:center;text-align:left}
+ html.short #view .combat-x .wh-mini .wh-mini-art{grid-column:1;grid-row:1/3}
+ html.short #view .combat-x .wh-mini>b,html.short #view .combat-x .wh-mini>small{grid-column:2;font-size:13px;line-height:1.2}
+ html.short #view .combat-x .wh-mini>.btn{grid-column:1/-1;padding:4px;min-height:30px}
+}
+
+/* Match Hero's equipment paper doll: the same slot arrangement and worn character, scaled for combat. */
+.combat-equipped .combat-equipped-grid{display:block}
+.combat-equipped .paper-doll{grid-template-columns:52px minmax(0,1fr) 52px;grid-template-rows:repeat(4,52px);gap:6px;margin:0;max-width:none}
+.combat-equipped .paper-doll .combat-equipped-slot{height:100%;padding:2px;gap:2px;background:color-mix(in srgb,var(--c) 12%,var(--ground));border-color:color-mix(in srgb,var(--c) 40%,var(--line));color:var(--c)}
+.combat-equipped .paper-doll .combat-equipped-slot.empty{background:transparent;border-color:var(--line2)}
+.combat-equipped .paper-doll .combat-equipped-slot small{font-size:13px;color:var(--mute);line-height:1}
+.combat-equipped .paper-doll .fig-stage{min-width:0;padding:0}
+.combat-equipped .paper-doll .fig-img{width:96px!important;height:128px!important;max-width:none}
+.combat-equipped .paper-doll .fig-pet img{width:32px!important;height:32px!important}
+@media(min-width:861px){
+ html.short #view .combat-equipped .paper-doll{grid-template-columns:40px minmax(0,1fr) 40px;grid-template-rows:repeat(4,34px);gap:3px;margin:0}
+ html.short .combat-equipped .paper-doll .combat-equipped-slot small{display:none}
+ html.short .combat-equipped .paper-doll .fig-img{width:72px!important;height:96px!important}
+}
+@media(min-width:861px){
+ /* Keep the paper doll and every destination visible in the busiest short-window town. */
+ html.short #view .combat-x .where{padding:4px!important;gap:4px}
+ html.short #view .combat-x .where .wh-area{padding:4px;gap:3px}
+ html.short #view .combat-x .wh-areas{gap:4px}
+ html.short #view .combat-x .wh-minis-h{display:none}
+}

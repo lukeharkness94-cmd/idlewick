@@ -27,10 +27,10 @@ assert.equal(await p.evaluate(()=>!!DQ.worldState.active),false,'the fight settl
 await p.evaluate(()=>{DQ.stopAct(true);DQ.worldState.result=null;DQ.go('museum');});await p.waitForTimeout(400);await close();
 assert.ok(await p.locator('.mu-wing').count()>=5,'five wings');assert.ok(await p.locator('.mu-wing .tag').first().innerText(),'wing bonus labelled');
 await p.evaluate(()=>DQ.go('tower'));await p.waitForTimeout(400);assert.ok(await p.locator('.tw-floor').count()>=5);assert.match(await p.locator('.tw-main .tag').innerText(),/combat \d+/i,'recommended strength shown');
-await p.locator('.tw-floor.next [data-do="towerfight"]').click();await p.waitForTimeout(400);assert.equal(await p.evaluate(()=>DQ.ui.view),'combat');assert.ok(await p.evaluate(()=>DQ.data.MON[DQ.act.id].tower.floor===1));
+await p.locator('.tw-floor.next [data-do="towerselect"]').click();await p.locator('.tc-action [data-do="towerfight"]').click();await p.waitForTimeout(400);assert.equal(await p.evaluate(()=>DQ.ui.view),'combat');assert.ok(await p.evaluate(()=>DQ.data.MON[DQ.act.id].tower.floor===1));
 await p.evaluate(()=>{DQ.stopAct(true);DQ.hearRecipe('stonebread');DQ.ui.tab.cooking='Farmhouse';DQ.go('cooking');});await p.waitForTimeout(500);await close();
 assert.ok(await p.locator('.illustrated-card.locked[data-task-id="secret_stonebread"]').count()===1,'a rumour shows as a locked ??? card');assert.equal(await p.locator('[data-task-id="secret_hunters_feast"]').count(),0,'an unheard recipe is not listed');
-await p.evaluate(()=>{DQ.learnRecipe('stonebread');DQ.ui.render(false);});await p.waitForTimeout(300);await close();assert.equal(await p.locator('.illustrated-card.locked[data-task-id="secret_stonebread"]').count(),0,'once learned it is an ordinary recipe');
+await p.evaluate(()=>{DQ.learnRecipe('stonebread');DQ.grant('bread',2);DQ.grant('ore_coal',1);DQ.ui.render(false);});await p.waitForTimeout(300);await close();assert.equal(await p.locator('.illustrated-card.locked[data-task-id="secret_stonebread"]').count(),0,'once learned with discovered ingredients it is an ordinary recipe');
 /* audio: start it, then fights, travel and tier changes; one bed at a time, timers bounded */
 await p.evaluate(()=>{DQ.S.settings.music=true;DQ.S.settings.sfx=true;DQ.S.settings.ambience=true;DQ.musicStart();});await p.waitForTimeout(400);
 const st=()=>p.evaluate(()=>Object.assign(DQ.audioStats(),{mode:DQ.audioState().mode,tier:DQ.audioState().tier}));

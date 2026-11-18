@@ -27,6 +27,13 @@ test('desktop save bridge preserves save semantics without silently falling back
   const before=q.exportSave();desktop.setItem=()=>{throw Error('disk full');};
   assert.equal(q.save(),false);assert.equal(storage.size,0);assert.equal(q.exportSave(),before);
 });
+test('silently discarded writes are not reported as successful saves or imports', () => {
+  const files=new Map(),desktop={getItem:key=>files.get(key)||null,setItem:(key,value)=>files.set(key,value),removeItem:key=>files.delete(key)};
+  const {q}=harness(desktop);assert.equal(q.save(),true);const persisted=[...files.entries()],live=q.S;
+  desktop.setItem=()=>{};q.S.coins+=1;
+  assert.equal(q.save(),false);assert.match(q.saveHealth,/could not be saved/);
+  assert.equal(q.importSave(encode(q.newState('Replacement'))),false);assert.equal(q.S,live);assert.deepEqual([...files.entries()],persisted);
+});
 test('invalid import leaves live and persisted state unchanged', () => {
   const {q, storage} = harness(); q.save(); const before = q.exportSave(), persisted = [...storage.entries()];
   assert.equal(q.importSave(encode({v:2,xp:{},name:'Corrupt',farm:null})),false);
@@ -709,6 +716,8 @@ test('the lost traveller choice needs real meals and pays out once',()=>{
 });
 test('an adventure chains quests across skills and ends in a village relic project',()=>{
  const {q,load}=harness();load('routes');load('adventures');const S=q.S,D=q.data;S.coins=10000;
+ // This is a granted adventure-chain fixture, with the activities its chapters actually require.
+ S.xp.woodcutting=D.XPF[D.NODE['wood:oak'].lvl];S.unlocked.woodcutting=S.unlocked.smithing=S.unlocked.farming=true;
  q.makeDiscovery('weathered_map');q.startQuest('am_map');S.inv.shrimp=8;q.qev('chop','oak',15);
  assert.equal(q.questState(D.QM.am_map),'ready');q.claimQuest('am_map');assert.equal(q.questState(D.QM.am_map),'done');
  assert.equal(q.questState(D.QM.am_mill),'locked','needs Mossbarrow');S.towns.mossbarrow={visited:true,boss:false};assert.equal(q.questState(D.QM.am_mill),'new');

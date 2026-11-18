@@ -32,7 +32,7 @@ for (const [id, t] of Object.entries(D.TRICKS)) {
   p.bonus = half; p.trick = t; p.trickDone = true;
   p.text = `${t.name}: ${t.text} · ${describe(half)}`;
 }
-DQ.trick = key => { const id = S() && S().pets && S().pets.active, t = id && D.TRICKS[id]; return !!t && t.key === key && !!D.PET[id]; };
+DQ.trick = key => { const id = S() && S().pets && S().pets.active, t = id && D.TRICKS[id]; return !!t && t.key === key && !!D.PET[id] && !!S().pets.owned[id]; };
 DQ.trickNote = (text, where) => {
   if ((DQ.sim && DQ.sim.on) || DQ.forecasting) return;
   const id = S().pets.active, p = D.PET[id]; if (!p) return;

@@ -19,7 +19,7 @@ Q.usesOf = id => {
   /* 4 the next boat you could build */
   const boat = (D.BOATS || []).find(([bid]) => !Q.have(bid)); if (boat) { const r = D.RECIPES['build_' + boat[0].slice(5)]; if (r && r.in[id]) out.push({ k: 'boat', text: `Makes your next boat: the ${boat[1].toLowerCase()} (${fmt(Math.min(held(id), r.in[id]))}/${fmt(r.in[id])})`, go: { do: 'go', a: 'carpentry', label: 'Carpentry' } }); }
   /* 5 a recipe you can already make with it */
-  if (out.length < 3) { const r = Object.values(D.RECIPES).filter(r => r.in && r.in[id] && r.skill !== 'carpentry' && Q.skillUnlocked(r.skill) && Q.recipeLvlOk(r)).sort((a, b) => b.lvl - a.lvl)[0];
+  if (out.length < 3) { const r = Object.values(D.RECIPES).filter(r => r.in && r.in[id] && r.skill !== 'carpentry' && Q.skillUnlocked(r.skill) && Q.recipeLvlOk(r) && Q.recipeDiscovered(r)).sort((a, b) => b.lvl - a.lvl)[0];
     if (r) { const o = Object.keys(r.out)[0]; out.push({ k: 'recipe', text: `${{ cooking: 'Cooks into', smithing: 'Smelts or smiths into', crafting: 'Crafts into' }[r.skill] || 'Makes'} ${D.ITEMS[o] ? D.ITEMS[o].name.toLowerCase() : o}`, go: { do: 'go', a: D.SK[r.skill].page || r.skill, label: D.SK[r.skill].name } }); } }
   /* 6 a seed grows into a crop worth something */
   if (!out.length && id.startsWith('seed_')) out.push({ k: 'farm', text: 'Plant it in a field plot', go: { do: 'go', a: 'farming', label: 'Farm' } });

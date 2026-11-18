@@ -98,7 +98,7 @@ DQ.questLinks = (kind, id) => {
 const BONUS_NAMES = { atk: 'Accuracy', str: 'Power', def: 'Defence', rng: 'Ranged', rngStr: 'Arrow power', mag: 'Magic' };
 DQ.compareItem = id => {
   const it = D.ITEMS[id]; if (!it) return null; const st = S();
-  if (it.type === 'tool') {
+  if (it.type === 'tool' && it.toolSkill) {
     const k = it.toolSkill, now = DQ.toolTier(k), cur = now ? D.ITEMS[`tool_${DQ.toolKey(k)}_${now}`] : null;
     if (it.tier <= now) return { tool: true, better: false, cur, rows: [] };
     return { tool: true, better: true, cur, rows: [{ n: `${D.SK[k].name} speed`, a: Math.round(D.TOOL_SPEED[now] * 100), b: Math.round(D.TOOL_SPEED[it.tier] * 100), unit: '% faster', d: Math.round((D.TOOL_SPEED[it.tier] - D.TOOL_SPEED[now]) * 100) }] };
@@ -155,20 +155,36 @@ DQ.gearMark = id => { const v = DQ.gearVerdict(id); return v ? `<span class="gea
    strongest creature it sends you to fight (its creature level), and the highest skill level any of its gathering or
    making steps needs. Worked out from the objectives, so new quests get it for free. */
 const NODE_EV = { catch: 'fish', chop: 'wood', mine: 'mine', thieve: 'thieve' };
-DQ.questRec = q => {
-  if (!q) return null; let combat = 0, skill = null;
-  const need = (sk, lvl) => { if (sk && lvl > 1 && (!skill || lvl > skill.lvl)) skill = { sk, lvl }; };
-  for (const o of q.obj || []) {
-    if (['kill', 'boss', 'guide'].includes(o.ev)) { const m = D.MON[o.key]; if (m && m.cl) combat = Math.max(combat, m.cl); continue; }
-    if (o.key === '*' || !o.key) continue;
-    if (NODE_EV[o.ev]) { const n = (D.NODES[NODE_EV[o.ev]] || []).find(x => x.id === o.key); if (n) need(n.skill, n.lvl); continue; }
-    if (o.ev === 'harvest') { const c = D.CROP && D.CROP[o.key]; if (c) need('farming', c.lvl); continue; }
-    if (['cook', 'smelt', 'smith', 'craft'].includes(o.ev)) { const r = (Array.isArray(D.RECIPES) ? D.RECIPES : Object.values(D.RECIPES)).find(r => r.id === o.key || r.id.endsWith('_' + o.key) || (r.out && r.out[o.key])); if (r) need(r.skill, r.lvl); }
-  }
-  /* adventures are found rather than given, so they carry no Hero level of their own: use their region's first */
-  const floor = (D.QUESTS || []).filter(x => x.town === q.town && x.adv > 1).reduce((m, x) => Math.min(m, x.adv), Infinity);
-  return { hero: Math.max(q.adv || 1, q.town === 'willowbrook' || floor === Infinity ? 1 : floor), combat, skill };
+/* Match the event and actual primary output emitted by recipe completion. A suffix such as
+   smelt_bar_rune is not evidence that a recipe makes the item rune. */
+DQ.questRecipeCandidates = o => Object.values(D.RECIPES || {}).filter(r => r.ev === o.ev &&
+  (o.key === '*' || Object.keys(r.out || {})[0] === o.key) && !(r.once && o.n > 1))
+  .sort((a,b) => a.lvl-b.lvl || a.id.localeCompare(b.id));
+DQ.questObjectiveTasks = o => {
+  if (NODE_EV[o.ev]) return (D.NODES[NODE_EV[o.ev]]||[]).filter(n => o.key==='*'||n.id===o.key).map(n=>({kind:NODE_EV[o.ev],id:n.id,skill:n.skill,lvl:n.lvl})).sort((a,b)=>a.lvl-b.lvl);
+  if (['cook','smelt','smith','craft','carve','survey'].includes(o.ev)) return DQ.questRecipeCandidates(o).map(r=>({kind:'recipe',id:r.id,skill:r.skill,lvl:r.lvl}));
+  if (o.ev==='harvest') return (D.CROPS||[]).filter(c=>o.key==='*'||c.id===o.key).map(c=>({kind:'farm',id:c.id,skill:'farming',lvl:c.lvl})).sort((a,b)=>a.lvl-b.lvl);
+  return [];
 };
+DQ.questSkillNeeds = q => {
+  const needs={};for(const o of q.obj||[]){const task=DQ.questObjectiveTasks(o)[0];if(task)needs[task.skill]=Math.max(needs[task.skill]||1,task.lvl);}
+  return Object.entries(needs).map(([sk,lvl])=>({sk,lvl}));
+};
+DQ.questRec = q => {
+  if (!q) return null; let combat=0,skill=null;
+  for(const o of q.obj||[]){if(['kill','boss','guide'].includes(o.ev)){const m=D.MON[o.key];if(m?.cl)combat=Math.max(combat,m.cl);}}
+  for(const n of DQ.questSkillNeeds(q))if(n.lvl>1&&(!skill||n.lvl>skill.lvl))skill=n;
+  if(q.guild)skill={sk:q.guild,lvl:99};
+  const floor=(D.QUESTS||[]).filter(x=>x.town===q.town&&x.adv>1).reduce((m,x)=>Math.min(m,x.adv),Infinity);
+  return {hero:Math.max(q.adv||1,q.town==='willowbrook'||floor===Infinity?1:floor),combat,skill};
+};
+/* New offers wait for their actual activity levels. Accepted quests and their progress remain intact.
+   A quest teaching a skill must never require that same skill before it can be accepted. */
+DQ.questPreparation = q => q.guild ? [] : DQ.questSkillNeeds(q).filter(n => q.unlocks!==n.sk &&
+  (!DQ.skillUnlocked(n.sk)||DQ.lvl(n.sk)<n.lvl));
+const questUnlocked0=DQ.questUnlocked,questBlockers0=DQ.questBlockers;
+DQ.questUnlocked=q=>questUnlocked0(q)&&DQ.questPreparation(q).length===0;
+DQ.questBlockers=q=>[...questBlockers0(q),...DQ.questPreparation(q).map(n=>!DQ.skillUnlocked(n.sk)?`Learn ${D.SK[n.sk].name}: ${DQ.unlockHow?DQ.unlockHow(n.sk):'complete its introduction'}`:`${D.SK[n.sk].name} level ${n.lvl} (you: ${DQ.lvl(n.sk)})`)];
 /* one number for ordering a quest list: whichever recommendation is highest, on the Hero scale */
 DQ.questRecScore = q => { const r = DQ.questRec(q); return r ? Math.max(r.hero, r.combat, r.skill ? r.skill.lvl : 0) : 0; };
 DQ.questRecParts = q => { const r = DQ.questRec(q); if (!r) return []; const out = [{ k: 'hero', n: 'Hero', lvl: r.hero, ok: DQ.advLvl() >= r.hero }];

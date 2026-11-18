@@ -40,7 +40,7 @@ Q.sceneUrl = id => { const ids = Object.keys(D.PROJECTS || {}).filter(k => D.PRO
   for (const k of ids) stages[k] = Q.projectStage ? Q.projectStage(k) : ((Q.S && Q.S.projects && Q.S.projects[k]) ? 4 : 0);
   /* what else belongs in the town at its own scale: your boats at Saltmere, traps where you lay them, your crops */
   const S = Q.S || {}, un = S.unlocked || {}, extras = { boats: id === 'saltmere' ? (D.BOATS || []).filter(([b]) => Q.have && Q.have(b) > 0).map(r => r[2]) : [],
-    traps: !!(un.beastmastery && Q.lvl && Q.lureLvl && Q.lvl('beastmastery') >= Q.lureLvl(id)), farm: id === 'willowbrook' && !!un.farming };
+    traps: !!((Q.fieldAccessLevel?un.hunting:un.beastmastery) && Q.lvl && Q.lureLvl && (Q.fieldAccessLevel?Q.fieldAccessLevel():Q.lvl('beastmastery')) >= Q.lureLvl(id)), farm: id === 'willowbrook' && !!un.farming };
   const key = id + ':' + ids.map(k => stages[k]).join('') + ':' + extras.boats.join('') + (extras.traps ? 't' : '') + (extras.farm ? 'f' : '');
   if (!scenes[key]) { const c = A.sceneFor(id, stages, extras); scenes[key] = (A.scale2x ? A.scale2x(c) : c).toDataURL(); } return scenes[key]; };
 /* the part of town where a skill happens, at the hero's scale (towns.js districtFor) */

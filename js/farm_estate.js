@@ -31,6 +31,9 @@ UI.V.farming=()=>{
 /* Only the changing workspace transitions; task progress and the surrounding HUD keep running. */
 const switchSection=a=>{
  if(!['fields','pens','seeds','animals'].includes(a))return;
+ const cropIndex=Q.S.farm.plots.findIndex(Q.plotRipe),animalIndex=Q.S.farm.animals.findIndex(v=>v.stored>0);
+ if(a==='fields'&&cropIndex>=0)UI.estateFieldPage=Math.floor(cropIndex/(innerWidth<=860?4:innerWidth<=1440?6:12));
+ if((a==='pens'||a==='animals')&&animalIndex>=0)UI.estatePenPage=Math.floor(animalIndex/(innerWidth<=860?2:innerWidth<=1440?4:6));
  const previous=UI.estateSection,calm=Q.S.settings.reduceFx||matchMedia('(prefers-reduced-motion: reduce)').matches;
  const render=()=>{UI.estateSection=a;UI.estateTab=(a==='pens'||a==='animals')?'animals':'seeds';UI.render(false);const phone=innerWidth<=860,tabs=phone?'.estate-mobile-tabs':'.estate-section-tabs',focusTab=phone?a:(a==='pens'||a==='animals'?'pens':'fields');document.querySelector(tabs+' [data-a="'+focusTab+'"]')?.focus({preventScroll:true});};
  UI.estateTransition?.skipTransition();

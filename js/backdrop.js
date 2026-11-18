@@ -68,10 +68,12 @@
     if (r.snow) for (let i = 0; i < r.snow; i++) px(rnd() * W, rnd() * H, 1, 1, '#ffffff');
     if (r.rain) { g.globalAlpha = .5; for (let i = 0; i < r.rain; i++) { const x = rnd() * W, y = rnd() * H; px(x, y, 1, 4, '#9aa8c8'); } g.globalAlpha = 1; }
     if (r.dots) { const [n, cols, y0, y1] = r.dots; for (let i = 0; i < n; i++) px(rnd() * W, y0 + rnd() * (y1 - y0), 1, 1, cols[i % cols.length]); }
+    if(r.detail)r.detail({px,pine,rnd,W,H});
     return c.toDataURL();
   };
   const cache = {};
   const urlOf = key => cache[key] || (cache[key] = paint(key));
+  DQ.registerBackdrop = (key, recipe) => { R[key] = recipe; delete cache[key]; };
   DQ.backdropKeys = () => Object.keys(R);
   DQ.backdropUrl = urlOf;
 
@@ -86,7 +88,7 @@
   let shown = '';
   const apply = () => {
     if (!DQ.S || !DQ.S.settings) return;
-    const key = (UI.view === 'combat' && combatKey()) || (S().settings.backdrop === 'forest' ? 'forest' : 'hills');
+    const key = (UI.view === 'combat' && combatKey()) || DQ.skillBackdropKey?.(UI.view) || (S().settings.backdrop === 'forest' ? 'forest' : 'hills');
     const root = document.documentElement; root.classList.add('has-backdrop'); root.dataset.backdrop = key;
     if (key === shown) return; shown = key;
     root.style.setProperty('--backdrop', `url('${urlOf(key)}')`);
@@ -99,5 +101,5 @@
   UI.DO.backdrop = k => { S().settings.backdrop = k === 'forest' ? 'forest' : 'hills'; apply(); UI.render(false); };
   const settings0 = UI.V.settings;
   if (settings0) UI.V.settings = () => { const cur = S().settings.backdrop === 'forest' ? 'forest' : 'hills';
-    return settings0() + `<section class="panel backdrop-pick"><div class="phead"><h2>Backdrop</h2><small>Combat shows the area you fight in</small></div><div class="bd-opts">${[['hills', 'Starlit hills'], ['forest', 'Twilight forest']].map(([k, n]) => `<button class="bd-opt ${cur === k ? 'on' : ''}" data-do="backdrop" data-a="${k}" aria-pressed="${cur === k}"><img src="${urlOf(k)}" width="240" height="135" alt=""><span>${n}</span></button>`).join('')}</div></section>`; };
+    return settings0() + `<section class="panel backdrop-pick"><div class="phead"><h2>Backdrop</h2><small>${DQ.skillBackdropKey?'Skills show their workplaces; Combat follows its area':'Combat shows the area you fight in'}</small></div><div class="bd-opts">${[['hills', 'Starlit hills'], ['forest', 'Twilight forest']].map(([k, n]) => `<button class="bd-opt ${cur === k ? 'on' : ''}" data-do="backdrop" data-a="${k}" aria-pressed="${cur === k}"><img src="${urlOf(k)}" width="240" height="135" alt=""><span>${n}</span></button>`).join('')}</div></section>`; };
 })();

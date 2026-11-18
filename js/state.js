@@ -15,22 +15,24 @@ DQ.SLOTS = ['head', 'body', 'legs', 'weapon', 'shield', 'ring', 'amulet', 'ammo'
 DQ.SLOT_NAMES = { head: 'Head', body: 'Body', legs: 'Legs', weapon: 'Weapon', shield: 'Shield', ring: 'Ring', amulet: 'Amulet', ammo: 'Ammo' };
 DQ.invDirty = false;
 
-DQ.newState = (name = 'Adventurer', look) => {
+DQ.newState = (name = 'Adventurer', look, starter = 'sword') => {
+  const kit=D.STARTER_KITS?.[starter]||{weapon:'bronze_sword'};
   const xp = {}; D.SKILLS.forEach(s => xp[s.id] = 0); xp.hitpoints = D.XPF[10];
   return {
+    restorationVersion: 1, legacyRestoration: {},
     journey: 'boss', projects: {}, projectGiven: {}, minis: {}, pinnedProject: null, noticeBadges: {},
     v: 2, name, look: look || { skin: D.LOOKS.skin[0], hair: D.LOOKS.hair[1], tunic: D.LOOKS.tunic[0], face: 'bright' },
     created: Date.now(), lastSeen: Date.now(), playtime: 0, awayMs: 0, awayEff: 0, tele: { adv: {}, skill: {}, first: {}, away: [], sessions: 0 }, seenTabs: {}, disc: {}, lastAway: null, exportedAt: 0, snoozeBk: 0, title: null, research: { done: {}, active: [] },
-    xp, coins: 25, hp: 10, inv: { bread: 5 }, bank: {}, equip: { weapon: 'bronze_sword' }, ammo: { id: null, n: 0 },
+    xp, coins: 25, hp: 10, inv: { bread: 5, ...(kit.runes?{rune:kit.runes}:{}) }, bank: {}, equip: { weapon: kit.weapon, ...(kit.ammo?{ammo:kit.ammo}:{}) }, ammo: { id: kit.ammo||null, n: kit.quantity||0 },
     town: 'willowbrook', towns: { willowbrook: { visited: true, boss: false } },
-    q: {}, ach: {}, seen: {}, unlocked: {},
+    q: {}, ach: {}, seen: {}, unlocked: {}, toolUpgrades: {},
     unlockRules: 2,
     stats: { carve: 0, voyage: 0, train: 0, harvest: 0, collect: 0, pets: 0, furnish: 0, hired: 0, catch: 0, chop: 0, mine: 0, thieve: 0, cook: 0, burn: 0, smelt: 0, smith: 0, craft: 0, alch: 0, brew: 0, enchant: 0, kill: 0, earned: 0, deaths: 0, bought: 0, sold: 0, equipped: 0, tools: 0, rare: 0 },
-    settings: { masterVol: 1, ambience: true, ambVol: .45, theme: 'dark', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, storyScenes: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
+    settings: { masterVol: 1, ambience: true, ambVol: .45, theme: 'light', lettering: 'hearthside', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, storyScenes: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
     style: { melee: 'aggressive', ranged: 'offense', magic: 'offense' }, spell: 'spark',
     act: null, log: [], tut: { done: {}, hidden: false },
     gameTime: 0, farm: { plots: [{ crop: null }, { crop: null }, { crop: null }], plotsBought: 3, animals: [], pensBought: 2, feed: 0, autoReplant: true, last: 'potato', next: null },
-    pets: { owned: {}, active: null, tracks: {}, events: [], expedition: null, bondVersion: 1 }, hunt: { area: null, target: null, encounters: 0 }, enchants: {}, house: { owned: false, rooms: {}, furn: {}, wall: [] }, workers: [], hire: { cands: [], at: -1e9 }, beast: { kills: {}, drops: {} },
+    pets: { owned: {}, active: null, tracks: {}, events: [], expedition: null, bondVersion: 1 }, hunt: { area: null, target: null, encounters: 0, fieldFocus: null, loopVersion: 1, legacyFieldLevel: 0 }, enchants: {}, house: { owned: false, rooms: {}, furn: {}, wall: [] }, workers: [], hire: { cands: [], at: -1e9 }, beast: { kills: {}, drops: {} },
   };
 };
 { let cur = DQ.newState(); Object.defineProperty(DQ, 'S', { get: () => cur, set: v => { cur = v; if (DQ.xpAliases) DQ.xpAliases(v); }, configurable: true, enumerable: true }); }
@@ -95,10 +97,24 @@ function candidateState(o) {
     const known = a.kind === 'recipe' ? D.RECIPES[a.id] : a.kind === 'fight' ? D.MON[a.id] : a.kind === 'alch' ? D.ITEMS[a.id] : a.kind === 'sail' ? D.VOYAGE?.[a.id] : a.kind === 'train' ? (D.PET[a.id] || (String(a.id).startsWith('lure:') && D.TOWN[String(a.id).slice(5)])) : D.NODE[a.kind + ':' + a.id];
     return !!known && (!a.pace || !!D.PACE[a.pace]) && ['count', 'elapsed', 'progress', 'lvlTarget'].every(k => a[k] === undefined || (Number.isFinite(a[k]) && a[k] >= 0));
   };
+  if(result.farm?.plots?.some(p=>p.nextCrop!=null&&!D.CROP[p.nextCrop]))throw new Error('Invalid plot planting plan');
   if (result.act && !validAction(result.act)) throw new Error('Invalid active task');
   if (result.queue && result.queue.some(a => !validAction(a))) throw new Error('Invalid queue');
   if (result.buffs && result.buffs.some(b => !record(b) || !Number.isFinite(b.until) || !Number.isFinite(b.mult) || b.mult <= 0)) throw new Error('Invalid buff');
   if (!o || o.unlockRules === undefined) delete result.unlockRules; /* older saves: migrate their unlocks once */
+  if(o.restorationVersion===undefined)delete result.restorationVersion;
+  if(DQ.migrateRestoration)DQ.migrateRestoration(result);
+  if(DQ.migrateDiscoveries)DQ.migrateDiscoveries(result);
+  for(const w of result.workers)for(const field of ['job','jobComplete'])if(w[field]!=null){const j=w[field];if(!record(j)||!D.ITEMS[j.item]||!Number.isSafeInteger(j.target)||j.target<1||j.target>1000000||!Number.isSafeInteger(j.done)||j.done<0||j.done>1000010||typeof j.label!=='string')throw new Error('Invalid worker target');if(field==='job'&&(!D.NODE[w.task]||D.NODE[w.task].item!==j.item||D.NODE[w.task].skill!==w.skill))throw new Error('Invalid worker target task');}
+  if(result.restorationVersion!==1)throw new Error('Unsupported restoration version');
+  if(!record(result.legacyRestoration)||Object.entries(result.legacyRestoration).some(([id,v])=>!D.PROJECTS[id]||v!==true||!result.projects[id]))throw new Error('Invalid legacy restoration');
+  if(o.hunt?.loopVersion===undefined)delete result.hunt.loopVersion;
+  if(DQ.migrateHuntingLoop)DQ.migrateHuntingLoop(result);
+  if(DQ.migrateToolUpgrades)DQ.migrateToolUpgrades(result);
+  if(!record(result.toolUpgrades)||Object.entries(result.toolUpgrades).some(([id,v])=>!D.ITEMS[id]?.toolSkill||!D.ITEMS[id]?.tier||v!==true))throw new Error('Invalid tool upgrades');
+  if(!Number.isSafeInteger(result.hunt.legacyFieldLevel)||result.hunt.legacyFieldLevel<0||result.hunt.legacyFieldLevel>99)throw new Error('Invalid legacy hunting access');
+  if(result.hunt.loopVersion!==undefined&&result.hunt.loopVersion!==1)throw new Error('Unsupported hunting loop');
+  if(result.hunt.fieldFocus!=null&&(typeof result.hunt.fieldFocus!=='string'||!D.ITEMS[result.hunt.fieldFocus]))throw new Error('Invalid hunting focus');
   migrate(result);
   return result;
 }
@@ -135,6 +151,7 @@ function migrate(S) {
   }
 }
 DQ.saveHealth = '';
+DQ.saveLocation = () => window.idlewickDesktop?.storage ? 'desktop' : window.self !== window.top ? 'preview' : 'browser';
 let observedSave;
 try { observedSave = store.getItem(SAVE_KEY); } catch (e) {}
 DQ.save = () => {
@@ -148,6 +165,7 @@ DQ.save = () => {
     }
     const next = JSON.stringify({ ...DQ.S, lastSeen: Date.now() });
     store.setItem(SAVE_KEY, next);
+    if (store.getItem(SAVE_KEY) !== next) throw new Error('Save write could not be verified');
     observedSave = next; DQ.S.lastSeen = JSON.parse(next).lastSeen; DQ.saveHealth = '';
     return true;
   } catch (e) {
@@ -165,6 +183,7 @@ DQ.importSave = text => {
     if (observedSave !== undefined && current !== observedSave) return false;
     const raw = JSON.stringify({ ...next, lastSeen: Date.now() });
     store.setItem(SAVE_KEY, raw);
+    if (store.getItem(SAVE_KEY) !== raw) throw new Error('Imported save write could not be verified');
     observedSave = raw; DQ.S = next; DQ.S.lastSeen = JSON.parse(raw).lastSeen; DQ.saveHealth = ''; return true;
   } catch (e) { return false; }
 };
@@ -254,6 +273,7 @@ DQ.have = id => (DQ.S.inv[id] || 0) + (DQ.S.bank[id] || 0);
 DQ.isTool = id => !!(DQ.data.ITEMS[id] && DQ.data.ITEMS[id].type === 'tool');
 DQ.packSlots = () => Object.keys(DQ.S.inv).filter(id => !DQ.isTool(id)).length;
 DQ.give = (id, n = 1) => {
+  if(n>0&&DQ.rememberItem)DQ.rememberItem(id);
   const S = DQ.S; if (n <= 0) return;
   if (S.inv[id]) S.inv[id] += n;
   else if (DQ.packSlots() < DQ.packMax()) S.inv[id] = n;
@@ -262,6 +282,7 @@ DQ.give = (id, n = 1) => {
 };
 DQ.take = (id, n = 1) => {
   const S = DQ.S; if (DQ.have(id) < n) return false;
+  if(n>0&&DQ.rememberItem)DQ.rememberItem(id);
   const fromPack = Math.min(n, S.inv[id] || 0);
   if (fromPack) { S.inv[id] -= fromPack; if (!S.inv[id]) delete S.inv[id]; }
   const rest = n - fromPack;
@@ -325,7 +346,7 @@ DQ.nodeRegional = n => !!n && (n.skill === 'thieving' || D.SIGNATURE_NODES.has(n
 DQ.nodeDiscovered = n => !!n && (n.town === DQ.S.town || !!(DQ.S.towns[n.town] && DQ.S.towns[n.town].visited));
 DQ.nodeHere = n => !!n && (n.town === DQ.S.town || (!DQ.nodeRegional(n) && DQ.nodeDiscovered(n)));
 DQ.toolKey = sk => { const t = D.TOOLS.find(t => t[1] === sk); return t && t[0]; };
-DQ.toolTier = sk => { const k = DQ.toolKey(sk); if (!k) return 0; for (let t = 5; t >= 1; t--) if (DQ.have(`tool_${k}_${t}`)) return t; return 0; };
+DQ.toolTier = sk => { const k = DQ.toolKey(sk); if (!k) return 0; for (const t of [...D.TOOL_ORDER].reverse()) if (DQ.have(`tool_${k}_${t}`)) return t; return 0; };
 DQ.perkSpeed = sk => { const l = DQ.lvl(sk); return D.PERKS.reduce((a, p) => a + (p.speed && l >= p.lvl ? p.speed : 0), 0); };
 DQ.speedMult = sk => clamp(1 - D.TOOL_SPEED[DQ.toolTier(sk)] - DQ.perkSpeed(sk) - (DQ.extraSpeed ? DQ.extraSpeed(sk) : 0), .3, 1);
 DQ.dblChance = sk => (DQ.lvl(sk) >= 99 ? .1 : 0) + ((DQ.fx && DQ.fx().dbl) || 0);

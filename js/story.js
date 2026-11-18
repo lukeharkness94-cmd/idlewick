@@ -5,7 +5,7 @@ const defs=D.STORY_SCENES,seen=id=>!!S().seen['story:'+id],quiet=()=>Q.forecasti
 let active=null,pending=null;
 /* Main-story quests are explicit; discoveries, projects and regional arrivals are quiet entries. */
 for(const q of D.QUESTS)if(q.id==='first_steps'||q.id==='goblin_menace'||q.obj.some(o=>o.ev==='boss'))q.main=true;
-Q.storyCinematic=s=>!!(s&&(s.id==='willowbrook_promise'||s.quest&&D.QM[s.quest]?.main||s.type==='quest'&&D.QM[s.source]?.main||s.boss&&D.QUESTS.some(q=>q.main&&q.obj.some(o=>o.ev==='boss'&&o.key===s.boss))));
+Q.storyCinematic=s=>!!(s&&(s.quest&&D.QM[s.quest]?.main||s.type==='quest'&&D.QM[s.source]?.main||s.boss&&D.QUESTS.some(q=>q.main&&q.obj.some(o=>o.ev==='boss'&&o.key===s.boss))));
 
 const text=v=>typeof v==='function'?v():v;
 Q.availableStories=()=>Object.values(defs).filter(s=>s.eligible());
@@ -33,14 +33,23 @@ function draw(){
  const speaker=decision&&c?(s.type==='quest'?D.QM[s.source].giver:f.speaker):f.speaker;
  const legacyDecision=s.type==='quest'&&Q.questState(D.QM[s.source])==='done'&&!chosen;
  const body=decision?(legacyDecision?'This chapter was completed before its decision was recorded. Your earned progress and rewards are preserved.':c?text(c.response||c.text):'What will you do?'):text(f.text);
- const portrait=speaker==='Narrator'?UI.portrait(64):Q.folkPortrait(speaker,64);
  const choices=decision&&!chosen&&!legacyDecision?(s.choices||[]).map(c=>`<button class="story-choice btn" data-do="storychoose" data-a="${s.id}" data-b="${c.id}" ${missing(c)?'disabled':''}><b>${esc(c.label)}</b><small>${esc(missing(c)||text(c.effect)||'This choice will be remembered.')}</small></button>`).join(''):'';
  const step=Math.min(active.index+1,frames.length+(s.choices?1:0)),total=frames.length+(s.choices?1:0);
- const project=s.project&&D.PROJECTS[s.project],A=Q.pixelArt,art=project&&(project.art||s.project);
- const restoration=project?`<div class="story-restoration"><div><span>Before restoration</span><img src="${A.url('story-before:'+art,()=>A.stagePiece(art,0))}" alt="${esc(project.name)} before repair"></div><span class="story-repair-arrow" aria-hidden="true">→</span><div><span>Restored</span><img src="${A.url('story-after:'+art,()=>A.stagePiece(art,4))}" alt="Restored ${esc(project.name)}"></div></div>`:'';
- const m=active.modal,root=m.querySelector('.m-body');
- root.innerHTML=`<section class="story-scene" data-scene="${s.id}" data-shot="${f.shot||'wide'}"><div class="story-stage" role="img" aria-label="${esc(D.TOWN[s.town].name)} · ${esc(s.title)}"><img class="story-landscape" src="${Q.sceneUrl(s.town)}" alt=""><span class="story-location">${esc(D.TOWN[s.town].name)}</span><img class="story-hero" src="${Q.heroFigureUrl(S().look)}" alt="Your hero"><span class="story-stage-person">${speaker==='Narrator'?'':Q.folkPortrait(speaker,96)}</span><span class="story-vignette"></span>${restoration}</div><div class="story-dialogue"><span class="story-portrait">${portrait}</span><div><span class="k">${esc(speaker)}</span><p class="story-line" tabindex="-1">${esc(body)}</p>${decision&&c?`<small class="story-remembered">Your decision: ${esc(c.label)}${c.effect?' · '+esc(text(c.effect)):''}</small>`:''}</div></div>${active.error?`<p class="story-error" role="alert">${esc(active.error)}</p>`:''}${choices?`<div class="story-choices" role="group" aria-label="Your decision">${choices}</div>`:''}<div class="story-controls"><button class="btn sm" data-do="storyskip">${decision&&!chosen&&!legacyDecision?'Decide later':'Skip scene'}</button><small>${step} / ${total} · your task keeps running</small>${choices?'':`<button class="btn primary" data-do="storynext">${decision||(!s.choices&&active.index===frames.length-1)?'Return to game':'Continue'}</button>`}</div></section>`;
- const line=root.querySelector('.story-line');line.focus({preventScroll:true});
+ const root=active.modal.querySelector('.m-body');
+ // Keep the stage and portrait mounted: advancing changes only the dialogue and controls.
+ if(!root.querySelector('.story-conversation'))root.innerHTML=`<section class="story-scene story-conversation" data-scene="${s.id}"><div class="story-speaker"><span class="story-location">${esc(D.TOWN[s.town].name)}</span><span class="story-talker"></span></div><div class="story-dialogue"><div class="story-copy"><span class="k story-speaker-name"></span><div class="story-line" role="button" tabindex="0" data-do="storyadvance"></div><div class="story-response"></div><div class="story-options"></div></div></div><div class="story-controls"></div></section>`;
+ const person=root.querySelector('.story-talker');
+ if(person.dataset.speaker!==speaker){person.innerHTML=speaker==='Narrator'?UI.portrait(192):Q.folkPortrait(speaker,192);person.dataset.speaker=speaker;}
+ root.querySelector('.story-speaker-name').textContent=speaker;
+ const line=root.querySelector('.story-line'),waiting=decision&&!chosen&&!legacyDecision&&!!s.choices?.length;
+ line.textContent=body;line.setAttribute('aria-label',body+(waiting?' Choose a response below.':' Click for the next line.'));
+ root.querySelector('.story-response').innerHTML=decision&&c?`<small class="story-remembered">Your decision: ${esc(c.label)}${c.effect?' · '+esc(text(c.effect)):''}</small>`:'';
+ root.querySelector('.story-options').innerHTML=(active.error?`<p class="story-error" role="alert">${esc(active.error)}</p>`:'')+(choices?`<div class="story-choices" role="group" aria-label="Your decision">${choices}</div>`:'');
+ root.querySelector('.story-controls').innerHTML=`<button class="btn sm" data-do="storyskip">${waiting?'Decide later':'Skip scene'}</button><small>${step} / ${total} · ${waiting?'Choose a response':'Click the dialogue or press Space'} · your task keeps running</small>${choices?'':`<button class="btn primary" data-do="storynext">${decision||(!s.choices&&active.index===frames.length-1)?'Return to game':'Continue'}</button>`}`;
+ const reduced=S().settings.reduceFx||matchMedia('(prefers-reduced-motion: reduce)').matches;
+ line.getAnimations().forEach(a=>a.cancel());person.getAnimations().forEach(a=>a.cancel());
+ if(!reduced){line.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});if(!waiting)person.animate([{transform:'translateY(0)'},{transform:'translateY(-2px)',offset:.25},{transform:'translateY(0)',offset:.5},{transform:'translateY(-1px)',offset:.75},{transform:'translateY(0)'}],{duration:850,easing:'ease-in-out'});}
+ line.focus({preventScroll:true});
 }
 Q.openStory=id=>{
  const s=defs[id];if(typeof s?.eligible!=='function'||!s.eligible()||quiet()||!Q.started)return false;
@@ -51,6 +60,7 @@ Q.openStory=id=>{
 };
 Object.assign(UI.DO,{
  storyopen:id=>Q.openStory(id),storynext:()=>{if(!active)return;const s=defs[active.id];if(active.index>=s.frames().length-1&&!s.choices||active.index>=s.frames().length)return finish();active.index++;draw();},
+ storyadvance:()=>{if(!active)return;const s=defs[active.id];if(active.index>=s.frames().length&&s.choices?.length&&!choiceOf(s)){active.modal.querySelector('[data-do="storychoose"]:not(:disabled)')?.focus();return;}UI.DO.storynext();},
  storyskip:()=>finish(),storychoose:(id,pick)=>{if(!active||active.id!==id)return;if(Q.chooseStory(id,pick)){active.error=null;draw();UI.renderHud();UI.renderRail();if(UI.view==='overview')UI.render(false);}else{active.error=missing(defs[id].choices.find(c=>c.id===pick)||{})||Q.saveHealth||'This decision could not be saved. Nothing has been spent; please try again.';draw();}},
  storyarchive:()=>Q.go('journal'),restorationdismiss:()=>{UI.restoredSite=null;UI.render(false);},storypage:a=>{UI.storyPage=Math.max(0,+a||0);UI.render(false);},
  storysetting:()=>{S().settings.storyScenes=S().settings.storyScenes===false;pending=null;Q.save();UI.render(false);}
@@ -60,7 +70,7 @@ addEventListener('keydown',e=>{
  if(!active)return;
  const line=e.target.closest?.('.story-line'),buttons=[...active.modal.querySelectorAll('button')].filter(b=>!b.disabled&&b.offsetWidth);
  if(line&&e.key==='Tab'){e.preventDefault();e.stopImmediatePropagation();(e.shiftKey?buttons[buttons.length-1]:buttons[0])?.focus();return;}
- if(line&&(e.key===' '||e.key==='Enter')){e.preventDefault();e.stopImmediatePropagation();const s=defs[active.id];if(active.index>=s.frames().length&&!choiceOf(s)&&s.choices?.length)buttons[0]?.focus();else UI.DO.storynext();return;}
+ if(line&&(e.key===' '||e.key==='Enter')){e.preventDefault();e.stopImmediatePropagation();UI.DO.storyadvance();return;}
  if(!['Tab','Escape'].includes(e.key))e.stopImmediatePropagation();
 },true);
 function offer(id){if(quiet()||!Q.started||S().settings.storyScenes===false||seen(id)||!defs[id]?.eligible()||!Q.storyCinematic(defs[id]))return;if(pending&&defs[pending]?.choices?.length&&!choiceOf(defs[pending]))return;pending=id;}
@@ -83,7 +93,7 @@ UI.openDiscovery=id=>defs['discovery_'+id]?Q.openStory('discovery_'+id):discover
 for(const q of D.QUESTS.filter(q=>q.choices))defs['decision_'+q.id]={id:'decision_'+q.id,title:q.name,town:q.town,type:'quest',source:q.id,choiceKey:q.id,eligible:()=>['ready','done'].includes(Q.questState(q)),frames:()=>[{speaker:q.giver,shot:'wide',text:q.blurb}],choices:q.choices.map(c=>({...c,effect:q.id==='bl_ledger'?(c.id==='ilsa'?'Ilsa becomes your ally. Later: a warden’s greathelm.':'Mother Silt becomes your ally. Later: a smuggler’s knot.'):'Changes the story and its later acknowledgement.'}))};
 UI.openQuestChoice=id=>{const q=D.QM[id];if(!q)return;if(q.main)return Q.openStory('decision_'+id);UI.questTab='active';UI.tab.questSelected=id;Q.go('quests');};
 const quests0=UI.V.quests;
-UI.V.quests=()=>{const h=quests0(),q=D.QM[UI.tab.questSelected];if(!q||q.main||!q.choices||Q.questState(q)!=='ready'||Q.choiceOf(q.id)||h.includes('quest-reveal'))return h;const options=`<section class="inline-decision"><b>Choose how this chapter ends</b>${q.choices.map(c=>`<button class="btn" data-do="qclaim" data-a="${q.id}" data-b="${c.id}"><b>${esc(c.label)}</b><small>${esc(c.text)}</small></button>`).join('')}</section>`;return h.replace('<div class="qdetail">','<div class="qdetail">'+options);};
+UI.V.quests=()=>{const h=quests0(),q=D.QM[UI.tab.questSelected];if(!q||q.main||!q.choices||Q.questState(q)!=='ready'||Q.choiceOf(q.id)||h.includes('quest-reveal'))return h;const options=`<section class="inline-decision"><b>Choose how this chapter ends</b>${q.choices.map(c=>`<button class="btn" data-do="qclaim" data-a="${q.id}" data-b="${c.id}"><b>${esc(c.label)}</b><small>${esc(c.text)}</small></button>`).join('')}</section>`;return h.replace('<div class="quest-actions">','<div class="quest-actions">'+options);};
 const makeDiscovery0=Q.makeDiscovery;Q.makeDiscovery=(id,...a)=>{const r=makeDiscovery0(id,...a);if(r&&id==='goblin_satchel')offer('discovery_'+id);return r;};
 /* Home leads through the existing opening quests. It never accepts or changes goals on the player's behalf. */
 const next0=Q.journeyNext;

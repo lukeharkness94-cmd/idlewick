@@ -19,7 +19,7 @@ DQ.sourceOf = id => {
   if (id.startsWith('crop_')) return { kind: 'farm', page: 'farming', skill: 'farming', name: it.name };
   const animal = (D.ANIMALS || []).find(a => a.prod === id); if (animal) return { kind: 'animal', page: 'farming', skill: 'farming', name: animal.name };
   const recipe = Object.values(D.RECIPES || {}).filter(r => r.out && r.out[id]).sort((a, b) => a.lvl - b.lvl)[0];
-  if (recipe) return { kind: 'recipe', id: recipe.id, page: D.SK[recipe.skill].page, skill: recipe.skill, lvl: recipe.lvl, name: recipe.name };
+  if (recipe) return { kind: 'recipe', id: recipe.id, page: D.SK[recipe.skill].page, skill: recipe.skill, lvl: recipe.lvl, town:recipe.town, name: recipe.name };
   const shops = Object.entries(D.SHOPS || {}).filter(([, list]) => list.includes(id)).map(([town]) => town);
   if (shops.length) return { kind: 'shop', page: 'shop', town: shops.includes(S().town) ? S().town : shops[0], name: 'Shop' };
   const mon = D.MONLIST.filter(m => !m.boss && (m.drops || []).some(d => d[0] === id)).sort((a, b) => a.cl - b.cl)[0];
@@ -33,9 +33,10 @@ const where = src => {
 };
 /* a compact button beside anything you are short of */
 UI.routeChip = id => {
-  const src = DQ.sourceOf(id); if (!src) return '';
-  const locked = src.skill && !DQ.skillUnlocked(src.skill);
-  return `<button class="route-chip" data-do="route" data-a="${id}" data-tip="text:${esc((locked ? 'Locked: ' : 'Get it from ') + where(src))}" aria-label="${esc(`${VERB[src.kind]} ${D.ITEMS[id].name}: ${where(src)}`)}">${esc(VERB[src.kind])} ${ico('arrow')}</button>`;
+  const src=DQ.sourceOf(id);if(!src)return '';
+  const unknown=DQ.itemDiscovered&&!DQ.itemDiscovered(id),locked=src.skill&&!DQ.skillUnlocked(src.skill);
+  const label=unknown?'Find '+D.ITEMS[id].name+' · '+DQ.ingredientDiscovery(id).label:`${VERB[src.kind]} ${D.ITEMS[id].name}: ${where(src)}${locked?' · skill locked':''}`;
+  return `<button class="route-chip route-icon" data-do="route" data-a="${id}" data-tip="text:${esc(label)}" aria-label="${esc(label)}">${UI.activityIcon(src.page)}</button>`;
 };
 
 /* follow a route, remembering where you came from */
@@ -61,7 +62,7 @@ UI.render = fresh => {
   const r = UI.returnTo; if (!r) return;
   if (r.page === UI.view) { UI.returnTo = null; return; }
   if (!bar || bar.querySelector('.returnbar')) return;
-  bar.insertAdjacentHTML('afterbegin', `<div class="returnbar" role="navigation" aria-label="Return"><button class="btn sm" data-do="routeback">${ico('arrow')}<span>Back to ${esc(r.label)}</span></button><button class="n-x" data-do="routeclose" aria-label="Dismiss">${ico('close')}</button></div>`);
+  bar.insertAdjacentHTML('afterbegin', `<div class="returnbar" role="navigation" aria-label="Return"><button class="btn sm" data-do="routeback" aria-label="Return to ${esc(r.label)}" data-tip="text:Return to ${esc(r.label)}">${UI.activityIcon(r.page)}<span>${esc(r.label)}</span></button><button class="n-x" data-do="routeclose" aria-label="Dismiss">${ico('close')}</button></div>`);
 };
 /* moving through the main menus is a fresh start, not a detour */
 const hub0 = UI.DO.hub; if (hub0) UI.DO.hub = (...a) => { UI.returnTo = null; return hub0(...a); };
@@ -92,7 +93,7 @@ const detail1 = UI.detail;
 UI.detail = (id, from) => {
   const h = detail1(id, from), it = id && D.ITEMS[id]; if (!it || it.slot) return h;
   const u = DQ.itemUses(id), line = usesLine(id); if (!line) return h;
-  const r = u.recipe, go = r ? `<button class="btn sm" data-do="userecipe" data-a="${r.id}">${ico('arrow')} ${esc(D.SK[r.skill].name)}: ${esc(r.name)}</button>` : '';
+  const r = u.recipe, go = r ? `<button class="btn sm" data-do="userecipe" data-a="${r.id}">${ico('arrow')} ${esc(D.SK[r.skill].name)}: ${esc(DQ.recipeDiscovered(r)?r.name:'Discover recipe ingredients')}</button>` : '';
   return h.replace(/<\/div>\s*$/, `<p class="item-uses">${esc(line)}</p>${go}</div>`);
 };
 UI.DO.userecipe = id => { const r = D.RECIPES[id]; if (!r) return; UI.returnTo = { page: UI.view, label: titleOf(UI.view) }; UI.focusTask ? UI.focusTask(D.SK[r.skill].page, r.id, r.tab, r.skill) : go(D.SK[r.skill].page); };

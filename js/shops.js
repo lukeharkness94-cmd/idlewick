@@ -34,12 +34,12 @@ DQ.tonicPrice = town => Math.round(DQ.cachePrice(town, false) * .6 / 10) * 10;
 DQ.rareOffers = (town = S().town) => {
   const gear = (D.TOWN_RARE_GEAR[town] || []).filter(have).map(id => ({ id, price: Math.round(D.ITEMS[id].val * 6) }));
   const tid = D.TOWN_TROPHY[town], beaten = !!(S().towns[town] && S().towns[town].boss);
-  if (tid && have(tid)) gear.push({ id: tid, price: Math.round(D.ITEMS[tid].val * 4), trophy: true, locked: !beaten });
+  if (tid && have(tid) && D.ITEMS[tid].slot!=='weapon') gear.push({ id: tid, price: Math.round(D.ITEMS[tid].val * 4), trophy: true, locked: !beaten });
   return {
     gear,
     mats: (D.TOWN_SPECIALS[town] || []).filter(have).map(id => ({ id, price: Math.max(5, Math.round(D.ITEMS[id].val * 5)) })),
     caches: [{ k: 'fine', name: 'Fine cache', price: DQ.cachePrice(town, false), open: true }, { k: 'grand', name: 'Grand cache', price: DQ.cachePrice(town, true), open: idx(town) >= 2, need: 'Saltmere and beyond' }],
-    tonic: { price: DQ.tonicPrice(town), open: idx(town) >= 1, need: 'Mossbarrow and beyond' },
+    tonic: { price: DQ.tonicPrice(town), open: idx(town) >= 1 && (!Number.isFinite(S().tonicBoughtAt) || GT() >= S().tonicBoughtAt + 6*3600000), need: idx(town)<1 ? 'Mossbarrow and beyond' : `Emergency supply returns in ${DQ.fmtTime(Math.max(0,S().tonicBoughtAt+6*3600000-GT()))}` },
   };
 };
 DQ.owns = id => DQ.have(id) > 0 || Object.values(S().equip).includes(id);
@@ -49,11 +49,11 @@ DQ.rareSold = id => !!(S().shopSold && S().shopSold[id]) || DQ.owns(id);
 const TONIC_MS = 30 * 60000, TONIC_MAX = 120 * 60000;
 DQ.luckLeft = () => { const b = DQ.buffs().find(x => x.type === 'luck'); return b ? b.until - GT() : 0; };
 DQ.buyTonic = () => {
-  const o = DQ.rareOffers().tonic; if (!o.open) return DQ.toast(`Fortune tonic is sold in ${o.need}`, true);
+  const o = DQ.rareOffers().tonic; if (!o.open) return DQ.toast(o.need, true);
   if (S().coins < o.price) return DQ.toast('Not enough coins', true);
   const left = DQ.luckLeft(); if (left >= TONIC_MAX - 1000) return DQ.toast('You are as fortunate as you can be for now', true);
-  S().coins -= o.price; const until = GT() + Math.min(TONIC_MAX, left + TONIC_MS);
-  S().buffs = DQ.buffs().filter(b => b.type !== 'luck').concat({ type: 'luck', mult: 1.5, until, name: 'Fortune' }); DQ.sfx('buy'); DQ.emit('shop'); return true;
+  const before=JSON.parse(JSON.stringify(S()));S().coins -= o.price; S().tonicBoughtAt=GT(); const until = GT() + Math.min(TONIC_MAX, left + TONIC_MS);
+  S().buffs = DQ.buffs().filter(b => b.type !== 'luck').concat({ type: 'luck', mult: 1.5, until, name: 'Fortune' }); if(!DQ.save()){DQ.S=before;DQ.fxDirty();return false;} DQ.sfx('buy'); DQ.emit('shop'); return true;
 };
 
 /* ---------- Caches: sealed, local, and a gamble ---------- */
@@ -80,7 +80,7 @@ UI.rarePage = () => {
     ...offers.gear.map(g => ({ ...g, key: 'gear:' + g.id, name: D.ITEMS[g.id].name, owned: DQ.rareSold(g.id), text: g.trophy ? 'A replacement boss trophy. Defeat the town boss to unlock it.' : 'Local masterwork · one of each', count: 1 })),
     ...offers.mats.map(m => ({ ...m, key: 'mat:' + m.id, name: D.ITEMS[m.id].name, count: qty })),
     ...offers.caches.map(c => ({ key: 'cache:' + c.k, name: c.name, price: c.price, locked: !c.open, text: c.open ? 'Contains coins, gems and a chance of local gear. Contents vary.' : 'Sold in ' + c.need, count: 1 })),
-    { key: 'tonic:luck', name: 'Fortune tonic', price: offers.tonic.price, locked: !offers.tonic.open, text: offers.tonic.open ? 'Rare drops are 50% more likely for 30 minutes. Stacks up to two hours.' : 'Sold in ' + offers.tonic.need, count: 1 }
+    { key: 'tonic:luck', name: 'Fortune tonic', price: offers.tonic.price, locked: !offers.tonic.open, text: offers.tonic.open ? 'Emergency supply: +50% drops for 30 minutes, one purchase per 6 game hours across all towns. Brew Potion of Fortune for sustained supply.' : offers.tonic.need, count: 1 }
   ];
   const selected = choices.find(c => c.key === UI.tab.rareChoice) || choices[0];
   const cost = selected.price * selected.count, affordable = S().coins >= cost;

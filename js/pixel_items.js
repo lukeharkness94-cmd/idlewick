@@ -285,6 +285,9 @@ const PRODUCE = {
   /* leather string: a coiled cord with a knotted tail */
   string: s => { const c = rp('#c8a070'); for (let i = 0; i < 26; i++) { const a = i / 26 * Math.PI * 3.2, r = 5.2 - i * .12; s.dot(8 + Math.cos(a) * r, 8 + Math.sin(a) * r * .8, c); } s.line(10, 11, 14, 14, c); s.ell(14, 14, 1.2, 1.2, rp('#8a6440')); s.fix(5, 5, c.gl); },
   /* wooden trap: a slatted box with a spring jaw and a trigger peg */
+  reinforced_trap: s => {const w=rp('#8a6745'),m=rp('#a6adb2');s.rect(2,8,12,6,w);s.poly([[2,8],[8,3],[14,8]],w);s.line(2,8,14,8,m);s.rect(3,8,2,6,m);s.rect(11,8,2,6,m);s.rect(6,10,4,4,rp('#352f30'));s.fix(4,9,'#f0e5c7');s.fix(12,9,'#f0e5c7');},
+  precision_trap: s => {const m=rp('#79a5b2'),w=rp('#71523d');s.rect(1,11,14,3,w);s.ell(8,8,6,4,m);s.rect(4,6,8,5,rp('#283c40'));for(const x of [3,6,9,12])s.rect(x,5,1,4,m);s.line(3,11,12,4,rp('#d9bd68'));s.ell(8,11,2,2,rp('#e1c46c'));s.rect(6,12,4,1,m);},
+  live_trap: s => {const w=rp('#b18b61'),c=rp('#b8899a');s.rect(2,4,12,10,w);s.rect(4,6,8,6,rp('#3e3637'));for(const x of [4,7,10,13])s.rect(x,4,1,9,w);s.rect(2,12,12,3,c);s.rect(3,2,10,2,w);s.rect(6,1,4,2,rp('#c9c3b7'));s.fix(12,7,'#e9cf80');},
   wooden_trap: s => { const w = rp('#a8784a'); s.rect(2, 8, 12, 6, w); for (const x of [5, 8, 11]) s.line(x, 8, x, 13, null, w.lo); s.poly([[2, 8], [8, 3], [14, 8]], rp('#8a6440')); s.line(3, 7, 13, 7, rp('#9aa3ad')); s.rect(7, 4, 2, 2, rp('#c8a070')); s.fix(3, 9, w.gl); },
   egg: s => { s.ell(8, 9, 4, 5, rp('#f6efe0')); s.fix(6, 6, '#ffffff'); s.fix(10, 11, rp('#f6efe0').lo); },
   milk: s => { s.poly([[5, 5], [11, 5], [12, 14], [4, 14]], rp('#f4f4f0')); s.rect(6, 2, 4, 3, rp('#e8e0d0')); s.rect(6, 1, 4, 1, rp('#4a8ac0')); s.line(5, 9, 11, 9, null, rp('#4a8ac0').base); },
@@ -399,6 +402,21 @@ function dishSprite(s, d) {
 function itemSprite(id) {
   const it = D.ITEMS[id]; if (!it) return null;
   const s = Spr(16, 16), col = it.col || '#999999';
+  if(it.crossArt){
+    const seed=[...id].reduce((n,c)=>n+c.charCodeAt(0),0),m=rp(col);
+    if(id.startsWith('chart_')){s.poly([[2,2],[12,1],[14,13],[4,14]],rp('#d8c18b'));s.line(5,4,10,11,null,'#6a8157');s.line(5,11,11,5,null,'#8a754f');s.fix(3+seed%7,4,'#607f9c');s.rect(4+seed%5,9,2,2,m);}
+    else if(id==='survey_frame'){s.line(3,14,8,3,R.wood);s.line(12,14,8,3,R.wood);s.rect(2,5,12,2,m);s.ell(8,5,3,2,rp('#d6bf86'));s.fix(8,4,'#5d7380');}
+    else if(id==='training_frame'){s.rect(2,2,2,13,m);s.rect(12,2,2,13,m);s.rect(2,2,12,2,R.woodLight);s.line(8,4,8,7,null,'#d4c895');s.ell(8,10,4,4,rp('#b68b62'));s.ell(8,10,2,2,rp('#665044'));}
+    else if(id==='irrigation_frame'){s.rect(1,8,14,5,R.wood);s.rect(2,9,12,2,rp('#77b5bd'));s.rect(9,2,3,7,m);s.rect(5,2,6,2,m);for(const x of [4,7,10])s.line(x,12,x,14,null,'#80bbc9');}
+    else if(id==='workshop_jig'){s.rect(1,7,14,3,R.wood);s.rect(2,10,2,5,R.wood);s.rect(12,10,2,5,R.wood);s.rect(5,3,7,5,m);s.rect(7,4,3,3,rp('#4d4b5b'));s.line(3,5,5,5,null,'#d3c8a1');}
+    else if(id==='trail_ration'){s.poly([[2,5],[12,3],[14,12],[3,14]],rp('#c4ac7b'));s.ell(8,8,5,2,m);s.line(6,5,10,12,null,'#e1d3a9');s.fix(11,7,'#4e5b53');}
+    else if(id==='reed_bait'||id==='trap_blend'){s.poly([[3,5],[12,5],[14,13],[2,13]],m);s.line(4,4,11,4,R.straw);if(id==='reed_bait'){s.line(7,6,6,12,null,'#dac995');s.line(9,6,10,11,null,'#d9c28e');}else{s.ell(8,10,2,2,rp('#604d43'));for(const x of [5,8,11])s.fix(x,7,'#e6d5a6');}}
+    else if(it.type==='potion'){s.rect(5,2,5,3,R.wood);s.ell(8,9,5,5,m);s.rect(4,8,8,3,m);s.line(5,6,6,5,null,'#e9dfbc');s.rect(6,8,4,3,R.woodLight);s.fix(6+seed%4,9,'#394c51');s.fix(3+seed%8,12,'#d0bd85');}
+    else {s.line(2,13,12,2,R.wood);s.line(3,13,13,2,R.woodLight);s.rect(2,3,12,2,m);s.rect(2,11,12,2,m);s.line(3,4,12,11,null,'#d2bd80');s.rect(3+seed%7,5,2,4,m);s.fix(12,3,'#e1d4a4');}
+    return s;
+  }
+
+  if(it.artBase){const base=itemSprite(it.artBase),n=it.workmanship||1;base.rect(1,12,2,3,rp(it.col));base.line(2,13,5+n%3,10,null,'#d8c38f');base.fix(1+n,14,'#e9d49f');return base;}
   if (id.startsWith('raw_') && (FISH[id.slice(4)] || id === 'raw_shrimp' || id === 'raw_lobster')) { const k = id.slice(4); if (k === 'shrimp') shrimp(s); else if (k === 'lobster') lobster(s); else fish(s, FISH[k], 0, 0); return s; }
   if (it.type === 'food' && (FISH[id] || id === 'shrimp' || id === 'lobster')) { if (id === 'shrimp') shrimp(s, true); else if (id === 'lobster') lobster(s, true); else fish(s, FISH[id], 0, -1, true); garnish(s); return s; }
   if (id === 'burnt') { plate(s); fish(s, { len: 11, dep: 3.4, body: '#3a322e', belly: '#5a4a3e', tail: 'fork' }, 0, -2, false); return s; }

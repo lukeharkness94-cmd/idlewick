@@ -21,9 +21,12 @@ D.SECRET_RECIPES = [
   { id: 'hunters_feast', skill: 'cooking', tab: 'Farmhouse', lvl: 30, xp: 150, in: { salmon: 2, crop_onion: 2, crop_potato: 2 }, found: 'A traveller’s thanks, written on the back of a map', rumour: 'A hunter’s supper that makes big things fall over faster.', event: 'traveller' },
   { id: 'stonebread', skill: 'cooking', tab: 'Farmhouse', lvl: 22, xp: 110, in: { bread: 2, ore_coal: 1 }, found: 'A miner’s note, wedged in an iron seam', rumour: 'Ironpeak miners bake something you could build a wall with.', study: ['mine', 'iron', 3] },
   { id: 'lantern_tea', skill: 'cooking', tab: 'Farmhouse', lvl: 12, xp: 60, in: { crop_cabbage: 2, feather: 1 }, found: 'Traded for a story with a travelling merchant', rumour: 'The merchants drink something that keeps them walking all night.', event: 'merchant' },
-].filter(r => D.ITEMS[r.id] && Object.keys(r.in).every(k => D.ITEMS[k]));
+  { id:'shore_broth', output:'potion_heal', qty:1, skill:'cooking',tab:'Farmhouse',lvl:12,xp:55,in:{shrimp:4,crop_onion:1},found:'A fisher’s lunch notes, copied beside the shrimp entry',rumour:'The fishers turn yesterday’s shrimp into a useful emergency broth.',study:['fish','shrimp',2] },
+  { id:'charcoal_burn', output:'ore_coal',qty:3,skill:'crafting',tab:'Materials',lvl:10,xp:35,in:{log_normal:4},found:'A charcoal burner’s sketch in your tree notes',rumour:'Stack the wood tightly and let it smoulder. The notes explain the rest.',study:['wood','normal',3] },
+  { id:'field_loaf',output:'bread',qty:4,skill:'cooking',tab:'Farmhouse',lvl:15,xp:65,in:{crop_wheat:2,milk:1},found:'A farmhand’s batch recipe in the wheat notes',rumour:'One mixing bowl, four loaves. A field lunch that travels well.',study:['crop','wheat',2] },
+].filter(r => D.ITEMS[r.output||r.id] && Object.keys(r.in).every(k => D.ITEMS[k]));
 for (const r of D.SECRET_RECIPES) {
-  const rec = { id: 'secret_' + r.id, skill: r.skill, tab: r.tab, name: D.ITEMS[r.id].name, lvl: r.lvl, xp: r.xp, t: 3200, in: r.in, out: { [r.id]: 1 }, ev: r.skill === 'cooking' ? 'cook' : r.skill === 'smithing' ? 'smith' : 'craft', secret: r.id };
+  const rec = { id: 'secret_' + r.id, skill: r.skill, tab: r.tab, name: ({shore_broth:'Fisher’s healing broth',charcoal_burn:'Charcoal burning',field_loaf:'Farmhand’s four loaves'})[r.id] || D.ITEMS[r.id].name, lvl: r.lvl, xp: r.xp, t: 3200, in: r.in, out: { [r.output||r.id]: r.qty||1 }, ev: r.skill === 'cooking' ? 'cook' : r.skill === 'smithing' ? 'smith' : 'craft', secret: r.id };
   D.RECIPES[rec.id] = rec; (D.RLIST[r.skill] = D.RLIST[r.skill] || []).push(rec); r.rec = rec.id;
 }
 D.SECRET = Object.fromEntries(D.SECRET_RECIPES.map(r => [r.id, r]));
@@ -37,11 +40,13 @@ DQ.hearRecipe = id => { const r = D.SECRET[id]; if (!r || DQ.recipeHeard(id) || 
   if (!(DQ.sim && DQ.sim.on)) DQ.notify({ kind: 'info', key: 'rumour:' + id, icon: 'book', col: '#b8a8f0', title: 'A rumour', text: r.rumour, sound: false, ttl: 8000 });
   if (DQ.journal) DQ.journal('recipe', `Heard a rumour: ${r.rumour}`, 'book'); return true; };
 DQ.learnRecipe = (id, quiet) => { const r = D.SECRET[id]; if (!r || DQ.recipeKnown(id) || DQ.forecasting) return false; book().known[id] = Date.now(); book().heard[id] = book().heard[id] || Date.now();
-  const it = D.ITEMS[id];
-  if (!quiet && !(DQ.sim && DQ.sim.on)) DQ.notify({ kind: 'unlock', key: 'recipe:' + id, icon: 'book', col: it.col, title: `Recipe found: ${it.name}`, text: `${r.found}. Make it in ${D.SK[r.skill].name}.`, sound: 'gem', burst: true, ttl: 12000 });
-  if (DQ.journal) DQ.journal('recipe', `Recipe found: ${it.name}. ${r.found}.`, 'book'); DQ.emit && DQ.emit('recipes'); return true; };
+  const it = D.ITEMS[r.output||id];
+  if (!quiet && !(DQ.sim && DQ.sim.on)) DQ.notify({ kind: 'unlock', key: 'recipe:' + id, icon: 'book', col: it.col, title: `Recipe found: ${D.RECIPES[r.rec]?.name||it.name}`, text: `${r.found}. Make it in ${D.SK[r.skill].name}.`, sound: 'gem', burst: true, ttl: 12000 });
+  if (DQ.journal) DQ.journal('recipe', `Recipe found: ${D.RECIPES[r.rec]?.name||it.name}. ${r.found}.`, 'book'); DQ.emit && DQ.emit('recipes'); return true; };
 /* the sources that are plain rules: a creature's rare drop (with a rumour after ten defeats), and a studied seam */
 DQ.recipeOnKill = m => { for (const r of D.SECRET_RECIPES) { if (!r.drop || r.drop[0] !== m.id || DQ.recipeKnown(r.id)) continue; if ((S().beast.kills[m.id] || 0) >= 10) DQ.hearRecipe(r.id); if (DQ.chance(r.drop[1])) DQ.learnRecipe(r.id); } };
 DQ.recipeOnStudy = (kind, id, stars) => { for (const r of D.SECRET_RECIPES) { if (!r.study || r.study[0] !== kind || r.study[1] !== id) continue; if (stars >= 1) DQ.hearRecipe(r.id); if (stars >= r.study[2]) DQ.learnRecipe(r.id); } };
+DQ.studyDiscovery = (kind,id) => { const r=D.SECRET_RECIPES.find(r=>r.study&&r.study[0]===kind&&r.study[1]===id&&!DQ.recipeKnown(r.id));if(!r)return null;const at=D.MASTERY_STEPS[r.study[2]-1],n=DQ.mastCount(kind,id);return {id:r.id,at,left:Math.max(0,at-n),text:DQ.recipeHeard(r.id)?r.rumour:'A practical recipe waits in these notes.'}; };
+DQ.migrateDiscoveries = st => {for(const r of D.SECRET_RECIPES){if(!r.study)continue;const n=(st.mast||{})[r.study[0]+':'+r.study[1]]||0;if(n<25)continue;st.recipes=st.recipes||{known:{},heard:{}};st.recipes.known=st.recipes.known||{};st.recipes.heard=st.recipes.heard||{};st.recipes.heard[r.id]=st.recipes.heard[r.id]||Date.now();if(n>=D.MASTERY_STEPS[r.study[2]-1])st.recipes.known[r.id]=st.recipes.known[r.id]||Date.now();}};
 DQ.recipeFromEvent = key => { const r = D.SECRET_RECIPES.find(x => x.event === key && !DQ.recipeKnown(x.id)); return r ? r.id : null; };
 })();

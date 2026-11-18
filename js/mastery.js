@@ -37,7 +37,7 @@ DQ.mastTick = (a, n = 1) => {
 DQ.ENTRY_NAMES = ['Notes', 'Quicker hands', 'Keen eye', 'Second nature', 'Mastered'];
 DQ.entryPerk = (kind, star) => { if (kind === 'brew') return `${star * 2}% double`; const y = YIELD_KINDS.includes(kind), w = SPEED_WORD[kind] || 'faster'; return `${star === 1 ? 'Uses shown · ' : ''}${star * 2}% ${w}${y && star >= 5 ? ' · 10% double' : y && star >= 3 ? ' · 5% double' : ''}`; };
 DQ.studyBar = (pct, full, tip) => `<i class="study-bar ${full ? 'full' : pct >= 90 ? 'near' : ''}" style="--p:${Math.max(0, Math.min(100, Math.round(pct)))}%" ${tip ? `data-tip="text:${DQ.esc(tip)}"` : ''} aria-hidden="true"></i>`;
-DQ.mastTip = (kind, id) => { const m = DQ.mastInfo(kind, id); return m.next ? `Field guide ${m.stars}/${STEPS.length} · next: ${DQ.entryPerk(kind, m.stars + 1)} in ${DQ.fmt(m.next - m.n)}` : `Field guide complete · ${m.speed}% faster${m.extra ? ` · ${m.extra}% double` : ''}`; };
+DQ.mastTip = (kind, id) => { const m = DQ.mastInfo(kind, id),discovery=DQ.studyDiscovery?.(kind,id);if(discovery)return `Recipe discovery in ${DQ.fmt(discovery.left)} more Guide progress. ${discovery.text}`; return m.next ? `Field guide ${m.stars}/${STEPS.length} · next: ${DQ.entryPerk(kind, m.stars + 1)} in ${DQ.fmt(m.next - m.n)}` : `Field guide complete · ${m.speed}% faster${m.extra ? ` · ${m.extra}% double` : ''}`; };
 DQ.mastBadge = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''; const m = DQ.mastInfo(kind, id); return m.n ? DQ.studyBar(m.pct, !m.next) : ''; };
 DQ.mastLine = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''; const m = DQ.mastInfo(kind, id);
   return `<div class="mast-line ${m.next ? (m.pct >= 90 ? 'near' : '') : 'max'}" data-tip="text:${DQ.esc(DQ.mastTip(kind, id))}" role="img" aria-label="${DQ.esc(DQ.mastTip(kind, id))}"><span class="mast-pips">${Array.from({ length: STEPS.length }, (_, i) => `<i class="${i < m.stars ? 'on' : ''}"></i>`).join('')}</span><span class="bar"><i style="width:${m.pct}%"></i></span></div>`; };
@@ -45,8 +45,8 @@ DQ.mastLine = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''
 const grow0 = DQ.growDur; if (grow0) DQ.growDur = c => Math.round(grow0(c) * (1 - DQ.mastSpeed('crop', c.id)));
 const period0 = DQ.animalPeriod; if (period0) DQ.animalPeriod = a => period0(a) * (1 - DQ.mastSpeed('animal', a.id));
 const harvest0 = DQ.harvest; if (harvest0) DQ.harvest = (i, o = {}) => { const p = S().farm.plots[i], cid = p && p.crop, ok = harvest0(i, o);
-  if (ok && cid && !o.by) { DQ.mastTick({ kind: 'crop', id: cid }); if (DQ.chance(DQ.mastExtra('crop', cid))) DQ.grant('crop_' + cid, 1); } return ok; };
-const collect0 = DQ.collect; if (collect0) DQ.collect = (i, o = {}) => { const a = S().farm.animals[i], id = a && a.id, n = collect0(i, o); if (n && id && !o.by) DQ.mastTick({ kind: 'animal', id }, n); return n; };
+  if (ok && cid) { DQ.mastTick({ kind: 'crop', id: cid },o.by ? .25 : 1); if (!o.by && DQ.chance(DQ.mastExtra('crop', cid))) DQ.grant('crop_' + cid, 1); } return ok; };
+const collect0 = DQ.collect; if (collect0) DQ.collect = (i, o = {}) => { const a = S().farm.animals[i], id = a && a.id, n = collect0(i, o); if (n && id) DQ.mastTick({ kind: 'animal', id }, n*(o.by ? .25 : 1)); return n; };
 /* the task itself gets faster */
 const dur0 = DQ.durFor;
 DQ.durFor = (kind, id) => { const d = dur0(kind, id), s = DQ.mastSpeed(kind, id); return s ? Math.max(200, Math.round(d * (1 - s))) : d; };

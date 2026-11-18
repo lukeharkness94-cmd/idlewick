@@ -192,7 +192,7 @@ const KIND_SKILL = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thiev
    { skill, page, label(a), dur(id), check(id) -> refusal text or '', done(a) } here (Nov 2026). */
 const EXT = DQ.KIND_EXT = DQ.KIND_EXT || {};
 DQ.actKey = a => a ? a.kind + ':' + a.id : '';
-DQ.actSkill = a => { a = a || DQ.act; if (!a) return null; if (EXT[a.kind]) return EXT[a.kind].skill; if (a.kind === 'recipe') return D.RECIPES[a.id].skill; if (a.kind === 'fight') { const st = DQ.weaponStyle(); return st === 'ranged' ? 'ranged' : st === 'magic' ? 'magic' : D.SK[meleeSkill()].id; } return KIND_SKILL[a.kind]; };
+DQ.actSkill = a => { a = a || DQ.act; if (!a) return null; if (EXT[a.kind]) return EXT[a.kind].skillFor?.(a.id) || EXT[a.kind].skill; if (a.kind === 'recipe') return D.RECIPES[a.id].skill; if (a.kind === 'fight') { const st = DQ.weaponStyle(); return st === 'ranged' ? 'ranged' : st === 'magic' ? 'magic' : D.SK[meleeSkill()].id; } return KIND_SKILL[a.kind]; };
 DQ.actLabel = a => {
   a = a || DQ.act; if (!a) return ''; if (EXT[a.kind]) return EXT[a.kind].label(a);
   if (a.kind === 'fish') return `Fishing ${D.NODE['fish:' + a.id].name.toLowerCase()}`;
@@ -204,7 +204,7 @@ DQ.actLabel = a => {
   const r = D.RECIPES[a.id]; return { cooking: 'Cooking', smithing: 'Making', crafting: 'Crafting' }[r.skill] + ' ' + r.name.toLowerCase();
 };
 const baseDur = (kind, id) => kind === 'recipe' ? D.RECIPES[id].t : kind === 'alch' ? 2600 : kind === 'fight' ? 2000 : D.NODE[kind + ':' + id].t;
-DQ.durFor = (kind, id) => { if (EXT[kind]) return Math.round(EXT[kind].dur(id) * DQ.speedMult(EXT[kind].skill)); const sk = kind === 'recipe' ? D.RECIPES[id].skill : KIND_SKILL[kind]; return Math.round(baseDur(kind, id) * (sk ? DQ.speedMult(sk) : 1)); };
+DQ.durFor = (kind, id) => { if (EXT[kind]) return Math.round(EXT[kind].dur(id) * DQ.speedMult(EXT[kind].skillFor?.(id) || EXT[kind].skill)); const sk = kind === 'recipe' ? D.RECIPES[id].skill : KIND_SKILL[kind]; return Math.round(baseDur(kind, id) * (sk ? DQ.speedMult(sk) : 1)); };
 DQ.successChance = (kind, n) => {
   const L = DQ.lvl(n.skill);
   return kind === 'thieve' ? clamp(.5 + (L - n.lvl) * .016, .4, .95) : clamp(.58 + (L - n.lvl) * .012, .55, .96);
@@ -212,18 +212,51 @@ DQ.successChance = (kind, n) => {
 /* Cooking (Nov 2026): any fish you hold raw can be cooked, whatever your level; your Cooking level sets how often it
    burns. At the recipe's level 30%, falling 2.5% per level above it to 1%; below the recipe's level 4% more per level
    short, up to 85%. (Was 55% at level, falling 2% per level.) */
+/* Cooking discovers fish through actual acquisition/history, never through Cooking level alone. */
+DQ.rememberItem = id => {if(D.ITEMS[id]){const seen=S().seen.items||(S().seen.items={}),fresh=!seen[id];seen[id]=1;if(fresh&&!DQ.forecasting&&!DQ.sim.on)DQ.emit('itemfound',id);}};
+DQ.rememberFish = id => {if((D.NODES.fish||[]).some(n=>n.item===id||n.item==='raw_'+id))DQ.rememberItem(id);};
+DQ.itemDiscovered = id => {
+ if(id==='coins')return true;
+ if(S().seen.items?.[id]||DQ.have(id)>0||Object.values(S().equip).includes(id))return true;
+ if(S().workers.some(w=>(w.made?.[id]||0)>0))return true;
+ return Object.entries(S().mast||{}).some(([key,n])=>{if(n<=0)return false;const sep=key.indexOf(':'),kind=key.slice(0,sep),k=key.slice(sep+1);return D.NODE[kind+':'+k]?.item===id||kind==='recipe'&&!!(D.RECIPES[k]?.out[id]||D.RECIPES[k]?.in[id])||kind==='crop'&&id==='crop_'+k||kind==='animal'&&D.ANIMAL[k]?.prod===id||kind==='brew'&&k===id;});
+};
+DQ.ingredientDiscovery = id => {
+ const node=Object.values(D.NODE).filter(n=>n.item===id).sort((a,b)=>a.lvl-b.lvl)[0];
+ if(node)return {skill:node.skill,level:node.lvl,page:D.SK[node.skill].page,kind:node.kind,id:node.id,label:`${D.SK[node.skill].name} ${node.lvl}`};
+ const crop=D.CROPS?.find(c=>'crop_'+c.id===id);if(crop)return {skill:'farming',level:crop.lvl,page:'farming',label:`Farming ${crop.lvl}`};
+ const animal=D.ANIMALS?.find(a=>a.prod===id);if(animal)return {skill:'farming',level:animal.lvl,page:'farming',label:`Farming ${animal.lvl}`};
+ const recipe=Object.values(D.RECIPES).filter(r=>r.out[id]&&(!r.secret||DQ.recipeUsable?.(r))).sort((a,b)=>a.lvl-b.lvl)[0];
+ if(recipe)return {skill:recipe.skill,level:recipe.lvl,page:D.SK[recipe.skill].page,kind:'recipe',id:recipe.id,label:`${D.SK[recipe.skill].name} ${recipe.lvl}`};
+ if(D.ITEMS[id]?.type==='gem')return {skill:'mining',level:1,page:'mining',label:'Mining 1 · rare find'};
+ const shop=Object.entries(D.SHOPS||{}).find(([town,items])=>items.includes(id)&&DQ.townUnlocked(town))||Object.entries(D.SHOPS||{}).find(([,items])=>items.includes(id));
+ if(shop)return {page:'shop',label:`Shop · ${DQ.townUnlocked(shop[0])?D.TOWN[shop[0]].name:'reach a later town'}`};
+ const drop=D.MONLIST.find(m=>m.drops?.some(d=>d[0]===id));if(drop)return {page:'combat',label:(drop.boss||drop.mini)?.req?`Combat ${(drop.boss||drop.mini).req} · creature drop`:'Combat · creature drop'};
+ return {page:'bestiary',label:'Guide · discover its source'};
+};
+DQ.recipeDiscovery = r => {if(!r)return null;const fish=DQ.cookingDiscovery(r);if(fish&&!fish.known)return {...fish,item:fish.node.item,source:DQ.ingredientDiscovery(fish.node.item)};const item=Object.keys(r.in||{}).find(id=>!DQ.itemDiscovered(id)&&!(fish?.known&&(D.NODES.fish||[]).some(n=>n.item===id||n.item.replace(/^raw_/,'')===id)));if(!item)return null;const source=DQ.ingredientDiscovery(item);return {known:false,item,source,reason:`Find ${D.ITEMS[item].name} first · ${source.label}`};};
+DQ.cookingDiscovery = r => {
+ if(!r||r.skill!=='cooking')return null;
+ const inputs=Object.keys(r.in||{}),nodes=(D.NODES.fish||[]).filter(n=>inputs.includes(n.item)||inputs.includes(n.item.replace(/^raw_/,'')));
+ if(!nodes.length)return null;
+ const known=n=>{const raw=n.item,cooked=raw.replace(/^raw_/,''),seen=S().seen.items||{};return !!(seen[raw]||seen[cooked]||DQ.have(raw)||DQ.have(cooked)||(S().mast||{})['fish:'+n.id]||Object.entries(S().mast||{}).some(([k,count])=>count>0&&k.startsWith('recipe:')&&D.RECIPES[k.slice(7)]?.in[raw])||S().workers.some(w=>(w.made?.[raw]||0)>0));};
+ const node=nodes.find(n=>!known(n))||nodes[0];
+ return {known:nodes.every(known),node,reason:`Catch ${D.ITEMS[node.item].name} first · Fishing ${node.lvl}`};
+};
+DQ.recipeDiscovered = r => !DQ.recipeDiscovery(r);
 DQ.recipeLvlOk = r => !!r && (DQ.lvl(r.skill) >= r.lvl || (r.skill === 'cooking' && !!r.burn && Object.keys(r.in || {}).some(k => /^raw_/.test(k) && DQ.have(k) > 0)));
 DQ.burnChance = r => { const gap = DQ.lvl('cooking') - r.lvl; return gap >= 0 ? clamp(.30 - gap * .025 - DQ.fx().burn, .01, .30) : clamp(.30 - gap * .04 - DQ.fx().burn, .01, .85); };
-DQ.canMake = r => Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n);
+DQ.canMake = r => !(DQ.recipeGate&&DQ.recipeGate(r)) && Object.entries(r.in).every(([k, n]) => DQ.have(k) >= n);
 const meleeSkill = () => ({ accurate: 'melee', aggressive: 'melee', defensive: 'defence' }[S().style.melee]);
 
 DQ.startAct = (kind, id, o = {}) => {
   if (DQ.act && DQ.act.kind === kind && DQ.act.id === id && !o.quiet) return DQ.stopAct();
   const bad = m => { if (!o.quiet) DQ.toast(m, true); return false; };
   if (kind === 'recipe') {
-    const r = D.RECIPES[id]; if (!DQ.skillUnlocked(r.skill)) return bad(`${D.SK[r.skill].name} is not unlocked yet`);
+    const r = D.RECIPES[id]; if(!r)return bad('Unknown recipe');const gate=DQ.recipeGate&&DQ.recipeGate(r);if(gate)return bad(gate);if (!DQ.skillUnlocked(r.skill)) return bad(`${D.SK[r.skill].name} is not unlocked yet`);
     if (!DQ.recipeLvlOk(r)) return bad(`Requires ${D.SK[r.skill].name} ${r.lvl}`);
     if (DQ.recipeUsable && !DQ.recipeUsable(r)) return bad('You have not found this recipe');
+    const discovery=DQ.recipeDiscovery(r);if(discovery)return bad(discovery.reason);
     if (!DQ.canMake(r)) return bad('You are missing materials');
   } else if (kind === 'alch') {
     if (!DQ.skillUnlocked('magic') || DQ.lvl('magic') < D.ALCH[0].lvl) return bad(`Alchemy needs Magic ${D.ALCH[0].lvl}`);
@@ -238,7 +271,8 @@ DQ.startAct = (kind, id, o = {}) => {
     if (st === 'magic' && !pickSpell()) return bad('You need more Arcane runes for a spell');
     DQ.fight = { id, hp: m.hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 };
   } else if (EXT[kind]) {
-    if (!DQ.skillUnlocked(EXT[kind].skill)) return bad(`${D.SK[EXT[kind].skill].name} is not unlocked yet`);
+    const skill = EXT[kind].skillFor?.(id) || EXT[kind].skill;
+    if (!DQ.skillUnlocked(skill)) return bad(`${D.SK[skill].name} is not unlocked yet`);
     const why = EXT[kind].check(id); if (why) return bad(why);
   } else {
     const n = D.NODE[kind + ':' + id];
@@ -265,7 +299,7 @@ DQ.actDur = a => {
 };
 DQ.stopAct = (silent, why, done) => { /* done: a batch finished as planned, shown as good news, not a warning */
   if (!DQ.act) return;
-  const stopped = DQ.act, stoppedPage = EXT[stopped.kind] ? EXT[stopped.kind].page : stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
+  const stopped = DQ.act, stoppedPage = EXT[stopped.kind] ? (EXT[stopped.kind].pageFor?.(stopped.id) || EXT[stopped.kind].page) : stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
   DQ.act = null; DQ.fight = null; S().act = null;
   /* while catching up on time away the next queued task starts at once; live, it waits for the current call to finish */
   if (why && !DQ.forecasting) { if (DQ.sim.on) { if (!DQ.act && DQ.advanceQueue) DQ.advanceQueue(); } else setTimeout(() => { if (!DQ.act) DQ.advanceQueue(); }, 0); }
@@ -326,12 +360,12 @@ function recipeDone(r) {
   const taster = DQ.trick && DQ.trick('taster'); if (taster && r.burn && DQ.act && DQ.act.count === 1) fxHit('taster');
   if (r.burn && !(taster && DQ.act && DQ.act.count === 1) && chance(Math.min(.92, DQ.burnChance(r) * DQ.pace().risk * (taster ? .75 : 1)))) { DQ.grant('burnt'); S().stats.burn++; DQ.floatAt(document.querySelector('.card.active'), 'Burnt!', '#e2574c'); DQ.sfx('hurt'); }
   else {
-    const dbl = chance(DQ.dblChance(r.skill) + (DQ.mastExtra ? DQ.mastExtra('recipe', r.id) : 0)) ? 2 : 1;
+    const dbl = !r.once && chance(DQ.dblChance(r.skill) + (DQ.mastExtra ? DQ.mastExtra('recipe', r.id) : 0)) ? 2 : 1;
     Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n * dbl));
     if (DQ.trick && DQ.trick('bellows') && r.skill === 'smithing' && r.tab === 'Bars' && chance(.1)) { fxHit('bellows'); Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); DQ.trickNote('an extra bar!'); }
-    if (DQ.trick && DQ.trick('echo') && chance(1 / 20)) { fxHit('echo'); Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); DQ.trickNote('echo! a free one'); }
+    if (!r.once && DQ.trick && DQ.trick('echo') && chance(1 / 20)) { fxHit('echo'); Object.entries(r.out).forEach(([k, n]) => DQ.grant(k, n)); DQ.trickNote('echo! a free one'); }
     const x = DQ.addXp(r.skill, r.xp); floatXp(r.skill, x); floatItem(outId, r.out[outId] * dbl);
-    S().stats[r.ev] += 1; DQ.qev(r.ev, outId, 1); DQ.petRoll('skill', r.skill); DQ.sfx({ cooking: 'sizzle', smithing: 'anvil', crafting: 'stitch' }[r.skill]);
+    S().stats[r.ev] = (S().stats[r.ev]||0)+1; DQ.qev(r.ev, outId, 1); DQ.petRoll('skill', r.skill); DQ.sfx({ cooking: 'sizzle', smithing: 'anvil', crafting: 'stitch', herbalism:'sizzle', enchanting:'cast', exploration:'start', carpentry:'wood' }[r.skill]);
   }
   const made = DQ.act ? DQ.act.count : 0;
   if (DQ.act && DQ.act.limit && made >= DQ.act.limit) DQ.stopAct(false, `${made} ${r.name.toLowerCase()} made, as planned. Your pack is ready.`, true);
@@ -467,7 +501,7 @@ function combatRound() {
   if (DQ.beastAttack) { f.hp -= DQ.beastAttack(f, m); if (f.hp <= 0) return kill(m); }
   /* the monster attacks on its own clock: faster weapons get more swings in between */
   f.mt = (f.mt || 0) + (DQ.act ? DQ.act.dur * D.PACE[DQ.act.pace || 'steady'].speed : 2000);
-  const clock = U.slow ? 2300 : 2000; if (U.slow) fxHit('slow');
+  const clock = (m.attackMs || 2000) * (U.slow ? 1.15 : 1); if (U.slow) fxHit('slow');
   while (f.mt >= clock && DQ.fight) { f.mt -= clock; if (monsterAttack(f, m, ps, sty) === 'dead') return; }
 }
 function monsterAttack(f, m, ps, sty) {
@@ -485,12 +519,17 @@ function monsterAttack(f, m, ps, sty) {
     taken = special ? m.max * sp.mult : rnd(1, m.max);
     if (m.id === 'grubnash' && f.hp < m.hp * .5) taken *= 1.25;
     if (special) {
+      taken *= DQ.buffMult('specialGuard');
       if (m.id === 'oldtusk' && sty === 'ranged') taken *= .5;
       if (m.id === 'pyrrhax' && f.lastEl === 'frost') taken *= .5;
       if (A('brace')) taken *= .5;
       if (ps.tech && ps.tech.special) taken *= 1 - ps.tech.special;
       if (U.bulwark) { taken *= .65; fxHit('bulwark'); } else if (U.sovereign) { taken *= .8; fxHit('sovereign'); }
-      if (DQ.trick && DQ.trick('cold')) { taken *= .8; fxHit('cold'); }
+      if (DQ.trick && DQ.trick('cold')) { const saved=taken*.2;taken *= .8;fxHit('cold');f.companionGuard=(f.companionGuard||0)+saved;if(!f.guardShown&&!DQ.sim.on&&!DQ.forecasting){f.guardShown=true;DQ.log(`${D.PET[S().pets.active].name} softens the special attack.`, 'good');} }
+      if(sp.frostMult&&f.lastEl==='frost')taken*=sp.frostMult;
+      if(sp.rangedMult&&sty==='ranged')taken*=sp.rangedMult;
+      if(sp.freeze)f.frozen=sp.freeze;
+      if(sp.hex)f.hex=sp.hex;
       if (m.id === 'frostmaw') f.frozen = 1;
       if (m.id === 'morwenna') f.hex = 4;
     } else { if (A('kite')) taken *= .7; if (A('fortress')) taken *= .85; if (U.hide) { taken *= .85; fxHit('hide'); } }
@@ -539,7 +578,7 @@ function kill(m) {
     if (uniq && !guaranteed && !found[id]) { const P = S().upity = S().upity || {}; P[id] = (P[id] || 0) + 1; pity = P[id] >= Math.ceil(2.5 / p); }
     if (!(guaranteed || pity || chance(Math.min(1, p * DQ.buffMult('luck') * (DQ.uniqueFx().fortune ? 1.25 : 1))))) continue;
     if (uniq) { const firstCopy = !found[id]; found[id] = 1; if (S().upity) delete S().upity[id];
-      if (firstCopy && !DQ.forecasting) { DQ.notify({ kind: 'unlock', key: 'unique:' + id, icon: D.ITEMS[id].ic, col: D.ITEMS[id].col, title: `Unique find: ${D.ITEMS[id].name}`, text: `${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}${D.UNIQUE_USE && D.UNIQUE_USE[D.ITEMS[id].unique.key] ? ` Good for ${D.UNIQUE_USE[D.ITEMS[id].unique.key]}.` : ''}`, action: { label: 'Inspect', fn: () => { DQ.ui.sel = id; DQ.ui.selFrom = 'pack'; DQ.go('character'); DQ.ui.render(false); } }, sound: 'unique', burst: true, ttl: 14000 }); S().freshUnique = id; if (DQ.journal) DQ.journal('loot', `${m.name} dropped ${D.ITEMS[id].name}. ${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, D.ITEMS[id].ic); } }
+      if (firstCopy && !DQ.forecasting) { DQ.notify({ kind: 'unlock', key: 'unique:' + id, icon: D.ITEMS[id].ic, col: D.ITEMS[id].col, title: `Unique find: ${D.ITEMS[id].name}`, text: `${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}${D.UNIQUE_USE && D.UNIQUE_USE[D.ITEMS[id].unique.key] ? ` Good for ${D.UNIQUE_USE[D.ITEMS[id].unique.key]}.` : ''}`, action: { label: 'Compare equipment', fn: () => { DQ.ui.sel = id; DQ.ui.selFrom = 'pack'; DQ.go('character'); DQ.ui.render(false); } }, sound: 'unique', burst: true, ttl: 14000 }); S().freshUnique = id; if (DQ.journal) DQ.journal('loot', `${m.name} dropped ${D.ITEMS[id].name}. ${D.ITEMS[id].unique.name}: ${D.ITEMS[id].unique.text}`, D.ITEMS[id].ic); } }
     const n = rnd(a, b), rar = D.rarityOf(guaranteed ? 0 : p); got.push(id);
     if (id === 'coin_pouch') { const cc = Math.round(rnd(m.coins[0] + 5, m.coins[1] * 3 + 10) * DQ.coinMult() * (DQ.trick && DQ.trick('comb') ? 1.5 : 1)); if (DQ.trick && DQ.trick('comb')) fxHit('comb'); extraCoins += cc; drops.push({ id, n: cc, rar, coins: true }); loot.push(`a pouch of ${fmt(cc)} coins`); continue; }
     if (id === 'treasure_chest') {

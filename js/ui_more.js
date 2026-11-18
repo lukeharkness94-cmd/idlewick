@@ -61,7 +61,7 @@ UI.renderPins = () => {
   box.innerHTML = `<div class="pinbar">${ids.map(id => {
     const q = D.QM[id], st = DQ.questState(q), p = S().q[id], i = q.obj.findIndex((o, j) => DQ.objProg(q, p, j) < o.n), o = q.obj[Math.max(0, i)];
     const sk = q.main && D.SK[q.unlocks];
-    const btn = st === 'new' ? `<button class="btn sm primary" data-do="qstart" data-a="${id}">Accept</button>` : st === 'ready' ? `<button class="btn sm primary" data-do="qclaim" data-a="${id}">Claim</button>` : `<button class="btn sm" data-do="go" data-a="${DQ.objPage(q, o)}">Go ${ico('arrow')}</button>`;
+    const btn = st === 'new' ? `<button class="btn sm primary" data-do="qstart" data-a="${id}">Accept quest</button>` : st === 'ready' ? `<button class="btn sm primary" data-do="qclaim" data-a="${id}">Claim</button>` : `<button class="btn sm" data-do="go" data-a="${DQ.objPage(q, o)}">Go ${ico('arrow')}</button>`;
     return `<div class="pin ${q.main ? 'main' : ''} ${st}" style="${sk ? `--c:${sk.col}` : ''}"><button class="pin-t" data-do="openquest" data-a="${id}">${q.main ? ico('star') : ico('quest')}<b>${q.name}</b>${suggest ? '<small>Suggested</small>' : ''}</button>
       <div class="pin-o"><span class="sm">${st === 'ready' ? 'All done! Claim your reward.' : st === 'new' ? `${q.giver}, ${D.TOWN[q.town].name}${sk ? ` · teaches ${sk.name}` : ''}` : o.label}</span>${st === 'active' ? `<span class="pin-p"><span class="bar"><i data-b="qbar:${id}:${i}"></i></span><small class="mono" data-b="qtxt:${id}:${i}"></small></span>` : ''}</div>
       ${btn}${suggest ? '' : `<button class="pin-x" data-do="unpin" data-a="${id}" aria-label="Unpin" data-tip="text:Unpin">${ico('close')}</button>`}</div>`;
@@ -72,13 +72,13 @@ let pinSig = '';
 DQ.on('ui', () => { const s = JSON.stringify([S().pins, D.QUESTS.map(q => DQ.questState(q)[0]).join(''), (S().pins || []).map(id => { const q = D.QM[id], p = S().q[id]; return q ? q.obj.findIndex((o, j) => DQ.objProg(q, p, j) < o.n) : 0; })]); if (s !== pinSig) { pinSig = s; UI.renderPins(); } });
 DQ.on('quests', () => { pinSig = ''; });
 Object.assign(UI.DO, {
-  pin: a => { const P = S().pins = S().pins || []; if (P.includes(a)) P.splice(P.indexOf(a), 1); else { P.unshift(a); if (P.length > 3) P.pop(); } pinSig = ''; DQ.sfx('tab'); UI.renderPins(); if (UI.view === 'quests') UI.render(false); },
+  pin: a => { const P = S().pins = S().pins || []; if (P.includes(a)) P.splice(P.indexOf(a), 1); else { P.unshift(a); if (P.length > 3) P.pop(); } pinSig = ''; DQ.save(); DQ.sfx('tab'); UI.renderPins(); if (UI.view === 'quests') UI.render(false); },
   unpin: a => { UI.DO.pin(a); },
 });
 /* Pin buttons on quest cards */
 const origRender = UI.render;
 UI.render = fresh => {
   origRender(fresh);
-  if (UI.view === 'quests') $$('#view .quest').forEach(c => { const id = c.id.slice(2), q = D.QM[id]; if (!q || DQ.questState(q) === 'done') return; const on = (S().pins || []).includes(id); const b = document.createElement('button'); b.className = 'pinbtn' + (on ? ' on' : ''); b.dataset.do = 'pin'; b.dataset.a = id; b.innerHTML = `${ico('pin')}${on ? 'Pinned' : 'Pin'}`; c.appendChild(b); });
+  if (UI.view === 'quests') $$('#view .quest').forEach(c => { const id = c.id.slice(2), q = D.QM[id]; if (!q || DQ.questState(q) === 'done') return; const on = (S().pins || []).includes(id); const b = document.createElement('button'); b.className = 'pinbtn' + (on ? ' on' : ''); b.dataset.do = 'pin'; b.dataset.a = id; b.innerHTML = `${ico('pin')}${on ? 'Pinned' : 'Pin'}`; (c.querySelector('.quest-actions') || c).appendChild(b); });
 };
 })();

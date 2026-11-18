@@ -8,7 +8,7 @@ const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S, { esc, ico, fmt } = Q
 if (!D.BEAST_SPECIES) return;
 const JOBS = {
   crit: { role: 'Striker', what: 'critical hits', short: 'more critical hits', fit: 'Best when you fight steadily with a sword, bow or staff: every fight lands a few more heavy hits.' },
-  coin: { role: 'Provider', what: 'coins from kills', short: 'more coins from kills', fit: 'Best when coins are your bottleneck: shop gear, restorations and boats all cost them.' },
+  coin: { role: 'Provider', what: 'coins from every source', short: 'more coins', fit: 'Best when coins are your bottleneck: shop gear, restorations and boats all cost them.' },
   xpAll: { role: 'Scholar', what: 'XP from everything', short: 'more XP from everything', fit: 'Best for long sessions: it speeds every skill, not just combat.' },
   boss: { role: 'Bossbreaker', what: 'damage against bosses', short: 'more damage against bosses', fit: 'Best before a boss: it only helps in boss fights, so train with a different companion.' }
 };

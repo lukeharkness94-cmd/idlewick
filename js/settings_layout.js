@@ -21,7 +21,7 @@ UI.V.settings=()=>{
  const volume=take(audio,'[data-do="set"][data-a="muted"]')+['masterVol','vol','musicVol','ambVol'].map(k=>take(audio,`label:has([data-in="${k}"])`)).join('');
  const musicLabel=audio?.querySelector('[data-do="set"][data-a="music"] b');if(musicLabel)musicLabel.textContent='Music';
  const layers=['music','ambience','sfx'].map(k=>take(audio,`[data-do="set"][data-a="${k}"]`)).join('');
- const task=audio?.querySelector('[data-do="tasksound"]')?.closest('.seg')?.parentElement;const taskHtml=task?.outerHTML||'';task?.remove();
+ const task=audio?.querySelector('[data-do="tasksound"]')?.closest('.seg')?.parentElement;const taskTitle=task?.querySelector('.k');if(taskTitle)taskTitle.textContent='Repeated task effects';const taskNote=task?.querySelector('small');if(taskNote)taskNote.textContent='Off silences repeated gathering and production effects. Village ambience and music keep their own controls.';const taskHtml=task?.outerHTML||'';task?.remove();
  const filters=audio?.querySelector('[data-do="sndcat"]')?.closest('.stack.tight')?.parentElement;
  filters?.querySelector(':scope>.k')?.remove();
  if(filters)for(const b of filters.querySelectorAll('[data-do="sndcat"] b'))b.textContent=(b.textContent==='Rewards'?'Reward':b.textContent)+' sounds';

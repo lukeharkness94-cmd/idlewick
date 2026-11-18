@@ -1,0 +1,157 @@
+{
+  "assumptions": "Granted controlled levels, no assigned companion or furniture. Rune upstream estimate uses one output per gathering action and excludes travel/unlocks/bonus catches. Voyage trials grant a boat and all skill unlocks/level 40, compare 36 deterministic seeds with ten simulated minutes each; the ration stays active for each trial. These are not fresh-player journeys or real retention tests.",
+  "runes": {
+    "inputs": {
+      "ore_quartz": 3,
+      "log_normal": 4
+    },
+    "output": {
+      "rune": 16
+    },
+    "recipeMs": 4000,
+    "upstreamSerialMs": 19424,
+    "runesPerUpstreamSecond": 0.8237232289950577
+  },
+  "feed": {
+    "vegetable": {
+      "inputs": {
+        "crop_potato": 2,
+        "crop_onion": 1
+      },
+      "output": 12,
+      "quickEquivalent": 9
+    },
+    "grain": {
+      "inputs": {
+        "crop_wheat": 2
+      },
+      "output": 12,
+      "quickEquivalent": 6
+    }
+  },
+  "cargo": [
+    {
+      "ration": false,
+      "seeds": 36,
+      "simulatedMinutesPerSeed": 10,
+      "voyages": 1188,
+      "feathers": 10638,
+      "feathersPerVoyage": 8.954545454545455
+    },
+    {
+      "ration": true,
+      "seeds": 36,
+      "simulatedMinutesPerSeed": 10,
+      "voyages": 1188,
+      "feathers": 13340,
+      "feathersPerVoyage": 11.228956228956228
+    }
+  ],
+  "observations": [
+    {
+      "region": "willowbrook",
+      "level": 1,
+      "xp": 128,
+      "baseSeconds": 20,
+      "inputs": {
+        "bread": 1
+      },
+      "output": {
+        "ore_quartz": 2,
+        "feather": 1
+      }
+    },
+    {
+      "region": "mossbarrow",
+      "level": 8,
+      "xp": 187,
+      "baseSeconds": 20,
+      "inputs": {
+        "bread": 1
+      },
+      "output": {
+        "log_ash": 2,
+        "feather": 1
+      }
+    },
+    {
+      "region": "saltmere",
+      "level": 15,
+      "xp": 246,
+      "baseSeconds": 20,
+      "inputs": {
+        "bread": 1
+      },
+      "output": {
+        "ore_silver": 2,
+        "feather": 1
+      }
+    },
+    {
+      "region": "ironpeak",
+      "level": 25,
+      "xp": 330,
+      "baseSeconds": 20,
+      "inputs": {
+        "bread": 1
+      },
+      "output": {
+        "log_cedar": 2,
+        "feather": 1
+      }
+    },
+    {
+      "region": "gloomfen",
+      "level": 35,
+      "xp": 414,
+      "baseSeconds": 20,
+      "inputs": {
+        "bread": 1
+      },
+      "output": {
+        "log_gloomwood": 2,
+        "feather": 1
+      }
+    },
+    {
+      "region": "emberfall",
+      "level": 45,
+      "xp": 498,
+      "baseSeconds": 20,
+      "inputs": {
+        "bread": 1
+      },
+      "output": {
+        "ore_obsidian": 2,
+        "feather": 1
+      }
+    },
+    {
+      "region": "skyreach",
+      "level": 55,
+      "xp": 582,
+      "baseSeconds": 20,
+      "inputs": {
+        "bread": 1
+      },
+      "output": {
+        "ore_skyglass": 2,
+        "feather": 1
+      }
+    },
+    {
+      "region": "hollow",
+      "level": 65,
+      "xp": 666,
+      "baseSeconds": 20,
+      "inputs": {
+        "bread": 1
+      },
+      "output": {
+        "ore_voidstone": 2,
+        "feather": 1
+      }
+    }
+  ],
+  "limits": "No claim that every option is always faster or cheaper. Refit, wards and frames are optional. Full opening pacing, human usefulness and all late-game economy interactions still need playtesting."
+}

@@ -1,0 +1,437 @@
+{
+  "assumptions": "24 seeded forecasts per case. Granted boss-gate style/Defence levels, matching armour, full health and abundant bread/arrows/runes. Sword-family melee only. No human pacing or natural acquisition claim. Existing top-tier stats unchanged; comparisons exclude/include new bridge weapons.",
+  "rows": [
+    {
+      "style": "melee",
+      "boss": "grubnash",
+      "improved": false,
+      "weapon": "bronze_sword",
+      "winRate": 1,
+      "seconds": 27.666666666666668,
+      "food": 3.8333333333333335
+    },
+    {
+      "style": "melee",
+      "boss": "grubnash",
+      "improved": true,
+      "weapon": "fine_sword_5",
+      "winRate": 1,
+      "seconds": 27.333333333333332,
+      "food": 3.625
+    },
+    {
+      "style": "melee",
+      "boss": "oldtusk",
+      "improved": false,
+      "weapon": "iron_sword",
+      "winRate": 1,
+      "seconds": 58.5,
+      "food": 7.375
+    },
+    {
+      "style": "melee",
+      "boss": "oldtusk",
+      "improved": true,
+      "weapon": "fine_sword_15",
+      "winRate": 1,
+      "seconds": 53.5,
+      "food": 6.291666666666667
+    },
+    {
+      "style": "melee",
+      "boss": "barnacle",
+      "improved": false,
+      "weapon": "steel_sword",
+      "winRate": 1,
+      "seconds": 50.333333333333336,
+      "food": 8.416666666666666
+    },
+    {
+      "style": "melee",
+      "boss": "barnacle",
+      "improved": true,
+      "weapon": "fine_sword_25",
+      "winRate": 1,
+      "seconds": 47.833333333333336,
+      "food": 8.916666666666666
+    },
+    {
+      "style": "melee",
+      "boss": "frostmaw",
+      "improved": false,
+      "weapon": "adamant_sword",
+      "winRate": 1,
+      "seconds": 78.5,
+      "food": 15.208333333333334
+    },
+    {
+      "style": "melee",
+      "boss": "frostmaw",
+      "improved": true,
+      "weapon": "fine_sword_45",
+      "winRate": 0.9583333333333334,
+      "seconds": 69.91304347826086,
+      "food": 13.782608695652174
+    },
+    {
+      "style": "melee",
+      "boss": "morwenna",
+      "improved": false,
+      "weapon": "astral_sword",
+      "winRate": 1,
+      "seconds": 25.166666666666668,
+      "food": 1.6666666666666667
+    },
+    {
+      "style": "melee",
+      "boss": "morwenna",
+      "improved": true,
+      "weapon": "astral_sword",
+      "winRate": 1,
+      "seconds": 25.166666666666668,
+      "food": 1.6666666666666667
+    },
+    {
+      "style": "melee",
+      "boss": "pyrrhax",
+      "improved": false,
+      "weapon": "astral_sword",
+      "winRate": 1,
+      "seconds": 63.333333333333336,
+      "food": 8.666666666666666
+    },
+    {
+      "style": "melee",
+      "boss": "pyrrhax",
+      "improved": true,
+      "weapon": "astral_sword",
+      "winRate": 1,
+      "seconds": 63.333333333333336,
+      "food": 8.666666666666666
+    },
+    {
+      "style": "melee",
+      "boss": "zephyrion",
+      "improved": false,
+      "weapon": "astral_sword",
+      "winRate": 1,
+      "seconds": 50.5,
+      "food": 7.583333333333333
+    },
+    {
+      "style": "melee",
+      "boss": "zephyrion",
+      "improved": true,
+      "weapon": "astral_sword",
+      "winRate": 1,
+      "seconds": 50.5,
+      "food": 7.583333333333333
+    },
+    {
+      "style": "melee",
+      "boss": "hollowking",
+      "improved": false,
+      "weapon": "astral_sword",
+      "winRate": 0.6666666666666666,
+      "seconds": 80.25,
+      "food": 18.0625
+    },
+    {
+      "style": "melee",
+      "boss": "hollowking",
+      "improved": true,
+      "weapon": "astral_sword",
+      "winRate": 0.6666666666666666,
+      "seconds": 80.25,
+      "food": 18.0625
+    },
+    {
+      "style": "ranged",
+      "boss": "grubnash",
+      "improved": false,
+      "weapon": "bow_normal",
+      "winRate": 1,
+      "seconds": 16.833333333333332,
+      "food": 1.875
+    },
+    {
+      "style": "ranged",
+      "boss": "grubnash",
+      "improved": true,
+      "weapon": "fine_bow_5",
+      "winRate": 1,
+      "seconds": 17.833333333333332,
+      "food": 1.9166666666666667
+    },
+    {
+      "style": "ranged",
+      "boss": "oldtusk",
+      "improved": false,
+      "weapon": "bow_oak",
+      "winRate": 1,
+      "seconds": 29.333333333333332,
+      "food": 2.4583333333333335
+    },
+    {
+      "style": "ranged",
+      "boss": "oldtusk",
+      "improved": true,
+      "weapon": "fine_bow_15",
+      "winRate": 1,
+      "seconds": 28.5,
+      "food": 2.25
+    },
+    {
+      "style": "ranged",
+      "boss": "barnacle",
+      "improved": false,
+      "weapon": "bow_willow",
+      "winRate": 1,
+      "seconds": 41,
+      "food": 6.666666666666667
+    },
+    {
+      "style": "ranged",
+      "boss": "barnacle",
+      "improved": true,
+      "weapon": "fine_bow_25",
+      "winRate": 1,
+      "seconds": 43.666666666666664,
+      "food": 7.416666666666667
+    },
+    {
+      "style": "ranged",
+      "boss": "frostmaw",
+      "improved": false,
+      "weapon": "bow_yew",
+      "winRate": 0.9583333333333334,
+      "seconds": 51.130434782608695,
+      "food": 10.826086956521738
+    },
+    {
+      "style": "ranged",
+      "boss": "frostmaw",
+      "improved": true,
+      "weapon": "fine_bow_45",
+      "winRate": 0.9583333333333334,
+      "seconds": 49.565217391304344,
+      "food": 10.869565217391305
+    },
+    {
+      "style": "ranged",
+      "boss": "morwenna",
+      "improved": false,
+      "weapon": "bow_elder",
+      "winRate": 1,
+      "seconds": 17.833333333333332,
+      "food": 1.5
+    },
+    {
+      "style": "ranged",
+      "boss": "morwenna",
+      "improved": true,
+      "weapon": "bow_elder",
+      "winRate": 1,
+      "seconds": 17.833333333333332,
+      "food": 1.5
+    },
+    {
+      "style": "ranged",
+      "boss": "pyrrhax",
+      "improved": false,
+      "weapon": "bow_elder",
+      "winRate": 1,
+      "seconds": 31.666666666666668,
+      "food": 2.8333333333333335
+    },
+    {
+      "style": "ranged",
+      "boss": "pyrrhax",
+      "improved": true,
+      "weapon": "bow_elder",
+      "winRate": 1,
+      "seconds": 31.666666666666668,
+      "food": 2.8333333333333335
+    },
+    {
+      "style": "ranged",
+      "boss": "zephyrion",
+      "improved": false,
+      "weapon": "bow_elder",
+      "winRate": 1,
+      "seconds": 24,
+      "food": 2.1666666666666665
+    },
+    {
+      "style": "ranged",
+      "boss": "zephyrion",
+      "improved": true,
+      "weapon": "bow_elder",
+      "winRate": 1,
+      "seconds": 24,
+      "food": 2.1666666666666665
+    },
+    {
+      "style": "ranged",
+      "boss": "hollowking",
+      "improved": false,
+      "weapon": "bow_elder",
+      "winRate": 0.9583333333333334,
+      "seconds": 55.30434782608696,
+      "food": 13.826086956521738
+    },
+    {
+      "style": "ranged",
+      "boss": "hollowking",
+      "improved": true,
+      "weapon": "bow_elder",
+      "winRate": 0.9583333333333334,
+      "seconds": 55.30434782608696,
+      "food": 13.826086956521738
+    },
+    {
+      "style": "magic",
+      "boss": "grubnash",
+      "improved": false,
+      "weapon": "staff_normal",
+      "winRate": 1,
+      "seconds": 27.833333333333332,
+      "food": 3.6666666666666665
+    },
+    {
+      "style": "magic",
+      "boss": "grubnash",
+      "improved": true,
+      "weapon": "fine_staff_5",
+      "winRate": 1,
+      "seconds": 28,
+      "food": 3.7916666666666665
+    },
+    {
+      "style": "magic",
+      "boss": "oldtusk",
+      "improved": false,
+      "weapon": "staff_oak",
+      "winRate": 1,
+      "seconds": 38.333333333333336,
+      "food": 6.333333333333333
+    },
+    {
+      "style": "magic",
+      "boss": "oldtusk",
+      "improved": true,
+      "weapon": "fine_staff_15",
+      "winRate": 1,
+      "seconds": 36.333333333333336,
+      "food": 5.833333333333333
+    },
+    {
+      "style": "magic",
+      "boss": "barnacle",
+      "improved": false,
+      "weapon": "staff_willow",
+      "winRate": 1,
+      "seconds": 40.5,
+      "food": 6.708333333333333
+    },
+    {
+      "style": "magic",
+      "boss": "barnacle",
+      "improved": true,
+      "weapon": "fine_staff_25",
+      "winRate": 1,
+      "seconds": 34.5,
+      "food": 5
+    },
+    {
+      "style": "magic",
+      "boss": "frostmaw",
+      "improved": false,
+      "weapon": "staff_yew",
+      "winRate": 0.9583333333333334,
+      "seconds": 46.78260869565218,
+      "food": 9.91304347826087
+    },
+    {
+      "style": "magic",
+      "boss": "frostmaw",
+      "improved": true,
+      "weapon": "fine_staff_45",
+      "winRate": 1,
+      "seconds": 45.666666666666664,
+      "food": 8.833333333333334
+    },
+    {
+      "style": "magic",
+      "boss": "morwenna",
+      "improved": false,
+      "weapon": "staff_elder",
+      "winRate": 1,
+      "seconds": 28.666666666666668,
+      "food": 2.3333333333333335
+    },
+    {
+      "style": "magic",
+      "boss": "morwenna",
+      "improved": true,
+      "weapon": "staff_elder",
+      "winRate": 1,
+      "seconds": 28.666666666666668,
+      "food": 2.3333333333333335
+    },
+    {
+      "style": "magic",
+      "boss": "pyrrhax",
+      "improved": false,
+      "weapon": "staff_elder",
+      "winRate": 1,
+      "seconds": 46.5,
+      "food": 4
+    },
+    {
+      "style": "magic",
+      "boss": "pyrrhax",
+      "improved": true,
+      "weapon": "staff_elder",
+      "winRate": 1,
+      "seconds": 46.5,
+      "food": 4
+    },
+    {
+      "style": "magic",
+      "boss": "zephyrion",
+      "improved": false,
+      "weapon": "staff_elder",
+      "winRate": 1,
+      "seconds": 38.5,
+      "food": 3.3333333333333335
+    },
+    {
+      "style": "magic",
+      "boss": "zephyrion",
+      "improved": true,
+      "weapon": "staff_elder",
+      "winRate": 1,
+      "seconds": 38.5,
+      "food": 3.3333333333333335
+    },
+    {
+      "style": "magic",
+      "boss": "hollowking",
+      "improved": false,
+      "weapon": "staff_elder",
+      "winRate": 0.75,
+      "seconds": 72.44444444444444,
+      "food": 15.166666666666666
+    },
+    {
+      "style": "magic",
+      "boss": "hollowking",
+      "improved": true,
+      "weapon": "staff_elder",
+      "winRate": 0.75,
+      "seconds": 72.44444444444444,
+      "food": 15.166666666666666
+    }
+  ]
+}

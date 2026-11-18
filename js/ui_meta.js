@@ -191,9 +191,9 @@ DQ.on('title', () => UI.renderHud());
 /* ---------- Your tools: the best tool you own for each skill ---------- */
 UI.toolsPanel = () => {
   const rows = D.TOOLS.map(([k, sk, ic, label]) => {
-    const t = DQ.toolTier(sk), own = t ? D.ITEMS[`tool_${k}_${t}`] : null, next = t < 5 ? D.ITEMS[`tool_${k}_${t + 1}`] : null, open = DQ.skillUnlocked(sk), pct = Math.round(D.TOOL_SPEED[t] * 100);
+    const t = DQ.toolTier(sk), own = t ? D.ITEMS[`tool_${k}_${t}`] : null, next = D.ITEMS[`tool_${k}_${D.TOOL_ORDER.find(n=>n>t)}`] || null, open = DQ.skillUnlocked(sk), pct = +(D.TOOL_SPEED[t]*100).toFixed(1);
     return `<div class="toolrow ${open ? '' : 'locked'}" style="--c:${D.SK[sk].col}"><span class="ti">${ico(ic)}</span><div class="tb"><b>${own ? own.name : `No ${label.toLowerCase()}`}</b>
-      <small>${D.SK[sk].name}${open ? ` ${DQ.lvl(sk)}` : ' (locked)'} · ${t ? `${pct}% faster` : 'normal speed'}</small><span class="pips" aria-label="Tier ${t} of 5">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= t ? 'on' : ''}"></i>`).join('')}</span></div>
+      <small>${D.SK[sk].name}${open ? ` ${DQ.lvl(sk)}` : ' (locked)'} · ${t ? `${pct}% faster` : 'normal speed'}</small><span class="pips" aria-label="Upgrade ${D.TOOL_ORDER.indexOf(t)+1} of ${D.TOOL_ORDER.length}">${D.TOOL_ORDER.map(i => `<i class="${i <= t ? 'on' : ''}"></i>`).join('')}</span></div>
       ${next ? `<button class="btn sm" data-do="go" data-a="shop" data-tip="text:${esc(next.name)}: ${fmt(next.buy)} coins. Opens the shop.">Upgrade ${DQ.fmtK ? DQ.fmtK(next.buy) : fmt(next.buy)}</button>` : '<span class="max">Best</span>'}</div>`;
   }).join('');
   return `<section data-reference="true" class="panel toolsp" id="inventory-tools"><h3>Gathering tools</h3><p class="hint">Best tool is used automatically.</p><div class="toolrows">${rows}</div></section>`;
@@ -213,7 +213,7 @@ UI.compareHtml = id => {
   if (c.tool) return c.better ? `<div class="cmp"><span class="k">Compared with ${c.cur ? esc(c.cur.name) : 'no tool'}</span>${c.rows.map(r => `<div class="cmprow up"><span>${r.n}</span><b class="mono">${r.a}% \u2192 ${r.b}%</b><em>\u25B2 ${sg(r.d)}%</em></div>`).join('')}</div>` : `<div class="cmp"><span class="k">You already own a better or equal tool</span></div>`;
   const combat = c.rows.filter(r => r.key && r.d !== 0);
   const v = DQ.gearVerdict && DQ.gearVerdict(id), net = c.cur ? c.itemRows.reduce((n, r) => n + r.d, 0) : null;
-  const verdict = v === 'up' || v === 'down' ? `<p class="gear-verdict ${v}"><span class="gear-cmp ${v}">${v === 'up' ? '▲' : '▼'}</span> ${v === 'up' ? 'Better overall' : 'Worse overall'}${net != null ? ` · stats ${sg(net)} in total` : ' · fills an empty slot'}</p>` : '';
+  const verdict = v === 'up' || v === 'down' ? `<p class="gear-verdict ${v}"><span class="gear-cmp ${v}">${v === 'up' ? '▲' : '▼'}</span> ${v === 'up' ? 'Higher total stats' : 'Lower total stats'}${net != null ? ` · stats ${sg(net)} in total` : ' · fills an empty slot'}</p>` : '';
   return `<div class="cmp slot-comparison"><div class="k">${esc(DQ.SLOT_NAMES[c.slot])} · equipped ${c.cur ? esc(c.cur.name) : 'nothing'}</div>${verdict}
     <table><thead><tr><th>Stat</th><th>Equipped</th><th>This item</th><th>Change</th></tr></thead><tbody>${c.itemRows.map(r => `<tr class="${r.d > 0 ? 'up' : r.d < 0 ? 'down' : ''}"><th>${UI.statNames[r.key]}</th><td>${r.a}</td><td>${r.b}</td><td>${r.d ? sg(r.d) : '—'}</td></tr>`).join('')}</tbody></table>
     ${c.styleChange ? `<p class="sm">Style ${c.styleChange[0]} → ${c.styleChange[1]}</p>` : ''}
@@ -242,7 +242,7 @@ DQ.tips.item = id => { const h = tipBase(id), f = D.ITEMS[id] && D.ITEMS[id].fla
 /* where a unique comes from: the creature once you have met it (otherwise only its region, to keep the mystery), the
    honest first-copy guarantee from the engine's bad-luck protection, and what the effect is good for */
 UI.uniqueLine = (it, cls = '', full = false) => { if (!it || !it.unique) return ''; const use = D.UNIQUE_USE && D.UNIQUE_USE[it.unique.key], src = full && DQ.uniqueSource(it.id);
-  return `<div class="unique-fx ${cls}">${ico('star')}<b>${esc(it.unique.name)}</b> <span>${esc(it.unique.text)}</span>${full && use ? `<small class="unique-use">Good for ${esc(use)}. Its stats are modest, so ordinary gear can be stronger when the effect does not matter.</small>` : ''}${src ? `<small class="unique-src">${esc(src.text)}</small>` : ''}</div>`; };
+  return `<div class="unique-fx ${cls}">${ico('star')}<b>${esc(it.unique.name)}</b> <span>${esc(it.unique.text)}</span>${full && use ? `<small class="unique-use">Good for ${esc(use)}. Compare the effect and stats with your equipped gear before choosing.</small>` : ''}${src ? `<small class="unique-src">${esc(src.text)}</small>` : ''}</div>`; };
 const tipUnique = DQ.tips.item;
 DQ.tips.item = id => { const h = tipUnique(id), it = D.ITEMS[id]; return h && it && it.unique ? h.replace('<div class="dim">Worth', `${UI.uniqueLine(it, '', true)}<div class="dim">Worth`) : h; };
 const cmpUnique = UI.compareHtml;
@@ -260,9 +260,9 @@ UI.selbarHtml = (id, from) => {
   const it = D.ITEMS[id], bank = from === 'bank', n = bank ? (S().bank[id] || 0) : (S().inv[id] || 0), can = it.slot ? DQ.canEquip(id) : null;
   const line = it.slot ? `<span>${UI.statLine(it.b)}</span>${UI.compareLine(id)}` : it.heal ? `<span class="dim">Heals ${it.heal} health</span>` : `<span class="dim">${esc(DQ.cap(it.type))}</span>`;
   const b = [];
-  if (it.slot) b.push(can.equipped ? '<span class="spare-explanation">Already equipped · spare copy</span>' : `<button class="btn sm ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
+  if (it.slot) b.push(can.equipped ? '<span class="spare-explanation">Already equipped · spare copy</span>' : `<button class="btn sm ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip ${esc(it.name)}${can.ok ? '' : ' (locked)'}</button>`);
   if (it.heal) b.push(`<button class="btn sm primary" data-do="eat" data-a="${id}">Eat</button>`);
-  b.push(bank ? `<button class="btn sm" data-do="withdraw" data-a="${id}" data-b="${n > 1 ? 'all' : 1}">${n > 1 ? 'Take all' : 'Take'}</button>` : `<button class="btn sm" data-do="deposit" data-a="${id}" data-b="all">Bank</button>`);
+  b.push(bank ? `<button class="btn sm" data-do="withdraw" data-a="${id}" data-b="${n > 1 ? 'all' : 1}">${n > 1 ? 'Take all' : 'Take'}</button>` : `<button class="btn sm" data-do="deposit" data-a="${id}" data-b="all">Bank ${esc(it.name)}</button>`);
   if (!DQ.sellable(id)) b.push(`<span class="keepsake-note" data-tip="text:${esc(DQ.KEEPSAKE_NOTE)}">${ico('lock')} Keepsake</span>`);
   else b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell ${UI.money(it.val || 0)}</button>`);
   if (n > 1 && DQ.sellable(id)) b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all ${UI.money((it.val || 0) * n)}</button>`);
@@ -311,4 +311,6 @@ UI.after.settings = () => {
   panels.forEach((panel, i) => { panel.hidden = names[i] !== selected; });
   view.insertAdjacentHTML('afterbegin', `<label class="panel page-picker" for="settings-category">Settings${UI.choiceButtons(`<select id="settings-category" data-in="settings-category">${names.map(name => `<option value="${esc(name)}" ${name === selected ? 'selected' : ''}>${esc(name)}</option>`).join('')}</select>`)}</label>`);
 };
+/* Base route remains available while candidate shop integration is being tested. */
+UI.DO.toolshop = id => { UI.shopTab='buy'; UI.shopSelected.buy=id; DQ.go('shop'); };
 })();

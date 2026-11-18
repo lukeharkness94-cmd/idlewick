@@ -31,7 +31,7 @@ const LINES = {
   enchanting:   [['Runic edge', { dmg: .002 }], ['Warding', { dr: .002 }]],
   carpentry:    [['True grain', { dbl: .01 }], ['Sharp plane', { speed: .01 }], ['Joiner’s luck', { fl: .005 }]],
   sailing:      [['Fair winds', { speed: .01 }], ['Salvager', { coin: .005 }], ['Sea legs', { fl: .005 }]],
-  beastmastery: [['Gentle hands', { xp: .02 }], ['Herd sense', { animal: .01 }], ['Kindred', { fl: .005 }]]
+  beastmastery: [['Gentle hands', { xp: .02 }], ['Herd sense', { animal: .01 }], ['Kindred', D.FIELD_TRAPS?{ xp: .01 }:{ fl: .005 }]]
 };
 /* the flourish each hands-on skill can roll, and the word it shows */
 D.FLOURISH = { fishing: 'Big one!', woodcutting: 'Clean fell!', mining: 'Rich vein!', thieving: 'Clean lift!', cooking: 'Perfect dish!', smithing: 'Masterwork!', crafting: 'Inspired!', magic: 'Surge!', carpentry: 'True grain!', sailing: 'Fair wind!', beastmastery: 'Breakthrough!' };
@@ -103,6 +103,7 @@ const extraOutput = a => {
   return '';
 };
 DQ.flourish = a => {
+  if(a?.kind==='recipe'&&D.RECIPES[a.id]?.once)return false;
   const sk = DQ.actSkill(a); if (!sk || !D.FLOURISH[sk] || !lastXp || lastXp.sk !== sk || !(lastXp.amt > 0) || lastXp.seq <= seenSeq) return false;
   const base = lastXp.amt; lastXp = null;
   const x = add0(sk, base, { raw: true }), gift = extraOutput(a);

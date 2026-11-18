@@ -24,7 +24,7 @@ await p.locator('[data-do="planfoodgo"]').click();const lim=await p.evaluate(()=
 const done=await p.evaluate(async()=>{DQ.S.settings.notify=true;DQ.act.limit=2;for(let i=0;i<30&&DQ.act;i++)DQ.advanceTime(4000,4000,0);await new Promise(r=>setTimeout(r,300));return {stopped:!DQ.act,made:DQ.have('shrimp'),note:(DQ.noteLog||[]).slice(0,3).map(n=>n.o?n.o.title:'').join('|')+[...document.querySelectorAll('#notes .note')].map(n=>n.innerText.slice(0,40)).join('|')};});
 assert.ok(done.stopped,'the batch stops by itself');assert.match(done.note,/Batch complete/);
 /* 5 */
-await p.evaluate(()=>{DQ.S.beast.kills.chicken=3;DQ.go('hunting');});assert.match(await p.locator('.hunt-lead').innerText(),/today.s hunt/i);assert.ok(await p.locator('[data-do="huntgo"]').count()>=1);
+await p.evaluate(()=>{DQ.S.beast.kills.chicken=3;DQ.ui.huntMode='quarry';DQ.go('hunting');});assert.match(await p.locator('.hunt-lead').innerText(),/today.s hunt/i);assert.ok(await p.locator('[data-do="huntgo"]').count()>=1);
 await p.evaluate(()=>DQ.go('exploration'));assert.match(await p.locator('.explore-lead').innerText(),/next worthwhile discovery/i);assert.equal(await p.locator('.discoveries').count(),1,'discoveries panel shown once');
 /* 7 */
 const u=await p.evaluate(()=>{const S=DQ.S,D=DQ.data;S.pinnedProject=Object.keys(D.PROJECTS).find(k=>D.PROJECTS[k].town===S.town&&!S.projects[k]&&D.PROJECTS[k].cost.log_normal);return {log:DQ.usesOf('log_normal').map(x=>x.text),boat:DQ.usesOf('plank_normal').map(x=>x.text),tip:DQ.tips.item('log_normal')};});

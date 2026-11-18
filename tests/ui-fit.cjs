@@ -7,7 +7,7 @@ const assert=require('node:assert/strict');
  const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{}),args:['--no-sandbox']});
  try{
   const p=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];p.on('pageerror',e=>errors.push(e.message));
-  await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/index.html');
+  if(process.env.INTEGRATION_CANDIDATE)await p.addInitScript(()=>window.__IDLEWICK_INTEGRATION_TEST__=true);await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/index.html');
   await p.locator('#t-new').click();await p.locator('#crname').fill('Fit');await p.locator('#cr-go').click();await p.waitForTimeout(700);
   await p.evaluate(()=>{for(const sk of Object.keys(DQ.S.xp)){DQ.S.xp[sk]=30000;DQ.S.unlocked[sk]=true;}DQ.S.tut.hidden=true;DQ.S.settings.notify=false;DQ.fxDirty();DQ.ui.renderDock();DQ.closeModal&&DQ.closeModal();});
   for(const [w,h] of [[1440,900],[1470,820],[1440,780],[1280,800],[1280,720]]){
@@ -25,6 +25,7 @@ const assert=require('node:assert/strict');
     assert.equal(await p.locator('.workspace-focus').evaluate(e=>e.getBoundingClientRect().top),before,'the action panel stays still while the list scrolls');
    }
   }
+  await p.evaluate(()=>{DQ.stopAct(true);DQ.paused=true;});
   /* every desktop page: the window itself never scrolls; Quests is a list beside the selected quest */
   await p.setViewportSize({width:1440,height:780});
   for(const page of ['overview','activity','journal','quests','people','combat','bestiary','map','exploration','projects','house','hirelings','character','tools','bank','skillsummary','mastery','achievements','collection','museum','tower','shop','hunting','magic','brewery','enchanting','research','settings']){

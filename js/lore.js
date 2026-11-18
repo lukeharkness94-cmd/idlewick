@@ -23,7 +23,7 @@ const WOODS = ['normal', 'oak', 'willow', 'maple', 'yew', 'magic', 'elder'];
 Object.keys(W).forEach(id => {
   const it = D.ITEMS[id]; if (!it) return; it.name = W[id];
   const m = id.match(/^(bronze|iron|steel|mithril|adamant|rune|astral)_/), w = id.match(/^(?:bow|staff)_(\w+)$/);
-  it.flavour = m ? FL_METAL[T.indexOf(m[1])] : w ? FL_WOOD[WOODS.indexOf(w[1])] : { barnacle_cutlass: 'Still smells of the sea, and of an apology.', witch_staff: 'The cauldron may have been involved.', emberfang_bow: 'The string is the colour of a sunset in a bad mood.' }[id];
+  it.flavour = m ? FL_METAL[T.indexOf(m[1])] : w ? FL_WOOD[WOODS.indexOf(w[1])] : { barnacle_cutlass: 'A salt-stained cutlass with a worn grip. Its previous owner was not known for returning borrowed things.', witch_staff: 'The cauldron may have been involved.', emberfang_bow: 'The string is the colour of a sunset in a bad mood.' }[id];
 });
 Object.values(D.RECIPES).forEach(r => { const out = Object.keys(r.out || {})[0]; if (W[out]) r.name = W[out]; });
 
@@ -44,14 +44,14 @@ D.LORE = {
   boar: L('Territorial and short-tempered. It charges in straight lines, which is its only plan.', 'Hunters talk of a boar so stubborn it once charged a river, and lost.'),
   wolf: L('Hunts at dusk and respects fire. Lone wolves are bold; packs are bolder.', 'The Grey Wolf of Mossbarrow Wood is a story told to children to make them come home before dark. It works about half the time.'),
   scarecrow: L('Stuffed with straw and old grudges. Moves only when you are not quite looking. Fire is its undoing.', 'Farmers swear they only ever built one scarecrow per field. The fields have more now. Nobody will discuss it.'),
-  oldtusk: L('Charges in a brutal line. Fight him at range and he can barely touch you.', 'Old Tusk is older than the market itself. The first Mossbarrow farmers fenced around him rather than risk a conversation. His tusks are carved with the dates of every fence that failed.'),
+  oldtusk: L('Charges in a straight line with little warning. Piercing attacks are useful against him, so a bow is worth preparing.', 'Old Tusk is older than the market itself. The first Mossbarrow farmers fenced around him rather than risk a conversation. His tusks are carved with the dates of every fence that failed.'),
   crab: L('Armoured, patient, and exactly the colour of a rock. Slashing blades skid off its shell.', 'Fishermen mark good reefs with a painted stone. Sometimes the stone gets up and leaves.'),
   bandit: L('Poachers of the coast road. Quick with a knife and quicker with an excuse.', 'The Saltmere bandits hold a vote on every robbery. It takes so long that most travellers escape.'),
   smuggler: L('Hauls contraband through the dunes and fights dirty when cornered.', 'Smugglers swear their cargo is "mostly turnips". The turnips make a clinking sound.'),
   pirate: L('Salt-stained sailors turned raiders. Fond of loud noises and tight ropes.', "Captain Barnacle's crew keeps a ledger of every ship they have robbed, ranked by how rude the captain was about it."),
   barnacle: L('His crust of barnacles turns away blades and arrows. Crushing blows and storm spells work best.', 'Barnacle was the harbour\'s finest captain until the tide took his ship and a reef took his pride. He now commands the wreck from its beach, convinced the sea owes him a refund. His cannon has never missed, only arrived late.'),
   bat: L('Swarms in cold tunnels and strikes from above. Unnerved by sharp light.', 'Ironpeak miners keep a bell in every tunnel. The bats hate it. The miners love how much the bats hate it.'),
-  icewolf: L('A pale hunter of the high passes whose breath freezes in the air. Fire makes it hesitate.', 'Travellers say you can hear an ice wolf by the silence it leaves. Then you cannot.'),
+  icewolf: L('A pale hunter of the high passes whose breath freezes in the air. Fire makes it hesitate.', 'Caravan guards say the dogs stop barking just before ice wolves appear. They have learned to watch the snowdrifts when that happens.'),
   raider: L('A dwarf of the lower deeps, armoured and stubborn. Lightning cracks their iron.', 'The raiders were once honest miners who simply stopped being paid. They have since developed strong opinions about invoices.'),
   troll: L('Huge, slow and tougher than the rock it sleeps on. Fire scorches its thick hide.', 'Mountain trolls turn to stone in sunlight, and have been caught out so often that the high road is lined with very surprised statues.'),
   frostmaw: L('His glacier slam can freeze you in place. Fire breaks the ice, and is his weakness.', "Frostmaw wasn't born cold. The mountain was warm once, they say, until Frostmaw sat down on it. Where he sleeps the snow never melts, and the avalanches arrive with timing that feels personal."),
@@ -68,10 +68,10 @@ D.LORE = {
   hawk: L('Rides the thermals above Skyreach and dives on anything shiny. Arrows and lightning bring it down.', 'Skyreach shepherds have trained a few storm hawks to guard sheep. The hawks have trained the shepherds to bring snacks.'),
   golem: L('Living stone shaped like a cloud. Crushing blows and aether break it.', "Skyreach's founders carved the golems as bridges. The golems promptly decided they would rather be doormen."),
   wyvern: L('A smaller cousin of the dragons that hunts on the wing. Frost and arrows ground it.', 'A wyvern will follow a stormfront for weeks just to sit on it. Weather scholars call this unscientific.'),
-  zephyrion: L('Stays in the air. Pin him with a bow, or melee will barely reach him.', "Zephyrion rides the storm like a pony. Its wingbeats can be heard three valleys away; its shadow can be felt in two. Sailors say it keeps the weather in a nest, and that the eggs are very upset."),
+  zephyrion: L('Spends much of the fight in the air, making ordinary melee attacks less effective. A bow is a useful way to counter him.', "Zephyrion follows the storms between the high peaks. Shepherds claim its nest is full of thunderclouds, although none has volunteered to climb up and check. They are quite certain the sound is worse near feeding time."),
   voidknight: L('An empty suit of armour that still walks its rounds. Aether and crushing blows break it.', 'The Void knights promised to serve a king who no longer has a kingdom. They still turn up every morning and salute the furniture.'),
   shade: L('A patch of dark that moves on its own. Ordinary weapons barely scratch it; fire and aether sting.', 'Shades are what is left when a name is forgotten. They hum, and the tune is a little too familiar.'),
-  horror: L('Too many eyes and not enough patience. Fire and piercing arrows hurt it.', 'Scholars who study the Abyssal horrors have filed hundreds of reports. All of them end with the word "anyway".'),
+  horror: L('Too many eyes and not enough patience. Fire and piercing arrows hurt it.', 'Scholars have written hundreds of reports about the Abyssal horrors. The first recommends further observation. Most of the later ones recommend sending somebody else.'),
   hollowking: L('Changes form twice. Crush first, then aether and fire, then pierce.', 'The Hollow King collected titles, then crowns, then bells, because he couldn’t stand the thought of the world carrying on without him. He hasn’t left his throne in years. His court still brings him tea. He has been waiting for you, specifically.'),
 };
 })();

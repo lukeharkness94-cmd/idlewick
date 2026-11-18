@@ -96,7 +96,7 @@ UI.travelAnim = to => {
 };
 
 /* ---------- Shop ---------- */
-UI.itemSub = it => { const b = UI.statLine(it.b), r = Object.entries(it.req || {}).map(([sk, l]) => `<span class="${DQ.skillUnlocked(sk) && DQ.lvl(sk) >= l ? 'ok' : 'bad'}">${D.SK[sk].name} ${l}</span>`).join(' '); return [it.type === 'relic' ? `${esc(it.desc || '')} Keepsake: it cannot be sold.` : '', it.heal ? `Heals ${it.heal}` : '', it.type === 'tool' ? `${Math.round(D.TOOL_SPEED[it.tier] * 100)}% faster ${D.SK[it.toolSkill].name.toLowerCase()}` : '', b, r].filter(Boolean).join(' · '); };
+UI.itemSub = it => { const b = UI.statLine(it.b), r = Object.entries(it.req || {}).map(([sk, l]) => `<span class="${DQ.skillUnlocked(sk) && DQ.lvl(sk) >= l ? 'ok' : 'bad'}">${D.SK[sk].name} ${l}</span>`).join(' '); return [it.type === 'relic' ? `${esc(it.desc || '')} Keepsake: it cannot be sold.` : '', it.heal ? `Heals ${it.heal}` : '', it.type === 'tool' ? it.toolSkill?`${+(D.TOOL_SPEED[it.tier]*100).toFixed(1)}% faster ${D.SK[it.toolSkill].name.toLowerCase()}`:esc(it.sub||'Kept tool') : '', b, r].filter(Boolean).join(' · '); };
 UI.shopSelected = {};
 UI.shopTabs = tab => `<div class="tabs">${[['buy','Buy'], ['rare','Rare wares'], ['sell','Sell']].map(([value, label]) => `<button class="tab ${tab === value ? 'on' : ''}" data-do="shoptab" data-a="${value}">${label}</button>`).join('')}</div>`;
 /* what an item asks of you before you can use it: gear requirements, a seed's Farming level (Nov 2026, from the player) */
@@ -111,15 +111,15 @@ UI.shopPreview = id => {
 UI.V.shop = () => {
   const tab = UI.shopTab, buying = tab === 'buy', qty = UI.shopQty;
   const stock = buying ? D.SHOPS[S().town] : [], held = stock.filter(id => DQ.lockedSkillFor(id));
-  const ids = buying ? stock.filter(id => !DQ.lockedSkillFor(id)) : Object.keys({ ...S().inv, ...S().bank }).filter(DQ.sellable);
+  const ids = buying ? stock.filter(id => !DQ.lockedSkillFor(id)&&(!UI.shopCatalogFilter||UI.shopCatalogFilter(id))) : Object.keys({ ...S().inv, ...S().bank }).filter(DQ.sellable);
   const later = [...new Set(held.map(DQ.lockedSkillFor))].map(sk => `<p class="shop-later">${ico('lock')} <b>${D.SK[sk].name}</b> gear is sold here once you learn ${D.SK[sk].name}. ${esc(DQ.skillTeacher(sk))}.</p>`).join('');
   const id = ids.includes(UI.shopSelected[tab]) ? UI.shopSelected[tab] : ids[0], it = id && D.ITEMS[id];
   UI.shopSelected[tab] = id;
   const owned = it ? DQ.have(id) : 0, tool = it && it.type === 'tool', count = tool ? 1 : qty;
   const cost = it ? (buying ? DQ.buyPrice(id) * count : DQ.sellPrice(id) * Math.min(count, owned)) : 0;
-  const disabled = !it || (buying && (S().coins < cost || (tool && owned)));
-  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span>${DQ.gearMark ? DQ.gearMark(item) : ''}<b>${esc(D.ITEMS[item].name)}</b><span class="stock-price">${UI.money(buying?DQ.buyPrice(item):DQ.sellPrice(item))}</span>${buying&&DQ.itemReqs(item).length?`<span class="req-chips">${UI.reqChips(item)}</span>`:''}${buying?'':'<small>'+DQ.have(item)+' held</small>'}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
-    ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
+  const disabled = !it || (buying && (S().coins < cost || (tool && owned)|| (DQ.shopMaterialsAffordable&&!DQ.shopMaterialsAffordable(id,count))));
+  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span>${DQ.gearMark ? DQ.gearMark(item) : ''}<b>${esc(D.ITEMS[item].name)}</b><span class="stock-price">${buying&&UI.shopCardCost?UI.shopCardCost(item):UI.money(buying?DQ.buyPrice(item):DQ.sellPrice(item))}</span>${buying&&DQ.itemReqs(item).length?`<span class="req-chips">${UI.reqChips(item)}</span>`:''}${buying?'':'<small>'+DQ.have(item)+' held</small>'}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
+    ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}${buying&&DQ.shopMaterialCost?UI.needTiles(Object.fromEntries(Object.entries(DQ.shopMaterialCost(id)).map(([k,n])=>[k,n*count]))):''}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
       <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} ${disabled ? 'disabled' : ''}>${tool && owned && buying ? 'Already owned' : (buying ? 'Buy' : 'Sell')+' ×'+(buying?count:Math.min(count,owned))} ${tool && owned && buying ? '' : UI.money(cost)}</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all ${UI.money(DQ.sellPrice(id) * owned)}</button>` : ''}</div>
       ${buying && S().coins < cost ? `<p class="bad">Need ${UI.money(cost - S().coins)} more.</p>` : ''}
       </div><div class="shop-comparison">${UI.compareHtml ? UI.compareHtml(id) : ''}</div></div>` : '<p>Nothing to sell. Gather resources or visit your bank.</p>'}
@@ -127,40 +127,43 @@ UI.V.shop = () => {
 };
 
 /* ---------- Quests ---------- */
+/* One progress calculation for journal rows, detail summaries and the pinned objective. */
+UI.questProgress = q => {
+  const state = DQ.questState(q), p = S().q[q.id], values = q.obj.map((o,j) => state === 'done' ? o.n : Math.min(o.n,DQ.objProg(q,p,j)));
+  const index = Math.max(0, q.obj.findIndex((o,j) => values[j] < o.n));
+  return { state, values, index, complete: values.filter((v,j)=>v>=q.obj[j].n).length, pct: Math.round(values.reduce((a,v,j)=>a+v/q.obj[j].n,0)/q.obj.length*100) };
+};
+UI.questSummary = q => {
+  const p = UI.questProgress(q), o = q.obj[p.index];
+  return p.state === 'ready' ? `Ready to return to ${q.giver}` : p.state === 'done' ? '✓ Story completed' : p.state === 'locked' ? DQ.questBlockers(q).join(' · ') : `${o.label} · ${fmt(p.values[p.index])}/${fmt(o.n)}`;
+};
+UI.B.qsummary = (e,id) => { const q=D.QM[id]; if(q)e.textContent=UI.questSummary(q); };
+UI.B.qtotal = (e,id) => { const q=D.QM[id]; if(q)e.style.width=UI.questProgress(q).pct+'%'; };
 UI.V.quests = () => {
   const st = q => DQ.questState(q), groups = { active: q => ['active', 'ready'].includes(st(q)), available: q => st(q) === 'new', upcoming: q => st(q) === 'locked' && !(DQ.questHidden && DQ.questHidden(q)) && (DQ.townUnlocked(q.town) || q.main), done: q => st(q) === 'done' };
-  const names = { active: 'Active', available: 'Available', upcoming: 'Upcoming', done: 'Completed' };
+  const names = { available: 'Available', active: 'Active', done: 'Completed', upcoming: 'Upcoming' };
   const tab = UI.questTab = groups[UI.questTab] ? UI.questTab : D.QUESTS.some(groups.active) ? 'active' : 'available';
-  const list = D.QUESTS.filter(groups[tab]).sort((a, b) => (b.main ? 1 : 0) - (a.main ? 1 : 0) || (st(a) === 'ready' ? -1 : 0) - (st(b) === 'ready' ? -1 : 0) || (DQ.questRecScore ? DQ.questRecScore(a) - DQ.questRecScore(b) : 0) || a.adv - b.adv);
-  /* recommended levels: short on the row, in full on the card; green once you meet them */
-  const recChips = (q, short) => (DQ.questRecParts ? DQ.questRecParts(q) : []).filter(r => !short || r.k !== 'hero' || r.lvl > 1).map(r => `<span class="qrec ${r.ok ? 'ok' : 'short'}" title="Recommended ${r.n} level ${r.lvl}">${short && r.k === 'combat' ? 'Combat' : esc(r.n)} ${r.lvl}</span>`).join('');
-  const selected = list.find(q => q.id === UI.tab.questSelected) || list[0];
-  UI.tab.questSelected = selected && selected.id;
-  /* List and detail (one-screen overhaul): a compact list of quest rows that scrolls, and the selected quest in full. */
+  const list = D.QUESTS.filter(groups[tab]).sort((a,b)=>(b.main?1:0)-(a.main?1:0)||(st(a)==='ready'?-1:0)-(st(b)==='ready'?-1:0)||(DQ.questRecScore?DQ.questRecScore(a)-DQ.questRecScore(b):0)||a.adv-b.adv);
+  const recChips = q => (DQ.questRecParts ? DQ.questRecParts(q) : []).map(r=>`<span class="qrec ${r.ok?'ok':'short'}" data-tip="text:Recommended ${esc(r.n)} level ${r.lvl}">${esc(r.n)} ${r.lvl}</span>`).join('');
+  const retained=D.QM[UI.questRevealId];if(retained&&!list.includes(retained))list.push(retained);
+  const selected = list.find(q=>q.id===UI.tab.questSelected)||list[0];UI.tab.questSelected=selected?.id;
   const rowOf = q => {
-    const s = st(q), p = S().q[q.id], t = D.TOWN[q.town], sk = q.main && D.SK[q.unlocks];
-    const pct = p ? Math.round(q.obj.reduce((a, o, j) => a + Math.min(1, DQ.objProg(q, p, j) / o.n), 0) / q.obj.length * 100) : 0;
-    const blk = s === 'locked' ? (DQ.advLvl() < q.adv ? `Hero level ${q.adv}` : (DQ.questBlockers(q)[0] || 'Not yet')) : '';
-    return `<button class="qrow ${s} ${q.main ? 'main' : ''} ${q.id === (selected && selected.id) ? 'on' : ''}" data-do="qselect" data-a="${q.id}" aria-pressed="${q.id === (selected && selected.id)}" style="${sk ? `--c:${sk.col}` : ''}"><span class="qr-face">${(DQ.folkPortrait && DQ.folkPortrait(q.giver, 40)) || ico(q.main ? 'star' : s === 'locked' ? 'lock' : 'quest')}${q.main ? `<i class="qr-main">${ico('star')}</i>` : ''}</span><span class="qr-t"><b>${esc(q.name)}</b><small>${s === 'locked' ? esc(String(blk).replace(/<[^>]+>/g, '')) : `${esc(q.giver)} · ${esc(t.name)}`}</small>${s === 'done' ? '' : `<span class="qrecs">${recChips(q, true)}</span>`}${s === 'active' || s === 'ready' ? `<span class="bar"><i style="width:${pct}%"></i></span>` : ''}</span><span class="state ${s}">${{ new: 'New', locked: 'Locked', active: pct + '%', ready: '✓ Claim reward', done: '✓ Completed' }[s]}</span></button>`;
+    const s=st(q),p=UI.questProgress(q),on=q.id===selected?.id;
+    return `<button class="qrow ${s} ${q.main?'main':''} ${on?'on':''}" data-do="qselect" data-a="${q.id}" aria-pressed="${on}"><span class="qr-face">${DQ.folkPortrait?.(q.giver,40)||ico(q.main?'star':'quest')}</span><span class="qr-t"><b>${esc(q.name)}</b><small>${esc(q.giver)}</small><span class="qr-objective" data-b="qsummary:${q.id}">${esc(UI.questSummary(q))}</span>${['active','ready'].includes(s)?`<span class="bar"><i data-b="qtotal:${q.id}" style="width:${p.pct}%"></i></span>`:''}</span><span class="state ${s}" data-b="qstate:${q.id}">${{new:'New',locked:'Locked',active:p.pct+'%',ready:'✓ Return',done:'✓ Done'}[s]}</span></button>`;
   };
-  const cards = selected ? [selected].map((q, i) => {
-    const s = st(q), p = S().q[q.id], t = D.TOWN[q.town];
-    const objs = q.obj.map((o, j) => { const pr = DQ.objProg(q, p, j), ok = pr >= o.n; return `<div class="obj ${ok ? 'ok' : ''}"><span>${ok ? ico('check') : ''}${o.label}${o.ev === 'guide' && !ok && D.MON[o.key] ? ` <button class="btn sm obj-go" data-do="guide" data-a="${o.key}">${ico('book')}Open ${esc(D.MON[o.key].name)}’s page</button>` : ''}</span><span class="mono" ${p ? `data-b="qtxt:${q.id}:${j}"` : ''}>${p ? '' : `0 / ${fmt(o.n)}`}</span><span class="bar"><i ${p ? `data-b="qbar:${q.id}:${j}"` : ''}></i></span></div>`; }).join('');
-    const prevQ = q.req ? D.QM[q.req] : null;
-    const blk = DQ.questBlockers(q);
-    const req = s === 'locked' && q.main ? `<div class="reqs">${blk.map(b => `<div class="bad">✗ ${b}</div>`).join('')}</div>` : s === 'locked' ? `<div class="reqs bad">${DQ.advLvl() < q.adv ? `Hero level ${q.adv} <span class="mono">(you: ${DQ.advLvl()})</span>` : ''}${prevQ && !(S().q[q.req] && S().q[q.req].s === 'done') ? ` Finish “${prevQ.name}” first` : ''}</div>` : '';
-    const sk = q.main && D.SK[q.unlocks];
-    /* reading order: name, where, the story (and anything said), what is needed, rewards, then the action */
-    const say = q.say || q.intro ? `<p class="quest-say">“${esc(q.say || q.intro)}”</p>` : '';
-    const actions = `<div class="quest-actions">${s === 'new' ? `<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>` : s === 'ready' ? `<button class="btn primary" data-do="qclaim" data-a="${q.id}">Claim reward</button>` : s === 'active' ? `<button class="btn primary" data-do="questcontinue" data-a="${q.id}">Continue quest</button>` : ''}</div>`;
-    return `<section class="panel quest ${s} ${q.main ? 'main' : ''}" style="--i:${i};${sk ? `--c:${sk.col}` : ''}" id="q-${q.id}">${sk ? `<span class="mq-ribbon">${ico('star')} Main quest · Unlocks ${sk.name}</span>` : ''}<div class="phead quest-head" style="margin:0">${DQ.folkPortrait ? `<button class="quest-face" data-do="folkfrom" data-a="${esc(q.giver)}" data-tip="text:About ${esc(q.giver)}">${DQ.folkPortrait(q.giver, 96)}</button>` : ''}<div><h2>${q.name}</h2><small>${q.giver} · ${t.name}</small></div><span class="state ${s}">${{ new: 'Available', locked: 'Locked', active: 'In progress', ready: '✓ Ready to claim', done: '✓ Completed' }[s]}</span></div>
-      <div class="quest-story" id="quest-story-${q.id}"><p class="blurb">${q.blurb}</p>${say}</div>
-      ${DQ.questImpact && DQ.questImpact(q.id) ? `<p class="quest-impact">Town change · ${esc(DQ.questImpact(q.id))}</p>` : ''}${req}${s === 'done' ? '' : `<div class="quest-rec"><span class="k">Recommended</span>${recChips(q)}</div>`}${s === 'locked' ? '' : `<div class="quest-objs"><div class="k">Required</div>${objs}</div>`}
-      <div class="rewards"><span class="k">Rewards</span><div class="rws">${sk ? `<span class="rw unlockrw" style="--c:${sk.col}">${ico(q.unlocks)}Learn ${sk.name}</span>` : ''}${UI.rewards(q.reward)}</div></div>${actions}</section>`;
-  }).join('') : '';
-  const done = D.QUESTS.filter(groups.done).length;
-  return `<section class="panel shophead"><div><span class="k">Quest log</span><h2>${done} of ${D.QUESTS.length} complete</h2></div><div class="tabs">${Object.entries(names).map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="qtab" data-a="${k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</div></section>
-    ${list.length ? `<div class="qlayout"><nav class="qlist" aria-label="${names[tab]} quests">${list.map(rowOf).join('')}</nav><div class="qdetail">${cards}</div></div>` : `<section class="panel"><p class="dim" style="margin:0">${{ active: 'No active quests.', available: 'Nothing new. Level up or travel.', upcoming: 'Nothing upcoming.', done: 'You have not finished any quests yet.' }[tab]}</p></section>`}`;
+  const cards = selected ? [selected].map(q=>{
+    const s=st(q),p=S().q[q.id],progress=UI.questProgress(q),t=D.TOWN[q.town],sk=q.main&&D.SK[q.unlocks];
+    const scene=Object.values(D.STORY_SCENES||{}).find(v=>v.quest===q.id),frame=scene?.frames().find(f=>f.speaker===q.giver);
+    const spoken=DQ.questVoice?DQ.questVoice(q):q.say||q.intro||(frame&&(typeof frame.text==='function'?frame.text():frame.text));
+    const story=s==='done'?(DQ.questThanks?DQ.questThanks(q):q.thanks||q.blurb):q.blurb;
+    const objs=q.obj.map((o,j)=>{const pr=progress.values[j],ok=pr>=o.n;return `<div class="obj ${ok?'ok':''}"><span>${ok?ico('check'):''}${esc(o.label)}${o.ev==='guide'&&!ok&&D.MON[o.key]?` <button class="btn sm obj-go route-icon" data-do="guide" data-a="${o.key}" aria-label="Open field guide" data-tip="text:Open field guide"><span aria-hidden="true">${ico('book')}</span></button>`:''}</span><span class="mono" ${p&&s!=='done'?`data-b="qtxt:${q.id}:${j}"`:''}>${fmt(pr)} / ${fmt(o.n)}</span><span class="bar"><i ${p&&s!=='done'?`data-b="qbar:${q.id}:${j}"`:''} style="width:${pr/o.n*100}%"></i></span></div>`;}).join('');
+    const blockers=s==='locked'?`<div class="reqs" role="note"><span class="k">Before this story begins</span>${DQ.questBlockers(q).map(b=>`<p>${esc(b)}</p>`).join('')}</div>`:'';
+    const action=s==='new'?`<button class="btn primary" data-do="qstart" data-a="${q.id}">Accept quest</button>`:s==='ready'&&!(q.choices&&!q.main)?`<button class="btn primary" data-do="qclaim" data-a="${q.id}">Return to ${esc(q.giver)}</button>`:s==='active'?`<button class="btn primary route-icon" data-do="questcontinue" data-a="${q.id}" aria-label="Continue objective: ${esc(q.obj[progress.index].label)}" data-tip="text:Continue objective: ${esc(q.obj[progress.index].label)}">${UI.objectiveIcon(q,q.obj[progress.index])}</button>`:'';
+    return `<section class="panel quest quest-journal ${s} ${q.main?'main':''}" id="q-${q.id}"><div class="journal-kicker"><span class="k">${q.main?'Main story':'Side story'}${q.adventure&&D.ADVENTURES?.[q.adventure]?` · ${esc(D.ADVENTURES[q.adventure].name)}`:''}${q.stage?` · Chapter ${q.stage}`:''}</span><span class="state ${s}">${{new:'Available',locked:'Not yet available',active:'In progress',ready:'✓ Ready to return',done:'✓ Completed'}[s]}</span></div><h2>${esc(q.name)}</h2><div class="journal-giver"><button class="quest-face" data-do="folkfrom" data-a="${esc(q.giver)}" aria-label="About ${esc(q.giver)}">${DQ.folkPortrait?.(q.giver,64)||ico('quest')}</button><div><b>${esc(q.giver)}</b><small>${esc(t.name)}</small></div></div><div class="journal-reading"><div class="quest-story" id="quest-story-${q.id}">${spoken&&s!=='done'?`<blockquote class="quest-voice">“${esc(spoken.replace(/^[“”"]|[“”"]$/g,''))}”</blockquote>`:''}${s==='done'||!spoken||story!==spoken?`<p class="blurb">${esc(story)}</p>`:''}</div>${DQ.questImpact?.(q.id)?`<p class="quest-impact">${esc(DQ.questImpact(q.id))}</p>`:''}${blockers}${s!=='done'&&DQ.questRecParts?.(q).some(r=>!r.ok)?`<div class="quest-rec"><span class="k">Recommended</span>${recChips(q)}</div>`:''}${s==='locked'?'':`<div class="quest-objs"><div class="journal-objective-head"><span class="k">${s==='done'?'Your part in the story':'Your next steps'}</span><span class="sm" data-b="qsteps:${q.id}">${progress.complete}/${q.obj.length} objectives complete</span></div>${objs}</div>`}<div class="rewards"><span class="k">${s==='done'?'Rewards earned':'Rewards'}</span><div class="rws">${sk?`<span class="rw unlockrw">${ico(q.unlocks)}Learn ${esc(sk.name)}</span>`:''}${UI.rewards(q.reward)}</div></div></div><div class="quest-actions">${action}</div></section>`;
+  }).join(''):'';
+  const done=D.QUESTS.filter(groups.done).length;
+  const sections=[['Main story',list.filter(q=>q.main)],['Side stories',list.filter(q=>!q.main)]].filter(([,qs])=>qs.length).map(([label,qs])=>`<h3 class="journal-section">${label} <small>${qs.length}</small></h3>${qs.map(rowOf).join('')}`).join('');
+  return `<section class="panel shophead journal-header"><div><span class="k">Quest journal</span><h2>Stories of the realm</h2><small>${done} stories completed</small></div><nav class="tabs" aria-label="Quest status">${Object.entries(names).map(([k,n])=>`<button class="tab ${tab===k?'on':''}" data-do="qtab" data-a="${k}" aria-pressed="${tab===k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</nav></section>${list.length?`<div class="qlayout quest-journal-layout"><nav class="qlist" aria-label="${names[tab]} quests">${sections}</nav><div class="qdetail">${cards}</div></div>`:`<section class="panel journal-empty"><h2>${{active:'No stories underway',available:'No new requests here',upcoming:'No upcoming requests',done:'Your story is just beginning'}[tab]}</h2><p>${{active:'Choose an available story and someone to help.',available:'Check Upcoming to see what opens the next story.',upcoming:'Explore the realm and meet its people.',done:'Completed stories and their acknowledgements will stay here.'}[tab]}</p><button class="btn" data-do="qtab" data-a="${tab==='available'?'upcoming':'available'}">${tab==='available'?'See upcoming stories':'Browse available stories'}</button></section>`}`;
 };
 
 /* ---------- Character ---------- */
@@ -171,6 +174,8 @@ const equipCell = slot => {
   const it = D.ITEMS[id];
   return `<button class="eq" style="--c:${it.col}" data-do="unequip" data-a="${slot}" aria-label="${DQ.SLOT_NAMES[slot]}: ${esc(it.name)}. Unequip" data-tip="item:${id}">${DQ.itemIco(it)}${slot === 'ammo' ? `<b class="mono">${fmtK(S().ammo.n)}</b>` : ''}<small>${DQ.SLOT_NAMES[slot]}</small></button>`;
 };
+/* Shared paper-doll layout: Hero and combat use the same figure, slot order and visual states. */
+UI.equipmentDoll = (cell = equipCell) => `<div class="doll paper-doll" role="group" aria-label="Equipment around your hero"><div class="dollc">${UI.heroFigure()}</div>${SLOT_LAYOUT.map(sl => `<div class="ds ds-${sl}">${cell(sl)}</div>`).join('')}</div>`;
 UI.packSorted = () => Object.keys(S().inv).filter(id => !DQ.isTool(id)).sort(byCat);
 UI.packFilter = 'all'; UI.packQ = '';
 UI.packVisible = () => UI.packSorted().filter(id => inCat(id, UI.packFilter) && D.ITEMS[id].name.toLowerCase().includes(UI.packQ.toLowerCase()));
@@ -185,10 +190,10 @@ UI.detail = (id, from) => {
   if (!id || !DQ.have(id)) return `<div class="detail detail-empty"><span class="k">Item details</span><p class="dim">Select an item.</p></div>`;
   const it = D.ITEMS[id], n = from === 'bank' ? (S().bank[id] || 0) : (S().inv[id] || 0), can = it.slot ? DQ.canEquip(id) : null;
   const btns = [];
-  if (it.slot) btns.push(can.equipped ? '<span class="spare-explanation">Already equipped · this is a spare copy</span>' : `<button class="btn ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip${can.ok ? '' : ' (locked)'}</button>`);
+  if (it.slot) btns.push(can.equipped ? '<span class="spare-explanation">Already equipped · this is a spare copy</span>' : `<button class="btn ${can.ok ? 'primary' : ''}" data-do="equip" data-a="${id}" ${can.ok ? '' : `data-tip="text:${esc(can.why)}"`}>Equip ${esc(it.name)}${can.ok ? '' : ' (locked)'}</button>`);
   if (it.heal) btns.push(`<button class="btn" data-do="eat" data-a="${id}">Eat (+${it.heal})</button>`);
   if (from === 'bank') btns.push(`<button class="btn" data-do="withdraw" data-a="${id}" data-b="1">Take 1</button>${n > 1 ? `<button class="btn" data-do="withdraw" data-a="${id}" data-b="10">Take 10</button><button class="btn" data-do="withdraw" data-a="${id}" data-b="all">Take all</button>` : ''}`);
-  else btns.push(`<button class="btn" data-do="deposit" data-a="${id}" data-b="all">Bank</button>`);
+  else btns.push(`<button class="btn" data-do="deposit" data-a="${id}" data-b="all">Bank ${esc(it.name)}</button>`);
   if (!DQ.sellable(id)) btns.push(`<p class="keepsake-note">${ico('lock')} ${esc(DQ.KEEPSAKE_NOTE)}</p>`);
   else btns.push(`<button class="btn" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell 1 ${UI.money(DQ.sellPrice(id))}</button>${n > 1 ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all ${UI.money(DQ.sellPrice(id) * n)}</button>` : ''}`);
   return `<div class="detail"><div class="dt-h">${itm(id)}<div><b style="color:${it.col}">${esc(it.name)}</b><small>${fmt(n)} in ${from === 'bank' ? 'bank' : 'pack'}</small></div></div><div class="btnrow wrap">${btns.join('')}</div><div class="detail-info">${(DQ.tips && DQ.tips.item ? DQ.tips.item(id) : '') || `<p class="sm">${UI.itemSub(it) || DQ.cap(it.type)}</p>`}</div></div>`;
@@ -196,13 +201,13 @@ UI.detail = (id, from) => {
 UI.V.character = () => {
   const s = S(), b = DQ.bonus(), ps = DQ.pstats(), marks = DQ.heroMarks();
   return `<div class="tabs character-mobile-tabs"><button class="tab ${UI.tab.characterPanel === 'equipment' ? '' : 'on'}" data-do="tab" data-a="characterPanel" data-b="pack">Backpack</button><button class="tab ${UI.tab.characterPanel === 'equipment' ? 'on' : ''}" data-do="tab" data-a="characterPanel" data-b="equipment">Equipment</button></div><div class="chargrid character-layout ${UI.tab.characterPanel === 'equipment' ? 'show-equipment' : ''}"><section class="panel paper"><div class="phead"><h2>Equipment</h2><small class="mono">Hero ${DQ.advLvl()} · Combat ${DQ.combatLvl()}</small></div>
-      <div class="doll paper-doll" role="group" aria-label="Equipment around your hero"><div class="dollc">${UI.heroFigure()}</div>${SLOT_LAYOUT.map(sl => `<div class="ds ds-${sl}">${equipCell(sl)}</div>`).join('')}</div>
+      ${UI.equipmentDoll()}
       <section data-reference="true" class="equipment-stats" id="equipment-stats"><h3 id="equipment-stats-toggle">Combat stats <span class="mono">Max hit ${ps.max}</span></h3>
         <div class="bonuses">${[['Accuracy', b.atk, 'attack'], ['Power', b.str, 'strength'], ['Defence', b.def, 'defence'], ['Ranged', b.rng, 'ranged'], ['Arrows', b.rngStr, 'ranged'], ['Magic', b.mag, 'magic']].map(([n, v, sk]) => `<div style="--c:${D.SK[sk].col}">${ico(sk)}<span>${n}</span><b class="mono">+${v}</b></div>`).join('')}</div>
         <div class="statlist"><div><span>Fighting style</span><b>${DQ.cap(ps.style)}</b></div><div><span>Damage reduction</span><b class="mono">${Math.round(ps.red * 100)}%</b></div><div><span>Total level</span><b class="mono" data-b="totlvl"></b></div></div>
       </section>
       <section data-reference="true" class="equipment-appearance" id="equipment-appearance"><h3 id="equipment-appearance-toggle">Appearance &amp; sharing</h3>${marks.length ? `<div class="fig-marks">${marks.map(mark => `<span class="fig-mark" data-tip="text:${esc(mark.sub)}">${ico(mark.ic)}${esc(mark.t)}</span>`).join('')}</div>` : ''}<p class="hint">Capes at skill 30 / 60 / 99 · medals at Hero 10 / 25 / 50 / 75.</p><button class="btn sm" data-do="share">${ico('star')}Share hero</button></section></section>
-    <div class="col"><section class="panel"><div class="phead"><h2>Backpack</h2><span><small class="mono" data-b="packn"></small> <button class="btn sm" data-do="go" data-a="bank">${ico('bank')}Bank (${Object.keys(S().bank).length})</button> <button class="btn sm" data-do="depositall">Bank all</button></span></div><div class="filtbar"><div class="tabs">${UI.catTabs(s.inv, UI.packFilter, 'packfilter')}</div><input id="packq" class="search" data-in="packq" placeholder="Search backpack" value="${esc(UI.packQ)}" aria-label="Search backpack"></div>${UI.inventoryPicker('pack')}<div class="slots" id="packgrid">${UI.packGrid()}</div><p class="hint">${DQ.packMax()} slots · overflow goes to the <b>bank</b>.</p></section>
+    <div class="col"><section class="panel"><div class="phead"><h2>Backpack</h2><span><small class="mono" data-b="packn"></small> <button class="btn sm" data-do="go" data-a="bank">${ico('bank')}Open bank (${Object.keys(S().bank).length})</button> <button class="btn sm" data-do="depositall">Bank all</button></span></div><div class="filtbar"><div class="tabs">${UI.catTabs(s.inv, UI.packFilter, 'packfilter')}</div><input id="packq" class="search" data-in="packq" placeholder="Search backpack" value="${esc(UI.packQ)}" aria-label="Search backpack"></div>${UI.inventoryPicker('pack')}<div class="slots" id="packgrid">${UI.packGrid()}</div><p class="hint">${DQ.packMax()} slots · overflow goes to the <b>bank</b>.</p></section>
     <section class="panel" id="detailbox">${UI.detail(UI.sel, UI.selFrom)}</section></div></div>`;
 };
 
@@ -322,7 +327,7 @@ const DO = {
   hidetut: () => { S().tut.hidden = true; UI.render(false); },
   set: a => { const s = S().settings; s[a] = !s[a]; DQ.audioApply(); DQ.musicRefresh(); UI.renderHud(); UI.render(false); },
   tasksound: a => { S().settings.taskSounds = a; DQ.audioInit(); UI.render(false); },
-  savenow: () => { DQ.save(); DQ.toast('Game saved'); },
+  savenow: () => { const ok = DQ.save(); DQ.toast(ok ? (DQ.saveLocation() === 'desktop' ? 'Saved on this device' : 'Saved in this browser location') : (DQ.saveHealth || 'Save failed. Download a backup before closing.'), !ok); },
   export: () => DQ.modal({ title: 'Export save', wide: true, body: `<p class="sm dim">Copy this text somewhere safe. You can paste it into Import save on any device.</p><textarea id="expta" readonly rows="6">${DQ.exportSave()}</textarea>`, actions: [{ label: 'Copy', primary: true, fn: () => { const t = $('#expta'); t.select(); try { navigator.clipboard.writeText(t.value).then(() => DQ.toast('Copied to clipboard')).catch(() => DQ.toast('Press Ctrl+C to copy')); } catch (e) { DQ.toast('Press Ctrl+C to copy'); } return false; } }, { label: 'Close' }] }),
   import: () => DQ.modal({ title: 'Import save', wide: true, body: `<p class="sm dim">Paste an exported save below. This replaces your current game.</p><textarea id="impta" rows="6" placeholder="Paste save text here"></textarea>`, actions: [{ label: 'Load save', primary: true, fn: () => { if (DQ.importSave($('#impta').value)) { DQ.act = null; location.reload(); } else { DQ.toast('That does not look like a valid save', true); return false; } } }, { label: 'Cancel' }] }),
   newgame: () => DQ.modal({ title: 'Erase everything?', body: '<p>This permanently deletes your hero, items and progress and returns you to the title screen. Export your save first if you might want it back.</p>', actions: [{ label: 'Erase and restart', primary: true, fn: () => { DQ.act = null; DQ.eraseSave(); DQ.paused = true; location.reload(); } }, { label: 'Keep playing' }] }),
@@ -456,4 +461,5 @@ UI.init = () => {
   DQ.on('slain', () => { const foe=$('#av-foe');setTimeout(()=>{if(foe?.isConnected)DQ.flash(foe,'slain');},DQ.battleTiming?.impact||390); });
   THEME(); UI.renderHud(); UI.renderRail(); UI.render(true); requestAnimationFrame(UI.frame);
 };
+DQ.on('itemfound',()=>{if(['cooking','smithing','crafting','carpentry','brewery','enchanting','research','projects','magic','bestiary'].includes(UI.view))UI.refresh();});
 })();

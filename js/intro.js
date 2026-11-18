@@ -18,7 +18,7 @@ const SCRIPT = name => [
     'Then the bells started to go missing. A town would have its bell at supper, and by breakfast there would just be a rope, swinging a bit guiltily.',
     'Nobody saw who took them. Several people saw nothing, very carefully.'] },
   { shot: 'dark', town: 'willowbrook', lines: [
-    'Without the bell, the market stopped meeting. Without the market, the roads stopped mattering.',
+    'People used to meet at the market when the noon bell rang. After it vanished, fewer traders came. Before long, whole market days were passing with nobody on the road.',
     'Fields went wild. Goblins moved into the east farms and called it a kingdom. Smugglers took the harbour and called it business.',
     'People did what people do. They packed up and left. A few left notes. Most just took the good pans.'] },
   { shot: 'letter', letter: [
@@ -34,7 +34,7 @@ const SCRIPT = name => [
     'You are not a knight. Nobody chose you. There was no prophecy, just a letter and a very long walk.',
     'You can learn to fish, cut timber, cook a decent meal and hold your ground when it matters. It turns out that is enough to start.'] },
   { shot: 'road', lines: [
-    'Mend one town, and the road to the next one opens.',
+    'Help a town get back on its feet, then defeat the creature blocking its road. That will open the way to the next town.',
     'Somewhere at the end of that road is whoever has the bells. You would like a word.'] },
   { shot: 'title' }
 ];

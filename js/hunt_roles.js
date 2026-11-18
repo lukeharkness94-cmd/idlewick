@@ -28,7 +28,7 @@ Q.huntCandidates = () => {
 const dangerChip = d => d ? `<span class="chip-d tone-${d.key === 'easy' ? 'ok' : d.key === 'fair' ? 'warn' : 'bad'}">${esc(d.label)}</span>` : '';
 const huntinging = c => Q.act && Q.act.kind === 'fight' && Q.act.id === c.m.id;
 UI.V.hunting = () => {
-  const list = Q.huntCandidates(), top = list[0], known = list.slice(1).filter(c => c.seen || c.score > 45), unmet = list.slice(1).filter(c => !(c.seen || c.score > 45)), rest = known.slice(0, 5).concat(unmet.slice(0, 1)), moreUnmet = unmet.length - Math.min(1, unmet.length);
+  const candidates=Q.huntCandidates(),active=Q.act?.kind==='fight'&&Q.act.area&&candidates.find(c=>c.m.id===Q.act.id),list=active?[active,...candidates.filter(c=>c!==active)]:candidates, top = list[0], known = list.slice(1).filter(c => c.seen || c.score > 45), unmet = list.slice(1).filter(c => !(c.seen || c.score > 45)), rest = known.slice(0, 5).concat(unmet.slice(0, 1)), moreUnmet = unmet.length - Math.min(1, unmet.length);
   if (!top) return `${hero('hunting')}<section class="panel"><p>Nothing to hunt around ${esc(D.TOWN[S().town].name)} yet. Travel on from the world map.</p><div class="btnrow"><button class="btn primary" data-do="go" data-a="map">World map</button></div></section>`;
   const nm = c => c.seen ? esc(c.m.name) : 'Unknown creature';
   const lead = `<section class="panel hunt-lead"><div class="hl-art ${top.seen ? '' : 'blackout'}">${Q.monSprite(top.m, 96, top.seen ? 'bob' : 'sil')}</div>

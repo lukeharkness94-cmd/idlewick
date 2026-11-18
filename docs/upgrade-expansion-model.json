@@ -1,0 +1,950 @@
+{
+  "status": "Model only; no playable items, gates, recipes, drops or prices changed.",
+  "assumptions": "Tool cap remains 45%. Five new optional tool rungs are interleaved; no prerequisite purchase chain. Weapon families go from seven to fourteen by inserting seven variants below the current level-60 cap. Existing top-tier stats are unchanged. Every proposed tool has a Smithing route using mined-and-smelted metal; ordinary weapons use material/grade names and metal inputs, with wood/string retained where appropriate. Named rare rewards remain earned-only. Material quantities and complete recipe gates are not yet modelled. All candidate stats are bounded by their existing neighbours. Boss fixtures grant levels/armour/food, test melee swords only, and use 24 seeded forecasts per case. This does not prove economy, material reachability, ranged/magic balance or enjoyment.",
+  "tools": [
+    {
+      "position": 1,
+      "name": "Bronze",
+      "requiredMetal": "bar_bronze",
+      "productionSkill": "smithing",
+      "speed": 0.04,
+      "gold": 60,
+      "new": true,
+      "shrimpCycleMs": 1840,
+      "assumptions": "Fishing 20, no owned furniture or assigned companion; existing perks and speed floor remain. Candidate speed only; granted state is for modelling."
+    },
+    {
+      "position": 2,
+      "name": "Reinforced bronze",
+      "requiredMetal": "bar_bronze",
+      "productionSkill": "smithing",
+      "speed": 0.08,
+      "gold": 120,
+      "new": false,
+      "shrimpCycleMs": 1760,
+      "assumptions": "Fishing 20, no owned furniture or assigned companion; existing perks and speed floor remain. Candidate speed only; granted state is for modelling."
+    },
+    {
+      "position": 3,
+      "name": "Iron",
+      "requiredMetal": "bar_iron",
+      "productionSkill": "smithing",
+      "speed": 0.12,
+      "gold": 290,
+      "new": true,
+      "shrimpCycleMs": 1680,
+      "assumptions": "Fishing 20, no owned furniture or assigned companion; existing perks and speed floor remain. Candidate speed only; granted state is for modelling."
+    },
+    {
+      "position": 4,
+      "name": "Steel",
+      "requiredMetal": "bar_steel",
+      "productionSkill": "smithing",
+      "speed": 0.16,
+      "gold": 700,
+      "new": false,
+      "shrimpCycleMs": 1600,
+      "assumptions": "Fishing 20, no owned furniture or assigned companion; existing perks and speed floor remain. Candidate speed only; granted state is for modelling."
+    },
+    {
+      "position": 5,
+      "name": "Reinforced steel",
+      "requiredMetal": "bar_steel",
+      "productionSkill": "smithing",
+      "speed": 0.205,
+      "gold": 1600,
+      "new": true,
+      "shrimpCycleMs": 1510,
+      "assumptions": "Fishing 20, no owned furniture or assigned companion; existing perks and speed floor remain. Candidate speed only; granted state is for modelling."
+    },
+    {
+      "position": 6,
+      "name": "Mithril",
+      "requiredMetal": "bar_mithril",
+      "productionSkill": "smithing",
+      "speed": 0.25,
+      "gold": 3500,
+      "new": false,
+      "shrimpCycleMs": 1420,
+      "assumptions": "Fishing 20, no owned furniture or assigned companion; existing perks and speed floor remain. Candidate speed only; granted state is for modelling."
+    },
+    {
+      "position": 7,
+      "name": "Reinforced mithril",
+      "requiredMetal": "bar_mithril",
+      "productionSkill": "smithing",
+      "speed": 0.3,
+      "gold": 7500,
+      "new": true,
+      "shrimpCycleMs": 1320,
+      "assumptions": "Fishing 20, no owned furniture or assigned companion; existing perks and speed floor remain. Candidate speed only; granted state is for modelling."
+    },
+    {
+      "position": 8,
+      "name": "Adamant",
+      "requiredMetal": "bar_adamant",
+      "productionSkill": "smithing",
+      "speed": 0.35,
+      "gold": 16000,
+      "new": false,
+      "shrimpCycleMs": 1220,
+      "assumptions": "Fishing 20, no owned furniture or assigned companion; existing perks and speed floor remain. Candidate speed only; granted state is for modelling."
+    },
+    {
+      "position": 9,
+      "name": "Reinforced adamant",
+      "requiredMetal": "bar_adamant",
+      "productionSkill": "smithing",
+      "speed": 0.4,
+      "gold": 32500,
+      "new": true,
+      "shrimpCycleMs": 1120,
+      "assumptions": "Fishing 20, no owned furniture or assigned companion; existing perks and speed floor remain. Candidate speed only; granted state is for modelling."
+    },
+    {
+      "position": 10,
+      "name": "Runic",
+      "requiredMetal": "bar_rune",
+      "productionSkill": "smithing",
+      "speed": 0.45,
+      "gold": 65000,
+      "new": false,
+      "shrimpCycleMs": 1020,
+      "assumptions": "Fishing 20, no owned furniture or assigned companion; existing perks and speed floor remain. Candidate speed only; granted state is for modelling."
+    }
+  ],
+  "weapons": [
+    {
+      "family": "sword",
+      "id": "model_sword_3",
+      "name": "Tempered bronze longsword",
+      "requiredMetal": "bar_bronze",
+      "level": 3,
+      "req": {
+        "attack": 3
+      },
+      "b": {
+        "atk": 5,
+        "str": 4
+      },
+      "gold": 60,
+      "between": [
+        "bronze_sword",
+        "iron_sword"
+      ],
+      "base": "bronze_sword"
+    },
+    {
+      "family": "sword",
+      "id": "model_sword_5",
+      "name": "Fine bronze longsword",
+      "requiredMetal": "bar_bronze",
+      "level": 5,
+      "req": {
+        "attack": 5
+      },
+      "b": {
+        "atk": 6,
+        "str": 5
+      },
+      "gold": 90,
+      "between": [
+        "bronze_sword",
+        "iron_sword"
+      ],
+      "base": "bronze_sword"
+    },
+    {
+      "family": "sword",
+      "id": "model_sword_15",
+      "name": "Fine iron longsword",
+      "requiredMetal": "bar_iron",
+      "level": 15,
+      "req": {
+        "attack": 15
+      },
+      "b": {
+        "atk": 13,
+        "str": 11
+      },
+      "gold": 430,
+      "between": [
+        "iron_sword",
+        "steel_sword"
+      ],
+      "base": "iron_sword"
+    },
+    {
+      "family": "sword",
+      "id": "model_sword_25",
+      "name": "Fine steel longsword",
+      "requiredMetal": "bar_steel",
+      "level": 25,
+      "req": {
+        "attack": 25
+      },
+      "b": {
+        "atk": 21,
+        "str": 18
+      },
+      "gold": 1480,
+      "between": [
+        "steel_sword",
+        "mithril_sword"
+      ],
+      "base": "steel_sword"
+    },
+    {
+      "family": "sword",
+      "id": "model_sword_35",
+      "name": "Fine mithril longsword",
+      "requiredMetal": "bar_mithril",
+      "level": 35,
+      "req": {
+        "attack": 35
+      },
+      "b": {
+        "atk": 31,
+        "str": 26
+      },
+      "gold": 4560,
+      "between": [
+        "mithril_sword",
+        "adamant_sword"
+      ],
+      "base": "mithril_sword"
+    },
+    {
+      "family": "sword",
+      "id": "model_sword_45",
+      "name": "Fine adamant longsword",
+      "requiredMetal": "bar_adamant",
+      "level": 45,
+      "req": {
+        "attack": 45
+      },
+      "b": {
+        "atk": 43,
+        "str": 37
+      },
+      "gold": 13860,
+      "between": [
+        "adamant_sword",
+        "rune_sword"
+      ],
+      "base": "adamant_sword"
+    },
+    {
+      "family": "sword",
+      "id": "model_sword_55",
+      "name": "Fine rune longsword",
+      "requiredMetal": "bar_rune",
+      "level": 55,
+      "req": {
+        "attack": 55
+      },
+      "b": {
+        "atk": 58,
+        "str": 50
+      },
+      "gold": 41570,
+      "between": [
+        "rune_sword",
+        "astral_sword"
+      ],
+      "base": "rune_sword"
+    },
+    {
+      "family": "dagger",
+      "id": "model_dagger_3",
+      "name": "Tempered bronze dagger",
+      "requiredMetal": "bar_bronze",
+      "level": 3,
+      "req": {
+        "attack": 3
+      },
+      "b": {
+        "atk": 6,
+        "str": 3
+      },
+      "gold": 40,
+      "between": [
+        "bronze_dagger",
+        "iron_dagger"
+      ],
+      "base": "bronze_dagger"
+    },
+    {
+      "family": "dagger",
+      "id": "model_dagger_5",
+      "name": "Fine bronze dagger",
+      "requiredMetal": "bar_bronze",
+      "level": 5,
+      "req": {
+        "attack": 5
+      },
+      "b": {
+        "atk": 7,
+        "str": 3
+      },
+      "gold": 60,
+      "between": [
+        "bronze_dagger",
+        "iron_dagger"
+      ],
+      "base": "bronze_dagger"
+    },
+    {
+      "family": "dagger",
+      "id": "model_dagger_15",
+      "name": "Fine iron dagger",
+      "requiredMetal": "bar_iron",
+      "level": 15,
+      "req": {
+        "attack": 15
+      },
+      "b": {
+        "atk": 14,
+        "str": 7
+      },
+      "gold": 320,
+      "between": [
+        "iron_dagger",
+        "steel_dagger"
+      ],
+      "base": "iron_dagger"
+    },
+    {
+      "family": "dagger",
+      "id": "model_dagger_25",
+      "name": "Fine steel dagger",
+      "requiredMetal": "bar_steel",
+      "level": 25,
+      "req": {
+        "attack": 25
+      },
+      "b": {
+        "atk": 24,
+        "str": 12
+      },
+      "gold": 1110,
+      "between": [
+        "steel_dagger",
+        "mithril_dagger"
+      ],
+      "base": "steel_dagger"
+    },
+    {
+      "family": "dagger",
+      "id": "model_dagger_35",
+      "name": "Fine mithril dagger",
+      "requiredMetal": "bar_mithril",
+      "level": 35,
+      "req": {
+        "attack": 35
+      },
+      "b": {
+        "atk": 35,
+        "str": 17
+      },
+      "gold": 3420,
+      "between": [
+        "mithril_dagger",
+        "adamant_dagger"
+      ],
+      "base": "mithril_dagger"
+    },
+    {
+      "family": "dagger",
+      "id": "model_dagger_45",
+      "name": "Fine adamant dagger",
+      "requiredMetal": "bar_adamant",
+      "level": 45,
+      "req": {
+        "attack": 45
+      },
+      "b": {
+        "atk": 49,
+        "str": 24
+      },
+      "gold": 10390,
+      "between": [
+        "adamant_dagger",
+        "rune_dagger"
+      ],
+      "base": "adamant_dagger"
+    },
+    {
+      "family": "dagger",
+      "id": "model_dagger_55",
+      "name": "Fine rune dagger",
+      "requiredMetal": "bar_rune",
+      "level": 55,
+      "req": {
+        "attack": 55
+      },
+      "b": {
+        "atk": 67,
+        "str": 32
+      },
+      "gold": 31180,
+      "between": [
+        "rune_dagger",
+        "astral_dagger"
+      ],
+      "base": "rune_dagger"
+    },
+    {
+      "family": "hammer",
+      "id": "model_hammer_3",
+      "name": "Tempered bronze warhammer",
+      "requiredMetal": "bar_bronze",
+      "level": 3,
+      "req": {
+        "attack": 3
+      },
+      "b": {
+        "atk": 4,
+        "str": 6
+      },
+      "gold": 80,
+      "between": [
+        "bronze_hammer",
+        "iron_hammer"
+      ],
+      "base": "bronze_hammer"
+    },
+    {
+      "family": "hammer",
+      "id": "model_hammer_5",
+      "name": "Fine bronze warhammer",
+      "requiredMetal": "bar_bronze",
+      "level": 5,
+      "req": {
+        "attack": 5
+      },
+      "b": {
+        "atk": 5,
+        "str": 8
+      },
+      "gold": 120,
+      "between": [
+        "bronze_hammer",
+        "iron_hammer"
+      ],
+      "base": "bronze_hammer"
+    },
+    {
+      "family": "hammer",
+      "id": "model_hammer_15",
+      "name": "Fine iron warhammer",
+      "requiredMetal": "bar_iron",
+      "level": 15,
+      "req": {
+        "attack": 15
+      },
+      "b": {
+        "atk": 10,
+        "str": 16
+      },
+      "gold": 590,
+      "between": [
+        "iron_hammer",
+        "steel_hammer"
+      ],
+      "base": "iron_hammer"
+    },
+    {
+      "family": "hammer",
+      "id": "model_hammer_25",
+      "name": "Fine steel warhammer",
+      "requiredMetal": "bar_steel",
+      "level": 25,
+      "req": {
+        "attack": 25
+      },
+      "b": {
+        "atk": 17,
+        "str": 26
+      },
+      "gold": 2030,
+      "between": [
+        "steel_hammer",
+        "mithril_hammer"
+      ],
+      "base": "steel_hammer"
+    },
+    {
+      "family": "hammer",
+      "id": "model_hammer_35",
+      "name": "Fine mithril warhammer",
+      "requiredMetal": "bar_mithril",
+      "level": 35,
+      "req": {
+        "attack": 35
+      },
+      "b": {
+        "atk": 25,
+        "str": 38
+      },
+      "gold": 6270,
+      "between": [
+        "mithril_hammer",
+        "adamant_hammer"
+      ],
+      "base": "mithril_hammer"
+    },
+    {
+      "family": "hammer",
+      "id": "model_hammer_45",
+      "name": "Fine adamant warhammer",
+      "requiredMetal": "bar_adamant",
+      "level": 45,
+      "req": {
+        "attack": 45
+      },
+      "b": {
+        "atk": 35,
+        "str": 54
+      },
+      "gold": 19050,
+      "between": [
+        "adamant_hammer",
+        "rune_hammer"
+      ],
+      "base": "adamant_hammer"
+    },
+    {
+      "family": "hammer",
+      "id": "model_hammer_55",
+      "name": "Fine rune warhammer",
+      "requiredMetal": "bar_rune",
+      "level": 55,
+      "req": {
+        "attack": 55
+      },
+      "b": {
+        "atk": 47,
+        "str": 73
+      },
+      "gold": 57160,
+      "between": [
+        "rune_hammer",
+        "astral_hammer"
+      ],
+      "base": "rune_hammer"
+    },
+    {
+      "family": "bow",
+      "id": "model_bow_3",
+      "name": "Tempered bronze fitted bow",
+      "requiredMetal": "bar_bronze",
+      "level": 3,
+      "req": {
+        "ranged": 3
+      },
+      "b": {
+        "rng": 7
+      },
+      "gold": 90,
+      "between": [
+        "bow_normal",
+        "bow_oak"
+      ],
+      "base": "bow_normal"
+    },
+    {
+      "family": "bow",
+      "id": "model_bow_5",
+      "name": "Fine bronze fitted bow",
+      "requiredMetal": "bar_bronze",
+      "level": 5,
+      "req": {
+        "ranged": 5
+      },
+      "b": {
+        "rng": 9
+      },
+      "gold": 120,
+      "between": [
+        "bow_normal",
+        "bow_oak"
+      ],
+      "base": "bow_normal"
+    },
+    {
+      "family": "bow",
+      "id": "model_bow_15",
+      "name": "Fine iron fitted bow",
+      "requiredMetal": "bar_iron",
+      "level": 15,
+      "req": {
+        "ranged": 15
+      },
+      "b": {
+        "rng": 16
+      },
+      "gold": 320,
+      "between": [
+        "bow_oak",
+        "bow_willow"
+      ],
+      "base": "bow_oak"
+    },
+    {
+      "family": "bow",
+      "id": "model_bow_25",
+      "name": "Fine steel fitted bow",
+      "requiredMetal": "bar_steel",
+      "level": 25,
+      "req": {
+        "ranged": 25
+      },
+      "b": {
+        "rng": 25
+      },
+      "gold": 810,
+      "between": [
+        "bow_willow",
+        "bow_maple"
+      ],
+      "base": "bow_willow"
+    },
+    {
+      "family": "bow",
+      "id": "model_bow_35",
+      "name": "Fine mithril fitted bow",
+      "requiredMetal": "bar_mithril",
+      "level": 35,
+      "req": {
+        "ranged": 35
+      },
+      "b": {
+        "rng": 36
+      },
+      "gold": 2130,
+      "between": [
+        "bow_maple",
+        "bow_yew"
+      ],
+      "base": "bow_maple"
+    },
+    {
+      "family": "bow",
+      "id": "model_bow_45",
+      "name": "Fine adamant fitted bow",
+      "requiredMetal": "bar_adamant",
+      "level": 45,
+      "req": {
+        "ranged": 45
+      },
+      "b": {
+        "rng": 49
+      },
+      "gold": 5920,
+      "between": [
+        "bow_yew",
+        "bow_magic"
+      ],
+      "base": "bow_yew"
+    },
+    {
+      "family": "bow",
+      "id": "model_bow_55",
+      "name": "Fine rune fitted bow",
+      "requiredMetal": "bar_rune",
+      "level": 55,
+      "req": {
+        "ranged": 55
+      },
+      "b": {
+        "rng": 64
+      },
+      "gold": 17320,
+      "between": [
+        "bow_magic",
+        "bow_elder"
+      ],
+      "base": "bow_magic"
+    },
+    {
+      "family": "staff",
+      "id": "model_staff_3",
+      "name": "Tempered bronze banded staff",
+      "requiredMetal": "bar_bronze",
+      "level": 3,
+      "req": {
+        "magic": 3
+      },
+      "b": {
+        "mag": 6
+      },
+      "gold": 100,
+      "between": [
+        "staff_normal",
+        "staff_oak"
+      ],
+      "base": "staff_normal"
+    },
+    {
+      "family": "staff",
+      "id": "model_staff_5",
+      "name": "Fine bronze banded staff",
+      "requiredMetal": "bar_bronze",
+      "level": 5,
+      "req": {
+        "magic": 5
+      },
+      "b": {
+        "mag": 8
+      },
+      "gold": 130,
+      "between": [
+        "staff_normal",
+        "staff_oak"
+      ],
+      "base": "staff_normal"
+    },
+    {
+      "family": "staff",
+      "id": "model_staff_15",
+      "name": "Fine iron banded staff",
+      "requiredMetal": "bar_iron",
+      "level": 15,
+      "req": {
+        "magic": 15
+      },
+      "b": {
+        "mag": 15
+      },
+      "gold": 350,
+      "between": [
+        "staff_oak",
+        "staff_willow"
+      ],
+      "base": "staff_oak"
+    },
+    {
+      "family": "staff",
+      "id": "model_staff_25",
+      "name": "Fine steel banded staff",
+      "requiredMetal": "bar_steel",
+      "level": 25,
+      "req": {
+        "magic": 25
+      },
+      "b": {
+        "mag": 24
+      },
+      "gold": 890,
+      "between": [
+        "staff_willow",
+        "staff_maple"
+      ],
+      "base": "staff_willow"
+    },
+    {
+      "family": "staff",
+      "id": "model_staff_35",
+      "name": "Fine mithril banded staff",
+      "requiredMetal": "bar_mithril",
+      "level": 35,
+      "req": {
+        "magic": 35
+      },
+      "b": {
+        "mag": 35
+      },
+      "gold": 2350,
+      "between": [
+        "staff_maple",
+        "staff_yew"
+      ],
+      "base": "staff_maple"
+    },
+    {
+      "family": "staff",
+      "id": "model_staff_45",
+      "name": "Fine adamant banded staff",
+      "requiredMetal": "bar_adamant",
+      "level": 45,
+      "req": {
+        "magic": 45
+      },
+      "b": {
+        "mag": 48
+      },
+      "gold": 6510,
+      "between": [
+        "staff_yew",
+        "staff_magic"
+      ],
+      "base": "staff_yew"
+    },
+    {
+      "family": "staff",
+      "id": "model_staff_55",
+      "name": "Fine rune banded staff",
+      "requiredMetal": "bar_rune",
+      "level": 55,
+      "req": {
+        "magic": 55
+      },
+      "b": {
+        "mag": 63
+      },
+      "gold": 19050,
+      "between": [
+        "staff_magic",
+        "staff_elder"
+      ],
+      "base": "staff_magic"
+    }
+  ],
+  "bosses": [
+    {
+      "boss": "grubnash",
+      "combatSkillFixture": 8,
+      "candidate": false,
+      "weapon": "bronze_sword",
+      "winRate": 1,
+      "averageSeconds": 27.666666666666668,
+      "foodPerWin": 3.8333333333333335
+    },
+    {
+      "boss": "grubnash",
+      "combatSkillFixture": 8,
+      "candidate": true,
+      "weapon": "model_sword_5",
+      "winRate": 1,
+      "averageSeconds": 27.333333333333332,
+      "foodPerWin": 3.625
+    },
+    {
+      "boss": "oldtusk",
+      "combatSkillFixture": 18,
+      "candidate": false,
+      "weapon": "iron_sword",
+      "winRate": 1,
+      "averageSeconds": 58.5,
+      "foodPerWin": 7.375
+    },
+    {
+      "boss": "oldtusk",
+      "combatSkillFixture": 18,
+      "candidate": true,
+      "weapon": "model_sword_15",
+      "winRate": 1,
+      "averageSeconds": 53.5,
+      "foodPerWin": 6.291666666666667
+    },
+    {
+      "boss": "barnacle",
+      "combatSkillFixture": 25,
+      "candidate": false,
+      "weapon": "steel_sword",
+      "winRate": 1,
+      "averageSeconds": 50.333333333333336,
+      "foodPerWin": 8.416666666666666
+    },
+    {
+      "boss": "barnacle",
+      "combatSkillFixture": 25,
+      "candidate": true,
+      "weapon": "model_sword_25",
+      "winRate": 1,
+      "averageSeconds": 47.833333333333336,
+      "foodPerWin": 8.916666666666666
+    },
+    {
+      "boss": "frostmaw",
+      "combatSkillFixture": 45,
+      "candidate": false,
+      "weapon": "adamant_sword",
+      "winRate": 1,
+      "averageSeconds": 78.5,
+      "foodPerWin": 15.208333333333334
+    },
+    {
+      "boss": "frostmaw",
+      "combatSkillFixture": 45,
+      "candidate": true,
+      "weapon": "model_sword_45",
+      "winRate": 0.9583333333333334,
+      "averageSeconds": 69.91304347826086,
+      "foodPerWin": 13.782608695652174
+    },
+    {
+      "boss": "morwenna",
+      "combatSkillFixture": 65,
+      "candidate": false,
+      "weapon": "astral_sword",
+      "winRate": 1,
+      "averageSeconds": 25.166666666666668,
+      "foodPerWin": 1.6666666666666667
+    },
+    {
+      "boss": "morwenna",
+      "combatSkillFixture": 65,
+      "candidate": true,
+      "weapon": "astral_sword",
+      "winRate": 1,
+      "averageSeconds": 25.166666666666668,
+      "foodPerWin": 1.6666666666666667
+    },
+    {
+      "boss": "pyrrhax",
+      "combatSkillFixture": 85,
+      "candidate": false,
+      "weapon": "astral_sword",
+      "winRate": 1,
+      "averageSeconds": 63.333333333333336,
+      "foodPerWin": 8.666666666666666
+    },
+    {
+      "boss": "pyrrhax",
+      "combatSkillFixture": 85,
+      "candidate": true,
+      "weapon": "astral_sword",
+      "winRate": 1,
+      "averageSeconds": 63.333333333333336,
+      "foodPerWin": 8.666666666666666
+    },
+    {
+      "boss": "zephyrion",
+      "combatSkillFixture": 95,
+      "candidate": false,
+      "weapon": "astral_sword",
+      "winRate": 1,
+      "averageSeconds": 50.5,
+      "foodPerWin": 7.583333333333333
+    },
+    {
+      "boss": "zephyrion",
+      "combatSkillFixture": 95,
+      "candidate": true,
+      "weapon": "astral_sword",
+      "winRate": 1,
+      "averageSeconds": 50.5,
+      "foodPerWin": 7.583333333333333
+    },
+    {
+      "boss": "hollowking",
+      "combatSkillFixture": 97,
+      "candidate": false,
+      "weapon": "astral_sword",
+      "winRate": 0.6666666666666666,
+      "averageSeconds": 80.25,
+      "foodPerWin": 18.0625
+    },
+    {
+      "boss": "hollowking",
+      "combatSkillFixture": 97,
+      "candidate": true,
+      "weapon": "astral_sword",
+      "winRate": 0.6666666666666666,
+      "averageSeconds": 80.25,
+      "foodPerWin": 18.0625
+    }
+  ]
+}

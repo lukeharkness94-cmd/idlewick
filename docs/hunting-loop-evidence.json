@@ -1,0 +1,630 @@
+{
+  "fresh": {
+    "assumptions": "New state; no grants, direct XP edits or unlock shortcuts. Real actions/quest rewards and first boss. Fixed deliberately generous preparation intervals; this is a reachability check, not an optimised beginner route or human pacing test.",
+    "minutes": 67.7,
+    "hunting": 2,
+    "beastmastery": 1,
+    "steps": [
+      {
+        "minutes": 10,
+        "activity": "fish:shrimp",
+        "hero": 4,
+        "combat": 3,
+        "coins": 351
+      },
+      {
+        "minutes": 20,
+        "activity": "wood:normal",
+        "hero": 7,
+        "combat": 3,
+        "coins": 412
+      },
+      {
+        "minutes": 30,
+        "activity": "recipe:cook_shrimp",
+        "hero": 10,
+        "combat": 3,
+        "coins": 630
+      },
+      {
+        "minutes": 60,
+        "activity": "fight:goblin",
+        "hero": 13,
+        "combat": 11,
+        "coins": 3345
+      },
+      {
+        "minutes": 61,
+        "activity": "fight:grubnash",
+        "hero": 13,
+        "combat": 11,
+        "coins": 3494
+      },
+      {
+        "minutes": 64,
+        "activity": "fight:cow",
+        "hero": 13,
+        "combat": 12,
+        "coins": 3546
+      },
+      {
+        "minutes": 65,
+        "activity": "fight:chicken",
+        "hero": 13,
+        "combat": 12,
+        "coins": 3589
+      },
+      {
+        "minutes": 66.5,
+        "activity": "wood:normal",
+        "hero": 13,
+        "combat": 12,
+        "coins": 3589
+      },
+      {
+        "minutes": 66.53,
+        "activity": "recipe:craft_string",
+        "hero": 14,
+        "combat": 12,
+        "coins": 3687
+      },
+      {
+        "minutes": 66.7,
+        "activity": "recipe:craft_trap",
+        "hero": 14,
+        "combat": 12,
+        "coins": 3687
+      },
+      {
+        "minutes": 67.7,
+        "activity": "train:lure:willowbrook",
+        "hero": 14,
+        "combat": 12,
+        "coins": 3687
+      }
+    ]
+  },
+  "traps": [
+    {
+      "trap": "wooden_trap",
+      "cycles": 1000,
+      "breaks": 241,
+      "materialUnits": 2018,
+      "baseDurationMs": 7360,
+      "huntingXp": 204020.86,
+      "assumptions": "Hunting held at 35; Guide held fixed; companions locked to isolate materials; abundant crafted trap stock is granted for this controlled fixture only."
+    },
+    {
+      "trap": "reinforced_trap",
+      "cycles": 1000,
+      "breaks": 73,
+      "materialUnits": 2018,
+      "baseDurationMs": 7360,
+      "huntingXp": 204020.86,
+      "assumptions": "Hunting held at 35; Guide held fixed; companions locked to isolate materials; abundant crafted trap stock is granted for this controlled fixture only."
+    },
+    {
+      "trap": "precision_trap",
+      "cycles": 1000,
+      "breaks": 23,
+      "materialUnits": 2018,
+      "baseDurationMs": 7360,
+      "huntingXp": 204020.86,
+      "assumptions": "Hunting held at 35; Guide held fixed; companions locked to isolate materials; abundant crafted trap stock is granted for this controlled fixture only."
+    }
+  ],
+  "shop": [
+    {
+      "id": "tool_rod_1",
+      "gold": 120,
+      "materials": {
+        "bar_bronze": 3,
+        "log_normal": 2,
+        "string": 2
+      },
+      "initialRegion": "willowbrook"
+    },
+    {
+      "id": "tool_rod_2",
+      "gold": 700,
+      "materials": {
+        "bar_steel": 6,
+        "log_oak": 2,
+        "string": 2
+      },
+      "initialRegion": "mossbarrow"
+    },
+    {
+      "id": "tool_rod_3",
+      "gold": 3500,
+      "materials": {
+        "bar_mithril": 12,
+        "log_willow": 2,
+        "string": 2
+      },
+      "initialRegion": "ironpeak"
+    },
+    {
+      "id": "tool_rod_4",
+      "gold": 16000,
+      "materials": {
+        "bar_adamant": 22,
+        "log_maple": 2,
+        "string": 2
+      },
+      "initialRegion": "gloomfen"
+    },
+    {
+      "id": "tool_rod_5",
+      "gold": 65000,
+      "materials": {
+        "bar_rune": 36,
+        "log_yew": 2,
+        "string": 2
+      },
+      "initialRegion": "emberfall"
+    },
+    {
+      "id": "tool_axe_1",
+      "gold": 120,
+      "materials": {
+        "bar_bronze": 3,
+        "log_normal": 2
+      },
+      "initialRegion": "willowbrook"
+    },
+    {
+      "id": "tool_axe_2",
+      "gold": 700,
+      "materials": {
+        "bar_steel": 6,
+        "log_oak": 2
+      },
+      "initialRegion": "mossbarrow"
+    },
+    {
+      "id": "tool_axe_3",
+      "gold": 3500,
+      "materials": {
+        "bar_mithril": 12,
+        "log_willow": 2
+      },
+      "initialRegion": "ironpeak"
+    },
+    {
+      "id": "tool_axe_4",
+      "gold": 16000,
+      "materials": {
+        "bar_adamant": 22,
+        "log_maple": 2
+      },
+      "initialRegion": "gloomfen"
+    },
+    {
+      "id": "tool_axe_5",
+      "gold": 65000,
+      "materials": {
+        "bar_rune": 36,
+        "log_yew": 2
+      },
+      "initialRegion": "emberfall"
+    },
+    {
+      "id": "tool_pick_1",
+      "gold": 120,
+      "materials": {},
+      "initialRegion": "willowbrook"
+    },
+    {
+      "id": "tool_pick_2",
+      "gold": 700,
+      "materials": {
+        "bar_steel": 6,
+        "log_oak": 2
+      },
+      "initialRegion": "mossbarrow"
+    },
+    {
+      "id": "tool_pick_3",
+      "gold": 3500,
+      "materials": {
+        "bar_mithril": 12,
+        "log_willow": 2
+      },
+      "initialRegion": "ironpeak"
+    },
+    {
+      "id": "tool_pick_4",
+      "gold": 16000,
+      "materials": {
+        "bar_adamant": 22,
+        "log_maple": 2
+      },
+      "initialRegion": "gloomfen"
+    },
+    {
+      "id": "tool_pick_5",
+      "gold": 65000,
+      "materials": {
+        "bar_rune": 36,
+        "log_yew": 2
+      },
+      "initialRegion": "emberfall"
+    },
+    {
+      "id": "tool_gloves_1",
+      "gold": 120,
+      "materials": {
+        "bar_bronze": 3,
+        "cowhide": 2,
+        "string": 2
+      },
+      "initialRegion": "willowbrook"
+    },
+    {
+      "id": "tool_gloves_2",
+      "gold": 700,
+      "materials": {
+        "bar_steel": 6,
+        "frost_pelt": 2,
+        "string": 2
+      },
+      "initialRegion": "mossbarrow"
+    },
+    {
+      "id": "tool_gloves_3",
+      "gold": 3500,
+      "materials": {
+        "bar_mithril": 12,
+        "bogscale": 2,
+        "string": 2
+      },
+      "initialRegion": "ironpeak"
+    },
+    {
+      "id": "tool_gloves_4",
+      "gold": 16000,
+      "materials": {
+        "bar_adamant": 22,
+        "drakehide": 2,
+        "string": 2
+      },
+      "initialRegion": "gloomfen"
+    },
+    {
+      "id": "tool_gloves_5",
+      "gold": 65000,
+      "materials": {
+        "bar_rune": 36,
+        "wyrm_scale": 2,
+        "string": 2
+      },
+      "initialRegion": "emberfall"
+    },
+    {
+      "id": "tool_hoe_1",
+      "gold": 120,
+      "materials": {
+        "bar_bronze": 3,
+        "log_normal": 2
+      },
+      "initialRegion": "willowbrook"
+    },
+    {
+      "id": "tool_hoe_2",
+      "gold": 700,
+      "materials": {
+        "bar_steel": 6,
+        "log_oak": 2
+      },
+      "initialRegion": "mossbarrow"
+    },
+    {
+      "id": "tool_hoe_3",
+      "gold": 3500,
+      "materials": {
+        "bar_mithril": 12,
+        "log_willow": 2
+      },
+      "initialRegion": "ironpeak"
+    },
+    {
+      "id": "tool_hoe_4",
+      "gold": 16000,
+      "materials": {
+        "bar_adamant": 22,
+        "log_maple": 2
+      },
+      "initialRegion": "gloomfen"
+    },
+    {
+      "id": "tool_hoe_5",
+      "gold": 65000,
+      "materials": {
+        "bar_rune": 36,
+        "log_yew": 2
+      },
+      "initialRegion": "emberfall"
+    },
+    {
+      "id": "tool_rod_0.5",
+      "gold": 60,
+      "materials": {
+        "bar_bronze": 2,
+        "log_normal": 2,
+        "string": 2
+      },
+      "initialRegion": "willowbrook"
+    },
+    {
+      "id": "tool_rod_1.5",
+      "gold": 290,
+      "materials": {
+        "bar_iron": 4,
+        "log_oak": 2,
+        "string": 2
+      },
+      "initialRegion": "mossbarrow"
+    },
+    {
+      "id": "tool_rod_2.5",
+      "gold": 1600,
+      "materials": {
+        "bar_steel": 8,
+        "log_willow": 2,
+        "string": 2
+      },
+      "initialRegion": "ironpeak"
+    },
+    {
+      "id": "tool_rod_3.5",
+      "gold": 7500,
+      "materials": {
+        "bar_mithril": 16,
+        "log_maple": 2,
+        "string": 2
+      },
+      "initialRegion": "gloomfen"
+    },
+    {
+      "id": "tool_rod_4.5",
+      "gold": 32500,
+      "materials": {
+        "bar_adamant": 28,
+        "log_yew": 2,
+        "string": 2
+      },
+      "initialRegion": "emberfall"
+    },
+    {
+      "id": "tool_axe_0.5",
+      "gold": 60,
+      "materials": {
+        "bar_bronze": 2,
+        "log_normal": 2
+      },
+      "initialRegion": "willowbrook"
+    },
+    {
+      "id": "tool_axe_1.5",
+      "gold": 290,
+      "materials": {
+        "bar_iron": 4,
+        "log_oak": 2
+      },
+      "initialRegion": "mossbarrow"
+    },
+    {
+      "id": "tool_axe_2.5",
+      "gold": 1600,
+      "materials": {
+        "bar_steel": 8,
+        "log_willow": 2
+      },
+      "initialRegion": "ironpeak"
+    },
+    {
+      "id": "tool_axe_3.5",
+      "gold": 7500,
+      "materials": {
+        "bar_mithril": 16,
+        "log_maple": 2
+      },
+      "initialRegion": "gloomfen"
+    },
+    {
+      "id": "tool_axe_4.5",
+      "gold": 32500,
+      "materials": {
+        "bar_adamant": 28,
+        "log_yew": 2
+      },
+      "initialRegion": "emberfall"
+    },
+    {
+      "id": "tool_pick_0.5",
+      "gold": 60,
+      "materials": {
+        "bar_bronze": 2,
+        "log_normal": 2
+      },
+      "initialRegion": "willowbrook"
+    },
+    {
+      "id": "tool_pick_1.5",
+      "gold": 290,
+      "materials": {
+        "bar_iron": 4,
+        "log_oak": 2
+      },
+      "initialRegion": "mossbarrow"
+    },
+    {
+      "id": "tool_pick_2.5",
+      "gold": 1600,
+      "materials": {
+        "bar_steel": 8,
+        "log_willow": 2
+      },
+      "initialRegion": "ironpeak"
+    },
+    {
+      "id": "tool_pick_3.5",
+      "gold": 7500,
+      "materials": {
+        "bar_mithril": 16,
+        "log_maple": 2
+      },
+      "initialRegion": "gloomfen"
+    },
+    {
+      "id": "tool_pick_4.5",
+      "gold": 32500,
+      "materials": {
+        "bar_adamant": 28,
+        "log_yew": 2
+      },
+      "initialRegion": "emberfall"
+    },
+    {
+      "id": "tool_gloves_0.5",
+      "gold": 60,
+      "materials": {
+        "bar_bronze": 2,
+        "cowhide": 2,
+        "string": 2
+      },
+      "initialRegion": "willowbrook"
+    },
+    {
+      "id": "tool_gloves_1.5",
+      "gold": 290,
+      "materials": {
+        "bar_iron": 4,
+        "frost_pelt": 2,
+        "string": 2
+      },
+      "initialRegion": "mossbarrow"
+    },
+    {
+      "id": "tool_gloves_2.5",
+      "gold": 1600,
+      "materials": {
+        "bar_steel": 8,
+        "bogscale": 2,
+        "string": 2
+      },
+      "initialRegion": "ironpeak"
+    },
+    {
+      "id": "tool_gloves_3.5",
+      "gold": 7500,
+      "materials": {
+        "bar_mithril": 16,
+        "drakehide": 2,
+        "string": 2
+      },
+      "initialRegion": "gloomfen"
+    },
+    {
+      "id": "tool_gloves_4.5",
+      "gold": 32500,
+      "materials": {
+        "bar_adamant": 28,
+        "wyrm_scale": 2,
+        "string": 2
+      },
+      "initialRegion": "emberfall"
+    },
+    {
+      "id": "tool_hoe_0.5",
+      "gold": 60,
+      "materials": {
+        "bar_bronze": 2,
+        "log_normal": 2
+      },
+      "initialRegion": "willowbrook"
+    },
+    {
+      "id": "tool_hoe_1.5",
+      "gold": 290,
+      "materials": {
+        "bar_iron": 4,
+        "log_oak": 2
+      },
+      "initialRegion": "mossbarrow"
+    },
+    {
+      "id": "tool_hoe_2.5",
+      "gold": 1600,
+      "materials": {
+        "bar_steel": 8,
+        "log_willow": 2
+      },
+      "initialRegion": "ironpeak"
+    },
+    {
+      "id": "tool_hoe_3.5",
+      "gold": 7500,
+      "materials": {
+        "bar_mithril": 16,
+        "log_maple": 2
+      },
+      "initialRegion": "gloomfen"
+    },
+    {
+      "id": "tool_hoe_4.5",
+      "gold": 32500,
+      "materials": {
+        "bar_adamant": 28,
+        "log_yew": 2
+      },
+      "initialRegion": "emberfall"
+    }
+  ],
+  "companion": {
+    "minutes": 60,
+    "kills": 1616,
+    "skillFrom": 1,
+    "skillTo": 12,
+    "skillXp": 4216.422104141767,
+    "bondFrom": 1,
+    "bondTo": 9,
+    "assumptions": "Controlled fixture with granted level-25 melee/defence/health, iron equipment, 5,000 bread and a bond-1 Hearthwolf, fighting goblins. Before this change, companion victories gave zero Beastmastery skill XP; bond XP rules are unchanged."
+  },
+  "expeditions": {
+    "basic": {
+      "name": "Basic trap",
+      "cost": 40,
+      "hours": 1,
+      "common": 0.4,
+      "rare": 0.1,
+      "consolation": 5
+    },
+    "iron": {
+      "name": "Iron trap",
+      "cost": 120,
+      "hours": 2,
+      "common": 0.6,
+      "rare": 0.3,
+      "consolation": 10
+    },
+    "rune": {
+      "name": "Rune trap",
+      "item": "rune_trap",
+      "hours": 4,
+      "common": 0.8,
+      "rare": 0.6,
+      "consolation": 20
+    },
+    "padded": {
+      "name": "Padded live trap",
+      "item": "live_trap",
+      "hours": 1,
+      "common": 0.55,
+      "rare": 0.2,
+      "consolation": 10
+    },
+    "notes": "Basic/Iron/Rune odds and pity are unchanged. Padded is a crafted, consumed one-hour alternative. Rates per attempt are not guaranteed eggs per hour."
+  }
+}

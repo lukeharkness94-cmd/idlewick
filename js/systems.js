@@ -19,9 +19,9 @@ DQ.fx = () => {
   });
   if (DQ.techFx) DQ.techFx(f);
   /* a damaged building (js/world_events.js) gives nothing until it is repaired */
-  if (S().projects && S().projects.well && !(S().damaged || {}).well) f.regen += .1;
-  if (S().projects && S().projects.inn && !(S().damaged || {}).inn) f.heal += .05;
-  for(const [id,p] of Object.entries(D.PROJECTS||{}))if(S().projects[id]&&p.fx&&!(S().damaged||{})[id])for(const [key,value] of Object.entries(p.fx)){
+  if (S().projects && S().projects.well && (!DQ.projectBenefitActive || DQ.projectBenefitActive('well')) && !(S().damaged || {}).well) f.regen += .1;
+  if (S().projects && S().projects.inn && (!DQ.projectBenefitActive || DQ.projectBenefitActive('inn')) && !(S().damaged || {}).inn) f.heal += .05;
+  for(const [id,p] of Object.entries(D.PROJECTS||{}))if(S().projects[id]&&(!DQ.projectBenefitActive||DQ.projectBenefitActive(id))&&p.fx&&!(S().damaged||{})[id])for(const [key,value] of Object.entries(p.fx)){
     if(key.startsWith('speed_'))f.speed[key.slice(6)]=(f.speed[key.slice(6)]||0)+value; else if(key.startsWith('xp_'))f.xp[key.slice(3)]=(f.xp[key.slice(3)]||0)+value; else f[key]=(f[key]||0)+value;
   }
   f.dmg += f.trophy * Object.values(S().towns).filter(t => t.boss).length;
@@ -194,7 +194,18 @@ DQ.hire = i => {
   S().hire.cands.splice(i, 1, mkCand()); DQ.sfx('buy'); DQ.log(`You hire ${c.name}, a ${D.SK[c.skill].name.toLowerCase()} hand.`); S().stats.hired = (S().stats.hired || 0) + 1; DQ.achDirty = true; DQ.emit('workers');
 };
 DQ.dismiss = id => { S().workers = S().workers.filter(w => w.id !== id); DQ.emit('workers'); };
-DQ.assign = (id, node) => { const w = S().workers.find(x => x.id === id); if (!w) return; w.task = node; w.t = 0; w.unpaid = false; DQ.sfx('start'); DQ.emit('workers'); };
+DQ.workerCanGather = (w,node) => { const n=D.NODE[node];return !!w&&(w.skill==='farming'?node==='farm':!!n&&n.skill===w.skill&&n.lvl<=D.lvlOf(w.xp)&&DQ.townUnlocked(n.town)); };
+DQ.assign = (id, node, target = null, label = '') => {
+ const w=S().workers.find(x=>x.id===id);if(!w||node&&!DQ.workerCanGather(w,node))return false;
+ if(target!==null&&(!Number.isSafeInteger(target)||target<1||target>1000000||w.skill==='farming'))return false;
+ w.task=node||null;w.t=0;w.unpaid=false;w.job=target===null?null:{item:D.NODE[node].item,target,done:0,label:String(label).slice(0,120)};w.jobComplete=null;
+ DQ.sfx('start');DQ.emit('workers');return true;
+};
+DQ.finishWorkerJob = w => {if(!w.job||w.job.done<w.job.target)return;w.jobComplete={...w.job};w.job=null;w.task=null;w.t=0;w.unpaid=false;
+ if(!DQ.forecasting){DQ.journal&&DQ.journal('worker',`${w.name} finished: ${fmt(w.jobComplete.done)} ${D.ITEMS[w.jobComplete.item].name} sent to bank. Wages stopped.`,'users');
+ if(!DQ.sim.on)DQ.emit('workers');
+ if(!DQ.sim.on)DQ.notify({kind:'info',key:'worker-done:'+w.id,icon:'users',title:`${w.name}: job complete`,text:`${fmt(w.jobComplete.done)} ${D.ITEMS[w.jobComplete.item].name} in the bank. Wages stopped.`,sound:false});}
+};
 DQ.workerDur = w => {
   const tr = DQ.traitOf(w), sp = clamp(1 - DQ.fx().wspeed - (tr[1] === 'wspeed' ? tr[2] : 0) - (w.boost || 0), .4, 1) * (w.sulk > GT() ? 1.25 : 1);
   if (w.skill === 'farming') return 8000 * sp;
@@ -211,10 +222,11 @@ function workStep(w) {
     const L = D.lvlOf(w.xp), p = clamp(.58 + (L - n.lvl) * .012, .55, .96);
     if (chance(p)) {
       const q = 1 + (tr[1] === 'dbl' && chance(tr[2]) ? 1 : 0);
-      S().bank[n.item] = (S().bank[n.item] || 0) + q; DQ.invDirty = true; if (DQ.sim.on) DQ.sim.items[n.item] = (DQ.sim.items[n.item] || 0) + q;
-      w.made[n.item] = (w.made[n.item] || 0) + q; w.xp += n.xp * .35 * (tr[1] === 'xp' ? 1 + tr[2] : 1);
+      S().bank[n.item] = (S().bank[n.item] || 0) + q; if(DQ.rememberItem)DQ.rememberItem(n.item); DQ.invDirty = true; if (DQ.sim.on) DQ.sim.items[n.item] = (DQ.sim.items[n.item] || 0) + q;
+      w.made[n.item] = (w.made[n.item] || 0) + q; if(w.job&&w.job.item===n.item)w.job.done+=q; w.xp += n.xp * .35 * (tr[1] === 'xp' ? 1 + tr[2] : 1);
     }
   }
+  DQ.finishWorkerJob(w);
   const after = D.lvlOf(w.xp);
   if (after > before && !DQ.sim.on) DQ.notify({ kind: 'info', key: 'w:' + w.id, icon: 'users', col: D.SK[w.skill].col, title: `${w.name} reached level ${after}`, text: `${D.SK[w.skill].name} hand. Better work unlocks as they level.`, sound: false, ttl: 5000 });
   if (after > before) w.wage = +(1 + after * .6).toFixed(1);
@@ -233,11 +245,17 @@ DQ.advanceWorld = dt => {
     while (a.t >= per && a.stored < 5 && g++ < 500) { if (F.feed <= 0) { a.t = per; a.hungry = true; break; } F.feed--; a.stored++; a.t -= per; a.hungry = false; }
   });
   s.workers.forEach(w => {
-    if (!w.task) return;
-    w.owed += DQ.workerWage(w) * dt / 60000;
-    if (w.owed >= 1) { const c = Math.floor(w.owed); if (s.coins >= c) { s.coins -= c; w.owed -= c; w.unpaid = false; } else { if (!w.unpaid && !DQ.sim.on) DQ.notify({ kind: 'warn', key: 'unpaid', icon: 'coin', col: '#e5b04a', title: `${w.name} has stopped working`, text: 'You cannot afford their wages. Earn some coins and they will start again.', sound: 'stop' }); w.unpaid = true; w.owed = Math.min(w.owed, 5); return; } }
-    const d = DQ.workerDur(w); if (!d) return; w.t += dt; let g = 0;
-    while (w.t >= d && g++ < 6000) { w.t -= d; workStep(w); }
+    if(!w.task)return;
+    if(w.job&&w.job.done>=w.job.target){DQ.finishWorkerJob(w);return;}
+    let remaining=dt,guard=0;
+    while(w.task&&remaining>0&&guard++<6000){
+      const d=DQ.workerDur(w);if(!d)break;
+      if(w.unpaid&&s.coins<Math.max(1,Math.floor(w.owed)))break;
+      const span=Math.min(remaining,Math.max(0,d-w.t)),owed=w.owed+DQ.workerWage(w)*span/60000,c=Math.floor(owed);
+      if(s.coins<c){w.unpaid=true;w.owed=Math.min(owed,5);if(!DQ.sim.on)DQ.notify({kind:'warn',key:'unpaid',icon:'coin',title:`${w.name} has stopped working`,text:'Their wages are unpaid. They resume when you have coins.',sound:false});break;}
+      s.coins-=c;w.owed=owed-c;w.unpaid=false;w.t+=span;remaining-=span;
+      if(w.t+1e-6>=d){w.t=Math.max(0,w.t-d);workStep(w);}else break;
+    }
   });
   if ((petAcc += dt) > 2000) { petAcc = 0; DQ.fxDirty(); }
 };

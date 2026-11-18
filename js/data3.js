@@ -138,7 +138,7 @@ set('hunting', { chop: 20, 'own:wooden_trap': 3, combat: 8 });
 set('herbalism', { harvest: 20, 'skill:farming': 10 });
 set('exploration', { catch: 25, chop: 25, 'visit:mossbarrow': 1 });
 /* starter routes that no longer ask for the skill they unlock */
-const mp = D.QM.miners_pick; if (mp) { mp.adv = 3; mp.blurb = 'Brannoc’s old mine is full of rats and its props are rotten. Clear the rats and bring timber, and he will hand you his spare pickaxe so you can learn Mining.'; mp.obj = [{ ev: 'chop', key: 'normal', n: 10, label: 'Chop 10 logs for new pit props' }, { ev: 'kill', key: 'rat', n: 4, label: 'Clear 4 rats from the old mine' }]; }
+const mp = D.QM.miners_pick; if (mp) { mp.adv = 3; mp.blurb = 'The old mine’s full of rats, and the timber holding the roof up has seen better days. Cut some fresh logs and clear the rats out before anyone goes back in. Do that properly and you can have my spare pickaxe. Mind the handle. It’s older than you, and considerably less forgiving.'; mp.obj = [{ ev: 'chop', key: 'normal', n: 10, label: 'Chop 10 logs for new pit props' }, { ev: 'kill', key: 'rat', n: 4, label: 'Clear 4 rats from the old mine' }]; }
 const mc = D.QM.mq_crafting; if (mc) { mc.adv = 8; D.SK.crafting.unlock = 8; mc.obj = mc.obj.map(o => o.ev === 'chop' && o.key === 'birch' ? { ev: 'chop', key: 'normal', n: 15, label: 'Chop 15 logs for her frames' } : o); }
 })();
 
@@ -154,5 +154,40 @@ for (let t = 1; t <= 5; t++) {
   const rod = `tool_rod_${t}`, gl = `tool_gloves_${t}`, hv = D.ITEMS[T.hides[t - 1]].val;
   add({ id: 'craft_' + rod, skill: 'crafting', tab: 'Tools', name: D.ITEMS[rod].name, lvl: T.rodLvl[t - 1], xp: Math.round(28 * Math.pow(2.1, t)), t: 3000, in: { [T.logs[t - 1]]: 3, string: 2, [bar]: Math.max(1, Math.ceil(D.ITEMS[rod].val * .7 / bv)) }, out: { [rod]: 1 }, ev: 'craft' });
   add({ id: 'craft_' + gl, skill: 'crafting', tab: 'Tools', name: D.ITEMS[gl].name, lvl: T.gloveLvl[t - 1], xp: Math.round(28 * Math.pow(2.1, t)), t: 3000, in: { [T.hides[t - 1]]: Math.max(2, Math.ceil(D.ITEMS[gl].val * .9 / hv)), string: 2 }, out: { [gl]: 1 }, ev: 'craft' });
+}
+})();
+
+/* Base-game equipment progression: intermediate workmanship uses existing mineable metals. */
+(() => {
+const D=window.DQ.data, add=r=>{D.RECIPES[r.id]=r;D.RLIST[r.skill].push(r);};
+D.STARTER_KITS={sword:{weapon:'bronze_sword',label:'Sword',hint:'Straightforward melee combat.'},bow:{weapon:'bow_normal',label:'Bow',hint:'Ranged combat · 300 bronze arrows.',ammo:'arrow_bronze',quantity:300},staff:{weapon:'staff_normal',label:'Staff',hint:'Magic combat · Spark and 300 runes.',runes:300}};
+D.TOOL_ORDER=[.5,1,1.5,2,2.5,3,3.5,4,4.5,5];
+const grades=['Bronze','Reinforced bronze','Iron','Steel','Reinforced steel','Mithril','Reinforced mithril','Adamant','Reinforced adamant','Runic'];
+const metals=['bronze','bronze','iron','steel','steel','mithril','mithril','adamant','adamant','rune'];
+const speeds=[.04,.08,.12,.16,.205,.25,.30,.35,.40,.45],prices=[60,120,290,700,1600,3500,7500,16000,32500,65000],levels=[1,6,16,31,40,51,60,71,80,86],counts=[2,3,4,6,8,12,16,22,28,36];
+D.TOOL_COSTS={};
+for(const [key,sk,ic,label]of D.TOOLS)for(let i=0;i<10;i++){
+ const tier=D.TOOL_ORDER[i],id=`tool_${key}_${tier}`,base=D.ITEMS[`tool_${key}_${Math.ceil(tier)}`],bar='bar_'+metals[i],metal=D.TIERS.find(t=>t.id===metals[i]);
+ if(!D.ITEMS[id]){D.ITEMS[id]={...base,id,tier,buy:prices[i],val:Math.round(prices[i]/3),artBase:base.id,workmanship:i};for(const stock of Object.values(D.SHOPS))if(stock.includes(base.id))stock.push(id);}
+ const it=D.ITEMS[id];it.name=grades[i]+' '+label.toLowerCase();it.col=metal.col;D.TOOL_SPEED[tier]=speeds[i];D.TOOL_PRICE[tier]=prices[i];
+ const inputs={[bar]:counts[i]},wood=D.TOOL_MAKE.logs[Math.ceil(tier)-1];
+ if(key==='gloves'){inputs[D.TOOL_MAKE.hides[Math.ceil(tier)-1]]=2;inputs.string=2;}else{inputs[wood]=2;if(key==='rod')inputs.string=2;}
+ D.TOOL_COSTS[id]=inputs;it.val=Math.max(1,Math.floor(Object.entries(inputs).reduce((n,[k,v])=>n+D.ITEMS[k].val*v,0)*.5*.7));
+ const rid='smith_'+id,old=D.RECIPES[rid];if(old){old.name=it.name;old.lvl=levels[i];old.in={...inputs};}else add({id:rid,skill:'smithing',tab:'Tools',name:it.name,lvl:levels[i],xp:Math.round(30*Math.pow(2.1,tier)),t:3000,in:{...inputs},out:{[id]:1},ev:'smith'});
+ const craft=D.RECIPES['craft_'+id];if(craft){craft.name=it.name;craft.in={...inputs};}
+}
+// Ordinary bows and staves need forged fittings as well as their wood and casting supplies.
+for(const r of D.RLIST.crafting)for(const id of Object.keys(r.out)){const it=D.ITEMS[id];if(it.slot==='weapon'&&Number.isInteger(it.tier)){const bar='bar_'+D.TIERS[it.tier].id;r.in[bar]=Math.max(1,r.in[bar]||1);}}
+const families={sword:D.TIERS.map(t=>t.id+'_sword'),dagger:D.TIERS.map(t=>t.id+'_dagger'),hammer:D.TIERS.map(t=>t.id+'_hammer'),bow:['normal','oak','willow','maple','yew','magic','elder'].map(x=>'bow_'+x),staff:['normal','oak','willow','maple','yew','magic','elder'].map(x=>'staff_'+x)};
+const extra=[3,5,15,25,35,45,55],labels=['Tempered bronze','Fine bronze','Fine iron','Fine steel','Fine mithril','Fine adamant','Fine rune'],nouns={sword:'longsword',dagger:'dagger',hammer:'warhammer',bow:'fitted bow',staff:'banded staff'};
+D.WEAPON_BRIDGES=[];
+for(const [family,ids]of Object.entries(families))for(let i=0;i<extra.length;i++){
+ const level=extra[i],hi=ids.findIndex(id=>Math.max(...Object.values(D.ITEMS[id].req))>level),a=D.ITEMS[ids[hi-1]],b=D.ITEMS[ids[hi]],la=Math.max(...Object.values(a.req)),lb=Math.max(...Object.values(b.req)),t=(level-la)/(lb-la),id=`fine_${family}_${level}`,stats={};
+ for(const key of new Set([...Object.keys(a.b),...Object.keys(b.b)]))stats[key]=Math.round((a.b[key]||0)+((b.b[key]||0)-(a.b[key]||0))*t);
+ const baseRecipe=Object.values(D.RECIPES).find(r=>r.out[a.id]),recipeUpper=Object.values(D.RECIPES).find(r=>r.out[b.id]),metal=D.TIERS[hi-1],bar='bar_'+metal.id;
+ const it=D.ITEMS[id]={...a,id,name:labels[i]+' '+nouns[family],b:stats,req:{[Object.keys(a.req)[0]]:level},tier:hi-1,buy:Math.round(a.buy*Math.pow(b.buy/a.buy,t)/10)*10,artBase:a.id,workmanship:i+1};it.val=Math.min(Math.round(it.buy/3),Math.max(a.val,Math.round((a.val+b.val)/2)));
+ const skill=baseRecipe.skill,rid=(skill==='smithing'?'smith_':'craft_')+id,inputs={...baseRecipe.in};inputs[bar]=Math.max(1,(inputs[bar]||1)+1);
+ add({id:rid,skill,tab:baseRecipe.tab,name:it.name,lvl:Math.min(99,Math.round(baseRecipe.lvl+(recipeUpper.lvl-baseRecipe.lvl)*t)),xp:Math.round(baseRecipe.xp+(recipeUpper.xp-baseRecipe.xp)*t),t:baseRecipe.t,in:inputs,out:{[id]:1},ev:baseRecipe.ev});
+ D.WEAPON_BRIDGES.push(id);for(const stock of Object.values(D.SHOPS))if(stock.includes(a.id))stock.push(id);
 }
 })();
