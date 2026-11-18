@@ -216,3 +216,36 @@ body{background-color:var(--ground)}
 #view .illustrated-choices .illustrated-card>small,#view .illustrated-choices .illustrated-card>.choice-state{font-size:15px!important;line-height:1.3}
 @media(max-width:380px){.shop-upgrade-header .shop-categories{grid-template-columns:1fr!important}.shop-upgrade-header .tool-families{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:380px){.visual-shop>.shop-stock{padding:6px!important}#view .illustrated-choices{padding:2px!important}#view .illustrated-choices .illustrated-card{padding:8px!important}}
+/* Four-column desktop catalogues retain a fixed footprint and full labels. */
+:root{--catalogue-card-width:260px}
+#view .illustrated-choices{max-width:1088px;width:100%}
+#view .illustrated-choices .illustrated-card{padding-left:6px!important;padding-right:6px!important}
+@media(min-width:861px){.visual-shop{grid-template-columns:minmax(0,1fr) 300px!important}}
+/* Shared packing: available width determines the column count, never a hard cap. */
+#view .illustrated-choices{max-width:none}
+#view :is(.beast-cards,.guide-cards,.hfurn-grid,.scholarship-grid,.techgrid,.skl,.tool-upgrade-grid,.magic-spell-choices .spells){--packed-card-width:260px;display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(100%,var(--packed-card-width)),var(--packed-card-width)))!important;gap:12px;justify-content:start;align-content:start;min-width:0}
+#view :is(.guide-cards,.scholarship-grid,.techgrid){--packed-card-width:360px}
+#view .hfurn-grid{--packed-card-width:320px}
+#view :is(.beast-choice>b,.guide-cards .beast>span>b,.hfurn-head b,.tech .th>b,.skrow>span){white-space:nowrap;overflow-wrap:normal;word-break:normal}
+#view .beast-choice{min-width:0}
+#view .tech .th{flex-wrap:wrap}
+#view .tech .th>b{flex-basis:100%}
+#view .estate-fields>.plots{grid-template-columns:repeat(auto-fill,minmax(min(100%,140px),140px))!important;justify-content:start}
+#view .estate-pasture>.pens{grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),210px))!important;justify-content:start}
+#view .seed-choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,140px),140px))!important;justify-content:start}
+#view .seed-choice>span,#view .plot>b,#view .pen-t>b{white-space:nowrap!important}
+#view .pen-grid{grid-template-columns:repeat(auto-fill,calc(96px * var(--k)));justify-content:start}
+@media(max-width:860px){#view .guide-cards .beast{grid-template-columns:1fr;justify-items:center}#view .guide-cards .beast>span{width:100%;min-width:0}}
+#view :is(.achgrid,.unlock-grid,.col-list){--packed-card-width:360px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,var(--packed-card-width)),var(--packed-card-width)));justify-content:start;align-content:start;gap:12px;min-width:0}
+#view .col-list{--packed-card-width:520px}
+#view .skl{--packed-card-width:360px}
+#view .hfurn>b,#view .ach h3,#view .col-t>b{white-space:nowrap;word-break:normal;overflow-wrap:normal}
+@media(max-width:860px){#view .col-row{grid-template-columns:1fr;justify-items:start}#view .col-row .col-t,#view .col-row .col-o{grid-column:1;width:100%}}
+#view .ach>div>b{white-space:nowrap}
+#view .mu-tiles{grid-template-columns:repeat(auto-fill,48px);justify-content:start}
+#view .skrow small.sk-next{overflow:visible;text-overflow:clip}
+/* The live field guide uses topic tiles, sharing the same packing contract. */
+#view :is(.ga-near,.ga-all){display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),260px))!important;justify-content:start;align-content:start;gap:12px}
+#view :is(.ga-near,.ga-all) .gt{width:100%;height:170px;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px}
+#view :is(.ga-near,.ga-all) .gt>b{max-width:none;white-space:nowrap;overflow:visible;text-overflow:clip;font-size:17px}
+#view .hfurn-grid{--packed-card-width:260px}

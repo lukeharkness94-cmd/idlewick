@@ -82,7 +82,7 @@ const SETUP = {
         // Required inputs are explicitly named (owner, 17 Nov); undiscovered outputs stay concealed.
         const needed=new Set([...root.querySelectorAll('[data-do="route"]')].map(e=>e.dataset.a));
         if(pageSkill)Object.values(D.RECIPES).filter(x=>x.skill===pageSkill.id).forEach(x=>Object.keys(x.in||{}).forEach(id=>needed.add(id)));
-        for(const id of needed){if(D.ITEMS[id])hidden.delete(D.ITEMS[id].name);Object.values(D.NODE).filter(n=>n.item===id).forEach(n=>hidden.delete(n.name));}
+        for(const id of needed){if(D.ITEMS[id])hidden.delete(D.ITEMS[id].name);if(id.startsWith('seed_')&&D.CROP[id.slice(5)])hidden.delete(D.CROP[id.slice(5)].name);Object.values(D.NODE).filter(n=>n.item===id).forEach(n=>hidden.delete(n.name));}
         const text = strip(root.innerText);
         const tips0 = [...root.querySelectorAll('[title],[data-tip],[aria-label]')].map(e => [e.getAttribute('title'), (e.getAttribute('data-tip') || '').startsWith('text:') ? e.getAttribute('data-tip').slice(5) : '', e.getAttribute('aria-label')].join(' ')).join('\n'), tips = strip(tips0);
         for (const [name, why] of hidden) {
