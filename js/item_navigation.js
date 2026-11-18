@@ -30,7 +30,7 @@ Q.itemNavigation=id=>{
  if(Object.values(D.BEAST_TRAPS||{}).some(t=>t.item===id))add(use,'beasts','beastmastery','page','beastmastery','Beastmastery',U.activityIcon('beastmastery'));
  if(Q.sellable(id))add(use,'sell','shop','sell',id,'Sell in the shop',ico('shop'));
  if(it.slot)add(use,'gear','character','page','character','Equipment',ico('bag'));
- for(const x of Q.usesOf(id)){const a=x.go;if(a)add(use,a.a,a.a,a.do==='openproject'?'project':'page',a.a,a.label,U.activityIcon(a.a));}
+ for(const x of Q.usesOf(id)){const a=x.go,page=({project:'projects',quest:'quests',research:'research',boat:'carpentry',farm:'farming'})[x.k]||a?.a;if(a&&!use.some(r=>r.page===page))add(use,page,page,a.do==='openproject'?'project':'page',a.a,a.label,U.activityIcon(page));}
  if(Q.recoveryOffers?.().includes(id))add(get,'recovery','shop','recovery',id,'Buy back',ico('bag'));
  return {get,use};
 };
