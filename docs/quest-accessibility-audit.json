@@ -103,46 +103,28 @@
     {
       "id": "mq_crafting",
       "name": "Needle and Thread",
-      "region": "mossbarrow",
-      "hero": 8,
+      "region": "willowbrook",
+      "hero": 3,
       "guild": null,
       "prerequisite": null,
-      "requirements": [
-        {
-          "sk": "woodcutting",
-          "lvl": 1
-        }
-      ],
+      "requirements": [],
       "recommendation": {
-        "hero": 8,
+        "hero": 3,
         "combat": 0,
         "skill": null
       },
       "objectives": [
         {
           "event": "deliver",
-          "target": "cowhide",
-          "count": 8,
+          "target": "flax",
+          "count": 10,
           "activityOptions": []
         },
         {
           "event": "deliver",
-          "target": "feather",
-          "count": 20,
+          "target": "log_normal",
+          "count": 5,
           "activityOptions": []
-        },
-        {
-          "event": "chop",
-          "target": "normal",
-          "count": 15,
-          "activityOptions": [
-            {
-              "kind": "wood",
-              "id": "normal",
-              "skill": "woodcutting",
-              "lvl": 1
-            }
-          ]
         }
       ]
     },
@@ -3234,6 +3216,12 @@
           "activityOptions": [
             {
               "kind": "recipe",
+              "id": "craft_flax_string",
+              "skill": "crafting",
+              "lvl": 1
+            },
+            {
+              "kind": "recipe",
               "id": "craft_leather_coif",
               "skill": "crafting",
               "lvl": 1
@@ -5137,6 +5125,12 @@
           "target": "*",
           "count": 8,
           "activityOptions": [
+            {
+              "kind": "recipe",
+              "id": "craft_flax_string",
+              "skill": "crafting",
+              "lvl": 1
+            },
             {
               "kind": "recipe",
               "id": "craft_leather_coif",
@@ -8075,6 +8069,12 @@
           "target": "*",
           "count": 5,
           "activityOptions": [
+            {
+              "kind": "recipe",
+              "id": "craft_flax_string",
+              "skill": "crafting",
+              "lvl": 1
+            },
             {
               "kind": "recipe",
               "id": "craft_leather_coif",
@@ -11427,6 +11427,12 @@
           "activityOptions": [
             {
               "kind": "recipe",
+              "id": "craft_flax_string",
+              "skill": "crafting",
+              "lvl": 1
+            },
+            {
+              "kind": "recipe",
               "id": "craft_leather_coif",
               "skill": "crafting",
               "lvl": 1
@@ -12807,6 +12813,12 @@
           "target": "string",
           "count": 8,
           "activityOptions": [
+            {
+              "kind": "recipe",
+              "id": "craft_flax_string",
+              "skill": "crafting",
+              "lvl": 1
+            },
             {
               "kind": "recipe",
               "id": "craft_string",

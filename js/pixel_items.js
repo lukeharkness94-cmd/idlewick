@@ -402,6 +402,7 @@ function dishSprite(s, d) {
 function itemSprite(id) {
   const it = D.ITEMS[id]; if (!it) return null;
   const s = Spr(16, 16), col = it.col || '#999999';
+  if(id==='flax'){for(const [x,y]of [[4,3],[8,1],[12,4]]){s.line(x,y+2,8,14,R.wood);s.line(x+1,y+2,9,13,null,'#78a58b');s.ell(x,y+1,2,2,rp('#7f91bf'));s.fix(x,y,'#d9d4a5');}s.rect(5,10,6,2,R.straw);return s;}
   if(it.crossArt){
     const seed=[...id].reduce((n,c)=>n+c.charCodeAt(0),0),m=rp(col);
     if(id.startsWith('chart_')){s.poly([[2,2],[12,1],[14,13],[4,14]],rp('#d8c18b'));s.line(5,4,10,11,null,'#6a8157');s.line(5,11,11,5,null,'#8a754f');s.fix(3+seed%7,4,'#607f9c');s.rect(4+seed%5,9,2,2,m);}

@@ -26,17 +26,18 @@ Q.buy=(id,qty=1)=>{
  const before=JSON.parse(JSON.stringify(S()));S().coins-=coins;for(const[k,n]of Object.entries(cost))Q.take(k,n*count);Q.give(id,count);S().stats.bought+=count;if(tool)S().stats.tools++;
  if(!Q.save()){Q.S=before;Q.xpAliases(Q.S);Q.fxDirty();return false;}Q.sfx('buy');Q.achDirty=true;Q.emit('shop');return true;
 };
-const families=D.TOOLS.map(([key,sk,ic,label])=>({key,sk,ic,label,ids:D.TOOL_ORDER.map(t=>'tool_'+key+'_'+t)}));
+const families=D.TOOLS.map(([key,sk,ic,label])=>({key,sk,ic,label:D.SK[sk].name,ids:D.TOOL_ORDER.map(t=>'tool_'+key+'_'+t)}));
 const targets0=Q.actionTargets;
 if(targets0)Q.actionTargets=page=>page==='shop'?families.flatMap(f=>f.ids.filter(id=>Q.shopUpgradeState(id).ready).map(id=>({page:'shop',kind:'tool',family:f.key,id}))):targets0(page);
 const selectReadyTool=family=>{const f=families.find(f=>f.key===family),id=f?.ids.find(id=>Q.shopUpgradeState(id).ready);if(id)UI.shopSelected.buy=id;return id;};
-const cues=ids=>{const ready=ids.filter(id=>Q.shopUpgradeState(id).ready).length;return ready?`<span class="notice-badge upgrade-cue ready" aria-label="${ready} upgrades ready" data-tip="text:${ready} upgrades ready: coins and materials available">${ready}</span>`:'';};
+const cues=ids=>{const ready=ids.filter(id=>Q.shopUpgradeState(id).ready).length+(ids.length>10?(UI.shopUpgradeExtraCount?.()||0):0);return ready?`<span class="notice-badge upgrade-cue ready" aria-label="${ready} upgrades ready" data-tip="text:${ready} upgrades ready: coins and materials available">${ready}</span>`:'';};
 UI.shopCategory=UI.shopCategory||'tools';UI.shopToolFamily='axe';
-UI.shopCatalogFilter=id=>{const it=D.ITEMS[id];return UI.shopCategory==='equipment'?it.type!=='tool'&&!!(it.slot||it.type==='ammo'):it.type!=='tool'&&!it.slot&&it.type!=='ammo';};
+UI.shopCatalogFilter=id=>{const it=D.ITEMS[id];return UI.shopCategory==='equipment'?it.type!=='tool'&&!!(it.slot||it.type==='ammo'):it.type!=='tool'&&!it.slot&&it.type!=='ammo'&&(!UI.shopSupplyFilter||UI.shopSupplyFilter(id));};
 UI.shopCardCost=id=>UI.money(Q.buyPrice(id))+`<span class="shop-mat-price">${Object.entries(Q.shopMaterialCost(id)).map(([k,n])=>`<span>${Q.itemDiscovered(k)?Q.itemIco(D.ITEMS[k]):ico('lock')}<b>${n}</b></span>`).join('')}</span>`;
 const tabs0=UI.shopTabs;
-UI.shopTabs=tab=>tabs0(tab)+`<nav class="shop-categories" aria-label="Shop categories">${[['tools','Tools','mining'],['equipment','Equipment','shield'],['supplies','Supplies','bag']].map(([id,label,ic])=>`<button class="btn ${tab==='buy'&&UI.shopCategory===id?'on':''}" data-do="shopcategory" data-a="${id}">${ico(ic)}<span>${label}</span>${id==='tools'?cues(families.flatMap(f=>f.ids)):''}</button>`).join('')}</nav>`;
-const familyNav=()=>`<nav class="tool-families" aria-label="Tool families">${families.map(f=>`<button class="btn ${UI.shopTab==='buy'&&UI.shopCategory==='tools'&&f.key===UI.shopToolFamily?'on':''}" data-do="toolfamily" data-a="${f.key}" aria-pressed="${UI.shopTab==='buy'&&UI.shopCategory==='tools'&&f.key===UI.shopToolFamily}">${UI.activityIcon(f.sk)}<span>${esc(f.label)}</span>${cues(f.ids)}</button>`).join('')}</nav>`;
+UI.shopTabs=tab=>tabs0(tab)+`<nav class="shop-categories" aria-label="Shop categories">${[['tools','Skill upgrades','mining'],['equipment','Equipment','shield'],['supplies','Supplies','bag']].map(([id,label,ic])=>`<button class="btn ${tab==='buy'&&UI.shopCategory===id?'on':''}" data-do="shopcategory" data-a="${id}">${ico(ic)}<span>${label}</span>${id==='tools'?cues(families.flatMap(f=>f.ids)):''}</button>`).join('')}</nav>`;
+UI.shopSkillExtraNav=()=>'';
+const familyNav=()=>`<nav class="tool-families" aria-label="Skill upgrades">${families.map(f=>`<button class="btn ${UI.shopTab==='buy'&&UI.shopCategory==='tools'&&f.key===UI.shopToolFamily?'on':''}" data-do="toolfamily" data-a="${f.key}" aria-pressed="${UI.shopTab==='buy'&&UI.shopCategory==='tools'&&f.key===UI.shopToolFamily}">${UI.activityIcon(f.sk)}<span>${esc(f.label)}</span>${cues(f.ids)}</button>`).join('')}${UI.shopSkillExtraNav()}</nav>`;
 const shopHeader=()=>`<section class="panel shop-upgrade-header"><div class="phead"><h2>Shop</h2><small>${esc(D.TOWN[S().town].name)}</small></div>${UI.shopTabs(UI.shopTab)}${familyNav()}</section>`;
 // One scaffold for every shelf: navigation never sits inside a changing item panel.
 const stableShop=raw=>{

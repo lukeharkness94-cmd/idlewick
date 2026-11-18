@@ -4875,6 +4875,32 @@ body{background-color:var(--ground)}
 .hs-home-reference .unlock-step{padding:5px 0}
 /* Routine acknowledgements rise at the bottom instead of covering the control that was just redrawn. */
 .hearthside .toast.at-btn{left:50%!important;top:auto!important;bottom:20px;transform:translateX(-50%);animation-name:toast}
+
+/* Raised choice cards retain their surround inside clipped choice lists. */
+.illustrated-choices{padding:6px!important;scroll-padding-top:6px}
+.illustrated-card:hover,.illustrated-card:focus-visible{position:relative;z-index:2;translate:0 0!important}
+#tip{z-index:10000;max-height:calc(var(--vh100,100vh) - 24px);overflow-y:auto}
+.tool-families{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px!important}
+.tool-families .btn{padding:5px!important;min-height:34px;min-width:0;font-size:14px;white-space:normal}
+.tool-families .btn img{width:24px!important;height:24px!important}
+.recovery-shelf{overflow-y:auto}
+@media(max-width:860px){.tool-families{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+/* Requirement text stays on one line; only whole tiles reflow on narrow screens. */
+.need-tile,.need-tile.compact{grid-template-columns:auto auto auto;gap:6px;max-width:100%;padding:4px 7px}
+.need-tile .nt-t{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;line-height:1.25}
+.need-tile .nt-t>b{font-size:14px;white-space:nowrap}
+.need-tile .nt-c{white-space:nowrap;font-variant-numeric:tabular-nums;font-size:14px}
+.need-tile .nt-art{width:28px;height:28px}
+.need-tile .nt-art :is(img,.pxi,.ic){width:26px!important;height:26px!important}
+.need-tile .route-chip{grid-column:auto;min-height:30px;padding:3px}
+.skill-commission-locks{display:flex;flex-wrap:wrap;gap:6px}
+.skill-commission-locks>span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:4px 8px;background:var(--panel2);border:1px solid var(--line2);border-radius:6px}
+#tip.on{pointer-events:auto}
+.item-route-icons{display:flex;flex-wrap:wrap;gap:7px;padding:4px 0}
+.item-route-icons .item-route-icon{width:38px;height:38px;flex:none;border-radius:7px}
+.item-route-icon :is(img,.ic){width:28px!important;height:28px!important;pointer-events:none}
+.item-route-none{display:inline-grid;place-items:center;width:38px;height:38px;color:var(--mute)}
+.unlock-step>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 
 </head>
@@ -6186,6 +6212,17 @@ for(const [family,ids]of Object.entries(families))for(let i=0;i<extra.length;i++
  add({id:rid,skill,tab:baseRecipe.tab,name:it.name,lvl:Math.min(99,Math.round(baseRecipe.lvl+(recipeUpper.lvl-baseRecipe.lvl)*t)),xp:Math.round(baseRecipe.xp+(recipeUpper.xp-baseRecipe.xp)*t),t:baseRecipe.t,in:inputs,out:{[id]:1},ev:baseRecipe.ev});
  D.WEAPON_BRIDGES.push(id);for(const stock of Object.values(D.SHOPS))if(stock.includes(a.id))stock.push(id);
 }
+})();
+
+/* Willowbrook's fibre route: gathering precedes the Crafting lesson. */
+(() => {const D=window.DQ.data;
+D.ITEMS.flax={id:'flax',name:'Flax fibres',type:'resource',ic:'woodcutting',col:'#78a58b',val:2,sub:'Gather at the Willowbrook woodland edge. Hettie teaches you to spin it into string.'};
+const n={id:'flax',kind:'wood',name:'Wild flax',town:'willowbrook',skill:'woodcutting',lvl:2,xp:7,t:3000,item:'flax',col:'#78a58b',ic:'woodcutting'};D.NODES.wood.push(n);D.NODE['wood:flax']=n;
+const r={id:'craft_flax_string',name:'Flax string',skill:'crafting',tab:'Leather',lvl:1,xp:6,t:1800,in:{flax:2},out:{string:3},ev:'craft'};D.RECIPES[r.id]=r;D.RLIST.crafting.push(r);
+const q=D.QM.mq_crafting;q.town='willowbrook';q.adv=3;D.SK.crafting.unlock=3;
+q.blurb='I came to Willowbrook to mend a coat, dear, and found half the village waiting with theirs. There is flax along the woodland edge. Bring me ten handfuls and five logs for a frame, and I’ll teach you to spin strong string. After that, we can tackle the coats.';q.spoken=q.blurb;
+q.obj=[{ev:'deliver',key:'flax',n:10,label:'Bring Hettie 10 flax fibres'},{ev:'deliver',key:'log_normal',n:5,label:'Bring 5 logs for her frame'}];
+D.UNL.woodcutting[2]=[...(D.UNL.woodcutting[2]||[]),'Wild flax'];D.UNL.crafting[1]=[...(D.UNL.crafting[1]||[]),'Flax string'];
 })();
 
 </script>
@@ -8899,6 +8936,7 @@ function dishSprite(s, d) {
 function itemSprite(id) {
   const it = D.ITEMS[id]; if (!it) return null;
   const s = Spr(16, 16), col = it.col || '#999999';
+  if(id==='flax'){for(const [x,y]of [[4,3],[8,1],[12,4]]){s.line(x,y+2,8,14,R.wood);s.line(x+1,y+2,9,13,null,'#78a58b');s.ell(x,y+1,2,2,rp('#7f91bf'));s.fix(x,y,'#d9d4a5');}s.rect(5,10,6,2,R.straw);return s;}
   if(it.crossArt){
     const seed=[...id].reduce((n,c)=>n+c.charCodeAt(0),0),m=rp(col);
     if(id.startsWith('chart_')){s.poly([[2,2],[12,1],[14,13],[4,14]],rp('#d8c18b'));s.line(5,4,10,11,null,'#6a8157');s.line(5,11,11,5,null,'#8a754f');s.fix(3+seed%7,4,'#607f9c');s.rect(4+seed%5,9,2,2,m);}
@@ -9495,6 +9533,7 @@ const rp = c => ramp(c || '#999999');
 
 /* ================= Trees (32 x 48): nine species ================= */
 const TREE = {
+  flax:{kind:"flax",leaf:"#78a58b",deep:"#446b50",bark:"#92a978"},
   normal: { kind: 'round', leaf: '#5f9a45', deep: '#3f7a3c', bark: '#7a5236' },
   oak: { kind: 'oak' },
   willow: { kind: 'willow', leaf: '#8ab06a', deep: '#5f8a4a', bark: '#6a6a4a' },
@@ -9516,6 +9555,7 @@ const TREE = {
   wraithbark: { kind: 'weeping', leaf: '#c8d0e0', deep: '#9aa4bc', bark: '#b8b8c8', sparkle: '#ffffff' }
 };
 function treeSprite(id) {
+  if(id==='flax'){const s=Spr(32,48);for(const [x,y]of [[7,20],[15,10],[24,23]]){s.line(x,y+4,16,46,rp('#587e57'));s.line(x+1,y+5,17,45,null,'#a3b67b');s.ell(x,y+2,4,3,rp('#7f91bf'));s.fix(x,y,'#e1d9a7');}return s;}
   const t = TREE[id] || TREE.normal; if (t.kind === 'oak') return A.sprites.oak();
   const s = Spr(32, 48), L = rp(t.leaf), Dp = rp(t.deep), bark = rp(t.bark);
   if (t.kind === 'cone') { s.rect(15, 38, 3, 9, bark); [[16, 5, 6, 18], [16, 12, 9, 28], [16, 20, 11, 39]].forEach(([cx, top, half, bot], i) => s.poly([[cx, top], [cx + half, bot], [cx - half, bot]], i % 2 ? Dp : L)); }
@@ -10430,7 +10470,7 @@ DQ.newState = (name = 'Adventurer', look, starter = 'sword') => {
     created: Date.now(), lastSeen: Date.now(), playtime: 0, awayMs: 0, awayEff: 0, tele: { adv: {}, skill: {}, first: {}, away: [], sessions: 0 }, seenTabs: {}, disc: {}, lastAway: null, exportedAt: 0, snoozeBk: 0, title: null, research: { done: {}, active: [] },
     xp, coins: 25, hp: 10, inv: { bread: 5, ...(kit.runes?{rune:kit.runes}:{}) }, bank: {}, equip: { weapon: kit.weapon, ...(kit.ammo?{ammo:kit.ammo}:{}) }, ammo: { id: kit.ammo||null, n: kit.quantity||0 },
     town: 'willowbrook', towns: { willowbrook: { visited: true, boss: false } },
-    q: {}, ach: {}, seen: {}, unlocked: {}, toolUpgrades: {},
+    q: {}, ach: {}, seen: {}, unlocked: {}, toolUpgrades: {}, skillUpgrades: {},
     unlockRules: 2,
     stats: { carve: 0, voyage: 0, train: 0, harvest: 0, collect: 0, pets: 0, furnish: 0, hired: 0, catch: 0, chop: 0, mine: 0, thieve: 0, cook: 0, burn: 0, smelt: 0, smith: 0, craft: 0, alch: 0, brew: 0, enchant: 0, kill: 0, earned: 0, deaths: 0, bought: 0, sold: 0, equipped: 0, tools: 0, rare: 0 },
     settings: { masterVol: 1, ambience: true, ambVol: .45, theme: 'light', lettering: 'hearthside', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, storyScenes: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
@@ -10516,6 +10556,7 @@ function candidateState(o) {
   if(o.hunt?.loopVersion===undefined)delete result.hunt.loopVersion;
   if(DQ.migrateHuntingLoop)DQ.migrateHuntingLoop(result);
   if(DQ.migrateToolUpgrades)DQ.migrateToolUpgrades(result);
+  if(!record(result.skillUpgrades)||Object.entries(result.skillUpgrades).some(([sk,v])=>!D.SK[sk]||!Number.isInteger(v)||v<0||v>3))throw new Error('Invalid skill upgrades');
   if(!record(result.toolUpgrades)||Object.entries(result.toolUpgrades).some(([id,v])=>!D.ITEMS[id]?.toolSkill||!D.ITEMS[id]?.tier||v!==true))throw new Error('Invalid tool upgrades');
   if(!Number.isSafeInteger(result.hunt.legacyFieldLevel)||result.hunt.legacyFieldLevel<0||result.hunt.legacyFieldLevel>99)throw new Error('Invalid legacy hunting access');
   if(result.hunt.loopVersion!==undefined&&result.hunt.loopVersion!==1)throw new Error('Unsupported hunting loop');
@@ -11336,12 +11377,14 @@ addEventListener('keydown', e => {
 
 /* ---------- tooltips ---------- */
 DQ.tips = {};
-let tipEl, tipTimer, tipTarget;
+let tipEl, tipTimer, tipTarget, tipLeaveTimer;
 function initTips() {
   tipEl = document.createElement('div'); tipEl.id = 'tip'; tipEl.setAttribute('role', 'tooltip'); document.body.appendChild(tipEl);
   const show = (t, x, y) => {
+    if(t.closest('.blackout,.sil'))return hide();
     const v = t.dataset.tip; const i = v.indexOf(':'), kind = v.slice(0, i), arg = v.slice(i + 1);
     let html = kind === 'text' ? esc(arg) : (DQ.tips[kind] ? DQ.tips[kind](arg, t) : ''); if (!html) return hide();
+    clearTimeout(tipLeaveTimer);tipEl.setAttribute('role',kind==='item'?'dialog':'tooltip');
     tipEl.innerHTML = html; tipEl.classList.add('on'); t.setAttribute('aria-describedby', [t.getAttribute('aria-describedby'), 'tip'].filter(Boolean).join(' ')); place(x, y, t);
   };
   const place = (x, y, t) => {
@@ -11351,17 +11394,19 @@ function initTips() {
     if (py + r.height > innerHeight - 8) py = (x === null ? tr.top - r.height - 8 : y - r.height - 14); if (py < 8) py = 8;
     tipEl.style.transform = `translate(${DQ.toPage(px)}px,${DQ.toPage(py)}px)`;
   };
-  const hide = () => { clearTimeout(tipTimer); if(tipTarget){const ids=(tipTarget.getAttribute('aria-describedby')||'').split(' ').filter(x=>x&&x!=='tip');if(ids.length)tipTarget.setAttribute('aria-describedby',ids.join(' '));else tipTarget.removeAttribute('aria-describedby');} tipTarget = null; tipEl.classList.remove('on'); };
+  const hide = () => { clearTimeout(tipLeaveTimer);clearTimeout(tipTimer); if(tipTarget){const ids=(tipTarget.getAttribute('aria-describedby')||'').split(' ').filter(x=>x&&x!=='tip');if(ids.length)tipTarget.setAttribute('aria-describedby',ids.join(' '));else tipTarget.removeAttribute('aria-describedby');} tipTarget = null; tipEl.classList.remove('on'); };
   document.addEventListener('mouseover', e => {
-    const t = e.target.closest('[data-tip]'); if (t === tipTarget) return; hide();
+    if(e.target.closest('#tip')){clearTimeout(tipLeaveTimer);return;}
+    const t = e.target.closest('[data-tip]'); if (t === tipTarget){clearTimeout(tipLeaveTimer);return;} hide();
     if (!t || !DQ.S.settings.tips) return; tipTarget = t;
     tipTimer = setTimeout(() => show(t, e.clientX, e.clientY), 220);
   });
-  document.addEventListener('mousemove', e => { if (tipEl.classList.contains('on') && tipTarget) place(e.clientX, e.clientY, tipTarget); });
-  document.addEventListener('mouseout', e => { if (!e.relatedTarget || !e.relatedTarget.closest || !e.relatedTarget.closest('[data-tip]')) hide(); });
-  document.addEventListener('pointerdown', hide, { passive: true });
-  document.addEventListener('focusin', e => { const t = e.target.closest && e.target.closest('[data-tip]'); if (t && DQ.S.settings.tips) { tipTarget = t; show(t, null, null); } });
-  document.addEventListener('focusout', hide);
+  // Keep the card still so its icon routes can be reached with the pointer.
+  const hideSoon=()=>{clearTimeout(tipLeaveTimer);tipLeaveTimer=setTimeout(hide,240);};
+  document.addEventListener('mouseout', e => {if(e.relatedTarget?.closest?.('#tip')||e.relatedTarget?.closest?.('[data-tip]'))return;hideSoon();});
+  document.addEventListener('pointerdown', e=>{if(!e.target.closest('#tip'))hide();}, { passive: true });
+  document.addEventListener('focusin', e => { if(e.target.closest?.('#tip')){clearTimeout(tipLeaveTimer);return;}const t = e.target.closest && e.target.closest('[data-tip]'); if (t && DQ.S.settings.tips) { tipTarget = t; show(t, null, null); } });
+  document.addEventListener('focusout',e=>{if(!e.relatedTarget?.closest?.('#tip'))hideSoon();});
   // Keyboard focus exposes static information too. On touch, hold an action for information;
   // releasing after a hold never also buys, equips or starts that action.
   DQ.prepareTips = root => { if(!root)return;root.querySelectorAll('[data-tip]').forEach(t=>{if(!t.matches('button,a,input,[tabindex]')&&!t.closest('button,a'))t.tabIndex=0;}); };
@@ -11370,7 +11415,7 @@ function initTips() {
   document.addEventListener('pointermove',e=>{if(origin&&Math.hypot(e.clientX-origin[0],e.clientY-origin[1])>10){clearTimeout(holdTimer);origin=null;}},{passive:true});
   for(const ev of ['pointerup','pointercancel'])document.addEventListener(ev,()=>{clearTimeout(holdTimer);origin=null;},{passive:true});
   document.addEventListener('click',e=>{if(held&&Date.now()-heldAt<1200&&held.contains(e.target)){e.preventDefault();e.stopImmediatePropagation();held=null;}},true);
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();if(e.key==='ArrowDown'&&tipEl.classList.contains('on')&&tipEl.querySelector('.item-route-icon')){e.preventDefault();tipEl.querySelector('.item-route-icon').focus();}});
   DQ.hideTip = hide;
 }
 })();
@@ -13586,23 +13631,20 @@ UI.homestead = () => {
 
 </script>
 <script>
-/* Material tiles (Nov 2026, from the player: "more visual cues as opposed to just text", "use this logic wherever
-   anything needs materials"). One tile per thing a task needs: the item's picture with how many it takes, its name,
-   and what you hold: green with a tick when you have enough, red with how many are missing (and a route to get
-   more) when not. compact tiles drop the name to the tooltip so small cards stay on one screen. */
+/* Shared requirements: named input, held / required, optional source icon. */
 (() => {
-const DQ = window.DQ, D = DQ.data, UI = DQ.ui, { esc, fmt, ico } = DQ, S = () => DQ.S;
-const k = n => n >= 1e4 ? (n / 1e3).toFixed(n >= 1e5 ? 0 : 1) + 'k' : fmt(n);
-UI.needTile = (id, n, o = {}) => {
-  const coins = id === 'coins', it = coins ? null : D.ITEMS[id]; if (!coins && !it) return '';
-  if(!coins&&DQ.itemDiscovered&&!DQ.itemDiscovered(id)){const source=DQ.ingredientDiscovery(id),route=o.noRoute?'':UI.routeChip(id);return `<span class="need-tile short unknown-ingredient" data-tip="text:${esc('You need '+it.name+'. Find it through '+source.label+'.')}"><span class="nt-art">${DQ.itemIco(it)}<b class="nt-n">×${k(n)}</b></span><span class="nt-t"><b>${esc(it.name)}</b><small>Not found yet · ${esc(source.label)}</small></span>${route}</span>`;}
-  const have = coins ? S().coins : DQ.have(id), ok = have >= n, name = coins ? 'Coins' : it.name;
-  const art = coins ? ico('coin') : DQ.itemIco(it), route = ok || coins || !UI.routeChip || o.noRoute ? '' : UI.routeChip(id);
-  const held = o.live && !coins ? `<b data-b="count:${id}"></b>` : k(have);
-  const line = ok ? `✓ ${held} held` : coins ? `✗ need ${k(n - have)} more` : `✗ ${held} of ${k(n)} · need ${k(n - have)}`;
-  return `<span class="need-tile ${ok ? 'ok' : 'short'} ${o.compact ? 'compact' : ''}" ${coins ? `data-tip="text:${esc(`${fmt(n)} coins · you have ${fmt(have)}`)}"` : `data-tip="item:${id}"`}><span class="nt-art">${art}<b class="nt-n">${coins ? k(n) : '×' + k(n)}</b></span>${o.compact ? `<small class="nt-c">${ok ? '✓' : `${k(have)}/${k(n)}`}</small>` : `<span class="nt-t"><b>${esc(name)}</b><small>${line}</small></span>`}${route}</span>`;
+const DQ=window.DQ,D=DQ.data,UI=DQ.ui,{esc,fmt,ico}=DQ;
+const count=n=>n>=1e4?(n/1e3).toFixed(n>=1e5?0:1)+'k':fmt(n);
+UI.needTile=(id,n,o={})=>{
+ const coins=id==='coins',it=coins?null:D.ITEMS[id];if(!coins&&!it)return '';
+ const have=coins?DQ.S.coins:DQ.have(id),ok=have>=n,name=coins?'Coins':it.name;
+ const source=!coins&&DQ.ingredientDiscovery?DQ.ingredientDiscovery(id):null;
+ const tip=coins?`${name}: ${fmt(have)} / ${fmt(n)}`:`${name}: ${fmt(have)} / ${fmt(n)}${source?.label?' · '+source.label:''}`;
+ const held=o.live&&!coins?`<b data-b="count:${id}">${count(have)}</b>`:count(have);
+ const route=ok||coins||o.noRoute||!UI.routeChip?'':UI.routeChip(id);
+ return `<span class="need-tile ${ok?'ok':'short'} ${o.compact?'compact':''}" data-tip="${coins?'text:'+esc(tip):'item:'+id}" aria-label="${esc(tip)}"><span class="nt-art">${coins?ico('coin'):DQ.itemIco(it)}</span><span class="nt-t">${o.compact?'':`<b>${esc(name)}</b>`}<small class="nt-c">${held} / ${count(n)}</small></span>${route}</span>`;
 };
-UI.needTiles = (cost, o) => `<span class="need-tiles">${Object.entries(cost || {}).map(([id, n]) => UI.needTile(id, n, o)).join('')}</span>`;
+UI.needTiles=(cost,o)=>`<span class="need-tiles">${Object.entries(cost||{}).map(([id,n])=>UI.needTile(id,n,o)).join('')}</span>`;
 })();
 
 </script>
@@ -16270,9 +16312,8 @@ const idx = town => D.TOWN[town].idx;
 DQ.cachePrice = (town, grand) => Math.round(300 * Math.pow(idx(town) + 1, 1.7) * (grand ? 4 : 1) / 10) * 10;
 DQ.tonicPrice = town => Math.round(DQ.cachePrice(town, false) * .6 / 10) * 10;
 DQ.rareOffers = (town = S().town) => {
-  const gear = (D.TOWN_RARE_GEAR[town] || []).filter(have).map(id => ({ id, price: Math.round(D.ITEMS[id].val * 6) }));
-  const tid = D.TOWN_TROPHY[town], beaten = !!(S().towns[town] && S().towns[town].boss);
-  if (tid && have(tid) && D.ITEMS[tid].slot!=='weapon') gear.push({ id: tid, price: Math.round(D.ITEMS[tid].val * 4), trophy: true, locked: !beaten });
+  const gear = (D.TOWN_RARE_GEAR[town] || []).filter(have).filter(id => !DQ.exclusiveLoot?.(id)).map(id => ({ id, price: Math.round(D.ITEMS[id].val * 6) }));
+  // Earned loot is recovered through Buy back, never sold as new stock.
   return {
     gear,
     mats: (D.TOWN_SPECIALS[town] || []).filter(have).map(id => ({ id, price: Math.max(5, Math.round(D.ITEMS[id].val * 5)) })),
@@ -16303,7 +16344,7 @@ DQ.openCache = grand => {
   const out = [], coins = Math.round(o.price * (grand ? .45 + Math.random() * .5 : .25 + Math.random() * .45) * DQ.coinMult());
   DQ.addCoins(coins, { noStat: true }); out.push({ coins });
   for (let i = 0; i < (grand ? 2 : 1); i++) { const gem = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(gem); out.push({ id: gem, n: 1, tag: 'rare' }); }
-  const gl = (D.TOWN_GEAR[town] || []).concat(D.TOWN_RARE_GEAR[town] || []).filter(have);
+  const gl = (D.TOWN_GEAR[town] || []).concat(D.TOWN_RARE_GEAR[town] || []).filter(have).filter(id => !DQ.exclusiveLoot?.(id));
   if (gl.length && chance(grand ? .8 : .35)) { const g = pick(gl); DQ.grant(g); out.push({ id: g, n: 1, tag: 'epic' }); }
   const sp = (D.TOWN_SPECIALS[town] || []).filter(have).filter(i => !/^gem_/.test(i)); if (sp.length && chance(grand ? .7 : .3)) { const s = pick(sp), n = rnd(2, grand ? 8 : 4); DQ.grant(s, n); out.push({ id: s, n, tag: 'uncommon' }); }
   S().stats.rare = (S().stats.rare || 0) + 1; S().stats.bought = (S().stats.bought || 0) + 1; DQ.achDirty = true; DQ.emit('shop');
@@ -16736,7 +16777,7 @@ UI.B.unlockbar=(e,sk,stat)=>{const r=DQ.actionProgress(sk).find(r=>r.stat===dec(
 /* where each requirement is fulfilled: the page (and, for items, the route to obtain them) */
 const reqDest=r=>{const [k,a]=r.stat.includes(':')?r.stat.split(':'):[r.stat,null];if(destinations[k])return {go:destinations[k]};if(k==='hero')return {go:'overview'};if(k==='combat'||k==='beasts')return {go:'combat'};if(k==='skill')return {go:D.SK[a].page};if(k==='visit')return {go:'map'};if(k==='tool')return {route:`tool_${DQ.toolKey(a)}_1`};if(k==='own'||k==='use')return {route:a};return {go:'skillsummary'};};
 const reqHtml=sk=>DQ.actionProgress(sk.id).map(r=>{const pct=Math.min(100,r.have/r.need*100),d=reqDest(r),done=r.have>=r.need,where=d.route?(DQ.sourceOf&&DQ.sourceOf(d.route)):null,goName=d.go?(D.SK[d.go]?.name||({overview:'Home',combat:'Combat',map:'World',skillsummary:'Skills'})[d.go]||d.go):where?where.name:'';
-  return `<button class="unlock-step ${done?'done':''}" aria-label="${esc(DQ.reqLabel(r))} · ${done?'Completed':'Open '+esc(goName)}" data-tip="text:${done?'Completed':'Open '+esc(goName)}" ${d.route?`data-do="route" data-a="${d.route}"`:`data-do="go" data-a="${d.go}"`}><span>${done?ico('check'):''}<b data-b="unlockcount:${sk.id}:${enc(r.stat)}">${r.kind==='level'?`${r.have}/${r.need}`:`${Math.min(r.have,r.need)}/${r.need}`}</b> ${esc(DQ.reqLabel(r))}</span><span class="bar"><i data-b="unlockbar:${sk.id}:${enc(r.stat)}" style="width:${pct}%"></i></span><small aria-hidden="true">${done?ico('check'):UI.activityIcon(d.go||where?.page||'skillsummary')}</small></button>`}).join('');
+  return `<button class="unlock-step ${done?'done':''}" aria-label="${esc(DQ.reqLabel(r))} · ${done?'Completed':'Open '+esc(goName)}" data-tip="text:${done?'Completed':'Open '+esc(goName)}" ${d.route?`data-do="route" data-a="${d.route}"`:`data-do="go" data-a="${d.go}"`}><span>${done?ico('check'):''}<b data-b="unlockcount:${sk.id}:${enc(r.stat)}">${r.kind==='level'?`${r.have}/${r.need}`:`${Math.min(r.have,r.need)}/${r.need}`}</b> ${esc(UI.unlockCompactLabel?UI.unlockCompactLabel(r):DQ.reqLabel(r))}</span><span class="bar"><i data-b="unlockbar:${sk.id}:${enc(r.stat)}" style="width:${pct}%"></i></span><small aria-hidden="true">${done?ico('check'):UI.activityIcon(d.go||where?.page||'skillsummary')}</small></button>`}).join('');
 UI.unlockSteps=sk=>reqHtml(D.SK[sk]);
 /* ---------- Skill menu tooltip: pictures and one line per requirement (Nov 2026) ---------- */
 const STAT_ART={catch:['item','raw_shrimp'],chop:['item','log_normal'],harvest:['item','crop_potato'],craft:['skill','crafting'],smith:['skill','smithing'],kill:['skill','attack'],mine:['item','ore_copper'],cook:['skill','cooking']};
@@ -18984,11 +19025,11 @@ UI.areaPanel = town => {
   const minis = D.MONLIST.filter(m => m.mini && !m.tower && m.town === town), qm = qt && D.MON[qt];
   const quest = qm ? `<div class="wh-quest"><span class="wh-q-art">${DQ.monSprite(qm, 32)}</span><span><small>Quest target</small><b>${esc(qm.name)}</b></span><button class="btn sm primary" data-do="huntquest" data-a="${qt}">${qm.mini ? 'Challenge' : 'Track'}</button></div>` : '';
   const head = (x) => { const m = x.monster, met = (S().beast.kills[x.id] || 0) > 0, nm = met ? m.name : 'Unknown creature', on = focus && focus.id === x.id;
-    return `<button type="button" class="wh-head enc-row ${on ? 'on' : ''} ${qt === x.id ? 'quest' : ''}" data-do="huntpreview" data-a="${x.id}" aria-pressed="${!!on}" aria-label="${esc(nm)}, level ${m.cl}, ${rarity(x.pct)}, ${x.pct}% of encounters. Show it on the stage." data-tip="text:${esc(nm)} · level ${m.cl} · ${rarity(x.pct)} (${x.pct}%)${qt === x.id ? ' · quest target' : ''}${met ? (r => ` · field guide ${r.rank}/${r.T.length}${r.next ? `, next entry after ${r.need} more` : ''}`)(DQ.research(m)) : ''}">${DQ.monSprite(m, 32, met ? '' : 'sil')}<small>${x.pct}%</small>${(() => { if (!met || !DQ.studyBar) return ''; const r = DQ.research(m), prev = r.rank ? r.T[Math.min(r.rank, r.T.length) - 1] : 0; return DQ.studyBar(r.next ? (r.kills - prev) / Math.max(1, r.next - prev) * 100 : 100, !r.next); })()}</button>`; };
+    return `<button type="button" class="wh-head enc-row ${on ? 'on' : ''} ${qt === x.id ? 'quest' : ''}" data-do="guide" data-a="${x.id}" aria-pressed="${!!on}" aria-label="${esc(nm)}, level ${m.cl}, ${rarity(x.pct)}, ${x.pct}% of encounters. Open its field entry." data-tip="text:${esc(nm)} · level ${m.cl} · ${rarity(x.pct)} (${x.pct}%)${qt === x.id ? ' · quest target' : ''}${met ? (r => ` · field guide ${r.rank}/${r.T.length}${r.next ? `, next entry after ${r.need} more` : ''}`)(DQ.research(m)) : ''}">${DQ.monSprite(m, 32, met ? '' : 'sil')}<small>${x.pct}%</small>${(() => { if (!met || !DQ.studyBar) return ''; const r = DQ.research(m), prev = r.rank ? r.T[Math.min(r.rank, r.T.length) - 1] : 0; return DQ.studyBar(r.next ? (r.kills - prev) / Math.max(1, r.next - prev) * 100 : 100, !r.next); })()}</button>`; };
   const cards = areas.map(a => { const odds = DQ.encounterOdds(a), on = active === a.id, lv = odds.map(x => x.monster.cl);
     return `<article class="area-card wh-area ${on ? 'selected' : ''}"><div class="wh-area-h"><div><b>${esc(a.name)}</b><small>Level ${Math.min(...lv)}–${Math.max(...lv)}${on ? ' · exploring' : ''}</small></div><button class="btn sm ${on ? '' : 'primary'}" data-do="huntarea" data-a="${a.id}">${on ? 'Retreat' : 'Explore'}</button></div><div class="wh-heads encounter-list" role="group" aria-label="Creatures in ${esc(a.name)}">${odds.map(head).join('')}</div></article>`; }).join('');
   const tiles = minis.map(m => { const ok = DQ.combatLvl() >= m.mini.req, done = S().minis && S().minis[m.id], on = f && f.id === m.id, d = DQ.dangerOf ? DQ.dangerOf(m) : null;
-    return `<article class="wh-mini ${done ? 'done' : ''} ${on ? 'on' : ''} ${qt === m.id ? 'quest' : ''}" style="--c:${m.col}"><button type="button" class="wh-mini-art" data-do="huntpreview" data-a="${m.id}" aria-label="${esc(m.name)}: show it on the stage" data-tip="text:${esc(m.name)} · level ${m.cl}${d ? ' · ' + esc(d.label) : ''}">${DQ.monSprite(m, 48)}</button><b>${esc(m.name)}</b><small class="${ok ? 'ok' : 'bad'}">${done ? '✓ Defeated' : ok ? `Level ${m.cl}` : `Needs combat ${m.mini.req}`}</small><button class="btn sm ${ok && !on && !done ? 'primary' : ''}" ${ok ? `data-do="act" data-a="fight" data-b="${m.id}"` : 'disabled'}>${on ? 'Retreat' : done ? 'Again' : 'Challenge'}</button></article>`; }).join('');
+    return `<article class="wh-mini ${done ? 'done' : ''} ${on ? 'on' : ''} ${qt === m.id ? 'quest' : ''}" style="--c:${m.col}"><button type="button" class="wh-mini-art" data-do="guide" data-a="${m.id}" aria-label="${esc(m.name)}: open its field entry" data-tip="text:${esc(m.name)} · level ${m.cl}${d ? ' · ' + esc(d.label) : ''}">${DQ.monSprite(m, 48)}</button><b>${esc(m.name)}</b><small class="${ok ? 'ok' : 'bad'}">${done ? '✓ Defeated' : ok ? `Level ${m.cl}` : `Needs combat ${m.mini.req}`}</small><button class="btn sm ${ok && !on && !done ? 'primary' : ''}" ${ok ? `data-do="act" data-a="fight" data-b="${m.id}"` : 'disabled'}>${on ? 'Retreat' : done ? 'Again' : 'Challenge'}</button></article>`; }).join('');
   return `<section class="panel activity-choices hunt-areas where"><div class="phead"><div><span class="k">Hunting</span><h2>Choose an area</h2></div><small>${esc(D.TOWN[town].name)}</small></div>
     ${quest}<div class="wh-areas">${cards}</div>${tiles ? `<div class="wh-minis-h k">Challenges</div><div class="wh-minis">${tiles}</div>` : ''}</section>`;
 };
@@ -19321,7 +19362,7 @@ const render0 = UI.render; UI.render = (...a) => { apply(); return render0(...a)
       notes: [['meet', 'Spent forty years under the hill. Keeps a stool by the cold forge, mostly to grumble from.'], ['mq_smithing', 'Kept Smith Edda’s hammer and notebook when she left for the mountains. He has never read past the first page. He says the rest is hers.'], ['miners_pick', 'Named every pit prop in the old mine. The spare pickaxe he gave you was the one he never quite trusted himself with.'], ['mb_silver', 'Was right about the silver seam after all. He has told the whole tavern twice, and Mabel three times.']] },
     { n: 'Whisper', id: 'whisper', town: 'mossbarrow', role: 'Pickpocket', look: { skin: 'fair', hair: ['#3a2a2a', 'short'], hat: ['hood', '#4a3a6a'], clothes: '#3a2e4a', freckles: 1, grin: 1 },
       notes: [['meet', 'Grins before she speaks. Nobody in Mossbarrow knows her real name, and she likes it that way.'], ['mq_thieving', 'Took your purse to see whether you would chase her. Gave half your lesson fee to the children by the mill that same night.'], ['quick_fingers', 'Turns up wherever there are docks and deep pockets. Says the sea air is good for her fingers.']] },
-    { n: 'Seamstress Hettie', id: 'hettie', town: 'mossbarrow', role: 'Seamstress', look: { skin: 'fair', hair: ['#e8e4dc', 'bun'], clothes: '#8a6a9a', glasses: '#c8a050', old: 1, tape: 1 },
+    { n: 'Seamstress Hettie', id: 'hettie', town: 'willowbrook', role: 'Seamstress', look: { skin: 'fair', hair: ['#e8e4dc', 'bun'], clothes: '#8a6a9a', glasses: '#c8a050', old: 1, tape: 1 },
       notes: [['meet', 'Has sewn every coat in Mossbarrow for fifty years and can tell whose is whose by the stitching alone.'], ['mq_crafting', 'Her hands shake now, but she still threads a needle first time. She kept a scrap of your first leather in her button tin.']] },
     { n: 'Hunter Wynn', id: 'wynn', town: 'mossbarrow', role: 'Hunter', look: { skin: 'tan', hair: ['#8a4a24', 'short'], beard: ['#8a4a24', 'short'], hat: ['hood', '#3e5a2e'], clothes: '#4a5a32' },
       notes: [['meet', 'Talks to the woods more than to people, and never lets anyone hunt with only a sword.'], ['mq_ranged', 'Carved his first bow at nine, from a branch Old Tusk had snapped. He has waited a long time for the rematch.'], ['boar_hunt', 'Leaves the smallest boars alone and will not say why.'], ['king_of_the_wood', 'Hung one of Old Tusk’s tusks over his door. He sat with it a whole evening before he could talk about the hunt.']] },
@@ -19761,7 +19802,7 @@ UI.V.farming=()=>{
  const cnt=(n,t)=>n?`<em class="est-count" aria-label="${n} ${t}">${n}<i>${t}</i></em>`:'';
  const routeCrop=D.CROP[UI.farmRoute],routeSeed=routeCrop&&!Q.have('seed_'+routeCrop.id)?`<div class="estate-route-target" data-farm-target="${routeCrop.id}">${Q.itemIco(D.ITEMS['crop_'+routeCrop.id])}<b>${esc(routeCrop.name)}</b><small>Farming ${routeCrop.lvl} · needs seeds before planting</small><button class="btn" data-do="route" data-a="seed_${routeCrop.id}">Get ${esc(routeCrop.name.toLowerCase())} seeds</button></div>`:'';
  const bg=A?A.url('farm-estate',A.farmEstateSprite):'';
- return `<div class="farm-estate" data-section="${UI.estateSection}"><section class="panel estate-controls"><div class="phead"><h2>Your farm</h2><small>Farming <b data-b="lvl:farming"></b></small></div><div class="estate-section-tabs btnrow"><button class="btn ${['fields','seeds'].includes(UI.estateSection)?'on':''}" data-do="estatesection" data-a="fields" aria-pressed="${['fields','seeds'].includes(UI.estateSection)}">${Q.itemIco(D.ITEMS.crop_wheat)}<span><b>Crops & fields</b><small>Sow · grow · harvest</small></span>${cnt(nRipe,'ripe')}</button><button class="btn ${['pens','animals'].includes(UI.estateSection)?'on':''}" data-do="estatesection" data-a="pens" aria-pressed="${['pens','animals'].includes(UI.estateSection)}">${Q.animalSprite(D.ANIMAL.cow,32)}<span><b>Livestock & pasture</b><small>Feed · care · collect</small></span>${cnt(nProd,'to collect')}</button></div><div class="estate-mobile-tabs btnrow">${['fields','pens','seeds','animals'].map(k=>`<button class="btn sm ${UI.estateSection===k?'on':''}" data-do="estatesection" data-a="${k}" aria-pressed="${UI.estateSection===k}">${k==='animals'?Q.animalSprite(D.ANIMAL.cow,32):ico(({fields:'crop',pens:'barn',seeds:'seed'})[k])}${({fields:'Fields',pens:'Pens',seeds:'Seeds',animals:'Livestock'})[k]}${k==='fields'&&nRipe||k==='pens'&&nProd?`<em class="est-count">${k==='fields'?nRipe:nProd}</em>`:''}</button>`).join('')}</div><div class="estate-actions">${actionRows}</div></section><div class="estate-layout"><section class="panel estate-land"><div class="estate-scenery" style="background-image:url('${bg}')" role="img" aria-label="Farmhouse, pond, tilled fields and fenced pasture"></div><div class="estate-zones"><div class="estate-fields"><h3><span>Fields · ${Q.S.farm.plots.length} plots</span>${pager('fields',fp.p,fp.pages)}${buyPlot?.outerHTML||''}</h3>${plots.outerHTML}</div><div class="estate-pasture"><h3><span>Pasture · ${Q.S.farm.pensBought} pens</span>${pager('pens',pp.p,pp.pages)}${buyPen?.outerHTML||''}</h3>${pens.outerHTML}</div></div></section><section class="panel estate-supplies"><h3 class="estate-supply-title">${UI.estateTab==='seeds'?'Seeds & planting':'Livestock market'}</h3><div class="btnrow estate-supply-tabs"><button class="btn ${UI.estateTab==='seeds'?'on':''}" data-do="estatetab" data-a="seeds">Seeds & planting</button><button class="btn ${UI.estateTab==='animals'?'on':''}" data-do="estatetab" data-a="animals">Livestock</button></div>${UI.estateTab==='seeds'?`${routeSeed}${seeds?.outerHTML||'<p>Buy seeds in the shop.</p>'}${settings?.outerHTML||''}<button class="btn" data-do="go" data-a="shop">Buy seeds</button>`:`${market?.outerHTML||''}${pager('market',mp,Math.ceil(marketItems.length/(innerWidth<=860?3:6)))}`}</section></div></div>`;
+ return `<div class="farm-estate" data-section="${UI.estateSection}"><section class="panel estate-controls"><div class="phead"><h2>Your farm</h2><small>Farming <b data-b="lvl:farming"></b></small></div><div class="estate-section-tabs btnrow"><button class="btn ${['fields','seeds'].includes(UI.estateSection)?'on':''}" data-do="estatesection" data-a="fields" aria-pressed="${['fields','seeds'].includes(UI.estateSection)}">${Q.itemIco(D.ITEMS.crop_wheat)}<span><b>Crops & fields</b><small>Sow · grow · harvest</small></span>${cnt(nRipe,'ripe')}</button><button class="btn ${['pens','animals'].includes(UI.estateSection)?'on':''}" data-do="estatesection" data-a="pens" aria-pressed="${['pens','animals'].includes(UI.estateSection)}">${Q.animalSprite(D.ANIMAL.cow,32)}<span><b>Livestock & pasture</b><small>Feed · care · collect</small></span>${cnt(nProd,'to collect')}</button></div><div class="estate-mobile-tabs btnrow">${['fields','pens','seeds','animals'].map(k=>`<button class="btn sm ${UI.estateSection===k?'on':''}" data-do="estatesection" data-a="${k}" aria-pressed="${UI.estateSection===k}">${k==='animals'?Q.animalSprite(D.ANIMAL.cow,32):ico(({fields:'crop',pens:'barn',seeds:'seed'})[k])}${({fields:'Fields',pens:'Pens',seeds:'Seeds',animals:'Livestock'})[k]}${k==='fields'&&nRipe||k==='pens'&&nProd?`<em class="est-count">${k==='fields'?nRipe:nProd}</em>`:''}</button>`).join('')}</div><div class="estate-actions">${actionRows}</div></section><div class="estate-layout"><section class="panel estate-land"><div class="estate-scenery" style="background-image:url('${bg}')" role="img" aria-label="Farmhouse, pond, tilled fields and fenced pasture"></div><div class="estate-zones"><div class="estate-fields"><h3><span>Fields · ${Q.S.farm.plots.length} plots</span>${pager('fields',fp.p,fp.pages)}${buyPlot?.outerHTML||''}</h3>${plots.outerHTML}</div><div class="estate-pasture"><h3><span>Pasture · ${Q.S.farm.pensBought} pens</span>${pager('pens',pp.p,pp.pages)}${buyPen?.outerHTML||''}</h3>${pens.outerHTML}</div></div></section><section class="panel estate-supplies"><h3 class="estate-supply-title">${UI.estateTab==='seeds'?'Seeds & planting':'Livestock market'}</h3><div class="btnrow estate-supply-tabs"><button class="btn ${UI.estateTab==='seeds'?'on':''}" data-do="estatetab" data-a="seeds">Seeds & planting</button><button class="btn ${UI.estateTab==='animals'?'on':''}" data-do="estatetab" data-a="animals">Livestock</button></div>${UI.estateTab==='seeds'?`${routeSeed}${seeds?.outerHTML||'<p>Buy seeds in the shop.</p>'}${settings?.outerHTML||''}<button class="btn" data-do="shopseeds">Buy seeds</button>`:`${market?.outerHTML||''}${pager('market',mp,Math.ceil(marketItems.length/(innerWidth<=860?3:6)))}`}</section></div></div>`;
 };
 /* Only the changing workspace transitions; task progress and the surrounding HUD keep running. */
 const switchSection=a=>{
@@ -21462,17 +21503,18 @@ Q.buy=(id,qty=1)=>{
  const before=JSON.parse(JSON.stringify(S()));S().coins-=coins;for(const[k,n]of Object.entries(cost))Q.take(k,n*count);Q.give(id,count);S().stats.bought+=count;if(tool)S().stats.tools++;
  if(!Q.save()){Q.S=before;Q.xpAliases(Q.S);Q.fxDirty();return false;}Q.sfx('buy');Q.achDirty=true;Q.emit('shop');return true;
 };
-const families=D.TOOLS.map(([key,sk,ic,label])=>({key,sk,ic,label,ids:D.TOOL_ORDER.map(t=>'tool_'+key+'_'+t)}));
+const families=D.TOOLS.map(([key,sk,ic,label])=>({key,sk,ic,label:D.SK[sk].name,ids:D.TOOL_ORDER.map(t=>'tool_'+key+'_'+t)}));
 const targets0=Q.actionTargets;
 if(targets0)Q.actionTargets=page=>page==='shop'?families.flatMap(f=>f.ids.filter(id=>Q.shopUpgradeState(id).ready).map(id=>({page:'shop',kind:'tool',family:f.key,id}))):targets0(page);
 const selectReadyTool=family=>{const f=families.find(f=>f.key===family),id=f?.ids.find(id=>Q.shopUpgradeState(id).ready);if(id)UI.shopSelected.buy=id;return id;};
-const cues=ids=>{const ready=ids.filter(id=>Q.shopUpgradeState(id).ready).length;return ready?`<span class="notice-badge upgrade-cue ready" aria-label="${ready} upgrades ready" data-tip="text:${ready} upgrades ready: coins and materials available">${ready}</span>`:'';};
+const cues=ids=>{const ready=ids.filter(id=>Q.shopUpgradeState(id).ready).length+(ids.length>10?(UI.shopUpgradeExtraCount?.()||0):0);return ready?`<span class="notice-badge upgrade-cue ready" aria-label="${ready} upgrades ready" data-tip="text:${ready} upgrades ready: coins and materials available">${ready}</span>`:'';};
 UI.shopCategory=UI.shopCategory||'tools';UI.shopToolFamily='axe';
-UI.shopCatalogFilter=id=>{const it=D.ITEMS[id];return UI.shopCategory==='equipment'?it.type!=='tool'&&!!(it.slot||it.type==='ammo'):it.type!=='tool'&&!it.slot&&it.type!=='ammo';};
+UI.shopCatalogFilter=id=>{const it=D.ITEMS[id];return UI.shopCategory==='equipment'?it.type!=='tool'&&!!(it.slot||it.type==='ammo'):it.type!=='tool'&&!it.slot&&it.type!=='ammo'&&(!UI.shopSupplyFilter||UI.shopSupplyFilter(id));};
 UI.shopCardCost=id=>UI.money(Q.buyPrice(id))+`<span class="shop-mat-price">${Object.entries(Q.shopMaterialCost(id)).map(([k,n])=>`<span>${Q.itemDiscovered(k)?Q.itemIco(D.ITEMS[k]):ico('lock')}<b>${n}</b></span>`).join('')}</span>`;
 const tabs0=UI.shopTabs;
-UI.shopTabs=tab=>tabs0(tab)+`<nav class="shop-categories" aria-label="Shop categories">${[['tools','Tools','mining'],['equipment','Equipment','shield'],['supplies','Supplies','bag']].map(([id,label,ic])=>`<button class="btn ${tab==='buy'&&UI.shopCategory===id?'on':''}" data-do="shopcategory" data-a="${id}">${ico(ic)}<span>${label}</span>${id==='tools'?cues(families.flatMap(f=>f.ids)):''}</button>`).join('')}</nav>`;
-const familyNav=()=>`<nav class="tool-families" aria-label="Tool families">${families.map(f=>`<button class="btn ${UI.shopTab==='buy'&&UI.shopCategory==='tools'&&f.key===UI.shopToolFamily?'on':''}" data-do="toolfamily" data-a="${f.key}" aria-pressed="${UI.shopTab==='buy'&&UI.shopCategory==='tools'&&f.key===UI.shopToolFamily}">${UI.activityIcon(f.sk)}<span>${esc(f.label)}</span>${cues(f.ids)}</button>`).join('')}</nav>`;
+UI.shopTabs=tab=>tabs0(tab)+`<nav class="shop-categories" aria-label="Shop categories">${[['tools','Skill upgrades','mining'],['equipment','Equipment','shield'],['supplies','Supplies','bag']].map(([id,label,ic])=>`<button class="btn ${tab==='buy'&&UI.shopCategory===id?'on':''}" data-do="shopcategory" data-a="${id}">${ico(ic)}<span>${label}</span>${id==='tools'?cues(families.flatMap(f=>f.ids)):''}</button>`).join('')}</nav>`;
+UI.shopSkillExtraNav=()=>'';
+const familyNav=()=>`<nav class="tool-families" aria-label="Skill upgrades">${families.map(f=>`<button class="btn ${UI.shopTab==='buy'&&UI.shopCategory==='tools'&&f.key===UI.shopToolFamily?'on':''}" data-do="toolfamily" data-a="${f.key}" aria-pressed="${UI.shopTab==='buy'&&UI.shopCategory==='tools'&&f.key===UI.shopToolFamily}">${UI.activityIcon(f.sk)}<span>${esc(f.label)}</span>${cues(f.ids)}</button>`).join('')}${UI.shopSkillExtraNav()}</nav>`;
 const shopHeader=()=>`<section class="panel shop-upgrade-header"><div class="phead"><h2>Shop</h2><small>${esc(D.TOWN[S().town].name)}</small></div>${UI.shopTabs(UI.shopTab)}${familyNav()}</section>`;
 // One scaffold for every shelf: navigation never sits inside a changing item panel.
 const stableShop=raw=>{
@@ -21751,6 +21793,132 @@ U.render=(...args)=>{const result=render0(...args);if(U.view==='quests'){
  const button=document.querySelector('.quest-actions [data-do="questcontinue"]'),q=button&&D.QM[button.dataset.a];
  if(button&&q){const p=U.questProgress(q),o=q.obj[p.index];button.classList.remove('route-icon');button.classList.add('hs-continue');button.innerHTML=U.objectiveIcon(q,o)+'<span>Continue: '+esc(o.label)+'</span>';}
 }return result;};
+})();
+
+</script>
+<script>
+/* Earned loot recovery and skill-specific workshop commissions. Existing tools keep their ladder. */
+(() => {
+const Q=window.DQ,D=Q.data,UI=Q.ui,S=()=>Q.S,{esc,ico}=Q;
+Q.exclusiveLoot=id=>{const it=D.ITEMS[id];return !!it?.slot&&(!!it.rare||!!it.unique||Object.values(D.TOWN_TROPHY).includes(id)||Object.values(D.TOWERS||{}).some(t=>t.prize===id));};
+for(const stock of Object.values(D.SHOPS))for(let i=stock.length-1;i>=0;i--)if(Q.exclusiveLoot(stock[i]))stock.splice(i,1);
+const buy=Q.buy;Q.buy=(id,n=1)=>Q.exclusiveLoot(id)?(Q.toast('Earn this loot in the field. Previously found pieces can be recovered under Buy back.',true),false):buy(id,n);
+Q.recoveryOffers=()=>Object.keys(D.ITEMS).filter(id=>Q.exclusiveLoot(id)&&!Q.owns(id)&&!!S().seen.items?.[id]);
+Q.recoverLoot=id=>{
+ if(Q.forecasting||Q.sim.on||!Q.recoveryOffers().includes(id))return false;
+ const price=Math.max(1,D.ITEMS[id].val*4);if(S().coins<price)return false;
+ const before=JSON.parse(JSON.stringify(S()));S().coins-=price;Q.give(id,1);S().stats.bought++;
+ if(!Q.save()){Q.S=before;Q.xpAliases(Q.S);Q.fxDirty();return false;}Q.emit('shop');return true;
+};
+const enterShop=()=>UI.view==='shop'?UI.render(false):Q.go('shop');
+const toolSkills=new Set(D.TOOLS.map(t=>t[1])),skills=D.SKILLS.filter(s=>!toolSkills.has(s.id));
+D.SKILL_COMMISSIONS=Object.fromEntries(skills.map(s=>[s.id,{name:({cooking:'Kitchen fittings',smithing:'Forge fittings',crafting:'Sewing bench',hunting:'Tracking kit',beastmastery:'Ranch training kit',exploration:'Survey kit',research:'Study desk',herbalism:'Apothecary kit',enchanting:'Runework bench',carpentry:'Joinery bench',sailing:'Navigation kit',melee:'Practice equipment',ranged:'Range fittings',magic:'Spellwork kit',defence:'Defence training kit',hitpoints:'Conditioning kit'})[s.id]||s.name+' equipment'}]));
+Q.skillCommission=sk=>{
+ const rank=S().skillUpgrades?.[sk]||0,next=rank+1,need=[0,5,25,50][next],cost=rank<3?{coins:[0,250,2000,10000][next],['bar_'+['','bronze','iron','steel'][next]]:25,log_normal:10*next}:{};
+ return {rank,next,need,cost,ready:rank<3&&Q.skillUnlocked(sk)&&Q.lvl(sk)>=need&&Object.entries(cost).every(([id,n])=>id==='coins'?S().coins>=n:Q.have(id)>=n)};
+};
+Q.buySkillCommission=sk=>{
+ if(!D.SKILL_COMMISSIONS[sk]||Q.forecasting||Q.sim.on)return false;const st=Q.skillCommission(sk);if(!st.ready)return false;
+ const before=JSON.parse(JSON.stringify(S()));S().coins-=st.cost.coins;for(const[id,n]of Object.entries(st.cost))if(id!=='coins')Q.take(id,n);(S().skillUpgrades||={})[sk]=st.next;
+ if(!Q.save()){Q.S=before;Q.xpAliases(Q.S);Q.fxDirty();return false;}Q.fxDirty();Q.emit('shop');return true;
+};
+const xp=Q.extraXp;Q.extraXp=sk=>(xp?xp(sk):1)*(1+.03*(S().skillUpgrades?.[sk]||0));
+UI.shopUpgradeExtraCount=()=>skills.filter(s=>Q.skillCommission(s.id).ready).length;
+const targets=Q.actionTargets;Q.actionTargets=page=>page==='shop'?[...targets(page),...skills.filter(s=>Q.skillCommission(s.id).ready).map(s=>({page:'shop',kind:'skillupgrade',family:s.id,id:s.id}))]:targets(page);
+UI.shopSkillExtraNav=()=>skills.map(s=>{const st=Q.skillCommission(s.id);return `<button class="btn ${UI.shopToolFamily===s.id?'on':''}" data-do="skillcommission" data-a="${s.id}">${UI.activityIcon(s.id)}<span>${esc(s.name)}</span>${st.ready?'<span class="notice-badge">1</span>':''}</button>`;}).join('');
+const tabs=UI.shopTabs;UI.shopTabs=tab=>tabs(tab).replace('</div>',`<button class="btn ${tab==='recovery'?'on':''}" data-do="shoprecovery">${ico('bag')}Buy back</button></div>`);
+const family=UI.DO.toolfamily;UI.DO.toolfamily=id=>{UI.skillCommissionSelected=null;family(id);};
+const openMenu=UI.openMenuAction;UI.openMenuAction=t=>{if(t?.kind==='skillupgrade'){UI.DO.skillcommission(t.id);return true;}if(t?.kind==='tool')UI.skillCommissionSelected=null;return openMenu(t);};
+const toolshop=UI.DO.toolshop;UI.DO.toolshop=id=>{UI.skillCommissionSelected=null;toolshop(id);};
+const category=UI.DO.shopcategory;UI.DO.shopcategory=id=>{UI.skillCommissionSelected=null;UI.shopSeedsOnly=false;category(id);};
+UI.shopSupplyFilter=id=>!UI.shopSeedsOnly||D.ITEMS[id].type==='seed'||id.startsWith('seed_');
+UI.DO.shopseeds=()=>{UI.skillCommissionSelected=null;UI.shopSeedsOnly=true;UI.shopTab='buy';UI.shopCategory='supplies';UI.shopSelected.buy=null;enterShop();};
+UI.DO.shoprecovery=()=>{UI.shopTab='recovery';UI.skillCommissionSelected=null;enterShop();};
+let lastShopSpend=-Infinity;const spendOnce=fn=>{if(Date.now()-lastShopSpend<500)return;lastShopSpend=Date.now();fn();};
+UI.DO.recoverloot=id=>spendOnce(()=>{Q.recoverLoot(id);UI.renderHud();UI.render(false);});
+UI.DO.skillcommission=sk=>{if(!D.SKILL_COMMISSIONS[sk])return;UI.shopTab='buy';UI.shopCategory='tools';UI.shopToolFamily=sk;UI.skillCommissionSelected=sk;enterShop();};
+UI.DO.buycommission=sk=>spendOnce(()=>{Q.buySkillCommission(sk);UI.renderHud();UI.render(false);});
+const shortcut=sk=>`<button class="linkish skill-shop-link" data-do="skillupgrades" data-a="${sk}" aria-label="${esc(D.SK[sk].name)} upgrades" data-tip="text:Open ${esc(D.SK[sk].name)} shop upgrades">${ico('shop')}</button>`;
+const taskPanel=UI.taskPanel;if(taskPanel)UI.taskPanel=(key,...args)=>{const raw=taskPanel(key,...args);return D.SK[key]?raw.replace(/(<section class="panel activity-choices"><div class="phead"><h2>.*?<\/h2>)/,'$1'+shortcut(key)):raw;};
+const hero=UI.skillHero;UI.skillHero=(sk,extra='')=>hero(sk,extra).replace('</h2>',`</h2><button class="linkish skill-shop-link" data-do="skillupgrades" data-a="${sk}" aria-label="${esc(D.SK[sk].name)} upgrades" data-tip="text:Open ${esc(D.SK[sk].name)} shop upgrades">${ico('shop')}</button>`);
+UI.DO.skillupgrades=sk=>{const tool=D.TOOLS.find(t=>t[1]===sk);if(tool){UI.skillCommissionSelected=null;UI.shopTab='buy';UI.shopCategory='tools';UI.shopToolFamily=tool[0];enterShop();}else UI.DO.skillcommission(sk);};
+const commissionLocks=sk=>!Q.skillUnlocked(sk)?`<div class="skill-commission-locks">${Q.actionProgress(sk).map(r=>`<span data-tip="text:${esc(Q.reqLabel(r))}">${esc(({craft:'Crafted',smith:'Smithed',harvest:'Harvested',kill:'Victories',catch:'Fish caught',chop:'Gathered'})[r.stat]||Q.reqLabel(r).replace(/ level \d+/,''))}<b>${r.have} / ${r.need}</b></span>`).join('')}</div>`:'';
+const shop=UI.V.shop;
+UI.V.shop=()=>{
+ const sk=UI.skillCommissionSelected;
+ if(UI.shopTab==='recovery')return `<section class="panel shop-upgrade-header"><h2>Shop · Buy back</h2>${UI.shopTabs('recovery')}</section><section class="panel recovery-shelf"><p>Recover rare equipment you previously found and no longer own. Each replacement costs four times its base value.</p><div class="illustrated-choices">${Q.recoveryOffers().map(id=>`<article class="illustrated-card">${Q.itemIco(D.ITEMS[id])}<b>${esc(D.ITEMS[id].name)}</b><button class="btn" data-do="recoverloot" data-a="${id}" ${S().coins<D.ITEMS[id].val*4?'disabled':''}>Recover · ${D.ITEMS[id].val*4} coins</button></article>`).join('')||'<p>No missing rare equipment to recover. Find a piece first; equipped and stored items are already safe.</p>'}</div></section>`;
+ if(sk&&UI.shopCategory==='tools'&&UI.shopTab==='buy'){
+  const st=Q.skillCommission(sk),label=D.SKILL_COMMISSIONS[sk].name,raw=shop(),t=document.createElement('template');t.innerHTML=raw;
+  const work=t.content.querySelector('.visual-shop');if(work)work.outerHTML=`<div class="visual-shop"><section class="panel shop-stock"><h2>${esc(D.SK[sk].name)} upgrades</h2><div class="illustrated-choices">${[1,2,3].map(r=>`<article class="illustrated-card ${r===st.next?'selected':''}">${UI.activityIcon(sk)}<b>${esc(label)} ${r}</b><small>+${r*3}% ${esc(D.SK[sk].name)} XP</small><small>Level ${[0,5,25,50][r]} · ${r<=st.rank?'Acquired':r===st.next?'Next upgrade':'Buy the previous rank first'}</small></article>`).join('')}</div></section><section class="panel shop-task"><div class="shop-detail-body"><h2>${esc(label)}</h2><p>+3% ${esc(D.SK[sk].name)} XP per rank · maximum +9%.</p>${st.rank<3?UI.needTiles(st.cost):'<p class="ok">All ranks acquired.</p>'}${commissionLocks(sk)}<p>${!Q.skillUnlocked(sk)?'':st.rank<3&&Q.lvl(sk)<st.need?'Requires '+esc(D.SK[sk].name)+' '+st.need:st.ready?'Ready to upgrade.':'Gather the missing materials.'}</p></div><div class="shop-detail-actions"><span></span><button class="btn primary" data-do="buycommission" data-a="${sk}" ${st.ready?'':'disabled'}>Upgrade ${esc(label)}</button></div></section></div>`;return t.innerHTML;
+ }
+ return shop();
+};
+})();
+
+</script>
+<script>
+/* Icon routes use the actual catalogue. Navigation never starts or spends an action. */
+(() => {
+const Q=window.DQ,D=Q.data,U=Q.ui,{esc,ico}=Q;
+Q.itemNavigation=id=>{
+ const it=D.ITEMS[id];if(!it)return {get:[],use:[]};const get=[],use=[];
+ const add=(list,key,page,kind,target,label,pic)=>{if(!list.some(x=>x.key===key))list.push({key,page,kind,target,label,pic});};
+ for(const n of Object.values(D.NODE))if(n.item===id)add(get,'node:'+n.skill,D.SK[n.skill].page,'node',n.kind+':'+n.id,`${D.SK[n.skill].name} ${n.lvl}`,U.activityIcon(n.skill));
+ for(const r of Object.values(D.RECIPES)){
+  if(r.out?.[id])add(get,'recipe:'+r.skill,D.SK[r.skill].page,'recipe',r.id,`${D.SK[r.skill].name} ${r.lvl}`,U.activityIcon(r.skill));
+  if(r.in?.[id])add(use,'recipe:'+r.skill,D.SK[r.skill].page,'recipe',r.id,`${D.SK[r.skill].name} ${r.lvl}`,U.activityIcon(r.skill));
+ }
+ if(Object.values(D.SHOPS).some(s=>s.includes(id)))add(get,'shop','shop','shop',id,'Shop',ico('shop'));
+ if(!Q.exclusiveLoot(id)&&(Object.values(D.TOWN_RARE_GEAR).some(s=>s.includes(id))||Object.values(D.TOWN_SPECIALS).some(s=>s.includes(id))))add(get,'rare','shop','rare',id,'Rare wares',ico('shop'));
+ for(const m of D.MONLIST)if(m.first===id||m.drops?.some(d=>d[0]===id)){
+  const known=(Q.S.beast.kills[m.id]||0)>0,group=m.boss?'boss':m.tower?'tower':'creature';
+  add(get,group,'combat','creature',m.id,known?m.name:(m.boss?'Boss reward':'Creature drop'),known?Q.monSprite(m,32):ico(m.boss?'trophy':'paw'));
+ }
+ for(const t of Object.values(D.TOWERS||{}))if(t.prize===id)add(get,'tower','tower','tower',t.town||Object.keys(D.TOWERS).find(k=>D.TOWERS[k]===t),'Tower reward',ico('tower'));
+ for(const q of D.QUESTS){if(q.reward?.items?.[id]&&!q.secret)add(get,'quest','quests','quest',q.id,'Quest reward',ico('quest'));if(q.obj.some(o=>o.ev==='deliver'&&o.key===id))add(use,'quest','quests','quest',q.id,'Quest hand-in',ico('quest'));}
+ if(id.startsWith('crop_')||(D.ANIMALS||[]).some(a=>a.prod===id))add(get,'farm','farming','page','farming','Farming',U.activityIcon('farming'));
+ if(id.startsWith('seed_')||(D.ANIMALS||[]).some(a=>a.feed===id))add(use,'farm','farming','page','farming','Farming',U.activityIcon('farming'));
+ for(const [pid,p]of Object.entries(D.PROJECTS))if(JSON.stringify(p.cost||p.need||{}).includes('"'+id+'"'))add(use,'projects','projects','project',pid,p.name,ico('town'));
+ const tech=(D.TECHS||[]).find(t=>t.cost?.[id]);if(tech)add(use,'research','research','research',tech.id,'Scholarship',U.activityIcon('research'));
+ for(const r of D.POTION_RECIPES||[]){if(r.id===id)add(get,'potion','brewery','page','brewery','Herbalism',U.activityIcon('herbalism'));if(r.in?.[id])add(use,'potion','brewery','page','brewery','Herbalism',U.activityIcon('herbalism'));}
+ if(id==='feed')add(use,'farm','farming','page','farming','Livestock',U.activityIcon('farming'));
+ if(it.toolSkill)add(use,'tool',D.SK[it.toolSkill].page,'page',D.SK[it.toolSkill].page,D.SK[it.toolSkill].name,U.activityIcon(it.toolSkill));
+ if(it.slot||it.heal||it.type==='ammo'||it.type==='potion')add(use,'combat','combat','page','combat','Combat',U.activityIcon('combat'));
+ if(it.type==='egg')add(use,'beasts','beastmastery','page','beastmastery','Beastmastery',U.activityIcon('beastmastery'));
+ if((D.FIELD_TRAPS||[]).some(t=>t.id===id))add(use,'field','hunting','page','hunting','Hunting',U.activityIcon('hunting'));
+ if(Object.values(D.BEAST_TRAPS||{}).some(t=>t.item===id))add(use,'beasts','beastmastery','page','beastmastery','Beastmastery',U.activityIcon('beastmastery'));
+ if(Q.sellable(id))add(use,'sell','shop','sell',id,'Sell in the shop',ico('shop'));
+ if(it.slot)add(use,'gear','character','page','character','Equipment',ico('bag'));
+ for(const x of Q.usesOf(id)){const a=x.go;if(a)add(use,a.a,a.a,a.do==='openproject'?'project':'page',a.a,a.label,U.activityIcon(a.a));}
+ if(Q.recoveryOffers?.().includes(id))add(get,'recovery','shop','recovery',id,'Buy back',ico('bag'));
+ return {get,use};
+};
+const itemArt=Q.itemIco;Q.itemIco=it=>{const h=itemArt(it);return it?h.replace('<img ',`<img data-tip="item:${it.id}" `):h;};
+const prepare=Q.prepareTips;Q.prepareTips=root=>{root?.querySelectorAll('[data-tip^="item:"]').forEach(e=>{if(e.closest('.blackout,.sil,.choice-art:has(.blackout)'))return;const b=e.closest('button');if(b&&!b.dataset.tip)b.dataset.tip=e.dataset.tip;});prepare?.(root);};
+U.unlockCompactLabel=r=>{const[k,a]=r.stat.split(':');return r.item?D.ITEMS[r.item].name:k==='hero'?'Hero level':k==='combat'?'Combat level':k==='skill'?D.SK[a].name:k==='visit'?D.TOWN[a].name:k==='tool'?D.ITEMS['tool_'+Q.toolKey(a)+'_1'].name:({craft:'Items crafted',smith:'Items smithed',harvest:'Crops harvested',kill:'Victories',catch:'Fish caught',chop:'Gathering actions',beasts:'Creatures studied'})[k]||Q.reqLabel(r);};
+const old=Q.tips.item;
+Q.tips.item=id=>{
+ const raw=old(id);if(!raw)return raw;const t=document.createElement('template');t.innerHTML=raw;
+ for(const e of t.content.querySelectorAll('.tt-k')){if(e.nextElementSibling?.matches('.tt-list'))e.nextElementSibling.remove();e.remove();}
+ t.content.querySelectorAll('.uses,.item-uses,.item-purpose').forEach(e=>e.remove());
+ const routes=Q.itemNavigation(id),row=(key,title)=>`<section class="item-route-section"><div class="tt-k">${title}</div><div class="item-route-icons">${routes[key].map((r,i)=>`<button class="iconb item-route-icon" data-do="itemnav" data-a="${id}" data-b="${key}:${i}" aria-label="${esc(r.label)}" title="${esc(r.label)}">${r.pic}</button>`).join('')||`<span class="item-route-none" role="img" aria-label="${key==='get'?'No direct source recorded':'No further use recorded'}" title="${key==='get'?'No direct source recorded':'No further use recorded'}">${ico('lock')}</span>`}</div></section>`;
+ return t.innerHTML+row('get','How to get it')+row('use',"Where it’s used");
+};
+U.DO.itemnav=(id,index)=>{
+ const [side,i]=index.split(':'),r=Q.itemNavigation(id)[side]?.[+i];if(!r)return;Q.hideTip();
+ if(r.kind==='recipe'){const recipe=D.RECIPES[r.target];U.routeSource={kind:'recipe',id:r.target,page:r.page,skill:recipe.skill,town:recipe.town,item:id};return U.DO.userecipe(r.target);}
+ if(r.kind==='node'){const n=D.NODE[r.target];U.routeSource={kind:n.kind,id:n.id,page:r.page,skill:n.skill,town:n.town,item:id};U.returnTo={page:U.view,label:Q.cap(U.view)};return U.focusTask(D.SK[n.skill].page,n.id,null,n.skill);}
+ if(r.kind==='creature')return U.DO.guide(r.target);
+ if(r.kind==='quest')return U.DO.openquest(r.target);
+ if(r.kind==='project')return U.DO.openproject(r.target);
+ if(r.kind==='recovery')return U.DO.shoprecovery();
+ if(r.kind==='shop'){const towns=Object.keys(D.SHOPS).filter(t=>D.SHOPS[t].includes(id));U.routeSource={kind:'shop',page:'shop',item:id,town:towns.includes(Q.S.town)?Q.S.town:towns[0]};U.skillCommissionSelected=null;U.shopSeedsOnly=false;U.shopTab='buy';U.shopSelected.buy=id;U.routeShopItem=id;return U.view==='shop'?U.render(false):Q.go('shop');}
+ if(r.kind==='sell'){U.shopTab='sell';U.shopSelected.sell=id;return U.view==='shop'?U.render(false):Q.go('shop');}
+ if(r.kind==='rare'){const towns=Object.keys(D.TOWN_RARE_GEAR).filter(t=>(D.TOWN_RARE_GEAR[t]||[]).includes(id)||(D.TOWN_SPECIALS[t]||[]).includes(id));if(!towns.includes(Q.S.town)){U.tab.mapTown=towns[0];return Q.go('map');}U.shopTab='rare';U.tab.rareChoice=(Object.values(D.TOWN_RARE_GEAR).some(s=>s.includes(id))?'gear:':'mat:')+id;return U.view==='shop'?U.render(false):Q.go('shop');}
+ if(r.kind==='research'){U.tab.researchChoice=r.target;return Q.go('research');}
+ if(r.kind==='tower'){if(r.target===Q.S.town)return Q.go('tower');U.tab.mapTown=r.target;return Q.go('map');}
+ Q.go(r.page);
+};
 })();
 
 </script>

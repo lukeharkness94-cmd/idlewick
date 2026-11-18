@@ -191,3 +191,14 @@ for(const [family,ids]of Object.entries(families))for(let i=0;i<extra.length;i++
  D.WEAPON_BRIDGES.push(id);for(const stock of Object.values(D.SHOPS))if(stock.includes(a.id))stock.push(id);
 }
 })();
+
+/* Willowbrook's fibre route: gathering precedes the Crafting lesson. */
+(() => {const D=window.DQ.data;
+D.ITEMS.flax={id:'flax',name:'Flax fibres',type:'resource',ic:'woodcutting',col:'#78a58b',val:2,sub:'Gather at the Willowbrook woodland edge. Hettie teaches you to spin it into string.'};
+const n={id:'flax',kind:'wood',name:'Wild flax',town:'willowbrook',skill:'woodcutting',lvl:2,xp:7,t:3000,item:'flax',col:'#78a58b',ic:'woodcutting'};D.NODES.wood.push(n);D.NODE['wood:flax']=n;
+const r={id:'craft_flax_string',name:'Flax string',skill:'crafting',tab:'Leather',lvl:1,xp:6,t:1800,in:{flax:2},out:{string:3},ev:'craft'};D.RECIPES[r.id]=r;D.RLIST.crafting.push(r);
+const q=D.QM.mq_crafting;q.town='willowbrook';q.adv=3;D.SK.crafting.unlock=3;
+q.blurb='I came to Willowbrook to mend a coat, dear, and found half the village waiting with theirs. There is flax along the woodland edge. Bring me ten handfuls and five logs for a frame, and I’ll teach you to spin strong string. After that, we can tackle the coats.';q.spoken=q.blurb;
+q.obj=[{ev:'deliver',key:'flax',n:10,label:'Bring Hettie 10 flax fibres'},{ev:'deliver',key:'log_normal',n:5,label:'Bring 5 logs for her frame'}];
+D.UNL.woodcutting[2]=[...(D.UNL.woodcutting[2]||[]),'Wild flax'];D.UNL.crafting[1]=[...(D.UNL.crafting[1]||[]),'Flax string'];
+})();

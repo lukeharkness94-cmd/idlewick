@@ -25,7 +25,7 @@ DQ.newState = (name = 'Adventurer', look, starter = 'sword') => {
     created: Date.now(), lastSeen: Date.now(), playtime: 0, awayMs: 0, awayEff: 0, tele: { adv: {}, skill: {}, first: {}, away: [], sessions: 0 }, seenTabs: {}, disc: {}, lastAway: null, exportedAt: 0, snoozeBk: 0, title: null, research: { done: {}, active: [] },
     xp, coins: 25, hp: 10, inv: { bread: 5, ...(kit.runes?{rune:kit.runes}:{}) }, bank: {}, equip: { weapon: kit.weapon, ...(kit.ammo?{ammo:kit.ammo}:{}) }, ammo: { id: kit.ammo||null, n: kit.quantity||0 },
     town: 'willowbrook', towns: { willowbrook: { visited: true, boss: false } },
-    q: {}, ach: {}, seen: {}, unlocked: {}, toolUpgrades: {},
+    q: {}, ach: {}, seen: {}, unlocked: {}, toolUpgrades: {}, skillUpgrades: {},
     unlockRules: 2,
     stats: { carve: 0, voyage: 0, train: 0, harvest: 0, collect: 0, pets: 0, furnish: 0, hired: 0, catch: 0, chop: 0, mine: 0, thieve: 0, cook: 0, burn: 0, smelt: 0, smith: 0, craft: 0, alch: 0, brew: 0, enchant: 0, kill: 0, earned: 0, deaths: 0, bought: 0, sold: 0, equipped: 0, tools: 0, rare: 0 },
     settings: { masterVol: 1, ambience: true, ambVol: .45, theme: 'light', lettering: 'hearthside', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, storyScenes: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
@@ -111,6 +111,7 @@ function candidateState(o) {
   if(o.hunt?.loopVersion===undefined)delete result.hunt.loopVersion;
   if(DQ.migrateHuntingLoop)DQ.migrateHuntingLoop(result);
   if(DQ.migrateToolUpgrades)DQ.migrateToolUpgrades(result);
+  if(!record(result.skillUpgrades)||Object.entries(result.skillUpgrades).some(([sk,v])=>!D.SK[sk]||!Number.isInteger(v)||v<0||v>3))throw new Error('Invalid skill upgrades');
   if(!record(result.toolUpgrades)||Object.entries(result.toolUpgrades).some(([id,v])=>!D.ITEMS[id]?.toolSkill||!D.ITEMS[id]?.tier||v!==true))throw new Error('Invalid tool upgrades');
   if(!Number.isSafeInteger(result.hunt.legacyFieldLevel)||result.hunt.legacyFieldLevel<0||result.hunt.legacyFieldLevel>99)throw new Error('Invalid legacy hunting access');
   if(result.hunt.loopVersion!==undefined&&result.hunt.loopVersion!==1)throw new Error('Unsupported hunting loop');

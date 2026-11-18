@@ -32,9 +32,8 @@ const idx = town => D.TOWN[town].idx;
 DQ.cachePrice = (town, grand) => Math.round(300 * Math.pow(idx(town) + 1, 1.7) * (grand ? 4 : 1) / 10) * 10;
 DQ.tonicPrice = town => Math.round(DQ.cachePrice(town, false) * .6 / 10) * 10;
 DQ.rareOffers = (town = S().town) => {
-  const gear = (D.TOWN_RARE_GEAR[town] || []).filter(have).map(id => ({ id, price: Math.round(D.ITEMS[id].val * 6) }));
-  const tid = D.TOWN_TROPHY[town], beaten = !!(S().towns[town] && S().towns[town].boss);
-  if (tid && have(tid) && D.ITEMS[tid].slot!=='weapon') gear.push({ id: tid, price: Math.round(D.ITEMS[tid].val * 4), trophy: true, locked: !beaten });
+  const gear = (D.TOWN_RARE_GEAR[town] || []).filter(have).filter(id => !DQ.exclusiveLoot?.(id)).map(id => ({ id, price: Math.round(D.ITEMS[id].val * 6) }));
+  // Earned loot is recovered through Buy back, never sold as new stock.
   return {
     gear,
     mats: (D.TOWN_SPECIALS[town] || []).filter(have).map(id => ({ id, price: Math.max(5, Math.round(D.ITEMS[id].val * 5)) })),
@@ -65,7 +64,7 @@ DQ.openCache = grand => {
   const out = [], coins = Math.round(o.price * (grand ? .45 + Math.random() * .5 : .25 + Math.random() * .45) * DQ.coinMult());
   DQ.addCoins(coins, { noStat: true }); out.push({ coins });
   for (let i = 0; i < (grand ? 2 : 1); i++) { const gem = DQ.weighted(D.GEM_WEIGHTS); DQ.grant(gem); out.push({ id: gem, n: 1, tag: 'rare' }); }
-  const gl = (D.TOWN_GEAR[town] || []).concat(D.TOWN_RARE_GEAR[town] || []).filter(have);
+  const gl = (D.TOWN_GEAR[town] || []).concat(D.TOWN_RARE_GEAR[town] || []).filter(have).filter(id => !DQ.exclusiveLoot?.(id));
   if (gl.length && chance(grand ? .8 : .35)) { const g = pick(gl); DQ.grant(g); out.push({ id: g, n: 1, tag: 'epic' }); }
   const sp = (D.TOWN_SPECIALS[town] || []).filter(have).filter(i => !/^gem_/.test(i)); if (sp.length && chance(grand ? .7 : .3)) { const s = pick(sp), n = rnd(2, grand ? 8 : 4); DQ.grant(s, n); out.push({ id: s, n, tag: 'uncommon' }); }
   S().stats.rare = (S().stats.rare || 0) + 1; S().stats.bought = (S().stats.bought || 0) + 1; DQ.achDirty = true; DQ.emit('shop');

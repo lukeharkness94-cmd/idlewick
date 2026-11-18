@@ -64,7 +64,7 @@ const fs=require('node:fs');
      assert.match(await page.locator('.ftr-weapon').textContent(),/s per attack/);
      assert.ok(await page.locator('.encounter-arena').evaluate(el=>getComputedStyle(el).backgroundRepeat.split(',').every(value=>value.trim()==='no-repeat')));
      assert.equal(await page.locator('.combat-col .combat-supplies').count(),1);assert.equal(await page.locator('.combat-col .fighter .ftr-row').count()>=4,true);assert.equal(await page.locator('.combat-side .battle-brief').count(),1);assert.equal(await page.locator('.tiledesc').count(),0);
-     assert.equal(await page.locator('.combat-live .lootp').count(),0);if(width===1440&&theme==='dark'){await page.evaluate(()=>{for(let i=0;i<3;i++)DQ.closeModal();});const head=page.locator('.encounter-list .enc-row').nth(1),hid=await head.getAttribute('data-a');await head.click();assert.equal(await page.evaluate(()=>DQ.combatFocus().id),hid,'a creature portrait previews it on the stage');await page.locator('.ready-line [data-do="guide"], [data-do="guide"]').first().click();assert.match(await page.locator('.modal').innerText(),/Field guide/);await page.evaluate(()=>DQ.closeModal());}
+     assert.equal(await page.locator('.combat-live .lootp').count(),0);if(width===1440&&theme==='dark'){await page.evaluate(()=>{for(let i=0;i<3;i++)DQ.closeModal();});const head=page.locator('.encounter-list .enc-row').nth(1),hid=await head.getAttribute('data-a');await head.click();assert.match(await page.locator('.modal').innerText(),/Field guide/);await page.evaluate(()=>DQ.closeModal());await page.locator('.ready-line [data-do="guide"], [data-do="guide"]').first().click();assert.match(await page.locator('.modal').innerText(),/Field guide/);await page.evaluate(()=>DQ.closeModal());}
     }
    }
    assert.ok(await page.locator('#hud [aria-label="Settings"]').isVisible());
@@ -152,8 +152,7 @@ const fs=require('node:fs');
   /* effects remove themselves when their animation finishes; allow for a busy machine, but never leave one behind */
   await page.waitForFunction(()=>!document.querySelector('.scene-effect'),null,{timeout:2500});assert.equal(await page.locator('.scene-effect').count(),0);
   await page.evaluate(()=>{DQ.go('combat');DQ.startAct('fight','chicken',{quiet:true});DQ.ui.render(false);});
-  await page.waitForTimeout(300);await page.evaluate(()=>DQ.splat('foe',2,'hit',0));
-  await page.waitForTimeout(260);assert.ok(await page.locator('.combat-slash').count());
+  await page.waitForTimeout(300);assert.ok(await page.evaluate(()=>new Promise(resolve=>{const ob=new MutationObserver(()=>{if(document.querySelector('.combat-slash')){ob.disconnect();clearTimeout(timer);resolve(true);}});ob.observe(document.querySelector('.encounter-arena'),{childList:true,subtree:true});const timer=setTimeout(()=>{ob.disconnect();resolve(false);},2500);DQ.splat('foe',2,'hit',0);})));
   /* pixel sprites move as a whole */
   assert.ok(await page.locator('#av-you .px-hero').count());
   assert.ok(await page.locator('#av-foe .px-foe').count());
@@ -170,8 +169,7 @@ const fs=require('node:fs');
   await page.waitForTimeout(900);
   for(const [weapon,style] of [['bow_normal','ranged'],['staff_normal','magic']]){
    await page.evaluate(weapon=>{DQ.stopAct(true);DQ.S.equip.weapon=weapon;DQ.fxDirty();DQ.ui.render(false);},weapon);
-   await page.waitForTimeout(300);await page.evaluate(()=>DQ.splat('foe',2,'hit',0));
-   await page.waitForTimeout(260);assert.ok(await page.locator('.combat-projectile.'+style).count());
+   await page.waitForTimeout(300);assert.ok(await page.evaluate(style=>new Promise(resolve=>{const ob=new MutationObserver(()=>{if(document.querySelector('.combat-projectile.'+style)){ob.disconnect();clearTimeout(timer);resolve(true);}});ob.observe(document.querySelector('.encounter-arena'),{childList:true,subtree:true});const timer=setTimeout(()=>{ob.disconnect();resolve(false);},2500);DQ.splat('foe',2,'hit',0);}),style));
    await page.waitForTimeout(900);
   }
   await page.evaluate(()=>{DQ.S.settings.reduceFx=true;DQ.ui.render(false);DQ.splat('foe',2,'hit',0);});

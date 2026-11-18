@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict'),{setup}=require('./hunting-loop.cjs');
+const h=setup(),q=h.q,D=q.data;h.load('shop_skill_updates');q.S=q.newState();q.S.coins=100000;
+assert.equal(D.QM.mq_crafting.town,'willowbrook');assert.equal(D.QM.mq_crafting.adv,3);assert.ok(D.QM.mq_crafting.obj.every(o=>!['visit','craft'].includes(o.ev)));assert.equal(D.NODE['wood:flax'].town,'willowbrook');assert.equal(D.RECIPES.craft_flax_string.in.flax,2);
+q.S.xp.woodcutting=D.XPF[2];assert.ok(q.startAct('wood','flax',{quiet:true}));q.simulate(12000);q.stopAct(true);assert.ok(q.have('flax')>0);
+q.S.unlocked.crafting=true;q.give('flax',2);assert.ok(q.startAct('recipe','craft_flax_string',{quiet:true}));q.simulate(6000);q.stopAct(true);assert.ok(q.have('string')>=3);
+for(const id of Object.values(D.TOWN_TROPHY)){assert.ok(!q.rareOffers().gear.some(g=>g.id===id));assert.equal(q.buy(id),false);assert.equal(q.recoverLoot(id),false);}
+q.give('chief_helm',1);assert.ok(!q.recoveryOffers().includes('chief_helm'));q.sell('chief_helm',1);assert.ok(q.recoveryOffers().includes('chief_helm'));const coins=q.S.coins;assert.ok(q.recoverLoot('chief_helm'));assert.equal(q.S.coins,coins-D.ITEMS.chief_helm.val*4);assert.equal(q.recoverLoot('chief_helm'),false);assert.equal(q.have('chief_helm'),1);
+q.S.unlocked.cooking=true;q.S.xp.cooking=D.XPF[25];q.give('bar_bronze',25);q.give('log_normal',10);const before=q.extraXp('cooking');assert.ok(q.buySkillCommission('cooking'));assert.equal(q.have('bar_bronze'),0);assert.ok(Math.abs(q.extraXp('cooking')/before-1.03)<1e-10);assert.equal(q.buySkillCommission('cooking'),false);q.S=q.validateSave(JSON.parse(JSON.stringify(q.S)));assert.equal(q.S.skillUpgrades.cooking,1);
+q.give('bar_iron',25);q.give('log_normal',20);const snap=JSON.stringify(q.S);h.deny(true);assert.equal(q.buySkillCommission('cooking'),false);h.deny(false);assert.equal(JSON.stringify(q.S),snap);
+q.sell('chief_helm',1);const lost=JSON.stringify(q.S);h.deny(true);assert.equal(q.recoverLoot('chief_helm'),false);h.deny(false);assert.equal(JSON.stringify(q.S),lost);const old=JSON.parse(JSON.stringify(q.S));delete old.skillUpgrades;q.S=q.validateSave(old);assert.deepEqual(Object.keys(q.S.skillUpgrades),[]);
+for(const s of D.SKILLS)assert.ok(D.TOOLS.some(t=>t[1]===s.id)||D.SKILL_COMMISSIONS[s.id],s.id);
+console.log('PASS local flax to string; earned-only recovery and duplicate guard; every skill covered; commission materials/XP/save/rollback');

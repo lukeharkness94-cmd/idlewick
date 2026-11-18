@@ -330,12 +330,14 @@ addEventListener('keydown', e => {
 
 /* ---------- tooltips ---------- */
 DQ.tips = {};
-let tipEl, tipTimer, tipTarget;
+let tipEl, tipTimer, tipTarget, tipLeaveTimer;
 function initTips() {
   tipEl = document.createElement('div'); tipEl.id = 'tip'; tipEl.setAttribute('role', 'tooltip'); document.body.appendChild(tipEl);
   const show = (t, x, y) => {
+    if(t.closest('.blackout,.sil'))return hide();
     const v = t.dataset.tip; const i = v.indexOf(':'), kind = v.slice(0, i), arg = v.slice(i + 1);
     let html = kind === 'text' ? esc(arg) : (DQ.tips[kind] ? DQ.tips[kind](arg, t) : ''); if (!html) return hide();
+    clearTimeout(tipLeaveTimer);tipEl.setAttribute('role',kind==='item'?'dialog':'tooltip');
     tipEl.innerHTML = html; tipEl.classList.add('on'); t.setAttribute('aria-describedby', [t.getAttribute('aria-describedby'), 'tip'].filter(Boolean).join(' ')); place(x, y, t);
   };
   const place = (x, y, t) => {
@@ -345,17 +347,19 @@ function initTips() {
     if (py + r.height > innerHeight - 8) py = (x === null ? tr.top - r.height - 8 : y - r.height - 14); if (py < 8) py = 8;
     tipEl.style.transform = `translate(${DQ.toPage(px)}px,${DQ.toPage(py)}px)`;
   };
-  const hide = () => { clearTimeout(tipTimer); if(tipTarget){const ids=(tipTarget.getAttribute('aria-describedby')||'').split(' ').filter(x=>x&&x!=='tip');if(ids.length)tipTarget.setAttribute('aria-describedby',ids.join(' '));else tipTarget.removeAttribute('aria-describedby');} tipTarget = null; tipEl.classList.remove('on'); };
+  const hide = () => { clearTimeout(tipLeaveTimer);clearTimeout(tipTimer); if(tipTarget){const ids=(tipTarget.getAttribute('aria-describedby')||'').split(' ').filter(x=>x&&x!=='tip');if(ids.length)tipTarget.setAttribute('aria-describedby',ids.join(' '));else tipTarget.removeAttribute('aria-describedby');} tipTarget = null; tipEl.classList.remove('on'); };
   document.addEventListener('mouseover', e => {
-    const t = e.target.closest('[data-tip]'); if (t === tipTarget) return; hide();
+    if(e.target.closest('#tip')){clearTimeout(tipLeaveTimer);return;}
+    const t = e.target.closest('[data-tip]'); if (t === tipTarget){clearTimeout(tipLeaveTimer);return;} hide();
     if (!t || !DQ.S.settings.tips) return; tipTarget = t;
     tipTimer = setTimeout(() => show(t, e.clientX, e.clientY), 220);
   });
-  document.addEventListener('mousemove', e => { if (tipEl.classList.contains('on') && tipTarget) place(e.clientX, e.clientY, tipTarget); });
-  document.addEventListener('mouseout', e => { if (!e.relatedTarget || !e.relatedTarget.closest || !e.relatedTarget.closest('[data-tip]')) hide(); });
-  document.addEventListener('pointerdown', hide, { passive: true });
-  document.addEventListener('focusin', e => { const t = e.target.closest && e.target.closest('[data-tip]'); if (t && DQ.S.settings.tips) { tipTarget = t; show(t, null, null); } });
-  document.addEventListener('focusout', hide);
+  // Keep the card still so its icon routes can be reached with the pointer.
+  const hideSoon=()=>{clearTimeout(tipLeaveTimer);tipLeaveTimer=setTimeout(hide,240);};
+  document.addEventListener('mouseout', e => {if(e.relatedTarget?.closest?.('#tip')||e.relatedTarget?.closest?.('[data-tip]'))return;hideSoon();});
+  document.addEventListener('pointerdown', e=>{if(!e.target.closest('#tip'))hide();}, { passive: true });
+  document.addEventListener('focusin', e => { if(e.target.closest?.('#tip')){clearTimeout(tipLeaveTimer);return;}const t = e.target.closest && e.target.closest('[data-tip]'); if (t && DQ.S.settings.tips) { tipTarget = t; show(t, null, null); } });
+  document.addEventListener('focusout',e=>{if(!e.relatedTarget?.closest?.('#tip'))hideSoon();});
   // Keyboard focus exposes static information too. On touch, hold an action for information;
   // releasing after a hold never also buys, equips or starts that action.
   DQ.prepareTips = root => { if(!root)return;root.querySelectorAll('[data-tip]').forEach(t=>{if(!t.matches('button,a,input,[tabindex]')&&!t.closest('button,a'))t.tabIndex=0;}); };
@@ -364,7 +368,7 @@ function initTips() {
   document.addEventListener('pointermove',e=>{if(origin&&Math.hypot(e.clientX-origin[0],e.clientY-origin[1])>10){clearTimeout(holdTimer);origin=null;}},{passive:true});
   for(const ev of ['pointerup','pointercancel'])document.addEventListener(ev,()=>{clearTimeout(holdTimer);origin=null;},{passive:true});
   document.addEventListener('click',e=>{if(held&&Date.now()-heldAt<1200&&held.contains(e.target)){e.preventDefault();e.stopImmediatePropagation();held=null;}},true);
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();if(e.key==='ArrowDown'&&tipEl.classList.contains('on')&&tipEl.querySelector('.item-route-icon')){e.preventDefault();tipEl.querySelector('.item-route-icon').focus();}});
   DQ.hideTip = hide;
 }
 })();

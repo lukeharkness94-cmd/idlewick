@@ -7,6 +7,7 @@ const rp = c => ramp(c || '#999999');
 
 /* ================= Trees (32 x 48): nine species ================= */
 const TREE = {
+  flax:{kind:"flax",leaf:"#78a58b",deep:"#446b50",bark:"#92a978"},
   normal: { kind: 'round', leaf: '#5f9a45', deep: '#3f7a3c', bark: '#7a5236' },
   oak: { kind: 'oak' },
   willow: { kind: 'willow', leaf: '#8ab06a', deep: '#5f8a4a', bark: '#6a6a4a' },
@@ -28,6 +29,7 @@ const TREE = {
   wraithbark: { kind: 'weeping', leaf: '#c8d0e0', deep: '#9aa4bc', bark: '#b8b8c8', sparkle: '#ffffff' }
 };
 function treeSprite(id) {
+  if(id==='flax'){const s=Spr(32,48);for(const [x,y]of [[7,20],[15,10],[24,23]]){s.line(x,y+4,16,46,rp('#587e57'));s.line(x+1,y+5,17,45,null,'#a3b67b');s.ell(x,y+2,4,3,rp('#7f91bf'));s.fix(x,y,'#e1d9a7');}return s;}
   const t = TREE[id] || TREE.normal; if (t.kind === 'oak') return A.sprites.oak();
   const s = Spr(32, 48), L = rp(t.leaf), Dp = rp(t.deep), bark = rp(t.bark);
   if (t.kind === 'cone') { s.rect(15, 38, 3, 9, bark); [[16, 5, 6, 18], [16, 12, 9, 28], [16, 20, 11, 39]].forEach(([cx, top, half, bot], i) => s.poly([[cx, top], [cx + half, bot], [cx - half, bot]], i % 2 ? Dp : L)); }
