@@ -337,7 +337,7 @@ function initTips() {
     if(t.closest('.blackout,.sil'))return hide();
     const v = t.dataset.tip; const i = v.indexOf(':'), kind = v.slice(0, i), arg = v.slice(i + 1);
     let html = kind === 'text' ? esc(arg) : (DQ.tips[kind] ? DQ.tips[kind](arg, t) : ''); if (!html) return hide();
-    clearTimeout(tipLeaveTimer);tipEl.setAttribute('role',kind==='item'?'dialog':'tooltip');
+    clearTimeout(tipLeaveTimer);tipEl.setAttribute('role','tooltip');
     tipEl.innerHTML = html; tipEl.classList.add('on'); t.setAttribute('aria-describedby', [t.getAttribute('aria-describedby'), 'tip'].filter(Boolean).join(' ')); place(x, y, t);
   };
   const place = (x, y, t) => {
@@ -368,7 +368,7 @@ function initTips() {
   document.addEventListener('pointermove',e=>{if(origin&&Math.hypot(e.clientX-origin[0],e.clientY-origin[1])>10){clearTimeout(holdTimer);origin=null;}},{passive:true});
   for(const ev of ['pointerup','pointercancel'])document.addEventListener(ev,()=>{clearTimeout(holdTimer);origin=null;},{passive:true});
   document.addEventListener('click',e=>{if(held&&Date.now()-heldAt<1200&&held.contains(e.target)){e.preventDefault();e.stopImmediatePropagation();held=null;}},true);
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();if(e.key==='ArrowDown'&&tipEl.classList.contains('on')&&tipEl.querySelector('.item-route-icon')){e.preventDefault();tipEl.querySelector('.item-route-icon').focus();}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();});
   DQ.hideTip = hide;
 }
 })();

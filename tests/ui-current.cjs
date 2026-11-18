@@ -31,7 +31,7 @@ const fs=require('node:fs');
   await page.locator('#cr-go').click();await page.waitForTimeout(1000);
   await page.evaluate(()=>{DQ.S.tut.hidden=true;DQ.go('overview');DQ.ui.render(false);document.querySelectorAll('.note').forEach(el=>el.remove());});
   const roadmap=await page.locator('.unlock-roadmap').innerText();
-  assert.match(roadmap,/Cooking/);assert.match(roadmap,/0\/5\s*Fish caught/i);assert.match(roadmap,/0\/5\s*Logs chopped/i);
+  assert.match(roadmap,/Cooking/);assert.match(roadmap,/0\/5\s*Fish caught/i);assert.match(roadmap,/0\/5\s*Gathering actions/i);
   await page.evaluate(()=>{DQ.S.stats.catch=5;DQ.S.stats.chop=5;DQ.checkActionUnlocks();});
   assert.equal(await page.evaluate(()=>DQ.skillUnlocked('cooking')&&DQ.S.unlocked.cooking),true);
   await page.evaluate(()=>{DQ.closeModal();document.querySelectorAll('.note').forEach(el=>el.remove());});

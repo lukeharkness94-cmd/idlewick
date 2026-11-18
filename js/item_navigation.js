@@ -42,7 +42,7 @@ Q.tips.item=id=>{
  const raw=old(id);if(!raw)return raw;const t=document.createElement('template');t.innerHTML=raw;
  for(const e of t.content.querySelectorAll('.tt-k')){if(e.nextElementSibling?.matches('.tt-list'))e.nextElementSibling.remove();e.remove();}
  t.content.querySelectorAll('.uses,.item-uses,.item-purpose').forEach(e=>e.remove());
- const routes=Q.itemNavigation(id),row=(key,title)=>`<section class="item-route-section"><div class="tt-k">${title}</div><div class="item-route-icons">${routes[key].map((r,i)=>`<button class="iconb item-route-icon" data-do="itemnav" data-a="${id}" data-b="${key}:${i}" aria-label="${esc(r.label)}" title="${esc(r.label)}">${r.pic}</button>`).join('')||`<span class="item-route-none" role="img" aria-label="${key==='get'?'No direct source recorded':'No further use recorded'}" title="${key==='get'?'No direct source recorded':'No further use recorded'}">${ico('lock')}</span>`}</div></section>`;
+ const routes=Q.itemNavigation(id),row=(key,title)=>`<section class="item-route-section"><div class="tt-k">${title}</div><div class="item-route-icons">${routes[key].map((r,i)=>`<span class="item-route-icon" role="img" aria-label="${esc(r.label)}" title="${esc(r.label)}">${r.pic}</span>`).join('')||`<span class="item-route-none" role="img" aria-label="${key==='get'?'No direct source recorded':'No further use recorded'}" title="${key==='get'?'No direct source recorded':'No further use recorded'}">${ico('lock')}</span>`}</div></section>`;
  return t.innerHTML+row('get','How to get it')+row('use',"Where it’s used");
 };
 U.DO.itemnav=(id,index)=>{
