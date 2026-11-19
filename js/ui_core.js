@@ -134,6 +134,7 @@ DQ.tips.item = id => {
   if (it.heal) extra += `<div class="ok">+${it.heal} health</div>`;
   if(it.type==='tool'&&!it.toolSkill&&it.sub)extra+=`<div>${esc(it.sub)}</div>`;
   if (it.type === 'tool' && it.toolSkill) extra += `<div>${Math.round(D.TOOL_SPEED[it.tier] * 100)}% faster ${D.SK[it.toolSkill].name.toLowerCase()}</div>`;
+  if(it.type==='tool'&&it.purpose)extra+=`<div>${esc(it.purpose)}</div>`;
   const own = DQ.have(id);
   return `<b style="color:${it.col}">${esc(it.name)}${it.rare ? ' ★' : ''}</b><em>${kind}</em>${bonus ? `<div class="stat-l">${bonus}</div>` : ''}${extra}${reqLine(it)}<div class="dim">Worth ${fmt(it.val)} coins${own ? ` · You have ${fmt(own)}` : ''}</div>`;
 };

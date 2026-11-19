@@ -30,18 +30,18 @@ const BR = { gather: ['Gathering', '#7ec36a', 'woodcutting'], craft: ['Artisans'
 D.TECH_BRANCHES = BR;
 const T = (id, br, tier, name, desc, fx, cost, mins, req = []) => ({ id, br, tier, name, desc, fx, cost, mins, req });
 D.TECHS = [
-  T('sharper1', 'gather', 1, 'Sharper Tools I', 'Gathering is 3% faster.', { gather: .03 }, { coins: 600, log_normal: 20 }, 10),
+  T('sharper1', 'gather', 1, 'Efficient Fieldwork I', 'Better handling and work routines make gathering 3% faster.', { gather: .03 }, { coins: 600, log_normal: 20 }, 10),
   T('hauling1', 'gather', 1, 'Bigger Packs I', '+4 backpack slots.', { pack: 4 }, { coins: 800, log_oak: 15 }, 15),
-  T('sharper2', 'gather', 2, 'Sharper Tools II', 'Gathering is 3% faster again.', { gather: .03 }, { coins: 6000, bar_iron: 15 }, 45, ['sharper1']),
+  T('sharper2', 'gather', 2, 'Efficient Fieldwork II', 'Refined handling and work routines make gathering 3% faster again.', { gather: .03 }, { coins: 6000, bar_iron: 15 }, 45, ['sharper1']),
   T('keen1', 'gather', 2, 'Keen Eyes I', 'Gems, nests and lucky finds turn up 30% more often.', { find: .3 }, { coins: 4000, gem_sapphire: 3 }, 40),
   T('hauling2', 'gather', 3, 'Bigger Packs II', '+4 more backpack slots.', { pack: 4 }, { coins: 30000, cloth: 20 }, 90, ['hauling1']),
-  T('sharper3', 'gather', 3, 'Sharper Tools III', 'Gathering is 4% faster again.', { gather: .04 }, { coins: 50000, bar_mithril: 15 }, 120, ['sharper2']),
+  T('sharper3', 'gather', 3, 'Efficient Fieldwork III', 'Expert handling and work routines make gathering 4% faster again.', { gather: .04 }, { coins: 50000, bar_mithril: 15 }, 120, ['sharper2']),
   T('keen2', 'gather', 4, 'Keen Eyes II', 'Lucky finds turn up 40% more often again.', { find: .4 }, { coins: 120000, gem_ruby: 4 }, 180, ['keen1']),
 
-  T('bellows', 'craft', 1, 'Better Bellows', '+6% Smithing XP.', { xp_smithing: .06 }, { coins: 700, bar_bronze: 10 }, 10),
+  T('bellows', 'craft', 1, 'Forge Heat Studies', 'Learn to read the heat of the metal: +6% Smithing XP.', { xp_smithing: .06 }, { coins: 700, bar_bronze: 10 }, 10),
   T('hands', 'craft', 1, 'Steady Hands', 'Crafting is 6% faster.', { speed_crafting: .06 }, { coins: 700, log_oak: 10 }, 10),
-  T('spice', 'craft', 1, 'Spice Lore', '6% less burnt food.', { burn: .06 }, { coins: 500, crop_potato: 20 }, 10),
-  T('wastenot', 'craft', 3, 'Waste Not', '5% chance of double yield when gathering and making things.', { dbl: .05 }, { coins: 40000, bar_steel: 20 }, 120, ['bellows']),
+  T('spice', 'craft', 1, 'Heat Control', 'Learn when to lower the heat or lift the pan: 6% less burnt food.', { burn: .06 }, { coins: 500, crop_potato: 20 }, 10),
+  T('wastenot', 'craft', 3, 'Productive Methods', 'Recover useful extra output from each batch or resource: 5% chance of double yield when gathering and making things.', { dbl: .05 }, { coins: 40000, bar_steel: 20 }, 120, ['bellows']),
   T('mastercraft', 'craft', 4, 'Mastercraft', 'Smithing and Crafting are 8% faster.', { speed_smithing: .08, speed_crafting: .08 }, { coins: 110000, bar_mithril: 20 }, 180, ['hands', 'wastenot']),
 
   T('medicine', 'combat', 1, 'Field Medicine', 'Food heals 10% more.', { heal: .1 }, { coins: 600, bread: 20 }, 10),

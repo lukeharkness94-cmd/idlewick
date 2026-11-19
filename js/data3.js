@@ -165,11 +165,18 @@ D.TOOL_ORDER=[.5,1,1.5,2,2.5,3,3.5,4,4.5,5];
 const grades=['Bronze','Reinforced bronze','Iron','Steel','Reinforced steel','Mithril','Reinforced mithril','Adamant','Reinforced adamant','Runic'];
 const metals=['bronze','bronze','iron','steel','steel','mithril','mithril','adamant','adamant','rune'];
 const speeds=[.04,.08,.12,.16,.205,.25,.30,.35,.40,.45],prices=[60,120,290,700,1600,3500,7500,16000,32500,65000],levels=[1,6,16,31,40,51,60,71,80,86],counts=[2,3,4,6,8,12,16,22,28,36];
+D.TOOL_PURPOSE={
+ rod:'Balanced fittings and controlled line retrieval reduce the time needed to land each catch.',
+ axe:'A well-shaped cutting edge and secure handle remove wood efficiently with each stroke.',
+ pick:'A durable point and balanced head break the ore-bearing rock with less wasted effort.',
+ gloves:'Fitted fingers and reinforced cuffs give better control when handling pockets and locks.',
+ hoe:'Better soil preparation improves root access to air and water, shortening crop growing time.'
+};
 D.TOOL_COSTS={};
 for(const [key,sk,ic,label]of D.TOOLS)for(let i=0;i<10;i++){
  const tier=D.TOOL_ORDER[i],id=`tool_${key}_${tier}`,base=D.ITEMS[`tool_${key}_${Math.ceil(tier)}`],bar='bar_'+metals[i],metal=D.TIERS.find(t=>t.id===metals[i]);
  if(!D.ITEMS[id]){D.ITEMS[id]={...base,id,tier,buy:prices[i],val:Math.round(prices[i]/3),artBase:base.id,workmanship:i};for(const stock of Object.values(D.SHOPS))if(stock.includes(base.id))stock.push(id);}
- const it=D.ITEMS[id];it.name=grades[i]+' '+label.toLowerCase();it.col=metal.col;D.TOOL_SPEED[tier]=speeds[i];D.TOOL_PRICE[tier]=prices[i];
+ const it=D.ITEMS[id];it.purpose=D.TOOL_PURPOSE[key];it.name=grades[i]+' '+label.toLowerCase();it.col=metal.col;D.TOOL_SPEED[tier]=speeds[i];D.TOOL_PRICE[tier]=prices[i];
  const inputs={[bar]:counts[i]},wood=D.TOOL_MAKE.logs[Math.ceil(tier)-1];
  if(key==='gloves'){inputs[D.TOOL_MAKE.hides[Math.ceil(tier)-1]]=2;inputs.string=2;}else{inputs[wood]=2;if(key==='rod')inputs.string=2;}
  D.TOOL_COSTS[id]=inputs;it.val=Math.max(1,Math.floor(Object.entries(inputs).reduce((n,[k,v])=>n+D.ITEMS[k].val*v,0)*.5*.7));

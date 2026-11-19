@@ -13,7 +13,26 @@ Q.recoverLoot=id=>{
 };
 const enterShop=()=>UI.view==='shop'?UI.render(false):Q.go('shop');
 const toolSkills=new Set(D.TOOLS.map(t=>t[1])),skills=D.SKILLS.filter(s=>!toolSkills.has(s.id));
-D.SKILL_COMMISSIONS=Object.fromEntries(skills.map(s=>[s.id,{name:({cooking:'Kitchen fittings',smithing:'Forge fittings',crafting:'Sewing bench',hunting:'Tracking kit',beastmastery:'Ranch training kit',exploration:'Survey kit',research:'Study desk',herbalism:'Apothecary kit',enchanting:'Runework bench',carpentry:'Joinery bench',sailing:'Navigation kit',melee:'Practice equipment',ranged:'Range fittings',magic:'Spellwork kit',defence:'Defence training kit',hitpoints:'Conditioning kit'})[s.id]||s.name+' equipment'}]));
+// Workshop ranks improve learning; their equipment must explain that benefit, not imply faster timers.
+const workshopPurpose={
+ cooking:['Practice cookware','Marked measures and even heating help you learn temperature control from each meal.'],
+ smithing:['Smithing patterns','Engraved patterns help you compare your forging with the correct shapes and learn from each piece.'],
+ crafting:['Pattern bench','Measured guides help you recognise accurate cuts and learn from each crafted item.'],
+ magic:['Spell study stand','A steady focus and marked casting guides help you learn from each spell.'],
+ hunting:['Track study kit','Track casts and measuring guides help you recognise animal signs during fieldwork.'],
+ beastmastery:['Handling pen','A controlled handling space helps you learn how to work with your companions.'],
+ exploration:['Survey kit','Calibrated measuring guides help you learn from each survey and observation.'],
+ research:['Study desk','An organised writing surface keeps references and notes together so you learn more from each study.'],
+ herbalism:['Herbal study bench','Labelled preparation guides help you recognise plants and learn from each preparation.'],
+ enchanting:['Enchanting bench','Etched guides and steady clamps help you study each inscription as you work.'],
+ carpentry:['Joinery templates','Measured templates help you spot mistakes and learn from each piece of woodwork.'],
+ sailing:['Navigation table','Chart guides and plotting instruments help you learn from each voyage.'],
+ melee:['Melee dummy','Marked striking zones help you learn positioning and control while training melee.'],
+ ranged:['Archery targets','Clear aiming marks help you learn from each shot while training ranged combat.'],
+ defence:['Guard dummy','Marked attack angles help you learn guard positions while training defence.'],
+ hitpoints:['Conditioning frame','Supported exercises build the conditioning developed through Health training.']
+};
+D.SKILL_COMMISSIONS=Object.fromEntries(skills.map(s=>{const [name,purpose]=workshopPurpose[s.id];return [s.id,{name,purpose}];}));
 Q.skillCommission=(sk,selected)=>{
  const rank=S().skillUpgrades?.[sk]||0,next=selected==null?rank+1:selected,valid=Number.isInteger(next)&&next>=1&&next<=3,need=valid?[0,5,25,50][next]:null;
  const cost=valid?{coins:[0,250,2000,10000][next],['bar_'+['','bronze','iron','steel'][next]]:25,log_normal:10*next}:{};
@@ -53,7 +72,7 @@ UI.V.shop=()=>{
  if(sk&&UI.shopCategory==='tools'&&UI.shopTab==='buy'){
   const owned=S().skillUpgrades?.[sk]||0,selected=UI.skillCommissionRank||Math.min(3,owned+1),st=Q.skillCommission(sk,selected),label=D.SKILL_COMMISSIONS[sk].name,raw=shop(),t=document.createElement('template');t.innerHTML=raw;
   const requirements=`<div class="commission-prerequisites"><span class="${Q.lvl(sk)>=st.need?'ok':'bad'}">${UI.activityIcon(sk)}<span>${esc(D.SK[sk].name)}</span><b>${Q.lvl(sk)} / ${st.need}</b></span>${st.previous?`<span class="${owned>=st.previous?'ok':'bad'}" data-tip="text:${esc(label)} ${st.previous} must be acquired first">${UI.activityIcon(sk)}<span>${esc(label)} ${st.previous}</span><b>${owned>=st.previous?1:0} / 1</b></span>`:''}</div>`;
-  const work=t.content.querySelector('.visual-shop'),nav=work?.querySelector('.tool-families')?.outerHTML||'';if(work)work.outerHTML=`<div class="visual-shop"><section class="panel shop-stock">${nav}<h2>${esc(D.SK[sk].name)} upgrades</h2><div class="illustrated-choices commission-ranks">${[1,2,3].map(r=>`<button type="button" class="illustrated-card ${r===selected?'selected':''}" data-do="commissionrank" data-a="${sk}" data-b="${r}" aria-pressed="${r===selected}">${UI.activityIcon(sk)}<b>${esc(label)} ${r}</b><small>+${r*3}% ${esc(D.SK[sk].name)} XP</small><small>${r<=owned?'Acquired':'Level '+[0,5,25,50][r]}</small></button>`).join('')}</div></section><section class="panel shop-task"><div class="shop-detail-body"><h2>${esc(label)} ${selected}</h2><p>+${selected*3}% ${esc(D.SK[sk].name)} XP</p><h3 class="commission-requirements-title">Requirements</h3>${requirements}${commissionLocks(sk)}${selected<=owned?'<p class="ok">Acquired</p>':UI.needTiles(st.cost)}</div><div class="shop-detail-actions"><span></span><button class="btn primary" data-do="buycommission" data-a="${sk}" ${st.ready?'':'disabled'}>${selected<=owned?'Acquired':'Upgrade '+esc(label)+' '+selected}</button></div></section></div>`;return t.innerHTML;
+  const work=t.content.querySelector('.visual-shop'),nav=work?.querySelector('.tool-families')?.outerHTML||'';if(work)work.outerHTML=`<div class="visual-shop"><section class="panel shop-stock">${nav}<h2>${esc(D.SK[sk].name)} upgrades</h2><div class="illustrated-choices commission-ranks">${[1,2,3].map(r=>`<button type="button" class="illustrated-card ${r===selected?'selected':''}" data-do="commissionrank" data-a="${sk}" data-b="${r}" aria-pressed="${r===selected}">${UI.activityIcon(sk)}<b>${esc(label)} ${r}</b><small>+${r*3}% ${esc(D.SK[sk].name)} XP</small><small>${r<=owned?'Acquired':'Level '+[0,5,25,50][r]}</small></button>`).join('')}</div></section><section class="panel shop-task"><div class="shop-detail-body"><h2>${esc(label)} ${selected}</h2><p>+${selected*3}% ${esc(D.SK[sk].name)} XP</p><p class="upgrade-purpose">${esc(D.SKILL_COMMISSIONS[sk].purpose)}</p><h3 class="commission-requirements-title">Requirements</h3>${requirements}${commissionLocks(sk)}${selected<=owned?'<p class="ok">Acquired</p>':UI.needTiles(st.cost)}</div><div class="shop-detail-actions"><span></span><button class="btn primary" data-do="buycommission" data-a="${sk}" ${st.ready?'':'disabled'}>${selected<=owned?'Acquired':'Upgrade '+esc(label)+' '+selected}</button></div></section></div>`;return t.innerHTML;
  }
  return shop();
 };

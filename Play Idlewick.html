@@ -6332,11 +6332,18 @@ D.TOOL_ORDER=[.5,1,1.5,2,2.5,3,3.5,4,4.5,5];
 const grades=['Bronze','Reinforced bronze','Iron','Steel','Reinforced steel','Mithril','Reinforced mithril','Adamant','Reinforced adamant','Runic'];
 const metals=['bronze','bronze','iron','steel','steel','mithril','mithril','adamant','adamant','rune'];
 const speeds=[.04,.08,.12,.16,.205,.25,.30,.35,.40,.45],prices=[60,120,290,700,1600,3500,7500,16000,32500,65000],levels=[1,6,16,31,40,51,60,71,80,86],counts=[2,3,4,6,8,12,16,22,28,36];
+D.TOOL_PURPOSE={
+ rod:'Balanced fittings and controlled line retrieval reduce the time needed to land each catch.',
+ axe:'A well-shaped cutting edge and secure handle remove wood efficiently with each stroke.',
+ pick:'A durable point and balanced head break the ore-bearing rock with less wasted effort.',
+ gloves:'Fitted fingers and reinforced cuffs give better control when handling pockets and locks.',
+ hoe:'Better soil preparation improves root access to air and water, shortening crop growing time.'
+};
 D.TOOL_COSTS={};
 for(const [key,sk,ic,label]of D.TOOLS)for(let i=0;i<10;i++){
  const tier=D.TOOL_ORDER[i],id=`tool_${key}_${tier}`,base=D.ITEMS[`tool_${key}_${Math.ceil(tier)}`],bar='bar_'+metals[i],metal=D.TIERS.find(t=>t.id===metals[i]);
  if(!D.ITEMS[id]){D.ITEMS[id]={...base,id,tier,buy:prices[i],val:Math.round(prices[i]/3),artBase:base.id,workmanship:i};for(const stock of Object.values(D.SHOPS))if(stock.includes(base.id))stock.push(id);}
- const it=D.ITEMS[id];it.name=grades[i]+' '+label.toLowerCase();it.col=metal.col;D.TOOL_SPEED[tier]=speeds[i];D.TOOL_PRICE[tier]=prices[i];
+ const it=D.ITEMS[id];it.purpose=D.TOOL_PURPOSE[key];it.name=grades[i]+' '+label.toLowerCase();it.col=metal.col;D.TOOL_SPEED[tier]=speeds[i];D.TOOL_PRICE[tier]=prices[i];
  const inputs={[bar]:counts[i]},wood=D.TOOL_MAKE.logs[Math.ceil(tier)-1];
  if(key==='gloves'){inputs[D.TOOL_MAKE.hides[Math.ceil(tier)-1]]=2;inputs.string=2;}else{inputs[wood]=2;if(key==='rod')inputs.string=2;}
  D.TOOL_COSTS[id]=inputs;it.val=Math.max(1,Math.floor(Object.entries(inputs).reduce((n,[k,v])=>n+D.ITEMS[k].val*v,0)*.5*.7));
@@ -13589,6 +13596,7 @@ DQ.tips.item = id => {
   if (it.heal) extra += `<div class="ok">+${it.heal} health</div>`;
   if(it.type==='tool'&&!it.toolSkill&&it.sub)extra+=`<div>${esc(it.sub)}</div>`;
   if (it.type === 'tool' && it.toolSkill) extra += `<div>${Math.round(D.TOOL_SPEED[it.tier] * 100)}% faster ${D.SK[it.toolSkill].name.toLowerCase()}</div>`;
+  if(it.type==='tool'&&it.purpose)extra+=`<div>${esc(it.purpose)}</div>`;
   const own = DQ.have(id);
   return `<b style="color:${it.col}">${esc(it.name)}${it.rare ? ' ★' : ''}</b><em>${kind}</em>${bonus ? `<div class="stat-l">${bonus}</div>` : ''}${extra}${reqLine(it)}<div class="dim">Worth ${fmt(it.val)} coins${own ? ` · You have ${fmt(own)}` : ''}</div>`;
 };
@@ -16816,18 +16824,18 @@ const BR = { gather: ['Gathering', '#7ec36a', 'woodcutting'], craft: ['Artisans'
 D.TECH_BRANCHES = BR;
 const T = (id, br, tier, name, desc, fx, cost, mins, req = []) => ({ id, br, tier, name, desc, fx, cost, mins, req });
 D.TECHS = [
-  T('sharper1', 'gather', 1, 'Sharper Tools I', 'Gathering is 3% faster.', { gather: .03 }, { coins: 600, log_normal: 20 }, 10),
+  T('sharper1', 'gather', 1, 'Efficient Fieldwork I', 'Better handling and work routines make gathering 3% faster.', { gather: .03 }, { coins: 600, log_normal: 20 }, 10),
   T('hauling1', 'gather', 1, 'Bigger Packs I', '+4 backpack slots.', { pack: 4 }, { coins: 800, log_oak: 15 }, 15),
-  T('sharper2', 'gather', 2, 'Sharper Tools II', 'Gathering is 3% faster again.', { gather: .03 }, { coins: 6000, bar_iron: 15 }, 45, ['sharper1']),
+  T('sharper2', 'gather', 2, 'Efficient Fieldwork II', 'Refined handling and work routines make gathering 3% faster again.', { gather: .03 }, { coins: 6000, bar_iron: 15 }, 45, ['sharper1']),
   T('keen1', 'gather', 2, 'Keen Eyes I', 'Gems, nests and lucky finds turn up 30% more often.', { find: .3 }, { coins: 4000, gem_sapphire: 3 }, 40),
   T('hauling2', 'gather', 3, 'Bigger Packs II', '+4 more backpack slots.', { pack: 4 }, { coins: 30000, cloth: 20 }, 90, ['hauling1']),
-  T('sharper3', 'gather', 3, 'Sharper Tools III', 'Gathering is 4% faster again.', { gather: .04 }, { coins: 50000, bar_mithril: 15 }, 120, ['sharper2']),
+  T('sharper3', 'gather', 3, 'Efficient Fieldwork III', 'Expert handling and work routines make gathering 4% faster again.', { gather: .04 }, { coins: 50000, bar_mithril: 15 }, 120, ['sharper2']),
   T('keen2', 'gather', 4, 'Keen Eyes II', 'Lucky finds turn up 40% more often again.', { find: .4 }, { coins: 120000, gem_ruby: 4 }, 180, ['keen1']),
 
-  T('bellows', 'craft', 1, 'Better Bellows', '+6% Smithing XP.', { xp_smithing: .06 }, { coins: 700, bar_bronze: 10 }, 10),
+  T('bellows', 'craft', 1, 'Forge Heat Studies', 'Learn to read the heat of the metal: +6% Smithing XP.', { xp_smithing: .06 }, { coins: 700, bar_bronze: 10 }, 10),
   T('hands', 'craft', 1, 'Steady Hands', 'Crafting is 6% faster.', { speed_crafting: .06 }, { coins: 700, log_oak: 10 }, 10),
-  T('spice', 'craft', 1, 'Spice Lore', '6% less burnt food.', { burn: .06 }, { coins: 500, crop_potato: 20 }, 10),
-  T('wastenot', 'craft', 3, 'Waste Not', '5% chance of double yield when gathering and making things.', { dbl: .05 }, { coins: 40000, bar_steel: 20 }, 120, ['bellows']),
+  T('spice', 'craft', 1, 'Heat Control', 'Learn when to lower the heat or lift the pan: 6% less burnt food.', { burn: .06 }, { coins: 500, crop_potato: 20 }, 10),
+  T('wastenot', 'craft', 3, 'Productive Methods', 'Recover useful extra output from each batch or resource: 5% chance of double yield when gathering and making things.', { dbl: .05 }, { coins: 40000, bar_steel: 20 }, 120, ['bellows']),
   T('mastercraft', 'craft', 4, 'Mastercraft', 'Smithing and Crafting are 8% faster.', { speed_smithing: .08, speed_crafting: .08 }, { coins: 110000, bar_mithril: 20 }, 180, ['hands', 'wastenot']),
 
   T('medicine', 'combat', 1, 'Field Medicine', 'Food heals 10% more.', { heal: .1 }, { coins: 600, bread: 20 }, 10),
@@ -21753,7 +21761,7 @@ UI.V.shop=()=>{
  if(UI.routeShopItem&&D.ITEMS[UI.routeShopItem]){const it=D.ITEMS[UI.routeShopItem];UI.shopCategory=it.type==='tool'?'tools':it.slot||it.type==='ammo'?'equipment':'supplies';if(it.toolSkill)UI.shopToolFamily=Q.toolKey(it.toolSkill);UI.routeShopItem=null;}
  if(UI.shopTab!=='buy'||UI.shopCategory!=='tools')return stableShop(shop0());
  const F=families.find(f=>f.key===UI.shopToolFamily)||families[0],ids=F.ids.filter(id=>!Q.toolUpgradeOwned(id)),selected=ids.includes(UI.shopSelected.buy)?UI.shopSelected.buy:ids[0];UI.shopSelected.buy=selected;
- const detail=selected?(()=>{const it=D.ITEMS[selected],state=Q.shopUpgradeState(selected);return `<div class="phead"><h2>Tool upgrade</h2></div>${UI.shopPreview(selected)}<p>${+(D.TOOL_SPEED[it.tier]*100).toFixed(1)}% faster ${esc(D.SK[F.sk].name)}. Your best acquired tool is used automatically.</p>${UI.needTiles({coins:Q.buyPrice(selected),...state.cost})}<p class="${state.ready?'ok':'dim'}">${state.lock?'Learn '+esc(D.SK[state.lock].name)+' first.':!state.reachable?'Reach '+esc(D.TOWN[state.region].name)+' to unlock this commission.':state.ready?'You have the supplies for this upgrade.':'Gather the missing supplies, then return here to upgrade.'}</p><div class="shop-action"><button class="btn primary" data-do="buyupgrade" data-a="${selected}" ${state.ready?'':'disabled'}>Upgrade</button></div>`;})():'<h2>Every upgrade acquired</h2><p>Your best tool is already in use.</p>';
+ const detail=selected?(()=>{const it=D.ITEMS[selected],state=Q.shopUpgradeState(selected);return `<div class="phead"><h2>Tool upgrade</h2></div>${UI.shopPreview(selected)}<p class="upgrade-purpose">${esc(it.purpose||'')}</p><p>${+(D.TOOL_SPEED[it.tier]*100).toFixed(1)}% faster ${esc(D.SK[F.sk].name)}. Your best acquired tool is used automatically.</p>${UI.needTiles({coins:Q.buyPrice(selected),...state.cost})}<p class="${state.ready?'ok':'dim'}">${state.lock?'Learn '+esc(D.SK[state.lock].name)+' first.':!state.reachable?'Reach '+esc(D.TOWN[state.region].name)+' to unlock this commission.':state.ready?'You have the supplies for this upgrade.':'Gather the missing supplies, then return here to upgrade.'}</p><div class="shop-action"><button class="btn primary" data-do="buyupgrade" data-a="${selected}" ${state.ready?'':'disabled'}>Upgrade</button></div>`;})():'<h2>Every upgrade acquired</h2><p>Your best tool is already in use.</p>';
  return stableShop(`<div class="visual-shop shop-tools"><section class="panel shop-stock"><div class="illustrated-choices">${ids.map(id=>{const it=D.ITEMS[id],state=Q.shopUpgradeState(id);return `<button class="illustrated-card ${id===selected?'selected':''}" data-tool="${id}" data-do="shopselect" data-a="${id}" aria-pressed="${id===selected}"><span class="choice-art">${Q.itemIco(it)}</span><b>${esc(it.name)}</b><small>${+(D.TOOL_SPEED[it.tier]*100).toFixed(1)}% faster</small><span class="stock-price">${UI.shopCardCost(id)}</span><span class="choice-state ${state.ready?'ok':''}">${state.ready?'✓ Ready to upgrade':state.lock?'Skill required':!state.reachable?'Region required':'Supplies needed'}</span></button>`;}).join('')||'<p>You have acquired every upgrade in this family.</p>'}</div></section><section class="panel shop-task">${detail}</section></div>`);
 };
 Object.assign(UI.DO,{
@@ -22029,7 +22037,26 @@ Q.recoverLoot=id=>{
 };
 const enterShop=()=>UI.view==='shop'?UI.render(false):Q.go('shop');
 const toolSkills=new Set(D.TOOLS.map(t=>t[1])),skills=D.SKILLS.filter(s=>!toolSkills.has(s.id));
-D.SKILL_COMMISSIONS=Object.fromEntries(skills.map(s=>[s.id,{name:({cooking:'Kitchen fittings',smithing:'Forge fittings',crafting:'Sewing bench',hunting:'Tracking kit',beastmastery:'Ranch training kit',exploration:'Survey kit',research:'Study desk',herbalism:'Apothecary kit',enchanting:'Runework bench',carpentry:'Joinery bench',sailing:'Navigation kit',melee:'Practice equipment',ranged:'Range fittings',magic:'Spellwork kit',defence:'Defence training kit',hitpoints:'Conditioning kit'})[s.id]||s.name+' equipment'}]));
+// Workshop ranks improve learning; their equipment must explain that benefit, not imply faster timers.
+const workshopPurpose={
+ cooking:['Practice cookware','Marked measures and even heating help you learn temperature control from each meal.'],
+ smithing:['Smithing patterns','Engraved patterns help you compare your forging with the correct shapes and learn from each piece.'],
+ crafting:['Pattern bench','Measured guides help you recognise accurate cuts and learn from each crafted item.'],
+ magic:['Spell study stand','A steady focus and marked casting guides help you learn from each spell.'],
+ hunting:['Track study kit','Track casts and measuring guides help you recognise animal signs during fieldwork.'],
+ beastmastery:['Handling pen','A controlled handling space helps you learn how to work with your companions.'],
+ exploration:['Survey kit','Calibrated measuring guides help you learn from each survey and observation.'],
+ research:['Study desk','An organised writing surface keeps references and notes together so you learn more from each study.'],
+ herbalism:['Herbal study bench','Labelled preparation guides help you recognise plants and learn from each preparation.'],
+ enchanting:['Enchanting bench','Etched guides and steady clamps help you study each inscription as you work.'],
+ carpentry:['Joinery templates','Measured templates help you spot mistakes and learn from each piece of woodwork.'],
+ sailing:['Navigation table','Chart guides and plotting instruments help you learn from each voyage.'],
+ melee:['Melee dummy','Marked striking zones help you learn positioning and control while training melee.'],
+ ranged:['Archery targets','Clear aiming marks help you learn from each shot while training ranged combat.'],
+ defence:['Guard dummy','Marked attack angles help you learn guard positions while training defence.'],
+ hitpoints:['Conditioning frame','Supported exercises build the conditioning developed through Health training.']
+};
+D.SKILL_COMMISSIONS=Object.fromEntries(skills.map(s=>{const [name,purpose]=workshopPurpose[s.id];return [s.id,{name,purpose}];}));
 Q.skillCommission=(sk,selected)=>{
  const rank=S().skillUpgrades?.[sk]||0,next=selected==null?rank+1:selected,valid=Number.isInteger(next)&&next>=1&&next<=3,need=valid?[0,5,25,50][next]:null;
  const cost=valid?{coins:[0,250,2000,10000][next],['bar_'+['','bronze','iron','steel'][next]]:25,log_normal:10*next}:{};
@@ -22069,7 +22096,7 @@ UI.V.shop=()=>{
  if(sk&&UI.shopCategory==='tools'&&UI.shopTab==='buy'){
   const owned=S().skillUpgrades?.[sk]||0,selected=UI.skillCommissionRank||Math.min(3,owned+1),st=Q.skillCommission(sk,selected),label=D.SKILL_COMMISSIONS[sk].name,raw=shop(),t=document.createElement('template');t.innerHTML=raw;
   const requirements=`<div class="commission-prerequisites"><span class="${Q.lvl(sk)>=st.need?'ok':'bad'}">${UI.activityIcon(sk)}<span>${esc(D.SK[sk].name)}</span><b>${Q.lvl(sk)} / ${st.need}</b></span>${st.previous?`<span class="${owned>=st.previous?'ok':'bad'}" data-tip="text:${esc(label)} ${st.previous} must be acquired first">${UI.activityIcon(sk)}<span>${esc(label)} ${st.previous}</span><b>${owned>=st.previous?1:0} / 1</b></span>`:''}</div>`;
-  const work=t.content.querySelector('.visual-shop'),nav=work?.querySelector('.tool-families')?.outerHTML||'';if(work)work.outerHTML=`<div class="visual-shop"><section class="panel shop-stock">${nav}<h2>${esc(D.SK[sk].name)} upgrades</h2><div class="illustrated-choices commission-ranks">${[1,2,3].map(r=>`<button type="button" class="illustrated-card ${r===selected?'selected':''}" data-do="commissionrank" data-a="${sk}" data-b="${r}" aria-pressed="${r===selected}">${UI.activityIcon(sk)}<b>${esc(label)} ${r}</b><small>+${r*3}% ${esc(D.SK[sk].name)} XP</small><small>${r<=owned?'Acquired':'Level '+[0,5,25,50][r]}</small></button>`).join('')}</div></section><section class="panel shop-task"><div class="shop-detail-body"><h2>${esc(label)} ${selected}</h2><p>+${selected*3}% ${esc(D.SK[sk].name)} XP</p><h3 class="commission-requirements-title">Requirements</h3>${requirements}${commissionLocks(sk)}${selected<=owned?'<p class="ok">Acquired</p>':UI.needTiles(st.cost)}</div><div class="shop-detail-actions"><span></span><button class="btn primary" data-do="buycommission" data-a="${sk}" ${st.ready?'':'disabled'}>${selected<=owned?'Acquired':'Upgrade '+esc(label)+' '+selected}</button></div></section></div>`;return t.innerHTML;
+  const work=t.content.querySelector('.visual-shop'),nav=work?.querySelector('.tool-families')?.outerHTML||'';if(work)work.outerHTML=`<div class="visual-shop"><section class="panel shop-stock">${nav}<h2>${esc(D.SK[sk].name)} upgrades</h2><div class="illustrated-choices commission-ranks">${[1,2,3].map(r=>`<button type="button" class="illustrated-card ${r===selected?'selected':''}" data-do="commissionrank" data-a="${sk}" data-b="${r}" aria-pressed="${r===selected}">${UI.activityIcon(sk)}<b>${esc(label)} ${r}</b><small>+${r*3}% ${esc(D.SK[sk].name)} XP</small><small>${r<=owned?'Acquired':'Level '+[0,5,25,50][r]}</small></button>`).join('')}</div></section><section class="panel shop-task"><div class="shop-detail-body"><h2>${esc(label)} ${selected}</h2><p>+${selected*3}% ${esc(D.SK[sk].name)} XP</p><p class="upgrade-purpose">${esc(D.SKILL_COMMISSIONS[sk].purpose)}</p><h3 class="commission-requirements-title">Requirements</h3>${requirements}${commissionLocks(sk)}${selected<=owned?'<p class="ok">Acquired</p>':UI.needTiles(st.cost)}</div><div class="shop-detail-actions"><span></span><button class="btn primary" data-do="buycommission" data-a="${sk}" ${st.ready?'':'disabled'}>${selected<=owned?'Acquired':'Upgrade '+esc(label)+' '+selected}</button></div></section></div>`;return t.innerHTML;
  }
  return shop();
 };
