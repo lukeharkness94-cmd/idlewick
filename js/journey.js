@@ -159,10 +159,10 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
     const project = D.PROJECTS[id];
     if (S().projects[id]) return step('Project complete', project.story + ' ' + project.reward, 'go', 'map');
     if (S().town !== project.town) return step('Return to '+D.TOWN[project.town].name, 'Your neighbours are ready to help.', 'journeytravel', project.town);
-    if (id === 'inn' && DQ.have('shrimp') < 12) {
+    if (id === 'inn' && DQ.have('shrimp') < (DQ.projectNeed(id).shrimp||0)) {
       if (!DQ.skillUnlocked('cooking')) return (S().stats.catch || 0) < 5 ? task('Learn Cooking', `Catch five fish and chop five logs for a cooking fire. ${DQ.unlockHow('cooking')}.`, 'fish', 'shrimp') : task('Learn Cooking', `Chop logs for a cooking fire. ${DQ.unlockHow('cooking')}.`, 'wood', 'normal');
-      if (!DQ.have('raw_shrimp')) return task('Catch shrimp for the inn', 'The inn needs 12 cooked shrimp. Gather raw shrimp first.', 'fish', 'shrimp');
-      return task('Cook for the inn', fmt(DQ.have('shrimp')) + ' / 12 cooked shrimp ready. Some attempts may burn.', 'recipe', 'cook_shrimp');
+      if (!DQ.have('raw_shrimp')) return task('Catch shrimp for the inn', 'The inn still needs '+DQ.projectNeed(id).shrimp+' cooked shrimp. Gather raw shrimp first.', 'fish', 'shrimp');
+      return task('Cook for the inn', fmt(DQ.have('shrimp')) + ' / '+DQ.projectNeed(id).shrimp+' cooked shrimp ready. Some attempts may burn.', 'recipe', 'cook_shrimp');
     }
     /* the first missing material, routed to where it comes from */
     const need = DQ.projectNeed(id), deliverable = Object.entries(need).some(([k]) => held(k) > 0);
@@ -210,13 +210,13 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
     const want = { melee: 'aggressive', defence: 'defensive' }[low];
     if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. ${D.SK[low].name} ${lv} trails ${D.SK[sk[sk.length - 1][0]].name} ${top}: ${low === 'defence' ? 'more damage taken' : 'more misses, smaller hits'}. Switches focus and fights chickens.`, 'journeytrain', want, 'chicken');
   }
-  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Melee and Defence.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
+  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train '+D.SK[DQ.weaponStyle()].name+' and Defence.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
   /* Ready by level: let the battle forecast decide what, if anything, is missing. */
   const f = DQ.bossForecast ? DQ.bossForecast('grubnash') : null;
   if (f && f.winRate >= .75) return task('Challenge Grubnash', `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current gear and food.`, 'fight', 'grubnash');
   /* the most useful concrete step from the real save: rest, armour you own or can afford, his weakness, food */
-  const prep = DQ.prepAdvice ? DQ.prepAdvice('grubnash', f).filter(x => x.key !== 'food' && x.key !== 'level') : [];
-  if (prep.length && (prep[0].afford !== false)) return step(prep[0].title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${prep[0].text}`, prep[0].action || 'go', prep[0].a || 'combat');
+  const prep = DQ.prepAdvice ? DQ.prepAdvice('grubnash', f).filter(x => x.key !== 'food' && x.key !== 'level' && x.actionable!==false) : [];
+  if (prep.length && (prep[0].preparing || prep[0].afford !== false)) return step(prep[0].title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${prep[0].text}`, prep[0].action || 'go', prep[0].a || 'combat');
   const needFood = f && f.foodPerKill != null ? Math.ceil(f.foodPerKill * 1.5) : DQ.maxHp() * 2;
   if (food < needFood) {
     const msg = `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins. ` : ''}Food restores ${fmt(food)} health; about ${fmt(needFood)} would carry you through.`;
@@ -240,7 +240,7 @@ DQ.regionNext = () => {
     return task(`Train for ${short}`, `Combat ${DQ.combatLvl()} / ${req}. ${foe ? `${foe.name}s are a fair fight here.` : ''}`, 'fight', foe ? foe.id : b.id); }
   const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
   if (f && f.winRate >= .75) return task(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'fight', b.id);
-  const tip = DQ.prepAdvice ? DQ.prepAdvice(b.id, f)[0] : null;
+  const tip = DQ.prepAdvice ? DQ.prepAdvice(b.id, f).find(x=>x.actionable!==false) : null;
   return tip ? step(tip.title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${tip.text}`, tip.action || 'go', tip.a || 'combat') : step(`Challenge ${short}`, 'You are ready by level. Check the forecast on the Combat page.', 'go', 'combat');
 };
 /* Optional goals beside the one primary action: something short, something over a few sessions, a long pursuit */

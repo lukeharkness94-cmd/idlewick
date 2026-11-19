@@ -13,7 +13,8 @@ potion('trap_blend','Trail scent blend','paw','#b6a66c','trapCare',.8,'Field tra
 potion('calming_draught','Calming draught','bottle','#90bfa5','bondTraining',1.25,'Deliberate companion training gives 25% more bond XP for 20 minutes');
 potion('field_ward','Field ward','shield','#a4a8d4','specialGuard',.9,'Boss and tower specials deal 10% less damage for 20 minutes');
 potion('trail_ration','Packed fish supper','food','#c59a65','sailingCargo',1.25,'Voyage cargo has a 25% chance to return an extra stack for 20 minutes');
-recipe('craft_runes','crafting',8,{ore_quartz:3,log_normal:4},{rune:16},{xp:24,note:'A player-made alternative to shop runes. Quartz is inscribed with ordinary timber as fuel. No runes are needed to make the first batch.'});
+recipe('craft_runes','magic',1,{ore_copper:2,log_normal:2},{rune:16},{xp:6,tab:'Runes',name:'Copper rune batch',note:'Inscribe copper over a charcoal fire. Mine copper and cut ordinary timber; no purchased runes or Crafting unlock is needed.'});
+recipe('quartz_runes','magic',10,{ore_quartz:3,log_normal:4},{rune:40},{xp:24,tab:'Runes',name:'Quartz rune batch',note:'Quartz holds more magic than copper, producing a larger batch from each inscription.'});
 recipe('inscribe_runes','enchanting',25,{ore_quartz:2,ore_moonstone:1},{rune:60},{xp:90,study:'rune_patterns',note:'An advanced batch unlocked by a practical Scholarship study.'});
 recipe('cook_feed','cooking',1,{crop_potato:2,crop_onion:1},{feed:12},{xp:18});
 recipe('cook_grain_feed','cooking',15,{crop_wheat:2},{feed:12},{xp:30});

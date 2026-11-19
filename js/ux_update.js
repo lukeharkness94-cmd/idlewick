@@ -27,10 +27,11 @@ const taskmap0=UI.DO.taskmap;
 UI.DO.taskmap=town=>{const page=UI.view,id=UI.taskChoice[page],node=Object.values(D.NODE).find(n=>n.id===id&&n.skill===page);UI.routeSource={page,id,skill:page,town,kind:node?.kind};if(Q.townUnlocked(town))return UI.DO.routetravel(town);return taskmap0(town);};
 /* A defeated creature has a short exit before the next silhouette arrives; no combat timing changes. */
 Q.on('beaststrike',()=>{const el=document.querySelector('.battle-companion');if(el&&!calm())el.animate([{transform:'translateX(0)'},{transform:'translateX(12px)',offset:.4},{transform:'translateX(0)'}],{duration:400});});
-Q.on('foedefeated',m=>{if(UI.view!=='combat'||Q.sim.on)return;const foe=document.getElementById('av-foe');if(!foe)return;const rect=foe.getBoundingClientRect(),layer=document.getElementById('toastlayer')||document.body;
+Q.on('foedefeated',m=>{const show=()=>{if(UI.view!=='combat'||Q.sim.on)return;const foe=document.getElementById('av-foe');if(!foe)return;const rect=foe.getBoundingClientRect(),layer=document.getElementById('toastlayer')||document.body;
  const label=document.createElement('div');label.className='defeat-caption';label.textContent=m.name+' defeated';label.setAttribute('role','status');label.style.left=pagePx(rect.left+rect.width/2)+'px';label.style.top=pagePx(Math.max(120,rect.top-24))+'px';layer.appendChild(label);setTimeout(()=>label.remove(),1100);
  if(calm())return;const ghost=foe.cloneNode(true);ghost.removeAttribute('id');ghost.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));ghost.className='foe-death-ghost';Object.assign(ghost.style,{left:pagePx(rect.left)+'px',top:pagePx(rect.top)+'px',width:pagePx(rect.width)+'px',height:pagePx(rect.height)+'px'});layer.appendChild(ghost);ghost.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(22px) rotate(8deg)'}],{duration:480,easing:'ease-in',fill:'forwards'});setTimeout(()=>ghost.remove(),510);
  requestAnimationFrame(()=>{const next=document.getElementById('av-foe');if(next)next.animate([{opacity:0},{opacity:0,offset:.35},{opacity:1}],{duration:650});});
+};setTimeout(show,Math.max(0,(UI.impactUntil||0)-performance.now()));
 });
 /* One Scholarship family card, with visible rank buttons and the selected rank's unchanged cost/action. */
 const research0=UI.V.research;UI.researchRanks={};

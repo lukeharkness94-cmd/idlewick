@@ -1,0 +1,294 @@
+{
+  "baseline_commit": "10dc23c",
+  "date": "2026-11-19",
+  "limitations": [
+    "Scripted policy, not human playtesting",
+    "No granted progression in opening/preparation journeys",
+    "Reading and navigation time excluded",
+    "Forecasts consume random draws; comparisons are illustrative, not controlled retention/balance experiments"
+  ],
+  "opening": {
+    "before": [
+      {
+        "starter": "sword",
+        "simulated_minutes": 120,
+        "first_boss_reward_minute": 25.5,
+        "hero": 18,
+        "combat": 13,
+        "stalled": false,
+        "coins": 9285,
+        "items_bought": 0,
+        "mining_actions": 0,
+        "craft_events": 0,
+        "finished_quests": [
+          "first_steps",
+          "goblin_menace",
+          "hungry_cook",
+          "chiefs_end"
+        ]
+      },
+      {
+        "starter": "bow",
+        "simulated_minutes": 20,
+        "first_boss_reward_minute": null,
+        "hero": 6,
+        "combat": 6,
+        "stalled": true,
+        "coins": 1352,
+        "items_bought": 0,
+        "mining_actions": 0,
+        "craft_events": 0,
+        "finished_quests": [
+          "first_steps",
+          "goblin_menace",
+          "hungry_cook"
+        ]
+      },
+      {
+        "starter": "staff",
+        "simulated_minutes": 22,
+        "first_boss_reward_minute": null,
+        "hero": 6,
+        "combat": 6,
+        "stalled": true,
+        "coins": 1458,
+        "items_bought": 0,
+        "mining_actions": 0,
+        "craft_events": 0,
+        "finished_quests": [
+          "first_steps",
+          "goblin_menace",
+          "hungry_cook"
+        ]
+      }
+    ],
+    "after": [
+      {
+        "starter": "sword",
+        "simulated_minutes": 120,
+        "first_boss_reward_minute": 23.5,
+        "hero": 20,
+        "combat": 14,
+        "stalled": false,
+        "coins": 8834,
+        "items_bought": 0,
+        "mining_actions": 0,
+        "craft_events": 0,
+        "finished_quests": [
+          "first_steps",
+          "goblin_menace",
+          "hungry_cook",
+          "chiefs_end",
+          "boar_hunt"
+        ]
+      },
+      {
+        "starter": "bow",
+        "simulated_minutes": 120,
+        "first_boss_reward_minute": 21,
+        "hero": 20,
+        "combat": 16,
+        "stalled": false,
+        "coins": 1836,
+        "items_bought": 2200,
+        "mining_actions": 0,
+        "craft_events": 0,
+        "finished_quests": [
+          "first_steps",
+          "goblin_menace",
+          "hungry_cook",
+          "chiefs_end",
+          "boar_hunt"
+        ]
+      },
+      {
+        "starter": "staff",
+        "simulated_minutes": 120,
+        "first_boss_reward_minute": 33.5,
+        "hero": 17,
+        "combat": 14,
+        "stalled": false,
+        "coins": 7389,
+        "items_bought": 101,
+        "mining_actions": 193,
+        "craft_events": 89,
+        "finished_quests": [
+          "first_steps",
+          "goblin_menace",
+          "hungry_cook",
+          "chiefs_end",
+          "miners_pick",
+          "boar_hunt"
+        ]
+      }
+    ]
+  },
+  "preparation": {
+    "policy": "Fresh sword hero; seed 23; one-second work steps; no granted progress; reading time excluded",
+    "trace": [
+      {
+        "what": "First Steps claimed",
+        "minute": 0.35,
+        "hero": 2,
+        "combat": 3
+      },
+      {
+        "what": "Hettie teaches Crafting from gathered flax and timber",
+        "minute": 5.82,
+        "hero": 3,
+        "combat": 3
+      },
+      {
+        "what": "Three traps crafted from own logs and flax string",
+        "minute": 6.2,
+        "hero": 3,
+        "combat": 3
+      },
+      {
+        "what": "Well restored with gathered timber and quest coins",
+        "minute": 6.2,
+        "hero": 3,
+        "combat": 3
+      },
+      {
+        "what": "Mining bootstrapped through the rat-and-timber quest, without buying ore",
+        "minute": 7.12,
+        "hero": 4,
+        "combat": 3
+      }
+    ],
+    "coins": 422,
+    "crafting": 2,
+    "traps": 3,
+    "copper": 5,
+    "well": true,
+    "unlocks": [
+      {
+        "id": "fishing",
+        "name": "Fishing",
+        "how": "Reach Hero level 0",
+        "open": true
+      },
+      {
+        "id": "woodcutting",
+        "name": "Woodcutting",
+        "how": "Reach Hero level 0",
+        "open": true
+      },
+      {
+        "id": "mining",
+        "name": "Mining",
+        "how": "Own a pickaxe (kept) (1/1)",
+        "open": true
+      },
+      {
+        "id": "thieving",
+        "name": "Thieving",
+        "how": "Complete the main quest \u201cThe Light-Fingered Stranger\u201d",
+        "open": false
+      },
+      {
+        "id": "farming",
+        "name": "Farming",
+        "how": "Hero level 5 (now 4), Logs chopped (15/15), 5 potato seeds (used when you learn it) (0/5)",
+        "open": false
+      },
+      {
+        "id": "cooking",
+        "name": "Cooking",
+        "how": "Fish caught (5/5), Logs chopped (5/5)",
+        "open": true
+      },
+      {
+        "id": "smithing",
+        "name": "Smithing",
+        "how": "Complete the main quest \u201cThe Cold Forge\u201d",
+        "open": false
+      },
+      {
+        "id": "crafting",
+        "name": "Crafting",
+        "how": "Complete the main quest \u201cNeedle and Thread\u201d",
+        "open": true
+      },
+      {
+        "id": "magic",
+        "name": "Magic",
+        "how": "Reach Hero level 0",
+        "open": true
+      },
+      {
+        "id": "research",
+        "name": "Scholarship",
+        "how": "Hero level 12 (now 4), Different creatures studied (1/8)",
+        "open": false
+      },
+      {
+        "id": "melee",
+        "name": "Melee",
+        "how": "Reach Hero level 0",
+        "open": true
+      },
+      {
+        "id": "defence",
+        "name": "Defence",
+        "how": "Reach Hero level 0",
+        "open": true
+      },
+      {
+        "id": "ranged",
+        "name": "Ranged",
+        "how": "Reach Hero level 0",
+        "open": true
+      },
+      {
+        "id": "hitpoints",
+        "name": "Health",
+        "how": "Reach Hero level 0",
+        "open": true
+      },
+      {
+        "id": "hunting",
+        "name": "Hunting",
+        "how": "Logs chopped (20/20), Hold 3 wooden traps (kept) (3/3), Combat level 8 (now 3)",
+        "open": false
+      },
+      {
+        "id": "exploration",
+        "name": "Exploration",
+        "how": "Fish caught (5/25), Logs chopped (25/25), Visit Mossbarrow (0/1)",
+        "open": false
+      },
+      {
+        "id": "herbalism",
+        "name": "Herbalism",
+        "how": "Crops harvested (0/20), Farming level 10 (now 1)",
+        "open": false
+      },
+      {
+        "id": "enchanting",
+        "name": "Enchanting",
+        "how": "Items crafted (4/30), Smithing actions (0/20)",
+        "open": false
+      },
+      {
+        "id": "carpentry",
+        "name": "Carpentry",
+        "how": "Hold 1 bronze handsaw (kept) (0/1)",
+        "open": false
+      },
+      {
+        "id": "sailing",
+        "name": "Sailing",
+        "how": "Visit Saltmere (0/1), Hold 1 skiff (kept) (0/1)",
+        "open": false
+      },
+      {
+        "id": "beastmastery",
+        "name": "Beastmastery",
+        "how": "Hold 3 wooden traps (kept) (3/3), Combat level 10 (now 3)",
+        "open": false
+      }
+    ]
+  }
+}

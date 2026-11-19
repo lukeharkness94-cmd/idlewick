@@ -112,6 +112,7 @@ UI.V.shop = () => {
   const tab = UI.shopTab, buying = tab === 'buy', qty = UI.shopQty;
   const stock = buying ? D.SHOPS[S().town] : [], held = stock.filter(id => DQ.lockedSkillFor(id));
   const ids = buying ? stock.filter(id => !DQ.lockedSkillFor(id)&&(!UI.shopCatalogFilter||UI.shopCatalogFilter(id))) : Object.keys({ ...S().inv, ...S().bank }).filter(DQ.sellable);
+  if(buying&&UI.shopCategory==='equipment')ids.sort((a,b)=>Math.max(1,...Object.values(D.ITEMS[a].req||{}))-Math.max(1,...Object.values(D.ITEMS[b].req||{}))||DQ.buyPrice(a)-DQ.buyPrice(b)||D.ITEMS[a].name.localeCompare(D.ITEMS[b].name));
   const later = [...new Set(held.map(DQ.lockedSkillFor))].map(sk => `<p class="shop-later">${ico('lock')} <b>${D.SK[sk].name}</b> gear is sold here once you learn ${D.SK[sk].name}. ${esc(DQ.skillTeacher(sk))}.</p>`).join('');
   const id = ids.includes(UI.shopSelected[tab]) ? UI.shopSelected[tab] : ids[0], it = id && D.ITEMS[id];
   UI.shopSelected[tab] = id;
@@ -258,7 +259,7 @@ function welcome(sum, gap) {
 }
 
 /* ---------- Actions ---------- */
-const refresh = () => { if (UI._rt) return; UI._rt = setTimeout(() => { UI._rt = 0; UI.render(false); }, 120); };
+const refresh = () => { if(UI.view==='combat'&&UI.updateEncounter){UI.updateEncounter();return;} if (UI._rt) return; UI._rt = setTimeout(() => { UI._rt = 0; if(UI.view==='combat'&&UI.updateEncounter)UI.updateEncounter();else UI.render(false); }, 120); };
 UI.refresh = refresh;
 const DO = {
   achall: () => { UI.achAll = true; UI.render(false); },
@@ -439,7 +440,7 @@ const THEME = () => { document.body.dataset.town = S().town; };
 const sig = () => DQ.foods().map(id => id + DQ.have(id)).join();
 let foodSig = '', slow = 0;
 UI.init = () => {
-  DQ.on('act', () => { if (DQ.act) S().lastAct = { kind: DQ.act.kind, id: DQ.act.id }; UI.renderHud(); UI.renderRail(); UI.render(false); });
+  DQ.on('act', () => { if (DQ.act) S().lastAct = { kind: DQ.act.kind, id: DQ.act.id }; UI.renderHud(); UI.renderRail(); if(UI.view==='combat'&&UI.updateEncounter)UI.updateEncounter();else UI.render(false); });
   DQ.on('ui', () => {
     UI.upd();
     if (DQ.invDirty) { DQ.invDirty = false; const ae = document.activeElement; /* keep typing in a search box undisturbed while loot arrives */ if (ae && (ae.id === 'packq' || ae.id === 'bankq')) { const g = $(ae.id === 'packq' ? '#packgrid' : '#bankgrid'); if (g) g.innerHTML = ae.id === 'packq' ? UI.packGrid() : UI.bankGrid(); } else if (['character', 'bank', 'shop', 'magic', 'cooking', 'smithing', 'crafting'].includes(UI.view)) refresh(); }

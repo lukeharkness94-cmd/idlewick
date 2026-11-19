@@ -41,7 +41,7 @@ DQ.hearRecipe = id => { const r = D.SECRET[id]; if (!r || DQ.recipeHeard(id) || 
   if (DQ.journal) DQ.journal('recipe', `Heard a rumour: ${r.rumour}`, 'book'); return true; };
 DQ.learnRecipe = (id, quiet) => { const r = D.SECRET[id]; if (!r || DQ.recipeKnown(id) || DQ.forecasting) return false; book().known[id] = Date.now(); book().heard[id] = book().heard[id] || Date.now();
   const it = D.ITEMS[r.output||id];
-  if (!quiet && !(DQ.sim && DQ.sim.on)) DQ.notify({ kind: 'unlock', key: 'recipe:' + id, icon: 'book', col: it.col, title: `Recipe found: ${D.RECIPES[r.rec]?.name||it.name}`, text: `${r.found}. Make it in ${D.SK[r.skill].name}.`, sound: 'gem', burst: true, ttl: 12000 });
+  if (!quiet && !(DQ.sim && DQ.sim.on)) DQ.notify({ kind: 'unlock', key: 'recipe:' + id, icon: 'book', col: it.col, title: `Recipe found: ${D.RECIPES[r.rec]?.name||it.name}`, text: `${r.found}. Make it in ${D.SK[r.skill].name} at level ${r.lvl}.`, page:D.SK[r.skill].page, action:{label:'Open recipe',fn:()=>DQ.ui.focusTask(D.SK[r.skill].page,r.rec,D.RECIPES[r.rec].tab,r.skill)}, sound: 'gem', burst: true, ttl: 12000 });
   if (DQ.journal) DQ.journal('recipe', `Recipe found: ${D.RECIPES[r.rec]?.name||it.name}. ${r.found}.`, 'book'); DQ.emit && DQ.emit('recipes'); return true; };
 /* the sources that are plain rules: a creature's rare drop (with a rumour after ten defeats), and a studied seam */
 DQ.recipeOnKill = m => { for (const r of D.SECRET_RECIPES) { if (!r.drop || r.drop[0] !== m.id || DQ.recipeKnown(r.id)) continue; if ((S().beast.kills[m.id] || 0) >= 10) DQ.hearRecipe(r.id); if (DQ.chance(r.drop[1])) DQ.learnRecipe(r.id); } };

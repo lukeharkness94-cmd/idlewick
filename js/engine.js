@@ -54,6 +54,8 @@ function onLevel(sk, from, to) {
   if (sk === 'hitpoints') S().hp += to - from;
   const perks = D.PERKS.filter(p => p.lvl > from && p.lvl <= to);
   const details = [unlockText(sk, from, to), ...perks.map(p => `${p.name}: ${p.speed ? `${Math.round(p.speed * 100)}% faster actions` : `${Math.round(p.dbl * 100)}% chance of double yield`}.`) ].filter(Boolean);
+  if(DQ.xpSource)details.unshift(DQ.xpSource+'.');
+  const growth=DQ.combatGrowth?.(sk,from);if(growth)details.push(growth);
   const unlockedDetails = details.slice();
   if (!details.length) {
     const next = Object.keys(D.UNL[sk] || {}).map(Number).filter(level => level > to).sort((a,b) => a-b)[0];
@@ -163,7 +165,8 @@ DQ.claimQuest = id => {
   q.obj.forEach(o => { if (o.ev === 'deliver') DQ.take(o.key, o.n); });
   st.s = 'done'; const r = q.reward;
   if (q.unlocks && !S().unlocked[q.unlocks]) { const s = D.SK[q.unlocks]; S().unlocked[q.unlocks] = true; DQ.sfx('unlock'); DQ.notify({ kind: 'unlock', key: 'unlock:' + s.id, icon: s.id, col: s.col, title: `${s.name} unlocked!`, text: `${q.giver} has taught you ${s.name.toLowerCase()}. ${s.blurb}`, action: { label: `Open ${s.name}`, fn: () => DQ.go(s.page) }, sound: false, ttl: 14000, burst: true }); DQ.emit('lvl'); }
-  Object.entries(r.xp || {}).forEach(([k, v]) => DQ.addXp(k, v, { raw: true }));
+  const xpSource=DQ.xpSource;DQ.xpSource='Quest reward: '+q.name;
+  try{Object.entries(r.xp || {}).forEach(([k, v]) => DQ.addXp(k, v, { raw: true }));}finally{DQ.xpSource=xpSource;}
   DQ.addCoins(r.coins || 0); Object.entries(r.items || {}).forEach(([k, v]) => DQ.grant(k, v));
   DQ.log(`Quest complete: ${q.name}.`, 'quest');
   DQ.notify({ kind: 'quest', key: 'qd:' + id, icon: 'quest', col: '#f3d58a', title: `Quest complete: ${q.name}`, thanks: !!q.thanks, text: (q.thanks ? `${q.giver}: “${q.thanks}” ` : '') + (DQ.titleNod ? DQ.titleNod(q) : '') + 'Rewards: ' + DQ.rewardText(r, q).join(' · '), sound: 'quest', burst: true, ttl: 10000 });
@@ -226,7 +229,7 @@ DQ.ingredientDiscovery = id => {
  if(node)return {skill:node.skill,level:node.lvl,page:D.SK[node.skill].page,kind:node.kind,id:node.id,label:`${D.SK[node.skill].name} ${node.lvl}`};
  const crop=D.CROPS?.find(c=>'crop_'+c.id===id);if(crop)return {skill:'farming',level:crop.lvl,page:'farming',label:`Farming ${crop.lvl}`};
  const animal=D.ANIMALS?.find(a=>a.prod===id);if(animal)return {skill:'farming',level:animal.lvl,page:'farming',label:`Farming ${animal.lvl}`};
- const recipe=Object.values(D.RECIPES).filter(r=>r.out[id]&&(!r.secret||DQ.recipeUsable?.(r))).sort((a,b)=>a.lvl-b.lvl)[0];
+ const recipe=Object.values(D.RECIPES).filter(r=>Object.keys(r.out||{})[0]===id&&(!r.secret||DQ.recipeUsable?.(r))).sort((a,b)=>a.lvl-b.lvl)[0];
  if(recipe)return {skill:recipe.skill,level:recipe.lvl,page:D.SK[recipe.skill].page,kind:'recipe',id:recipe.id,label:`${D.SK[recipe.skill].name} ${recipe.lvl}`};
  if(D.ITEMS[id]?.type==='gem')return {skill:'mining',level:1,page:'mining',label:'Mining 1 · rare find'};
  const shop=Object.entries(D.SHOPS||{}).find(([town,items])=>items.includes(id)&&DQ.townUnlocked(town))||Object.entries(D.SHOPS||{}).find(([,items])=>items.includes(id));

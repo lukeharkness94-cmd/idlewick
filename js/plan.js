@@ -193,7 +193,7 @@ DQ.prepAdvice = (monId, fc) => {
     }
     if (own) out.push({ key: 'upgrade', title: `Wear your ${nm(own[0])}`, text: `It is clearly stronger than the ${nm(own[1])} you have on, and you already own it.`, action: DQ.have(own[0]) ? 'equip' : 'go', a: DQ.have(own[0]) ? own[0] : 'bank' });
     else if (ups.length) { const price = ups.reduce((n, id) => n + D.ITEMS[id].buy, 0), names = ups.slice(0, 3).map(nm), list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
-      out.push({ key: 'upgrade', title: coins >= price ? `Upgrade your gear (${fmt(price)} coins)` : 'Save for better gear', text: `The shop here sells ${list}${ups.length > 3 ? ' and more' : ''}, clearly stronger than what you wear. ${coins >= price ? `You have ${fmt(coins)} coins.` : `You have ${fmt(coins)} of ${fmt(price)} coins.`}`, action: 'go', a: 'shop' }); }
+      out.push({ key: 'upgrade', title: coins >= price ? `Upgrade your gear (${fmt(price)} coins)` : 'Save for better gear', text: `The shop here sells ${list}${ups.length > 3 ? ' and more' : ''}, clearly stronger than what you wear. ${coins >= price ? `You have ${fmt(coins)} coins.` : `You have ${fmt(coins)} of ${fmt(price)} coins.`}`, action: 'go', a: 'shop', items:ups }); }
   }
   if (DQ.weakKnown(m)) {
     const weak = DQ.weakOf(m).weak, mine = DQ.myDtype();
@@ -216,7 +216,7 @@ DQ.prepAdvice = (monId, fc) => {
       if (have) out.push({ key: 'weak', title: `Switch to your ${D.ITEMS[have].name.toLowerCase()}`, text: `${who} is weak to ${name}: ${pctUp(DQ.typeMult(m, 'weak'))} damage per hit.${arrowsFor(have)}`, action: DQ.have(have) ? 'equip' : 'go', a: DQ.have(have) ? have : 'bank' });
       else if (spellFix) out.push(spellFix);
       else if (!shop && weak.includes('pierce') && !DQ.skillUnlocked('ranged')) out.push({ key: 'weak', info: true, title: `${who} is weak to arrows`, text: `Ranged is not learned yet. ${DQ.skillTeacher ? DQ.skillTeacher('ranged') : ''}.` });
-      else if (shop) out.push({ key: 'weak', title: coins >= D.ITEMS[shop].buy ? `Buy the ${D.ITEMS[shop].name.toLowerCase()} (${fmt(D.ITEMS[shop].buy)} coins)` : `Save for the ${D.ITEMS[shop].name.toLowerCase()}`, text: `${who} is weak to ${name}. ${coins >= D.ITEMS[shop].buy ? 'The shop here sells one.' : `${fmt(coins)} / ${fmt(D.ITEMS[shop].buy)} coins.`}`, action: 'go', a: 'shop', afford: coins >= D.ITEMS[shop].buy }); if (out.length && out[out.length - 1].key === 'weak' && shop) out[out.length - 1].text += arrowsFor(shop);
+      else if (shop) out.push({ key: 'weak', title: coins >= D.ITEMS[shop].buy ? `Buy the ${D.ITEMS[shop].name.toLowerCase()} (${fmt(D.ITEMS[shop].buy)} coins)` : `Save for the ${D.ITEMS[shop].name.toLowerCase()}`, text: `${who} is weak to ${name}. ${coins >= D.ITEMS[shop].buy ? 'The shop here sells one.' : `${fmt(coins)} / ${fmt(D.ITEMS[shop].buy)} coins.`}`, action: 'go', a: 'shop', afford: coins >= D.ITEMS[shop].buy, items:[shop] }); if (out.length && out[out.length - 1].key === 'weak' && shop) out[out.length - 1].text += arrowsFor(shop);
     }
   }
   const heal = DQ.foods().reduce((t, id) => t + D.ITEMS[id].heal * DQ.have(id), 0);

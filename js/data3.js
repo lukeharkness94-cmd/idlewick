@@ -193,7 +193,7 @@ for(const [family,ids]of Object.entries(families))for(let i=0;i<extra.length;i++
  for(const key of new Set([...Object.keys(a.b),...Object.keys(b.b)]))stats[key]=Math.round((a.b[key]||0)+((b.b[key]||0)-(a.b[key]||0))*t);
  const baseRecipe=Object.values(D.RECIPES).find(r=>r.out[a.id]),recipeUpper=Object.values(D.RECIPES).find(r=>r.out[b.id]),metal=D.TIERS[hi-1],bar='bar_'+metal.id;
  const it=D.ITEMS[id]={...a,id,name:labels[i]+' '+nouns[family],b:stats,req:{[Object.keys(a.req)[0]]:level},tier:hi-1,buy:Math.round(a.buy*Math.pow(b.buy/a.buy,t)/10)*10,artBase:a.id,workmanship:i+1};it.val=Math.min(Math.round(it.buy/3),Math.max(a.val,Math.round((a.val+b.val)/2)));
- const skill=baseRecipe.skill,rid=(skill==='smithing'?'smith_':'craft_')+id,inputs={...baseRecipe.in};inputs[bar]=Math.max(1,(inputs[bar]||1)+1);
+ const skill=baseRecipe.skill,rid=(skill==='smithing'?'smith_':'craft_')+id,inputs={...baseRecipe.in};inputs[bar]=Math.max(1,(inputs[bar]||1)+(i===0?1:2));
  add({id:rid,skill,tab:baseRecipe.tab,name:it.name,lvl:Math.min(99,Math.round(baseRecipe.lvl+(recipeUpper.lvl-baseRecipe.lvl)*t)),xp:Math.round(baseRecipe.xp+(recipeUpper.xp-baseRecipe.xp)*t),t:baseRecipe.t,in:inputs,out:{[id]:1},ev:baseRecipe.ev});
  D.WEAPON_BRIDGES.push(id);for(const stock of Object.values(D.SHOPS))if(stock.includes(a.id))stock.push(id);
 }

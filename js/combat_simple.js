@@ -72,6 +72,7 @@
       <div class="cx-chips">${d ? `<span class="rl-i ${tone}" data-tip="text:${esc(d.why || d.label)}">${tone === 'ok' ? '✓' : '!'} ${esc(d.label)}</span>` : ''}${foodPill(heal, false)}<button class="rl-i ${worn < 4 ? 'warn' : 'ok'}" data-do="combatgear" data-tip="text:View and change your equipped gear here">${S().equip.weapon?DQ.itemIco(D.ITEMS[S().equip.weapon]):ico('bag')} Equipment ${worn}/${slots.length}</button></div>
       <div class="cx-tools">${tm ? `<button class="btn sm" data-do="guide" data-a="${tm.id}">${ico('book')}Guide</button>` : ''}${dashHas(byKey('prep').from) ? `<button class="btn sm" data-do="combatmore" data-a="prep">${ico('info')}Details</button>` : ''}${dashHas(byKey('loot').from) ? `<button class="btn sm" data-do="combatmore" data-a="loot">${ico('pouch')}Loot</button>` : ''}</div>${go}</div>`;
   };
+  UI.updateCombatHeader=()=>{const el=document.querySelector('#view .ready-line');if(el)el.outerHTML=header();};
   const bossBtn = () => { const b = bossOf(), p = byKey('boss'); if (!b || !dashHas(p.from)) return ''; let bg = null; try { bg = p.badge(); } catch (e) { bg = null; }
     return `<button class="boss-foot ${bg && bg.tone ? 'tone-' + bg.tone : ''}" data-do="combatmore" data-a="boss">${DQ.monSprite(b, 32)}<span><small>Boss</small><b>${esc(b.boss.short || b.name)}</b></span><span class="bf-go">${esc(bg ? bg.t : '')}</span></button>`; };
   const trainPanel = strip => {

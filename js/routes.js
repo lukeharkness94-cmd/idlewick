@@ -16,16 +16,34 @@ DQ.sourceOf = id => {
     const nodes = (D.NODES[kind] || []).filter(n => n.item === id).sort((a, b) => a.lvl - b.lvl);
     if (nodes.length) { const n = nodes.find(x => DQ.nodeHere(x)) || nodes[0]; return { kind, id: n.id, page: PAGE[kind], skill: n.skill, lvl: n.lvl, town: n.town, name: DQ.skillUnlocked(n.skill) && DQ.lvl(n.skill) >= n.lvl ? n.name : '???' }; }
   }
-  if (id.startsWith('crop_')) return { kind: 'farm', page: 'farming', skill: 'farming', name: it.name };
-  const animal = (D.ANIMALS || []).find(a => a.prod === id); if (animal) return { kind: 'animal', page: 'farming', skill: 'farming', name: animal.name };
-  const recipe = Object.values(D.RECIPES || {}).filter(r => r.out && r.out[id]).sort((a, b) => a.lvl - b.lvl)[0];
-  if (recipe) return { kind: 'recipe', id: recipe.id, page: D.SK[recipe.skill].page, skill: recipe.skill, lvl: recipe.lvl, town:recipe.town, name: recipe.name };
-  const shops = Object.entries(D.SHOPS || {}).filter(([, list]) => list.includes(id)).map(([town]) => town);
-  if (shops.length) return { kind: 'shop', page: 'shop', town: shops.includes(S().town) ? S().town : shops[0], name: 'Shop' };
-  const mon = D.MONLIST.filter(m => !m.boss && (m.drops || []).some(d => d[0] === id)).sort((a, b) => a.cl - b.cl)[0];
-  if (mon) return { kind: 'fight', id: mon.id, page: 'combat', town: mon.town, name: DQ.monName(mon) };
+  if (id.startsWith('crop_')) return { kind: 'farm', page: 'farming', skill: 'farming', lvl:D.CROP[id.slice(5)]?.lvl||1, name: it.name };
+  const animal = (D.ANIMALS || []).find(a => a.prod === id); if (animal) return { kind: 'animal', page: 'farming', skill: 'farming', lvl:animal.lvl, name: animal.name };
+  const recipes = Object.values(D.RECIPES || {}).filter(r => r.out && r.out[id] && (!r.secret || DQ.recipeUsable?.(r))).sort((a,b)=>a.lvl-b.lvl);
+  const recipe=recipes.find(r=>Object.keys(r.out)[0]===id);
+  const recipeSource=r=>({kind:'recipe',id:r.id,page:D.SK[r.skill].page,skill:r.skill,lvl:r.lvl,town:r.town,name:r.name});
+  const readyRecipe=recipes.find(r=>Object.keys(r.out)[0]===id&&DQ.skillUnlocked(r.skill)&&DQ.lvl(r.skill)>=r.lvl&&!(DQ.recipeGate?.(r))&&!DQ.recipeDiscovery?.(r));
+  if(readyRecipe)return recipeSource(readyRecipe);
+  const shops = Object.entries(D.SHOPS || {}).filter(([,list])=>list.includes(id)).map(([town])=>town);
+  const shop=shops.find(t=>t===S().town)||shops.find(t=>DQ.townUnlocked(t));
+  if(shop)return {kind:'shop',page:'shop',town:shop,name:'Shop'};
+  const monsters=D.MONLIST.filter(m=>(m.drops||[]).some(d=>d[0]===id)||m.first===id).sort((a,b)=>Number(!!a.boss)-Number(!!b.boss)||a.cl-b.cl);
+  const mon=monsters.find(m=>DQ.townUnlocked(m.town))||monsters[0];
+  if(mon)return {kind:'fight',id:mon.id,page:'combat',town:mon.town,name:DQ.monName(mon)};
+  if(recipe)return recipeSource(recipe);
+  if(shops.length)return {kind:'shop',page:'shop',town:shops[0],name:'Shop'};
+  // Incidental outputs must not outrank a direct source or send a survey's feather requirement back to itself.
+  const secondary=recipes.find(r=>DQ.skillUnlocked(r.skill)&&DQ.lvl(r.skill)>=r.lvl&&!DQ.recipeGate?.(r)&&!DQ.recipeDiscovery?.(r));
+  if(secondary)return recipeSource(secondary);
   return null;
 };
+const ingredient0=DQ.ingredientDiscovery;
+DQ.ingredientDiscovery=id=>{const src=DQ.sourceOf(id);if(!src)return ingredient0(id);
+ if(src.skill&&D.SK[src.skill])return {...src,level:src.lvl||1,label:D.SK[src.skill].name+' '+(src.lvl||1)};
+ if(src.kind==='shop')return {...src,label:'Shop · '+(DQ.townUnlocked(src.town)?D.TOWN[src.town].name:'reach a later town')};
+ if(src.kind==='fight')return {...src,label:'Combat · creature drop'};
+ return ingredient0(id);
+};
+
 const where = src => {
   const town = src.town && src.town !== S().town && !(src.kind !== 'shop' && D.NODE && DQ.nodeHere(D.NODE[src.kind + ':' + src.id])) ? ` in ${D.TOWN[src.town].name}` : '';
   const lvl = src.skill && src.lvl > 1 ? ` (${D.SK[src.skill].name} ${src.lvl})` : '';

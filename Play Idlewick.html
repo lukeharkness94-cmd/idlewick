@@ -5046,6 +5046,50 @@ html.calm .events .ev-result{animation:none}
 .events .evr-tile.loss b{color:var(--bad)}
 
 @media(max-width:600px){#view .shop-stock .tool-families{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+/* Requirements, skill-header routes and player feedback share the reading hierarchy. */
+#tip .tt-k{font-size:14px}
+.skillhero{position:relative}.skill-shop-link{position:static;margin-left:auto;align-self:center;flex:none;min-width:36px;min-height:36px}
+.skillhero>.skill-shop-link{position:absolute;right:12px;top:12px}
+.recipe-origin{display:flex;align-items:center;justify-content:center;gap:5px;font-size:13px;color:var(--brass)}
+.recipe-origin .ic{width:18px;height:18px}
+.recipe-reveal{text-align:center;padding:16px}.recipe-reveal .recipe-reveal-art{display:flex;justify-content:center;margin:12px auto 22px;animation:recipe-unfold .75s ease-out}.recipe-reveal-art .ic{width:112px;height:112px;filter:drop-shadow(0 0 22px #d6b55680)}
+@keyframes recipe-unfold{from{opacity:0;transform:translateY(18px) scale(.7);filter:brightness(2)}to{opacity:1;transform:translateY(0) scale(1);filter:brightness(1)}}
+.combat-dps{display:block;white-space:nowrap;font-variant-numeric:tabular-nums;margin:4px 0 8px;color:var(--text)}
+.village-standing{display:grid;grid-template-columns:auto minmax(120px,240px) 1fr;align-items:center;gap:12px;padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--line2);flex:none;grid-column:1/-1}
+.village-standing .bar{height:8px}.village-standing small{font-size:14px}
+.event-fullscreen{padding:20px;background:#07101aea}.event-fullscreen>.m-card.wide{width:min(1200px,100%);max-width:none;height:calc(100dvh - 40px);display:flex;flex-direction:column}.event-fullscreen .m-body{flex:1;min-height:0;display:flex}.encounter-moment{display:flex;flex-direction:column;flex:1;min-width:0}.event-panorama{background-image:linear-gradient(transparent,#101a2470),var(--event-scene);background-size:cover;background-position:center 65%;image-rendering:pixelated;min-height:120px;flex:1;max-height:45vh;border-radius:8px}.encounter-moment .events{flex:none;padding-top:12px}.encounter-moment .event,.encounter-moment .ev-result{margin:0}.encounter-moment .ev-t{font-size:24px}.encounter-moment .ev-b>p{font-size:20px;max-width:75ch}.encounter-moment .ev-opts{display:flex;flex-wrap:wrap;gap:12px}.encounter-moment .ev-opt{flex:1;min-width:180px;min-height:64px}.event-fullscreen .m-act{margin-top:12px}
+@media(min-width:861px){
+ .workspace-focus>.activity-stage{display:flex;flex-direction:column;min-height:0;max-height:100%;position:static}
+ .workspace-focus>.activity-stage>.activity-scene{height:clamp(110px,22vh,220px);min-height:100px;flex:1 1 160px}
+ .workspace-focus>.activity-stage>.activity-caption{flex:0 0 auto;min-height:min-content;min-width:0;padding:12px}
+ .activity-caption .task-summary{margin-top:8px}.activity-caption .recipe-ingredients{display:flex;flex-wrap:wrap;gap:6px 12px}
+ .activity-caption .activity-actions{margin:8px 0}
+ .magic-runes .magic-body>.activity-workspace{display:grid;grid-template-columns:minmax(300px,.85fr) minmax(0,1.5fr);gap:16px}
+ .magic-runes .activity-stage{align-self:start;max-height:100%}
+}
+@media(max-width:860px){.village-standing{grid-template-columns:1fr}.village-standing .bar{max-width:100%}.event-fullscreen{padding:8px}.event-fullscreen>.m-card.wide{height:calc(100dvh - 16px)}.event-panorama{min-height:100px;max-height:28vh}.encounter-moment .ev-b>p{font-size:17px}}
+@media(prefers-reduced-motion:reduce){.recipe-reveal .recipe-reveal-art{animation:none}}
+.calm .recipe-reveal .recipe-reveal-art{animation:none}
+.skillhero .sh-main>.skill-shop-link{position:absolute;right:12px;top:12px;margin:0}
+.skillhero:has(.skill-shop-link) .sh-side{padding-right:44px}
+.activity-caption .task-summary>.recipe-ingredients{margin:4px 0 10px}
+.village-map>.phead .village-standing{grid-template-columns:auto minmax(100px,180px);gap:8px;padding:0;background:none;border:0;flex:0 1 auto}
+.village-map>.phead .village-standing small{display:none}
+.village-map>.phead .village-standing .bar{min-width:100px}
+@media(max-width:860px){.village-map>.phead{flex-wrap:wrap}.village-map>.phead .village-standing{flex-basis:100%;justify-content:start}}
+.event-panorama{position:relative;display:grid;place-items:center}.event-subject .ic{width:112px;height:112px;filter:drop-shadow(0 10px 8px #0007)}
+@media(min-width:861px){
+ .magic-runes .activity-stage{display:flex;flex-direction:column;padding:0;min-height:0;height:100%;max-height:100%;overflow:hidden}
+ .magic-runes .activity-scene{flex:1 1 160px;min-height:0!important;height:auto!important}
+ .magic-runes .activity-caption{flex:0 0 auto;min-height:min-content;padding:12px}
+}
+@media(min-width:861px) and (max-height:800px){
+ /* The catalogue retains the rune art; this duplicate scene gives way to the actual requirements. */
+ .magic-runes .activity-scene{display:none}
+}
+.recipe-reveal-art :is(img,svg,.ic),.event-subject :is(img,svg,.ic){width:112px!important;height:112px!important;max-width:none;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 8px 12px #b6934a60)}
+.magic-runes .activity-choices .skill-shop-link{display:none}
 </style>
 
 </head>
@@ -5255,7 +5299,7 @@ D.SKILLS = [
   { id: 'thieving',    name: 'Thieving',    col: '#9b87e0', group: 'gather',  page: 'thieving',    unlock: 13, quest: 'mq_thieving',  blurb: 'Lift purses and raid stalls. A fine way to find coins.' },
   { id: 'farming',     name: 'Farming',     col: '#b8864f', group: 'gather',  page: 'farming',     unlock: 10,  blurb: 'Grow crops and raise animals on your own homestead.' },
   { id: 'cooking',     name: 'Cooking',     col: '#f2b44a', group: 'artisan', page: 'cooking',     unlock: 3,  blurb: 'Turn raw fish into food that heals you in a fight.' },
-  { id: 'smithing',    name: 'Smithing',    col: '#e8703a', group: 'artisan', page: 'smithing',    unlock: 12, quest: 'mq_smithing',  blurb: 'Smelt ore into bars and hammer them into weapons and armour.' },
+  { id: 'smithing',    name: 'Smithing',    col: '#e8703a', group: 'artisan', page: 'smithing',    unlock: 4, quest: 'mq_smithing',  blurb: 'Smelt ore into bars and hammer them into weapons and armour.' },
   { id: 'crafting',    name: 'Crafting',    col: '#d98ad1', group: 'artisan', page: 'crafting',    unlock: 15, quest: 'mq_crafting', blurb: 'Sew leather, cut jewellery, carve bows and staves.' },
   { id: 'magic',       name: 'Magic',       col: '#7d89f5', group: 'artisan', page: 'magic',       unlock: 0,  blurb: 'Staffs and spells: levels as you fight with them. Also turns clutter into coins with alchemy.' },
   { id:'research', name:'Scholarship', col:'#b79862', group:'artisan', page:'research', unlock:16, blurb:'Study practical discoveries to earn Scholarship XP and permanent improvements.' },
@@ -5458,7 +5502,7 @@ D.CROPS = [
 ].map(([id, name, col, lvl, secs, yld, pxp, hxp, sell, seed]) => {
   mk('seed_' + id, { name: name + ' seeds', ic: 'seed', col, val: Math.max(1, Math.floor(seed / 3)), buy: seed, type: 'seed' });
   mk('crop_' + id, { name, ic: 'crop', col, val: sell, type: 'crop', heal: lvl < 25 ? 2 : undefined });
-  return { id, name, col, lvl, secs, yld, pxp, hxp };
+  return { id, name, col, lvl, secs, yld, pxp:lvl<=15?Math.round(pxp*1.25):pxp, hxp:lvl<=15?Math.round(hxp*1.25):hxp };
 });
 D.CROP = Object.fromEntries(D.CROPS.map(c => [c.id, c]));
 /* Animals: (id, name, colour, farming lvl, price, produce, seconds per produce, produce value, collect xp) */
@@ -5837,7 +5881,7 @@ D.QUESTS = [
 /* ---------- Main quests: each one teaches a new skill ---------- */
 const MQ = (id, unlocks, town, name, giver, adv, req, blurb, obj, reward) => Object.assign(Q(id, town, name, giver, adv, req, blurb, obj, reward), { main: true, unlocks });
 D.QUESTS.unshift(
-  MQ('mq_smithing', 'smithing', 'willowbrook', 'The Cold Forge', 'Old Brannoc', 12, 'miners_pick',
+  MQ('mq_smithing', 'smithing', 'willowbrook', 'The Cold Forge', 'Old Brannoc', 4, 'miners_pick',
     'Edda left her hammer and notebook with me when she went up to the mountains. I kept meaning to light the forge again. Well, you can see how far that got. Bring me copper, tin and enough logs for the furnace, and I’ll show you how to turn the ore into something useful.',
     [{ ev: 'mine', key: 'copper', n: 10, label: 'Mine 10 copper ore for the first smelt' }, { ev: 'mine', key: 'tin', n: 10, label: 'Mine 10 tin ore to make bronze' }, { ev: 'deliver', key: 'log_normal', n: 20, label: 'Bring 20 logs to fuel the furnace' }],
     { xp: { smithing: 150 }, coins: 100, items: { bar_bronze: 5 } }),
@@ -6360,7 +6404,7 @@ for(const [family,ids]of Object.entries(families))for(let i=0;i<extra.length;i++
  for(const key of new Set([...Object.keys(a.b),...Object.keys(b.b)]))stats[key]=Math.round((a.b[key]||0)+((b.b[key]||0)-(a.b[key]||0))*t);
  const baseRecipe=Object.values(D.RECIPES).find(r=>r.out[a.id]),recipeUpper=Object.values(D.RECIPES).find(r=>r.out[b.id]),metal=D.TIERS[hi-1],bar='bar_'+metal.id;
  const it=D.ITEMS[id]={...a,id,name:labels[i]+' '+nouns[family],b:stats,req:{[Object.keys(a.req)[0]]:level},tier:hi-1,buy:Math.round(a.buy*Math.pow(b.buy/a.buy,t)/10)*10,artBase:a.id,workmanship:i+1};it.val=Math.min(Math.round(it.buy/3),Math.max(a.val,Math.round((a.val+b.val)/2)));
- const skill=baseRecipe.skill,rid=(skill==='smithing'?'smith_':'craft_')+id,inputs={...baseRecipe.in};inputs[bar]=Math.max(1,(inputs[bar]||1)+1);
+ const skill=baseRecipe.skill,rid=(skill==='smithing'?'smith_':'craft_')+id,inputs={...baseRecipe.in};inputs[bar]=Math.max(1,(inputs[bar]||1)+(i===0?1:2));
  add({id:rid,skill,tab:baseRecipe.tab,name:it.name,lvl:Math.min(99,Math.round(baseRecipe.lvl+(recipeUpper.lvl-baseRecipe.lvl)*t)),xp:Math.round(baseRecipe.xp+(recipeUpper.xp-baseRecipe.xp)*t),t:baseRecipe.t,in:inputs,out:{[id]:1},ev:baseRecipe.ev});
  D.WEAPON_BRIDGES.push(id);for(const stock of Object.values(D.SHOPS))if(stock.includes(a.id))stock.push(id);
 }
@@ -6510,7 +6554,7 @@ DQ.hearRecipe = id => { const r = D.SECRET[id]; if (!r || DQ.recipeHeard(id) || 
   if (DQ.journal) DQ.journal('recipe', `Heard a rumour: ${r.rumour}`, 'book'); return true; };
 DQ.learnRecipe = (id, quiet) => { const r = D.SECRET[id]; if (!r || DQ.recipeKnown(id) || DQ.forecasting) return false; book().known[id] = Date.now(); book().heard[id] = book().heard[id] || Date.now();
   const it = D.ITEMS[r.output||id];
-  if (!quiet && !(DQ.sim && DQ.sim.on)) DQ.notify({ kind: 'unlock', key: 'recipe:' + id, icon: 'book', col: it.col, title: `Recipe found: ${D.RECIPES[r.rec]?.name||it.name}`, text: `${r.found}. Make it in ${D.SK[r.skill].name}.`, sound: 'gem', burst: true, ttl: 12000 });
+  if (!quiet && !(DQ.sim && DQ.sim.on)) DQ.notify({ kind: 'unlock', key: 'recipe:' + id, icon: 'book', col: it.col, title: `Recipe found: ${D.RECIPES[r.rec]?.name||it.name}`, text: `${r.found}. Make it in ${D.SK[r.skill].name} at level ${r.lvl}.`, page:D.SK[r.skill].page, action:{label:'Open recipe',fn:()=>DQ.ui.focusTask(D.SK[r.skill].page,r.rec,D.RECIPES[r.rec].tab,r.skill)}, sound: 'gem', burst: true, ttl: 12000 });
   if (DQ.journal) DQ.journal('recipe', `Recipe found: ${D.RECIPES[r.rec]?.name||it.name}. ${r.found}.`, 'book'); DQ.emit && DQ.emit('recipes'); return true; };
 /* the sources that are plain rules: a creature's rare drop (with a rumour after ten defeats), and a studied seam */
 DQ.recipeOnKill = m => { for (const r of D.SECRET_RECIPES) { if (!r.drop || r.drop[0] !== m.id || DQ.recipeKnown(r.id)) continue; if ((S().beast.kills[m.id] || 0) >= 10) DQ.hearRecipe(r.id); if (DQ.chance(r.drop[1])) DQ.learnRecipe(r.id); } };
@@ -6583,7 +6627,8 @@ potion('trap_blend','Trail scent blend','paw','#b6a66c','trapCare',.8,'Field tra
 potion('calming_draught','Calming draught','bottle','#90bfa5','bondTraining',1.25,'Deliberate companion training gives 25% more bond XP for 20 minutes');
 potion('field_ward','Field ward','shield','#a4a8d4','specialGuard',.9,'Boss and tower specials deal 10% less damage for 20 minutes');
 potion('trail_ration','Packed fish supper','food','#c59a65','sailingCargo',1.25,'Voyage cargo has a 25% chance to return an extra stack for 20 minutes');
-recipe('craft_runes','crafting',8,{ore_quartz:3,log_normal:4},{rune:16},{xp:24,note:'A player-made alternative to shop runes. Quartz is inscribed with ordinary timber as fuel. No runes are needed to make the first batch.'});
+recipe('craft_runes','magic',1,{ore_copper:2,log_normal:2},{rune:16},{xp:6,tab:'Runes',name:'Copper rune batch',note:'Inscribe copper over a charcoal fire. Mine copper and cut ordinary timber; no purchased runes or Crafting unlock is needed.'});
+recipe('quartz_runes','magic',10,{ore_quartz:3,log_normal:4},{rune:40},{xp:24,tab:'Runes',name:'Quartz rune batch',note:'Quartz holds more magic than copper, producing a larger batch from each inscription.'});
 recipe('inscribe_runes','enchanting',25,{ore_quartz:2,ore_moonstone:1},{rune:60},{xp:90,study:'rune_patterns',note:'An advanced batch unlocked by a practical Scholarship study.'});
 recipe('cook_feed','cooking',1,{crop_potato:2,crop_onion:1},{feed:12},{xp:18});
 recipe('cook_grain_feed','cooking',15,{crop_wheat:2},{feed:12},{xp:30});
@@ -11630,6 +11675,8 @@ function onLevel(sk, from, to) {
   if (sk === 'hitpoints') S().hp += to - from;
   const perks = D.PERKS.filter(p => p.lvl > from && p.lvl <= to);
   const details = [unlockText(sk, from, to), ...perks.map(p => `${p.name}: ${p.speed ? `${Math.round(p.speed * 100)}% faster actions` : `${Math.round(p.dbl * 100)}% chance of double yield`}.`) ].filter(Boolean);
+  if(DQ.xpSource)details.unshift(DQ.xpSource+'.');
+  const growth=DQ.combatGrowth?.(sk,from);if(growth)details.push(growth);
   const unlockedDetails = details.slice();
   if (!details.length) {
     const next = Object.keys(D.UNL[sk] || {}).map(Number).filter(level => level > to).sort((a,b) => a-b)[0];
@@ -11739,7 +11786,8 @@ DQ.claimQuest = id => {
   q.obj.forEach(o => { if (o.ev === 'deliver') DQ.take(o.key, o.n); });
   st.s = 'done'; const r = q.reward;
   if (q.unlocks && !S().unlocked[q.unlocks]) { const s = D.SK[q.unlocks]; S().unlocked[q.unlocks] = true; DQ.sfx('unlock'); DQ.notify({ kind: 'unlock', key: 'unlock:' + s.id, icon: s.id, col: s.col, title: `${s.name} unlocked!`, text: `${q.giver} has taught you ${s.name.toLowerCase()}. ${s.blurb}`, action: { label: `Open ${s.name}`, fn: () => DQ.go(s.page) }, sound: false, ttl: 14000, burst: true }); DQ.emit('lvl'); }
-  Object.entries(r.xp || {}).forEach(([k, v]) => DQ.addXp(k, v, { raw: true }));
+  const xpSource=DQ.xpSource;DQ.xpSource='Quest reward: '+q.name;
+  try{Object.entries(r.xp || {}).forEach(([k, v]) => DQ.addXp(k, v, { raw: true }));}finally{DQ.xpSource=xpSource;}
   DQ.addCoins(r.coins || 0); Object.entries(r.items || {}).forEach(([k, v]) => DQ.grant(k, v));
   DQ.log(`Quest complete: ${q.name}.`, 'quest');
   DQ.notify({ kind: 'quest', key: 'qd:' + id, icon: 'quest', col: '#f3d58a', title: `Quest complete: ${q.name}`, thanks: !!q.thanks, text: (q.thanks ? `${q.giver}: “${q.thanks}” ` : '') + (DQ.titleNod ? DQ.titleNod(q) : '') + 'Rewards: ' + DQ.rewardText(r, q).join(' · '), sound: 'quest', burst: true, ttl: 10000 });
@@ -11802,7 +11850,7 @@ DQ.ingredientDiscovery = id => {
  if(node)return {skill:node.skill,level:node.lvl,page:D.SK[node.skill].page,kind:node.kind,id:node.id,label:`${D.SK[node.skill].name} ${node.lvl}`};
  const crop=D.CROPS?.find(c=>'crop_'+c.id===id);if(crop)return {skill:'farming',level:crop.lvl,page:'farming',label:`Farming ${crop.lvl}`};
  const animal=D.ANIMALS?.find(a=>a.prod===id);if(animal)return {skill:'farming',level:animal.lvl,page:'farming',label:`Farming ${animal.lvl}`};
- const recipe=Object.values(D.RECIPES).filter(r=>r.out[id]&&(!r.secret||DQ.recipeUsable?.(r))).sort((a,b)=>a.lvl-b.lvl)[0];
+ const recipe=Object.values(D.RECIPES).filter(r=>Object.keys(r.out||{})[0]===id&&(!r.secret||DQ.recipeUsable?.(r))).sort((a,b)=>a.lvl-b.lvl)[0];
  if(recipe)return {skill:recipe.skill,level:recipe.lvl,page:D.SK[recipe.skill].page,kind:'recipe',id:recipe.id,label:`${D.SK[recipe.skill].name} ${recipe.lvl}`};
  if(D.ITEMS[id]?.type==='gem')return {skill:'mining',level:1,page:'mining',label:'Mining 1 · rare find'};
  const shop=Object.entries(D.SHOPS||{}).find(([town,items])=>items.includes(id)&&DQ.townUnlocked(town))||Object.entries(D.SHOPS||{}).find(([,items])=>items.includes(id));
@@ -12853,7 +12901,7 @@ DQ.prepAdvice = (monId, fc) => {
     }
     if (own) out.push({ key: 'upgrade', title: `Wear your ${nm(own[0])}`, text: `It is clearly stronger than the ${nm(own[1])} you have on, and you already own it.`, action: DQ.have(own[0]) ? 'equip' : 'go', a: DQ.have(own[0]) ? own[0] : 'bank' });
     else if (ups.length) { const price = ups.reduce((n, id) => n + D.ITEMS[id].buy, 0), names = ups.slice(0, 3).map(nm), list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
-      out.push({ key: 'upgrade', title: coins >= price ? `Upgrade your gear (${fmt(price)} coins)` : 'Save for better gear', text: `The shop here sells ${list}${ups.length > 3 ? ' and more' : ''}, clearly stronger than what you wear. ${coins >= price ? `You have ${fmt(coins)} coins.` : `You have ${fmt(coins)} of ${fmt(price)} coins.`}`, action: 'go', a: 'shop' }); }
+      out.push({ key: 'upgrade', title: coins >= price ? `Upgrade your gear (${fmt(price)} coins)` : 'Save for better gear', text: `The shop here sells ${list}${ups.length > 3 ? ' and more' : ''}, clearly stronger than what you wear. ${coins >= price ? `You have ${fmt(coins)} coins.` : `You have ${fmt(coins)} of ${fmt(price)} coins.`}`, action: 'go', a: 'shop', items:ups }); }
   }
   if (DQ.weakKnown(m)) {
     const weak = DQ.weakOf(m).weak, mine = DQ.myDtype();
@@ -12876,7 +12924,7 @@ DQ.prepAdvice = (monId, fc) => {
       if (have) out.push({ key: 'weak', title: `Switch to your ${D.ITEMS[have].name.toLowerCase()}`, text: `${who} is weak to ${name}: ${pctUp(DQ.typeMult(m, 'weak'))} damage per hit.${arrowsFor(have)}`, action: DQ.have(have) ? 'equip' : 'go', a: DQ.have(have) ? have : 'bank' });
       else if (spellFix) out.push(spellFix);
       else if (!shop && weak.includes('pierce') && !DQ.skillUnlocked('ranged')) out.push({ key: 'weak', info: true, title: `${who} is weak to arrows`, text: `Ranged is not learned yet. ${DQ.skillTeacher ? DQ.skillTeacher('ranged') : ''}.` });
-      else if (shop) out.push({ key: 'weak', title: coins >= D.ITEMS[shop].buy ? `Buy the ${D.ITEMS[shop].name.toLowerCase()} (${fmt(D.ITEMS[shop].buy)} coins)` : `Save for the ${D.ITEMS[shop].name.toLowerCase()}`, text: `${who} is weak to ${name}. ${coins >= D.ITEMS[shop].buy ? 'The shop here sells one.' : `${fmt(coins)} / ${fmt(D.ITEMS[shop].buy)} coins.`}`, action: 'go', a: 'shop', afford: coins >= D.ITEMS[shop].buy }); if (out.length && out[out.length - 1].key === 'weak' && shop) out[out.length - 1].text += arrowsFor(shop);
+      else if (shop) out.push({ key: 'weak', title: coins >= D.ITEMS[shop].buy ? `Buy the ${D.ITEMS[shop].name.toLowerCase()} (${fmt(D.ITEMS[shop].buy)} coins)` : `Save for the ${D.ITEMS[shop].name.toLowerCase()}`, text: `${who} is weak to ${name}. ${coins >= D.ITEMS[shop].buy ? 'The shop here sells one.' : `${fmt(coins)} / ${fmt(D.ITEMS[shop].buy)} coins.`}`, action: 'go', a: 'shop', afford: coins >= D.ITEMS[shop].buy, items:[shop] }); if (out.length && out[out.length - 1].key === 'weak' && shop) out[out.length - 1].text += arrowsFor(shop);
     }
   }
   const heal = DQ.foods().reduce((t, id) => t + D.ITEMS[id].heal * DQ.have(id), 0);
@@ -13390,7 +13438,7 @@ DQ.ENTRY_NAMES = ['Notes', 'Quicker hands', 'Keen eye', 'Second nature', 'Master
 DQ.entryPerk = (kind, star) => { if (kind === 'brew') return `${star * 2}% double`; const y = YIELD_KINDS.includes(kind), w = SPEED_WORD[kind] || 'faster'; return `${star === 1 ? 'Uses shown · ' : ''}${star * 2}% ${w}${y && star >= 5 ? ' · 10% double' : y && star >= 3 ? ' · 5% double' : ''}`; };
 DQ.studyBar = (pct, full, tip) => `<i class="study-bar ${full ? 'full' : pct >= 90 ? 'near' : ''}" style="--p:${Math.max(0, Math.min(100, Math.round(pct)))}%" ${tip ? `data-tip="text:${DQ.esc(tip)}"` : ''} aria-hidden="true"></i>`;
 DQ.mastTip = (kind, id) => { const m = DQ.mastInfo(kind, id),discovery=DQ.studyDiscovery?.(kind,id);if(discovery)return `Recipe discovery in ${DQ.fmt(discovery.left)} more Guide progress. ${discovery.text}`; return m.next ? `Field guide ${m.stars}/${STEPS.length} · next: ${DQ.entryPerk(kind, m.stars + 1)} in ${DQ.fmt(m.next - m.n)}` : `Field guide complete · ${m.speed}% faster${m.extra ? ` · ${m.extra}% double` : ''}`; };
-DQ.mastBadge = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''; const m = DQ.mastInfo(kind, id); return m.n ? DQ.studyBar(m.pct, !m.next) : ''; };
+DQ.mastBadge = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''; const m = DQ.mastInfo(kind, id); return DQ.studyBar(m.pct, !m.next); };
 DQ.mastLine = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''; const m = DQ.mastInfo(kind, id);
   return `<div class="mast-line ${m.next ? (m.pct >= 90 ? 'near' : '') : 'max'}" data-tip="text:${DQ.esc(DQ.mastTip(kind, id))}" role="img" aria-label="${DQ.esc(DQ.mastTip(kind, id))}"><span class="mast-pips">${Array.from({ length: STEPS.length }, (_, i) => `<i class="${i < m.stars ? 'on' : ''}"></i>`).join('')}</span><span class="bar"><i style="width:${m.pct}%"></i></span></div>`; };
 /* crops and livestock are not tasks: their entries fill as you harvest and collect, and speed up growth and produce */
@@ -13646,16 +13694,16 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
   if (!choice) return `<section class="panel"><h2>${esc(title)}</h2><p>No tasks here yet. Visit another town to find more.</p><button class="btn" data-do="go" data-a="map">World map</button></section>`;
   UI.taskChoice[key] = choice.id;
   /* locked content stays blacked out everywhere: name and art hidden, only the requirement shown (Nov 2026) */
-  if (choice.locked) choice = Object.assign({}, choice, { name: '???', blackout: true, blocked: true, info: `<p class="locked-why">${ico('lock')} ${esc(choice.reason || 'Not unlocked yet')}</p>${choice.discoverItem?`<button class="btn" data-do="route" data-a="${choice.discoverItem}">Find this ingredient</button>`:''}` });
+  if (choice.locked && !choice.revealed) choice = Object.assign({}, choice, { name: '???', blackout: true, blocked: true, info: `${choice.info||''}<p class="locked-why">${ico('lock')} ${esc(choice.reason || 'Not unlocked yet')}</p>${choice.discoverItem?`<button class="btn" data-do="route" data-a="${choice.discoverItem}">Find this ingredient</button>`:''}` });
   const running = DQ.act && DQ.act.kind === kind && DQ.act.id === choice.id;
-  const art = (c, size=96) => `<span class="${c.locked || c.blackout ? 'blackout' : ''}" ${c.locked||c.blackout?'aria-hidden="true"':''}>${c.artKind === 'item' ? `<span class="activity-item-art" style="--art-size:${size}px">${DQ.itemIco(D.ITEMS[c.artId || c.id])}</span>` : DQ.artImage(c.artKind || (kind==='fight'?'creature':kind),c.artId || c.id,size,c.locked&&['fight','thieve'].includes(kind)?'sil':'',c.locked||c.blackout?'Locked':c.name)}</span>`;
+  const art = (c, size=96) => `<span class="${c.locked && !c.revealed || c.blackout ? 'blackout' : ''}" ${c.locked||c.blackout?'aria-hidden="true"':''}>${c.artKind === 'item' ? `<span class="activity-item-art" style="--art-size:${size}px">${DQ.itemIco(D.ITEMS[c.artId || c.id])}</span>` : DQ.artImage(c.artKind || (kind==='fight'?'creature':kind),c.artId || c.id,size,c.locked&&['fight','thieve'].includes(kind)?'sil':'',c.locked||c.blackout?'Locked':c.name)}</span>`;
   const action = `<div class="activity-actions">${choice.away?`<button class="btn primary" data-do="taskmap" data-a="${choice.town}">View ${esc(D.TOWN[choice.town].name)}</button>`:''}<button class="btn primary task-primary" data-do="act" data-a="${kind}" data-b="${choice.id}" ${!running && choice.blocked ? 'disabled' : ''}>${running ? kind === 'fight' ? 'Retreat' : 'Stop' : choice.blackout ? 'Locked' : esc((verb?verb+' ':'')+choice.name.replace(/^(Cook|Bars|Weapons|Armour) · /,''))}</button>${DQ.planUnlocked && DQ.planUnlocked() ? `<button class="btn" data-do="queueadd" data-a="${kind}" data-b="${choice.id}" ${choice.locked||choice.away ? 'disabled' : ''}>Queue</button>` : ''}</div>`;
   const cards = `<section class="panel activity-choices"><div class="phead"><h2>${kind==='fight'?'Choose an opponent':kind==='recipe'?'Choose what to make':kind==='alch'?'Choose an item':({fish:'Fish catalogue',wood:'Trees',mine:'Ore deposits',thieve:'Targets',sail:'Islands',train:'Trap lines'}[kind]||'Choose your spot')}</h2><small>${choices.some(c=>c.town)?`${choices.length} resources · all regions`:D.TOWN[S().town].name}</small></div>${UI.taskToolbar[key] || ''}<div class="illustrated-choices">${choices.filter(c=>c.visible!==false).map(c=>{
     const working=DQ.act&&DQ.act.kind===kind&&DQ.act.id===c.id;
     const requirementText=c.short?String(c.short).replace(/^Needs /,''):String(c.reason||'Not unlocked yet').replace(/^Requires [A-Za-z ]+? (\d+)/,'Lv $1').replace(/^Requires /,'');
     const requirementLabel=requirementText.length>34?'Requirements not met':requirementText;
     return `<button data-task-id="${c.id}" class="illustrated-card ${working?'active':''} ${choice.id===c.id?'selected':''} ${c.locked?'locked':''} ${c.missing?'missing':''}" data-do="taskselect" data-a="${kind}" data-b="${c.id}" data-page="${key}" aria-pressed="${choice.id===c.id}" ${c.locked?`aria-disabled="true" data-tip="text:${esc(c.reason||'Not unlocked yet')}"`:''}>
-      <span class="choice-art">${art(c,96)}</span>${!c.locked && DQ.mastBadge ? DQ.mastBadge(kind, c.id) : ''}${!c.locked && DQ.gearMark ? (g => g && D.ITEMS[g] && D.ITEMS[g].slot ? DQ.gearMark(g) : '')(c.yieldId || (c.artKind === 'item' ? c.artId || c.id : null)) : ''}<b>${c.locked?'???':esc(c.name)}</b><small>${c.locked?`${ico('lock')}<span>${esc(requirementLabel)}</span>`:c.caption||esc(c.reason||'')}</small>${c.locked?'':`<span class="choice-state">${working?'● Working':c.stateText?c.stateText:c.locked?'Locked':c.away?'Travel required':''}</span>`}${working?`<span class="bar prog"><i data-prog="${kind}:${c.id}"></i></span>`:''}</button>`;
+      <span class="choice-art">${art(c,96)}</span>${c.secret?'<span class="recipe-origin" title="Learned from a discovered recipe">'+ico('book')+' Found recipe</span>':''}${!c.locked && DQ.mastBadge ? DQ.mastBadge(kind, c.id) : ''}${!c.locked && DQ.gearMark ? (g => g && D.ITEMS[g] && D.ITEMS[g].slot ? DQ.gearMark(g) : '')(c.yieldId || (c.artKind === 'item' ? c.artId || c.id : null)) : ''}<b>${c.locked&&!c.revealed?'???':esc(c.name)}</b><small>${c.locked?`${ico('lock')}<span>${esc(requirementLabel)}</span>`:c.caption||esc(c.reason||'')}</small>${c.locked?'':`<span class="choice-state">${working?'● Working':c.stateText?c.stateText:c.locked?'Locked':c.away?'Travel required':''}</span>`}${working?`<span class="bar prog"><i data-prog="${kind}:${c.id}"></i></span>`:''}</button>`;
   }).join('') || '<p class="dim">No recipes match. Try another category.</p>'}</div></section>`;
   if(kind==='fight')return `<section class="panel encounter-controls"><div class="phead"><h2>${esc(choice.name)}</h2><small>Combat <b data-b="combat"></b></small></div>${action}<div class="task-summary">${choice.info||''}</div></section>${cards}`;
   const stage = `<section class="panel activity-stage ${running?'working':''}" style="--c:${D.SK[key]?.col||'var(--brass)'};--work-beat:${Math.max(900,Math.min(1700,(DQ.act?.dur||3600)/3))}ms"><div class="activity-scene ${kind} skill-${key}" data-kind="${kind}" data-task="${choice.id}" style="--landscape:url('${DQ.districtUrl ? DQ.districtUrl(S().town, kind, key, choice) : DQ.sceneUrl ? DQ.sceneUrl(S().town) : ''}')"><span class="scene-target">${art(choice, choice.artKind==='item' ? 48 : kind==='wood' ? 144 : kind==='train' ? 64 : 96)}</span>${choice.yieldId&&kind!=='fish'?`<span class="scene-yield"><small>Produces</small>${DQ.itemIco(D.ITEMS[choice.yieldId])}</span>`:''}${running?`<span class="scene-worker" aria-hidden="true"><img class="px" src="${DQ.heroWorkFigureUrl?DQ.heroWorkFigureUrl(S().look):DQ.heroFigureUrl(S().look)}" width="72" height="96" alt=""></span><span class="action-tool" aria-hidden="true">${(t => t ? DQ.itemIco(D.ITEMS[t]) : ico({wood:'woodcutting',mine:'mining',fish:'rod',thieve:'glove',recipe:{cooking:'cooking',smithing:'hammer',crafting:'crafting'}[key],alch:'staff'}[kind]||key))((k => { const n = k && DQ.toolTier(key); return n && D.ITEMS[`tool_${k}_${n}`] ? `tool_${k}_${n}` : null; })(DQ.toolKey && DQ.toolKey(key)))}</span><span class="work-atmosphere" aria-hidden="true"><i></i><i></i><i></i><i></i></span>`:''}</div>
@@ -13697,6 +13745,7 @@ UI.focusTask = (page, id, tab, sk) => {
 /* recipe categories: first row by material or discipline, second row by type */
 const METAL_BAR={Bronze:'bar_bronze',Iron:'bar_iron',Steel:'bar_steel',Mithril:'bar_mithril',Adamant:'bar_adamant',Rune:'bar_rune',Astral:'bar_astral',Smelting:'ore_copper'},METAL={bronze:'Bronze',iron:'Iron',steel:'Steel',mithril:'Mithril',adamant:'Adamant',rune:'Rune',astral:'Astral'},HIDE={leather:'Leather',frost:'Frostpelt',bog:'Bogscale',drake:'Drakehide'};
 DQ.recipeGroup = r => {
+  if(r.secret)return {g:'Discovered recipes'};
   const out=Object.keys(r.out)[0],it=D.ITEMS[out]||{},m=out.split('_')[0];
   if(r.skill==='smithing'){ if(r.id.startsWith('smelt_')||it.ic==='bar')return {g:'Smelting'}; if(r.tab==='Tools')return {g:'Tools'}; return {g:METAL[m]||D.TIERS[it.tier]?.name||'Other',s:it.slot==='weapon'?'Weapons':'Armour'}; }
   if(r.skill==='crafting'){ if(r.tab==='Tools')return {g:'Tools'}; if(it.charm)return {g:'Charms'}; if(r.tab==='Jewellery')return {g:'Jewellery'}; if(r.tab==='Arrows')return {g:'Arrows'};
@@ -13708,16 +13757,16 @@ UI.V.recipes = sk => {
   /* Categories by material, then by type (Nov 2026): Smithing groups by metal (weapons / armour), Crafting by what you
      make (armour by hide, wood by bows / staves / shields). Each chip says how many are ready, or the level it opens at. */
   /* every list in level order, so new additions never trail at the end */
-  const list=D.RLIST[sk].filter(r=>!DQ.recipeShown||DQ.recipeShown(r)).sort((a,b)=>a.lvl-b.lvl||a.name.localeCompare(b.name)),grp=r=>DQ.recipeGroup(r),order=['Fish','Fish suppers','Farmhouse','Smelting','Bronze','Iron','Steel','Mithril','Adamant','Rune','Astral','Basics','Armour','Wood','Arrows','Jewellery','Charms','Tools'],groups=[...new Set(list.map(r=>grp(r).g))].sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
+  const list=D.RLIST[sk].filter(r=>!DQ.recipeShown||DQ.recipeShown(r)).sort((a,b)=>a.lvl-b.lvl||a.name.localeCompare(b.name)),grp=r=>DQ.recipeGroup(r),order=['Fish','Fish suppers','Farmhouse','Smelting','Bronze','Iron','Steel','Mithril','Adamant','Rune','Astral','Basics','Armour','Wood','Arrows','Jewellery','Charms','Tools','Discovered recipes'],groups=[...new Set(list.map(r=>grp(r).g))].sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
   const g=UI.tab[sk]=groups.includes(UI.tab[sk])?UI.tab[sk]:(groups.find(x=>list.some(r=>grp(r).g===x&&DQ.recipeLvlOk(r)&&DQ.recipeDiscovered(r)&&DQ.canMake(r)))||groups[0]);
   const subs=[...new Set(list.filter(r=>grp(r).g===g).map(r=>grp(r).s).filter(Boolean))],sub=UI.tab[sk+'sub']=subs.includes(UI.tab[sk+'sub'])?UI.tab[sk+'sub']:subs[0],only=UI.tab[sk+'ready'];
-  const inG=(r,x,y)=>grp(r).g===x&&(!y||grp(r).s===y),chip=(x,y,on,act,b)=>{const rs=list.filter(r=>inG(r,x,y)),ready=rs.filter(r=>DQ.recipeLvlOk(r)&&DQ.recipeDiscovered(r)&&DQ.canMake(r)).length,min=Math.min(...rs.map(r=>r.lvl)),locked=(DQ.lvl(sk)<min&&!rs.some(r=>DQ.recipeLvlOk(r)))||rs.every(r=>!DQ.recipeDiscovered(r));
+  const inG=(r,x,y)=>grp(r).g===x&&(!y||grp(r).s===y),chip=(x,y,on,act,b)=>{const rs=list.filter(r=>inG(r,x,y)),ready=rs.filter(r=>DQ.recipeLvlOk(r)&&DQ.recipeDiscovered(r)&&DQ.canMake(r)).length,min=Math.min(...rs.map(r=>r.lvl)),locked=(DQ.lvl(sk)<min&&!rs.some(r=>DQ.recipeLvlOk(r)))||rs.every(r=>!DQ.recipeDiscovered(r)&&!(r.secret&&DQ.recipeKnown(r.secret)));
     const metalBar=!y&&sk==='smithing'&&METAL_BAR[x],pic=metalBar&&D.ITEMS[metalBar]?metalBar:x==='Tools'&&sk==='smithing'?'tool_pick_1':Object.keys((rs[0]||{out:{}}).out)[0],art=pic&&D.ITEMS[pic]?`<span class="rc-art ${locked||rs[0]&&!DQ.recipeDiscovered(rs[0])?'blackout':''}">${DQ.itemIco(D.ITEMS[pic])}</span>`:'';
     return `<button class="chip rc-chip ${on?'on':''} ${locked?'locked':''}" data-do="tab" data-a="${act}" data-b="${esc(b)}" aria-pressed="${on}">${art}${locked?ico('lock'):''}<span>${esc(y||x)}</span><small>${locked?`Lv ${min}`:ready?`${ready} ready`:''}</small></button>`;};
   UI.taskToolbar[sk]=`<div class="recipe-categories" role="group" aria-label="Category">${groups.map(x=>chip(x,null,x===g,sk,x)).join('')}<span class="filter-sep" aria-hidden="true"></span><button class="filter-toggle ${only?'on':''}" role="switch" aria-checked="${only?'true':'false'}" data-do="readyonly" data-a="${sk}"><span class="ft-track" aria-hidden="true"><span class="ft-knob"></span></span><span>Ready to make</span><b>${only?'On':'Off'}</b></button></div>${subs.length>1?`<div class="recipe-categories recipe-sub" role="group" aria-label="Type">${subs.map(y=>chip(g,y,y===sub,sk+'sub',y)).join('')}</div>`:''}`;
   const missingOf=r=>Object.entries(r.in).filter(([id,n])=>DQ.have(id)<n).map(([id,n])=>`${n-DQ.have(id)} ${D.ITEMS[id].name.toLowerCase()}`);
   const choices=list.map(r=>{if(r.secret&&DQ.recipeUsable&&!DQ.recipeUsable(r))return {id:r.id,name:'???',artKind:'item',artId:Object.keys(r.out)[0],visible:inG(r,g,subs.length>1?sub:null)&&!only,locked:true,blocked:true,short:'A rumour',reason:D.SECRET[r.secret].rumour};const outId=Object.keys(r.out)[0],it=D.ITEMS[outId],discovery=DQ.recipeDiscovery(r),undiscovered=!!discovery,gate=DQ.recipeGate?.(r)||'',complete=!!r.once&&DQ.itemDiscovered(outId),lvlLock=!complete&&(!DQ.skillUnlocked(sk)||!DQ.recipeLvlOk(r)||undiscovered||!!gate),miss=lvlLock||complete?[]:missingOf(r);
-    return {id:r.id,name:r.name,artKind:'item',artId:outId,visible:inG(r,g,subs.length>1?sub:null)&&(!only||DQ.canMake(r)),locked:lvlLock,missing:!lvlLock&&miss.length>0,blocked:complete||lvlLock||miss.length>0,
+    return {id:r.id,name:r.name,secret:!!r.secret,revealed:!!r.secret&&DQ.recipeKnown(r.secret),artKind:'item',artId:outId,visible:inG(r,g,subs.length>1?sub:null)&&(!only||DQ.canMake(r)||r.secret&&DQ.recipeKnown(r.secret)),locked:lvlLock,missing:!lvlLock&&miss.length>0,blocked:complete||lvlLock||miss.length>0,
     discoverItem:undiscovered?discovery.item:null,short:undiscovered?'Needs '+D.ITEMS[discovery.item].name:undefined,reason:complete?'Completed · kept permanently':undiscovered?discovery.reason:gate?gate:lvlLock?`Requires ${D.SK[sk].name} ${r.lvl}`:miss.length?`Missing ${miss.join(', ')}`:'',
     stateText:complete?'✓ Completed · kept':gate?gate:lvlLock?`🔒 ${D.SK[sk].name} ${r.lvl} (you are ${DQ.lvl(sk)})`:miss.length?`Missing ${miss.length===1?miss[0]:miss.length+' materials'}`:'Ready to make',
     caption:`Lv ${r.lvl} · ${(DQ.durFor('recipe',r.id)/1000).toFixed(1)}s`,
@@ -13727,8 +13776,9 @@ UI.V.recipes = sk => {
 
 /* ---------- Magic page ---------- */
 UI.V.magic = () => {
-  const tab=UI.tab.magic==='Spellbook'?'Spellbook':'Alchemy',level=DQ.lvl('magic'),alchemy=DQ.alchSpell();
-  const header=`<div class="magic-heading">${UI.skillHero('magic')}<div class="tabs magic-tabs">${['Alchemy','Spellbook'].map(t=>`<button class="tab ${t===tab?'on':''}" data-do="tab" data-a="magic" data-b="${t}">${t==='Alchemy'?ico('coin'):ico('magic')} ${t}</button>`).join('')}</div></div>`;
+  const tab=['Spellbook','Runes'].includes(UI.tab.magic)?UI.tab.magic:'Alchemy',level=DQ.lvl('magic'),alchemy=DQ.alchSpell();
+  const header=`<div class="magic-heading">${UI.skillHero('magic')}<div class="tabs magic-tabs">${['Alchemy','Spellbook','Runes'].map(t=>`<button class="tab ${t===tab?'on':''}" data-do="tab" data-a="magic" data-b="${t}">${t==='Alchemy'?ico('coin'):ico('magic')} ${t}</button>`).join('')}</div></div>`;
+  if(tab==='Runes')return `<div class="magic-workshop magic-runes">${header}<div class="magic-body">${UI.V.recipes('magic').replace(/<section data-reference="true"[\s\S]*$/,'')}</div></div>`;
   let body;
   if(tab==='Alchemy'){
     const ids=Object.keys({...S().inv,...S().bank}).filter(id=>D.ITEMS[id].val>=8&&!DQ.isEquipped(id)&&D.ITEMS[id].type!=='food'&&id!=='rune').sort((a,b)=>D.ITEMS[b].val-D.ITEMS[a].val);
@@ -13757,7 +13807,7 @@ UI.V.combat = () => {
   const f = DQ.act && DQ.act.kind === 'fight' ? D.MON[DQ.act.id] : null, st = DQ.weaponStyle(), ps = DQ.pstats(), sty = S().style;
   const preview = DQ.combatFocus();
   const met = preview && (f || (S().beast.kills[preview.id] || 0) > 0), pname = preview ? (met ? preview.name : 'Unknown creature') : '';
-  const foe = preview ? `<div class="avatar foe-guide ${preview.boss ? 'boss' : ''}" id="av-foe" style="--c:${preview.col}" data-do="guide" data-a="${preview.id}" role="button" tabindex="0" aria-label="${esc(pname)}: open its field guide" data-tip="text:${esc(pname)} · open its field guide">${met && DQ.battleFoe ? DQ.battleFoe(preview) : DQ.monSprite(preview,192,met?'':'sil')}</div><div class="nm">${esc(pname)} <span class="lvchip">Lv ${preview.cl}</span></div><span class="bar hpb"><i ${f?'data-b="fhp"':'style="width:100%"'}></i></span><small class="mono" ${f?'data-b="fhptxt"':''}>${preview.hp} / ${preview.hp} health</small>`
+  const foe = preview ? `<div class="avatar foe-guide ${preview.boss ? 'boss' : ''}" id="av-foe" style="--c:${preview.col}" data-do="guide" data-a="${preview.id}" role="button" tabindex="0" aria-label="${esc(pname)}: open its field guide" data-tip="text:${esc(pname)} · open its field guide">${DQ.battleFoe ? DQ.battleFoe(preview,!!met) : DQ.monSprite(preview,192,met?'':'sil')}</div><div class="nm">${esc(pname)} <span class="lvchip">Lv ${preview.cl}</span></div><span class="bar hpb"><i ${f?'data-b="fhp"':'style="width:100%"'}></i></span><small class="mono" ${f?'data-b="fhptxt"':''}>${preview.hp} / ${preview.hp} health</small>`
     : `<div class="avatar idle" id="av-foe" style="--c:#4a5a5e">?</div><div class="empty-foe">Choose a target to start fighting.</div>`;
   const cur = st === 'melee' && sty[st] === 'accurate' ? 'aggressive' : sty[st]; /* Melee is one skill now: the old Accurate focus reads as Offensive */
   const wname = S().equip.weapon ? D.ITEMS[S().equip.weapon].name : 'Bare hands';
@@ -13980,6 +14030,7 @@ UI.V.shop = () => {
   const tab = UI.shopTab, buying = tab === 'buy', qty = UI.shopQty;
   const stock = buying ? D.SHOPS[S().town] : [], held = stock.filter(id => DQ.lockedSkillFor(id));
   const ids = buying ? stock.filter(id => !DQ.lockedSkillFor(id)&&(!UI.shopCatalogFilter||UI.shopCatalogFilter(id))) : Object.keys({ ...S().inv, ...S().bank }).filter(DQ.sellable);
+  if(buying&&UI.shopCategory==='equipment')ids.sort((a,b)=>Math.max(1,...Object.values(D.ITEMS[a].req||{}))-Math.max(1,...Object.values(D.ITEMS[b].req||{}))||DQ.buyPrice(a)-DQ.buyPrice(b)||D.ITEMS[a].name.localeCompare(D.ITEMS[b].name));
   const later = [...new Set(held.map(DQ.lockedSkillFor))].map(sk => `<p class="shop-later">${ico('lock')} <b>${D.SK[sk].name}</b> gear is sold here once you learn ${D.SK[sk].name}. ${esc(DQ.skillTeacher(sk))}.</p>`).join('');
   const id = ids.includes(UI.shopSelected[tab]) ? UI.shopSelected[tab] : ids[0], it = id && D.ITEMS[id];
   UI.shopSelected[tab] = id;
@@ -14126,7 +14177,7 @@ function welcome(sum, gap) {
 }
 
 /* ---------- Actions ---------- */
-const refresh = () => { if (UI._rt) return; UI._rt = setTimeout(() => { UI._rt = 0; UI.render(false); }, 120); };
+const refresh = () => { if(UI.view==='combat'&&UI.updateEncounter){UI.updateEncounter();return;} if (UI._rt) return; UI._rt = setTimeout(() => { UI._rt = 0; if(UI.view==='combat'&&UI.updateEncounter)UI.updateEncounter();else UI.render(false); }, 120); };
 UI.refresh = refresh;
 const DO = {
   achall: () => { UI.achAll = true; UI.render(false); },
@@ -14307,7 +14358,7 @@ const THEME = () => { document.body.dataset.town = S().town; };
 const sig = () => DQ.foods().map(id => id + DQ.have(id)).join();
 let foodSig = '', slow = 0;
 UI.init = () => {
-  DQ.on('act', () => { if (DQ.act) S().lastAct = { kind: DQ.act.kind, id: DQ.act.id }; UI.renderHud(); UI.renderRail(); UI.render(false); });
+  DQ.on('act', () => { if (DQ.act) S().lastAct = { kind: DQ.act.kind, id: DQ.act.id }; UI.renderHud(); UI.renderRail(); if(UI.view==='combat'&&UI.updateEncounter)UI.updateEncounter();else UI.render(false); });
   DQ.on('ui', () => {
     UI.upd();
     if (DQ.invDirty) { DQ.invDirty = false; const ae = document.activeElement; /* keep typing in a search box undisturbed while loot arrives */ if (ae && (ae.id === 'packq' || ae.id === 'bankq')) { const g = $(ae.id === 'packq' ? '#packgrid' : '#bankgrid'); if (g) g.innerHTML = ae.id === 'packq' ? UI.packGrid() : UI.bankGrid(); } else if (['character', 'bank', 'shop', 'magic', 'cooking', 'smithing', 'crafting'].includes(UI.view)) refresh(); }
@@ -14414,7 +14465,7 @@ Object.assign(UI.DO,{
  huntarea:id=>{if(DQ.act?.kind==='fight'&&DQ.act.area===id)DQ.stopAct();else DQ.startHunt(id);UI.render(false);},
  huntquest:id=>{const a=DQ.areaForMonster(id);if(a)DQ.startHunt(a.id,id,true);UI.render(false);}
 });
-DQ.on('encounter',()=>{UI.renderHud();if(UI.view==='combat')UI.render(false);});
+DQ.on('encounter',()=>{UI.renderHud();if(UI.view==='combat'){if(UI.updateEncounter)UI.updateEncounter();else UI.render(false);}});
 })();
 
 </script>
@@ -17653,10 +17704,10 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
     const project = D.PROJECTS[id];
     if (S().projects[id]) return step('Project complete', project.story + ' ' + project.reward, 'go', 'map');
     if (S().town !== project.town) return step('Return to '+D.TOWN[project.town].name, 'Your neighbours are ready to help.', 'journeytravel', project.town);
-    if (id === 'inn' && DQ.have('shrimp') < 12) {
+    if (id === 'inn' && DQ.have('shrimp') < (DQ.projectNeed(id).shrimp||0)) {
       if (!DQ.skillUnlocked('cooking')) return (S().stats.catch || 0) < 5 ? task('Learn Cooking', `Catch five fish and chop five logs for a cooking fire. ${DQ.unlockHow('cooking')}.`, 'fish', 'shrimp') : task('Learn Cooking', `Chop logs for a cooking fire. ${DQ.unlockHow('cooking')}.`, 'wood', 'normal');
-      if (!DQ.have('raw_shrimp')) return task('Catch shrimp for the inn', 'The inn needs 12 cooked shrimp. Gather raw shrimp first.', 'fish', 'shrimp');
-      return task('Cook for the inn', fmt(DQ.have('shrimp')) + ' / 12 cooked shrimp ready. Some attempts may burn.', 'recipe', 'cook_shrimp');
+      if (!DQ.have('raw_shrimp')) return task('Catch shrimp for the inn', 'The inn still needs '+DQ.projectNeed(id).shrimp+' cooked shrimp. Gather raw shrimp first.', 'fish', 'shrimp');
+      return task('Cook for the inn', fmt(DQ.have('shrimp')) + ' / '+DQ.projectNeed(id).shrimp+' cooked shrimp ready. Some attempts may burn.', 'recipe', 'cook_shrimp');
     }
     /* the first missing material, routed to where it comes from */
     const need = DQ.projectNeed(id), deliverable = Object.entries(need).some(([k]) => held(k) > 0);
@@ -17704,13 +17755,13 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
     const want = { melee: 'aggressive', defence: 'defensive' }[low];
     if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. ${D.SK[low].name} ${lv} trails ${D.SK[sk[sk.length - 1][0]].name} ${top}: ${low === 'defence' ? 'more damage taken' : 'more misses, smaller hits'}. Switches focus and fights chickens.`, 'journeytrain', want, 'chicken');
   }
-  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train Melee and Defence.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
+  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train '+D.SK[DQ.weaponStyle()].name+' and Defence.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
   /* Ready by level: let the battle forecast decide what, if anything, is missing. */
   const f = DQ.bossForecast ? DQ.bossForecast('grubnash') : null;
   if (f && f.winRate >= .75) return task('Challenge Grubnash', `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current gear and food.`, 'fight', 'grubnash');
   /* the most useful concrete step from the real save: rest, armour you own or can afford, his weakness, food */
-  const prep = DQ.prepAdvice ? DQ.prepAdvice('grubnash', f).filter(x => x.key !== 'food' && x.key !== 'level') : [];
-  if (prep.length && (prep[0].afford !== false)) return step(prep[0].title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${prep[0].text}`, prep[0].action || 'go', prep[0].a || 'combat');
+  const prep = DQ.prepAdvice ? DQ.prepAdvice('grubnash', f).filter(x => x.key !== 'food' && x.key !== 'level' && x.actionable!==false) : [];
+  if (prep.length && (prep[0].preparing || prep[0].afford !== false)) return step(prep[0].title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${prep[0].text}`, prep[0].action || 'go', prep[0].a || 'combat');
   const needFood = f && f.foodPerKill != null ? Math.ceil(f.foodPerKill * 1.5) : DQ.maxHp() * 2;
   if (food < needFood) {
     const msg = `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins. ` : ''}Food restores ${fmt(food)} health; about ${fmt(needFood)} would carry you through.`;
@@ -17734,7 +17785,7 @@ DQ.regionNext = () => {
     return task(`Train for ${short}`, `Combat ${DQ.combatLvl()} / ${req}. ${foe ? `${foe.name}s are a fair fight here.` : ''}`, 'fight', foe ? foe.id : b.id); }
   const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
   if (f && f.winRate >= .75) return task(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'fight', b.id);
-  const tip = DQ.prepAdvice ? DQ.prepAdvice(b.id, f)[0] : null;
+  const tip = DQ.prepAdvice ? DQ.prepAdvice(b.id, f).find(x=>x.actionable!==false) : null;
   return tip ? step(tip.title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${tip.text}`, tip.action || 'go', tip.a || 'combat') : step(`Challenge ${short}`, 'You are ready by level. Check the forecast on the Combat page.', 'go', 'combat');
 };
 /* Optional goals beside the one primary action: something short, something over a few sessions, a long pursuit */
@@ -17980,16 +18031,34 @@ DQ.sourceOf = id => {
     const nodes = (D.NODES[kind] || []).filter(n => n.item === id).sort((a, b) => a.lvl - b.lvl);
     if (nodes.length) { const n = nodes.find(x => DQ.nodeHere(x)) || nodes[0]; return { kind, id: n.id, page: PAGE[kind], skill: n.skill, lvl: n.lvl, town: n.town, name: DQ.skillUnlocked(n.skill) && DQ.lvl(n.skill) >= n.lvl ? n.name : '???' }; }
   }
-  if (id.startsWith('crop_')) return { kind: 'farm', page: 'farming', skill: 'farming', name: it.name };
-  const animal = (D.ANIMALS || []).find(a => a.prod === id); if (animal) return { kind: 'animal', page: 'farming', skill: 'farming', name: animal.name };
-  const recipe = Object.values(D.RECIPES || {}).filter(r => r.out && r.out[id]).sort((a, b) => a.lvl - b.lvl)[0];
-  if (recipe) return { kind: 'recipe', id: recipe.id, page: D.SK[recipe.skill].page, skill: recipe.skill, lvl: recipe.lvl, town:recipe.town, name: recipe.name };
-  const shops = Object.entries(D.SHOPS || {}).filter(([, list]) => list.includes(id)).map(([town]) => town);
-  if (shops.length) return { kind: 'shop', page: 'shop', town: shops.includes(S().town) ? S().town : shops[0], name: 'Shop' };
-  const mon = D.MONLIST.filter(m => !m.boss && (m.drops || []).some(d => d[0] === id)).sort((a, b) => a.cl - b.cl)[0];
-  if (mon) return { kind: 'fight', id: mon.id, page: 'combat', town: mon.town, name: DQ.monName(mon) };
+  if (id.startsWith('crop_')) return { kind: 'farm', page: 'farming', skill: 'farming', lvl:D.CROP[id.slice(5)]?.lvl||1, name: it.name };
+  const animal = (D.ANIMALS || []).find(a => a.prod === id); if (animal) return { kind: 'animal', page: 'farming', skill: 'farming', lvl:animal.lvl, name: animal.name };
+  const recipes = Object.values(D.RECIPES || {}).filter(r => r.out && r.out[id] && (!r.secret || DQ.recipeUsable?.(r))).sort((a,b)=>a.lvl-b.lvl);
+  const recipe=recipes.find(r=>Object.keys(r.out)[0]===id);
+  const recipeSource=r=>({kind:'recipe',id:r.id,page:D.SK[r.skill].page,skill:r.skill,lvl:r.lvl,town:r.town,name:r.name});
+  const readyRecipe=recipes.find(r=>Object.keys(r.out)[0]===id&&DQ.skillUnlocked(r.skill)&&DQ.lvl(r.skill)>=r.lvl&&!(DQ.recipeGate?.(r))&&!DQ.recipeDiscovery?.(r));
+  if(readyRecipe)return recipeSource(readyRecipe);
+  const shops = Object.entries(D.SHOPS || {}).filter(([,list])=>list.includes(id)).map(([town])=>town);
+  const shop=shops.find(t=>t===S().town)||shops.find(t=>DQ.townUnlocked(t));
+  if(shop)return {kind:'shop',page:'shop',town:shop,name:'Shop'};
+  const monsters=D.MONLIST.filter(m=>(m.drops||[]).some(d=>d[0]===id)||m.first===id).sort((a,b)=>Number(!!a.boss)-Number(!!b.boss)||a.cl-b.cl);
+  const mon=monsters.find(m=>DQ.townUnlocked(m.town))||monsters[0];
+  if(mon)return {kind:'fight',id:mon.id,page:'combat',town:mon.town,name:DQ.monName(mon)};
+  if(recipe)return recipeSource(recipe);
+  if(shops.length)return {kind:'shop',page:'shop',town:shops[0],name:'Shop'};
+  // Incidental outputs must not outrank a direct source or send a survey's feather requirement back to itself.
+  const secondary=recipes.find(r=>DQ.skillUnlocked(r.skill)&&DQ.lvl(r.skill)>=r.lvl&&!DQ.recipeGate?.(r)&&!DQ.recipeDiscovery?.(r));
+  if(secondary)return recipeSource(secondary);
   return null;
 };
+const ingredient0=DQ.ingredientDiscovery;
+DQ.ingredientDiscovery=id=>{const src=DQ.sourceOf(id);if(!src)return ingredient0(id);
+ if(src.skill&&D.SK[src.skill])return {...src,level:src.lvl||1,label:D.SK[src.skill].name+' '+(src.lvl||1)};
+ if(src.kind==='shop')return {...src,label:'Shop · '+(DQ.townUnlocked(src.town)?D.TOWN[src.town].name:'reach a later town')};
+ if(src.kind==='fight')return {...src,label:'Combat · creature drop'};
+ return ingredient0(id);
+};
+
 const where = src => {
   const town = src.town && src.town !== S().town && !(src.kind !== 'shop' && D.NODE && DQ.nodeHere(D.NODE[src.kind + ':' + src.id])) ? ` in ${D.TOWN[src.town].name}` : '';
   const lvl = src.skill && src.lvl > 1 ? ` (${D.SK[src.skill].name} ${src.lvl})` : '';
@@ -19191,6 +19260,7 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
       <div class="cx-chips">${d ? `<span class="rl-i ${tone}" data-tip="text:${esc(d.why || d.label)}">${tone === 'ok' ? '✓' : '!'} ${esc(d.label)}</span>` : ''}${foodPill(heal, false)}<button class="rl-i ${worn < 4 ? 'warn' : 'ok'}" data-do="combatgear" data-tip="text:View and change your equipped gear here">${S().equip.weapon?DQ.itemIco(D.ITEMS[S().equip.weapon]):ico('bag')} Equipment ${worn}/${slots.length}</button></div>
       <div class="cx-tools">${tm ? `<button class="btn sm" data-do="guide" data-a="${tm.id}">${ico('book')}Guide</button>` : ''}${dashHas(byKey('prep').from) ? `<button class="btn sm" data-do="combatmore" data-a="prep">${ico('info')}Details</button>` : ''}${dashHas(byKey('loot').from) ? `<button class="btn sm" data-do="combatmore" data-a="loot">${ico('pouch')}Loot</button>` : ''}</div>${go}</div>`;
   };
+  UI.updateCombatHeader=()=>{const el=document.querySelector('#view .ready-line');if(el)el.outerHTML=header();};
   const bossBtn = () => { const b = bossOf(), p = byKey('boss'); if (!b || !dashHas(p.from)) return ''; let bg = null; try { bg = p.badge(); } catch (e) { bg = null; }
     return `<button class="boss-foot ${bg && bg.tone ? 'tone-' + bg.tone : ''}" data-do="combatmore" data-a="boss">${DQ.monSprite(b, 32)}<span><small>Boss</small><b>${esc(b.boss.short || b.name)}</b></span><span class="bf-go">${esc(bg ? bg.t : '')}</span></button>`; };
   const trainPanel = strip => {
@@ -19342,8 +19412,9 @@ UI.portrait = (size = 48, cls = '') => `<span class="portrait px-portrait ${cls}
 Q.battleHero = () => `<span class="battle-rig hero-rig px-hero encounter-hero" role="img" aria-label="Your equipped hero"><span class="rig-torso"><img class="pxa" src="${Q.heroFigureUrl(Q.S.look)}" width="144" height="192" alt="" draggable="false"></span></span>`;
 /* creatures are drawn facing right; in a fight they stand on the right, so they are mirrored to face the hero (the
    chicken is the one drawn facing left already) */
-const FACES_LEFT = new Set(['chicken']);
-Q.battleFoe = m => `<span class="battle-rig foe-rig px-foe" role="img" aria-label="${esc(m.name)} ready for battle" data-creature="${m.id}"><span class="foe-torso">${FACES_LEFT.has(m.id) ? Q.artImage('creature', m.id, 192, '', m.name) : `<span class="foe-face">${Q.artImage('creature', m.id, 192, '', m.name)}</span>`}</span></span>`;
+// Current code-drawn creatures, including the revised chicken, face right.
+Q.creatureFacing=id=>D.MON[id]?.artFacing||'right';
+Q.battleFoe = (m,known=true) => `<span class="battle-rig foe-rig px-foe" role="img" aria-label="${esc(known?m.name:'Unknown creature')} ready for battle" data-creature="${m.id}"><span class="foe-torso">${Q.creatureFacing(m.id)==='left' ? Q.artImage('creature', m.id, 192, known?'':'sil', known?m.name:'Unknown creature') : `<span class="foe-face">${Q.artImage('creature', m.id, 192, known?'':'sil', known?m.name:'Unknown creature')}</span>`}</span></span>`;
 const pose0 = Q.poseBattle;
 Q.poseBattle = (avatar, style, phase, animate) => { const root = avatar && avatar.querySelector('.px-hero'); if (!root) return pose0 ? pose0(avatar, style, phase, animate) : false; if (Q.S.settings.reduceFx) return true;
   const attack = phase === 'attack', dir = attack ? 1 : -1; animate(root, [{ transform: 'translateX(0)' }, { transform: `translateX(${-dir * 4}px)`, offset: .25 }, { transform: `translateX(${dir * 14}px)`, offset: .5 }, { transform: 'translateX(0)' }], { duration: attack ? (Q.battleTiming ? Q.battleTiming.duration : 420) : 340, easing: 'ease-in-out' }); return true; };
@@ -20086,10 +20157,11 @@ const taskmap0=UI.DO.taskmap;
 UI.DO.taskmap=town=>{const page=UI.view,id=UI.taskChoice[page],node=Object.values(D.NODE).find(n=>n.id===id&&n.skill===page);UI.routeSource={page,id,skill:page,town,kind:node?.kind};if(Q.townUnlocked(town))return UI.DO.routetravel(town);return taskmap0(town);};
 /* A defeated creature has a short exit before the next silhouette arrives; no combat timing changes. */
 Q.on('beaststrike',()=>{const el=document.querySelector('.battle-companion');if(el&&!calm())el.animate([{transform:'translateX(0)'},{transform:'translateX(12px)',offset:.4},{transform:'translateX(0)'}],{duration:400});});
-Q.on('foedefeated',m=>{if(UI.view!=='combat'||Q.sim.on)return;const foe=document.getElementById('av-foe');if(!foe)return;const rect=foe.getBoundingClientRect(),layer=document.getElementById('toastlayer')||document.body;
+Q.on('foedefeated',m=>{const show=()=>{if(UI.view!=='combat'||Q.sim.on)return;const foe=document.getElementById('av-foe');if(!foe)return;const rect=foe.getBoundingClientRect(),layer=document.getElementById('toastlayer')||document.body;
  const label=document.createElement('div');label.className='defeat-caption';label.textContent=m.name+' defeated';label.setAttribute('role','status');label.style.left=pagePx(rect.left+rect.width/2)+'px';label.style.top=pagePx(Math.max(120,rect.top-24))+'px';layer.appendChild(label);setTimeout(()=>label.remove(),1100);
  if(calm())return;const ghost=foe.cloneNode(true);ghost.removeAttribute('id');ghost.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));ghost.className='foe-death-ghost';Object.assign(ghost.style,{left:pagePx(rect.left)+'px',top:pagePx(rect.top)+'px',width:pagePx(rect.width)+'px',height:pagePx(rect.height)+'px'});layer.appendChild(ghost);ghost.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(22px) rotate(8deg)'}],{duration:480,easing:'ease-in',fill:'forwards'});setTimeout(()=>ghost.remove(),510);
  requestAnimationFrame(()=>{const next=document.getElementById('av-foe');if(next)next.animate([{opacity:0},{opacity:0,offset:.35},{opacity:1}],{duration:650});});
+};setTimeout(show,Math.max(0,(UI.impactUntil||0)-performance.now()));
 });
 /* One Scholarship family card, with visible rank buttons and the selected rank's unchanged cost/action. */
 const research0=UI.V.research;UI.researchRanks={};
@@ -22100,6 +22172,183 @@ UI.V.shop=()=>{
  }
  return shop();
 };
+})();
+
+</script>
+<script>
+/* Concrete preparation and consumable routes. No automatic purchases, starts or goal changes. */
+(() => {
+const Q=window.DQ,D=Q.data,U=Q.ui,S=()=>Q.S;
+Q.purchasePlan=(ids,qty=1)=>{
+ const cost={coins:0};for(const id of ids){cost.coins+=Q.buyPrice(id)*qty;for(const[k,n]of Object.entries(Q.shopMaterialCost(id)))cost[k]=(cost[k]||0)+n*qty;}
+ const missing=Object.entries(cost).filter(([id,n])=>(id==='coins'?S().coins:Q.have(id))<n).map(([id,n])=>({id,need:n,have:id==='coins'?S().coins:Q.have(id)}));
+ return {cost,missing,ready:!missing.length};
+};
+const prep=Q.prepAdvice;
+Q.prepAdvice=(...args)=>{
+ const rows=prep(...args).map(row=>{if(!row.items?.length)return row;const plan=Q.purchasePlan(row.items),material=plan.missing.find(x=>x.id!=='coins');
+  if(material){const can=plan.missing.filter(x=>x.id!=='coins').every(x=>{const src=Q.sourceOf(x.id);return src&&(!src.skill||Q.skillUnlocked(src.skill)&&Q.lvl(src.skill)>=(src.lvl||1))&&(!src.town||Q.townUnlocked(src.town))&&(src.kind!=='shop'||S().coins>=Q.buyPrice(x.id)*(x.need-x.have));});
+   return {...row,title:'Prepare '+D.ITEMS[material.id].name.toLowerCase()+' for your gear',text:plan.missing.map(x=>(x.id==='coins'?'Coins':D.ITEMS[x.id].name)+': '+Q.fmt(x.have)+' / '+Q.fmt(x.need)).join(' · ')+'. This purchase also needs materials.',action:'route',a:material.id,preparing:true,actionable:can,afford:false,purchase:plan};
+  }
+  return {...row,afford:plan.ready,purchase:plan,text:row.text.replace(/You have [\d,]+ coins, enough for all of it\./,'You have the coins and materials for this purchase.')};
+ });
+ // A counter already in your pack or a usable ability takes priority over a blocked shopping recommendation.
+ return [...rows.filter(x=>!x.preparing),...rows.filter(x=>x.preparing)];
+};
+Q.combatSupplyStep=()=>{
+ const style=Q.weaponStyle();if(!['ranged','magic'].includes(style))return null;
+ let id='rune',held=Q.have(id);
+ if(style==='ranged'){
+  const owned=Object.keys({...S().inv,...S().bank}).find(k=>D.ITEMS[k]?.slot==='ammo'&&Q.have(k)>0&&Q.canEquip(k).ok);
+  held=(S().ammo.n||0)+(S().ammo.id?Q.have(S().ammo.id):0);id=S().ammo.id||owned||'arrow_bronze';
+  if(held<20&&owned&&owned!==S().ammo.id)return {title:'Equip '+D.ITEMS[owned].name,detail:'You already have arrows. Equip them to continue Ranged training.',action:'equip',a:owned};
+ }
+ // Once the rune-material introduction is accepted, finish it before resuming the boss route.
+ // Its combat objective still needs casting supplies; never point an empty staff at rats.
+ if(style==='magic'&&!Q.skillUnlocked('mining')){
+  const q=D.QM.miners_pick,state=Q.questState(q);
+  if(state==='ready')return {title:'Collect your mining pick',detail:'Mine copper for your own Magic supplies.',action:'qclaim',a:q.id};
+  if(state==='active'){const o=q.obj.find((o,i)=>Q.objProg(q,S().q[q.id],i)<o.n);
+   if(o?.ev==='chop')return {title:o.label,detail:'Earn your pickaxe, then mine copper for Magic.',action:'journeytask',a:'wood',b:o.key};
+   if(o?.ev==='kill'&&held>=20)return {title:o.label,detail:'You have casting supplies for the mine. Earn your pickaxe, then make runes in Magic.',action:'huntquest',a:o.key};
+  }
+ }
+ if(held>=20)return null;
+ if(style==='ranged'&&!(D.SHOPS[S().town]||[]).includes(id)){
+  const local=(D.SHOPS[S().town]||[]).find(k=>D.ITEMS[k]?.slot==='ammo'&&Q.canEquip(k).ok);
+  if(local){id=local;held=Q.have(id);}else return {title:'Find '+D.ITEMS[id].name.toLowerCase(),detail:'The source route shows where these arrows are available and keeps a return link.',action:'route',a:id};
+ }
+ const recipe=Object.values(D.RECIPES).filter(r=>r.out[id]).sort((a,b)=>b.out[id]/b.t-a.out[id]/a.t).find(r=>Q.skillUnlocked(r.skill)&&Q.lvl(r.skill)>=r.lvl&&!Q.recipeGate?.(r)&&Q.recipeDiscovered(r)&&Q.canMake(r));
+ if(recipe)return {title:'Make '+D.ITEMS[id].name.toLowerCase(),detail:Q.fmt(held)+' left. You have the supplies to make another batch.',action:'journeytask',a:'recipe',b:recipe.id};
+ if(style==='magic'){
+  const r=D.RECIPES.craft_runes,missing=Object.entries(r.in).find(([k,n])=>Q.have(k)<n);
+  if(missing){const src=Q.sourceOf(missing[0]);
+   if(src?.id&&src.skill&&Q.skillUnlocked(src.skill)&&Q.lvl(src.skill)>=(src.lvl||1))return {title:'Gather '+D.ITEMS[missing[0]].name.toLowerCase()+' for runes',detail:Q.have(missing[0])+' / '+missing[1]+'. Inscribe a batch in Magic instead of buying casting supplies.',action:'journeytask',a:src.kind,b:src.id};
+   if(src?.skill==='mining'&&!Q.skillUnlocked('mining')){
+    const q=D.QM.miners_pick,state=Q.questState(q);
+    if(state==='new'||state==='ready')return {title:state==='new'?'Learn to mine your rune materials':'Collect your mining pick',detail:'A pickaxe opens copper for your first player-made runes.',action:state==='new'?'qstart':'qclaim',a:q.id};
+   }
+  }
+ }
+ // A low-stock reminder must not trap a player in repeated one-item purchases.
+ // Let the remaining supplies work when a useful refill is unaffordable.
+ const price=Q.buyPrice(id);if(held>0&&S().coins<price*10)return null;
+ const qty=[100,10,1].find(n=>S().coins>=price*n);
+ if(!qty)return {title:'Fund your combat supplies',detail:'You need '+D.ITEMS[id].name.toLowerCase()+'. Sell spare supplies or claim a quest reward before continuing.',action:'journeysell',a:id};
+ return {title:'Restock '+D.ITEMS[id].name.toLowerCase(),detail:Q.fmt(held)+' left · '+qty+' cost '+Q.fmt(price*qty)+' coins. Your chosen fighting style needs these supplies.',action:'journeysupply',a:id,b:String(qty)};
+};
+const next=Q.journeyNext;
+Q.journeyNext=(id=S().journey||'boss')=>{
+ const step=next(id);if(id!=='boss'||S().q.first_steps?.s!=='done'||['qstart','qclaim'].includes(step.action)||!Q.regionBoss())return step;
+ return Q.combatSupplyStep()||step;
+};
+const regional=Q.regionNext;
+Q.regionNext=()=>{
+ const ready=D.QUESTS.find(q=>!q.guild&&q.obj.some(o=>o.ev==='boss')&&Q.questState(q)==='ready');
+ if(ready)return {title:'Claim your victory reward',detail:ready.giver+' is waiting to thank you.',action:'qclaim',a:ready.id};
+ const boss=Q.regionBoss();if(!boss||S().town!==boss.town)return regional();
+ if(Q.combatLvl()<boss.boss.req){
+  const owned=Q.prepAdvice(boss.id).find(x=>x.action==='equip'&&(x.key.startsWith('equip:')||x.key==='upgrade')&&(D.ITEMS[x.a]?.slot!=='weapon'||D.ITEMS[x.a]?.style===Q.weaponStyle()));
+  if(owned)return {title:owned.title,detail:owned.text+' Use the gear you have before more training.',action:'equip',a:owned.a};
+ }
+ let quest=D.QUESTS.find(q=>!q.guild&&q.obj.some(o=>o.ev==='boss'&&o.key===boss.id));
+ const seen=new Set();while(quest?.req&&S().q[quest.req]?.s!=='done'&&!seen.has(quest.id)){seen.add(quest.id);quest=D.QM[quest.req];}
+ if(!quest||quest.obj.some(o=>o.ev==='boss'&&o.key===boss.id))return regional();
+ const state=Q.questState(quest);
+ if(state==='new')return {title:'Accept “'+quest.name+'”',detail:quest.giver+' needs your help before the '+(boss.boss.short||boss.name)+' hunt.',action:'qstart',a:quest.id};
+ if(state==='ready')return {title:'Claim “'+quest.name+'”',detail:'Collect your reward and continue the regional story.',action:'qclaim',a:quest.id};
+ if(state==='active'){
+  const obj=quest.obj.find((o,i)=>Q.objProg(quest,S().q[quest.id],i)<o.n);
+  if(obj?.ev==='kill'&&D.MON[obj.key]&&!D.MON[obj.key].boss){const food=Q.foodStep?.('Prepare food for “'+quest.name+'”.');if(food)return food;
+   return {title:obj.label,detail:quest.giver+' · '+Q.objProg(quest,S().q[quest.id],quest.obj.indexOf(obj))+' / '+obj.n+'. This helps open the regional boss quest.',action:'huntquest',a:obj.key};}
+  return {title:'Continue “'+quest.name+'”',detail:obj?.label||'Check your next objective.',action:'questcontinue',a:quest.id};
+ }
+ const need=Q.questPreparation(quest)[0];
+ if(need)return {title:'Prepare '+D.SK[need.sk].name+' for “'+quest.name+'”',detail:Q.skillUnlocked(need.sk)?D.SK[need.sk].name+' '+Q.lvl(need.sk)+' / '+need.lvl+'. This preparation opens the next story objective.':Q.unlockHow(need.sk),action:'go',a:D.SK[need.sk].page};
+ return regional();
+};
+U.DO.journeysupply=(id,qty)=>{
+ if(!D.ITEMS[id])return;U.skillCommissionSelected=null;U.shopTab='buy';U.shopCategory=D.ITEMS[id].slot==='ammo'?'equipment':'supplies';U.shopSupplyFilter=null;U.shopQty=[1,10,100].includes(+qty)?+qty:1;U.shopSelected.buy=id;U.returnTo={page:'overview',label:'Your goal'};Q.go('shop');
+};
+U.DO.journeysell=()=>{U.skillCommissionSelected=null;U.shopTab='sell';U.returnTo={page:'overview',label:'Your goal'};Q.go('shop');};
+})();
+
+</script>
+<script>
+/* Live player feedback: preserve existing actions, saves and simulation rules. */
+(() => {
+const Q=window.DQ,D=Q.data,U=Q.ui,S=()=>Q.S,{esc,ico}=Q;
+const calm=()=>S().settings.reduceFx||matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Delivery quests include the actual gathering/production prerequisites, not just their headline activity.
+const needs=Q.questSkillNeeds;
+Q.questSkillNeeds=q=>{
+ const out=new Map(needs(q).map(n=>[n.sk,n.lvl]));
+ const visit=(id,n,path=new Set())=>{if(Q.have(id)>=n||path.has(id))return;const src=Q.sourceOf(id);if(!src)return;
+  if(src.kind==='shop'&&Q.townUnlocked(src.town))return;
+  path=new Set(path);path.add(id);if(src.skill)out.set(src.skill,Math.max(out.get(src.skill)||1,src.lvl||1));
+  const r=src.kind==='recipe'&&D.RECIPES[src.id];if(r)for(const[k,v]of Object.entries(r.in))visit(k,v,path);
+ };
+ for(const o of q.obj||[]){if(o.ev==='deliver')visit(o.key,o.n);else{const task=Q.questObjectiveTasks(o)[0],r=task?.kind==='recipe'&&D.RECIPES[task.id];if(r)for(const[k,n]of Object.entries(r.in))visit(k,n);}}
+ return [...out].map(([sk,lvl])=>({sk,lvl}));
+};
+// Only ordinary level unlocks appear in the level-up list. Found patterns have their own shelf.
+for(const [sk,levels]of Object.entries(D.UNL))for(const [lv,names]of Object.entries(levels)){levels[lv]=names.filter(name=>!D.SECRET_RECIPES.some(r=>D.RECIPES[r.rec]?.name===name));if(!levels[lv].length)delete levels[lv];}
+const learn=Q.learnRecipe;
+Q.learnRecipe=(id,quiet)=>{
+ const learned=learn(id,quiet),r=D.SECRET[id];if(!learned||quiet||Q.sim.on||Q.forecasting||S().settings.notify===false)return learned;
+ const rec=D.RECIPES[r.rec],item=D.ITEMS[r.output||id];
+ Q.popupQueue({title:'A recipe worth keeping',body:`<div class="recipe-reveal"><span class="recipe-reveal-art">${Q.itemIco(item)}</span><span class="k">Discovered recipe · kept permanently</span><h2>${esc(rec.name)}</h2><p>${esc(r.found)}.</p><p>${D.SK[r.skill].name} ${r.lvl} · available on the Discovered recipes shelf. A discovered recipe, now yours to keep.</p></div>`,actions:[{label:'Open recipe',primary:true,fn:()=>U.focusTask(D.SK[r.skill].page,r.rec,rec.tab,r.skill)},{label:'Later'}]});
+ return learned;
+};
+// Live Guide progress: update only fills/pips, without rebuilding the activity or its controls.
+for(const key of ['mastBadge','mastLine']){const fn=Q[key];Q[key]=(kind,id)=>fn(kind,id).replace(/^<([a-z]+) /,`<$1 data-study-kind="${kind}" data-study-id="${id}" `);}
+Q.on('ui',()=>{for(const el of document.querySelectorAll('[data-study-kind]')){const m=Q.mastInfo(el.dataset.studyKind,el.dataset.studyId);el.style.setProperty('--p',m.pct+'%');el.classList.toggle('full',!m.next);el.classList.toggle('max',!m.next);el.classList.toggle('near',!!m.next&&m.pct>=90);const fill=el.querySelector('.bar>i');if(fill)fill.style.width=m.pct+'%';el.querySelectorAll('.mast-pips>i').forEach((p,i)=>p.classList.toggle('on',i<m.stars));el.dataset.tip='text:'+Q.mastTip(el.dataset.studyKind,el.dataset.studyId);if(el.classList.contains('mast-line'))el.setAttribute('aria-label',Q.mastTip(el.dataset.studyKind,el.dataset.studyId));}});
+// Ordinary DPS is an estimate against the selected enemy, not a promise about abilities or boss phases.
+Q.damageEstimate=(m=Q.combatFocus?.())=>{
+ const p=Q.pstats(),w=D.WTYPES[D.weaponType()],dtype=p.style==='magic'?D.SPELL_EL[p.spell.id]:w.dtype,wr=m?Q.weakOf(m,Q.fight):{weak:[],resist:[]},weak=wr.weak.includes(dtype),resist=wr.resist.includes(dtype),mult=m?(weak?Q.typeMult(m,'weak'):resist?Q.typeMult(m,'resist'):1):1;
+ const acc=p.acc*w.acc*(weak?1.1:1),def=m?(m.def+8)*(64+m.def):0,chance=m?Q.clamp(acc>def?1-(def+2)/(2*(acc+1)):acc/(2*(def+1)),.05,.95):1;
+ const max=Math.max(1,Math.round(p.max*w.dmg*mult*(m?1+Q.beastBonus(m.id):1)*(m?.boss||m?.mini?Q.buffMult('boss'):1))),seconds=Q.combatInterval()/1000;
+ return {dps:(1+max)/2*chance/seconds,max,chance,seconds};
+};
+Q.combatGrowth=(sk,from)=>{if(!['melee','ranged','magic'].includes(sk)||Q.weaponStyle()!==sk)return '';const now=Q.pstats(),xp=S().xp[sk];let before;try{S().xp[sk]=D.XPF[from];Q.fxDirty();before=Q.pstats();}finally{S().xp[sk]=xp;Q.fxDirty();}return `Equipped max hit ${before.max} → ${now.max}; accuracy ${Math.round(before.acc)} → ${Math.round(now.acc)}. A level can improve accuracy before the next whole point of damage.`;};
+U.B.dps=e=>{const d=Q.damageEstimate();U.set(e,`${d.dps.toFixed(2)} DPS · ${Math.round(d.chance*100)}% hit · max ${d.max}`);};
+// Preserve the arena, training bars and equipment controls across consecutive opponents and level ticks.
+let encounterTimer;
+U.updateEncounter=()=>{
+ if(U.view!=='combat'||!document.querySelector('.encounter-arena'))return;
+ clearTimeout(encounterTimer);const wait=Math.max(0,(U.impactUntil||0)-performance.now());
+ if(wait){encounterTimer=setTimeout(U.updateEncounter,wait+40);return;}
+ const temp=document.createElement('template');temp.innerHTML=U.V.combat();
+ const old=document.querySelector('.encounter-arena>.side:last-child'),fresh=temp.content.querySelector('.encounter-arena>.side:last-child');
+ if(old&&fresh&&old.querySelector('#av-foe')?.dataset.a!==fresh.querySelector('#av-foe')?.dataset.a)old.replaceWith(fresh);
+ const mid=document.querySelector('.encounter-arena>.mid'),nextMid=temp.content.querySelector('.encounter-arena>.mid');if(mid&&nextMid&&!!mid.querySelector('[data-prog]')!==!!nextMid.querySelector('[data-prog]'))mid.innerHTML=nextMid.innerHTML;
+ const prog=mid?.querySelector('[data-prog]');if(prog&&Q.act?.kind==='fight')prog.dataset.prog='fight:'+Q.act.id;
+ const targets=document.querySelector('.combat-targets .hunt-areas'),nextTargets=temp.content.querySelector('.combat-targets .hunt-areas');if(targets&&nextTargets&&targets.innerHTML!==nextTargets.innerHTML)targets.innerHTML=nextTargets.innerHTML;
+ const heroLevel=document.querySelector('.encounter-arena .lvchip.you');if(heroLevel)heroLevel.textContent='Combat '+Q.combatLvl();
+ U.updateCombatHeader?.();U.collectProg();U.upd();
+};
+Q.on('splat',(side,text,kind,delay=0)=>{if(side==='foe'&&/^\d/.test(String(text))&&!kind.includes('miss')&&!Q.sim.on&&!Q.forecasting&&!calm())U.impactUntil=performance.now()+Math.max(0,delay-180)+(Q.battleTiming?.impact||390);});
+for(const key of ['fhp','fhptxt']){const bind=U.B[key];U.B[key]=(e,...a)=>{if(performance.now()<(U.impactUntil||0))return;bind(e,...a);};}
+const render=U.render;
+U.render=(...args)=>{const result=render(...args);
+ const summary=document.querySelector('.activity-caption .task-summary'),ingredients=summary?.querySelector('.recipe-ingredients');if(ingredients)summary.prepend(ingredients);
+ if(U.view==='combat'){const head=document.querySelector('.hud-train .kit-head');if(head&&!head.querySelector('[data-b="dps"]'))head.insertAdjacentHTML('afterend',`<small class="combat-dps" data-b="dps" data-tip="text:Expected ordinary attack damage per second against this creature. Includes hit chance, speed and damage type; excludes ability bursts, companions and special phases."></small>`);const el=document.querySelector('[data-b="dps"]');if(el)U.B.dps(el);}
+ if(U.view==='projects'){
+  document.querySelectorAll('.local-project-payoff .tag').forEach(e=>e.remove());
+  const wrap=document.querySelector('#view .village-map>.phead');if(wrap&&!wrap.querySelector('.village-standing')){
+   const town=S().town,have=Q.localStanding(town),max=Object.values(D.PROJECTS).filter(p=>p.town===town&&!p.relic).length*10;
+   wrap.querySelector('small')?.remove();wrap.insertAdjacentHTML('beforeend',`<div class="village-standing" role="group" aria-label="Village standing"><b>Local standing ${have} / ${max}</b><span class="bar"><i style="width:${max?have/max*100:0}%"></i></span><small>Restore buildings to open local supplies. Standing is permanent and never spent.</small></div>`);
+  }
+  if(!S().tut.hidden&&!S().tut.done.projects){S().tut.done.projects=true;Q.save();Q.popupQueue({title:'Bring the village back to life',body:'<p>Town projects turn your gathered materials into restored buildings and useful local supplies.</p><p>Select a building to see its requirements. Deliver what you can; contributions are kept. Restoring a building raises this village’s standing and changes its scenery.</p><p>Pin a project to keep its next material within reach. You can return whenever you like.</p>',actions:[{label:'Explore town projects',primary:true}]});}
+ }
+ return result;
+};
+// Rare opportunities get a full scene when opened, with the outcome in exactly the same place.
+const inbox=U.inboxHtml;
+U.eventScene=id=>{const t=document.createElement('template');t.innerHTML=inbox();const card=[...t.content.children].find(e=>e.dataset.eventId===String(id));return card?.outerHTML||'<p>This opportunity has already been settled.</p>';};
+U.DO.openevent=id=>{const event=S().inbox.find(e=>String(e.id)===String(id));if(!event)return;U.activeEvent=String(id);const m=Q.modal({title:event.title,wide:true,body:`<section class="encounter-moment" style="--event-scene:url('${Q.sceneUrl(S().town)}')"><div class="event-panorama" aria-hidden="true"><span class="event-subject">${event.item&&D.ITEMS[event.item]?Q.itemIco(D.ITEMS[event.item]):event.type==='chest'&&D.ITEMS.treasure_chest?Q.itemIco(D.ITEMS.treasure_chest):ico(event.ic)}</span></div><div class="events" id="inboxbox">${U.eventScene(id)}</div></section>`,actions:[{label:'Return to the adventure',primary:true}]});m.classList.add('event-fullscreen');};
+U.inboxHtml=()=>{if(document.querySelector('.encounter-moment'))return U.eventScene(U.activeEvent);const t=document.createElement('template');t.innerHTML=inbox();for(const event of t.content.querySelectorAll('.event')){const opts=event.querySelector('.ev-opts');if(opts){const b=document.createElement('button');b.className='btn primary';b.textContent='Explore this encounter';b.dataset.do='openevent';b.dataset.a=event.dataset.eventId;opts.replaceWith(b);}}return t.innerHTML;};
+const inboxPanel=U.inboxPanel;U.inboxPanel=()=>{const h=inboxPanel(),t=document.createElement('template');t.innerHTML=h;for(const event of t.content.querySelectorAll('.event')){const id=event.dataset.eventId;event.querySelector('.ev-opts')?.replaceWith(Object.assign(document.createElement('button'),{className:'btn primary',textContent:'Explore this encounter'}));const button=event.querySelector('button');if(button){button.dataset.do='openevent';button.dataset.a=id;}}return t.innerHTML;};
 })();
 
 </script>

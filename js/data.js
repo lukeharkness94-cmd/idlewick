@@ -24,7 +24,7 @@ D.SKILLS = [
   { id: 'thieving',    name: 'Thieving',    col: '#9b87e0', group: 'gather',  page: 'thieving',    unlock: 13, quest: 'mq_thieving',  blurb: 'Lift purses and raid stalls. A fine way to find coins.' },
   { id: 'farming',     name: 'Farming',     col: '#b8864f', group: 'gather',  page: 'farming',     unlock: 10,  blurb: 'Grow crops and raise animals on your own homestead.' },
   { id: 'cooking',     name: 'Cooking',     col: '#f2b44a', group: 'artisan', page: 'cooking',     unlock: 3,  blurb: 'Turn raw fish into food that heals you in a fight.' },
-  { id: 'smithing',    name: 'Smithing',    col: '#e8703a', group: 'artisan', page: 'smithing',    unlock: 12, quest: 'mq_smithing',  blurb: 'Smelt ore into bars and hammer them into weapons and armour.' },
+  { id: 'smithing',    name: 'Smithing',    col: '#e8703a', group: 'artisan', page: 'smithing',    unlock: 4, quest: 'mq_smithing',  blurb: 'Smelt ore into bars and hammer them into weapons and armour.' },
   { id: 'crafting',    name: 'Crafting',    col: '#d98ad1', group: 'artisan', page: 'crafting',    unlock: 15, quest: 'mq_crafting', blurb: 'Sew leather, cut jewellery, carve bows and staves.' },
   { id: 'magic',       name: 'Magic',       col: '#7d89f5', group: 'artisan', page: 'magic',       unlock: 0,  blurb: 'Staffs and spells: levels as you fight with them. Also turns clutter into coins with alchemy.' },
   { id:'research', name:'Scholarship', col:'#b79862', group:'artisan', page:'research', unlock:16, blurb:'Study practical discoveries to earn Scholarship XP and permanent improvements.' },
@@ -227,7 +227,7 @@ D.CROPS = [
 ].map(([id, name, col, lvl, secs, yld, pxp, hxp, sell, seed]) => {
   mk('seed_' + id, { name: name + ' seeds', ic: 'seed', col, val: Math.max(1, Math.floor(seed / 3)), buy: seed, type: 'seed' });
   mk('crop_' + id, { name, ic: 'crop', col, val: sell, type: 'crop', heal: lvl < 25 ? 2 : undefined });
-  return { id, name, col, lvl, secs, yld, pxp, hxp };
+  return { id, name, col, lvl, secs, yld, pxp:lvl<=15?Math.round(pxp*1.25):pxp, hxp:lvl<=15?Math.round(hxp*1.25):hxp };
 });
 D.CROP = Object.fromEntries(D.CROPS.map(c => [c.id, c]));
 /* Animals: (id, name, colour, farming lvl, price, produce, seconds per produce, produce value, collect xp) */
@@ -606,7 +606,7 @@ D.QUESTS = [
 /* ---------- Main quests: each one teaches a new skill ---------- */
 const MQ = (id, unlocks, town, name, giver, adv, req, blurb, obj, reward) => Object.assign(Q(id, town, name, giver, adv, req, blurb, obj, reward), { main: true, unlocks });
 D.QUESTS.unshift(
-  MQ('mq_smithing', 'smithing', 'willowbrook', 'The Cold Forge', 'Old Brannoc', 12, 'miners_pick',
+  MQ('mq_smithing', 'smithing', 'willowbrook', 'The Cold Forge', 'Old Brannoc', 4, 'miners_pick',
     'Edda left her hammer and notebook with me when she went up to the mountains. I kept meaning to light the forge again. Well, you can see how far that got. Bring me copper, tin and enough logs for the furnace, and I’ll show you how to turn the ore into something useful.',
     [{ ev: 'mine', key: 'copper', n: 10, label: 'Mine 10 copper ore for the first smelt' }, { ev: 'mine', key: 'tin', n: 10, label: 'Mine 10 tin ore to make bronze' }, { ev: 'deliver', key: 'log_normal', n: 20, label: 'Bring 20 logs to fuel the furnace' }],
     { xp: { smithing: 150 }, coins: 100, items: { bar_bronze: 5 } }),

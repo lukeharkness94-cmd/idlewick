@@ -113,3 +113,9 @@ Unverified without people: whether saved preparations are used beyond the first 
 4. Did you notice you could gather from any town? Did anything feel like an errand?
 5. Was each new skill unlock clear (Cooking, Mining, Farming, Hunting)? Did any feel like a chore?
 6. Did "Goal complete" on Home help you choose what to do next?
+
+## 19 November player-feedback follow-up (prepared, not yet human-tested)
+
+Use one fresh staff, bow and sword session through the first boss; give no resources or instructions. Observe whether they find the inscription tab, understand a missing recipe input, notice the distinction between discovered patterns and level unlocks, and can finish a newly offered delivery quest without learning an unrelated locked skill first. Ask whether Magic self-supply feels useful or repetitive. Record the staff's extra preparation time separately from reading and navigation.
+
+For returning players, observe one full-scene opportunity and its outcome: do they understand the risk, the ability to leave it pending, and what their choice changed? For farmers, compare the early crop XP change at realistic check-in frequency. On a laptop, check that the selected recipe's inputs and primary action remain visible. During a real sequence of fights, watch for stage/control movement and whether the projectile, damage and death read in that order. Test the village introduction, standing bar and first restoration without coaching. None of these questions has an invented human result.
