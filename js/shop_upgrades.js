@@ -38,12 +38,13 @@ const tabs0=UI.shopTabs;
 UI.shopTabs=tab=>tabs0(tab)+`<nav class="shop-categories" aria-label="Shop categories">${[['tools','Skill upgrades','mining'],['equipment','Equipment','shield'],['supplies','Supplies','bag']].map(([id,label,ic])=>`<button class="btn ${tab==='buy'&&UI.shopCategory===id?'on':''}" data-do="shopcategory" data-a="${id}">${ico(ic)}<span>${label}</span>${id==='tools'?cues(families.flatMap(f=>f.ids)):''}</button>`).join('')}</nav>`;
 UI.shopSkillExtraNav=()=>'';
 const familyNav=()=>`<nav class="tool-families" aria-label="Skill upgrades">${families.map(f=>`<button class="btn ${UI.shopTab==='buy'&&UI.shopCategory==='tools'&&f.key===UI.shopToolFamily?'on':''}" data-do="toolfamily" data-a="${f.key}" aria-pressed="${UI.shopTab==='buy'&&UI.shopCategory==='tools'&&f.key===UI.shopToolFamily}">${UI.activityIcon(f.sk)}<span>${esc(f.label)}</span>${cues(f.ids)}</button>`).join('')}${UI.shopSkillExtraNav()}</nav>`;
-const shopHeader=()=>{const t=document.createElement('template');t.innerHTML=UI.shopTabs(UI.shopTab);const categories=t.content.querySelector('.shop-categories');const primary=categories?.outerHTML||'';categories?.remove();return `<section class="panel shop-upgrade-header"><div class="phead"><h2>Shop</h2><small>${esc(D.TOWN[S().town].name)}</small></div>${primary}<div class="shop-shelf-actions">${t.innerHTML}</div>${UI.shopTab==='buy'&&UI.shopCategory==='tools'?familyNav():''}</section>`;};
+const shopHeader=()=>{const t=document.createElement('template');t.innerHTML=UI.shopTabs(UI.shopTab);const categories=t.content.querySelector('.shop-categories');const primary=categories?.outerHTML||'';categories?.remove();return `<section class="panel shop-upgrade-header"><div class="phead"><h2>Shop</h2><small>${esc(D.TOWN[S().town].name)}</small></div>${primary}<div class="shop-shelf-actions">${t.innerHTML}</div></section>`;};
 // One scaffold for every shelf: navigation never sits inside a changing item panel.
 const stableShop=raw=>{
  const tmp=document.createElement('template');tmp.innerHTML=raw;
  const workspace=tmp.content.querySelector('.visual-shop'),stock=workspace?.querySelector('.shop-stock'),task=workspace?.querySelector('.shop-task');if(!workspace||!stock||!task)return shopHeader()+raw;
  for(const e of stock.querySelectorAll(':scope > .phead,:scope > .tabs,:scope > .shop-categories'))e.remove();
+ if(UI.shopTab==='buy'&&UI.shopCategory==='tools'){const nav=document.createElement('template');nav.innerHTML=familyNav();stock.prepend(nav.content);}
  const controls=task.querySelector('.shop-controls')||task.querySelector('[data-do="localqty"]')?.parentElement;
  let actions=task.querySelector('.shop-action');const local=task.querySelector('[data-do="localbuy"]');
  if(!actions&&local){actions=document.createElement('div');actions.className='shop-action';actions.append(local);}

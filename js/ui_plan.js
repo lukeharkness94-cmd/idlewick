@@ -42,9 +42,10 @@ UI.planSummary = () => {
 UI.eventResultHtml = r => { const tiles = [];
   if (r.coins) tiles.push(`<div class="evr-tile ${r.coins > 0 ? 'gain' : 'loss'}"><span class="evr-art">${ico('coin')}</span><b>${r.coins > 0 ? '+' : '−'}${fmt(Math.abs(r.coins))}</b><small>coins</small></div>`);
   for (const [k, n] of Object.entries(r.items || {})) tiles.push(`<div class="evr-tile ${n > 0 ? 'gain' : 'loss'}"><span class="evr-art">${DQ.itemIco(D.ITEMS[k])}</span><b>${n > 0 ? '+' : '−'}${fmt(Math.abs(n))}</b><small>${esc(D.ITEMS[k].name)}</small></div>`);
+  for(const [sk,n] of Object.entries(r.xp||{}))if(D.SK[sk])tiles.push(`<div class="evr-tile gain"><span class="evr-art">${ico(sk)}</span><b>+${fmt(n)}</b><small>${esc(D.SK[sk].name)} XP</small></div>`);
   if (r.hp) tiles.push(`<div class="evr-tile ${r.hp > 0 ? 'gain' : 'loss'}"><span class="evr-art">${ico('heart')}</span><b>${r.hp > 0 ? '+' : '−'}${Math.abs(r.hp)}</b><small>health</small></div>`);
   for (const b of r.buffs || []) tiles.push(`<div class="evr-tile loss"><span class="evr-art">${ico('clock')}</span><b>${esc(b)}</b><small>for a while</small></div>`);
-  return `<div class="ev-result ${r.bad ? 'bad' : ''}" style="--c:${r.col}"><div class="evr-head"><span class="ev-ic">${ico(r.ic)}</span><div><b>${esc(r.title)}</b>${r.chose ? `<small class="dim"> · you chose: ${esc(r.chose)}</small>` : ''}</div></div><p class="evr-msg">${r.bad ? '✗' : '✓'} ${esc(r.msg)}</p>${tiles.length ? `<div class="evr-tiles">${tiles.map((t, i) => t.replace('class="evr-tile', `style="--i:${i}" class="evr-tile`)).join('')}</div>` : ''}</div>`; };
+  return `<div class="ev-result ${r.bad ? 'bad' : ''}" data-event-id="${esc(r.id)}" tabindex="-1" role="status" aria-live="polite" style="--c:${r.col};min-height:${Math.max(0,Number(r.height)||0)}px"><div class="evr-head"><span class="ev-ic">${ico(r.ic)}</span><div><b>${esc(r.title)}</b>${r.chose ? `<small class="dim"> · you chose: ${esc(r.chose)}</small>` : ''}</div></div><p class="evr-msg">${r.bad ? '✗' : '✓'} ${esc(r.msg)}</p>${tiles.length ? `<div class="evr-tiles">${tiles.map((t, i) => t.replace('class="evr-tile', `style="--i:${i}" class="evr-tile`)).join('')}</div>` : ''}</div>`; };
 /* a decision card: what happened, then each choice as an equal button saying exactly what it does (no choice is
    pre-highlighted as if recommended). Offers made in coins show what the item is worth to you, so you can tell a
    good deal from a bad one (Nov 2026, from the player). */
@@ -60,7 +61,13 @@ const optSub = (e, k, sub) => { const it = D.ITEMS[e.item];
   if (e.type === 'trader' && it && k === 'haggle') return `50%: ${fmt(Math.round(it.val * 2.2 * e.n))} coins · 50%: they leave`;
   if (e.type === 'rare' && k === 'buy') return `Pay ${fmt(e.price)} coins`;
   return sub || (['no', 'pass', 'decline'].includes(k) ? 'Nothing happens' : ''); };
-UI.inboxHtml = () => { const L = S().inbox || []; return (DQ.eventResults || []).map(UI.eventResultHtml).join('') + L.map(e => `<div class="event" style="--c:${e.col}"><span class="ev-ic">${ico(e.ic)}</span><div class="ev-b"><b class="ev-t">${esc(e.title)}</b><p>${esc(e.text)}</p>${dealHtml(e)}<div class="ev-opts" role="group" aria-label="Choose one">${e.opts.map(([k, l, sub]) => (sub = optSub(e, k, sub), 0) || `<button class="btn ev-opt" data-do="decide" data-a="${e.id}" data-b="${k}"><b>${esc(l)}</b><small>${esc(sub)}</small></button>`).join('')}</div></div></div>`).join(''); };
+UI.inboxHtml = () => {
+ const L=S().inbox||[],R=DQ.eventResults||[],all=[...L,...R],ids=new Set(all.map(e=>String(e.id)));
+ DQ.eventDisplayOrder=(DQ.eventDisplayOrder||[]).filter(id=>ids.has(id));
+ for(const e of all)if(!DQ.eventDisplayOrder.includes(String(e.id)))DQ.eventDisplayOrder.push(String(e.id));
+ const card=e=>`<div class="event" data-event-id="${esc(e.id)}" style="--c:${e.col}"><span class="ev-ic">${ico(e.ic)}</span><div class="ev-b"><b class="ev-t">${esc(e.title)}</b><p>${esc(e.text)}</p>${dealHtml(e)}<div class="ev-opts" role="group" aria-label="Choose one">${e.opts.map(([k, l, sub]) => (sub = optSub(e, k, sub), 0) || `<button class="btn ev-opt" data-do="decide" data-a="${e.id}" data-b="${k}"><b>${esc(l)}</b><small>${esc(sub)}</small></button>`).join('')}</div></div></div>`;
+ return DQ.eventDisplayOrder.map(id=>{const r=R.find(e=>String(e.id)===id);return r?UI.eventResultHtml(r):card(L.find(e=>String(e.id)===id));}).join('');
+};
 UI.inboxPanel = () => (S().inbox || []).length || (DQ.eventResults || []).length ? `<section class="panel inboxp fancy"><div class="phead"><h2>Decisions waiting</h2><small>From your time away</small></div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></section>` : '';
 UI.returnExtras = sum => {
   const L = S().inbox || [], tips = [];
@@ -73,8 +80,8 @@ UI.returnExtras = sum => {
 };
 DQ.on('inbox', () => { $$('#inboxbox').forEach(b => b.innerHTML = UI.inboxHtml() || '<p class="sm dim" style="margin:0">All settled.</p>'); $$('.wb-decide-h').forEach(h => { const n = (S().inbox || []).length; h.innerHTML = `<span class="k">${n ? `Decide · ${n} still waiting` : 'All decided'}</span>${n ? '<small>Pick one choice for each. Each button says what it does.</small>' : ''}`; }); UI.renderHud(); if (UI.view === 'overview' && !(S().inbox || []).length && !document.querySelector('.modal #inboxbox')) UI.refresh(); });
 /* results stay until you move on: another page, or closing the welcome-back pop-up */
-{ const go0 = DQ.go; DQ.go = (...a) => { if (a[0] !== UI.view) DQ.eventResults = []; return go0(...a); };
-  const close0 = DQ.closeModal; DQ.closeModal = (...a) => { if (document.querySelector('.modal #inboxbox')) DQ.eventResults = []; return close0(...a); }; }
+{ const go0 = DQ.go; DQ.go = (...a) => { if (a[0] !== UI.view) DQ.eventResults = [], DQ.eventDisplayOrder=[]; return go0(...a); };
+  const close0 = DQ.closeModal; DQ.closeModal = (...a) => { if (document.querySelector('.modal #inboxbox')) DQ.eventResults = [], DQ.eventDisplayOrder=[]; return close0(...a); }; }
 
 /* ---------- Combat build pieces ---------- */
 const dchip = (t, cls) => { const d = D.DTYPES[t]; return `<span class="dchip ${cls}" style="--c:${d.col}" data-tip="text:${d.name}">${ico(d.ic)}${d.name}</span>`; };
