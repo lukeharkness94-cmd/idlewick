@@ -27,10 +27,13 @@ DQ.sourceOf = id => {
   const shop=shops.find(t=>t===S().town)||shops.find(t=>DQ.townUnlocked(t));
   if(shop)return {kind:'shop',page:'shop',town:shop,name:'Shop'};
   const monsters=D.MONLIST.filter(m=>(m.drops||[]).some(d=>d[0]===id)||m.first===id).sort((a,b)=>Number(!!a.boss)-Number(!!b.boss)||a.cl-b.cl);
-  const mon=monsters.find(m=>DQ.townUnlocked(m.town))||monsters[0];
-  if(mon)return {kind:'fight',id:mon.id,page:'combat',town:mon.town,name:DQ.monName(mon)};
+  const fight=m=>({kind:'fight',id:m.id,page:'combat',town:m.town,name:DQ.monName(m)});
+  const mon=monsters.find(m=>DQ.townUnlocked(m.town));
+  if(mon)return fight(mon);
   if(recipe)return recipeSource(recipe);
+  /* nothing reachable yet: a later town's shop that sells it beats a rare drop from that town's creatures (20 Nov) */
   if(shops.length)return {kind:'shop',page:'shop',town:shops[0],name:'Shop'};
+  if(monsters.length)return fight(monsters[0]);
   // Incidental outputs must not outrank a direct source or send a survey's feather requirement back to itself.
   const secondary=recipes.find(r=>DQ.skillUnlocked(r.skill)&&DQ.lvl(r.skill)>=r.lvl&&!DQ.recipeGate?.(r)&&!DQ.recipeDiscovery?.(r));
   if(secondary)return recipeSource(secondary);

@@ -4379,7 +4379,7 @@ html.calm .stage-track i{transition:none}@media(prefers-reduced-motion:reduce){.
 [data-tip][tabindex="0"]:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
 
 /* Combat's spare lower-left space is an always-visible loadout. Slot choice opens owned alternatives. */
-#view .combat-x .combat-equipped{flex:none;margin: auto 0 0!important;padding:10px!important;background:var(--panel);border:1px solid var(--line2);border-radius:12px}
+#view .combat-x .combat-equipped{flex:none;margin:0!important;padding:10px!important;background:var(--panel);border:1px solid var(--line2);border-radius:12px}
 .combat-equipped h3{font:600 14px var(--f-ui);margin:0 0 7px;color:var(--ink)}
 .combat-equipped-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
 .combat-equipped-slot{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;height:56px;padding:3px 0;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--ink);font:500 13px var(--f-ui)}
@@ -4424,6 +4424,37 @@ html.calm .stage-track i{transition:none}@media(prefers-reduced-motion:reduce){.
  html.short #view .combat-x .where .wh-area{padding:4px;gap:3px}
  html.short #view .combat-x .wh-areas{gap:4px}
  html.short #view .combat-x .wh-minis-h{display:none}
+}
+
+/* Combat, equipped panel (20 Nov 2026): it follows the places directly instead of sinking to the window's foot, and
+   takes the rest of the column. Spare height goes to the doll (taller slots, then the hero at 5x or 6x: whole-number
+   scales of the 24 x 32 figure) and a line of the worn gear's totals; the busiest town keeps the compact doll. */
+@media(min-width:861px){
+ #view .combat-x>.combat-targets>.combat-equipped{flex:1 1 auto;min-height:min-content;display:flex;flex-direction:column}
+ #view .combat-x .combat-equipped>.combat-equipped-grid{flex:1 1 auto;min-height:226px;display:flex!important;align-items:center;container-type:size}
+ html.short #view .combat-x .combat-equipped>.combat-equipped-grid{min-height:145px}
+ #view .combat-x .combat-equipped .paper-doll{width:100%;height:100%;max-height:340px;grid-template-rows:repeat(4,minmax(52px,1fr))}
+ html.short #view .combat-x .combat-equipped .paper-doll{grid-template-rows:repeat(4,minmax(34px,1fr))}
+ @container (min-height:300px){
+  #view .combat-x .combat-equipped .paper-doll .fig-img{width:120px!important;height:160px!important}
+  #view .combat-x .combat-equipped .paper-doll .combat-equipped-slot small{display:block}
+ }
+ @container (min-height:380px){#view .combat-x .combat-equipped .paper-doll .fig-img{width:144px!important;height:192px!important}}
+ @container (min-height:220px){html.short #view .combat-x .combat-equipped .paper-doll .fig-img{width:96px!important;height:128px!important}}
+ /* the doll beside the stage already names every slot, so a narrow header keeps only the chip's icon and count */
+ html.lw-1600 #view .combat-x .cx-eq-word{display:none}
+}
+.combat-equipped-totals{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;margin:8px 0 0;font:500 14px var(--f-ui);color:var(--mute)}
+.combat-equipped-totals:empty{display:none}
+.combat-equipped-totals>span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.combat-equipped-totals .ic{width:16px!important;height:16px!important}
+.combat-equipped-totals b{color:var(--ink);font-weight:600}
+.combat-equipped-totals i{font-style:normal}
+@media(min-width:861px){
+ /* short windows: the totals ride on the heading's line as icon and number, so the panel is no taller than before */
+ html.short #view .combat-x .combat-equipped{position:relative}
+ html.short .combat-equipped-totals{position:absolute;top:5px;right:8px;margin:0;gap:0 8px;flex-wrap:nowrap}
+ html.short .combat-equipped-totals i{display:none}
 }
 </style>
 <style>/* Idlewick, light theme: "the cartographer's table by day".
@@ -18068,10 +18099,13 @@ DQ.sourceOf = id => {
   const shop=shops.find(t=>t===S().town)||shops.find(t=>DQ.townUnlocked(t));
   if(shop)return {kind:'shop',page:'shop',town:shop,name:'Shop'};
   const monsters=D.MONLIST.filter(m=>(m.drops||[]).some(d=>d[0]===id)||m.first===id).sort((a,b)=>Number(!!a.boss)-Number(!!b.boss)||a.cl-b.cl);
-  const mon=monsters.find(m=>DQ.townUnlocked(m.town))||monsters[0];
-  if(mon)return {kind:'fight',id:mon.id,page:'combat',town:mon.town,name:DQ.monName(mon)};
+  const fight=m=>({kind:'fight',id:m.id,page:'combat',town:m.town,name:DQ.monName(m)});
+  const mon=monsters.find(m=>DQ.townUnlocked(m.town));
+  if(mon)return fight(mon);
   if(recipe)return recipeSource(recipe);
+  /* nothing reachable yet: a later town's shop that sells it beats a rare drop from that town's creatures (20 Nov) */
   if(shops.length)return {kind:'shop',page:'shop',town:shops[0],name:'Shop'};
+  if(monsters.length)return fight(monsters[0]);
   // Incidental outputs must not outrank a direct source or send a survey's feather requirement back to itself.
   const secondary=recipes.find(r=>DQ.skillUnlocked(r.skill)&&DQ.lvl(r.skill)>=r.lvl&&!DQ.recipeGate?.(r)&&!DQ.recipeDiscovery?.(r));
   if(secondary)return recipeSource(secondary);
@@ -19283,7 +19317,7 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
       : tm && (tm.boss || tm.mini || tm.tower) ? (DQ.combatLvl() >= ((tm.boss || tm.mini).req || 0) ? `<button class="btn primary cx-go" data-do="act" data-a="fight" data-b="${tm.id}">Challenge</button>` : `<button class="btn cx-go" disabled>Combat ${(tm.boss || tm.mini).req}</button>`)
       : area ? `<button class="btn primary cx-go" data-do="huntarea" data-a="${area.id}">Explore ${esc(area.name)}</button>` : '';
     return `<div class="ready-line cx-head tone-${tone || 'none'}"><div class="arena-ctl cx-title">${tm ? `<small>${where}</small><b>${esc(nm)}</b>${tm ? `<span class="lvchip">Lv ${tm.cl}</span>` : ''}` : `<b>${nm}</b>`}</div>
-      <div class="cx-chips">${d ? `<span class="rl-i ${tone}" data-tip="text:${esc(d.why || d.label)}">${tone === 'ok' ? '✓' : '!'} ${esc(d.label)}</span>` : ''}${foodPill(heal, false)}<button class="rl-i ${worn < 4 ? 'warn' : 'ok'}" data-do="combatgear" data-tip="text:View and change your equipped gear here">${S().equip.weapon?DQ.itemIco(D.ITEMS[S().equip.weapon]):ico('bag')} Equipment ${worn}/${slots.length}</button></div>
+      <div class="cx-chips">${d ? `<span class="rl-i ${tone}" data-tip="text:${esc(d.why || d.label)}">${tone === 'ok' ? '✓' : '!'} ${esc(d.label)}</span>` : ''}${foodPill(heal, false)}<button class="rl-i ${worn < 4 ? 'warn' : 'ok'}" data-do="combatgear" data-tip="text:Equipment: view and change your equipped gear here" aria-label="Equipment ${worn} of ${slots.length} worn">${S().equip.weapon?DQ.itemIco(D.ITEMS[S().equip.weapon]):ico('bag')} <span class="cx-eq-word">Equipment </span>${worn}/${slots.length}</button></div>
       <div class="cx-tools">${tm ? `<button class="btn sm" data-do="guide" data-a="${tm.id}">${ico('book')}Guide</button>` : ''}${dashHas(byKey('prep').from) ? `<button class="btn sm" data-do="combatmore" data-a="prep">${ico('info')}Details</button>` : ''}${dashHas(byKey('loot').from) ? `<button class="btn sm" data-do="combatmore" data-a="loot">${ico('pouch')}Loot</button>` : ''}</div>${go}</div>`;
   };
   UI.updateCombatHeader=()=>{const el=document.querySelector('#view .ready-line');if(el)el.outerHTML=header();};
@@ -20212,7 +20246,7 @@ UI.render=fresh=>{render0(fresh);document.documentElement.classList.toggle('comp
    if(hero){const hr=hero.getBoundingClientRect(),hh=hr.height/z,k=Math.max(2,Math.round(hh*.62/32)),sz=32*k,img=comp.querySelector('img');if(img){img.style.width=img.style.height=sz+'px';img.style.maxWidth=img.style.maxHeight='none';}
     comp.style.left=((hr.right-ar.left)/z-sz*.15)+'px';comp.style.bottom=((ar.bottom-hr.bottom)/z-4)+'px';comp.style.transform='none';comp.classList.add('placed');}}}
  const src=UI.routeSource;if(src&&src.page===UI.view){const n=D.NODE[src.kind+':'+src.id],needs=src.town&&src.town!==S().town&&(src.kind==='shop'||src.kind==='fight'||src.kind==='recipe'&&D.RECIPES[src.id]?.town||(n&&!Q.nodeHere(n)));if(needs&&!view.querySelector('.route-travel')){const row=document.createElement('div');row.className='route-travel';row.innerHTML=`<span>${esc(D.ITEMS[src.item]?.name||src.name||'This activity')} · ${esc(D.TOWN[src.town].name)}</span><button class="btn primary" data-do="routetravel" data-a="${src.town}" ${Q.townUnlocked(src.town)?'':'disabled'}>${Q.townUnlocked(src.town)?'Travel & return to this task':'Road not open yet'}</button>`;view.prepend(row);}}
- for(const e of view.querySelectorAll('[data-tip^="item:"]')){if(e.matches('.need-tile')||e.closest('button,a')||e.querySelector('button,a')||e.matches('input'))continue;const id=e.dataset.tip.slice(5);if(!Q.sourceOf(id))continue;/* one route per item: skip when its row already has a route button for it (review 20 Nov) */if(e.closest('.blackout,.sil,[aria-hidden="true"]'))continue;/* never link (or name) a concealed picture */const row=e.parentElement&&(e.parentElement.closest('.need-tile,.need,.need-row,.req,.needs,li,.activity-caption p,.rw')||e.parentElement);if(row&&row.querySelector(`[data-do="route"][data-a="${id}"]`))continue;e.classList.add('requirement-route');e.setAttribute('role','button');e.tabIndex=0;e.dataset.do='route';e.dataset.a=id;e.setAttribute('aria-label',`Obtain ${D.ITEMS[id]?.name||id}`);}
+ for(const e of view.querySelectorAll('[data-tip^="item:"]')){if(e.matches('.need-tile')||e.closest('button,a')||e.querySelector('button,a')||e.matches('input'))continue;const id=e.dataset.tip.slice(5);if(!Q.sourceOf(id))continue;/* one route per item: skip when its row already has a route button for it (review 20 Nov) */if(e.closest('.blackout,.sil,[aria-hidden="true"]'))continue;/* never link (or name) a concealed picture */const row=e.parentElement&&(e.parentElement.closest('.need-tile,.need,.need-row,.req,.needs,li,.activity-caption p,.rw')||e.parentElement);if(row&&row.querySelector('[data-do="route"]'))continue;/* the row already has its route (one per requirement) */e.classList.add('requirement-route');e.setAttribute('role','button');e.tabIndex=0;e.dataset.do='route';e.dataset.a=id;e.setAttribute('aria-label',`Obtain ${D.ITEMS[id]?.name||id}`);}
  if(UI.view==='shop'&&UI.routeShopItem){UI.shopSelected.buy=UI.routeShopItem;UI.sel=UI.routeShopItem;}
 };
 })();
@@ -22024,8 +22058,11 @@ U.B.combatreserve=e=>{const w=D.ITEMS[S().equip.weapon],sp=D.SPELLS.find(s=>s.id
 const emptyIcon=k=>({head:'helm',body:'body',legs:'legs',shield:'shield',weapon:'sword',ring:'ring',amulet:'amulet',ammo:'arrow_ammo'})[k];
 const equippedId=k=>k==='ammo'&&S().ammo.n>0?S().ammo.id:k==='ammo'?null:S().equip[k];
 const loadout=()=>U.equipmentDoll(k=>{const id=equippedId(k),name=Q.SLOT_NAMES[k],item=id&&D.ITEMS[id];return `<button type="button" class="eq combat-equipped-slot ${item?'filled':'empty'}" style="--c:${item?item.col:'var(--mute)'}" data-do="combatgearpick" data-a="${k}" data-tip="${item?'item:'+id:'text:'+esc(name+' · Empty. Choose equipment for this slot.')}" aria-label="${esc(name+': '+(item?item.name:'empty')+'. Choose equipment')}">${item?Q.itemIco(item):ico(emptyIcon(k))}<small>${esc(name)}</small>${k==='ammo'&&item?`<b class="equipped-ammo">${S().ammo.n}</b>`:''}</button>`;});
-U.B.combatequipped=e=>{const sig=JSON.stringify([S().equip,S().ammo,S().look]);if(e._gearSig!==sig){e._gearSig=sig;e.innerHTML=loadout();}};
-const showLoadout=()=>{if(U.view!=='combat')return;const col=document.querySelector('#view .combat-x>.combat-targets');if(!col||col.querySelector('.combat-equipped'))return;col.insertAdjacentHTML('beforeend','<section class="panel combat-equipped" aria-label="Equipped combat gear"><h3>Equipped</h3><div class="combat-equipped-grid" data-b="combatequipped"></div></section>');U.B.combatequipped(col.querySelector('[data-b="combatequipped"]'));};
+/* the worn gear's totals for the style you are fighting with, under the doll (same numbers as Hero > Combat stats) */
+const totals=()=>{const b=Q.bonus(),st=Q.weaponStyle(),rows=st==='ranged'?[['Ranged',b.rng,'ranged'],['Arrows',b.rngStr,'ranged']]:st==='magic'?[['Magic',b.mag,'magic']]:[['Accuracy',b.atk,'attack'],['Power',b.str,'strength']];
+ return [...rows,['Defence',b.def,'defence']].map(([n,v,sk])=>`<span style="--c:${D.SK[sk].col}" data-tip="text:${esc(n)} from worn gear" aria-label="${esc(n)} +${v||0}">${ico(sk)}<i>${esc(n)} </i><b class="mono">+${v||0}</b></span>`).join('');};
+U.B.combatequipped=e=>{const sig=JSON.stringify([S().equip,S().ammo,S().look]);if(e._gearSig!==sig){e._gearSig=sig;e.innerHTML=loadout();const t=e.parentElement&&e.parentElement.querySelector('.combat-equipped-totals');if(t)t.innerHTML=totals();}};
+const showLoadout=()=>{if(U.view!=='combat')return;const col=document.querySelector('#view .combat-x>.combat-targets');if(!col||col.querySelector('.combat-equipped'))return;col.insertAdjacentHTML('beforeend','<section class="panel combat-equipped" aria-label="Equipped combat gear"><h3>Equipped</h3><div class="combat-equipped-grid" data-b="combatequipped"></div><p class="combat-equipped-totals"></p></section>');U.B.combatequipped(col.querySelector('[data-b="combatequipped"]'));};
 const body=()=>{const slot=U.combatGearSlot||'weapon',current=equippedId(slot),owned=Object.keys({...S().inv,...S().bank}).filter(id=>D.ITEMS[id]?.slot===slot&&Q.have(id)>0);
  const weapon=D.ITEMS[S().equip.weapon],spell=D.SPELLS.find(s=>s.id===S().spell),shots=weapon?.style==='ranged'?S().ammo.n:weapon?.style==='magic'?Math.floor(Q.have('rune')/(spell?.runes||1)):null;
  return `<div class="combat-gear">${shots!==null?'<p class="sm" data-b="combatreserve"></p>':''}${U.combatGearFocused?'':`<nav class="combat-gear-slots" aria-label="Equipment slots">${Q.SLOTS.map(k=>{const id=equippedId(k);return `<button class="btn ${slot===k?'on':''}" data-do="combatgearslot" data-a="${k}" aria-pressed="${slot===k}">${id?Q.itemIco(D.ITEMS[id]):ico(({head:'helm',body:'body',legs:'legs',shield:'shield',weapon:'sword',ring:'ring',amulet:'amulet',ammo:'arrow_ammo'})[k])}<span>${esc(Q.SLOT_NAMES[k])}</span><small>${id?esc(D.ITEMS[id].name):'Empty'}${k==='ammo'&&id?' · '+S().ammo.n:''}</small></button>`;}).join('')}</nav>`}<section><h3>${esc(Q.SLOT_NAMES[slot])}</h3><p>${current?'Equipped: '+esc(D.ITEMS[current].name):'Nothing equipped'} · Backpack and bank supplies</p><div class="combat-gear-options">${owned.map(id=>{const it=D.ITEMS[id],c=Q.canEquip(id);return `<article class="combat-gear-item">${Q.itemIco(it)}<div><b>${esc(it.name)}</b><small>${U.statLine(it.b)||''} · ${Q.have(id)} held</small>${U.gearPurpose?U.gearPurpose(it,false):''}${U.compareLine?U.compareLine(id):''}<small>${c.ok?'Ready':esc(c.why)}</small></div><button class="btn ${c.ok?'primary':''}" data-do="combatequip" data-a="${id}" ${c.ok?'':'disabled'}>Equip ${esc(it.name)}</button></article>`;}).join('')||'<p>No spare equipment for this slot. Your current gear stays equipped.</p>'}</div></section><p class="sm">Changing gear keeps the current encounter and running activity. A bow needs equipped arrows; a staff needs runes.</p></div>`;

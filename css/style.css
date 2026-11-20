@@ -4295,7 +4295,7 @@ html.calm .stage-track i{transition:none}@media(prefers-reduced-motion:reduce){.
 [data-tip][tabindex="0"]:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
 
 /* Combat's spare lower-left space is an always-visible loadout. Slot choice opens owned alternatives. */
-#view .combat-x .combat-equipped{flex:none;margin: auto 0 0!important;padding:10px!important;background:var(--panel);border:1px solid var(--line2);border-radius:12px}
+#view .combat-x .combat-equipped{flex:none;margin:0!important;padding:10px!important;background:var(--panel);border:1px solid var(--line2);border-radius:12px}
 .combat-equipped h3{font:600 14px var(--f-ui);margin:0 0 7px;color:var(--ink)}
 .combat-equipped-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
 .combat-equipped-slot{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;height:56px;padding:3px 0;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--ink);font:500 13px var(--f-ui)}
@@ -4340,4 +4340,35 @@ html.calm .stage-track i{transition:none}@media(prefers-reduced-motion:reduce){.
  html.short #view .combat-x .where .wh-area{padding:4px;gap:3px}
  html.short #view .combat-x .wh-areas{gap:4px}
  html.short #view .combat-x .wh-minis-h{display:none}
+}
+
+/* Combat, equipped panel (20 Nov 2026): it follows the places directly instead of sinking to the window's foot, and
+   takes the rest of the column. Spare height goes to the doll (taller slots, then the hero at 5x or 6x: whole-number
+   scales of the 24 x 32 figure) and a line of the worn gear's totals; the busiest town keeps the compact doll. */
+@media(min-width:861px){
+ #view .combat-x>.combat-targets>.combat-equipped{flex:1 1 auto;min-height:min-content;display:flex;flex-direction:column}
+ #view .combat-x .combat-equipped>.combat-equipped-grid{flex:1 1 auto;min-height:226px;display:flex!important;align-items:center;container-type:size}
+ html.short #view .combat-x .combat-equipped>.combat-equipped-grid{min-height:145px}
+ #view .combat-x .combat-equipped .paper-doll{width:100%;height:100%;max-height:340px;grid-template-rows:repeat(4,minmax(52px,1fr))}
+ html.short #view .combat-x .combat-equipped .paper-doll{grid-template-rows:repeat(4,minmax(34px,1fr))}
+ @container (min-height:300px){
+  #view .combat-x .combat-equipped .paper-doll .fig-img{width:120px!important;height:160px!important}
+  #view .combat-x .combat-equipped .paper-doll .combat-equipped-slot small{display:block}
+ }
+ @container (min-height:380px){#view .combat-x .combat-equipped .paper-doll .fig-img{width:144px!important;height:192px!important}}
+ @container (min-height:220px){html.short #view .combat-x .combat-equipped .paper-doll .fig-img{width:96px!important;height:128px!important}}
+ /* the doll beside the stage already names every slot, so a narrow header keeps only the chip's icon and count */
+ html.lw-1600 #view .combat-x .cx-eq-word{display:none}
+}
+.combat-equipped-totals{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;margin:8px 0 0;font:500 14px var(--f-ui);color:var(--mute)}
+.combat-equipped-totals:empty{display:none}
+.combat-equipped-totals>span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.combat-equipped-totals .ic{width:16px!important;height:16px!important}
+.combat-equipped-totals b{color:var(--ink);font-weight:600}
+.combat-equipped-totals i{font-style:normal}
+@media(min-width:861px){
+ /* short windows: the totals ride on the heading's line as icon and number, so the panel is no taller than before */
+ html.short #view .combat-x .combat-equipped{position:relative}
+ html.short .combat-equipped-totals{position:absolute;top:5px;right:8px;margin:0;gap:0 8px;flex-wrap:nowrap}
+ html.short .combat-equipped-totals i{display:none}
 }

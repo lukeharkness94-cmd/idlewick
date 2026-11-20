@@ -487,7 +487,7 @@ Crops and Livestock now have distinct original pixel emblems, warm field versus 
 
 ## Merge of the ChatGPT/Codex work (Nov 2026) and known test state
 - The story scenes, restoration banners, Beastmastery rework (assigned beasts, trap expeditions), farm estate and quest-flow changes were recovered from a ChatGPT sandbox copy (it had never been pushed), compared against `main`, and merged onto the current game. Hand-merged fixes: `tests/story.cjs` loads the skill data, `js/engine.js` tolerates main quests that unlock no skill, the tab count badge is 13px (readability floor), and the browser tests no longer hard-code `/usr/bin/chromium`.
-- `tests/story-ui.cjs` is stale beyond its restoration step: it expects the Hunter's-ledger claim to open a decision scene, which the current UI does not. It also fails the same way in the original ChatGPT copy. Rewrite it alongside the cutscene work below.
+- `tests/story-ui.cjs` was stale beyond its restoration step (it expected side-quest and discovery decisions to open scenes). Rewritten 20 Nov: the ledger and the ashen anvil decide inline, scene layout checks use a main-quest scene.
 - Codex's seven recommendations were all built afterwards: see "Codex's recommendations" below.
 
 ## Codex's recommendations, built (Nov 2026)
@@ -891,3 +891,9 @@ Reviewed the 16 commits from 5f9fcc1 to ad6b748 by playing a fresh hero, profili
 - **AGENTS.md:** superseded statements were replaced in place (top menu, combat layout D, Scale2x, default lettering, five card-size rules, model-only ladder notes, interactive tooltips, portrait clicks, story-ui), with a test-environment rule.
 
 Not changed, for the owner to decide: the shop shows a fresh hero all ten tool tiers of each family (showing fewer would need a disclosure, which the rules forbid); the title and opening stay dark while the game defaults to light parchment.
+
+### Follow-up, same day: combat column and the rest of the stale tests
+
+- **Combat, lower left:** the Equipped panel used `margin-top:auto` to sit at the foot of the column, leaving an empty band under the boss card early in the game. It now follows the boss card and takes the remaining height: slots grow (up to a cap), the worn hero steps up to 5× or 6× when the panel is tall enough (container queries, whole-number scales of the 24 × 32 figure), and a totals line shows the worn gear's Accuracy/Power (or Ranged/Arrows, or Magic) and Defence. In the busiest town at 1280 × 720 the panel keeps its earlier compact size; there the totals ride on the heading's line as icon and number. At page widths under 1600 the header's Equipment chip drops its word ("1/7"), so it no longer slides under the Guide button.
+- **Routes:** an item sold only in a town you have not reached now routes to that town's shop ("Cabbage seeds · Mossbarrow — Road not open yet") instead of to a rare drop from that town's creatures (cabbage seeds pointed at a 2.5% boar drop). The item-picture pass also skips any row that already has a route button, not only one to the same item (the farm's cabbage card had a second, circular route).
+- **The remaining stale tests**, confirmed failing on untouched `ad6b748` before any change: `story-ui` (side-quest and discovery decisions are inline; the conversation layout has no landscape; focus-ring colour transitions are not motion), `ux-roles` (tooltips list uses as "Where it’s used" icons; the boar is a Disruptor), `ux-update` (the defeat caption waits for the visible hit; Efficient Fieldwork; the seed route above), `ui-journeys` (Herbalism's first goals are on the Researched potions tab; counts read `0 / 5`).
