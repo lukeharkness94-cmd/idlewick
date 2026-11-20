@@ -37,10 +37,17 @@ Q.combatGrowth=(sk,from)=>{if(!['melee','ranged','magic'].includes(sk)||Q.weapon
 U.B.dps=e=>{const d=Q.damageEstimate();U.set(e,`${d.dps.toFixed(2)} DPS · ${Math.round(d.chance*100)}% hit · max ${d.max}`);};
 // Preserve the arena, training bars and equipment controls across consecutive opponents and level ticks.
 let encounterTimer;
+U.afterImpact=(fn,delay=0)=>{
+ const earliest=performance.now()+delay;
+ const run=()=>{const wait=Math.max(earliest,U.impactUntil||0)-performance.now();if(wait>1){setTimeout(run,wait);return;}
+  const flights=[...(U.impactFlights||[])];if(flights.length){Promise.allSettled(flights.map(a=>a.finished)).then(run);return;}fn();};
+ setTimeout(run,delay);
+};
 U.updateEncounter=()=>{
  if(U.view!=='combat'||!document.querySelector('.encounter-arena'))return;
  clearTimeout(encounterTimer);const wait=Math.max(0,(U.impactUntil||0)-performance.now());
  if(wait){encounterTimer=setTimeout(U.updateEncounter,wait+40);return;}
+ if(U.impactFlights?.size){Promise.allSettled([...U.impactFlights].map(a=>a.finished)).then(U.updateEncounter);return;}
  const temp=document.createElement('template');temp.innerHTML=U.V.combat();
  const old=document.querySelector('.encounter-arena>.side:last-child'),fresh=temp.content.querySelector('.encounter-arena>.side:last-child');
  if(old&&fresh&&old.querySelector('#av-foe')?.dataset.a!==fresh.querySelector('#av-foe')?.dataset.a)old.replaceWith(fresh);
@@ -51,7 +58,7 @@ U.updateEncounter=()=>{
  U.updateCombatHeader?.();U.collectProg();U.upd();
 };
 Q.on('splat',(side,text,kind,delay=0)=>{if(side==='foe'&&/^\d/.test(String(text))&&!kind.includes('miss')&&!Q.sim.on&&!Q.forecasting&&!calm())U.impactUntil=performance.now()+Math.max(0,delay-180)+(Q.battleTiming?.impact||390);});
-for(const key of ['fhp','fhptxt']){const bind=U.B[key];U.B[key]=(e,...a)=>{if(performance.now()<(U.impactUntil||0))return;bind(e,...a);};}
+for(const key of ['fhp','fhptxt']){const bind=U.B[key];U.B[key]=(e,...a)=>{if(performance.now()<(U.impactUntil||0)||U.impactFlights?.size)return;bind(e,...a);};}
 const render=U.render;
 U.render=(...args)=>{const result=render(...args);
  const summary=document.querySelector('.activity-caption .task-summary'),ingredients=summary?.querySelector('.recipe-ingredients');if(ingredients)summary.prepend(ingredients);

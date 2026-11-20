@@ -223,12 +223,25 @@ UI.V.gather = sk => {
 };
 
 /* open a page with one card chosen, in its category, scrolled into view and briefly highlighted */
+UI.revealCard = el => {
+  if(!el)return;
+  const behavior=matchMedia('(prefers-reduced-motion: reduce)').matches||S().settings.reduceFx?'auto':'smooth';
+  if(innerWidth<=860){el.scrollIntoView({block:'center',behavior});return;}
+  // Desktop is a fixed workspace: reveal the target inside its own catalogue, never scroll the shell.
+  for(let box=el.parentElement;box&&box!==document.body;box=box.parentElement){
+    if(box.id==='view')break;
+    if(!/auto|scroll/.test(getComputedStyle(box).overflowY)||box.scrollHeight<=box.clientHeight+1)continue;
+    const card=el.getBoundingClientRect(),area=box.getBoundingClientRect(),zoom=DQ.zoom||1;
+    const top=card.top<area.top?card.top-area.top:card.bottom>area.bottom?card.bottom-area.bottom:0;
+    if(top)box.scrollBy({top:top/zoom,behavior});break;
+  }
+};
 UI.focusTask = (page, id, tab, sk) => {
   if (DQ.data.RECIPES[id]) { const r = DQ.data.RECIPES[id], g = DQ.recipeGroup(r); sk = r.skill; tab = g.g; UI.tab[sk + 'sub'] = g.s || null; }
   if (tab) { UI.tab[sk || page] = tab; UI.tab[(sk || page) + 'ready'] = false; }
   UI.taskChoice[page] = id; UI.spot = { id, until: Date.now() + 2600 }; if (UI.view === page) UI.render(false); else DQ.go(page);
   setTimeout(() => { const el = document.querySelector(`.illustrated-card[data-b="${id}"]`); if (!el) return;
-    el.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); el.focus({ preventScroll: true }); }, 80);
+    UI.revealCard(el); el.focus({ preventScroll: true }); }, 80);
 };
 
 /* ---------- Recipe pages ---------- */

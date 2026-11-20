@@ -76,8 +76,8 @@ Q.heroUrl = Q.heroBustUrl;
 UI.portrait = (size = 48, cls = '') => `<span class="portrait px-portrait ${cls}" style="width:${size}px;height:${size}px"><img class="pxa" src="${Q.heroBustUrl(Q.S && Q.S.look)}" width="${size}" height="${size}" alt="Your hero"></span>`;
 /* combat: the hero and foe as whole sprites; attacks move the whole figure, hits flash */
 Q.battleHero = () => `<span class="battle-rig hero-rig px-hero encounter-hero" role="img" aria-label="Your equipped hero"><span class="rig-torso"><img class="pxa" src="${Q.heroFigureUrl(Q.S.look)}" width="144" height="192" alt="" draggable="false"></span></span>`;
-/* creatures are drawn facing right; in a fight they stand on the right, so they are mirrored to face the hero (the
-   chicken is the one drawn facing left already) */
+/* Battle enemies stand on the right. Mirror canonical right-facing art toward the hero;
+   explicit artFacing metadata supports any future left-facing drawing. */
 // Current code-drawn creatures, including the revised chicken, face right.
 Q.creatureFacing=id=>D.MON[id]?.artFacing||'right';
 Q.battleFoe = (m,known=true) => `<span class="battle-rig foe-rig px-foe" role="img" aria-label="${esc(known?m.name:'Unknown creature')} ready for battle" data-creature="${m.id}"><span class="foe-torso">${Q.creatureFacing(m.id)==='left' ? Q.artImage('creature', m.id, 192, known?'':'sil', known?m.name:'Unknown creature') : `<span class="foe-face">${Q.artImage('creature', m.id, 192, known?'':'sil', known?m.name:'Unknown creature')}</span>`}</span></span>`;

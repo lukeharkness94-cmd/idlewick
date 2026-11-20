@@ -356,5 +356,5 @@ html.calm .events .ev-result{animation:none}
  /* The catalogue retains the rune art; this duplicate scene gives way to the actual requirements. */
  .magic-runes .activity-scene{display:none}
 }
-.recipe-reveal-art :is(img,svg,.ic),.event-subject :is(img,svg,.ic){width:112px!important;height:112px!important;max-width:none;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 8px 12px #b6934a60)}
+.recipe-reveal-art :is(img,svg,.ic),.event-subject :is(img,svg,.ic){width:128px!important;height:128px!important;max-width:none;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 8px 12px #b6934a60)}
 .magic-runes .activity-choices .skill-shop-link{display:none}

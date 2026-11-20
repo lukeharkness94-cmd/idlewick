@@ -457,9 +457,9 @@ UI.init = () => {
   DQ.on('welcome', welcome);
   DQ.on('splat', (side, text, kind, delay) => {
     const box = $(side === 'you' ? '#sp-you' : '#sp-foe'); if (!box || document.hidden) return;
-    const el = document.createElement('div'); el.className = 'splat ' + kind; el.textContent = text; const impact = Math.max(0,(delay||0)-180) + (DQ.battleTiming?.impact||390); el.style.animationDelay = impact + 'ms'; box.appendChild(el); setTimeout(() => el.remove(), 1400 + impact);
+    const impact=Math.max(0,(delay||0)-180)+(DQ.battleTiming?.impact||390),show=()=>{if(!box.isConnected||document.hidden)return;const el=document.createElement('div');el.className='splat '+kind;el.textContent=text;box.appendChild(el);setTimeout(()=>el.remove(),1400);};if(side==='foe')UI.afterImpact(show,impact);else setTimeout(show,impact);
   });
-  DQ.on('slain', () => { const foe=$('#av-foe');setTimeout(()=>{if(foe?.isConnected)DQ.flash(foe,'slain');},DQ.battleTiming?.impact||390); });
+  DQ.on('slain', () => { const foe=$('#av-foe');UI.afterImpact(()=>{if(foe?.isConnected)DQ.flash(foe,'slain');},DQ.battleTiming?.impact||390); });
   THEME(); UI.renderHud(); UI.renderRail(); UI.render(true); requestAnimationFrame(UI.frame);
 };
 DQ.on('itemfound',()=>{if(['cooking','smithing','crafting','carpentry','brewery','enchanting','research','projects','magic','bestiary'].includes(UI.view))UI.refresh();});

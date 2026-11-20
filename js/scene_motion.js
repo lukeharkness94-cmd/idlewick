@@ -18,6 +18,7 @@ function effect(scene,cls,html,x,y){
 function fly(el,frames,options){
  const a=animate(el,frames,options);if(!a){el.remove();return;}const finish=a.onfinish,cancel=a.oncancel;
  a.onfinish=()=>{finish?.();el.remove();};a.oncancel=()=>{cancel?.();el.remove();};
+ return a;
 }
 function point(el,scene){const a=el.getBoundingClientRect(),b=scene.getBoundingClientRect();return {x:(a.left-b.left+a.width/2)/(window.DQ.zoom||1),y:(a.top-b.top+a.height*.55)/(window.DQ.zoom||1)};}
 function sparks(scene,x,y,col,count=4){
@@ -38,7 +39,8 @@ Q.on('splat',(side,text,kind,delay=0)=>{
   const pose=style==='melee'?[{transform:'translateX(0)'},{transform:`translateX(${-dir*5}px) rotate(${-dir*3}deg)`,offset:.22},{transform:`translateX(${dir*20}px) rotate(${dir*5}deg)`,offset:.48},{transform:'translateX(0)'}]:[{transform:'translateY(0)'},{transform:'translateY(-3px)',offset:.3},{transform:'translateY(0)'}];
   Q.poseBattle?.(actor,style,'attack',animate);
   animate(actor,pose.map(frame=>({...frame,easing:'cubic-bezier(.22,.7,.3,1)'})),{duration:Q.battleTiming?.duration||720,easing:'linear'});
-  const timing=Q.battleTiming||{release:210,impact:390};
+  const timing=Q.battleTiming||{release:210,impact:390};let impactAt=performance.now()+timing.impact,projectileFlight;
+  if(side==='foe')UI.impactUntil=Math.max(UI.impactUntil||0,impactAt);
   setTimeout(()=>{
    if(!arena.isConnected||calm()||document.hidden)return;
    const hand=actor.querySelector(style==='magic'?'.rig-held-weapon':'.rig-hand-anchor')||actor;
@@ -47,20 +49,24 @@ Q.on('splat',(side,text,kind,delay=0)=>{
     const projectile=effect(arena,'combat-projectile '+style,style==='ranged'?Q.ico('arrow_ammo'):'',launch.x,launch.y);
     if(style==='magic')projectile.style.setProperty('--spell-color',Q.fight?.lastEl==='fire'?'#ebaa65':Q.fight?.lastEl==='frost'?'#a8d8e2':'#c3ace7');
     const angle=Math.atan2(end.y-launch.y,end.x-launch.x)*180/Math.PI;
-    fly(projectile,[{transform:`translate(-50%,-50%) rotate(${angle+45}deg)`,opacity:1},{transform:`translate(calc(-50% + ${end.x-launch.x}px),calc(-50% + ${end.y-launch.y}px)) rotate(${angle+45}deg)`,opacity:1}],{duration:timing.impact-timing.release,easing:'linear'});
+    const flight=projectileFlight=fly(projectile,[{transform:`translate(-50%,-50%) rotate(${angle+45}deg)`,opacity:1},{transform:`translate(calc(-50% + ${end.x-launch.x}px),calc(-50% + ${end.y-launch.y}px)) rotate(${angle+45}deg)`,opacity:1}],{duration:timing.impact-timing.release,easing:'linear'});
+    impactAt=Math.max(impactAt,performance.now()+timing.impact-timing.release);
+    if(side==='foe'&&flight){UI.impactUntil=Math.max(UI.impactUntil||0,impactAt);const flights=UI.impactFlights||=new Set();flights.add(flight);const done=()=>flights.delete(flight);flight.finished.then(done,done);}
    }else{
     const slash=effect(arena,'combat-slash','',end.x,end.y);
     fly(slash,[{transform:'translate(-50%,-50%) rotate(-65deg) scale(.4)',opacity:0},{transform:'translate(-50%,-50%) rotate(15deg) scale(1)',opacity:1,offset:.5},{transform:'translate(-50%,-50%) rotate(80deg) scale(1.1)',opacity:0}],{duration:260,easing:'cubic-bezier(.2,.7,.3,1)'});
    }
   },timing.release);
-  setTimeout(()=>{
+  const impact=()=>{
    if(!arena.isConnected||calm()||document.hidden)return;
+   const remaining=impactAt-performance.now();if(remaining>1){setTimeout(impact,remaining);return;}
+   if(projectileFlight&&['running','paused'].includes(projectileFlight.playState)){projectileFlight.finished.then(impact,()=>{});return;}
    Q.poseBattle?.(target,style,landed?'hit':'miss',animate);
    if(landed){
     animate(target,[{transform:'translateX(0)',filter:'brightness(1)'},{transform:`translateX(${dir*7}px)`,filter:'brightness(1.35)',offset:.2},{transform:`translateX(${-dir*3}px)`,filter:'brightness(1)',offset:.5},{transform:'translateX(0)',filter:'brightness(1)'}],{duration:310,easing:'cubic-bezier(.22,.7,.3,1)'});
     sparks(arena,end.x,end.y,side==='you'?'#d99882':'#e2cca0',String(text).includes('!')?6:4);
    }else animate(target,[{transform:'translateX(0)'},{transform:`translateX(${dir*9}px)`,offset:.45},{transform:'translateX(0)'}],{duration:350,easing:'cubic-bezier(.22,.7,.3,1)'});
-  },timing.impact);
+  };setTimeout(impact,timing.impact);
  },Math.max(0,delay-180));
 });
 Q.on('workcycle',event=>{

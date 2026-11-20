@@ -31,7 +31,7 @@ Q.on('foedefeated',m=>{const show=()=>{if(UI.view!=='combat'||Q.sim.on)return;co
  const label=document.createElement('div');label.className='defeat-caption';label.textContent=m.name+' defeated';label.setAttribute('role','status');label.style.left=pagePx(rect.left+rect.width/2)+'px';label.style.top=pagePx(Math.max(120,rect.top-24))+'px';layer.appendChild(label);setTimeout(()=>label.remove(),1100);
  if(calm())return;const ghost=foe.cloneNode(true);ghost.removeAttribute('id');ghost.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));ghost.className='foe-death-ghost';Object.assign(ghost.style,{left:pagePx(rect.left)+'px',top:pagePx(rect.top)+'px',width:pagePx(rect.width)+'px',height:pagePx(rect.height)+'px'});layer.appendChild(ghost);ghost.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(22px) rotate(8deg)'}],{duration:480,easing:'ease-in',fill:'forwards'});setTimeout(()=>ghost.remove(),510);
  requestAnimationFrame(()=>{const next=document.getElementById('av-foe');if(next)next.animate([{opacity:0},{opacity:0,offset:.35},{opacity:1}],{duration:650});});
-};setTimeout(show,Math.max(0,(UI.impactUntil||0)-performance.now()));
+};UI.afterImpact(show);
 });
 /* One Scholarship family card, with visible rank buttons and the selected rank's unchanged cost/action. */
 const research0=UI.V.research;UI.researchRanks={};

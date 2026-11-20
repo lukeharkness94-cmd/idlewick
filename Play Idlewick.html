@@ -5088,7 +5088,7 @@ html.calm .events .ev-result{animation:none}
  /* The catalogue retains the rune art; this duplicate scene gives way to the actual requirements. */
  .magic-runes .activity-scene{display:none}
 }
-.recipe-reveal-art :is(img,svg,.ic),.event-subject :is(img,svg,.ic){width:112px!important;height:112px!important;max-width:none;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 8px 12px #b6934a60)}
+.recipe-reveal-art :is(img,svg,.ic),.event-subject :is(img,svg,.ic){width:128px!important;height:128px!important;max-width:none;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 8px 12px #b6934a60)}
 .magic-runes .activity-choices .skill-shop-link{display:none}
 </style>
 
@@ -13733,12 +13733,25 @@ UI.V.gather = sk => {
 };
 
 /* open a page with one card chosen, in its category, scrolled into view and briefly highlighted */
+UI.revealCard = el => {
+  if(!el)return;
+  const behavior=matchMedia('(prefers-reduced-motion: reduce)').matches||S().settings.reduceFx?'auto':'smooth';
+  if(innerWidth<=860){el.scrollIntoView({block:'center',behavior});return;}
+  // Desktop is a fixed workspace: reveal the target inside its own catalogue, never scroll the shell.
+  for(let box=el.parentElement;box&&box!==document.body;box=box.parentElement){
+    if(box.id==='view')break;
+    if(!/auto|scroll/.test(getComputedStyle(box).overflowY)||box.scrollHeight<=box.clientHeight+1)continue;
+    const card=el.getBoundingClientRect(),area=box.getBoundingClientRect(),zoom=DQ.zoom||1;
+    const top=card.top<area.top?card.top-area.top:card.bottom>area.bottom?card.bottom-area.bottom:0;
+    if(top)box.scrollBy({top:top/zoom,behavior});break;
+  }
+};
 UI.focusTask = (page, id, tab, sk) => {
   if (DQ.data.RECIPES[id]) { const r = DQ.data.RECIPES[id], g = DQ.recipeGroup(r); sk = r.skill; tab = g.g; UI.tab[sk + 'sub'] = g.s || null; }
   if (tab) { UI.tab[sk || page] = tab; UI.tab[(sk || page) + 'ready'] = false; }
   UI.taskChoice[page] = id; UI.spot = { id, until: Date.now() + 2600 }; if (UI.view === page) UI.render(false); else DQ.go(page);
   setTimeout(() => { const el = document.querySelector(`.illustrated-card[data-b="${id}"]`); if (!el) return;
-    el.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); el.focus({ preventScroll: true }); }, 80);
+    UI.revealCard(el); el.focus({ preventScroll: true }); }, 80);
 };
 
 /* ---------- Recipe pages ---------- */
@@ -14375,9 +14388,9 @@ UI.init = () => {
   DQ.on('welcome', welcome);
   DQ.on('splat', (side, text, kind, delay) => {
     const box = $(side === 'you' ? '#sp-you' : '#sp-foe'); if (!box || document.hidden) return;
-    const el = document.createElement('div'); el.className = 'splat ' + kind; el.textContent = text; const impact = Math.max(0,(delay||0)-180) + (DQ.battleTiming?.impact||390); el.style.animationDelay = impact + 'ms'; box.appendChild(el); setTimeout(() => el.remove(), 1400 + impact);
+    const impact=Math.max(0,(delay||0)-180)+(DQ.battleTiming?.impact||390),show=()=>{if(!box.isConnected||document.hidden)return;const el=document.createElement('div');el.className='splat '+kind;el.textContent=text;box.appendChild(el);setTimeout(()=>el.remove(),1400);};if(side==='foe')UI.afterImpact(show,impact);else setTimeout(show,impact);
   });
-  DQ.on('slain', () => { const foe=$('#av-foe');setTimeout(()=>{if(foe?.isConnected)DQ.flash(foe,'slain');},DQ.battleTiming?.impact||390); });
+  DQ.on('slain', () => { const foe=$('#av-foe');UI.afterImpact(()=>{if(foe?.isConnected)DQ.flash(foe,'slain');},DQ.battleTiming?.impact||390); });
   THEME(); UI.renderHud(); UI.renderRail(); UI.render(true); requestAnimationFrame(UI.frame);
 };
 DQ.on('itemfound',()=>{if(['cooking','smithing','crafting','carpentry','brewery','enchanting','research','projects','magic','bestiary'].includes(UI.view))UI.refresh();});
@@ -17365,6 +17378,7 @@ function effect(scene,cls,html,x,y){
 function fly(el,frames,options){
  const a=animate(el,frames,options);if(!a){el.remove();return;}const finish=a.onfinish,cancel=a.oncancel;
  a.onfinish=()=>{finish?.();el.remove();};a.oncancel=()=>{cancel?.();el.remove();};
+ return a;
 }
 function point(el,scene){const a=el.getBoundingClientRect(),b=scene.getBoundingClientRect();return {x:(a.left-b.left+a.width/2)/(window.DQ.zoom||1),y:(a.top-b.top+a.height*.55)/(window.DQ.zoom||1)};}
 function sparks(scene,x,y,col,count=4){
@@ -17385,7 +17399,8 @@ Q.on('splat',(side,text,kind,delay=0)=>{
   const pose=style==='melee'?[{transform:'translateX(0)'},{transform:`translateX(${-dir*5}px) rotate(${-dir*3}deg)`,offset:.22},{transform:`translateX(${dir*20}px) rotate(${dir*5}deg)`,offset:.48},{transform:'translateX(0)'}]:[{transform:'translateY(0)'},{transform:'translateY(-3px)',offset:.3},{transform:'translateY(0)'}];
   Q.poseBattle?.(actor,style,'attack',animate);
   animate(actor,pose.map(frame=>({...frame,easing:'cubic-bezier(.22,.7,.3,1)'})),{duration:Q.battleTiming?.duration||720,easing:'linear'});
-  const timing=Q.battleTiming||{release:210,impact:390};
+  const timing=Q.battleTiming||{release:210,impact:390};let impactAt=performance.now()+timing.impact,projectileFlight;
+  if(side==='foe')UI.impactUntil=Math.max(UI.impactUntil||0,impactAt);
   setTimeout(()=>{
    if(!arena.isConnected||calm()||document.hidden)return;
    const hand=actor.querySelector(style==='magic'?'.rig-held-weapon':'.rig-hand-anchor')||actor;
@@ -17394,20 +17409,24 @@ Q.on('splat',(side,text,kind,delay=0)=>{
     const projectile=effect(arena,'combat-projectile '+style,style==='ranged'?Q.ico('arrow_ammo'):'',launch.x,launch.y);
     if(style==='magic')projectile.style.setProperty('--spell-color',Q.fight?.lastEl==='fire'?'#ebaa65':Q.fight?.lastEl==='frost'?'#a8d8e2':'#c3ace7');
     const angle=Math.atan2(end.y-launch.y,end.x-launch.x)*180/Math.PI;
-    fly(projectile,[{transform:`translate(-50%,-50%) rotate(${angle+45}deg)`,opacity:1},{transform:`translate(calc(-50% + ${end.x-launch.x}px),calc(-50% + ${end.y-launch.y}px)) rotate(${angle+45}deg)`,opacity:1}],{duration:timing.impact-timing.release,easing:'linear'});
+    const flight=projectileFlight=fly(projectile,[{transform:`translate(-50%,-50%) rotate(${angle+45}deg)`,opacity:1},{transform:`translate(calc(-50% + ${end.x-launch.x}px),calc(-50% + ${end.y-launch.y}px)) rotate(${angle+45}deg)`,opacity:1}],{duration:timing.impact-timing.release,easing:'linear'});
+    impactAt=Math.max(impactAt,performance.now()+timing.impact-timing.release);
+    if(side==='foe'&&flight){UI.impactUntil=Math.max(UI.impactUntil||0,impactAt);const flights=UI.impactFlights||=new Set();flights.add(flight);const done=()=>flights.delete(flight);flight.finished.then(done,done);}
    }else{
     const slash=effect(arena,'combat-slash','',end.x,end.y);
     fly(slash,[{transform:'translate(-50%,-50%) rotate(-65deg) scale(.4)',opacity:0},{transform:'translate(-50%,-50%) rotate(15deg) scale(1)',opacity:1,offset:.5},{transform:'translate(-50%,-50%) rotate(80deg) scale(1.1)',opacity:0}],{duration:260,easing:'cubic-bezier(.2,.7,.3,1)'});
    }
   },timing.release);
-  setTimeout(()=>{
+  const impact=()=>{
    if(!arena.isConnected||calm()||document.hidden)return;
+   const remaining=impactAt-performance.now();if(remaining>1){setTimeout(impact,remaining);return;}
+   if(projectileFlight&&['running','paused'].includes(projectileFlight.playState)){projectileFlight.finished.then(impact,()=>{});return;}
    Q.poseBattle?.(target,style,landed?'hit':'miss',animate);
    if(landed){
     animate(target,[{transform:'translateX(0)',filter:'brightness(1)'},{transform:`translateX(${dir*7}px)`,filter:'brightness(1.35)',offset:.2},{transform:`translateX(${-dir*3}px)`,filter:'brightness(1)',offset:.5},{transform:'translateX(0)',filter:'brightness(1)'}],{duration:310,easing:'cubic-bezier(.22,.7,.3,1)'});
     sparks(arena,end.x,end.y,side==='you'?'#d99882':'#e2cca0',String(text).includes('!')?6:4);
    }else animate(target,[{transform:'translateX(0)'},{transform:`translateX(${dir*9}px)`,offset:.45},{transform:'translateX(0)'}],{duration:350,easing:'cubic-bezier(.22,.7,.3,1)'});
-  },timing.impact);
+  };setTimeout(impact,timing.impact);
  },Math.max(0,delay-180));
 });
 Q.on('workcycle',event=>{
@@ -18559,7 +18578,7 @@ const lessons={
   cooking:{title:'Cooking',text:'Choose a recipe and your character will keep cooking while the ingredients last. Food can burn, but a higher Cooking level makes that less likely.',towards:'Cooked food restores health. Auto-eat can use food from your backpack or bank during a fight.',goal:'Cook some of the shrimp you’ve caught, then check your food supply before going into combat.',art:['item','shrimp']},
   smithing:{title:'Smithing',text:'Smelt ore into bars first, then choose a recipe to forge those bars into equipment or tools. The material tiles show what each recipe still needs.',towards:'Smithing supplies weapons, armour, tools and fittings used by several other skills.',goal:'Try smelting bronze from copper and tin, then look for a useful item you can make with it.',art:['item','bar_bronze']},
   crafting:{title:'Crafting',text:'Crafting lets you work hides, wood, cloth and gems into useful equipment. Choose a recipe and gather its ingredients; the work repeats while you have enough supplies.',towards:'You can make bows, staves, armour, jewellery and traps. Several of these help you unlock or improve other skills.',goal:'Try making string from cowhide, then use string and logs to make wooden traps.',art:['item','leather_vest']},
-  magic:{title:'Magic',text:'Equip a staff to use combat spells, or choose Alchemy to turn an owned item into coins. Both activities need Arcane runes, so check your supply first.',towards:'Spells deal different types of damage. A creature’s field guide can help you choose a spell that suits the fight.',goal:'Pick a spell you can cast with your current level and supplies, then prepare for a suitable fight.',art:['item','rune']},
+  magic:{title:'Magic',text:'Equip a staff and choose a spell in Spellbook to cast automatically in combat. Runes lets you make casting supplies from copper and logs at Magic 1; Alchemy turns spare items into coins from Magic 16.',towards:'Spells deal different types of damage. A creature’s field guide can help you choose a spell that suits the fight.',goal:'Once you have a mining pick, gather 2 copper ore and 2 logs for a Copper rune batch. Choose a spell you can cast, then prepare for a suitable fight.',art:['item','rune']},
   combat:{title:'Combat',text:'Choose an area to explore. You’ll encounter its creatures at the odds shown, and your character will fight automatically until you retreat or a stopping rule applies.',towards:'Fights build your combat skills and provide loot. Defeating the regional boss opens the road to the next town.',goal:'Prepare food and equipment, then try the Meadow Path. You can retreat if you need more supplies.',art:['creature','chicken']},
   ranged:{title:'Ranged combat',text:'Equip a bow and arrows to fight at range. Arrows are used as you attack, so remember to check the quiver before setting out.',towards:'Bows deal piercing damage, which is useful against creatures with that weakness.',goal:'Equip a bow and matching arrows, then choose a fight that suits your current strength.',art:['item','bow_normal']}
 };
@@ -19410,8 +19429,8 @@ Q.heroUrl = Q.heroBustUrl;
 UI.portrait = (size = 48, cls = '') => `<span class="portrait px-portrait ${cls}" style="width:${size}px;height:${size}px"><img class="pxa" src="${Q.heroBustUrl(Q.S && Q.S.look)}" width="${size}" height="${size}" alt="Your hero"></span>`;
 /* combat: the hero and foe as whole sprites; attacks move the whole figure, hits flash */
 Q.battleHero = () => `<span class="battle-rig hero-rig px-hero encounter-hero" role="img" aria-label="Your equipped hero"><span class="rig-torso"><img class="pxa" src="${Q.heroFigureUrl(Q.S.look)}" width="144" height="192" alt="" draggable="false"></span></span>`;
-/* creatures are drawn facing right; in a fight they stand on the right, so they are mirrored to face the hero (the
-   chicken is the one drawn facing left already) */
+/* Battle enemies stand on the right. Mirror canonical right-facing art toward the hero;
+   explicit artFacing metadata supports any future left-facing drawing. */
 // Current code-drawn creatures, including the revised chicken, face right.
 Q.creatureFacing=id=>D.MON[id]?.artFacing||'right';
 Q.battleFoe = (m,known=true) => `<span class="battle-rig foe-rig px-foe" role="img" aria-label="${esc(known?m.name:'Unknown creature')} ready for battle" data-creature="${m.id}"><span class="foe-torso">${Q.creatureFacing(m.id)==='left' ? Q.artImage('creature', m.id, 192, known?'':'sil', known?m.name:'Unknown creature') : `<span class="foe-face">${Q.artImage('creature', m.id, 192, known?'':'sil', known?m.name:'Unknown creature')}</span>`}</span></span>`;
@@ -20161,7 +20180,7 @@ Q.on('foedefeated',m=>{const show=()=>{if(UI.view!=='combat'||Q.sim.on)return;co
  const label=document.createElement('div');label.className='defeat-caption';label.textContent=m.name+' defeated';label.setAttribute('role','status');label.style.left=pagePx(rect.left+rect.width/2)+'px';label.style.top=pagePx(Math.max(120,rect.top-24))+'px';layer.appendChild(label);setTimeout(()=>label.remove(),1100);
  if(calm())return;const ghost=foe.cloneNode(true);ghost.removeAttribute('id');ghost.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));ghost.className='foe-death-ghost';Object.assign(ghost.style,{left:pagePx(rect.left)+'px',top:pagePx(rect.top)+'px',width:pagePx(rect.width)+'px',height:pagePx(rect.height)+'px'});layer.appendChild(ghost);ghost.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(22px) rotate(8deg)'}],{duration:480,easing:'ease-in',fill:'forwards'});setTimeout(()=>ghost.remove(),510);
  requestAnimationFrame(()=>{const next=document.getElementById('av-foe');if(next)next.animate([{opacity:0},{opacity:0,offset:.35},{opacity:1}],{duration:650});});
-};setTimeout(show,Math.max(0,(UI.impactUntil||0)-performance.now()));
+};UI.afterImpact(show);
 });
 /* One Scholarship family card, with visible rank buttons and the selected rank's unchanged cost/action. */
 const research0=UI.V.research;UI.researchRanks={};
@@ -21970,7 +21989,7 @@ Q.heroTitle=()=>typeof S().title==='string'&&S().title.startsWith('collection:')
 U.DO.collectiontitle=id=>{if(!Q.collectionTitleEligible(id))return;const before=S().title;Q.setTitle(before==='collection:'+id?'':'collection:'+id);if(!Q.save()){S().title=before;Q.emit('title');}U.renderHud();U.render(false);};
 if(U.V.museum){const museum0=U.V.museum;U.V.museum=()=>museum0().replace('</aside>',`<div class="collection-titles"><h3>Collection titles</h3>${Object.entries(collectionTitles).map(([id,label])=>`<button class="btn" data-do="collectiontitle" data-a="${id}" ${Q.collectionTitleEligible(id)?'':'disabled'}>${S().title==='collection:'+id?'Wearing ':''}${label}</button><small>${id==='curator'?'Finish any museum wing':'Record all eight regional surveys'}</small>`).join('')}</div></aside>`);}
 // Both new skill workspaces reuse the normal recipe UI, exact source routes and finite-worker links.
-U.DO.crossstudy=id=>{const t=D.TECH[id];if(!t)return;U.tab.researchChoice=id;U.researchRanks=U.researchRanks||{};U.researchRanks[t.br+':'+t.name.replace(/\s+(I|II|III|IV)$/,'')]=id;Q.go('research');let el=document.querySelector('[data-study="'+id+'"]');if(innerWidth<=860&&el){const grid=el.closest('.scholarship-grid'),child=[...grid.children].find(e=>e===el||e.contains(el));U.researchPhoneMode='projects';U.researchPhonePage=[...grid.children].indexOf(child);U.render(false);el=document.querySelector('[data-study="'+id+'"]');}el?.scrollIntoView({block:'center',behavior:'instant'});};
+U.DO.crossstudy=id=>{const t=D.TECH[id];if(!t)return;U.tab.researchChoice=id;U.researchRanks=U.researchRanks||{};U.researchRanks[t.br+':'+t.name.replace(/\s+(I|II|III|IV)$/,'')]=id;Q.go('research');let el=document.querySelector('[data-study="'+id+'"]');if(innerWidth<=860&&el){const grid=el.closest('.scholarship-grid'),child=[...grid.children].find(e=>e===el||e.contains(el));U.researchPhoneMode='projects';U.researchPhonePage=[...grid.children].indexOf(child);U.render(false);el=document.querySelector('[data-study="'+id+'"]');}U.revealCard(el);};
 if(U.openMenuAction){const action0=U.openMenuAction;U.openMenuAction=t=>{if(t?.page==='research'){U.DO.crossstudy(t.id);return true;}return action0(t);};}
 U.DO.crossguild=()=>U.openGuild?.('enchanting');
 U.DO.crossmerchant=()=>U.focusTask('thieving','merchant',null,'thieving');
@@ -22314,10 +22333,17 @@ Q.combatGrowth=(sk,from)=>{if(!['melee','ranged','magic'].includes(sk)||Q.weapon
 U.B.dps=e=>{const d=Q.damageEstimate();U.set(e,`${d.dps.toFixed(2)} DPS · ${Math.round(d.chance*100)}% hit · max ${d.max}`);};
 // Preserve the arena, training bars and equipment controls across consecutive opponents and level ticks.
 let encounterTimer;
+U.afterImpact=(fn,delay=0)=>{
+ const earliest=performance.now()+delay;
+ const run=()=>{const wait=Math.max(earliest,U.impactUntil||0)-performance.now();if(wait>1){setTimeout(run,wait);return;}
+  const flights=[...(U.impactFlights||[])];if(flights.length){Promise.allSettled(flights.map(a=>a.finished)).then(run);return;}fn();};
+ setTimeout(run,delay);
+};
 U.updateEncounter=()=>{
  if(U.view!=='combat'||!document.querySelector('.encounter-arena'))return;
  clearTimeout(encounterTimer);const wait=Math.max(0,(U.impactUntil||0)-performance.now());
  if(wait){encounterTimer=setTimeout(U.updateEncounter,wait+40);return;}
+ if(U.impactFlights?.size){Promise.allSettled([...U.impactFlights].map(a=>a.finished)).then(U.updateEncounter);return;}
  const temp=document.createElement('template');temp.innerHTML=U.V.combat();
  const old=document.querySelector('.encounter-arena>.side:last-child'),fresh=temp.content.querySelector('.encounter-arena>.side:last-child');
  if(old&&fresh&&old.querySelector('#av-foe')?.dataset.a!==fresh.querySelector('#av-foe')?.dataset.a)old.replaceWith(fresh);
@@ -22328,7 +22354,7 @@ U.updateEncounter=()=>{
  U.updateCombatHeader?.();U.collectProg();U.upd();
 };
 Q.on('splat',(side,text,kind,delay=0)=>{if(side==='foe'&&/^\d/.test(String(text))&&!kind.includes('miss')&&!Q.sim.on&&!Q.forecasting&&!calm())U.impactUntil=performance.now()+Math.max(0,delay-180)+(Q.battleTiming?.impact||390);});
-for(const key of ['fhp','fhptxt']){const bind=U.B[key];U.B[key]=(e,...a)=>{if(performance.now()<(U.impactUntil||0))return;bind(e,...a);};}
+for(const key of ['fhp','fhptxt']){const bind=U.B[key];U.B[key]=(e,...a)=>{if(performance.now()<(U.impactUntil||0)||U.impactFlights?.size)return;bind(e,...a);};}
 const render=U.render;
 U.render=(...args)=>{const result=render(...args);
  const summary=document.querySelector('.activity-caption .task-summary'),ingredients=summary?.querySelector('.recipe-ingredients');if(ingredients)summary.prepend(ingredients);
