@@ -36,7 +36,7 @@ Q.itemNavigation=id=>{
 };
 const itemArt=Q.itemIco;Q.itemIco=it=>{const h=itemArt(it);return it?h.replace('<img ',`<img data-tip="item:${it.id}" `):h;};
 const prepare=Q.prepareTips;Q.prepareTips=root=>{root?.querySelectorAll('[data-tip^="item:"]').forEach(e=>{if(e.closest('.blackout,.sil,.choice-art:has(.blackout)'))return;const b=e.closest('button');if(b&&!b.dataset.tip)b.dataset.tip=e.dataset.tip;});prepare?.(root);};
-U.unlockCompactLabel=r=>{const[k,a]=r.stat.split(':');return r.item?D.ITEMS[r.item].name:k==='hero'?'Hero level':k==='combat'?'Combat level':k==='skill'?D.SK[a].name:k==='visit'?D.TOWN[a].name:k==='tool'?D.ITEMS['tool_'+Q.toolKey(a)+'_1'].name:({craft:'Items crafted',smith:'Items smithed',harvest:'Crops harvested',kill:'Victories',catch:'Fish caught',chop:'Gathering actions',beasts:'Creatures studied'})[k]||Q.reqLabel(r);};
+U.unlockCompactLabel=r=>{const[k,a]=r.stat.split(':');return r.item?D.ITEMS[r.item].name:k==='hero'?'Hero level':k==='combat'?'Combat level':k==='skill'?D.SK[a].name:k==='visit'?D.TOWN[a].name:k==='tool'?D.ITEMS['tool_'+Q.toolKey(a)+'_'+D.TOOL_ORDER[0]].name:({craft:'Items crafted',smith:'Items smithed',harvest:'Crops harvested',kill:'Victories',catch:'Fish caught',chop:'Gathering actions',beasts:'Creatures studied'})[k]||Q.reqLabel(r);};
 const old=Q.tips.item;
 Q.tips.item=id=>{
  const raw=old(id);if(!raw)return raw;const t=document.createElement('template');t.innerHTML=raw;

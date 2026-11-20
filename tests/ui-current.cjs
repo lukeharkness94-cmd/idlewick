@@ -98,10 +98,10 @@ const fs=require('node:fs');
   assert.equal(await page.locator('.encounter-arena [data-prog]').count(),0);
   await page.evaluate(()=>{DQ.ui.questTab='available';DQ.go('quests');DQ.ui.render(false);});
   for(let i=0;i<2;i++){
-   await page.evaluate(()=>{for(let k=0;k<4;k++)DQ.closeModal&&DQ.closeModal();}); /* a story scene may still be open from earlier steps */
+   await page.evaluate(()=>{for(let k=0;k<4;k++)DQ.closeModal&&DQ.closeModal();const q=DQ.data.QUESTS.find(q=>DQ.questState(q)==='new');DQ.ui.tab.questSelected=q&&q.id;DQ.ui.render(false);}); /* a story scene may still be open from earlier steps; Current lists quests under way first, so pick a new offer */
    const accept=page.locator('#view [data-do="qstart"]').first();
    const id=await accept.getAttribute('data-a');await accept.click();await page.evaluate(()=>{for(let k=0;k<4;k++)DQ.closeModal&&DQ.closeModal();}); /* accepting a main quest opens its skippable story scene */
-   assert.equal(await page.evaluate(()=>DQ.ui.questTab),'available');
+   assert.equal(await page.evaluate(()=>DQ.ui.questTab),'current');
    assert.ok(await page.evaluate(id=>['active','ready'].includes(DQ.questState(DQ.data.QM[id])),id));
   }
   await page.evaluate(()=>{DQ.go('research');});

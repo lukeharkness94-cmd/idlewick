@@ -545,7 +545,7 @@ D.QUESTS = [
   Q('hungry_cook', 'willowbrook', 'The Hungry Cook', 'Mabel the Cook', 3, null, 'I’ve promised supper to the families whose farms were raided, love. Most of them are bringing bread or potatoes, which leaves me to sort out the fish. Start by cooking eight shrimp. We’ll get something warm on the table, and then perhaps everyone will stop trying to solve their troubles on an empty stomach.',
     [{ ev: 'cook', key: 'shrimp', n: 8, label: 'Cook 8 shrimp' }], { xp: { cooking: 350 }, coins: 150 }),
   Q('miners_pick', 'willowbrook', "A Miner's Pick", 'Old Brannoc', 6, null, 'Brannoc lost his pickaxe and his patience. Show him how it is done.',
-    [{ ev: 'mine', key: 'copper', n: 6, label: 'Mine 6 copper ore' }, { ev: 'mine', key: 'tin', n: 6, label: 'Mine 6 tin ore' }], { xp: { mining: 300 }, coins: 150, items: { tool_pick_1: 1 } }),
+    [{ ev: 'mine', key: 'copper', n: 6, label: 'Mine 6 copper ore' }, { ev: 'mine', key: 'tin', n: 6, label: 'Mine 6 tin ore' }], { xp: { mining: 300 }, coins: 150, items: { 'tool_pick_0.5': 1 } }),
   Q('chiefs_end', 'willowbrook', "The Chief's Last Stand", 'Sergeant Orrin', 6, 'goblin_menace', 'Grubnash has dug himself into the hill fort and decided that makes him a king. His goblins are using it as a base for the farm raids. We need him out of there. You need combat level 8 to face him, and I’d take plenty of food. Watch for his war cry; he wants you frightened enough to make a mistake.',
     [{ ev: 'boss', key: 'grubnash', n: 1, label: 'Defeat Grubnash the Goblin Chief' }], { xp: { attack: 800, strength: 800, defence: 400 }, coins: 400 }),
 

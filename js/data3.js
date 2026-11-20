@@ -162,8 +162,13 @@ for (let t = 1; t <= 5; t++) {
 const D=window.DQ.data, add=r=>{D.RECIPES[r.id]=r;D.RLIST[r.skill].push(r);};
 D.STARTER_KITS={sword:{weapon:'bronze_sword',label:'Sword',hint:'Straightforward melee combat.'},bow:{weapon:'bow_normal',label:'Bow',hint:'Ranged combat · 300 bronze arrows.',ammo:'arrow_bronze',quantity:300},staff:{weapon:'staff_normal',label:'Staff',hint:'Magic combat · Spark and 300 runes.',runes:300}};
 D.TOOL_ORDER=[.5,1,1.5,2,2.5,3,3.5,4,4.5,5];
-const grades=['Bronze','Reinforced bronze','Iron','Steel','Reinforced steel','Mithril','Reinforced mithril','Adamant','Reinforced adamant','Runic'];
-const metals=['bronze','bronze','iron','steel','steel','mithril','mithril','adamant','adamant','rune'];
+/* Ten tool tiers, each its own mined material in Mining-level order (20 Nov 2026, owner feedback: no more
+   "Reinforced" repeats, and each tool wears its mineral's colours). Existing ores and bars only; speeds, prices,
+   Smithing levels and item IDs are unchanged. Colours are the mineral's own, spread so neighbours read apart. */
+const grades=['Copper','Bronze','Iron','Silver','Steel','Gold','Mithril','Adamant','Obsidian','Runic'];
+const matIn=[n=>({ore_copper:n}),n=>({bar_bronze:n}),n=>({bar_iron:n}),n=>({ore_silver:n}),n=>({bar_steel:n}),n=>({bar_gold:n}),n=>({bar_mithril:n}),n=>({bar_adamant:n}),n=>({ore_obsidian:Math.round(n*.45),bar_adamant:Math.round(n*.45)}),n=>({bar_rune:n})];
+const toolCols=['#d4723a','#b98d4e','#8b9096','#eef2f6','#8fa7c0','#f0c75a','#6c7fe0','#4fbf7a','#5a4378','#46c8d8'];
+D.TOOL_MATERIAL=grades;
 const speeds=[.04,.08,.12,.16,.205,.25,.30,.35,.40,.45],prices=[60,120,290,700,1600,3500,7500,16000,32500,65000],levels=[1,6,16,31,40,51,60,71,80,86],counts=[2,3,4,6,8,12,16,22,28,36];
 D.TOOL_PURPOSE={
  rod:'Balanced fittings and controlled line retrieval reduce the time needed to land each catch.',
@@ -174,10 +179,10 @@ D.TOOL_PURPOSE={
 };
 D.TOOL_COSTS={};
 for(const [key,sk,ic,label]of D.TOOLS)for(let i=0;i<10;i++){
- const tier=D.TOOL_ORDER[i],id=`tool_${key}_${tier}`,base=D.ITEMS[`tool_${key}_${Math.ceil(tier)}`],bar='bar_'+metals[i],metal=D.TIERS.find(t=>t.id===metals[i]);
+ const tier=D.TOOL_ORDER[i],id=`tool_${key}_${tier}`,base=D.ITEMS[`tool_${key}_${Math.ceil(tier)}`];
  if(!D.ITEMS[id]){D.ITEMS[id]={...base,id,tier,buy:prices[i],val:Math.round(prices[i]/3),artBase:base.id,workmanship:i};for(const stock of Object.values(D.SHOPS))if(stock.includes(base.id))stock.push(id);}
- const it=D.ITEMS[id];it.purpose=D.TOOL_PURPOSE[key];it.name=grades[i]+' '+label.toLowerCase();it.col=metal.col;D.TOOL_SPEED[tier]=speeds[i];D.TOOL_PRICE[tier]=prices[i];
- const inputs={[bar]:counts[i]},wood=D.TOOL_MAKE.logs[Math.ceil(tier)-1];
+ const it=D.ITEMS[id];it.purpose=D.TOOL_PURPOSE[key];it.name=grades[i]+' '+label.toLowerCase();it.col=toolCols[i];D.TOOL_SPEED[tier]=speeds[i];D.TOOL_PRICE[tier]=prices[i];
+ const inputs=matIn[i](counts[i]),wood=D.TOOL_MAKE.logs[Math.ceil(tier)-1];
  if(key==='gloves'){inputs[D.TOOL_MAKE.hides[Math.ceil(tier)-1]]=2;inputs.string=2;}else{inputs[wood]=2;if(key==='rod')inputs.string=2;}
  D.TOOL_COSTS[id]=inputs;it.val=Math.max(1,Math.floor(Object.entries(inputs).reduce((n,[k,v])=>n+D.ITEMS[k].val*v,0)*.5*.7));
  const rid='smith_'+id,old=D.RECIPES[rid];if(old){old.name=it.name;old.lvl=levels[i];old.in={...inputs};}else add({id:rid,skill:'smithing',tab:'Tools',name:it.name,lvl:levels[i],xp:Math.round(30*Math.pow(2.1,tier)),t:3000,in:{...inputs},out:{[id]:1},ev:'smith'});

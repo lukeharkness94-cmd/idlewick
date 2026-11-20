@@ -128,7 +128,8 @@ DQ.actionTargets = page => {
   const s = DQ.S, D = DQ.data;
   // Home and Activity are summaries/history, not duplicate quest-action menus.
   if(page==='quests')return D.QUESTS.filter(q=>['new','ready'].includes(DQ.questState(q))).sort((a,b)=>(DQ.questState(b)==='ready')-(DQ.questState(a)==='ready')).map(q=>({page,id:q.id,kind:DQ.questState(q)==='ready'?'quest-ready':'quest-new'}));
-  if(page==='projects')return Object.entries(D.PROJECTS||{}).filter(([id,p])=>p.town===s.town&&!s.projects[id]&&(DQ.projectNeed?(n=>DQ.canAfford(n)||Object.keys(n).some(k=>k!=='coins'&&DQ.have(k)>0))(DQ.projectNeed(id)):DQ.canAfford(p.cost))).map(([id])=>({page,id}));
+  // Village signals only a project you can finish now, not one you could merely add to (20 Nov, owner).
+  if(page==='projects')return Object.entries(D.PROJECTS||{}).filter(([id,p])=>p.town===s.town&&!s.projects[id]&&DQ.canAfford(DQ.projectNeed?DQ.projectNeed(id):p.cost)).map(([id])=>({page,id}));
   if(page==='farming'&&DQ.skillUnlocked('farming'))return [...s.farm.plots.map((p,i)=>DQ.plotRipe(p)?{page,id:i,kind:'crop'}:null),...s.farm.animals.map((a,i)=>a.stored>0?{page,id:i,kind:'animal'}:null)].filter(Boolean);
   if(page==='research'&&DQ.scholarOpen?.()&&DQ.researchSlots){const free=Math.max(0,DQ.researchSlots()-(s.research?.active||[]).length);return D.TECHS.filter(t=>!DQ.techReason(t)&&DQ.techCanAfford(t)).slice(0,free).map(t=>({page,id:t.id}));}
   return [];

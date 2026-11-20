@@ -141,10 +141,12 @@ UI.questSummary = q => {
 UI.B.qsummary = (e,id) => { const q=D.QM[id]; if(q)e.textContent=UI.questSummary(q); };
 UI.B.qtotal = (e,id) => { const q=D.QM[id]; if(q)e.style.width=UI.questProgress(q).pct+'%'; };
 UI.V.quests = () => {
-  const st = q => DQ.questState(q), groups = { active: q => ['active', 'ready'].includes(st(q)), available: q => st(q) === 'new', upcoming: q => st(q) === 'locked' && !(DQ.questHidden && DQ.questHidden(q)) && (DQ.townUnlocked(q.town) || q.main), done: q => st(q) === 'done' };
-  const names = { available: 'Available', active: 'Active', done: 'Completed', upcoming: 'Upcoming' };
-  const tab = UI.questTab = groups[UI.questTab] ? UI.questTab : D.QUESTS.some(groups.active) ? 'active' : 'available';
-  const list = D.QUESTS.filter(groups[tab]).sort((a,b)=>(b.main?1:0)-(a.main?1:0)||(st(a)==='ready'?-1:0)-(st(b)==='ready'?-1:0)||(DQ.questRecScore?DQ.questRecScore(a)-DQ.questRecScore(b):0)||a.adv-b.adv);
+  /* one Current list (20 Nov, owner): ready to hand in, then under way, then new offers; "active"/"available" open it */
+  const st = q => DQ.questState(q), groups = { current: q => ['active', 'ready', 'new'].includes(st(q)), upcoming: q => st(q) === 'locked' && !(DQ.questHidden && DQ.questHidden(q)) && (DQ.townUnlocked(q.town) || q.main), done: q => st(q) === 'done' };
+  const names = { current: 'Current', done: 'Completed', upcoming: 'Upcoming' }, order = { ready: 0, active: 1, new: 2 };
+  if (UI.questTab === 'active' || UI.questTab === 'available') UI.questTab = 'current';
+  const tab = UI.questTab = groups[UI.questTab] ? UI.questTab : 'current';
+  const list = D.QUESTS.filter(groups[tab]).sort((a,b)=>((order[st(a)]??3)-(order[st(b)]??3))||(b.main?1:0)-(a.main?1:0)||(DQ.questRecScore?DQ.questRecScore(a)-DQ.questRecScore(b):0)||a.adv-b.adv);
   const recChips = q => (DQ.questRecParts ? DQ.questRecParts(q) : []).map(r=>`<span class="qrec ${r.ok?'ok':'short'}" data-tip="text:Recommended ${esc(r.n)} level ${r.lvl}">${esc(r.n)} ${r.lvl}</span>`).join('');
   const retained=D.QM[UI.questRevealId];if(retained&&!list.includes(retained))list.push(retained);
   const selected = list.find(q=>q.id===UI.tab.questSelected)||list[0];UI.tab.questSelected=selected?.id;
@@ -164,12 +166,14 @@ UI.V.quests = () => {
   }).join(''):'';
   const done=D.QUESTS.filter(groups.done).length;
   const sections=[['Main story',list.filter(q=>q.main)],['Side stories',list.filter(q=>!q.main)]].filter(([,qs])=>qs.length).map(([label,qs])=>`<h3 class="journal-section">${label} <small>${qs.length}</small></h3>${qs.map(rowOf).join('')}`).join('');
-  return `<section class="panel shophead journal-header"><div><span class="k">Quest journal</span><h2>Stories of the realm</h2><small>${done} stories completed</small></div><nav class="tabs" aria-label="Quest status">${Object.entries(names).map(([k,n])=>`<button class="tab ${tab===k?'on':''}" data-do="qtab" data-a="${k}" aria-pressed="${tab===k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</nav></section>${list.length?`<div class="qlayout quest-journal-layout"><nav class="qlist" aria-label="${names[tab]} quests">${sections}</nav><div class="qdetail">${cards}</div></div>`:`<section class="panel journal-empty"><h2>${{active:'No stories underway',available:'No new requests here',upcoming:'No upcoming requests',done:'Your story is just beginning'}[tab]}</h2><p>${{active:'Choose an available story and someone to help.',available:'Check Upcoming to see what opens the next story.',upcoming:'Explore the realm and meet its people.',done:'Completed stories and their acknowledgements will stay here.'}[tab]}</p><button class="btn" data-do="qtab" data-a="${tab==='available'?'upcoming':'available'}">${tab==='available'?'See upcoming stories':'Browse available stories'}</button></section>`}`;
+  return `<section class="panel shophead journal-header"><div><span class="k">Quest journal</span><h2>Your stories</h2><small>${done} stories completed</small></div><nav class="tabs" aria-label="Quest status">${Object.entries(names).map(([k,n])=>`<button class="tab ${tab===k?'on':''}" data-do="qtab" data-a="${k}" aria-pressed="${tab===k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</nav></section>${list.length?`<div class="qlayout quest-journal-layout"><nav class="qlist" aria-label="${names[tab]} quests">${sections}</nav><div class="qdetail">${cards}</div></div>`:`<section class="panel journal-empty"><h2>${{active:'No stories underway',available:'No new requests here',upcoming:'No upcoming requests',done:'Your story is just beginning'}[tab]}</h2><p>${{active:'Choose an available story and someone to help.',available:'Check Upcoming to see what opens the next story.',upcoming:'Explore the realm and meet its people.',done:'Completed stories and their acknowledgements will stay here.'}[tab]}</p><button class="btn" data-do="qtab" data-a="${tab==='available'?'upcoming':'available'}">${tab==='available'?'See upcoming stories':'Browse available stories'}</button></section>`}`;
 };
 
 /* ---------- Character ---------- */
 const SLOT_LAYOUT = ['head', 'amulet', 'body', 'shield', 'weapon', 'ring', 'legs', 'ammo'];
 const equipCell = slot => {
+  /* a staff's ammunition is its runes: the Ammo slot shows how many you hold (20 Nov) */
+  if (slot === 'ammo' && !S().ammo.id && DQ.weaponStyle() === 'magic' && D.ITEMS.rune) { const it = D.ITEMS.rune, n = DQ.have('rune'); return `<button class="eq ${n ? '' : 'empty'}" style="--c:${it.col}" data-do="magicrunes" aria-label="Ammo: ${n} Arcane runes. Open Magic runes" data-tip="item:rune">${DQ.itemIco(it)}<b class="mono">${fmtK(n)}</b><small>${DQ.SLOT_NAMES[slot]}</small></button>`; }
   const id = slot === 'ammo' ? S().ammo.id : S().equip[slot];
   if (!id) return `<div class="eq empty" role="img" aria-label="${DQ.SLOT_NAMES[slot]} slot, empty" data-tip="text:${DQ.SLOT_NAMES[slot]} slot (empty)">${ico({ head: 'helm', amulet: 'amulet', weapon: 'sword', body: 'body', shield: 'shield', legs: 'legs', ring: 'ring', ammo: 'arrow_ammo' }[slot])}<small>${DQ.SLOT_NAMES[slot]}</small></div>`;
   const it = D.ITEMS[id];

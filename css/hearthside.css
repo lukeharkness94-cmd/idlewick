@@ -444,3 +444,22 @@ html.calm #title .title-scene img{transition:none}
 #title .title-card .create{width:100%;max-width:none}
 @media (min-width:601px){#title .create .cr-form{min-height:430px}#title .create .cr-act{margin-top:auto}}
 @media (max-width:600px){#title .cr-steps{grid-template-columns:auto auto auto;justify-content:center}#title .cr-steps button:not(.on) span{display:none}#title .cr-steps button span{overflow:visible;white-space:nowrap}}
+/* Shop footer (20 Nov): "Quantity" sits beside its buttons so the row fits its 44px and never runs into Buy */
+.visual-shop .shop-quantity-slot .shop-controls{display:flex;align-items:center;height:100%;margin:0}
+.visual-shop .shop-quantity-slot .shop-controls>label{display:flex;flex-direction:row;align-items:center;width:auto;gap:10px;margin:0;font:600 14px var(--f-body);color:var(--mute)}
+.shop-quantity-slot .choice-buttons{display:flex;gap:6px}
+.shop-quantity-slot .choice-button{min-height:36px;height:36px;padding:0 12px}
+/* Purchases (20 Nov): the item flies to the backpack, the counter pops, Buy reads "Bought" */
+.buy-fly{position:fixed;z-index:9000;pointer-events:none;image-rendering:pixelated;filter:drop-shadow(0 4px 6px #0005)}
+.btn.just-bought{background:var(--good,#2f7a4c)!important;border-color:var(--good,#2f7a4c)!important;color:#fff!important}
+.packchip{position:relative}
+.packchip.pack-pop{animation:packPop .5s cubic-bezier(.3,1.6,.5,1) .5s both}
+.pack-plus{position:absolute;left:50%;top:-6px;translate:-50% 0;font:700 14px var(--f-body);color:var(--good,#2f7a4c);background:var(--panel);border:1px solid var(--line2);border-radius:999px;padding:0 6px;pointer-events:none;animation:packPlus 1.1s ease-out .45s both}
+@keyframes packPop{0%{scale:1}40%{scale:1.22}100%{scale:1}}
+@keyframes packPlus{0%{opacity:0;translate:-50% 6px}20%{opacity:1;translate:-50% 0}80%{opacity:1}100%{opacity:0;translate:-50% -14px}}
+html.calm .packchip.pack-pop,html.calm .pack-plus{animation:none}
+@media (prefers-reduced-motion:reduce){.packchip.pack-pop,.pack-plus{animation:none}}
+/* Top menu "something to do" dot (20 Nov): a bright dot with a ring, readable on parchment and on the dark theme */
+#topnav .tnav{position:relative}
+#topnav .tnav .hubdot.todo{display:block;position:absolute;top:4px;right:4px;width:11px;height:11px;min-width:0;padding:0;border-radius:50%;background:#e2572c;box-shadow:0 0 0 2px var(--panel);font-size:0}
+#topnav .tnav .hubdot.num{display:none}

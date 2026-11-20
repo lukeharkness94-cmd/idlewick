@@ -39,7 +39,7 @@ DQ.reqParts=r=>{const [k,a]=r.stat.includes(':')?r.stat.split(':'):[r.stat,null]
   if(k==='hero')return {pic:ico('star'),label:`Hero level ${r.need}`};
   if(k==='combat')return {pic:art('skill','attack'),label:`Combat level ${r.need}`};
   if(k==='skill')return {pic:art('skill',a),label:`${D.SK[a].name} level ${r.need}`};
-  if(k==='tool'){const t=`tool_${DQ.toolKey(a)}_1`;return {pic:art('item',t),label:`A ${({mining:'pickaxe',fishing:'fishing rod',woodcutting:'axe',thieving:'pair of thief gloves',farming:'hoe'})[a]||'tool'}`,note:'kept'};}
+  if(k==='tool'){const t=`tool_${DQ.toolKey(a)}_${D.TOOL_ORDER[0]}`;return {pic:art('item',t),label:`A ${({mining:'pickaxe',fishing:'fishing rod',woodcutting:'axe',thieving:'pair of thief gloves',farming:'hoe'})[a]||'tool'}`,note:'kept'};}
   if(k==='own'||k==='use')return {pic:art('item',a),label:`${r.need>1&&I?plural(I.name):I?I.name:a}`,note:k==='own'?'kept':'used when you learn it'};
   if(k==='visit')return {pic:ico('town'),label:`Visit ${D.TOWN[a]?D.TOWN[a].name:a}`};
   if(k==='beasts')return {pic:ico('paw'),label:'Different creatures studied'};
