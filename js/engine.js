@@ -16,8 +16,12 @@ const indexUnlock = (skill, level, label) => {
   const levels = D.UNL[skill] = D.UNL[skill] || {}, names = levels[level] = levels[level] || [];
   if (!names.includes(label)) names.push(label);
 };
+/* a recipe renamed or moved by a later data file drops its old name, so a level never lists one thing twice (20 Nov) */
+(D.UNL_SEED || []).forEach(([skill, level, name, id]) => { const r = D.RECIPES[id], list = D.UNL[skill] && D.UNL[skill][level]; if (list && (!r || r.name !== name || r.lvl !== level || r.skill !== skill)) { const i = list.indexOf(name); if (i >= 0) list.splice(i, 1); } });
 Object.values(D.NODE).forEach(n => indexUnlock(n.skill, n.lvl, n.name));
 Object.values(D.RECIPES).forEach(r => indexUnlock(r.skill, r.lvl, r.name));
+/* batch sizes belong on the card, not in a level-up list: "Bronze arrows (12)" reads "Bronze arrows" */
+for (const levels of Object.values(D.UNL)) for (const [l, names] of Object.entries(levels)) levels[l] = [...new Set(names.map(n => typeof n === 'string' ? n.replace(/\s*\(\d+\)$/, '') : n))];
 Object.values(D.ITEMS).filter(it => ['gear','ammo'].includes(it.type)).forEach(it => Object.entries(it.req || {}).forEach(([sk, level]) => indexUnlock(sk, level, 'Equip: ' + it.name)));
 (D.CROPS || []).forEach(c => indexUnlock('farming', c.lvl, 'Grow ' + c.name));
 (D.ANIMALS || []).forEach(a => indexUnlock('farming', a.lvl, 'Keep ' + a.name));

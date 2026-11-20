@@ -99,7 +99,7 @@ DQ.sfx = name => {
   const s = S(); if (!s.sfx || s.muted || DQ.sim.on) return;
   if (!ctx) return; const now = performance.now();
   if (TASK.has(name)) {
-    if (s.taskSounds === 'off') return;
+    if (s.taskSounds === 'off' || DQ.strikeLive === name) return;
     const gap = s.taskSounds === 'varied' ? 450 : 900, prob = s.taskSounds === 'varied' ? .78 : .45;
     if (now - (last[name] || 0) < gap && name !== 'hit' && name !== 'miss') return;
     if (Math.random() > prob && name !== 'hit') return;
@@ -108,6 +108,14 @@ DQ.sfx = name => {
   recent.push(now); while (recent.length && now - recent[0] > 400) recent.shift();
   if (recent.length > 5 && !IMPORTANT.has(name)) return;
   last[name] = now; try { SFX[name] && SFX[name](); } catch (e) {}
+};
+/* Strike sounds (20 Nov 2026): js/strike_sync.js plays the work sound as each swing lands on screen. While it does,
+   the once-per-finished-task sound for that kind stays quiet so nothing doubles up. */
+DQ.strikeLive = null;
+DQ.sfxStrike = name => {
+  const s = S(); if (!s.sfx || s.muted || DQ.sim.on || !ctx || s.taskSounds === 'off') return;
+  const now = performance.now(); if (now - (last['strike:' + name] || 0) < 140) return;
+  last['strike:' + name] = now; try { SFX[name] && SFX[name](); } catch (e) {}
 };
 DQ.audioInit = init;
 DQ.audioApply = applyVolumes;

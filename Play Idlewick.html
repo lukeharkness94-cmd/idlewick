@@ -5225,6 +5225,21 @@ html.calm .packchip.pack-pop,html.calm .pack-plus{animation:none}
 #topnav .tnav{position:relative}
 #topnav .tnav .hubdot.todo{display:block;position:absolute;top:4px;right:4px;width:11px;height:11px;min-width:0;padding:0;border-radius:50%;background:#e2572c;box-shadow:0 0 0 2px var(--panel);font-size:0}
 #topnav .tnav .hubdot.num{display:none}
+/* A choice that opens while you watch (20 Nov): light sweeps across, the card pops and glows; a "New" ribbon stays */
+.illustrated-card{position:relative}
+.illustrated-card .new-ribbon{position:absolute;top:6px;right:6px;padding:1px 8px;border-radius:999px;background:var(--brass);color:var(--hs-action-ink,#fff);font:700 13px var(--f-body);letter-spacing:.04em;pointer-events:none;z-index:2}
+.illustrated-card.just-unlocked{animation:unlockPop .7s cubic-bezier(.3,1.5,.5,1) both,unlockGlow 2.2s ease-out both;overflow:hidden}
+.illustrated-card.just-unlocked::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,color-mix(in srgb,#fff 70%,transparent) 50%,transparent 70%);translate:-120% 0;animation:unlockSweep .9s .15s ease-out both;pointer-events:none}
+.illustrated-card.just-unlocked .choice-art img{animation:unlockArt .8s ease-out both}
+@keyframes unlockPop{0%{scale:.92}55%{scale:1.06}100%{scale:1}}
+@keyframes unlockGlow{0%,100%{box-shadow:0 0 0 0 transparent}25%{box-shadow:0 0 0 3px var(--brass),0 0 26px 6px color-mix(in srgb,var(--brass) 55%,transparent)}}
+@keyframes unlockSweep{to{translate:120% 0}}
+@keyframes unlockArt{0%{filter:brightness(0)}100%{filter:none}}
+html.calm .illustrated-card.just-unlocked,html.calm .illustrated-card.just-unlocked::after,html.calm .illustrated-card.just-unlocked .choice-art img{animation:none}
+html.calm .illustrated-card.just-unlocked{box-shadow:0 0 0 3px var(--brass)}
+@media (prefers-reduced-motion:reduce){.illustrated-card.just-unlocked,.illustrated-card.just-unlocked::after,.illustrated-card.just-unlocked .choice-art img{animation:none}.illustrated-card.just-unlocked{box-shadow:0 0 0 3px var(--brass)}}
+/* Where you got it (20 Nov): one quiet line in item tooltips and details */
+.item-origin{margin-top:6px;padding-top:6px;border-top:1px solid color-mix(in srgb,currentColor 18%,transparent);font-size:14px;font-style:italic;opacity:.85}
 </style>
 
 </head>
@@ -6187,6 +6202,8 @@ const unl = (sk, l, name) => { if (l <= 1) return; ((D.UNL[sk] = D.UNL[sk] || {}
 [[5, 'Silver tongue: better prices in every shop'], [20, 'Lockpicking: richer treasure chests'], [25, 'Pick the locks on chests found while away'], [30, 'Lockpicking: a second gem in treasure chests']].forEach(([l, n]) => unl('thieving', l, n));
 Object.values(D.NODE).forEach(n => unl(n.skill, n.lvl, n.name));
 Object.values(D.RECIPES).forEach(r => unl(r.skill, r.lvl, r.name));
+/* remembered so later renames can replace these names instead of listing both (20 Nov) */
+D.UNL_SEED = Object.values(D.RECIPES).map(r => [r.skill, r.lvl, r.name, r.id]);
 Object.values(ITEMS).forEach(it => { if (it.type === 'gear' || it.type === 'ammo') Object.entries(it.req || {}).forEach(([sk, l]) => unl(sk, l, 'Equip: ' + it.name)); });
 D.SPELLS.forEach(s => unl('magic', s.lvl, s.name + ' spell'));
 D.ALCH.forEach(a => unl('magic', a.lvl, a.name));
@@ -6484,7 +6501,7 @@ set('hunting', { chop: 20, 'own:wooden_trap': 3, combat: 8 });
 set('herbalism', { harvest: 20, 'skill:farming': 10 });
 set('exploration', { catch: 25, chop: 25, 'visit:mossbarrow': 1 });
 /* starter routes that no longer ask for the skill they unlock */
-const mp = D.QM.miners_pick; if (mp) { mp.adv = 3; mp.blurb = 'The old mine’s full of rats, and the timber holding the roof up has seen better days. Cut some fresh logs and clear the rats out before anyone goes back in. Do that properly and you can have my spare pickaxe. Mind the handle. It’s older than you, and considerably less forgiving.'; mp.obj = [{ ev: 'chop', key: 'normal', n: 10, label: 'Chop 10 logs for new pit props' }, { ev: 'kill', key: 'rat', n: 4, label: 'Clear 4 rats from the old mine' }]; }
+const mp = D.QM.miners_pick; if (mp) { mp.adv = 3; mp.blurb = 'The rats have come up out of the old mine and moved onto the Meadow Path, where they eat anything you put down for more than a minute. The timber holding the mine roof has seen better days, too. Cut some fresh logs and chase the rats off the path, and you can have my spare pickaxe. Mind the handle. It’s older than you, and considerably less forgiving.'; mp.obj = [{ ev: 'chop', key: 'normal', n: 10, label: 'Chop 10 logs for new pit props' }, { ev: 'kill', key: 'rat', n: 4, label: 'Clear 4 rats from the Meadow Path' }]; }
 const mc = D.QM.mq_crafting; if (mc) { mc.adv = 8; D.SK.crafting.unlock = 8; mc.obj = mc.obj.map(o => o.ev === 'chop' && o.key === 'birch' ? { ev: 'chop', key: 'normal', n: 15, label: 'Chop 15 logs for her frames' } : o); }
 })();
 
@@ -10079,7 +10096,7 @@ const ICON = {
   farming: s => { s.line(3, 15, 11, 3, R.wood); s.poly([[9, 3], [14, 4], [14, 7], [11, 6]], R.iron); for (const x of [2, 5]) { s.line(x, 15, x + 1, 9, rp('#b89a40')); s.dot(x + 1, 8, rp('#e0c060')); s.dot(x + 2, 7, rp('#e0c060')); } },
   cooking: s => { s.ell(8, 10, 6, 4, R.iron); s.rect(2, 9, 12, 2, R.iron); s.rect(1, 8, 2, 1, R.iron); s.rect(13, 8, 2, 1, R.iron); s.ell(8, 8, 4, 1.4, rp('#c88a4a')); [[6, 4], [9, 3], [11, 5]].forEach(([x, y]) => s.fix(x, y, '#ffffff')); },
   smithing: s => { s.poly([[2, 9], [14, 9], [12, 12], [4, 12]], R.iron); s.rect(6, 12, 4, 3, R.iron); s.line(8, 7, 13, 2, R.wood); s.poly([[10, 1], [14, 0], [15, 4], [12, 5]], R.steel); s.fix(5, 8, '#ffb04a'); },
-  crafting: s => { s.line(3, 13, 13, 3, R.steel); s.fix(13, 2, R.steel.gl); s.ell(4, 12, 2, 2, R.gold); for (let i = 0; i < 8; i++) s.fix(5 + i, 14 - Math.round(Math.sin(i / 2) * 2), '#c8483c'); },
+  crafting: s => { const bw = R.woodLight; s.line(3, 1, 6, 4, bw); s.line(6, 4, 8, 8, bw); s.line(8, 8, 6, 12, bw); s.line(6, 12, 3, 15, bw); s.line(3, 2, 3, 14, null, '#efe4c8'); s.line(9, 13, 14, 3, R.steel); s.fix(14, 2, R.steel.gl); s.line(8, 15, 10, 12, R.wood); },
   magic: s => { s.line(3, 15, 10, 5, R.wood); s.line(4, 15, 11, 5, R.wood); s.ell(12, 4, 2.6, 2.6, ramp('#9b87e0', { gl: .85 })); [[14, 1], [9, 2], [15, 7]].forEach(([x, y]) => s.fix(x, y, '#e8e0ff')); },
   research: s => { s.rect(2, 3, 12, 10, rp('#8a3a3a')); s.rect(3, 4, 10, 8, rp('#f4ecd8')); s.line(8, 4, 8, 12, null, '#8a3a3a'); s.line(4, 6, 7, 6, null, '#9a8a7a'); s.line(9, 6, 12, 6, null, '#9a8a7a'); s.ell(12, 12, 2, 2, R.gold); },
   hunting: s => { for (let i = 0; i < 10; i++) { s.dot(3 + i, 12 - Math.round(Math.sin(i / 3) * 3) - i * .5, R.gold); s.dot(3 + i, 13 - Math.round(Math.sin(i / 3) * 3) - i * .5, R.gold); } s.ell(13, 5, 2.4, 2.4, R.gold); [[4, 14], [7, 15]].forEach(([x, y]) => s.fix(x, y, '#7a5236')); },
@@ -10186,8 +10203,10 @@ const EMBLEM = {
     for (const [x, y] of [[11, 9], [12, 6], [17, 8], [18, 5], [22, 9]]) s.fix(x, y, '#f4f0e8'); },
   smithing: s => { const a = R.iron; s.poly([[3, 15], [27, 15], [29, 17], [22, 20], [9, 20], [3, 18]], a); s.rect(11, 20, 9, 5, a); s.poly([[7, 25], [24, 25], [26, 30], [5, 30]], rp('#6a7480')); s.line(4, 15, 26, 15, null, '#e8eef2');
     thick(s, 18, 13, 26, 3, R.wood); s.poly([[22, 1], [30, 0], [31, 6], [24, 7]], R.steel); s.fix(30, 1, '#ffffff'); for (const [x, y, c] of [[14, 11, '#ffd060'], [11, 9, '#ffb04a'], [17, 8, '#fff6c0'], [9, 12, '#ff8a3a']]) s.fix(x, y, c); },
-  crafting: s => { const sp = R.woodLight; s.rect(4, 14, 14, 3, sp); s.rect(4, 27, 14, 3, sp); const th = rp('#c8483c'); s.rect(6, 17, 10, 10, th); for (const y of [19, 22, 25]) s.line(6, y, 15, y, null, '#8a2a2a');
-    s.line(16, 22, 22, 20, th); s.line(22, 20, 25, 23, th); thick(s, 18, 28, 28, 3, R.steel, 1); s.line(19, 28, 29, 3, R.steel); s.fix(28, 4, '#2a1c1f'); s.fix(29, 2, '#ffffff'); },
+  /* Crafting (20 Nov): a strung wooden bow crossed by a carving knife, since bows, staves, traps and charms are what it makes */
+  crafting: s => { const bw = R.woodLight; for (const [a, b] of [[[7, 2], [12, 6]], [[12, 6], [15, 11]], [[15, 11], [16, 16]], [[16, 16], [15, 21]], [[15, 21], [12, 26]], [[12, 26], [7, 30]]]) thick(s, a[0], a[1], b[0], b[1], bw, 2);
+    s.line(8, 3, 8, 29, null, '#efe4c8'); s.rect(15, 14, 3, 5, R.leather); s.fix(7, 2, bw.hi); s.fix(7, 30, bw.hi); s.fix(13, 7, bw.gl);
+    s.poly([[18, 24], [28, 6], [30, 5], [29, 8], [20, 26]], R.steel); s.line(19, 24, 28, 7, null, '#ffffff'); thick(s, 14, 31, 19, 24, R.wood, 3); s.fix(17, 26, R.gold.base); s.fix(18, 25, R.gold.base); },
   magic: s => { thick(s, 5, 30, 18, 11, R.wood); s.rect(15, 12, 5, 2, R.gold); const orb = ramp('#9b87e0', { gl: .85 }); s.ell(22, 8, 5.4, 5.4, orb); s.fix(20, 5, '#ffffff'); s.fix(21, 5, '#f0e8ff');
     for (const [x, y] of [[29, 3], [14, 4], [29, 14], [27, 1], [12, 7]]) s.fix(x, y, '#e8e0ff'); s.fix(28, 2, '#b8a8f0'); s.fix(30, 3, '#b8a8f0'); s.fix(29, 4, '#b8a8f0'); },
   research: s => { const cv = rp('#8a3a3a'); s.poly([[1, 9], [15, 7], [16, 9], [17, 7], [31, 9], [31, 27], [17, 26], [16, 28], [15, 26], [1, 27]], cv); const pg = rp('#f4ecd8');
@@ -11238,7 +11257,7 @@ DQ.sfx = name => {
   const s = S(); if (!s.sfx || s.muted || DQ.sim.on) return;
   if (!ctx) return; const now = performance.now();
   if (TASK.has(name)) {
-    if (s.taskSounds === 'off') return;
+    if (s.taskSounds === 'off' || DQ.strikeLive === name) return;
     const gap = s.taskSounds === 'varied' ? 450 : 900, prob = s.taskSounds === 'varied' ? .78 : .45;
     if (now - (last[name] || 0) < gap && name !== 'hit' && name !== 'miss') return;
     if (Math.random() > prob && name !== 'hit') return;
@@ -11247,6 +11266,14 @@ DQ.sfx = name => {
   recent.push(now); while (recent.length && now - recent[0] > 400) recent.shift();
   if (recent.length > 5 && !IMPORTANT.has(name)) return;
   last[name] = now; try { SFX[name] && SFX[name](); } catch (e) {}
+};
+/* Strike sounds (20 Nov 2026): js/strike_sync.js plays the work sound as each swing lands on screen. While it does,
+   the once-per-finished-task sound for that kind stays quiet so nothing doubles up. */
+DQ.strikeLive = null;
+DQ.sfxStrike = name => {
+  const s = S(); if (!s.sfx || s.muted || DQ.sim.on || !ctx || s.taskSounds === 'off') return;
+  const now = performance.now(); if (now - (last['strike:' + name] || 0) < 140) return;
+  last['strike:' + name] = now; try { SFX[name] && SFX[name](); } catch (e) {}
 };
 DQ.audioInit = init;
 DQ.audioApply = applyVolumes;
@@ -11778,8 +11805,12 @@ const indexUnlock = (skill, level, label) => {
   const levels = D.UNL[skill] = D.UNL[skill] || {}, names = levels[level] = levels[level] || [];
   if (!names.includes(label)) names.push(label);
 };
+/* a recipe renamed or moved by a later data file drops its old name, so a level never lists one thing twice (20 Nov) */
+(D.UNL_SEED || []).forEach(([skill, level, name, id]) => { const r = D.RECIPES[id], list = D.UNL[skill] && D.UNL[skill][level]; if (list && (!r || r.name !== name || r.lvl !== level || r.skill !== skill)) { const i = list.indexOf(name); if (i >= 0) list.splice(i, 1); } });
 Object.values(D.NODE).forEach(n => indexUnlock(n.skill, n.lvl, n.name));
 Object.values(D.RECIPES).forEach(r => indexUnlock(r.skill, r.lvl, r.name));
+/* batch sizes belong on the card, not in a level-up list: "Bronze arrows (12)" reads "Bronze arrows" */
+for (const levels of Object.values(D.UNL)) for (const [l, names] of Object.entries(levels)) levels[l] = [...new Set(names.map(n => typeof n === 'string' ? n.replace(/\s*\(\d+\)$/, '') : n))];
 Object.values(D.ITEMS).filter(it => ['gear','ammo'].includes(it.type)).forEach(it => Object.entries(it.req || {}).forEach(([sk, level]) => indexUnlock(sk, level, 'Equip: ' + it.name)));
 (D.CROPS || []).forEach(c => indexUnlock('farming', c.lvl, 'Grow ' + c.name));
 (D.ANIMALS || []).forEach(a => indexUnlock('farming', a.lvl, 'Keep ' + a.name));
@@ -22921,6 +22952,136 @@ wrap('buycommission', () => null);
 
 </script>
 <script>
+/* Idlewick: a choice opening on the page you are looking at gets a moment (20 Nov 2026, owner feedback).
+   When a level-up opens a new fish, tree, rock, recipe or other choice card while its page is on screen, the card
+   is scrolled into view inside its list, its blackout lifts with a light sweeping across, it pops and glows, and a
+   "New" ribbon stays on it until you pick it or leave the page. Presentation only; nothing about unlocking changes.
+   Reduced motion keeps the ribbon and a still glow. */
+(() => {
+const DQ = window.DQ, UI = DQ.ui;
+let lastPage = null, lastLocked = new Set();
+const fresh = new Set();
+const lockedNow = () => new Set([...document.querySelectorAll('#view .illustrated-card.locked[data-task-id]')].map(c => c.dataset.page + ':' + c.dataset.taskId));
+const mark = () => {
+  for (const c of document.querySelectorAll('#view .illustrated-card[data-task-id]')) {
+    const key = c.dataset.page + ':' + c.dataset.taskId;
+    if (!fresh.has(key) || c.classList.contains('locked')) continue;
+    if (!c.querySelector('.new-ribbon')) c.insertAdjacentHTML('beforeend', '<span class="new-ribbon" aria-hidden="true">New</span>');
+  }
+};
+const render0 = UI.render;
+UI.render = (...a) => {
+  const r = render0(...a);
+  try {
+    const page = UI.view, now = lockedNow();
+    if (page !== lastPage) fresh.clear();
+    else {
+      const opened = [...lastLocked].filter(k => !now.has(k));
+      opened.forEach(k => fresh.add(k));
+      if (opened.length) requestAnimationFrame(() => {
+        opened.forEach((k, i) => {
+          const [pg, id] = k.split(':'), c = document.querySelector(`#view .illustrated-card[data-page="${pg}"][data-task-id="${CSS.escape(id)}"]`);
+          if (!c) return;
+          if (i === 0 && UI.revealCard) UI.revealCard(c);
+          c.classList.remove('just-unlocked'); void c.offsetWidth; c.classList.add('just-unlocked');
+          setTimeout(() => c.isConnected && c.classList.remove('just-unlocked'), 2400);
+        });
+        if (DQ.sfx) DQ.sfx('unlock');
+      });
+    }
+    lastPage = page; lastLocked = now; mark();
+  } catch (e) {}
+  return r;
+};
+/* picking the new card retires its ribbon */
+document.addEventListener('click', e => { const c = e.target.closest && e.target.closest('#view .illustrated-card[data-task-id]'); if (c) { fresh.delete(c.dataset.page + ':' + c.dataset.taskId); c.querySelector('.new-ribbon')?.remove(); } }, true);
+})();
+
+</script>
+<script>
+/* Idlewick: the sound lands when the swing lands (20 Nov 2026, owner feedback).
+   For work you can see being struck (chopping, mining, smithing, crafting, carpentry) the activity scene swings a
+   whole number of times per action, in step with the action's own clock, and the work sound plays on each swing's
+   impact rather than once when the action finishes. Fishing, cooking and the rest keep their single sound.
+   Presentation only: action timing and rewards are untouched. Elapsed time drives everything, so refresh rate and
+   frame drops change nothing; reduced motion keeps the sounds without the swinging. */
+(() => {
+const DQ = window.DQ, D = DQ.data, UI = DQ.ui;
+const IMPACT = .4; /* the share of each swing at which the tool meets wood, rock or metal (matches css work keyframes) */
+const soundOf = act => {
+  if (!act) return null;
+  if (act.kind === 'wood') return 'wood';
+  if (act.kind === 'mine') return 'mine';
+  if (act.kind === 'recipe') { const r = D.RECIPES[act.id]; return r && ({ smithing: 'anvil', crafting: 'stitch', carpentry: 'wood' })[r.skill] || null; }
+  return null;
+};
+let stageEl = null, beatSet = 0, lastStrike = -1, lastAct = null;
+const loop = () => {
+  requestAnimationFrame(loop);
+  const act = DQ.act, name = soundOf(act), stage = document.querySelector('#view .activity-stage.working');
+  if (!name || !stage || document.hidden || !act.dur) { DQ.strikeLive = null; stageEl = null; return; }
+  const dur = act.dur, swings = Math.max(1, Math.round(dur / 1200)), beat = dur / swings;
+  const elapsed = Math.max(0, (Date.now() - act.t0) % dur);
+  if (stage !== stageEl || Math.abs(beat - beatSet) > 1 || act !== lastAct) {
+    /* one swing per beat, phase-locked to the action's start, so the last swing ends as the action completes */
+    stageEl = stage; beatSet = beat; lastAct = act;
+    stage.style.setProperty('--work-beat', Math.round(beat) + 'ms');
+    stage.querySelectorAll('.scene-worker,.action-tool,.work-atmosphere i').forEach(el => { el.style.animationDuration = Math.round(beat) + 'ms'; el.style.animationDelay = -Math.round(elapsed % beat) + 'ms'; });
+    lastStrike = Math.floor(elapsed / beat - IMPACT);
+  }
+  DQ.strikeLive = name;
+  const strike = Math.floor(elapsed / beat - IMPACT);
+  if (strike !== lastStrike) { if (strike >= 0) DQ.sfxStrike && DQ.sfxStrike(name); lastStrike = strike; } /* -1 is the wind-up before the first swing lands */
+};
+requestAnimationFrame(loop);
+})();
+
+</script>
+<script>
+/* Idlewick: every item remembers where you first got it (20 Nov 2026, owner feedback).
+   The first time an item reaches you, one plain line is saved in S.found, e.g. "Dropped by a goblin on the Meadow
+   Path, Willowbrook" or "Bought in the Willowbrook shop", and shown in the item's tooltip and detail panel.
+   The line comes from an explicit source (shop, quest, farm, starting pack) or, failing that, from what you were
+   doing at that moment. Items already owned before this existed simply have no line; nothing is invented.
+   Forecasts never write. */
+(() => {
+const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S, esc = DQ.esc;
+let origin = null; /* an explicit source set around a purchase, quest reward, harvest and so on */
+const town = id => (D.TOWN[id] || D.TOWN[S().town] || {}).name || '';
+const a = word => /^[aeiou]/i.test(word) ? 'an ' + word : 'a ' + word;
+const fromAct = () => {
+  const act = DQ.act; if (!act) return null;
+  if (act.kind === 'fight') {
+    const m = D.MON[DQ.fight?.id] || D.MON[act.id], area = act.area && Object.values(D.AREAS || {}).flat().find(x => x.id === act.area);
+    if (!m) return null;
+    /* you have just beaten it, so its real name is known (the kill is counted after the drop) */
+    const who = m.boss || m.mini ? m.name : a(m.name.toLowerCase());
+    return `Dropped by ${who}${area ? ` on the ${area.name}` : ''}, ${town(m.town || S().town)}`;
+  }
+  const n = D.NODE[act.kind + ':' + act.id];
+  if (n) { const t = town(n.town || S().town); return ({ wood: `Cut from ${a(n.name.toLowerCase())}, ${t}`, mine: `Mined from ${a(n.name.toLowerCase())}, ${t}`, fish: `Fished up in ${t}`, thieve: `Pickpocketed from ${a(n.name.toLowerCase())}, ${t}` })[act.kind]; }
+  if (act.kind === 'recipe') { const r = D.RECIPES[act.id]; if (r) return `Made with ${D.SK[r.skill].name}${r.town ? `, ${town(r.town)}` : ''}`; }
+  const sk = DQ.actSkill && DQ.actSkill(); if (sk && D.SK[sk]) return `Found while ${D.SK[sk].name.toLowerCase() === 'hunting' ? 'hunting' : 'training ' + D.SK[sk].name}, ${town(S().town)}`;
+  return null;
+};
+DQ.noteOrigin = (id, text) => { if (!id || !text || DQ.forecasting) return; const f = S().found || (S().found = {}); if (!f[id]) f[id] = text; };
+DQ.originOf = id => (S().found || {})[id] || null;
+const remember0 = DQ.rememberItem;
+DQ.rememberItem = id => { const r = remember0(id); try { if (D.ITEMS[id] && !DQ.forecasting && !DQ.originOf(id)) DQ.noteOrigin(id, origin || fromAct()); } catch (e) {} return r; };
+const during = (text, f) => (...args) => { const prev = origin; origin = typeof text === 'function' ? text(...args) : text; try { return f(...args); } finally { origin = prev; } };
+const wrap = (name, text) => { if (typeof DQ[name] === 'function') DQ[name] = during(text, DQ[name]); };
+wrap('buy', () => `Bought in the ${town()} shop`);
+wrap('buyLocalSupply', () => `Bought from ${town()}’s own supplies`);
+wrap('claimQuest', id => { const q = D.QM[id]; return q ? `Reward for “${q.name}” from ${q.giver}` : null; });
+wrap('harvest', () => 'Grown on your farm');
+wrap('collect', i => { const an = S().farm.animals[i], def = an && (D.ANIMALS || []).find(x => x.id === an.id); return def ? `From your ${def.name.toLowerCase()} on the farm` : 'From your farm animals'; });
+/* the tooltip and the item panel both read DQ.tips.item */
+const tip0 = DQ.tips.item;
+DQ.tips.item = id => { const h = tip0(id), o = DQ.originOf(id); return h && o ? h + `<div class="item-origin">${esc(o)}</div>` : h; };
+})();
+
+</script>
+<script>
 /* Idlewick: per-draw memory for expensive lookups (20 Nov 2026 review).
    A single page draw asked DQ.sourceOf ("where can I get this item?") thousands of times for a few dozen items, and
    DQ.questRecipeCandidates hundreds of times for three objectives; Smithing took ~190 ms to draw instead of ~45.
@@ -23047,7 +23208,7 @@ function create() {
     const focus = $('#crname') || $('#tmenu [data-kit].on') || $('#cr-go'); if (focus) focus.focus({ preventScroll: true });
   };
   const go = n => { const input = $('#crname'); if (input) name = input.value; step = Math.max(0, Math.min(2, n)); DQ.sfx('click'); draw(); };
-  const commit = () => { const input = $('#crname'); if (input) name = input.value; const draft = DQ.S, chosen = DQ.newState('', look, starter); draft.equip = chosen.equip; draft.ammo = chosen.ammo; draft.inv = chosen.inv; DQ.S = previous; if (DQ.hasSave() && DQ.backup && !DQ.backup('before new hero')) { DQ.S = draft; DQ.toast('Could not back up your existing hero. Download a backup first.', true); return; } DQ.S = draft; DQ.S.name = heroName(); DQ.S.look = look; DQ.S.journal = [{ t: Date.now(), kind: 'begin', icon: 'candle', town: 'willowbrook', text: `You come home to Willowbrook with ${BACKSTORY[starter].pack}, five loaves and Wren’s letter in your pocket.` }]; if (DQ.save()) start(true); else DQ.toast(DQ.saveHealth, true); };
+  const commit = () => { const input = $('#crname'); if (input) name = input.value; const draft = DQ.S, chosen = DQ.newState('', look, starter); draft.equip = chosen.equip; draft.ammo = chosen.ammo; draft.inv = chosen.inv; DQ.S = previous; if (DQ.hasSave() && DQ.backup && !DQ.backup('before new hero')) { DQ.S = draft; DQ.toast('Could not back up your existing hero. Download a backup first.', true); return; } DQ.S = draft; DQ.S.name = heroName(); DQ.S.look = look; DQ.S.journal = [{ t: Date.now(), kind: 'begin', icon: 'candle', town: 'willowbrook', text: `You come home to Willowbrook with ${BACKSTORY[starter].pack}, five loaves and Wren’s letter in your pocket.` }]; if (DQ.noteOrigin) for (const id of [...Object.keys(DQ.S.inv), ...Object.values(DQ.S.equip), DQ.S.ammo && DQ.S.ammo.id]) if (id) DQ.noteOrigin(id, 'In your pack when you came home'); if (DQ.save()) start(true); else DQ.toast(DQ.saveHealth, true); };
   const begin = () => DQ.hasSave() ? DQ.modal({ title: 'Begin a new hero?', body: '<p>Your existing hero will be kept in automatic backups. Your new adventure replaces the active save.</p>', actions: [{ label: 'Begin new hero', primary: true, fn: commit }, { label: 'Keep existing hero' }] }) : commit();
   $('#tmenu').onclick = e => {
     const t = e.target.closest('button'); if (!t) return;

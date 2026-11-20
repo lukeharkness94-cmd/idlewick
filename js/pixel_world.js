@@ -216,7 +216,7 @@ const ICON = {
   farming: s => { s.line(3, 15, 11, 3, R.wood); s.poly([[9, 3], [14, 4], [14, 7], [11, 6]], R.iron); for (const x of [2, 5]) { s.line(x, 15, x + 1, 9, rp('#b89a40')); s.dot(x + 1, 8, rp('#e0c060')); s.dot(x + 2, 7, rp('#e0c060')); } },
   cooking: s => { s.ell(8, 10, 6, 4, R.iron); s.rect(2, 9, 12, 2, R.iron); s.rect(1, 8, 2, 1, R.iron); s.rect(13, 8, 2, 1, R.iron); s.ell(8, 8, 4, 1.4, rp('#c88a4a')); [[6, 4], [9, 3], [11, 5]].forEach(([x, y]) => s.fix(x, y, '#ffffff')); },
   smithing: s => { s.poly([[2, 9], [14, 9], [12, 12], [4, 12]], R.iron); s.rect(6, 12, 4, 3, R.iron); s.line(8, 7, 13, 2, R.wood); s.poly([[10, 1], [14, 0], [15, 4], [12, 5]], R.steel); s.fix(5, 8, '#ffb04a'); },
-  crafting: s => { s.line(3, 13, 13, 3, R.steel); s.fix(13, 2, R.steel.gl); s.ell(4, 12, 2, 2, R.gold); for (let i = 0; i < 8; i++) s.fix(5 + i, 14 - Math.round(Math.sin(i / 2) * 2), '#c8483c'); },
+  crafting: s => { const bw = R.woodLight; s.line(3, 1, 6, 4, bw); s.line(6, 4, 8, 8, bw); s.line(8, 8, 6, 12, bw); s.line(6, 12, 3, 15, bw); s.line(3, 2, 3, 14, null, '#efe4c8'); s.line(9, 13, 14, 3, R.steel); s.fix(14, 2, R.steel.gl); s.line(8, 15, 10, 12, R.wood); },
   magic: s => { s.line(3, 15, 10, 5, R.wood); s.line(4, 15, 11, 5, R.wood); s.ell(12, 4, 2.6, 2.6, ramp('#9b87e0', { gl: .85 })); [[14, 1], [9, 2], [15, 7]].forEach(([x, y]) => s.fix(x, y, '#e8e0ff')); },
   research: s => { s.rect(2, 3, 12, 10, rp('#8a3a3a')); s.rect(3, 4, 10, 8, rp('#f4ecd8')); s.line(8, 4, 8, 12, null, '#8a3a3a'); s.line(4, 6, 7, 6, null, '#9a8a7a'); s.line(9, 6, 12, 6, null, '#9a8a7a'); s.ell(12, 12, 2, 2, R.gold); },
   hunting: s => { for (let i = 0; i < 10; i++) { s.dot(3 + i, 12 - Math.round(Math.sin(i / 3) * 3) - i * .5, R.gold); s.dot(3 + i, 13 - Math.round(Math.sin(i / 3) * 3) - i * .5, R.gold); } s.ell(13, 5, 2.4, 2.4, R.gold); [[4, 14], [7, 15]].forEach(([x, y]) => s.fix(x, y, '#7a5236')); },
@@ -323,8 +323,10 @@ const EMBLEM = {
     for (const [x, y] of [[11, 9], [12, 6], [17, 8], [18, 5], [22, 9]]) s.fix(x, y, '#f4f0e8'); },
   smithing: s => { const a = R.iron; s.poly([[3, 15], [27, 15], [29, 17], [22, 20], [9, 20], [3, 18]], a); s.rect(11, 20, 9, 5, a); s.poly([[7, 25], [24, 25], [26, 30], [5, 30]], rp('#6a7480')); s.line(4, 15, 26, 15, null, '#e8eef2');
     thick(s, 18, 13, 26, 3, R.wood); s.poly([[22, 1], [30, 0], [31, 6], [24, 7]], R.steel); s.fix(30, 1, '#ffffff'); for (const [x, y, c] of [[14, 11, '#ffd060'], [11, 9, '#ffb04a'], [17, 8, '#fff6c0'], [9, 12, '#ff8a3a']]) s.fix(x, y, c); },
-  crafting: s => { const sp = R.woodLight; s.rect(4, 14, 14, 3, sp); s.rect(4, 27, 14, 3, sp); const th = rp('#c8483c'); s.rect(6, 17, 10, 10, th); for (const y of [19, 22, 25]) s.line(6, y, 15, y, null, '#8a2a2a');
-    s.line(16, 22, 22, 20, th); s.line(22, 20, 25, 23, th); thick(s, 18, 28, 28, 3, R.steel, 1); s.line(19, 28, 29, 3, R.steel); s.fix(28, 4, '#2a1c1f'); s.fix(29, 2, '#ffffff'); },
+  /* Crafting (20 Nov): a strung wooden bow crossed by a carving knife, since bows, staves, traps and charms are what it makes */
+  crafting: s => { const bw = R.woodLight; for (const [a, b] of [[[7, 2], [12, 6]], [[12, 6], [15, 11]], [[15, 11], [16, 16]], [[16, 16], [15, 21]], [[15, 21], [12, 26]], [[12, 26], [7, 30]]]) thick(s, a[0], a[1], b[0], b[1], bw, 2);
+    s.line(8, 3, 8, 29, null, '#efe4c8'); s.rect(15, 14, 3, 5, R.leather); s.fix(7, 2, bw.hi); s.fix(7, 30, bw.hi); s.fix(13, 7, bw.gl);
+    s.poly([[18, 24], [28, 6], [30, 5], [29, 8], [20, 26]], R.steel); s.line(19, 24, 28, 7, null, '#ffffff'); thick(s, 14, 31, 19, 24, R.wood, 3); s.fix(17, 26, R.gold.base); s.fix(18, 25, R.gold.base); },
   magic: s => { thick(s, 5, 30, 18, 11, R.wood); s.rect(15, 12, 5, 2, R.gold); const orb = ramp('#9b87e0', { gl: .85 }); s.ell(22, 8, 5.4, 5.4, orb); s.fix(20, 5, '#ffffff'); s.fix(21, 5, '#f0e8ff');
     for (const [x, y] of [[29, 3], [14, 4], [29, 14], [27, 1], [12, 7]]) s.fix(x, y, '#e8e0ff'); s.fix(28, 2, '#b8a8f0'); s.fix(30, 3, '#b8a8f0'); s.fix(29, 4, '#b8a8f0'); },
   research: s => { const cv = rp('#8a3a3a'); s.poly([[1, 9], [15, 7], [16, 9], [17, 7], [31, 9], [31, 27], [17, 26], [16, 28], [15, 26], [1, 27]], cv); const pg = rp('#f4ecd8');

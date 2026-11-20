@@ -167,7 +167,7 @@ test('project and research badges disappear when resources or slots are unavaila
   const {q,load}=harness();load('fx');
   q.S.coins=1e8;for(const id of Object.keys(q.data.ITEMS))q.S.bank[id]=100000;
   assert.equal(q.noticeCount('projects'),q.projectsForTown(q.S.town).length);
-  q.S.coins=0;assert.equal(q.noticeCount('projects'),q.projectsForTown(q.S.town).length,'materials can be delivered without coins');
+  q.S.coins=0;assert.equal(q.noticeCount('projects'),q.projectsForTown(q.S.town).map(x=>Array.isArray(x)?x[0]:typeof x==='string'?x:x.id).filter(id=>q.canAfford(q.projectNeed?q.projectNeed(id):q.data.PROJECTS[id].cost)).length,'Village signals only projects you can finish (20 Nov)');
   q.S.bank={};q.S.inv={};assert.equal(q.noticeCount('projects'),0,'nothing to deliver, nothing to count');
   for(const id of Object.keys(q.data.ITEMS))q.S.bank[id]=100000;q.S.coins=1e8;for(const sk of Object.keys(q.S.xp))q.S.xp[sk]=100000;q.S.unlocked.research=true;
   assert.ok(q.noticeCount('research')>0);

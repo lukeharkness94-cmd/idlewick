@@ -777,6 +777,8 @@ const unl = (sk, l, name) => { if (l <= 1) return; ((D.UNL[sk] = D.UNL[sk] || {}
 [[5, 'Silver tongue: better prices in every shop'], [20, 'Lockpicking: richer treasure chests'], [25, 'Pick the locks on chests found while away'], [30, 'Lockpicking: a second gem in treasure chests']].forEach(([l, n]) => unl('thieving', l, n));
 Object.values(D.NODE).forEach(n => unl(n.skill, n.lvl, n.name));
 Object.values(D.RECIPES).forEach(r => unl(r.skill, r.lvl, r.name));
+/* remembered so later renames can replace these names instead of listing both (20 Nov) */
+D.UNL_SEED = Object.values(D.RECIPES).map(r => [r.skill, r.lvl, r.name, r.id]);
 Object.values(ITEMS).forEach(it => { if (it.type === 'gear' || it.type === 'ammo') Object.entries(it.req || {}).forEach(([sk, l]) => unl(sk, l, 'Equip: ' + it.name)); });
 D.SPELLS.forEach(s => unl('magic', s.lvl, s.name + ' spell'));
 D.ALCH.forEach(a => unl('magic', a.lvl, a.name));

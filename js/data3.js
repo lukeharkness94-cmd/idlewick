@@ -138,7 +138,7 @@ set('hunting', { chop: 20, 'own:wooden_trap': 3, combat: 8 });
 set('herbalism', { harvest: 20, 'skill:farming': 10 });
 set('exploration', { catch: 25, chop: 25, 'visit:mossbarrow': 1 });
 /* starter routes that no longer ask for the skill they unlock */
-const mp = D.QM.miners_pick; if (mp) { mp.adv = 3; mp.blurb = 'The old mine’s full of rats, and the timber holding the roof up has seen better days. Cut some fresh logs and clear the rats out before anyone goes back in. Do that properly and you can have my spare pickaxe. Mind the handle. It’s older than you, and considerably less forgiving.'; mp.obj = [{ ev: 'chop', key: 'normal', n: 10, label: 'Chop 10 logs for new pit props' }, { ev: 'kill', key: 'rat', n: 4, label: 'Clear 4 rats from the old mine' }]; }
+const mp = D.QM.miners_pick; if (mp) { mp.adv = 3; mp.blurb = 'The rats have come up out of the old mine and moved onto the Meadow Path, where they eat anything you put down for more than a minute. The timber holding the mine roof has seen better days, too. Cut some fresh logs and chase the rats off the path, and you can have my spare pickaxe. Mind the handle. It’s older than you, and considerably less forgiving.'; mp.obj = [{ ev: 'chop', key: 'normal', n: 10, label: 'Chop 10 logs for new pit props' }, { ev: 'kill', key: 'rat', n: 4, label: 'Clear 4 rats from the Meadow Path' }]; }
 const mc = D.QM.mq_crafting; if (mc) { mc.adv = 8; D.SK.crafting.unlock = 8; mc.obj = mc.obj.map(o => o.ev === 'chop' && o.key === 'birch' ? { ev: 'chop', key: 'normal', n: 15, label: 'Chop 15 logs for her frames' } : o); }
 })();
 

@@ -463,3 +463,18 @@ html.calm .packchip.pack-pop,html.calm .pack-plus{animation:none}
 #topnav .tnav{position:relative}
 #topnav .tnav .hubdot.todo{display:block;position:absolute;top:4px;right:4px;width:11px;height:11px;min-width:0;padding:0;border-radius:50%;background:#e2572c;box-shadow:0 0 0 2px var(--panel);font-size:0}
 #topnav .tnav .hubdot.num{display:none}
+/* A choice that opens while you watch (20 Nov): light sweeps across, the card pops and glows; a "New" ribbon stays */
+.illustrated-card{position:relative}
+.illustrated-card .new-ribbon{position:absolute;top:6px;right:6px;padding:1px 8px;border-radius:999px;background:var(--brass);color:var(--hs-action-ink,#fff);font:700 13px var(--f-body);letter-spacing:.04em;pointer-events:none;z-index:2}
+.illustrated-card.just-unlocked{animation:unlockPop .7s cubic-bezier(.3,1.5,.5,1) both,unlockGlow 2.2s ease-out both;overflow:hidden}
+.illustrated-card.just-unlocked::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,color-mix(in srgb,#fff 70%,transparent) 50%,transparent 70%);translate:-120% 0;animation:unlockSweep .9s .15s ease-out both;pointer-events:none}
+.illustrated-card.just-unlocked .choice-art img{animation:unlockArt .8s ease-out both}
+@keyframes unlockPop{0%{scale:.92}55%{scale:1.06}100%{scale:1}}
+@keyframes unlockGlow{0%,100%{box-shadow:0 0 0 0 transparent}25%{box-shadow:0 0 0 3px var(--brass),0 0 26px 6px color-mix(in srgb,var(--brass) 55%,transparent)}}
+@keyframes unlockSweep{to{translate:120% 0}}
+@keyframes unlockArt{0%{filter:brightness(0)}100%{filter:none}}
+html.calm .illustrated-card.just-unlocked,html.calm .illustrated-card.just-unlocked::after,html.calm .illustrated-card.just-unlocked .choice-art img{animation:none}
+html.calm .illustrated-card.just-unlocked{box-shadow:0 0 0 3px var(--brass)}
+@media (prefers-reduced-motion:reduce){.illustrated-card.just-unlocked,.illustrated-card.just-unlocked::after,.illustrated-card.just-unlocked .choice-art img{animation:none}.illustrated-card.just-unlocked{box-shadow:0 0 0 3px var(--brass)}}
+/* Where you got it (20 Nov): one quiet line in item tooltips and details */
+.item-origin{margin-top:6px;padding-top:6px;border-top:1px solid color-mix(in srgb,currentColor 18%,transparent);font-size:14px;font-style:italic;opacity:.85}
