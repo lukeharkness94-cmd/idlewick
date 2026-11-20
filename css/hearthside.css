@@ -123,8 +123,6 @@ body{background-color:var(--ground)}
 }
 @media(pointer:coarse){.hs-home .btn{min-height:44px}}
 /* The candle-lit entrance keeps its night sky, with the same readable paper controls as the game. */
-#title .logo h1,#title .logo>.ic{color:#f4d69e}
-#title .logo p,#title .ver{color:#c0cbbb}
 #title .create{background:var(--panel);border-color:var(--line2);backdrop-filter:none}
 #title .create input{background:var(--panel2);color:var(--ink);border-color:var(--line2)}
 #title .tbtn{background:var(--panel2);color:var(--ink);border-color:var(--line2);text-shadow:none}
@@ -365,3 +363,31 @@ html.calm .events .ev-result{animation:none}
   .shop-upgrade-header .shop-categories>.btn{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px;padding:8px 4px;min-height:72px;font-size:16px;line-height:1.15;white-space:normal;text-align:center;overflow:visible}
   .shop-upgrade-header .shop-categories>.btn .ic,.shop-upgrade-header .shop-categories>.btn img{margin:0}
 }
+
+/* ---------- Title (20 Nov 2026): the player's town behind a parchment card, in the player's theme ---------- */
+#title{background:var(--ground)}
+#title .title-scene{position:absolute;inset:0;overflow:hidden}
+#title .title-scene img{position:absolute;max-width:none;image-rendering:pixelated}
+#title .title-wash{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 70% at 50% 48%,color-mix(in srgb,var(--ground) 55%,transparent),transparent 75%),linear-gradient(180deg,color-mix(in srgb,var(--ground) 30%,transparent),transparent 30%,transparent 70%,color-mix(in srgb,var(--ground) 45%,transparent))}
+:root[data-theme="dark"] #title .title-scene img{filter:brightness(.42) saturate(.75) hue-rotate(-8deg)}
+:root[data-theme="dark"] #title .title-wash{background:radial-gradient(ellipse 60% 70% at 50% 48%,#0b1216a8,transparent 75%),linear-gradient(180deg,#0a1a2a99,transparent 45%,#0b121680)}
+#title #tcv{position:absolute;inset:0;pointer-events:none}
+#title .title-in{gap:0}
+#title .title-card{display:flex;flex-direction:column;align-items:center;gap:26px;padding:34px 40px 30px;width:min(560px,100%);background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line2);border-radius:16px;box-shadow:0 1px 0 color-mix(in srgb,var(--brass) 35%,transparent) inset,0 18px 50px -18px #0006}
+#title .title-card:has(.create){width:min(780px,100%);padding:24px 26px}
+#title .title-card .create{background:transparent;border:0;padding:0;width:100%;box-shadow:none}
+#title .logo{gap:6px}
+#title .logo h1,#title .logo>.ic{color:var(--ink)}
+#title .logo>.ic{color:var(--brass)}
+#title .logo p{color:var(--mute);max-width:440px;text-align:center;margin:0}
+#title .ver{color:var(--ink);background:color-mix(in srgb,var(--panel) 85%,transparent);padding:3px 10px;border-radius:999px}
+#title .tmenu{width:min(380px,100%)}
+#title .tmute{background:var(--panel);border-color:var(--line2)}
+@media (max-width:600px){#title .title-card{padding:22px 16px;gap:18px;border-radius:12px}}
+#title .logo h1{text-shadow:0 2px 0 color-mix(in srgb,var(--brass) 30%,transparent)}
+:root[data-theme="dark"] #title .logo h1{color:var(--brass-hi);text-shadow:0 3px 20px #0008}
+#title .ver{left:50%;right:auto;translate:-50% 0;width:max-content;max-width:calc(100% - 32px);text-align:center}
+#title:has(.create) .ver{display:none}
+#title .title-card{width:min(600px,100%)}
+#title .logo p{max-width:500px;text-wrap:balance}
+@media (max-width:600px){#title .title-in{padding:64px 12px 72px}#title .title-card:has(.create){padding:18px 14px}}

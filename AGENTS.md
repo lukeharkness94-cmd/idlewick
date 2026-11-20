@@ -177,3 +177,8 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - Validation: opening-routes-ui.cjs, player-feedback-ui.cjs, quest-progression.cjs, crosslinks*.cjs, review-opening.cjs and review-preparation.cjs, with regression/art/storage/ui-fit/ui-current/ui-rules. Scripted progression and granted UI fixtures are not human playtests. Always deliver inspected current screenshots and the rebuilt playable HTML.
 
 - 20 November follow-up: `UI.revealCard` reveals exact recipe/study targets inside desktop catalogue scrollers without moving the shell; phones retain card navigation. `UI.afterImpact` and tracked projectile animation promises coordinate hit numbers, exits and replacement foes with actual browser flight completion, including delayed launch/cancellation. Never change simulation rewards/timers to solve a presentation delay.
+
+### Owner decisions — 20 November 2026
+- Shop tiers: every tool tier and workshop rank stays on the shelf. An "Available only" switch (the Ready to make switch's look; `UI.shopAvailableOnly`, in-session) hides tiers that need a region you haven't reached or a skill you haven't learned, and workshop ranks below their level; acquired ranks and tiers that only need supplies stay. It is off by default.
+- Title screen: it follows the player's theme like the rest of the game (no forced night scene). The hero's current town scene sits behind a parchment card at the smallest whole-number scale that covers the window (cropped, never stretched; dusk filter in the dark theme). Hero creation sits in the same card. The opening story (`js/intro.js`) keeps its own dark shots.
+

@@ -73,12 +73,7 @@
 :root[data-theme="light"] .qline{color:#7d4e08!important}
 /* tooltips stay dark parchment in both themes: strong contrast and the same look everywhere */
 
-/* ---------- The title screen is a night scene: keep it dark whatever the theme ---------- */
-:root[data-theme="light"] #title{
-  --ground:#0d1215; --panel:#141c21; --panel2:#1b262c; --line:#28373e; --line2:#364a52;
-  --ink:#e9e4d5; --mute:#93a3a1; --brass:#d8a64a; --brass-hi:#f3d58a; --brass-lo:#8a6a2e;
-  color-scheme:dark;
-}
+/* The title follows the theme like the rest of the game (20 Nov 2026); its look is the "Title" block in css/hearthside.css. */
 :root[data-theme="light"] .rail .brand{color:var(--brass-hi)}
 :root[data-theme="light"] .hub.on{background:#fffcf3}
 @media (max-width:860px){:root[data-theme="light"] .rail{background:#fbf7ecf2}}

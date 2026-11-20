@@ -4372,3 +4372,7 @@ html.calm .stage-track i{transition:none}@media(prefers-reduced-motion:reduce){.
  html.short .combat-equipped-totals{position:absolute;top:5px;right:8px;margin:0;gap:0 8px;flex-wrap:nowrap}
  html.short .combat-equipped-totals i{display:none}
 }
+
+/* Shop: the "Available only" switch above the tool tiers (20 Nov), same look as Ready to make */
+.shop-filter-row{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin:0 0 10px}
+.shop-filter-row small{font-size:14px}

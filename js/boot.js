@@ -4,29 +4,39 @@ const DQ = window.DQ, D = DQ.data, { $, $$, ico, esc } = DQ;
 DQ.started = false;
 
 function fireflies(cv) {
+  const tint = document.documentElement.dataset.theme === 'dark' ? '243,213,138' : '255,236,190';
   const cx = cv.getContext('2d'); let w, h; const fit = () => { w = cv.width = innerWidth; h = cv.height = innerHeight; }; fit(); addEventListener('resize', fit);
   const fl = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), r: .6 + Math.random() * 1.8, p: Math.random() * 6, s: .02 + Math.random() * .05 }));
   let lastFrame=performance.now();
   const loop = t => {
     if (!cv.isConnected) return;
     const frames=Math.max(0,Math.min(3,(t-lastFrame)/(1000/60)));lastFrame=t; cx.clearRect(0, 0, w, h);
-    for (const f of fl) { f.x += Math.sin(t / 2400 + f.p) * .0004 * frames; f.y -= f.s * .0006 * frames; if (f.y < -.02) { f.y = 1.02; f.x = Math.random(); } const a = .35 + .65 * Math.abs(Math.sin(t / 900 + f.p)); cx.fillStyle = `rgba(243,213,138,${a * .85})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r, 0, 6.3); cx.fill(); cx.fillStyle = `rgba(243,213,138,${a * .12})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r * 6, 0, 6.3); cx.fill(); }
+    for (const f of fl) { f.x += Math.sin(t / 2400 + f.p) * .0004 * frames; f.y -= f.s * .0006 * frames; if (f.y < -.02) { f.y = 1.02; f.x = Math.random(); } const a = .35 + .65 * Math.abs(Math.sin(t / 900 + f.p)); cx.fillStyle = `rgba(${tint},${a * .85})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r, 0, 6.3); cx.fill(); cx.fillStyle = `rgba(${tint},${a * .12})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r * 6, 0, 6.3); cx.fill(); }
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
 }
 
+/* The title (20 Nov 2026 redo): it follows the player's theme like the rest of the game. Behind a parchment card,
+   the hero's current town (a new hero's Willowbrook, half-mended or not) at the smallest whole-number scale that
+   covers the window, cropped from the middle and never stretched; dusk under the dark theme. */
+const titleTown = () => { const t = DQ.S && DQ.S.town; return t && D.TOWN && D.TOWN[t] ? t : 'willowbrook'; };
+function sceneFit() {
+  const box = $('#title .title-scene'), img = box && box.querySelector('img'); if (!img) return;
+  const w = box.clientWidth || innerWidth, h = box.clientHeight || innerHeight, k = Math.max(1, Math.ceil(Math.max(w / 640, h / 360)));
+  Object.assign(img.style, { width: 640 * k + 'px', height: 360 * k + 'px', left: Math.round((w - 640 * k) / 2) + 'px', top: Math.round((h - 360 * k) / 2) + 'px' });
+}
 function titleHtml(has) {
-  const S = DQ.S;
-  return `<div class="title-sky"></div><canvas id="tcv"></canvas>
-    <svg class="title-hills" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><path d="M0 220q150-90 320-40t330-30 330 20 220-30v160H0z" fill="#0f1a1e"/><path d="M0 260q200-60 400-20t420-10 380 10v60H0z" fill="#0a1114"/><g fill="#070c0e"><path d="M120 280v-70l16-20 16 20v70z"/><path d="M180 280v-50l14-16 14 16v50z"/><path d="M880 280v-90l20-24 20 24v90z"/><path d="M940 280v-60l16-18 16 18v60z"/></g><g fill="#f3d58a"><rect x="130" y="224" width="5" height="8"/><rect x="900" y="206" width="5" height="9"/><rect x="950" y="236" width="5" height="8"/></g></svg>
-    <div class="title-in"><div class="logo">${ico('candle')}<h1>Idlewick</h1><p>A cosy idle adventure. Light the wick, and keep the realm ticking.</p></div>
-    ${DQ.saveHealth ? `<p role="alert">${esc(DQ.saveHealth)}</p>` : ''}<div class="tmenu" id="tmenu">${has ? `<button class="tbtn primary" id="t-cont"><span>Continue</span><small>${esc(S.name)} · Hero ${DQ.advLvl()} · ${DQ.fmtTime(S.playtime)} played</small>${(() => { let a = ''; try { a = S.act ? DQ.actLabel(S.act) : ''; } catch (e) { a = ''; } const t = D.TOWN[S.town] ? D.TOWN[S.town].name : ''; return `<small class="t-last">${a ? `Last time: ${esc(a.charAt(0).toLowerCase() + a.slice(1))} in ${esc(t)}` : `Resting in ${esc(t)}`}</small>`; })()}</button>` : ''}<button class="tbtn ${has ? '' : 'primary'}" id="t-new"><span>New game</span></button></div></div>
+  const S = DQ.S, url = DQ.sceneUrl ? DQ.sceneUrl(titleTown()) : '';
+  return `<div class="title-scene" aria-hidden="true">${url ? `<img class="pxa" src="${url}" alt="" draggable="false">` : ''}</div><div class="title-wash"></div><canvas id="tcv"></canvas>
+    <div class="title-in"><div class="title-card"><div class="logo">${ico('candle')}<h1>Idlewick</h1><p>A cosy idle adventure. Mend the towns, find the missing bells, put the kettle on.</p></div>
+    ${DQ.saveHealth ? `<p role="alert">${esc(DQ.saveHealth)}</p>` : ''}<div class="tmenu" id="tmenu">${has ? `<button class="tbtn primary" id="t-cont"><span>Continue</span><small>${esc(S.name)} · Hero ${DQ.advLvl()} · ${DQ.fmtTime(S.playtime)} played</small>${(() => { let a = ''; try { a = S.act ? DQ.actLabel(S.act) : ''; } catch (e) { a = ''; } const t = D.TOWN[S.town] ? D.TOWN[S.town].name : ''; return `<small class="t-last">${a ? `Last time: ${esc(a.charAt(0).toLowerCase() + a.slice(1))} in ${esc(t)}` : `Resting in ${esc(t)}`}</small>`; })()}</button>` : ''}<button class="tbtn ${has ? '' : 'primary'}" id="t-new"><span>New game</span></button></div></div></div>
     <button class="iconb tmute" id="t-mute" aria-label="Mute">${ico('sound')}</button><small class="ver">Version 0.4 · Close the game any time: your hero keeps working while you are away</small>`;
 }
 
+addEventListener('resize', () => { if (!$('#title').hidden) sceneFit(); });
 function showTitle() {
-  const has = DQ.load(), t = $('#title'); DQ.applyTheme(); t.hidden = false; t.innerHTML = titleHtml(has); fireflies($('#tcv'));
+  const has = DQ.load(), t = $('#title'); DQ.applyTheme(); t.hidden = false; t.innerHTML = titleHtml(has); sceneFit(); fireflies($('#tcv'));
   const go = () => { DQ.audioInit(); DQ.musicMode('title'); DQ.musicStart(); };
   $('#t-mute').onclick = () => { go(); DQ.setMuted(!DQ.S.settings.muted); $('#t-mute').innerHTML = ico(DQ.S.settings.muted ? 'mute' : 'sound'); };
   if (has) { $('#t-cont').onclick = () => { go(); start(false); }; $('#t-cont').focus(); }
