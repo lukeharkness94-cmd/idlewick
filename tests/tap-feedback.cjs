@@ -1,6 +1,6 @@
 const {chromium}=require('playwright'),assert=require('node:assert/strict');
-(async()=>{const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']});try{
-const p=await browser.newPage();await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8774/index.html');await p.waitForFunction(()=>!!window.DQ?.applyScale);let cases=0;
+(async()=>{const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined,headless:true,args:['--no-sandbox']});try{
+const p=await browser.newPage();await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/index.html');await p.waitForFunction(()=>!!window.DQ?.applyScale);let cases=0;
 for(const [width,height]of [[1280,720],[1920,1080],[3440,1440],[390,844]])for(const scale of [.9,1,1.15]){
  await p.setViewportSize({width,height});await p.evaluate(scale=>{DQ.S.settings.uiScale=scale;DQ.S.settings.reduceFx=false;DQ.applyScale();document.querySelectorAll('.tap-fx').forEach(n=>n.remove());},scale);
  const target={x:Math.floor(width*.71),y:Math.floor(height*.67)};await p.mouse.click(target.x,target.y);

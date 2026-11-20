@@ -1,8 +1,8 @@
 /* Isolated granted fixtures: navigation and interaction checks, not human enjoyment results. */
 const{chromium}=require('playwright'),assert=require('node:assert/strict');
-(async()=>{const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox'],headless:true});try{
+(async()=>{const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined,args:['--no-sandbox'],headless:true});try{
 const p=await b.newPage({viewport:{width:1440,height:900}}),errors=[];p.on('pageerror',e=>errors.push(e.stack));
-await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8774/index.html');await p.locator('#t-new').click();await p.locator('#cr-go').click();await p.waitForTimeout(850);
+await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/index.html');await p.locator('#t-new').click();await p.locator('#cr-go').click();await p.waitForTimeout(850);
 await p.evaluate(()=>{DQ.paused=true;DQ.S.settings.notify=false;DQ.S.settings.storyScenes=false;for(const k of Object.keys(DQ.skillLessons))DQ.S.tut.done['lesson:'+k]=true;for(let i=0;i<12;i++)DQ.closeModal();for(const sk of DQ.data.SKILLS){DQ.S.unlocked[sk.id]=true;DQ.S.xp[sk.id]=DQ.data.XPF[70];}DQ.S.coins=1000000;DQ.give('ore_quartz',10);DQ.give('log_normal',20);DQ.ui.focusTask('crafting','craft_runes');});
 await p.evaluate(()=>{DQ.give('bread',5);DQ.give('feather',10);DQ.ui.focusTask('exploration','survey_willowbrook');DQ.ui.focusTask('exploration','observe_willowbrook');});assert.equal(await p.evaluate(()=>DQ.ui.taskChoice.exploration),'observe_willowbrook');assert.match(await p.locator('.task-summary').innerText(),/survey|chart/i);
 await p.evaluate(()=>{for(const it of Object.values(DQ.data.ITEMS).filter(it=>it.slot).slice(0,100))DQ.give(it.id,1);DQ.ui.packFilter='all';DQ.ui.packQ='';for(const id of Object.keys(DQ.data.ITEMS))if(!DQ.isTool(id))DQ.S.bank[id]=1;DQ.go('bank');});

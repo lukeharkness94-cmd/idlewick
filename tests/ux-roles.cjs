@@ -3,7 +3,7 @@
    4 expedition food plan and "Batch complete" · 5 Hunting and Exploration roles · 6 companion choice by job
    7 truthful "why you need it" uses. */
 const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs');
-(async()=>{const b=await chromium.launch({headless:true,args:['--no-sandbox'],...(fs.existsSync('/usr/bin/chromium')?{executablePath:'/usr/bin/chromium'}:{})});
+(async()=>{const b=await chromium.launch({headless:true,args:['--no-sandbox'],...(fs.existsSync('/usr/bin/chromium')?{executablePath:process.env.CHROMIUM_PATH||undefined}:{})});
 try{const p=await b.newPage({viewport:{width:1440,height:790}}),errors=[];p.on('pageerror',e=>errors.push(e.message));
 await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/index.html');await p.locator('#t-new').click();await p.locator('#cr-go').click();await p.waitForTimeout(900);
 await p.evaluate(()=>{const S=DQ.S,D=DQ.data;S.settings.muted=true;S.tut.hidden=true;S.settings.notify=false;for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[6];for(const k of ['cooking','fishing','hunting','exploration'])S.xp[k]=D.XPF[12];S.unlocked.cooking=S.unlocked.hunting=S.unlocked.exploration=true;for(let i=0;i<8;i++)DQ.closeModal();});
@@ -25,7 +25,7 @@ const done=await p.evaluate(async()=>{DQ.S.settings.notify=true;DQ.act.limit=2;f
 assert.ok(done.stopped,'the batch stops by itself');assert.match(done.note,/Batch complete/);
 /* 5 */
 await p.evaluate(()=>{DQ.S.beast.kills.chicken=3;DQ.ui.huntMode='quarry';DQ.go('hunting');});assert.match(await p.locator('.hunt-lead').innerText(),/today.s hunt/i);assert.ok(await p.locator('[data-do="huntgo"]').count()>=1);
-await p.evaluate(()=>DQ.go('exploration'));assert.match(await p.locator('.explore-lead').innerText(),/next worthwhile discovery/i);assert.equal(await p.locator('.discoveries').count(),1,'discoveries panel shown once');
+await p.evaluate(()=>{DQ.ui.tab['cross:exploration']='atlas';DQ.go('exploration');});assert.match(await p.locator('.explore-lead').innerText(),/next worthwhile discovery/i);assert.equal(await p.locator('.discoveries').count(),1,'discoveries panel shown once');
 /* 7 */
 const u=await p.evaluate(()=>{const S=DQ.S,D=DQ.data;S.pinnedProject=Object.keys(D.PROJECTS).find(k=>D.PROJECTS[k].town===S.town&&!S.projects[k]&&D.PROJECTS[k].cost.log_normal);return {log:DQ.usesOf('log_normal').map(x=>x.text),boat:DQ.usesOf('plank_normal').map(x=>x.text),tip:DQ.tips.item('log_normal')};});
 assert.ok(u.log.some(t=>/restoration/.test(t)),'logs: '+u.log.join('|'));assert.ok(u.boat.some(t=>/next boat/.test(t)));assert.match(u.tip,/Why you need it/);

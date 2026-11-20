@@ -1,5 +1,5 @@
 const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('fs');
-(async()=>{const browser=await chromium.launch({...(fs.existsSync('/usr/bin/chromium')?{executablePath:'/usr/bin/chromium'}:{}),args:['--no-sandbox']});try{
+(async()=>{const browser=await chromium.launch({...(fs.existsSync('/usr/bin/chromium')?{executablePath:process.env.CHROMIUM_PATH||undefined}:{}),args:['--no-sandbox']});try{
 const p=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];p.on('pageerror',e=>errors.push(e.message));
 await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/Play%20Idlewick.html');await p.locator('#t-new').click();await p.locator('#cr-go').click();await p.waitForTimeout(700);
 const checks=await p.evaluate(()=>{

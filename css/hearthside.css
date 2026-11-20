@@ -187,7 +187,8 @@ body{background-color:var(--ground)}
 #tip,#tip.on{pointer-events:none!important}
 .item-route-icons .item-route-icon{display:inline-grid;place-items:center;width:32px;height:32px;border:0;border-radius:0;background:none;box-shadow:none}
 @media(max-width:860px){.shop-upgrade-header .shop-categories .btn{font-size:16px;padding:7px;min-height:44px}.shop-upgrade-header .shop-categories{gap:5px}}
-.shop-upgrade-header .shop-categories .btn{width:100%;font-size:19px!important}
+.shop-upgrade-header .shop-categories .btn{width:100%}
+@media (min-width:861px){.shop-upgrade-header .shop-categories .btn{font-size:19px!important}}
 .shop-upgrade-header .shop-categories .btn.on{background:var(--brass)!important;color:var(--hs-action-ink)!important}
 /* Upgrade ranks describe progression; only the purchase control is a button. */
 .shop-stock article.illustrated-card,.recovery-shelf article.illustrated-card{border:0!important;background:transparent!important;box-shadow:none!important;translate:none!important;cursor:default}
@@ -323,7 +324,7 @@ html.calm .events .ev-result{animation:none}
 .recipe-origin .ic{width:18px;height:18px}
 .recipe-reveal{text-align:center;padding:16px}.recipe-reveal .recipe-reveal-art{display:flex;justify-content:center;margin:12px auto 22px;animation:recipe-unfold .75s ease-out}.recipe-reveal-art .ic{width:112px;height:112px;filter:drop-shadow(0 0 22px #d6b55680)}
 @keyframes recipe-unfold{from{opacity:0;transform:translateY(18px) scale(.7);filter:brightness(2)}to{opacity:1;transform:translateY(0) scale(1);filter:brightness(1)}}
-.combat-dps{display:block;white-space:nowrap;font-variant-numeric:tabular-nums;margin:4px 0 8px;color:var(--text)}
+.combat-dps{display:block;font-size:14px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;margin:4px 0 8px;color:var(--text)}
 .village-standing{display:grid;grid-template-columns:auto minmax(120px,240px) 1fr;align-items:center;gap:12px;padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--line2);flex:none;grid-column:1/-1}
 .village-standing .bar{height:8px}.village-standing small{font-size:14px}
 .event-fullscreen{padding:20px;background:#07101aea}.event-fullscreen>.m-card.wide{width:min(1200px,100%);max-width:none;height:calc(100dvh - 40px);display:flex;flex-direction:column}.event-fullscreen .m-body{flex:1;min-height:0;display:flex}.encounter-moment{display:flex;flex-direction:column;flex:1;min-width:0}.event-panorama{background-image:linear-gradient(transparent,#101a2470),var(--event-scene);background-size:cover;background-position:center 65%;image-rendering:pixelated;min-height:120px;flex:1;max-height:45vh;border-radius:8px}.encounter-moment .events{flex:none;padding-top:12px}.encounter-moment .event,.encounter-moment .ev-result{margin:0}.encounter-moment .ev-t{font-size:24px}.encounter-moment .ev-b>p{font-size:20px;max-width:75ch}.encounter-moment .ev-opts{display:flex;flex-wrap:wrap;gap:12px}.encounter-moment .ev-opt{flex:1;min-width:180px;min-height:64px}.event-fullscreen .m-act{margin-top:12px}
@@ -358,3 +359,9 @@ html.calm .events .ev-result{animation:none}
 }
 .recipe-reveal-art :is(img,svg,.ic),.event-subject :is(img,svg,.ic){width:128px!important;height:128px!important;max-width:none;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 8px 12px #b6934a60)}
 .magic-runes .activity-choices .skill-shop-link{display:none}
+/* Phone shop categories (review 20 Nov): three columns of ~105px could not hold icon + label side by side, so
+   "Skill upgrades" and "Equipment" were cut off. Stack the icon above a centred label instead. */
+@media (max-width:860px){
+  .shop-upgrade-header .shop-categories>.btn{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px;padding:8px 4px;min-height:72px;font-size:16px;line-height:1.15;white-space:normal;text-align:center;overflow:visible}
+  .shop-upgrade-header .shop-categories>.btn .ic,.shop-upgrade-header .shop-categories>.btn img{margin:0}
+}

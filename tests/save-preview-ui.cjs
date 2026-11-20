@@ -1,6 +1,6 @@
 const {chromium}=require('playwright'),assert=require('node:assert/strict');
-(async()=>{const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']});try{
- const context=await browser.newContext(),page=await context.newPage(),url=process.env.IDLEWICK_URL||'http://127.0.0.1:8774/index.html';
+(async()=>{const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined,headless:true,args:['--no-sandbox']});try{
+ const context=await browser.newContext(),page=await context.newPage(),url=process.env.IDLEWICK_URL||'http://127.0.0.1:8765/index.html';
  await page.goto(url);await page.locator('#t-new').click();await page.locator('#crname').fill('Save QA');await page.locator('#cr-go').click();await page.waitForTimeout(600);
  await page.evaluate(()=>{DQ.paused=true;DQ.S.coins=1234;DQ.S.xp.fishing=1000;if(!DQ.save())throw Error(DQ.saveHealth);});
  await page.reload();await page.waitForFunction(()=>window.DQ?.S?.name==='Save QA');assert.equal(await page.evaluate(()=>DQ.S.coins),1234);assert.equal(await page.evaluate(()=>DQ.S.xp.fishing),1000);

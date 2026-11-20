@@ -5,7 +5,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const URL=process.env.IDLEWICK_URL||'http://127.0.0.1:8765/';
 (async()=>{
- const browser=await chromium.launch({headless:true,args:['--no-sandbox'],...(fs.existsSync('/usr/bin/chromium')?{executablePath:'/usr/bin/chromium'}:{})});
+ const browser=await chromium.launch({headless:true,args:['--no-sandbox'],...(fs.existsSync('/usr/bin/chromium')?{executablePath:process.env.CHROMIUM_PATH||undefined}:{})});
  const fresh=async(name='Journey')=>{const ctx=await browser.newContext({viewport:{width:1280,height:900}});const page=await ctx.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(URL);await page.locator('#t-new').click();await page.locator('#crname').fill(name);await page.locator('#cr-go').click();await page.waitForTimeout(700);
   await page.evaluate(()=>{DQ.S.settings.muted=true;DQ.S.settings.storyScenes=false; /* Story playback has its own suite. */document.querySelectorAll('.note').forEach(n=>n.remove());});return {ctx,page,errors};};
@@ -15,7 +15,7 @@ const URL=process.env.IDLEWICK_URL||'http://127.0.0.1:8765/';
   {const {ctx,page,errors}=await fresh();
    assert.match(await page.locator('.journey h2').innerText(),/Meet Elder Wren/);
    await page.locator('.journey .btn.primary').click();await page.waitForTimeout(300);
-   await page.evaluate(()=>{DQ.go('overview');});assert.match(await page.locator('.journey-done').innerText(),/0\/5 shrimp/);
+   await page.evaluate(()=>{DQ.go('overview');});assert.match(await page.locator('.hs-home').innerText(),/0\s*\/\s*5/);
    await page.evaluate(()=>{DQ.startAct('fish','shrimp',{quiet:true});DQ.simulate(5*60000);DQ.startAct('wood','normal',{quiet:true});DQ.simulate(4*60000);DQ.ui.render(true);});
    assert.match(await page.locator('.journey h2').innerText(),/Claim First Steps/);
    await page.evaluate(()=>{DQ.stopAct&&DQ.stopAct(true);DQ.ui.render(true);for(let i=0;i<4;i++)DQ.closeModal&&DQ.closeModal();document.querySelectorAll('.note').forEach(n=>n.remove());});assert.equal(await page.evaluate(()=>DQ.skillUnlocked('cooking')),true,'First Steps teaches the cooking fire');
