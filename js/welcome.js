@@ -34,8 +34,27 @@ UI.welcomeBody = (sum, gap) => {
   const ready = D.QUESTS.filter(q => DQ.questState(q) === 'ready').length, research = DQ.awayDone || [];
   const chips = [ready ? `<button class="wb-chip" data-do="returnpick" data-a="go" data-b="quests">${ico('quest')}<b class="wb-num">${ready}</b> quest reward${ready > 1 ? 's' : ''} to claim</button>` : '', research.length ? `<span class="wb-chip">${ico('research')}Research finished: ${research.map(esc).join(', ')}</span>` : ''].filter(Boolean).join('');
   /* decisions straight after what you earned: they need an answer, everything below is optional */
-  const nDec = (S().inbox || []).length, decide = nDec || (DQ.eventResults || []).length ? `<div class="wb-sec wb-decide"><div class="wb-decide-h"><span class="k">${nDec ? `Decide · ${nDec} thing${nDec > 1 ? 's' : ''} happened while you were away` : 'Decided'}</span>${nDec ? '<small>Pick one choice for each. Each button says what it does.</small>' : ''}</div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></div>` : '';
+  const nDec = (S().inbox || []).length, decide = nDec || (DQ.eventResults || []).length ? `<div class="wb-sec wb-decide"><div class="wb-decide-h"><span class="k">${nDec ? `Decide · ${nDec} thing${nDec > 1 ? 's' : ''} happened while you were away` : 'Decided'}</span></div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></div>` : '';
   const extras = UI.returnExtras(sum);
-  return `<div class="wb">${banner}${earned}${decide}${chips ? `<div class="wb-chips">${chips}</div>` : ''}${nextCard}${opts ? `<div class="wb-sec"><span class="k">Other good options</span><div class="wb-opts">${opts}</div></div>` : ''}${extras}${capped ? `<p class="sm dim wb-fine">Full speed for the first 2 hours away, half speed after that, and nothing past 8 hours.</p>` : ''}</div>`;
+  /* 20 Nov (owner): decisions first, then clear "what next" actions, then three more things to do, then what you earned */
+  const act = (label, title, detail, btn, doAct, a = '', b = '', primary = false) => `<div class="wb-do"><span class="wb-do-k">${esc(label)}</span><div><b>${esc(title)}</b>${detail ? `<small>${esc(detail)}</small>` : ''}</div><button class="btn ${primary ? 'primary' : ''}" data-do="returnpick" data-a="${doAct}" data-b="${esc(String(a))}"${b ? ` data-c="${esc(String(b))}"` : ''}>${esc(btn)}</button></div>`;
+  const readyQ = D.QUESTS.filter(q => DQ.questState(q) === 'ready'), rows = [];
+  if (readyQ.length) rows.push(act('Claim', readyQ.length > 1 ? `${readyQ.length} quest rewards are ready` : `“${readyQ[0].name}” is ready`, readyQ.length > 1 ? readyQ.slice(0, 3).map(q => q.name).join(', ') : `Return to ${readyQ[0].giver}`, readyQ.length > 1 ? 'Claim rewards' : 'Claim reward', 'openquest', readyQ[0].id, '', true));
+  if (DQ.act) rows.push(act('Continue', DQ.actLabel(), 'Still going', 'Watch', 'go', DQ.actPage() || 'overview'));
+  else if (S().lastAct) rows.push(act('Continue', `Your last task: ${DQ.actLabel(S().lastAct) || 'carry on'}`, sum.stopped ? 'It stopped while you were away' : '', 'Start again', 'resume', '', '', !readyQ.length));
+  rows.push(act('Your quest', next.title, `${goal} · ${next.detail}`, next.title.length > 22 ? 'Go' : next.title, next.action, next.a || '', next.b || '', !readyQ.length && !!DQ.act));
+  const whatNext = `<div class="wb-sec"><span class="k">What next</span><div class="wb-dos">${rows.join('')}</div></div>`;
+  /* three more things: closest restoration, a skill about to level, the nearest quest, or one not started yet */
+  const more = (DQ.returnChoices ? DQ.returnChoices() : []).map(x => ({ ...x }));
+  const journeyQ = S().journey && D.QM[S().journey] ? S().journey : null;
+  const named = `${next.title} ${next.detail}`, activeQ = D.QUESTS.filter(q => DQ.questState(q) === 'active' && q.id !== journeyQ && !named.includes(q.name)).map(q => ({ q, pct: UI.questProgress ? UI.questProgress(q).pct : 0 })).sort((a, b) => b.pct - a.pct)[0];
+  if (activeQ) more.push({ title: `Nearly there: ${activeQ.q.name}`, text: `${Math.round(activeQ.pct)}% done · ${activeQ.q.giver}`, action: 'openquest', a: activeQ.q.id, art: 'quest' });
+  const newQ = D.QUESTS.find(q => DQ.questState(q) === 'new' && q.town === S().town && !named.includes(q.name));
+  if (newQ) more.push({ title: `New: ${newQ.name}`, text: `${newQ.giver} has a job for you`, action: 'openquest', a: newQ.id, art: 'quest' });
+  const opt3 = more.slice(0, 3).map(x => { const [kind, id] = String(x.art || '').split(':');
+    const art = kind === 'skill' ? skillArt(id) : kind === 'project' && DQ.pixelArt && DQ.pixelArt.stagePiece ? DQ.pixelArt.img(DQ.pixelArt.url('wb-site:' + id + ':' + (DQ.projectStage ? DQ.projectStage(id) : 0), () => DQ.pixelArt.stagePiece((D.PROJECTS[id] || {}).art || id, DQ.projectStage ? DQ.projectStage(id) : 0)), 32, 32, 64, '', '') : ico(kind === 'quest' ? 'quest' : 'star');
+    return `<button class="wb-opt" data-do="returnpick" data-a="${x.action}" data-b="${x.a}"><span class="wb-art">${art}</span><span><b>${esc(x.title)}</b><small>${esc(x.text)}</small></span></button>`; }).join('');
+  const research_ = research.length ? `<div class="wb-chips"><span class="wb-chip">${ico('research')}Research finished: ${research.map(esc).join(', ')}</span></div>` : '';
+  return `<div class="wb">${banner}${decide}${whatNext}${opt3 ? `<div class="wb-sec"><span class="k">More to do</span><div class="wb-opts">${opt3}</div></div>` : ''}${research_}${earned}${extras}${capped ? `<p class="sm dim wb-fine">Full speed for the first 2 hours away, half speed after that, and nothing past 8 hours.</p>` : ''}</div>`;
 };
 })();

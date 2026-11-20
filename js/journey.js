@@ -384,7 +384,7 @@ DQ.returnChoices = () => {
   return out;
 };
 UI.returnChoices = () => { const L = DQ.returnChoices(); return L.length ? `<div class="k" style="margin:14px 0 6px">Other good options</div><div class="return-choices">${L.map(x => `<div><b>${esc(x.title)}</b><small>${esc(x.text)}</small><button class="btn sm" data-do="returnpick" data-a="${x.action}" data-b="${x.a}">Open</button></div>`).join('')}</div>` : ''; };
-UI.DO.returnpick = (action, a) => { DQ.closeModal(); if (UI.DO[action]) UI.DO[action](a); };
+UI.DO.returnpick = (action, a, el) => { DQ.closeModal(); if (UI.DO[action]) UI.DO[action](a, el && el.dataset ? el.dataset.c : undefined); };
 Object.assign(UI.DO, {
   pinproject: id => { if (DQ.pinProject(id)) UI.render(false); },
   openproject: id => { const p=D.PROJECTS[id];if(!p)return;if(p.town!==S().town){const next=DQ.journeyNext(id);return UI.DO[next.action](next.a,next.b);} UI.tab.projectChoice = id; if (UI.view === 'projects') UI.render(false); else DQ.go('projects'); },

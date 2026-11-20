@@ -478,3 +478,10 @@ html.calm .illustrated-card.just-unlocked{box-shadow:0 0 0 3px var(--brass)}
 @media (prefers-reduced-motion:reduce){.illustrated-card.just-unlocked,.illustrated-card.just-unlocked::after,.illustrated-card.just-unlocked .choice-art img{animation:none}.illustrated-card.just-unlocked{box-shadow:0 0 0 3px var(--brass)}}
 /* Where you got it (20 Nov): one quiet line in item tooltips and details */
 .item-origin{margin-top:6px;padding-top:6px;border-top:1px solid color-mix(in srgb,currentColor 18%,transparent);font-size:14px;font-style:italic;opacity:.85}
+/* Welcome back (20 Nov): clear "what next" rows, each led by its verb */
+.wb-dos{display:flex;flex-direction:column;gap:8px}
+.wb-do{display:grid;grid-template-columns:96px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2)}
+.wb-do-k{font:700 13px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--brass)}
+.wb-do b{display:block;font-size:17px}.wb-do small{display:block;color:var(--mute);font-size:14px}
+.wb-do .btn{white-space:nowrap}
+@media (max-width:600px){.wb-do{grid-template-columns:1fr;gap:6px}}

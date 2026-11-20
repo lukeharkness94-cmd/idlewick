@@ -5240,6 +5240,13 @@ html.calm .illustrated-card.just-unlocked{box-shadow:0 0 0 3px var(--brass)}
 @media (prefers-reduced-motion:reduce){.illustrated-card.just-unlocked,.illustrated-card.just-unlocked::after,.illustrated-card.just-unlocked .choice-art img{animation:none}.illustrated-card.just-unlocked{box-shadow:0 0 0 3px var(--brass)}}
 /* Where you got it (20 Nov): one quiet line in item tooltips and details */
 .item-origin{margin-top:6px;padding-top:6px;border-top:1px solid color-mix(in srgb,currentColor 18%,transparent);font-size:14px;font-style:italic;opacity:.85}
+/* Welcome back (20 Nov): clear "what next" rows, each led by its verb */
+.wb-dos{display:flex;flex-direction:column;gap:8px}
+.wb-do{display:grid;grid-template-columns:96px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2)}
+.wb-do-k{font:700 13px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--brass)}
+.wb-do b{display:block;font-size:17px}.wb-do small{display:block;color:var(--mute);font-size:14px}
+.wb-do .btn{white-space:nowrap}
+@media (max-width:600px){.wb-do{grid-template-columns:1fr;gap:6px}}
 </style>
 
 </head>
@@ -18128,7 +18135,7 @@ DQ.returnChoices = () => {
   return out;
 };
 UI.returnChoices = () => { const L = DQ.returnChoices(); return L.length ? `<div class="k" style="margin:14px 0 6px">Other good options</div><div class="return-choices">${L.map(x => `<div><b>${esc(x.title)}</b><small>${esc(x.text)}</small><button class="btn sm" data-do="returnpick" data-a="${x.action}" data-b="${x.a}">Open</button></div>`).join('')}</div>` : ''; };
-UI.DO.returnpick = (action, a) => { DQ.closeModal(); if (UI.DO[action]) UI.DO[action](a); };
+UI.DO.returnpick = (action, a, el) => { DQ.closeModal(); if (UI.DO[action]) UI.DO[action](a, el && el.dataset ? el.dataset.c : undefined); };
 Object.assign(UI.DO, {
   pinproject: id => { if (DQ.pinProject(id)) UI.render(false); },
   openproject: id => { const p=D.PROJECTS[id];if(!p)return;if(p.town!==S().town){const next=DQ.journeyNext(id);return UI.DO[next.action](next.a,next.b);} UI.tab.projectChoice = id; if (UI.view === 'projects') UI.render(false); else DQ.go('projects'); },
@@ -20131,9 +20138,28 @@ UI.welcomeBody = (sum, gap) => {
   const ready = D.QUESTS.filter(q => DQ.questState(q) === 'ready').length, research = DQ.awayDone || [];
   const chips = [ready ? `<button class="wb-chip" data-do="returnpick" data-a="go" data-b="quests">${ico('quest')}<b class="wb-num">${ready}</b> quest reward${ready > 1 ? 's' : ''} to claim</button>` : '', research.length ? `<span class="wb-chip">${ico('research')}Research finished: ${research.map(esc).join(', ')}</span>` : ''].filter(Boolean).join('');
   /* decisions straight after what you earned: they need an answer, everything below is optional */
-  const nDec = (S().inbox || []).length, decide = nDec || (DQ.eventResults || []).length ? `<div class="wb-sec wb-decide"><div class="wb-decide-h"><span class="k">${nDec ? `Decide · ${nDec} thing${nDec > 1 ? 's' : ''} happened while you were away` : 'Decided'}</span>${nDec ? '<small>Pick one choice for each. Each button says what it does.</small>' : ''}</div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></div>` : '';
+  const nDec = (S().inbox || []).length, decide = nDec || (DQ.eventResults || []).length ? `<div class="wb-sec wb-decide"><div class="wb-decide-h"><span class="k">${nDec ? `Decide · ${nDec} thing${nDec > 1 ? 's' : ''} happened while you were away` : 'Decided'}</span></div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></div>` : '';
   const extras = UI.returnExtras(sum);
-  return `<div class="wb">${banner}${earned}${decide}${chips ? `<div class="wb-chips">${chips}</div>` : ''}${nextCard}${opts ? `<div class="wb-sec"><span class="k">Other good options</span><div class="wb-opts">${opts}</div></div>` : ''}${extras}${capped ? `<p class="sm dim wb-fine">Full speed for the first 2 hours away, half speed after that, and nothing past 8 hours.</p>` : ''}</div>`;
+  /* 20 Nov (owner): decisions first, then clear "what next" actions, then three more things to do, then what you earned */
+  const act = (label, title, detail, btn, doAct, a = '', b = '', primary = false) => `<div class="wb-do"><span class="wb-do-k">${esc(label)}</span><div><b>${esc(title)}</b>${detail ? `<small>${esc(detail)}</small>` : ''}</div><button class="btn ${primary ? 'primary' : ''}" data-do="returnpick" data-a="${doAct}" data-b="${esc(String(a))}"${b ? ` data-c="${esc(String(b))}"` : ''}>${esc(btn)}</button></div>`;
+  const readyQ = D.QUESTS.filter(q => DQ.questState(q) === 'ready'), rows = [];
+  if (readyQ.length) rows.push(act('Claim', readyQ.length > 1 ? `${readyQ.length} quest rewards are ready` : `“${readyQ[0].name}” is ready`, readyQ.length > 1 ? readyQ.slice(0, 3).map(q => q.name).join(', ') : `Return to ${readyQ[0].giver}`, readyQ.length > 1 ? 'Claim rewards' : 'Claim reward', 'openquest', readyQ[0].id, '', true));
+  if (DQ.act) rows.push(act('Continue', DQ.actLabel(), 'Still going', 'Watch', 'go', DQ.actPage() || 'overview'));
+  else if (S().lastAct) rows.push(act('Continue', `Your last task: ${DQ.actLabel(S().lastAct) || 'carry on'}`, sum.stopped ? 'It stopped while you were away' : '', 'Start again', 'resume', '', '', !readyQ.length));
+  rows.push(act('Your quest', next.title, `${goal} · ${next.detail}`, next.title.length > 22 ? 'Go' : next.title, next.action, next.a || '', next.b || '', !readyQ.length && !!DQ.act));
+  const whatNext = `<div class="wb-sec"><span class="k">What next</span><div class="wb-dos">${rows.join('')}</div></div>`;
+  /* three more things: closest restoration, a skill about to level, the nearest quest, or one not started yet */
+  const more = (DQ.returnChoices ? DQ.returnChoices() : []).map(x => ({ ...x }));
+  const journeyQ = S().journey && D.QM[S().journey] ? S().journey : null;
+  const named = `${next.title} ${next.detail}`, activeQ = D.QUESTS.filter(q => DQ.questState(q) === 'active' && q.id !== journeyQ && !named.includes(q.name)).map(q => ({ q, pct: UI.questProgress ? UI.questProgress(q).pct : 0 })).sort((a, b) => b.pct - a.pct)[0];
+  if (activeQ) more.push({ title: `Nearly there: ${activeQ.q.name}`, text: `${Math.round(activeQ.pct)}% done · ${activeQ.q.giver}`, action: 'openquest', a: activeQ.q.id, art: 'quest' });
+  const newQ = D.QUESTS.find(q => DQ.questState(q) === 'new' && q.town === S().town && !named.includes(q.name));
+  if (newQ) more.push({ title: `New: ${newQ.name}`, text: `${newQ.giver} has a job for you`, action: 'openquest', a: newQ.id, art: 'quest' });
+  const opt3 = more.slice(0, 3).map(x => { const [kind, id] = String(x.art || '').split(':');
+    const art = kind === 'skill' ? skillArt(id) : kind === 'project' && DQ.pixelArt && DQ.pixelArt.stagePiece ? DQ.pixelArt.img(DQ.pixelArt.url('wb-site:' + id + ':' + (DQ.projectStage ? DQ.projectStage(id) : 0), () => DQ.pixelArt.stagePiece((D.PROJECTS[id] || {}).art || id, DQ.projectStage ? DQ.projectStage(id) : 0)), 32, 32, 64, '', '') : ico(kind === 'quest' ? 'quest' : 'star');
+    return `<button class="wb-opt" data-do="returnpick" data-a="${x.action}" data-b="${x.a}"><span class="wb-art">${art}</span><span><b>${esc(x.title)}</b><small>${esc(x.text)}</small></span></button>`; }).join('');
+  const research_ = research.length ? `<div class="wb-chips"><span class="wb-chip">${ico('research')}Research finished: ${research.map(esc).join(', ')}</span></div>` : '';
+  return `<div class="wb">${banner}${decide}${whatNext}${opt3 ? `<div class="wb-sec"><span class="k">More to do</span><div class="wb-opts">${opt3}</div></div>` : ''}${research_}${earned}${extras}${capped ? `<p class="sm dim wb-fine">Full speed for the first 2 hours away, half speed after that, and nothing past 8 hours.</p>` : ''}</div>`;
 };
 })();
 
