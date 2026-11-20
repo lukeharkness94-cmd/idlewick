@@ -5153,6 +5153,59 @@ html.calm .events .ev-result{animation:none}
 #title .title-card{width:min(600px,100%)}
 #title .logo p{max-width:500px;text-wrap:balance}
 @media (max-width:600px){#title .title-in{padding:64px 12px 72px}#title .title-card:has(.create){padding:18px 14px}}
+
+/* ---------- Hero creation (20 Nov 2026): three steps on the road home ---------- */
+#title .title-card:has(.create){width:min(820px,100%)}
+#title .title-card:has(.create) .logo h1{font-size:44px}
+#title .title-card:has(.create) .logo p{display:none}
+#title .create{grid-template-columns:180px minmax(0,1fr);gap:16px 24px;align-items:start}
+#title .cr-steps{grid-column:1/-1;list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;counter-reset:none}
+#title .cr-steps button{width:100%;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--line2);background:var(--panel2);color:var(--mute);font:600 15px var(--f-body);cursor:pointer;text-align:left}
+#title .cr-steps button b{display:grid;place-items:center;flex:none;width:24px;height:24px;border-radius:50%;background:var(--panel);border:1px solid var(--line2);font-size:14px}
+#title .cr-steps button.on{color:var(--ink);border-color:var(--brass)}
+#title .cr-steps button.on b{background:var(--brass);border-color:var(--brass);color:var(--hs-action-ink,#fff)}
+#title .cr-steps button.done{color:var(--ink)}
+#title .cr-steps button.done b{border-color:var(--good,#2f7a4c);color:var(--good,#2f7a4c)}
+#title .cr-steps button:disabled{opacity:.55;cursor:default}
+#title .cr-port{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:220px;padding-top:12px}
+#title .cr-port img{width:144px;height:192px;image-rendering:pixelated}
+#title .cr-port::after{content:"";width:120px;height:14px;margin-top:-8px;border-radius:50%;background:radial-gradient(ellipse,#0003,transparent 70%)}
+#title .cr-form{gap:14px}
+#title .cr-row{display:flex;gap:10px;flex-wrap:wrap}
+#title .cr-row .tbtn{flex:1;padding:8px 12px;font-size:16px}
+#title .cr-letter{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border:1px solid var(--line2);border-radius:10px;background:color-mix(in srgb,var(--panel2) 70%,var(--panel));font-size:17px;line-height:1.5}
+#title .cr-letter p{margin:0}
+#title .cr-letter .date{color:var(--mute);font-size:15px}
+#title .cr-letter .blank{color:var(--brass);border-bottom:2px solid var(--brass);padding:0 3px}
+#title .cr-letter .cr-kit-options .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:3px;padding:10px;white-space:normal}
+#title .cr-letter .cr-kit-options .btn b{font-size:16px}
+#title .cr-letter .cr-kit-options .btn small{font-size:14px;line-height:1.35;color:var(--mute)}
+#title .cr-letter .cr-kit-options .btn.on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 12%,var(--panel));box-shadow:inset 3px 0 0 var(--brass)}
+#title .cr-pack{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+#title .cr-slot{display:flex;align-items:center;gap:6px;padding:6px 10px 6px 6px;border:1px solid var(--line2);border-radius:8px;background:var(--panel2);font:600 15px var(--f-body)}
+#title .cr-slot img,#title .cr-slot .ic{width:32px!important;height:32px!important}
+#title .cr-slot.new{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 12%,var(--panel2))}
+#title .cr-note{color:var(--mute);font-size:15px;margin:6px 0 0}
+#title .cr-greet{display:flex;gap:16px;align-items:flex-start;padding:16px;border:1px solid var(--line2);border-radius:10px;background:color-mix(in srgb,var(--panel2) 70%,var(--panel))}
+#title .cr-greet img{width:96px;height:96px;flex:none;border-radius:8px;image-rendering:pixelated;background:var(--panel2)}
+#title .cr-greet p{margin:4px 0 0;font-size:19px;line-height:1.45}
+#title .cr-greet .cr-note{font-size:16px}
+#title .cr-act{margin-top:4px}
+/* the town drifts a little closer with each step (whole pixels; still under reduced motion) */
+#title .title-scene img{translate:calc(var(--step,0) * -48px) calc(var(--step,0) * -12px);transition:translate 1.4s cubic-bezier(.3,.7,.2,1)}
+html.calm #title .title-scene img{transition:none}
+@media (prefers-reduced-motion:reduce){#title .title-scene img{transition:none}}
+@media (max-width:600px){
+ #title .create{grid-template-columns:1fr}
+ #title .cr-steps{gap:4px}#title .cr-steps button{padding:5px 6px;font-size:13px;gap:4px}#title .cr-steps button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #title .cr-port{min-height:0;padding-top:0}#title .cr-port img{width:96px;height:128px}
+ #title .cr-letter .cr-kit-options{grid-template-columns:1fr}
+ #title .cr-greet{flex-direction:column;align-items:center;text-align:center}
+}
+#title .tmenu:has(.create){width:100%}
+#title .title-card .create{width:100%;max-width:none}
+@media (min-width:601px){#title .create .cr-form{min-height:430px}#title .create .cr-act{margin-top:auto}}
+@media (max-width:600px){#title .cr-steps{grid-template-columns:auto auto auto;justify-content:center}#title .cr-steps button:not(.on) span{display:none}#title .cr-steps button span{overflow:visible;white-space:nowrap}}
 </style>
 
 </head>
@@ -22854,24 +22907,67 @@ function showTitle() {
   if (!has) $('#t-new').focus({ preventScroll: true, focusVisible: false });
 }
 
+/* Hero creation (20 Nov 2026, the owner's chosen "road home" + "letter" concept): three short steps with the town
+   drifting closer behind the card. 1 Who's coming home: name and look (Surprise me; Quick start begins at once).
+   2 Write back to Wren: what you've been doing since you left picks the starting weapon, and the real starter pack
+   is shown underneath. 3 Wren at the gate greets you by name and weapon, then the opening story plays.
+   #cr-go always means "begin now" (Quick start on step 1, Begin on step 3); no class lock, the kits are unchanged. */
+const BACKSTORY = {
+  sword: { title: 'Guarding turnips', text: 'at a warehouse in Ironpeak. Not one went missing.', bring: 'sword', greet: n => `${n}! Look at you. Is that a sword? Good. The goblins have been very rude about the well.`, pack: 'a bronze sword' },
+  bow: { title: 'Shooting pigeons', text: 'off the mill roof, a penny each. The miller still owes me.', bring: 'bow', greet: n => `${n}! You brought a bow. Lovely. Please don’t shoot the ducks, they’re Orrin’s.`, pack: 'a bow and 300 arrows' },
+  staff: { title: 'Helping a wizard', text: 'who mostly did people’s taxes. I can do a spark. And sums.', bring: 'staff', greet: n => `${n}! A staff. Can it fix a well? No? Well. It’s a nice stick.`, pack: 'a staff and 300 runes' }
+};
+const NAMES = ['Tamsin', 'Hob', 'Bryn', 'Odo', 'Petra', 'Wil', 'Mags', 'Cuthbert', 'Nell', 'Alder', 'Rook', 'Fen', 'Ottilie', 'Barnaby'];
 function create() {
   const look = { skin: D.LOOKS.skin[0], hair: D.LOOKS.hair[1], tunic: D.LOOKS.tunic[0], face: 'bright' }, keep = DQ.S.settings;
-  const previous = DQ.S;
-  let starter='sword';
-  DQ.S = DQ.newState('', look); DQ.S.settings = keep; DQ.S.journal = [{ t: Date.now(), kind: 'begin', icon: 'candle', town: 'willowbrook', text: 'You come home to Willowbrook with an empty pack and Wren’s letter in your pocket.' }]; DQ.applyTheme();
-  /* faces: three distinct pixel designs, shown as small portraits */
-  const faceRow = () => DQ.HERO_FACES && DQ.pixelArt ? `<div><span class="k">Face</span><div class="sws faces">${DQ.HERO_FACES.map(f => `<button class="swatch face-swatch ${look.face === f ? 'on' : ''}" data-k="face" data-c="${f}" aria-label="Face: ${f}"><img class="pxa" src="${DQ.heroBustUrl(Object.assign({}, look, { face: f }))}" width="32" height="32" alt=""></button>`).join('')}</div></div>` : '';
-  const preview=()=>`<img src="${DQ.heroFigureUrl(look)}" width="96" height="128" alt="Your hero with a ${D.STARTER_KITS[starter].label.toLowerCase()}">`;
-  const sw = (k) => D.LOOKS[k].map((c, i) => `<button class="swatch ${look[k] === c ? 'on' : ''}" data-k="${k}" data-c="${c}" style="background:${c}" aria-label="${k} ${i + 1}"></button>`).join('');
-  $('#tmenu').innerHTML = `<div class="create"><div class="cr-port" id="crp">${preview()}</div><div class="cr-form"><label><span class="k">Hero name</span><input id="crname" maxlength="20" placeholder="Adventurer" autocomplete="off"></label>
-    <div><span class="k">Skin</span><div class="sws">${sw('skin')}</div></div><div><span class="k">Hair</span><div class="sws">${sw('hair')}</div></div><div><span class="k">Tunic</span><div class="sws">${sw('tunic')}</div></div>${faceRow()}</div><fieldset class="cr-weapons"><legend>Starting weapon</legend><div class="cr-kit-options">${Object.entries(D.STARTER_KITS).map(([id,k])=>`<button type="button" class="btn ${id==='sword'?'on':''}" data-kit="${id}" aria-pressed="${id==='sword'}">${DQ.itemIco(D.ITEMS[k.weapon])}<b>${k.label}</b><small>${k.hint}</small></button>`).join('')}</div><p>You can change weapons anytime. Other starter weapons and supplies are sold in the shop.</p></fieldset>
-    <div class="cr-act"><button class="tbtn" id="cr-back"><span>Back</span></button><button class="tbtn primary" id="cr-go"><span>Begin adventure</span></button></div></div>`;
-  $('#crname').focus();
-  $('#tmenu').onclick = e => { const kit=e.target.closest('[data-kit]');if(kit){starter=kit.dataset.kit;DQ.S.equip.weapon=D.STARTER_KITS[starter].weapon;$$('[data-kit]').forEach(x=>{x.classList.toggle('on',x===kit);x.setAttribute('aria-pressed',x===kit);});$('#crp').innerHTML=`<img src="${DQ.heroFigureUrl(look)}" width="96" height="128" alt="Your hero with a ${D.STARTER_KITS[starter].label.toLowerCase()}">`;return;}const b = e.target.closest('.swatch'); if (!b) return; look[b.dataset.k] = b.dataset.c; DQ.S.look = look; DQ.sfx('click'); $$(`.swatch[data-k="${b.dataset.k}"]`).forEach(x => x.classList.toggle('on', x === b)); $('#crp').innerHTML = preview(); };
-  $('#cr-back').onclick = () => { DQ.sfx('click'); DQ.S = previous; showTitle(); };
-  const commit = () => { const draft = DQ.S, chosen=DQ.newState('',look,starter);draft.equip=chosen.equip;draft.ammo=chosen.ammo;draft.inv=chosen.inv; DQ.S = previous; if (DQ.hasSave() && DQ.backup && !DQ.backup('before new hero')) { DQ.S = draft; DQ.toast('Could not back up your existing hero. Download a backup first.', true); return; } DQ.S = draft; DQ.S.name = $('#crname').value.trim().slice(0, 20) || 'Adventurer'; DQ.S.look = look; if (DQ.save()) start(true); else DQ.toast(DQ.saveHealth, true); };
+  const previous = DQ.S, pick = list => list[Math.floor(Math.random() * list.length)];
+  let starter = 'sword', step = 0, seen = 0, name = '';
+  DQ.S = DQ.newState('', look); DQ.S.settings = keep; DQ.applyTheme();
+  const heroName = () => name.trim().slice(0, 20) || 'Adventurer';
+  const kit = () => D.STARTER_KITS[starter];
+  const preview = () => { DQ.S.equip.weapon = kit().weapon; DQ.S.look = look; return `<img class="pxa" src="${DQ.heroFigureUrl(look)}" width="96" height="128" alt="Your hero with a ${kit().label.toLowerCase()}">`; };
+  const sw = k => D.LOOKS[k].map((c, i) => `<button type="button" class="swatch ${look[k] === c ? 'on' : ''}" data-k="${k}" data-c="${c}" style="background:${c}" aria-label="${k} ${i + 1}" aria-pressed="${look[k] === c}"></button>`).join('');
+  const faceRow = () => DQ.HERO_FACES && DQ.pixelArt ? `<div><span class="k">Face</span><div class="sws faces">${DQ.HERO_FACES.map(f => `<button type="button" class="swatch face-swatch ${look.face === f ? 'on' : ''}" data-k="face" data-c="${f}" aria-label="Face: ${f}" aria-pressed="${look.face === f}"><img class="pxa" src="${DQ.heroBustUrl(Object.assign({}, look, { face: f }))}" width="32" height="32" alt=""></button>`).join('')}</div></div>` : '';
+  const item = (id, n, label, mark) => `<div class="cr-slot ${mark ? 'new' : ''}">${DQ.itemIco(D.ITEMS[id])}<span>${esc(label)}${n > 1 ? ` ×${n}` : ''}</span></div>`;
+  const pack = () => { const k = kit(); return `<div class="cr-pack" aria-label="Your starting pack">${item(k.weapon, 1, D.ITEMS[k.weapon].name, 1)}${k.ammo ? item(k.ammo, k.quantity, 'Arrows', 1) : ''}${k.runes ? item('rune', k.runes, 'Runes', 1) : ''}${item('bread', 5, 'Bread')}<div class="cr-slot">${ico('coin')}<span>25 coins</span></div></div>`; };
+  const steps = ['Who’s coming home', 'Write to Wren', 'Wren at the gate'];
+  const bar = () => `<ol class="cr-steps">${steps.map((t, i) => `<li><button type="button" class="${i === step ? 'on' : ''} ${i < step ? 'done' : ''}" data-step="${i}" ${i > seen ? 'disabled' : ''} aria-current="${i === step ? 'step' : 'false'}"><b>${i + 1}</b><span>${t}</span></button></li>`).join('')}</ol>`;
+  const wren = DQ.folkOf && (DQ.folkOf('Elder Wren') || DQ.folkOf('Wren'));
+  const bodies = [
+    () => `<label><span class="k">Hero name</span><input id="crname" maxlength="20" placeholder="Adventurer" autocomplete="off" value="${esc(name)}"></label>
+      <div><span class="k">Skin</span><div class="sws">${sw('skin')}</div></div><div><span class="k">Hair</span><div class="sws">${sw('hair')}</div></div><div><span class="k">Tunic</span><div class="sws">${sw('tunic')}</div></div>${faceRow()}
+      <div class="cr-row"><button type="button" class="tbtn" id="cr-dice"><span>Surprise me</span></button><button type="button" class="tbtn" id="cr-go"><span>Quick start</span></button></div>
+      <div class="cr-act"><button type="button" class="tbtn" id="cr-back"><span>Back</span></button><button type="button" class="tbtn primary" id="cr-next"><span>Write to Wren</span></button></div>`,
+    () => `<div class="cr-letter"><p class="date">On the road home, early spring</p><p>Dear Wren,</p><p>It’s <b class="blank">${esc(heroName())}</b>. Yes, I remember the well. I’ll be home by Thursday.</p><p>Since I left, I’ve been</p>
+      <div class="cr-kit-options" role="group" aria-label="What you have been doing, which sets your starting weapon">${Object.entries(BACKSTORY).map(([id, b]) => `<button type="button" class="btn ${id === starter ? 'on' : ''}" data-kit="${id}" aria-pressed="${id === starter}">${DQ.itemIco(D.ITEMS[D.STARTER_KITS[id].weapon])}<b>${b.title}</b><small>${b.text}</small></button>`).join('')}</div>
+      <p>so I’m bringing my <b class="blank">${BACKSTORY[starter].bring}</b>. Put the kettle on.</p></div>
+      <div><span class="k">Your pack</span>${pack()}<p class="cr-note">${starter === 'staff' ? 'Spark is ready to cast; each cast uses a rune.' : starter === 'bow' ? 'Arrows are equipped. Any shop sells more.' : 'No ammunition needed.'} You can change weapon any time.</p></div>
+      <div class="cr-act"><button type="button" class="tbtn" id="cr-prev"><span>Back</span></button><button type="button" class="tbtn primary" id="cr-next"><span>Walk to the gate</span></button></div>`,
+    () => `<div class="cr-greet">${wren ? `<img class="pxa" src="${DQ.folkUrl(wren)}" width="96" height="96" alt="Wren">` : ''}<div><span class="k">Wren</span><p>“${esc(BACKSTORY[starter].greet(heroName()))}”</p><p class="cr-note">“Your old room’s made up. Mind the third stair.”</p></div></div>
+      <div class="cr-act"><button type="button" class="tbtn" id="cr-prev"><span>Back</span></button><button type="button" class="tbtn primary" id="cr-go"><span>Begin</span></button></div>`
+  ];
+  const draw = () => {
+    seen = Math.max(seen, step);
+    $('#tmenu').innerHTML = `<div class="create cr-step-${step}">${bar()}<div class="cr-port" id="crp">${preview()}</div><div class="cr-form">${bodies[step]()}</div></div>`;
+    const scene = $('#title .title-scene'); if (scene) scene.style.setProperty('--step', step);
+    const focus = $('#crname') || $('#tmenu [data-kit].on') || $('#cr-go'); if (focus) focus.focus({ preventScroll: true });
+  };
+  const go = n => { const input = $('#crname'); if (input) name = input.value; step = Math.max(0, Math.min(2, n)); DQ.sfx('click'); draw(); };
+  const commit = () => { const input = $('#crname'); if (input) name = input.value; const draft = DQ.S, chosen = DQ.newState('', look, starter); draft.equip = chosen.equip; draft.ammo = chosen.ammo; draft.inv = chosen.inv; DQ.S = previous; if (DQ.hasSave() && DQ.backup && !DQ.backup('before new hero')) { DQ.S = draft; DQ.toast('Could not back up your existing hero. Download a backup first.', true); return; } DQ.S = draft; DQ.S.name = heroName(); DQ.S.look = look; DQ.S.journal = [{ t: Date.now(), kind: 'begin', icon: 'candle', town: 'willowbrook', text: `You come home to Willowbrook with ${BACKSTORY[starter].pack}, five loaves and Wren’s letter in your pocket.` }]; if (DQ.save()) start(true); else DQ.toast(DQ.saveHealth, true); };
   const begin = () => DQ.hasSave() ? DQ.modal({ title: 'Begin a new hero?', body: '<p>Your existing hero will be kept in automatic backups. Your new adventure replaces the active save.</p>', actions: [{ label: 'Begin new hero', primary: true, fn: commit }, { label: 'Keep existing hero' }] }) : commit();
-  $('#cr-go').onclick = begin; $('#crname').addEventListener('keydown', e => { if (e.key === 'Enter') begin(); });
+  $('#tmenu').onclick = e => {
+    const t = e.target.closest('button'); if (!t) return;
+    if (t.id === 'cr-go') return begin();
+    if (t.id === 'cr-back') { DQ.sfx('click'); DQ.S = previous; return showTitle(); }
+    if (t.id === 'cr-next') return go(step + 1);
+    if (t.id === 'cr-prev') return go(step - 1);
+    if (t.dataset.step) return go(+t.dataset.step);
+    if (t.id === 'cr-dice') { for (const k of ['skin', 'hair', 'tunic']) look[k] = pick(D.LOOKS[k]); if (DQ.HERO_FACES) look.face = pick(DQ.HERO_FACES); name = pick(NAMES); starter = pick(Object.keys(D.STARTER_KITS)); DQ.sfx('click'); return draw(); }
+    if (t.dataset.kit) { starter = t.dataset.kit; DQ.sfx('click'); return draw(); }
+    if (t.dataset.k) { const input = $('#crname'); if (input) name = input.value; look[t.dataset.k] = t.dataset.c; DQ.sfx('click'); $$(`.swatch[data-k="${t.dataset.k}"]`).forEach(x => { x.classList.toggle('on', x === t); x.setAttribute('aria-pressed', x === t); }); $('#crp').innerHTML = preview(); if (t.dataset.k !== 'face') $$('.face-swatch img').forEach((im, i) => { im.src = DQ.heroBustUrl(Object.assign({}, look, { face: DQ.HERO_FACES[i] })); }); }
+  };
+  $('#tmenu').onkeydown = e => { if (e.key === 'Enter' && e.target.id === 'crname') { e.preventDefault(); go(1); } };
+  draw();
 }
 
 function start(isNew) {

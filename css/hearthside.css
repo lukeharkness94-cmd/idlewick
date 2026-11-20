@@ -391,3 +391,56 @@ html.calm .events .ev-result{animation:none}
 #title .title-card{width:min(600px,100%)}
 #title .logo p{max-width:500px;text-wrap:balance}
 @media (max-width:600px){#title .title-in{padding:64px 12px 72px}#title .title-card:has(.create){padding:18px 14px}}
+
+/* ---------- Hero creation (20 Nov 2026): three steps on the road home ---------- */
+#title .title-card:has(.create){width:min(820px,100%)}
+#title .title-card:has(.create) .logo h1{font-size:44px}
+#title .title-card:has(.create) .logo p{display:none}
+#title .create{grid-template-columns:180px minmax(0,1fr);gap:16px 24px;align-items:start}
+#title .cr-steps{grid-column:1/-1;list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;counter-reset:none}
+#title .cr-steps button{width:100%;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--line2);background:var(--panel2);color:var(--mute);font:600 15px var(--f-body);cursor:pointer;text-align:left}
+#title .cr-steps button b{display:grid;place-items:center;flex:none;width:24px;height:24px;border-radius:50%;background:var(--panel);border:1px solid var(--line2);font-size:14px}
+#title .cr-steps button.on{color:var(--ink);border-color:var(--brass)}
+#title .cr-steps button.on b{background:var(--brass);border-color:var(--brass);color:var(--hs-action-ink,#fff)}
+#title .cr-steps button.done{color:var(--ink)}
+#title .cr-steps button.done b{border-color:var(--good,#2f7a4c);color:var(--good,#2f7a4c)}
+#title .cr-steps button:disabled{opacity:.55;cursor:default}
+#title .cr-port{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:220px;padding-top:12px}
+#title .cr-port img{width:144px;height:192px;image-rendering:pixelated}
+#title .cr-port::after{content:"";width:120px;height:14px;margin-top:-8px;border-radius:50%;background:radial-gradient(ellipse,#0003,transparent 70%)}
+#title .cr-form{gap:14px}
+#title .cr-row{display:flex;gap:10px;flex-wrap:wrap}
+#title .cr-row .tbtn{flex:1;padding:8px 12px;font-size:16px}
+#title .cr-letter{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border:1px solid var(--line2);border-radius:10px;background:color-mix(in srgb,var(--panel2) 70%,var(--panel));font-size:17px;line-height:1.5}
+#title .cr-letter p{margin:0}
+#title .cr-letter .date{color:var(--mute);font-size:15px}
+#title .cr-letter .blank{color:var(--brass);border-bottom:2px solid var(--brass);padding:0 3px}
+#title .cr-letter .cr-kit-options .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:3px;padding:10px;white-space:normal}
+#title .cr-letter .cr-kit-options .btn b{font-size:16px}
+#title .cr-letter .cr-kit-options .btn small{font-size:14px;line-height:1.35;color:var(--mute)}
+#title .cr-letter .cr-kit-options .btn.on{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 12%,var(--panel));box-shadow:inset 3px 0 0 var(--brass)}
+#title .cr-pack{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+#title .cr-slot{display:flex;align-items:center;gap:6px;padding:6px 10px 6px 6px;border:1px solid var(--line2);border-radius:8px;background:var(--panel2);font:600 15px var(--f-body)}
+#title .cr-slot img,#title .cr-slot .ic{width:32px!important;height:32px!important}
+#title .cr-slot.new{border-color:var(--brass);background:color-mix(in srgb,var(--brass) 12%,var(--panel2))}
+#title .cr-note{color:var(--mute);font-size:15px;margin:6px 0 0}
+#title .cr-greet{display:flex;gap:16px;align-items:flex-start;padding:16px;border:1px solid var(--line2);border-radius:10px;background:color-mix(in srgb,var(--panel2) 70%,var(--panel))}
+#title .cr-greet img{width:96px;height:96px;flex:none;border-radius:8px;image-rendering:pixelated;background:var(--panel2)}
+#title .cr-greet p{margin:4px 0 0;font-size:19px;line-height:1.45}
+#title .cr-greet .cr-note{font-size:16px}
+#title .cr-act{margin-top:4px}
+/* the town drifts a little closer with each step (whole pixels; still under reduced motion) */
+#title .title-scene img{translate:calc(var(--step,0) * -48px) calc(var(--step,0) * -12px);transition:translate 1.4s cubic-bezier(.3,.7,.2,1)}
+html.calm #title .title-scene img{transition:none}
+@media (prefers-reduced-motion:reduce){#title .title-scene img{transition:none}}
+@media (max-width:600px){
+ #title .create{grid-template-columns:1fr}
+ #title .cr-steps{gap:4px}#title .cr-steps button{padding:5px 6px;font-size:13px;gap:4px}#title .cr-steps button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #title .cr-port{min-height:0;padding-top:0}#title .cr-port img{width:96px;height:128px}
+ #title .cr-letter .cr-kit-options{grid-template-columns:1fr}
+ #title .cr-greet{flex-direction:column;align-items:center;text-align:center}
+}
+#title .tmenu:has(.create){width:100%}
+#title .title-card .create{width:100%;max-width:none}
+@media (min-width:601px){#title .create .cr-form{min-height:430px}#title .create .cr-act{margin-top:auto}}
+@media (max-width:600px){#title .cr-steps{grid-template-columns:auto auto auto;justify-content:center}#title .cr-steps button:not(.on) span{display:none}#title .cr-steps button span{overflow:visible;white-space:nowrap}}
