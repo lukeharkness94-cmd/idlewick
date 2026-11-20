@@ -444,7 +444,12 @@ function die() {
 }
 DQ.splat = (side, text, kind, delay) => { if (!DQ.sim.on) DQ.emit('splat', side, text, kind, delay); };
 
+/* Tracking (20 Nov 2026, owner): a tracked creature takes a few seconds to find before each fight. Those rounds
+   pass with no attacks either way, so a chosen target costs some kill rate, live and away alike. */
+DQ.TRACK_MS = 4000;
+DQ.trackRounds = () => Math.max(1, Math.round(DQ.TRACK_MS / Math.max(600, DQ.combatInterval())));
 function combatRound() {
+  if (DQ.fight && DQ.fight.tracking > 0) { DQ.fight.tracking--; return; }
   const f = DQ.fight, m = D.MON[f.id], ps = DQ.pstats(), A = DQ.ability, U = DQ.uniqueFx(); DQ.lastFoe = f.id; f.round++; f.pa = (f.pa || 0) + 1;
   const sty = ps.style, W = D.WTYPES[D.weaponType()], mhp = m.hp;
   if (sty === 'ranged') {
@@ -630,7 +635,7 @@ function kill(m) {
   if (DQ.creatureGainXp) DQ.creatureGainXp(m);
   const next = DQ.nextEncounter && DQ.nextEncounter(m);
   if (next) {
-    DQ.act.id = next.id; S().act.id = next.id; f.id = next.id; f.hp = next.hp;
+    DQ.act.id = next.id; S().act.id = next.id; f.id = next.id; f.hp = next.hp; if (DQ.act.track) f.tracking = DQ.trackRounds();
     if (!DQ.sim.on) { DQ.log(`You encounter ${/^[AEIOU]/.test(next.name) ? 'an' : 'a'} ${next.name.toLowerCase()}.`); DQ.emit('encounter', next); }
   } else f.hp = m.hp;
   f.round = 0;
@@ -812,7 +817,7 @@ DQ.resumeAfterLoad = () => {
     try {
       let ok = false; const k = s.kind;
       if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town; else if (EXT[k]) ok = !EXT[k].check(s.id); else ok = !!D.NODE[k + ':' + s.id] && DQ.nodeHere(D.NODE[k + ':' + s.id]);
-      if (ok) { DQ.act = { kind: k, id: s.id, area: s.area || null, target: s.target || null, questTarget: !!s.questTarget, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, limit: s.limit || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0, progress: s.progress || 0 }; DQ.act.dur = DQ.actDur(DQ.act); DQ.act.t0 -= DQ.act.progress; if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
+      if (ok) { DQ.act = { kind: k, id: s.id, area: s.area || null, target: s.target || null, questTarget: !!s.questTarget, track: !!s.track, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, limit: s.limit || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0, progress: s.progress || 0 }; DQ.act.dur = DQ.actDur(DQ.act); DQ.act.t0 -= DQ.act.progress; if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
     } catch (e) {}
     if (!DQ.act) S().act = null;
   }

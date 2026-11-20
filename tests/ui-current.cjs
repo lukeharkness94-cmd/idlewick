@@ -64,7 +64,7 @@ const fs=require('node:fs');
      assert.match(await page.locator('.ftr-weapon').textContent(),/s per attack/);
      assert.ok(await page.locator('.encounter-arena').evaluate(el=>getComputedStyle(el).backgroundRepeat.split(',').every(value=>value.trim()==='no-repeat')));
      assert.equal(await page.locator('.combat-col .combat-supplies').count(),1);assert.equal(await page.locator('.combat-col .fighter .ftr-row').count()>=4,true);assert.equal(await page.locator('.combat-side .battle-brief').count(),1);assert.equal(await page.locator('.tiledesc').count(),0);
-     assert.equal(await page.locator('.combat-live .lootp').count(),0);if(width===1440&&theme==='dark'){await page.evaluate(()=>{for(let i=0;i<3;i++)DQ.closeModal();});const head=page.locator('.encounter-list .enc-row').nth(1),hid=await head.getAttribute('data-a');await head.click();assert.match(await page.locator('.modal').innerText(),/Field guide/);await page.evaluate(()=>DQ.closeModal());await page.locator('.ready-line [data-do="guide"], [data-do="guide"]').first().click();assert.match(await page.locator('.modal').innerText(),/Field guide/);await page.evaluate(()=>DQ.closeModal());}
+     assert.equal(await page.locator('.combat-live .lootp').count(),0);if(width===1440&&theme==='dark'){await page.evaluate(()=>{for(let i=0;i<3;i++)DQ.closeModal();});const head=page.locator('.cw-mon .cw-mon-art').nth(1),hid=await head.getAttribute('data-a');await head.click();assert.match(await page.locator('.modal').innerText(),/Field guide/);await page.evaluate(()=>DQ.closeModal());await page.locator('.ready-line [data-do="guide"], [data-do="guide"]').first().click();assert.match(await page.locator('.modal').innerText(),/Field guide/);await page.evaluate(()=>DQ.closeModal());}
     }
    }
    assert.ok(await page.locator('#hud [aria-label="Settings"]').isVisible());
@@ -78,10 +78,10 @@ const fs=require('node:fs');
    assert.ok(r.badge,'New badge shows after an unlock');assert.ok(!r.after,'New badge clears once the page is opened');assert.equal(r.gear,0,'no weapon in work scenes');
    assert.ok(r.order.every((v,i,a)=>v>=0&&(!i||v>a[i-1])),'quest card reads name, story, rewards, action: '+r.order);assert.match(r.left,/quests/);assert.match(r.left,/Exploration/);}
   // Combat: the preview, the preparation brief and the start control describe the same encounter; the eat stepper works.
-  {const r=await page.evaluate(()=>{const S=DQ.S;S.beast.kills.goblin=1;DQ.ui.taskChoice.combat='goblin';DQ.go('combat');DQ.ui.render(true);
+  {const r=await page.evaluate(()=>{const S=DQ.S;S.beast.kills.goblin=1;/* out of combat the stage is the Where to fight window (20 Nov), so check the three agree during a fight */S.town='willowbrook';DQ.startAct('fight','goblin',{quiet:true});DQ.go('combat');DQ.ui.render(true);
     const nm=document.querySelector('#av-foe')?.closest('.side')?.querySelector('.nm')?.innerText||'',brief=document.querySelector('.battle-brief h3')?.innerText||'',ctl=document.querySelector('.arena-ctl')?.innerText||'',danger=document.querySelector('.battle-brief .danger')?.innerText||'';
     const at=S.settings.eatAt;DQ.ui.DO.eatstep('10');const after=S.settings.eatAt;S.settings.eatAt=at;
-    S.journey='boss';S.journeyTarget='grubnash';const was=S.towns.willowbrook.boss;S.towns.willowbrook.boss=true;DQ.go('overview');DQ.ui.render(true);const home=document.querySelector('.journey')?.innerText||'';S.towns.willowbrook.boss=was;
+    S.journey='boss';S.journeyTarget='grubnash';const was=S.towns.willowbrook.boss;S.towns.willowbrook.boss=true;DQ.go('overview');DQ.ui.render(true);const home=document.querySelector('.journey')?.innerText||'';S.towns.willowbrook.boss=was;DQ.stopAct(true);
     return {nm,brief,ctl,danger,at,after,home};});
    assert.match(r.nm,/Goblin/);assert.match(r.brief,/Goblin/);assert.match(r.ctl,/Goblin/);assert.match(r.danger,/danger/i);assert.equal(r.after,Math.min(70,r.at+10));
    assert.match(r.home,/Goal complete/i);assert.match(r.home,/Choose another goal/);}
@@ -89,7 +89,7 @@ const fs=require('node:fs');
   await page.evaluate(()=>{DQ.paused=true;DQ.startAct('fish','shrimp',{quiet:true});DQ.act.t0=Date.now()-DQ.act.dur/2;DQ.go('combat');DQ.ui.render(false);});
   assert.equal(await page.evaluate(()=>DQ.act.kind),'fish');
   assert.equal(await page.locator('.encounter-arena [data-prog]').count(),0);
-  assert.ok((await page.locator('.encounter-arena .mid').innerText()).includes('Preview'));
+  assert.equal(await page.locator('.encounter-arena .cw-window').count(),1,'another activity running: the stage offers where to fight (20 Nov)');
   assert.ok(await page.locator('#hud [data-prog="@"]').count());
   await page.evaluate(()=>{DQ.startAct('fight','chicken',{quiet:true});DQ.act.t0=Date.now()-DQ.act.dur/2;DQ.ui.render(false);});
   assert.equal(await page.locator('.encounter-arena [data-prog="fight:chicken"]').count(),1);
@@ -112,9 +112,10 @@ const fs=require('node:fs');
    return !!template.content.querySelector('.px-foe img.pxa[src^="data:image/png"]');
   })),'every enemy has a battle-ready model');
   await page.evaluate(()=>DQ.go('combat'));
-  assert.ok(await page.locator('.area-card').count()>=2,'combat offers town areas');
-  assert.match(await page.locator('.hunt-areas').innerText(),/\d+%/,'areas expose encounter odds');assert.match(await page.locator('.wh-head').first().getAttribute('aria-label'),/Common|Uncommon|Rare/,'and name the rarity');
-  await page.locator('.area-card [data-do="huntarea"]').first().click();
+  /* 20 Nov: the areas live in the stage's Where to fight window */
+  assert.ok(await page.locator('.cw-area').count()>=2,'combat offers town areas');
+  assert.match(await page.locator('.cw-window').innerText(),/\d+%/,'areas expose encounter odds');assert.match(await page.locator('.cw-mon-art').first().getAttribute('aria-label'),/Common|Uncommon|Rare/,'and name the rarity');
+  await page.locator('.cw-area [data-do="huntarea"]').first().click();
   assert.equal(await page.evaluate(()=>DQ.act?.kind),'fight');
   assert.ok(await page.evaluate(()=>!!DQ.act?.area),'expedition persists its selected area');
   await page.evaluate(()=>DQ.stopAct(true));
