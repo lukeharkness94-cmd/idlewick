@@ -16,7 +16,7 @@ const fs=require('node:fs');
    await page.evaluate(theme=>{DQ.S.settings.theme=theme;DQ.applyTheme();},theme);
    const entrance=await page.evaluate(()=>{
     const style=selector=>getComputedStyle(document.querySelector(selector));
-    return {name:style('#crname').color,nameBg:style('#crname').backgroundColor,back:style('#cr-back').color,backBg:style('#cr-back').backgroundColor,begin:style('#cr-go').color,primary:getComputedStyle(document.documentElement).getPropertyValue('--brass').trim(),form:style('#crname').fontFamily,logo:style('.logo h1').fontFamily,overflow:document.documentElement.scrollWidth>innerWidth};
+    return {name:style('#crname').color,nameBg:style('#crname').backgroundColor,back:style('#cr-back').color,backBg:style('#cr-back').backgroundColor,begin:style('#tmenu .tbtn.primary').color,primary:getComputedStyle(document.documentElement).getPropertyValue('--brass').trim(),form:style('#crname').fontFamily,logo:style('.logo h1').fontFamily,overflow:document.documentElement.scrollWidth>innerWidth};
    });
    const rgb=c=>c.startsWith('#')?c.slice(1).match(/../g).map(x=>parseInt(x,16)):c.match(/[\d.]+/g).slice(0,3).map(Number);
    const lum=c=>rgb(c).map(x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4;}).reduce((a,x,i)=>a+x*[.2126,.7152,.0722][i],0);
