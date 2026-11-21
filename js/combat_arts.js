@@ -42,7 +42,7 @@ const MORE = [['ember_dart', 'Ember Dart', 6, 6, 1, 'fire'], ['gale', 'Gale Cutt
   ['blizzard', 'Blizzard', 66, 39, 5, 'frost'], ['tempest', 'Tempest', 76, 42, 6, 'storm'], ['starfall', 'Starfall', 86, 45, 6, 'aether']];
 for (const [id, name, lvl, max, runes, el] of MORE) if (!D.SPELLS.some(s => s.id === id)) { D.SPELLS.push({ id, name, lvl, max, runes }); D.SPELL_EL[id] = el; ((D.UNL.magic = D.UNL.magic || {})[lvl] = D.UNL.magic[lvl] || []).push(name + ' spell'); }
 D.SPELLS.sort((a, b) => a.lvl - b.lvl);
-for (const [sk, list] of Object.entries(D.ARTS)) for (const a of list) if (a.lvl > 1) ((D.UNL[sk] = D.UNL[sk] || {})[a.lvl] = D.UNL[sk][a.lvl] || []).push(`Combat art: ${a.name} (${a.text})`);
+for (const [sk, list] of Object.entries(D.ARTS)) for (const a of list) if (a.lvl > 1) ((D.UNL[sk] = D.UNL[sk] || {})[a.lvl] = D.UNL[sk][a.lvl] || []).push(`${a.name} (combat art)`);
 /* ---------- which art is in use ---------- */
 const open = a => a && Q.lvl(Object.keys(D.ARTS).find(k => D.ARTS[k].includes(a))) >= a.lvl;
 Q.artFor = style => { const list = D.ARTS[style]; if (!list) return null; const id = (S().arts || {})[style], a = D.ART[id]; return open(a) ? a : list[0]; };

@@ -569,3 +569,4 @@ html.short .cw-foe{gap:5px;padding:7px!important}html.short .cw-foe-h img{width:
 .hud-train .cx-art .ic{width:14px!important;height:14px!important}
 .hud-train [data-b="dps"]{display:inline-block!important}
 .hud-train .cx-dpsrow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.skrow .sk-next{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
