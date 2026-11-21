@@ -153,7 +153,8 @@ DQ.prepAdvice = (monId, fc) => {
   const m = D.MON[monId]; if (!m) return [];
   const out = [], max = DQ.maxHp(), hp = Math.ceil(S().hp), town = S().town, coins = S().coins;
   const owned = id => DQ.have(id) || (S().bank && S().bank[id]);
-  if (hp < max * (DQ.act && DQ.act.kind === 'fight' && DQ.act.id !== monId ? .6 : .9)) { const per = Math.ceil(max / 50) * (1 + DQ.fx().regen), secs = Math.ceil((max - hp) / per * 3); out.push({ key: 'rest', title: 'Rest to full health first', text: `Health ${hp} / ${max}. You recover about ${secs}s outside combat, for example while fishing or cooking.`, action: 'go', a: 'fishing' }); }
+  /* while you are training on something else, health rises and falls every fight; resting is advice for when you stop (21 Nov: it flickered with Buy armour) */
+  if (!(DQ.act && DQ.act.kind === 'fight' && DQ.act.id !== monId) && hp < max * .9) { const per = Math.ceil(max / 50) * (1 + DQ.fx().regen), secs = Math.ceil((max - hp) / per * 3); out.push({ key: 'rest', title: 'Rest to full health first', text: `Health ${hp} / ${max}. You recover about ${secs}s outside combat, for example while fishing or cooking.`, action: 'go', a: 'fishing' }); }
   const stock = (D.SHOPS[town] || []).filter(id => !DQ.lockedSkillFor(id)), buys = [], who = (m.boss && m.boss.short) || m.name;
   /* abilities: an empty slot, or a boss special nothing in your slots answers, or a slotted ability your weapon cannot use */
   { const L = S().abilities || [], slots = DQ.abilSlots(), style = DQ.weaponStyle();

@@ -208,9 +208,9 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (DQ.combatLvl() < req && DQ.weaponStyle() === 'melee') {
     const sk = ['melee', 'defence'].map(k => [k, DQ.lvl(k)]).sort((a, b) => a[1] - b[1]), [low, lv] = sk[0], top = sk[sk.length - 1][1];
     const want = { melee: 'aggressive', defence: 'defensive' }[low];
-    if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. ${D.SK[low].name} ${lv} trails ${D.SK[sk[sk.length - 1][0]].name} ${top}: ${low === 'defence' ? 'more damage taken' : 'more misses, smaller hits'}. Switches focus and fights chickens.`, 'journeytrain', want, 'chicken');
+    if (top - lv >= 3 && S().style.melee !== want) return step(`Train ${D.SK[low].name} for Grubnash`, `Combat ${DQ.combatLvl()} / ${req}. ${D.SK[low].name} ${lv} trails ${D.SK[sk[sk.length - 1][0]].name} ${top}: ${low === 'defence' ? 'more damage taken' : 'more misses, smaller hits'}. Switches focus and fights mudlings.`, 'journeytrain', want, 'mudling');
   }
-  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train '+D.SK[DQ.weaponStyle()].name+' and Defence.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'chicken');
+  if (DQ.combatLvl() < req) return task('Train for Grubnash', 'Combat ' + DQ.combatLvl() + ' / ' + req + '. Train '+D.SK[DQ.weaponStyle()].name+' and Defence.' + (food < DQ.maxHp() ? ' Cook a little food on the way.' : ''), 'fight', 'mudling');
   /* Ready by level: let the battle forecast decide what, if anything, is missing. */
   const f = DQ.bossForecast ? DQ.bossForecast('grubnash') : null;
   if (f && f.winRate >= .75) return task('Challenge Grubnash', `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current gear and food.`, 'fight', 'grubnash');
@@ -223,7 +223,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
     if (!DQ.have('raw_shrimp')) return task('Gather food for the fight', msg, 'fish', 'shrimp');
     return task('Cook your provisions', msg, 'recipe', 'cook_shrimp');
   }
-  return task('Grow a little stronger', `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins. ` : ''}Food is fine; a few more combat levels or better gear will tip the odds. Check the forecast on the Combat page.`, 'fight', 'chicken');
+  return task('Grow a little stronger', `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins. ` : ''}Food is fine; a few more combat levels or better gear will tip the odds. Check the forecast on the Combat page.`, 'fight', 'mudling');
 };
 /* After Grubnash the boss destination follows the next region boss: travel, its quest, training, then the most useful
    preparation from the real save (DQ.prepAdvice) until the forecast favours you. */
@@ -236,7 +236,7 @@ DQ.regionNext = () => {
   if (bq && DQ.questState(bq) === 'new') return step(`Accept “${bq.name}”`, `${bq.giver} asks you to face ${short}. Accepting makes the victory count.`, 'qstart', bq.id);
   const req = b.boss.req;
   if (DQ.combatLvl() < req) { const fs = DQ.foodStep && DQ.foodStep(`Training here hits back harder than mudlings.`); if (fs) return fs; }
-  if (DQ.combatLvl() < req) { const foe = D.MONLIST.filter(m => m.town === b.town && !m.boss && !m.mini && m.cl <= DQ.combatLvl() + 2).sort((a, c) => c.cl - a.cl)[0] || D.MONLIST.find(m => m.town === b.town && !m.boss);
+  if (DQ.combatLvl() < req) { const foe = D.MONLIST.filter(m => m.town === b.town && !m.boss && !m.mini && !m.hl && !m.tower && m.cl <= DQ.combatLvl() + 2).sort((a, c) => c.cl - a.cl)[0] || D.MONLIST.find(m => m.town === b.town && !m.boss && !m.hl);
     return task(`Train for ${short}`, `Combat ${DQ.combatLvl()} / ${req}. ${foe ? `${foe.name}s are a fair fight here.` : ''}`, 'fight', foe ? foe.id : b.id); }
   const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
   if (f && f.winRate >= .75) return task(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'fight', b.id);
