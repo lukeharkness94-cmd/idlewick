@@ -5395,6 +5395,53 @@ html.rail-tight #combatnav .cg-tile .bar{width:80%}
 /* Melee/Ranged page tabs wrap on phones rather than pushing the page sideways */
 #view .style-page-tabs { flex-wrap: wrap; min-width: 0; }
 #view .style-page-tabs .btn { min-width: 0; }
+
+/* Night on the fight stage (owner, 23 Nov): the time-of-day tint colours the landscape only. The fighters, their
+   names, health and hit numbers sit above it at full strength, and night is a gentle wash, not a blackout. */
+.encounter-arena > .tod-tint, .encounter-arena > .weather { z-index: 0; }
+.encounter-arena > .side, .encounter-arena > .mid { position: relative; z-index: 1; }
+body[data-tod="night"] .encounter-arena > .tod-tint { background: linear-gradient(#0a144048, #1a245058); }
+body[data-tod="dusk"] .encounter-arena > .tod-tint { background: linear-gradient(#ff8a5a22, #7a4a8a20); }
+.encounter-arena .side .nm, .encounter-arena .side small.mono { text-shadow: 0 1px 0 color-mix(in srgb, var(--panel) 80%, transparent); }
+
+/* Your foe card, rebuilt (owner, 23 Nov: "text on two lines and symbols hovering over each other"). One column:
+   portrait (opens the field entry) with name, level and place on single lines and the health bar under them; then how
+   it fights as chips that wrap whole, never mid-chip; then drops. The boss button sits to the side at its own size. */
+.cw-next-body>.cw-foe{display:flex!important;flex-direction:column;gap:10px;grid-template-columns:none}
+.cw-next-body>.cw-foe>*{grid-column:auto!important;grid-row:auto!important}
+.cw-foe-h{display:flex;align-items:center;gap:12px;min-width:0}
+.cw-foe-pic{flex:none;display:grid;place-items:center;width:76px;height:76px;padding:0;border:1px solid var(--line2);border-radius:10px;background:color-mix(in srgb,var(--panel2) 70%,transparent);cursor:pointer}
+.cw-foe-pic:hover,.cw-foe-pic:focus-visible{border-color:var(--accent)}
+.cw-foe-id{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cw-foe-id>b{font:600 18px var(--f-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw-foe-id>small{color:var(--mute);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw-foe-id .cw-hp{display:flex;align-items:center;gap:8px;margin-top:4px}
+.cw-foe-id .cw-hp .bar{flex:1 1 auto;height:8px}
+.cw-foe-id .cw-hp small{flex:none;font-size:14px}
+.cw-chips{display:flex;flex-wrap:wrap;gap:6px}
+.cw-chip{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:3px 10px;border-radius:999px;border:1px solid var(--line2);background:color-mix(in srgb,var(--panel2) 60%,transparent);font-size:14px;line-height:1.4}
+.cw-chip .ic{width:16px;height:16px;flex:none}
+.cw-chip-k{color:var(--mute)}
+.cw-chip b{font-weight:600}
+.cw-chip .cw-dt{white-space:nowrap}
+.cw-drops{display:flex;align-items:center;gap:10px}
+.cw-drops>.k{flex:none}
+.cw-drops>div{display:flex;flex-wrap:wrap;gap:6px}
+.cw-fighting .cw-next-body>.boss-foot{flex:0 0 220px;align-self:flex-start}
+html.short .cw-foe-pic{width:56px;height:56px}html.short .cw-foe-pic img{width:48px!important;height:48px!important}
+/* fighter names on the stage read against any landscape */
+.encounter-arena .side .nm{display:inline-flex;align-items:center;gap:6px;padding:1px 8px;border-radius:999px;background:color-mix(in srgb,var(--panel) 82%,transparent)}
+.encounter-arena .side small.mono{padding:0 6px;border-radius:6px;background:color-mix(in srgb,var(--panel) 70%,transparent)}
+
+/* Hunting ground (hunt_stalk.js): the step the hunt is on, over the trap-line scene */
+.activity-scene.hunt .hunt-steptag{position:absolute;left:10px;top:10px;z-index:4;display:inline-flex;align-items:center;gap:6px;padding:3px 12px;border-radius:999px;background:color-mix(in srgb,var(--panel) 90%,transparent);border:1px solid var(--line2);font:600 15px var(--f-body);color:var(--ink)}
+.activity-scene.hunt .hunt-steptag .ic{width:18px;height:18px}
+.hunt-steps{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0}
+.hunt-steps>span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:2px 10px;border-radius:999px;border:1px solid var(--line2);font-size:14px}
+.hunt-steps>span .ic{width:18px;height:18px}
+.hunt-steps>i{font-style:normal;color:var(--mute)}
+.hunt-drops{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media (max-width:860px){.cw-next-body>.boss-foot,.cw-fighting .cw-next-body>.boss-foot{flex:none;align-self:stretch}}
 </style>
 
 </head>
@@ -14357,7 +14404,7 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
   const running = DQ.act && DQ.act.kind === kind && DQ.act.id === choice.id;
   const art = (c, size=96) => `<span class="${c.locked && !c.revealed || c.blackout ? 'blackout' : ''}" ${c.locked||c.blackout?'aria-hidden="true"':''}>${c.artKind === 'item' ? `<span class="activity-item-art" style="--art-size:${size}px">${DQ.itemIco(D.ITEMS[c.artId || c.id])}</span>` : DQ.artImage(c.artKind || (kind==='fight'?'creature':kind),c.artId || c.id,size,c.locked&&['fight','thieve'].includes(kind)?'sil':'',c.locked||c.blackout?'Locked':c.name)}</span>`;
   const action = `<div class="activity-actions">${choice.away?`<button class="btn primary" data-do="taskmap" data-a="${choice.town}">View ${esc(D.TOWN[choice.town].name)}</button>`:''}<button class="btn primary task-primary" data-do="act" data-a="${kind}" data-b="${choice.id}" ${!running && choice.blocked ? 'disabled' : ''}>${running ? kind === 'fight' ? 'Retreat' : 'Stop' : choice.blackout ? 'Locked' : esc((verb?verb+' ':'')+choice.name.replace(/^(Cook|Bars|Weapons|Armour) · /,''))}</button>${DQ.planUnlocked && DQ.planUnlocked() ? `<button class="btn" data-do="queueadd" data-a="${kind}" data-b="${choice.id}" ${choice.locked||choice.away ? 'disabled' : ''}>Queue</button>` : ''}</div>`;
-  const cards = `<section class="panel activity-choices"><div class="phead"><h2>${kind==='fight'?'Choose an opponent':kind==='recipe'?(key==='exploration'?'Choose a survey':'Choose what to make'):kind==='alch'?'Choose an item':({fish:'Fish catalogue',wood:'Trees',mine:'Ore deposits',thieve:'Targets',sail:'Islands',train:'Trap lines'}[kind]||'Choose your spot')}</h2><small>${choices.some(c=>c.town)?`${choices.length} resources · all regions`:D.TOWN[S().town].name}</small></div>${UI.taskToolbar[key] || ''}<div class="illustrated-choices">${choices.filter(c=>c.visible!==false).map(c=>{
+  const cards = `<section class="panel activity-choices"><div class="phead"><h2>${kind==='fight'?'Choose an opponent':kind==='recipe'?(key==='exploration'?'Choose a survey':'Choose what to make'):kind==='alch'?'Choose an item':({fish:'Fish catalogue',wood:'Trees',mine:'Ore deposits',thieve:'Targets',sail:'Islands',train:'Trap lines',hunt:'Choose your quarry'}[kind]||'Choose your spot')}</h2><small>${choices.some(c=>c.town)?`${choices.length} resources · all regions`:D.TOWN[S().town].name}</small></div>${UI.taskToolbar[key] || ''}<div class="illustrated-choices">${choices.filter(c=>c.visible!==false).map(c=>{
     const working=DQ.act&&DQ.act.kind===kind&&DQ.act.id===c.id;
     const requirementText=c.short?String(c.short).replace(/^Needs /,''):String(c.reason||'Not unlocked yet').replace(/^Requires [A-Za-z ]+? (\d+)/,'Lv $1').replace(/^Requires /,'');
     const requirementLabel=requirementText.length>34?'Requirements not met':requirementText;
@@ -23307,7 +23354,7 @@ U.updateEncounter=()=>{
  if(wait){encounterTimer=setTimeout(U.updateEncounter,wait+40);return;}
  if(U.impactFlights?.size){Promise.allSettled([...U.impactFlights].map(a=>a.finished)).then(U.updateEncounter);return;}
  const temp=document.createElement('template');temp.innerHTML=U.V.combat();
- const old=document.querySelector('.encounter-arena>.side:last-child'),fresh=temp.content.querySelector('.encounter-arena>.side:last-child');
+ const lastSide=r=>{const a=r.querySelectorAll('.encounter-arena>.side');return a[a.length-1]||null;},old=lastSide(document),fresh=lastSide(temp.content);
  if(old&&fresh&&old.querySelector('#av-foe')?.dataset.a!==fresh.querySelector('#av-foe')?.dataset.a)old.replaceWith(fresh);
  const mid=document.querySelector('.encounter-arena>.mid'),nextMid=temp.content.querySelector('.encounter-arena>.mid');if(mid&&nextMid&&!!mid.querySelector('[data-prog]')!==!!nextMid.querySelector('[data-prog]'))mid.innerHTML=nextMid.innerHTML;
  const prog=mid?.querySelector('[data-prog]');if(prog&&Q.act?.kind==='fight')prog.dataset.prog='fight:'+Q.act.id;
@@ -23875,7 +23922,8 @@ const huntCard = g => { if (!DQ.skillUnlocked('hunting')) return `<article class
 const windowHtml = () => {
   const town = S().town, ground = DQ.huntGround ? DQ.huntGround(town) : null; if (!ground) UI.cwTab = 'areas';
   const areas = (DQ.combatAreas ? DQ.combatAreas(town) : D.AREAS[town] || []), qt = questMon(), qm = qt && D.MON[qt];
-  const wtabs = ground ? `<div class="cw-tabs" role="tablist"><button type="button" class="btn sm ${UI.cwTab !== 'hunt' ? 'on' : ''}" role="tab" aria-selected="${UI.cwTab !== 'hunt'}" data-do="cwtab" data-a="areas">${ico('attack')}Combat areas</button><button type="button" class="btn sm ${UI.cwTab === 'hunt' ? 'on' : ''}" role="tab" aria-selected="${UI.cwTab === 'hunt'}" data-do="cwtab" data-a="hunt">${ico('paw')}Hunting ground</button></div>` : '';
+  /* animals are hunted on the Hunting page (hunt_stalk.js); the window keeps a way there */
+  const wtabs = ground && DQ.skillUnlocked('hunting') ? `<div class="cw-tabs"><button type="button" class="btn sm" data-do="huntground" data-tip="text:Hunt animals on the Hunting page">${ico('paw')}Hunting ground</button></div>` : '';
   if (UI.cwTab === 'hunt' && ground) return `<div class="cw-window cw-window-hunt" role="region" aria-label="Hunting ground"><div class="cw-head"><small>${esc(D.TOWN[town].name)} · your Hunting level ${DQ.huntLevel ? DQ.huntLevel() : DQ.lvl('hunting')}</small>${wtabs}</div><div class="cw-areas">${huntCard(ground)}</div></div>`;
   const cards = areas.map(a => { const odds = DQ.encounterOdds(a), lv = odds.map(x => x.monster.cl), lo = Math.min(...lv), hi = Math.max(...lv);
     return `<article class="cw-area"><div class="cw-area-h"><div><b>${esc(a.name)}</b><small class="${tone(lo, hi)}">Combat ${lo}–${hi} recommended</small></div><button type="button" class="btn primary" data-do="huntarea" data-a="${a.id}">${ico('attack')}Explore</button></div><div class="cw-mons">${odds.map(x => monTile(x, qt)).join('')}</div></article>`; }).join('');
@@ -23889,9 +23937,14 @@ const foeHtml = () => {
   const seen = (S().seen && S().seen.items) || {}, drops = (m.drops || []).map(d => d[0]).filter((id, i, a) => D.ITEMS[id] && a.indexOf(id) === i), known = drops.filter(id => seen[id]), unknown = drops.length - known.length;
   const area = act.area && Object.values(D.AREAS || {}).flat().find(a => a.id === act.area);
   const tracking = act.track ? `<div class="cw-trackline">${ico('paw')}<span>Tracking</span><button type="button" class="linkish" data-do="huntarea" data-a="${act.area || ''}">Explore instead</button></div>` : '';
-  return `<section class="panel cw-foe" aria-label="The creature you are fighting"><div class="cw-foe-h">${DQ.monSprite(m, 64)}<div><span class="k">${m.boss ? 'Boss' : m.mini ? 'Challenge' : esc(area ? area.name : 'Fighting')}</span><b>${esc(m.name)}</b><small>Lv ${m.cl}</small></div><button type="button" class="btn sm route-icon" data-do="guide" data-a="${m.id}" aria-label="Open its field entry" data-tip="text:Field guide">${ico('book')}</button></div>
-    <div class="cw-hp"><span class="bar"><i data-b="cwfoehp"></i></span><small class="mono" data-b="cwfoehptxt"></small></div>
-    <dl class="cw-stats"><div><dt>Attacks every</dt><dd>${((m.attackMs || 2000) / 1000).toFixed(1)}s</dd></div><div><dt>Max hit</dt><dd>${m.max}</dd></div>${w.weak.length ? `<div><dt>Weak to</dt><dd>${w.weak.map(dt).join('')}</dd></div>` : ''}${w.resist.length ? `<div><dt>Resists</dt><dd>${w.resist.map(dt).join('')}</dd></div>` : ''}</dl>
+  const place = m.boss ? 'Boss' : m.mini ? 'Challenge' : (area ? area.name : '');
+  const chip = (icon, label, val, tip) => `<span class="cw-chip" data-tip="text:${esc(tip)}">${icon ? ico(icon) : ''}<span class="cw-chip-k">${label}</span><b>${val}</b></span>`;
+  const chips = [chip('clock', 'Attacks', ((m.attackMs || 2000) / 1000).toFixed(1) + 's', 'Time between its attacks'), chip('attack', 'Max hit', m.max, 'Its biggest possible hit')];
+  if (w.weak.length) chips.push(`<span class="cw-chip"><span class="cw-chip-k">Weak to</span>${w.weak.map(dt).join('')}</span>`);
+  if (w.resist.length) chips.push(`<span class="cw-chip"><span class="cw-chip-k">Resists</span>${w.resist.map(dt).join('')}</span>`);
+  /* one row each: who it is, its health, how it fights, what it drops; the portrait opens its field entry */
+  return `<section class="panel cw-foe" aria-label="The creature you are fighting"><div class="cw-foe-h"><button type="button" class="cw-foe-pic" data-do="guide" data-a="${m.id}" aria-label="${esc(m.name)}: open its field entry" data-tip="text:Field guide">${DQ.monSprite(m, 64)}</button><div class="cw-foe-id"><b>${esc(m.name)}</b><small>Lv ${m.cl}${place ? ' · ' + esc(place) : ''}</small><div class="cw-hp"><span class="bar"><i data-b="cwfoehp"></i></span><small class="mono" data-b="cwfoehptxt"></small></div></div></div>
+    <div class="cw-chips">${chips.join('')}</div>
     ${drops.length ? `<div class="cw-drops"><span class="k">Drops</span><div>${known.map(id => `<span class="cw-drop" data-tip="item:${id}">${DQ.itemIco(D.ITEMS[id])}</span>`).join('')}${unknown ? `<span class="cw-drop unknown" data-tip="text:${unknown} not found yet">?<b>${unknown}</b></span>` : ''}</div></div>` : ''}${tracking}</section>`;
 };
 UI.B.cwfoehp = e => { const f = DQ.fight, m = f && D.MON[f.id]; e.style.width = m ? Math.max(0, Math.round(f.hp / m.hp * 100)) + '%' : '0%'; };
@@ -24130,6 +24183,120 @@ const order0 = UI.skillDockOrder; UI.skillDockOrder = () => order0().filter(s =>
 const r0 = UI.render; UI.render = (...a) => { const r = r0(...a); try { const box = document.getElementById('combatnav'), t = box && box.querySelector('.cg-tiles'); if (t) t.outerHTML = tiles(); else if (box) box.insertAdjacentHTML('beforeend', tiles()); if (UI.upd) UI.upd(); } catch (e) {} return r; };
 Q.on('lvl', () => UI.renderRail && UI.renderRail());
 Q.on('act', () => UI.renderRail && UI.renderRail());
+})();
+
+</script>
+<script>
+/* Idlewick: hunting is its own activity, not a fight (owner, 23 Nov 2026: "it's not a fight, it's about tracking,
+   laying the trap and then quickly killing. Sometimes we shouldn't successfully kill them and so we go back to hunting").
+   Hunting → Hunting ground: choose an animal from your town's hunting ground. Each hunt is one repeating task in three
+   steps: Tracking, Setting the trap, Strike. The strike lands or the animal slips away; either way the next hunt starts
+   with tracking again. It uses DQ.KIND_EXT (kind 'hunt', id = creature id), so offline work, the queue and the Now card
+   work as for any other task.
+   A catch is what a kill used to be: the animal's drops, a quest kill (DQ.qev('kill')), the creature's field-guide entry
+   (DQ.recordKill), the wild-companion chance and the World Life hooks. No combat XP, no damage taken, no food used.
+   Hunting XP per hour roughly matches Fieldwork at the same level (the fieldwork rate 8 x (5 + 0.35 x level) per 8 s,
+   scaled by duration); an escape still pays 30% for the tracking. Animals no longer appear in the combat window. */
+(() => {
+const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S, { esc, ico } = Q;
+D.HUNT_STEPS = [['Tracking', .45, 'paw'], ['Setting the trap', .30, 'pin'], ['Strike', .25, 'dagger']];
+const areaOf = id => Object.values(D.AREAS).flat().find(a => a.hunt && a.monsters.some(e => e.id === id)) || null;
+const animal = id => { const m = D.MON[id]; return m && m.hl && areaOf(id) ? m : null; };
+Q.isAnimal = id => !!animal(id);
+/* better field traps help the strike: +4% per trap tier owned and usable (never consumed by a hunt) */
+const trapBonus = () => { const t = Q.fieldTrap ? Q.fieldTrap() : null; return t ? .04 * (D.FIELD_TRAPS.indexOf(t) + 1) : 0; };
+Q.huntCatch = id => { const m = animal(id); if (!m) return 0; const L = Q.huntLevel ? Q.huntLevel() : Q.lvl('hunting');
+  return Math.max(.45, Math.min(.92, .6 + .025 * (L - m.hl) + trapBonus())); };
+Q.huntDur = id => { const m = animal(id); if (!m) return 6000;
+  return Math.max(1500, Math.round((5000 + m.hl * 60) * (Q.speedMult ? Q.speedMult('hunting') : 1))); };
+Q.huntXp = (id, caught) => { const m = animal(id); if (!m) return 0; const L = Q.lvl('hunting');
+  const base = 8 * (5 + .35 * L) * (Q.huntDur(id) / 8000) * (1 + m.hl / 100) / .75;
+  return Math.max(1, Math.round(base * (caught ? 1 : .3))); };
+/* what the player actually receives, after the skill's XP multipliers */
+Q.huntXpShown = (id, caught) => Math.max(1, Math.round(Q.huntXp(id, caught) * (Q.xpMult ? Q.xpMult('hunting') : 1) * (Q.catchUp ? Q.catchUp('hunting') : 1)));
+/* which step the current hunt is on, from how far through the cycle it is */
+Q.huntStep = (a = Q.act) => { if (!a || a.kind !== 'hunt') return null; const p = Math.min(1, Math.max(0, (Date.now() - a.t0) / (a.dur || 1)));
+  let acc = 0; for (const s of D.HUNT_STEPS) { acc += s[1]; if (p < acc) return s; } return D.HUNT_STEPS[2]; };
+const lootOf = m => { const got = [], out = [];
+  for (const [id, [a, b], p] of m.drops || []) { const it = D.ITEMS[id]; if (!it || it.type === 'gear' || it.type === 'ammo' || id === 'coin_pouch' || id === 'treasure_chest') continue;
+    if (!Q.chance(Math.min(1, p * (Q.buffMult ? Q.buffMult('luck') : 1)))) continue;
+    const n = a + Math.floor(Math.random() * (b - a + 1)); Q.grant(id, n); got.push(id); out.push({ id, n, rar: D.rarityOf ? D.rarityOf(p) : null }); }
+  return { got, out }; };
+Q.KIND_EXT.hunt = {
+  skill: 'hunting', page: 'hunting', skillFor: () => 'hunting', pageFor: () => 'hunting',
+  label: a => { const m = animal(a.id), s = Q.huntStep(a); return m ? `${s ? s[0] : 'Hunting'}: ${m.name.toLowerCase()}` : 'Hunting'; },
+  dur: id => Q.huntDur(id),
+  check: id => { const m = animal(id); if (!m) return 'Choose an animal'; if (!Q.skillUnlocked('hunting')) return 'Learn Hunting first';
+    const g = areaOf(id); if (g.town !== S().town) return `Travel to ${D.TOWN[g.town].name} first`;
+    if (Q.canHunt && !Q.canHunt(m)) return `Requires Hunting ${m.hl}`; return ''; },
+  done: a => { const m = animal(a.id); if (!m) return Q.stopAct(false, 'That animal is not here.');
+    const caught = Q.chance(Q.huntCatch(a.id)), H = S().hunt = S().hunt || {};
+    Q.addXp('hunting', Q.huntXp(a.id, caught));
+    if (!caught) { H.escaped = (H.escaped || 0) + 1; a.escaped = (a.escaped || 0) + 1; if (!Q.sim.on && !Q.forecasting) { Q.log(`The ${m.name.toLowerCase()} slipped away. Back to tracking.`); Q.emit('huntescape', m); } return; }
+    if (Q.act) Q.act.count++; H.caught = (H.caught || 0) + 1; S().stats.hunts = (S().stats.hunts || 0) + 1;
+    const { got, out } = lootOf(m);
+    Q.qev('kill', m.id); Q.recordKill(m, got);
+    const cid = 'wild_' + m.id, pet = D.PET && D.PET[cid];
+    if (pet && pet.collectible && !S().pets.owned[cid] && !Q.forecasting && Q.chance(Math.max(.008, .05 - m.cl * .00035))) Q.awardPet(cid);
+    if (!Q.forecasting) { for (const h of Q.killHooks || []) h(m); if (Q.recipeOnKill) Q.recipeOnKill(m); if (Q.museumScan && (S().beast.kills[m.id] || 0) <= 1) Q.museumScan(); }
+    if (!Q.sim.on && !Q.forecasting) { Q.log(`You catch the ${m.name.toLowerCase()}.${out.length ? ' ' + out.map(o => `${o.n > 1 ? o.n + ' ' : ''}${D.ITEMS[o.id].name.toLowerCase()}`).join(', ') : ''}`, 'good'); Q.emit('huntcatch', m, out); }
+  }
+};
+/* hunts count towards the creature's field-guide page through recordKill, not a second 'hunt' entry */
+const tick0 = Q.mastTick; if (tick0) Q.mastTick = (a, ...r) => a && a.kind === 'hunt' ? undefined : tick0(a, ...r);
+/* the hunt happens out on the trap lines (towns.js district 'train'); creature pages already hold its field guide */
+const du0 = Q.districtUrl; if (du0) Q.districtUrl = (town, kind, ...r) => du0(town, kind === 'hunt' ? 'train' : kind, ...r);
+const ml0 = Q.mastLine; if (ml0) Q.mastLine = (kind, id) => kind === 'hunt' ? '' : ml0(kind, id);
+const mb0 = Q.mastBadge; if (mb0) Q.mastBadge = (kind, id) => kind === 'hunt' ? '' : mb0(kind, id);
+/* ---------- routes: anything that tried to fight an animal now hunts it ---------- */
+const start0 = Q.startHunt;
+Q.startHunt = (areaId, target = null, forQuest = false) => {
+  const area = Object.values(D.AREAS).flat().find(a => a.id === areaId);
+  /* before Hunting is learned, a quest's animal can still be fought the old way, so the quest stays reachable */
+  if (area && area.hunt && Q.skillUnlocked('hunting')) { const id = target && animal(target) ? target : (area.monsters.find(e => Q.canHunt(D.MON[e.id])) || {}).id; if (!id) return false;
+    UI.huntMode = 'ground'; UI.taskChoice.hunting = id; return Q.startAct('hunt', id); }
+  return start0(areaId, target, forQuest);
+};
+const huntAnimal = id => { const m = animal(id); if (!m || !Q.skillUnlocked('hunting')) return false; UI.huntMode = 'ground'; UI.taskChoice.hunting = id; Q.go('hunting'); return true; };
+UI.DO.huntground = id => { if (!Q.skillUnlocked('hunting')) return Q.go('hunting'); UI.huntMode = 'ground'; if (id && animal(id)) UI.taskChoice.hunting = id; Q.go('hunting'); };
+const track0 = UI.DO.hunttrack; UI.DO.hunttrack = id => huntAnimal(id) || track0(id);
+const hq0 = UI.DO.huntquest; if (hq0) UI.DO.huntquest = id => huntAnimal(id) || hq0(id);
+const hg0 = UI.DO.huntgo; if (hg0) UI.DO.huntgo = a => { const id = String(a).split('|')[1]; return huntAnimal(id) || hg0(a); };
+/* an old save mid-fight with an animal carries on as a hunt */
+const resume0 = Q.resumeAfterLoad;
+Q.resumeAfterLoad = (...r) => { const a = S().act; if (a && a.kind === 'fight' && animal(a.id)) { S().act = { kind: 'hunt', id: a.id, t0: Date.now(), count: 0, elapsed: 0, progress: 0, pace: 'steady', rule: a.rule || 'none', limit: a.limit || 0 }; } return resume0 ? resume0(...r) : undefined; };
+/* the combat window shows combat areas only */
+UI.cwTab = 'areas';
+const cw0 = UI.DO.cwtab; if (cw0) UI.DO.cwtab = t => t === 'hunt' ? UI.DO.huntground() : cw0(t);
+/* ---------- the Hunting page: Hunting ground | Fieldwork ---------- */
+const field0 = UI.V.hunting;
+UI.DO.huntmode = mode => { UI.huntMode = mode === 'field' ? 'field' : 'ground'; UI.render(false); };
+const groundPage = () => {
+  const g = Q.huntGround ? Q.huntGround(S().town) : null, L = Q.huntLevel(), here = D.TOWN[S().town].name;
+  if (!g) return `<section class="panel empty"><p>No hunting ground near ${esc(here)}.</p></section>`;
+  const odds = Q.encounterOdds(g), qt = Q.questHuntTarget && Q.questHuntTarget();
+  const choices = odds.map(x => { const m = x.monster, known = (S().beast.kills[m.id] || 0) > 0, open = Q.canHunt(m), id = m.id, pct = Math.round(Q.huntCatch(id) * 100);
+    const drops = (m.drops || []).map(d => d[0]).filter((k, i, a) => D.ITEMS[k] && a.indexOf(k) === i && Q.itemDiscovered(k));
+    return { id, name: known || open ? m.name : '???', artKind: 'creature', artId: id, yieldId: null, locked: !open, revealed: open && !known, blocked: !open, reason: open ? '' : `Requires Hunting ${m.hl}`, short: open ? '' : 'Lv ' + m.hl,
+      caption: `Hunting ${m.hl}${qt === id ? ' · Quest' : ''}`, stateText: open ? `${pct}% catch` : 'Locked',
+      info: `<div class="hunt-steps">${D.HUNT_STEPS.map(s => `<span>${ico(s[2])}${s[0]}</span>`).join('<i aria-hidden="true">→</i>')}</div><p class="dim">${pct}% chance the strike lands; otherwise it slips away and you start tracking again. ${Q.huntXpShown(id, true)} Hunting XP a catch, ${Q.huntXpShown(id, false)} if it gets away.</p>${drops.length ? `<div class="hunt-drops"><span class="k">Drops</span>${drops.map(k => `<span class="cw-drop" data-tip="item:${k}">${Q.itemIco(D.ITEMS[k])}</span>`).join('')}</div>` : ''}` }; });
+  return UI.taskPanel('hunting', g.name, 'hunt', choices, 'Hunt');
+};
+UI.V.hunting = () => {
+  if (!Q.skillUnlocked('hunting')) return UI.lockedPage('hunting');
+  if (UI.huntMode === 'quarry') UI.huntMode = 'ground';
+  if (UI.huntMode === 'field') { const h = field0(); return h.replace(/<nav class="hunt-mode-tabs[\s\S]*?<\/nav>/, tabs()); }
+  return tabs() + groundPage() + `<section data-reference="true" class="panel reference-panel" id="hunting-progress">${UI.skillHero('hunting')}</section>`;
+};
+const tabs = () => `<nav class="hunt-mode-tabs btnrow" role="tablist"><button class="btn ${UI.huntMode !== 'field' ? 'on' : ''}" role="tab" aria-selected="${UI.huntMode !== 'field'}" data-do="huntmode" data-a="ground">${ico('paw')}Hunting ground</button><button class="btn ${UI.huntMode === 'field' ? 'on' : ''}" role="tab" aria-selected="${UI.huntMode === 'field'}" data-do="huntmode" data-a="field">${ico('nest')}Fieldwork</button></nav>`;
+if (UI.huntMode === undefined) UI.huntMode = 'ground';
+/* the stage says which step the hunt is on */
+UI.B.huntstep = e => { const s = Q.huntStep(); UI.set(e, s ? s[0] : ''); };
+Q.on('ui', () => { if (UI.view !== 'hunting' || !Q.act || Q.act.kind !== 'hunt') return; const sc = document.querySelector('#view .activity-scene.hunt'); if (!sc) return;
+  let t = sc.querySelector('.hunt-steptag'); if (!t) { sc.insertAdjacentHTML('beforeend', '<span class="hunt-steptag" role="status"></span>'); t = sc.querySelector('.hunt-steptag'); }
+  const s = Q.huntStep(); if (s && t.dataset.s !== s[0]) { t.dataset.s = s[0]; t.innerHTML = `${ico(s[2])}${s[0]}`; sc.dataset.step = D.HUNT_STEPS.indexOf(s); } });
+Q.on('huntescape', () => { const sc = document.querySelector('#view .activity-scene.hunt'); if (sc && Q.floatAt) Q.floatAt(sc, 'It got away!', '#d9a066'); });
+Q.on('huntcatch', (m, out) => { const sc = document.querySelector('#view .activity-scene.hunt'); if (sc && Q.floatAt) Q.floatAt(sc, out.length ? out.slice(0, 2).map(o => `+${o.n} ${D.ITEMS[o.id].name}`).join(' · ') : 'Caught!', '#f3d58a'); });
 })();
 
 </script>
