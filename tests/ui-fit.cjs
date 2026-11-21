@@ -35,7 +35,7 @@ const assert=require('node:assert/strict');
   /* Combat: the fight, the fighting style and the creatures stay on screen; everything else scrolls beneath */
   await p.evaluate(()=>{DQ.go('combat');DQ.closeModal&&DQ.closeModal();});await p.waitForTimeout(1300);
   const vis=sel=>p.locator(sel).first().evaluate(e=>{const r=e.getBoundingClientRect();return r.top>=0&&r.top<innerHeight-30&&r.height>20;});
-  for(const sel of ['.ready-line','.encounter-arena','.combat-hud .style-strip','.combat-targets','.combat-abils','.combat-food'])assert.ok(await vis(sel),`combat: ${sel} on screen`);
+  for(const sel of ['.ready-line','.encounter-arena','.style-strip','.combat-targets','.combat-abils','.combat-food'])assert.ok(await vis(sel),`combat: ${sel} on screen`);
   /* what you act on is on screen: each combat skill's level on the style strip, ability slots and food beneath it */
   assert.ok(await p.locator('.style-strip [data-b="lvl:attack"], .style-strip [data-b^="lvl:"]').count()>=3,'combat skill levels on the style strip');
   assert.ok(await p.locator('.combat-abils .ab-tile').count()>=1,'ability slots on screen');assert.ok(await p.locator('.combat-food [data-do="autoeat"]').count()===1,'food settings on screen');
@@ -63,9 +63,9 @@ const assert=require('node:assert/strict');
      destination and its button is whole inside the column at 1280x720: the column never scrolls and clips nothing */
   const where=await p.evaluate(async()=>{const S=DQ.S,D=DQ.data;S.towns.willowbrook.boss=true;S.towns.mossbarrow={visited:true,boss:false};S.town='mossbarrow';const q=D.QM.mb_gnarlroot;S.q[q.id]={s:'active',p:q.obj.map(()=>0)};DQ.fxDirty();DQ.go('combat');DQ.ui.render(true);for(let i=0;i<6;i++)DQ.closeModal();await new Promise(r=>setTimeout(r,400));
     /* 20 Nov (owner): areas, creatures and the quest target live in the stage's Where to fight window; challenges and the boss in the column */
-    const col=document.querySelector('.combat-targets'),win=document.querySelector('.cw-window'),inside=(box,sel)=>{const cr=box.getBoundingClientRect();return [...box.querySelectorAll(sel)].filter(e=>e.offsetWidth).filter(e=>{const r=e.getBoundingClientRect();return r.bottom>Math.min(cr.bottom,innerHeight)+1||r.right>cr.right+1||r.top<cr.top-1;}).map(e=>(e.className||e.tagName).toString().slice(0,24));};
-    const bad=[...inside(col,'button,.wh-mini,.boss-foot'),...(win?inside(win,'button,.cw-area,.cw-mon,.cw-quest'):['no window'])];
-    return {bad,scroll:Math.max(col.scrollHeight-col.clientHeight,win?win.scrollHeight-win.clientHeight:0),areas:win?win.querySelectorAll('.cw-area [data-do="huntarea"]').length:0,heads:win?win.querySelectorAll('.cw-mon').length:0,minis:col.querySelectorAll('.wh-mini').length,quest:win?win.querySelectorAll('.cw-quest').length:0,boss:col.querySelectorAll('.boss-foot').length};});
+    const col=document.querySelector('.combat-targets'),next=document.querySelector('.cw-next'),win=document.querySelector('.cw-window'),inside=(box,sel)=>{const cr=box.getBoundingClientRect();return [...box.querySelectorAll(sel)].filter(e=>e.offsetWidth).filter(e=>{const r=e.getBoundingClientRect();return r.bottom>Math.min(cr.bottom,innerHeight)+1||r.right>cr.right+1||r.top<cr.top-1;}).map(e=>(e.className||e.tagName).toString().slice(0,24));};
+    const bad=[...inside(col,'button'),...(next?inside(next,'button,.wh-mini,.boss-foot'):['no next panel']),...(win?inside(win,'button,.cw-area,.cw-mon,.cw-quest'):['no window'])];
+    return {bad,scroll:Math.max(col.scrollHeight-col.clientHeight,win?win.scrollHeight-win.clientHeight:0),areas:win?win.querySelectorAll('.cw-area [data-do="huntarea"]').length:0,heads:win?win.querySelectorAll('.cw-mon').length:0,minis:document.querySelectorAll('.combat-x .wh-mini').length,quest:win?win.querySelectorAll('.cw-quest').length:0,boss:document.querySelectorAll('.combat-x .boss-foot').length};});
   assert.deepEqual(where.bad,[],'where to fight: everything inside the column '+JSON.stringify(where));assert.ok(where.scroll<=2,'where to fight never scrolls '+JSON.stringify(where));
   assert.ok(where.areas===2&&where.heads>=8&&where.minis===2&&where.quest===1&&where.boss===1,'areas, creatures, challenges, quest target and boss all present '+JSON.stringify(where));
   assert.deepEqual(errors,[]);

@@ -44,26 +44,42 @@ UI.DO.hunttrack = id => {
 /* a plain Explore clears tracking */
 const area0 = UI.DO.huntarea;
 if (area0) UI.DO.huntarea = (id, ...r) => { const res = area0(id, ...r); if (DQ.act && DQ.act.kind === 'fight') { DQ.act.track = false; if (S().act) S().act.track = false; if (DQ.fight) DQ.fight.tracking = 0; } return res; };
+/* Where everything sits (owner, 22 Nov 2026: "it should really feel logical"):
+   left column, YOUR FIGHTER: what you wear, how you fight (weapon, art, training focus) and your abilities;
+   the stage: WHERE TO FIGHT, or the fight itself;
+   the row under it, THIS FIGHT: the foe you are facing (in a fight) or the boss and challenges you could take on next,
+   beside your food. Built from the same panels, moved into place after each render. */
 const shape = () => {
   const x = document.querySelector('#view .combat-x'); if (!x) return;
-  const col = x.querySelector('.combat-targets'), where = col && col.querySelector('.where'), boss = col && col.querySelector('.boss-foot'), arena = x.querySelector('.encounter-arena'), act = fightAct(), head = col && col.querySelector('.step-h');
+  const col = x.querySelector('.combat-targets'), arena = x.querySelector('.encounter-arena'), hud = x.querySelector('.combat-hud'), act = fightAct();
   if (!col) return;
-  if (boss && where && where.contains(boss)) where.after(boss);
-  x.classList.toggle('cw-fighting', !!act); x.classList.toggle('cw-idle', !act);
+  x.classList.add('cw-reorg'); x.classList.toggle('cw-fighting', !!act); x.classList.toggle('cw-idle', !act);
+  const where = x.querySelector('.where'), boss = x.querySelector('.boss-foot');
+  if (where) { where.querySelector('.wh-areas')?.remove(); where.querySelector('.wh-quest')?.remove(); where.querySelector('.phead')?.remove(); where.querySelector('.wh-minis-h')?.remove(); }
+  /* the fight row's first panel: foe, or what to take on next */
+  let next = hud && hud.querySelector('.cw-next');
+  if (hud && !next) { hud.insertAdjacentHTML('afterbegin', '<section class="panel cw-next" aria-live="polite"><div class="kit-head"><span class="k"></span></div><div class="cw-next-body"></div></section>'); next = hud.querySelector('.cw-next'); }
+  const body = next && next.querySelector('.cw-next-body'), label = next && next.querySelector('.kit-head .k');
   if (act) {
     if (where) where.remove();
-    if (head) head.textContent = 'Your foe';
-    const old = col.querySelector('.cw-foe'), html = foeHtml(), sig = act.id + ':' + !!act.track;
-    if (!old || old.dataset.sig !== sig) { if (old) old.remove(); if (html) { if (head) head.insertAdjacentHTML('afterend', html); else col.insertAdjacentHTML('afterbegin', html); const n = col.querySelector('.cw-foe'); if (n) n.dataset.sig = sig; } }
+    if (label) label.textContent = 'Your foe';
+    const old = x.querySelector('.cw-foe'), html = foeHtml(), sig = act.id + ':' + !!act.track;
+    if (!old || old.dataset.sig !== sig || !body.contains(old)) { if (old) old.remove(); if (html && body) { body.insertAdjacentHTML('afterbegin', html); const n = body.querySelector('.cw-foe'); if (n) n.dataset.sig = sig; } }
     arena && arena.querySelector('.cw-window')?.remove();
   } else {
-    col.querySelector('.cw-foe')?.remove();
-    if (where) { where.querySelector('.wh-areas')?.remove(); where.querySelector('.wh-quest')?.remove(); where.querySelector('.phead')?.remove(); where.querySelector('.wh-minis-h')?.remove(); if (!where.querySelector('.wh-minis')) where.remove(); }
-    if (head) head.textContent = col.querySelector('.wh-minis') ? 'Challenges' : 'Next boss';
+    x.querySelector('.cw-foe')?.remove();
+    if (label) label.textContent = x.querySelector('.wh-mini') ? 'Challenges and boss' : 'Next boss';
+    if (where && body && !body.contains(where)) { if (where.querySelector('.wh-minis')) body.prepend(where); else where.remove(); }
     if (arena && !arena.querySelector('.cw-window')) arena.insertAdjacentHTML('beforeend', windowHtml());
     const title = x.querySelector('.cx-title'); if (title) title.innerHTML = `<small>${esc(D.TOWN[S().town].name)}</small><b>Where to fight</b>`;
     x.querySelector('.cx-go')?.remove();
   }
+  if (boss && body && !body.contains(boss)) body.append(boss);
+  /* the left column: your fighter */
+  const stepH = col.querySelector('.step-h'); if (stepH) stepH.textContent = 'Your fighter';
+  const eq = col.querySelector('.combat-equipped'), train = hud && hud.querySelector('.hud-train'), abils = hud && hud.querySelector('.combat-abils');
+  if (train) (eq || stepH || col.lastElementChild) ? (eq ? eq.after(train) : col.append(train)) : col.append(train);
+  if (abils) (train && col.contains(train)) ? train.after(abils) : col.append(abils);
   if (UI.upd) UI.upd();
 };
 /* the stage tells you when it is still tracking */

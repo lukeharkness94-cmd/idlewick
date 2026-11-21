@@ -570,3 +570,30 @@ html.short .cw-foe{gap:5px;padding:7px!important}html.short .cw-foe-h img{width:
 .hud-train [data-b="dps"]{display:inline-block!important}
 .hud-train .cx-dpsrow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .skrow .sk-next{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ---------- Combat, regrouped (22 Nov 2026): Your fighter | Where to fight / the fight | This fight ---------- */
+@media (min-width:861px){
+#view .combat-x.cw-reorg .combat-targets{display:flex;flex-direction:column;gap:8px;min-height:0;overflow:hidden}
+#view .combat-x.cw-reorg .combat-targets>.step-h{flex:none}
+#view .combat-x.cw-reorg .combat-targets>.combat-equipped{flex:1 1 0;min-height:96px;overflow:hidden}
+#view .combat-x.cw-reorg .combat-targets>.hud-train,#view .combat-x.cw-reorg .combat-targets>.combat-abils{flex:none;margin:0;padding:10px}
+#view .combat-x.cw-reorg .combat-targets .hud-train .kit-head{flex-wrap:wrap;row-gap:4px}
+#view .combat-x.cw-reorg .combat-targets .style-strip{display:flex;flex-direction:column;gap:6px}
+#view .combat-x.cw-reorg .combat-targets .cx-styles{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#view .combat-x.cw-reorg .combat-targets .cx-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#view .combat-x.cw-reorg .combat-targets .ab-slots{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#view .combat-x.cw-reorg .combat-hud{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)!important}
+}
+.cw-next .kit-head{margin-bottom:6px}
+.cw-next-body{display:flex;gap:10px;align-items:stretch;min-width:0}
+.cw-next-body>.where{flex:1 1 auto;min-width:0;margin:0;padding:0;border:0;background:none;box-shadow:none}
+.cw-next-body>.where .wh-minis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cw-next-body>.boss-foot{flex:0 0 220px;align-self:stretch}
+.cw-next-body>.cw-foe{flex:1 1 auto;margin:0;border:0;padding:0;background:none;box-shadow:none;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:14px;align-content:start}
+.cw-next-body>.cw-foe>.cw-foe-h,.cw-next-body>.cw-foe>.cw-hp{grid-column:1}
+.cw-next-body>.cw-foe>.cw-stats,.cw-next-body>.cw-foe>.cw-drops,.cw-next-body>.cw-foe>.cw-trackline{grid-column:2}
+.cw-next-body>.cw-foe>.cw-stats{grid-row:1/3}
+@media (max-width:860px){.cw-next-body{flex-direction:column}.cw-next-body>.boss-foot{flex:none}.cw-next-body>.cw-foe{grid-template-columns:1fr}.cw-next-body>.cw-foe>*{grid-column:1!important;grid-row:auto!important}}
+.cw-next-body>.cw-foe>.cw-drops{grid-column:1!important}
+.cw-next-body>.cw-foe>.cw-stats{grid-row:1/4}
+@media (max-width:860px){#view .combat-x.cw-idle .encounter-arena{display:block!important;height:auto!important;min-height:0!important}#view .combat-x .cw-window{width:100%;box-sizing:border-box}}
+@media (max-width:860px){#view .combat-x .cw-window{container-type:normal}}

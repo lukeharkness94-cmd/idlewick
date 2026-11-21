@@ -928,3 +928,10 @@ Now `js/audio.js` sequences composed themes on the audio clock:
 - Smithing: anvils (+4/8/12/16/20/25% faster) and hammers (+3/6/9/12/15/20% chance to make two), bronze/iron/steel/mithril/adamant/runic at Smithing 1/15/30/50/70/85, costing bars of that alloy. Shown on the Smithing shop shelf and as small icons on the Smithing page.
 - Combat arts: Melee (Steady Strikes, Cleaving Blows, Piercing Thrust, Crushing Blows, Heavy Swing, Bleeding Edge, Guard Breaker, Riposte, Whirlwind, Master's Form) and Ranged (Aimed Draw, Broadheads, Fire/Frost/Storm Arrows, Pinning Shot, Hunter's Mark, Volley, Piercing Bolt, Starshot) at levels 1 to 90; seven new spells (Ember Dart, Gale Cutter, Hailstorm, Inferno, Blizzard, Tempest, Starfall) take the spellbook to twelve. Numbers are modest (single-digit to mid-teens percent) and have not been through the boss ladder sim; run PARITY/COUNTER sims with the module loaded before tuning further.
 - Also fixed: the Combat getting-started pop-up showed a chicken (now a goblin).
+
+## Layout logic pass (Claude, 22 Nov 2026)
+Owner: "Do this with the entire UI with a special focus in the combat menus. It should really feel logical as to where everything sits."
+- Combat regrouped by what each part is about: left column **Your fighter** (gear, fighting style with the art in use and training focus, abilities); stage **Where to fight** or the fight; bottom row **This fight** (your foe during a fight, or challenges and the next boss before one) beside **Food**. Previously the build was split between the top-left (gear) and the bottom row (style, abilities), and the boss and challenges sat above your gear.
+- Phone combat: the Where to fight window was squeezed to 30 px wide (an older bug, the window's `container-type:size` and the hidden fighters); it now fills the stage.
+- Hero → Tools gains a Workshop section, so anvils, hammers and workshop ranks you own are visible outside the shop.
+- Audit of every other page (Home, Quests, World, Village, Hero, Guide, Shop, skill pages) found their groupings already consistent with the top menu; no other moves were needed.

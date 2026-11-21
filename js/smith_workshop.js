@@ -85,3 +85,17 @@ if (hero0) UI.skillHero = (sk, extra = '') => { if (sk !== 'smithing') return he
   const kit = `<span class="smith-kit" data-tip="text:${esc([a ? `${Q.smithGearName('anvil', a)}: +${Math.round(D.SMITH_GEAR.anvil.per[a - 1] * 100)}% faster` : 'No anvil upgrade yet', h ? `${Q.smithGearName('hammer', h)}: +${Math.round(D.SMITH_GEAR.hammer.per[h - 1] * 100)}% chance to make two` : 'No hammer upgrade yet'].join(' · '))}">${a ? art('anvil', a - 1, 32) : ''}${h ? art('hammer', h - 1, 32) : ''}</span>`;
   return hero0(sk, extra + ((a || h) ? kit : '')); };
 })();
+/* Hero → Tools lists everything you own that makes a skill better: gathering tools, then your workshop (anvil, hammer
+   and each skill's workshop rank), each with a link to its shop shelf (22 Nov 2026 layout pass). */
+(() => {
+const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S, { esc } = Q;
+const v0 = UI.V.tools;
+UI.V.tools = () => {
+  const a = (S().smithGear || {}).anvil || 0, h = (S().smithGear || {}).hammer || 0, ranks = S().skillUpgrades || {};
+  const row = (art, name, line, sk) => `<div class="toolrow" style="--c:${D.SK[sk].col}"><span class="ti">${art}</span><div class="tb"><b>${esc(name)}</b><small>${esc(line)}</small></div><button class="btn sm" data-do="skillupgrades" data-a="${sk}">Upgrade</button></div>`;
+  const smith = [a ? row(UI.activityIcon('smithing'), Q.smithGearName('anvil', a), `+${Math.round(D.SMITH_GEAR.anvil.per[a - 1] * 100)}% faster Smithing`, 'smithing') : row(UI.activityIcon('smithing'), 'No anvil upgrade', 'Smithing · normal speed', 'smithing'),
+    h ? row(UI.activityIcon('smithing'), Q.smithGearName('hammer', h), `+${Math.round(D.SMITH_GEAR.hammer.per[h - 1] * 100)}% chance to make two`, 'smithing') : row(UI.activityIcon('smithing'), 'No hammer upgrade', 'Smithing · one piece at a time', 'smithing')];
+  const others = Object.entries(ranks).filter(([sk, r]) => r > 0 && D.SK[sk] && D.SKILL_COMMISSIONS && D.SKILL_COMMISSIONS[sk] && sk !== 'smithing').map(([sk, r]) => row(UI.activityIcon(sk), `${D.SKILL_COMMISSIONS[sk].name} ${r}`, `+${r * 3}% ${D.SK[sk].name} XP`, sk));
+  return v0() + `<section class="panel toolsp workshop-tools"><h3>Workshop</h3><p class="hint">Upgrades for making things. Bought in the shop under each skill.</p><div class="toolrows">${smith.join('')}${others.join('')}</div></section>`;
+};
+})();
