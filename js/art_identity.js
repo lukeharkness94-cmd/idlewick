@@ -253,6 +253,8 @@ function moreCreatures(p,id){
    if(ex.mark==='kite'){p.poly([[36,23],[46,12],[45,28]],'#d6c985');p.line(38,25,46,39,'#b8a76c');}
    if(ex.mark==='echo'){p.ellipse(24,14,14,12,'#4a405e');p.ellipse(24,14,10,8,null);}
    if(ex.mark==='halo'){p.ellipse(24,4,12,4,'#d8c985');p.ellipse(24,4,8,2,null);for(const x of [14,24,34])p.line(x,21,x-2,42,'#c9b9c4');}
+   /* Goblin raider (20 Nov): long ears, a sack of stolen hides over one shoulder, a henhouse feather in its hood */
+   if(ex.mark==='raider'){p.poly([[15,13],[3,8],[15,18]],a);p.poly([[33,13],[45,8],[33,18]],a);p.ellipse(39,27,9,11,'#9c7a4c');p.ellipse(37,24,4,3,'#b8955f');p.line(36,18,41,16,'#6e5235');p.poly([[24,4],[29,0],[27,8]],'#eee5cf');p.rect(17,21,14,3,'#6e5235');}
   }else if(ex.body==='clawed'){
    p.ellipse(24,29,13,11,c);for(const sx of [-1,1]){p.line(24+sx*9,29,24+sx*18,20,d);p.ellipse(24+sx*18,18,5,6,a);p.line(24+sx*8,34,24+sx*17,42,d);}eye(p,20,24);eye(p,28,24);
    if(ex.mark==='fin')p.poly([[19,22],[24,5],[30,23]],'#7bc2b4');
@@ -269,6 +271,8 @@ function moreCreatures(p,id){
    if(ex.mark==='bell')p.poly([[9,34],[16,15],[32,15],[40,34]],'#8a9a66');p.ellipse(24,36,4,5,'#d5b665');
    if(ex.mark==='veil')for(const x of [14,20,27,34])p.line(x,18,x-3,43,'#d29376');
    if(ex.mark==='orbit'){p.ellipse(24,23,18,7,'#c6bbd4');p.ellipse(24,23,13,4,null);star(p,42,13,CREAM,2);}
+   /* Mudling (20 Nov): well mud that got up and walked; drips, a pebble crown and a reed it chews */
+   if(ex.mark==='mud'){for(const [x,y]of [[12,40],[21,44],[30,41],[37,43]])p.ellipse(x,y,3,4,d);for(const [x,y]of [[18,7],[24,4],[30,7]])p.ellipse(x,y,3,3,'#9a9488');p.line(31,30,43,22,'#8fa860');p.ellipse(16,30,4,3,a);}
   }
   return true;
  }

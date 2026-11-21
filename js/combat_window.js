@@ -7,6 +7,8 @@
    Challenges stay in the left column out of combat, so the window fits a 1280 x 720 laptop without scrolling. */
 (() => {
 const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S, { esc, ico } = DQ;
+/* the Farm fields hunting ground fights on the Meadow Path's backdrop */
+const bd0 = DQ.backdropUrl; if (bd0) DQ.backdropUrl = k => bd0(k === 'willowbrook:farm' ? 'willowbrook:0' : k);
 const fightAct = () => DQ.act && DQ.act.kind === 'fight' ? DQ.act : null;
 const met = id => (S().beast.kills[id] || 0) > 0;
 const questMon = () => { const id = DQ.questHuntTarget ? DQ.questHuntTarget() : null, m = id && D.MON[id]; return m && m.town === S().town && !m.boss ? id : null; };
@@ -14,7 +16,7 @@ const tone = (lo, hi) => { const c = DQ.combatLvl(); return c >= hi ? 'ok' : c >
 const monTile = (x, qt) => { const m = x.monster, k = met(x.id), nm = k ? m.name : '???';
   return `<div class="cw-mon ${qt === x.id ? 'quest' : ''}"><button type="button" class="cw-mon-art" data-do="guide" data-a="${x.id}" aria-label="${esc(k ? m.name : 'Unknown creature')}, level ${m.cl}, ${x.pct >= 45 ? 'Common' : x.pct >= 20 ? 'Uncommon' : 'Rare'}, ${x.pct}% of encounters. Open its field entry." data-tip="text:${esc(k ? m.name : 'Unknown creature')} · Lv ${m.cl} · ${x.pct}% of encounters">${DQ.monSprite(m, 40, k ? '' : 'sil')}</button><b>${esc(nm)}</b><small>Lv ${m.cl} · ${x.pct}%</small><button type="button" class="btn sm" data-do="hunttrack" data-a="${x.id}" aria-label="Track ${esc(k ? m.name : 'unknown creature')}">${ico('paw')}Track</button></div>`; };
 const windowHtml = () => {
-  const town = S().town, areas = D.AREAS[town] || [], qt = questMon(), qm = qt && D.MON[qt];
+  const town = S().town, areas = (DQ.combatAreas ? DQ.combatAreas(town) : D.AREAS[town] || []), qt = questMon(), qm = qt && D.MON[qt];
   const cards = areas.map(a => { const odds = DQ.encounterOdds(a), lv = odds.map(x => x.monster.cl), lo = Math.min(...lv), hi = Math.max(...lv);
     return `<article class="cw-area"><div class="cw-area-h"><div><b>${esc(a.name)}</b><small class="${tone(lo, hi)}">Combat ${lo}–${hi} recommended</small></div><button type="button" class="btn primary" data-do="huntarea" data-a="${a.id}">${ico('attack')}Explore</button></div><div class="cw-mons">${odds.map(x => monTile(x, qt)).join('')}</div></article>`; }).join('');
   const quest = qm ? `<button type="button" class="cw-quest" data-do="huntquest" data-a="${qt}">${DQ.monSprite(qm, 32)}<span><small>Quest${qm.mini ? ' · challenge' : ''}</small><b>${esc(qm.name)}</b></span></button>` : '';

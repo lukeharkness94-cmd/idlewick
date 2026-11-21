@@ -67,7 +67,7 @@ DQ.creatureGainXp=m=>{const id=S().pets.active,o=id&&S().pets.owned[id],p=id&&D.
 };
 
 UI.areaPanel=town=>{
-  const active=DQ.act?.kind==='fight'&&DQ.act.area,qt=questTarget(),areas=D.AREAS[town]||[];
+  const active=DQ.act?.kind==='fight'&&DQ.act.area,qt=questTarget(),areas=(DQ.combatAreas?DQ.combatAreas(town):D.AREAS[town]||[]);
   return `<section class="panel activity-choices hunt-areas"><div class="phead"><div><span class="k">Hunting</span><h2>Choose an area</h2></div><small>${esc(D.TOWN[town].name)}</small></div>
     
     ${qt?`<div class="quest-hunt"><button type="button" class="enc-art" data-do="guide" data-a="${qt}" aria-label="${esc(D.MON[qt].name)}: open its field guide">${DQ.artImage('creature',qt,48,'',D.MON[qt].name)}</button><span><b>Quest target: ${esc(D.MON[qt].name)}</b></span><button class="btn primary" data-do="huntquest" data-a="${qt}">Track target</button></div>`:''}

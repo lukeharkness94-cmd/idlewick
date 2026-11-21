@@ -23,7 +23,9 @@ Q.huntCandidates = () => {
     const odds = Q.encounterOdds(area).find(e => e.id === m.id);
     out.push({ m, area, why, score, seen, pct: odds ? odds.pct : 0, danger: Q.dangerOf ? Q.dangerOf(m) : null });
   }
-  return out.sort((a, b) => b.score - a.score || a.m.cl - b.m.cl);
+  /* a town with a hunting ground (villains.js, area.hunt) hunts its animals; combat keeps the villains (20 Nov) */
+  const game = out.filter(c => c.area.hunt);
+  return (game.length ? game : out).sort((a, b) => b.score - a.score || a.m.cl - b.m.cl);
 };
 const dangerChip = d => d ? `<span class="chip-d tone-${d.key === 'easy' ? 'ok' : d.key === 'fair' ? 'warn' : 'bad'}">${esc(d.label)}</span>` : '';
 const huntinging = c => Q.act && Q.act.kind === 'fight' && Q.act.id === c.m.id;

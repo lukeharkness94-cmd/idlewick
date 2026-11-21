@@ -8,7 +8,7 @@ const fighting = () => DQ.act && DQ.act.kind === 'fight' ? DQ.act : null;
 const questMon = () => { const id = DQ.questHuntTarget ? DQ.questHuntTarget() : null, m = id && D.MON[id]; return m && m.town === S().town && !m.boss ? id : null; };
 const rarity = pct => pct >= 45 ? 'Common' : pct >= 20 ? 'Uncommon' : 'Rare';
 UI.areaPanel = town => {
-  const f = fighting(), active = f && f.area, qt = questMon(), areas = D.AREAS[town] || [], focus = DQ.combatFocus ? DQ.combatFocus() : null;
+  const f = fighting(), active = f && f.area, qt = questMon(), areas = (DQ.combatAreas ? DQ.combatAreas(town) : D.AREAS[town] || []), focus = DQ.combatFocus ? DQ.combatFocus() : null;
   const minis = D.MONLIST.filter(m => m.mini && !m.tower && m.town === town), qm = qt && D.MON[qt];
   const quest = qm ? `<div class="wh-quest"><span class="wh-q-art">${DQ.monSprite(qm, 32)}</span><span><small>Quest target</small><b>${esc(qm.name)}</b></span><button class="btn sm primary" data-do="huntquest" data-a="${qt}">${qm.mini ? 'Challenge' : 'Track'}</button></div>` : '';
   const head = (x) => { const m = x.monster, met = (S().beast.kills[x.id] || 0) > 0, nm = met ? m.name : 'Unknown creature', on = focus && focus.id === x.id;

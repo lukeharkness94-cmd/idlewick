@@ -8478,6 +8478,8 @@ function moreCreatures(p,id){
    if(ex.mark==='kite'){p.poly([[36,23],[46,12],[45,28]],'#d6c985');p.line(38,25,46,39,'#b8a76c');}
    if(ex.mark==='echo'){p.ellipse(24,14,14,12,'#4a405e');p.ellipse(24,14,10,8,null);}
    if(ex.mark==='halo'){p.ellipse(24,4,12,4,'#d8c985');p.ellipse(24,4,8,2,null);for(const x of [14,24,34])p.line(x,21,x-2,42,'#c9b9c4');}
+   /* Goblin raider (20 Nov): long ears, a sack of stolen hides over one shoulder, a henhouse feather in its hood */
+   if(ex.mark==='raider'){p.poly([[15,13],[3,8],[15,18]],a);p.poly([[33,13],[45,8],[33,18]],a);p.ellipse(39,27,9,11,'#9c7a4c');p.ellipse(37,24,4,3,'#b8955f');p.line(36,18,41,16,'#6e5235');p.poly([[24,4],[29,0],[27,8]],'#eee5cf');p.rect(17,21,14,3,'#6e5235');}
   }else if(ex.body==='clawed'){
    p.ellipse(24,29,13,11,c);for(const sx of [-1,1]){p.line(24+sx*9,29,24+sx*18,20,d);p.ellipse(24+sx*18,18,5,6,a);p.line(24+sx*8,34,24+sx*17,42,d);}eye(p,20,24);eye(p,28,24);
    if(ex.mark==='fin')p.poly([[19,22],[24,5],[30,23]],'#7bc2b4');
@@ -8494,6 +8496,8 @@ function moreCreatures(p,id){
    if(ex.mark==='bell')p.poly([[9,34],[16,15],[32,15],[40,34]],'#8a9a66');p.ellipse(24,36,4,5,'#d5b665');
    if(ex.mark==='veil')for(const x of [14,20,27,34])p.line(x,18,x-3,43,'#d29376');
    if(ex.mark==='orbit'){p.ellipse(24,23,18,7,'#c6bbd4');p.ellipse(24,23,13,4,null);star(p,42,13,CREAM,2);}
+   /* Mudling (20 Nov): well mud that got up and walked; drips, a pebble crown and a reed it chews */
+   if(ex.mark==='mud'){for(const [x,y]of [[12,40],[21,44],[30,41],[37,43]])p.ellipse(x,y,3,4,d);for(const [x,y]of [[18,7],[24,4],[30,7]])p.ellipse(x,y,3,3,'#9a9488');p.line(31,30,43,22,'#8fa860');p.ellipse(16,30,4,3,a);}
   }
   return true;
  }
@@ -9925,7 +9929,7 @@ Object.assign(PET_SPECS, {
 });
 Object.assign(FOLK, { witch: () => cauldron(), armoury: () => guard(), merchant: () => fishstall(), dwarf: () => stout({ skin: '#e0a880', cloth: '#6a5a8a', beard: '#c06a3a', helm: '#e0b040', axe: true }) });
 const creatureSprite = id => { const f = SPECS[id] || PET_SPECS[id] || FOLK[id] || ANIMAL[id]; return f ? f() : null; };
-Object.assign(A, { humanoid, creatureSprite, CREATURE_SPECS: SPECS, PET_SPECS, FOLK, ANIMAL,
+Object.assign(A, { humanoid, blob, creatureSprite, CREATURE_SPECS: SPECS, PET_SPECS, FOLK, ANIMAL,
   creatureUrl: id => A.url('creature:' + id, () => creatureSprite(id)),
   hasCreature: id => !!(SPECS[id] || PET_SPECS[id] || FOLK[id] || ANIMAL[id]) });
 })();
@@ -14704,7 +14708,7 @@ DQ.creatureGainXp=m=>{const id=S().pets.active,o=id&&S().pets.owned[id],p=id&&D.
 };
 
 UI.areaPanel=town=>{
-  const active=DQ.act?.kind==='fight'&&DQ.act.area,qt=questTarget(),areas=D.AREAS[town]||[];
+  const active=DQ.act?.kind==='fight'&&DQ.act.area,qt=questTarget(),areas=(DQ.combatAreas?DQ.combatAreas(town):D.AREAS[town]||[]);
   return `<section class="panel activity-choices hunt-areas"><div class="phead"><div><span class="k">Hunting</span><h2>Choose an area</h2></div><small>${esc(D.TOWN[town].name)}</small></div>
     
     ${qt?`<div class="quest-hunt"><button type="button" class="enc-art" data-do="guide" data-a="${qt}" aria-label="${esc(D.MON[qt].name)}: open its field guide">${DQ.artImage('creature',qt,48,'',D.MON[qt].name)}</button><span><b>Quest target: ${esc(D.MON[qt].name)}</b></span><button class="btn primary" data-do="huntquest" data-a="${qt}">Track target</button></div>`:''}
@@ -14716,6 +14720,54 @@ Object.assign(UI.DO,{
  huntquest:id=>{const a=DQ.areaForMonster(id);if(a)DQ.startHunt(a.id,id,true);UI.render(false);}
 });
 DQ.on('encounter',()=>{UI.renderHud();if(UI.view==='combat'){if(UI.updateEncounter)UI.updateEncounter();else UI.render(false);}});
+})();
+
+</script>
+<script>
+/* Idlewick: villains to fight, animals to hunt (20 Nov 2026, owner feedback: "we need actual villain creatures to
+   battle and the chickens, cows etc for hunting early on").
+   Willowbrook's two combat areas swap their farm animals for villains at the same odds: on the Meadow Path a Mudling
+   (well mud that got up and walked) takes the chicken's place, and in the Goblin Thicket a Goblin raider takes the
+   cow's. Each keeps the town's shared drop table, so early gear, pouches and chests drop exactly as before; the raider
+   carries the cowhide and feathers it stole, so those still come from combat for Hettie and the tannery.
+   Chickens and cows move to a Farm fields hunting ground (area.hunt): Hunting's quarry list offers it, the combat
+   window leaves it out. Both creatures stay defined, so old saves keep their kills, field-guide pages and pets. */
+(() => {
+const DQ = window.DQ, D = DQ.data;
+const like = (base, o) => {
+  const b = D.MON[base]; if (!b || D.MON[o.id]) return;
+  const m = { ...b, ...o, drops: [...o.own, ...b.drops.filter(d => !o.drop.includes(d[0]) && !o.own.some(x => x[0] === d[0]))] };
+  delete m.own; delete m.drop; m.hp = Math.round(o.hp * .62); m.max = Math.max(1, Math.round(o.max * .72));
+  D.MON[m.id] = m; D.MONLIST.push(m);
+  (D.EXTRA_CREATURES = D.EXTRA_CREATURES || {})[m.id] = { body: o.body, mark: o.mark, index: Object.keys(D.EXTRA_CREATURES).length };
+};
+like('chicken', { id: 'mudling', name: 'Mudling', cl: 1, hp: 3, max: 1, att: 1, def: 1, coins: [0, 3], col: '#7a5a3a', body: 'spectral', mark: 'mud', drop: ['feather'], own: [['seed_potato', [1, 2], .12]] });
+like('cow', { id: 'goblin_raider', name: 'Goblin raider', cl: 8, hp: 10, max: 2, att: 3, def: 4, coins: [1, 6], col: '#7fae5c', body: 'humanoid', mark: 'raider', drop: [], own: [['cowhide', [1, 1], .9], ['feather', [2, 5], .5]] });
+/* learnable counters, in the same spirit as their neighbours */
+if (D.WEAK) { D.WEAK.mudling = { weak: ['slash', 'fire'], resist: ['crush'] }; D.WEAK.goblin_raider = { weak: ['slash'], resist: [] }; }
+if (D.LORE) {
+  D.LORE.mudling = { note: 'A lump of well mud that got up one night and kept walking. Slow, damp and personally offended by boots.', legend: 'Wren insists the mudlings started when someone tipped the last of the well into the meadow “just to see”. Nobody has owned up. Several people have very clean boots.' };
+  D.LORE.goblin_raider = { note: 'One of Grubnash’s farm raiders. Carries a sack of stolen hides and wears a henhouse feather as a sort of uniform.', legend: 'Raiders are ranked by the size of their sack. The biggest sack in the Thicket belongs to a raider called Lumpy, who is mostly sack.' };
+}
+/* swap the farm animals out of the combat areas, keeping their odds */
+const swap = { chicken: 'mudling', cow: 'goblin_raider' };
+for (const a of D.AREAS.willowbrook || []) for (const e of a.monsters) if (swap[e.id] && D.MON[swap[e.id]]) e.id = swap[e.id];
+/* and give them a field of their own, for Hunting */
+if (D.AREAS.willowbrook && !D.AREAS.willowbrook.some(a => a.hunt)) D.AREAS.willowbrook.push({ id: 'willowbrook:farm', town: 'willowbrook', name: 'Farm fields', hunt: true, monsters: [{ id: 'chicken', weight: 60 }, { id: 'cow', weight: 40 }] });
+/* their own code-drawn sprites (32 x 32, house style): a mud blob with a pebble crown, a hooded raider with a sack */
+const A = DQ.pixelArt;
+if (A && A.CREATURE_SPECS && A.blob && A.humanoid) {
+  const rp = c => A.ramp(c);
+  A.CREATURE_SPECS.mudling = () => { const s = A.blob({ col: '#7a5a3a' }); for (const [x, y] of [[11, 7], [16, 5], [21, 7]]) s.ell(x, y, 1.6, 1.6, rp('#9a9488')); s.line(23, 18, 29, 12, rp('#8fa860')); s.fix(29, 11, '#c8d890'); return s; };
+  A.CREATURE_SPECS.goblin_raider = () => { const s = A.humanoid({ skin: '#7fae5c', cloth: '#7a5a36', ears: 'goblin', mouth: 'grin', hat: 'hood', hatCol: '#4e3f2e', weapon: 'dagger', belt: '#5a3a22' }); s.ell(7, 19, 4, 5, rp('#9c7a4c')); s.ell(7, 16, 2, 1, rp('#b8955f')); s.line(9, 14, 12, 12, rp('#6e5235')); s.line(19, 2, 22, 0, rp('#eee5cf')); s.fix(21, 1, '#ffffff'); return s; };
+}
+DQ.combatAreas = town => (D.AREAS[town] || []).filter(a => !a.hunt);
+/* every ordinary enemy can become a companion (hunting.js); the newcomers too */
+for (const id of ['mudling', 'goblin_raider']) {
+  const m = D.MON[id], pid = 'wild_' + id; if (!m || !D.PET || D.PET[pid]) continue;
+  const p = { id: pid, name: m.name, kind: 'Wild beast', spr: 'quad', mon: id, col: m.col, collectible: false, src: { type: 'hunt', mon: id }, bonus: id === 'mudling' ? { dr: .02 } : { coin: .03 }, text: id === 'mudling' ? '−2% damage taken' : '+3% coins' };
+  D.PETS.push(p); D.PET[pid] = p;
+}
 })();
 
 </script>
@@ -18003,7 +18055,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (bossQuest && DQ.questState(bossQuest) === 'new') return step('Accept the Grubnash quest', 'Make your boss victory count toward the village quest and its rewards.', 'qstart', bossQuest.id);
   if (!DQ.skillUnlocked('cooking')) return (S().stats.catch || 0) < 5 ? task('Learn Cooking', 'Unlock: catch 5 fish, chop 5 logs.', 'fish', 'shrimp') : task('Learn Cooking', 'Chop five logs for a cooking fire, then cook your catch.', 'wood', 'normal');
   const food = DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0), req = D.MON.grubnash.boss.req;
-  /* never send a beginner to fight with nothing to eat: chickens peck back, and a knock-out ends the session's training */
+  /* never send a beginner to fight with nothing to eat: mudlings swing back, and a knock-out ends the session's training */
   if (DQ.combatLvl() < req && food < DQ.maxHp()) return DQ.have('raw_shrimp') >= 12 || (DQ.act && DQ.act.kind === 'recipe' && DQ.have('raw_shrimp') > 0)
     ? task('Cook food for training', `Cook your ${fmt(DQ.have('raw_shrimp'))} raw shrimp before training.`, 'recipe', 'cook_shrimp')
     : task('Catch shrimp to cook', 'Catch and cook about 12 shrimp before training.', 'fish', 'shrimp');
@@ -18038,7 +18090,7 @@ DQ.regionNext = () => {
   if (bq && DQ.questState(bq) === 'ready') return step('Claim your victory reward', `${bq.giver} is waiting to thank you.`, 'qclaim', bq.id);
   if (bq && DQ.questState(bq) === 'new') return step(`Accept “${bq.name}”`, `${bq.giver} asks you to face ${short}. Accepting makes the victory count.`, 'qstart', bq.id);
   const req = b.boss.req;
-  if (DQ.combatLvl() < req) { const fs = DQ.foodStep && DQ.foodStep(`Training here hits back harder than chickens.`); if (fs) return fs; }
+  if (DQ.combatLvl() < req) { const fs = DQ.foodStep && DQ.foodStep(`Training here hits back harder than mudlings.`); if (fs) return fs; }
   if (DQ.combatLvl() < req) { const foe = D.MONLIST.filter(m => m.town === b.town && !m.boss && !m.mini && m.cl <= DQ.combatLvl() + 2).sort((a, c) => c.cl - a.cl)[0] || D.MONLIST.find(m => m.town === b.town && !m.boss);
     return task(`Train for ${short}`, `Combat ${DQ.combatLvl()} / ${req}. ${foe ? `${foe.name}s are a fair fight here.` : ''}`, 'fight', foe ? foe.id : b.id); }
   const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
@@ -18862,7 +18914,7 @@ DQ.lessonForPage=page=>{
 };
 DQ.lessonInfo=id=>{DQ.initGuides();return lessons[id]||null;};
 DQ.acknowledgeLesson=id=>{DQ.initGuides();if(!lessons[id])return false;S().tut.done['lesson:'+id]=true;delete S().seen['tutorial:'+id];DQ.save();return true;};
-const intro=()=>`<section class="panel first-play-guide"><div class="first-play-art">${DQ.monSprite(D.MON.chicken,96)}</div><div><span class="k">A short introduction</span><h2>Welcome to Willowbrook</h2><p>Gather supplies, turn them into useful things, and help your village grow. Pick one task at a time; it keeps working while you explore or close the game.</p><div class="first-play-path"><span>Gather</span> → <span>Make &amp; equip</span> → <span>Fight &amp; restore</span></div><div class="btnrow wrap"><button class="btn primary" data-do="introstart">${S().q.first_steps?.s==='done'?'Explore activities':'Start First Steps'}</button><button class="btn sm" data-do="introskip">Skip introduction</button></div></div></section>`;
+const intro=()=>`<section class="panel first-play-guide"><div class="first-play-art">${DQ.monSprite(D.MON.mudling||D.MON.chicken,96)}</div><div><span class="k">A short introduction</span><h2>Welcome to Willowbrook</h2><p>Gather supplies, turn them into useful things, and help your village grow. Pick one task at a time; it keeps working while you explore or close the game.</p><div class="first-play-path"><span>Gather</span> → <span>Make &amp; equip</span> → <span>Fight &amp; restore</span></div><div class="btnrow wrap"><button class="btn primary" data-do="introstart">${S().q.first_steps?.s==='done'?'Explore activities':'Start First Steps'}</button><button class="btn sm" data-do="introskip">Skip introduction</button></div></div></section>`;
 const coachHtml=l=>`<div class="skill-coach pop" aria-label="First-time ${esc(l.title)} guide"><span class="coach-art">${DQ.artImage(l.art[0],l.art[1],96,'',l.title)}</span><div><p>${esc(l.text)}</p>${l.towards?`<p class="lesson-towards">${esc(l.towards)}</p>`:''}<p class="lesson-goal"><strong>Try this:</strong> ${esc(l.goal)}</p></div></div>`;
 let current=null,lastPage=null,lastState=null;
 const render=UI.render;
@@ -19576,7 +19628,7 @@ const fighting = () => DQ.act && DQ.act.kind === 'fight' ? DQ.act : null;
 const questMon = () => { const id = DQ.questHuntTarget ? DQ.questHuntTarget() : null, m = id && D.MON[id]; return m && m.town === S().town && !m.boss ? id : null; };
 const rarity = pct => pct >= 45 ? 'Common' : pct >= 20 ? 'Uncommon' : 'Rare';
 UI.areaPanel = town => {
-  const f = fighting(), active = f && f.area, qt = questMon(), areas = D.AREAS[town] || [], focus = DQ.combatFocus ? DQ.combatFocus() : null;
+  const f = fighting(), active = f && f.area, qt = questMon(), areas = (DQ.combatAreas ? DQ.combatAreas(town) : D.AREAS[town] || []), focus = DQ.combatFocus ? DQ.combatFocus() : null;
   const minis = D.MONLIST.filter(m => m.mini && !m.tower && m.town === town), qm = qt && D.MON[qt];
   const quest = qm ? `<div class="wh-quest"><span class="wh-q-art">${DQ.monSprite(qm, 32)}</span><span><small>Quest target</small><b>${esc(qm.name)}</b></span><button class="btn sm primary" data-do="huntquest" data-a="${qt}">${qm.mini ? 'Challenge' : 'Track'}</button></div>` : '';
   const head = (x) => { const m = x.monster, met = (S().beast.kills[x.id] || 0) > 0, nm = met ? m.name : 'Unknown creature', on = focus && focus.id === x.id;
@@ -20847,7 +20899,9 @@ Q.huntCandidates = () => {
     const odds = Q.encounterOdds(area).find(e => e.id === m.id);
     out.push({ m, area, why, score, seen, pct: odds ? odds.pct : 0, danger: Q.dangerOf ? Q.dangerOf(m) : null });
   }
-  return out.sort((a, b) => b.score - a.score || a.m.cl - b.m.cl);
+  /* a town with a hunting ground (villains.js, area.hunt) hunts its animals; combat keeps the villains (20 Nov) */
+  const game = out.filter(c => c.area.hunt);
+  return (game.length ? game : out).sort((a, b) => b.score - a.score || a.m.cl - b.m.cl);
 };
 const dangerChip = d => d ? `<span class="chip-d tone-${d.key === 'easy' ? 'ok' : d.key === 'fair' ? 'warn' : 'bad'}">${esc(d.label)}</span>` : '';
 const huntinging = c => Q.act && Q.act.kind === 'fight' && Q.act.id === c.m.id;
@@ -23169,6 +23223,8 @@ DQ.tips.item = id => { const h = tip0(id), o = DQ.originOf(id); return h && o ? 
    Challenges stay in the left column out of combat, so the window fits a 1280 x 720 laptop without scrolling. */
 (() => {
 const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S, { esc, ico } = DQ;
+/* the Farm fields hunting ground fights on the Meadow Path's backdrop */
+const bd0 = DQ.backdropUrl; if (bd0) DQ.backdropUrl = k => bd0(k === 'willowbrook:farm' ? 'willowbrook:0' : k);
 const fightAct = () => DQ.act && DQ.act.kind === 'fight' ? DQ.act : null;
 const met = id => (S().beast.kills[id] || 0) > 0;
 const questMon = () => { const id = DQ.questHuntTarget ? DQ.questHuntTarget() : null, m = id && D.MON[id]; return m && m.town === S().town && !m.boss ? id : null; };
@@ -23176,7 +23232,7 @@ const tone = (lo, hi) => { const c = DQ.combatLvl(); return c >= hi ? 'ok' : c >
 const monTile = (x, qt) => { const m = x.monster, k = met(x.id), nm = k ? m.name : '???';
   return `<div class="cw-mon ${qt === x.id ? 'quest' : ''}"><button type="button" class="cw-mon-art" data-do="guide" data-a="${x.id}" aria-label="${esc(k ? m.name : 'Unknown creature')}, level ${m.cl}, ${x.pct >= 45 ? 'Common' : x.pct >= 20 ? 'Uncommon' : 'Rare'}, ${x.pct}% of encounters. Open its field entry." data-tip="text:${esc(k ? m.name : 'Unknown creature')} · Lv ${m.cl} · ${x.pct}% of encounters">${DQ.monSprite(m, 40, k ? '' : 'sil')}</button><b>${esc(nm)}</b><small>Lv ${m.cl} · ${x.pct}%</small><button type="button" class="btn sm" data-do="hunttrack" data-a="${x.id}" aria-label="Track ${esc(k ? m.name : 'unknown creature')}">${ico('paw')}Track</button></div>`; };
 const windowHtml = () => {
-  const town = S().town, areas = D.AREAS[town] || [], qt = questMon(), qm = qt && D.MON[qt];
+  const town = S().town, areas = (DQ.combatAreas ? DQ.combatAreas(town) : D.AREAS[town] || []), qt = questMon(), qm = qt && D.MON[qt];
   const cards = areas.map(a => { const odds = DQ.encounterOdds(a), lv = odds.map(x => x.monster.cl), lo = Math.min(...lv), hi = Math.max(...lv);
     return `<article class="cw-area"><div class="cw-area-h"><div><b>${esc(a.name)}</b><small class="${tone(lo, hi)}">Combat ${lo}–${hi} recommended</small></div><button type="button" class="btn primary" data-do="huntarea" data-a="${a.id}">${ico('attack')}Explore</button></div><div class="cw-mons">${odds.map(x => monTile(x, qt)).join('')}</div></article>`; }).join('');
   const quest = qm ? `<button type="button" class="cw-quest" data-do="huntquest" data-a="${qt}">${DQ.monSprite(qm, 32)}<span><small>Quest${qm.mini ? ' · challenge' : ''}</small><b>${esc(qm.name)}</b></span></button>` : '';

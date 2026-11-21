@@ -200,7 +200,7 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (bossQuest && DQ.questState(bossQuest) === 'new') return step('Accept the Grubnash quest', 'Make your boss victory count toward the village quest and its rewards.', 'qstart', bossQuest.id);
   if (!DQ.skillUnlocked('cooking')) return (S().stats.catch || 0) < 5 ? task('Learn Cooking', 'Unlock: catch 5 fish, chop 5 logs.', 'fish', 'shrimp') : task('Learn Cooking', 'Chop five logs for a cooking fire, then cook your catch.', 'wood', 'normal');
   const food = DQ.foods().reduce((n, id) => n + DQ.have(id) * D.ITEMS[id].heal, 0), req = D.MON.grubnash.boss.req;
-  /* never send a beginner to fight with nothing to eat: chickens peck back, and a knock-out ends the session's training */
+  /* never send a beginner to fight with nothing to eat: mudlings swing back, and a knock-out ends the session's training */
   if (DQ.combatLvl() < req && food < DQ.maxHp()) return DQ.have('raw_shrimp') >= 12 || (DQ.act && DQ.act.kind === 'recipe' && DQ.have('raw_shrimp') > 0)
     ? task('Cook food for training', `Cook your ${fmt(DQ.have('raw_shrimp'))} raw shrimp before training.`, 'recipe', 'cook_shrimp')
     : task('Catch shrimp to cook', 'Catch and cook about 12 shrimp before training.', 'fish', 'shrimp');
@@ -235,7 +235,7 @@ DQ.regionNext = () => {
   if (bq && DQ.questState(bq) === 'ready') return step('Claim your victory reward', `${bq.giver} is waiting to thank you.`, 'qclaim', bq.id);
   if (bq && DQ.questState(bq) === 'new') return step(`Accept “${bq.name}”`, `${bq.giver} asks you to face ${short}. Accepting makes the victory count.`, 'qstart', bq.id);
   const req = b.boss.req;
-  if (DQ.combatLvl() < req) { const fs = DQ.foodStep && DQ.foodStep(`Training here hits back harder than chickens.`); if (fs) return fs; }
+  if (DQ.combatLvl() < req) { const fs = DQ.foodStep && DQ.foodStep(`Training here hits back harder than mudlings.`); if (fs) return fs; }
   if (DQ.combatLvl() < req) { const foe = D.MONLIST.filter(m => m.town === b.town && !m.boss && !m.mini && m.cl <= DQ.combatLvl() + 2).sort((a, c) => c.cl - a.cl)[0] || D.MONLIST.find(m => m.town === b.town && !m.boss);
     return task(`Train for ${short}`, `Combat ${DQ.combatLvl()} / ${req}. ${foe ? `${foe.name}s are a fair fight here.` : ''}`, 'fight', foe ? foe.id : b.id); }
   const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
