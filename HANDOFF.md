@@ -921,3 +921,10 @@ Now `js/audio.js` sequences composed themes on the audio clock:
 - **Combat** (138 bpm, full drums, fiddle ostinato) and **Boss** (150 bpm, harmonic minor, timpani, brass) take the region's key, so fights change with the region too.
 - Levels were measured per theme (music bus peaks 0.19–0.31, RMS 0.05–0.10) and recorded samples are −20 to −25 dB RMS. Ambience, effects, volumes and settings are unchanged.
 - Limits: composed and checked by measurement and recordings, not yet by a human listening session.
+
+## Feedback 22 Nov 2026: tool metals, field guide line, Smithing anvils and hammers, combat arts (Claude)
+- Tools: the Copper axe already needed copper; the Copper pickaxe was the one exception. It now needs 2 copper ore and 2 logs like every other tier, and the Willowbrook shop sells copper ore (15 coins) so Mining can start.
+- Field guide line: labelled, with pips, bar and "Catch 54 more · 4% faster". Verbs per kind (Catch, Chop, Mine, Pick, Harvest, Collect, Cook, Smith, Smelt, Craft, Brew, Enchant, Build, Make).
+- Smithing: anvils (+4/8/12/16/20/25% faster) and hammers (+3/6/9/12/15/20% chance to make two), bronze/iron/steel/mithril/adamant/runic at Smithing 1/15/30/50/70/85, costing bars of that alloy. Shown on the Smithing shop shelf and as small icons on the Smithing page.
+- Combat arts: Melee (Steady Strikes, Cleaving Blows, Piercing Thrust, Crushing Blows, Heavy Swing, Bleeding Edge, Guard Breaker, Riposte, Whirlwind, Master's Form) and Ranged (Aimed Draw, Broadheads, Fire/Frost/Storm Arrows, Pinning Shot, Hunter's Mark, Volley, Piercing Bolt, Starshot) at levels 1 to 90; seven new spells (Ember Dart, Gale Cutter, Hailstorm, Inferno, Blizzard, Tempest, Starfall) take the spellbook to twelve. Numbers are modest (single-digit to mid-teens percent) and have not been through the boss ladder sim; run PARITY/COUNTER sims with the module loaded before tuning further.
+- Also fixed: the Combat getting-started pop-up showed a chicken (now a goblin).

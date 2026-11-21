@@ -460,7 +460,7 @@ function combatRound() {
     const sp = pickSpell(); if (!sp) return DQ.stopAct(false, 'Out of Arcane runes. Buy more from the shop.');
     ps.spell = sp; ps.max = Math.round((sp.max + Math.floor(DQ.lvl('magic') * ((D.STYLE_TUNE && D.STYLE_TUNE.level) || 1) / 10) + Math.floor(DQ.bonus().mag / 12)) * (1 + DQ.fx().dmg + (ps.tech ? ps.tech.dmg : 0)) * DQ.buffMult('weak')); if (!(ps.tech && ps.tech.free && chance(ps.tech.free))) DQ.take('rune', sp.runes);
   }
-  const dtype = sty === 'magic' ? D.SPELL_EL[ps.spell.id] : W.dtype; f.lastEl = dtype;
+  const dtype = sty === 'magic' ? D.SPELL_EL[ps.spell.id] : (ps.dtype || W.dtype); f.lastEl = dtype; /* a combat art can change the damage type (combat_arts.js) */
   /* Hollow King changes form */
   if (m.id === 'hollowking') { const ph = f.hp > mhp * 2 / 3 ? 0 : f.hp > mhp / 3 ? 1 : 2; if (ph !== f.phase) { f.phase = ph; if (!DQ.sim.on) DQ.log(`The Hollow King changes form! Now weak to ${D.HOLLOW_PHASES[ph].weak.join(' and ')}.`, 'bad'); } }
   let dealt = 0, tag = '';
@@ -493,6 +493,7 @@ function combatRound() {
     if (dealt && U.stun && chance(.12)) { f.stun = 1; fxHit('stun'); }
     if (dealt && U.poison) { f.poison = Math.min(3, (f.poison || 0) + 1); fxHit('poison'); }
     if (dealt && U.curse && sty === 'magic') { f.curse = Math.min(3, (f.curse || 0) + 1); fxHit('curse'); }
+    if (dealt && DQ.artHit) dealt = DQ.artHit(ps, dealt, m, f, max);
     if (DQ.beastHeroHit) dealt = DQ.beastHeroHit(dealt, m, f);
   }
   /* XP counts the damage the creature could actually take: overkill on weak creatures teaches nothing extra */

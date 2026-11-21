@@ -550,3 +550,22 @@ html.short .cw-foe{gap:5px;padding:7px!important}html.short .cw-foe-h img{width:
 #view .shop-stock .smith-gear{max-height:none!important;overflow:visible!important;flex:none!important;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))!important}
 #view .shop-stock .smith-gear .illustrated-card{min-height:0;height:auto!important;padding:10px 6px}
 #view .shop-stock:has(.smith-gear){overflow-y:auto}
+/* Combat arts (22 Nov 2026) */
+.arts-head .phead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.arts-tabs .btn b{margin-left:4px;opacity:.75}
+.arts-page{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:16px;align-items:start;margin-top:14px}
+.arts-grid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))!important;gap:10px}
+.art-card{display:flex;flex-direction:column;align-items:center;gap:4px;min-height:96px;padding:12px 8px;text-align:center}
+.art-card .art-dot{width:14px;height:14px;border-radius:50%;background:var(--c);box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 30%,transparent)}
+.art-card .art-dot.plain{--c:var(--brass)}
+.art-card small{font-size:13px;color:var(--mute)}
+.art-card.locked{filter:grayscale(1);opacity:.7}
+.arts-focus h2{margin:4px 0}
+.arts-next{color:var(--mute);font-size:14px}
+@media (max-width:860px){.arts-page{grid-template-columns:1fr}}
+.hud-train .kit-head .cx-art{display:inline-flex;align-items:center;gap:4px;font-size:13px;margin-left:6px;white-space:nowrap}
+.hud-train .kit-head .cx-art .ic{width:14px!important;height:14px!important}
+.hud-train .cx-art{display:inline-flex;align-items:center;gap:4px;font-size:13px;margin:0 0 0 8px;white-space:nowrap;vertical-align:middle}
+.hud-train .cx-art .ic{width:14px!important;height:14px!important}
+.hud-train [data-b="dps"]{display:inline-block!important}
+.hud-train .cx-dpsrow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
