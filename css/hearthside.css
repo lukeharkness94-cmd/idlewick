@@ -532,3 +532,21 @@ html.short .cw-foe{gap:5px;padding:7px!important}html.short .cw-foe-h img{width:
 @media (max-width:860px){#view .combat-x .cw-window{position:static;inset:auto}#view .combat-x.cw-idle .encounter-arena{min-height:0;padding:0;background-image:none!important}#view .combat-x.cw-idle .encounter-arena>:not(.cw-window){display:none}.cw-areas{grid-template-columns:1fr}}
 #view .combat-x .cw-window{container-type:size}
 @container (min-height:330px){.cw-mon-art img{width:64px!important;height:64px!important}.cw-mons{grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}.cw-mon b{font-size:14px}}
+/* Field guide line under the action button (22 Nov 2026): labelled, with what to do next */
+.mast-line{display:grid;grid-template-columns:auto auto 1fr;grid-template-rows:auto auto;align-items:center;column-gap:8px;row-gap:3px;height:auto;max-width:none;margin:10px 0 0;padding:6px 8px;border-radius:8px;background:color-mix(in srgb,var(--brass) 9%,transparent);border:1px solid color-mix(in srgb,var(--brass) 26%,transparent)}
+.mast-line .mast-k{display:inline-flex;align-items:center;gap:5px;font-family:var(--f-ui);font-size:13px;color:var(--ink);white-space:nowrap}
+.mast-line .mast-k .ic{width:16px!important;height:16px!important}
+.mast-line .mast-k b{font-weight:700}
+.mast-line .bar{grid-column:3;height:4px}
+.mast-line .mast-next{grid-column:1/-1;font-size:13px;color:var(--mute);line-height:1.25}
+.mast-line.max .bar{display:none}
+/* Smithing workshop: anvils and hammers (22 Nov 2026) */
+.smith-shelf-h{display:flex;align-items:baseline;gap:8px;margin:10px 0 6px;font-family:var(--f-display);font-size:18px}
+.smith-shelf-h small{font-family:var(--f-ui);font-size:13px;color:var(--mute)}
+.smith-gear .illustrated-card{min-height:150px}
+.smith-gear-hero{display:flex;align-items:center;gap:12px}
+.smith-gear-hero h2{margin:0}
+.smith-kit{display:inline-flex;gap:2px;margin-left:8px;vertical-align:middle}
+#view .shop-stock .smith-gear{max-height:none!important;overflow:visible!important;flex:none!important;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))!important}
+#view .shop-stock .smith-gear .illustrated-card{min-height:0;height:auto!important;padding:10px 6px}
+#view .shop-stock:has(.smith-gear){overflow-y:auto}

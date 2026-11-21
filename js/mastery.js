@@ -37,10 +37,18 @@ DQ.mastTick = (a, n = 1) => {
 DQ.ENTRY_NAMES = ['Notes', 'Quicker hands', 'Keen eye', 'Second nature', 'Mastered'];
 DQ.entryPerk = (kind, star) => { if (kind === 'brew') return `${star * 2}% double`; const y = YIELD_KINDS.includes(kind), w = SPEED_WORD[kind] || 'faster'; return `${star === 1 ? 'Uses shown · ' : ''}${star * 2}% ${w}${y && star >= 5 ? ' · 10% double' : y && star >= 3 ? ' · 5% double' : ''}`; };
 DQ.studyBar = (pct, full, tip) => `<i class="study-bar ${full ? 'full' : pct >= 90 ? 'near' : ''}" style="--p:${Math.max(0, Math.min(100, Math.round(pct)))}%" ${tip ? `data-tip="text:${DQ.esc(tip)}"` : ''} aria-hidden="true"></i>`;
-DQ.mastTip = (kind, id) => { const m = DQ.mastInfo(kind, id),discovery=DQ.studyDiscovery?.(kind,id);if(discovery)return `Field guide ${m.stars}/${STEPS.length} · ${DQ.fmt(discovery.left)} more to discover a recipe`; return m.next ? `Field guide ${m.stars}/${STEPS.length} · ${DQ.fmt(m.next - m.n)} more for ${DQ.entryPerk(kind, m.stars + 1)}` : `Field guide complete · ${m.speed}% faster${m.extra ? ` · ${m.extra}% double` : ''}`; };
+/* the verb for "N more": Catch 54 more, Mine 12 more, Cook 30 more (owner, 22 Nov) */
+const RECIPE_VERB = { cooking: 'Cook', smithing: 'Smith', crafting: 'Craft', herbalism: 'Brew', enchanting: 'Enchant', carpentry: 'Build', magic: 'Make', farming: 'Make' };
+DQ.mastVerb = (kind, id) => { if (kind === 'recipe') { const r = D.RECIPES[id]; if (r && /^smelt_/.test(r.id)) return 'Smelt'; return (r && RECIPE_VERB[r.skill]) || 'Make'; }
+  return ({ fish: 'Catch', wood: 'Chop', mine: 'Mine', thieve: 'Pick', crop: 'Harvest', animal: 'Collect', brew: 'Brew', sail: 'Sail', train: 'Set traps', fight: 'Defeat' })[kind] || 'Do'; };
+DQ.mastNext = (kind, id) => { const m = DQ.mastInfo(kind, id), discovery = DQ.studyDiscovery?.(kind, id), v = DQ.mastVerb(kind, id);
+  if (discovery) return `${v} ${DQ.fmt(discovery.left)} more · a recipe`;
+  return m.next ? `${v} ${DQ.fmt(m.next - m.n)} more · ${DQ.entryPerk(kind, m.stars + 1)}` : `Complete · ${m.speed}% faster${m.extra ? ` · ${m.extra}% double` : ''}`; };
+DQ.mastTip = (kind, id) => { const m = DQ.mastInfo(kind, id); return `Field guide ${m.next ? `${m.stars}/${STEPS.length}` : 'complete'} · ${DQ.mastNext(kind, id).replace(/^Complete · /, '')}`; };
 DQ.mastBadge = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''; const m = DQ.mastInfo(kind, id); return DQ.studyBar(m.pct, !m.next); };
 DQ.mastLine = (kind, id) => { if (kind === 'fight' || kind === 'alch') return ''; const m = DQ.mastInfo(kind, id);
-  return `<div class="mast-line ${m.next ? (m.pct >= 90 ? 'near' : '') : 'max'}" data-tip="text:${DQ.esc(DQ.mastTip(kind, id))}" role="img" aria-label="${DQ.esc(DQ.mastTip(kind, id))}"><span class="mast-pips">${Array.from({ length: STEPS.length }, (_, i) => `<i class="${i < m.stars ? 'on' : ''}"></i>`).join('')}</span><span class="bar"><i style="width:${m.pct}%"></i></span></div>`; };
+  /* a labelled line (owner, 22 Nov: make it obvious this is the field guide, and say what to do: "Catch 54 more") */
+  return `<div class="mast-line ${m.next ? (m.pct >= 90 ? 'near' : '') : 'max'}" data-tip="text:${DQ.esc(DQ.mastTip(kind, id))}" role="group" aria-label="${DQ.esc(DQ.mastTip(kind, id))}"><span class="mast-k">${DQ.ico ? DQ.ico('book') : ''}Field guide <b>${m.stars}/${STEPS.length}</b></span><span class="mast-pips">${Array.from({ length: STEPS.length }, (_, i) => `<i class="${i < m.stars ? 'on' : ''}"></i>`).join('')}</span><span class="bar"><i style="width:${m.pct}%"></i></span><small class="mast-next">${DQ.esc(DQ.mastNext(kind, id))}</small></div>`; };
 /* crops and livestock are not tasks: their entries fill as you harvest and collect, and speed up growth and produce */
 const grow0 = DQ.growDur; if (grow0) DQ.growDur = c => Math.round(grow0(c) * (1 - DQ.mastSpeed('crop', c.id)));
 const period0 = DQ.animalPeriod; if (period0) DQ.animalPeriod = a => period0(a) * (1 - DQ.mastSpeed('animal', a.id));

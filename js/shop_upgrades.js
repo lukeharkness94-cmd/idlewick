@@ -7,7 +7,7 @@ Q.toolUpgradeOwned=id=>{const it=D.ITEMS[id];return !!(S().toolUpgrades?.[id]||Q
 const give0=Q.give,tier0=Q.toolTier;
 Q.give=(id,n=1)=>{const r=give0(id,n),it=D.ITEMS[id];if(n>0&&it?.toolSkill&&it.tier){S().toolUpgrades=S().toolUpgrades||{};for(const t of D.TOOL_ORDER.filter(t=>t<=it.tier))S().toolUpgrades['tool_'+Q.toolKey(it.toolSkill)+'_'+t]=true;}return r;};
 Q.toolTier=sk=>{const k=Q.toolKey(sk);for(const t of [...D.TOOL_ORDER].reverse())if(S().toolUpgrades?.['tool_'+k+'_'+t])return Math.max(t,tier0(sk));return tier0(sk);};
-Q.shopMaterialCost=id=>{const it=D.ITEMS[id];if(!it)return {};if(it.toolSkill)return id==='tool_pick_0.5'?{}:{...D.TOOL_COSTS[id]};/* the first (copper) pickaxe needs no ore, so Mining can start */if(it.slot==='weapon'&&!it.rare){const r=Object.values(D.RECIPES).find(r=>r.out[id]);return r?{...r.in}:{};}return it.type==='gear'&&Number.isInteger(it.tier)&&it.tier>0?{...metal[it.tier]}:{};};
+Q.shopMaterialCost=id=>{const it=D.ITEMS[id];if(!it)return {};if(it.toolSkill)return {...D.TOOL_COSTS[id]};/* every tier needs its own metal (owner, 22 Nov); the Willowbrook shop sells copper ore, so the first pickaxe and Mining can still start */if(it.slot==='weapon'&&!it.rare){const r=Object.values(D.RECIPES).find(r=>r.out[id]);return r?{...r.in}:{};}return it.type==='gear'&&Number.isInteger(it.tier)&&it.tier>0?{...metal[it.tier]}:{};};
 Q.toolShopRegion=id=>D.TOWNS.find(t=>(D.SHOPS[t.id]||[]).includes(id))?.id;
 Q.shopUpgradeState=id=>{
  const it=D.ITEMS[id],cost=Q.shopMaterialCost(id),region=Q.toolShopRegion(id),owned=it?.type==='tool'&&Q.toolUpgradeOwned(id),lock=Q.lockedSkillFor(id),reachable=!region||Q.townUnlocked(region),materials=Object.entries(cost).every(([k,n])=>Q.have(k)>=n),gold=S().coins>=Q.buyPrice(id);

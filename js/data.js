@@ -524,7 +524,7 @@ const tools = (...ts) => ts.flatMap(t => D.TOOLS.map(([k]) => `tool_${k}_${t}`))
 const arrows = (...ts) => ts.map(i => 'arrow_' + TIERS[i].id);
 const seeds = (...ids) => ids.map(c => 'seed_' + c);
 D.SHOPS = {
-  willowbrook: ['bread', 'feather', 'rune', 'feed', ...seeds('potato', 'onion'), ...tools(1), ...metal(0), ...arrows(0), ...bows(0), ...robes(0)],
+  willowbrook: ['bread', 'feather', 'rune', 'feed', 'ore_copper', ...seeds('potato', 'onion'), ...tools(1), ...metal(0), ...arrows(0), ...bows(0), ...robes(0)],
   mossbarrow:  ['bread', 'feather', 'rune', 'feed', ...seeds('potato', 'onion', 'cabbage', 'wheat', 'strawberry', 'pumpkin'), ...tools(1, 2), ...metal(0, 1), ...arrows(0, 1), ...bows(0, 1), ...robes(0)],
   saltmere:    ['bread', 'feather', 'rune', 'feed', ...seeds('cabbage', 'wheat'), ...tools(1, 2), ...metal(1), ...arrows(1), ...bows(1), ...robes(1)],
   ironpeak:    ['bread', 'feather', 'rune', 'feed', ...seeds('pumpkin', 'goldleaf'), ...tools(2, 3), ...metal(2), ...arrows(2), ...bows(2), ...robes(1, 2)],
