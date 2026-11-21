@@ -500,7 +500,7 @@ html.calm .illustrated-card.just-unlocked{box-shadow:0 0 0 3px var(--brass)}
 .cw-area-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .cw-area-h b{display:block;font-size:17px}.cw-area-h small{font-size:14px;font-weight:600}
 .cw-area-h small.ok{color:var(--good,#2f7a4c)}.cw-area-h small.warn{color:#9a6a12}.cw-area-h small.bad{color:#b0362c}
-.cw-mons{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:6px}
+.cw-mons{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
 .cw-mon{display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 2px;border-radius:8px;text-align:center;min-width:0}
 .cw-mon.quest{background:color-mix(in srgb,var(--brass) 14%,transparent)}
 .cw-mon-art{background:none;border:0;padding:0;cursor:pointer;line-height:0}
