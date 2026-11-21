@@ -49,7 +49,7 @@ U.updateEncounter=()=>{
  if(wait){encounterTimer=setTimeout(U.updateEncounter,wait+40);return;}
  if(U.impactFlights?.size){Promise.allSettled([...U.impactFlights].map(a=>a.finished)).then(U.updateEncounter);return;}
  const temp=document.createElement('template');temp.innerHTML=U.V.combat();
- const old=document.querySelector('.encounter-arena>.side:last-child'),fresh=temp.content.querySelector('.encounter-arena>.side:last-child');
+ const lastSide=r=>{const a=r.querySelectorAll('.encounter-arena>.side');return a[a.length-1]||null;},old=lastSide(document),fresh=lastSide(temp.content);
  if(old&&fresh&&old.querySelector('#av-foe')?.dataset.a!==fresh.querySelector('#av-foe')?.dataset.a)old.replaceWith(fresh);
  const mid=document.querySelector('.encounter-arena>.mid'),nextMid=temp.content.querySelector('.encounter-arena>.mid');if(mid&&nextMid&&!!mid.querySelector('[data-prog]')!==!!nextMid.querySelector('[data-prog]'))mid.innerHTML=nextMid.innerHTML;
  const prog=mid?.querySelector('[data-prog]');if(prog&&Q.act?.kind==='fight')prog.dataset.prog='fight:'+Q.act.id;

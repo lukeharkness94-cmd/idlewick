@@ -24,7 +24,8 @@ const huntCard = g => { if (!DQ.skillUnlocked('hunting')) return `<article class
 const windowHtml = () => {
   const town = S().town, ground = DQ.huntGround ? DQ.huntGround(town) : null; if (!ground) UI.cwTab = 'areas';
   const areas = (DQ.combatAreas ? DQ.combatAreas(town) : D.AREAS[town] || []), qt = questMon(), qm = qt && D.MON[qt];
-  const wtabs = ground ? `<div class="cw-tabs" role="tablist"><button type="button" class="btn sm ${UI.cwTab !== 'hunt' ? 'on' : ''}" role="tab" aria-selected="${UI.cwTab !== 'hunt'}" data-do="cwtab" data-a="areas">${ico('attack')}Combat areas</button><button type="button" class="btn sm ${UI.cwTab === 'hunt' ? 'on' : ''}" role="tab" aria-selected="${UI.cwTab === 'hunt'}" data-do="cwtab" data-a="hunt">${ico('paw')}Hunting ground</button></div>` : '';
+  /* animals are hunted on the Hunting page (hunt_stalk.js); the window keeps a way there */
+  const wtabs = ground && DQ.skillUnlocked('hunting') ? `<div class="cw-tabs"><button type="button" class="btn sm" data-do="huntground" data-tip="text:Hunt animals on the Hunting page">${ico('paw')}Hunting ground</button></div>` : '';
   if (UI.cwTab === 'hunt' && ground) return `<div class="cw-window cw-window-hunt" role="region" aria-label="Hunting ground"><div class="cw-head"><small>${esc(D.TOWN[town].name)} · your Hunting level ${DQ.huntLevel ? DQ.huntLevel() : DQ.lvl('hunting')}</small>${wtabs}</div><div class="cw-areas">${huntCard(ground)}</div></div>`;
   const cards = areas.map(a => { const odds = DQ.encounterOdds(a), lv = odds.map(x => x.monster.cl), lo = Math.min(...lv), hi = Math.max(...lv);
     return `<article class="cw-area"><div class="cw-area-h"><div><b>${esc(a.name)}</b><small class="${tone(lo, hi)}">Combat ${lo}–${hi} recommended</small></div><button type="button" class="btn primary" data-do="huntarea" data-a="${a.id}">${ico('attack')}Explore</button></div><div class="cw-mons">${odds.map(x => monTile(x, qt)).join('')}</div></article>`; }).join('');
@@ -38,9 +39,14 @@ const foeHtml = () => {
   const seen = (S().seen && S().seen.items) || {}, drops = (m.drops || []).map(d => d[0]).filter((id, i, a) => D.ITEMS[id] && a.indexOf(id) === i), known = drops.filter(id => seen[id]), unknown = drops.length - known.length;
   const area = act.area && Object.values(D.AREAS || {}).flat().find(a => a.id === act.area);
   const tracking = act.track ? `<div class="cw-trackline">${ico('paw')}<span>Tracking</span><button type="button" class="linkish" data-do="huntarea" data-a="${act.area || ''}">Explore instead</button></div>` : '';
-  return `<section class="panel cw-foe" aria-label="The creature you are fighting"><div class="cw-foe-h">${DQ.monSprite(m, 64)}<div><span class="k">${m.boss ? 'Boss' : m.mini ? 'Challenge' : esc(area ? area.name : 'Fighting')}</span><b>${esc(m.name)}</b><small>Lv ${m.cl}</small></div><button type="button" class="btn sm route-icon" data-do="guide" data-a="${m.id}" aria-label="Open its field entry" data-tip="text:Field guide">${ico('book')}</button></div>
-    <div class="cw-hp"><span class="bar"><i data-b="cwfoehp"></i></span><small class="mono" data-b="cwfoehptxt"></small></div>
-    <dl class="cw-stats"><div><dt>Attacks every</dt><dd>${((m.attackMs || 2000) / 1000).toFixed(1)}s</dd></div><div><dt>Max hit</dt><dd>${m.max}</dd></div>${w.weak.length ? `<div><dt>Weak to</dt><dd>${w.weak.map(dt).join('')}</dd></div>` : ''}${w.resist.length ? `<div><dt>Resists</dt><dd>${w.resist.map(dt).join('')}</dd></div>` : ''}</dl>
+  const place = m.boss ? 'Boss' : m.mini ? 'Challenge' : (area ? area.name : '');
+  const chip = (icon, label, val, tip) => `<span class="cw-chip" data-tip="text:${esc(tip)}">${icon ? ico(icon) : ''}<span class="cw-chip-k">${label}</span><b>${val}</b></span>`;
+  const chips = [chip('clock', 'Attacks', ((m.attackMs || 2000) / 1000).toFixed(1) + 's', 'Time between its attacks'), chip('attack', 'Max hit', m.max, 'Its biggest possible hit')];
+  if (w.weak.length) chips.push(`<span class="cw-chip"><span class="cw-chip-k">Weak to</span>${w.weak.map(dt).join('')}</span>`);
+  if (w.resist.length) chips.push(`<span class="cw-chip"><span class="cw-chip-k">Resists</span>${w.resist.map(dt).join('')}</span>`);
+  /* one row each: who it is, its health, how it fights, what it drops; the portrait opens its field entry */
+  return `<section class="panel cw-foe" aria-label="The creature you are fighting"><div class="cw-foe-h"><button type="button" class="cw-foe-pic" data-do="guide" data-a="${m.id}" aria-label="${esc(m.name)}: open its field entry" data-tip="text:Field guide">${DQ.monSprite(m, 64)}</button><div class="cw-foe-id"><b>${esc(m.name)}</b><small>Lv ${m.cl}${place ? ' · ' + esc(place) : ''}</small><div class="cw-hp"><span class="bar"><i data-b="cwfoehp"></i></span><small class="mono" data-b="cwfoehptxt"></small></div></div></div>
+    <div class="cw-chips">${chips.join('')}</div>
     ${drops.length ? `<div class="cw-drops"><span class="k">Drops</span><div>${known.map(id => `<span class="cw-drop" data-tip="item:${id}">${DQ.itemIco(D.ITEMS[id])}</span>`).join('')}${unknown ? `<span class="cw-drop unknown" data-tip="text:${unknown} not found yet">?<b>${unknown}</b></span>` : ''}</div></div>` : ''}${tracking}</section>`;
 };
 UI.B.cwfoehp = e => { const f = DQ.fight, m = f && D.MON[f.id]; e.style.width = m ? Math.max(0, Math.round(f.hp / m.hp * 100)) + '%' : '0%'; };

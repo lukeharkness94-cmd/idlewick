@@ -945,3 +945,14 @@ Owner: keep Runes and Alchemy in Magic; give Melee and Ranged their own areas; a
 - Hunting ground moved to the combat window as a tab (Hunting level locks, Hunting still required, quest targets still reachable from the quest row); Hunting page keeps Fieldwork with a button to it.
 - Also: Exploration tab beside Map; Inventory's combat stats became Gear bonuses plus one fighting line with a Fight link; Home's duplicate "keeps working" line removed; Bank fills the width when nothing is selected.
 - Scripted runs (first hour, three starter kits) still reach Grubnash and Mossbarrow; run-to-run variance is large (Grubnash fell at 22, 27 and >60 minutes in three walkthroughs), so they show nothing broken rather than a pacing change. Tests updated for the new locations: ui-fit (16 skill rows + 5 combat rows), quest-journal-ui (Skills order), ux-roles and creature-roster (hunting ground tab).
+
+
+## Hunting as its own activity (23 Nov 2026)
+Owner feedback: the hunting ground was just combat. Now Hunting → Hunting ground (js/hunt_stalk.js) runs a repeating
+track → set trap → strike cycle on one chosen animal; the strike can miss and the animal slips away (30% XP, no kill),
+then tracking starts again. A catch counts as the old kill everywhere (quests, field guide, drops, wild companions,
+museum and recipe hooks) without combat XP, damage or food. XP per hour is matched to Fieldwork at the same level
+(checked in the browser: ~2.4 XP/s for a chicken at Hunting 3 against ~2.3 for Fieldwork). Animal quests (the Ranged
+main quest's boars among them) route to the hunt; before Hunting is learned they still fight it. Also fixed: the
+fight stage kept the first creature's sprite (updateEncounter looked at the stage's last child), the night tint
+covered the fighters, and the Your foe card wrapped and overlapped. Test: tests/hunt-stalk.cjs.

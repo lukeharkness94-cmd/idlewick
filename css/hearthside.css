@@ -633,3 +633,50 @@ html.rail-tight #combatnav .cg-tile .bar{width:80%}
 /* Melee/Ranged page tabs wrap on phones rather than pushing the page sideways */
 #view .style-page-tabs { flex-wrap: wrap; min-width: 0; }
 #view .style-page-tabs .btn { min-width: 0; }
+
+/* Night on the fight stage (owner, 23 Nov): the time-of-day tint colours the landscape only. The fighters, their
+   names, health and hit numbers sit above it at full strength, and night is a gentle wash, not a blackout. */
+.encounter-arena > .tod-tint, .encounter-arena > .weather { z-index: 0; }
+.encounter-arena > .side, .encounter-arena > .mid { position: relative; z-index: 1; }
+body[data-tod="night"] .encounter-arena > .tod-tint { background: linear-gradient(#0a144048, #1a245058); }
+body[data-tod="dusk"] .encounter-arena > .tod-tint { background: linear-gradient(#ff8a5a22, #7a4a8a20); }
+.encounter-arena .side .nm, .encounter-arena .side small.mono { text-shadow: 0 1px 0 color-mix(in srgb, var(--panel) 80%, transparent); }
+
+/* Your foe card, rebuilt (owner, 23 Nov: "text on two lines and symbols hovering over each other"). One column:
+   portrait (opens the field entry) with name, level and place on single lines and the health bar under them; then how
+   it fights as chips that wrap whole, never mid-chip; then drops. The boss button sits to the side at its own size. */
+.cw-next-body>.cw-foe{display:flex!important;flex-direction:column;gap:10px;grid-template-columns:none}
+.cw-next-body>.cw-foe>*{grid-column:auto!important;grid-row:auto!important}
+.cw-foe-h{display:flex;align-items:center;gap:12px;min-width:0}
+.cw-foe-pic{flex:none;display:grid;place-items:center;width:76px;height:76px;padding:0;border:1px solid var(--line2);border-radius:10px;background:color-mix(in srgb,var(--panel2) 70%,transparent);cursor:pointer}
+.cw-foe-pic:hover,.cw-foe-pic:focus-visible{border-color:var(--accent)}
+.cw-foe-id{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cw-foe-id>b{font:600 18px var(--f-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw-foe-id>small{color:var(--mute);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cw-foe-id .cw-hp{display:flex;align-items:center;gap:8px;margin-top:4px}
+.cw-foe-id .cw-hp .bar{flex:1 1 auto;height:8px}
+.cw-foe-id .cw-hp small{flex:none;font-size:14px}
+.cw-chips{display:flex;flex-wrap:wrap;gap:6px}
+.cw-chip{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:3px 10px;border-radius:999px;border:1px solid var(--line2);background:color-mix(in srgb,var(--panel2) 60%,transparent);font-size:14px;line-height:1.4}
+.cw-chip .ic{width:16px;height:16px;flex:none}
+.cw-chip-k{color:var(--mute)}
+.cw-chip b{font-weight:600}
+.cw-chip .cw-dt{white-space:nowrap}
+.cw-drops{display:flex;align-items:center;gap:10px}
+.cw-drops>.k{flex:none}
+.cw-drops>div{display:flex;flex-wrap:wrap;gap:6px}
+.cw-fighting .cw-next-body>.boss-foot{flex:0 0 220px;align-self:flex-start}
+html.short .cw-foe-pic{width:56px;height:56px}html.short .cw-foe-pic img{width:48px!important;height:48px!important}
+/* fighter names on the stage read against any landscape */
+.encounter-arena .side .nm{display:inline-flex;align-items:center;gap:6px;padding:1px 8px;border-radius:999px;background:color-mix(in srgb,var(--panel) 82%,transparent)}
+.encounter-arena .side small.mono{padding:0 6px;border-radius:6px;background:color-mix(in srgb,var(--panel) 70%,transparent)}
+
+/* Hunting ground (hunt_stalk.js): the step the hunt is on, over the trap-line scene */
+.activity-scene.hunt .hunt-steptag{position:absolute;left:10px;top:10px;z-index:4;display:inline-flex;align-items:center;gap:6px;padding:3px 12px;border-radius:999px;background:color-mix(in srgb,var(--panel) 90%,transparent);border:1px solid var(--line2);font:600 15px var(--f-body);color:var(--ink)}
+.activity-scene.hunt .hunt-steptag .ic{width:18px;height:18px}
+.hunt-steps{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0}
+.hunt-steps>span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:2px 10px;border-radius:999px;border:1px solid var(--line2);font-size:14px}
+.hunt-steps>span .ic{width:18px;height:18px}
+.hunt-steps>i{font-style:normal;color:var(--mute)}
+.hunt-drops{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media (max-width:860px){.cw-next-body>.boss-foot,.cw-fighting .cw-next-body>.boss-foot{flex:none;align-self:stretch}}
