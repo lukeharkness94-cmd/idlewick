@@ -629,3 +629,7 @@ html.rail-tight #combatnav .cg-tile>img,html.rail-tight #combatnav .cg-tile>.ski
 html.rail-tight #combatnav .cg-tile .cg-t b{display:none}
 html.rail-tight #combatnav .cg-tile .cg-t{justify-content:center}
 html.rail-tight #combatnav .cg-tile .bar{width:80%}
+
+/* Melee/Ranged page tabs wrap on phones rather than pushing the page sideways */
+#view .style-page-tabs { flex-wrap: wrap; min-width: 0; }
+#view .style-page-tabs .btn { min-width: 0; }

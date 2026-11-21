@@ -5391,6 +5391,10 @@ html.rail-tight #combatnav .cg-tile>img,html.rail-tight #combatnav .cg-tile>.ski
 html.rail-tight #combatnav .cg-tile .cg-t b{display:none}
 html.rail-tight #combatnav .cg-tile .cg-t{justify-content:center}
 html.rail-tight #combatnav .cg-tile .bar{width:80%}
+
+/* Melee/Ranged page tabs wrap on phones rather than pushing the page sideways */
+#view .style-page-tabs { flex-wrap: wrap; min-width: 0; }
+#view .style-page-tabs .btn { min-width: 0; }
 </style>
 
 </head>
@@ -16798,7 +16802,7 @@ const HUBS = [
   { id: 'home', name: 'Home', ic: 'home', pages: ['overview', 'activity', 'journal'] },
   { id: 'quests', name: 'Quests', ic: 'quest', pages: ['quests', 'people'] },
   { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'magic', 'brewery', 'enchanting', 'research', 'carpentry', 'sailing', 'beastmastery'] },
-  { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'tower', 'melee', 'ranged', 'arts'] },
+  { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'tower', 'melee', 'ranged'] },
   { id: 'world', name: 'World', ic: 'map', pages: ['map', 'exploration'] },
   { id: 'village', name: 'Village', ic: 'house', pages: ['projects', 'house', 'hirelings'] },
   { id: 'hero', name: 'Hero', ic: 'bag', pages: ['character', 'tools', 'bank', 'skillsummary', 'mastery'] },
@@ -24044,7 +24048,7 @@ Q.artsBook = style => {
   <section class="panel arts-book"><div class="illustrated-choices arts-grid">${cards}</div></section></div>`;
 };
 /* the old Combat arts tab now opens the book of the style you fight with */
-UI.V.arts = () => { const st = Q.weaponStyle(); setTimeout(() => Q.go(st === 'magic' ? 'magic' : st), 0); return Q.artsBook(st); };
+UI.V.arts = () => { const st = Q.weaponStyle(), pg = st === 'magic' ? 'magic' : st; setTimeout(() => Q.go(pg), 0); return UI.V[pg](); };
 Object.assign(UI.DO, {
   artstab: k => { if (['melee', 'ranged', 'magic'].includes(k)) { tab = k; UI.render(false); } },
   artpick: (style, id) => { if (Q.setArt(style, id)) { Q.sfx && Q.sfx('tab'); UI.render(false); } },

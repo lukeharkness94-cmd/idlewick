@@ -9,7 +9,7 @@ const HUBS = [
   { id: 'home', name: 'Home', ic: 'home', pages: ['overview', 'activity', 'journal'] },
   { id: 'quests', name: 'Quests', ic: 'quest', pages: ['quests', 'people'] },
   { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'magic', 'brewery', 'enchanting', 'research', 'carpentry', 'sailing', 'beastmastery'] },
-  { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'tower', 'melee', 'ranged', 'arts'] },
+  { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'tower', 'melee', 'ranged'] },
   { id: 'world', name: 'World', ic: 'map', pages: ['map', 'exploration'] },
   { id: 'village', name: 'Village', ic: 'house', pages: ['projects', 'house', 'hirelings'] },
   { id: 'hero', name: 'Hero', ic: 'bag', pages: ['character', 'tools', 'bank', 'skillsummary', 'mastery'] },
