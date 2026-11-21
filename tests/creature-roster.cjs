@@ -28,11 +28,11 @@ const r=await p.evaluate(()=>{const S=DQ.S,D=DQ.data;S.settings.notify=false;for
  /* the combat window lists combat areas only, never the hunting ground */
  DQ.go('combat');const names=[...document.querySelectorAll('#view .cw-area-h b')].map(b=>b.textContent);out.window=names;
  /* hunting page lists the ground and locks what is above your level */
- S.xp.hunting=0;DQ.ui.DO.huntground();out.locks=document.querySelectorAll('#view .cw-window-hunt .cw-locked').length;
- /* a hunt kill pays Hunting */
- let before=S.xp.hunting;DQ.startHunt('willowbrook:hunt','chicken');DQ.nextEncounter(D.MON.chicken);out.huntXp=S.xp.hunting-before;DQ.stopAct();before=S.xp.hunting;DQ.startHunt('willowbrook:0','mudling');DQ.nextEncounter(D.MON.mudling);out.fightXp=S.xp.hunting-before;DQ.stopAct();
+ S.xp.hunting=0;DQ.ui.DO.huntground();out.locks=document.querySelectorAll('#view .activity-choices .locked, #view .activity-choices [aria-disabled="true"], #view .activity-choices .blackout').length;
+ /* a hunt is its own activity (hunt_stalk.js): a catch pays Hunting; an ordinary fight pays no Hunting at all */
+ let before=S.xp.hunting;DQ.startHunt('willowbrook:hunt','chicken');out.huntKind=DQ.act&&DQ.act.kind;const rnd=Math.random;Math.random=()=>.01;DQ.KIND_EXT.hunt.done(DQ.act);Math.random=rnd;out.huntXp=S.xp.hunting-before;DQ.stopAct();before=S.xp.hunting;DQ.startHunt('willowbrook:0','mudling');DQ.nextEncounter(D.MON.mudling);out.fightXp=S.xp.hunting-before;DQ.stopAct();
  return out;});
 assert.ok(r.cowBlocked,'cow needs Hunting 7');assert.ok(r.chickenOk,'chicken huntable at 1');assert.equal(r.picks,1,'only the chicken at Hunting 1');assert.ok(r.picksLater>=5,'all farm animals at Hunting 10');
-assert.deepEqual(r.window,['Meadow Path','Goblin Thicket']);assert.ok(r.locks>=3,'locked animals shown locked');assert.ok(r.huntXp>=r.fightXp*2.5&&r.huntXp>0,'a hunt pays Hunting about three times an ordinary fight '+r.huntXp+' vs '+r.fightXp);
+assert.deepEqual(r.window,['Meadow Path','Goblin Thicket']);assert.ok(r.locks>=3,'locked animals shown locked');assert.equal(r.huntKind,'hunt','animals are hunted, not fought');assert.ok(r.huntXp>0&&r.huntXp>r.fightXp,'a catch pays Hunting '+r.huntXp+' vs '+r.fightXp);
 assert.deepEqual(errors,[]);console.log('PASS creature roster: hostile combat areas, hunting grounds by Hunting level, sources and quests intact');
 }finally{await b.close();}})().catch(e=>{console.error(e);process.exit(1);});

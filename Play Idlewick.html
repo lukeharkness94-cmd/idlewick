@@ -24224,7 +24224,7 @@ const lootOf = m => { const got = [], out = [];
   return { got, out }; };
 Q.KIND_EXT.hunt = {
   skill: 'hunting', page: 'hunting', skillFor: () => 'hunting', pageFor: () => 'hunting',
-  label: a => { const m = animal(a.id), s = Q.huntStep(a); return m ? `${s ? s[0] : 'Hunting'}: ${m.name.toLowerCase()}` : 'Hunting'; },
+  label: a => { const m = animal(a.id), s = Q.huntStep(a); return m ? `${s ? s[0] : 'Hunting'}: ${(S().beast.kills[m.id] || 0) > 0 ? m.name.toLowerCase() : 'unknown quarry'}` : 'Hunting'; },
   dur: id => Q.huntDur(id),
   check: id => { const m = animal(id); if (!m) return 'Choose an animal'; if (!Q.skillUnlocked('hunting')) return 'Learn Hunting first';
     const g = areaOf(id); if (g.town !== S().town) return `Travel to ${D.TOWN[g.town].name} first`;
@@ -24232,7 +24232,7 @@ Q.KIND_EXT.hunt = {
   done: a => { const m = animal(a.id); if (!m) return Q.stopAct(false, 'That animal is not here.');
     const caught = Q.chance(Q.huntCatch(a.id)), H = S().hunt = S().hunt || {};
     Q.addXp('hunting', Q.huntXp(a.id, caught));
-    if (!caught) { H.escaped = (H.escaped || 0) + 1; a.escaped = (a.escaped || 0) + 1; if (!Q.sim.on && !Q.forecasting) { Q.log(`The ${m.name.toLowerCase()} slipped away. Back to tracking.`); Q.emit('huntescape', m); } return; }
+    if (!caught) { H.escaped = (H.escaped || 0) + 1; a.escaped = (a.escaped || 0) + 1; if (!Q.sim.on && !Q.forecasting) { Q.log(`The ${(S().beast.kills[m.id] || 0) > 0 ? m.name.toLowerCase() : 'animal'} slipped away. Back to tracking.`); Q.emit('huntescape', m); } return; }
     if (Q.act) Q.act.count++; H.caught = (H.caught || 0) + 1; S().stats.hunts = (S().stats.hunts || 0) + 1;
     const { got, out } = lootOf(m);
     Q.qev('kill', m.id); Q.recordKill(m, got);
@@ -24277,7 +24277,8 @@ const groundPage = () => {
   const odds = Q.encounterOdds(g), qt = Q.questHuntTarget && Q.questHuntTarget();
   const choices = odds.map(x => { const m = x.monster, known = (S().beast.kills[m.id] || 0) > 0, open = Q.canHunt(m), id = m.id, pct = Math.round(Q.huntCatch(id) * 100);
     const drops = (m.drops || []).map(d => d[0]).filter((k, i, a) => D.ITEMS[k] && a.indexOf(k) === i && Q.itemDiscovered(k));
-    return { id, name: known || open ? m.name : '???', artKind: 'creature', artId: id, yieldId: null, locked: !open, revealed: open && !known, blocked: !open, reason: open ? '' : `Requires Hunting ${m.hl}`, short: open ? '' : 'Lv ' + m.hl,
+    /* an animal you have not caught yet stays ??? (UI rules: unmet creatures are never named), as its silhouette */
+    return { id, name: known ? m.name : '???', artKind: 'creature', artId: id, yieldId: null, locked: !open, revealed: false, blocked: !open, reason: open ? '' : `Requires Hunting ${m.hl}`, short: open ? '' : 'Lv ' + m.hl,
       caption: `Hunting ${m.hl}${qt === id ? ' · Quest' : ''}`, stateText: open ? `${pct}% catch` : 'Locked',
       info: `<div class="hunt-steps">${D.HUNT_STEPS.map(s => `<span>${ico(s[2])}${s[0]}</span>`).join('<i aria-hidden="true">→</i>')}</div><p class="dim">${pct}% chance the strike lands; otherwise it slips away and you start tracking again. ${Q.huntXpShown(id, true)} Hunting XP a catch, ${Q.huntXpShown(id, false)} if it gets away.</p>${drops.length ? `<div class="hunt-drops"><span class="k">Drops</span>${drops.map(k => `<span class="cw-drop" data-tip="item:${k}">${Q.itemIco(D.ITEMS[k])}</span>`).join('')}</div>` : ''}` }; });
   return UI.taskPanel('hunting', g.name, 'hunt', choices, 'Hunt');
