@@ -40,7 +40,7 @@ DQ.studyBar = (pct, full, tip) => `<i class="study-bar ${full ? 'full' : pct >= 
 /* the verb for "N more": Catch 54 more, Mine 12 more, Cook 30 more (owner, 22 Nov) */
 const RECIPE_VERB = { cooking: 'Cook', smithing: 'Smith', crafting: 'Craft', herbalism: 'Brew', enchanting: 'Enchant', carpentry: 'Build', magic: 'Make', farming: 'Make' };
 DQ.mastVerb = (kind, id) => { if (kind === 'recipe') { const r = D.RECIPES[id]; if (r && /^smelt_/.test(r.id)) return 'Smelt'; return (r && RECIPE_VERB[r.skill]) || 'Make'; }
-  return ({ fish: 'Catch', wood: 'Chop', mine: 'Mine', thieve: 'Pick', crop: 'Harvest', animal: 'Collect', brew: 'Brew', sail: 'Sail', train: 'Set traps', fight: 'Defeat' })[kind] || 'Do'; };
+  return ({ fish: 'Catch', wood: 'Chop', mine: 'Mine', thieve: 'Pick', crop: 'Harvest', animal: 'Collect', brew: 'Brew', sail: 'Sail', train: 'Set traps', fight: 'Defeat', drill: 'Practise' })[kind] || 'Do'; };
 DQ.mastNext = (kind, id) => { const m = DQ.mastInfo(kind, id), discovery = DQ.studyDiscovery?.(kind, id), v = DQ.mastVerb(kind, id);
   if (discovery) return `${v} ${DQ.fmt(discovery.left)} more · a recipe`;
   return m.next ? `${v} ${DQ.fmt(m.next - m.n)} more · ${DQ.entryPerk(kind, m.stars + 1)}` : `Complete · ${m.speed}% faster${m.extra ? ` · ${m.extra}% double` : ''}`; };

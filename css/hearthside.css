@@ -597,3 +597,35 @@ html.short .cw-foe{gap:5px;padding:7px!important}html.short .cw-foe-h img{width:
 .cw-next-body>.cw-foe>.cw-stats{grid-row:1/4}
 @media (max-width:860px){#view .combat-x.cw-idle .encounter-arena{display:block!important;height:auto!important;min-height:0!important}#view .combat-x .cw-window{width:100%;box-sizing:border-box}}
 @media (max-width:860px){#view .combat-x .cw-window{container-type:normal}}
+/* Combat group in the left menu (22 Nov 2026): the five fighting skills as small tiles under Combat */
+#combatnav .cg-tiles{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px}
+#combatnav .cg-tile{position:relative;display:grid;grid-template-columns:24px minmax(0,1fr);grid-template-rows:auto auto;align-items:center;column-gap:5px;row-gap:2px;min-width:0;padding:5px 6px 4px;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--ink);text-align:left;cursor:pointer}
+#combatnav .cg-tile:last-child:nth-child(odd){grid-column:1/-1}
+#combatnav .cg-tile>img,#combatnav .cg-tile>.skill-emblem{grid-row:1/3;width:24px!important;height:24px!important}
+#combatnav .cg-tile .cg-t{display:flex;align-items:baseline;justify-content:space-between;gap:4px;min-width:0}
+#combatnav .cg-tile .cg-t b{font:600 13px var(--f-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#combatnav .cg-tile .cg-t small{font-size:13px;color:var(--mute)}
+#combatnav .cg-tile .bar{height:3px;--c:var(--c)}
+#combatnav .cg-tile .bar i{background:var(--c)}
+#combatnav .cg-tile.on{border-color:var(--c);box-shadow:inset 3px 0 var(--c)}
+#combatnav .cg-tile.working{border-color:color-mix(in srgb,var(--c) 60%,var(--line))}
+#combatnav .cg-tile:hover{border-color:var(--c)}
+html.rail-tight #combatnav .cg-tile{padding:3px 5px 3px}
+@media(max-width:860px){#combatnav .cg-tiles{display:none}}
+#combatnav .cg-tiles{grid-template-columns:1fr;gap:3px}
+#combatnav .cg-tile{grid-template-columns:20px minmax(0,1fr);padding:3px 8px 3px 6px;row-gap:1px;border-radius:6px}
+#combatnav .cg-tile:last-child:nth-child(odd){grid-column:auto}
+#combatnav .cg-tile>img,#combatnav .cg-tile>.skill-emblem{width:20px!important;height:20px!important}
+.equip-fightline{margin:8px 0 0;font-size:14px;color:var(--mute);display:flex;flex-wrap:wrap;gap:4px;align-items:center}.equip-fightline b{color:var(--ink)}.equip-fightline .linkish{margin-left:auto;display:inline-flex;align-items:center;gap:4px}
+.cw-head .cw-tabs{margin-left:auto;display:flex;gap:6px;align-self:center}
+.cw-head .cw-tabs .btn.on{border-color:var(--brass);box-shadow:inset 0 -2px var(--brass)}
+.cw-mon.cw-locked b,.cw-mon.cw-locked small{color:var(--mute)}
+.cw-hunt .cw-area-h small{color:var(--mute)}
+#view .chargrid:has(> .panel.empty:last-child){grid-template-columns:minmax(0,1fr)!important}
+/* short windows: the five combat skills as one row of icons with their levels (names in the tooltip and label) */
+html.rail-tight #combatnav .cg-tiles{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin-top:4px}
+html.rail-tight #combatnav .cg-tile{grid-template-columns:1fr;grid-template-rows:auto auto auto;justify-items:center;padding:3px 0 2px;row-gap:1px}
+html.rail-tight #combatnav .cg-tile>img,html.rail-tight #combatnav .cg-tile>.skill-emblem{grid-row:auto;width:20px!important;height:20px!important}
+html.rail-tight #combatnav .cg-tile .cg-t b{display:none}
+html.rail-tight #combatnav .cg-tile .cg-t{justify-content:center}
+html.rail-tight #combatnav .cg-tile .bar{width:80%}

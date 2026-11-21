@@ -6,7 +6,7 @@
 (() => {
 const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S, { esc, ico, fmt } = Q;
 if (!Q.mastInfo) return;
-const NODE_SK = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' }, VERB = { fish: 'caught', wood: 'cut', mine: 'mined', thieve: 'picked', recipe: 'made', crop: 'harvested', animal: 'collected', brew: 'brewed', sail: 'voyages', train: 'traps laid' };
+const NODE_SK = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' }, VERB = { fish: 'caught', wood: 'cut', mine: 'mined', thieve: 'picked', recipe: 'made', crop: 'harvested', animal: 'collected', brew: 'brewed', sail: 'voyages', train: 'traps laid', drill: 'drills' };
 const PAGE = { crop: 'farming', animal: 'farming', brew: 'brewery', sail: 'sailing', train: 'beastmastery' };
 const studyQ = m => D.QUESTS.find(q => S().q[q.id] && ['active', 'new'].includes(S().q[q.id].s) && q.obj.some((o, j) => o.ev === 'guide' && o.key === m.id && Q.objProg(q, S().q[q.id], j) < o.n));
 /* ---------- one shape for everything in the book ---------- */
@@ -29,7 +29,9 @@ const topics = () => { const t = [];
   if (D.POTION_RECIPES && Q.skillUnlocked('herbalism')) t.push({ id: 'brew', group: 'Making', name: 'Potions', ic: 'herbalism', items: () => D.POTION_RECIPES.map(r => material('brew', { id: r.id, name: (D.ITEMS[r.id] || {}).name || r.id }, 'herbalism', { itemId: r.id, lvl: 1, open: !!(Q.canBrew && Q.canBrew(r)), need: 'Research its recipe' })) });
   if (D.VOYAGES && Q.skillUnlocked('sailing')) t.push({ id: 'sail', group: 'Gathering', name: 'Sailing', ic: 'sailing', items: () => [...D.VOYAGES].sort((a, b) => a.lvl - b.lvl).map(v => material('sail', v, 'sailing', { art: size => Q.artImage('skill', 'sailing', Math.min(64, size), '', v.name) })) });
   if (Q.lureLvl && (Q.skillUnlocked('beastmastery')||(Q.fieldAccessLevel&&Q.skillUnlocked('hunting')))) t.push({ id: 'train', group: 'Gathering', name: 'Trap lines', ic: Q.fieldAccessLevel?'hunting':'beastmastery', items: () => D.TOWNS.map(tw => material('train', { id: 'lure:' + tw.id, name: tw.name }, Q.fieldAccessLevel?'hunting':'beastmastery', { lvl: Q.lureLvl(tw.id), open: (Q.fieldAccessLevel?Q.fieldAccessLevel():Q.lvl('beastmastery')) >= Q.lureLvl(tw.id) && !!(S().towns[tw.id] && S().towns[tw.id].visited), art: size => Q.artImage('skill', Q.fieldAccessLevel?'hunting':'beastmastery', Math.min(64, size), '', tw.name) })) });
-  const order = ['Creatures', 'Gathering', 'Growing', 'Making']; t.sort((x, y) => order.indexOf(x.group) - order.indexOf(y.group));
+  /* practice yards (combat_skills.js): one topic per style you have practised or can practise */
+  if (D.DRILLS) for (const [st, rows] of Object.entries(D.DRILLS)) t.push({ id: 'drill:' + st, group: 'Practice', name: D.SK[st].name, ic: st, items: () => rows.map(r => material('drill', { id: st + ':' + r.id, name: r.name, lvl: r.lvl }, st, { itemId: r.art })) });
+  const order = ['Creatures', 'Gathering', 'Growing', 'Making', 'Practice']; t.sort((x, y) => order.indexOf(x.group) - order.indexOf(y.group));
   return t; };
 /* ---------- the three parts ---------- */
 const tile = (e, sel, near) => `<button class="gt ${sel ? 'on' : ''} ${e.filled >= e.total ? 'full' : ''} ${e.known ? '' : 'unk'} ${e.quest ? 'quest' : ''}" data-do="guidepick" data-a="${esc(e.key)}" aria-pressed="${!!sel}" ${e.locked ? `data-tip="text:${esc(e.need)}"` : ''} aria-label="${esc(e.name)}, ${e.filled} of ${e.total} entries"><span class="gt-art">${e.art(64)}</span><b>${esc(e.name)}</b><small class="gt-status">${e.quest ? 'Quest · ' : ''}${e.filled} / ${e.total} entries${near ? ' · Near next entry' : ''}</small>${e.known ? Q.studyBar(e.filled >= e.total ? 100 : e.pct, e.filled >= e.total) : ''}</button>`;
@@ -56,7 +58,7 @@ UI.DO.guidepick = a => { UI.guideSel[UI.guideTopic] = a; UI.render(false); };
 /* older links that named a region still land on it */
 UI.DO.guidetown = id => { UI.guideTopic = 'c:' + id; UI.render(false); };
 /* a material's page takes you to it, selected, like any other route */
-UI.DO.guidemat = (kind, id) => { if (PAGE[kind]) { if (kind === 'animal' && UI.tab) UI.tab.farmSection = 'livestock'; return Q.go(PAGE[kind]); } const sk = kind === 'recipe' ? D.RECIPES[id].skill : NODE_SK[kind]; if (!sk) return; UI.taskChoice[sk] = id; Q.go(D.SK[sk].page || sk); };
+UI.DO.guidemat = (kind, id) => { if (kind === 'drill') { const st = String(id).split(':')[0]; if (UI.DO.styletab) UI.DO.styletab(st, 'drill'); UI.taskChoice[st] = id; return Q.go(st); } if (PAGE[kind]) { if (kind === 'animal' && UI.tab) UI.tab.farmSection = 'livestock'; return Q.go(PAGE[kind]); } const sk = kind === 'recipe' ? D.RECIPES[id].skill : NODE_SK[kind]; if (!sk) return; UI.taskChoice[sk] = id; Q.go(D.SK[sk].page || sk); };
 /* brewing fills a potion's page; its entries are a chance of a second bottle */
 const brew0 = Q.brew; if (brew0) Q.brew = id => { const ok = brew0(id); if (ok) { Q.mastTick({ kind: 'brew', id }); if (Q.chance(Q.mastExtra('brew', id))) { Q.give(id, 1); Q.toast && Q.toast('A second bottle!'); } } return ok; };
 })();

@@ -15,12 +15,21 @@ const questMon = () => { const id = DQ.questHuntTarget ? DQ.questHuntTarget() : 
 const tone = (lo, hi) => { const c = DQ.combatLvl(); return c >= hi ? 'ok' : c >= lo ? 'warn' : 'bad'; };
 const monTile = (x, qt) => { const m = x.monster, k = met(x.id), nm = k ? m.name : '???';
   return `<div class="cw-mon ${qt === x.id ? 'quest' : ''}"><button type="button" class="cw-mon-art" data-do="guide" data-a="${x.id}" aria-label="${esc(k ? m.name : 'Unknown creature')}, level ${m.cl}, ${x.pct >= 45 ? 'Common' : x.pct >= 20 ? 'Uncommon' : 'Rare'}, ${x.pct}% of encounters. Open its field entry." data-tip="text:${esc(k ? m.name : 'Unknown creature')} · Lv ${m.cl} · ${x.pct}% of encounters">${DQ.monSprite(m, 40, k ? '' : 'sil')}</button><b>${esc(nm)}</b><small>Lv ${m.cl} · ${x.pct}%</small><button type="button" class="btn sm" data-do="hunttrack" data-a="${x.id}" aria-label="Track ${esc(k ? m.name : 'unknown creature')}">${ico('paw')}Track</button></div>`; };
+/* the hunting ground: animals, locked by Hunting level, for Hunting XP and materials (moved here from Hunting → Quarry) */
+const huntTile = x => { const m = x.monster, k = met(x.id), ok = DQ.canHunt ? DQ.canHunt(m) : true, nm = k ? m.name : '???';
+  return `<div class="cw-mon ${ok ? '' : 'cw-locked'}"><button type="button" class="cw-mon-art" data-do="guide" data-a="${x.id}" aria-label="${esc(k ? m.name : 'Unknown creature')}, ${ok ? `level ${m.cl}, ${x.pct}% of encounters` : `needs Hunting ${m.hl}`}. Open its field entry." data-tip="text:${esc(k ? m.name : 'Unknown creature')} · ${ok ? `Lv ${m.cl} · ${x.pct}%` : `Hunting ${m.hl}`}">${DQ.monSprite(m, 40, k && ok ? '' : 'sil')}</button><b>${esc(ok ? nm : '???')}</b><small>${ok ? `Lv ${m.cl} · ${x.pct}%` : `Hunting ${m.hl}`}</small>${ok ? `<button type="button" class="btn sm" data-do="hunttrack" data-a="${x.id}" aria-label="Track ${esc(k ? m.name : 'unknown creature')}">${ico('paw')}Track</button>` : `<button type="button" class="btn sm" disabled>${ico('lock')}Lv ${m.hl}</button>`}</div>`; };
+const huntCard = g => { if (!DQ.skillUnlocked('hunting')) return `<article class="cw-area cw-hunt-locked"><div class="cw-area-h"><div><b>${esc(g.name)}</b><small>Learn Hunting to hunt animals here</small></div><button type="button" class="btn" data-do="go" data-a="hunting">${ico('paw')}Hunting</button></div><div class="cw-mons">${DQ.encounterOdds(g).map(x => `<div class="cw-mon cw-locked"><span class="cw-mon-art">${DQ.monSprite(x.monster, 40, 'sil')}</span><b>???</b><small>Hunting ${x.monster.hl}</small></div>`).join('')}</div></article>`;
+  const odds = DQ.encounterOdds(g), open = odds.filter(x => DQ.canHunt ? DQ.canHunt(x.monster) : true);
+  return `<article class="cw-area cw-hunt"><div class="cw-area-h"><div><b>${esc(g.name)}</b><small>Hunting ${DQ.huntLevel ? DQ.huntLevel() : DQ.lvl('hunting')} · animals for hides, feathers and meat</small></div><button type="button" class="btn primary" data-do="huntarea" data-a="${g.id}" ${open.length ? '' : 'disabled'}>${ico('paw')}Hunt</button></div><div class="cw-mons">${odds.map(huntTile).join('')}</div></article>`; };
 const windowHtml = () => {
-  const town = S().town, areas = (DQ.combatAreas ? DQ.combatAreas(town) : D.AREAS[town] || []), qt = questMon(), qm = qt && D.MON[qt];
+  const town = S().town, ground = DQ.huntGround ? DQ.huntGround(town) : null; if (!ground) UI.cwTab = 'areas';
+  const areas = (DQ.combatAreas ? DQ.combatAreas(town) : D.AREAS[town] || []), qt = questMon(), qm = qt && D.MON[qt];
+  const wtabs = ground ? `<div class="cw-tabs" role="tablist"><button type="button" class="btn sm ${UI.cwTab !== 'hunt' ? 'on' : ''}" role="tab" aria-selected="${UI.cwTab !== 'hunt'}" data-do="cwtab" data-a="areas">${ico('attack')}Combat areas</button><button type="button" class="btn sm ${UI.cwTab === 'hunt' ? 'on' : ''}" role="tab" aria-selected="${UI.cwTab === 'hunt'}" data-do="cwtab" data-a="hunt">${ico('paw')}Hunting ground</button></div>` : '';
+  if (UI.cwTab === 'hunt' && ground) return `<div class="cw-window cw-window-hunt" role="region" aria-label="Hunting ground"><div class="cw-head"><small>${esc(D.TOWN[town].name)} · your Hunting level ${DQ.huntLevel ? DQ.huntLevel() : DQ.lvl('hunting')}</small>${wtabs}</div><div class="cw-areas">${huntCard(ground)}</div></div>`;
   const cards = areas.map(a => { const odds = DQ.encounterOdds(a), lv = odds.map(x => x.monster.cl), lo = Math.min(...lv), hi = Math.max(...lv);
     return `<article class="cw-area"><div class="cw-area-h"><div><b>${esc(a.name)}</b><small class="${tone(lo, hi)}">Combat ${lo}–${hi} recommended</small></div><button type="button" class="btn primary" data-do="huntarea" data-a="${a.id}">${ico('attack')}Explore</button></div><div class="cw-mons">${odds.map(x => monTile(x, qt)).join('')}</div></article>`; }).join('');
   const quest = qm ? `<button type="button" class="cw-quest" data-do="huntquest" data-a="${qt}">${DQ.monSprite(qm, 32)}<span><small>Quest${qm.mini ? ' · challenge' : ''}</small><b>${esc(qm.name)}</b></span></button>` : '';
-  return `<div class="cw-window" role="region" aria-label="Where to fight"><div class="cw-head"><small>${esc(D.TOWN[town].name)} · your combat level ${DQ.combatLvl()}</small>${quest}</div><div class="cw-areas">${cards}</div></div>`;
+  return `<div class="cw-window" role="region" aria-label="Where to fight"><div class="cw-head"><small>${esc(D.TOWN[town].name)} · your combat level ${DQ.combatLvl()}</small>${quest}${wtabs}</div><div class="cw-areas">${cards}</div></div>`;
 };
 const foeHtml = () => {
   const f = DQ.fight, act = fightAct(); if (!f || !act) return '';
@@ -36,6 +45,8 @@ const foeHtml = () => {
 };
 UI.B.cwfoehp = e => { const f = DQ.fight, m = f && D.MON[f.id]; e.style.width = m ? Math.max(0, Math.round(f.hp / m.hp * 100)) + '%' : '0%'; };
 UI.B.cwfoehptxt = e => { const f = DQ.fight, m = f && D.MON[f.id]; UI.set(e, m ? `${Math.max(0, Math.ceil(f.hp))} / ${m.hp}` : ''); };
+UI.DO.cwtab = t => { UI.cwTab = t === 'hunt' ? 'hunt' : 'areas'; document.querySelector('#view .cw-window')?.remove(); UI.render(false); };
+UI.DO.huntground = () => { UI.cwTab = 'hunt'; document.querySelector('#view .cw-window')?.remove(); if (UI.view === 'combat') UI.render(false); else DQ.go('combat'); };
 UI.DO.hunttrack = id => {
   const a = DQ.areaForMonster && DQ.areaForMonster(id); if (!a || a.town !== S().town) return;
   if (!DQ.startHunt(a.id, id, false)) return;
@@ -71,7 +82,7 @@ const shape = () => {
     if (label) label.textContent = x.querySelector('.wh-mini') ? 'Challenges and boss' : 'Next boss';
     if (where && body && !body.contains(where)) { if (where.querySelector('.wh-minis')) body.prepend(where); else where.remove(); }
     if (arena && !arena.querySelector('.cw-window')) arena.insertAdjacentHTML('beforeend', windowHtml());
-    const title = x.querySelector('.cx-title'); if (title) title.innerHTML = `<small>${esc(D.TOWN[S().town].name)}</small><b>Where to fight</b>`;
+    const title = x.querySelector('.cx-title'); if (title) title.innerHTML = `<small>${esc(D.TOWN[S().town].name)}</small><b>${UI.cwTab === 'hunt' ? 'Hunting ground' : 'Where to fight'}</b>`;
     x.querySelector('.cx-go')?.remove();
   }
   if (boss && body && !body.contains(boss)) body.append(boss);

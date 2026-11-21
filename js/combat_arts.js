@@ -11,35 +11,39 @@ const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S, { esc, ico } = Q;
 /* ---------- the books ---------- */
 const ART = (id, name, lvl, text, fx) => ({ id, name, lvl, text, ...fx });
 D.ARTS = {
+  /* power-neutral by design (22 Nov audit): each art trades one thing for another, changes the damage type, or adds
+     an effect at a cost, so boss balance (scripts/sim-bosses.cjs, run without arts) still holds. Capstones give +4%/+4%. */
   melee: [
-    ART('steady', 'Steady Strikes', 1, '+8% accuracy', { acc: .08 }),
-    ART('cleave_art', 'Cleaving Blows', 8, 'Slash damage · +4% damage', { dtype: 'slash', dmg: .04 }),
-    ART('thrust', 'Piercing Thrust', 15, 'Stab damage · +6% accuracy', { dtype: 'stab', acc: .06 }),
-    ART('crush_art', 'Crushing Blows', 22, 'Crush damage · +5% damage', { dtype: 'crush', dmg: .05 }),
-    ART('heavy', 'Heavy Swing', 30, '+14% damage · −8% accuracy', { dmg: .14, acc: -.08 }),
-    ART('bleed', 'Bleeding Edge', 40, 'Hits make the foe bleed', { bleed: true }),
-    ART('breaker', 'Guard Breaker', 50, '+12% accuracy · +4% damage', { acc: .12, dmg: .04 }),
-    ART('riposte', 'Riposte', 62, '−6% damage taken · +4% damage', { dr: .06, dmg: .04 }),
-    ART('whirl', 'Whirlwind', 75, 'Every 4th hit strikes twice', { twice: 4 }),
-    ART('master_form', 'Master’s Form', 90, '+9% damage · +9% accuracy', { dmg: .09, acc: .09 })
+    ART('steady', 'Steady Strikes', 1, '+8% accuracy · −6% damage', { acc: .08, dmg: -.06 }),
+    ART('cleave_art', 'Cleaving Blows', 8, 'Slash damage', { dtype: 'slash' }),
+    ART('thrust', 'Piercing Thrust', 15, 'Stab damage', { dtype: 'stab' }),
+    ART('crush_art', 'Crushing Blows', 22, 'Crush damage', { dtype: 'crush' }),
+    ART('heavy', 'Heavy Swing', 30, '+14% damage · −12% accuracy', { dmg: .14, acc: -.12 }),
+    ART('bleed', 'Bleeding Edge', 40, 'Hits make the foe bleed · −8% damage', { bleed: true, dmg: -.08 }),
+    ART('breaker', 'Guard Breaker', 50, '+15% accuracy · −10% damage', { acc: .15, dmg: -.1 }),
+    ART('riposte', 'Riposte', 62, '−8% damage taken · −8% damage', { dr: .08, dmg: -.08 }),
+    ART('whirl', 'Whirlwind', 75, 'Every 5th hit strikes twice · −12% damage', { twice: 5, dmg: -.12 }),
+    ART('master_form', 'Master’s Form', 90, '+4% damage · +4% accuracy', { dmg: .04, acc: .04 })
   ],
   ranged: [
-    ART('aimed_draw', 'Aimed Draw', 1, '+8% accuracy', { acc: .08 }),
-    ART('broadhead', 'Broadheads', 8, '+6% damage', { dmg: .06 }),
+    ART('aimed_draw', 'Aimed Draw', 1, '+8% accuracy · −6% damage', { acc: .08, dmg: -.06 }),
+    ART('broadhead', 'Broadheads', 8, '+10% damage · −8% accuracy', { dmg: .1, acc: -.08 }),
     ART('fire_arrows', 'Fire Arrows', 16, 'Fire damage', { dtype: 'fire' }),
     ART('frost_arrows', 'Frost Arrows', 28, 'Frost damage', { dtype: 'frost' }),
-    ART('pinning', 'Pinning Shot', 36, 'Hits pin the foe in place', { pin: true }),
-    ART('storm_arrows', 'Storm Arrows', 46, 'Storm damage · +3% damage', { dtype: 'storm', dmg: .03 }),
-    ART('hunters_mark', 'Hunter’s Mark', 55, '+20% damage to animals you hunt', { animals: .2 }),
-    ART('volley_art', 'Volley', 66, 'Every 4th shot hits twice', { twice: 4 }),
-    ART('piercing_bolt', 'Piercing Bolt', 78, '+12% accuracy · +5% damage', { acc: .12, dmg: .05 }),
-    ART('starshot', 'Starshot', 90, 'Aether damage · +7% damage', { dtype: 'aether', dmg: .07 })
+    ART('pinning', 'Pinning Shot', 36, 'Hits pin the foe · −8% damage', { pin: true, dmg: -.08 }),
+    ART('storm_arrows', 'Storm Arrows', 46, 'Storm damage', { dtype: 'storm' }),
+    ART('hunters_mark', 'Hunter’s Mark', 55, '+20% damage to animals · −6% to others', { animals: .2, others: -.06 }),
+    ART('volley_art', 'Volley', 66, 'Every 5th shot hits twice · −12% damage', { twice: 5, dmg: -.12 }),
+    ART('piercing_bolt', 'Piercing Bolt', 78, '+15% accuracy · −10% damage', { acc: .15, dmg: -.1 }),
+    ART('starshot', 'Starshot', 90, 'Aether damage · +4% damage · +4% accuracy', { dtype: 'aether', dmg: .04, acc: .04 })
   ]
 };
 D.ART = Object.fromEntries(Object.values(D.ARTS).flat().map(a => [a.id, a]));
 /* the spellbook: the five spells stay, seven join them between and after */
-const MORE = [['ember_dart', 'Ember Dart', 6, 6, 1, 'fire'], ['gale', 'Gale Cutter', 18, 12, 2, 'storm'], ['hail', 'Hailstorm', 34, 20, 3, 'frost'], ['inferno', 'Inferno', 49, 30, 4, 'fire'],
-  ['blizzard', 'Blizzard', 66, 39, 5, 'frost'], ['tempest', 'Tempest', 76, 42, 6, 'storm'], ['starfall', 'Starfall', 86, 45, 6, 'aether']];
+/* the new spells fill elements and levels between the old ones; none hits harder than Aether Blast (36), so Magic
+   stays level with Melee and Ranged (D.STYLE_TUNE parity); the late ones are worth it for their element and cost */
+const MORE = [['ember_dart', 'Ember Dart', 6, 5, 1, 'fire'], ['gale', 'Gale Cutter', 18, 12, 2, 'storm'], ['hail', 'Hailstorm', 34, 20, 3, 'frost'], ['inferno', 'Inferno', 49, 30, 4, 'fire'],
+  ['blizzard', 'Blizzard', 66, 36, 5, 'frost'], ['tempest', 'Tempest', 76, 36, 4, 'storm'], ['starfall', 'Starfall', 86, 36, 3, 'aether']];
 for (const [id, name, lvl, max, runes, el] of MORE) if (!D.SPELLS.some(s => s.id === id)) { D.SPELLS.push({ id, name, lvl, max, runes }); D.SPELL_EL[id] = el; ((D.UNL.magic = D.UNL.magic || {})[lvl] = D.UNL.magic[lvl] || []).push(name + ' spell'); }
 D.SPELLS.sort((a, b) => a.lvl - b.lvl);
 for (const [sk, list] of Object.entries(D.ARTS)) for (const a of list) if (a.lvl > 1) ((D.UNL[sk] = D.UNL[sk] || {})[a.lvl] = D.UNL[sk][a.lvl] || []).push(`${a.name} (combat art)`);
@@ -54,7 +58,7 @@ Q.pstats = () => { const ps = ps0(); const a = Q.artFor(ps.style); if (!a) retur
 const dt0 = Q.myDtype; if (dt0) Q.myDtype = () => { const st = Q.weaponStyle(), a = st !== 'magic' && Q.artFor(st); return a && a.dtype ? a.dtype : dt0(); };
 /* effects on a hit: called by the engine with the hit already rolled */
 Q.artHit = (ps, dealt, m, f, max) => { const a = ps && ps.art; if (!a) return dealt;
-  if (a.animals && m.hl) dealt = Math.max(1, Math.round(dealt * (1 + a.animals)));
+  if (a.animals) dealt = Math.max(1, Math.round(dealt * (1 + (m.hl ? a.animals : (a.others || 0)))));
   if (a.bleed) f.poison = Math.min(3, (f.poison || 0) + 1);
   if (a.pin) f.pinned = 2;
   if (a.twice && f.pa % a.twice === 0) { dealt += Q.rnd(1, Math.max(1, Math.round(max))); Q.splat('foe', a.name, 'hit', 180); }
@@ -62,9 +66,9 @@ Q.artHit = (ps, dealt, m, f, max) => { const a = ps && ps.art; if (!a) return de
 /* ---------- the page: Combat → Combat arts ---------- */
 const SK_ICON = { melee: 'attack', ranged: 'ranged', magic: 'magic' };
 let tab = null;
-UI.V.arts = () => {
-  const st = Q.weaponStyle(); if (!tab) tab = st;
-  const tabs = `<nav class="arts-tabs btnrow" role="tablist">${['melee', 'ranged', 'magic'].map(k => `<button class="btn ${tab === k ? 'on' : ''}" role="tab" aria-selected="${tab === k}" data-do="artstab" data-a="${k}">${UI.activityIcon ? UI.activityIcon(k) : ico(SK_ICON[k])}${esc(D.SK[k].name)} <b class="mono">${Q.lvl(k)}</b></button>`).join('')}</nav>`;
+/* one style's book, used by the Melee, Ranged and Magic pages (combat_skills.js) */
+Q.artsBook = style => {
+  const st = Q.weaponStyle(), tab = style;
   let cards, focus;
   if (tab === 'magic') {
     const cur = D.SPELLS.find(s => s.id === S().spell && Q.lvl('magic') >= s.lvl) || D.SPELLS[0];
@@ -79,10 +83,11 @@ UI.V.arts = () => {
     focus = `<h2>${esc(cur.name)}</h2><p>${esc(cur.text)}</p><p class="dim">Used whenever you fight with ${tab === 'melee' ? 'a melee weapon' : 'a bow'}${st === tab ? '' : `. You are holding ${st === 'magic' ? 'a staff' : st === 'ranged' ? 'a bow' : 'a melee weapon'} now`}.</p>`;
   }
   const next = (tab === 'magic' ? D.SPELLS : D.ARTS[tab]).find(x => Q.lvl(tab) < x.lvl);
-  return `<section class="panel arts-head"><div class="phead"><div><span class="k">Combat arts</span><h2>${esc(D.SK[tab].name)} ${tab === 'magic' ? 'spellbook' : tab === 'melee' ? 'techniques' : 'shots'}</h2></div>${tabs}</div></section>
-  <div class="arts-page"><section class="panel arts-focus"><span class="k">In use</span>${focus}${next ? `<p class="arts-next">Next · Lv ${next.lvl} ${esc(UI.unlockShort ? 'Something new' : '')}</p>` : ''}</section>
+  return `<div class="arts-page"><section class="panel arts-focus"><span class="k">In use</span>${focus}${next ? `<p class="arts-next">Next · Lv ${next.lvl} ${esc(UI.unlockShort ? 'Something new' : '')}</p>` : ''}</section>
   <section class="panel arts-book"><div class="illustrated-choices arts-grid">${cards}</div></section></div>`;
 };
+/* the old Combat arts tab now opens the book of the style you fight with */
+UI.V.arts = () => { const st = Q.weaponStyle(); setTimeout(() => Q.go(st === 'magic' ? 'magic' : st), 0); return Q.artsBook(st); };
 Object.assign(UI.DO, {
   artstab: k => { if (['melee', 'ranged', 'magic'].includes(k)) { tab = k; UI.render(false); } },
   artpick: (style, id) => { if (Q.setArt(style, id)) { Q.sfx && Q.sfx('tab'); UI.render(false); } },
@@ -92,7 +97,7 @@ Object.assign(UI.DO, {
 const render0 = UI.render;
 const place = () => { if (UI.view !== 'combat') return; const box = document.querySelector('#view .hud-train'); if (!box || box.querySelector('.cx-art')) return;
   const st = Q.weaponStyle(), art = st === 'magic' ? (D.SPELLS.find(s => s.id === S().spell && Q.lvl('magic') >= s.lvl) || D.SPELLS[0]) : Q.artFor(st); if (!art) return;
-  const html = `<button type="button" class="linkish cx-art" data-do="go" data-a="arts" data-tip="text:Combat arts: choose a ${st === 'magic' ? 'spell' : st === 'ranged' ? 'shot' : 'technique'}">${ico('book')}<span>${esc(art.name)}</span></button>`;
+  const html = `<button type="button" class="linkish cx-art" data-do="go" data-a="${st === 'magic' ? 'magic' : st}" data-tip="text:Choose a ${st === 'magic' ? 'spell' : st === 'ranged' ? 'shot' : 'technique'}">${ico('book')}<span>${esc(art.name)}</span></button>`;
   const dps = box.querySelector('[data-b="dps"]'); if (dps) { const row = document.createElement('div'); row.className = 'cx-dpsrow'; dps.before(row); row.append(dps); row.insertAdjacentHTML('beforeend', html); } else box.querySelector('.kit-head')?.insertAdjacentHTML('afterend', html); };
 UI.render = (...a) => { const r = render0(...a); try { place(); setTimeout(place, 0); } catch (e) {} return r; };
 })();

@@ -28,7 +28,7 @@ const r=await p.evaluate(()=>{const S=DQ.S,D=DQ.data;S.settings.notify=false;for
  /* the combat window lists combat areas only, never the hunting ground */
  DQ.go('combat');const names=[...document.querySelectorAll('#view .cw-area-h b')].map(b=>b.textContent);out.window=names;
  /* hunting page lists the ground and locks what is above your level */
- S.xp.hunting=0;DQ.go('hunting');DQ.ui.huntMode='quarry';DQ.ui.render(false);out.locks=document.querySelectorAll('#view .hunt-row button[disabled]').length;
+ S.xp.hunting=0;DQ.ui.DO.huntground();out.locks=document.querySelectorAll('#view .cw-window-hunt .cw-locked').length;
  /* a hunt kill pays Hunting */
  let before=S.xp.hunting;DQ.startHunt('willowbrook:hunt','chicken');DQ.nextEncounter(D.MON.chicken);out.huntXp=S.xp.hunting-before;DQ.stopAct();before=S.xp.hunting;DQ.startHunt('willowbrook:0','mudling');DQ.nextEncounter(D.MON.mudling);out.fightXp=S.xp.hunting-before;DQ.stopAct();
  return out;});
