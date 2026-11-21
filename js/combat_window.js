@@ -7,8 +7,8 @@
    Challenges stay in the left column out of combat, so the window fits a 1280 x 720 laptop without scrolling. */
 (() => {
 const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S, { esc, ico } = DQ;
-/* the Farm fields hunting ground fights on the Meadow Path's backdrop */
-const bd0 = DQ.backdropUrl; if (bd0) DQ.backdropUrl = k => bd0(k === 'willowbrook:farm' ? 'willowbrook:0' : k);
+/* a hunting ground fights on its town's first area backdrop */
+const bd0 = DQ.backdropUrl; if (bd0) DQ.backdropUrl = k => bd0(/:(hunt|farm)$/.test(String(k)) ? String(k).split(':')[0] + ':0' : k);
 const fightAct = () => DQ.act && DQ.act.kind === 'fight' ? DQ.act : null;
 const met = id => (S().beast.kills[id] || 0) > 0;
 const questMon = () => { const id = DQ.questHuntTarget ? DQ.questHuntTarget() : null, m = id && D.MON[id]; return m && m.town === S().town && !m.boss ? id : null; };
@@ -58,7 +58,7 @@ const shape = () => {
     arena && arena.querySelector('.cw-window')?.remove();
   } else {
     col.querySelector('.cw-foe')?.remove();
-    if (where) { where.querySelector('.wh-areas')?.remove(); where.querySelector('.wh-quest')?.remove(); where.querySelector('.phead')?.remove(); if (!where.querySelector('.wh-minis')) where.remove(); }
+    if (where) { where.querySelector('.wh-areas')?.remove(); where.querySelector('.wh-quest')?.remove(); where.querySelector('.phead')?.remove(); where.querySelector('.wh-minis-h')?.remove(); if (!where.querySelector('.wh-minis')) where.remove(); }
     if (head) head.textContent = col.querySelector('.wh-minis') ? 'Challenges' : 'Next boss';
     if (arena && !arena.querySelector('.cw-window')) arena.insertAdjacentHTML('beforeend', windowHtml());
     const title = x.querySelector('.cx-title'); if (title) title.innerHTML = `<small>${esc(D.TOWN[S().town].name)}</small><b>Where to fight</b>`;
@@ -71,6 +71,10 @@ DQ.on('ui', () => { const arena = document.querySelector('#view .combat-x .encou
   let msg = arena.querySelector('.cw-trackmsg'); if (on && !msg) { arena.insertAdjacentHTML('beforeend', `<div class="cw-trackmsg" role="status">${ico('paw')}Tracking…</div>`); } else if (!on && msg) msg.remove(); });
 const render0 = UI.render;
 UI.render = (...a) => { const r = render0(...a); try { if (UI.view === 'combat') shape(); } catch (e) { console.error(e); } return r; };
+/* in-place combat refreshes (UI.updateEncounter, player_feedback.js) redraw the column and header from the plain combat
+   page, so reshape after them too; wrapped once everything has loaded */
+const wrapUpdate = () => { const u0 = UI.updateEncounter; if (!u0 || u0._cw) return; UI.updateEncounter = (...a) => { const r = u0(...a); try { if (UI.view === 'combat') shape(); } catch (e) {} return r; }; UI.updateEncounter._cw = true; };
+setTimeout(wrapUpdate, 0);
 DQ.on('act', () => { if (UI.view === 'combat') setTimeout(() => { try { shape(); } catch (e) {} }, 0); });
 DQ.on('encounter', () => { if (UI.view === 'combat') setTimeout(() => { try { shape(); } catch (e) {} }, 0); });
 })();

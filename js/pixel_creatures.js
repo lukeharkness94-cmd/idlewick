@@ -510,7 +510,9 @@ Object.assign(PET_SPECS, {
 });
 Object.assign(FOLK, { witch: () => cauldron(), armoury: () => guard(), merchant: () => fishstall(), dwarf: () => stout({ skin: '#e0a880', cloth: '#6a5a8a', beard: '#c06a3a', helm: '#e0b040', axe: true }) });
 const creatureSprite = id => { const f = SPECS[id] || PET_SPECS[id] || FOLK[id] || ANIMAL[id]; return f ? f() : null; };
-Object.assign(A, { humanoid, blob, creatureSprite, CREATURE_SPECS: SPECS, PET_SPECS, FOLK, ANIMAL,
+Object.assign(A, { humanoid, blob, creatureSprite,
+  /* the builders, for creature_roster's sprites (pixel_roster.js) */
+  BUILD: { humanoid, quad, bird, clawed, spectral, dragon, bat, rodent, golem, blob, brute, stout, lanky, hunch, floater, knight, beetle, spider, scorpion, isopod, newt, mushroom, treant, wisp, serpent, veil, orb, shadow, jelly, deer, armoured, toad, hedgehog, hare, fox, moth, kite }, CREATURE_SPECS: SPECS, PET_SPECS, FOLK, ANIMAL,
   creatureUrl: id => A.url('creature:' + id, () => creatureSprite(id)),
   hasCreature: id => !!(SPECS[id] || PET_SPECS[id] || FOLK[id] || ANIMAL[id]) });
 })();
