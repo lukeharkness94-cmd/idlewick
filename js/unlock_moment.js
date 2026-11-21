@@ -1,6 +1,6 @@
 /* Idlewick: a choice opening on the page you are looking at gets a moment (20 Nov 2026, owner feedback).
    When a level-up opens a new fish, tree, rock, recipe or other choice card while its page is on screen, the card
-   is scrolled into view inside its list, its blackout lifts with a light sweeping across, it pops and glows, and a
+   keeps its place in the list (your scroll position is never moved), its blackout lifts with a light sweeping across, it pops and glows, and a
    "New" ribbon stays on it until you pick it or leave the page. Presentation only; nothing about unlocking changes.
    Reduced motion keeps the ribbon and a still glow. */
 (() => {
@@ -28,7 +28,6 @@ UI.render = (...a) => {
         opened.forEach((k, i) => {
           const [pg, id] = k.split(':'), c = document.querySelector(`#view .illustrated-card[data-page="${pg}"][data-task-id="${CSS.escape(id)}"]`);
           if (!c) return;
-          if (i === 0 && UI.revealCard) UI.revealCard(c);
           c.classList.remove('just-unlocked'); void c.offsetWidth; c.classList.add('just-unlocked');
           setTimeout(() => c.isConnected && c.classList.remove('just-unlocked'), 2400);
         });

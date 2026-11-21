@@ -691,7 +691,7 @@ DQ.buy = (id, qty = 1) => {
 };
 /* Keepsakes (adventure relics and anything marked keepsake) belong to a story and can never be sold, from any screen. */
 DQ.sellable = id => { const it = D.ITEMS[id]; return !!it && it.type !== 'relic' && !it.keepsake; };
-DQ.KEEPSAKE_NOTE = 'Keepsake: part of an adventure, so it cannot be sold. It stays safe in your pack or bank.';
+DQ.KEEPSAKE_NOTE = 'Keepsake · part of an adventure.';
 DQ.sell = (id, qty, from) => {
   const it = D.ITEMS[id], store = from === 'pack' ? S().inv : from === 'bank' ? S().bank : null;
   if (!it || !Number.isFinite(qty) || qty <= 0) return;

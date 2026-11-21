@@ -339,7 +339,7 @@ DQ.recoverRelics = () => {
 };
 /* run after every successful load or import, then tell the player once the game is on screen */
 const tellRecovered = () => { const back = DQ.recoveredRelics; if (!back || !back.length) return; DQ.recoveredRelics = null;
-  const go = () => DQ.notify({ kind: 'info', key: 'relics:recovered', icon: 'bag', col: '#d8b050', title: 'Keepsakes recovered', text: `${back.map(id => D.ITEMS[id].name).join(', ')} ${back.length > 1 ? 'are' : 'is'} back in your pack. Keepsakes can no longer be sold.` });
+  const go = () => DQ.notify({ kind: 'info', key: 'relics:recovered', icon: 'bag', col: '#d8b050', title: 'Keepsakes recovered', text: `${back.map(id => D.ITEMS[id].name).join(', ')} ${back.length > 1 ? 'are' : 'is'} back in your pack.` });
   if (DQ.started) go(); else setTimeout(() => DQ.started && go(), 2500); };
 for (const name of ['load', 'importSave']) { const f0 = DQ[name]; if (f0) DQ[name] = (...a) => { const ok = f0(...a); if (ok && DQ.S) { DQ.recoverRelics(); tellRecovered(); } return ok; }; }
 })();

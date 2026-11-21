@@ -45,13 +45,13 @@ UI.DO.planfood = len => {
   const need = e.unknown ? null : Math.ceil(e.perMin * min), short = need == null ? 0 : Math.max(0, need - e.have), src = source();
   const chips = LENGTHS.map(([m, l]) => `<button class="chip ${m === min ? 'on' : ''}" data-do="planfood" data-a="${m}" aria-pressed="${m === min}">${esc(l)}</button>`).join('');
   const verdict = e.unknown ? `<p>No estimate yet: pick a creature in this area and the plan will use your real gear.</p>`
-    : need === 0 ? `<p class="ok">${esc(DQ.monName(e.m))} barely scratches you. Your food is not a concern for ${esc(span(min))}.</p>`
+    : need === 0 ? `<p class="ok">${esc(DQ.monName(e.m))} barely scratches you. No food needed for ${esc(span(min))}.</p>`
     : short === 0 ? `<p class="ok">You carry <b>${fmt(e.have)}</b> meals; ${esc(span(min))} of ${esc(DQ.monName(e.m))} needs about <b>${fmt(need)}</b>. You are ready.</p>`
     : `<p>${esc(span(min))} of ${esc(DQ.monName(e.m))} needs about <b>${fmt(need)}</b> meals. You carry <b>${fmt(e.have)}</b>: <b>${fmt(short)} more</b> to be safe.</p>`;
   let act = '';
   if (short > 0 && src) {
     const can = Math.floor(src.held / src.per), n = Math.min(short, can), name = D.ITEMS[src.out].name.toLowerCase();
-    act = n > 0 ? `<div class="btnrow"><button class="btn primary" data-do="planfoodgo" data-a="${src.r.id}|${n}">Cook ${fmt(n)} ${esc(name)}${n < short ? ` (you hold fish for ${fmt(can)})` : ''}</button></div><p class="sm dim">One batch: it stops by itself when done and tells you it is complete.</p>`
+    act = n > 0 ? `<div class="btnrow"><button class="btn primary" data-do="planfoodgo" data-a="${src.r.id}|${n}">Cook ${fmt(n)} ${esc(name)}${n < short ? ` (you hold fish for ${fmt(can)})` : ''}</button></div>`
       : src.node ? `<div class="btnrow"><button class="btn primary" data-do="planfoodfish" data-a="${src.node.id}">Catch ${esc(D.ITEMS[src.raw].name.toLowerCase())}</button></div><p class="sm dim">Catch about ${fmt(short * src.per)}, then plan again to cook them as one batch.</p>` : '';
   } else if (short > 0) act = `<p class="sm dim">Nothing you can cook here yet. The shop sells bread.</p>`;
   Q.closeModal && Q.closeModal();

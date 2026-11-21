@@ -20,7 +20,7 @@ UI.planHtml = () => {
       ${UI.choiceButtons(`<select data-in="qpace" data-i="${i}" aria-label="Pace">${Object.entries(D.PACE).map(([k, p]) => `<option value="${k}" ${t.pace === k ? 'selected' : ''}>${p.name}</option>`).join('')}</select>`)}</div></div>
       <div class="qbtns"><button class="iconb sm" data-do="qup" data-a="${i}" aria-label="Move up" ${i ? '' : 'disabled'}>${ico('chevron', 'up')}</button><button class="iconb sm" data-do="qdel" data-a="${i}" aria-label="Remove">${ico('close')}</button></div></div>`).join('');
   return `${cur}<div class="plan-q"><div class="phead" style="margin:14px 0 8px"><h3>Queue <small class="mono">${Q.length} / ${slots}</small></h3>${Q.length ? '<button class="linkbtn" data-do="qclear">Clear</button>' : ''}</div>
-    ${rows || '<p class="sm dim" style="margin:0">Empty. When the current task finishes or runs out of supplies, the next one starts by itself, even while you are away.</p>'}
+    ${rows || '<p class="sm dim" style="margin:0">Empty. Queued tasks start when the current one ends, even while you are away.</p>'}
     <p class="hint">New tasks start at <b>${D.PACE[S().defPace || 'steady'].name}</b> pace. ${paceSeg(S().defPace || 'steady', 'defpace')}</p></div>`;
 };
 UI.openPlan = () => { const m = DQ.modal({ title: 'Task plan', wide: true, body: `<div id="planbody">${UI.planHtml()}</div>`, actions: [{ label: 'Done', primary: true }] }); m.classList.add('planmodal'); };
