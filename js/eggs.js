@@ -15,7 +15,7 @@ Q.eggs = () => { const p = S().pets; if (!Array.isArray(p.eggs)) p.eggs = []; re
 Q.eggOf = id => Q.eggs().find(e => e.id === id) || null;
 /* where an egg was found, in the player's words */
 Q.eggSource = id => { const p = D.PET[id] || {}, s = p.src || {};
-  return s.type === 'boss' ? `Taken from ${D.MON[s.mon].name}` : s.type === 'shop' ? `Bought in ${D.TOWN[s.town].name}` : s.type === 'harvest' ? 'Found among your crops' : s.type === 'skill' ? `Found while ${D.SK[s.skill].name.toLowerCase() === 'thieving' ? 'thieving' : D.SK[s.skill].name.toLowerCase()}` : s.type === 'hunt' ? `From the ${D.MON[s.mon].name.toLowerCase()}s of ${D.TOWN[D.MON[s.mon].town].name}` : 'Brought back by the trapper'; };
+  return s.type === 'boss' ? `Taken from ${D.MON[s.mon].name}` : s.type === 'shop' ? `Bought in ${D.TOWN[s.town].name}` : s.type === 'harvest' ? 'Found among your crops' : s.type === 'skill' ? `Found while ${D.SK[s.skill].name.toLowerCase() === 'thieving' ? 'thieving' : D.SK[s.skill].name.toLowerCase()}` : s.type === 'hunt' ? `From the ${(DQ.plural?DQ.plural(D.MON[s.mon].name):D.MON[s.mon].name+'s').toLowerCase()} of ${D.TOWN[D.MON[s.mon].town].name}` : 'Brought back by the trapper'; };
 const award0 = Q.awardPet;
 Q.awardPet = (id, options = {}) => {
   const p = D.PET[id]; if (!p || S().pets.owned[id] || Q.eggOf(id)) return false;

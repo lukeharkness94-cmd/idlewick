@@ -227,6 +227,8 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
 };
 /* After Grubnash the boss destination follows the next region boss: travel, its quest, training, then the most useful
    preparation from the real save (DQ.prepAdvice) until the forecast favours you. */
+/* English plurals for creature names: witches, wolves, mice; names that end in s keep it */
+DQ.plural = n => /(ch|sh|x|ss)$/i.test(n) ? n + 'es' : /wolf$/i.test(n) ? n.slice(0, -1) + 'ves' : /[^aeiou]y$/i.test(n) ? n.slice(0, -1) + 'ies' : /s$/.test(n) ? n : n + 's';
 DQ.regionBoss = () => { for (const t of D.TOWNS) { const b = D.MON[t.boss]; if (b && !(S().towns[t.id] && S().towns[t.id].boss)) return b; } return null; };
 DQ.regionNext = () => {
   const b = DQ.regionBoss(); if (!b) return step('The realm is at peace', 'Every boss is defeated. Chase a collection, a title or a trophy, or restore what is left.', 'go', 'bestiary');
@@ -237,7 +239,7 @@ DQ.regionNext = () => {
   const req = b.boss.req;
   if (DQ.combatLvl() < req) { const fs = DQ.foodStep && DQ.foodStep(`Training here hits back harder than mudlings.`); if (fs) return fs; }
   if (DQ.combatLvl() < req) { const foe = D.MONLIST.filter(m => m.town === b.town && !m.boss && !m.mini && !m.hl && !m.tower && m.cl <= DQ.combatLvl() + 2).sort((a, c) => c.cl - a.cl)[0] || D.MONLIST.find(m => m.town === b.town && !m.boss && !m.hl);
-    return task(`Train for ${short}`, `Combat ${DQ.combatLvl()} / ${req}. ${foe ? `${foe.name}s are a fair fight here.` : ''}`, 'fight', foe ? foe.id : b.id); }
+    return task(`Train for ${short}`, `Combat ${DQ.combatLvl()} / ${req}. ${foe ? `${DQ.plural ? DQ.plural(foe.name) : foe.name + 's'} are a fair fight here.` : ''}`, 'fight', foe ? foe.id : b.id); }
   const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
   if (f && f.winRate >= .75) return task(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'fight', b.id);
   const tip = DQ.prepAdvice ? DQ.prepAdvice(b.id, f).find(x=>x.actionable!==false) : null;
@@ -252,7 +254,7 @@ DQ.optionalGoals = () => {
   const proj = DQ.projectsForTown(town).filter(([id]) => !S().projects[id]).sort((a, c) => (a[1].cost.coins || 0) - (c[1].cost.coins || 0))[0];
   if (proj) out.push({ span: 'A few sessions', text: `${proj[1].name}: ${proj[1].reward}`, action: 'openproject', a: proj[0] });
   const chase = D.MONLIST.find(m => m.town === town && !m.boss && (S().beast.kills[m.id] || 0) > 0 && m.drops.some(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique && !(S().uniqFound || {})[d[0]]));
-  if (chase && DQ.uniqueSource) { const id = chase.drops.find(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique)[0], src = DQ.uniqueSource(id); out.push({ span: 'Long', text: `${D.ITEMS[id].name} from ${chase.name}s: ${src.need - Math.min(src.have, src.need)} more defeats at most`, action: 'guide', a: chase.id }); }
+  if (chase && DQ.uniqueSource) { const id = chase.drops.find(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique)[0], src = DQ.uniqueSource(id); out.push({ span: 'Long', text: `${D.ITEMS[id].name} from ${DQ.plural(chase.name)}: ${src.need - Math.min(src.have, src.need)} more defeats at most`, action: 'guide', a: chase.id }); }
   else if (DQ.understanding) { const mons = D.MONLIST.filter(m => m.town === town), u = mons.filter(m => DQ.understanding(m).done).length; if (u < mons.length && mons.some(m => S().beast.kills[m.id])) out.push({ span: 'Long', text: `${D.TOWN[town].name} field guide: ${u} / ${mons.length} creatures understood`, action: 'go', a: 'bestiary' }); }
   return out.slice(0, 3);
 };
