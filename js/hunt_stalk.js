@@ -28,6 +28,17 @@ Q.huntXpShown = (id, caught) => Math.max(1, Math.round(Q.huntXp(id, caught) * (Q
 /* which step the current hunt is on, from how far through the cycle it is */
 Q.huntStep = (a = Q.act) => { if (!a || a.kind !== 'hunt') return null; const p = Math.min(1, Math.max(0, (Date.now() - a.t0) / (a.dur || 1)));
   let acc = 0; for (const s of D.HUNT_STEPS) { acc += s[1]; if (p < acc) return s; } return D.HUNT_STEPS[2]; };
+/* ---------- tiers and kit (hunt_tiers_data.js) ---------- */
+const tierOf = m => D.HUNT_TIERS ? D.HUNT_TIERS[m.tier ?? D.huntTierOf(m.hl)] : null;
+Q.huntTierOf = id => { const m = animal(id); return m ? tierOf(m) : null; };
+/* any active quest that wants this animal, in any town: such hunts never need the level or the kit */
+Q.questWantsAnimal = id => { for (const q of D.QUESTS) { const p = S().q[q.id]; if (!p || p.s !== 'active') continue;
+  if (q.obj.some((o, i) => o.ev === 'kill' && o.key === id && Q.objProg(q, p, i) < o.n)) return true; } return false; };
+const reached = town => !!(S().towns[town] && S().towns[town].visited);
+/* what stands between you and this hunt, as one short reason, or '' */
+Q.huntKitNeed = id => { const m = animal(id), T = m && tierOf(m); if (!T || Q.questWantsAnimal(id)) return '';
+  if (T.trap && !Q.have(T.trap)) return `Needs ${D.ITEMS[T.trap].name}`;
+  if (T.bait && !Q.have(T.bait)) return `Needs ${D.ITEMS[T.bait].name}`; return ''; };
 const lootOf = m => { const got = [], out = [];
   for (const [id, [a, b], p] of m.drops || []) { const it = D.ITEMS[id]; if (!it || it.type === 'gear' || it.type === 'ammo' || id === 'coin_pouch' || id === 'treasure_chest') continue;
     if (!Q.chance(Math.min(1, p * (Q.buffMult ? Q.buffMult('luck') : 1)))) continue;
@@ -38,12 +49,21 @@ Q.KIND_EXT.hunt = {
   label: a => { const m = animal(a.id), s = Q.huntStep(a); return m ? `${s ? s[0] : 'Hunting'}: ${(S().beast.kills[m.id] || 0) > 0 ? m.name.toLowerCase() : 'unknown quarry'}` : 'Hunting'; },
   dur: id => Q.huntDur(id),
   check: id => { const m = animal(id); if (!m) return 'Choose an animal'; if (!Q.skillUnlocked('hunting')) return 'Learn Hunting first';
-    const g = areaOf(id); if (g.town !== S().town) return `Travel to ${D.TOWN[g.town].name} first`;
-    if (Q.canHunt && !Q.canHunt(m)) return `Requires Hunting ${m.hl}`; return ''; },
+    /* every hunting ground can be worked from anywhere once you have reached its town */
+    const g = areaOf(id), wanted = Q.questWantsAnimal(id); if (!reached(g.town) && !wanted) return `Reach ${D.TOWN[g.town].name} first`;
+    if (Q.huntLevel() < m.hl && !wanted && !(Q.canHunt && Q.canHunt(m) && Q.questHuntTarget && Q.questHuntTarget() === id)) return `Requires Hunting ${m.hl}`;
+    return Q.huntKitNeed(id); },
   done: a => { const m = animal(a.id); if (!m) return Q.stopAct(false, 'That animal is not here.');
-    const caught = Q.chance(Q.huntCatch(a.id)), H = S().hunt = S().hunt || {};
+    const caught = Q.chance(Q.huntCatch(a.id)), H = S().hunt = S().hunt || {}, T = tierOf(m);
+    /* one bait per hunt, caught or not (a quest's animal can be hunted without, but uses one if you have it) */
+    if (T && T.bait && Q.have(T.bait)) Q.take(T.bait, 1);
+    const stopIfOut = () => { const need = Q.huntKitNeed(a.id); if (need && Q.act === a) Q.stopAct(false, `${need} to keep hunting.`); };
     Q.addXp('hunting', Q.huntXp(a.id, caught));
-    if (!caught) { H.escaped = (H.escaped || 0) + 1; a.escaped = (a.escaped || 0) + 1; if (!Q.sim.on && !Q.forecasting) { Q.log(`The ${(S().beast.kills[m.id] || 0) > 0 ? m.name.toLowerCase() : 'animal'} slipped away. Back to tracking.`); Q.emit('huntescape', m); } return; }
+    /* which step decided it: a miss is put down to losing the trail, the trap being dodged or the strike missing */
+    const failAt = caught ? -1 : (r => r < .3 ? 0 : r < .6 ? 1 : 2)(Math.random());
+    const res = { id: m.id, c: caught ? 1 : 0, f: failAt, t: Date.now() }; H.recent = [...(H.recent || []), { c: res.c, f: failAt }].slice(-12); a.lastHunt = res;
+    if (!Q.sim.on && !Q.forecasting) Q.emit('huntresult', res, m);
+    if (!caught) { H.escaped = (H.escaped || 0) + 1; a.escaped = (a.escaped || 0) + 1; if (!Q.sim.on && !Q.forecasting) { Q.log(`The ${(S().beast.kills[m.id] || 0) > 0 ? m.name.toLowerCase() : 'animal'} slipped away. Back to tracking.`); Q.emit('huntescape', m); } stopIfOut(); return; }
     if (Q.act) Q.act.count++; H.caught = (H.caught || 0) + 1; S().stats.hunts = (S().stats.hunts || 0) + 1;
     const { got, out } = lootOf(m);
     Q.qev('kill', m.id); Q.recordKill(m, got);
@@ -51,6 +71,7 @@ Q.KIND_EXT.hunt = {
     if (pet && pet.collectible && !S().pets.owned[cid] && !Q.forecasting && Q.chance(Math.max(.008, .05 - m.cl * .00035))) Q.awardPet(cid);
     if (!Q.forecasting) { for (const h of Q.killHooks || []) h(m); if (Q.recipeOnKill) Q.recipeOnKill(m); if (Q.museumScan && (S().beast.kills[m.id] || 0) <= 1) Q.museumScan(); }
     if (!Q.sim.on && !Q.forecasting) { Q.log(`You catch the ${m.name.toLowerCase()}.${out.length ? ' ' + out.map(o => `${o.n > 1 ? o.n + ' ' : ''}${D.ITEMS[o.id].name.toLowerCase()}`).join(', ') : ''}`, 'good'); Q.emit('huntcatch', m, out); }
+    stopIfOut();
   }
 };
 /* hunts count towards the creature's field-guide page through recordKill, not a second 'hunt' entry */
@@ -65,11 +86,12 @@ Q.startHunt = (areaId, target = null, forQuest = false) => {
   const area = Object.values(D.AREAS).flat().find(a => a.id === areaId);
   /* before Hunting is learned, a quest's animal can still be fought the old way, so the quest stays reachable */
   if (area && area.hunt && Q.skillUnlocked('hunting')) { const id = target && animal(target) ? target : (area.monsters.find(e => Q.canHunt(D.MON[e.id])) || {}).id; if (!id) return false;
-    UI.huntMode = 'ground'; UI.taskChoice.hunting = id; return Q.startAct('hunt', id); }
+    pick(id); return Q.startAct('hunt', id); }
   return start0(areaId, target, forQuest);
 };
-const huntAnimal = id => { const m = animal(id); if (!m || !Q.skillUnlocked('hunting')) return false; UI.huntMode = 'ground'; UI.taskChoice.hunting = id; Q.go('hunting'); return true; };
-UI.DO.huntground = id => { if (!Q.skillUnlocked('hunting')) return Q.go('hunting'); UI.huntMode = 'ground'; if (id && animal(id)) UI.taskChoice.hunting = id; Q.go('hunting'); };
+const pick = id => { const m = animal(id); if (!m) return; UI.huntMode = 'ground'; UI.huntGroundAt = areaOf(id).town; UI.huntTier = m.tier ?? D.huntTierOf(m.hl); UI.taskChoice.hunting = id; };
+const huntAnimal = id => { const m = animal(id); if (!m || !Q.skillUnlocked('hunting')) return false; pick(id); Q.go('hunting'); return true; };
+UI.DO.huntground = id => { if (!Q.skillUnlocked('hunting')) return Q.go('hunting'); UI.huntMode = 'ground'; if (id && animal(id)) pick(id); Q.go('hunting'); };
 const track0 = UI.DO.hunttrack; UI.DO.hunttrack = id => huntAnimal(id) || track0(id);
 const hq0 = UI.DO.huntquest; if (hq0) UI.DO.huntquest = id => huntAnimal(id) || hq0(id);
 const hg0 = UI.DO.huntgo; if (hg0) UI.DO.huntgo = a => { const id = String(a).split('|')[1]; return huntAnimal(id) || hg0(a); };
@@ -82,17 +104,35 @@ const cw0 = UI.DO.cwtab; if (cw0) UI.DO.cwtab = t => t === 'hunt' ? UI.DO.huntgr
 /* ---------- the Hunting page: Hunting ground | Fieldwork ---------- */
 const field0 = UI.V.hunting;
 UI.DO.huntmode = mode => { UI.huntMode = mode === 'field' ? 'field' : 'ground'; UI.render(false); };
+/* every hunting ground, from any town (owner, 23 Nov 2026): a row of grounds, then the five tiers, then that tier's animals */
+const grounds = () => D.TOWNS.map(t => Q.huntGround ? Q.huntGround(t.id) : null).filter(Boolean);
+const defaultTier = () => { const L = Q.huntLevel(); let t = 0; D.HUNT_TIERS.forEach((T, i) => { if (L >= T.lo) t = i; }); return t; };
+UI.DO.huntgroundat = town => { UI.huntGroundAt = town; UI.render(false); };
+UI.DO.hunttier = i => { UI.huntTier = Math.max(0, Math.min(4, +i || 0)); UI.render(false); };
+UI.DO.huntkit = id => { const r = D.RECIPES['craft_' + id] || D.RECIPES['cook_' + id]; if (!r) return; UI.returnTo = { page: 'hunting', label: 'Hunting' }; UI.focusTask(r.skill, r.id, r.tab, r.skill); };
+const kitLine = T => { if (!T || (!T.trap && !T.bait)) return `<p class="hunt-kit dim">No kit needed. A wooden trap in your pack helps the strike.</p>`;
+  const part = id => { const n = Q.have(id), it = D.ITEMS[id]; return `<button type="button" class="hunt-kit-item ${n ? 'ok' : 'miss'}" data-do="huntkit" data-a="${id}" data-tip="item:${id}" aria-label="${esc(it.name)}: ${n} held, make more">${Q.itemIco(it)}<span>${esc(it.name)}</span><b class="mono">${n}</b></button>`; };
+  return `<div class="hunt-kit"><span class="k">${esc(T.name)} kit</span>${part(T.trap)}${part(T.bait)}<small class="dim">Trap is kept; one bait per hunt.</small></div>`; };
 const groundPage = () => {
-  const g = Q.huntGround ? Q.huntGround(S().town) : null, L = Q.huntLevel(), here = D.TOWN[S().town].name;
-  if (!g) return `<section class="panel empty"><p>No hunting ground near ${esc(here)}.</p></section>`;
-  const odds = Q.encounterOdds(g), qt = Q.questHuntTarget && Q.questHuntTarget();
-  const choices = odds.map(x => { const m = x.monster, known = (S().beast.kills[m.id] || 0) > 0, open = Q.canHunt(m), id = m.id, pct = Math.round(Q.huntCatch(id) * 100);
+  const all = grounds(); if (!all.length) return `<section class="panel empty"><p>No hunting grounds.</p></section>`;
+  if (!all.some(g => g.town === UI.huntGroundAt)) UI.huntGroundAt = S().town;
+  if (UI.huntTier === undefined) UI.huntTier = defaultTier();
+  const g = all.find(x => x.town === UI.huntGroundAt) || all[0], T = D.HUNT_TIERS[UI.huntTier], L = Q.huntLevel(), here = reached(g.town);
+  const gtabs = `<nav class="hunt-grounds btnrow" role="tablist" aria-label="Hunting grounds">${all.map(x => { const ok = reached(x.town), on = x.town === g.town;
+    return `<button type="button" class="btn sm ${on ? 'on' : ''} ${ok ? '' : 'locked'}" role="tab" aria-selected="${on}" data-do="huntgroundat" data-a="${x.town}" data-tip="text:${esc(x.name)} · ${esc(D.TOWN[x.town].name)}${ok ? '' : ' · reach it first'}">${ok ? '' : ico('lock')}<span>${esc(x.name)}</span><small>${esc(D.TOWN[x.town].name)}</small></button>`; }).join('')}</nav>`;
+  const ttabs = `<nav class="hunt-tiers btnrow" role="tablist" aria-label="Tiers">${D.HUNT_TIERS.map((t, i) => { const on = i === UI.huntTier, open = L >= t.lo;
+    return `<button type="button" class="btn sm ${on ? 'on' : ''}" role="tab" aria-selected="${on}" data-do="hunttier" data-a="${i}">${open ? '' : ico('lock')}${esc(t.name)}<small class="mono">${t.lo}–${t.hi}</small></button>`; }).join('')}</nav>`;
+  const list = g.monsters.map(e => D.MON[e.id]).filter(m => m && (m.tier ?? D.huntTierOf(m.hl)) === UI.huntTier);
+  const choices = list.map(m => { const id = m.id, known = (S().beast.kills[id] || 0) > 0, wanted = Q.questWantsAnimal(id), lvlOk = L >= m.hl || wanted, open = (here || wanted) && lvlOk, need = open ? Q.huntKitNeed(id) : '', pct = Math.round(Q.huntCatch(id) * 100);
     const drops = (m.drops || []).map(d => d[0]).filter((k, i, a) => D.ITEMS[k] && a.indexOf(k) === i && Q.itemDiscovered(k));
-    /* an animal you have not caught yet stays ??? (UI rules: unmet creatures are never named), as its silhouette */
-    return { id, name: known ? m.name : '???', artKind: 'creature', artId: id, yieldId: null, locked: !open, revealed: false, blocked: !open, reason: open ? '' : `Requires Hunting ${m.hl}`, short: open ? '' : 'Lv ' + m.hl,
-      caption: `Hunting ${m.hl}${qt === id ? ' · Quest' : ''}`, stateText: open ? `${pct}% catch` : 'Locked',
-      info: `<div class="hunt-steps">${D.HUNT_STEPS.map(s => `<span>${ico(s[2])}${s[0]}</span>`).join('<i aria-hidden="true">→</i>')}</div><p class="dim">${pct}% chance the strike lands; otherwise it slips away and you start tracking again. ${Q.huntXpShown(id, true)} Hunting XP a catch, ${Q.huntXpShown(id, false)} if it gets away.</p>${drops.length ? `<div class="hunt-drops"><span class="k">Drops</span>${drops.map(k => `<span class="cw-drop" data-tip="item:${k}">${Q.itemIco(D.ITEMS[k])}</span>`).join('')}</div>` : ''}` }; });
-  return UI.taskPanel('hunting', g.name, 'hunt', choices, 'Hunt');
+    const why = !here && !wanted ? `Reach ${D.TOWN[g.town].name}` : !lvlOk ? `Requires Hunting ${m.hl}` : need;
+    /* an animal you have not caught yet stays ??? (UI rules: unmet creatures are never named) */
+    return { id, name: known ? m.name : '???', artKind: 'creature', artId: id, yieldId: null, locked: !open, revealed: false, blocked: !open || !!need, reason: why, short: !open ? (!here && !wanted ? `Lv ${m.hl} · Reach ${D.TOWN[g.town].name}` : 'Lv ' + m.hl) : '',
+      caption: `Hunting ${m.hl}${wanted ? ' · Quest' : ''}`, stateText: !open ? 'Locked' : need ? need.replace(/^Needs /, 'No ') : `${pct}% catch`,
+      info: `<div class="hunt-steps">${D.HUNT_STEPS.map(s => `<span>${ico(s[2])}${s[0]}</span>`).join('<i aria-hidden="true">→</i>')}</div>${kitLine(T)}<p class="dim">${pct}% chance the strike lands; otherwise it slips away and you start tracking again. ${Q.huntXpShown(id, true)} Hunting XP a catch, ${Q.huntXpShown(id, false)} if it gets away.</p>${drops.length ? `<div class="hunt-drops"><span class="k">Drops</span>${drops.map(k => `<span class="cw-drop" data-tip="item:${k}">${Q.itemIco(D.ITEMS[k])}</span>`).join('')}</div>` : ''}` }; });
+  if (!choices.length) return gtabs + ttabs + `<section class="panel empty"><p>No ${esc(T.name.toLowerCase())} animals here.</p></section>`;
+  /* the catalogue's corner names the ground's own town, not the one you are standing in */
+  return gtabs + ttabs + UI.taskPanel('hunting', `${g.name} · ${T.name}`, 'hunt', choices, 'Hunt').replace(`>${D.TOWN[S().town].name}</small>`, `>${esc(D.TOWN[g.town].name)}</small>`);
 };
 UI.V.hunting = () => {
   if (!Q.skillUnlocked('hunting')) return UI.lockedPage('hunting');
@@ -104,9 +144,51 @@ const tabs = () => `<nav class="hunt-mode-tabs btnrow" role="tablist"><button cl
 if (UI.huntMode === undefined) UI.huntMode = 'ground';
 /* the stage says which step the hunt is on */
 UI.B.huntstep = e => { const s = Q.huntStep(); UI.set(e, s ? s[0] : ''); };
-Q.on('ui', () => { if (UI.view !== 'hunting' || !Q.act || Q.act.kind !== 'hunt') return; const sc = document.querySelector('#view .activity-scene.hunt'); if (!sc) return;
+Q.on('ui', () => { if (UI.view !== 'hunting' || !Q.act || Q.act.kind !== 'hunt') return; const sc = document.querySelector('#view .activity-scene.hunt'); if (!sc || sc.dataset.task !== Q.act.id) return;
   let t = sc.querySelector('.hunt-steptag'); if (!t) { sc.insertAdjacentHTML('beforeend', '<span class="hunt-steptag" role="status"></span>'); t = sc.querySelector('.hunt-steptag'); }
   const s = Q.huntStep(); if (s && t.dataset.s !== s[0]) { t.dataset.s = s[0]; t.innerHTML = `${ico(s[2])}${s[0]}`; sc.dataset.step = D.HUNT_STEPS.indexOf(s); } });
 Q.on('huntescape', () => { const sc = document.querySelector('#view .activity-scene.hunt'); if (sc && Q.floatAt) Q.floatAt(sc, 'It got away!', '#d9a066'); });
 Q.on('huntcatch', (m, out) => { const sc = document.querySelector('#view .activity-scene.hunt'); if (sc && Q.floatAt) Q.floatAt(sc, out.length ? out.slice(0, 2).map(o => `+${o.n} ${D.ITEMS[o.id].name}`).join(' · ') : 'Caught!', '#f3d58a'); });
+
+/* ---------- how far the hunt has got, and how the last one went (owner, 23 Nov 2026: "more visual at what stage
+   you're at with each hunt and whether certain elements were successful") ----------
+   A strip of the three steps under the progress bar: the current one lit, the ones behind it ticked. When a hunt
+   resolves, the strip shows that hunt's result for a moment: each step that worked gets a tick, the one that failed a
+   cross (lost the trail, dodged the trap, missed the strike), and a catch ends on a full row of ticks. Beside it, dots
+   for the last twelve hunts. The scene follows the steps: the animal is distant while you track, the trap appears
+   when it is set, you lunge on the strike, then it is caught or bolts. All of it after the roll, never before. */
+const FAIL = ['Lost the trail', 'Dodged the trap', 'Missed the strike'];
+let showing = null, showTimer = 0;
+const stripHtml = () => `<div class="hunt-track" role="status" aria-live="polite"><ol class="hunt-track-steps">${D.HUNT_STEPS.map((s, i) => `<li data-i="${i}"><span class="ht-ico">${ico(s[2])}</span><span class="ht-name">${['Track', 'Set trap', 'Strike'][i]}</span><span class="ht-mark" aria-hidden="true"></span></li>`).join('')}</ol><div class="hunt-track-out"></div><div class="hunt-recent" aria-label="Last hunts"></div></div>`;
+const paint = () => {
+  if (UI.view !== 'hunting' || UI.huntMode === 'field') return;
+  const stage = document.querySelector('#view .activity-stage'); if (!stage) return;
+  const sc = stage.querySelector('.activity-scene'), a0 = Q.act && Q.act.kind === 'hunt' ? Q.act : null;
+  /* only the animal you are hunting gets the strip; looking at another card shows its details alone */
+  const a = a0 && sc && sc.dataset.task === a0.id ? a0 : null;
+  if (!a && !(showing && sc && sc.dataset.task === showing.id)) { stage.querySelector('.hunt-track')?.remove(); sc?.querySelector('.hunt-steptag')?.remove(); if (sc) delete sc.dataset.step; return; }
+  let el = stage.querySelector('.hunt-track');
+  if (!el) { const after = stage.querySelector('.activity-progress'); if (!after) return; after.insertAdjacentHTML('afterend', stripHtml()); el = stage.querySelector('.hunt-track'); }
+  const lis = el.querySelectorAll('.hunt-track-steps li'), out = el.querySelector('.hunt-track-out');
+  if (showing) {
+    lis.forEach((li, i) => { const st = showing.c ? 'ok' : i < showing.f ? 'ok' : i === showing.f ? 'fail' : 'skip'; if (li.dataset.st !== st) { li.dataset.st = st; li.querySelector('.ht-mark').textContent = st === 'ok' ? '✓' : st === 'fail' ? '✗' : ''; } });
+    const txt = showing.c ? 'Caught!' : `${FAIL[showing.f]}. It got away.`; if (out.textContent !== txt) { out.textContent = txt; out.dataset.r = showing.c ? 'ok' : 'fail'; }
+  } else {
+    const step = a ? D.HUNT_STEPS.indexOf(Q.huntStep(a)) : -1;
+    lis.forEach((li, i) => { const st = step < 0 ? 'idle' : i < step ? 'done' : i === step ? 'now' : 'next'; if (li.dataset.st !== st) { li.dataset.st = st; li.querySelector('.ht-mark').textContent = st === 'done' ? '✓' : ''; } });
+    const txt = a ? `${Q.huntStep(a)[0]}…` : ''; if (out.textContent !== txt) { out.textContent = txt; out.dataset.r = ''; }
+    if (sc && a) { const k = String(step); if (sc.dataset.step !== k) sc.dataset.step = k; }
+  }
+  const rec = (S().hunt && S().hunt.recent) || [], sig = rec.map(r => r.c + '' + r.f).join(',');
+  const box = el.querySelector('.hunt-recent'); if (box.dataset.sig !== sig) { box.dataset.sig = sig;
+    box.innerHTML = rec.length ? `<span class="k">Last ${rec.length}</span>${rec.map(r => `<i class="${r.c ? 'ok' : 'fail'}" title="${r.c ? 'Caught' : FAIL[r.f]}"></i>`).join('')}<b class="mono">${rec.filter(r => r.c).length}/${rec.length}</b>` : ''; }
+  /* the trap appears in the scene once it is set */
+  if (sc && !sc.querySelector('.hunt-trap')) { const T = Q.act && Q.act.kind === 'hunt' ? Q.huntTierOf(Q.act.id) : null, id = (T && T.trap) || 'wooden_trap'; sc.insertAdjacentHTML('beforeend', `<span class="hunt-trap" aria-hidden="true">${Q.itemIco(D.ITEMS[id])}</span>`); }
+};
+Q.on('ui', paint);
+Q.on('huntresult', res => {
+  showing = res; clearTimeout(showTimer);
+  const sc = document.querySelector('#view .activity-scene.hunt'); if (sc) { sc.dataset.result = res.c ? 'caught' : 'escaped'; sc.dataset.step = '2'; }
+  paint(); showTimer = setTimeout(() => { showing = null; const s2 = document.querySelector('#view .activity-scene.hunt'); if (s2) delete s2.dataset.result; paint(); }, 1600);
+});
 })();
