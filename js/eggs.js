@@ -74,7 +74,7 @@ const page0 = UI.V.beastmastery;
 if (page0) UI.V.beastmastery = () => { const h = page0(); const eggs = UI.hatcheryHtml(); if (!eggs) return h;
   return h.includes('class="ranch-side">') ? h.replace('class="ranch-side">', 'class="ranch-side">' + eggs) : h; };
 /* one plain explanation of the three ways, as a pop-up (reference, not an action) and above the two finding pages */
-const WAYS = [['Lucky finds', 'Rare drop from any skill, harvest or boss. Odds: Guide → Collection.'], ['The trapper', 'Paid trap, back in 1–4 hours with an egg or tracks. Runs alongside your task.'], ['Wooden traps', 'A task: loot, Beastmastery XP and a chance at the region’s wild egg.']];
+const WAYS = [['Lucky finds', 'Rare drop from any skill, harvest or boss. Odds: Guide → Collection.'], ['The trapper', 'Paid trap, back in 1–4 hours with an egg or tracks. Runs alongside your task.'], ['Hunting fieldwork', 'Recover materials and earn Hunting XP. An occasional wild egg goes to the Beastmastery hatchery.']];
 UI.DO.eggways = () => Q.modal({ title: 'Where eggs come from', body: `<div class="egg-ways">${WAYS.map(([t, d], i) => `<div class="egg-way"><b>${i + 1}. ${t}</b><p>${d}</p></div>`).join('')}<p class="sm dim">Hatch times: wild 10 min · speckled 30 min · royal 1 hour.</p></div>`, actions: [{ label: 'Open the collection log', fn: () => { UI.colTab = 'eggs'; Q.go('collection'); } }, { label: 'Close', primary: true }] });
 /* the rail count for Beastmastery never counted eggs before; a waiting egg is not an action, so it still does not */
 })();

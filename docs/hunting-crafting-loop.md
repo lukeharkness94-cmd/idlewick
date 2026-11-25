@@ -27,3 +27,30 @@ Seventeen original code-drawn skill workplaces now follow the viewed page. Comba
 - The existing 24-hour economy supply simulation remains unchanged. It does not buy tools, so its unchanged output does not validate the new material costs; explicit commission costs and bootstrap/conservation checks supplement it.
 
 Human testing is still needed for material usefulness, resupply frequency, the value of focus, companion-skill pacing and the clarity of Fieldwork versus Quarry versus expeditions. No human enjoyment results or real 120 Hz/platform/Steam Cloud validation are claimed. No reset is required by the tested migrations. Fresh-start design takes priority; future unavoidable resets must be explicit, never silent.
+
+## v4 Task 4 — Fieldwork checkpoint
+
+Fieldwork uses its existing repeating task and save IDs. The strip divides each
+cycle into **Set trap → Wait → Check trap → Recover trap**. The recovery settles
+at the end of the existing cycle. It shows the actual haul and whether the trap
+came back intact. Stopping before recovery leaves that cycle unpaid.
+
+Trap preparation links take players to the actual recipes. Carpentry saws the
+frames, Smithing makes the bars and Crafting makes the string and assembles the
+trap. The starter wooden trap continues to use ordinary logs so it can still
+unlock Hunting before Carpentry. The Fieldwork panel offers the existing trail
+scent blend, and the Hunting ground keeps its bait tiers and original tracking,
+trap and strike stages, with trail signs on the selected quarry.
+
+An occasional Fieldwork egg goes straight into the existing Beastmastery
+hatchery. The hatchery link is available while the egg is waiting, even after
+Fieldwork has recovered more materials. Feeding and training take place at the
+ranch. The hatchery persists in saves. The latest fieldwork recovery is session
+feedback, so it can be rebuilt from the next completed cycle after a reload.
+The egg expedition and the later live-capture task retain their own scope.
+
+The reachability simulator now follows Hettie's current Willowbrook flax-and-logs
+quest. Its fresh route reached Fieldwork after 62.97 simulated minutes with no
+grants. The controlled 1,000-cycle samples produced 2,018 material units per
+trap tier, with 241 wooden, 73 reinforced and 23 precision traps breaking.
+These samples measure the simulated actions and supply burden.
