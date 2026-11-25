@@ -1,9 +1,11 @@
 /* First-hour walkthrough: a guided beginner in the real page (Playwright), following Home's Next step, closing pop-ups
    and logging every pop-up, notification, task stop and Next-step change. Automated evidence only: it is not player
    feedback. Start a server (python3 -m http.server 8765), then: MIN=60 node scripts/play-first-hour.cjs */
-const{chromium}=require('playwright');
+const { chromium } = require('playwright');
+const { writeFileSync } = require('node:fs');
 const MIN=+(process.env.MIN||60);
-(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1920,height:1080}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+(async()=>{const b=await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
+try {const p=await b.newPage({viewport:{width:1920,height:1080}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
 await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/index.html');await p.locator('#t-new').click();await p.locator('#crname').fill('Luke');await p.locator('#cr-go').click();await p.waitForTimeout(800);
 await p.evaluate(()=>{window.LOG=[];window.T0=0;const n0=DQ.notify;DQ.notify=o=>{if(!DQ.sim.on&&!DQ.forecasting)LOG.push({t:+(DQ.S.playtime/60000).toFixed(1),k:'note:'+o.kind+(DQ.notificationTier?':'+DQ.notificationTier(o):''),s:o.title});return n0(o);};
  const m0=DQ.modal;DQ.modal=o=>{LOG.push({t:+(DQ.S.playtime/60000).toFixed(1),k:'MODAL',s:o.title});return m0(o);};
@@ -15,13 +17,41 @@ await p.evaluate(()=>{window.LOG=[];window.T0=0;const n0=DQ.notify;DQ.notify=o=>
     return 'click '+d;}}
   return null;};
  window.run=sec=>{for(let i=0;i<sec;i++){DQ.S.playtime+=1000;DQ.advanceTime(1000,1000,DQ.act?DQ.act.progress||0:0);if(i%10===0)DQ.emit('ui');}};});
-let lastNext='';const acts=[];
+const readState = () => p.evaluate(() => ({
+  hero: DQ.advLvl(), combat: DQ.combatLvl(), coins: DQ.S.coins,
+  hp: [Math.round(DQ.S.hp), DQ.maxHp()], inventorySlots: Object.keys(DQ.S.inv).length,
+  inventory: DQ.S.inv, activity: DQ.act ? { kind: DQ.act.kind, id: DQ.act.id } : null,
+  lv: Object.fromEntries(Object.keys(DQ.S.xp).filter(k => DQ.S.xp[k] > 0).map(k => [k, DQ.lvl(k)])),
+  quests: DQ.S.q, stats: DQ.S.stats, next: DQ.journeyNext(),
+}));
+const initial = await readState();
+let lastNext='';const acts=[], snapshots=[];
 for(let m=0;m<MIN*2;m++){ // half-minute steps
  for(let k=0;k<3;k++){const r=await p.evaluate(()=>step());if(r){acts.push((m/2).toFixed(1)+'m '+r);await p.waitForTimeout(150);}else break;}
  await p.evaluate(()=>run(30));
  const nx=await p.evaluate(()=>{DQ.go('overview');const h=document.querySelector('#view .journey h2, #view .journey h3, #view h2');return (h?h.textContent.trim():'')+' | act: '+(DQ.act?DQ.actLabel():'none');});
+ const minute=(m+1)/2;
+ if ([5, 15, 30, 45, 60, MIN].includes(minute)) snapshots.push({ minute, ...await readState() });
  if(nx!==lastNext){acts.push((m/2).toFixed(1)+'m NEXT: '+nx);lastNext=nx;}
 }
 const log=await p.evaluate(()=>LOG);const st=await p.evaluate(()=>({hero:DQ.advLvl(),combat:DQ.combatLvl(),coins:DQ.S.coins,lv:Object.fromEntries(Object.keys(DQ.S.xp).filter(k=>DQ.S.xp[k]>0).map(k=>[k,DQ.lvl(k)])),q:Object.entries(DQ.S.q).map(([k,v])=>k+':'+v.s).join(' ')}));
 console.log('== ACTIONS');acts.forEach(a=>console.log(a));console.log('== LOG');log.forEach(l=>console.log(l.t+'m',l.k,l.s));console.log('== STATE',JSON.stringify(st));console.log('errors',errs);
-await p.evaluate(()=>DQ.save&&DQ.save());await b.close();})();
+if (process.env.EVIDENCE) {
+ const events = log.filter(e => e.k === 'MODAL' || e.k.startsWith('note:'));
+ const counts = windows => {
+  const result={};
+  for (const e of events.filter(windows)) {
+   const key=e.k === 'MODAL' ? 'modal' : e.k.split(':')[1];
+   result[key]=(result[key] || 0)+1;
+  }
+  return result;
+ };
+ const windows = [[0, 5], [5, 15], [15, 30], [30, Infinity]].map(([start, end]) => ({
+  start, end: Math.min(end, MIN), counts: counts(e => e.t >= start && e.t < end),
+ })).filter(w => w.start < MIN);
+ writeFileSync(process.env.EVIDENCE, JSON.stringify({ initial, snapshots, actions: acts, log, events: events.length,
+  counts: counts(() => true), windows, errors: errs }, null, 2) + '\n');
+}
+if (errs.length) process.exitCode=1;
+} finally { await b.close(); }
+})().catch(error => { console.error(error); process.exitCode=1; });
