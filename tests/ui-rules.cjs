@@ -43,7 +43,7 @@ const SETUP = {
 };
 
 (async () => {
-  const b = await chromium.launch();
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
   for (const [vw, vh] of [[1440, 900], [390, 844]]) for (const save of ['early', 'mid']) for (const theme of ['dark', 'light']) {
     if (vw < 800 && theme === 'light') continue;
     const p = await b.newPage({ viewport: { width: vw, height: vh } }); const errs = [];

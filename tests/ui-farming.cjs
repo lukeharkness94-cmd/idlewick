@@ -5,7 +5,7 @@
 const assert=require('node:assert/strict');
 let chromium;try{({chromium}=require('playwright'));}catch(e){console.log('SKIP ui-farming: playwright is not installed');process.exit(0);}
 (async()=>{
- const browser=await chromium.launch(require('node:fs').existsSync('/opt/pw-browsers/chromium')?{}:{});
+ const browser=await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
  try{
   const page=await browser.newPage({viewport:{width:1300,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/');

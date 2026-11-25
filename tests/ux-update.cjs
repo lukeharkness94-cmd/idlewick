@@ -14,7 +14,22 @@ await p.evaluate(()=>{const Q=DQ,S=Q.S;S.q.first_steps={s:'ready',p:[5,5]};S.inv
 const ready=await p.locator('.qrow[data-a="first_steps"]').innerText();assert.match(ready,/Ready to return|Claim reward/i);await p.locator('[data-do="qclaim"][data-a="first_steps"]').click();await p.waitForTimeout(350);const local=await p.evaluate(()=>{const r=document.querySelector('.quest-reveal')?.getBoundingClientRect();return {list:window.__questList===document.querySelector('.qlist'),height:r?.height,before:window.__questRect.height,done:DQ.S.q.first_steps.s}});assert.equal(local.done,'done');assert.ok(local.list);assert.ok(Math.abs(local.height-local.before)<=2,JSON.stringify(local));await p.evaluate(()=>{for(let i=0;i<8;i++)DQ.closeModal();DQ.ui.DO.qrevealdone();});
 await p.evaluate(()=>{const Q=DQ,id=Object.keys(Q.data.PROJECTS).find(k=>Q.data.PROJECTS[k].town===Q.S.town&&!Q.S.projects[k]);Q.S.projectGiven=Q.S.projectGiven||{};Q.S.projectGiven[id]={...Q.data.PROJECTS[id].cost};const coins=Q.S.coins;if(!Q.finishProject(id)||Q.S.coins!==coins)throw Error('Fully donated project did not complete without another payment');});
 // Defeat feedback is visible even when the next encounter is the same species.
-await p.evaluate(()=>{const Q=DQ;Q.S.settings.reduceFx=false;Q.S.town='willowbrook';Q.go('combat');Q.startAct('fight','goblin',{quiet:true});Q.ui.render(true);Q.advanceTime(10000,true);});/* the caption waits for the visible hit to land (UI.afterImpact, 20 Nov) */await p.locator('.defeat-caption').first().waitFor({state:'attached',timeout:5000});await p.evaluate(()=>DQ.stopAct(true));await p.waitForTimeout(1200);assert.equal(await p.locator('.defeat-caption').count(),0);
+const wasPaused=await p.evaluate(()=>{
+ const Q=DQ,wasPaused=Q.paused;
+ Q.paused=true;
+ Q.S.settings.reduceFx=false;Q.S.town='willowbrook';Q.go('combat');
+ if(!Q.startAct('fight','goblin',{quiet:true}))throw Error('Could not start the goblin fight');
+ Q.ui.render(true);
+ Q.advanceTime(10000,true);
+ return wasPaused;
+});
+/* Both appearance and removal follow the visible hit, which may land later on a busy renderer. */
+const defeat=p.locator('.defeat-caption').first();
+await defeat.waitFor({state:'attached',timeout:10000});
+assert.match(await defeat.innerText(),/Goblin defeated/i);
+await p.evaluate(()=>DQ.stopAct(true));
+await p.waitForFunction(()=>!document.querySelector('.defeat-caption'),null,{timeout:10000});
+await p.evaluate(paused=>{DQ.paused=paused;},wasPaused);
 // Farm routes keep the requested crop visible even before its seeds are owned.
 await p.evaluate(()=>{DQ.ui.DO.route('crop_cabbage');});assert.ok(await p.locator('[data-farm-target="cabbage"]').isVisible());await p.locator('[data-farm-target="cabbage"] [data-do="route"]').click();/* cabbage seeds are sold in Mossbarrow: the shop says where, honestly, rather than sending you to a rare drop (20 Nov) */assert.equal(await p.evaluate(()=>DQ.ui.view),'shop');assert.equal(await p.evaluate(()=>DQ.ui.routeSource.item),'seed_cabbage');assert.match(await p.locator('.route-travel').innerText(),/Cabbage seeds[\s\S]*Mossbarrow/);
 // Project markers distinguish an available repair from delivering the entire remaining cost.
