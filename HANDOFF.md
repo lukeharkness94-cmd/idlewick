@@ -956,3 +956,9 @@ museum and recipe hooks) without combat XP, damage or food. XP per hour is match
 main quest's boars among them) route to the hunt; before Hunting is learned they still fight it. Also fixed: the
 fight stage kept the first creature's sprite (updateEncounter looked at the stage's last child), the night tint
 covered the fighters, and the Your foe card wrapped and overlapped. Test: tests/hunt-stalk.cjs.
+
+## Combat and Hunting QA (25 Nov 2026)
+
+Ingredient links select the exact source without starting an activity. Quarry drops prefer eligible hunts, and early cowhide routes to the Goblin raider. Quest Continue and the pinned objective share the same route, including the Mossbarrow boars and their pre-Hunting combat fallback. Explore instead clears the fixed target and starts rolling weighted encounters in the same area after the current foe.
+
+Combat's phone tabs include Magic. Fight entry shows missing arrows or runes, practice requires the matching equipped weapon, and archery practice uses no arrows. Now restores the running quarry, Fieldwork or practice target. The old arts link goes to the equipped style's book. Save validation accepts those tasks, preserves pre-Hunting quest fights, and migrates the two renamed quarry IDs in running tasks, the queue and the field guide. Focused browser coverage lives in tests/combat-hunting-qa.cjs.

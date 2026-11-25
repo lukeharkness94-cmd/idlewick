@@ -273,9 +273,8 @@ DQ.startAct = (kind, id, o = {}) => {
     if (m.town !== S().town) return bad(`${m.name} lives in ${D.TOWN[m.town].name}`);
     if (m.boss && DQ.combatLvl() < m.boss.req) return bad(`You need combat level ${m.boss.req} to challenge ${m.boss.short}`);
     if (m.mini && DQ.combatLvl() < m.mini.req) return bad(`You need combat level ${m.mini.req} to challenge ${m.mini.short}`);
-    const st = DQ.weaponStyle();
-    if (st === 'ranged' && !(S().ammo.id && (S().ammo.n > 0 || DQ.have(S().ammo.id)))) return bad('Equip some arrows first');
-    if (st === 'magic' && !pickSpell()) return bad('You need more Arcane runes for a spell');
+    const supply = DQ.fightSupplyNeed();
+    if (supply) return bad(supply.reason);
     DQ.fight = { id, hp: m.hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 };
   } else if (EXT[kind]) {
     const skill = EXT[kind].skillFor?.(id) || EXT[kind].skill;
@@ -400,6 +399,18 @@ const pickSpell = () => {
   const ok = s => s && DQ.lvl('magic') >= s.lvl && DQ.have('rune') >= s.runes;
   if (ok(sp)) return sp;
   return [...D.SPELLS].reverse().find(ok) || null;
+};
+DQ.fightSupplyNeed = () => {
+  const style = DQ.weaponStyle(), { id, n } = S().ammo;
+  if (style === 'ranged' && !(id && (n > 0 || DQ.have(id)))) {
+    const arrows = Object.keys({ ...S().inv, ...S().bank }).find(item =>
+      D.ITEMS[item]?.slot === 'ammo' && DQ.have(item) && DQ.canEquip(item).ok);
+    const stocked = (D.SHOPS[S().town] || []).find(item =>
+      D.ITEMS[item]?.slot === 'ammo' && DQ.canEquip(item).ok);
+    return { reason: 'Equip some arrows first', item: arrows || stocked || 'arrow_bronze', equip: !!arrows };
+  }
+  if (style === 'magic' && !pickSpell()) return { reason: 'You need more Arcane runes for a spell', item: 'rune' };
+  return null;
 };
 DQ.pstats = () => {
   const st = DQ.weaponStyle(), b = DQ.bonus(), L = DQ.lvl, sty = S().style;
@@ -817,8 +828,8 @@ DQ.resumeAfterLoad = () => {
   if (s) {
     try {
       let ok = false; const k = s.kind;
-      if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town; else if (EXT[k]) ok = !EXT[k].check(s.id); else ok = !!D.NODE[k + ':' + s.id] && DQ.nodeHere(D.NODE[k + ':' + s.id]);
-      if (ok) { DQ.act = { kind: k, id: s.id, area: s.area || null, target: s.target || null, questTarget: !!s.questTarget, track: !!s.track, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, limit: s.limit || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0, progress: s.progress || 0 }; DQ.act.dur = DQ.actDur(DQ.act); DQ.act.t0 -= DQ.act.progress; if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0 }; }
+      if (k === 'recipe') ok = !!D.RECIPES[s.id]; else if (k === 'alch') ok = !!D.ITEMS[s.id]; else if (k === 'fight') ok = !!D.MON[s.id] && D.MON[s.id].town === S().town && (!DQ.isAnimal?.(s.id) || DQ.questWantsAnimal(s.id)); else if (EXT[k]) ok = !EXT[k].check(s.id); else ok = !!D.NODE[k + ':' + s.id] && DQ.nodeHere(D.NODE[k + ':' + s.id]);
+      if (ok) { DQ.act = { kind: k, id: s.id, area: s.area || null, target: s.target || null, questTarget: !!s.questTarget, track: !!s.track, t0: Date.now(), pace: s.pace || 'steady', rule: s.rule || 'none', count: s.count || 0, limit: s.limit || 0, elapsed: s.elapsed || 0, lvlTarget: s.lvlTarget || 0, progress: s.progress || 0 }; DQ.act.dur = DQ.actDur(DQ.act); DQ.act.t0 -= DQ.act.progress; if (k === 'fight') DQ.fight = { id: s.id, hp: D.MON[s.id].hp, round: 0, mt: 0, ma: 0, pa: 0, phase: 0, tracking: s.track ? DQ.trackRounds() : 0 }; }
     } catch (e) {}
     if (!DQ.act) S().act = null;
   }

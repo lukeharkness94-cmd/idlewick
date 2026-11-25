@@ -87,7 +87,12 @@ Q.artsBook = style => {
   <section class="panel arts-book"><div class="illustrated-choices arts-grid">${cards}</div></section></div>`;
 };
 /* the old Combat arts tab now opens the book of the style you fight with */
-UI.V.arts = () => { const st = Q.weaponStyle(), pg = st === 'magic' ? 'magic' : st; setTimeout(() => Q.go(pg), 0); return UI.V[pg](); };
+UI.V.arts = () => {
+  const style = Q.weaponStyle();
+  UI.selectStyleBook(style);
+  setTimeout(() => { if (UI.view === 'arts') Q.go(style); }, 0);
+  return UI.V[style]();
+};
 Object.assign(UI.DO, {
   artstab: k => { if (['melee', 'ranged', 'magic'].includes(k)) { tab = k; UI.render(false); } },
   artpick: (style, id) => { if (Q.setArt(style, id)) { Q.sfx && Q.sfx('tab'); UI.render(false); } },

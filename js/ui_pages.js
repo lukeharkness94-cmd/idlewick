@@ -294,8 +294,19 @@ const DO = {
   qclaim: (a, choice) => { DQ.claimQuest(a, choice); if (UI.view === 'quests') { UI.questTab = null; UI.render(false); } },
   qtab: a => { UI.questTab = a; UI.render(false); },
   questcontinue: id => {
-    const q = D.QM[id], progress = S().q[id];
-    const objective = q.obj.find((o, j) => DQ.objProg(q, progress, j) < o.n) || q.obj[0];
+    const q = D.QM[id], objective = DQ.unfinishedObjective(q);
+    if (!objective) return UI.DO.openquest(id);
+    const target = ['kill', 'boss'].includes(objective.ev) && D.MON[objective.key];
+    if (target) {
+      UI.returnTo = { page: 'quests', label: q.name };
+      if (DQ.isAnimal?.(target.id) && DQ.skillUnlocked('hunting')) {
+        UI.routeSource = null;
+        return UI.DO.huntground(target.id);
+      }
+      UI.routeSource = { kind: 'fight', page: 'combat', id: target.id, town: target.town, name: target.name, quest: id };
+      UI.taskChoice.combat = target.id;
+      return UI.view === 'combat' ? UI.render(false) : DQ.go('combat');
+    }
     const page = DQ.objPage(q, objective);
     if (page === 'combat' && D.MON[objective.key]) UI.taskChoice.combat = objective.key;
     if (page === 'map') UI.mapSel = objective.ev === 'visit' ? objective.key : q.town;

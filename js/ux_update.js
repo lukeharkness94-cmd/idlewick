@@ -16,13 +16,18 @@ UI.DO.route=id=>{const src=Q.sourceOf(id);if(!src)return;if(UI.view!==src.page)U
  if(src.kind==='shop'){UI.shopSelected.buy=id;UI.shopTab='buy';UI.sel=id;UI.routeShopItem=id;}
  if(src.kind==='farm'){UI.seed=id.replace(/^crop_|^seed_/,'');UI.farmRoute=UI.seed;UI.estateTab='seeds';UI.estateSection='seeds';const seeds=D.CROPS.filter(c=>Q.have('seed_'+c.id));UI.estateSeedPage=Math.max(0,Math.floor(seeds.findIndex(c=>c.id===UI.seed)/(innerWidth<=860?4:6)));}
  if(src.kind==='animal'){UI.farmAnimal=D.ANIMALS.find(a=>a.prod===id)?.id;UI.estateTab='animals';UI.estateSection='animals';UI.estateMarketPage=Math.max(0,Math.floor(D.ANIMALS.findIndex(a=>a.id===UI.farmAnimal)/(innerWidth<=860?3:4)));}
- if(src.id)UI.focusTask(src.page,src.id,D.RECIPES[src.id]?.tab,src.skill);else Q.go(src.page);
- UI.routeSource={...src,item:id};UI.render(false);
+ if (document.querySelector('.modal[data-more]')) Q.closeModal();
+ UI.routeSource={...src,item:id};
+ if(src.kind==='hunt')UI.DO.huntground(src.id);
+ else if(src.kind==='fight')Q.go('combat');
+ else if(src.id)UI.focusTask(src.page,src.id,D.RECIPES[src.id]?.tab,src.skill);
+ else Q.go(src.page);
+ UI.render(false);
 };
 /* Travel is explicit and visible. Once it completes, return to the selected task without starting it. */
 UI.DO.routetravel=town=>{const src=UI.routeSource;if(!src||!Q.townUnlocked(town))return;UI.travelReturn={...src};Q.go('map');UI.travelAnim(town);};
 const travel0=Q.travel;
-Q.travel=town=>{const out=travel0(town),r=UI.travelReturn;if(r&&S().town===town){UI.travelReturn=null;if(r.kind==='shop'){UI.shopSelected.buy=r.item;UI.shopTab='buy';UI.sel=r.item;}if(r.id)UI.focusTask(r.page,r.id,D.RECIPES[r.id]?.tab,r.skill);else Q.go(r.page);UI.routeSource=r;}return out;};
+Q.travel=town=>{const out=travel0(town),r=UI.travelReturn;if(r&&S().town===town){UI.travelReturn=null;if(r.kind==='shop'){UI.shopSelected.buy=r.item;UI.shopTab='buy';UI.sel=r.item;}UI.routeSource=r;if(r.kind==='fight')Q.go('combat');else if(r.id)UI.focusTask(r.page,r.id,D.RECIPES[r.id]?.tab,r.skill);else Q.go(r.page);}return out;};
 const taskmap0=UI.DO.taskmap;
 UI.DO.taskmap=town=>{const page=UI.view,id=UI.taskChoice[page],node=Object.values(D.NODE).find(n=>n.id===id&&n.skill===page);UI.routeSource={page,id,skill:page,town,kind:node?.kind};if(Q.townUnlocked(town))return UI.DO.routetravel(town);return taskmap0(town);};
 /* A defeated creature has a short exit before the next silhouette arrives; no combat timing changes. */

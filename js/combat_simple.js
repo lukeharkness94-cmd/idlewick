@@ -28,7 +28,11 @@
   ];
   const byKey = k => POPS.find(p => p.key === k);
   let open = null;
-  const bodyOf = key => { const el = document.querySelector('#view ' + byKey(key).from); return el ? `<div class="combat-pop">${el.outerHTML}</div>` : ''; };
+  const bodyOf = key => { const el = document.querySelector('#view ' + byKey(key).from); if (!el) return '';
+    const supply = key === 'boss' && DQ.act?.id !== (bossOf()?.id) ? UI.fightSupplyEntry?.() : '';
+    const card = el.cloneNode(true);
+    if (supply) for (const button of card.querySelectorAll('[data-do="act"][data-a="fight"]')) button.disabled = true;
+    return `<div class="combat-pop">${supply || ''}${card.outerHTML}</div>`; };
   const refresh = () => {
     if (!open) return; const m = document.querySelector('.modal[data-more]');
     if (!m) { open = null; return; }

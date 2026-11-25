@@ -619,7 +619,7 @@ D.QUESTS.unshift(
     [{ ev: 'deliver', key: 'cowhide', n: 8, label: 'Bring 8 cowhides to practise on' }, { ev: 'deliver', key: 'feather', n: 20, label: 'Bring 20 feathers for her quills' }, { ev: 'chop', key: 'birch', n: 10, label: 'Chop 10 birch logs for her frames' }],
     { xp: { crafting: 150 }, coins: 150, items: { cowhide: 6 } }),
   MQ('mq_ranged', 'ranged', 'mossbarrow', 'A Hunter’s Bow', 'Hunter Wynn', 18, null,
-    'A sword is useful. Not arguing with that. But when Old Tusk charges, I’d rather have a bow and a bit of distance. Bring birch for the stave and feathers for the arrows. Then we’ll practise on the boars. I’m better at showing you than explaining it.',
+    'A sword is useful. Not arguing with that. But when Old Tusk charges, I’d rather have a bow and a bit of distance. Bring birch for the stave and feathers for the arrows. Then we’ll practise on the boars. I’ll give you a Wooden Shortbow and arrows. The oak Hunter’s Bow is a later upgrade at Ranged 10. I’m better at showing you than explaining it.',
     [{ ev: 'deliver', key: 'log_birch', n: 10, label: 'Bring 10 birch logs for the bow stave' }, { ev: 'deliver', key: 'feather', n: 40, label: 'Bring 40 feathers to fletch arrows' }, { ev: 'kill', key: 'boar', n: 6, label: 'Track down 6 wild boars as practice' }],
     { xp: { ranged: 150 }, items: { bow_normal: 1, arrow_bronze: 150 } }),
   MQ('mq_magic', 'magic', 'saltmere', 'The Drowned Library', 'Archivist Merrow', 28, null,

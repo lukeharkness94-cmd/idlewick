@@ -5,7 +5,7 @@
 const DQ = window.DQ, D = DQ.data, UI = DQ.ui, { $, esc, ico } = DQ;
 const S = () => DQ.S;
 const PAGE = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' };
-const VERB = { fish: 'Fish', wood: 'Chop', mine: 'Mine', thieve: 'Steal', recipe: 'Make', farm: 'Grow', animal: 'Raise', fight: 'Hunt', shop: 'Buy' };
+const VERB = { fish: 'Fish', wood: 'Chop', mine: 'Mine', thieve: 'Steal', recipe: 'Make', farm: 'Grow', animal: 'Raise', fight: 'Fight', hunt: 'Hunt', shop: 'Buy' };
 
 /* Where an item comes from, cheapest/earliest source first. Null when it has no single obvious source. */
 /* a creature you have not defeated stays unnamed everywhere (the player's rule: locked things are blacked out) */
@@ -28,12 +28,22 @@ DQ.sourceOf = id => {
   if(shop)return {kind:'shop',page:'shop',town:shop,name:'Shop'};
   const monsters=D.MONLIST.filter(m=>(m.drops||[]).some(d=>d[0]===id)||m.first===id).sort((a,b)=>Number(!!a.boss)-Number(!!b.boss)||a.cl-b.cl);
   const fight=m=>({kind:'fight',id:m.id,page:'combat',town:m.town,name:DQ.monName(m)});
-  const mon=monsters.find(m=>DQ.townUnlocked(m.town));
-  if(mon)return fight(mon);
+  const hunt = m => ({
+    kind: 'hunt', id: m.id, page: 'hunting', skill: 'hunting',
+    lvl: m.hl, town: m.town, name: DQ.monName(m)
+  });
+  const canHunt = m => DQ.isAnimal?.(m.id) && DQ.KIND_EXT?.hunt?.check(m.id) === '';
+  const fightable = m => !DQ.isAnimal?.(m.id) && (m.boss || m.mini || DQ.areaForMonster?.(m.id)) &&
+    (!m.boss || DQ.combatLvl() >= m.boss.req) && (!m.mini || DQ.combatLvl() >= m.mini.req);
+  const quarry = DQ.skillUnlocked('hunting') && monsters.find(canHunt);
+  if (quarry) return hunt(quarry);
+  const reachable = monsters.find(m => m.town === S().town && fightable(m)) ||
+    monsters.find(m => DQ.townUnlocked(m.town) && fightable(m));
+  if (reachable) return fight(reachable);
   if(recipe)return recipeSource(recipe);
   /* nothing reachable yet: a later town's shop that sells it beats a rare drop from that town's creatures (20 Nov) */
   if(shops.length)return {kind:'shop',page:'shop',town:shops[0],name:'Shop'};
-  if(monsters.length)return fight(monsters[0]);
+  if(monsters.length)return DQ.isAnimal?.(monsters[0].id) ? hunt(monsters[0]) : fight(monsters[0]);
   // Incidental outputs must not outrank a direct source or send a survey's feather requirement back to itself.
   const secondary=recipes.find(r=>DQ.skillUnlocked(r.skill)&&DQ.lvl(r.skill)>=r.lvl&&!DQ.recipeGate?.(r)&&!DQ.recipeDiscovery?.(r));
   if(secondary)return recipeSource(secondary);
@@ -72,8 +82,8 @@ Object.assign(UI.DO, {
     if (src.id && ['fish', 'wood', 'mine', 'thieve', 'recipe', 'fight'].includes(src.kind)) UI.taskChoice[src.page] = src.id;
     go(src.page);
   },
-  routeback: () => { const r = UI.returnTo; UI.returnTo = null; if (r) go(r.page); else UI.render(false); },
-  routeclose: () => { UI.returnTo = null; UI.render(false); }
+  routeback: () => { const r = UI.returnTo; UI.returnTo = null; UI.routeSource = null; if (r) go(r.page); else UI.render(false); },
+  routeclose: () => { UI.returnTo = null; UI.routeSource = null; UI.render(false); }
 });
 const render0 = UI.render;
 UI.render = fresh => {

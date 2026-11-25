@@ -21,6 +21,33 @@ const huntTile = x => { const m = x.monster, k = met(x.id), ok = DQ.canHunt ? DQ
 const huntCard = g => { if (!DQ.skillUnlocked('hunting')) return `<article class="cw-area cw-hunt-locked"><div class="cw-area-h"><div><b>${esc(g.name)}</b><small>Learn Hunting to hunt animals here</small></div><button type="button" class="btn" data-do="go" data-a="hunting">${ico('paw')}Hunting</button></div><div class="cw-mons">${DQ.encounterOdds(g).map(x => `<div class="cw-mon cw-locked"><span class="cw-mon-art">${DQ.monSprite(x.monster, 40, 'sil')}</span><b>???</b><small>Hunting ${x.monster.hl}</small></div>`).join('')}</div></article>`;
   const odds = DQ.encounterOdds(g), open = odds.filter(x => DQ.canHunt ? DQ.canHunt(x.monster) : true);
   return `<article class="cw-area cw-hunt"><div class="cw-area-h"><div><b>${esc(g.name)}</b><small>Hunting ${DQ.huntLevel ? DQ.huntLevel() : DQ.lvl('hunting')} · animals for hides, feathers and meat</small></div><button type="button" class="btn primary" data-do="huntarea" data-a="${g.id}" ${open.length ? '' : 'disabled'}>${ico('paw')}Hunt</button></div><div class="cw-mons">${odds.map(huntTile).join('')}</div></article>`; };
+UI.fightSupplyEntry = () => {
+  const need = DQ.fightSupplyNeed();
+  if (!need) return '';
+  const name = D.ITEMS[need.item].name;
+  return `<div class="fight-supply" role="status"><span>${esc(need.reason)}</span><button type="button" class="btn sm" data-do="${need.equip ? 'combatequip' : 'route'}" data-a="${need.item}">${need.equip ? 'Equip ' + esc(name.toLowerCase()) : 'Find ' + (need.item === 'rune' ? 'runes' : 'arrows')}</button></div>`;
+};
+UI.DO.routefight = id => {
+  const route = UI.routeSource, m = D.MON[id];
+  if (!m || route?.id !== id || m.town !== S().town) return;
+  if (DQ.act?.kind === 'fight' && DQ.act.id === id) return DQ.stopAct();
+  if (route.quest && !DQ.questWantsKill(id, route.quest) && !m.boss) return;
+  if (m.boss || m.mini) DQ.startAct('fight', id);
+  else if (route.quest) UI.DO.huntquest(id);
+  else UI.DO.hunttrack(id);
+};
+const routedFight = () => {
+  const route = UI.routeSource;
+  const m = route?.kind === 'fight' && D.MON[route.id];
+  if (!m || (route.quest && !m.boss && !DQ.questWantsKill(m.id, route.quest))) return null;
+  return { m, route };
+};
+const routedFightHtml = ({ m, route }) => {
+  const kind = route.quest ? 'Quest objective' : D.ITEMS[route.item]?.name || 'Ingredient source';
+  const label = route.quest ? m.name : DQ.monName(m);
+  const locked = DQ.fightSupplyNeed() || DQ.combatLvl() < (m.boss?.req || m.mini?.req || 0);
+  return `<div class="cw-quest cw-route-fight"><span><small>${esc(kind)}</small><b>${esc(label)}</b></span>${m.town === S().town ? `<button class="btn sm" data-do="routefight" data-a="${m.id}" ${locked ? 'disabled' : ''}>${route.quest ? 'Fight' : 'Track'}</button>` : ''}</div>`;
+};
 const windowHtml = () => {
   const town = S().town, ground = DQ.huntGround ? DQ.huntGround(town) : null; if (!ground) UI.cwTab = 'areas';
   const areas = (DQ.combatAreas ? DQ.combatAreas(town) : D.AREAS[town] || []), qt = questMon(), qm = qt && D.MON[qt];
@@ -29,8 +56,9 @@ const windowHtml = () => {
   if (UI.cwTab === 'hunt' && ground) return `<div class="cw-window cw-window-hunt" role="region" aria-label="Hunting ground"><div class="cw-head"><small>${esc(D.TOWN[town].name)} · your Hunting level ${DQ.huntLevel ? DQ.huntLevel() : DQ.lvl('hunting')}</small>${wtabs}</div><div class="cw-areas">${huntCard(ground)}</div></div>`;
   const cards = areas.map(a => { const odds = DQ.encounterOdds(a), lv = odds.map(x => x.monster.cl), lo = Math.min(...lv), hi = Math.max(...lv);
     return `<article class="cw-area"><div class="cw-area-h"><div><b>${esc(a.name)}</b><small class="${tone(lo, hi)}">Combat ${lo}–${hi} recommended</small></div><button type="button" class="btn primary" data-do="huntarea" data-a="${a.id}">${ico('attack')}Explore</button></div><div class="cw-mons">${odds.map(x => monTile(x, qt)).join('')}</div></article>`; }).join('');
-  const quest = qm ? `<button type="button" class="cw-quest" data-do="huntquest" data-a="${qt}">${DQ.monSprite(qm, 32)}<span><small>Quest${qm.mini ? ' · challenge' : ''}</small><b>${esc(qm.name)}</b></span></button>` : '';
-  return `<div class="cw-window" role="region" aria-label="Where to fight"><div class="cw-head"><small>${esc(D.TOWN[town].name)} · your combat level ${DQ.combatLvl()}</small>${quest}${wtabs}</div><div class="cw-areas">${cards}</div></div>`;
+  const route = routedFight(), needsSupply = !!DQ.fightSupplyNeed();
+  const quest = route ? routedFightHtml(route) : qm ? `<button type="button" class="cw-quest" data-do="huntquest" data-a="${qt}" ${needsSupply && !(DQ.isAnimal?.(qt) && DQ.skillUnlocked('hunting')) ? 'disabled' : ''}>${DQ.monSprite(qm, 32)}<span><small>Quest${qm.mini ? ' · challenge' : ''}</small><b>${esc(qm.name)}</b></span></button>` : '';
+  return `<div class="cw-window" role="region" aria-label="Where to fight"><div class="cw-head"><small>${esc(D.TOWN[town].name)} · your combat level ${DQ.combatLvl()}</small>${quest}${wtabs}</div>${UI.fightSupplyEntry()}<div class="cw-areas">${cards}</div></div>`;
 };
 const foeHtml = () => {
   const f = DQ.fight, act = fightAct(); if (!f || !act) return '';
@@ -38,7 +66,7 @@ const foeHtml = () => {
   const w = DQ.weakOf ? DQ.weakOf(m, f) : { weak: [], resist: [] }, dt = k => D.DTYPES[k] ? `<span class="cw-dt" style="--c:${D.DTYPES[k].col}">${esc(D.DTYPES[k].name)}</span>` : '';
   const seen = (S().seen && S().seen.items) || {}, drops = (m.drops || []).map(d => d[0]).filter((id, i, a) => D.ITEMS[id] && a.indexOf(id) === i), known = drops.filter(id => seen[id]), unknown = drops.length - known.length;
   const area = act.area && Object.values(D.AREAS || {}).flat().find(a => a.id === act.area);
-  const tracking = act.track ? `<div class="cw-trackline">${ico('paw')}<span>Tracking</span><button type="button" class="linkish" data-do="huntarea" data-a="${act.area || ''}">Explore instead</button></div>` : '';
+  const tracking = act.track ? `<div class="cw-trackline">${ico('paw')}<span>Tracking</span><button type="button" class="linkish" data-do="huntexplore" data-a="${act.area || ''}">Explore instead</button></div>` : '';
   const place = m.boss ? 'Boss' : m.mini ? 'Challenge' : (area ? area.name : '');
   const chip = (icon, label, val, tip) => `<span class="cw-chip" data-tip="text:${esc(tip)}">${icon ? ico(icon) : ''}<span class="cw-chip-k">${label}</span><b>${val}</b></span>`;
   const chips = [chip('clock', 'Attacks', ((m.attackMs || 2000) / 1000).toFixed(1) + 's', 'Time between its attacks'), chip('attack', 'Max hit', m.max, 'Its biggest possible hit')];
@@ -58,9 +86,6 @@ UI.DO.hunttrack = id => {
   if (!DQ.startHunt(a.id, id, false)) return;
   DQ.act.track = true; S().act.track = true; if (DQ.fight) DQ.fight.tracking = DQ.trackRounds(); DQ.save(); UI.render(false);
 };
-/* a plain Explore clears tracking */
-const area0 = UI.DO.huntarea;
-if (area0) UI.DO.huntarea = (id, ...r) => { const res = area0(id, ...r); if (DQ.act && DQ.act.kind === 'fight') { DQ.act.track = false; if (S().act) S().act.track = false; if (DQ.fight) DQ.fight.tracking = 0; } return res; };
 /* Where everything sits (owner, 22 Nov 2026: "it should really feel logical"):
    left column, YOUR FIGHTER: what you wear, how you fight (weapon, art, training focus) and your abilities;
    the stage: WHERE TO FIGHT, or the fight itself;
@@ -82,9 +107,14 @@ const shape = () => {
     if (label) label.textContent = 'Your foe';
     const old = x.querySelector('.cw-foe'), html = foeHtml(), sig = act.id + ':' + !!act.track;
     if (!old || old.dataset.sig !== sig || !body.contains(old)) { if (old) old.remove(); if (html && body) { body.insertAdjacentHTML('afterbegin', html); const n = body.querySelector('.cw-foe'); if (n) n.dataset.sig = sig; } }
+    const route = routedFight(), previousRoute = body?.querySelector('.cw-route-fight');
+    if (route && route.m.id !== act.id && route.m.town === S().town) {
+      if (!previousRoute) body?.insertAdjacentHTML('afterbegin', routedFightHtml(route));
+    } else previousRoute?.remove();
     arena && arena.querySelector('.cw-window')?.remove();
   } else {
     x.querySelector('.cw-foe')?.remove();
+    body?.querySelector('.cw-route-fight')?.remove();
     if (label) label.textContent = x.querySelector('.wh-mini') ? 'Challenges and boss' : 'Next boss';
     if (where && body && !body.contains(where)) { if (where.querySelector('.wh-minis')) body.prepend(where); else where.remove(); }
     if (arena && !arena.querySelector('.cw-window')) arena.insertAdjacentHTML('beforeend', windowHtml());
@@ -92,6 +122,9 @@ const shape = () => {
     x.querySelector('.cx-go')?.remove();
   }
   if (boss && body && !body.contains(boss)) body.append(boss);
+  if (!act && DQ.fightSupplyNeed()) {
+    for (const button of x.querySelectorAll('.cw-window [data-do="hunttrack"], .cw-window [data-do="huntarea"], .wh-mini [data-do="act"]')) button.disabled = true;
+  }
   /* the left column: your fighter */
   const stepH = col.querySelector('.step-h'); if (stepH) stepH.textContent = 'Your fighter';
   const eq = col.querySelector('.combat-equipped'), train = hud && hud.querySelector('.hud-train'), abils = hud && hud.querySelector('.combat-abils');

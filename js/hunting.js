@@ -14,6 +14,9 @@ for(const town of D.TOWNS){
   D.AREAS[town.id]=groups.map((list,i)=>({id:`${town.id}:${i}`,town:town.id,name:(names[town.id]||['Outskirts','Wilds'])[i],monsters:list.map((m,j)=>({id:m.id,weight:[58,28,14,8][j]||6}))}));
 }
 DQ.areaForMonster=id=>Object.values(D.AREAS).flat().find(a=>a.monsters.some(e=>e.id===id));
+DQ.questWantsKill = (id, questId) => D.QUESTS.some(q =>
+  (!questId || q.id === questId) && S().q[q.id]?.s === 'active' &&
+  q.obj.some((o, i) => o.ev === 'kill' && o.key === id && DQ.objProg(q, S().q[q.id], i) < o.n));
 const questTarget=()=>{
   for(const q of D.QUESTS){const p=S().q[q.id];if(!p||p.s!=='active'||q.town!==S().town)continue;
     const o=q.obj.find((o,i)=>o.ev==='kill'&&DQ.objProg(q,p,i)<o.n&&D.MON[o.key]);if(o)return o.key;
@@ -36,9 +39,17 @@ DQ.nextEncounter=defeated=>{
   if(!DQ.act?.area)return null;
   const area=Object.values(D.AREAS).flat().find(a=>a.id===DQ.act.area);if(!area)return null;
   S().hunt.encounters=(S().hunt.encounters||0)+1;
-  if(DQ.act.questTarget&&questTarget()!==DQ.act.target){DQ.act.target=null;DQ.act.questTarget=false;if(S().act){S().act.target=null;S().act.questTarget=false;}S().hunt.target=null;}
   const cid='wild_'+defeated.id, pet=D.PET[cid];
   if(pet?.collectible&&!S().pets.owned[cid]&&chance(Math.max(.008,.05-defeated.cl*.00035)))DQ.awardPet(cid);
+  if (DQ.act.questTarget && !DQ.questWantsKill(DQ.act.target)) {
+    if (area.hunt) {
+      DQ.stopAct(true);
+      return null;
+    }
+    Object.assign(DQ.act, { target: null, questTarget: false });
+    if (S().act) Object.assign(S().act, { target: null, questTarget: false });
+    S().hunt.target = null;
+  }
   return DQ.pickEncounter(area,DQ.act.target);
 };
 
@@ -76,6 +87,14 @@ UI.areaPanel=town=>{
 };
 Object.assign(UI.DO,{
  huntarea:id=>{if(DQ.act?.kind==='fight'&&DQ.act.area===id)DQ.stopAct();else DQ.startHunt(id);UI.render(false);},
+ huntexplore:id=>{
+  const a=DQ.act, area=DQ.combatAreas?.(S().town).find(row=>row.id===id);
+  if(!area||a?.kind!=='fight'||a.area!==id||!a.track)return;
+  Object.assign(a,{target:null,questTarget:false,track:false});
+  Object.assign(S().act,{target:null,questTarget:false,track:false});
+  S().hunt.target=null; if(DQ.fight)DQ.fight.tracking=0;
+  DQ.save();UI.render(false);
+ },
  huntquest:id=>{const a=DQ.areaForMonster(id);if(a)DQ.startHunt(a.id,id,true);UI.render(false);}
 });
 DQ.on('encounter',()=>{UI.renderHud();if(UI.view==='combat'){if(UI.updateEncounter)UI.updateEncounter();else UI.render(false);}});

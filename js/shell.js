@@ -8,8 +8,8 @@ const S = () => DQ.S;
 const HUBS = [
   { id: 'home', name: 'Home', ic: 'home', pages: ['overview', 'activity', 'journal'] },
   { id: 'quests', name: 'Quests', ic: 'quest', pages: ['quests', 'people'] },
-  { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'magic', 'brewery', 'enchanting', 'research', 'carpentry', 'sailing', 'beastmastery'] },
-  { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'tower', 'melee', 'ranged'] },
+  { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'brewery', 'enchanting', 'research', 'carpentry', 'sailing', 'beastmastery'] },
+  { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'tower', 'melee', 'ranged', 'magic'] },
   { id: 'world', name: 'World', ic: 'map', pages: ['map', 'exploration'] },
   { id: 'village', name: 'Village', ic: 'house', pages: ['projects', 'house', 'hirelings'] },
   { id: 'hero', name: 'Hero', ic: 'bag', pages: ['character', 'tools', 'bank', 'skillsummary', 'mastery'] },
@@ -128,19 +128,32 @@ DQ.go = id => { const st = S(), sk = st && st.newSkills && Object.keys(st.newSki
 DQ.on('act', () => UI.renderDock && UI.renderDock());
 DQ.on('lvl', () => UI.renderDock && UI.renderDock());
 
+UI.DO.nowactivity = () => {
+  const a = DQ.act;
+  if (!a) return;
+  const page = DQ.actPage();
+  if (a.kind === 'hunt' || (a.kind === 'train' && a.id.startsWith('lure:'))) return UI.focusHuntingActivity(a);
+  if (a.kind === 'drill') return UI.focusPractice(page, a.id);
+  if (a.kind === 'alch') UI.tab.magic = 'Alchemy';
+  if (page === 'combat') {
+    UI.routeSource = null;
+    return UI.view === page ? UI.render(false) : DQ.go(page);
+  }
+  UI.focusTask(page, a.id);
+};
 /* ---------- Top bar ---------- */
 UI.renderHud = () => {
   const a = DQ.act, sk = a && DQ.actSkill(), s = sk && D.SK[sk], fight = a && a.kind === 'fight' && D.MON[a.id];
   const taskArt = a && (fight ? DQ.monSprite(fight, 48) : a.kind === 'recipe' ? DQ.itemIco(D.ITEMS[Object.keys(D.RECIPES[a.id].out)[0]]) : a.kind === 'alch' ? DQ.itemIco(D.ITEMS[a.id]) : (() => { const n = (D.NODES[a.kind] || []).find(x => x.id === a.id); return n && D.ITEMS[n.item] ? DQ.itemIco(D.ITEMS[n.item]) : DQ.artImage(a.kind, a.id, 48, '', DQ.actLabel()); })());
   const task = a ? `<div class="h-task" style="--c:${s ? s.col : '#d8a64a'}">
-      <span class="h-tic">${taskArt}</span>
-      <button class="h-tb" data-do="plan" data-tip="text:Pace, stop rule and queue"><span class="h-t1"><b>${esc(DQ.actLabel().replace(/ rock$/, ''))}</b><span class="h-meta"><span data-b="hud:eta"></span><span data-b="hud:rate"></span></span></span><span class="bar prog" role="img" aria-label="This action"><i data-prog="@"></i></span>${sk ? `<span class="bar h-xp" role="img" aria-label="${esc(s.name)} level progress" data-tip="text:${esc(s.name)} level progress"><i data-b="xpbar:${sk}"></i></span>` : ''}<span class="h-t3"><small>${fight ? `Combat <b class="mono" data-b="combat"></b> vs Lv ${fight.cl} · ` : s ? `${s.name} <b class="mono" data-b="lvl:${sk}"></b> · ` : ''}${D.PACE[a.pace || 'steady'].name}${(S().queue || []).length ? ` · ${S().queue.length} queued` : ''} · <span data-b="hud:count"></span></small><span class="hq hb" data-b="hudbuff" hidden></span></span></button>
+      <button type="button" class="h-tic" data-do="plan" aria-label="Task plan" data-tip="text:Pace, stop rule and queue">${taskArt}</button>
+      <button class="h-tb" data-do="nowactivity" data-tip="text:Go to this activity"><span class="h-t1"><b>${esc(DQ.actLabel().replace(/ rock$/, ''))}</b><span class="h-meta"><span data-b="hud:eta"></span><span data-b="hud:rate"></span></span></span><span class="bar prog" role="img" aria-label="This action"><i data-prog="@"></i></span>${sk ? `<span class="bar h-xp" role="img" aria-label="${esc(s.name)} level progress" data-tip="text:${esc(s.name)} level progress"><i data-b="xpbar:${sk}"></i></span>` : ''}<span class="h-t3"><small>${fight ? `Combat <b class="mono" data-b="combat"></b> vs Lv ${fight.cl} · ` : s ? `${s.name} <b class="mono" data-b="lvl:${sk}"></b> · ` : ''}${D.PACE[a.pace || 'steady'].name}${(S().queue || []).length ? ` · ${S().queue.length} queued` : ''} · <span data-b="hud:count"></span></small><span class="hq hb" data-b="hudbuff" hidden></span></span></button>
       <button class="h-stop" data-do="stop" aria-label="Stop this task" data-tip="text:Stop this task (Space)"><i class="stop-sq" aria-hidden="true"></i><span>Stop</span></button></div>`
     : `<div class="h-task idle"><span class="h-tic">${ico('clock')}</span><div class="h-tb"><b>Nothing running</b><small>Choose your next step on Home</small><span class="hq hb" data-b="hudbuff" hidden></span></div>${S().lastAct ? `<button class="btn sm primary" data-do="resume">Resume</button>` : `<button class="btn sm" data-do="go" data-a="overview">Your destination</button>`}</div>`;
   const nowEl = $('#nowcard');
   if (nowEl) nowEl.innerHTML = a ? `<div class="now" style="--c:${s ? s.col : '#d8a64a'}">
       <span class="now-k">Now<i> · on this page</i>${(S().queue || []).length ? `<em class="now-next"> · then ${esc(DQ.actLabel(S().queue[0]).replace(/ rock$/, ''))}${S().queue.length > 1 ? ` +${S().queue.length - 1}` : ''}</em>` : ''}</span>
-      <button class="now-go" data-do="go" data-a="${DQ.actPage()}" data-tip="text:Go to this activity"><span class="now-ic">${taskArt}</span><b>${esc(DQ.actLabel().replace(/ rock$/, ''))}</b></button>
+      <button class="now-go" data-do="nowactivity" data-tip="text:Go to this activity"><span class="now-ic">${taskArt}</span><b>${esc(DQ.actLabel().replace(/ rock$/, ''))}</b></button>
       <span class="bar prog" role="img" aria-label="This action"><i data-prog="@"></i></span>
       <span class="now-f"><button class="now-plan" data-do="plan" data-tip="text:Pace, stop rule and queue"><span data-b="hud:count"></span><span class="hq hb" data-b="hudbuff" hidden></span></button><button class="now-stop" data-do="stop" aria-label="${fight ? 'Retreat' : 'Stop this task'}" data-tip="text:${fight ? 'Retreat' : 'Stop this task'} (Space)"><i class="stop-sq" aria-hidden="true"></i><span class="now-sl">${fight ? 'Retreat' : 'Stop'}</span></button></span></div>`
     : `<div class="now idle"><span class="now-k">Now</span><b class="now-idle">Nothing running</b>${S().lastAct ? `<button class="btn sm primary" data-do="resume">Resume</button>` : `<small>Pick a skill below to start</small>`}</div>`;

@@ -96,7 +96,7 @@ const legacy = { 'willowbrook:farm': 'willowbrook:hunt' };
 
 /* ---------- Hunting level: animals above it cannot be tracked yet; a quest target always can ---------- */
 DQ.huntLevel = () => DQ.fieldAccessLevel ? DQ.fieldAccessLevel() : DQ.lvl('hunting');
-DQ.canHunt = m => !m || !m.hl || DQ.huntLevel() >= m.hl || (DQ.questHuntTarget && DQ.questHuntTarget() === m.id);
+DQ.canHunt = m => !m || !m.hl || DQ.huntLevel() >= m.hl || DQ.questWantsKill(m.id);
 const pick0 = DQ.pickEncounter;
 DQ.pickEncounter = (area, target) => {
   if (!area || !area.hunt) return pick0(area, target);

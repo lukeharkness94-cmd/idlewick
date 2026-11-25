@@ -18,7 +18,7 @@ D.DRILLS = {
     { id: 'runed', name: 'Runed dummy', lvl: 70, mult: 1.3, art: 'rune', text: 'Knows a little magic and a lot of footwork.' }
   ],
   ranged: [
-    { id: 'butts', name: 'Hay-bale butts', lvl: 1, mult: 1, art: 'feather', text: 'Close targets on hay bales. Fetching the arrows is the hard part.' },
+    { id: 'butts', name: 'Hay-bale butts', lvl: 1, mult: 1, art: 'feather', text: 'Close targets on hay bales. The range provides practice arrows.' },
     { id: 'swing', name: 'Swinging target', lvl: 20, mult: 1.1, art: 'log_oak', text: 'A target on a rope, swinging in the wind.' },
     { id: 'long', name: 'Long range', lvl: 40, mult: 1.2, art: 'arrow_iron', text: 'Targets at the far end of the meadow.' },
     { id: 'wind', name: 'Wind range', lvl: 70, mult: 1.3, art: 'storm_feather', text: 'On the cliff top, where every shot needs judging.' }
@@ -27,12 +27,14 @@ D.DRILLS = {
 const drill = id => { const [st, d] = String(id).split(':'); const row = (D.DRILLS[st] || []).find(x => x.id === d); return row ? { st, row } : null; };
 const STYLE_WORD = { melee: 'a melee weapon', ranged: 'a bow' };
 Q.drillXp = id => { const x = drill(id); if (!x) return 0; const ps = Q.pstats(); const max = ps.style === x.st ? ps.max : 1; return Math.max(1, Math.round(.22 * max * x.row.mult * 10) / 10); };
+const holdsPracticeWeapon = style => !!S().equip.weapon && Q.weaponStyle() === style;
 Q.KIND_EXT.drill = {
+  valid: id => !!drill(id),
   skillFor: id => (drill(id) || {}).st || 'melee', pageFor: id => (drill(id) || {}).st || 'melee', skill: 'melee', page: 'melee',
   label: a => { const x = drill(a.id); return x ? `Practising at the ${x.row.name.toLowerCase()}` : 'Practising'; },
   dur: id => Math.round(3000 * (1 - (Q.mastSpeed ? Q.mastSpeed('drill', id) : 0))),
-  check: id => { const x = drill(id); if (!x) return 'Choose a practice target'; if (Q.lvl(x.st) < x.row.lvl) return `Requires ${D.SK[x.st].name} ${x.row.lvl}`; if (Q.weaponStyle() !== x.st) return `Equip ${STYLE_WORD[x.st]} to practise`; return ''; },
-  done: a => { const x = drill(a.id); if (!x) return; if (Q.weaponStyle() !== x.st) return Q.stopAct(false, `You put down ${STYLE_WORD[x.st]}, so practice stopped.`);
+  check: id => { const x = drill(id); if (!x) return 'Choose a practice target'; if (Q.lvl(x.st) < x.row.lvl) return `Requires ${D.SK[x.st].name} ${x.row.lvl}`; if (!holdsPracticeWeapon(x.st)) return `Equip ${STYLE_WORD[x.st]} to practise`; return ''; },
+  done: a => { const x = drill(a.id); if (!x) return; if (!holdsPracticeWeapon(x.st)) return Q.stopAct(false, `You put down ${STYLE_WORD[x.st]}, so practice stopped.`);
     if (Q.act) Q.act.count++; Q.addXp(x.st, Q.drillXp(a.id)); const st = S().stats; st.drills = (st.drills || 0) + 1; }
 };
 /* the field guide counts drills like any other repeating task */
@@ -43,10 +45,18 @@ const page = st => () => {
   const t = tabs[st] || (tabs[st] = 'book'), hero = UI.skillHero ? UI.skillHero(st) : '';
   const nav = `<nav class="btnrow style-page-tabs" role="tablist"><button class="btn ${t === 'book' ? 'on' : ''}" role="tab" aria-selected="${t === 'book'}" data-do="styletab" data-a="${st}" data-b="book">${ico('book')}${st === 'melee' ? 'Techniques' : 'Shots'}</button><button class="btn ${t === 'drill' ? 'on' : ''}" role="tab" aria-selected="${t === 'drill'}" data-do="styletab" data-a="${st}" data-b="drill">${UI.activityIcon ? UI.activityIcon(st) : ico('attack')}${st === 'melee' ? 'Training yard' : 'Archery range'}</button><button class="btn" data-do="go" data-a="combat">${ico('attack')}Fight</button></nav>`;
   if (t === 'book') return `${hero}${nav}${Q.artsBook(st)}`;
-  const L = Q.lvl(st), holding = Q.weaponStyle() === st;
-  const choices = D.DRILLS[st].map(r => { const id = `${st}:${r.id}`, locked = L < r.lvl; return { id, name: r.name, artKind: 'item', artId: r.art, yieldId: null, locked, blocked: locked || !holding, reason: locked ? `Requires ${D.SK[st].name} ${r.lvl}` : !holding ? `Equip ${STYLE_WORD[st]} to practise` : '', short: locked ? 'Lv ' + r.lvl : '', caption: `${D.SK[st].name} ${r.lvl}`, stateText: locked ? 'Locked' : `${Q.drillXp(id)} XP · 3s`, info: `<p>${esc(r.text)}</p><p class="dim">${D.SK[st].name} XP only: no Health XP, loot or coins. Fights level you faster.</p>` }; });
+  const L = Q.lvl(st), holding = holdsPracticeWeapon(st);
+  const choices = D.DRILLS[st].map(r => { const id = `${st}:${r.id}`, locked = L < r.lvl; return { id, name: r.name, artKind: 'item', artId: r.art, yieldId: null, locked, blocked: locked || !holding, reason: locked ? `Requires ${D.SK[st].name} ${r.lvl}` : !holding ? `Equip ${STYLE_WORD[st]} to practise` : '', short: locked ? 'Lv ' + r.lvl : '', caption: `${D.SK[st].name} ${r.lvl}`, stateText: locked ? 'Locked' : `${Q.drillXp(id)} XP · 3s`, info: `<p>${esc(r.text)}</p><p class="dim">${D.SK[st].name} XP only: no Health XP, loot or coins. ${st === 'ranged' ? ' Practice needs a bow and uses no arrows.' : ''} Fights level you faster.</p>` }; });
   const h = UI.taskPanel(st, st === 'melee' ? 'Training yard' : 'Archery range', 'drill', choices, 'Practise');
   return `${hero}${nav}${h}`;
+};
+UI.selectStyleBook = style => {
+  if (style === 'magic') UI.tab.magic = 'Spellbook';
+  else tabs[style] = 'book';
+};
+UI.focusPractice = (style, id) => {
+  tabs[style] = 'drill';
+  UI.focusTask(style, id);
 };
 UI.V.melee = page('melee'); UI.V.ranged = page('ranged');
 UI.DO.styletab = (st, t) => { if (!D.DRILLS[st]) return; tabs[st] = t === 'drill' ? 'drill' : 'book'; UI.render(false); };

@@ -32,8 +32,7 @@ Q.huntStep = (a = Q.act) => { if (!a || a.kind !== 'hunt') return null; const p 
 const tierOf = m => D.HUNT_TIERS ? D.HUNT_TIERS[m.tier ?? D.huntTierOf(m.hl)] : null;
 Q.huntTierOf = id => { const m = animal(id); return m ? tierOf(m) : null; };
 /* any active quest that wants this animal, in any town: such hunts never need the level or the kit */
-Q.questWantsAnimal = id => { for (const q of D.QUESTS) { const p = S().q[q.id]; if (!p || p.s !== 'active') continue;
-  if (q.obj.some((o, i) => o.ev === 'kill' && o.key === id && Q.objProg(q, p, i) < o.n)) return true; } return false; };
+Q.questWantsAnimal = id => Q.questWantsKill(id);
 const reached = town => !!(S().towns[town] && S().towns[town].visited);
 /* what stands between you and this hunt, as one short reason, or '' */
 Q.huntKitNeed = id => { const m = animal(id), T = m && tierOf(m); if (!T || Q.questWantsAnimal(id)) return '';
@@ -45,6 +44,7 @@ const lootOf = m => { const got = [], out = [];
     const n = a + Math.floor(Math.random() * (b - a + 1)); Q.grant(id, n); got.push(id); out.push({ id, n, rar: D.rarityOf ? D.rarityOf(p) : null }); }
   return { got, out }; };
 Q.KIND_EXT.hunt = {
+  valid: id => !!animal(id),
   skill: 'hunting', page: 'hunting', skillFor: () => 'hunting', pageFor: () => 'hunting',
   label: a => { const m = animal(a.id), s = Q.huntStep(a); return m ? `${s ? s[0] : 'Hunting'}: ${(S().beast.kills[m.id] || 0) > 0 ? m.name.toLowerCase() : 'unknown quarry'}` : 'Hunting'; },
   dur: id => Q.huntDur(id),
@@ -90,14 +90,29 @@ Q.startHunt = (areaId, target = null, forQuest = false) => {
   return start0(areaId, target, forQuest);
 };
 const pick = id => { const m = animal(id); if (!m) return; UI.huntMode = 'ground'; UI.huntGroundAt = areaOf(id).town; UI.huntTier = m.tier ?? D.huntTierOf(m.hl); UI.taskChoice.hunting = id; };
-const huntAnimal = id => { const m = animal(id); if (!m || !Q.skillUnlocked('hunting')) return false; pick(id); Q.go('hunting'); return true; };
-UI.DO.huntground = id => { if (!Q.skillUnlocked('hunting')) return Q.go('hunting'); UI.huntMode = 'ground'; if (id && animal(id)) pick(id); Q.go('hunting'); };
+const openHunting = () => UI.view === 'hunting' ? UI.render(false) : Q.go('hunting');
+const huntAnimal = id => { if (!animal(id) || !Q.skillUnlocked('hunting')) return false; UI.DO.huntground(id); return true; };
+UI.DO.huntground = id => { if (!Q.skillUnlocked('hunting')) return Q.go('hunting'); UI.huntMode = 'ground'; if (id && animal(id)) pick(id); openHunting(); };
 const track0 = UI.DO.hunttrack; UI.DO.hunttrack = id => huntAnimal(id) || track0(id);
 const hq0 = UI.DO.huntquest; if (hq0) UI.DO.huntquest = id => huntAnimal(id) || hq0(id);
 const hg0 = UI.DO.huntgo; if (hg0) UI.DO.huntgo = a => { const id = String(a).split('|')[1]; return huntAnimal(id) || hg0(a); };
 /* an old save mid-fight with an animal carries on as a hunt */
 const resume0 = Q.resumeAfterLoad;
-Q.resumeAfterLoad = (...r) => { const a = S().act; if (a && a.kind === 'fight' && animal(a.id)) { S().act = { kind: 'hunt', id: a.id, t0: Date.now(), count: 0, elapsed: 0, progress: 0, pace: 'steady', rule: a.rule || 'none', limit: a.limit || 0 }; } return resume0 ? resume0(...r) : undefined; };
+Q.resumeAfterLoad = (...args) => {
+  const a = S().act;
+  if (a?.kind === 'fight' && animal(a.id) && Q.skillUnlocked('hunting')) {
+    S().act = { ...a, kind: 'hunt', progress: 0 };
+  }
+  return resume0(...args);
+};
+UI.focusHuntingActivity = a => {
+  if (a.kind === 'hunt') pick(a.id);
+  else {
+    UI.huntMode = 'field';
+    UI.taskChoice.hunting = a.id;
+  }
+  openHunting();
+};
 /* the combat window shows combat areas only */
 UI.cwTab = 'areas';
 const cw0 = UI.DO.cwtab; if (cw0) UI.DO.cwtab = t => t === 'hunt' ? UI.DO.huntground() : cw0(t);

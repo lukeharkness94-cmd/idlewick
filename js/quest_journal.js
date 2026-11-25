@@ -9,7 +9,7 @@ const continue0=UI.DO.questcontinue;
 UI.DO.questcontinue=id=>{
  const q=D.QM[id];if(!q)return;
  if(Q.questState(q)!=='active')return UI.DO.openquest(id);
- const o=q.obj.find((o,j)=>Q.objProg(q,S().q[id],j)<o.n);if(!o)return UI.DO.openquest(id);
+ const o=Q.unfinishedObjective(q);if(!o)return UI.DO.openquest(id);
  if(UI.view==='quests')UI.returnTo={page:'quests',label:q.name};
  if(o.ev==='deliver'&&D.ITEMS[o.key]&&D.ITEMS[o.key].type!=='relic')return UI.DO.route(o.key);
  const kind={catch:'fish',chop:'wood',mine:'mine',thieve:'thieve'}[o.ev];

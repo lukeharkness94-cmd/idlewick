@@ -40,10 +40,13 @@ UI.B.eta = (e, sk) => {
 };
 
 /* ---------- Pinned quests ---------- */
+DQ.unfinishedObjective = q => q?.obj.find((objective, index) =>
+  DQ.objProg(q, S().q[q.id], index) < objective.n);
 const PAGE_OF = { catch: 'fishing', chop: 'woodcutting', mine: 'mining', thieve: 'thieving', cook: 'cooking', smelt: 'smithing', smith: 'smithing', craft: 'crafting', harvest: 'farming', collect: 'farming', pet: 'farming', visit: 'map' };
 DQ.objPage = (q, o) => {
   if (PAGE_OF[o.ev]) return PAGE_OF[o.ev];
-  if (o.ev === 'kill' || o.ev === 'boss') return q.town === S().town ? 'combat' : 'map';
+  if (o.ev === 'kill' && DQ.isAnimal?.(o.key) && DQ.skillUnlocked('hunting')) return 'hunting';
+  if (o.ev === 'kill' || o.ev === 'boss') return D.MON[o.key]?.town === S().town ? 'combat' : 'map';
   if (o.ev === 'level') return D.SK[o.key].page;
   if (o.ev === 'deliver') { const k = o.key; if (k.startsWith('log_')) return 'woodcutting'; if (k.startsWith('ore_') || k.startsWith('gem_')) return 'mining'; if (k.startsWith('raw_')) return 'fishing'; if (k.startsWith('crop_') || ['egg', 'milk', 'wool'].includes(k)) return 'farming'; if (D.FISH_IDS.includes(k)) return 'cooking'; if (k.startsWith('bar_')) return 'smithing'; return 'combat'; }
   return 'quests';
@@ -61,7 +64,7 @@ UI.renderPins = () => {
   box.innerHTML = `<div class="pinbar">${ids.map(id => {
     const q = D.QM[id], st = DQ.questState(q), p = S().q[id], i = q.obj.findIndex((o, j) => DQ.objProg(q, p, j) < o.n), o = q.obj[Math.max(0, i)];
     const sk = q.main && D.SK[q.unlocks];
-    const btn = st === 'new' ? `<button class="btn sm primary" data-do="qstart" data-a="${id}">Accept quest</button>` : st === 'ready' ? `<button class="btn sm primary" data-do="qclaim" data-a="${id}">Claim</button>` : `<button class="btn sm" data-do="go" data-a="${DQ.objPage(q, o)}">Go ${ico('arrow')}</button>`;
+    const btn = st === 'new' ? `<button class="btn sm primary" data-do="qstart" data-a="${id}">Accept quest</button>` : st === 'ready' ? `<button class="btn sm primary" data-do="qclaim" data-a="${id}">Claim</button>` : `<button class="btn sm" data-do="questcontinue" data-a="${id}">Go ${ico('arrow')}</button>`;
     return `<div class="pin ${q.main ? 'main' : ''} ${st}" style="${sk ? `--c:${sk.col}` : ''}"><button class="pin-t" data-do="openquest" data-a="${id}">${q.main ? ico('star') : ico('quest')}<b>${q.name}</b>${suggest ? '<small>Suggested</small>' : ''}</button>
       <div class="pin-o"><span class="sm">${st === 'ready' ? 'All done! Claim your reward.' : st === 'new' ? `${q.giver}, ${D.TOWN[q.town].name}${sk ? ` · teaches ${sk.name}` : ''}` : o.label}</span>${st === 'active' ? `<span class="pin-p"><span class="bar"><i data-b="qbar:${id}:${i}"></i></span><small class="mono" data-b="qtxt:${id}:${i}"></small></span>` : ''}</div>
       ${btn}${suggest ? '' : `<button class="pin-x" data-do="unpin" data-a="${id}" aria-label="Unpin" data-tip="text:Unpin">${ico('close')}</button>`}</div>`;

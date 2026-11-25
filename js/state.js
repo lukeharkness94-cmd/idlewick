@@ -47,6 +47,35 @@ const merge = (base, over) => {
   return base;
 };
 const record = value => value && typeof value === 'object' && !Array.isArray(value);
+function migrateQuarryIds(state) {
+  const names = { wild_goat: 'hill_goat', wild_turkey: 'turkey' };
+  const rename = id => Object.hasOwn(names, id) ? names[id] : id;
+  const migrateAction = action => {
+    if (!record(action) || !['hunt', 'fight'].includes(action.kind)) return action;
+    const id = rename(action.id), target = rename(action.target);
+    return { ...action, id, ...(target !== undefined ? { target } : {}) };
+  };
+  state.act = migrateAction(state.act);
+  state.lastAct = migrateAction(state.lastAct);
+  if (state.queue) state.queue = state.queue.map(migrateAction);
+  if (state.hunt.target) state.hunt.target = rename(state.hunt.target);
+  for (const [oldId, newId] of Object.entries(names)) {
+    for (const key of ['kills', 'weakWins', 'answered']) {
+      const counts = state.beast[key];
+      if (!record(counts) || !Object.hasOwn(counts, oldId)) continue;
+      const data = state.beast[key] = { ...counts };
+      data[newId] = (data[newId] || 0) + data[oldId];
+      delete data[oldId];
+    }
+    for (const key of Object.keys(state.beast.drops)) {
+      if (!key.startsWith(oldId + ':')) continue;
+      const target = newId + key.slice(oldId.length);
+      state.beast.drops[target] ||= state.beast.drops[key];
+      delete state.beast.drops[key];
+    }
+    if (state.title === 'beast:' + oldId) state.title = 'beast:' + newId;
+  }
+}
 function candidateState(o) {
   if (DQ.prepareBeastSave) o = DQ.prepareBeastSave(o);
   if (!record(o) || o.v !== 2 || !record(o.xp)) throw new Error('Unsupported save');
@@ -92,9 +121,10 @@ function candidateState(o) {
   for (const key of ['queue', 'buffs', 'abilities', 'inbox']) {
     if (result[key] !== undefined && !Array.isArray(result[key])) throw new Error('Invalid save list');
   }
+  migrateQuarryIds(result);
   const validAction = a => {
     if (!record(a)) return false;
-    const known = a.kind === 'recipe' ? D.RECIPES[a.id] : a.kind === 'fight' ? D.MON[a.id] : a.kind === 'alch' ? D.ITEMS[a.id] : a.kind === 'sail' ? D.VOYAGE?.[a.id] : a.kind === 'train' ? (D.PET[a.id] || (String(a.id).startsWith('lure:') && D.TOWN[String(a.id).slice(5)])) : D.NODE[a.kind + ':' + a.id];
+    const known = a.kind === 'recipe' ? D.RECIPES[a.id] : a.kind === 'fight' ? D.MON[a.id] : a.kind === 'alch' ? D.ITEMS[a.id] : a.kind === 'sail' ? D.VOYAGE?.[a.id] : a.kind === 'train' ? (D.PET[a.id] || (String(a.id).startsWith('lure:') && D.TOWN[String(a.id).slice(5)])) : DQ.KIND_EXT?.[a.kind]?.valid?.(a.id) || D.NODE[a.kind + ':' + a.id];
     return !!known && (!a.pace || !!D.PACE[a.pace]) && ['count', 'elapsed', 'progress', 'lvlTarget'].every(k => a[k] === undefined || (Number.isFinite(a[k]) && a[k] >= 0));
   };
   if(result.farm?.plots?.some(p=>p.nextCrop!=null&&!D.CROP[p.nextCrop]))throw new Error('Invalid plot planting plan');

@@ -510,7 +510,6 @@ html.calm .illustrated-card.just-unlocked{box-shadow:0 0 0 3px var(--brass)}
 .cw-mon .btn.sm .ic{width:14px!important;height:14px!important}
 html.short #view .combat-x .cw-window{padding:8px 10px;gap:6px}
 html.short .cw-head h3{font-size:17px}
-html.short .cw-mon small{display:none}
 /* the foe you are fighting, in the left column */
 .cw-foe{display:flex;flex-direction:column;gap:8px;padding:10px!important}
 .cw-foe-h{display:flex;align-items:center;gap:10px}
@@ -734,3 +733,19 @@ html.short .cw-foe-pic{width:56px;height:56px}html.short .cw-foe-pic img{width:4
 html.calm .activity-scene.hunt .scene-target,html.calm .activity-scene.hunt .hunt-trap,html.calm .activity-scene.hunt .scene-worker{transition:none;animation:none!important}
 @media (prefers-reduced-motion:reduce){.activity-scene.hunt .scene-target,.activity-scene.hunt .hunt-trap,.activity-scene.hunt .scene-worker{transition:none;animation:none!important}}
 .activity-stage:has(.hunt-track) .hunt-steps{display:none}
+
+/* Keep fight readiness and hunt selectors readable at narrow widths. */
+.fight-supply{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;color:var(--bad);font-size:14px}
+@media(max-width:860px){
+ #subnav .subnav.combat{flex-wrap:wrap;overflow:visible}
+ .cw-mon .btn.sm[data-do="hunttrack"]{min-height:44px;padding-inline:4px}
+ .hunt-grounds,.hunt-tiers{gap:4px}
+ .hunt-grounds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .hunt-grounds .btn,.hunt-tiers .btn{padding:5px 7px;min-width:0;white-space:normal}
+ .hunt-grounds .btn{display:grid;grid-template-columns:minmax(0,1fr);gap:1px;align-content:center;text-align:left}
+ .hunt-grounds .btn.locked{grid-template-columns:auto minmax(0,1fr);gap:1px 4px}
+ .hunt-grounds .btn.locked small{grid-column:2;margin:0}
+ .hunt-kit,.hunt-steps{flex-wrap:wrap}
+ .hunt-track-steps li{gap:3px;padding:5px 4px}
+}
+.h-task button.h-tic{border:0;padding:0;cursor:pointer}
