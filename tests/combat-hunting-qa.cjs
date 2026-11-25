@@ -6,21 +6,27 @@ const path = require('node:path');
   const browser = await chromium.launch({ args: ['--no-sandbox'],
     ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}) });
   try {
-    const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
     const errors = [];
-    page.on('pageerror', error => errors.push(error.message));
-    await page.goto(process.env.IDLEWICK_URL || 'http://127.0.0.1:8765/');
-    await page.locator('#t-new').click();
-    await page.locator('#crname').fill('Combat QA');
-    await page.locator('#cr-go').click();
+    const newHero = async () => {
+      const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+      page.on('pageerror', error => errors.push(error.message));
+      await page.goto(process.env.IDLEWICK_URL || 'http://127.0.0.1:8765/');
+      await page.locator('#t-new').click();
+      await page.locator('#crname').fill('Combat QA');
+      await page.locator('#cr-go').click();
+      await page.evaluate(() => {
+        const Q = DQ;
+        Q.paused = true;
+        Object.assign(Q.S.settings, { muted: true, notify: false, storyScenes: false, reduceFx: true });
+        Q.S.tut.hidden = true;
+        for (const skill of Object.keys(Q.skillLessons)) Q.S.tut.done['lesson:' + skill] = true;
+        Q.closeModal();
+      });
+      return page;
+    };
+    let page = await newHero();
     await page.evaluate(() => {
       const Q = DQ, D = Q.data;
-      Q.paused = true;
-      Object.assign(Q.S.settings, { muted: true, notify: false, storyScenes: false, reduceFx: true });
-      Q.S.tut.hidden = true;
-      for (const skill of Object.keys(Q.skillLessons)) Q.S.tut.done['lesson:' + skill] = true;
-      Q.closeModal();
-
       // Fresh hero: earn the inputs, quest reward, traps and Combat 8 through gameplay.
       const check = (ok, msg) => { if (!ok) throw Error(msg); };
       const work = (kind, id, until, max = 120) => {
@@ -65,6 +71,10 @@ const path = require('node:path');
     });
 
     console.log('PASS fresh Cowhide → Crafting → wooden traps → Hunting, and Raw game source');
+
+    // Use a separate context so delayed unlocks from the fresh-hero run cannot interrupt route clicks.
+    await page.close();
+    page = await newHero();
 
     // Granted progression fixture for concurrent quests and a real reload.
     await page.evaluate(() => {
@@ -141,9 +151,12 @@ const path = require('node:path');
       const target = Q.data.DRILLS.ranged[1];
       Q.S.xp.ranged = Q.data.XPF[target.lvl];
       Q.S.unlocked.ranged = true;
+      const meleeTarget = 'melee:' + Q.data.DRILLS.melee[0].id;
+      Q.S.equip.weapon = null;
+      if (Q.startAct('drill', meleeTarget, { quiet: true })) throw Error('Melee drill accepted empty hands');
       Q.S.equip.weapon = 'bow_normal';
       Q.S.ammo = { id: null, n: 0 };
-      if (Q.startAct('drill', 'melee:' + Q.data.DRILLS.melee[0].id, { quiet: true })) throw Error('Melee drill accepted a bow');
+      if (Q.startAct('drill', meleeTarget, { quiet: true })) throw Error('Melee drill accepted a bow');
       if (!Q.startAct('drill', 'ranged:' + target.id, { quiet: true })) throw Error('Archery drill required arrows');
       Q.go('overview');
       Q.ui.DO.nowactivity();
