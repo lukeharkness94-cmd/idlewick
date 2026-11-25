@@ -37,7 +37,7 @@ Restored sites gain inhabitants, working tables, supplies or planting details, r
 
 ## Evidence and limitations
 
-19 cross-skill integration checks cover actual production, permanent records, offline parity, save rollback, seed/worker conservation, real special damage/cargo, refits and continuing fights. Packaged crosslinks-ui exercises Wren's quest, source/travel routes, all new workspaces and 32 theme/layout cases. Regression (122), pixel art (8), desktop storage, Hunting UI (40 layouts), UI fit and World Life checks pass. long-session-ui covers the new interaction details; see HANDOFF for final verification.
+19 cross-skill integration checks cover actual production, permanent records, offline parity, save rollback, seed/worker conservation, real special damage/cargo, refits and continuing fights. Packaged crosslinks-ui exercises Wren's quest, source/travel routes, all new workspaces and 32 theme/layout cases. Regression (122), pixel art (8), desktop storage, Hunting UI (40 layouts), UI fit and World Life checks pass. long-session-ui covers the new interaction details; see the [historical handoff](archive/HANDOFF-2026-11-25.md) for final verification.
 
 Controlled figures in crosslinks-balance.json: rune production takes 4 seconds, about 19.4 seconds including upstream gathering in the granted fixture. Cooked feed yields 12 versus quick conversion's 9 for the same vegetables or 6 for wheat. In 36 paired ten-minute voyage trials, mean feather cargo rose from 8.95 to 11.23 per voyage with provisions; each cohort completed 1,188 voyages. These are simulations, not normal fresh-player pacing, guaranteed yields or enjoyment evidence.
 
