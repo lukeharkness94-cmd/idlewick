@@ -551,6 +551,9 @@ D.QUESTS = [
 
   Q('seeds_of_hope', 'mossbarrow', 'Seeds of Hope', 'Granny Bramble', 10, null, 'You can use a corner of my farm, dear. Start with potatoes; they’re forgiving, and we’ll always find someone to eat them. Grow a crop and bring in the harvest. I’ll be here if you need a hand. The goats will offer advice as well, but I wouldn’t follow it.',
     [{ ev: 'harvest', key: 'potato', n: 10, label: 'Harvest 10 potatoes' }], { xp: { farming: 300 }, coins: 200, items: { seed_onion: 6, feed: 20 } }),
+  Q('sunbloom_parcel', 'mossbarrow', 'The Sunbloom Parcel', 'Granny Bramble', 10, 'seeds_of_hope',
+    'A trader left me two sunblooms, dear. I put one near the soup and the whole kitchen smelled like hot brass. Harvest two plots of onions for the kitchen and I’ll give you the sunbloom and a bag of my winter onions. You can use them to study Herbalism and brew your first Potion of Might.',
+    [{ ev: 'harvest', key: 'onion', n: 2, label: 'Harvest 2 onion plots' }], { items: { crop_onion: 10, crop_sunbloom: 2 } }),
   Q('egg_hunt', 'mossbarrow', 'Egg Hunt', 'Granny Bramble', 11, 'seeds_of_hope', 'The hens are laying well, but somebody needs to collect the eggs and give the animals a little attention. Would you see to it, dear? Ten eggs will do for the market. And do spend a moment with the animals while you’re there. Duchess behaves better when she thinks she’s important.',
     [{ ev: 'collect', key: 'egg', n: 10, label: 'Collect 10 eggs' }, { ev: 'pet', key: '*', n: 5, label: 'Pet your animals 5 times' }], { xp: { farming: 600 }, coins: 400 }),
   Q('boar_hunt', 'mossbarrow', 'Tusks and Trouble', 'Hunter Wynn', 7, null, 'The boars are tearing up the planted fields. Wolves have started following them out of the woods, too. We need to drive both away before the farmers lose the crop. Watch how they move before you go in. A boar doesn’t turn quickly, but a wolf will.',

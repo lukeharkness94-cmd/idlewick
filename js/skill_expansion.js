@@ -92,15 +92,17 @@ UI.V.enchanting=()=>{const plan=DQ.enchantPlan(),best=plan.find(p=>p.rank<5),nam
 Object.assign(UI.DO,{enchant:id=>{if(DQ.enchant(id))UI.render(false);}});
 const brewery=UI.V.brewery;
 /* Herbalism: a short path to the first useful potion, shown until Potion of Might is brewable */
-const herbGoals=()=>{const done=id=>DQ.techDone&&DQ.techDone(id),R=D.POTION_RECIPES.find(r=>r.id==='potion_heal'),M=D.POTION_RECIPES.find(r=>r.id==='potion_might');
- if(done('warbrew'))return '';
+const herbGoals=()=>{const done=id=>DQ.techDone&&DQ.techDone(id),R=D.POTION_RECIPES.find(r=>r.id==='potion_heal');
+ const parcel = DQ.questState(D.QM.sunbloom_parcel) !== 'done';
+ if(done('warbrew') && !parcel)return '';
  const mats=r=>UI.needTiles(Object.assign({},r.in,{coins:r.coins}));
  const step=(on,doneNow,title,body,btn)=>`<li class="${doneNow?'done':on?'now':''}"><b>${doneNow?'✓ ':''}${title}</b><small>${body}</small>${on&&!doneNow&&btn?btn:''}</li>`;
  const r1=done('herbalism'),scholar=DQ.skillUnlocked('research');
  return `<section class="panel herb-goals"><div class="phead"><h2>First goals</h2></div><ol class="herb-path">
   ${step(true,r1,'Research Herbalism',scholar?'In Scholarship: 900 coins and 10 onions.':`Learn Scholarship first: ${DQ.unlockHow('research')}.`,scholar?'<button class="btn sm" data-do="go" data-a="research">Open Scholarship</button>':'')}
   ${step(r1,DQ.have('potion_heal')>0,'Brew a Healing draught',`Heals 40%. Drunk for you once per fight when food runs out and health is low. <span class="rws">${mats(R)}</span>`)}
-  ${step(r1,false,'Next: War Brewing → Potion of Might','+15% damage for 20 min. For a boss you keep losing to. Scholarship, Tier II.')}
+  ${step(r1,done('warbrew'),'Next: War Brewing → Potion of Might','+15% damage for 20 min. Study War Brewing in Scholarship after Herbalism.')}
+  ${parcel ? step(true,false,'The Sunbloom Parcel','After Seeds of Hope, Granny Bramble in Mossbarrow offers onions for study and enough sunbloom for one brew.') : ''}
  </ol></section>`;};
 UI.V.brewery=()=>DQ.skillUnlocked('herbalism')?`${hero('herbalism')}${herbGoals()}${brewery()}`:UI.lockedPage('herbalism');
 })();

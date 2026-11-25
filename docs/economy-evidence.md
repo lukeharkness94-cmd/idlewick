@@ -180,3 +180,37 @@ Sailing XP runs at roughly 75–110% of Fishing at the same level while the haul
 ## Skill perks and flourishes (Nov 2026)
 
 `node scripts/sim-economy.cjs 24` with and without `NO_PERKS=1`: 24 h coins 588,099 → 622,131 (+6%), hero 65 → 66, first hour 3,992 → 4,850 coins. Boss ladder (`sim-bosses.cjs`) identical with and without perks.
+
+## Earlier Potion of Might (v4 Task 2)
+
+War Brewing is a Tier I study. Moving the gate removes the Scholarship 10
+detour while retaining the 6,000 coins, 10 iron bars, 45-minute study, and
+Herbalism study prerequisite. The existing tier-based XP formula awards
+1,350 Scholarship XP for this study instead of 2,700.
+
+Granny Bramble's optional Mossbarrow quest, *The Sunbloom Parcel*, follows
+*Seeds of Hope*. Two onion plot harvests earn 10 onions and two Sunblooms.
+The Sunbloom is a one-time supply for one potion. Repeat brewing still
+uses the ordinary recipe and crop supply. Mossbarrow access still follows
+Grubnash. The potion still adds 15% damage for 20 minutes.
+
+### Controlled preparation checks
+
+Starting from Scholarship 1 with both skills open and all inputs supplied,
+studying Herbalism and then War Brewing took 210 simulated minutes before
+and 60 after. The original route used 30 five-minute Field notes to reach
+Scholarship 10, paying 7,650 coins across the studies. The new route paid
+6,900. This isolates studying from travel, farming, earning coins and
+gathering iron. It is a comparison of the repeatable-notes route, and
+another research route can take a different amount of time.
+
+The early-boss sensitivity check ran 96 forecasts per loadout, using the
+comparison simulator's regional gear and 15 food. The second loadout added
+one actual Potion of Might. Treat Grubnash as a counterfactual for the
+parcel, since the quest comes after that boss.
+
+| Boss | Win rate without → with Might | Food per win without → with Might |
+| --- | --- | --- |
+| Grubnash | 100% → 100% | 1.2 → 0.8 |
+| Old Tusk | 100% → 100% | 6.0 → 5.5 |
+| Barnacle | 99% → 100% | 5.9 → 5.0 |

@@ -53,7 +53,7 @@ D.TECHS = [
 
   T('herbalism', 'alch', 1, 'Herbalism', 'Unlocks the Healing draught in the Brewery.', {}, { coins: 900, crop_onion: 10 }, 15),
   T('quickening', 'alch', 2, 'Quickening', 'Unlocks the Potion of Haste.', {}, { coins: 6000, feather: 20 }, 45, ['herbalism']),
-  T('warbrew', 'alch', 2, 'War Brewing', 'Unlocks the Potion of Might.', {}, { coins: 6000, bar_iron: 10 }, 45, ['herbalism']),
+  T('warbrew', 'alch', 1, 'War Brewing', 'Unlocks the Potion of Might.', {}, { coins: 6000, bar_iron: 10 }, 45, ['herbalism']),
   T('fortune', 'alch', 3, 'Fortune Lore', 'Brew 3 Potions of Fortune per batch: 3 hours of +50% drops.', {}, { coins: 45000, gem_sapphire: 5 }, 120, ['quickening']),
   T('scholar', 'alch', 4, 'Scholar’s Tonic', "Unlocks Scholar's tonic.", {}, { coins: 150000, gem_diamond: 2 }, 180, ['fortune']),
 
