@@ -18,5 +18,46 @@ test('crate send failure and forecasts spend nothing; original expedition tiers 
 test('tool purchase atomically consumes gold and forged supplies from pack/bank; duplicates and obsolete tiers fail',()=>{const{q}=setup();q.S.coins=100000;q.S.unlocked.woodcutting=true;q.give('bar_bronze',1);q.S.bank.bar_bronze=2;q.give('log_normal',2);const cost=q.buyPrice('tool_axe_1'),coins=q.S.coins;assert.ok(q.buy('tool_axe_1'));assert.equal(q.have('bar_bronze'),0);assert.equal(q.S.coins,coins-cost);assert.equal(q.toolTier('woodcutting'),1);assert.equal(q.buy('tool_axe_1'),false);q.take('tool_axe_1',1);assert.equal(q.toolTier('woodcutting'),1);assert.equal(q.buy('tool_axe_1'),false);q.S.bank.tool_axe_3=1;q.S=q.validateSave(fresh(q));assert.equal(q.buy('tool_axe_2'),false);});
 test('starter pickaxe breaks no bootstrap loop; insufficient resources/failed saves cannot part-charge',()=>{const{q,deny}=setup();q.S.coins=10000;assert.ok(q.shopMaterialCost('tool_pick_0.5').ore_copper>0,'the copper pickaxe needs copper');assert.ok(q.data.SHOPS.willowbrook.includes('ore_copper'),'and the first shop sells copper ore, so there is no bootstrap loop');assert.ok(q.buy('ore_copper',2));q.give('log_normal',2);assert.ok(q.buy('tool_pick_0.5'));assert.ok(Object.keys(q.shopMaterialCost('tool_pick_1')).length>0,'the second pickaxe needs bronze');const before=q.exportSave();assert.equal(q.buy('tool_axe_1'),false);assert.equal(q.exportSave(),before);q.give('bar_bronze',3);q.give('log_normal',2);const funded=q.exportSave();deny(true);assert.equal(q.buy('tool_axe_1'),false);deny(false);assert.equal(q.exportSave(),funded);for(const qty of[0,-1,1.5,NaN,Infinity])assert.equal(q.buy('tool_axe_1',qty),false);});
 test('readiness derives from gold, materials, unlocks and region; all material costs reference real items',()=>{const{q}=setup();q.S.coins=10000;assert.equal(q.shopUpgradeState('tool_axe_1').ready,false);q.give('bar_bronze',3);q.give('log_normal',2);assert.equal(q.shopUpgradeState('tool_axe_1').ready,true);q.S.coins=0;assert.equal(q.shopUpgradeState('tool_axe_1').ready,false);assert.equal(q.shopUpgradeState('tool_axe_1').materials,true);for(const it of Object.values(q.data.ITEMS))for(const k of Object.keys(q.shopMaterialCost(it.id)))assert.ok(q.data.ITEMS[k],k);assert.equal(q.shopMaterialsAffordable('iron_sword',2),false);});
+test('fieldwork hands one egg to the hatchery and still recovers materials while that egg is waiting',()=>{
+ const h=setup(),q=h.q;unlock(q);
+ q.pixelArt={};
+ h.load('eggs');
+ const id=q.signatureOf('willowbrook').id;
+ q.chance=p=>p<.1; // Keep the wooden trap, guarantee the existing egg roll.
+ assert.ok(q.startAct('train','lure:willowbrook',{quiet:true}));
+ const duration=q.act.dur;
+ q.simulate(Math.floor(duration*.95));
+ assert.equal(q.fieldRecovery('willowbrook'),undefined,'Recover stage has no outcome until the cycle completes');
+ assert.equal(q.eggs().length,0);
+ q.simulate(Math.ceil(duration*.05));
+ assert.equal(q.fieldRecovery('willowbrook').egg,id);
+ assert.equal(q.eggs().length,1);
+ assert.equal(q.S.pets.owned[id],undefined);
+ assert.equal(q.S.stats.train,1);
+ let page;
+ q.go=to=>{page=to;};
+ q.ui.DO.fieldcare(id);
+ assert.equal(page,'beastmastery');
+ assert.equal(q.ui.beastMode,'beasts');
+ assert.equal(q.ui.beastSelected,id);
+ q.simulate(duration);
+ assert.equal(q.eggs().length,1);
+ assert.ok(q.fieldRecovery('willowbrook').quantity>0);
+ assert.match(q.ui.fieldRecoveryHtml(q.fieldRecovery('willowbrook'),id),/Open hatchery/);
+ assert.equal(q.have('wooden_trap'),100);
+ q.eggOf(id).due=1;
+ assert.equal(q.hatchDue(),1);
+ assert.ok(q.S.pets.owned[id]);
+ assert.equal(q.hatchDue(),0);
+});
+test('trap parts reuse the exact Carpentry, Smithing and Crafting recipes',()=>{
+ const{q}=setup();
+ const routes=[];
+ q.ui.focusTask=(...args)=>routes.push(args.slice(0,2));
+ for(const id of ['plank_oak','bar_iron','string'])q.ui.DO.fieldpart(id);
+ assert.deepEqual(routes.slice(0,2),[['carpentry','saw_oak'],['smithing','smelt_iron']]);
+ assert.equal(routes[2][0],'crafting');
+ assert.equal(q.data.RECIPES[routes[2][1]].out.string,3);
+});
 test('assigned victories progress Beastmastery without altering bond XP or allowing forecast/unassigned gains',()=>{const{q}=setup();unlock(q);q.S.pets.owned.bond_wolf={bondXp:0,trainingUntil:0};q.setPet('bond_wolf');q.beastVictory({heroXp:100});assert.equal(q.S.pets.owned.bond_wolf.bondXp,25);assert.equal(q.S.xp.beastmastery,25*q.xpMult('beastmastery'));const xp=q.S.xp.beastmastery;q.setPet(null);q.beastVictory({heroXp:100});assert.equal(q.S.xp.beastmastery,xp);q.setPet('bond_wolf');q.forecasting=true;q.beastVictory({heroXp:100});assert.equal(q.S.xp.beastmastery,xp);});
 console.log(n+' hunting/crafting/shop integration checks passed');}

@@ -128,6 +128,13 @@ UI.DO.huntkit = id => { const r = D.RECIPES['craft_' + id] || D.RECIPES['cook_' 
 const kitLine = T => { if (!T || (!T.trap && !T.bait)) return `<p class="hunt-kit dim">No kit needed. A wooden trap in your pack helps the strike.</p>`;
   const part = id => { const n = Q.have(id), it = D.ITEMS[id]; return `<button type="button" class="hunt-kit-item ${n ? 'ok' : 'miss'}" data-do="huntkit" data-a="${id}" data-tip="item:${id}" aria-label="${esc(it.name)}: ${n} held, make more">${Q.itemIco(it)}<span>${esc(it.name)}</span><b class="mono">${n}</b></button>`; };
   return `<div class="hunt-kit"><span class="k">${esc(T.name)} kit</span>${part(T.trap)}${part(T.bait)}<small class="dim">Trap is kept; one bait per hunt.</small></div>`; };
+const trailSigns = {
+  bird: 'Shed feathers along the trail',
+  game: 'Fresh prints in the soft ground',
+  wool: 'Tufts of wool caught on branches',
+  shell: 'Scrapes along the banks',
+  scale: 'Scales caught on the undergrowth'
+};
 const groundPage = () => {
   const all = grounds(); if (!all.length) return `<section class="panel empty"><p>No hunting grounds.</p></section>`;
   if (!all.some(g => g.town === UI.huntGroundAt)) UI.huntGroundAt = S().town;
@@ -144,7 +151,7 @@ const groundPage = () => {
     /* an animal you have not caught yet stays ??? (UI rules: unmet creatures are never named) */
     return { id, name: known ? m.name : '???', artKind: 'creature', artId: id, yieldId: null, locked: !open, revealed: false, blocked: !open || !!need, reason: why, short: !open ? (!here && !wanted ? `Lv ${m.hl} · Reach ${D.TOWN[g.town].name}` : 'Lv ' + m.hl) : '',
       caption: `Hunting ${m.hl}${wanted ? ' · Quest' : ''}`, stateText: !open ? 'Locked' : need ? need.replace(/^Needs /, 'No ') : `${pct}% catch`,
-      info: `<div class="hunt-steps">${D.HUNT_STEPS.map(s => `<span>${ico(s[2])}${s[0]}</span>`).join('<i aria-hidden="true">→</i>')}</div>${kitLine(T)}<p class="dim">${pct}% chance the strike lands; otherwise it slips away and you start tracking again. ${Q.huntXpShown(id, true)} Hunting XP a catch, ${Q.huntXpShown(id, false)} if it gets away.</p>${drops.length ? `<div class="hunt-drops"><span class="k">Drops</span>${drops.map(k => `<span class="cw-drop" data-tip="item:${k}">${Q.itemIco(D.ITEMS[k])}</span>`).join('')}</div>` : ''}` }; });
+      info: `<div class="hunt-steps">${D.HUNT_STEPS.map(s => `<span>${ico(s[2])}${s[0]}</span>`).join('<i aria-hidden="true">→</i>')}</div>${kitLine(T)}${open?`<p class="sm dim">Trail signs · ${trailSigns[m.huntKind]||'Fresh tracks near the trap line'}</p>`:''}<p class="dim">${pct}% chance the strike lands; otherwise it slips away and you start tracking again. ${Q.huntXpShown(id, true)} Hunting XP a catch, ${Q.huntXpShown(id, false)} if it gets away.</p>${drops.length ? `<div class="hunt-drops"><span class="k">Drops</span>${drops.map(k => `<span class="cw-drop" data-tip="item:${k}">${Q.itemIco(D.ITEMS[k])}</span>`).join('')}</div>` : ''}` }; });
   if (!choices.length) return gtabs + ttabs + `<section class="panel empty"><p>No ${esc(T.name.toLowerCase())} animals here.</p></section>`;
   /* the catalogue's corner names the ground's own town, not the one you are standing in */
   return gtabs + ttabs + UI.taskPanel('hunting', `${g.name} · ${T.name}`, 'hunt', choices, 'Hunt').replace(`>${D.TOWN[S().town].name}</small>`, `>${esc(D.TOWN[g.town].name)}</small>`);

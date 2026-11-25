@@ -5511,6 +5511,14 @@ html.calm .activity-scene.hunt .scene-target,html.calm .activity-scene.hunt .hun
  .hunt-track-steps li{gap:3px;padding:5px 4px}
 }
 .h-task button.h-tic{border:0;padding:0;cursor:pointer}
+
+/* Fieldwork preparation and the last completed cycle. */
+.field-prep,.field-recovery{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px}
+.field-prep .route-icon{min-width:32px;padding:2px}
+.field-prep .route-icon img{width:24px!important;height:24px!important}
+.field-recovery{margin-top:6px;font-size:14px}
+.field-recovery:empty{display:none}
+.hunt-stages[data-hunt-stages="field"] .stage-label{font-size:14px;line-height:1.15}
 </style>
 
 </head>
@@ -19931,13 +19939,13 @@ const lessons={
   ranged:{title:'Ranged combat',text:'Equip a bow and arrows to fight at range. Arrows are used as you attack, so remember to check the quiver before setting out.',towards:'Bows deal piercing damage, which is useful against creatures with that weakness.',goal:'Equip a bow and matching arrows, then choose a fight that suits your current strength.',art:['item','bow_normal']}
 };
 Object.assign(lessons,{
- hunting:{title:'Hunting',text:'Craft a field trap, choose a habitat and start fieldwork. Setting, waiting and checking repeat automatically; the best usable trap you own is chosen for you.',towards:'Fieldwork brings back useful materials. Reinforced traps last longer, and precision traps let you favour a material you’ve already discovered.',goal:'Begin with wooden traps in Willowbrook. You can still use the Quarry tab to find suitable combat targets.',art:['skill','hunting']},
+ hunting:{title:'Hunting',text:'Craft a field trap, choose a habitat and start fieldwork. Set the trap, wait, check it and recover the haul. Fieldwork repeats with your best usable trap.',towards:'Fieldwork brings back useful materials. Reinforced traps last longer, and precision traps let you favour a material you’ve already discovered.',goal:'Begin with wooden traps in Willowbrook. Open Hunting ground to track a quarry for its drops.',art:['skill','hunting']},
  exploration:{title:'Exploration',text:'Visiting a new region and discovering its creatures earns Exploration XP. Check this page when you want to see what you haven’t explored yet.',towards:'Exploration helps you keep track of the places and discoveries still waiting beyond your current route.',goal:'Look at the next region on the map and check what you need to open the road.',art:['skill','exploration']},
  herbalism:{title:'Herbalism',text:'Research a potion recipe in Scholarship, then bring its ingredients here to brew it. Each recipe shows what it makes and what supplies it needs.',towards:'Some potions restore health; others give a useful effect for a limited time. Read the effect before choosing one for your plans.',goal:'Find a potion recipe you can research, gather its ingredients and brew your first batch.',art:['skill','herbalism']},
  enchanting:{title:'Enchanting',text:'Choose an item you own, then use runes and a suitable gem to enchant it. Each rank adds to the item’s equipment bonuses.',towards:'Enchanting improves equipment you want to keep using, rather than replacing it with a different item.',goal:'Start with an item you use regularly and check the cost of its next enchantment.',art:['skill','enchanting']},
  carpentry:{title:'Carpentry',text:'Saw logs into planks, then use those planks to make useful things. Recipes become available as your Carpentry level grows.',towards:'Planks are needed for furniture, village projects, traps and boats.',goal:'To begin Sailing, build a skiff. Its recipe needs twelve ordinary planks and four lengths of string.',art:['skill','carpentry']},
  sailing:{title:'Sailing',text:'Choose an island and send your boat on a voyage. It will return with supplies, then repeat the route while you leave the activity running. Larger boats can reach more distant islands.',towards:'Voyages can supply cloth, gems, seeds and ore. Developing Sailing also improves your Fishing speed.',goal:'A skiff can reach Gull Rock. Try that route first and see what comes back.',art:['skill','sailing']},
- beastmastery:{title:'Beastmastery',text:'Your beasts hatch from eggs at the ranch. You can send an expedition to look for an egg, care for beasts you own and choose one to accompany you.',towards:'An assigned companion gains bond XP when you win fights. Deliberate training uses food and coins, and bonds unlock stronger benefits as they grow.',goal:'Choose a species and a trap at the Trapper, then send your first egg expedition. It returns by itself while you do other things.',art:['skill','beastmastery']}
+ beastmastery:{title:'Beastmastery',text:'Your beasts hatch from eggs at the ranch. You can send an expedition to look for an egg, care for beasts you own and choose one to accompany you.',towards:'An assigned companion gains bond XP when you win fights. Deliberate training uses food and coins, and bonds unlock stronger benefits as they grow.',goal:'Check your hatchery for eggs, including ones found during Hunting fieldwork. Feed and train companions at the ranch.',art:['skill','beastmastery']}
 });
 Object.assign(lessons,{
  house:{towards:'Your home provides lasting benefits and a place to display things you’ve earned.',title:'Your home',text:'Buy a home, then add rooms and furniture as you gather the materials. Each improvement shows its cost and the benefit it gives you.',goal:'A storage chest is a useful early improvement if you need more backpack space.',art:['skill','woodcutting']},
@@ -22310,7 +22318,7 @@ const page0 = UI.V.beastmastery;
 if (page0) UI.V.beastmastery = () => { const h = page0(); const eggs = UI.hatcheryHtml(); if (!eggs) return h;
   return h.includes('class="ranch-side">') ? h.replace('class="ranch-side">', 'class="ranch-side">' + eggs) : h; };
 /* one plain explanation of the three ways, as a pop-up (reference, not an action) and above the two finding pages */
-const WAYS = [['Lucky finds', 'Rare drop from any skill, harvest or boss. Odds: Guide → Collection.'], ['The trapper', 'Paid trap, back in 1–4 hours with an egg or tracks. Runs alongside your task.'], ['Wooden traps', 'A task: loot, Beastmastery XP and a chance at the region’s wild egg.']];
+const WAYS = [['Lucky finds', 'Rare drop from any skill, harvest or boss. Odds: Guide → Collection.'], ['The trapper', 'Paid trap, back in 1–4 hours with an egg or tracks. Runs alongside your task.'], ['Hunting fieldwork', 'Recover materials and earn Hunting XP. An occasional wild egg goes to the Beastmastery hatchery.']];
 UI.DO.eggways = () => Q.modal({ title: 'Where eggs come from', body: `<div class="egg-ways">${WAYS.map(([t, d], i) => `<div class="egg-way"><b>${i + 1}. ${t}</b><p>${d}</p></div>`).join('')}<p class="sm dim">Hatch times: wild 10 min · speckled 30 min · royal 1 hour.</p></div>`, actions: [{ label: 'Open the collection log', fn: () => { UI.colTab = 'eggs'; Q.go('collection'); } }, { label: 'Close', primary: true }] });
 /* the rail count for Beastmastery never counted eggs before; a waiting egg is not an action, so it still does not */
 })();
@@ -23081,6 +23089,12 @@ Q.on('levelup',(sk,lvl)=>{if(lvl!==99||!D.MASTERY_GUILDS[sk]||Q.forecasting||Q.s
 /* Visual hunting stages reflect current actions and real expedition deadlines; no extra timers or rewards. */
 (() => {
 const Q=window.DQ,UI=Q.ui,D=Q.data,{ico,esc}=Q;
+const fieldSteps = [
+  ['Set trap', 'wooden_trap', .15, 'Set the best qualifying field trap you own.'],
+  ['Wait', 'clock', .65, 'Give the bait and the trail time to work.'],
+  ['Check trap', 'paw', .85, 'Look for signs before lifting the trap.'],
+  ['Recover trap', 'bag', 1, 'At the end of the cycle, you recover the haul and any unbroken trap.']
+];
 Q.huntingStageState=(mode,now=Date.now())=>{
  const a=Q.act,j=Q.S.pets.expedition;
  if(mode==='expedition'){
@@ -23089,18 +23103,34 @@ Q.huntingStageState=(mode,now=Date.now())=>{
   return {labels:['Set','Wait',result?.kind==='capture'?'Egg found':result?'Tracks found':'Return'],icons:['wooden_trap','clock',result?.kind==='capture'?'egg':'paw'],current:result?3:-1,progress:0,done:!!result,active:false};
  }
  if(mode==='field'){
-  const active=a?.kind==='train'&&String(a.id).startsWith('lure:'),p=active?Math.max(0,Math.min(.999999,(a.progress||0)/Math.max(1,a.dur))):0,phase=Math.min(2,Math.floor(p*3));
-  return {labels:['Set','Wait','Check'],icons:[Q.fieldTrap?.()?.id||'wooden_trap','clock','paw'],current:active?phase:-1,progress:active?p*3-phase:0,active,done:false};
+  const active=Q.isFieldHunt ? Q.isFieldHunt(a) : a?.kind==='train'&&String(a.id).startsWith('lure:');
+  const p=active?Math.max(0,Math.min(.999999,(a.progress||0)/Math.max(1,a.dur))):0;
+  const phase=fieldSteps.findIndex(step=>p<step[2]);
+  const start=fieldSteps[phase-1]?.[2]||0, end=fieldSteps[phase][2];
+  return {labels:fieldSteps.map(step=>step[0]),icons:[Q.fieldTrap?.()?.id||fieldSteps[0][1],...fieldSteps.slice(1).map(step=>step[1])],
+    current:active?phase:-1,progress:active?(p-start)/(end-start):0,active,done:false};
  }
  const active=a?.kind==='fight'&&!!a.area,mon=active&&D.MON[a.id],hp=Q.fight?.hp;
  return {labels:['Habitat','Quarry','Hunt'],icons:['map','paw','attack'],current:active?2:-1,progress:active&&Number.isFinite(hp)?Math.max(0,Math.min(1,1-hp/mon.hp)):0,active,done:false};
 };
-const explain={hunt:['Choose a reachable habitat.','Locate the quarry for this hunt.','Progress reflects the current opponent’s remaining health.'],field:['Set the best qualifying field trap you own.','Wait within the current fieldwork cycle.','Check the trap; the outcome is rolled when this cycle completes.'],expedition:['The trap was sent.','The trap stays out until its real return time.','The return is resolved automatically. An egg or tracks are shown only after the result is known.']};
-const html=mode=>`<ol class="hunt-stages" data-hunt-stages="${mode}" aria-label="${mode==='hunt'?'Hunt':mode==='field'?'Fieldwork cycle':'Trap expedition'} stages">${[0,1,2].map(i=>`<li data-stage="${i}"><span class="stage-glyph" aria-hidden="true"></span><b class="stage-label"></b><span class="stage-check" aria-hidden="true"></span><span class="stage-track" aria-hidden="true"><i></i></span></li>`).join('')}</ol>`;
+const explain={hunt:['Choose a reachable habitat.','Locate the quarry for this hunt.','Progress reflects the current opponent’s remaining health.'],field:fieldSteps.map(step=>step[3]),expedition:['The trap was sent.','The trap stays out until its real return time.','The return is resolved automatically. An egg or tracks are shown only after the result is known.']};
+const html=mode=>`<ol class="hunt-stages" data-hunt-stages="${mode}" aria-label="${mode==='hunt'?'Hunt':mode==='field'?'Fieldwork cycle':'Trap expedition'} stages">${Array.from({length:explain[mode].length},(_,i)=>`<li data-stage="${i}"><span class="stage-glyph" aria-hidden="true"></span><b class="stage-label"></b><span class="stage-check" aria-hidden="true"></span><span class="stage-track" aria-hidden="true"><i></i></span></li>`).join('')}</ol>`;
 UI.huntingStageStrip=html;
-const update=()=>document.querySelectorAll('[data-hunt-stages]').forEach(el=>{
+const updateStages=()=>document.querySelectorAll('[data-hunt-stages]').forEach(el=>{
  const mode=el.dataset.huntStages,s=Q.huntingStageState(mode);el.querySelectorAll('[data-stage]').forEach((li,i)=>{const done=s.done||s.current>i,current=s.current===i;li.classList.toggle('done',done);li.classList.toggle('current',current);if(li.dataset.glyph!==s.icons[i]){li.querySelector('.stage-glyph').innerHTML=D.ITEMS[s.icons[i]]?Q.itemIco(D.ITEMS[s.icons[i]]):ico(s.icons[i]);li.dataset.glyph=s.icons[i];}li.querySelector('.stage-label').textContent=s.labels[i];li.querySelector('.stage-check').innerHTML=done?ico('check'):'';li.querySelector('.stage-track i').style.transform=`scaleX(${done?1:current?s.progress:0})`;li.setAttribute('aria-label',s.labels[i]+': '+(done?'complete':current?'in progress':'pending'));li.dataset.tip='text:'+explain[mode][i];});
 });
+const update=()=>{
+ updateStages();
+ for(const el of document.querySelectorAll('[data-field-recovery]')){
+  const town=el.dataset.fieldRecovery, result=Q.fieldRecovery?.(town);
+  const signature=Q.signatureOf?.(town)?.id;
+  const egg=signature&&Q.eggOf?.(signature)?signature:null;
+  if(el.lastRecovery===result&&el.waitingEgg===egg)continue;
+  el.lastRecovery=result;
+  el.waitingEgg=egg;
+  el.innerHTML=UI.fieldRecoveryHtml(result,egg);
+ }
+};
 const hunting0=UI.V.hunting;
 UI.V.hunting=()=>{const h=hunting0();return !Q.skillUnlocked('hunting')?h:h.replace('<div class="btnrow"><button class="btn primary" data-do="huntgo"',html('hunt')+'<div class="btnrow"><button class="btn primary" data-do="huntgo"');};
 const beasts0=UI.V.beastmastery;
@@ -23116,6 +23146,8 @@ Q.on('ui',update);
 (() => {
 const Q=window.DQ,D=Q.data,UI=Q.ui,S=()=>Q.S,{esc,ico}=Q;
 if(D.FLOURISH)D.FLOURISH.hunting='Good trail!';
+const recoveries = new WeakMap();
+Q.fieldRecovery = town => recoveries.get(S())?.[town];
 Q.isFieldHunt=a=>!!a&&a.kind==='train'&&String(a.id).startsWith('lure:');
 Q.migrateHuntingLoop=st=>{if(st.hunt.loopVersion===undefined){const worked=st.act?.kind==='train'&&String(st.act.id).startsWith('lure:')||Object.keys(st.mast||{}).some(k=>k.startsWith('train:lure:'));st.hunt.legacyFieldLevel=worked?D.lvlOf(st.xp.beastmastery||0):0;if(worked)st.unlocked.hunting=true;st.hunt.loopVersion=1;}return st;};
 Q.fieldAccessLevel=()=>Math.max(Q.lvl('hunting'),S().hunt.legacyFieldLevel||0);
@@ -23133,11 +23165,31 @@ Q.KIND_EXT.train={...train0,
  pageFor:id=>String(id).startsWith('lure:')?'hunting':'beastmastery',
  check:id=>{if(!String(id).startsWith('lure:'))return train0.check(id);const town=id.slice(5);if(!D.TOWN[town])return 'Choose a habitat';if(!Q.skillUnlocked('hunting'))return 'Learn Hunting first';if(!Q.townUnlocked(town)||!S().towns[town]?.visited)return 'Visit '+D.TOWN[town].name+' first';if(Q.fieldAccessLevel()<Q.lureLvl(town))return 'Requires Hunting '+Q.lureLvl(town);if(!Q.fieldTrap())return 'Craft a wooden field trap first';return '';},
  label:a=>Q.isFieldHunt(a)?'Hunting in '+D.TOWN[a.id.slice(5)].name:train0.label(a),
- done:a=>{if(!Q.isFieldHunt(a))return train0.done(a);const town=a.id.slice(5),trap=Q.fieldTrap(),odds=Q.fieldLootOdds(town);if(!trap)return Q.stopAct(false,'Out of field traps. Craft another to continue.');
- if(Q.act)Q.act.count++;if(Q.chance(trap.break))Q.take(trap.id,1);
- const sig=Q.signatureOf(town),egg=Q.skillUnlocked('beastmastery')&&sig&&!S().pets.owned[sig.id]&&!Q.forecasting&&Q.chance(Q.befriendChance(town));
- if(egg)Q.awardPet(sig.id);else {const sum=odds.reduce((n,x)=>n+x.weight,0);let roll=Math.random()*sum,pick=odds[odds.length-1].id;for(const o of odds){roll-=o.weight;if(roll<=0){pick=o.id;break;}}Q.grant(pick,1+Math.floor(Math.random()*3));}
- Q.addXp('hunting',Math.round(8*(5+Q.lvl('hunting')*.35)));S().stats.train=(S().stats.train||0)+1;Q.qev('lure',town);Q.qev('fieldhunt',town);
+ done:a=>{
+  if(!Q.isFieldHunt(a))return train0.done(a);
+  const town=a.id.slice(5),trap=Q.fieldTrap(),odds=Q.fieldLootOdds(town);
+  if(!trap)return Q.stopAct(false,'Out of field traps. Craft another to continue.');
+  if(Q.act)Q.act.count++;
+  const broken=Q.chance(trap.break);
+  if(broken)Q.take(trap.id,1);
+  const result={trap:trap.id,broken};
+  const sig=Q.signatureOf(town);
+  if(Q.skillUnlocked('beastmastery')&&sig&&!S().pets.owned[sig.id]&&!Q.eggOf?.(sig.id)&&!Q.forecasting&&Q.chance(Q.befriendChance(town))&&Q.awardPet(sig.id)){
+   result.egg=sig.id;
+  }else{
+   const sum=odds.reduce((n,x)=>n+x.weight,0);
+   let roll=Math.random()*sum, pick=odds[odds.length-1].id;
+   for(const o of odds){roll-=o.weight;if(roll<=0){pick=o.id;break;}}
+   result.item=pick;
+   result.quantity=1+Math.floor(Math.random()*3);
+   Q.grant(pick,result.quantity);
+  }
+  if(!Q.forecasting){
+   if(!recoveries.has(S()))recoveries.set(S(),{});
+   recoveries.get(S())[town]=result;
+  }
+  Q.addXp('hunting',Math.round(8*(5+Q.lvl('hunting')*.35)));
+  S().stats.train=(S().stats.train||0)+1;Q.qev('lure',town);Q.qev('fieldhunt',town);
  }
 };
 // Companion use supplies a repeatable Beastmastery path after fieldwork moves to Hunting.
@@ -23147,16 +23199,54 @@ if(Q.usesOf){const uses0=Q.usesOf;Q.usesOf=id=>{const trap=D.FIELD_TRAPS.find(t=
 // Existing active fieldwork resumes with its original kind/id; earlier Beastmastery XP is untouched.
 const resume0=Q.resumeAfterLoad;
 Q.resumeAfterLoad=()=>{if(Q.isFieldHunt(S().act)&&S().unlocked.beastmastery)S().unlocked.hunting=true;return resume0();};
+UI.fieldRecoveryHtml = (result, waitingEgg) => {
+ const trap=result&&esc(D.ITEMS[result.trap].name);
+ const contents=result?.egg?'Egg sent to Beastmastery':result?`${result.quantity}× ${esc(D.ITEMS[result.item].name)}`:'';
+ const summary=result?`<span><b>Last recovery</b> · ${contents} · ${trap} ${result.broken?'broke':'recovered'}</span>`:'';
+ const id=waitingEgg||result?.egg;
+ return summary+(id?`<button class="btn sm" data-do="fieldcare" data-a="${id}">${waitingEgg?'Open hatchery':'Open Beastmastery'}</button>`:'');
+};
+UI.DO.fieldcare = id => {
+ if(!Q.skillUnlocked('beastmastery')||(!Q.eggOf?.(id)&&!S().pets.owned[id]))return;
+ UI.beastMode='beasts';
+ UI.beastSelected=id;
+ Q.go('beastmastery');
+};
+const trapRecipe = id => D.RECIPES[id==='wooden_trap'?'craft_trap':'craft_'+id];
+const componentRecipe = id => {
+ if(id==='string')return D.RECIPES[Q.sourceOf?.(id)?.id]||D.RECIPES.craft_flax_string||D.RECIPES.craft_string;
+ if(id.startsWith('plank_'))return D.RECIPES['saw_'+id.slice(6)];
+ if(id.startsWith('bar_'))return D.RECIPES['smelt_'+id.slice(4)];
+ return null;
+};
+UI.DO.fieldpart = id => {
+ const recipe=componentRecipe(id);
+ if(!recipe)return UI.DO.route(id);
+ UI.returnTo={page:'hunting',label:'Hunting'};
+ UI.focusTask(D.SK[recipe.skill].page,recipe.id,recipe.tab,recipe.skill);
+};
+const trapParts = id => {
+ const recipe=trapRecipe(id);
+ return recipe ? `<div class="field-prep"><small>Parts for ${esc(recipe.name.toLowerCase())}</small>${Object.entries(recipe.in).map(([part,n])=>{
+  const label=D.ITEMS[part].name, skill=D.SK[componentRecipe(part)?.skill]?.name||'Woodcutting';
+  return `<button class="btn sm route-icon" data-do="fieldpart" data-a="${part}" aria-label="${esc(label)} · ${skill}" data-tip="text:${esc(label)} · ${Q.have(part)}/${n} · ${skill}">${Q.itemIco(D.ITEMS[part])}</button>`;
+ }).join('')}</div>`:'';
+};
+const scentButton = () => Q.buffMult('trapCare')<1
+ ? '<small>Trail scent active</small>'
+ : Q.have('trap_blend')
+ ? '<button class="btn sm" data-do="drink" data-a="trap_blend">Use trail scent</button>'
+ : Q.skillUnlocked('herbalism') ? '<button class="btn sm route-icon" data-do="route" data-a="trap_blend" aria-label="Find trail scent blend" data-tip="text:Trail scent helps field traps last longer">'+UI.activityIcon('herbalism')+'</button>' : '';
 const quarry0=UI.V.hunting;
 UI.DO.huntmode=mode=>{UI.huntMode=mode==='quarry'?'quarry':'field';UI.render(false);};
 UI.DO.fieldfocus=item=>{const town=String(UI.taskChoice.hunting||'lure:'+S().town).slice(5);if(item&&(!Q.fieldTrap()?.focus||!Q.fieldMaterials(town).includes(item)||!Q.itemDiscovered(item)))return;const before=S().hunt.fieldFocus;S().hunt.fieldFocus=item||null;if(!Q.save())S().hunt.fieldFocus=before;UI.render(false);};
 UI.DO.fieldcraft=id=>{const r=D.RECIPES['craft_'+id]||(id==='wooden_trap'?D.RECIPES.craft_trap:null);if(!r)return;UI.returnTo={page:'hunting',label:'Hunting'};UI.focusTask('crafting',r.id,r.tab,'crafting');};
 UI.V.hunting=()=>{
  if(!Q.skillUnlocked('hunting'))return UI.lockedPage('hunting');
- const tabs=`<nav class="hunt-mode-tabs btnrow"><button class="btn ${UI.huntMode!=='quarry'?'on':''}" data-do="huntmode" data-a="field">${ico('paw')}Fieldwork</button><button class="btn" data-do="huntground" data-tip="text:Hunt animals in your town's hunting ground, on the combat page">${ico('attack')}Hunting ground</button></nav>`;
+ const tabs=`<nav class="hunt-mode-tabs btnrow"><button class="btn ${UI.huntMode!=='quarry'?'on':''}" data-do="huntmode" data-a="field">${ico('paw')}Fieldwork</button><button class="btn" data-do="huntground" data-tip="text:Track a quarry and gather its drops">${ico('attack')}Hunting ground</button></nav>`;
  if(UI.huntMode==='quarry'){UI.huntMode='field';setTimeout(()=>UI.DO.huntground&&UI.DO.huntground(),0);}
  const trap=Q.fieldTrap(),L=Q.fieldAccessLevel();
- const choices=D.TOWNS.map(t=>{const lvl=Q.lureLvl(t.id),locked=L<lvl||!Q.townUnlocked(t.id)||!S().towns[t.id]?.visited,sig=Q.signatureOf(t.id),focus=Q.fieldFocus(t.id);return {id:'lure:'+t.id,name:t.name+' fieldwork',artKind:'item',artId:trap?.id||'wooden_trap',yieldId:null,locked,blocked:locked||!trap,reason:!Q.townUnlocked(t.id)||!S().towns[t.id]?.visited?'Visit '+t.name+' first':L<lvl?'Requires Hunting '+lvl:!trap?'Craft a wooden field trap first':'',short:L<lvl?'Lv '+lvl:!S().towns[t.id]?.visited?'Reach '+t.name:'',caption:'Hunting '+lvl,stateText:locked?'Locked':focus?'Material focus':'Materials & discoveries',info:`<div class="field-gear">${D.FIELD_TRAPS.map(x=>`<span class="field-tool ${trap?.id===x.id?'on':''}" data-tip="text:${esc(D.ITEMS[x.id].name)} · Hunting ${x.lvl} · ${Math.round(x.break*100)}% break chance">${Q.itemIco(D.ITEMS[x.id])}<small>${Q.have(x.id)}</small></span>`).join('')}<button class="btn route-icon" data-do="fieldcraft" data-a="${trap?.id==='wooden_trap'?'reinforced_trap':trap?.id==='reinforced_trap'||trap?.id==='precision_trap'?'precision_trap':'wooden_trap'}" aria-label="Craft field traps" data-tip="text:Craft field traps">${UI.activityIcon('crafting')}</button></div><p class="sm">${trap?esc(D.ITEMS[trap.id].name)+' · '+Math.round(trap.break*100)+'% break chance · automatic best trap.':'Craft a trap, then start. Fieldwork repeats while you do other things.'}</p>${trap?.focus?`<div class="field-focus"><button class="btn sm ${!focus?'on':''}" data-do="fieldfocus" data-a="">Mixed haul</button>${Q.fieldLootOdds(t.id).filter(o=>Q.itemDiscovered(o.id)).map(o=>`<button class="btn route-icon ${focus===o.id?'on':''}" data-do="fieldfocus" data-a="${o.id}" aria-label="Favour ${esc(D.ITEMS[o.id].name)}" data-tip="text:${esc(D.ITEMS[o.id].name)} · ${o.pct.toFixed(0)}% of material hauls">${Q.itemIco(D.ITEMS[o.id])}</button>`).join('')}</div>`:''}<p class="sm dim">${sig&&!S().pets.owned[sig.id]&&Q.skillUnlocked('beastmastery')?'An occasional egg can start a new bond at your ranch.':'Hauls supply crafting and other practical work.'}</p>`};});
+ const choices=D.TOWNS.map(t=>{const lvl=Q.lureLvl(t.id),locked=L<lvl||!Q.townUnlocked(t.id)||!S().towns[t.id]?.visited,sig=Q.signatureOf(t.id),focus=Q.fieldFocus(t.id);return {id:'lure:'+t.id,name:t.name+' fieldwork',artKind:'item',artId:trap?.id||'wooden_trap',yieldId:null,locked,blocked:locked||!trap,reason:!Q.townUnlocked(t.id)||!S().towns[t.id]?.visited?'Visit '+t.name+' first':L<lvl?'Requires Hunting '+lvl:!trap?'Craft a wooden field trap first':'',short:L<lvl?'Lv '+lvl:!S().towns[t.id]?.visited?'Reach '+t.name:'',caption:'Hunting '+lvl,stateText:locked?'Locked':focus?'Material focus':'Materials & discoveries',info:`<div class="field-gear">${D.FIELD_TRAPS.map(x=>`<span class="field-tool ${trap?.id===x.id?'on':''}" data-tip="text:${esc(D.ITEMS[x.id].name)} · Hunting ${x.lvl} · ${Math.round(x.break*100)}% break chance">${Q.itemIco(D.ITEMS[x.id])}<small>${Q.have(x.id)}</small></span>`).join('')}<button class="btn route-icon" data-do="fieldcraft" data-a="${trap?.id==='wooden_trap'?'reinforced_trap':trap?.id==='reinforced_trap'||trap?.id==='precision_trap'?'precision_trap':'wooden_trap'}" aria-label="Craft field traps" data-tip="text:Craft field traps">${UI.activityIcon('crafting')}</button></div><p class="sm">${trap?esc(D.ITEMS[trap.id].name)+' · '+Math.round(trap.break*100)+'% break chance · automatic best trap.':'Craft a trap, then start. Fieldwork repeats while you do other things.'}</p>${trap?.focus?`<div class="field-focus"><button class="btn sm ${!focus?'on':''}" data-do="fieldfocus" data-a="">Mixed haul</button>${Q.fieldLootOdds(t.id).filter(o=>Q.itemDiscovered(o.id)).map(o=>`<button class="btn route-icon ${focus===o.id?'on':''}" data-do="fieldfocus" data-a="${o.id}" aria-label="Favour ${esc(D.ITEMS[o.id].name)}" data-tip="text:${esc(D.ITEMS[o.id].name)} · ${o.pct.toFixed(0)}% of material hauls">${Q.itemIco(D.ITEMS[o.id])}</button>`).join('')}</div>`:''}<p class="sm dim">Signs · ${focus?esc(D.ITEMS[focus].name)+' trail':'Mixed tracks'}. ${sig&&!S().pets.owned[sig.id]&&Q.skillUnlocked('beastmastery')?'Eggs go to the Beastmastery hatchery.':''}</p>${trapParts(trap?.id==='wooden_trap'?'reinforced_trap':trap?'precision_trap':'wooden_trap')}${scentButton()}<div class="field-recovery" data-field-recovery="${t.id}" aria-live="polite"></div>`};});
  let h=UI.taskPanel('hunting','Fieldwork','train',choices,'Start');if(UI.huntingStageStrip)h=h.replace('<div class="activity-actions">',UI.huntingStageStrip('field')+'<div class="activity-actions">');return tabs+h+`<section data-reference="true" class="panel reference-panel" id="hunting-progress">${UI.skillHero('hunting')}</section>`;
 };
 // Older fieldwork links remain usable, but there is one home for this activity.
@@ -24852,6 +24942,13 @@ UI.DO.huntkit = id => { const r = D.RECIPES['craft_' + id] || D.RECIPES['cook_' 
 const kitLine = T => { if (!T || (!T.trap && !T.bait)) return `<p class="hunt-kit dim">No kit needed. A wooden trap in your pack helps the strike.</p>`;
   const part = id => { const n = Q.have(id), it = D.ITEMS[id]; return `<button type="button" class="hunt-kit-item ${n ? 'ok' : 'miss'}" data-do="huntkit" data-a="${id}" data-tip="item:${id}" aria-label="${esc(it.name)}: ${n} held, make more">${Q.itemIco(it)}<span>${esc(it.name)}</span><b class="mono">${n}</b></button>`; };
   return `<div class="hunt-kit"><span class="k">${esc(T.name)} kit</span>${part(T.trap)}${part(T.bait)}<small class="dim">Trap is kept; one bait per hunt.</small></div>`; };
+const trailSigns = {
+  bird: 'Shed feathers along the trail',
+  game: 'Fresh prints in the soft ground',
+  wool: 'Tufts of wool caught on branches',
+  shell: 'Scrapes along the banks',
+  scale: 'Scales caught on the undergrowth'
+};
 const groundPage = () => {
   const all = grounds(); if (!all.length) return `<section class="panel empty"><p>No hunting grounds.</p></section>`;
   if (!all.some(g => g.town === UI.huntGroundAt)) UI.huntGroundAt = S().town;
@@ -24868,7 +24965,7 @@ const groundPage = () => {
     /* an animal you have not caught yet stays ??? (UI rules: unmet creatures are never named) */
     return { id, name: known ? m.name : '???', artKind: 'creature', artId: id, yieldId: null, locked: !open, revealed: false, blocked: !open || !!need, reason: why, short: !open ? (!here && !wanted ? `Lv ${m.hl} · Reach ${D.TOWN[g.town].name}` : 'Lv ' + m.hl) : '',
       caption: `Hunting ${m.hl}${wanted ? ' · Quest' : ''}`, stateText: !open ? 'Locked' : need ? need.replace(/^Needs /, 'No ') : `${pct}% catch`,
-      info: `<div class="hunt-steps">${D.HUNT_STEPS.map(s => `<span>${ico(s[2])}${s[0]}</span>`).join('<i aria-hidden="true">→</i>')}</div>${kitLine(T)}<p class="dim">${pct}% chance the strike lands; otherwise it slips away and you start tracking again. ${Q.huntXpShown(id, true)} Hunting XP a catch, ${Q.huntXpShown(id, false)} if it gets away.</p>${drops.length ? `<div class="hunt-drops"><span class="k">Drops</span>${drops.map(k => `<span class="cw-drop" data-tip="item:${k}">${Q.itemIco(D.ITEMS[k])}</span>`).join('')}</div>` : ''}` }; });
+      info: `<div class="hunt-steps">${D.HUNT_STEPS.map(s => `<span>${ico(s[2])}${s[0]}</span>`).join('<i aria-hidden="true">→</i>')}</div>${kitLine(T)}${open?`<p class="sm dim">Trail signs · ${trailSigns[m.huntKind]||'Fresh tracks near the trap line'}</p>`:''}<p class="dim">${pct}% chance the strike lands; otherwise it slips away and you start tracking again. ${Q.huntXpShown(id, true)} Hunting XP a catch, ${Q.huntXpShown(id, false)} if it gets away.</p>${drops.length ? `<div class="hunt-drops"><span class="k">Drops</span>${drops.map(k => `<span class="cw-drop" data-tip="item:${k}">${Q.itemIco(D.ITEMS[k])}</span>`).join('')}</div>` : ''}` }; });
   if (!choices.length) return gtabs + ttabs + `<section class="panel empty"><p>No ${esc(T.name.toLowerCase())} animals here.</p></section>`;
   /* the catalogue's corner names the ground's own town, not the one you are standing in */
   return gtabs + ttabs + UI.taskPanel('hunting', `${g.name} · ${T.name}`, 'hunt', choices, 'Hunt').replace(`>${D.TOWN[S().town].name}</small>`, `>${esc(D.TOWN[g.town].name)}</small>`);
