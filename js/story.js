@@ -105,7 +105,10 @@ Q.journeyNext=(id=S().journey||'boss')=>{
   if(Q.questState(gob)==='ready')return step('Report to Sergeant Orrin','The patrol is complete. Hear what he learned about the hill fort and claim your reward.','qclaim',gob.id);
   if(Q.questState(mabel)==='new')return step('Help Mabel prepare supper','Cook for the raided families, and keep spare meals for your own journey.','qstart',mabel.id);
   if(Q.questState(mabel)==='ready')return step('Bring supper to Mabel','The kitchen is ready. Collect her thanks and your reward.','qclaim',mabel.id);
-  if(Q.questState(mabel)==='active'&&Q.have('raw_shrimp')>0)return step('Cook Mabel’s supper','Eight successful shrimp meals complete her request. Keep spare meals for the patrol.','journeytask','recipe','cook_shrimp');
+  if(Q.questState(mabel)==='active'){
+   if(!Q.have('raw_shrimp'))return step('Catch shrimp for Mabel','Your first serving was for the road. Catch more shrimp to finish Mabel’s request.','journeytask','fish','shrimp');
+   return step('Cook Mabel’s supper','Eight successful shrimp meals complete her request. Keep spare meals for the patrol.','journeytask','recipe','cook_shrimp');
+  }
   if(Q.questState(gob)==='active'&&Q.combatLvl()>=5&&Q.foods().reduce((n,k)=>n+Q.have(k)*D.ITEMS[k].heal,0)>=Q.maxHp())return step('Patrol the east farms','Track goblins for Orrin. Their orders may explain what Grubnash is planning.','huntquest','goblin');
  }
  return next0(id);

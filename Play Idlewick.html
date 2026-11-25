@@ -5511,6 +5511,15 @@ html.calm .activity-scene.hunt .scene-target,html.calm .activity-scene.hunt .hun
  .hunt-track-steps li{gap:3px;padding:5px 4px}
 }
 .h-task button.h-tic{border:0;padding:0;cursor:pointer}
+
+#skilldock .dk-requirements{width:100%;margin-block:2px;white-space:normal}
+.phone-skill-picker .dk-requirements{grid-column:1/-1}
+.skill-requirement-group{margin-top:16px}
+.skill-requirement-group h3{margin:0 0 8px}
+@media(min-width:861px){
+ #view>.skill-summary{min-height:0;max-height:100%;display:flex;flex-direction:column}
+ .skill-summary-scroll{min-height:0;overflow-y:auto;scrollbar-width:thin}
+}
 </style>
 
 </head>
@@ -7167,8 +7176,8 @@ D.STOP_RULES = [['none', 'Until I stop it'], ['time:30', 'For 30 minutes'], ['ti
 (() => {
 const D = window.DQ.data, set = (id, req) => { const s = D.SK[id]; if (!s) return; s.actionReq = req; delete s.unlock; };
 D.UNLOCK_BEFORE = { cooking: { hero: 3 }, mining: { hero: 6 }, farming: { hero: 10 }, research: { hero: 16 }, hunting: { kill: 10 }, herbalism: { harvest: 20 }, exploration: { catch: 25, chop: 25 } };
-set('cooking', { catch: 5, chop: 5 });
-set('mining', { 'tool:mining': 1 });
+D.SK.cooking.unlock = 0; // A recipe still requires its ingredient to have been discovered.
+set('mining', { chop: 10, 'tool:mining': 1 });
 set('farming', { hero: 5, chop: 15, 'use:seed_potato': 5 });
 set('research', { hero: 12, beasts: 8 });
 set('hunting', { chop: 20, 'own:wooden_trap': 3, combat: 8 });
@@ -7282,9 +7291,9 @@ for(const a of D.ACH||[])a.coins=Math.round(a.coins*.35);
 (() => {
 const DQ = window.DQ, D = DQ.data;
 for (const s of [
-  { id: 'carpentry', name: 'Carpentry', col: '#c08a4a', group: 'artisan', page: 'carpentry', actionReq: { 'own:tool_handsaw': 1 }, blurb: 'Saw logs into planks for furniture, town projects and boats.' },
+  { id: 'carpentry', name: 'Carpentry', col: '#c08a4a', group: 'artisan', page: 'carpentry', actionReq: { craft: 5, 'own:tool_handsaw': 1 }, blurb: 'Saw logs into planks for furniture, town projects and boats.' },
   { id: 'sailing', name: 'Sailing', col: '#3f8fc8', group: 'gather', page: 'sailing', actionReq: { 'visit:saltmere': 1, 'own:boat_skiff': 1 }, blurb: 'Sail from Saltmere to far islands and bring back what you find.' },
-  { id: 'beastmastery', name: 'Beastmastery', col: '#d08a5a', group: 'gather', page: 'beastmastery', actionReq: { 'own:wooden_trap': 3, combat: 10 }, blurb: 'Hatch beasts, keep them at your ranch and bond with one as your companion.' }
+  { id: 'beastmastery', name: 'Beastmastery', col: '#d08a5a', group: 'gather', page: 'beastmastery', actionReq: { 'skill:hunting': 3, 'own:wooden_trap': 3, combat: 10 }, blurb: 'Hatch beasts, keep them at your ranch and bond with one as your companion.' }
 ]) { D.SKILLS.push(s); D.SK[s.id] = s; }
 const icons = DQ.ICONS || {}; for (const k of ['carpentry', 'sailing', 'beastmastery', 'plank', 'boat', 'island']) if (!(k in icons)) icons[k] = 'M4 12h16';
 
@@ -11771,6 +11780,10 @@ function migrate(S) {
   }
   DQ.xpAliases(S);
   if (DQ.migrateBeasts) DQ.migrateBeasts(S);
+  // A rule change must preserve skills the player has already trained.
+  for (const skill of D.SKILLS) {
+    if ((skill.actionReq || skill.quest) && S.xp[skill.id] > 0) S.unlocked[skill.id] = true;
+  }
   /* Mossbarrow was added between Willowbrook and Saltmere: keep later roads open for older saves */
   const ids = D.TOWNS.map(t => t.id); let last = -1; ids.forEach((id, i) => { if (S.towns[id]) last = i; });
   for (let i = 0; i < last; i++) if (!S.towns[ids[i]]) S.towns[ids[i]] = { visited: false, boss: false };
@@ -11872,7 +11885,11 @@ DQ.skillUnlocked = sk => { const s=D.SK[sk]; if(!s)return false; if(DQ.S.unlocke
 const actionNames={kill:'combat victories',catch:'fish caught',chop:'logs chopped',harvest:'crops harvested',craft:'items crafted',smith:'smithing actions'};
 DQ.reqLabel = r => { const [k, a] = r.stat.includes(':') ? r.stat.split(':') : [r.stat, null], I = a && D.ITEMS[a];
   return k === 'hero' ? `Hero level ${r.need}` : k === 'combat' ? `Combat level ${r.need}` : k === 'skill' ? `${D.SK[a].name} level ${r.need}` : k === 'tool' ? `Own a ${({ mining: 'pickaxe', fishing: 'fishing rod', woodcutting: 'axe', thieving: 'pair of thief gloves', farming: 'hoe' })[a] || 'tool'} (kept)` : k === 'own' ? `Hold ${r.need} ${I ? I.name.toLowerCase() + (r.need > 1 && !/s$/.test(I.name) ? 's' : '') : a} (kept)` : k === 'use' ? `${r.need} ${I ? I.name.toLowerCase() : a} (used when you learn it)` : k === 'visit' ? `Visit ${D.TOWN[a] ? D.TOWN[a].name : a}` : k === 'beasts' ? `Different creatures studied` : `${DQ.cap ? DQ.cap(actionNames[r.stat] || r.stat) : (actionNames[r.stat] || r.stat)}`; };
-DQ.unlockHow = sk => { const s=D.SK[sk]; if(s.actionReq)return DQ.actionProgress(sk).map(r=>`${DQ.reqLabel(r)} (${r.kind === 'level' ? `now ${r.have}` : `${Math.min(r.have,r.need)}/${r.need}`})`).join(', '); return s.quest?`Complete the main quest “${s.questName}”`:`Reach Hero level ${s.unlock}`; };
+DQ.unlockHow = sk => { const s=D.SK[sk]; if(s.actionReq)return DQ.actionProgress(sk).map(r=>`${DQ.reqLabel(r)} (${r.kind === 'level' ? `now ${r.have}` : `${Math.min(r.have,r.need)}/${r.need}`})`).join(', '); if (s.quest) {
+  const quest = D.QM[s.quest];
+  const goals = quest?.obj?.map(o => o.label).filter(Boolean).join(' · ');
+  return `Complete “${quest?.name || s.questName}”${goals ? ': ' + goals : ''}`;
+} return `Reach Hero level ${s.unlock}`; };
 DQ.maxHp = () => DQ.lvl('hitpoints');
 DQ.combatLvl = () => {
   const L = DQ.lvl, base = .25 * (L('defence') + L('hitpoints'));
@@ -12988,6 +13005,8 @@ DQ.startAct = (kind, id, o = {}) => {
     if (!DQ.skillUnlocked('magic') || DQ.lvl('magic') < D.ALCH[0].lvl) return bad(`Alchemy needs Magic ${D.ALCH[0].lvl}`);
     if (DQ.have('rune') < 2) return bad('You need Arcane runes. The shop sells them.');
   } else if (kind === 'fight') {
+    const preparation = DQ.openingCombatNeed?.();
+    if (preparation) return bad(preparation.detail);
     const m = D.MON[id];
     if (m.town !== S().town) return bad(`${m.name} lives in ${D.TOWN[m.town].name}`);
     if (m.boss && DQ.combatLvl() < m.boss.req) return bad(`You need combat level ${m.boss.req} to challenge ${m.boss.short}`);
@@ -17404,15 +17423,20 @@ UI.skillDockOrder=()=>D.SKILLS.filter(s=>s.group!=='combat').sort((a,b)=>{
  const starter=s=>!s.quest&&!s.actionReq&&s.unlock<=1;
  return Number(starter(b))-Number(starter(a))||(dockOrder.indexOf(a.id)<0?999:dockOrder.indexOf(a.id))-(dockOrder.indexOf(b.id)<0?999:dockOrder.indexOf(b.id));
 });
+UI.skillDockVisible = () => UI.skillDockOrder().filter(skill => S().tut.showLockedSkills || DQ.skillUnlocked(skill.id));
+UI.lockedSkillsLink = (action = 'go') => {
+  const count = UI.skillDockOrder().filter(skill => !DQ.skillUnlocked(skill.id)).length;
+  return count ? `<button class="btn sm dk-requirements" data-do="${action}" data-a="skillsummary">Locked skills · ${count}</button>` : '';
+};
 UI.renderDock = () => {
   const el = $('#skilldock'); if (!el) return;
   const cur = UI.view, ap = DQ.act && DQ.actPage ? DQ.actPage() : null;
-  el.innerHTML = `<div class="dk-h">Skills</div>` + UI.skillDockOrder().map(s => {
+  el.innerHTML = `<div class="dk-h">Skills</div>` + UI.skillDockVisible().map(s => {
     const lock = !DQ.skillUnlocked(s.id);
     const lv=DQ.lvl(s.id),need=lv>=99?0:Math.max(0,D.XPF[lv+1]-(S().xp[s.id]||0));
     const pop = UI.levelPop[s.id], popping = pop && Date.now() - pop < 1600;
     return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''} ${DQ.act && DQ.act.kind !== 'fight' && DQ.actSkill && DQ.actSkill() === s.id ? 'working' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" data-tip="rail:${s.id}" data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span><span class="notice-badge" data-b="notice:${s.page}" hidden></span>${!lock && S().unlocked[s.id] && S().newSkills && S().newSkills[s.id] ? '<span class="dk-new">New</span>' : ''}${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span>`}</span>${!lock && ap === s.page ? '<i class="dk-live" aria-label="Working"></i>' : ''}</button>`;
-  }).join('');
+  }).join('') + UI.lockedSkillsLink();
   UI.upd();
 };
 /* A newly unlocked skill wears a small "New" badge in the rail until its page is first opened. */
@@ -17508,10 +17532,27 @@ UI.V.overview = () => {
       <div id="goalbox">${UI.homeGoals()}</div>
     </section>`}`;
 };
-UI.V.skillsummary = () => `<section class="panel"><div class="phead"><h2>Your skills</h2><small>Total level <b data-b="totlvl"></b></small></div><div class="skl">${D.SKILLS.map(skill => {
+const skillSummaryRows = skills => skills.map(skill => {
   const locked = !DQ.skillUnlocked(skill.id);
   return `<button class="skrow ${locked ? 'locked' : ''}" data-do="go" data-a="${skill.page}" style="--c:${skill.col}">${locked ? ico('lock') : DQ.artImage('skill',skill.id,32,'skill-emblem',skill.name)}<span>${skill.name}</span>${locked ? `<small>${esc(DQ.unlockHow(skill.id))}</small>` : `<b class="mono" data-b="lvl:${skill.id}"></b><span class="bar"><i data-b="xpbar:${skill.id}"></i></span>${(nx => nx ? `<small class="sk-next">Lv ${nx.lvl} · ${esc(UI.unlockShort(nx))}</small>` : '')(UI.nextUnlock && UI.nextUnlock(skill.id))}`}</button>`;
-}).join('')}</div></section>`;
+}).join('');
+UI.V.skillsummary = () => {
+  const open = D.SKILLS.filter(skill => DQ.skillUnlocked(skill.id));
+  const locked = D.SKILLS.filter(skill => !DQ.skillUnlocked(skill.id));
+  return `<section class="panel skill-summary"><div class="phead"><h2>Your skills</h2><small>Total level <b data-b="totlvl"></b></small>
+    <button class="btn sm" data-do="skiponboarding" aria-pressed="${!!S().tut.showLockedSkills}">${S().tut.showLockedSkills ? 'Show learned skills in navigation' : 'Skip onboarding'}</button></div>
+    <div class="skill-summary-scroll"><div class="skl">${skillSummaryRows(open)}</div>
+    ${locked.length ? `<section class="skill-requirement-group"><h3>Locked skills · requirements</h3><div class="skl">${skillSummaryRows(locked)}</div></section>` : ''}</div></section>`;
+};
+UI.DO.skiponboarding = () => {
+  S().tut.showLockedSkills = !S().tut.showLockedSkills;
+  if (S().tut.showLockedSkills) {
+    S().tut.done.intro = true;
+    S().tut.hidden = true;
+  }
+  DQ.save();
+  UI.render(false);
+};
 UI.V.activity = () => `${UI.inboxPanel()}<section class="panel"><div class="phead"><h2>Activity</h2><small class="mono" id="xph"></small></div><div id="chart"></div><ul class="log" id="loglist"></ul></section>`;
 let gAcc = 0;
 /* Up next refreshes quietly: if the same goals are showing, only the numbers and bars are updated in place, so nothing flickers or re-animates */
@@ -17563,7 +17604,9 @@ DQ.on('act', () => UI.packWarn(true));
     const el = document.getElementById('skilldock'); if (!el || innerWidth <= 860) { if (el) el.style.removeProperty('--dk-h'); document.documentElement.classList.remove('dock-fit'); return; }
     const rows = el.querySelectorAll('.dk'), head = el.querySelector('.dk-h'); if (!rows.length) return;
     const z = DQ.zoom || 1, top = el.getBoundingClientRect().top / z, bottom = innerHeight / z - 18, gap = parseFloat(getComputedStyle(el).rowGap) || 3;
-    const avail = bottom - top - (head ? head.getBoundingClientRect().height / z : 0) - gap * rows.length;
+    const requirements = el.querySelector('.dk-requirements');
+    const fixed = [head, requirements].reduce((height, element) => height + (element ? element.getBoundingClientRect().height / z + gap : 0), 0);
+    const avail = bottom - top - fixed - gap * Math.max(0, rows.length - 1);
     const h = Math.max(34, Math.min(64, Math.floor(avail / rows.length)));
     el.style.setProperty('--dk-h', h + 'px'); document.documentElement.classList.add('dock-fit');
   };
@@ -21568,7 +21611,7 @@ UI.V.research=()=>{const h=research0();if(!h.includes('scholarship-grid'))return
  const selected=rows.find(x=>x.t.id===UI.researchRanks[key])||rows.find(x=>S().research.active.some(a=>a.id===x.t.id))||rows.find(x=>!Q.techDone(x.t.id))||rows[rows.length-1];const family=document.createElement('section');family.className='tech-family';family.innerHTML=`<div class="tech-ranks" role="group" aria-label="${esc(key.split(':')[1])} ranks">${rows.map(({t})=>`<button class="btn sm ${t.id===selected.t.id?'on':''}" data-do="researchrank" data-a="${esc(key)}" data-b="${t.id}">${Q.techDone(t.id)?'✓ ':''}${esc(t.name.match(/\b(I|II|III|IV)$/)?.[1]||t.name)} · Tier ${t.tier}</button>`).join('')}</div>`;if(selected.card)family.appendChild(selected.card);grid.appendChild(family);}
  if(innerWidth<=860){const children=[...grid.children],page=Math.max(0,Math.min(UI.researchPhonePage||0,children.length-1));children.forEach((e,i)=>{e.hidden=i!==page;});const nav=document.createElement('div');nav.className='scholarship-phone-controls';nav.dataset.mode=UI.researchPhoneMode||'projects';nav.innerHTML=`<div class="btnrow"><button class="btn sm" data-do="researchphonemode" data-a="projects">Discoveries · Lv ${Q.lvl('research')}</button><button class="btn sm" data-do="researchphonemode" data-a="slots">Study slots ${S().research.active.length}/${Q.researchSlots()}</button></div><div class="btnrow"><button class="btn sm" data-do="researchphonepage" data-a="${page-1}" ${page?'':'disabled'}>Previous</button><span>${page+1} / ${children.length}</span><button class="btn sm" data-do="researchphonepage" data-a="${page+1}" ${page+1<children.length?'':'disabled'}>Next</button></div>`;grid.before(nav);}
  return box.innerHTML;};
-UI.DO.skillpicker=()=>Q.modal({title:'Choose a skill',body:`<div class="phone-skill-picker">${D.SKILLS.filter(s=>s.group!=='combat').map(s=>`<button class="btn" data-do="pickphoneskill" data-a="${s.page}">${Q.artImage('skill',s.id,32)}<span>${esc(s.name)}</span></button>`).join('')}</div>`,actions:[{label:'Close'}]});UI.DO.pickphoneskill=page=>{Q.closeModal();Q.go(page);};
+UI.DO.skillpicker=()=>Q.modal({title:'Choose a skill',body:`<div class="phone-skill-picker">${UI.skillDockVisible().map(s=>`<button class="btn" data-do="pickphoneskill" data-a="${s.page}">${Q.artImage('skill',s.id,32)}<span>${esc(s.name)}</span></button>`).join('')}${UI.lockedSkillsLink('pickphoneskill')}</div>`,actions:[{label:'Close'}]});UI.DO.pickphoneskill=page=>{Q.closeModal();Q.go(page);};
 UI.DO.researchphonemode=a=>{UI.researchPhoneMode=a;UI.render(false);};UI.DO.researchphonepage=a=>{UI.researchPhonePage=Math.max(0,+a);UI.render(false);};
 UI.DO.researchrank=(key,id)=>{UI.researchRanks[key]=id;UI.render(false);};
 /* Existing item requirement chips become direct routes, not dead text. */
@@ -21765,7 +21808,10 @@ Q.journeyNext=(id=S().journey||'boss')=>{
   if(Q.questState(gob)==='ready')return step('Report to Sergeant Orrin','The patrol is complete. Hear what he learned about the hill fort and claim your reward.','qclaim',gob.id);
   if(Q.questState(mabel)==='new')return step('Help Mabel prepare supper','Cook for the raided families, and keep spare meals for your own journey.','qstart',mabel.id);
   if(Q.questState(mabel)==='ready')return step('Bring supper to Mabel','The kitchen is ready. Collect her thanks and your reward.','qclaim',mabel.id);
-  if(Q.questState(mabel)==='active'&&Q.have('raw_shrimp')>0)return step('Cook Mabel’s supper','Eight successful shrimp meals complete her request. Keep spare meals for the patrol.','journeytask','recipe','cook_shrimp');
+  if(Q.questState(mabel)==='active'){
+   if(!Q.have('raw_shrimp'))return step('Catch shrimp for Mabel','Your first serving was for the road. Catch more shrimp to finish Mabel’s request.','journeytask','fish','shrimp');
+   return step('Cook Mabel’s supper','Eight successful shrimp meals complete her request. Keep spare meals for the patrol.','journeytask','recipe','cook_shrimp');
+  }
   if(Q.questState(gob)==='active'&&Q.combatLvl()>=5&&Q.foods().reduce((n,k)=>n+Q.have(k)*D.ITEMS[k].heal,0)>=Q.maxHp())return step('Patrol the east farms','Track goblins for Orrin. Their orders may explain what Grubnash is planning.','huntquest','goblin');
  }
  return next0(id);
@@ -24430,7 +24476,7 @@ const routedFight = () => {
 const routedFightHtml = ({ m, route }) => {
   const kind = route.quest ? 'Quest objective' : D.ITEMS[route.item]?.name || 'Ingredient source';
   const label = route.quest ? m.name : DQ.monName(m);
-  const locked = DQ.fightSupplyNeed() || DQ.combatLvl() < (m.boss?.req || m.mini?.req || 0);
+  const locked = DQ.openingCombatNeed?.() || DQ.fightSupplyNeed() || DQ.combatLvl() < (m.boss?.req || m.mini?.req || 0);
   return `<div class="cw-quest cw-route-fight"><span><small>${esc(kind)}</small><b>${esc(label)}</b></span>${m.town === S().town ? `<button class="btn sm" data-do="routefight" data-a="${m.id}" ${locked ? 'disabled' : ''}>${route.quest ? 'Fight' : 'Track'}</button>` : ''}</div>`;
 };
 const windowHtml = () => {
@@ -24441,7 +24487,7 @@ const windowHtml = () => {
   if (UI.cwTab === 'hunt' && ground) return `<div class="cw-window cw-window-hunt" role="region" aria-label="Hunting ground"><div class="cw-head"><small>${esc(D.TOWN[town].name)} · your Hunting level ${DQ.huntLevel ? DQ.huntLevel() : DQ.lvl('hunting')}</small>${wtabs}</div><div class="cw-areas">${huntCard(ground)}</div></div>`;
   const cards = areas.map(a => { const odds = DQ.encounterOdds(a), lv = odds.map(x => x.monster.cl), lo = Math.min(...lv), hi = Math.max(...lv);
     return `<article class="cw-area"><div class="cw-area-h"><div><b>${esc(a.name)}</b><small class="${tone(lo, hi)}">Combat ${lo}–${hi} recommended</small></div><button type="button" class="btn primary" data-do="huntarea" data-a="${a.id}">${ico('attack')}Explore</button></div><div class="cw-mons">${odds.map(x => monTile(x, qt)).join('')}</div></article>`; }).join('');
-  const route = routedFight(), needsSupply = !!DQ.fightSupplyNeed();
+  const route = routedFight(), needsSupply = !!(DQ.openingCombatNeed?.() || DQ.fightSupplyNeed());
   const quest = route ? routedFightHtml(route) : qm ? `<button type="button" class="cw-quest" data-do="huntquest" data-a="${qt}" ${needsSupply && !(DQ.isAnimal?.(qt) && DQ.skillUnlocked('hunting')) ? 'disabled' : ''}>${DQ.monSprite(qm, 32)}<span><small>Quest${qm.mini ? ' · challenge' : ''}</small><b>${esc(qm.name)}</b></span></button>` : '';
   return `<div class="cw-window" role="region" aria-label="Where to fight"><div class="cw-head"><small>${esc(D.TOWN[town].name)} · your combat level ${DQ.combatLvl()}</small>${quest}${wtabs}</div>${UI.fightSupplyEntry()}<div class="cw-areas">${cards}</div></div>`;
 };
@@ -24507,7 +24553,7 @@ const shape = () => {
     x.querySelector('.cx-go')?.remove();
   }
   if (boss && body && !body.contains(boss)) body.append(boss);
-  if (!act && DQ.fightSupplyNeed()) {
+  if (!act && (DQ.openingCombatNeed?.() || DQ.fightSupplyNeed())) {
     for (const button of x.querySelectorAll('.cw-window [data-do="hunttrack"], .cw-window [data-do="huntarea"], .wh-mini [data-do="act"]')) button.disabled = true;
   }
   /* the left column: your fighter */
@@ -24968,6 +25014,81 @@ UI.render = (...a) => {
 
 </script>
 <script>
+/* Fresh heroes finish a starter weapon and cook before entering a fight. */
+(() => {
+  const Q = window.DQ, UI = Q.ui, D = Q.data;
+  const current = () => Q.S;
+  const log = 'log_normal';
+
+  Q.openingCombatNeed = () => {
+    const S = current();
+    if (!S.tut.prepareCombat) return null;
+    if (!S.tut.weaponFinished) {
+      if (!Q.have(log)) {
+        return {
+          title: 'Cut a log for your weapon', detail: 'Cut 1 log to finish your starter weapon.',
+          action: 'journeytask', a: 'wood', b: 'normal',
+        };
+      }
+      if (!S.equip.weapon) return { title: 'Equip your starter weapon', detail: 'Equip a weapon before finishing it.', action: 'go', a: 'character' };
+      const weapon = D.ITEMS[S.equip.weapon]?.name || 'starter weapon';
+      return {
+        title: 'Finish your ' + weapon.toLowerCase(), detail: 'Use 1 log to finish assembling your weapon.',
+        action: 'finishstarter',
+      };
+    }
+    if (S.stats.cook < 1) {
+      if (!Q.have('raw_shrimp')) {
+        return {
+          title: 'Catch shrimp for your first meal', detail: 'Catch shrimp, then cook 1 serving before fighting.',
+          action: 'journeytask', a: 'fish', b: 'shrimp',
+        };
+      }
+      return {
+        title: 'Cook a shrimp before your first fight', detail: 'Cook 1 shrimp to finish your combat preparation.',
+        action: 'journeytask', a: 'recipe', b: 'cook_shrimp',
+      };
+    }
+    return null;
+  };
+
+  UI.DO.finishstarter = () => {
+    const S = current();
+    if (Q.openingCombatNeed()?.action !== 'finishstarter' || !S.equip.weapon || Q.forecasting) return;
+    const pack = S.inv[log] || 0;
+    const bank = S.bank[log] || 0;
+    if (!Q.take(log, 1)) return;
+    S.tut.weaponFinished = true;
+    if (!Q.save()) {
+      delete S.tut.weaponFinished;
+      if (pack) S.inv[log] = pack;
+      if (bank) S.bank[log] = bank;
+      Q.toast(Q.saveHealth || 'Could not save your preparation.', true);
+      return;
+    }
+    Q.log(`You finish assembling your ${D.ITEMS[S.equip.weapon].name.toLowerCase()}.`);
+    UI.render(false);
+  };
+
+  const journeyNext = Q.journeyNext;
+  Q.journeyNext = (...args) => {
+    const next = journeyNext(...args);
+    if ((next.action === 'journeytask' && next.a === 'fight') || ['journeytrain', 'huntquest'].includes(next.action)) {
+      return Q.openingCombatNeed() || next;
+    }
+    return next;
+  };
+
+  const supplyEntry = UI.fightSupplyEntry;
+  UI.fightSupplyEntry = () => {
+    const need = Q.openingCombatNeed();
+    if (!need) return supplyEntry();
+    return `<div class="fight-supply" role="status"><span>${Q.esc(need.detail)}</span><button class="btn sm" data-do="${need.action}" data-a="${need.a || ''}" data-b="${need.b || ''}">${Q.esc(need.title)}</button></div>`;
+  };
+})();
+
+</script>
+<script>
 /* Idlewick: title screen, character creation and startup. */
 (() => {
 const DQ = window.DQ, D = DQ.data, { $, $$, ico, esc } = DQ;
@@ -25060,7 +25181,7 @@ function create() {
     const focus = $('#crname') || $('#tmenu [data-kit].on') || $('#cr-go'); if (focus) focus.focus({ preventScroll: true });
   };
   const go = n => { const input = $('#crname'); if (input) name = input.value; step = Math.max(0, Math.min(2, n)); DQ.sfx('click'); draw(); };
-  const commit = () => { const input = $('#crname'); if (input) name = input.value; const draft = DQ.S, chosen = DQ.newState('', look, starter); draft.equip = chosen.equip; draft.ammo = chosen.ammo; draft.inv = chosen.inv; DQ.S = previous; if (DQ.hasSave() && DQ.backup && !DQ.backup('before new hero')) { DQ.S = draft; DQ.toast('Could not back up your existing hero. Download a backup first.', true); return; } DQ.S = draft; DQ.S.name = heroName(); DQ.S.look = look; DQ.S.journal = [{ t: Date.now(), kind: 'begin', icon: 'candle', town: 'willowbrook', text: `You come home to Willowbrook with ${BACKSTORY[starter].pack}, five loaves and Wren’s letter in your pocket.` }]; if (DQ.noteOrigin) for (const id of [...Object.keys(DQ.S.inv), ...Object.values(DQ.S.equip), DQ.S.ammo && DQ.S.ammo.id]) if (id) DQ.noteOrigin(id, 'In your pack when you came home'); if (DQ.save()) start(true); else DQ.toast(DQ.saveHealth, true); };
+  const commit = () => { const input = $('#crname'); if (input) name = input.value; const draft = DQ.S, chosen = DQ.newState('', look, starter); draft.equip = chosen.equip; draft.ammo = chosen.ammo; draft.inv = chosen.inv; DQ.S = previous; if (DQ.hasSave() && DQ.backup && !DQ.backup('before new hero')) { DQ.S = draft; DQ.toast('Could not back up your existing hero. Download a backup first.', true); return; } DQ.S = draft; DQ.S.tut.prepareCombat = true; DQ.S.name = heroName(); DQ.S.look = look; DQ.S.journal = [{ t: Date.now(), kind: 'begin', icon: 'candle', town: 'willowbrook', text: `You come home to Willowbrook with ${BACKSTORY[starter].pack}, five loaves and Wren’s letter in your pocket.` }]; if (DQ.noteOrigin) for (const id of [...Object.keys(DQ.S.inv), ...Object.values(DQ.S.equip), DQ.S.ammo && DQ.S.ammo.id]) if (id) DQ.noteOrigin(id, 'In your pack when you came home'); if (DQ.save()) start(true); else DQ.toast(DQ.saveHealth, true); };
   const begin = () => DQ.hasSave() ? DQ.modal({ title: 'Begin a new hero?', body: '<p>Your existing hero will be kept in automatic backups. Your new adventure replaces the active save.</p>', actions: [{ label: 'Begin new hero', primary: true, fn: commit }, { label: 'Keep existing hero' }] }) : commit();
   $('#tmenu').onclick = e => {
     const t = e.target.closest('button'); if (!t) return;

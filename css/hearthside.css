@@ -749,3 +749,12 @@ html.calm .activity-scene.hunt .scene-target,html.calm .activity-scene.hunt .hun
  .hunt-track-steps li{gap:3px;padding:5px 4px}
 }
 .h-task button.h-tic{border:0;padding:0;cursor:pointer}
+
+#skilldock .dk-requirements{width:100%;margin-block:2px;white-space:normal}
+.phone-skill-picker .dk-requirements{grid-column:1/-1}
+.skill-requirement-group{margin-top:16px}
+.skill-requirement-group h3{margin:0 0 8px}
+@media(min-width:861px){
+ #view>.skill-summary{min-height:0;max-height:100%;display:flex;flex-direction:column}
+ .skill-summary-scroll{min-height:0;overflow-y:auto;scrollbar-width:thin}
+}

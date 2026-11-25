@@ -269,6 +269,8 @@ DQ.startAct = (kind, id, o = {}) => {
     if (!DQ.skillUnlocked('magic') || DQ.lvl('magic') < D.ALCH[0].lvl) return bad(`Alchemy needs Magic ${D.ALCH[0].lvl}`);
     if (DQ.have('rune') < 2) return bad('You need Arcane runes. The shop sells them.');
   } else if (kind === 'fight') {
+    const preparation = DQ.openingCombatNeed?.();
+    if (preparation) return bad(preparation.detail);
     const m = D.MON[id];
     if (m.town !== S().town) return bad(`${m.name} lives in ${D.TOWN[m.town].name}`);
     if (m.boss && DQ.combatLvl() < m.boss.req) return bad(`You need combat level ${m.boss.req} to challenge ${m.boss.short}`);

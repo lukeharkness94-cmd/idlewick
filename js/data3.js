@@ -130,8 +130,8 @@ D.STOP_RULES = [['none', 'Until I stop it'], ['time:30', 'For 30 minutes'], ['ti
 (() => {
 const D = window.DQ.data, set = (id, req) => { const s = D.SK[id]; if (!s) return; s.actionReq = req; delete s.unlock; };
 D.UNLOCK_BEFORE = { cooking: { hero: 3 }, mining: { hero: 6 }, farming: { hero: 10 }, research: { hero: 16 }, hunting: { kill: 10 }, herbalism: { harvest: 20 }, exploration: { catch: 25, chop: 25 } };
-set('cooking', { catch: 5, chop: 5 });
-set('mining', { 'tool:mining': 1 });
+D.SK.cooking.unlock = 0; // A recipe still requires its ingredient to have been discovered.
+set('mining', { chop: 10, 'tool:mining': 1 });
 set('farming', { hero: 5, chop: 15, 'use:seed_potato': 5 });
 set('research', { hero: 12, beasts: 8 });
 set('hunting', { chop: 20, 'own:wooden_trap': 3, combat: 8 });

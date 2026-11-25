@@ -256,7 +256,7 @@ test('legacy saves gain the project pin field and an unknown pin is cleared with
 });
 test('new players receive one persistent lesson per unlocked skill', () => {
   const {q}=harness(); assert.equal(q.lessonForPage('woodcutting').id,'woodcutting');
-  assert.equal(q.lessonForPage('cooking'),null);
+  assert.equal(q.lessonForPage('mining'),null);
   assert.equal(q.acknowledgeLesson('woodcutting'),true); assert.equal(q.lessonForPage('woodcutting'),null);
   const saved=q.exportSave(); assert.equal(q.importSave(saved),true); assert.equal(q.lessonForPage('woodcutting'),null);
   q.S.xp.fishing=q.data.advReq(4);q.S.stats.catch=5;q.S.stats.chop=5; assert.equal(q.lessonForPage('cooking').id,'cooking');
@@ -474,8 +474,9 @@ test('ordinary gathering works from any visited town; thieving and signature res
 });
 test('practical skill unlocks: requirements, routes, consumption, no cycles, older saves keep their skills',()=>{
  const {q,load}=harness();load('skill_expansion');const S=q.S,D=q.data;
- assert.equal(q.skillUnlocked('cooking'),false);S.stats.catch=5;S.stats.chop=5;assert.equal(q.skillUnlocked('cooking'),true,'cooking from catching and chopping');
- assert.equal(q.skillUnlocked('mining'),false);S.inv.tool_pick_1=1;assert.equal(q.skillUnlocked('mining'),true,'a pickaxe, kept');assert.equal(q.have('tool_pick_1'),1);
+ assert.equal(q.skillUnlocked('cooking'),true,'Cooking is a starter activity');
+ assert.equal(q.recipeDiscovered(D.RECIPES.cook_shrimp),false,'still discover the first ingredient');
+ assert.equal(q.skillUnlocked('mining'),false);S.inv.tool_pick_1=1;assert.equal(q.skillUnlocked('mining'),false,'buying alone does not unlock Mining');S.stats.chop=10;assert.equal(q.skillUnlocked('mining'),true,'ten logs and a pickaxe, kept');assert.equal(q.have('tool_pick_1'),1);
  assert.ok(D.SHOPS.willowbrook.includes('tool_pick_1'),'the pickaxe is sold in Willowbrook');assert.ok(!D.QM.miners_pick.obj.some(o=>o.ev==='mine'),'the pickaxe quest does not need Mining');
  S.xp.fishing=D.advReq(5);S.stats.chop=15;S.inv.seed_potato=7;assert.equal(q.skillUnlocked('farming'),false,'consumed requirements wait for the learning moment');
  q.checkActionUnlocks();assert.equal(S.unlocked.farming,true);assert.equal(q.have('seed_potato'),2,'five seeds planted');
@@ -661,7 +662,7 @@ test('later regions: the destination follows the next boss and optional goals co
  const {q,load}=harness();load('lore');load('bestiary');const S=q.S,D=q.data;
  for(const t of ['willowbrook','mossbarrow','saltmere'])S.towns[t]={visited:true,boss:true};S.towns.ironpeak={visited:true,boss:false};S.q.first_steps={s:'done',p:[5,5]};
  S.town='saltmere';assert.equal(q.journeyNext().a,'ironpeak','travel to the next boss region');
- S.town='ironpeak';for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[36];
+ S.town='ironpeak';S.inv.bread=40;for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[36];
  const fq=D.QUESTS.find(x=>x.obj.some(o=>o.ev==='boss'&&o.key==='frostmaw'));if(fq)S.q[fq.id]={s:'active',p:[0]};
  const n=q.journeyNext();assert.match(n.title,/Train for Frostmaw/);assert.match(q.journeyDoneWhen(n),/combat level reaches 45/);
  S.beast.kills.troll=5;const g=q.optionalGoals();assert.ok(g.length>=1&&g.length<=3);assert.ok(g.some(x=>/Thunderclap maul/.test(x.text)),'a unique to chase, with honest guarantee progress');
@@ -941,8 +942,8 @@ test('Carpentry, Sailing and Beastmastery: planks and boats, voyages that need a
 });
 test('the new skills unlock from things you make, and each has a purpose: planks in projects and furniture, sea legs, befriending with traps', () => {
   const {q,load}=harness();load('creatures_expanded');load('lore');load('hunting');load('skills_new_data');load('skills_new');const D=q.data,S=q.S;for(const k of ['carpentry','sailing','beastmastery'])S.xp[k]=S.xp[k]||0;
-  assert.equal(q.skillUnlocked('carpentry'),false);S.inv.tool_handsaw=1;assert.equal(q.skillUnlocked('carpentry'),true,'a smithed handsaw opens Carpentry');
-  assert.equal(q.skillUnlocked('beastmastery'),false);S.inv.wooden_trap=3;for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[12];q.fxDirty();assert.equal(q.skillUnlocked('beastmastery'),true,'three traps and Combat 10 open Beastmastery');
+  assert.equal(q.skillUnlocked('carpentry'),false);S.inv.tool_handsaw=1;S.stats.craft=5;assert.equal(q.skillUnlocked('carpentry'),true,'five crafts and a smithed handsaw open Carpentry');
+  assert.equal(q.skillUnlocked('beastmastery'),false);S.inv.wooden_trap=3;for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[12];S.xp.hunting=D.XPF[3];q.fxDirty();assert.equal(q.skillUnlocked('beastmastery'),true,'Hunting 3, three traps and Combat 10 open Beastmastery');
   assert.ok(D.RECIPES.smith_handsaw&&D.RECIPES.smith_handsaw.lvl<=5,'the handsaw is an early smithing recipe');
   const tiers=D.ROOMS.flatMap(r=>r.furn).flatMap(f=>f.costs.slice(1));assert.ok(tiers.some(c=>Object.keys(c).some(k=>k.startsWith('plank_'))),'furniture upgrades ask for planks');
   S.xp.sailing=D.XPF[40];S.unlocked.sailing=true;const fs=q.extraSpeed('fishing');S.unlocked.sailing=false;assert.ok(fs-q.extraSpeed('fishing')>.1,'sea legs: Sailing 40 makes Fishing 12% faster');
