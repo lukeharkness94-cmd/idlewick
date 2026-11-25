@@ -10,9 +10,13 @@ const questFor=next=>{
 };
 const journey0=U.journeyPanel;
 U.journeyPanel=()=>{
- const html=journey0(),next=Q.journeyNext(),q=questFor(next);
- if(Q.goalDone())return html;
+ const html=journey0(),next=Q.journeyNext(),main=Q.mainQuestProgress?.(),q=main ? D.QM[main.id] : questFor(next);
+ if(Q.goalDone()&&!main)return html;
  const t=document.createElement('template');t.innerHTML=html;const panel=t.content.querySelector('.journey');if(!panel)return html;
+ if(next.optional){
+  const kicker=panel.querySelector('.phead .k');
+  if(kicker)kicker.textContent='Optional side story';
+ }
  const taskButton=panel.querySelector('.btn.primary');
  if(taskButton&&next.action==='journeytask'){
   const recipe=next.a==='recipe'&&D.RECIPES[next.b],node=D.NODE[next.a+':'+next.b],running=Q.act?.kind===next.a&&Q.act?.id===next.b;

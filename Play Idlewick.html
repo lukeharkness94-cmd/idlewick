@@ -11761,6 +11761,7 @@ function candidateState(o) {
   if(result.hunt.loopVersion!==undefined&&result.hunt.loopVersion!==1)throw new Error('Unsupported hunting loop');
   if(result.hunt.fieldFocus!=null&&(typeof result.hunt.fieldFocus!=='string'||!D.ITEMS[result.hunt.fieldFocus]))throw new Error('Invalid hunting focus');
   migrate(result);
+  DQ.reconcileMainQuests?.(result);
   return result;
 }
 DQ.validateSave = candidateState;
@@ -12508,9 +12509,7 @@ const showSkillUnlock=o=>{
   const id=(o.key||'').slice(7),sk=DQ.data.SK[id];if(!sk)return false;
   const art=DQ.artImage('skill',id,96,'',sk.name)||ico(id);
   const open=o.action&&o.action.fn?o.action.fn:()=>DQ.go(sk.page);
-  /* the skill's quick guide rides along with its unlock, so a new skill is one pop-up, not two in a row */
-  const L=DQ.lessonInfo&&DQ.lessonInfo(id);if(L&&DQ.acknowledgeLesson)DQ.acknowledgeLesson(id);
-  DQ.modal({title:`${sk.name} unlocked`,wide:true,sticky:true,body:`<div class="level-reveal lr-v2 lr-unlock" style="--c:${o.col||sk.col||'#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><span class="lr-ripple" aria-hidden="true"></span><span class="lr-ripple r2" aria-hidden="true"></span><span class="lr-ripple r3" aria-hidden="true"></span><span class="lr-rays" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><span class="lr-ribbon">New skill</span><h2>${esc(sk.name)}</h2><p>${esc(String(o.text||'').replace(/<[^>]+>/g,'').trim()||sk.blurb||'')}</p>${L?`<div class="lr-guide"><p>${esc(L.text)}</p>${L.towards?`<p class="lesson-towards">${esc(L.towards)}</p>`:''}${L.goal?`<p class="lesson-goal"><strong>Try this:</strong> ${esc(L.goal)}</p>`:''}</div>`:''}</div>`,actions:[{label:`Open ${sk.name}`,primary:true,fn:()=>{DQ.closeModal();open();setTimeout(pumpLevel,180);}},{label:'Later',fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
+  DQ.modal({title:`${sk.name} unlocked`,wide:true,sticky:true,body:`<div class="level-reveal lr-v2 lr-unlock" style="--c:${o.col||sk.col||'#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><span class="lr-ripple" aria-hidden="true"></span><span class="lr-ripple r2" aria-hidden="true"></span><span class="lr-ripple r3" aria-hidden="true"></span><span class="lr-rays" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><span class="lr-ribbon">New skill</span><h2>${esc(sk.name)}</h2><p>${esc(String(o.text||'').replace(/<[^>]+>/g,'').trim()||sk.blurb||'')}</p></div>`,actions:[{label:`Open ${sk.name}`,primary:true,fn:()=>{DQ.closeModal();open();setTimeout(pumpLevel,180);}},{label:'Later',fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
   DQ.sfx('unlock');setTimeout(()=>DQ.burstEl(document.querySelector('.level-emblem'),o.col||sk.col||'#d8a64a',44),100);return true;
 };
 const levelQueue=[];let levelRetry=0;
@@ -20012,30 +20011,20 @@ DQ.lessonForPage=page=>{
 DQ.lessonInfo=id=>{DQ.initGuides();return lessons[id]||null;};
 DQ.acknowledgeLesson=id=>{DQ.initGuides();if(!lessons[id])return false;S().tut.done['lesson:'+id]=true;delete S().seen['tutorial:'+id];DQ.save();return true;};
 const intro=()=>`<section class="panel first-play-guide"><div class="first-play-art">${DQ.monSprite(D.MON.mudling||D.MON.chicken,96)}</div><div><span class="k">A short introduction</span><h2>Welcome to Willowbrook</h2><p>Gather supplies, turn them into useful things, and help your village grow. Pick one task at a time; it keeps working while you explore or close the game.</p><div class="first-play-path"><span>Gather</span> → <span>Make &amp; equip</span> → <span>Fight &amp; restore</span></div><div class="btnrow wrap"><button class="btn primary" data-do="introstart">${S().q.first_steps?.s==='done'?'Explore activities':'Start First Steps'}</button><button class="btn sm" data-do="introskip">Skip introduction</button></div></div></section>`;
-const coachHtml=l=>`<div class="skill-coach pop" aria-label="First-time ${esc(l.title)} guide"><span class="coach-art">${DQ.artImage(l.art[0],l.art[1],96,'',l.title)}</span><div><p>${esc(l.text)}</p>${l.towards?`<p class="lesson-towards">${esc(l.towards)}</p>`:''}<p class="lesson-goal"><strong>Try this:</strong> ${esc(l.goal)}</p></div></div>`;
-let current=null,lastPage=null,lastState=null;
 const render=UI.render;
 UI.render=fresh=>{
   DQ.initGuides();
-  if(lastPage!==UI.view||lastState!==S()){current=null;lastPage=UI.view;lastState=S();}
-  if(!current){const l=DQ.lessonForPage(UI.view);if(l){current=l;}}
   render(fresh);
   const view=document.getElementById('view');if(!view)return;
-  /* the introduction now lives in Home's Next step card (one clear action); the panel stays for anyone who restarts the guides */
   if(UI.view==='overview'&&!S().tut.hidden&&!S().tut.done.intro&&S().tut.restarted)view.insertAdjacentHTML('afterbegin',intro());
-  /* the skill's quick guide is a pop-up the first time you open its page (Nov 2026). It counts as seen however it is
-     closed, waits while another dialog is open, and never repeats: a guide, not a forced tour. */
-  if(current&&!document.querySelector('.modal')&&!(DQ.sim&&DQ.sim.on)){const l=current;current=null;DQ.acknowledgeLesson(l.id);
-    DQ.modal({title:`${l.title}: getting started`,body:coachHtml(l),actions:[{label:'Got it',primary:true}]});}
 };
 Object.assign(UI.DO,{
-  lessonclose:id=>{DQ.acknowledgeLesson(id);current=null;UI.render(false);},
   introskip:()=>{S().tut.done.intro=true;DQ.save();UI.render(false);},
   introstart:()=>{S().tut.done.intro=true;DQ.save();if(DQ.questState(D.QM.first_steps)==='new')DQ.startQuest('first_steps');DQ.go('fishing');},
-  resetguides:()=>{S().tut={done:{},hidden:false,version:1,restarted:true};current=null;DQ.save();DQ.go('overview');UI.render(false);},
-  toggleguides:()=>{S().tut.hidden=!S().tut.hidden;current=null;DQ.save();UI.render(false);}
+  resetguides:()=>{S().tut={...S().tut,done:{},hidden:false,version:1,restarted:true};DQ.save();DQ.go('overview');UI.render(false);},
+  toggleguides:()=>{S().tut.hidden=!S().tut.hidden;DQ.save();UI.render(false);}
 });
-if(UI.V.settings){const settings=UI.V.settings;UI.V.settings=()=>settings()+`<section class="panel"><div class="phead"><h2>Help &amp; learning</h2></div><p>Short inline lessons introduce a skill the first time you open it. They never interrupt a running task.</p><div class="btnrow wrap"><button class="btn" data-do="toggleguides">${S().tut.hidden?'Enable':'Hide'} first-time guides</button><button class="btn" data-do="resetguides">Restart introduction &amp; skill guides</button></div></section>`;}
+if(UI.V.settings){const settings=UI.V.settings;UI.V.settings=()=>settings()+`<section class="panel"><div class="phead"><h2>Help &amp; learning</h2></div><p>Each skill has a quick guide you can open whenever you need it.</p><div class="btnrow wrap"><button class="btn" data-do="toggleguides">${S().tut.hidden?'Enable':'Hide'} the introduction</button><button class="btn" data-do="resetguides">Restart introduction</button></div></section>`;}
 })();
 
 </script>
@@ -23510,9 +23499,13 @@ const questFor=next=>{
 };
 const journey0=U.journeyPanel;
 U.journeyPanel=()=>{
- const html=journey0(),next=Q.journeyNext(),q=questFor(next);
- if(Q.goalDone())return html;
+ const html=journey0(),next=Q.journeyNext(),main=Q.mainQuestProgress?.(),q=main ? D.QM[main.id] : questFor(next);
+ if(Q.goalDone()&&!main)return html;
  const t=document.createElement('template');t.innerHTML=html;const panel=t.content.querySelector('.journey');if(!panel)return html;
+ if(next.optional){
+  const kicker=panel.querySelector('.phead .k');
+  if(kicker)kicker.textContent='Optional side story';
+ }
  const taskButton=panel.querySelector('.btn.primary');
  if(taskButton&&next.action==='journeytask'){
   const recipe=next.a==='recipe'&&D.RECIPES[next.b],node=D.NODE[next.a+':'+next.b],running=Q.act?.kind===next.a&&Q.act?.id===next.b;
@@ -25084,6 +25077,124 @@ UI.render = (...a) => {
     const need = Q.openingCombatNeed();
     if (!need) return supplyEntry();
     return `<div class="fight-supply" role="status"><span>${Q.esc(need.detail)}</span><button class="btn sm" data-do="${need.action}" data-a="${need.a || ''}" data-b="${need.b || ''}">${Q.esc(need.title)}</button></div>`;
+  };
+})();
+
+</script>
+<script>
+/* The quest journal and Home share one active main chapter. */
+(() => {
+  const Q = window.DQ, D = Q.data;
+  const chain = [];
+  const visit = quest => {
+    if (!quest || chain.includes(quest)) return;
+    visit(D.QM[quest.req]);
+    chain.push(quest);
+    quest.main = true;
+  };
+  visit(D.QM.first_steps);
+  for (const town of D.TOWNS) visit(D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === town.boss)));
+  const main = [...chain, ...D.QUESTS.filter(q => q.main && !chain.includes(q))];
+  const isActive = status => status === 'active' || status === 'ready';
+
+  Q.currentMainQuest = () => main.find(q => isActive(Q.S.q[q.id]?.s)) || null;
+  Q.reconcileMainQuests = state => {
+    const active = main.filter(q => isActive(state.q[q.id]?.s));
+    for (const quest of active.slice(1)) {
+      const record = state.q[quest.id];
+      record.queuedMain = record.s;
+      record.s = 'locked';
+    }
+    return state;
+  };
+
+  const questBlockers = Q.questBlockers;
+  Q.questBlockers = q => Q.S.q[q.id]?.queuedMain ?
+    ['Continue the current main quest first. Your objectives here are saved.'] : questBlockers(q);
+
+  const startQuest = Q.startQuest;
+  Q.startQuest = id => {
+    const q = D.QM[id];
+    if (!q) return;
+    const current = Q.currentMainQuest();
+    if (q.main && current && current.id !== id) {
+      Q.toast(`Finish ${current.name} before accepting another main quest.`, true);
+      return;
+    }
+    return startQuest(id);
+  };
+
+  const claimQuest = Q.claimQuest;
+  Q.claimQuest = (id, ...args) => {
+    const result = claimQuest(id, ...args);
+    if (D.QM[id]?.main && Q.S.q[id]?.s === 'done' && !Q.currentMainQuest()) {
+      const resume = main.find(q => Q.S.q[q.id]?.queuedMain);
+      if (resume) {
+        const record = Q.S.q[resume.id];
+        record.s = record.queuedMain;
+        delete record.queuedMain;
+        Q.save();
+        Q.emit('quests');
+      }
+    }
+    return result;
+  };
+
+  // Pay a small part of the next chapter's practical cost, while keeping accepted quest IDs and goals.
+  for (let i = 0; i < chain.length - 1; i++) {
+    const q = chain[i], next = chain[i + 1];
+    const delivery = next.obj.find(o => o.ev === 'deliver');
+    const harvest = next.obj.find(o => o.ev === 'harvest');
+    const craft = next.obj.find(o => o.ev === 'craft');
+    const item = delivery?.key || (harvest && D.ITEMS['seed_' + harvest.key] ? 'seed_' + harvest.key :
+      craft ? 'flax' : 'bread');
+    if (D.ITEMS[item]) {
+      q.reward.items = { [item]: Math.min(3, delivery?.n || 3), ...q.reward.items };
+    }
+  }
+
+  const questEntry = q => {
+    const record = Q.S.q[q.id];
+    const index = q.obj.findIndex((o, i) => Q.objProg(q, record, i) < o.n);
+    const objective = q.obj[index];
+    return { q, record, index, objective };
+  };
+
+  Q.mainQuestProgress = () => {
+    const q = Q.currentMainQuest() || chain.find(q => Q.questState(q) === 'new');
+    if (!q) return null;
+    const { record, index, objective } = questEntry(q);
+    return {
+      id: q.id, name: q.name, state: Q.questState(q),
+      label: objective?.label || 'Return to ' + q.giver,
+      have: objective ? Q.objProg(q, record, index) : q.obj.length,
+      need: objective?.n || q.obj.length,
+    };
+  };
+
+  const journeyNext = Q.journeyNext;
+  const step = (title, detail, action, a, b) => ({ title, detail, action, a, b });
+  Q.journeyNext = (goal = Q.S.journey || 'boss') => {
+    const guidance = journeyNext(goal);
+    const quest = Q.currentMainQuest();
+    if (goal !== 'boss' || !quest) return guidance;
+    if (guidance.a === 'hungry_cook' || /Mabel/.test(guidance.title)) {
+      return { ...guidance, optional: true };
+    }
+    const { record, index, objective } = questEntry(quest);
+    if (quest.town !== Q.S.town) return step(`Return to ${D.TOWN[quest.town].name}`, quest.name, 'journeytravel', quest.town);
+    if (record.s === 'ready') return step(`Return to ${quest.giver}`, quest.name, 'qclaim', quest.id);
+    if (!objective || objective.ev === 'boss') return guidance;
+    const detail = `${quest.name} · ${Q.objProg(quest, record, index)} / ${objective.n}`;
+    if (objective.ev === 'kill') {
+      return Q.openingCombatNeed?.() || Q.foodStep?.('Bring enough food to finish your patrol.') ||
+        step(objective.label, detail, 'huntquest', objective.key);
+    }
+    const kind = { catch: 'fish', chop: 'wood', mine: 'mine', thieve: 'thieve' }[objective.ev];
+    if (kind && D.NODE[kind + ':' + objective.key]) {
+      return step(objective.label, detail, 'journeytask', kind, objective.key);
+    }
+    return step(objective.label, detail, 'questcontinue', quest.id);
   };
 })();
 

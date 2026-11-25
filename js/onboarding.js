@@ -54,28 +54,18 @@ DQ.lessonForPage=page=>{
 DQ.lessonInfo=id=>{DQ.initGuides();return lessons[id]||null;};
 DQ.acknowledgeLesson=id=>{DQ.initGuides();if(!lessons[id])return false;S().tut.done['lesson:'+id]=true;delete S().seen['tutorial:'+id];DQ.save();return true;};
 const intro=()=>`<section class="panel first-play-guide"><div class="first-play-art">${DQ.monSprite(D.MON.mudling||D.MON.chicken,96)}</div><div><span class="k">A short introduction</span><h2>Welcome to Willowbrook</h2><p>Gather supplies, turn them into useful things, and help your village grow. Pick one task at a time; it keeps working while you explore or close the game.</p><div class="first-play-path"><span>Gather</span> → <span>Make &amp; equip</span> → <span>Fight &amp; restore</span></div><div class="btnrow wrap"><button class="btn primary" data-do="introstart">${S().q.first_steps?.s==='done'?'Explore activities':'Start First Steps'}</button><button class="btn sm" data-do="introskip">Skip introduction</button></div></div></section>`;
-const coachHtml=l=>`<div class="skill-coach pop" aria-label="First-time ${esc(l.title)} guide"><span class="coach-art">${DQ.artImage(l.art[0],l.art[1],96,'',l.title)}</span><div><p>${esc(l.text)}</p>${l.towards?`<p class="lesson-towards">${esc(l.towards)}</p>`:''}<p class="lesson-goal"><strong>Try this:</strong> ${esc(l.goal)}</p></div></div>`;
-let current=null,lastPage=null,lastState=null;
 const render=UI.render;
 UI.render=fresh=>{
   DQ.initGuides();
-  if(lastPage!==UI.view||lastState!==S()){current=null;lastPage=UI.view;lastState=S();}
-  if(!current){const l=DQ.lessonForPage(UI.view);if(l){current=l;}}
   render(fresh);
   const view=document.getElementById('view');if(!view)return;
-  /* the introduction now lives in Home's Next step card (one clear action); the panel stays for anyone who restarts the guides */
   if(UI.view==='overview'&&!S().tut.hidden&&!S().tut.done.intro&&S().tut.restarted)view.insertAdjacentHTML('afterbegin',intro());
-  /* the skill's quick guide is a pop-up the first time you open its page (Nov 2026). It counts as seen however it is
-     closed, waits while another dialog is open, and never repeats: a guide, not a forced tour. */
-  if(current&&!document.querySelector('.modal')&&!(DQ.sim&&DQ.sim.on)){const l=current;current=null;DQ.acknowledgeLesson(l.id);
-    DQ.modal({title:`${l.title}: getting started`,body:coachHtml(l),actions:[{label:'Got it',primary:true}]});}
 };
 Object.assign(UI.DO,{
-  lessonclose:id=>{DQ.acknowledgeLesson(id);current=null;UI.render(false);},
   introskip:()=>{S().tut.done.intro=true;DQ.save();UI.render(false);},
   introstart:()=>{S().tut.done.intro=true;DQ.save();if(DQ.questState(D.QM.first_steps)==='new')DQ.startQuest('first_steps');DQ.go('fishing');},
-  resetguides:()=>{S().tut={done:{},hidden:false,version:1,restarted:true};current=null;DQ.save();DQ.go('overview');UI.render(false);},
-  toggleguides:()=>{S().tut.hidden=!S().tut.hidden;current=null;DQ.save();UI.render(false);}
+  resetguides:()=>{S().tut={...S().tut,done:{},hidden:false,version:1,restarted:true};DQ.save();DQ.go('overview');UI.render(false);},
+  toggleguides:()=>{S().tut.hidden=!S().tut.hidden;DQ.save();UI.render(false);}
 });
-if(UI.V.settings){const settings=UI.V.settings;UI.V.settings=()=>settings()+`<section class="panel"><div class="phead"><h2>Help &amp; learning</h2></div><p>Short inline lessons introduce a skill the first time you open it. They never interrupt a running task.</p><div class="btnrow wrap"><button class="btn" data-do="toggleguides">${S().tut.hidden?'Enable':'Hide'} first-time guides</button><button class="btn" data-do="resetguides">Restart introduction &amp; skill guides</button></div></section>`;}
+if(UI.V.settings){const settings=UI.V.settings;UI.V.settings=()=>settings()+`<section class="panel"><div class="phead"><h2>Help &amp; learning</h2></div><p>Each skill has a quick guide you can open whenever you need it.</p><div class="btnrow wrap"><button class="btn" data-do="toggleguides">${S().tut.hidden?'Enable':'Hide'} the introduction</button><button class="btn" data-do="resetguides">Restart introduction</button></div></section>`;}
 })();

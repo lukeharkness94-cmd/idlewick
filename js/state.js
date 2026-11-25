@@ -147,6 +147,7 @@ function candidateState(o) {
   if(result.hunt.loopVersion!==undefined&&result.hunt.loopVersion!==1)throw new Error('Unsupported hunting loop');
   if(result.hunt.fieldFocus!=null&&(typeof result.hunt.fieldFocus!=='string'||!D.ITEMS[result.hunt.fieldFocus]))throw new Error('Invalid hunting focus');
   migrate(result);
+  DQ.reconcileMainQuests?.(result);
   return result;
 }
 DQ.validateSave = candidateState;
