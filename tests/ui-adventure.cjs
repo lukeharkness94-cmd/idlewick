@@ -4,7 +4,7 @@
 const assert=require('node:assert/strict');
 let chromium;try{({chromium}=require('playwright'));}catch(e){console.log('SKIP ui-adventure: playwright is not installed');process.exit(0);}
 const log=()=>{};
-(async()=>{const b=await chromium.launch();const ctx=await b.newContext({viewport:{width:1300,height:900}});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+(async()=>{const b=await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });const ctx=await b.newContext({viewport:{width:1300,height:900}});const p=await ctx.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
 await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/');await p.locator('#t-new').click();await p.locator('#crname').fill('Miller');await p.locator('#cr-go').click();await p.waitForTimeout(800);await p.keyboard.press('Escape');
 const ev=(f,a)=>p.evaluate(f,a);
 await ev(()=>{DQ.closeModal&&DQ.closeModal();DQ.holdNotes=false;DQ.S.settings.storyScenes=false;const S=DQ.S,X=DQ.data.XPF;for(const s of ['woodcutting','fishing','cooking','attack','strength','defence','hitpoints','smithing','mining','farming'])S.xp[s]=Math.max(S.xp[s],X[45]);

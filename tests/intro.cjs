@@ -8,7 +8,7 @@ const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
 const URL = process.env.IDLEWICK_URL || 'http://127.0.0.1:8765/index.html';
 (async () => {
-  const b = await chromium.launch();
+  const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
   const make = async force => {
     const ctx = await b.newContext({ viewport: { width: 1440, height: 810 } });
     if (force) await ctx.addInitScript(() => { try { localStorage.setItem('idlewick.intro', '1'); } catch (e) {} });
