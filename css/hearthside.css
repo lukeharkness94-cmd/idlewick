@@ -833,3 +833,7 @@ html:has(.home-glance) #hud .h-stats,html:has(.home-glance) #hud .h-task,html:ha
  #view .stock-item :is(.item-deltas,.bundle-indicator,.req-chips){grid-column:2/-1;justify-content:start}
  #view .stock-item .stock-price{grid-column:3;grid-row:1}
 }
+
+/* locked rail rows: a quiet bar showing how close the skill is to being learned */
+#skilldock .dk.locked .bar.dk-req{display:block;opacity:.85}
+#skilldock .dk.locked .bar.dk-req i{background:color-mix(in srgb,var(--c) 55%,var(--mute))}

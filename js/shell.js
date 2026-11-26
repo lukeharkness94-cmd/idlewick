@@ -109,10 +109,18 @@ UI.skillDockOrder=()=>D.SKILLS.filter(s=>s.group!=='combat').sort((a,b)=>{
  const starter=s=>!s.quest&&!s.actionReq&&s.unlock<=1;
  return Number(starter(b))-Number(starter(a))||(dockOrder.indexOf(a.id)<0?999:dockOrder.indexOf(a.id))-(dockOrder.indexOf(b.id)<0?999:dockOrder.indexOf(b.id));
 });
-UI.skillDockVisible = () => UI.skillDockOrder().filter(skill => S().tut.showLockedSkills || DQ.skillUnlocked(skill.id));
+/* every skill stays in the rail, locked ones with their lock and requirement (owner, 26 Nov 2026: "I absolutely do not
+   want them collapsed or invisible, I want people to be able to see what they're unlocking") */
+UI.skillDockVisible = () => UI.skillDockOrder();
+/* how far a locked skill's requirements are met, averaged over its live counters (0-100) */
+UI.unlockPct = sk => { try { const s = D.SK[sk]; let parts = [];
+  if (s.actionReq && DQ.actionProgress) parts = DQ.actionProgress(sk).map(r => Math.min(1, (r.have || 0) / Math.max(1, r.need || 1)));
+  else if (s.quest && D.QM[s.quest]) { const q = D.QM[s.quest], p = S().q[q.id]; parts = p && p.s === 'done' ? [1] : q.obj.map((o, i) => p && DQ.objProg ? Math.min(1, DQ.objProg(q, p, i) / o.n) : 0); }
+  else if (s.unlock) parts = [Math.min(1, (DQ.advLvl ? DQ.advLvl() : 1) / s.unlock)];
+  return parts.length ? Math.round(100 * parts.reduce((a, b) => a + b, 0) / parts.length) : 0; } catch (e) { return 0; } };
 UI.lockedSkillsLink = (action = 'go') => {
   const count = UI.skillDockOrder().filter(skill => !DQ.skillUnlocked(skill.id)).length;
-  return count ? `<button class="btn sm dk-requirements" data-do="${action}" data-a="skillsummary">Locked skills · ${count}</button>` : '';
+  return count && action !== 'go' ? `<button class="btn sm dk-requirements" data-do="${action}" data-a="skillsummary">Locked skills · ${count}</button>` : '';
 };
 UI.renderDock = () => {
   const el = $('#skilldock'); if (!el) return;
@@ -121,7 +129,7 @@ UI.renderDock = () => {
     const lock = !DQ.skillUnlocked(s.id);
     const lv=DQ.lvl(s.id),need=lv>=99?0:Math.max(0,D.XPF[lv+1]-(S().xp[s.id]||0));
     const pop = UI.levelPop[s.id], popping = pop && Date.now() - pop < 1600;
-    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''} ${DQ.act && DQ.act.kind !== 'fight' && DQ.actSkill && DQ.actSkill() === s.id ? 'working' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" data-tip="rail:${s.id}" data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span><span class="notice-badge" data-b="notice:${s.page}" hidden></span>${!lock && S().unlocked[s.id] && S().newSkills && S().newSkills[s.id] ? '<span class="dk-new">New</span>' : ''}${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span>`}</span>${!lock && ap === s.page ? '<i class="dk-live" aria-label="Working"></i>' : ''}</button>`;
+    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''} ${DQ.act && DQ.act.kind !== 'fight' && DQ.actSkill && DQ.actSkill() === s.id ? 'working' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" data-tip="rail:${s.id}" data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span><span class="notice-badge" data-b="notice:${s.page}" hidden></span>${!lock && S().unlocked[s.id] && S().newSkills && S().newSkills[s.id] ? '<span class="dk-new">New</span>' : ''}${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?`<span class="bar dk-req" title="Progress toward learning it"><i style="width:${UI.unlockPct(s.id)}%"></i></span>`:''}${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span>`}</span>${!lock && ap === s.page ? '<i class="dk-live" aria-label="Working"></i>' : ''}</button>`;
   }).join('') + UI.lockedSkillsLink();
   UI.upd();
 };
@@ -226,7 +234,7 @@ UI.V.skillsummary = () => {
   const open = D.SKILLS.filter(skill => DQ.skillUnlocked(skill.id));
   const locked = D.SKILLS.filter(skill => !DQ.skillUnlocked(skill.id));
   return `<section class="panel skill-summary"><div class="phead"><h2>Your skills</h2><small>Total level <b data-b="totlvl"></b></small>
-    <button class="btn sm" data-do="skiponboarding" aria-pressed="${!!S().tut.showLockedSkills}">${S().tut.showLockedSkills ? 'Show learned skills in navigation' : 'Skip onboarding'}</button></div>
+    <button class="btn sm" data-do="skiponboarding" aria-pressed="${!!S().tut.showLockedSkills}">${S().tut.showLockedSkills ? 'Onboarding skipped' : 'Skip onboarding'}</button></div>
     <div class="skill-summary-scroll"><div class="skl">${skillSummaryRows(open)}</div>
     ${locked.length ? `<section class="skill-requirement-group"><h3>Locked skills · requirements</h3><div class="skl">${skillSummaryRows(locked)}</div></section>` : ''}</div></section>`;
 };
@@ -306,3 +314,6 @@ DQ.on('act', () => UI.packWarn(true));
 })();
 /* Inventory on desktop: Appearance & sharing sits under Preparations in the right column, so the equipment column fits short windows */
 (() => { const UI = window.DQ.ui; const r0 = UI.render; UI.render = (...a) => { const r = r0(...a); try { if (UI.view === 'character' && innerWidth > 860) { const ap = document.getElementById('equipment-appearance'), col = document.querySelector('#view .character-layout>.col'); if (ap && col && ap.parentElement !== col) { ap.classList.add('panel', 'appearance-side'); col.appendChild(ap); } } } catch (e) {} return r; }; })();
+/* keep the locked rows' requirement bars live as logs, fish and kills come in */
+(() => { const DQ = window.DQ, UI = DQ.ui; const upd = () => { document.querySelectorAll('#skilldock .dk.locked').forEach(b => { const i = b.querySelector('.dk-req i'), sk = (b.dataset.tip || '').replace('rail:', ''); if (i && sk && UI.unlockPct) i.style.width = UI.unlockPct(sk) + '%'; }); };
+  DQ.on('workcycle', upd); DQ.on('kill', upd); DQ.on('ui', () => { if (Math.random() < .2) upd(); }); })();
