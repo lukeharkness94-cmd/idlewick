@@ -12,9 +12,16 @@
   for (const town of D.TOWNS) visit(D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === town.boss)));
   const main = [...chain, ...D.QUESTS.filter(q => q.main && !chain.includes(q))];
   const isActive = status => status === 'active' || status === 'ready';
+  const regionalPreparation = { boar_hunt: 2, crab_cull: 1 };
 
   Q.currentMainQuest = () => main.find(q => isActive(Q.S.q[q.id]?.s)) || null;
   Q.reconcileMainQuests = state => {
+    for (const [id, start] of Object.entries(regionalPreparation)) {
+      const record = state.q[id], objectives = D.QM[id].obj;
+      if (record?.p?.length !== start) continue;
+      const earned = ['ready', 'done'].includes(record.queuedMain || record.s);
+      record.p.push(...objectives.slice(start).map(o => earned ? o.n : 0));
+    }
     const active = main.filter(q => isActive(state.q[q.id]?.s));
     for (const quest of active.slice(1)) {
       const record = state.q[quest.id];
@@ -71,10 +78,13 @@
 
   const questEntry = q => {
     const record = Q.S.q[q.id];
-    const index = q.obj.findIndex((o, i) => Q.objProg(q, record, i) < o.n);
+    const incomplete = (o, i) => Q.objProg(q, record, i) < o.n;
+    const preparation = q.obj.findIndex((o, i) => regionalPreparation[q.id] !== undefined && i >= regionalPreparation[q.id] && incomplete(o, i));
+    const index = preparation >= 0 ? preparation : q.obj.findIndex(incomplete);
     const objective = q.obj[index];
     return { q, record, index, objective };
   };
+  Q.unfinishedObjective = q => q ? questEntry(q).objective : undefined;
 
   Q.mainQuestProgress = () => {
     const q = Q.currentMainQuest() || chain.find(q => Q.questState(q) === 'new');
@@ -105,6 +115,11 @@
     if (objective.ev === 'kill') {
       return Q.openingCombatNeed?.() || Q.foodStep?.('Bring enough food to finish your patrol.') ||
         step(objective.label, detail, 'huntquest', objective.key);
+    }
+    if (objective.ev === 'cook' && objective.key === 'shrimp') {
+      return Q.have('raw_shrimp') ?
+        step(objective.label, detail, 'journeytask', 'recipe', 'cook_shrimp') :
+        step('Catch shrimp for the patrol', detail, 'journeytask', 'fish', 'shrimp');
     }
     const kind = { catch: 'fish', chop: 'wood', mine: 'mine', thieve: 'thieve' }[objective.ev];
     if (kind && D.NODE[kind + ':' + objective.key]) {

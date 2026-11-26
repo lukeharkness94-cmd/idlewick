@@ -31,8 +31,8 @@ D.PROJECT_VOICES = {
 /* Regional projects use that region's own materials and give a distinct benefit. Every regional project also keeps the
    original +2% resting recovery, so players who finished one before this change keep exactly what they had. */
 const regionalProjects = [
- ['mossbarrow','market','Repair the market shelter','The market stalls are sheltered and traders can return.',{coins:150,log_normal:30,crop_potato:15},{coin:.03},'+3% coins from every source.'],
- ['saltmere','jetty','Rebuild the fishing jetty','Fishing boats can unload safely at the repaired jetty.',{coins:500,log_oak:40,raw_sardine:25},{speed_fishing:.05},'Fishing is 5% faster.'],
+ ['mossbarrow','market','Repair the market shelter','The market stalls are sheltered and traders can return.',{coins:100,log_normal:12,flax:6},{coin:.03},'+3% coins from every source.'],
+ ['saltmere','jetty','Rebuild the fishing jetty','Fishing boats can unload safely at the repaired jetty.',{coins:200,log_normal:16,raw_sardine:12},{speed_fishing:.05},'Fishing is 5% faster.'],
  ['ironpeak','hearth','Relight the communal hearth','The hold has a warm refuge for returning miners.',{coins:1200,log_willow:30,ore_coal:25},{speed_mining:.05},'Mining is 5% faster.'],
  ['gloomfen','lanterns','Restore the marsh lanterns','Lanterns mark a safe path through the marsh.',{coins:2500,log_maple:30,bar_iron:15},{dr:.03},'Monsters deal 3% less damage.'],
  ['emberfall','cistern','Repair the cooling cistern','Fresh water reaches the citadel courtyards again.',{coins:5000,log_yew:30,bar_steel:15},{heal:.05},'Food restores 5% more health.'],
@@ -238,12 +238,16 @@ DQ.regionNext = () => {
   if (bq && DQ.questState(bq) === 'new') return step(`Accept “${bq.name}”`, `${bq.giver} asks you to face ${short}. Accepting makes the victory count.`, 'qstart', bq.id);
   const req = b.boss.req;
   if (DQ.combatLvl() < req) { const fs = DQ.foodStep && DQ.foodStep(`Training here hits back harder than mudlings.`); if (fs) return fs; }
-  if (DQ.combatLvl() < req) { const foe = D.MONLIST.filter(m => m.town === b.town && !m.boss && !m.mini && !m.hl && !m.tower && m.cl <= DQ.combatLvl() + 2).sort((a, c) => c.cl - a.cl)[0] || D.MONLIST.find(m => m.town === b.town && !m.boss && !m.hl);
-    return task(`Train for ${short}`, `Combat ${DQ.combatLvl()} / ${req}. ${foe ? `${DQ.plural ? DQ.plural(foe.name) : foe.name + 's'} are a fair fight here.` : ''}`, 'fight', foe ? foe.id : b.id); }
+  const targets = D.MONLIST.filter(m => m.town === b.town && !m.boss && !m.mini && !m.hl && !m.tower);
+  const foe = targets.filter(m => m.cl <= DQ.combatLvl() + 2).sort((a, c) => c.cl - a.cl)[0] || targets[0];
+  const train = detail => task(`Train for ${short}`, `${detail}${foe ? ` Fight ${DQ.plural(foe.name).toLowerCase()} to improve your current style.` : ''}`, 'fight', foe?.id || b.id);
+  if (DQ.combatLvl() < req) return train(`Combat ${DQ.combatLvl()} / ${req}.`);
   const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
   if (f && f.winRate >= .75) return task(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'fight', b.id);
-  const tip = DQ.prepAdvice ? DQ.prepAdvice(b.id, f).find(x=>x.actionable!==false) : null;
-  return tip ? step(tip.title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${tip.text}`, tip.action || 'go', tip.a || 'combat') : step(`Challenge ${short}`, 'You are ready by level. Check the forecast on the Combat page.', 'go', 'combat');
+  const tip = DQ.prepAdvice?.(b.id, f).find(x => x.action && !x.info && x.actionable !== false && (x.afford !== false || x.preparing) && x.a !== 'combat');
+  if (tip) return step(tip.title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${tip.text}`, tip.action, tip.a);
+  const food = DQ.foodStep?.(`Bring enough food to train for ${short}.`);
+  return food || train('Your current build could use more practice. Check the boss preview for its counter and your max hit.');
 };
 /* Optional goals beside the one primary action: something short, something over a few sessions, a long pursuit */
 DQ.optionalGoals = () => {
@@ -252,7 +256,10 @@ DQ.optionalGoals = () => {
   if (q) out.push({ span: 'Short', text: `Finish “${q.name}” for ${q.giver}`, action: 'go', a: 'quests' });
   else if (DQ.loadouts && !DQ.loadouts().length && DQ.advLvl() >= 15) out.push({ span: 'Short', text: 'Save your current gear as a preparation, then try another', action: 'go', a: 'character' });
   const proj = DQ.projectsForTown(town).filter(([id]) => !S().projects[id]).sort((a, c) => (a[1].cost.coins || 0) - (c[1].cost.coins || 0))[0];
-  if (proj) out.push({ span: 'A few sessions', text: `${proj[1].name}: ${proj[1].reward}`, action: 'openproject', a: proj[0] });
+  if (proj) {
+    const ready = DQ.canAfford(DQ.projectNeed(proj[0]));
+    out.push({ span: ready ? 'Ready to restore' : 'Village project', text: `${proj[1].name} · ${proj[1].reward}`, action: 'openproject', a: proj[0] });
+  }
   const chase = D.MONLIST.find(m => m.town === town && !m.boss && (S().beast.kills[m.id] || 0) > 0 && m.drops.some(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique && !(S().uniqFound || {})[d[0]]));
   if (chase && DQ.uniqueSource) { const id = chase.drops.find(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique)[0], src = DQ.uniqueSource(id); out.push({ span: 'Long', text: `${D.ITEMS[id].name} from ${DQ.plural(chase.name)}: ${src.need - Math.min(src.have, src.need)} more defeats at most`, action: 'guide', a: chase.id }); }
   else if (DQ.understanding) { const mons = D.MONLIST.filter(m => m.town === town), u = mons.filter(m => DQ.understanding(m).done).length; if (u < mons.length && mons.some(m => S().beast.kills[m.id])) out.push({ span: 'Long', text: `${D.TOWN[town].name} field guide: ${u} / ${mons.length} creatures understood`, action: 'go', a: 'bestiary' }); }

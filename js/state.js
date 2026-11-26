@@ -108,6 +108,14 @@ function candidateState(o) {
   if (result.pinnedProject !== null && !(typeof result.pinnedProject === 'string' && Object.prototype.hasOwnProperty.call(D.PROJECTS || {}, result.pinnedProject))) result.pinnedProject = null;
   /* partial deliveries to projects: unknown projects or items are dropped, quantities must be whole and non-negative */
   if (!result.projectGiven || typeof result.projectGiven !== 'object' || Array.isArray(result.projectGiven)) result.projectGiven = {};
+  for (const [id, before, after, oldCap, newCap] of [['market', 'crop_potato', 'flax', 15, 6], ['jetty', 'log_oak', 'log_normal', 40, 16]]) {
+    const delivery = result.projectGiven[id];
+    if (delivery && Number.isFinite(delivery[before]) && delivery[before] > 0) {
+      delivery[after] = (Number.isFinite(delivery[after]) ? delivery[after] : 0) +
+        Math.ceil(Math.min(delivery[before], oldCap) / oldCap * newCap);
+      delete delivery[before];
+    }
+  }
   for (const [pid, g] of Object.entries(result.projectGiven)) { const pj = (D.PROJECTS || {})[pid];
     if (!pj || !g || typeof g !== 'object' || result.projects[pid]) { delete result.projectGiven[pid]; continue; }
     for (const [k, n] of Object.entries(g)) { if (!(k in pj.cost) && k.startsWith('log_') && ('plank_' + k.slice(4)) in pj.cost && Number.isFinite(n)) { g['plank_' + k.slice(4)] = (g['plank_' + k.slice(4)] || 0) + n; delete g[k]; continue; }

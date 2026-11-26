@@ -145,12 +145,20 @@ UI.specialLine = m => {
   return `<p class="sm special-line">${ico('info')} <b>${esc(sp.name)}</b> every ${sp.every}th attack: a sure hit of about ${hit} before armour. Softened or stopped by ${stops.join(', ')}.</p>`;
 };
 UI.lastForecast = {};
+UI.bossReadiness = m => {
+  const weak = DQ.weakOf(m).weak.map(t => D.DTYPES[t].name).join(' / ');
+  const max = DQ.damageEstimate(m).max;
+  const supply = DQ.foods().reduce((hp, id) => hp + D.ITEMS[id].heal * DQ.have(id), 0);
+  const target = Math.round(DQ.maxHp() * 2.5);
+  const warning = !S().settings.autoEat ? 'Auto-eat is off' : supply < target ? `Bring more food (aim for ${target} healing)` : '';
+  return `<div class="boss-readiness sm"><span>Counter <b>${esc(weak || 'See fight details')}${m.id === 'hollowking' ? ' (opening phase)' : ''}</b></span> · <span>Your max hit <b>${max}</b></span> · <span>Food <b>${fmt(supply)} healing</b></span>${warning ? `<div class="warn">${warning}</div>` : ''}</div>`;
+};
 UI.bossIntel = m => {
   const B = D.BOSSMECH[m.id]; if (!B) return '';
   const w = DQ.weakOf(m), mu = DQ.matchup(m);
   const alternatives = Object.keys({ ...S().inv, ...S().bank }).filter(id => D.ITEMS[id].slot && D.ITEMS[id].slot !== 'ammo' && DQ.canEquip(id).ok && S().equip[D.ITEMS[id].slot] !== id);
   const compare = alternatives.length ? `<section data-reference="true"><h3>Compare an equipment change</h3><p class="sm">Simulated with your current health and food.</p><div class="btnrow wrap">${alternatives.map(id => `<button class="btn sm" data-do="comparegear" data-a="${m.id}" data-b="${id}">${esc(D.ITEMS[id].name)}</button>`).join('')}</div></section>` : '';
-  return `<div class="intel"><div class="k">Prepare for this fight</div><p class="sm">Health ${Math.ceil(S().hp)} / ${DQ.maxHp()} · ${DQ.supplyInfo({kind:'fight'})?.label || 'No supplies'}. Auto-eat ${S().settings.autoEat ? 'on' : 'off'}.</p>${UI.prepSteps(m)}<p class="sm">${B.text}</p>${UI.specialLine(m)}
+  return `<div class="intel"><div class="k">Prepare for this fight</div>${UI.bossReadiness(m)}${UI.prepSteps(m)}<p class="sm">${B.text}</p>${UI.specialLine(m)}
     ${m.id === 'hollowking' ? '' : `<div class="chips">${w.weak.map(t => dchip(t, 'weak')).join('')}${w.resist.map(t => dchip(t, 'res')).join('')}</div>`}
     <div class="sm"><b>Counters:</b> ${B.counters.join(' · ')}</div>
     <div class="match">${mu.map(([k, t]) => `<div class="${k === 'good' ? 'ok' : k === 'bad' ? 'bad' : 'dim'}">${k === 'good' ? '✓' : k === 'bad' ? '✗' : '•'} ${t}</div>`).join('')}</div>
