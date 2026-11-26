@@ -168,6 +168,8 @@ function candidateState(o) {
     }
   }
   DQ.reconcileMainQuests?.(result);
+  /* modules that keep records in shared lists (e.g. waiting world events in inbox) check their own rows */
+  for (const check of DQ.saveChecks || []) check(result);
   return result;
 }
 DQ.validateSave = candidateState;

@@ -57,7 +57,7 @@ const homeGlance = () => {
    : `<button class="btn primary" data-do="${next.action}" data-a="${esc(next.a || '')}" data-b="${esc(next.b || '')}">${esc(next.title)}</button>`;
  const count = S().inbox?.length || 0;
  const local = (town.id !== 'willowbrook' || S().q.goblin_menace?.s === 'done') && Q.closestRestoration();
- const flag = count ? `<button class="btn" data-do="go" data-a="activity">${count} away ${count === 1 ? 'decision' : 'decisions'}</button>` :
+ const flag = count ? `<button class="btn" data-do="go" data-a="activity">${count} ${count === 1 ? 'decision' : 'decisions'} waiting</button>` :
    S().lastAway && !S().lastAway.gone ? '<button class="btn" data-do="go" data-a="activity">Welcome Back summary</button>' :
    local && local !== project ? `<button class="btn" data-do="openproject" data-a="${local}">${ico('house')}${esc(D.PROJECTS[local].name)}${Q.projectReady(local) ? ' · Ready' : ''}</button>` : '';
  return `<div class="home-glance">

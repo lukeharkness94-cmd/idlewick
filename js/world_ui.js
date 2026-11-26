@@ -24,19 +24,28 @@ UI.V.tower = () => { const town = S().town, T = (D.TOWERS || {})[town]; if (!T) 
     <aside class="panel tw-side"><span class="k">At the top</span><span class="tw-boss">${Q.monSprite(boss, 96, cleared >= T.floors.length - 1 ? '' : 'sil')}</span><h3>${cleared >= T.floors.length - 1 ? esc(boss.name) : '???'}</h3>
       <div class="tw-prize ${Q.towerDone(town) ? 'got' : ''}" data-tip="item:${T.prize}"><span class="activity-item-art" style="--art-size:48px">${Q.itemIco(prize)}</span><div><b>${esc(prize.name)}</b><small>${esc(prize.unique.text)}</small><small class="dim">${Q.towerDone(town) ? '✓ Won' : 'First victory'}</small></div></div>
       <div class="tw-all">${Object.values(D.TOWERS).map(x => `<span class="tw-dot ${Q.towerDone(x.town) ? 'on' : Q.towerFloor(x.town) ? 'part' : ''}" data-tip="text:${esc(D.TOWN[x.town].name)}: ${Q.towerFloor(x.town)}/${x.floors.length}"></span>`).join('')}</div></aside></div>`; };
-/* ---------- the event card: a small card over the page (never a modal), choices as buttons, "Later" tucks it away ---------- */
-const WS = () => Q.worldState; let tucked = false;
+/* ---------- world events (owner, 26 Nov 2026): a new event opens full-screen in the away-encounter scene
+   (player_feedback.js, UI.DO.openevent); Decide later or Escape leaves it waiting in Activity. Under #worldcard only
+   an event under way (a fight or ore to mine) shows as a pill, then its outcome, and damaged buildings on Village. ---------- */
+const WS = () => Q.worldState;
 const cardHost = () => { let el = document.getElementById('worldcard'); if (!el) { el = document.createElement('div'); el.id = 'worldcard'; el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); } return el; };
-UI.worldCard = () => { if (typeof document === 'undefined' || !Q.S) return; const el = cardHost(), W = WS(), ev = W.active, r = W.result, dm = damageHtml();
-  if (!ev && !r) { el.innerHTML = dm; el.className = dm ? 'show' : ''; tucked = false; return; }
+UI.worldCard = () => { if (typeof document === 'undefined' || !Q.S) return; const el = cardHost(), W = WS(), ev = Q.worldActive ? Q.worldActive() : W.active, r = W.result, dm = damageHtml();
+  if (!ev && !r) { el.innerHTML = dm; el.className = dm ? 'show' : ''; return; }
   if (r && !ev) { el.className = 'show result'; el.innerHTML = dm + `<div class="wc" style="--c:${r.col}"><span class="wc-ic">${ico(r.ic)}</span><div class="wc-b"><b>${esc(r.title)}</b><p>${esc(r.msg)}</p></div><button class="wc-x" data-do="worldclose" aria-label="Close">×</button></div>`; return; }
-  if (tucked || ev.doing) { const d = ev.doing; el.className = 'show pill'; el.innerHTML = dm + `<button class="wc-pill" style="--c:${ev.def.col}" data-do="${d ? (d.fight ? 'go' : d.go ? 'go' : 'worldopen') : 'worldopen'}" data-a="${d ? (d.fight ? 'combat' : d.go || '') : ''}">${ico(ev.def.ic)}<b>${esc(ev.title)}</b>${d && d.need ? `<span class="mono">${ev.count}/${d.need}</span>` : d ? '<span>under way</span>' : '<span>waiting</span>'}</button>`; return; }
-  el.className = 'show'; el.innerHTML = dm + `<div class="wc" style="--c:${ev.def.col}"><span class="wc-ic">${ico(ev.def.ic)}</span><div class="wc-b"><b>${esc(ev.title)}</b><p>${esc(ev.text)}</p><div class="wc-ch">${Q.worldChoices().map(c => `<button class="btn ${c.can && !c.can() ? '' : 'primary'}" data-do="worldchoose" data-a="${c.id}" ${c.can && !c.can() ? 'disabled' : ''}>${esc(c.label)}${c.sub ? `<small>${esc(c.sub)}</small>` : ''}</button>`).join('')}<button class="linkish" data-do="worldlater">Later</button></div></div></div>`; };
+  const d = ev.doing || {}; el.className = 'show pill'; el.innerHTML = dm + `<button class="wc-pill" style="--c:${ev.def.col}" data-do="go" data-a="${d.fight ? 'combat' : esc(d.go || 'overview')}">${ico(ev.def.ic)}<b>${esc(ev.title)}</b>${d.need ? `<span class="mono">${ev.count}/${d.need}</span>` : '<span>under way</span>'}</button>`; };
+/* the scene's picture: the creature you would face, the villager asking, or the thing on offer; all drawn in code */
+UI.eventArt = e => { if (!e || e.type !== 'world') return ''; Q.inboxRefresh && Q.inboxRefresh(); const x = e.data || {}, it = id => id && D.ITEMS[id] ? Q.itemIco(D.ITEMS[id]) : '';
+  let art = '';
+  try { if (x.mon && D.MON[x.mon]) art = Q.monSprite(D.MON[x.mon], 128, 'we-foe');
+    else if (e.ev === 'errand') art = (Q.folkPortrait ? Q.folkPortrait(x.giver, 128, 'we-face') : '') + it(x.item);
+    else if (e.ev === 'merchant') art = it(x.gem); else if (e.ev === 'shrine') art = it(x.item); else if (e.ev === 'star') art = it('star_shard'); } catch (z) { art = ''; }
+  const when = e.how === 'away' ? 'While you were away' : e.how === 'idle' ? 'While you were busy elsewhere' : '';
+  return `<span class="we-art">${art || ico(e.ic)}</span>${when ? `<span class="we-when">${when} · it waited for you</span>` : ''}`; };
+Q.worldShow = id => { if (UI.DO.openevent) UI.DO.openevent(id); };
+UI.DO.worldopen = id => { const L = Q.worldWaiting ? Q.worldWaiting() : []; const e = L.find(x => String(x.id) === String(id)) || L[L.length - 1]; if (e) UI.DO.openevent(e.id); };
 UI.DO.worldchoose = a => { Q.worldChoose(a); UI.worldCard(); UI.render && UI.render(false); };
-UI.DO.worldlater = () => { tucked = true; UI.worldCard(); };
-UI.DO.worldopen = () => { tucked = false; UI.worldCard(); };
 UI.DO.worldclose = () => { WS().result = null; UI.worldCard(); };
-Q.on('world', () => { if (WS().active && !WS().active.doing && !WS().result) tucked = tucked && !!WS().active; UI.worldCard(); });
+Q.on('world', () => UI.worldCard());
 /* ---------- damaged buildings: on the Village page only, as a card over the page (it moves nothing), one Repair each ---------- */
 const damageHtml = () => { if (UI.view !== 'projects' || !Q.S) return ''; const dmg = Object.keys(S().damaged || {}).filter(id => D.PROJECTS[id] && D.PROJECTS[id].town === S().town); if (!dmg.length) return '';
   return `<div class="wc damaged-row" style="--c:#e5b04a"><span class="wc-ic">${ico('house')}</span><div class="wc-b"><b>Damaged</b><p>No bonus until repaired.</p><div class="wc-ch">${dmg.map(id => `<button class="btn ${S().coins >= Q.repairCost(id) ? 'primary' : ''}" data-do="repair" data-a="${id}">${esc(D.PROJECTS[id].name.replace(/^\w+ the /, '').replace(/^./, c => c.toUpperCase()))}<small>${fmt(Q.repairCost(id))} coins</small></button>`).join('')}</div></div></div>`; };

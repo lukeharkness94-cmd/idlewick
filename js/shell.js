@@ -221,7 +221,7 @@ UI.V.overview = () => {
   const opening = S().q.first_steps?.s !== 'done';
   const decisions = (S().inbox || []).length;
   return `${welcome}${UI.homeSections.map(render => render()).join('')}
-    ${decisions ? `<button class="btn sm" data-do="go" data-a="activity">${decisions} away decision${decisions === 1 ? '' : 's'} waiting · View activity</button>` : ''}
+    ${decisions ? `<button class="btn sm" data-do="go" data-a="activity">${decisions} decision${decisions === 1 ? '' : 's'} waiting · View activity</button>` : ''}
     ${UI.homeNotices()}
     ${opening ? '' : `<section data-reference="true" class="panel upnext"><h3>Explore other suggestions</h3>
       <div id="goalbox">${UI.homeGoals()}</div>

@@ -998,30 +998,70 @@ test('T1 pre-update saves load cleanly: nothing free, additive defaults',()=>{
   assert.equal(Object.values(D.TOWERS).some(T=>q.have(T.prize)>0),false,'no tower prizes');
   const snap=q.exportSave();assert.ok(q.importSave(snap),'and it round-trips with the new fields');
 });
-test('T2 event timing: not in the first 15 minutes, never while away, one at a time, 30 to 60 minutes apart',()=>{
-  const {q}=world();const W=q.worldState,MIN=60000;const play=min=>{for(let i=0;i<min*60/5;i++)q.worldTick(5000);};
+test('T2 event timing: not in the first 15 minutes, 30 to 60 minutes apart; a fired event waits in the inbox and never expires (owner, 26 Nov 2026)',()=>{
+  const {q}=world();const W=q.worldState,S=q.S,MIN=60000;const play=min=>{for(let i=0;i<min*60/5;i++)q.worldTick(5000);};const wait=()=>(S.inbox||[]).filter(e=>e.type==='world');
   assert.ok(W.next>=15*MIN,'first event no sooner than 15 minutes');play(14.9);assert.equal(W.fired,0,'nothing in the first 15 minutes');
-  /* a closed game adds no time: one enormous gap counts as at most five seconds */
-  const before=W.played;q.worldTick(8*3600*1000);assert.ok(W.played-before<=5000,'time away is not counted');
-  q.sim.on=true;const p0=W.played;q.worldTick(5000);q.sim.on=false;assert.equal(W.played,p0,'offline catch-up never advances the event clock');
-  let guard=0;while(!W.active&&guard++<60)play(1);assert.equal(W.fired,1,'one event after the window');assert.ok(W.active,'it is waiting');assert.ok(W.played>=15*MIN&&W.played<=46*MIN,'the first comes between 15 and 45 minutes of play');
-  assert.equal(q.worldFire(),false,'never two at once');play(5);assert.equal(W.fired,1);
-  const at=W.played;assert.ok(q.worldChoose(q.worldChoices().slice(-1)[0].id)||true);if(W.active)play(13);assert.equal(W.active,null);
-  const gap=W.next-W.played;assert.ok(W.next-at>=30*MIN-13*MIN&&gap<=60*MIN+1,'the next is 30 to 60 minutes on');
-  const f=W.fired;play(Math.max(0,gap/MIN-1));assert.equal(W.fired,f,'not before its time');assert.ok(gap>=17*MIN,'at least 30 minutes after the last began');play(3);assert.equal(W.fired,f+1,'and then it comes');
+  /* a closed game adds no time to the play clock: one enormous gap counts as at most five seconds */
+  const before=W.played;q.worldTick(8*3600*1000);assert.ok(W.played-before<=5000,'time away is not counted as play');
+  q.sim.on=true;const p0=W.played;q.worldTick(5000);q.sim.on=false;assert.equal(W.played,p0,'offline catch-up never advances the play clock');
+  let guard=0;while(!wait().length&&guard++<60)play(1);assert.equal(W.fired,1,'one event after the window');assert.equal(wait().length,1,'it waits in the inbox');assert.ok(W.played>=15*MIN&&W.played<=46*MIN,'the first comes between 15 and 45 minutes of play');
+  const e=wait()[0];assert.ok(e.data&&e.title&&e.opts.length>=2&&q.data.WORLD_EVENT[e.ev],'the waiting event keeps its data and choices');
+  const at=W.played,gap=W.next-at;assert.ok(gap>=30*MIN-1&&gap<=60*MIN+1,'the next is 30 to 60 minutes on');
+  const f=W.fired;play(gap/MIN-1);assert.equal(W.fired,f,'not before its time');play(2);assert.equal(W.fired,f+1,'and then it comes');
+  play(6*60);assert.equal(wait().length,q.WORLD_CAP,'at most three world events wait at once');assert.equal(new Set(wait().map(x=>x.ev)).size,wait().length,'never two of the same kind');
+  const ids=JSON.stringify(wait().map(x=>x.id));play(3*60);assert.equal(JSON.stringify(wait().map(x=>x.id)),ids,'waiting events never expire and are never replaced');
   for(const def of q.data.WORLD_EVENTS)assert.ok(def.title&&def.choices&&def.lapse&&def.ok&&def.make,'event '+def.id+' is complete data');assert.ok(q.data.WORLD_EVENTS.length>=10);
 });
 test('T3 ignoring an event is harmless; a raid damages buildings, never destroys them; repair restores them fully',()=>{
   const {q}=world();const S=q.S,D=q.data,W=q.worldState;S.coins=5000;
-  for(const [id,p] of Object.entries(D.PROJECTS))if(p.town===S.town)S.projects[id]=true;q.fxDirty();const fx0=JSON.stringify(q.fx().speed),coins=S.coins,inv=JSON.stringify(S.inv);
-  /* every event, left unanswered: nothing is lost */
-  for(const def of D.WORLD_EVENTS){S.inv.log_normal=40;if(!def.ok())continue;assert.ok(q.worldFire(def.id),def.id);for(let i=0;i<13*12;i++)q.worldTick(5000);assert.equal(W.active,null,def.id+' lapsed');assert.equal(S.coins,coins,def.id+' cost nothing');assert.equal(Object.keys(S.damaged||{}).length,0,def.id+' damaged nothing');W.result=null;}
-  assert.ok(q.worldFire('raid'));assert.ok(q.worldChoose('hide'));const hit=Object.keys(S.damaged);assert.ok(hit.length>=2&&hit.length<=3,'2 to 3 buildings damaged');
+  for(const [id,p] of Object.entries(D.PROJECTS))if(p.town===S.town)S.projects[id]=true;q.fxDirty();const fx0=JSON.stringify(q.fx().speed),coins=S.coins;
+  /* every event, left waiting: nothing is lost, and every one offers a choice that costs nothing */
+  for(const def of D.WORLD_EVENTS){S.inv.log_normal=40;S.inbox=[];if(!def.ok())continue;assert.ok(q.worldFire(def.id),def.id);for(let i=0;i<13*12;i++)q.worldTick(5000);
+    const e=S.inbox.find(x=>x.ev===def.id);assert.ok(e,def.id+' still waiting after 13 minutes');assert.equal(S.coins,coins,def.id+' cost nothing');assert.equal(Object.keys(S.damaged||{}).length,0,def.id+' damaged nothing');
+    assert.ok(q.worldChoicesFor(e.id).some(c=>c.ok&&!c.can&&!c.fight&&!c.doing),def.id+' has a free choice');}
+  S.inbox=[];assert.ok(q.worldFire('raid'));assert.ok(q.worldChoose('hide'));const hit=Object.keys(S.damaged);assert.ok(hit.length>=2&&hit.length<=3,'2 to 3 buildings damaged');
+  assert.equal(S.inbox.length,0,'the choice settles the event');
   for(const id of hit)assert.equal(S.projects[id],true,'still built, only damaged');q.fxDirty();
   if(hit.some(id=>D.PROJECTS[id].fx))assert.notEqual(JSON.stringify(q.fx().speed)+JSON.stringify(q.fx().grow)+q.fx().xpAll,fx0+JSON.stringify(q.fx().grow)+'x','a damaged building gives no bonus');
   for(const id of hit){const c=q.repairCost(id);assert.ok(c>0&&c<=Math.max(20,(D.PROJECTS[id].cost.coins||100)*.15)+1,'repair is modest');assert.ok(q.repair(id));}
   assert.equal(Object.keys(S.damaged).length,0);q.fxDirty();assert.equal(JSON.stringify(q.fx().speed),fx0,'bonuses are back in full');
   assert.ok((S.journal||[]).some(e=>/Something is coming/.test(e.text)),'the outcome is in the journal');
+});
+test('T9 time away rolls world events at the play rate: none under 30 minutes, about one per 45, capped at three, never in forecasts',()=>{
+  const {q}=world();const S=q.S,MIN=60000;const wait=()=>(S.inbox||[]).filter(e=>e.type==='world');
+  q.makeAwayEvents({},14*MIN);assert.equal(wait().length,0,'a short absence brings nothing');
+  q.worldReset();S.inbox=[];q.worldAway(29*MIN);assert.equal(wait().length,0,'nor does 29 minutes');
+  let n=0;for(let i=0;i<300;i++){q.worldReset();S.inbox=[];n+=q.worldAway(45*MIN);}assert.ok(n/300>.38&&n/300<.62,'about one in two 45-minute absences ('+n+'/300)');
+  q.worldReset();S.inbox=[];q.worldAway(60*MIN);assert.equal(wait().length,1,'an hour away always brings one');
+  q.worldReset();S.inbox=[];q.forecasting=true;q.worldAway(8*60*MIN);q.forecasting=false;assert.equal(wait().length,0,'forecasts roll nothing');
+  q.worldReset();S.inbox=[];q.makeAwayEvents({},8*60*MIN);assert.equal(wait().length,3,'eight hours away fills the three places');assert.ok(wait().every(e=>e.how==='away'),'marked as from time away');
+  const away=S.inbox.filter(e=>e.type!=='world').length;assert.ok(away>=1,'the ordinary away encounters still come');
+  const ids=JSON.stringify(wait().map(e=>e.id));q.worldReset();q.makeAwayEvents({},8*60*MIN);assert.equal(JSON.stringify(wait().map(e=>e.id)),ids,'when full nothing is added and nothing is dropped');
+});
+test('T10 a waiting event survives save and reload, its fight is the same fight, unaffordable choices say why, failed saves roll back',()=>{
+  const {q,deny}=world();const S=q.S,D=q.data;for(const k of ['melee','defence','hitpoints'])S.xp[k]=D.XPF[30];S.hp=q.maxHp();S.inv.shrimp=20;S.tut.prepareCombat=false;S.coins=0;
+  assert.ok(q.worldFire('bandits'));assert.ok(q.worldFire('bard'));const band=S.inbox.find(e=>e.ev==='bandits'),bard=S.inbox.find(e=>e.ev==='bard');const foe=JSON.stringify(band.data.foe);assert.ok(band.data.foe&&band.data.foe.cl>1,'the creature is saved with the event');
+  const snap=q.exportSave();D.MON.ev_bandits={id:'ev_bandits',name:'Something',town:'willowbrook',cl:1,hp:5,max:1,att:1,def:1,coins:[0,0],col:'#888',drops:[],event:true};assert.ok(q.importSave(snap),'the save loads');
+  const S2=q.S;assert.equal(S2.inbox.filter(e=>e.type==='world').length,2,'both events still wait after reload');
+  /* the bard wants coins we do not have: shown, disabled, with the reason, and choosing it changes nothing */
+  const pay=q.worldChoicesFor(bard.id).find(c=>c.id==='pay');assert.equal(pay.ok,false);assert.match(pay.why,/Need \d+ coins/);const before=JSON.stringify(S2);assert.equal(q.resolveEvent(bard.id,'pay'),false);assert.equal(JSON.stringify(S2),before,'nothing changed');
+  /* a fight can only be started in the event's own town */
+  const away=D.TOWNS[1].id;S2.town=away;assert.match(q.worldChoicesFor(band.id).find(c=>c.id==='fight').why,/Back in Willowbrook/);S2.town='willowbrook';
+  /* a failed save rolls the choice back */
+  deny(true);assert.equal(q.resolveEvent(bard.id,'no'),false);deny(false);assert.ok(S2.inbox.some(e=>e.id===bard.id)||q.S.inbox.some(e=>e.id===bard.id),'still waiting after a failed save');
+  /* the fight chosen in hindsight is the saved creature, started like any fight */
+  const fight=q.worldChoicesFor(band.id).find(c=>c.id==='fight');assert.ok(fight.ok,fight.why);assert.match(fight.sub,new RegExp('Lv '+JSON.parse(foe).cl));
+  assert.equal(q.resolveEvent(band.id,'fight'),true);assert.ok(q.act&&q.act.kind==='fight'&&q.act.id==='ev_bandits','the fight starts');assert.equal(D.MON.ev_bandits.hp,JSON.parse(foe).hp,'with the saved creature');
+  assert.ok(q.worldState.active&&q.worldState.active.doing.fight==='ev_bandits','the event is under way');assert.equal(q.S.inbox.some(e=>e.id===band.id),false,'and no longer waiting');
+  /* the event under way is saved too: after a reload the same creature is fought and the event is still under way */
+  assert.equal(q.S.worldDoing.ev,'bandits');const snap2=q.exportSave();q.worldReset();D.MON.ev_bandits={id:'ev_bandits',name:'Something',town:'willowbrook',cl:1,hp:5,max:1,att:1,def:1,coins:[0,0],col:'#888',drops:[],event:true};
+  assert.ok(q.importSave(snap2));assert.equal(D.MON.ev_bandits.hp,JSON.parse(foe).hp,'the saved creature is back');assert.equal(q.S.act&&q.S.act.id,'ev_bandits','the fight is still the task');
+  assert.equal(q.worldActive()&&q.worldActive().doing.fight,'ev_bandits','and the event is under way again');
+  {const st=JSON.parse(JSON.stringify(q.S));delete st.worldDoing;assert.equal(q.validateSave(st).act,null,'a fight with an event creature and no event is not resumed');}
+  /* save validation keeps good rows, drops rows this version cannot resolve, and older saves load */
+  const raw=JSON.parse(JSON.stringify(q.S));raw.inbox.push({id:'x',type:'world',ev:'no_such_event',title:'?',data:{}},{id:'y',type:'world',ev:'bard',title:'A wandering bard'});const v=q.validateSave(raw);
+  assert.equal(v.inbox.some(e=>e.id==='x'||e.id==='y'),false,'malformed world rows are dropped');assert.ok(v.inbox.some(e=>e.ev==='bard'),'good rows stay');
+  const old=JSON.parse(JSON.stringify(q.S));delete old.inbox;assert.ok(q.validateSave(old),'a save without an inbox loads');
 });
 test('T4 audio state machine: village and tier decide the layers; a fight ducks and hands back; four volumes',()=>{
   const {q}=world();const S=q.S,D=q.data;S.settings.music=true;S.settings.sfx=true;
