@@ -207,6 +207,7 @@ Object.assign(UI.DO, {
   qclear: () => { S().queue = []; DQ.emit('queue'); },
   decide: (a, b) => DQ.resolveEvent(a, b),
   abil: a => { if (DQ.toggleAbility(a)) { DQ.sfx('equip'); UI.render(false); } },
+  abilswap: (off, on) => { const L = DQ.S.abilities || []; if (L.includes(off)) DQ.toggleAbility(off); if (on && DQ.data.AB[on] && !(DQ.S.abilities || []).includes(on)) DQ.toggleAbility(on); DQ.sfx('equip'); DQ.save && DQ.save(); UI.render(false); },
   eatstep: d => { const st = S().settings; st.eatAt = Math.max(30, Math.min(70, (st.eatAt || 50) + (+d || 0))); UI.render(false); },
   comparegear: (a, b) => {
     const el = document.getElementById('fc-' + a); if (!el) return;

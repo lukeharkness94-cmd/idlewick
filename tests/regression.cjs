@@ -586,7 +586,7 @@ test('preparation advice covers ability slots and boss specials',()=>{
  const {q}=harness();const S=q.S,D=q.data;
  S.town='ironpeak';S.towns.ironpeak={visited:true,boss:false};for(const k of ['attack','strength','defence','hitpoints'])S.xp[k]=D.XPF[44];S.hp=q.maxHp();S.inv.rune_sword=1;q.equipItem('rune_sword');S.abilities=[];
  let a=q.prepAdvice('frostmaw').find(x=>x.key==='abil');assert.ok(a&&/^Slot (Brace|Shield Bash)/.test(a.title),'empty slots: suggests answering the special first');
- S.abilities=['aimed'];a=q.prepAdvice('frostmaw').find(x=>x.key==='abil');assert.match(a.title,/Aimed Shot does nothing/);
+ S.abilities=['aimed'];a=q.prepAdvice('frostmaw').find(x=>x.key==='abil');assert.match(a.text,/Aimed Shot does nothing/);assert.equal(a.action,'abilswap');assert.equal(a.a,'aimed');
  S.abilities=['power','second','execute'];a=q.prepAdvice('frostmaw').find(x=>x.key==='abil');assert.ok(a&&/Swap in (Brace|Shield Bash)/.test(a.title),'full slots that ignore the special: suggests a swap');
  S.abilities=['brace','power','second'];assert.ok(!q.prepAdvice('frostmaw').some(x=>x.key==='abil'),'nothing to say when the special is answered');
 });

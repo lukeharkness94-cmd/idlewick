@@ -11,7 +11,7 @@ const MIN=+(process.env.MIN||60);
    openproject (open a restoration whose bundles can be delivered; the harness then presses Deliver all I can).
    Deliberately left out: 'go' (plain navigation to a page where the player still has to choose what to buy or do) and
    'guide' (opens a Field Guide page; nothing to act on). */
-const ALLOW_LIST=['journeytask','qstart','qclaim','act','huntarea','journeyfight','journeytrain','finishstarter','equip','abil','huntquest','questcontinue','journeytravel','journeysupply','journeysell','route','projectfinish','openproject','bossabil','bossautoeat','bossprepskip'];
+const ALLOW_LIST=['journeytask','qstart','qclaim','act','huntarea','journeyfight','journeytrain','finishstarter','equip','abil','huntquest','questcontinue','journeytravel','journeysupply','journeysell','route','projectfinish','openproject','bossabil','bossautoeat','bossprepskip','abilswap'];
 (async()=>{const b=await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
 try {const p=await b.newPage({viewport:{width:1920,height:1080}});const errs=[];p.on('pageerror',e=>errs.push('page: '+e.message));p.on('console',m=>{if(m.type()==='error')errs.push('console: '+m.text());});
 await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/index.html');await p.locator('#t-new').click();await p.locator('#crname').fill('Luke');await p.locator('#cr-go').click();await p.waitForTimeout(800);

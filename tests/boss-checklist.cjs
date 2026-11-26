@@ -61,6 +61,10 @@ const path = require('node:path');
       const q = D.QUESTS.find(x => x.obj.some(o => o.ev === 'kill' && o.key === 'gnarlroot')); S.q[q.id] = { s: 'ready', p: q.obj.map(o => o.n) };
       const n = Q.journeyNext(); return { title: n.title, action: n.action, a: n.a, id: q.id }; });
     assert.equal(claim.action, 'qclaim', 'won challenge is claimed: ' + claim.title); assert.equal(claim.a, claim.id);
+    /* (7) an ability the weapon cannot use is swapped from the Next step, never left as a page link (26 Nov staff replay) */
+    const swap = await page.evaluate(() => { const Q = DQ; Q.S.abilities = ['focus']; const st = Q.prepAdvice('grubnash').find(x => x.key === 'abil');
+      if (st && st.action === 'abilswap') Q.ui.DO.abilswap(st.a, st.b); return { st: st && [st.title, st.action], after: Q.S.abilities.slice() }; });
+    assert.equal(swap.st && swap.st[1], 'abilswap', JSON.stringify(swap)); assert.ok(!swap.after.includes('focus'), 'unusable ability removed');
     assert.deepEqual(errors, []);
     console.log('boss-checklist: ok', JSON.stringify({ first: setup.step, then: after.step.title }));
   } finally { await browser.close(); }

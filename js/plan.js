@@ -170,7 +170,8 @@ DQ.prepAdvice = (monId, fc) => {
     const best = pref.map(id => D.AB[id]).filter(a => a && usable(a) && !L.includes(a.id));
     const idle = L.map(id => D.AB[id]).filter(a => a && !DQ.ability(a.id));
     const answers = L.some(id => ['brace', 'bash', 'ward'].includes(id) && DQ.ability(id));
-    if (idle.length) out.push({ key: 'abil', title: `${idle[0].name} does nothing with this weapon`, text: `${idle[0].style ? `It needs a ${idle[0].style} weapon.` : 'It needs a shield.'}${best[0] ? ` Swap in ${best[0].name}: ${best[0].text}` : ''}`, action: 'go', a: 'combat' });
+    /* its button does the swap (or frees the slot), so Home never parks on a warning it cannot act on (26 Nov replay: a staff hero who switched to a mallet sat on this step for 4½ hours) */
+    if (idle.length) out.push({ key: 'abil', title: best[0] ? `Swap ${idle[0].name} for ${best[0].name}` : `Remove ${idle[0].name}`, text: `${idle[0].name} does nothing with this weapon: ${idle[0].style ? `it needs a ${idle[0].style} weapon.` : 'it needs a shield.'}${best[0] ? ` ${best[0].name}: ${best[0].text}` : ''}`, action: 'abilswap', a: idle[0].id, b: best[0] ? best[0].id : '' });
     else if (L.length < slots && best[0]) out.push({ key: 'abil', title: `Slot ${best[0].name}`, text: `${L.length} of ${slots} ability slots used. ${best[0].text}`, action: 'abil', a: best[0].id });
     else if (m.boss && m.boss.special && !answers && best[0] && ['brace', 'bash', 'ward'].includes(best[0].id)) out.push({ key: 'abil', title: `Swap in ${best[0].name}`, text: `Nothing in your slots answers ${m.boss.special.name}. ${best[0].text}`, action: 'go', a: 'combat' });
   }
