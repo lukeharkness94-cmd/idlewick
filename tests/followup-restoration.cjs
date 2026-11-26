@@ -18,7 +18,7 @@ const { chromium } = require('playwright');
       const bq = D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === 'oldtusk')); S.q[bq.id] = { s: 'active', p: bq.obj.map(() => 0) };
       for (const sk of ['melee', 'defence', 'hitpoints']) { let n = 0; while (Q.combatLvl() < 15 && n++ < 500) Q.addXp(sk, 200, { quiet: true }); }
       for (let i = 0; i < 60; i++) Q.addXp('woodcutting', 300, { quiet: true }); S.coins = 900; Q.give('bread', 30); S.lastBeatAt = (S.gameTime || 0) - 31 * 60e3;
-      const out = { steps: [] }; const coins0 = S.coins;
+      const out = { steps: [] }; S.coins = 100; out.poor = Q.followupRestorationStep(); S.coins = 900; const coins0 = S.coins;
       let n = Q.journeyNext(); out.steps.push(n.title);
       Q.ui.DO[n.action](n.a, n.b); out.routeSpent = coins0 - S.coins; out.view = Q.ui.view; out.selected = Q.ui.localSupply;
       out.bought = Q.buyLocalSupply(n.a, +n.b);
@@ -27,6 +27,7 @@ const { chromium } = require('playwright');
       out.done = !!S.projects.moss_windmill; out.after = Q.journeyNext().title; out.offered = Q.followupRestorationStep && Q.followupRestorationStep();
       return out; });
     console.log(JSON.stringify(r));
+    assert.equal(r.poor, null, 'not offered when the project and its supplies cost more than the hero carries');
     assert.match(r.steps[0], /^Buy 8 wool for the windmill sails$/); assert.equal(r.routeSpent, 0, 'the route spends nothing');
     assert.equal(r.view, 'shop'); assert.equal(r.selected, 'market:wool'); assert.ok(r.bought);
     assert.ok(r.done, 'windmill restored'); assert.equal(r.offered, null, 'not offered again right after a reward');

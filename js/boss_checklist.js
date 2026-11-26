@@ -105,9 +105,16 @@ Q.startAct = (kind, id, o) => { const r = start0(kind, id, o); if (r && kind ===
    and 30 minutes of play have passed since the last reward, Home offers one more of the town's existing restorations
    (at most two beyond the first), and only when every material can be had now: already carried, gathered at the hero's level
    here, or sold in this town's shop. The step is the project's own journey step; nothing new is added. */
-const gettable = (id, n) => { if (id === 'coins') return true; if (Q.have(id) >= n) return true;
-  for (const kind of ['fish', 'wood', 'mine', 'thieve']) if ((D.NODES[kind] || []).some(x => x.item === id && Q.skillUnlocked(x.skill) && Q.lvl(x.skill) >= x.lvl && (!Q.nodeHere || Q.nodeHere(x)))) return true;
-  return (D.SHOPS[S().town] || []).includes(id) || (D.LOCAL_SUPPLIES || []).some(o => o.item === id && Q.localSupplyReason && !Q.localSupplyReason(o)); };
+/* how the hero can get what a project still needs, and what it costs in coins: null when something cannot be had now or
+   the whole lot (the project's coins plus anything bought) is more than the hero carries */
+const nodeOk = id => ['fish', 'wood', 'mine', 'thieve'].some(kind => (D.NODES[kind] || []).some(x => x.item === id && Q.skillUnlocked(x.skill) && Q.lvl(x.skill) >= x.lvl && (!Q.nodeHere || Q.nodeHere(x))));
+const plan = id => { const need = Q.projectNeed(id); let coins = need.coins || 0; const buy = [];
+  for (const [k, n] of Object.entries(need)) { if (k === 'coins') continue; const m = n - Q.have(k); if (m <= 0 || nodeOk(k)) continue;
+    if ((D.SHOPS[S().town] || []).includes(k) && Q.buyPrice) { coins += Q.buyPrice(k) * m; continue; }
+    const o = (D.LOCAL_SUPPLIES || []).find(x => x.item === k && Q.localSupplyReason && !Q.localSupplyReason(x));
+    if (!o || (o.carry && Q.have(k) + m > o.carry)) return null;
+    coins += Q.localSupplyPrice(o) * m; buy.push({ o, k, m }); }
+  return coins <= S().coins ? { coins, buy } : null; };
 /* the last reward beat, in game time: a claimed quest or a restored building (offline catch-up counts too) */
 Q.BEAT_GAP_MS = 30 * 60e3;
 const beat = () => { if (!Q.forecasting) S().lastBeatAt = S().gameTime || 0; };
@@ -118,13 +125,11 @@ Q.followupRestorationStep = () => {
   if ((S().gameTime || 0) - (S().lastBeatAt ?? (S().gameTime || 0)) < Q.BEAT_GAP_MS) return null;
   const list = Object.entries(D.PROJECTS).filter(([, p]) => p.town === b.town && !p.relic);
   if (list.filter(([id]) => S().projects[id]).length >= 3) return null;
-  const open = list.find(([id]) => !S().projects[id] && Object.entries(Q.projectNeed(id)).every(([k, n]) => gettable(k, n)) && (Q.projectNeed(id).coins || 0) <= S().coins + 400);
+  const open = list.find(([id]) => !S().projects[id] && plan(id));
   if (!open) return null;
   /* a material only the town's supply shelf sells: route there with it selected (the player presses Buy) */
-  for (const [k, n] of Object.entries(Q.projectNeed(open[0]))) { if (k === 'coins' || Q.have(k) >= n) continue;
-    const nodeOk = ['fish', 'wood', 'mine', 'thieve'].some(kind => (D.NODES[kind] || []).some(x => x.item === k && Q.skillUnlocked(x.skill) && Q.lvl(x.skill) >= x.lvl));
-    const o = !nodeOk && !(D.SHOPS[S().town] || []).includes(k) && (D.LOCAL_SUPPLIES || []).find(x => x.item === k && Q.localSupplyReason && !Q.localSupplyReason(x));
-    if (o) { const m = n - Q.have(k); return { title: `Buy ${m} ${D.ITEMS[k].name.toLowerCase()} for the ${D.PROJECTS[open[0]].name.replace(/^\w+ the /, '').toLowerCase()}`, detail: `${D.PROJECTS[open[0]].name} while you train for ${b.boss.short || b.name}. The ${D.TOWN[S().town].name} supply shelf sells it.`, action: 'localroute', a: o.id, b: String(m), restoration: open[0] }; } }
+  for (const { o, k, m } of plan(open[0]).buy) {
+    { return { title: `Buy ${m} ${D.ITEMS[k].name.toLowerCase()} for the ${D.PROJECTS[open[0]].name.replace(/^\w+ the /, '').toLowerCase()}`, detail: `${D.PROJECTS[open[0]].name} while you train for ${b.boss.short || b.name}. The ${D.TOWN[S().town].name} supply shelf sells it.`, action: 'localroute', a: o.id, b: String(m), restoration: open[0] }; } }
   const step = Q.journeyNext(open[0]); return step && step.action ? { ...step, detail: `${D.PROJECTS[open[0]].name} while you train for ${b.boss.short || b.name}. ${step.detail || ''}`.trim(), restoration: open[0] } : null;
 };
 const region0 = Q.regionNext;
