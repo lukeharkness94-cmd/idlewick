@@ -322,6 +322,7 @@ DQ.actDur = a => {
 DQ.stopAct = (silent, why, done) => { /* done: a batch finished as planned, shown as good news, not a warning */
   if (!DQ.act) return;
   const stopped = DQ.act, stoppedPage = EXT[stopped.kind] ? (EXT[stopped.kind].pageFor?.(stopped.id) || EXT[stopped.kind].page) : stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
+  if (why && !DQ.forecasting) S().lastPlannedStop = why;
   if (DQ.sim.on && DQ.sim.activities) {
     DQ.sim.stop = { after: DQ.sim.elapsed, reason: why || (DQ.sim.died ? 'defeated in combat' : 'activity finished') };
   }
@@ -351,6 +352,14 @@ function gatherDone(kind, n) {
   DQ.sfx(kind); DQ.petRoll('skill', sk); const k = extraCoins() * DQ.coinMult();
   if (kind === 'fish') {
     if (chance(D.ECONOMY.fishPouchChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(8, 25) * k * (T('comb') ? 1.5 : 1))); if (T('comb')) fxHit('comb'); DQ.addCoins(c); DQ.floatAt(document.querySelector('.card.active'), `${ico('pouch')}+${c} coins`, '#f3d58a'); DQ.log(`You fish up a sodden coin pouch (${c} coins).`, 'good'); DQ.sfx('coin'); }
+    if (chance(D.ECONOMY.fishChestChance * (1 + DQ.fx().find))) {
+      const coins = Math.max(1, Math.round(rnd(120, 260) * k));
+      const gem = DQ.weighted(D.GEM_WEIGHTS);
+      DQ.addCoins(coins);
+      DQ.grant(gem);
+      S().stats.rare++;
+      DQ.log(`You haul up a sunken chest with ${coins} coins and ${itemName(gem).toLowerCase()}.`, 'good');
+    }
   } else if (kind === 'wood') {
     if (chance(D.ECONOMY.woodNestChance * (1 + DQ.fx().find) * (T('nuts') ? 2 : 1))) { if (T('nuts')) fxHit('nuts');
       if (chance(.5)) { const c = Math.max(1, Math.round(rnd(15, 45) * k)); DQ.addCoins(c); DQ.log(`A bird's nest holds ${c} coins.`, 'good'); DQ.floatAt(document.querySelector('.card.active'), `${ico('nest')}+${c} coins`, '#f3d58a'); DQ.sfx('coin'); }
@@ -473,6 +482,7 @@ function autoEat() {
   DQ.eat(fit, true);
 }
 function die() {
+  if (!DQ.forecasting) S().lastPlannedStop = 'Stopped after a combat defeat.';
   DQ.stopAct(true); S().hp = DQ.maxHp(); S().stats.deaths++; DQ.achDirty = true;
   if (!DQ.sim.on) { DQ.log('Oh dear, you are dead! You wake by the campfire.', 'bad'); DQ.sfx('death'); }
   else DQ.sim.died = true;
@@ -759,7 +769,7 @@ DQ.sellJunk = () => DQ.junkSale().entries.reduce((total, [id, n]) => total + (DQ
 
 DQ.buyMax = id => {
   const item = D.ITEMS[id];
-  if (!item || item.buy <= 0 || DQ.shopBuyLock(id)) return 0;
+  if (!item || !Number.isFinite(item.buy) || item.buy <= 0 || DQ.shopBuyLock(id)) return 0;
   const materials = Object.entries(DQ.shopMaterialCost?.(id) || {}).map(([key, n]) => Math.floor(DQ.have(key) / n));
   // Normal stacks can overflow to the bank. Explicit item limits still bound the purchase.
   const cap = Number.isFinite(item.stackLimit) ? Math.max(0, item.stackLimit - DQ.have(id)) : Number.MAX_SAFE_INTEGER;

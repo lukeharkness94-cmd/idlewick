@@ -149,12 +149,12 @@ test('routine progress stays in history without creating menu badges', () => {
   const {q,load}=harness();load('fx');q.ui.view='quests';
   for(const o of [{kind:'info',key:'beast:chicken',title:'Bestiary progress'}, {kind:'ach',key:'ach:first',title:'First achievement'}, {kind:'loot',key:'rare:gem_sapphire',title:'Rare find'}])q.notify(o);
   assert.equal(q.noteLog.length,3);assert.equal(q.noticeCount('mining'),0);assert.equal(q.noticeCount('character'),0);
-  assert.equal(q.notificationTier({kind:'level'}),'now');assert.equal(q.notificationTier({kind:'loot'}),'quiet');
-  assert.equal(q.notificationTier({kind:'unlock'}),'now');
+  assert.equal(q.notificationTier({kind:'level'}),'quiet');assert.equal(q.notificationTier({kind:'loot'}),'quiet');
+  assert.equal(q.notificationTier({kind:'unlock',key:'unlock:mining'}),'quiet');
 });
-test('same-page routine progress stays quiet and does not create unread counts', () => {
+test('same-page routine progress stays quiet with one digest entry', () => {
   const {q,load}=harness();load('fx');q.ui.view='bestiary';q.notify({kind:'info',key:'beast:chicken',title:'Bestiary progress'});
-  assert.equal(q.noteLog.length,1);assert.equal(q.noticeCount('mining'),0);assert.equal(q.noteMissed,0);
+  assert.equal(q.noteLog.length,1);assert.equal(q.noticeCount('mining'),0);assert.equal(q.unreadNotes,1);
 });
 test('menu counts follow actionable state and survive visiting the page', () => {
   const {q,load}=harness();load('fx');q.ui.view='quests';
@@ -180,7 +180,7 @@ test('project and research badges disappear when resources or slots are unavaila
 test('same-page warnings become inline status and critical alerts retain priority', () => {
   const {q,load}=harness();load('fx');q.ui.view='mining';let rendered=0;q.ui.renderPageNotice=()=>rendered++;
   q.notify({kind:'warn',key:'stopped',page:'mining',title:'Task stopped',text:'Missing supplies'});
-  assert.equal(rendered,1);assert.equal(q.ui.pageNotice.text,'Missing supplies');assert.equal(q.noteMissed,0);
+  assert.equal(rendered,1);assert.equal(q.ui.pageNotice.text,'Missing supplies');assert.equal(q.unreadNotes,0);
   for(const kind of ['death','warn','boss'])assert.equal(q.notificationTier({kind}),'now');
 });
 test('equipping the only copy removes it from the backpack and unequipping returns it', () => {
@@ -239,7 +239,7 @@ test('zero value items can be sold and invalid quantities do not change inventor
 test('an item discovery is announced once and remains quiet thereafter',()=>{
   const {q}=harness();const sounds=[],toasts=[],notes=[];q.sfx=x=>sounds.push(x);q.toast=x=>toasts.push(x);q.notify=x=>notes.push(x);
   q.grant('feather');q.take('feather');q.grant('feather');
-  assert.deepEqual(sounds,['discover']);assert.equal(toasts.length,1);assert.equal(notes.filter(n=>n.kind==='discovery').length,1);assert.equal(q.S.seen.items.feather,1);
+  assert.deepEqual(sounds,['discover']);assert.equal(toasts.length,0);assert.equal(notes.filter(n=>n.kind==="discovery").length,1);assert.equal(q.S.seen.items.feather,1);
 });
 test('a village project pin persists, replaces the previous pin and can be removed', () => {
   const {q}=harness(); assert.equal(q.S.pinnedProject,null);
@@ -331,9 +331,9 @@ test('battle forecasts emit no live UI events, including equipment comparisons',
  q.emit('act');assert.deepEqual(events,['act'],'Live events must resume after the forecast');
 });
 test('regional projects follow the current town and grant their benefit only once',()=>{
- const {q,load}=harness();load('fx');q.S.coins=100000;q.S.inv.log_normal=1000;q.S.inv.crop_potato=50;
+ const {q,load}=harness();load('fx');q.S.coins=100000;q.S.inv.log_normal=1000;q.S.inv.flax=50;
  assert.equal(q.finishProject('market'),false);q.S.town='mossbarrow';assert.equal(q.noticeCount('projects'),1);
- const coins=q.S.coins,regen=q.fx().regen;assert.equal(q.finishProject('market'),true);assert.equal(q.S.coins,coins-150);assert.ok(Math.abs(q.fx().regen-regen-.02)<1e-9);
+ const coins=q.S.coins,regen=q.fx().regen;assert.equal(q.finishProject('market'),true);assert.equal(q.S.coins,coins-100);assert.ok(Math.abs(q.fx().regen-regen-.02)<1e-9);
  assert.equal(q.finishProject('market'),false);assert.equal(q.noticeCount('projects'),0);
  assert.equal(q.journeyNext('well').a,'willowbrook');
  for(const town of q.data.TOWNS)assert.ok(q.projectsForTown(town.id).length>0);
