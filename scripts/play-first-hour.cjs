@@ -15,6 +15,8 @@ const ALLOW_LIST=['journeytask','qstart','qclaim','act','huntarea','journeyfight
 (async()=>{const b=await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
 try {const p=await b.newPage({viewport:{width:1920,height:1080}});const errs=[];p.on('pageerror',e=>errs.push('page: '+e.message));p.on('console',m=>{if(m.type()==='error')errs.push('console: '+m.text());});
 await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/index.html');await p.locator('#t-new').click();await p.locator('#crname').fill('Luke');await p.locator('#cr-go').click();await p.waitForTimeout(800);
+if(process.env.SEED)await p.evaluate(seed=>{let x=(+seed>>>0)||1;Math.random=()=>{x^=x<<13;x>>>=0;x^=x>>>17;x^=x<<5;x>>>=0;return x/4294967296;};},process.env.SEED);
+await p.evaluate(()=>{window.TIERS={};window.TIER_ITEMS={};DQ.on('loot',(m,drops)=>{if(DQ.sim.on||DQ.forecasting)return;for(const d of drops||[]){const k=d.rar?d.rar[0]:'none';TIERS[k]=(TIERS[k]||0)+1;(TIER_ITEMS[k]=TIER_ITEMS[k]||{})[d.id]=(TIER_ITEMS[k][d.id]||0)+(d.n||1);}});});
 await p.evaluate(ALLOW=>{window.ALLOW=ALLOW;window.LOG=[];window.T0=0;const n0=DQ.notify;DQ.notify=o=>{if(!DQ.sim.on&&!DQ.forecasting)LOG.push({t:+(DQ.S.playtime/60000).toFixed(1),k:'note:'+o.kind+(DQ.notificationTier?':'+DQ.notificationTier(o):''),s:o.title});return n0(o);};
  const m0=DQ.modal;DQ.modal=o=>{LOG.push({t:+(DQ.S.playtime/60000).toFixed(1),k:'MODAL',s:o.title});return m0(o);};
  const sa=DQ.stopAct;DQ.stopAct=(...a)=>{if(!DQ.sim.on&&!DQ.forecasting)LOG.push({t:+(DQ.S.playtime/60000).toFixed(1),k:'STOP',s:JSON.stringify(a).slice(0,80)+' act '+(DQ.act?DQ.act.kind+':'+DQ.act.id:'-')+' '+(new Error().stack.split('\n').slice(2,5).map(l=>l.trim().replace(/http:.*\/js\//,'')).join(' < '))+' hp '+Math.round(DQ.S.hp)+'/'+DQ.maxHp()+' food '+(DQ.foods?DQ.foods().reduce((n,id)=>n+DQ.have(id),0):'?')});return sa(...a);};
@@ -43,7 +45,7 @@ for(let m=0;m<MIN*2;m++){ // half-minute steps
  if(nx!==lastNext){acts.push((m/2).toFixed(1)+'m NEXT: '+nx);lastNext=nx;}
 }
 const log=await p.evaluate(()=>LOG);const st=await p.evaluate(()=>({hero:DQ.advLvl(),combat:DQ.combatLvl(),coins:DQ.S.coins,lv:Object.fromEntries(Object.keys(DQ.S.xp).filter(k=>DQ.S.xp[k]>0).map(k=>[k,DQ.lvl(k)])),q:Object.entries(DQ.S.q).map(([k,v])=>k+':'+v.s).join(' ')}));
-console.log('== ACTIONS');acts.forEach(a=>console.log(a));console.log('== LOG');log.forEach(l=>console.log(l.t+'m',l.k,l.s));console.log('== STATE',JSON.stringify(st));console.log('errors',errs);
+console.log('== ACTIONS');acts.forEach(a=>console.log(a));console.log('== LOG');log.forEach(l=>console.log(l.t+'m',l.k,l.s));console.log('== STATE',JSON.stringify(st));const tiers=await p.evaluate(()=>({TIERS,TIER_ITEMS}));console.log('== LOOT TIERS',JSON.stringify(tiers));console.log('errors',errs);
 if (process.env.EVIDENCE) {
  const events = log.filter(e => e.k === 'MODAL' || e.k.startsWith('note:'));
  const counts = windows => {
@@ -58,7 +60,7 @@ if (process.env.EVIDENCE) {
   start, end: Math.min(end, MIN), counts: counts(e => e.t >= start && e.t < end),
  })).filter(w => w.start < MIN);
  writeFileSync(process.env.EVIDENCE, JSON.stringify({ initial, snapshots, actions: acts, log, events: events.length,
-  counts: counts(() => true), windows, errors: errs }, null, 2) + '\n');
+  counts: counts(() => true), windows, lootTiers: tiers, errors: errs }, null, 2) + '\n');
 }
 if (errs.length) process.exitCode=1;
 } finally { await b.close(); }

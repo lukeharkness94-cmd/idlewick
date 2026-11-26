@@ -13,9 +13,14 @@ const path = require('node:path');
     await page.locator('#t-new').click();
     await page.locator('#cr-go').click();
     await page.waitForFunction(() => DQ.started && document.querySelector('#title').hidden);
-    const starter = await page.locator('#skilldock .dk').evaluateAll(rows => rows.map(row => row.dataset.a));
-    assert.deepEqual(starter, ['fishing', 'woodcutting', 'cooking']);
-    await page.locator('#skilldock .dk-requirements').click();
+    /* owner, 26 Nov 2026: every skill stays in the rail, locked ones visible with their requirements (supersedes the
+       Part B learned-skills-only rail). Three are open on a fresh hero. */
+    const rail = await page.locator('#skilldock .dk').evaluateAll(rows => rows.map(row => [row.dataset.a, row.classList.contains('locked')]));
+    assert.deepEqual(rail.filter(r => !r[1]).map(r => r[0]), ['fishing', 'woodcutting', 'cooking']);
+    assert.ok(rail.length >= 16, 'every skill is listed');
+    assert.ok(await page.locator('#skilldock .dk.locked .dk-req').count() >= 13, 'locked rows show a requirement bar');
+    assert.match(await page.locator('#skilldock .dk.locked').first().getAttribute('aria-label'), /:\s*\S/, 'locked rows name their requirement');
+    await page.evaluate(() => DQ.go('skillsummary'));
     assert.equal(await page.locator('.skill-requirement-group').count(), 1);
     assert.ok(await page.locator('.skill-requirement-group .locked').count() > 8);
     for (const row of await page.locator('.skill-requirement-group .locked').all()) {
@@ -69,7 +74,7 @@ const path = require('node:path');
     await returning.waitForFunction(() => DQ.started && document.querySelector('#title').hidden);
     assert.equal(await returning.locator('#skilldock .dk[data-a="carpentry"]').count(), 1);
     assert.equal(await returning.locator('#skilldock .dk[data-a="beastmastery"]').count(), 1);
-    await returning.locator('#skilldock .dk-requirements').click();
+    await returning.evaluate(() => DQ.go('skillsummary'));
     await returning.locator('[data-do="skiponboarding"]').click();
     assert.ok(await returning.locator('#skilldock .dk.locked').count() > 5);
     await returning.close();
@@ -83,7 +88,7 @@ const path = require('node:path');
       assert.ok(fit, view + ' fits a 390px phone');
     }
     assert.deepEqual(errors, []);
-    console.log('PASS 3 starter skills, visible requirements, exact Mining unlock, combat preparation, 2 preserved legacy skills, Skip Onboarding and 5 phone layouts');
+    console.log('PASS 3 starter skills open and every locked skill listed in the rail, visible requirements, exact Mining unlock, combat preparation, 2 preserved legacy skills, Skip Onboarding and 5 phone layouts');
   } finally {
     await browser.close();
   }
