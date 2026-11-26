@@ -44,3 +44,35 @@ The replay explicitly took the available restoration detours and did not grant r
 Reproduce the restoration policy with `RESTORE=1 MIN=240 KITS=sword EVIDENCE=/tmp/idlewick-regional.json node scripts/review-opening.cjs` against the packaged build. Progression times exclude menu reading and are neither a player average nor a promise.
 
 The later 180-minute replay with standard arrows in Saltmere and training guidance based on the next Combat level reached Grubnash at 19½ minutes, restored the market at 28½, unlocked Scholarship at 49, defeated Old Tusk at 131½, restored the jetty at 133 and turned in Crab Cull at 139. It was training for Barnacle when the run ended. The 82½-minute reward gap persists and remains the priority for the next pacing pass.
+
+## Reward gap fix and three-kit replay (Claude, 26 Nov 2026)
+
+**The fix** (`js/boss_checklist.js`, `Q.regionalChallengeStep`). While a hero trains for a region boss, Home offers one of the region's two existing challenge mini-bosses. It does so once that challenge's Combat requirement is met and the battle forecast wins at least 60% of the time. The step accepts the challenge's quest, studies the creature in the Field Guide, then challenges it.
+
+- **Mossbarrow:** Roots in the Orchard pays 400 coins and the Rookmother pays 650, each with a first-victory iron piece.
+- **No changes:** nothing new was added and no boss stats or XP changed.
+- **Claiming:** a won challenge's reward is offered first on Home. The first replay of this change left both quests unclaimed until that was fixed.
+
+**The replay.** `RESTORE=1 MIN=300 KITS=<kit> node scripts/review-opening.cjs` against the packaged build, seed 19, with no granted progress. Times are simulated minutes, not player averages.
+
+| Milestone | Sword | Bow | Staff |
+| --- | ---: | ---: | ---: |
+| Grubnash defeated | 20 | 23½ | 31½ |
+| Market shelter restored | 29 | 32 | 42½ |
+| Scholarship unlocked | 50 | 50½ | 61½ |
+| Gnarlroot (Roots in the Orchard) | 52 | 65½ | 104 |
+| Rookmother | ≈72¹ | 109 | 160 |
+| Old Tusk defeated | 115½ | 139½ | 222½ |
+| Saltmere jetty restored | 117 | 141 | 225 |
+| Crab Cull | 123½ | 146 | 231½ |
+| Saltmere challenges | not attempted² | 237, 241½ | not reached |
+| Barnacle defeated | — | 262 | — |
+| **Longest gap, Scholarship to Old Tusk** | **43½** | **43½** | **62½** |
+
+¹ The Rookmother quest was still locked when the Sword hero beat her at Combat 16. The victory and its iron platebody counted, but the quest did not.
+
+² The Sword hero accepted and studied the Brinemaw, but its forecast never reached 60% before minute 300. It trained for Barnacle from minute 123½ to 300 with no further reward beat.
+
+**Before this change,** the Scholarship-to-Old-Tusk gap was 82½ minutes for Sword. It is now within 60 minutes for Sword and Bow. Staff is 2½ minutes over, between the Rookmother and Old Tusk.
+
+**Still open (hours three to five):** after Crab Cull, the Sword and Staff routes have no reward beat until the five-hour cut-off. That is 176 minutes for Sword and 68½ or more for Staff. The Saltmere challenges are offered, but they wait for a 60% forecast. Lowering that threshold, or offering a Saltmere project or Field Guide step in this stretch, is a design decision. Boss stats and XP curves are unchanged.
