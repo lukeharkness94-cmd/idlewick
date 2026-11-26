@@ -20,6 +20,8 @@ for(const [sk,levels]of Object.entries(D.UNL))for(const [lv,names]of Object.entr
 for(const key of ['mastBadge','mastLine']){const fn=Q[key];Q[key]=(kind,id)=>fn(kind,id).replace(/^<([a-z]+) /,`<$1 data-study-kind="${kind}" data-study-id="${id}" `);}
 Q.on('ui',()=>{for(const el of document.querySelectorAll('[data-study-kind]')){const m=Q.mastInfo(el.dataset.studyKind,el.dataset.studyId);el.style.setProperty('--p',m.pct+'%');el.classList.toggle('full',!m.next);el.classList.toggle('max',!m.next);el.classList.toggle('near',!!m.next&&m.pct>=90);const fill=el.querySelector('.bar>i');if(fill)fill.style.width=m.pct+'%';el.querySelectorAll('.mast-pips>i').forEach((p,i)=>p.classList.toggle('on',i<m.stars));el.dataset.tip='text:'+Q.mastTip(el.dataset.studyKind,el.dataset.studyId);if(el.classList.contains('mast-line'))el.setAttribute('aria-label',Q.mastTip(el.dataset.studyKind,el.dataset.studyId));}});
 // Ordinary DPS is an estimate against the selected enemy, not a promise about abilities or boss phases.
+/* what deals each damage type: weapon kinds, spells and combat arts (read from the data, so new ones appear by themselves) */
+Q.dtypeSources=dt=>{const D0=D.DTYPES[dt];if(!D0)return'';const w=Object.values(D.WTYPES).filter(x=>x.dtype===dt).map(x=>x.name+'s'),sp=(D.SPELLS||[]).filter(s=>D.SPELL_EL[s.id]===dt).map(s=>s.name+' (spell)'),ar=Object.entries(D.ARTS||{}).flatMap(([st,l])=>l.filter(a=>a.dtype===dt).map(a=>`${a.name} (${st==='melee'?'Melee technique':'Ranged shot'})`));return `${D0.name}: ${[...w,...sp,...ar].join(', ')||'nothing you have yet'}`;};
 Q.damageEstimate=(m=Q.combatFocus?.())=>{
  const p=Q.pstats(),w=D.WTYPES[D.weaponType()],dtype=p.style==='magic'?D.SPELL_EL[p.spell.id]:w.dtype,wr=m?Q.weakOf(m,Q.fight):{weak:[],resist:[]},weak=wr.weak.includes(dtype),resist=wr.resist.includes(dtype),mult=m?(weak?Q.typeMult(m,'weak'):resist?Q.typeMult(m,'resist'):1):1;
  const acc=p.acc*w.acc*(weak?1.1:1),def=m?(m.def+8)*(64+m.def):0,chance=m?Q.clamp(acc>def?1-(def+2)/(2*(acc+1)):acc/(2*(def+1)),.05,.95):1;
@@ -27,7 +29,7 @@ Q.damageEstimate=(m=Q.combatFocus?.())=>{
  return {dps:(1+max)/2*chance/seconds,max,chance,seconds};
 };
 Q.combatGrowth=(sk,from)=>{if(!['melee','ranged','magic'].includes(sk)||Q.weaponStyle()!==sk)return '';const now=Q.pstats(),xp=S().xp[sk];let before;try{S().xp[sk]=D.XPF[from];Q.fxDirty();before=Q.pstats();}finally{S().xp[sk]=xp;Q.fxDirty();}return `Equipped max hit ${before.max} → ${now.max}; accuracy ${Math.round(before.acc)} → ${Math.round(now.acc)}. A level can improve accuracy before the next whole point of damage.`;};
-U.B.dps=e=>{const d=Q.damageEstimate();U.set(e,`${d.dps.toFixed(2)} DPS · ${Math.round(d.chance*100)}% hit · max ${d.max}`);};
+U.B.dps=e=>{const d=Q.damageEstimate(),dt=Q.myDtype&&D.DTYPES[Q.myDtype()];U.set(e,`${dt?dt.name+' · ':''}${d.dps.toFixed(2)} DPS · ${Math.round(d.chance*100)}% hit · max ${d.max}`);};
 // Preserve the arena, training bars and equipment controls across consecutive opponents and level ticks.
 let encounterTimer;
 U.afterImpact=(fn,delay=0)=>{

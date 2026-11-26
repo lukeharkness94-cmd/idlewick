@@ -889,3 +889,8 @@ button.linkish{display:inline-flex;align-items:center}
 
 /* the bell's unread count meets the 13px text floor (ui-rules R5) */
 .belldot{font-size:13px!important;line-height:18px!important;min-width:18px!important;height:18px!important;border-radius:9px!important}
+
+/* your damage type on the foe card: the matching weakness is ticked; the "You deal" chip turns green or red */
+.cw-dt.mine{font-weight:700;box-shadow:0 0 0 1px var(--c)}
+.cw-chip.cw-you.good{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent)}
+.cw-chip.cw-you.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}

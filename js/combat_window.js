@@ -63,13 +63,16 @@ const windowHtml = () => {
 const foeHtml = () => {
   const f = DQ.fight, act = fightAct(); if (!f || !act) return '';
   const m = D.MON[f.id]; if (!m) return '';
-  const w = DQ.weakOf ? DQ.weakOf(m, f) : { weak: [], resist: [] }, dt = k => D.DTYPES[k] ? `<span class="cw-dt" style="--c:${D.DTYPES[k].col}">${esc(D.DTYPES[k].name)}</span>` : '';
+  /* damage types say what deals them (hover) and which one is yours, so "Weak to Slash" leads somewhere */
+  const mine = DQ.myDtype ? DQ.myDtype() : null;
+  const w = DQ.weakOf ? DQ.weakOf(m, f) : { weak: [], resist: [] }, dt = k => D.DTYPES[k] ? `<span class="cw-dt ${k === mine ? 'mine' : ''}" style="--c:${D.DTYPES[k].col}" data-tip="text:${esc(DQ.dtypeSources(k))}">${k === mine ? '✓ ' : ''}${esc(D.DTYPES[k].name)}</span>` : '';
   const seen = (S().seen && S().seen.items) || {}, drops = (m.drops || []).map(d => d[0]).filter((id, i, a) => D.ITEMS[id] && a.indexOf(id) === i), known = drops.filter(id => seen[id]), unknown = drops.length - known.length;
   const area = act.area && Object.values(D.AREAS || {}).flat().find(a => a.id === act.area);
   const tracking = act.track ? `<div class="cw-trackline">${ico('paw')}<span>Tracking</span><button type="button" class="linkish" data-do="huntexplore" data-a="${act.area || ''}">Explore instead</button></div>` : '';
   const place = m.boss ? 'Boss' : m.mini ? 'Challenge' : (area ? area.name : '');
   const chip = (icon, label, val, tip) => `<span class="cw-chip" data-tip="text:${esc(tip)}">${icon ? ico(icon) : ''}<span class="cw-chip-k">${label}</span><b>${val}</b></span>`;
   const chips = [chip('clock', 'Attacks', ((m.attackMs || 2000) / 1000).toFixed(1) + 's', 'Time between its attacks'), chip('attack', 'Max hit', m.max, 'Its biggest possible hit')];
+  if (mine && D.DTYPES[mine]) { const st = w.weak.includes(mine) ? 'good' : w.resist.includes(mine) ? 'bad' : ''; chips.unshift(`<span class="cw-chip cw-you ${st}" data-tip="text:${esc(st === 'good' ? 'It is weak to your hits: more damage and accuracy.' : st === 'bad' ? 'It resists your hits: less damage.' : 'Neither weak nor resistant to your hits.')} ${esc(DQ.dtypeSources(mine))}"><span class="cw-chip-k">You deal</span><span class="cw-dt mine" style="--c:${D.DTYPES[mine].col}">${esc(D.DTYPES[mine].name)}</span></span>`); }
   if (w.weak.length) chips.push(`<span class="cw-chip"><span class="cw-chip-k">Weak to</span>${w.weak.map(dt).join('')}</span>`);
   if (w.resist.length) chips.push(`<span class="cw-chip"><span class="cw-chip-k">Resists</span>${w.resist.map(dt).join('')}</span>`);
   /* one row each: who it is, its health, how it fights, what it drops; the portrait opens its field entry */

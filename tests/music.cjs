@@ -11,7 +11,7 @@ const seen=[];
 for(const t of ['willowbrook','saltmere','hollow']){await p.evaluate(t=>{DQ.act=null;DQ.S.town=t;},t);await p.waitForTimeout(500);seen.push(await p.evaluate(()=>DQ.musicNow()));}
 assert.deepEqual(seen.map(s=>s.theme),['willowbrook','saltmere','hollow'],'follows the region');
 await p.evaluate(()=>{DQ.S.town='saltmere';DQ.act={kind:'fight',id:'bandit'};DQ.fight={id:'bandit'};});await p.waitForTimeout(500);const f=await p.evaluate(()=>DQ.musicNow());
-assert.equal(f.theme,'combat');assert.equal(f.root,57,'combat in the region key');assert.ok(f.bpm>120,'combat is faster');
+assert.equal(f.theme,'combat');assert.equal(f.root,57,'combat in the region key');assert.ok(f.bpm>seen[1].bpm,'combat is faster than its region (lo-fi tempos, 26 Nov)');
 await p.evaluate(()=>{DQ.act={kind:'fight',id:'grubnash'};DQ.fight={id:'grubnash'};});await p.waitForTimeout(500);assert.equal((await p.evaluate(()=>DQ.musicNow())).theme,'boss');
 assert.equal(await p.evaluate(()=>DQ.audioState().music),'boss');
 await p.evaluate(()=>{DQ.act=null;DQ.fight=null;});await p.waitForTimeout(1500);

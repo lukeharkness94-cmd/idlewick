@@ -5651,6 +5651,11 @@ button.linkish{display:inline-flex;align-items:center}
 
 /* the bell's unread count meets the 13px text floor (ui-rules R5) */
 .belldot{font-size:13px!important;line-height:18px!important;min-width:18px!important;height:18px!important;border-radius:9px!important}
+
+/* your damage type on the foe card: the matching weakness is ticked; the "You deal" chip turns green or red */
+.cw-dt.mine{font-weight:700;box-shadow:0 0 0 1px var(--c)}
+.cw-chip.cw-you.good{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent)}
+.cw-chip.cw-you.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
 </style>
 
 </head>
@@ -12228,7 +12233,7 @@ function applyVolumes() {
   if (!ctx) return; const s = S(), t = ctx.currentTime;
   master.gain.setTargetAtTime(s.muted ? 0 : (s.masterVol ?? 1), t, .05);
   sfxG.gain.setTargetAtTime(s.sfx ? s.vol * .8 : 0, t, .05);
-  musG.gain.setTargetAtTime(s.music ? s.musicVol * .55 : 0, t, .3);
+  musG.gain.setTargetAtTime(s.music ? s.musicVol * .45 : 0, t, .3);
   /* ambience sits under everything, and dips during fights so combat reads clearly */
   if (ambG) ambG.gain.setTargetAtTime(s.ambience === false ? 0 : (s.ambVol ?? .45) * .6 * (DQ.act && DQ.act.kind === 'fight' ? .25 : 1), t, .8);
 }
@@ -12364,21 +12369,26 @@ let modeId = 'title', themeId = null, bus = null, seqTimer = null, nextT = 0, st
 const isBossy = () => { const m = DQ.fight && DQ.data && DQ.data.MON[DQ.fight.id]; return !!(m && (m.boss || m.mini || m.tower)); };
 /* what should be playing now: the title, a fight, or the town you are in */
 DQ.musicTheme = () => { if (modeId === 'title') return 'title'; const st = DQ.S; if (DQ.act && DQ.act.kind === 'fight') return isBossy() ? 'boss' : 'combat'; return (st && MUS[st.town]) ? st.town : 'willowbrook'; };
-const build = id => { const town = (DQ.S && DQ.S.town) || 'willowbrook', base = MUS[id] || MUS.title;
-  if (!base.fight) return base; const region = MUS[town] || MUS.willowbrook;
-  return Object.assign({}, base, { root: REGION_KEY[town] || 55, lead: base.lead || region.lead || 'fiddle', town }); };
+/* Lo-fi treatment (owner, 26 Nov 2026: "the music is a little intense - could it be a little more lo-fi"): every theme
+   keeps its tune and key but plays about 18% slower with a light swing, through a warm tape filter with a slow pitch wobble
+   and a faint vinyl hiss; leads and drums are softer and the hats nearly gone. The composed tempos stay in D.MUSIC. */
+const LOFI = { tempo: .82, swing: .16, cutoff: 1900, wobble: 7, hiss: .006, hats: .3, snare: .55, kick: .8 };
+if (DQ.data) DQ.data.MUSIC_LOFI = LOFI;
+const build = id => { const town = (DQ.S && DQ.S.town) || 'willowbrook', base = MUS[id] || MUS.title, slow = t => Object.assign({}, t, { bpm: Math.round(t.bpm * LOFI.tempo) });
+  if (!base.fight) return slow(base); const region = MUS[town] || MUS.willowbrook;
+  return slow(Object.assign({}, base, { root: REGION_KEY[town] || 55, lead: base.lead || region.lead || 'fiddle', town })); };
 /* ---- instruments: each takes (time, midi, seconds, gain) and plays into the theme bus ---- */
 const out = (node, wet = .5) => { node.connect(bus); if (verb && wet) { const w = ctx.createGain(); w.gain.value = wet; node.connect(w); w.connect(verb); } };
 const env = (g, t, a, d, v, rel = .08) => { g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + a); g.gain.setTargetAtTime(v * .7, t + a, d * .4); g.gain.setTargetAtTime(0, t + d, rel); };
-const osc = (type, f, t, end, dest, detune = 0) => { const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); o.detune.value = detune; o.connect(dest); o.start(t); o.stop(end + .5); return o; };
+const osc = (type, f, t, end, dest, detune = 0) => { const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); o.detune.value = detune; if (tape && tape.wob) tape.wob.connect(o.detune); o.connect(dest); o.start(t); o.stop(end + .5); return o; };
 const vib = (o, t, end, rate = 5.2, depth = 5) => { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = rate; lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(depth, t + .25); l.connect(lg); lg.connect(o.detune); l.start(t); l.stop(end + .5); };
 const lp = (f, q = .7) => { const b = ctx.createBiquadFilter(); b.type = 'lowpass'; b.frequency.value = f; b.Q.value = q; return b; };
 const INST = {
   flute: (t, m, d, v) => { const g = ctx.createGain(), f = lp(2600); f.connect(g); vib(osc('triangle', mtof(m), t, t + d, f), t, t + d); osc('sine', mtof(m) * 2, t, t + d, f); env(g, t, .06, d, v * .9); out(g, .55); },
-  fiddle: (t, m, d, v) => { const g = ctx.createGain(), f = lp(2200, 1.2); f.connect(g); const o = osc('sawtooth', mtof(m), t, t + d, f); vib(o, t, t + d, 6, 8); env(g, t, .03, d, v * .55); out(g, .4); },
-  squeeze: (t, m, d, v) => { const g = ctx.createGain(), f = lp(1700); f.connect(g); osc('square', mtof(m), t, t + d, f); osc('square', mtof(m), t, t + d, f, 9); env(g, t, .04, d, v * .32); out(g, .35); },
+  fiddle: (t, m, d, v) => { const g = ctx.createGain(), f = lp(1400, .9); f.connect(g); const o = osc('sawtooth', mtof(m), t, t + d, f); vib(o, t, t + d, 6, 8); env(g, t, .03, d, v * .55); out(g, .4); },
+  squeeze: (t, m, d, v) => { const g = ctx.createGain(), f = lp(1200); f.connect(g); osc('square', mtof(m), t, t + d, f); osc('square', mtof(m), t, t + d, f, 9); env(g, t, .04, d, v * .32); out(g, .35); },
   horn: (t, m, d, v) => { const g = ctx.createGain(), f = lp(500); f.frequency.setValueAtTime(400, t); f.frequency.linearRampToValueAtTime(1300, t + .18); f.frequency.setTargetAtTime(800, t + .2, .3); f.connect(g); osc('sawtooth', mtof(m), t, t + d, f); osc('sawtooth', mtof(m - 12), t, t + d, f, 4); env(g, t, .12, d, v * .5); out(g, .6); },
-  brass: (t, m, d, v) => { const g = ctx.createGain(), f = lp(900, 2); f.frequency.setValueAtTime(600, t); f.frequency.linearRampToValueAtTime(2600, t + .06); f.frequency.setTargetAtTime(1400, t + .08, .15); f.connect(g); osc('sawtooth', mtof(m), t, t + d, f); osc('sawtooth', mtof(m), t, t + d, f, -7); env(g, t, .03, d, v * .42); out(g, .35); },
+  brass: (t, m, d, v) => { const g = ctx.createGain(), f = lp(900, 2); f.frequency.setValueAtTime(600, t); f.frequency.linearRampToValueAtTime(1500, t + .06); f.frequency.setTargetAtTime(1000, t + .08, .15); f.connect(g); osc('sawtooth', mtof(m), t, t + d, f); osc('sawtooth', mtof(m), t, t + d, f, -7); env(g, t, .03, d, v * .42); out(g, .35); },
   bell: (t, m, d, v) => { [[1, 1, 2.4], [2.01, .45, 1.6], [2.76, .25, 1.1], [5.4, .1, .6]].forEach(([k, a, len]) => { const g = ctx.createGain(); osc('sine', mtof(m) * k, t, t + len, g); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v * a * .7, t + .005); g.gain.exponentialRampToValueAtTime(.0005, t + len); out(g, .8); }); },
   harp: (t, m, d, v) => { const g = ctx.createGain(); osc('triangle', mtof(m), t, t + 1.4, g); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v * .55, t + .005); g.gain.exponentialRampToValueAtTime(.0005, t + 1.3); out(g, .6); },
   bass: (t, m, d, v) => { const g = ctx.createGain(), f = lp(420); f.connect(g); osc('triangle', mtof(m), t, t + d, f); osc('sine', mtof(m), t, t + d, f); env(g, t, .01, d * .9, v * .8, .05); out(g, 0); },
@@ -12398,17 +12408,17 @@ const DRUM = {
 const scaleNote = (th, deg) => { const sc = MODE[th.mode] || MODE.ionian, o = Math.floor(deg / 7); return th.root + sc[((deg % 7) + 7) % 7] + 12 * o; };
 function playBar(t0) {
   const th = theme, sd = 60 / th.bpm / (th.steps === 12 ? 2 : 4), chord = th.prog[bar % th.prog.length], n = th.steps, barLen = sd * n;
-  const tri = [chord, chord + 2, chord + 4].map(d => scaleNote(th, d)), V = .2;
+  const tri = [chord, chord + 2, chord + 4].map(d => scaleNote(th, d)), V = .2, at = i => t0 + i * sd + (n === 16 && i % 2 ? sd * LOFI.swing : 0);
   /* pad or choir under everything */
   if (th.pad) tri.forEach(m => (th.acc === 'choir' ? INST.choir : INST.pad)(t0, m, barLen * 1.05, V * .5));
   /* accompaniment */
   const acc = th.acc;
-  if (acc === 'harp') for (let i = 0; i < n; i += 2) INST.harp(t0 + i * sd, tri[[0, 1, 2, 1][(i / 2) % 4]] + 12, sd * 2, V * .5);
-  if (acc === 'arp16') for (let i = 0; i < n; i++) INST.bell(t0 + i * sd, tri[i % 3] + 12 + (i % 6 > 2 ? 12 : 0), sd, V * .25);
+  if (acc === 'harp') for (let i = 0; i < n; i += 2) INST.harp(at(i), tri[[0, 1, 2, 1][(i / 2) % 4]] + 12, sd * 2, V * .5);
+  if (acc === 'arp16') for (let i = 0; i < n; i++) INST.bell(at(i), tri[i % 3] + 12 + (i % 6 > 2 ? 12 : 0), sd, V * .25);
   if (acc === 'chords68') [0, 3, 6, 9].forEach(i => tri.forEach(m => INST.squeeze(t0 + i * sd, m, sd * 1.6, V * .22)));
   if (acc === 'drone') INST.fiddle(t0, th.root - 12, barLen, V * .25);
   if (acc === 'stab') [0, 6, 10].forEach(i => tri.forEach(m => INST.brass(t0 + i * sd, m, sd * 1.5, V * .25)));
-  if (acc === 'ostinato') for (let i = 0; i < n; i += 2) INST.fiddle(t0 + i * sd, tri[[0, 2, 1, 2][(i / 2) % 4]], sd * 1.8, V * .35);
+  if (acc === 'ostinato') for (let i = 0; i < n; i += 2) INST.fiddle(at(i), tri[[0, 2, 1, 2][(i / 2) % 4]], sd * 1.8, V * .35);
   /* bass */
   const b = th.bass, root = tri[0] - 24;
   if (b === 'root2') [0, n / 2].forEach(i => INST.bass(t0 + i * sd, root, sd * n / 2.2, V));
@@ -12418,10 +12428,10 @@ function playBar(t0) {
   if (b === 'pulse') [0, 8].forEach(i => INST.bass(t0 + i * sd, root, sd * 6, V * .7));
   if (b === 'drive') for (let i = 0; i < n; i += 2) INST.bass(t0 + i * sd, root + (i === 14 ? 7 : 0), sd * 1.6, V * .9);
   /* drums */
-  if (th.drums) for (const [k, steps] of Object.entries(th.drums)) for (const i of steps) if (DRUM[k]) DRUM[k](t0 + i * sd, V * (k === 'h' ? .8 : 1));
+  if (th.drums) for (const [k, steps] of Object.entries(th.drums)) for (const i of steps) if (DRUM[k]) DRUM[k](at(i), V * (k === 'h' ? LOFI.hats : k === 's' ? LOFI.snare : k === 'k' ? LOFI.kick : .8));
   /* the tune: a phrase of motifs, the last bar of the progression resolving */
   const mo = th.motifs[PHRASE[bar % PHRASE.length] % th.motifs.length], lead = INST[th.lead] || INST.flute;
-  if (mo) for (const [s, deg, len] of mo) lead(t0 + s * sd, scaleNote(th, chord + deg) + 12 + (th.high || 0), Math.max(sd, len * sd * .95), V * .6);
+  if (mo) for (const [s, deg, len] of mo) lead(at(s), scaleNote(th, chord + deg) + 12 + (th.high || 0), Math.max(sd, len * sd * .95), V * .6);
   return barLen;
 }
 function sequencer() {
@@ -12430,12 +12440,22 @@ function sequencer() {
   if (nextT < ctx.currentTime - .1) nextT = ctx.currentTime + .05; /* back from a hidden tab: start fresh, never catch up */
   while (nextT < ctx.currentTime + .35) { const len = playBar(nextT); nextT += len; bar++; step++; }
 }
+let tape = null;
+const tapeChain = () => { if (tape) return tape;
+  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 70;
+  const lo = ctx.createBiquadFilter(); lo.type = 'lowpass'; lo.frequency.value = LOFI.cutoff; lo.Q.value = .5;
+  hp.connect(lo); lo.connect(musG);
+  const lfo = ctx.createOscillator(), wob = ctx.createGain(); lfo.frequency.value = .35; wob.gain.value = LOFI.wobble; lfo.connect(wob); lfo.start();
+  const n = ctx.sampleRate * 2, b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); let last = 0;
+  for (let i = 0; i < n; i++) { last = (last + .02 * (Math.random() * 2 - 1)) / 1.02; d[i] = last * 3 + (Math.random() < .0004 ? (Math.random() - .5) * .6 : 0); }
+  const src = ctx.createBufferSource(); src.buffer = b; src.loop = true; const hg = ctx.createGain(); hg.gain.value = LOFI.hiss; src.connect(hg); hg.connect(lo); src.start();
+  return (tape = { in: hp, wob }); };
 function switchTheme(id) {
   if (!ctx) { themeId = null; return; }
   if (id === themeId && bus) return;
   const t = ctx.currentTime;
   if (bus) { const old = bus; old.gain.setTargetAtTime(0, t, .5); setTimeout(() => { try { old.disconnect(); } catch (e) {} }, 4000); }
-  bus = ctx.createGain(); bus.gain.setValueAtTime(0, t); bus.gain.setTargetAtTime(1, t + .1, .6); bus.connect(musG);
+  bus = ctx.createGain(); bus.gain.setValueAtTime(0, t); bus.gain.setTargetAtTime(1, t + .1, .6); bus.connect(tapeChain().in);
   themeId = id; theme = build(id); bar = 0; nextT = t + .15;
 }
 function musicTick() {
@@ -12775,8 +12795,11 @@ DQ.notify = o => {
     return;
   }
   if (o.popup) return;
+  /* a quest or boss moment keeps its sound even when its card is not shown (on its own page, during a fight, or past the
+     on-screen limit); routine notes stay quiet */
+  const chime = () => { if (o.sound && ['quest', 'boss'].includes(o.kind) && !DQ.forecasting) DQ.sfx(o.sound); };
   if (DQ.ui && DQ.ui.view === DQ.notificationPage(o) && !['unlock','level','adv'].includes(o.kind)) {
-    markSilent(o);
+    markSilent(o); chime();
     if (DQ.notificationTier(o) === 'now') {
       DQ.ui.pageNotice = { page: DQ.notificationPage(o), title: String(o.title || ''), text: String(o.text || '') };
       if (DQ.ui.renderPageNotice) DQ.ui.renderPageNotice();
@@ -12787,8 +12810,8 @@ DQ.notify = o => {
   const tier = DQ.notificationTier(o);
   if (tier === 'quiet') { markSilent(o); return; }
   if (o.key) { $$('.note', notesEl).filter(n => n.dataset.key === o.key).forEach(n => n.remove()); const i = queue.findIndex(q => q.key === o.key); if (i >= 0) queue.splice(i, 1); }
-  if (inFight()) { markSilent(o); return; }
-  if (document.hidden || DQ.holdNotes || nowLive() >= MAX_NOW) { if (queue.length < MAX_WAIT) queue.push(o); else markSilent(o); return; }
+  if (inFight()) { markSilent(o); chime(); return; }
+  if (document.hidden || DQ.holdNotes || nowLive() >= MAX_NOW) { if (queue.length < MAX_WAIT) queue.push(o); else { markSilent(o); chime(); } return; }
   showNote(o);
 };
 /* Cards wait behind the welcome-back summary, then follow it one at a time. */
@@ -24466,6 +24489,8 @@ for(const [sk,levels]of Object.entries(D.UNL))for(const [lv,names]of Object.entr
 for(const key of ['mastBadge','mastLine']){const fn=Q[key];Q[key]=(kind,id)=>fn(kind,id).replace(/^<([a-z]+) /,`<$1 data-study-kind="${kind}" data-study-id="${id}" `);}
 Q.on('ui',()=>{for(const el of document.querySelectorAll('[data-study-kind]')){const m=Q.mastInfo(el.dataset.studyKind,el.dataset.studyId);el.style.setProperty('--p',m.pct+'%');el.classList.toggle('full',!m.next);el.classList.toggle('max',!m.next);el.classList.toggle('near',!!m.next&&m.pct>=90);const fill=el.querySelector('.bar>i');if(fill)fill.style.width=m.pct+'%';el.querySelectorAll('.mast-pips>i').forEach((p,i)=>p.classList.toggle('on',i<m.stars));el.dataset.tip='text:'+Q.mastTip(el.dataset.studyKind,el.dataset.studyId);if(el.classList.contains('mast-line'))el.setAttribute('aria-label',Q.mastTip(el.dataset.studyKind,el.dataset.studyId));}});
 // Ordinary DPS is an estimate against the selected enemy, not a promise about abilities or boss phases.
+/* what deals each damage type: weapon kinds, spells and combat arts (read from the data, so new ones appear by themselves) */
+Q.dtypeSources=dt=>{const D0=D.DTYPES[dt];if(!D0)return'';const w=Object.values(D.WTYPES).filter(x=>x.dtype===dt).map(x=>x.name+'s'),sp=(D.SPELLS||[]).filter(s=>D.SPELL_EL[s.id]===dt).map(s=>s.name+' (spell)'),ar=Object.entries(D.ARTS||{}).flatMap(([st,l])=>l.filter(a=>a.dtype===dt).map(a=>`${a.name} (${st==='melee'?'Melee technique':'Ranged shot'})`));return `${D0.name}: ${[...w,...sp,...ar].join(', ')||'nothing you have yet'}`;};
 Q.damageEstimate=(m=Q.combatFocus?.())=>{
  const p=Q.pstats(),w=D.WTYPES[D.weaponType()],dtype=p.style==='magic'?D.SPELL_EL[p.spell.id]:w.dtype,wr=m?Q.weakOf(m,Q.fight):{weak:[],resist:[]},weak=wr.weak.includes(dtype),resist=wr.resist.includes(dtype),mult=m?(weak?Q.typeMult(m,'weak'):resist?Q.typeMult(m,'resist'):1):1;
  const acc=p.acc*w.acc*(weak?1.1:1),def=m?(m.def+8)*(64+m.def):0,chance=m?Q.clamp(acc>def?1-(def+2)/(2*(acc+1)):acc/(2*(def+1)),.05,.95):1;
@@ -24473,7 +24498,7 @@ Q.damageEstimate=(m=Q.combatFocus?.())=>{
  return {dps:(1+max)/2*chance/seconds,max,chance,seconds};
 };
 Q.combatGrowth=(sk,from)=>{if(!['melee','ranged','magic'].includes(sk)||Q.weaponStyle()!==sk)return '';const now=Q.pstats(),xp=S().xp[sk];let before;try{S().xp[sk]=D.XPF[from];Q.fxDirty();before=Q.pstats();}finally{S().xp[sk]=xp;Q.fxDirty();}return `Equipped max hit ${before.max} → ${now.max}; accuracy ${Math.round(before.acc)} → ${Math.round(now.acc)}. A level can improve accuracy before the next whole point of damage.`;};
-U.B.dps=e=>{const d=Q.damageEstimate();U.set(e,`${d.dps.toFixed(2)} DPS · ${Math.round(d.chance*100)}% hit · max ${d.max}`);};
+U.B.dps=e=>{const d=Q.damageEstimate(),dt=Q.myDtype&&D.DTYPES[Q.myDtype()];U.set(e,`${dt?dt.name+' · ':''}${d.dps.toFixed(2)} DPS · ${Math.round(d.chance*100)}% hit · max ${d.max}`);};
 // Preserve the arena, training bars and equipment controls across consecutive opponents and level ticks.
 let encounterTimer;
 U.afterImpact=(fn,delay=0)=>{
@@ -25095,13 +25120,16 @@ const windowHtml = () => {
 const foeHtml = () => {
   const f = DQ.fight, act = fightAct(); if (!f || !act) return '';
   const m = D.MON[f.id]; if (!m) return '';
-  const w = DQ.weakOf ? DQ.weakOf(m, f) : { weak: [], resist: [] }, dt = k => D.DTYPES[k] ? `<span class="cw-dt" style="--c:${D.DTYPES[k].col}">${esc(D.DTYPES[k].name)}</span>` : '';
+  /* damage types say what deals them (hover) and which one is yours, so "Weak to Slash" leads somewhere */
+  const mine = DQ.myDtype ? DQ.myDtype() : null;
+  const w = DQ.weakOf ? DQ.weakOf(m, f) : { weak: [], resist: [] }, dt = k => D.DTYPES[k] ? `<span class="cw-dt ${k === mine ? 'mine' : ''}" style="--c:${D.DTYPES[k].col}" data-tip="text:${esc(DQ.dtypeSources(k))}">${k === mine ? '✓ ' : ''}${esc(D.DTYPES[k].name)}</span>` : '';
   const seen = (S().seen && S().seen.items) || {}, drops = (m.drops || []).map(d => d[0]).filter((id, i, a) => D.ITEMS[id] && a.indexOf(id) === i), known = drops.filter(id => seen[id]), unknown = drops.length - known.length;
   const area = act.area && Object.values(D.AREAS || {}).flat().find(a => a.id === act.area);
   const tracking = act.track ? `<div class="cw-trackline">${ico('paw')}<span>Tracking</span><button type="button" class="linkish" data-do="huntexplore" data-a="${act.area || ''}">Explore instead</button></div>` : '';
   const place = m.boss ? 'Boss' : m.mini ? 'Challenge' : (area ? area.name : '');
   const chip = (icon, label, val, tip) => `<span class="cw-chip" data-tip="text:${esc(tip)}">${icon ? ico(icon) : ''}<span class="cw-chip-k">${label}</span><b>${val}</b></span>`;
   const chips = [chip('clock', 'Attacks', ((m.attackMs || 2000) / 1000).toFixed(1) + 's', 'Time between its attacks'), chip('attack', 'Max hit', m.max, 'Its biggest possible hit')];
+  if (mine && D.DTYPES[mine]) { const st = w.weak.includes(mine) ? 'good' : w.resist.includes(mine) ? 'bad' : ''; chips.unshift(`<span class="cw-chip cw-you ${st}" data-tip="text:${esc(st === 'good' ? 'It is weak to your hits: more damage and accuracy.' : st === 'bad' ? 'It resists your hits: less damage.' : 'Neither weak nor resistant to your hits.')} ${esc(DQ.dtypeSources(mine))}"><span class="cw-chip-k">You deal</span><span class="cw-dt mine" style="--c:${D.DTYPES[mine].col}">${esc(D.DTYPES[mine].name)}</span></span>`); }
   if (w.weak.length) chips.push(`<span class="cw-chip"><span class="cw-chip-k">Weak to</span>${w.weak.map(dt).join('')}</span>`);
   if (w.resist.length) chips.push(`<span class="cw-chip"><span class="cw-chip-k">Resists</span>${w.resist.map(dt).join('')}</span>`);
   /* one row each: who it is, its health, how it fights, what it drops; the portrait opens its field entry */

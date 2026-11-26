@@ -223,8 +223,11 @@ DQ.notify = o => {
     return;
   }
   if (o.popup) return;
+  /* a quest or boss moment keeps its sound even when its card is not shown (on its own page, during a fight, or past the
+     on-screen limit); routine notes stay quiet */
+  const chime = () => { if (o.sound && ['quest', 'boss'].includes(o.kind) && !DQ.forecasting) DQ.sfx(o.sound); };
   if (DQ.ui && DQ.ui.view === DQ.notificationPage(o) && !['unlock','level','adv'].includes(o.kind)) {
-    markSilent(o);
+    markSilent(o); chime();
     if (DQ.notificationTier(o) === 'now') {
       DQ.ui.pageNotice = { page: DQ.notificationPage(o), title: String(o.title || ''), text: String(o.text || '') };
       if (DQ.ui.renderPageNotice) DQ.ui.renderPageNotice();
@@ -235,8 +238,8 @@ DQ.notify = o => {
   const tier = DQ.notificationTier(o);
   if (tier === 'quiet') { markSilent(o); return; }
   if (o.key) { $$('.note', notesEl).filter(n => n.dataset.key === o.key).forEach(n => n.remove()); const i = queue.findIndex(q => q.key === o.key); if (i >= 0) queue.splice(i, 1); }
-  if (inFight()) { markSilent(o); return; }
-  if (document.hidden || DQ.holdNotes || nowLive() >= MAX_NOW) { if (queue.length < MAX_WAIT) queue.push(o); else markSilent(o); return; }
+  if (inFight()) { markSilent(o); chime(); return; }
+  if (document.hidden || DQ.holdNotes || nowLive() >= MAX_NOW) { if (queue.length < MAX_WAIT) queue.push(o); else { markSilent(o); chime(); } return; }
   showNote(o);
 };
 /* Cards wait behind the welcome-back summary, then follow it one at a time. */
