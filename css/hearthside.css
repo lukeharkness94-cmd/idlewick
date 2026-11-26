@@ -837,3 +837,21 @@ html:has(.home-glance) #hud .h-stats,html:has(.home-glance) #hud .h-task,html:ha
 /* locked rail rows: a quiet bar showing how close the skill is to being learned */
 #skilldock .dk.locked .bar.dk-req{display:block;opacity:.85}
 #skilldock .dk.locked .bar.dk-req i{background:color-mix(in srgb,var(--c) 55%,var(--mute))}
+
+/* Home fits the window on desktop (review 26 Nov): the village on the left, the running task, coins, the goal and any
+   flag on the right; nothing below the fold at 1440x900 or 1280x720. The picture is cropped, never stretched. */
+@media (min-width:861px){
+ #view .home-glance{grid-template-columns:minmax(0,1fr) minmax(340px,440px);grid-template-rows:auto auto 1fr;align-items:start;height:calc(var(--vh100,100vh) - 190px);min-height:420px}
+ #view .home-glance>.home-scene{grid-column:1;grid-row:1/-1;height:100%;align-self:stretch}
+ #view .home-glance>.home-scene .scene{height:100%!important;aspect-ratio:auto!important;object-fit:cover;object-position:center 60%}
+ #view .home-glance>:not(.home-scene){grid-column:2}
+ #view .home-glance>.home-glance-row{grid-template-columns:minmax(0,1fr) auto}
+ #view .home-glance>[data-home-unit="flag"]{align-self:start}
+}
+/* the top bar keeps its coin count on Home too, like every other page */
+html:has(.home-glance) #hud .h-stats{display:revert}
+/* inline buy buttons: one line of label, one of price */
+.inline-buy .btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;white-space:nowrap;line-height:1.15}
+.inline-buy .btn b{font-weight:600}
+.inline-buy .btn small{white-space:nowrap}
+.inline-buy.one{grid-template-columns:minmax(0,1fr)}

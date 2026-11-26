@@ -376,13 +376,15 @@ UI.renderLog = () => {
   el.innerHTML = S().log.slice(0, 14).map(l => { const d = new Date(l.t); return `<li class="${esc(l.k || '')}"><time>${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}</time><span>${esc(l.m)}</span></li>`; }).join('') || `<li><time></time><span class="dim">Your adventures will be written here.</span></li>`;
 };
 UI.chart = () => {
-  const W = 600, H = 150, L = 36, T = 8, bw = (W - L) / 60, bk = DQ.hist.slice(-60), off = 60 - bk.length;
+  /* the chart is drawn at its container's own width so its labels keep their size (a fixed 600-wide viewBox blew
+     them up to ~30px on a wide Activity page) */
+  const cw = ($('#chart') && $('#chart').clientWidth) || 600, W = Math.max(300, Math.min(2400, Math.round(cw))), H = 150, L = 36, T = 8, bw = (W - L) / 60, bk = DQ.hist.slice(-60), off = 60 - bk.length;
   const sums = bk.map(b => Object.values(b).reduce((a, v) => a + v, 0)), top = Math.max(50, Math.ceil(Math.max(50, ...sums) / 50) * 50), ph = H - T - 16;
   let g = '', bars = '';
   for (let i = 0; i <= 2; i++) { const y = T + ph - ph * i / 2; g += `<line class="gl" x1="${L}" x2="${W}" y1="${y}" y2="${y}"/><text x="${L - 6}" y="${y + 3}" text-anchor="end">${DQ.fmtK(top * i / 2)}</text>`; }
   bk.forEach((b, i) => { let y = T + ph; D.SKILLS.forEach(k => { const v = b[k.id]; if (!v) return; const h = v / top * ph; y -= h; bars += `<rect x="${(L + (off + i) * bw + 1).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${h.toFixed(1)}" rx="1.5" fill="${k.col}"/>`; }); });
   const tot = bk.reduce((a, b) => a + Object.values(b).reduce((x, v) => x + v, 0), 0), secs = Math.max(30, Math.min(300, bk.length * 5));
-  const c = $('#chart'), sig = bk.length + ':' + sums.join(',') + ':' + top;
+  const c = $('#chart'), sig = bk.length + ':' + sums.join(',') + ':' + top + ':' + W;
   if (c && !(c.firstChild && (c.dataset.sig === sig || Date.now() - (+c.dataset.at || 0) < 6000))) { c.dataset.at = Date.now(); c.dataset.sig = sig; c.innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Experience gained over the last five minutes">${g}${bars}<text x="${L}" y="${H - 2}">5 min ago</text><text x="${W}" y="${H - 2}" text-anchor="end">now</text></svg>`; }
   const xph = $('#xph'); if (xph) UI.set(xph, `${DQ.fmt(tot / secs * 3600)} XP / hr`);
 };

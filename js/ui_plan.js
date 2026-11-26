@@ -141,7 +141,7 @@ const showForecast = (id, text) => {
 UI.prepSteps = (m, fc) => {
   const steps = DQ.prepAdvice(m.id, fc || UI.lastForecast[m.id]).slice(0, 3);
   if (!steps.length) return `<p class="sm ok">✓ Nothing obvious to prepare: full health, armour in every slot and enough food.</p>`;
-  return `<ol class="prep-steps">${steps.map(x => `<li><b>${esc(x.title)}</b><small>${esc(x.text)}</small>${x.action ? `<button class="btn sm" data-do="${x.action}" data-a="${x.a}">${x.a === 'shop' ? 'Open shop' : x.a === 'character' ? 'Equipment' : x.a === 'combat' ? 'Train' : 'Go to ' + esc(D.SK[x.a] ? D.SK[x.a].name : x.a)}</button>` : ''}</li>`).join('')}</ol>`;
+  return `<ol class="prep-steps">${steps.map(x => `<li><b>${esc(x.title)}</b><small>${esc(x.text)}</small>${x.action ? `<button class="btn sm" data-do="${x.action}" data-a="${x.a}">${x.a === 'shop' ? 'Open shop' : x.a === 'character' ? 'Equipment' : x.a === 'combat' ? 'Train' : (D.SK[x.a] ? 'Go to ' + esc(D.SK[x.a].name) : D.ITEMS[x.a] ? 'Get ' + esc(D.ITEMS[x.a].name.toLowerCase()) : D.TOWN && D.TOWN[x.a] ? 'Go to ' + esc(D.TOWN[x.a].name) : 'Go there')}</button>` : ''}</li>`).join('')}</ol>`;
 };
 /* The boss special, spelled out: when it lands, how hard, and what stops it. */
 UI.specialLine = m => {
