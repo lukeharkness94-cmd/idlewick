@@ -76,3 +76,30 @@ The later 180-minute replay with standard arrows in Saltmere and training guidan
 **Before this change,** the Scholarship-to-Old-Tusk gap was 82½ minutes for Sword. It is now within 60 minutes for Sword and Bow. Staff is 2½ minutes over, between the Rookmother and Old Tusk.
 
 **Still open (hours three to five):** after Crab Cull, the Sword and Staff routes have no reward beat until the five-hour cut-off. That is 176 minutes for Sword and 68½ or more for Staff. The Saltmere challenges are offered, but they wait for a 60% forecast. Lowering that threshold, or offering a Saltmere project or Field Guide step in this stretch, is a design decision. Boss stats and XP curves are unchanged.
+
+### Final replay, after the follow-up restorations (26 Nov 2026)
+
+Changes since the replay above:
+
+- **Follow-up restoration:** after 30 minutes of game time without a reward, Home offers one of the town's existing restorations, if every material can be had now and the whole cost is affordable. Supply-shelf items are routed to, never bought by the route, and carry-limited items go in rounds. This step comes ahead of another try at a challenge.
+- **Saltmere challenges:** offered from a 50% forecast.
+- **Ability step:** an unusable ability is now swapped from Home.
+
+| Milestone | Sword | Bow | Staff |
+| --- | ---: | ---: | ---: |
+| Grubnash defeated | 19½ | 23½ | 34½ |
+| Scholarship unlocked | 47 | 51 | 58 |
+| Windmill restored (follow-up) | 60 | 64½ | 77 |
+| Granary restored (follow-up) | — | — | 110 |
+| Gnarlroot | ≈52³ | 69 | 116½ |
+| Rookmother | 79 | 111½ | 156½ |
+| Old Tusk defeated | 111½ | 142 | 168½ |
+| Crab Cull | 118½ | 148½ | 175½ |
+| Saltmere challenges | 214, 217½ | 187, 209½ | — |
+| Barnacle defeated | 257 | 241½ | — |
+| **Longest gap before Old Tusk** | **32½** | **42½** | **40** |
+| Longest gap overall | 95½ (Crab Cull → Brinemaw) | 42½ | 124½ after Crab Cull (run ends) |
+
+³ Gnarlroot does not appear as a milestone in this Sword run. It was beaten before its quest was taken.
+
+**Still open after Old Tusk.** The Sword route's Saltmere stretch depends on winning the Brinemaw at a 50% forecast. Across runs it measured 41, 59, 92, 95½ and 107 minutes. None of Saltmere's restorations can be offered to that hero, because the smokehouse needs palm logs at Woodcutting 27 and the Sword hero is at 8. Ask before changing boss or challenge stats.
