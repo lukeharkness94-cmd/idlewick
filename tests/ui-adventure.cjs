@@ -36,7 +36,9 @@ assert.ok(await ev(()=>!!document.querySelector('.modal .ghead')),'Continue open
 await ev(()=>DQ.closeModal());
 log('weak shown on combat chips:',await ev(()=>DQ.weakKnown(DQ.data.MON.scarecrow)));
 await p.locator('[data-do="questcontinue"][data-a="am_mill"]').first().click().catch(()=>{});await p.waitForTimeout(300);log('continue ->',await ev(()=>DQ.ui.view),await ev(()=>DQ.ui.taskChoice.combat));
-await ev(()=>{DQ.startAct('fight','scarecrow')});for(let i=0;i<12&&(await ev(()=>DQ.S.q.am_mill.s))==='active';i++){await ev(()=>{DQ.S.inv.bread=200;DQ.simulate(5*60000)});}
+/* Part B starter prerequisites: a fresh hero cuts one ordinary log and finishes the starter weapon before a first fight (the shrimp was cooked in chapter 1) */
+await ev(()=>{if(DQ.openingCombatNeed()?.action==='journeytask'&&DQ.openingCombatNeed().a==='wood'){DQ.startAct('wood','normal');DQ.simulate(60000);DQ.stopAct(true);}if(DQ.openingCombatNeed()?.action==='finishstarter')DQ.ui.DO.finishstarter();});assert.equal(await ev(()=>DQ.openingCombatNeed()),null,'the opening preparation is complete');
+assert.equal(await ev(()=>DQ.startAct('fight','scarecrow')),true,'the scarecrow fight starts');for(let i=0;i<12&&(await ev(()=>DQ.S.q.am_mill.s))==='active';i++){await ev(()=>{DQ.S.inv.bread=200;DQ.simulate(5*60000)});}
 log('am_mill',await ev(()=>JSON.stringify(DQ.S.q.am_mill)));await ev(()=>DQ.claimQuest('am_mill'));assert.equal(await ev(()=>DQ.S.q.am_mill.s),'done');
 /* chapter 3: smelt + harvest (offline) */
 await ev(()=>DQ.startQuest('am_box'));await ev(()=>{DQ.S.inv.ore_copper=20;DQ.S.inv.ore_tin=20;DQ.startAct('recipe','smelt_bronze')});await ev(()=>DQ.simulate(10*60000));
