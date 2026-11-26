@@ -45,7 +45,7 @@ const problems = [];
           const vis = e => { const r = e.getBoundingClientRect(); if (r.width < 2 || r.height < 2 || r.bottom < 0 || r.top > innerHeight) return false; const cs = getComputedStyle(e); return cs.visibility !== 'hidden' && +cs.opacity > 0.05 && !e.closest('[hidden],[aria-hidden=true]'); };
           const side = (cs, s) => parseFloat(cs[`border${s}Width`]) > 0.5 && cs[`border${s}Style`] !== 'none' && !/rgba\(.*,\s*0\)|transparent/.test(cs[`border${s}Color`]);
           const sides = cs => ['Top', 'Right', 'Bottom', 'Left'].filter(s => side(cs, s)).length;
-          const ring = cs => /inset 0px 0px 0px [12]px/.test(cs.boxShadow) || (parseFloat(cs.outlineWidth) >= 1 && cs.outlineStyle !== 'none' && !/rgba\(.*,\s*0\)/.test(cs.outlineColor));
+          const ring = cs => /inset 0px 0px 0px [12](\.\d+)?px|0px 0px 0px [12](\.\d+)?px inset/.test(cs.boxShadow) || (parseFloat(cs.outlineWidth) >= 1 && cs.outlineStyle !== 'none' && !/rgba\(.*,\s*0\)/.test(cs.outlineColor));
           const r = { click: [], flat: [] };
           const clicks = new Set(document.querySelectorAll(CLICK));
           for (const e of clicks) {

@@ -90,4 +90,8 @@
 
   /* keyboard focus keeps its own ring outside the outline */
   :is(button,[data-do],[role=button],[role=tab],[role=switch],.btn):focus-visible{outline:2px solid var(--brass-hi)!important;outline-offset:2px!important}
+  /* rail rows: the outline is drawn inside the row (an inset ring), so the 180px rail keeps its full width for
+     names like Scholarship beside a badge and the level */
+  #skilldock .dk,#dock .dk{border-width:0!important;box-shadow:inset 0 0 0 var(--act-w) var(--act-line)!important}
+  #skilldock .dk:is(.on,:hover),#dock .dk:is(.on,:hover){box-shadow:inset 0 0 0 var(--act-w) var(--act-on)!important}
 }
