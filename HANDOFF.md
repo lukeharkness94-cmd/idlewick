@@ -973,6 +973,12 @@ For the next implementation session, follow [the Claude handoff](docs/claude-han
 
 After stabilizing Part B, continue with Tasks 17–26. Start with the first-hour harness audit and verify each historical finding against current main. The [Claude handoff](docs/claude-handoff.md) links to the [original Part C brief](docs/claude-part-c-brief.md) with all requirements and acceptance checks.
 
+## Owner feedback round, 26 Nov 2026 (Claude, later the same day)
+Delivered on `claude/part-b-c` (see the matching AGENTS.md section for the rules): smithing stats and scene, museum icon, walking townsfolk, quest pictures, Village Finish/Give/Needs signs, choice order, unique levels (js/level_spread.js), town-independent gathering/surveys/fieldwork, crops 4x/6x, combat screen fixes (technique in Abilities, +N HP each, flat level tags, tracking bar), live trap counts, Fought/Hunted atlas, Sell all but 1, "Bought" once, petting hand, fishing catch redraw fix, real-size card art, no district bystanders.
+In separate branches by background agents (merge after review): world events as a full-screen scene with hindsight decisions (`claude/world-events`), the 8px shape rule (`claude/shape-rule`), hunting tiers only + Beastmastery Capture replacing expeditions + eggs as random drops (`claude/hunt-beasts`).
+Open: the Farming "New" badge after 15/15 gathering could not be reproduced (it clears from the rail and the unlock pop-up); ask the owner for a screenshot.
+New tests: town-walkers, choice-order, unique-levels, purchase-feedback, catch-redraw. Updated: regression (gathering rule), crosslinks (survey gate wording), player-feedback-ui (crop XP), catalogue-cards-ui (Available only off for the measurement).
+
 ## Part C delivered, Part B stabilised (Claude, 26 Nov 2026)
 
 Branch `claude/part-b-c`, starting from `f2ab3a7`. The rules are summarised at the end of AGENTS.md. Simulated times are scripted replays, not player averages.

@@ -214,3 +214,21 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - **Available only means affordable now** (owner, 26 Nov): tool tiers, workshop ranks and smithing gear are shown only when the hero has the coins, materials and level to make them now; the line under the switch counts what is hidden.
 - **Overflow sweep**: `node scripts/audit-overflow.cjs` opens every page at 1440 × 900, 1280 × 720 and 390 × 844 and fails on any text that spills out of its tile, button, card or panel. Small backpack/bank tiles show the gear arrow and a house icon instead of stat or delivery text. Farm plots say Plant <seed> / Growing · time / Harvest.
 
+### Owner feedback, 26 Nov 2026 (later the same day)
+- **Smithing**: the selected recipe shows the piece's stats against what you wear (`UI.compareHtml`, item_uses.js hook); the scene has the anvil on the ground with the piece on it and the hammer in hand (`DQ.smithSceneArt`).
+- **Museum icon** is a pillared hall (`ico('museum')`), distinct from the Achievements trophy.
+- **Townsfolk walk** the two roads of the Home and Village town scenes (`js/town_walkers.js`, canvas over the picture at its own pixels, more walkers as the town is restored, off under Reduce effects). `tests/town-walkers.cjs`.
+- **Quest pictures** (`js/quest_pictures.js`): every objective row fills a row of up to ten of the thing it asks for (silhouettes until earned); quests that teach a skill or give equipment/tools assemble that thing as a blueprint, bottom row first. Unmet creatures stay silhouettes.
+- **Village site signs** (owner chose option A for every state): always-visible Finish (green, site glows), Give (blue, the item you can hand in) and Needs (faint dashed, missing item greyed, a lock if never found). The legend uses the same signs.
+- **Shape rule** (owner chose 8px): everything clickable is one 8px rounded rectangle with a 2px outline; nothing unclickable has an outline (panels 12px fills, labels 4px flat chips, circles only for pips). See css/shape.css once merged.
+- **Order**: on every activity page, choices you can use come before locked ones (`UI.taskPanel` sorts on `locked`). `tests/choice-order.cjs`.
+- **Unique levels** (`js/level_spread.js`, runs last): no two gathering spots of one kind and no two recipes in one category/type share a level (tools per family); tin is Mining 2; the opening keeps flax string at Crafting 1 and the wooden trap at Crafting 2; unlock lists move with them. `tests/unique-levels.cjs`.
+- **Towns open content everywhere**: once a town is unlocked, all its gathering spots (thieving and signature ones included), surveys and fieldwork work from any town (`DQ.nodeRegional` is always false). Towns still matter for projects, combat, shops, discoveries. Locked cards say what to do ("Find Feather", "Make the Willowbrook field chart"), never "Requirements not met".
+- **Crops** grow 4x longer and give 6x XP (owner's choice); yields unchanged.
+- **Combat screen**: the technique/shot/spell in use heads the Abilities panel (on the heading line on short windows); food tiles say "+N HP each"; level tags are flat (no rings); while tracking, the VS bar shows tracking progress.
+- **Hunting** panel and Fieldwork show trap and bait counts that update live. Exploration's atlas splits creatures into Fought and Hunted.
+- **Backpack/bank**: Sell all but 1. A bought tool reads "Bought", not "Bought ×2". No "best tool is used automatically" sentences.
+- **Petting** shows a small hand stroking the animal while it leans in (`js/pet_stroke.js`); no size change.
+- **Fishing** catch animations survive a redraw and stay inside the scene (`tests/catch-redraw.cjs`).
+- **Gathering cards** (`js/card_scale.js`): 96px art box; whole-number scales follow real sizes (trees 2x, flax a low clump and hazel/elder 1x; fish 2x/3x/4x by length; ore and thieving marks 2x). District backdrops have no bystanders.
+
