@@ -54,7 +54,9 @@ const path = require('node:path');
       check(Q.questState(D.QM.mq_crafting) === 'ready', 'Hettie uses flax and logs on current main');
       Q.claimQuest('mq_crafting');
       check(Q.skillUnlocked('crafting') && Q.have('cowhide') >= 6, 'Crafting and hide reward');
-      work('recipe', 'craft_string', () => Q.lvl('crafting') >= 2 && Q.have('string') >= 3);
+      /* the opening's string is flax string at Crafting 1 (leather string is Crafting 3 since the 26 Nov level spread) */
+      work('wood', 'flax', () => Q.have('flax') >= 12);
+      work('recipe', 'craft_flax_string', () => Q.lvl('crafting') >= 2 && Q.have('string') >= 3);
       work('recipe', 'craft_trap', () => Q.have('wooden_trap') >= 3);
       Q.ui.DO.finishstarter();
       work('recipe', 'cook_shrimp', () => Q.S.stats.cook >= 1);

@@ -19,7 +19,7 @@ let chromium;try{({chromium}=require('playwright'));}catch(e){console.log('SKIP 
    await at(f);await page.waitForTimeout(1300);const r=await read();seen.push(r.src);
    assert.match(r.alt,new RegExp(alt),'artwork describes the stage at '+f);
    assert.equal(r.ripe,f>=1);assert.equal(r.harvestable,f>=1);
-   assert.match(r.label,f>=1?/ready to harvest/:/growing/);assert.equal(r.time==='Ready to harvest',f>=1);
+   assert.match(r.label,f>=1?/ready to harvest/:/growing/);assert.equal(r.time==='Ripe',f>=1); /* the pill beside it says Harvest (26 Nov) */
   }
   assert.equal(new Set(seen).size,4,'each growth stage shows different artwork without leaving the page');
   await page.evaluate(()=>DQ.ui.DO.plot('0'));await page.waitForTimeout(1300);
