@@ -15,7 +15,7 @@
    No coins are spent by any checklist button, no stats or drops change.
    Regional challenges (reward gap between Scholarship and Old Tusk, 82.5 simulated minutes in Codex's replay): while
    training for a region boss, if one of the region's two existing challenge mini-bosses is within reach (its Combat
-   requirement met, not yet beaten, and the battle forecast wins at least 60%), Home offers it as the Next step, with
+   requirement met, not yet beaten, and the battle forecast wins at least 60%, 50% in Saltmere), Home offers it as the Next step, with
    its existing quest (Roots in the Orchard: 400 coins; The Rookmother: 650 coins; each with a first-victory iron piece).
    No new reward is added. */
 (() => {
@@ -73,7 +73,10 @@ UI.DO.bossprepskip = id => { prep()[id || (boss() || {}).id] = 'skip'; Q.save &&
 /* ---------- Next step: challenges on the way, then the checklist, then the boss ---------- */
 const minisFor = town => D.MONLIST.filter(m => m.mini && !m.tower && m.town === town).sort((a, c) => (a.mini.req || 0) - (c.mini.req || 0));
 const beaten = m => !!(S().minis && S().minis[m.id]) || (S().beast.kills[m.id] || 0) > 0;
-const forecastOk = id => { try { const f = Q.bossForecast && Q.bossForecast(id); return f && f.winRate >= .6; } catch (e) { return false; } };
+/* the battle forecast a challenge needs before Home offers it: 60%, except Saltmere's at 50% (owner, 26 Nov 2026: the
+   Sword replay's forecast never reached 60% there and the route went 176 minutes without a reward) */
+D.CHALLENGE_FORECAST = { default: .6, saltmere: .5 };
+const forecastOk = id => { try { const f = Q.bossForecast && Q.bossForecast(id), need = D.CHALLENGE_FORECAST[D.MON[id].town] ?? D.CHALLENGE_FORECAST.default; return f && f.winRate >= need; } catch (e) { return false; } };
 const challengeQuest = m => D.QUESTS.find(x => x.obj.some(o => o.ev === 'kill' && o.key === m.id));
 Q.regionalChallengeStep = () => {
   const b = boss(); if (!b || S().town !== b.town) return null;
