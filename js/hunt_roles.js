@@ -55,19 +55,24 @@ Q.exploreLead = () => {
   const next = D.TOWNS.find(t => t.id !== S().town && Q.townUnlocked(t.id) && !S().towns[t.id]?.visited);
   if (next) { const n = Q.explorationSummary(next.id); return { k: 'town', title: `Visit ${next.name}`, text: `${n.creatures.length} creatures to find and ${n.quests.length} quests wait there. New places also teach Exploration.`, art: ico('map'), btn: ['travelto', next.id, `Travel to ${next.name}`] }; }
   /* 3 creatures still unmet where you are */
-  const here = discoveriesLeft(S().town); if (here > 0) return { k: 'creatures', title: `Find ${here} more ${here > 1 ? 'creatures' : 'creature'} around ${D.TOWN[S().town].name}`, text: 'Each first sighting starts a field-guide entry and pays Exploration XP.', art: ico('paw'), btn: ['go', 'hunting', 'Open Hunting'] };
+  const here = discoveriesLeft(S().town); if (here > 0) { const r = Q.explorationSummary(S().town), left = f => r.creatures.filter(m => f(m) && !r.found.includes(m)).length, fight = left(m => !m.hl && !m.tower), hunt = left(m => m.hl);
+    const parts = [fight ? `${fight} to fight` : '', hunt ? `${hunt} to hunt` : ''].filter(Boolean).join(' and ');
+    return { k: 'creatures', title: `Find ${parts} around ${D.TOWN[S().town].name}`, text: 'Each first sighting starts a field-guide entry and pays Exploration XP.', art: ico(fight ? 'attack' : 'paw'), btn: fight ? ['go', 'combat', 'Open Combat'] : ['go', 'hunting', 'Open Hunting'] }; }
   /* 4 another town with more to find */
   const far = D.TOWNS.filter(t => t.id !== S().town && Q.townUnlocked(t.id)).sort((a, b) => discoveriesLeft(b.id) - discoveriesLeft(a.id))[0];
   if (far && discoveriesLeft(far.id) > 0) return { k: 'far', title: `Return to ${far.name}`, text: `${discoveriesLeft(far.id)} creatures there are still undiscovered.`, art: ico('map'), btn: ['travelto', far.id, `Travel to ${far.name}`] };
   return { k: 'done', title: 'Everything within reach is explored', text: 'Defeat the next boss to open the road onward.', art: ico('trophy'), btn: ['go', 'map', 'World map'] };
 };
 UI.DO.travelto = id => { if (Q.travel) Q.travel(id); };
+/* the atlas splits a town's creatures into those you fight in combat and those you hunt (owner, 26 Nov 2026) */
+const split = r => { const fight = r.creatures.filter(m => !m.hl && !m.tower), hunt = r.creatures.filter(m => m.hl), got = l => l.filter(m => r.found.includes(m)).length;
+  return `Fought ${got(fight)}/${fight.length} · Hunted ${got(hunt)}/${hunt.length}`; };
 const explore0 = UI.V.exploration;
 UI.V.exploration = () => {
   const lead = Q.exploreLead(), visited = D.TOWNS.filter(t => S().towns[t.id]?.visited).length;
   const leadHtml = `<section class="panel explore-lead"><div class="el-art">${lead.art}</div><div class="el-body"><span class="k">Next worthwhile discovery</span><h2>${esc(lead.title)}</h2><p>${esc(lead.text)}</p><div class="btnrow"><button class="btn primary" data-do="${lead.btn[0]}" data-a="${esc(lead.btn[1])}">${esc(lead.btn[2])}</button></div></div></section>`;
   const unseenTowns = D.TOWNS.filter(t => !S().towns[t.id]?.visited).length; const rows = D.TOWNS.filter(t => S().towns[t.id]?.visited).map(t => { const r = Q.explorationSummary(t.id), pct = r.creatures.length ? r.found.length / r.creatures.length * 100 : 0;
-    return `<div class="explore-row ${r.visited ? '' : 'unseen'} ${t.id === S().town ? 'here' : ''}"><b>${r.visited ? esc(t.name) : '???'}</b><span class="er-bar"><span class="bar"><i style="width:${pct}%"></i></span></span><small>${r.visited ? `${r.found.length}/${r.creatures.length} creatures · ${r.completed.length}/${r.quests.length} quests${r.boss ? ' · boss ✓' : ''}` : 'Not visited'}</small></div>`; }).join('');
+    return `<div class="explore-row ${r.visited ? '' : 'unseen'} ${t.id === S().town ? 'here' : ''}"><b>${r.visited ? esc(t.name) : '???'}</b><span class="er-bar"><span class="bar"><i style="width:${pct}%"></i></span></span><small>${r.visited ? `${split(r)} · ${r.completed.length}/${r.quests.length} quests${r.boss ? ' · boss ✓' : ''}` : 'Not visited'}</small></div>`; }).join('');
   const table = `<section class="panel explore-table"><div class="phead"><h2>Realm progress</h2><small>${visited}/${D.TOWNS.length} towns visited</small></div><div class="explore-rows">${rows}</div>${unseenTowns ? `<p class="sm dim">${unseenTowns} more ${unseenTowns > 1 ? 'regions lie' : 'region lies'} beyond the road.</p>` : ''}<div class="btnrow"><button class="btn" data-do="go" data-a="map">World map</button></div></section>`;
   return `${hero('exploration')}<div class="explore-page">${leadHtml}${table}</div>${UI.discoveriesPanel ? UI.discoveriesPanel() : ''}`;
 };
