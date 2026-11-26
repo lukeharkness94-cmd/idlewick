@@ -125,8 +125,9 @@ const defaultTier = () => { const L = Q.huntLevel(); let t = 0; D.HUNT_TIERS.for
 UI.DO.huntgroundat = town => { UI.huntGroundAt = town; UI.render(false); };
 UI.DO.hunttier = i => { UI.huntTier = Math.max(0, Math.min(4, +i || 0)); UI.render(false); };
 UI.DO.huntkit = id => { const r = D.RECIPES['craft_' + id] || D.RECIPES['cook_' + id]; if (!r) return; UI.returnTo = { page: 'hunting', label: 'Hunting' }; UI.focusTask(r.skill, r.id, r.tab, r.skill); };
-const kitLine = T => { if (!T || (!T.trap && !T.bait)) return `<p class="hunt-kit dim">No kit needed. A wooden trap in your pack helps the strike.</p>`;
-  const part = id => { const n = Q.have(id), it = D.ITEMS[id]; return `<button type="button" class="hunt-kit-item ${n ? 'ok' : 'miss'}" data-do="huntkit" data-a="${id}" data-tip="item:${id}" aria-label="${esc(it.name)}: ${n} held, make more">${Q.itemIco(it)}<span>${esc(it.name)}</span><b class="mono">${n}</b></button>`; };
+/* kit counts update live while you hunt (owner, 26 Nov 2026: "need to be able to see how many traps I have left") */
+const part = id => { const n = Q.have(id), it = D.ITEMS[id]; return `<button type="button" class="hunt-kit-item ${n ? 'ok' : 'miss'}" data-do="huntkit" data-a="${id}" data-tip="item:${id}" aria-label="${esc(it.name)}: ${n} held, make more">${Q.itemIco(it)}<span>${esc(it.name)}</span><b class="mono" data-b="count:${id}">${n}</b></button>`; };
+const kitLine = T => { if (!T || (!T.trap && !T.bait)) return D.ITEMS.wooden_trap ? `<div class="hunt-kit"><span class="k">Kit</span>${part('wooden_trap')}<small class="dim">Optional: a wooden trap helps the strike.</small></div>` : `<p class="hunt-kit dim">No kit needed.</p>`;
   return `<div class="hunt-kit"><span class="k">${esc(T.name)} kit</span>${part(T.trap)}${part(T.bait)}<small class="dim">Trap is kept; one bait per hunt.</small></div>`; };
 const groundPage = () => {
   const all = grounds(); if (!all.length) return `<section class="panel empty"><p>No hunting grounds.</p></section>`;
