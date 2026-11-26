@@ -245,6 +245,12 @@ DQ.regionNext = () => {
   const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
   if (f && f.winRate >= .75) return task(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'fight', b.id);
   const tip = DQ.prepAdvice?.(b.id, f).find(x => x.action && !x.info && x.actionable !== false && (x.afford !== false || x.preparing) && x.a !== 'combat');
+  if (tip?.key === 'food') {
+    const recipe = Object.values(D.RECIPES).find(r => r.skill === 'cooking' && DQ.canMake(r) &&
+      DQ.recipeDiscovered(r) && DQ.recipeLvlOk(r) && !DQ.recipeGate?.(r) &&
+      Object.keys(r.out).some(id => D.ITEMS[id]?.heal));
+    return recipe ? task(tip.title, tip.text, 'recipe', recipe.id) : task('Catch shrimp for your provisions', tip.text, 'fish', 'shrimp');
+  }
   if (tip) return step(tip.title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${tip.text}`, tip.action, tip.a);
   const food = DQ.foodStep?.(`Bring enough food to train for ${short}.`);
   return food || train('Your current build could use more practice. Check the boss preview for its counter and your max hit.');
