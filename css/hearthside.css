@@ -865,3 +865,12 @@ html:has(.home-glance) #hud .h-stats{display:revert}
 .boss-checklist li.done .bc-label{color:var(--mute)}
 .boss-checklist .btn{flex:none}
 .bc-title{margin:6px 0 0;font:600 17px var(--f-display)}
+
+/* Floating combat text (Part C Task 24 A): every float sits on a dark chip with an outline, readable on the lightest and
+   darkest backdrops; over a fighter it starts above the sprite (fx.js) */
+#fx .fl{background:rgba(22,17,12,.82);padding:2px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.18);text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 1px 6px #000;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+#fx .fl.over-fighter{translate:0 -100%}
+
+/* Now card label (Part C Task 24 B): the activity wraps to a second line instead of cutting off ("Fighting Mudling",
+   "Fishing shrimp" read in full at 1440 × 900); same font size */
+#nowcard .now-go b{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;text-overflow:clip;overflow-wrap:normal;word-break:normal;line-height:1.15}

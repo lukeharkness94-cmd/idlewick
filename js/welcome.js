@@ -36,7 +36,7 @@
     const ceiling = sum.ceiling ? `<p class="wb-status wb-ceiling">${esc(Q.ceilingText(sum.ceiling.skill, sum.ceiling.lvl))}</p>` : '';
     const stopped = ceiling || (sum.stopped && sum.stop ?
       `<p class="wb-status warn">Stopped after ${Q.fmtTime(sum.stop.after)} · ${esc(sum.stop.reason)}</p>` : '');
-    const pending = Q.S.inbox.length;
+    const pending = (Q.S.inbox || []).length;
     const project = Q.returnChoices?.().find(choice => choice.art?.startsWith('project:'));
     const next = quest ? `<section class="wb-sec wb-main-quest"><h3>${esc(quest.name)}</h3><p>${esc(quest.label)} · <b>${quest.have} / ${quest.need}</b></p></section>` : '';
     return `<div class="wb wb-digest">

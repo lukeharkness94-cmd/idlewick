@@ -48,7 +48,12 @@ DQ.floatAt = (el, html, col) => {
   const r = el.getBoundingClientRect(); if (!r.width && !r.height) return;
   const f = document.createElement('div'); f.className = 'fl'; f.style.setProperty('--c', col || '#f3d58a');
   f.style.left = DQ.toPage(r.left + r.width / 2 + (Math.random() - .5) * Math.min(70, r.width * .5)) + 'px';
-  f.style.top = DQ.toPage(r.top + Math.min(r.height / 2, 36)) + 'px';
+  /* over a fighter (the foe or the hero on the stage) it starts above the sprite and rises away from it, so the text never
+     covers the creature (Part C Task 24 A); elsewhere it starts inside the element as before */
+  const fighter = el.id === 'av-foe' || el.id === 'av-hero' || el.closest?.('.side');
+  if (fighter) { f.classList.add('over-fighter'); f.style.left = DQ.toPage(r.left + r.width / 2) + 'px'; }
+  const stack = fighter ? fxEl.querySelectorAll('.fl.over-fighter').length : 0; /* floats that arrive together stack upward */
+  f.style.top = DQ.toPage(fighter ? r.top - 30 - stack * 30 : r.top + Math.min(r.height / 2, 36)) + 'px';
   f.innerHTML = html; fxEl.appendChild(f); f.addEventListener('animationend', () => f.remove());
   const live = fxEl.querySelectorAll('.fl'); if (live.length > 9) live[0].remove();
 };

@@ -5627,6 +5627,15 @@ html:has(.home-glance) #hud .h-stats{display:revert}
 .boss-checklist li.done .bc-label{color:var(--mute)}
 .boss-checklist .btn{flex:none}
 .bc-title{margin:6px 0 0;font:600 17px var(--f-display)}
+
+/* Floating combat text (Part C Task 24 A): every float sits on a dark chip with an outline, readable on the lightest and
+   darkest backdrops; over a fighter it starts above the sprite (fx.js) */
+#fx .fl{background:rgba(22,17,12,.82);padding:2px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.18);text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 1px 6px #000;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+#fx .fl.over-fighter{translate:0 -100%}
+
+/* Now card label (Part C Task 24 B): the activity wraps to a second line instead of cutting off ("Fighting Mudling",
+   "Fishing shrimp" read in full at 1440 × 900); same font size */
+#nowcard .now-go b{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;text-overflow:clip;overflow-wrap:normal;word-break:normal;line-height:1.15}
 </style>
 
 </head>
@@ -12576,7 +12585,12 @@ DQ.floatAt = (el, html, col) => {
   const r = el.getBoundingClientRect(); if (!r.width && !r.height) return;
   const f = document.createElement('div'); f.className = 'fl'; f.style.setProperty('--c', col || '#f3d58a');
   f.style.left = DQ.toPage(r.left + r.width / 2 + (Math.random() - .5) * Math.min(70, r.width * .5)) + 'px';
-  f.style.top = DQ.toPage(r.top + Math.min(r.height / 2, 36)) + 'px';
+  /* over a fighter (the foe or the hero on the stage) it starts above the sprite and rises away from it, so the text never
+     covers the creature (Part C Task 24 A); elsewhere it starts inside the element as before */
+  const fighter = el.id === 'av-foe' || el.id === 'av-hero' || el.closest?.('.side');
+  if (fighter) { f.classList.add('over-fighter'); f.style.left = DQ.toPage(r.left + r.width / 2) + 'px'; }
+  const stack = fighter ? fxEl.querySelectorAll('.fl.over-fighter').length : 0; /* floats that arrive together stack upward */
+  f.style.top = DQ.toPage(fighter ? r.top - 30 - stack * 30 : r.top + Math.min(r.height / 2, 36)) + 'px';
   f.innerHTML = html; fxEl.appendChild(f); f.addEventListener('animationend', () => f.remove());
   const live = fxEl.querySelectorAll('.fl'); if (live.length > 9) live[0].remove();
 };
@@ -21833,7 +21847,7 @@ const go0 = DQ.go; DQ.go = (...a) => { if (a[0] !== 'quests') { reveal = null; U
     const ceiling = sum.ceiling ? `<p class="wb-status wb-ceiling">${esc(Q.ceilingText(sum.ceiling.skill, sum.ceiling.lvl))}</p>` : '';
     const stopped = ceiling || (sum.stopped && sum.stop ?
       `<p class="wb-status warn">Stopped after ${Q.fmtTime(sum.stop.after)} · ${esc(sum.stop.reason)}</p>` : '');
-    const pending = Q.S.inbox.length;
+    const pending = (Q.S.inbox || []).length;
     const project = Q.returnChoices?.().find(choice => choice.art?.startsWith('project:'));
     const next = quest ? `<section class="wb-sec wb-main-quest"><h3>${esc(quest.name)}</h3><p>${esc(quest.label)} · <b>${quest.have} / ${quest.need}</b></p></section>` : '';
     return `<div class="wb wb-digest">
