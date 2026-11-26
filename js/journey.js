@@ -90,7 +90,7 @@ const moreProjects = {
 for (const [town, list] of Object.entries(moreProjects)) for (const [id, art, name, story, cost, fx, reward, voice] of list) { D.PROJECTS[id] = { town, art, name, story, cost, fx, reward }; D.PROJECT_VOICES[id] = voice; }
 /* Carpentry (Nov 2026): from Saltmere on, restoration is built with sawn planks rather than raw logs; Willowbrook and
    Mossbarrow keep logs, since Carpentry may not be learned yet. Logs already handed over are converted on load. */
-for (const p of Object.values(D.PROJECTS)) { const t = D.TOWN[p.town]; if (!t || t.idx < 2 || p.relic) continue;
+for (const [id, p] of Object.entries(D.PROJECTS)) { const t = D.TOWN[p.town]; if (!t || t.idx < 2 || p.relic || id === 'jetty') continue;
   for (const k of Object.keys(p.cost)) if (k.startsWith('log_') && D.ITEMS['plank_' + k.slice(4)]) { p.cost['plank_' + k.slice(4)] = p.cost[k]; delete p.cost[k]; } }
 DQ.projectsForTown = town => Object.entries(D.PROJECTS).filter(([,p])=>p.town===town);
 /* Projects are built in deliveries (Nov 2026): each material can be handed over whenever you have some, the building
