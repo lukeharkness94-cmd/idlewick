@@ -2202,7 +2202,10 @@ body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)
 /* ===================== UI standard (Nov 2026 brief) =====================
    One type scale: 16.5px body, 16px button labels, Alegreya SC headings (bundled locally), meta text at 14px.
    Supersedes the "Density at 100% zoom" step-down. Panels keep tight padding so larger text does not add empty space.
-   Revert by deleting this block. */
+   Revert by deleting this block.
+   Shapes (owner, 26 Nov 2026) live in css/shape.css, linked last: clickable = 8px rounded rectangle with a 2px outline
+   (--r-act, --act-line); not clickable = no outline (panels 12px soft fills, labels/chips/badges 4px flat fills);
+   circles only for pips and dots. */
 :root{--t-body:18px;--t-meta:14px;--t-btn:16px;--t-h2:20px;--t-h3:17px}
 body{font-size:var(--t-body)!important;line-height:1.5}
 h1,h2,h3,.phead h2,.panel h2{font-family:var(--f-display)!important;font-weight:700;letter-spacing:.01em}
