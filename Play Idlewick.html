@@ -25922,7 +25922,7 @@ Q.regionalChallengeStep = () => {
 };
 Q.bossPrepStep = () => {
   const b = boss(); if (!b || S().town !== b.town || Q.combatLvl() < b.boss.req || prep()[b.id]) return null;
-  const bq = D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === b.id)); if (bq && ['new', 'ready'].includes(Q.questState(bq))) return null;
+  const bq = D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === b.id)); if (bq && Q.questState(bq) !== 'active') return null; /* only once the boss quest is under way */
   const c = Q.bossChecklist(); if (!c || allDone(c)) return null;
   return { title: `Before ${b.boss.short || b.name}`, detail: 'Three quick checks before the fight. Each one ticks itself off.', action: 'bossprepskip', a: b.id, checklist: c, skip: true };
 };

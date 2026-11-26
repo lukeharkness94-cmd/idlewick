@@ -49,10 +49,13 @@ const url = process.env.IDLEWICK_URL || 'http://127.0.0.1:8765/';
         await page.waitForFunction(() => document.querySelector('#title').hidden);
         if (process.env.SHOT_DIR) await page.screenshot({ path: path.join(process.env.SHOT_DIR, 'offline-digest-phone.png') });
       }
+      /* Part C Task 20: a fresh hero's fishing stops at the progression ceiling (Fishing 10 in Willowbrook) and says so */
+      const ceiling = await page.locator('.wb-ceiling').count();
+      if (ceiling) assert.match(await page.locator('.wb-ceiling').innerText(), /^Fishing stopped at level \d+\..*Beat a boss or unlock a region/);
       await page.getByRole('button', { name: 'Continue', exact: true }).click();
       assert.equal(await page.locator('.wb-digest').count(), 0);
-      assert.equal(await page.evaluate(() => DQ.act?.id || null), cooking ? null : 'shrimp');
-      if (!cooking) {
+      assert.equal(await page.evaluate(() => DQ.act?.id || null), cooking || ceiling ? null : 'shrimp');
+      if (!cooking && !ceiling) {
         const preview = await page.evaluate(() => DQ.ui.planHtml());
         assert.match(preview, /XP per hour/);
         assert.match(preview, /raw shrimp per hour/i);
