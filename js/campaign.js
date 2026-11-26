@@ -113,7 +113,9 @@
     if (!objective || objective.ev === 'boss') return guidance;
     const detail = `${quest.name} · ${Q.objProg(quest, record, index)} / ${objective.n}`;
     if (objective.ev === 'kill') {
-      return Q.openingCombatNeed?.() || Q.foodStep?.('Bring enough food to finish your patrol.') ||
+      const hunt = Q.isAnimal?.(objective.key) && Q.skillUnlocked('hunting');
+      const supplies = hunt ? null : Q.combatSupplyStep?.();
+      return Q.openingCombatNeed?.() || supplies || Q.foodStep?.('Bring enough food to finish your patrol.') ||
         step(objective.label, detail, 'huntquest', objective.key);
     }
     if (objective.ev === 'cook' && objective.key === 'shrimp') {

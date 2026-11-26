@@ -208,17 +208,18 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
     const project = D.PROJECTS[id];
     if (S().projects[id]) return step('Project complete', project.story + ' ' + project.reward, 'go', 'map');
     if (S().town !== project.town) return step('Return to '+D.TOWN[project.town].name, 'Your neighbours are ready to help.', 'journeytravel', project.town);
-    if (id === 'inn' && DQ.have('shrimp') < (DQ.projectNeed(id).shrimp||0)) {
+    const shortfall = DQ.projectShortfall(id);
+    if (!shortfall.length) return step('Complete the project', project.reward + ' Hand over the last materials.', 'projectfinish', id);
+    if (id === 'inn' && shortfall.some(([item]) => item === 'shrimp')) {
       if (!DQ.skillUnlocked('cooking')) return (S().stats.catch || 0) < 5 ? task('Learn Cooking', `Catch five fish and chop five logs for a cooking fire. ${DQ.unlockHow('cooking')}.`, 'fish', 'shrimp') : task('Learn Cooking', `Chop logs for a cooking fire. ${DQ.unlockHow('cooking')}.`, 'wood', 'normal');
       if (!DQ.have('raw_shrimp')) return task('Catch shrimp for the inn', 'The inn still needs '+DQ.projectNeed(id).shrimp+' cooked shrimp. Gather raw shrimp first.', 'fish', 'shrimp');
       return task('Cook for the inn', fmt(DQ.have('shrimp')) + ' / '+DQ.projectNeed(id).shrimp+' cooked shrimp ready. Some attempts may burn.', 'recipe', 'cook_shrimp');
     }
     /* the first missing material, routed to where it comes from */
-    const need = DQ.projectNeed(id), deliverable = Object.entries(need).some(([k]) => held(k) > 0);
-    if (deliverable && Object.entries(need).every(([k, n]) => held(k) >= n)) return step('Complete the project', project.reward + ' Hand over the last materials.', 'projectfinish', id);
-    const missing = Object.entries(need).find(([item, n]) => item !== 'coins' && DQ.have(item) < n);
+    const need = DQ.projectNeed(id);
+    const missing = shortfall.find(([item]) => item !== 'coins');
     if (missing) {
-      const [item, n] = missing, it = D.ITEMS[item], src = DQ.sourceOf ? DQ.sourceOf(item) : null, detail = fmt(DQ.have(item)) + ' / ' + n + ' ' + it.name.toLowerCase() + ' ready for ' + project.name.toLowerCase() + '.';
+      const [item, gap] = missing, n = need[item], it = D.ITEMS[item], src = DQ.sourceOf ? DQ.sourceOf(item) : null, detail = fmt(n - gap) + ' / ' + n + ' materials ready for ' + project.name.toLowerCase() + '.';
       if (item === 'log_normal') return task('Gather timber', fmt(DQ.have(item)) + ' / ' + n + ' logs ready.', 'wood', 'normal');
       if (src && src.skill && !DQ.skillUnlocked(src.skill)) return step('Unlock ' + D.SK[src.skill].name, it.name + ' comes from ' + D.SK[src.skill].name + '. ' + DQ.unlockHow(src.skill) + '.', 'go', src.page);
       const verb = { fish: 'Catch', wood: 'Chop', mine: 'Mine', thieve: 'Steal', recipe: 'Make', fight: 'Hunt for' }[src && src.kind];
@@ -495,6 +496,7 @@ Object.assign(UI.DO, {
 let lastJourney = '';
 DQ.on('ui', () => {
   if (UI.view !== 'overview') return;
+  if (document.querySelector('.home-glance')) return;
   const next = DQ.journeyNext(), signature = JSON.stringify(next);
   if (signature === lastJourney) return;
   lastJourney = signature;
