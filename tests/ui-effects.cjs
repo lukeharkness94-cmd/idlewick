@@ -12,7 +12,7 @@ const fs=require('node:fs');
   await page.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/');
   await page.locator('#t-new').click();await page.locator('#crname').fill('Effects');await page.locator('#cr-go').click();await page.waitForTimeout(800);
   await page.evaluate(()=>{
-   const S=DQ.S,D=DQ.data;S.settings.notify=false;S.settings.muted=true;S.tut.hidden=true;DQ.paused=true;
+   const S=DQ.S,D=DQ.data;S.settings.notify=false;S.settings.muted=true;S.tut.hidden=true;DQ.paused=true;DQ.S.tut.prepareCombat=false;
    for(const k of Object.keys(S.xp))S.xp[k]=D.XPF[90];for(const k of Object.keys(D.SK))S.unlocked[k]=true;
    D.TOWNS.forEach(t=>S.towns[t.id]={visited:true,boss:false});S.coins=1e7;DQ.fxDirty();
    /* deterministic randomness for the whole check */

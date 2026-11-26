@@ -4,7 +4,7 @@
 const assert=require('node:assert/strict');const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined});const p=await b.newPage({viewport:{width:1440,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
 await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/index.html');await p.locator('#t-new').click();await p.locator('#crname').fill('World');await p.locator('#cr-go').click();await p.waitForTimeout(800);
-await p.evaluate(()=>{const S=DQ.S,D=DQ.data;for(const k of Object.keys(S.xp))S.xp[k]=D.XPF[50];for(const s of D.SKILLS)S.unlocked[s.id]=true;S.coins=20000;S.hp=DQ.maxHp();S.inv.shrimp=60;S.inv.log_normal=60;S.settings.notify=false;for(const [id,pr] of Object.entries(D.PROJECTS))if(pr.town==='willowbrook')S.projects[id]=true;DQ.fxDirty();DQ.closeModal&&DQ.closeModal();});
+await p.evaluate(()=>{const S=DQ.S,D=DQ.data;S.tut.prepareCombat=false;for(const k of Object.keys(S.xp))S.xp[k]=D.XPF[50];for(const s of D.SKILLS)S.unlocked[s.id]=true;S.coins=20000;S.hp=DQ.maxHp();S.inv.shrimp=60;S.inv.log_normal=60;S.settings.notify=false;for(const [id,pr] of Object.entries(D.PROJECTS))if(pr.town==='willowbrook')S.projects[id]=true;DQ.fxDirty();DQ.closeModal&&DQ.closeModal();});
 const close=()=>p.evaluate(()=>{for(let i=0;i<4;i++)if(DQ.closeModal&&document.querySelector('.modal'))DQ.closeModal();});
 /* the card: over the page, not a modal; Later tucks it away; a choice shows the outcome and writes the journal */
 await close();await p.evaluate(()=>DQ.worldFire('bard'));await p.waitForTimeout(300);

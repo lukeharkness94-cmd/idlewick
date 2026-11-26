@@ -6,7 +6,7 @@ const { chromium } = require('playwright'), assert = require('node:assert/strict
   try {
     const p = await b.newPage({ viewport: { width: 1440, height: 900 } }), errors = []; p.on('pageerror', e => errors.push(e.message));
     await p.goto(process.env.IDLEWICK_URL || 'http://127.0.0.1:8765/'); await p.locator('#t-new').click(); await p.locator('#crname').fill('Hunt'); await p.locator('#cr-go').click();
-    await p.evaluate(() => { DQ.paused = true; DQ.S.settings.muted = true; DQ.S.tut.hidden = true; DQ.closeModal && DQ.closeModal(); });
+    await p.evaluate(() => { DQ.paused = true; DQ.S.settings.muted = true; DQ.S.tut.hidden = true; DQ.S.tut.prepareCombat = false; DQ.closeModal && DQ.closeModal(); });
     /* 1. the Hunting page opens on the hunting ground with the town's animals */
     const r1 = await p.evaluate(() => { DQ.S.unlocked.hunting = true; DQ.S.xp.hunting = DQ.data.XPF[3]; DQ.ui.huntMode = undefined; DQ.go('hunting');
       const v = document.querySelector('#view'); return { tab: v.querySelector('.hunt-mode-tabs .on')?.textContent.trim(), cards: v.querySelectorAll('.activity-choices .choice, .activity-choices [data-do="taskpick"], .activity-choices .card').length, head: v.querySelector('.activity-choices h2')?.textContent }; });
@@ -31,7 +31,20 @@ const { chromium } = require('playwright'), assert = require('node:assert/strict
       return { ok, k, tiles: document.querySelectorAll('#view .cw-window-hunt, #view .cw-hunt').length, link: !!document.querySelector('#view .cw-tabs [data-do="huntground"]') }; });
     assert.equal(r5.ok, true); assert.equal(r5.k, 'hunt'); assert.equal(r5.tiles, 0); assert.equal(r5.link, true);
     /* 6. before Hunting is learned, a quest's animal is still reachable as a fight */
-    const r6 = await p.evaluate(() => { DQ.S.unlocked.hunting = false; const g = DQ.huntGround(DQ.S.town); const id = g.monsters[0].id; DQ.startHunt(g.id, id, true); const k = DQ.act && DQ.act.kind; DQ.stopAct(); DQ.S.unlocked.hunting = true; return k; });
+    const r6 = await p.evaluate(() => {
+      const S = DQ.S, original = S.town;
+      S.unlocked.hunting = false;
+      S.town = 'mossbarrow';
+      S.towns.mossbarrow = { visited: true, boss: false };
+      S.q.mq_ranged = { s: 'active', p: DQ.data.QM.mq_ranged.obj.map(() => 0) };
+      DQ.ui.DO.huntquest('boar');
+      const kind = DQ.act?.kind;
+      DQ.stopAct(true);
+      delete S.q.mq_ranged;
+      S.town = original;
+      S.unlocked.hunting = true;
+      return kind;
+    });
     assert.equal(r6, 'fight');
     /* 7. the stage follows the foe after each kill (it stayed on the first creature before) */
     await p.evaluate(() => { DQ.paused = false; DQ.S.inv.bread = 20; DQ.go('combat'); const a = DQ.combatAreas(DQ.S.town)[0]; DQ.startHunt(a.id, null); });
