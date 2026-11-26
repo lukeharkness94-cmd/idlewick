@@ -2286,7 +2286,10 @@ body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)
 /* ===================== UI standard (Nov 2026 brief) =====================
    One type scale: 16.5px body, 16px button labels, Alegreya SC headings (bundled locally), meta text at 14px.
    Supersedes the "Density at 100% zoom" step-down. Panels keep tight padding so larger text does not add empty space.
-   Revert by deleting this block. */
+   Revert by deleting this block.
+   Shapes (owner, 26 Nov 2026) live in css/shape.css, linked last: clickable = 8px rounded rectangle with a 2px outline
+   (--r-act, --act-line); not clickable = no outline (panels 12px soft fills, labels/chips/badges 4px flat fills);
+   circles only for pips and dots. */
 :root{--t-body:18px;--t-meta:14px;--t-btn:16px;--t-h2:20px;--t-h3:17px}
 body{font-size:var(--t-body)!important;line-height:1.5}
 h1,h2,h3,.phead h2,.panel h2{font-family:var(--f-display)!important;font-weight:700;letter-spacing:.01em}
@@ -5746,6 +5749,100 @@ html.calm .petted,html.calm .petted img{animation:none}
 /* Gathering cards (js/card_scale.js): a 96 px art box; the sprite stands on its ground line at its own whole-number scale */
 #view .illustrated-choices .illustrated-card.card-scaled>.choice-art{height:96px!important;min-height:96px!important;place-items:end center;padding-bottom:2px}
 #view .illustrated-card.card-scaled>.choice-art img{image-rendering:pixelated;object-fit:fill}
+</style>
+<style>/* ===================== Shape rule (owner, 26 Nov 2026) =====================
+   One shape for everything you can click, no outline on anything you can't.
+   - Clickable (buttons, tabs, choice cards, item tiles, slots, quest rows, rail rows, clickable portraits, chips that act,
+     a toggle's outer button, top-menu entries, page tabs): an 8px rounded rectangle (--r-act) with a 2px outline in
+     --act-line. States change the colour (hover, selected, primary, ready, warning, danger), never the shape.
+   - Not clickable: panels are soft fills with a 12px corner (--r-panel) and no border; labels, chips, badges, counts,
+     tags and status pills are flat tinted fills with a 4px corner (--r-info) and no border.
+   - Circles only for round things you don't click: progress pips and dots, notification dots. Bars keep 2-3px.
+   Linked last (after hearthside.css). Everything sits in one cascade layer: an !important declaration in a layer beats
+   every unlayered !important, so the rule holds whatever the older sheets set, without enumerating their selectors.
+   Inside the layer every declaration must be !important: a plain one loses to any unlayered rule.
+   Exceptions: hotspots drawn on the pixel scenes (village site spots, the tower cutaway's rooms, the SVG map) keep the
+   scene's own look; images that act get an outline ring instead of a border, so their art keeps its whole-number scale.
+   tests/shape-rule.cjs checks the main pages in both themes. */
+:root{--r-act:8px;--r-panel:12px;--r-info:4px;--act-w:2px;
+  --act-line:#71856e;--act-line-hi:#a7b39a;--act-on:var(--brass);--act-strong:var(--brass-hi);
+  --info-fill:color-mix(in srgb,var(--mute) 14%,transparent);--pip-off:color-mix(in srgb,var(--mute) 30%,var(--panel))}
+:root[data-theme="light"]{--act-line:#b09d7c;--act-line-hi:#8c7650;--act-on:var(--brass);--act-strong:#6f4a1c;
+  --info-fill:color-mix(in srgb,var(--mute) 11%,transparent);--pip-off:color-mix(in srgb,var(--mute) 26%,var(--panel))}
+
+@layer shape {
+  /* ---------- not clickable: panels are soft fills, 12px, no border ---------- */
+  :is(.panel,.sidebar,.hud,.m-card,.now,.now-card,.now-empty,.qlayout,.ach,.col-row,.tech,.tech-family,.cw-area,.cw-window,
+      .toolrow,.mast-line,.item-uses,.estate-fields,.proj-line,.ranch-board,.bossrow,.explore-left,.ench-row,.cmp,.ready-line,
+      .tc-building,.bonuses>div,.aslot,.seg,.guide-ladder>li,.hunt-steps>span){
+    border-color:transparent!important}
+  :where(#tip){border-color:transparent!important}
+  :is(.panel,.sidebar,.m-card,.now,.qlayout,.ach,.col-row,.tech,.tech-family,.cw-area,.cw-window,.estate-fields,.proj-line,
+      .ranch-board,.explore-left,.ench-row,.aslot){border-radius:var(--r-panel)!important}
+  #hud.panel{border-radius:var(--r-panel)!important}
+  /* empty equipment places on Hero are not clickable: a flat tinted place, no dashed outline */
+  .eq.empty:not(button,[data-do]){border-color:transparent!important;background:var(--info-fill)!important;border-radius:var(--r-act)!important}
+
+  /* ---------- not clickable: labels, chips, badges, counts, tags, status pills: flat, 4px ---------- */
+  :is(.tag,.chipx,.perk,.thief-perk,.ench-gain,.rw,.sl,.lvchip,.state,.notice-badge,.ss-hp,.big,.avatar.boss,.ranch-sign,
+      span.chip,span.rl-i,span.qrec,.qrec:not(button),.need-tile:not(button)):not(button,[data-do],[role=button],[role=tab]){
+    border-color:transparent!important;border-radius:var(--r-info)!important}
+  :is(.tag,.chipx,.perk,.thief-perk,.ench-gain,.rw,.sl,.hunt-steps>span,span.rl-i):not(button,[data-do]){background-color:var(--info-fill)!important}
+  .notice-badge{border-radius:var(--r-info)!important}
+
+  /* ---------- round things you don't click: pips and dots, no outline ---------- */
+  .pips i{border-color:transparent!important;background-color:var(--pip-off)!important}
+  .pips i.on{background-color:var(--c,var(--brass))!important}
+  .hfurn .pips i.on{background-color:var(--brass)!important}
+  .ench-pips i{border-color:transparent!important;border-radius:50%!important;transform:none!important;width:9px!important;height:9px!important;background-color:color-mix(in srgb,#9d7ce8 30%,transparent)!important}
+  .ench-pips i.on{background-color:#b48cff!important}
+
+  /* ---------- clickable: one shape, 8px, 2px outline ---------- */
+  :is(button,[data-do],[role=button],[role=tab],[role=switch],a.btn,.btn):not(img,.site-spot,.tc-room,svg *){
+    border-radius:var(--r-act)!important;border-width:var(--act-w)!important;border-style:solid!important;border-color:var(--act-line)!important}
+  /* fields you type into are interactive too */
+  :is(input:not([type=checkbox],[type=radio],[type=range],[type=color],[type=hidden]),textarea){
+    border-radius:var(--r-act)!important;border:var(--act-w) solid var(--act-line)!important}
+  :is(input,textarea):focus{border-color:var(--act-on)!important}
+  /* empty slots you can fill keep their dashed outline */
+  :is(button,[data-do]):is(.eq.empty,.aslot.empty,.ab-tile.empty,.plot.empty,.slot.empty){border-style:dashed!important}
+  /* hover and keyboard focus brighten the outline */
+  :is(button,[data-do],[role=button],[role=tab],[role=switch],.btn):not(:disabled,.locked,.site-spot,.tc-room,svg *):hover{border-color:var(--act-line-hi)!important}
+  /* selected, current and pressed */
+  :is(button,[data-do],[role=button],[role=tab],[role=switch],.btn):is(.on,.selected,.active,.current,.here,[aria-selected=true],[aria-pressed=true],[aria-current=page],[aria-checked=true]):not(.site-spot,.tc-room,svg *){
+    border-color:var(--act-on)!important}
+  /* the one main action: the strongest tone */
+  :is(button,[data-do],.btn):is(.primary,.task-primary):not(:disabled){border-color:var(--act-strong)!important}
+  /* status tones */
+  :is(button,[data-do],[role=button]):is(.ready,.ps-ready,.deliver-ready,.ok,.enough,.can){border-color:color-mix(in srgb,var(--good) 70%,var(--act-line))!important}
+  :is(button,[data-do],[role=button]):is(.warn,.short,.low){border-color:color-mix(in srgb,var(--warn) 75%,var(--act-line))!important}
+  :is(button,[data-do],.btn).danger{border-color:color-mix(in srgb,var(--bad) 70%,var(--act-line))!important}
+  :is(button,[data-do],.btn):is(.on,.selected).danger{border-color:var(--bad)!important}
+
+  /* text-only controls become small outlined buttons instead of underlined words */
+  button:is(.linkish,.tog,.sk-goal,.sh-next-btn,.now-go,.now-plan,.gi,.ss-weapon,.cw-mon-art,.voy-item){padding-inline:8px!important}
+  button.linkish{text-decoration:none!important}
+  /* portrait buttons frame their picture: the outline goes around it, never over it (the art keeps its size) */
+  button:is(.h-hero,.quest-face){padding:0!important;box-sizing:content-box!important}
+  /* the Now card's task button gained an outline it did not have: it takes it from the card's padding, not the rail's height */
+  #nowcard .now:has(.now-go){padding-block:4px!important}
+  .tool-families .btn{padding-inline:7px!important}
+  button.tog{padding-block:3px!important}
+  /* the switch's track stays a pill inside its button */
+  .tog .sw,.filter-toggle .ft-track{border-radius:999px!important}
+
+  /* a picture or name that became a route (ux_update.js) reads as one small button */
+  .voy-item{display:inline-flex!important;align-items:center!important;gap:7px!important;margin-right:6px!important}
+  span.requirement-route{display:inline-flex!important;align-items:center!important;gap:4px!important;padding:1px 3px!important;vertical-align:middle!important}
+  /* images that act: an outline ring, so the art is never resized by a border */
+  img:is([data-do],[role=button]){border:0!important;outline:var(--act-w) solid var(--act-line)!important;outline-offset:1px!important;border-radius:var(--r-act)!important}
+  img:is([data-do],[role=button]):hover{outline-color:var(--act-line-hi)!important}
+  /* a control inside a control: the outer one carries the outline */
+  :is(button,[data-do],[role=button]) img:is([data-do],[role=button]){outline:0!important}
+
+  /* keyboard focus keeps its own ring outside the outline */
+  :is(button,[data-do],[role=button],[role=tab],[role=switch],.btn):focus-visible{outline:2px solid var(--brass-hi)!important;outline-offset:2px!important}
+}
 </style>
 
 </head>
@@ -22323,7 +22420,7 @@ UI.render=fresh=>{render0(fresh);document.documentElement.classList.toggle('comp
    if(hero){const hr=hero.getBoundingClientRect(),hh=hr.height/z,k=Math.max(2,Math.round(hh*.62/32)),sz=32*k,img=comp.querySelector('img');if(img){img.style.width=img.style.height=sz+'px';img.style.maxWidth=img.style.maxHeight='none';}
     comp.style.left=((hr.right-ar.left)/z-sz*.15)+'px';comp.style.bottom=((ar.bottom-hr.bottom)/z-4)+'px';comp.style.transform='none';comp.classList.add('placed');}}}
  const src=UI.routeSource;if(src&&src.page===UI.view){const n=D.NODE[src.kind+':'+src.id],needs=src.town&&src.town!==S().town&&(src.kind==='shop'||src.kind==='fight'||src.kind==='recipe'&&D.RECIPES[src.id]?.town||(n&&!Q.nodeHere(n)));if(needs&&!view.querySelector('.route-travel')){const row=document.createElement('div');row.className='route-travel';row.innerHTML=`<span>${esc(D.ITEMS[src.item]?.name||src.name||'This activity')} · ${esc(D.TOWN[src.town].name)}</span><button class="btn primary" data-do="routetravel" data-a="${src.town}" ${Q.townUnlocked(src.town)?'':'disabled'}>${Q.townUnlocked(src.town)?'Travel & return to this task':'Road not open yet'}</button>`;view.prepend(row);}}
- for(const e of view.querySelectorAll('[data-tip^="item:"]')){if(e.matches('.need-tile')||e.closest('button,a')||e.querySelector('button,a')||e.matches('input'))continue;const id=e.dataset.tip.slice(5);if(!Q.sourceOf(id))continue;/* one route per item: skip when its row already has a route button for it (review 20 Nov) */if(e.closest('.blackout,.sil,[aria-hidden="true"]'))continue;/* never link (or name) a concealed picture */const row=e.parentElement&&(e.parentElement.closest('.need-tile,.need,.need-row,.req,.needs,li,.activity-caption p,.rw')||e.parentElement);if(row&&row.querySelector('[data-do="route"]'))continue;/* the row already has its route (one per requirement) */e.classList.add('requirement-route');e.setAttribute('role','button');e.tabIndex=0;e.dataset.do='route';e.dataset.a=id;e.setAttribute('aria-label',`Obtain ${D.ITEMS[id]?.name||id}`);}
+ for(const e of view.querySelectorAll('[data-tip^="item:"]')){if(e.matches('.need-tile')||e.closest('button,a')||e.querySelector('button,a,[data-tip^="item:"]')||e.matches('input'))continue;/* a wrapper whose picture carries the same tip leaves the route to the picture: one outlined control, not one inside another (shape rule, 26 Nov) */const id=e.dataset.tip.slice(5);if(!Q.sourceOf(id))continue;/* one route per item: skip when its row already has a route button for it (review 20 Nov) */if(e.closest('.blackout,.sil,[aria-hidden="true"]'))continue;/* never link (or name) a concealed picture */const row=e.parentElement&&(e.parentElement.closest('.need-tile,.need,.need-row,.req,.needs,li,.activity-caption p,.rw')||e.parentElement);if(row&&row.querySelector('[data-do="route"]'))continue;/* the row already has its route (one per requirement) */e.classList.add('requirement-route');e.setAttribute('role','button');e.tabIndex=0;e.dataset.do='route';e.dataset.a=id;e.setAttribute('aria-label',`Obtain ${D.ITEMS[id]?.name||id}`);}
  if(UI.view==='shop'&&UI.routeShopItem){UI.shopSelected.buy=UI.routeShopItem;UI.sel=UI.routeShopItem;}
 };
 })();

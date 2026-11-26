@@ -559,7 +559,7 @@ Menu: Home, Quests, World, Village, Hero, **Guide**, Shop. Left rail: Now card, 
 - Menu counts still show available actions only, so Guide carries no badge.
 
 ### Current test list
-`node tests/regression.cjs` (108), `tests/story.cjs`, `tests/beastmastery.cjs`, `tests/art-pixel.cjs`, `tests/desktop-storage.cjs`; with a preview server and `IDLEWICK_URL`: `ui-fit`, `ui-current`, `ui-audit`, `ux-roles`, `ui-journeys`, `ui-adventure`, `ui-effects`, `ui-farming`, `ux-update`, `beastmastery-ui`, `ranch`. `tests/story-ui.cjs` has a known, older failure at the `bl_ledger` step.
+`node tests/regression.cjs` (108), `tests/story.cjs`, `tests/beastmastery.cjs`, `tests/art-pixel.cjs`, `tests/desktop-storage.cjs`; with a preview server and `IDLEWICK_URL`: `ui-fit`, `ui-current`, `ui-audit`, `ux-roles`, `ui-journeys`, `ui-adventure`, `ui-effects`, `ui-farming`, `ux-update`, `beastmastery-ui`, `ranch`, `shape-rule` (the 26 Nov shape rule: clickable = 8px outlined rectangle, not clickable = no outline; `css/shape.css`). `tests/story-ui.cjs` has a known, older failure at the `bl_ledger` step.
 
 
 ## World Life update (Dec 2026)
