@@ -180,9 +180,10 @@ DQ.noteItemGain = (id, count) => {
   batchTimer = setTimeout(DQ.flushItemDigest, 60000 - (DQ.S.playtime || 0) % 60000);
 };
 DQ.on('ui', DQ.flushItemDigest);
-let openingReveals = 0;
+let openingReveals = 0, revealHero;
 DQ.allowAutomaticReveal = () => {
   if (modalEl || document.querySelector('#intro,.quest-reveal') || document.hidden) return false;
+  if (revealHero !== DQ.S) { revealHero = DQ.S; openingReveals = 0; }
   if ((DQ.S.playtime || 0) >= 5 * 60000) return true;
   if (openingReveals >= 3) return false;
   openingReveals++;

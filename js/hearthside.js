@@ -44,16 +44,19 @@ const homeRate = () => {
  const rate = xp && skill && act.kind !== 'thieve' && !recipe?.burn ? `${Q.fmt(xp * Q.xpMult(skill) * 3600000 / Q.actDur(act))} XP/hour estimated` : 'Earnings vary';
  return `${Q.actLabel()} · Running · ${rate}`;
 };
-U.V.overview = () => {
- const town = D.TOWN[S().town], next = Q.journeyNext(), main = Q.mainQuestProgress?.();
+const homeGlance = () => {
+ const town = D.TOWN[S().town], main = Q.mainQuestProgress?.();
  const project = [S().journey, S().pinnedProject, !main && Q.closestRestoration()].find(id => D.PROJECTS[id]?.town === town.id && !S().projects[id]);
+ const next = Q.journeyNext(project || S().journey);
  const goal = project ? { name: D.PROJECTS[project].name, label: 'Bundles complete',
    have: Object.keys(D.PROJECTS[project].cost).length - Object.keys(Q.projectNeed(project)).length,
    need: Object.keys(D.PROJECTS[project].cost).length } : main;
  const button = `<button class="btn primary" data-do="${next.action}" data-a="${esc(next.a || '')}" data-b="${esc(next.b || '')}">${esc(next.title)}</button>`;
  const count = S().inbox?.length || 0;
+ const local = (town.id !== 'willowbrook' || S().q.goblin_menace?.s === 'done') && Q.closestRestoration();
  const flag = count ? `<button class="btn" data-do="go" data-a="activity">${count} away ${count === 1 ? 'decision' : 'decisions'}</button>` :
-   S().lastAway && !S().lastAway.gone ? '<button class="btn" data-do="go" data-a="activity">Welcome Back summary</button>' : '';
+   S().lastAway && !S().lastAway.gone ? '<button class="btn" data-do="go" data-a="activity">Welcome Back summary</button>' :
+   local && local !== project ? `<button class="btn" data-do="openproject" data-a="${local}">${ico('house')}${esc(D.PROJECTS[local].name)}${Q.projectReady(local) ? ' · Ready' : ''}</button>` : '';
  return `<div class="home-glance">
   <section class="panel home-scene" data-home-unit="scene">${U.scene(town.id)}<button class="btn" data-do="go" data-a="projects">${ico('house')}${esc(town.name)}</button></section>
   <div class="home-glance-row"><button class="panel home-state" data-home-unit="activity" data-do="${Q.act ? 'nowactivity' : 'go'}" data-a="${Q.act ? '' : 'activity'}">${ico('clock')}<b data-b="homerate"></b></button>
@@ -64,7 +67,22 @@ U.V.overview = () => {
   <div class="btnrow">${button}<button class="btn" data-do="go" data-a="activity">Activity &amp; goals</button></div></section>
   ${flag ? `<div data-home-unit="flag">${flag}</div>` : ''}</div>`;
 };
+U.V.overview = homeGlance;
 U.B.homerate = e => U.set(e, homeRate());
+let lastHomeHtml = '', lastHomeCheck = 0;
+Q.on('ui', () => {
+ if (U.view !== 'overview' || performance.now() - lastHomeCheck < 400) return;
+ lastHomeCheck = performance.now();
+ const goal = document.querySelector('.home-next');
+ if (!goal || goal.contains(document.activeElement) || goal.matches(':hover')) return;
+ const html = homeGlance();
+ if (html === lastHomeHtml) return;
+ lastHomeHtml = html;
+ const next = document.createElement('template');
+ next.innerHTML = html;
+ const replacement = next.content.querySelector('.home-next');
+ if (replacement?.outerHTML !== goal.outerHTML) goal.replaceWith(replacement);
+});
 U.V.activity = () => activity0() + `<section class="home-activity-details" aria-label="Goals and opportunities">${home0()}</section>`;
 // The chapter's primary route is labelled; small ingredient/source shortcuts remain icon-first.
 const render0=U.render;
