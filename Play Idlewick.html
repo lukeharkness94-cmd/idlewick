@@ -6165,7 +6165,10 @@ D.CROPS = [
 ].map(([id, name, col, lvl, secs, yld, pxp, hxp, sell, seed]) => {
   mk('seed_' + id, { name: name + ' seeds', ic: 'seed', col, val: Math.max(1, Math.floor(seed / 3)), buy: seed, type: 'seed' });
   mk('crop_' + id, { name, ic: 'crop', col, val: sell, type: 'crop', heal: lvl < 25 ? 2 : undefined });
-  return { id, name, col, lvl, secs, yld, pxp:lvl<=15?Math.round(pxp*1.25):pxp, hxp:lvl<=15?Math.round(hxp*1.25):hxp };
+  /* Crops grow four times longer and give six times the XP (owner, 26 Nov 2026: "crops should probably take a lot longer
+     but also give a lot more XP"): about 50% more Farming XP per hour, far fewer trips to the field. Yields unchanged. */
+  const GROW = 4, XP = 6;
+  return { id, name, col, lvl, secs: secs * GROW, yld, pxp: Math.round((lvl<=15?pxp*1.25:pxp) * XP), hxp: Math.round((lvl<=15?hxp*1.25:hxp) * XP) };
 });
 D.CROP = Object.fromEntries(D.CROPS.map(c => [c.id, c]));
 /* Animals: (id, name, colour, farming lvl, price, produce, seconds per produce, produce value, collect xp) */
