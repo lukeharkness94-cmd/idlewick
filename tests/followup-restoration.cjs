@@ -25,6 +25,12 @@ const { chromium } = require('playwright');
       for (let k = 0; k < 8; k++) { n = Q.journeyNext(); out.steps.push(n.title + ' · ' + n.action);
         if (n.action === 'journeytask' && n.a === 'wood') Q.give('log_' + n.b, 30); else if (n.action === 'projectfinish') { Q.finishProject(n.a); break; } else break; }
       out.done = !!S.projects.moss_windmill; out.after = Q.journeyNext().title; out.offered = Q.followupRestorationStep && Q.followupRestorationStep();
+      /* a shelf with a carry limit (wheat: 12 at a time) is bought and delivered in rounds for the granary */
+      S.projects.moss_pond = true; S.coins = 5000; S.lastBeatAt = (S.gameTime || 0) - 31 * 60e3; out.rounds = [];
+      for (let k = 0; k < 10; k++) { const x = Q.journeyNext(); out.rounds.push(x.action);
+        if (x.action === 'localroute') Q.buyLocalSupply(x.a, +x.b); else if (x.action === 'projectgive') Q.projectGive(...x.a.split('|'));
+        else if (x.action === 'journeytask' && x.a === 'wood') Q.give('log_' + x.b, 40); else if (x.action === 'projectfinish') { Q.finishProject(x.a); break; } else break; }
+      out.granary = !!S.projects.moss_granary;
       return out; });
     console.log(JSON.stringify(r));
     assert.equal(r.poor, null, 'not offered when the project and its supplies cost more than the hero carries');
@@ -32,6 +38,7 @@ const { chromium } = require('playwright');
     assert.equal(r.view, 'shop'); assert.equal(r.selected, 'market:wool'); assert.ok(r.bought);
     assert.ok(r.done, 'windmill restored'); assert.equal(r.offered, null, 'not offered again right after a reward');
     assert.match(r.after, /Old Tusk/);
+    assert.ok(r.granary, 'granary restored in rounds: ' + r.rounds.join(' > ')); assert.ok(r.rounds.filter(x => x === 'localroute').length >= 2 && r.rounds.includes('projectgive'));
     assert.deepEqual(errors, []);
     console.log('followup-restoration: ok');
   } finally { await b.close(); }

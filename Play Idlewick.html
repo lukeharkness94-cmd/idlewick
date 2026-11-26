@@ -25940,9 +25940,14 @@ const plan = id => { const need = Q.projectNeed(id); let coins = need.coins || 0
   for (const [k, n] of Object.entries(need)) { if (k === 'coins') continue; const m = n - Q.have(k); if (m <= 0 || nodeOk(k)) continue;
     if ((D.SHOPS[S().town] || []).includes(k) && Q.buyPrice) { coins += Q.buyPrice(k) * m; continue; }
     const o = (D.LOCAL_SUPPLIES || []).find(x => x.item === k && Q.localSupplyReason && !Q.localSupplyReason(x));
-    if (!o || (o.carry && Q.have(k) + m > o.carry)) return null;
-    coins += Q.localSupplyPrice(o) * m; buy.push({ o, k, m }); }
+    if (!o) return null;
+    /* a shelf with a carry limit is bought in rounds: buy what fits, deliver it, buy again (projects take part deliveries) */
+    coins += Q.localSupplyPrice(o) * m; buy.push({ o, k, m: o.carry ? Math.min(m, o.carry - Q.have(k)) : m }); }
   return coins <= S().coins ? { coins, buy } : null; };
+/* why each unrestored project in this town is or is not offered (for replays and tests) */
+Q.restorationPlan = (town = S().town) => Object.entries(D.PROJECTS).filter(([id, p]) => p.town === town && !p.relic && !S().projects[id]).map(([id]) => {
+  const need = Q.projectNeed(id), why = Object.entries(need).filter(([k, n]) => k !== 'coins' && Q.have(k) < n && !nodeOk(k) && !(D.SHOPS[S().town] || []).includes(k) && !(D.LOCAL_SUPPLIES || []).some(x => x.item === k && Q.localSupplyReason && !Q.localSupplyReason(x))).map(([k]) => k);
+  return { id, ok: !!plan(id), coins: S().coins, need, missing: why }; });
 /* the last reward beat, in game time: a claimed quest or a restored building (offline catch-up counts too) */
 Q.BEAT_GAP_MS = 30 * 60e3;
 const beat = () => { if (!Q.forecasting) S().lastBeatAt = S().gameTime || 0; };
@@ -25956,6 +25961,7 @@ Q.followupRestorationStep = () => {
   if (!open) return null;
   /* a material only the town's supply shelf sells: route there with it selected (the player presses Buy) */
   for (const { o, k, m } of plan(open[0]).buy) {
+    if (m <= 0) return { title: `Deliver ${Q.have(k)} ${D.ITEMS[k].name.toLowerCase()} to the ${D.PROJECTS[open[0]].name.replace(/^\w+ the /, '').toLowerCase()}`, detail: `${D.PROJECTS[open[0]].name}: the supply shelf sells ${o.carry} at a time, so it goes in rounds.`, action: 'projectgive', a: `${open[0]}|${k}`, restoration: open[0] };
     { return { title: `Buy ${m} ${D.ITEMS[k].name.toLowerCase()} for the ${D.PROJECTS[open[0]].name.replace(/^\w+ the /, '').toLowerCase()}`, detail: `${D.PROJECTS[open[0]].name} while you train for ${b.boss.short || b.name}. The ${D.TOWN[S().town].name} supply shelf sells it.`, action: 'localroute', a: o.id, b: String(m), restoration: open[0] }; } }
   const step = Q.journeyNext(open[0]); return step && step.action ? { ...step, detail: `${D.PROJECTS[open[0]].name} while you train for ${b.boss.short || b.name}. ${step.detail || ''}`.trim(), restoration: open[0] } : null;
 };
