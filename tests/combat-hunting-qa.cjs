@@ -7,21 +7,22 @@ const path = require('node:path');
     ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}) });
   try {
     const errors = [];
-    const newHero = async () => {
+    const newHero = async (preparedFixture = false) => {
       const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(process.env.IDLEWICK_URL || 'http://127.0.0.1:8765/');
       await page.locator('#t-new').click();
       await page.locator('#crname').fill('Combat QA');
       await page.locator('#cr-go').click();
-      await page.evaluate(() => {
+      await page.evaluate(prepared => {
         const Q = DQ;
         Q.paused = true;
         Object.assign(Q.S.settings, { muted: true, notify: false, storyScenes: false, reduceFx: true });
         Q.S.tut.hidden = true;
+        if (prepared) { Q.S.tut.weaponFinished = true; Q.S.stats.cook = 1; }
         for (const skill of Object.keys(Q.skillLessons)) Q.S.tut.done['lesson:' + skill] = true;
         Q.closeModal();
-      });
+      }, preparedFixture);
       return page;
     };
     let page = await newHero();
@@ -43,7 +44,11 @@ const path = require('node:path');
       Q.ui.DO.route('cowhide');
       check(!Q.act && Q.ui.returnTo.page === 'crafting', 'Cowhide route starts no work');
       check(document.querySelector('[data-do="routefight"][data-a="goblin_raider"]'), 'Exact raider action');
+      Q.startQuest('first_steps');
+      work('fish', 'shrimp', () => Q.S.q.first_steps?.p[0] >= 5);
       work('wood', 'normal', () => Q.lvl('woodcutting') >= 2 && Q.have('log_normal') >= 20);
+      check(Q.questState(D.QM.first_steps) === 'ready', 'Complete the first main quest before taking the Crafting lesson');
+      Q.claimQuest('first_steps');
       work('wood', 'flax', () => Q.have('flax') >= 10 && Q.advLvl() >= 3);
       Q.startQuest('mq_crafting');
       check(Q.questState(D.QM.mq_crafting) === 'ready', 'Hettie uses flax and logs on current main');
@@ -51,6 +56,8 @@ const path = require('node:path');
       check(Q.skillUnlocked('crafting') && Q.have('cowhide') >= 6, 'Crafting and hide reward');
       work('recipe', 'craft_string', () => Q.lvl('crafting') >= 2 && Q.have('string') >= 3);
       work('recipe', 'craft_trap', () => Q.have('wooden_trap') >= 3);
+      Q.ui.DO.finishstarter();
+      work('recipe', 'cook_shrimp', () => Q.S.stats.cook >= 1);
       Q.S.settings.autoEat = false;
       // Advance the earned fight and pause to recover when needed.
       for (let i = 0; i < 400 && Q.combatLvl() < 8; i++) {
@@ -74,7 +81,7 @@ const path = require('node:path');
 
     // Use a separate context so delayed unlocks from the fresh-hero run cannot interrupt route clicks.
     await page.close();
-    page = await newHero();
+    page = await newHero(true);
 
     // Granted progression fixture for concurrent quests and a real reload.
     await page.evaluate(() => {
@@ -84,7 +91,7 @@ const path = require('node:path');
       Q.S.bank.wooden_trap = 0;
       if (Q.skillUnlocked('hunting')) throw Error('Fixture requires Hunting to be locked');
       Q.S.towns.mossbarrow = { visited: true, boss: false };
-      Q.S.q.goblin_menace = { s: 'active', p: [0] };
+      Q.S.q.wb_tattercaps = { s: 'active', p: [0, 0] };
       Q.S.q.mq_ranged = { s: 'active', p: [10, 40, 0] };
       Q.give('log_birch', 10);
       Q.give('feather', 40);

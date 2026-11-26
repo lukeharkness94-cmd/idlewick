@@ -25,13 +25,16 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
  await p.setViewportSize({width:1440,height:900});await p.evaluate(()=>{DQ.S.settings.theme='dark';DQ.applyTheme();DQ.go('fishing');});await p.waitForTimeout(900);await p.screenshot({path:'/tmp/idlewick-audit-skills.png'});
  await p.evaluate(()=>{DQ.ui.beastTab='monsters';DQ.go('bestiary');});await p.waitForTimeout(900);await p.screenshot({path:'/tmp/idlewick-audit-guide.png'});
  await p.evaluate(()=>DQ.go('combat'));await p.waitForTimeout(900);await p.screenshot({path:'/tmp/idlewick-audit-combat.png'});
- // Real unlock path and a persistent first-use lesson.
+ // Real unlock path and help on demand.
  await p.evaluate(()=>{DQ.S=DQ.newState('Unlock');DQ.S.settings.muted=true;DQ.S.settings.notify=false;DQ.S.stats.chop=20;DQ.S.inv.wooden_trap=3;for(const k of ['attack','strength','defence','hitpoints'])DQ.S.xp[k]=DQ.data.XPF[10];DQ.checkActionUnlocks();});
- /* the skill's quick guide rides with its unlock pop-up: one pop-up, not two */
- assert.equal(await p.locator('.modal .lr-guide').count(),1,'the unlock pop-up carries the quick guide');assert.match(await p.locator('.modal .lr-guide').innerText(),/Try this/);
- await p.evaluate(()=>{DQ.closeModal();DQ.go('hunting');});await p.waitForTimeout(300);assert.equal(await p.locator('.modal .skill-coach').count(),0,'no second guide pop-up after an unlock');
- assert.equal(await p.locator('#view .skill-coach').count(),0,'not inline at the top of the page');
- await p.evaluate(()=>{DQ.go('overview');DQ.go('hunting');});await p.waitForTimeout(200);assert.equal(await p.locator('.skill-coach').count(),0,'shown once');
- assert.deepEqual(errors,[]);console.log(`PASS ${count} page/state/theme/viewport combinations; sidebar fit, unlocks and persistent tutorials.`);
+ assert.equal(await p.locator('.modal .lr-unlock').count(),1,'the earned unlock is visible');
+ assert.equal(await p.locator('.modal .lr-guide').count(),0,'the player chooses when to read the guide');
+ await p.evaluate(()=>{DQ.closeModal();DQ.go('hunting');});
+ assert.equal(await p.locator('.modal').count(),0,'opening Hunting does not interrupt play');
+ await p.locator('.page-help [data-do="pagehelp"]').click();
+ assert.match(await p.locator('.modal .m-body').innerText(),/Try this/);
+ await p.evaluate(()=>{DQ.closeModal();DQ.go('overview');DQ.go('hunting');});
+ assert.equal(await p.locator('.modal').count(),0,'revisiting Hunting stays quiet');
+ assert.deepEqual(errors,[]);console.log(`PASS ${count} page/state/theme/viewport combinations; sidebar fit, unlocks and on-demand help.`);
  }finally{await b.close();}
 })().catch(e=>{console.error(e);process.exit(1)});

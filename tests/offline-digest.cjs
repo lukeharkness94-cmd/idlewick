@@ -39,8 +39,14 @@ const url = process.env.IDLEWICK_URL || 'http://127.0.0.1:8765/';
       const pending = await page.evaluate(() => DQ.S.inbox.length);
       assert.equal(await page.locator('.wb-encounter-count').count(), pending > 0 ? 1 : 0);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+      const visibleContinue = await page.getByRole('button', { name: 'Continue', exact: true }).evaluate(el => {
+        const rect = el.getBoundingClientRect();
+        return rect.top >= 0 && rect.bottom <= innerHeight + 1;
+      });
+      assert.ok(visibleContinue, 'Continue is reachable without scrolling the digest');
       if (cooking) {
         assert.match(await page.locator('.wb-status.warn').innerText(), /Stopped after.*out of raw shrimp/i);
+        await page.waitForFunction(() => document.querySelector('#title').hidden);
         if (process.env.SHOT_DIR) await page.screenshot({ path: path.join(process.env.SHOT_DIR, 'offline-digest-phone.png') });
       }
       await page.getByRole('button', { name: 'Continue', exact: true }).click();

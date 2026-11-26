@@ -252,7 +252,8 @@ UI.V.settings = () => {
 function welcome(sum, gap) {
   DQ.holdNotes = true;
   const body = UI.welcomeBody ? UI.welcomeBody(sum, gap) : `<p>${DQ.offlinePolicy()}</p>`;
-  return DQ.modal({ title: 'Welcome back', wide: true, body, actions: [{ label: 'Continue', primary: true }] });
+  const dialog = DQ.modal({ title: 'Welcome back', wide: true, body, actions: [{ label: 'Continue', primary: true }] });
+  dialog.classList.add('welcome-digest');
 }
 
 /* ---------- Actions ---------- */

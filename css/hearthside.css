@@ -764,3 +764,7 @@ html.calm .activity-scene.hunt .scene-target,html.calm .activity-scene.hunt .hun
 .wb-activity h3,.wb-activity p,.wb-main-quest h3,.wb-main-quest p,.plan-away p{margin:0 0 6px}
 .wb-activity ul{margin:6px 0;padding-inline-start:1.1em}
 .plan-away{margin-top:8px;padding:8px 0;border-top:1px solid var(--line)}
+
+.welcome-digest .m-card{display:flex;flex-direction:column;overflow:hidden}
+.welcome-digest .m-body{min-height:0;overflow-y:auto;scrollbar-width:thin}
+.welcome-digest :is(.m-act,h2){flex:none}
