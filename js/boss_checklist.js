@@ -74,12 +74,15 @@ UI.DO.bossprepskip = id => { prep()[id || (boss() || {}).id] = 'skip'; Q.save &&
 const minisFor = town => D.MONLIST.filter(m => m.mini && !m.tower && m.town === town).sort((a, c) => (a.mini.req || 0) - (c.mini.req || 0));
 const beaten = m => !!(S().minis && S().minis[m.id]) || (S().beast.kills[m.id] || 0) > 0;
 const forecastOk = id => { try { const f = Q.bossForecast && Q.bossForecast(id); return f && f.winRate >= .6; } catch (e) { return false; } };
+const challengeQuest = m => D.QUESTS.find(x => x.obj.some(o => o.ev === 'kill' && o.key === m.id));
 Q.regionalChallengeStep = () => {
-  const b = boss(); if (!b || S().town !== b.town || Q.combatLvl() >= b.boss.req) return null;
+  const b = boss(); if (!b || S().town !== b.town) return null;
+  /* a challenge already won: its reward waits with the giver (whatever the Combat level now) */
+  for (const m of minisFor(b.town)) { const q = challengeQuest(m); if (q && Q.questState(q) === 'ready') return { title: `Claim “${q.name}”`, detail: `${q.giver} is waiting to thank you.`, action: 'qclaim', a: q.id }; }
+  if (Q.combatLvl() >= b.boss.req) return null;
   const m = minisFor(b.town).find(x => !beaten(x) && Q.combatLvl() >= (x.mini.req || 0)); if (!m) return null;
-  const q = D.QUESTS.find(x => x.obj.some(o => o.ev === 'kill' && o.key === m.id));
+  const q = challengeQuest(m);
   if (q && Q.questState(q) === 'new') return { title: `Accept “${q.name}”`, detail: `${q.giver} has a job on the way to ${b.boss.short || b.name}: ${m.name}. It pays ${Q.fmt(q.reward.coins || 0)} coins.`, action: 'qstart', a: q.id };
-  if (q && Q.questState(q) === 'ready') return { title: `Claim “${q.name}”`, detail: `${q.giver} is waiting to thank you.`, action: 'qclaim', a: q.id };
   if (q && Q.questState(q) === 'active') { const i = q.obj.findIndex((o, k) => Q.objProg(q, S().q[q.id], k) < o.n), o = q.obj[i];
     if (o && o.ev === 'guide') return { title: o.label, detail: `Read ${m.name}'s field-guide entry before the fight.`, action: 'guide', a: m.id }; }
   if (!forecastOk(m.id)) return null;
@@ -95,7 +98,7 @@ Q.bossPrepStep = () => {
 const start0 = Q.startAct;
 Q.startAct = (kind, id, o) => { const r = start0(kind, id, o); if (r && kind === 'fight' && D.MON[id] && D.MON[id].boss && !Q.forecasting && !(Q.sim && Q.sim.on && !Q.sim.activities)) prep()[id] = prep()[id] || 'tried'; return r; };
 const region0 = Q.regionNext;
-Q.regionNext = () => { const s = Q.bossPrepStep() || Q.regionalChallengeStep(); return s || region0(); };
+Q.regionNext = () => { const c = Q.regionalChallengeStep(); if (c && c.action === 'qclaim') return c; return Q.bossPrepStep() || c || region0(); };
 /* the checklist holds the equip and slot steps plan.js would otherwise offer one at a time, so at the boss it comes first */
 const next0 = Q.journeyNext;
 Q.journeyNext = (...a) => { const n = next0(...a); if ((a[0] && D.PROJECTS[a[0]]) || !n || n.checklist) return n; if (['equip', 'abil'].includes(n.action)) { const s = Q.bossPrepStep(); if (s) return s; } return n; };

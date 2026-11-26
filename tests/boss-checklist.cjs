@@ -56,6 +56,11 @@ const path = require('node:path');
     /* and the boss can still be challenged straight away */
     const fought = await page.evaluate(id => { DQ.paused = false; DQ.startAct('fight', id, { quiet: true }); return DQ.act && DQ.act.id; }, setup.boss);
     assert.equal(fought, setup.boss, 'skip never blocks the boss');
+    /* (6) a regional challenge already won is claimed from Home before anything else (five-hour replays left them unclaimed) */
+    const claim = await page.evaluate(() => { const Q = DQ, D = Q.data, S = Q.S; S.towns.mossbarrow = { visited: true, boss: false }; S.towns.willowbrook.boss = true; S.town = 'mossbarrow'; Q.stopAct(true); for (const x of D.QUESTS) if (x.town === 'willowbrook' && S.q[x.id] && S.q[x.id].s !== 'done') S.q[x.id] = { s: 'done', p: x.obj.map(o => o.n) };
+      const q = D.QUESTS.find(x => x.obj.some(o => o.ev === 'kill' && o.key === 'gnarlroot')); S.q[q.id] = { s: 'ready', p: q.obj.map(o => o.n) };
+      const n = Q.journeyNext(); return { title: n.title, action: n.action, a: n.a, id: q.id }; });
+    assert.equal(claim.action, 'qclaim', 'won challenge is claimed: ' + claim.title); assert.equal(claim.a, claim.id);
     assert.deepEqual(errors, []);
     console.log('boss-checklist: ok', JSON.stringify({ first: setup.step, then: after.step.title }));
   } finally { await browser.close(); }
