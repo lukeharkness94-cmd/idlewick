@@ -317,7 +317,8 @@ function districtFor(town, kind, key, o = {}) {
       f(DPAL.woodDk, sx + 1, 58, 2, 30); f(DPAL.woodDk, sx + 39, 58, 2, 30);
       for (let k = 0; k < 6; k++) { const ac = k % 2 ? '#f4ecd8' : pick(['#b8483a', '#3f7fbf', '#4a8a5a'], () => sx / 300); f(ac, sx - 2 + k * 8, 52, 8, 7); f(mix(ac, '#000000', .2), sx - 2 + k * 8, 59, 8, 1); f(ac, sx + k * 8, 60, 4, 1); }
       f(DPAL.wood, sx, 78, 42, 10); f(DPAL.woodLt, sx, 78, 42, 1); for (let q = 0; q < 8; q++) ell(cols[q % 3], sx + 4 + q * 5, 76, 2.4, 2); }
-    person(P, 64, 84, rnd); person(P, 196, 86, rnd);
+    /* no bystanders: the only person in the picture is the one you are picking (owner, 26 Nov 2026: "why are there
+       random characters on the skill screen previews?") */
   } else if (kind === 'train') {
     skyBand(P, T, st, rnd, 60); P.ridge(T.hills[0], 48, 4, town.length); backTown(P, T, st, rnd, 60); P.ridge(T.hills[1], 62, 2, town.length + 1);
     for (let q = -6; q < DW; q += 9) { ell(mix(st.leaf, '#000000', .25), q + 4, 70, 7, 6); ell(st.leaf, q + 3, 68, 5, 4); if (rnd() < .3) f(pick(FLOWERS, rnd), q + 2, 66, 1, 1); }

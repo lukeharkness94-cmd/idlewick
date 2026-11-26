@@ -5742,6 +5742,10 @@ img.pet-hand{position:fixed;z-index:60;image-rendering:pixelated;pointer-events:
 .pen .pspr:active,.pen .pspr.petted,.hud-pet:active,.hud-pet.petted{scale:1!important;transform:none}
 html.calm .petted,html.calm .petted img{animation:none}
 @media (prefers-reduced-motion:reduce){.petted,.petted img,img.pet-hand{animation:none}}
+
+/* Gathering cards (js/card_scale.js): a 96 px art box; the sprite stands on its ground line at its own whole-number scale */
+#view .illustrated-choices .illustrated-card.card-scaled>.choice-art{height:96px!important;min-height:96px!important;place-items:end center;padding-bottom:2px}
+#view .illustrated-card.card-scaled>.choice-art img{image-rendering:pixelated;object-fit:fill}
 </style>
 
 </head>
@@ -10965,7 +10969,9 @@ const TREE = {
   wraithbark: { kind: 'weeping', leaf: '#c8d0e0', deep: '#9aa4bc', bark: '#b8b8c8', sparkle: '#ffffff' }
 };
 function treeSprite(id) {
-  if(id==='flax'){const s=Spr(32,48);for(const [x,y]of [[7,20],[15,10],[24,23]]){s.line(x,y+4,16,46,rp('#587e57'));s.line(x+1,y+5,17,45,null,'#a3b67b');s.ell(x,y+2,4,3,rp('#7f91bf'));s.fix(x,y,'#e1d9a7');}return s;}
+  /* wild flax is a knee-high plant, not a tree (owner, 26 Nov 2026: "is flax really that big in real life?"): a low clump
+     of thin stems with small blue flowers, standing on the same ground line as the trees, about a fifth of their height */
+  if(id==='flax'){const s=Spr(32,48);for(const [x,y]of [[8,32],[12,29],[16,27],[20,30],[24,33]]){s.line(x,y+3,16,46,rp('#587e57'));s.line(x+1,y+4,17,45,null,'#a3b67b');s.ell(x,y+1,2,1.5,rp('#7f91bf'));s.fix(x,y,'#e1d9a7');}s.ell(16,46,7,1.4,rp('#446b50'));return s;}
   const t = TREE[id] || TREE.normal; if (t.kind === 'oak') return A.sprites.oak();
   const s = Spr(32, 48), L = rp(t.leaf), Dp = rp(t.deep), bark = rp(t.bark);
   if (t.kind === 'cone') { s.rect(15, 38, 3, 9, bark); [[16, 5, 6, 18], [16, 12, 9, 28], [16, 20, 11, 39]].forEach(([cx, top, half, bot], i) => s.poly([[cx, top], [cx + half, bot], [cx - half, bot]], i % 2 ? Dp : L)); }
@@ -11620,7 +11626,8 @@ function districtFor(town, kind, key, o = {}) {
       f(DPAL.woodDk, sx + 1, 58, 2, 30); f(DPAL.woodDk, sx + 39, 58, 2, 30);
       for (let k = 0; k < 6; k++) { const ac = k % 2 ? '#f4ecd8' : pick(['#b8483a', '#3f7fbf', '#4a8a5a'], () => sx / 300); f(ac, sx - 2 + k * 8, 52, 8, 7); f(mix(ac, '#000000', .2), sx - 2 + k * 8, 59, 8, 1); f(ac, sx + k * 8, 60, 4, 1); }
       f(DPAL.wood, sx, 78, 42, 10); f(DPAL.woodLt, sx, 78, 42, 1); for (let q = 0; q < 8; q++) ell(cols[q % 3], sx + 4 + q * 5, 76, 2.4, 2); }
-    person(P, 64, 84, rnd); person(P, 196, 86, rnd);
+    /* no bystanders: the only person in the picture is the one you are picking (owner, 26 Nov 2026: "why are there
+       random characters on the skill screen previews?") */
   } else if (kind === 'train') {
     skyBand(P, T, st, rnd, 60); P.ridge(T.hills[0], 48, 4, town.length); backTown(P, T, st, rnd, 60); P.ridge(T.hills[1], 62, 2, town.length + 1);
     for (let q = -6; q < DW; q += 9) { ell(mix(st.leaf, '#000000', .25), q + 4, 70, 7, 6); ell(st.leaf, q + 3, 68, 5, 4); if (rnd() < .3) f(pick(FLOWERS, rnd), q + 2, 66, 1, 1); }
@@ -26492,6 +26499,33 @@ if (UI.DO && UI.DO.petpet) { const pp = UI.DO.petpet; UI.DO.petpet = (...a) => {
     if (!e.task) Q.go(e.skill);
     else UI.focusTask(e.skill, e.task);
   };
+})();
+
+</script>
+<script>
+/* Idlewick: gathering cards show their picture larger, at a whole-number scale that follows the real thing's size
+   (owner, 26 Nov 2026: "Could the images of the minerals/trees etc be a little larger in the cards? ... is flax really
+   that big in real life? Do some research into how large each thing ... is and make it relevant").
+   Approximate real sizes used:
+     woodcutting: wild flax under 1 m (drawn as a low clump); hazel and elder are shrub-trees of 3-6 m (1x); every
+       other tree is 10-40 m (2x, 96 px tall);
+     fishing (the fish sprite is small, so one step up throughout): shrimp and minnow under 10 cm (2x); sardine to
+       salmon, lobster, carp, perch, trout, 20-80 cm (3x); pike, catfish, monkfish, anglerfish, tuna, swordfish, shark
+       and the large regional fish, 1-3 m and more (4x, 128 px long);
+     mining: an ore boulder about a metre across (2x); thieving marks are people (2x).
+   Sprites are shown exactly at that whole-number scale, standing on the card's ground line; the card's art box is
+   96 px tall on these pages. Presentation only. */
+(() => {
+const Q = window.DQ, UI = Q.ui;
+const SIZE = {
+  wood: { flax: 1, hazel: 1, elder: 1, _: 2, w: 32, h: 48 },
+  fish: { shrimp: 2, minnow: 2, pike: 4, catfish: 4, monkfish: 4, anglerfish: 4, tuna: 4, swordfish: 4, shark: 4, basaltjaw: 4, stormray: 4, bogray: 4, voideel: 4, skyfin: 4, _: 3, w: 32, h: 16 },
+  mine: { _: 2, w: 32, h: 32 }, thieve: { _: 2, w: 32, h: 32 } };
+Q.cardScale = (kind, id) => { const t = SIZE[kind]; return t ? (t[id] || t._) : 0; };
+const apply = () => { document.querySelectorAll('#view .activity-choices .illustrated-card[data-a]').forEach(card => { const kind = card.dataset.a, t = SIZE[kind]; if (!t || card.dataset.scaled) return;
+  const img = card.querySelector('.choice-art img'); if (!img) return; const k = Q.cardScale(kind, card.dataset.b);
+  card.dataset.scaled = k; card.classList.add('card-scaled'); for (const [p, v] of [['width', t.w * k + 'px'], ['height', t.h * k + 'px'], ['max-width', 'none'], ['max-height', 'none']]) img.style.setProperty(p, v, 'important'); }); };
+const render0 = UI.render; UI.render = (...a) => { const r = render0(...a); try { apply(); } catch (e) { /* cards keep their old size */ } return r; };
 })();
 
 </script>

@@ -980,3 +980,7 @@ img.pet-hand{position:fixed;z-index:60;image-rendering:pixelated;pointer-events:
 .pen .pspr:active,.pen .pspr.petted,.hud-pet:active,.hud-pet.petted{scale:1!important;transform:none}
 html.calm .petted,html.calm .petted img{animation:none}
 @media (prefers-reduced-motion:reduce){.petted,.petted img,img.pet-hand{animation:none}}
+
+/* Gathering cards (js/card_scale.js): a 96 px art box; the sprite stands on its ground line at its own whole-number scale */
+#view .illustrated-choices .illustrated-card.card-scaled>.choice-art{height:96px!important;min-height:96px!important;place-items:end center;padding-bottom:2px}
+#view .illustrated-card.card-scaled>.choice-art img{image-rendering:pixelated;object-fit:fill}
