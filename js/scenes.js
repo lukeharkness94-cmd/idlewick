@@ -307,5 +307,5 @@ DQ.sceneUrl = id => {
   return (cache[key] = cv.toDataURL());
 };
 const prev = UI.scene;
-UI.scene = (id, cls = '') => { const u = DQ.sceneUrl(id); return u ? `<img class="scene pxscene ${cls}" src="${u}" alt="" draggable="false">` : prev(id, cls); };
+UI.scene = (id, cls = '') => { const u = DQ.sceneUrl(id); return u ? `<img class="scene pxscene ${cls}" data-town="${id}" src="${u}" alt="" draggable="false">` : prev(id, cls); };
 })();

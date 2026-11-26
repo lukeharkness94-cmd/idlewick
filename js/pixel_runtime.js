@@ -51,7 +51,7 @@ Q.districtUrl = (town, kind, key, choice) => { if (!A.districtFor) return Q.scen
   if (!districts[k]) { const c = A.districtFor(town, kind, key, o); districts[k] = (A.scale2x ? A.scale2x(c) : c).toDataURL(); } return districts[k]; };
 /* town scenes are not snapped to whole multiples (they would drop to 1x on most screens): the 640 x 360 drawing is
    doubled with Scale2x and fills its panel */
-UI.scene = (id, cls = '') => `<img class="scene pxscene ${cls}" src="${Q.sceneUrl(id)}" alt="" draggable="false">`;
+UI.scene = (id, cls = '') => `<img class="scene pxscene ${cls}" data-town="${id}" src="${Q.sceneUrl(id)}" alt="" draggable="false">`;
 
 /* ---------- the hero ---------- */
 const nearest = (list, hex) => { if (!hex) return 0; const h = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); const a = h(hex); let best = 0, bd = 1e9; list.forEach((c, i) => { const b = h(c), d = a.reduce((s, v, k) => s + (v - b[k]) ** 2, 0); if (d < bd) { bd = d; best = i; } }); return best; };

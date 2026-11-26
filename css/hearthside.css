@@ -920,3 +920,6 @@ button.linkish{display:inline-flex;align-items:center}
 .activity-scene.skill-smithing .smith-anvil img{width:64px;height:64px;image-rendering:pixelated}
 .activity-scene.skill-smithing .scene-target{position:absolute;left:calc(12% + 66px);bottom:58px;width:64px;margin:0;z-index:2;animation:none!important;filter:none}
 .activity-scene.skill-smithing .scene-target img{width:48px;height:48px}
+
+/* Townsfolk walking over the Home and Village town scenes (js/town_walkers.js): same box and crop as the picture */
+canvas.town-walkers{position:absolute;pointer-events:none;image-rendering:pixelated;margin:0;display:block}
