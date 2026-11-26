@@ -38,9 +38,9 @@ DQ.museumScan = (o = {}) => {
   for (const w of D.WINGS) { const list = w.entries(); let all = list.length > 0;
     for (const e of list) { if (mu.got[e.key]) continue; if (e.have()) { mu.got[e.key] = Date.now(); fresh.push({ wing: w, entry: e }); } else all = false; }
     if (all && !mu.wings[w.id]) { mu.wings[w.id] = Date.now(); if (DQ.fxDirty) DQ.fxDirty();
-      if (!quiet) DQ.notify({ kind: 'unlock', key: 'wing:' + w.id, icon: 'trophy', col: '#f3d58a', title: `${w.name} complete`, text: `${w.gives}, for good.`, sound: 'gem', burst: true, ttl: 12000 });
-      if (DQ.journal) DQ.journal('museum', `${w.name} complete: ${w.gives}.`, 'trophy'); } }
-  if (fresh.length && !quiet) { const f = fresh[0]; DQ.notify({ kind: 'info', key: 'museum', icon: 'book', col: '#f3d58a', title: `Museum: ${f.entry.name}`, text: fresh.length > 1 ? `and ${fresh.length - 1} more, in the ${f.wing.name}.` : `New in the ${f.wing.name}.`, sound: false, ttl: 6000, action: { label: 'See it', fn: () => DQ.go('museum') } }); }
+      if (!quiet) DQ.notify({ kind: 'unlock', key: 'wing:' + w.id, icon: 'museum', col: '#f3d58a', title: `${w.name} complete`, text: `${w.gives}, for good.`, sound: 'gem', burst: true, ttl: 12000 });
+      if (DQ.journal) DQ.journal('museum', `${w.name} complete: ${w.gives}.`, 'museum'); } }
+  if (fresh.length && !quiet) { const f = fresh[0]; DQ.notify({ kind: 'info', key: 'museum', icon: 'museum', col: '#f3d58a', title: `Museum: ${f.entry.name}`, text: fresh.length > 1 ? `and ${fresh.length - 1} more, in the ${f.wing.name}.` : `New in the ${f.wing.name}.`, sound: false, ttl: 6000, action: { label: 'See it', fn: () => DQ.go('museum') } }); }
   if (fresh.length && DQ.fxDirty) DQ.fxDirty();
   return fresh;
 };

@@ -271,6 +271,9 @@ Object.assign(ICON, {
   fire: s => { s.poly([[3, 14], [2, 9], [5, 4], [6, 8], [8, 1], [11, 7], [12, 5], [14, 10], [13, 14]], rp('#e0603a')); s.poly([[5, 14], [5, 10], [8, 6], [11, 10], [11, 14]], rp('#ffb04a')); s.fix(8, 11, '#fff6c0'); },
   nest: s => { s.ell(8, 11, 6.5, 3.4, R.wood); s.ell(8, 9.5, 4, 1.4, rp('#5a3a22')); s.ell(6, 8, 1.6, 1.8, rp('#cfe6f0')); s.ell(10, 8, 1.6, 1.8, rp('#cfe6f0')); },
   ring_logo: s => { s.ell(8, 9, 6, 6, R.gold); for (let j = -4; j <= 4; j++) for (let i = -4; i <= 4; i++) if (i * i + j * j <= 12) s.erase(8 + i, 9 + j); s.ell(8, 3, 2, 2, rp('#3f7fd6')); },
+  /* museum (owner, 26 Nov: "museum and achievements use the same icon"): a pillared hall with a gold relic inside */
+  museum: s => { const st = rp('#d8d0bc'); s.poly([[1, 5], [8, 1], [15, 5]], R.red); s.rect(1, 5, 14, 2, st); s.rect(3, 13, 10, 1, st); s.rect(1, 14, 14, 2, R.stone);
+    for (const x of [2, 5, 10, 13]) { s.rect(x, 7, 1, 6, st); s.fix(x, 7, '#fff6e0'); } s.rect(7, 8, 2, 5, rp('#4a3a3a')); s.ell(8, 10, 1, 1, R.gold); s.fix(8, 9, '#fff6c0'); s.fix(7, 3, '#ff9a8a'); },
   bit: s => { s.ell(8, 8, 3, 3, R.gold); },
   mute: s => { s.rect(1, 6, 3, 4, R.wood); s.poly([[4, 6], [8, 3], [8, 13], [4, 10]], R.gold); const r = rp('#c8483c'); s.line(10, 5, 14, 10, r); s.line(14, 5, 10, 10, r); s.line(11, 5, 15, 10, r); s.line(15, 5, 11, 10, r); }
 });

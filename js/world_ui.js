@@ -45,7 +45,7 @@ const render0 = UI.render; UI.render = f => { render0(f); try { UI.worldCard(); 
 /* ---------- welcome back: new museum entries from the time away, as one line ---------- */
 const wb0 = UI.welcomeBody;
 if (wb0) UI.welcomeBody = (sum, gap) => { const fresh = Q.museumScan ? Q.museumScan({ quiet: true }) : [], h = wb0(sum, gap); if (!fresh.length) return h;
-  const line = `<div class="wb-sec wb-museum"><span class="k">Museum</span><p>${ico('book')} ${fresh.length} new ${fresh.length === 1 ? 'entry' : 'entries'}: ${fresh.slice(0, 3).map(f => esc(f.entry.name)).join(', ')}${fresh.length > 3 ? '…' : ''}</p></div>`;
+  const line = `<div class="wb-sec wb-museum"><span class="k">Museum</span><p>${ico('museum')} ${fresh.length} new ${fresh.length === 1 ? 'entry' : 'entries'}: ${fresh.slice(0, 3).map(f => esc(f.entry.name)).join(', ')}${fresh.length > 3 ? '…' : ''}</p></div>`;
   return h.includes('<div class="wb-sec wb-decide') ? h.replace('<div class="wb-sec wb-decide', line + '<div class="wb-sec wb-decide') : h + line; };
 /* the Moonlit Hart: its own drawing */
 const A = Q.pixelArt;
