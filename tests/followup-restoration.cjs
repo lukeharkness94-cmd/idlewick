@@ -39,6 +39,20 @@ const { chromium } = require('playwright');
     assert.ok(r.done, 'windmill restored'); assert.equal(r.offered, null, 'not offered again right after a reward');
     assert.match(r.after, /Old Tusk/);
     assert.ok(r.granary, 'granary restored in rounds: ' + r.rounds.join(' > ')); assert.ok(r.rounds.filter(x => x === 'localroute').length >= 2 && r.rounds.includes('projectgive'));
+    /* Saltmere for a combat-trained hero (Woodcutting far below palm's 27): the jetty's shelf sells palm logs (owner, 26 Nov) */
+    const salt = await p.evaluate(() => { const Q = DQ, D = Q.data, S = Q.S;
+      S.towns.mossbarrow.boss = true; S.towns.saltmere = { visited: true, boss: false }; S.town = 'saltmere'; S.projects.jetty = true;
+      for (const q of D.QUESTS) if (q.town === 'mossbarrow' || (q.town === 'saltmere' && !q.obj.some(o => o.ev === 'boss'))) S.q[q.id] = { s: 'done', p: q.obj.map(o => o.n) };
+      const bq = D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === D.TOWN.saltmere.boss)); S.q[bq.id] = { s: 'active', p: bq.obj.map(() => 0) };
+      for (const m of D.MONLIST.filter(m => m.mini && m.town === 'saltmere')) S.minis[m.id] = true;
+      while (Q.lvl('fishing') < 12) Q.addXp('fishing', 500, { quiet: true });
+      S.coins = 5000; S.lastBeatAt = (S.gameTime || 0) - 31 * 60e3; const wc = Q.lvl('woodcutting'), steps = [];
+      for (let k = 0; k < 10; k++) { const x = Q.journeyNext(); steps.push(x.title);
+        if (x.action === 'localroute') Q.buyLocalSupply(x.a, +x.b); else if (x.action === 'projectgive') Q.projectGive(...x.a.split('|'));
+        else if (x.action === 'journeytask' && x.a === 'fish') Q.give('raw_' + x.b, 25); else if (x.action === 'projectfinish') { Q.finishProject(x.a); break; } else break; }
+      return { wc, steps, done: !!S.projects.salt_smokehouse }; });
+    console.log('saltmere', JSON.stringify(salt));
+    assert.ok(salt.wc < 27); assert.match(salt.steps[0], /^Buy 40 palm logs for the smokehouse$/); assert.ok(salt.done, 'smokehouse restored');
     assert.deepEqual(errors, []);
     console.log('followup-restoration: ok');
   } finally { await b.close(); }
