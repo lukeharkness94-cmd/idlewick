@@ -75,7 +75,7 @@ const path = require('node:path');
       Q.ui.DO.route('raw_game');
       const src = Q.sourceOf('raw_game');
       check(src.kind === 'hunt' && !Q.KIND_EXT.hunt.check(src.id), 'Accessible raw game source');
-      check(Q.ui.huntTier === D.MON[src.id].tier && Q.ui.huntGroundAt === src.town &&
+      check(Q.ui.huntTier === D.MON[src.id].tier && /* one hunting ground since 26 Nov 2026: no town to match */
         Q.ui.taskChoice.hunting === src.id && !Q.act && Q.ui.returnTo.page === 'cooking', 'Exact raw game route');
     });
 
@@ -120,8 +120,8 @@ const path = require('node:path');
     assert.equal(await page.evaluate(() => DQ.act.count), 2);
     await page.evaluate(() => { DQ.paused = true; DQ.stopAct(true); DQ.closeModal(); DQ.S.unlocked.hunting = true; DQ.give('wooden_trap', 3); });
     await page.evaluate(() => DQ.ui.DO.questcontinue('mq_ranged'));
-    assert.deepEqual(await page.evaluate(() => [DQ.ui.view, DQ.ui.huntGroundAt, DQ.ui.taskChoice.hunting, DQ.KIND_EXT.hunt.check('boar')]),
-      ['hunting', 'mossbarrow', 'boar', '']);
+    assert.deepEqual(await page.evaluate(() => [DQ.ui.view, DQ.ui.taskChoice.hunting, DQ.KIND_EXT.hunt.check('boar')]),
+      ['hunting', 'boar', '']);
 
     await page.evaluate(() => {
       const Q = DQ;
@@ -145,15 +145,17 @@ const path = require('node:path');
     });
     await page.reload();
     await page.locator('#t-cont').click();
-    await page.waitForFunction(() => DQ.act?.kind === 'hunt' && DQ.act.id === 'hill_goat');
-    assert.deepEqual(await page.evaluate(() => [DQ.act.count, DQ.S.queue[0].id]), [3, 'turkey']);
+    /* the wild goat is no longer on the one hunting ground (26 Nov 2026): the migrated hunt stops on load with a note */
+    await page.waitForFunction(() => DQ.S && (DQ.S.log || []).some(l => /no longer on the hunting ground/.test(l.m)));
+    assert.notEqual(await page.evaluate(() => DQ.act && DQ.act.id), 'hill_goat');
     console.log('PASS routed boar fight and hunt migration through isolated reloads');
     await page.evaluate(() => {
       DQ.paused = true; DQ.closeModal(); DQ.S.queue = [];
       DQ.ui.DO.huntground('boar');
+      DQ.startAct('hunt', 'seal', { quiet: true });
       DQ.ui.DO.nowactivity();
     });
-    assert.deepEqual(await page.evaluate(() => [DQ.ui.huntGroundAt, DQ.ui.huntTier, DQ.ui.taskChoice.hunting]), ['willowbrook', 1, 'hill_goat']);
+    assert.deepEqual(await page.evaluate(() => [DQ.ui.huntTier, DQ.ui.taskChoice.hunting]), [1, 'seal']);
     await page.evaluate(() => {
       const Q = DQ;
       Q.stopAct(true);
@@ -211,7 +213,7 @@ const path = require('node:path');
       Q.travel('willowbrook');
       if (!Q.startAct('train', 'lure:willowbrook', { quiet: true })) throw Error('Could not start Fieldwork');
       for (let i = 0; i < 4; i++) Q.closeModal();
-      Q.ui.DO.huntground('hill_goat');
+      Q.ui.DO.huntground('seal');
       Q.ui.DO.nowactivity();
       if (Q.ui.huntMode !== 'field' || Q.ui.taskChoice.hunting !== 'lure:willowbrook') throw Error('Wrong Fieldwork destination');
       Q.S.equip.weapon = 'bronze_sword';
@@ -261,7 +263,7 @@ const path = require('node:path');
         DQ.ui.DO.huntground('mountain_goat');
       });
       assert.equal(await page.locator('.task-primary').isDisabled(), true);
-      assert.equal(await page.locator('.hunt-grounds button').count(), 8);
+      assert.equal(await page.locator('.hunt-grounds button').count(), 0);
       assert.equal(await page.locator('.hunt-tiers button').count(), 5);
       await page.evaluate(() => {
         DQ.ui.DO.huntground('chicken');

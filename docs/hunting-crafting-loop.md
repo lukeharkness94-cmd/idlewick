@@ -1,5 +1,7 @@
 # Hunting, Crafting and Beastmastery — 16 November 2026
 
+> 26 November 2026: egg expeditions are retired. Beastmastery now captures animals you have hunted (Beastmastery → Capture), and Hunting has one ground with tier tabs. See docs/beastmastery.md, "Captures and lucky eggs". The expedition text below is history.
+
 Implemented the approved first slice. Further skill minigame designs remain proposals. Decisions happen before a run; no reaction tests, mandatory bait rotation, extra currency or repeated stage clicks were added.
 
 - **Hunting:** Fieldwork is the default, with Set → Wait → Check reflecting the real repeating action. Existing Quarry recommendations/combat remain available. Fieldwork supplies the existing regional material pool and can discover a signature egg once Beastmastery is open. It earns Hunting XP; old `train:lure:<town>` action/Guide/quest IDs are retained. Known material focus is optional and only available with a usable precision trap (weight 3 versus 1 for each other material, not a guaranteed drop).

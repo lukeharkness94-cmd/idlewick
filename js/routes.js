@@ -26,7 +26,8 @@ DQ.sourceOf = id => {
   const shops = Object.entries(D.SHOPS || {}).filter(([,list])=>list.includes(id)).map(([town])=>town);
   const shop=shops.find(t=>t===S().town)||shops.find(t=>DQ.townUnlocked(t));
   if(shop)return {kind:'shop',page:'shop',town:shop,name:'Shop'};
-  const monsters=D.MONLIST.filter(m=>(m.drops||[]).some(d=>d[0]===id)||m.first===id).sort((a,b)=>Number(!!a.boss)-Number(!!b.boss)||a.cl-b.cl);
+  /* animals off the one hunting ground (26 Nov 2026) are no source: they cannot be hunted any more */
+  const monsters=D.MONLIST.filter(m=>(!m.hl||m.ground)&&((m.drops||[]).some(d=>d[0]===id)||m.first===id)).sort((a,b)=>Number(!!a.boss)-Number(!!b.boss)||a.cl-b.cl);
   const fight=m=>({kind:'fight',id:m.id,page:'combat',town:m.town,name:DQ.monName(m)});
   const hunt = m => ({
     kind: 'hunt', id: m.id, page: 'hunting', skill: 'hunting',
@@ -145,7 +146,7 @@ DQ.sourcesOf = id => {
   }
   const shops = Object.entries(D.SHOPS || {}).filter(([t, l]) => l.includes(id) && DQ.townUnlocked(t)).map(([t]) => D.TOWN[t].name);
   if (shops.length) out.push({ pic: DQ.ico('shop'), text: 'Buy in the shop', note: `${shops.slice(0, 3).join(', ')}${shops.length > 3 ? '…' : ''}`, ok: shops.includes(D.TOWN[S().town].name) });
-  const mons = D.MONLIST.filter(m => (m.drops || []).some(d => d[0] === id)), met = mons.filter(m => (S().beast.kills[m.id] || 0) > 0);
+  const mons = D.MONLIST.filter(m => (!m.hl || !DQ.animalListed || DQ.animalListed(m)) && (m.drops || []).some(d => d[0] === id)), met = mons.filter(m => (S().beast.kills[m.id] || 0) > 0);
   if (met.length) out.push({ pic: DQ.monSprite(met[0], 32), text: `Dropped by ${met.slice(0, 2).map(m => m.name).join(', ')}`, note: mons.length > met.length ? 'and creatures you have not met' : '' });
   else if (mons.length && !it.unique) out.push({ pic: DQ.ico('paw'), text: 'Dropped by a creature', note: DQ.townUnlocked(mons[0].town) ? `around ${D.TOWN[mons[0].town].name}` : 'further down the road' });
   const qs = D.QUESTS.filter(q => !q.secret && q.reward && q.reward.items && q.reward.items[id] && DQ.questState(q) !== 'done');

@@ -66,7 +66,8 @@ DQ.on('lvl',()=>DQ.checkActionUnlocks());DQ.on('quests',()=>DQ.checkActionUnlock
 const hero=sk=>UI.skillHero?UI.skillHero(sk):`<section class="panel"><h2>${D.SK[sk].name}</h2></section>`;
 UI.V.hunting=()=>`${hero('hunting')}${UI.areaPanel(S().town)}`;
 DQ.explorationSummary=town=>{
- const creatures=D.MONLIST.filter(m=>m.town===town),found=creatures.filter(m=>(S().beast.kills[m.id]||0)>0);
+ /* animals live on the one hunting ground now, not in a town (26 Nov 2026): DQ.huntingSummary counts them */
+ const creatures=D.MONLIST.filter(m=>m.town===town&&!m.hl),found=creatures.filter(m=>(S().beast.kills[m.id]||0)>0);
  const quests=D.QUESTS.filter(q=>q.town===town),completed=quests.filter(q=>S().q[q.id]?.s==='done');
  return {creatures,found,quests,completed,visited:!!S().towns[town]?.visited,boss:!!S().towns[town]?.boss};
 };

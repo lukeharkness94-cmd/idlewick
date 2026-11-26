@@ -18,6 +18,7 @@ assert.ok(s1.xp>s0.xp,'feeding raises bond XP');assert.ok(s1.coins<s0.coins,'tra
 assert.ok(await p.locator('.pen.ps-nap[data-id="bond_wolf"]').count()===1,'pen shows napping');
 assert.ok(await p.locator('[data-do="beastfeed"]').isDisabled(),'cannot feed a napping beast again');
 /* wooden-trap fieldwork moved from the ranch to Hunting (16 Nov Hunting/Crafting slice): the ranch keeps its shed tab only */
-await p.locator('.ranch-tabs [data-a="shed"]').click();await p.waitForTimeout(300);assert.ok(await p.locator('.beast-subpage.mode-shed').isVisible(),'shed tab opens');assert.equal(await p.locator('.ranch-tabs [data-a="field"]').count(),0,'fieldwork lives in Hunting, not the ranch');
+/* captures replaced the Trapper's shed (26 Nov 2026): two tabs, Ranch and Capture */
+await p.locator('.ranch-tabs [data-a="capture"]').click();await p.waitForTimeout(300);assert.ok(await p.locator('#view > .capture-bar').isVisible(),'capture tab opens');assert.equal(await p.locator('.ranch-tabs [data-a="field"], .ranch-tabs [data-a="shed"]').count(),0,'no shed or fieldwork tab on the ranch');
 await p.locator('.ranch-tabs [data-a="ranch"]').click();await p.waitForTimeout(300);assert.ok(await p.locator('.pen-grid').isVisible(),'ranch tab returns');
-assert.deepEqual(errors,[]);await b.close();console.log('PASS ranch: pens, shelf, feeding trains and naps, shed and field tabs');})();
+assert.deepEqual(errors,[]);await b.close();console.log('PASS ranch: pens, shelf, feeding trains and naps, ranch and capture tabs');})();

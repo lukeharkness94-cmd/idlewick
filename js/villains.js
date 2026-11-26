@@ -96,6 +96,11 @@ const legacy = { 'willowbrook:farm': 'willowbrook:hunt' };
 
 /* ---------- Hunting level: animals above it cannot be tracked yet; a quest target always can ---------- */
 DQ.huntLevel = () => DQ.fieldAccessLevel ? DQ.fieldAccessLevel() : DQ.lvl('hunting');
+/* the one hunting ground (hunt_tiers_data.js D.HUNT_GROUND, owner 26 Nov 2026): an animal is listed anywhere animals are
+   listed (field guide, museum, bestiary) when it is on the ground or you have already caught one; the rest stay in
+   the data for old saves but are never shown as something still to find */
+DQ.groundAnimal = id => !!(D.MON[id] && D.MON[id].ground);
+DQ.animalListed = m => !!m && (!m.hl || !!m.ground || ((DQ.S && DQ.S.beast.kills[m.id]) || 0) > 0);
 DQ.canHunt = m => !m || !m.hl || DQ.huntLevel() >= m.hl || DQ.questWantsKill(m.id);
 const pick0 = DQ.pickEncounter;
 DQ.pickEncounter = (area, target) => {

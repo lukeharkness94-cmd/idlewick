@@ -5769,6 +5769,28 @@ html:not(.calm) .world-moment .we-art{animation:we-arrive .5s ease-out both}
 @media (max-width:860px){.world-moment .we-art{gap:10px}.world-moment .event-subject :is(img,svg,.ic){width:96px!important;height:96px!important}}
 .world-moment .we-art{padding:14px 28px;border-radius:50%;background:radial-gradient(closest-side,#f4ead2e6 55%,#f4ead200)}
 </style>
+<style>/* Beastmastery → Capture (js/beast_capture.js, 26 Nov 2026). The page is laid out like Hunting → Hunting ground: the
+   workspace is a direct child of the view, so the activity-page rules keep the window still and scroll only the list
+   of animals. The stage reuses the hunt's step strip, trap and scene classes from hearthside.css (the capture scene
+   also carries .hunt); this file adds the one row above the workspace (tier tabs, then the counts) and a kept animal
+   settling beside the trap instead of fading out. */
+.capture-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;margin:0 0 8px;flex:none}
+.capture-bar>.hunt-tiers{margin:0}
+.capture-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:14px}
+.capture-sum{display:inline-flex;align-items:center;gap:6px}
+.capture-sum .k{margin:0}
+.capture-head .hunt-recent{font-size:14px}
+.capture-old-trap{display:inline-flex;align-items:center;gap:5px;color:var(--mute)}
+.capture-old-trap .ic{width:16px;height:16px}
+.capture-gives{display:flex;align-items:center;gap:6px;margin:6px 0 0}
+.capture-gives .ic{width:18px;height:18px;flex:none}
+.activity-scene.capture[data-result="kept"] .scene-target{animation:capture-kept 1.2s ease-out both}
+@keyframes capture-kept{0%{translate:0 0}30%{translate:20px -8px}60%{translate:40px 0}100%{translate:40px 2px}}
+html.calm .activity-scene.capture .scene-target{animation:none!important}
+@media (prefers-reduced-motion:reduce){.activity-scene.capture .scene-target{animation:none!important}}
+/* the same proportions as the Hunting ground's workspace (style.css, .skill-hunting) */
+@media(min-width:861px){#view>.activity-workspace:has(.skill-beastmastery){grid-template-columns:minmax(360px,480px) minmax(0,1fr)}#view>.activity-workspace:has(.skill-beastmastery) .activity-caption{padding:12px}#view>.activity-workspace:has(.skill-beastmastery) .task-summary p{margin:6px 0}html.short #view>.activity-workspace:has(.skill-beastmastery) .activity-scene{height:160px}}
+</style>
 <style>/* ===================== Shape rule (owner, 26 Nov 2026) =====================
    One shape for everything you can click, no outline on anything you can't.
    - Clickable (buttons, tabs, choice cards, item tiles, slots, quest rows, rail rows, clickable portraits, chips that act,
@@ -7053,6 +7075,7 @@ D.ROSTER_WEIGHTS = [30, 24, 18, 13, 9, 6];
    the further up you go ... this will require new traps and materials to capture them").
    Five tiers by Hunting level. Every hunting ground holds five animals in every tier (8 grounds x 5 tiers x 5 = 200;
    the 39 animals already in the game keep their ids, levels, kills and field-guide pages and fill their own tier).
+   Since 26 Nov 2026 only D.HUNT_GROUND (below: one ground, ten a tier) is listed as quarry; the rest stay as data.
    Kit: from Intermediate up, a hunt needs that tier's trap in your pack (kept, never used up) and one bait per hunt
    (used whether the strike lands or not). Beginner needs nothing; a wooden trap still helps the strike.
      Beginner      Hunting 1-19   no kit
@@ -7313,6 +7336,31 @@ for (const town of TOWNS) {
   /* the ground lists its animals lowest first */
   r.hunt[1].sort((a, b) => (D.MON[a]?.hl || 0) - (D.MON[b]?.hl || 0));
 }
+/* ---------- one hunting ground (owner, 26 Nov 2026: "get rid of there being different towns for each - even if this
+   means reducing the monster count. Just have the different tiers") ----------
+   Hunting → Hunting ground is one place with five tier tabs. Ten animals per tier, each on its own Hunting level
+   (two apart, so no two share a rung of the ladder), plain farm and hedgerow animals at the bottom and the things of
+   legend at the top. Every quest's animal is on it (boar, crab, belladonna hare, chimehorn, candletoad, glassback,
+   storm hawk, prism kite). The other animals keep their ids, drops, kills, field-guide pages and pets: they are simply
+   not listed as quarry any more (an active quest could still send you after one; hunt_stalk.js allows that). */
+D.HUNT_GROUND = [
+  /* Beginner 1-19 */ ['chicken', 1], ['rabbit', 2], ['pheasant', 4], ['sheep', 6], ['cow', 8], ['boar', 10], ['crab', 12], ['thimblefox', 14], ['red_deer', 16], ['bellhare', 18],
+  /* Intermediate 20-39 */ ['seal', 20], ['mountain_goat', 22], ['tideglass', 24], ['badger', 26], ['chimehorn', 28], ['red_fox', 30], ['snow_hare', 32], ['woolly_yak', 34], ['barn_owl', 36], ['ice_elk', 38],
+  /* Skilled 40-59 */ ['fallow_deer', 40], ['black_bear', 42], ['marsh_heron', 44], ['walrus', 46], ['fen_boar', 48], ['lynx', 50], ['candletoad', 52], ['cinder_lizard', 54], ['moose', 56], ['ember_stag', 58],
+  /* Expert 60-79 */ ['golden_pheasant', 60], ['ashen_boar', 62], ['glassback', 64], ['moss_bear', 66], ['firebird', 68], ['hawk', 70], ['nimbusgrazer', 72], ['mist_stag', 74], ['prismkite', 76], ['twilight_unicorn', 78],
+  /* Master 80-99 */ ['griffin', 80], ['sunwheat_stag', 82], ['sky_stag', 84], ['moon_hare', 86], ['sun_phoenix', 88], ['star_stag', 90], ['thunderbird', 92], ['shadow_lynx', 94], ['eclipse_roc', 96], ['celestial_unicorn', 98]
+].filter(([id]) => D.MON[id] && D.MON[id].hl).map(([id, hl]) => { const m = D.MON[id]; m.hl = hl; m.tier = D.huntTierOf(hl); m.ground = true; return id; });
+/* the older animals on the ground that never had a field-guide note */
+Object.assign(D.HUNT_NOTES = D.HUNT_NOTES || {}, {
+  thimblefox: 'A fox no bigger than a teapot that steals thimbles, buttons and anything else small and shiny. Its den looks like a sewing basket.',
+  bellhare: 'Lives in the belladonna patch and has a call like a little bell. Nobody knows why it is not poisoned, and it is not telling.',
+  tideglass: 'A skittering shore thing with a shell like sea glass. Children collect the shells. The skitters would like them back.',
+  chimehorn: 'A goat whose horns ring like chimes when it butts something. Ironpeak always knows when one is annoyed, which is always.',
+  candletoad: 'A fat fen toad with a glow in its throat like a candle. Fen folk used them as lanterns until the toads started wandering off with the light.',
+  glassback: 'A lizard whose back has cooled into black glass in the Emberfall heat. Smiths say it is good luck. The lizard says nothing and bites.',
+  nimbusgrazer: 'A big woolly cloud of a beast that grazes the sky meadows. When it lies down it is hard to tell from the weather.',
+  prismkite: 'A thin bright bird that splits the sunlight into rainbows as it flies. Skyreach washing is very colourful and never quite dry.'
+});
 /* field-guide notes in the house voice (villains.js writes the roster's; these are the hunt tiers') */
 const notes = () => { if (!D.LORE) return; for (const [id, note] of Object.entries(D.HUNT_NOTES || {})) if (!D.LORE[id]) D.LORE[id] = { note, legend: note }; };
 notes(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', notes);
@@ -7324,7 +7372,7 @@ notes(); if (document.readyState === 'loading') document.addEventListener('DOMCo
 (() => {
 const D=window.DQ.data;
 for(const s of [
- {id:'hunting',name:'Hunting',col:'#c47a45',group:'gather',page:'hunting',actionReq:{kill:10},blurb:'Track wild creatures, learn their habitats and raise bonded companions.'},
+ {id:'hunting',name:'Hunting',col:'#c47a45',group:'gather',page:'hunting',actionReq:{kill:10},blurb:'Track and trap animals on the hunting ground for their meat, hides and feathers.'},
  {id:'exploration',name:'Exploration',col:'#55a99a',group:'gather',page:'exploration',actionReq:{catch:25,chop:25},blurb:'Map roads, habitats and hidden places up and down the old road.'},
  {id:'herbalism',name:'Herbalism',col:'#70ad62',group:'artisan',page:'brewery',actionReq:{harvest:20},blurb:'Turn gathered plants into remedies and powerful potions.'},
  {id:'enchanting',name:'Enchanting',col:'#a77be8',group:'artisan',page:'enchanting',actionReq:{craft:30,smith:20},blurb:'Bind runes and gems into equipment to strengthen its bonuses.'}
@@ -7660,7 +7708,7 @@ const DQ = window.DQ, D = DQ.data;
 for (const s of [
   { id: 'carpentry', name: 'Carpentry', col: '#c08a4a', group: 'artisan', page: 'carpentry', actionReq: { craft: 5, 'own:tool_handsaw': 1 }, blurb: 'Saw logs into planks for furniture, town projects and boats.' },
   { id: 'sailing', name: 'Sailing', col: '#3f8fc8', group: 'gather', page: 'sailing', actionReq: { 'visit:saltmere': 1, 'own:boat_skiff': 1 }, blurb: 'Sail from Saltmere to far islands and bring back what you find.' },
-  { id: 'beastmastery', name: 'Beastmastery', col: '#d08a5a', group: 'gather', page: 'beastmastery', actionReq: { 'skill:hunting': 3, 'own:wooden_trap': 3, combat: 10 }, blurb: 'Hatch beasts, keep them at your ranch and bond with one as your companion.' }
+  { id: 'beastmastery', name: 'Beastmastery', col: '#d08a5a', group: 'gather', page: 'beastmastery', actionReq: { 'skill:hunting': 3, 'own:wooden_trap': 3, combat: 10 }, blurb: 'Catch animals you have hunted, hatch the eggs you find, keep them at your ranch and bond with one as your companion.' }
 ]) { D.SKILLS.push(s); D.SK[s.id] = s; }
 const icons = DQ.ICONS || {}; for (const k of ['carpentry', 'sailing', 'beastmastery', 'plank', 'boat', 'island']) if (!(k in icons)) icons[k] = 'M4 12h16';
 
@@ -15183,7 +15231,8 @@ const lore = id => { const L = (D.LORE || {})[id]; return L ? (L.note || '').spl
 const held = id => DQ.have(id) > 0 || ((S().bank || {})[id] || 0) > 0;
 D.WINGS = [
   { id: 'creatures', name: 'Hall of Creatures', bonus: { xpAll: .01 }, gives: '+1% XP',
-    entries: () => D.MONLIST.filter(m => !m.boss && !m.mini).map(m => ({ key: 'c:' + m.id, name: m.name, text: lore(m.id), mon: m.id, have: () => (S().beast.kills[m.id] || 0) > 0 })) },
+    /* animals that have left the one hunting ground (26 Nov 2026) only count once you have caught one */
+    entries: () => D.MONLIST.filter(m => !m.boss && !m.mini && (!DQ.animalListed || DQ.animalListed(m))).map(m => ({ key: 'c:' + m.id, name: m.name, text: lore(m.id), mon: m.id, have: () => (S().beast.kills[m.id] || 0) > 0 })) },
   { id: 'beasts', name: 'The Menagerie', bonus: { coin: .02 }, gives: '+2% coins',
     entries: () => (DQ.collectiblePets ? DQ.collectiblePets() : D.PETS).flatMap(p => [{ key: 'b:' + p.id, name: p.name, text: p.text, pet: p.id, have: () => !!S().pets.owned[p.id] }]
       .concat((D.BEAST_SPECIES || {})[p.id] ? [{ key: 'e:' + p.id, name: D.BEAST_SPECIES[p.id].evolution, text: `${p.name}, at Bond 10.`, pet: p.id, evolved: true, have: () => !!(S().pets.owned[p.id] && S().pets.owned[p.id].evolved) }] : [])) },
@@ -16407,6 +16456,11 @@ const legacy = { 'willowbrook:farm': 'willowbrook:hunt' };
 
 /* ---------- Hunting level: animals above it cannot be tracked yet; a quest target always can ---------- */
 DQ.huntLevel = () => DQ.fieldAccessLevel ? DQ.fieldAccessLevel() : DQ.lvl('hunting');
+/* the one hunting ground (hunt_tiers_data.js D.HUNT_GROUND, owner 26 Nov 2026): an animal is listed anywhere animals are
+   listed (field guide, museum, bestiary) when it is on the ground or you have already caught one; the rest stay in
+   the data for old saves but are never shown as something still to find */
+DQ.groundAnimal = id => !!(D.MON[id] && D.MON[id].ground);
+DQ.animalListed = m => !!m && (!m.hl || !!m.ground || ((DQ.S && DQ.S.beast.kills[m.id]) || 0) > 0);
 DQ.canHunt = m => !m || !m.hl || DQ.huntLevel() >= m.hl || DQ.questWantsKill(m.id);
 const pick0 = DQ.pickEncounter;
 DQ.pickEncounter = (area, target) => {
@@ -18810,7 +18864,8 @@ DQ.recordKill = (m, drops) => {
 const cnt = rank => () => DQ.researchTotals().byRank[rank];
 [['field_notes', 'Field Notes', 'Learn the vitals of 5 monsters.', 5, cnt(3), 400], ['naturalist', 'Naturalist', 'Learn the full drop table of 10 monsters.', 10, cnt(4), 1500],
  ['lorekeeper', 'Lorekeeper', 'Write up the field notes of 10 monsters.', 10, cnt(5), 6000], ['legend_hunter', 'Legend Hunter', 'Uncover the legend of 5 monsters.', 5, cnt(6), 20000],
- ['beast_master', 'Beast Master', 'Uncover the legend of every monster.', D.MONLIST.length, cnt(6), 150000]]
+ /* every creature you can still meet: animals that left the one hunting ground (26 Nov 2026) are not counted */
+ ['beast_master', 'Beast Master', 'Uncover the legend of every monster.', D.MONLIST.filter(m => !m.hl || m.ground).length, cnt(6), 150000]]
   .forEach(([id, name, desc, goal, val, coins]) => D.ACH.push({ id, name, desc, goal, val, coins, ic: 'book' }));
 
 /* ---------- the monsters page, as a field guide ---------- */
@@ -19182,7 +19237,8 @@ DQ.on('lvl',()=>DQ.checkActionUnlocks());DQ.on('quests',()=>DQ.checkActionUnlock
 const hero=sk=>UI.skillHero?UI.skillHero(sk):`<section class="panel"><h2>${D.SK[sk].name}</h2></section>`;
 UI.V.hunting=()=>`${hero('hunting')}${UI.areaPanel(S().town)}`;
 DQ.explorationSummary=town=>{
- const creatures=D.MONLIST.filter(m=>m.town===town),found=creatures.filter(m=>(S().beast.kills[m.id]||0)>0);
+ /* animals live on the one hunting ground now, not in a town (26 Nov 2026): DQ.huntingSummary counts them */
+ const creatures=D.MONLIST.filter(m=>m.town===town&&!m.hl),found=creatures.filter(m=>(S().beast.kills[m.id]||0)>0);
  const quests=D.QUESTS.filter(q=>q.town===town),completed=quests.filter(q=>S().q[q.id]?.s==='done');
  return {creatures,found,quests,completed,visited:!!S().towns[town]?.visited,boss:!!S().towns[town]?.boss};
 };
@@ -19997,7 +20053,7 @@ DQ.optionalGoals = () => {
   }
   const chase = D.MONLIST.find(m => m.town === town && !m.boss && (S().beast.kills[m.id] || 0) > 0 && m.drops.some(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique && !(S().uniqFound || {})[d[0]]));
   if (chase && DQ.uniqueSource) { const id = chase.drops.find(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique)[0], src = DQ.uniqueSource(id); out.push({ span: 'Long', text: `${D.ITEMS[id].name} from ${DQ.plural(chase.name)}: ${src.need - Math.min(src.have, src.need)} more defeats at most`, action: 'guide', a: chase.id }); }
-  else if (DQ.understanding) { const mons = D.MONLIST.filter(m => m.town === town), u = mons.filter(m => DQ.understanding(m).done).length; if (u < mons.length && mons.some(m => S().beast.kills[m.id])) out.push({ span: 'Long', text: `${D.TOWN[town].name} field guide: ${u} / ${mons.length} creatures understood`, action: 'go', a: 'bestiary' }); }
+  else if (DQ.understanding) { const mons = D.MONLIST.filter(m => m.town === town && !m.hl), u = mons.filter(m => DQ.understanding(m).done).length; if (u < mons.length && mons.some(m => S().beast.kills[m.id])) out.push({ span: 'Long', text: `${D.TOWN[town].name} field guide: ${u} / ${mons.length} creatures understood`, action: 'go', a: 'bestiary' }); }
   return out.slice(0, 3);
 };
 DQ.finishProject = id => {
@@ -20267,7 +20323,8 @@ DQ.sourceOf = id => {
   const shops = Object.entries(D.SHOPS || {}).filter(([,list])=>list.includes(id)).map(([town])=>town);
   const shop=shops.find(t=>t===S().town)||shops.find(t=>DQ.townUnlocked(t));
   if(shop)return {kind:'shop',page:'shop',town:shop,name:'Shop'};
-  const monsters=D.MONLIST.filter(m=>(m.drops||[]).some(d=>d[0]===id)||m.first===id).sort((a,b)=>Number(!!a.boss)-Number(!!b.boss)||a.cl-b.cl);
+  /* animals off the one hunting ground (26 Nov 2026) are no source: they cannot be hunted any more */
+  const monsters=D.MONLIST.filter(m=>(!m.hl||m.ground)&&((m.drops||[]).some(d=>d[0]===id)||m.first===id)).sort((a,b)=>Number(!!a.boss)-Number(!!b.boss)||a.cl-b.cl);
   const fight=m=>({kind:'fight',id:m.id,page:'combat',town:m.town,name:DQ.monName(m)});
   const hunt = m => ({
     kind: 'hunt', id: m.id, page: 'hunting', skill: 'hunting',
@@ -20386,7 +20443,7 @@ DQ.sourcesOf = id => {
   }
   const shops = Object.entries(D.SHOPS || {}).filter(([t, l]) => l.includes(id) && DQ.townUnlocked(t)).map(([t]) => D.TOWN[t].name);
   if (shops.length) out.push({ pic: DQ.ico('shop'), text: 'Buy in the shop', note: `${shops.slice(0, 3).join(', ')}${shops.length > 3 ? '…' : ''}`, ok: shops.includes(D.TOWN[S().town].name) });
-  const mons = D.MONLIST.filter(m => (m.drops || []).some(d => d[0] === id)), met = mons.filter(m => (S().beast.kills[m.id] || 0) > 0);
+  const mons = D.MONLIST.filter(m => (!m.hl || !DQ.animalListed || DQ.animalListed(m)) && (m.drops || []).some(d => d[0] === id)), met = mons.filter(m => (S().beast.kills[m.id] || 0) > 0);
   if (met.length) out.push({ pic: DQ.monSprite(met[0], 32), text: `Dropped by ${met.slice(0, 2).map(m => m.name).join(', ')}`, note: mons.length > met.length ? 'and creatures you have not met' : '' });
   else if (mons.length && !it.unique) out.push({ pic: DQ.ico('paw'), text: 'Dropped by a creature', note: DQ.townUnlocked(mons[0].town) ? `around ${D.TOWN[mons[0].town].name}` : 'further down the road' });
   const qs = D.QUESTS.filter(q => !q.secret && q.reward && q.reward.items && q.reward.items[id] && DQ.questState(q) !== 'done');
@@ -20803,13 +20860,13 @@ const lessons={
   ranged:{title:'Ranged combat',text:'Equip a bow and arrows to fight at range. Arrows are used as you attack, so remember to check the quiver before setting out.',towards:'Bows deal piercing damage, which is useful against creatures with that weakness.',goal:'Equip a bow and matching arrows, then choose a fight that suits your current strength.',art:['item','bow_normal']}
 };
 Object.assign(lessons,{
- hunting:{title:'Hunting',text:'Craft a field trap, choose a habitat and start fieldwork. Setting, waiting and checking repeat automatically; the best usable trap you own is chosen for you.',towards:'Fieldwork brings back useful materials. Reinforced traps last longer, and precision traps let you favour a material you’ve already discovered.',goal:'Begin with wooden traps in Willowbrook. You can still use the Quarry tab to find suitable combat targets.',art:['skill','hunting']},
+ hunting:{title:'Hunting',text:'Pick an animal on the hunting ground and hunt it: track it, set the trap, strike. Some get away. The tabs are tiers by Hunting level; from Intermediate up you need that tier’s trap and bait.',towards:'Catches bring meat, hides and feathers for Cooking and Crafting. Fieldwork lays wooden traps for a region’s materials.',goal:'Start with a Beginner animal: the chicken needs no kit.',art:['skill','hunting']},
  exploration:{title:'Exploration',text:'Visiting a new region and discovering its creatures earns Exploration XP. Check this page when you want to see what you haven’t explored yet.',towards:'Exploration helps you keep track of the places and discoveries still waiting beyond your current route.',goal:'Look at the next region on the map and check what you need to open the road.',art:['skill','exploration']},
  herbalism:{title:'Herbalism',text:'Research a potion recipe in Scholarship, then bring its ingredients here to brew it. Each recipe shows what it makes and what supplies it needs.',towards:'Some potions restore health; others give a useful effect for a limited time. Read the effect before choosing one for your plans.',goal:'Find a potion recipe you can research, gather its ingredients and brew your first batch.',art:['skill','herbalism']},
  enchanting:{title:'Enchanting',text:'Choose an item you own, then use runes and a suitable gem to enchant it. Each rank adds to the item’s equipment bonuses.',towards:'Enchanting improves equipment you want to keep using, rather than replacing it with a different item.',goal:'Start with an item you use regularly and check the cost of its next enchantment.',art:['skill','enchanting']},
  carpentry:{title:'Carpentry',text:'Saw logs into planks, then use those planks to make useful things. Recipes become available as your Carpentry level grows.',towards:'Planks are needed for furniture, village projects, traps and boats.',goal:'To begin Sailing, build a skiff. Its recipe needs twelve ordinary planks and four lengths of string.',art:['skill','carpentry']},
  sailing:{title:'Sailing',text:'Choose an island and send your boat on a voyage. It will return with supplies, then repeat the route while you leave the activity running. Larger boats can reach more distant islands.',towards:'Voyages can supply cloth, gems, seeds and ore. Developing Sailing also improves your Fishing speed.',goal:'A skiff can reach Gull Rock. Try that route first and see what comes back.',art:['skill','sailing']},
- beastmastery:{title:'Beastmastery',text:'Your beasts hatch from eggs at the ranch. You can send an expedition to look for an egg, care for beasts you own and choose one to accompany you.',towards:'An assigned companion gains bond XP when you win fights. Deliberate training uses food and coins, and bonds unlock stronger benefits as they grow.',goal:'Choose a species and a trap at the Trapper, then send your first egg expedition. It returns by itself while you do other things.',art:['skill','beastmastery']}
+ beastmastery:{title:'Beastmastery',text:'Catch animals you have hunted and keep them at your ranch, or hatch the eggs you find while you work and fight. One beast goes with you as your companion.',towards:'Captures pay Beastmastery XP. Your companion gains bond XP when you win fights, and feeding and training grow the bond.',goal:'Hunt a chicken once, then capture one with a wooden trap from Beastmastery → Capture.',art:['skill','beastmastery']}
 });
 Object.assign(lessons,{
  house:{towards:'Your home provides lasting benefits and a place to display things you’ve earned.',title:'Your home',text:'Buy a home, then add rooms and furniture as you gather the materials. Each improvement shows its cost and the benefit it gives you.',goal:'A storage chest is a useful early improvement if you need more backpack space.',art:['skill','woodcutting']},
@@ -21001,13 +21058,13 @@ UI.render=fresh=>{
 (() => {
 const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S, { esc, ico, fmt } = Q;
 if (!Q.mastInfo) return;
-const NODE_SK = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' }, VERB = { fish: 'caught', wood: 'cut', mine: 'mined', thieve: 'picked', recipe: 'made', crop: 'harvested', animal: 'collected', brew: 'brewed', sail: 'voyages', train: 'traps laid', drill: 'drills' };
+const NODE_SK = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' }, VERB = { fish: 'caught', wood: 'cut', mine: 'mined', thieve: 'picked', recipe: 'made', crop: 'harvested', animal: 'collected', brew: 'brewed', sail: 'voyages', train: 'traps laid', drill: 'drills', capture: 'coaxed' };
 const PAGE = { crop: 'farming', animal: 'farming', brew: 'brewery', sail: 'sailing', train: 'beastmastery' };
 const studyQ = m => D.QUESTS.find(q => S().q[q.id] && ['active', 'new'].includes(S().q[q.id].s) && q.obj.some((o, j) => o.ev === 'guide' && o.key === m.id && Q.objProg(q, S().q[q.id], j) < o.n));
 /* ---------- one shape for everything in the book ---------- */
 const creature = m => { const r = Q.research(m), R = D.RESEARCH.ranks, seen = r.rank > 0, sq = studyQ(m), prev = r.rank ? r.T[Math.min(r.rank, r.T.length) - 1] : 0;
   return { key: m.id, kind: 'creature', name: seen || sq ? m.name : '???', known: seen, quest: sq, filled: r.rank, total: R.length, n: r.kills, pct: r.next ? Math.max(0, Math.min(100, (r.kills - prev) / Math.max(1, r.next - prev) * 100)) : 100, left: r.next ? r.need : 0,
-    art: size => Q.monSprite(m, size, seen || sq ? '' : 'sil'), sub: seen ? `Level ${m.cl}${m.boss ? ' boss' : m.mini ? ' challenge' : ''} · ${fmt(r.kills)} defeated` : `${D.TOWN[m.town].name}`,
+    art: size => Q.monSprite(m, size, seen || sq ? '' : 'sil'), sub: m.hl ? (seen ? `Hunting ${m.hl} · ${fmt(r.kills)} caught` : `Hunting ${m.hl}`) : seen ? `Level ${m.cl}${m.boss ? ' boss' : m.mini ? ' challenge' : ''} · ${fmt(r.kills)} defeated` : `${D.TOWN[m.town].name}`,
     ladder: R.map((x, i) => ({ name: x[1], text: x[2], at: r.T[i], done: r.rank > i })), unit: 'defeated', m }; };
 const material = (kind, x, sk, o = {}) => { const m = Q.mastInfo(kind, x.id), lvl = o.lvl != null ? o.lvl : x.lvl, open = ((o.open != null ? o.open : Q.lvl(sk) >= lvl) || m.n > 0) && (kind!=='recipe'||Q.recipeDiscovered(x)), itemId = o.itemId || (kind === 'recipe' ? Object.keys(x.out)[0] : x.item), it = D.ITEMS[itemId], need = kind==='recipe'&&Q.recipeDiscovery(x)?Q.recipeDiscovery(x).reason:o.need || `${D.SK[sk].name} ${lvl}`;
   const art = size => { try { if (o.art) return `<span class="${open ? '' : 'blackout'}">${o.art(size)}</span>`; if (kind === 'wood' || kind === 'mine' || kind === 'thieve') return `<span class="${open ? '' : 'blackout'}">${Q.artImage(kind, x.id, size, open ? '' : 'sil', x.name)}</span>`; } catch (e) {} return `<span aria-hidden="${!open}" class="activity-item-art guide-item ${open ? '' : 'blackout'}" style="--art-size:${size >= 96 ? 64 : size >= 64 ? 48 : 32}px">${it ? Q.itemIco(it) : ico('book')}</span>`; };
@@ -21015,7 +21072,11 @@ const material = (kind, x, sk, o = {}) => { const m = Q.mastInfo(kind, x.id), lv
     sub: `${need}${m.n ? ` · ${fmt(m.n)} ${VERB[kind]}` : ''}`, itemId,
     ladder: Q.ENTRY_NAMES.map((nm, i) => ({ name: nm, text: Q.entryPerk(kind, i + 1), at: D.MASTERY_STEPS[i], done: m.stars > i })), unit: VERB[kind] }; };
 const topics = () => { const t = [];
-  for (const town of D.TOWNS) if (S().towns[town.id] && S().towns[town.id].visited) t.push({ id: 'c:' + town.id, group: 'Creatures', name: town.name, ic: 'attack', items: () => D.MONLIST.filter(m => m.town === town.id && !m.tower).sort((a, b) => a.cl - b.cl).map(creature) });
+  for (const town of D.TOWNS) if (S().towns[town.id] && S().towns[town.id].visited) t.push({ id: 'c:' + town.id, group: 'Creatures', name: town.name, ic: 'attack', items: () => D.MONLIST.filter(m => m.town === town.id && !m.tower && !m.hl).sort((a, b) => a.cl - b.cl).map(creature) });
+  /* animals are on the one hunting ground (26 Nov 2026), so they have one page, by Hunting level; an animal that has
+     left the ground stays here once you have caught one */
+  const animals = () => D.MONLIST.filter(m => m.hl && (Q.animalListed ? Q.animalListed(m) : true)).sort((a, b) => a.hl - b.hl);
+  if (Q.skillUnlocked('hunting') || animals().some(m => S().beast.kills[m.id])) t.push({ id: 'c:hunt', group: 'Creatures', name: 'Hunting ground', ic: 'hunting', items: () => animals().map(creature) });
   for (const [kind, sk] of Object.entries(NODE_SK)) if ((D.NODES[kind] || []).length && Q.skillUnlocked(sk)) t.push({ id: kind, group: 'Gathering', name: D.SK[sk].name, ic: sk, items: () => [...D.NODES[kind]].sort((a, b) => a.lvl - b.lvl).map(x => material(kind, x, sk)) });
   const seen = new Set(); for (const r of Object.values(D.RECIPES)) if (!seen.has(r.skill) && D.SK[r.skill] && Q.skillUnlocked(r.skill)) { seen.add(r.skill); const sk = r.skill; t.push({ id: 'recipe:' + sk, group: 'Making', name: D.SK[sk].name, ic: sk, items: () => Object.values(D.RECIPES).filter(x => x.skill === sk && (!x.secret || (Q.recipeKnown && Q.recipeKnown(x.secret)))).sort((a, b) => a.lvl - b.lvl).map(x => material('recipe', x, sk)) }); }
   /* everything else you repeat: crops, livestock, potions, voyages and trap lines */
@@ -21024,6 +21085,9 @@ const topics = () => { const t = [];
   if (D.POTION_RECIPES && Q.skillUnlocked('herbalism')) t.push({ id: 'brew', group: 'Making', name: 'Potions', ic: 'herbalism', items: () => D.POTION_RECIPES.map(r => material('brew', { id: r.id, name: (D.ITEMS[r.id] || {}).name || r.id }, 'herbalism', { itemId: r.id, lvl: 1, open: !!(Q.canBrew && Q.canBrew(r)), need: 'Research its recipe' })) });
   if (D.VOYAGES && Q.skillUnlocked('sailing')) t.push({ id: 'sail', group: 'Gathering', name: 'Sailing', ic: 'sailing', items: () => [...D.VOYAGES].sort((a, b) => a.lvl - b.lvl).map(v => material('sail', v, 'sailing', { art: size => Q.artImage('skill', 'sailing', Math.min(64, size), '', v.name) })) });
   if (Q.lureLvl && (Q.skillUnlocked('beastmastery')||(Q.fieldAccessLevel&&Q.skillUnlocked('hunting')))) t.push({ id: 'train', group: 'Gathering', name: 'Trap lines', ic: Q.fieldAccessLevel?'hunting':'beastmastery', items: () => D.TOWNS.map(tw => material('train', { id: 'lure:' + tw.id, name: tw.name }, Q.fieldAccessLevel?'hunting':'beastmastery', { lvl: Q.lureLvl(tw.id), open: (Q.fieldAccessLevel?Q.fieldAccessLevel():Q.lvl('beastmastery')) >= Q.lureLvl(tw.id) && !!(S().towns[tw.id] && S().towns[tw.id].visited), art: size => Q.artImage('skill', Q.fieldAccessLevel?'hunting':'beastmastery', Math.min(64, size), '', tw.name) })) });
+  /* Beastmastery captures (beast_capture.js): each animal you have hunted can be coaxed into a live trap */
+  if (Q.KIND_EXT.capture && Q.skillUnlocked('beastmastery')) t.push({ id: 'capture', group: 'Gathering', name: 'Captures', ic: 'beastmastery', items: () => animals().map(m => { const open = (S().beast.kills[m.id] || 0) > 0;
+    return material('capture', { id: m.id, name: m.name, lvl: m.hl }, 'beastmastery', { open, need: open ? `Hunting ${m.hl} animal` : 'Hunt one first', art: size => Q.monSprite(m, Math.min(64, size), open ? '' : 'sil') }); }) });
   /* practice yards (combat_skills.js): one topic per style you have practised or can practise */
   if (D.DRILLS) for (const [st, rows] of Object.entries(D.DRILLS)) t.push({ id: 'drill:' + st, group: 'Practice', name: D.SK[st].name, ic: st, items: () => rows.map(r => material('drill', { id: st + ':' + r.id, name: r.name, lvl: r.lvl }, st, { itemId: r.art })) });
   const order = ['Creatures', 'Gathering', 'Growing', 'Making', 'Practice']; t.sort((x, y) => order.indexOf(x.group) - order.indexOf(y.group));
@@ -21053,7 +21117,7 @@ UI.DO.guidepick = a => { UI.guideSel[UI.guideTopic] = a; UI.render(false); };
 /* older links that named a region still land on it */
 UI.DO.guidetown = id => { UI.guideTopic = 'c:' + id; UI.render(false); };
 /* a material's page takes you to it, selected, like any other route */
-UI.DO.guidemat = (kind, id) => { if (kind === 'drill') { const st = String(id).split(':')[0]; if (UI.DO.styletab) UI.DO.styletab(st, 'drill'); UI.taskChoice[st] = id; return Q.go(st); } if (PAGE[kind]) { if (kind === 'animal' && UI.tab) UI.tab.farmSection = 'livestock'; return Q.go(PAGE[kind]); } const sk = kind === 'recipe' ? D.RECIPES[id].skill : NODE_SK[kind]; if (!sk) return; UI.taskChoice[sk] = id; Q.go(D.SK[sk].page || sk); };
+UI.DO.guidemat = (kind, id) => { if (kind === 'capture' && UI.DO.capturepick) return UI.DO.capturepick(id); if (kind === 'drill') { const st = String(id).split(':')[0]; if (UI.DO.styletab) UI.DO.styletab(st, 'drill'); UI.taskChoice[st] = id; return Q.go(st); } if (PAGE[kind]) { if (kind === 'animal' && UI.tab) UI.tab.farmSection = 'livestock'; return Q.go(PAGE[kind]); } const sk = kind === 'recipe' ? D.RECIPES[id].skill : NODE_SK[kind]; if (!sk) return; UI.taskChoice[sk] = id; Q.go(D.SK[sk].page || sk); };
 /* brewing fills a potion's page; its entries are a chance of a second bottle */
 const brew0 = Q.brew; if (brew0) Q.brew = id => { const ok = brew0(id); if (ok) { Q.mastTick({ kind: 'brew', id }); if (Q.chance(Q.mastExtra('brew', id))) { Q.give(id, 1); Q.toast && Q.toast('A second bottle!'); } } return ok; };
 })();
@@ -22882,16 +22946,20 @@ Q.exploreLead = () => {
   return { k: 'done', title: 'Everything within reach is explored', text: 'Defeat the next boss to open the road onward.', art: ico('trophy'), btn: ['go', 'map', 'World map'] };
 };
 UI.DO.travelto = id => { if (Q.travel) Q.travel(id); };
-/* the atlas splits a town's creatures into those you fight in combat and those you hunt (owner, 26 Nov 2026) */
-const split = r => { const fight = r.creatures.filter(m => !m.hl && !m.tower), hunt = r.creatures.filter(m => m.hl), got = l => l.filter(m => r.found.includes(m)).length;
-  return `Fought ${got(fight)}/${fight.length} · Hunted ${got(hunt)}/${hunt.length}`; };
+/* the atlas splits creatures into those you fight in each town and those you hunt (owner, 26 Nov 2026). Animals are on
+   the one hunting ground, so the hunted count is its own row rather than a share of every town. */
+const split = r => { const fight = r.creatures.filter(m => !m.hl && !m.tower), got = l => l.filter(m => r.found.includes(m)).length;
+  return `Fought ${got(fight)}/${fight.length}`; };
+Q.huntingSummary = () => { const list = D.MONLIST.filter(m => m.hl && (Q.animalListed ? Q.animalListed(m) : true)), found = list.filter(m => (S().beast.kills[m.id] || 0) > 0); return { list, found }; };
+const huntRow = () => { if (!Q.skillUnlocked('hunting') && !Q.huntingSummary().found.length) return ''; const h = Q.huntingSummary(), pct = h.list.length ? h.found.length / h.list.length * 100 : 0;
+  return `<div class="explore-row hunt-ground-row"><b>Hunting ground</b><span class="er-bar"><span class="bar"><i style="width:${pct}%"></i></span></span><small>Hunted ${h.found.length}/${h.list.length} · all tiers</small></div>`; };
 const explore0 = UI.V.exploration;
 UI.V.exploration = () => {
   const lead = Q.exploreLead(), visited = D.TOWNS.filter(t => S().towns[t.id]?.visited).length;
   const leadHtml = `<section class="panel explore-lead"><div class="el-art">${lead.art}</div><div class="el-body"><span class="k">Next worthwhile discovery</span><h2>${esc(lead.title)}</h2><p>${esc(lead.text)}</p><div class="btnrow"><button class="btn primary" data-do="${lead.btn[0]}" data-a="${esc(lead.btn[1])}">${esc(lead.btn[2])}</button></div></div></section>`;
   const unseenTowns = D.TOWNS.filter(t => !S().towns[t.id]?.visited).length; const rows = D.TOWNS.filter(t => S().towns[t.id]?.visited).map(t => { const r = Q.explorationSummary(t.id), pct = r.creatures.length ? r.found.length / r.creatures.length * 100 : 0;
     return `<div class="explore-row ${r.visited ? '' : 'unseen'} ${t.id === S().town ? 'here' : ''}"><b>${r.visited ? esc(t.name) : '???'}</b><span class="er-bar"><span class="bar"><i style="width:${pct}%"></i></span></span><small>${r.visited ? `${split(r)} · ${r.completed.length}/${r.quests.length} quests${r.boss ? ' · boss ✓' : ''}` : 'Not visited'}</small></div>`; }).join('');
-  const table = `<section class="panel explore-table"><div class="phead"><h2>Realm progress</h2><small>${visited}/${D.TOWNS.length} towns visited</small></div><div class="explore-rows">${rows}</div>${unseenTowns ? `<p class="sm dim">${unseenTowns} more ${unseenTowns > 1 ? 'regions lie' : 'region lies'} beyond the road.</p>` : ''}<div class="btnrow"><button class="btn" data-do="go" data-a="map">World map</button></div></section>`;
+  const table = `<section class="panel explore-table"><div class="phead"><h2>Realm progress</h2><small>${visited}/${D.TOWNS.length} towns visited</small></div><div class="explore-rows">${rows}${huntRow()}</div>${unseenTowns ? `<p class="sm dim">${unseenTowns} more ${unseenTowns > 1 ? 'regions lie' : 'region lies'} beyond the road.</p>` : ''}<div class="btnrow"><button class="btn" data-do="go" data-a="map">World map</button></div></section>`;
   return `${hero('exploration')}<div class="explore-page">${leadHtml}${table}</div>${UI.discoveriesPanel ? UI.discoveriesPanel() : ''}`;
 };
 })();
@@ -23033,11 +23101,12 @@ const MAX = 10, page0 = UI.V.beastmastery;
 const phone = () => innerWidth <= 860, tight = () => /\b(short|lw-1600)\b/.test(document.documentElement.className) && !phone();
 const K = () => phone() ? 2 : (innerHeight / (Q.zoom || 1) >= 900 ? 3 : 2), PER = () => phone() ? 1 : 6; /* whole-number pen scale: 3x when the window is tall enough for two rows, else 2x */
 UI.beastPenPage = 0; UI.beastFood = null;
-const view = () => UI.beastMode === 'field' ? 'field' : (UI.beastMode === 'capture' || UI.beastMode === 'shed') ? 'shed' : 'ranch';
+/* two tabs since 26 Nov 2026: the ranch, and Capture (beast_capture.js), which replaced the Trapper's expeditions */
+const view = () => UI.beastMode === 'field' ? 'field' : (UI.beastMode === 'capture' || UI.beastMode === 'shed') ? (UI.captureView ? 'capture' : 'shed') : 'ranch';
 const owned = () => D.PETS.filter(p => S().pets.owned[p.id]);
 const foodsHeld = () => (Q.foods ? Q.foods() : []).filter(id => Q.have(id) > 0 && D.ITEMS[id] && D.ITEMS[id].heal > 0);
 const chosenFood = () => { const f = foodsHeld(); if (UI.beastFood && f.includes(UI.beastFood) && Q.have(UI.beastFood) >= 2) return UI.beastFood; return f.find(id => Q.have(id) >= 2) || f[0] || null; };
-const tabs = v => `<div class="beast-tabs btnrow ranch-tabs" role="tablist">${[['ranch', 'Ranch · beasts and eggs'], ['shed', 'Trapper · send for an egg'], ['field', 'Wooden traps · search a region']].map(([k, l]) => `<button class="btn ${v === k ? 'on' : ''}" role="tab" aria-selected="${v === k}" data-do="beastmode" data-a="${k}">${l}</button>`).join('')}</div>`;
+const tabs = v => `<div class="beast-tabs btnrow ranch-tabs" role="tablist">${(UI.captureView ? [['ranch', 'Ranch · beasts and eggs'], ['capture', 'Capture · catch an animal']] : [['ranch', 'Ranch · beasts and eggs'], ['shed', 'Trapper · send for an egg'], ['field', 'Wooden traps · search a region']]).map(([k, l]) => `<button class="btn ${v === k ? 'on' : ''}" role="tab" aria-selected="${v === k}" data-do="beastmode" data-a="${k}">${l}</button>`).join('')}</div>`;
 const stateOf = id => { const t = Q.beastTraining(id, chosenFood()), o = S().pets.owned[id];
   if (Q.petLevel(id) >= MAX) return { k: 'max', text: 'Fully bonded', t };
   if (t.left > 0) return { k: 'nap', until: o.trainingUntil, t };
@@ -23056,7 +23125,7 @@ const penHtml = (p, k, sel) => {
       ${st.k === 'ready' ? `<span class="pen-want" aria-hidden="true">♥</span>` : ''}
       <span class="pen-bond"><b>Bond ${lv}</b><span class="bar"><i style="width:${pct}%"></i></span></span></button>
     <div class="pen-name"><b>${esc(o.evolved && Q.beastSpec(id) ? Q.beastSpec(id).evolution : p.name)}</b><small class="ps-${st.k}">${note}</small></div></div>`; };
-const emptyPen = k => `<div class="pen-cell"><button class="pen empty" data-do="beastmode" data-a="shed" style="--k:${k};width:${96 * k}px;height:${64 * k}px" aria-label="Empty pen. Hatch an egg to fill it."><img class="pen-back" src="${A.penBackUrl('empty', '#9a9a9a')}" width="${96 * k}" height="${64 * k}" alt="" draggable="false"><img class="pen-front" src="${A.penFrontUrl()}" width="${96 * k}" height="${64 * k}" alt="" draggable="false"><span class="pen-sign">Empty pen<small>Hatch an egg to fill it</small></span></button></div>`;
+const emptyPen = k => `<div class="pen-cell"><button class="pen empty" data-do="beastmode" data-a="${UI.captureView ? 'capture' : 'shed'}" style="--k:${k};width:${96 * k}px;height:${64 * k}px" aria-label="Empty pen. ${UI.captureView ? 'Capture an animal or hatch an egg' : 'Hatch an egg'} to fill it."><img class="pen-back" src="${A.penBackUrl('empty', '#9a9a9a')}" width="${96 * k}" height="${64 * k}" alt="" draggable="false"><img class="pen-front" src="${A.penFrontUrl()}" width="${96 * k}" height="${64 * k}" alt="" draggable="false"><span class="pen-sign">Empty pen<small>${UI.captureView ? 'Catch or hatch a beast' : 'Hatch an egg to fill it'}</small></span></button></div>`;
 const shelf = () => { const f = foodsHeld(), cur = chosenFood();
   const tiles = f.length ? f.map(id => { const it = D.ITEMS[id]; return `<button class="shelf-food ${id === cur ? 'on' : ''}" data-do="beastfood" data-a="${id}" aria-pressed="${id === cur}" data-tip="item:${id}">${Q.itemIco(it)}<span><b>${esc(it.name)}</b><small>×${fmt(Q.have(id))} · +${it.heal}</small></span></button>`; }).join('')
     : `<span class="shelf-none">The shelf is bare. Cook fish in Cooking, or buy bread at the shop: each session uses 2 cooked food.</span>`;
@@ -23072,7 +23141,10 @@ const sheet = id => { const p = D.PET[id], o = S().pets.owned[id], lv = Q.petLev
     <div class="beast-milestones">${D.BOND_MILESTONES.map(n => `<span class="tag ${lv >= n ? 'ok' : ''}" data-tip="text:Bond ${n}: ${n === 10 ? 'evolves · final upgrade' : 'passive upgrade'}">${lv >= n ? '✓' : '◇'} ${n}</span>`).join('')}</div>
     <p class="sm dim rs-cost">${lv >= MAX ? 'This bond is complete.' : `${t.coins} coins + 2 ${esc(foodName)} → +${t.xp} bond XP · 45 min nap`}</p>
     <div class="btnrow wrap"><button class="btn primary" data-do="beastfeed" data-a="${id}" ${t.ok ? '' : 'disabled'}>${t.ok ? `Feed & train · +${t.xp} bond XP` : esc(t.reason)}</button>${active ? `<span class="rs-with">★ Companion</span>` : `<button class="btn" data-do="setpet" data-a="${id}">Make companion</button>`}</div></section>`; };
-const shedTeaser = () => { const j = S().pets.expedition; return `<section class="panel ranch-shedcard"><span class="k">Trapper</span><p>${j ? `<b>Trap out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'No trap is out. Send one and it brings back an egg.'}</p><button class="btn" data-do="beastmode" data-a="shed">Open the shed</button><button class="linkish ranch-eggs-link" data-do="eggways">Where do eggs come from?</button></section>`; };
+const shedTeaser = () => { const j = S().pets.expedition;
+  /* captures replaced the Trapper (26 Nov 2026); an expedition sent before then still comes back by itself */
+  if (UI.captureView) return `<section class="panel ranch-shedcard"><span class="k">Capture</span><p>${j && D.PET[j.species] ? `<b>An old trap is out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'Catch an animal you have hunted and keep it.'}</p><button class="btn" data-do="beastmode" data-a="capture">Capture an animal</button><button class="linkish ranch-eggs-link" data-do="eggways">Where do eggs come from?</button></section>`;
+  return `<section class="panel ranch-shedcard"><span class="k">Trapper</span><p>${j ? `<b>Trap out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'No trap is out. Send one and it brings back an egg.'}</p><button class="btn" data-do="beastmode" data-a="shed">Open the shed</button><button class="linkish ranch-eggs-link" data-do="eggways">Where do eggs come from?</button></section>`; };
 const ranch = () => {
   const list = owned(), k = K(), per = PER(), pages = Math.max(1, Math.ceil(list.length / per)); UI.beastPenPage = Math.min(UI.beastPenPage, pages - 1);
   const sel = list.find(p => p.id === UI.beastSelected) || list.find(p => p.id === S().pets.active) || list[0];
@@ -23080,17 +23152,19 @@ const ranch = () => {
   const cells = slice.map(p => penHtml(p, k, sel && p.id === sel.id)).join('') + (phone() ? '' : Array.from({ length: Math.max(0, per - slice.length) }, () => emptyPen(k)).join(''));
   const nav = pages > 1 ? `<div class="pen-pages" role="group" aria-label="Pens">${Array.from({ length: pages }, (_, i) => `<button class="btn sm ${i === UI.beastPenPage ? 'on' : ''}" data-do="beastpenpage" data-a="${i}">${phone() ? (i + 1) + ' of ' + pages : i + 1}</button>`).join('')}</div>` : '';
   const board = `<section class="ranch-board" style="--k:${k}"><div class="ranch-strip" style="background-image:url(${A.ranchStripUrl()});--k:${k}" role="img" aria-label="Your ranch"><h2 class="ranch-sign">Your ranch</h2></div>
-    ${list.length ? `<div class="pen-grid">${cells}</div>${nav}` : `<div class="ranch-empty"><p><b>The pens are empty.</b> Every beast starts as an egg. Send a trap from the shed to bring home your first.</p><button class="btn primary" data-do="beastmode" data-a="shed">Open the Trapper's shed</button></div>`}${list.length ? shelf() : ''}</section>`;
+    ${list.length ? `<div class="pen-grid">${cells}</div>${nav}` : UI.captureView ? `<div class="ranch-empty"><p><b>The pens are empty.</b> Catch an animal you have hunted, or find an egg while you work and fight.</p><button class="btn primary" data-do="beastmode" data-a="capture">Capture an animal</button></div>` : `<div class="ranch-empty"><p><b>The pens are empty.</b> Every beast starts as an egg. Send a trap from the shed to bring home your first.</p><button class="btn primary" data-do="beastmode" data-a="shed">Open the Trapper's shed</button></div>`}${list.length ? shelf() : ''}</section>`;
   return `<div class="ranch-layout"><div class="ranch-main">${board}</div><div class="ranch-side">${sel ? sheet(sel.id) : ''}${shedTeaser()}</div></div>`; };
 UI.V.beastmastery = () => {
   if (!Q.skillUnlocked('beastmastery')) return page0();
   const v = view(); let h;
   if (v === 'ranch') h = ranch();
+  /* the capture workspace sits directly in the view, like Hunting's, so only its list of animals scrolls */
+  else if (v === 'capture') h = UI.captureView();
   else { const keep = UI.beastMode; UI.beastMode = v === 'shed' ? 'beasts' : 'field'; try { h = page0(); } finally { UI.beastMode = keep; } h = `<div class="beast-subpage mode-${v}">${h.replace(/<div class="beast-tabs[^>]*>[\s\S]*?<\/div>/, '')}</div>`; }
   return tabs(v) + h; };
 UI.DO.beastfood = id => { UI.beastFood = id; UI.render(false); };
 UI.DO.beastpenpage = i => { UI.beastPenPage = Math.max(0, +i || 0); UI.render(false); };
-const mode0 = UI.DO.beastmode; UI.DO.beastmode = a => { UI.beastMode = a === 'ranch' ? 'beasts' : a; if (mode0 && !['ranch', 'shed', 'field'].includes(a)) return mode0(a); UI.render(false); };
+const mode0 = UI.DO.beastmode; UI.DO.beastmode = a => { if (a === 'shed' && UI.captureView) a = 'capture'; UI.beastMode = a === 'ranch' ? 'beasts' : a; if (mode0 && !['ranch', 'shed', 'field'].includes(a)) return mode0(a); UI.render(false); };
 const sel0 = UI.DO.beastselect; UI.DO.beastselect = a => { UI.beastSelected = a; const i = owned().findIndex(p => p.id === a); if (i >= 0) UI.beastPenPage = Math.floor(i / PER()); UI.beastMode = view() === 'ranch' ? UI.beastMode : 'beasts'; UI.render(false); };
 /* feeding: the food flies from the shelf to the bowl, the beast hops the hurdle, hearts and the bond XP rise */
 const calm = () => !!(S().settings.reduceFx || document.documentElement.classList.contains('calm') || (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches));
@@ -23192,8 +23266,9 @@ const page0 = UI.V.beastmastery;
 if (page0) UI.V.beastmastery = () => { const h = page0(); const eggs = UI.hatcheryHtml(); if (!eggs) return h;
   return h.includes('class="ranch-side">') ? h.replace('class="ranch-side">', 'class="ranch-side">' + eggs) : h; };
 /* one plain explanation of the three ways, as a pop-up (reference, not an action) and above the two finding pages */
-const WAYS = [['Lucky finds', 'Rare drop from any skill, harvest or boss. Odds: Guide → Collection.'], ['The trapper', 'Paid trap, back in 1–4 hours with an egg or tracks. Runs alongside your task.'], ['Wooden traps', 'A task: loot, Beastmastery XP and a chance at the region’s wild egg.']];
-UI.DO.eggways = () => Q.modal({ title: 'Where eggs come from', body: `<div class="egg-ways">${WAYS.map(([t, d], i) => `<div class="egg-way"><b>${i + 1}. ${t}</b><p>${d}</p></div>`).join('')}<p class="sm dim">Hatch times: wild 10 min · speckled 30 min · royal 1 hour.</p></div>`, actions: [{ label: 'Open the collection log', fn: () => { UI.colTab = 'eggs'; Q.go('collection'); } }, { label: 'Close', primary: true }] });
+/* captures replaced the Trapper (owner, 26 Nov 2026, beast_capture.js) */
+const WAYS = [['Lucky finds', 'Rare egg from any skill or fight: 1 in 2,000 actions, 1 in 500 victories. Odds: Guide → Collection.'], ['Capture', 'Catch an animal you have hunted in Beastmastery → Capture. No egg: it goes straight to your pens.'], ['Fieldwork and fights', 'Each region’s wild beast can leave an egg in a wooden trap or after a victory.']];
+UI.DO.eggways = () => Q.modal({ title: 'Where beasts come from', body:`<div class="egg-ways">${WAYS.map(([t, d], i) => `<div class="egg-way"><b>${i + 1}. ${t}</b><p>${d}</p></div>`).join('')}<p class="sm dim">Hatch times: wild 10 min · speckled 30 min · royal 1 hour.</p></div>`, actions: [{ label: 'Open the collection log', fn: () => { UI.colTab = 'eggs'; Q.go('collection'); } }, { label: 'Close', primary: true }] });
 /* the rail count for Beastmastery never counted eggs before; a waiting egg is not an action, so it still does not */
 })();
 
@@ -23220,9 +23295,10 @@ Q.petOdds = id => { const p = D.PET[id], s = p.src || {}, spec = (D.BEAST_SPECIE
 const meter = (tries, p) => { const exp = Math.max(1, Math.round(1 / p)), pct = Math.min(100, Math.round(tries / exp * 100)); return `<span class="col-meter ${tries > exp ? 'over' : ''}"><span class="bar"><i style="width:${pct}%"></i></span></span>`; };
 const petRow = p => { const own = S().pets.owned[p.id], egg = Q.eggOf && Q.eggOf(p.id), o = Q.petOdds(p.id), kind = Q.eggKind ? Q.eggKind(p.id) : { name: 'Egg' };
   const art = own ? Q.petSprite(p, 48) : `<span class="${egg ? 'egg-wobble' : 'col-unk'}">${Q.eggImg ? Q.eggImg(p.id, 48) : ''}</span>`;
-  const state = own ? `<span class="tag ok">✓ Hatched</span>` : egg ? `<span class="tag warn">In the hatchery · <span data-beast-due="${egg.due}">${Q.fmtTime(Math.max(0, egg.due - Date.now()))}</span></span>` : '';
-  const odds = o.price ? `${fmt(o.price)} coins` : o.trap ? `${o.tracks}/5 tracks` : o.p ? `${oneIn(o.p)} per ${o.per}` : '';
-  const tries = !own && !egg && o.p ? `<small class="col-tries"><b class="mono">${fmt(o.tries)}</b> ${o.unit} so far${meter(o.tries, o.p)}</small>` : '';
+  const state = own ? `<span class="tag ok">✓ ${own.caught ? 'Caught' : 'Hatched'}</span>` : egg ? `<span class="tag warn">In the hatchery · <span data-beast-due="${egg.due}">${Q.fmtTime(Math.max(0, egg.due - Date.now()))}</span></span>` : '';
+  /* a lucky-find egg (beast_capture.js) has two odds, per action and per fight; a capture shows its chance per try */
+  const odds = o.price ? `${fmt(o.price)} coins` : o.luck ? (o.p ? `${oneIn(o.p)} per action · ${oneIn(o.kill)} per fight` : '') : o.per === 'try' && o.p ? `${Math.round(o.p * 100)}% per try` : o.trap ? `${o.tracks}/5 tracks` : o.p ? `${oneIn(o.p)} per ${o.per}` : '';
+  const tries = !own && !egg && o.p && !o.luck ?`<small class="col-tries"><b class="mono">${fmt(o.tries)}</b> ${o.unit} so far${meter(o.tries, o.p)}</small>` : '';
   return `<article class="col-row ${own ? 'got' : egg ? 'egg' : ''}" style="--c:${p.col}"><span class="col-art">${art}</span><div class="col-t"><b>${own ? esc(p.name) : esc(kind.name)}</b><small>${own ? esc(p.text) : esc(o.where)}</small></div><div class="col-o">${state || `<b>${odds}</b>`}${tries}</div></article>`; };
 const dropRows = () => { const out = [];
   for (const m of D.MONLIST.filter(m => (m.boss || m.mini) && !m.tower).sort((a, b) => a.cl - b.cl)) { const kills = S().beast.kills[m.id] || 0, met = kills > 0 || Q.combatLvl() >= (m.boss || m.mini).req;
@@ -23237,7 +23313,7 @@ UI.V.collection = () => { const pets = Q.collectiblePets ? Q.collectiblePets() :
   const body = tab === 'eggs' ? `<p class="col-note">Bar: your tries against the average needed.</p><div class="col-list">${pets.slice().sort((a, b) => order(a) - order(b)).map(petRow).join('')}</div>`
     : tab === 'drops' ? `<div class="col-list">${dropRows()}</div>`
     : `<div class="col-list">${workRows()}</div>`;
-  return `<section class="panel shophead col-head"><div><span class="k">Collection log</span><h2>${own} of ${pets.length} beasts hatched</h2></div><div class="tabs">${[['eggs', 'Beast eggs'], ['drops', 'Rare drops'], ['work', 'Lucky finds']].map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="coltab" data-a="${k}">${n}</button>`).join('')}</div></section><section class="panel col-panel">${body}</section>`; };
+  return `<section class="panel shophead col-head"><div><span class="k">Collection log</span><h2>${own} of ${pets.length} beasts at your ranch</h2></div><div class="tabs">${[['eggs', 'Beast eggs'], ['drops', 'Rare drops'], ['work', 'Lucky finds']].map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="coltab" data-a="${k}">${n}</button>`).join('')}</div></section><section class="panel col-panel">${body}</section>`; };
 UI.DO.coltab = a => { UI.colTab = a; UI.render(false); };
 })();
 
@@ -24971,7 +25047,7 @@ Q.itemNavigation=id=>{
  }
  if(Object.values(D.SHOPS).some(s=>s.includes(id)))add(get,'shop','shop','shop',id,'Shop',ico('shop'));
  if(!Q.exclusiveLoot(id)&&(Object.values(D.TOWN_RARE_GEAR).some(s=>s.includes(id))||Object.values(D.TOWN_SPECIALS).some(s=>s.includes(id))))add(get,'rare','shop','rare',id,'Rare wares',ico('shop'));
- for(const m of D.MONLIST)if(m.first===id||m.drops?.some(d=>d[0]===id)){
+ for(const m of D.MONLIST)if((!m.hl||m.ground)&&(m.first===id||m.drops?.some(d=>d[0]===id))){/* animals off the one hunting ground (26 Nov 2026) are no source */
   const known=(Q.S.beast.kills[m.id]||0)>0,group=m.boss?'boss':m.tower?'tower':'creature';
   add(get,group,'combat','creature',m.id,known?m.name:(m.boss?'Boss reward':'Creature drop'),known?Q.monSprite(m,32):ico(m.boss?'trophy':'paw'));
  }
@@ -25816,7 +25892,9 @@ Q.on('act', () => UI.renderRail && UI.renderRail());
 <script>
 /* Idlewick: hunting is its own activity, not a fight (owner, 23 Nov 2026: "it's not a fight, it's about tracking,
    laying the trap and then quickly killing. Sometimes we shouldn't successfully kill them and so we go back to hunting").
-   Hunting → Hunting ground: choose an animal from your town's hunting ground. Each hunt is one repeating task in three
+   Hunting → Hunting ground: one ground for the whole world (owner, 26 Nov 2026), five tier tabs, ten animals in each
+   (D.HUNT_GROUND); what you can hunt depends on your Hunting level and the tier's kit, never on the town you are in.
+   Choose an animal and hunt it. Each hunt is one repeating task in three
    steps: Tracking, Setting the trap, Strike. The strike lands or the animal slips away; either way the next hunt starts
    with tracking again. It uses DQ.KIND_EXT (kind 'hunt', id = creature id), so offline work, the queue and the Now card
    work as for any other task.
@@ -25849,7 +25927,6 @@ const tierOf = m => D.HUNT_TIERS ? D.HUNT_TIERS[m.tier ?? D.huntTierOf(m.hl)] : 
 Q.huntTierOf = id => { const m = animal(id); return m ? tierOf(m) : null; };
 /* any active quest that wants this animal, in any town: such hunts never need the level or the kit */
 Q.questWantsAnimal = id => Q.questWantsKill(id);
-const reached = town => !!(S().towns[town] && S().towns[town].visited);
 /* what stands between you and this hunt, as one short reason, or '' */
 Q.huntKitNeed = id => { const m = animal(id), T = m && tierOf(m); if (!T || Q.questWantsAnimal(id)) return '';
   if (T.trap && !Q.have(T.trap)) return `Needs ${D.ITEMS[T.trap].name}`;
@@ -25865,8 +25942,9 @@ Q.KIND_EXT.hunt = {
   label: a => { const m = animal(a.id), s = Q.huntStep(a); return m ? `${s ? s[0] : 'Hunting'}: ${(S().beast.kills[m.id] || 0) > 0 ? m.name.toLowerCase() : 'unknown quarry'}` : 'Hunting'; },
   dur: id => Q.huntDur(id),
   check: id => { const m = animal(id); if (!m) return 'Choose an animal'; if (!Q.skillUnlocked('hunting')) return 'Learn Hunting first';
-    /* every hunting ground can be worked from anywhere once you have reached its town */
-    const g = areaOf(id), wanted = Q.questWantsAnimal(id); if (!reached(g.town) && !wanted) return `Reach ${D.TOWN[g.town].name} first`;
+    /* one hunting ground for every town (owner, 26 Nov 2026): no travelling, only the Hunting level and the tier's kit.
+       An animal that is no longer on the ground can still be hunted while a quest asks for it. */
+    const wanted = Q.questWantsAnimal(id); if (!m.ground && !wanted) return 'Not on the hunting ground';
     if (Q.huntLevel() < m.hl && !wanted && !(Q.canHunt && Q.canHunt(m) && Q.questHuntTarget && Q.questHuntTarget() === id)) return `Requires Hunting ${m.hl}`;
     return Q.huntKitNeed(id); },
   done: a => { const m = animal(a.id); if (!m) return Q.stopAct(false, 'That animal is not here.');
@@ -25901,11 +25979,12 @@ const start0 = Q.startHunt;
 Q.startHunt = (areaId, target = null, forQuest = false) => {
   const area = Object.values(D.AREAS).flat().find(a => a.id === areaId);
   /* before Hunting is learned, a quest's animal can still be fought the old way, so the quest stays reachable */
-  if (area && area.hunt && Q.skillUnlocked('hunting')) { const id = target && animal(target) ? target : (area.monsters.find(e => Q.canHunt(D.MON[e.id])) || {}).id; if (!id) return false;
+  /* with no target, the best animal on the one ground you can hunt right now */
+  if (area && area.hunt && Q.skillUnlocked('hunting')) { const id = target && animal(target) ? target : [...(D.HUNT_GROUND || [])].reverse().find(k => !Q.KIND_EXT.hunt.check(k)); if (!id) return false;
     pick(id); return Q.startAct('hunt', id); }
   return start0(areaId, target, forQuest);
 };
-const pick = id => { const m = animal(id); if (!m) return; UI.huntMode = 'ground'; UI.huntGroundAt = areaOf(id).town; UI.huntTier = m.tier ?? D.huntTierOf(m.hl); UI.taskChoice.hunting = id; };
+const pick = id => { const m = animal(id); if (!m) return; UI.huntMode = 'ground'; UI.huntTier = m.tier ?? D.huntTierOf(m.hl); UI.taskChoice.hunting = id; };
 const openHunting = () => UI.view === 'hunting' ? UI.render(false) : Q.go('hunting');
 const huntAnimal = id => { if (!animal(id) || !Q.skillUnlocked('hunting')) return false; UI.DO.huntground(id); return true; };
 UI.DO.huntground = id => { if (!Q.skillUnlocked('hunting')) return Q.go('hunting'); UI.huntMode = 'ground'; if (id && animal(id)) pick(id); openHunting(); };
@@ -25919,7 +25998,11 @@ Q.resumeAfterLoad = (...args) => {
   if (a?.kind === 'fight' && animal(a.id) && Q.skillUnlocked('hunting')) {
     S().act = { ...a, kind: 'hunt', progress: 0 };
   }
-  return resume0(...args);
+  /* a hunt saved before the ground was made one (26 Nov 2026) for an animal no longer listed stops with a note */
+  const b = S().act, gone = b && b.kind === 'hunt' && animal(b.id) && !D.MON[b.id].ground && !Q.questWantsAnimal(b.id);
+  const r = resume0(...args);
+  if (gone && !Q.act && Q.log) Q.log(`The ${(S().beast.kills[b.id] || 0) > 0 ? D.MON[b.id].name.toLowerCase() : 'animal'} you were hunting is no longer on the hunting ground, so that hunt has stopped. Pick another from Hunting.`);
+  return r;
 };
 UI.focusHuntingActivity = a => {
   if (a.kind === 'hunt') pick(a.id);
@@ -25935,36 +26018,37 @@ const cw0 = UI.DO.cwtab; if (cw0) UI.DO.cwtab = t => t === 'hunt' ? UI.DO.huntgr
 /* ---------- the Hunting page: Hunting ground | Fieldwork ---------- */
 const field0 = UI.V.hunting;
 UI.DO.huntmode = mode => { UI.huntMode = mode === 'field' ? 'field' : 'ground'; UI.render(false); };
-/* every hunting ground, from any town (owner, 23 Nov 2026): a row of grounds, then the five tiers, then that tier's animals */
-const grounds = () => D.TOWNS.map(t => Q.huntGround ? Q.huntGround(t.id) : null).filter(Boolean);
+/* one hunting ground with five tier tabs (owner, 26 Nov 2026: "get rid of there being different towns for each ... Just
+   have the different tiers"). Which tier opens first follows your Hunting level. */
 const defaultTier = () => { const L = Q.huntLevel(); let t = 0; D.HUNT_TIERS.forEach((T, i) => { if (L >= T.lo) t = i; }); return t; };
-UI.DO.huntgroundat = town => { UI.huntGroundAt = town; UI.render(false); };
+/* the animals listed in a tier: the ground's own, plus any other animal an active quest still asks for */
+Q.groundTier = i => { const ids = (D.HUNT_GROUND || []).filter(id => D.MON[id].tier === i);
+  for (const m of D.MONLIST) if (m.hl && !m.ground && m.tier === i && animal(m.id) && Q.questWantsAnimal(m.id) && !ids.includes(m.id)) ids.push(m.id);
+  return ids.map(id => D.MON[id]).sort((a, b) => a.hl - b.hl); };
 UI.DO.hunttier = i => { UI.huntTier = Math.max(0, Math.min(4, +i || 0)); UI.render(false); };
-UI.DO.huntkit = id => { const r = D.RECIPES['craft_' + id] || D.RECIPES['cook_' + id]; if (!r) return; UI.returnTo = { page: 'hunting', label: 'Hunting' }; UI.focusTask(r.skill, r.id, r.tab, r.skill); };
+UI.DO.huntkit = id => { const r = D.RECIPES['craft_' + id] || D.RECIPES['cook_' + id]; if (!r) return; const bm = UI.view === 'beastmastery'; UI.returnTo = { page: bm ? 'beastmastery' : 'hunting', label: bm ? 'Beastmastery' : 'Hunting' }; UI.focusTask(r.skill, r.id, r.tab, r.skill); };
 /* kit counts update live while you hunt (owner, 26 Nov 2026: "need to be able to see how many traps I have left") */
 const part = id => { const n = Q.have(id), it = D.ITEMS[id]; return `<button type="button" class="hunt-kit-item ${n ? 'ok' : 'miss'}" data-do="huntkit" data-a="${id}" data-tip="item:${id}" aria-label="${esc(it.name)}: ${n} held, make more">${Q.itemIco(it)}<span>${esc(it.name)}</span><b class="mono" data-b="count:${id}">${n}</b></button>`; };
+UI.huntKitPart = part;
+/* the five tier tabs, shared with Beastmastery's Capture tab (beast_capture.js) */
+UI.huntTierTabs = (cur, action, level) => `<nav class="hunt-tiers btnrow" role="tablist" aria-label="Tiers">${D.HUNT_TIERS.map((t, i) => { const on = i === cur, open = level >= t.lo;
+  return `<button type="button" class="btn sm ${on ? 'on' : ''}" role="tab" aria-selected="${on}" data-do="${action}" data-a="${i}">${open ? '' : ico('lock')}${esc(t.name)}<small class="mono">${t.lo}–${t.hi}</small></button>`; }).join('')}</nav>`;
 const kitLine = T => { if (!T || (!T.trap && !T.bait)) return D.ITEMS.wooden_trap ? `<div class="hunt-kit"><span class="k">Kit</span>${part('wooden_trap')}<small class="dim">Optional: a wooden trap helps the strike.</small></div>` : `<p class="hunt-kit dim">No kit needed.</p>`;
   return `<div class="hunt-kit"><span class="k">${esc(T.name)} kit</span>${part(T.trap)}${part(T.bait)}<small class="dim">Trap is kept; one bait per hunt.</small></div>`; };
 const groundPage = () => {
-  const all = grounds(); if (!all.length) return `<section class="panel empty"><p>No hunting grounds.</p></section>`;
-  if (!all.some(g => g.town === UI.huntGroundAt)) UI.huntGroundAt = S().town;
   if (UI.huntTier === undefined) UI.huntTier = defaultTier();
-  const g = all.find(x => x.town === UI.huntGroundAt) || all[0], T = D.HUNT_TIERS[UI.huntTier], L = Q.huntLevel(), here = reached(g.town);
-  const gtabs = `<nav class="hunt-grounds btnrow" role="tablist" aria-label="Hunting grounds">${all.map(x => { const ok = reached(x.town), on = x.town === g.town;
-    return `<button type="button" class="btn sm ${on ? 'on' : ''} ${ok ? '' : 'locked'}" role="tab" aria-selected="${on}" data-do="huntgroundat" data-a="${x.town}" data-tip="text:${esc(x.name)} · ${esc(D.TOWN[x.town].name)}${ok ? '' : ' · reach it first'}">${ok ? '' : ico('lock')}<span>${esc(x.name)}</span><small>${esc(D.TOWN[x.town].name)}</small></button>`; }).join('')}</nav>`;
-  const ttabs = `<nav class="hunt-tiers btnrow" role="tablist" aria-label="Tiers">${D.HUNT_TIERS.map((t, i) => { const on = i === UI.huntTier, open = L >= t.lo;
-    return `<button type="button" class="btn sm ${on ? 'on' : ''}" role="tab" aria-selected="${on}" data-do="hunttier" data-a="${i}">${open ? '' : ico('lock')}${esc(t.name)}<small class="mono">${t.lo}–${t.hi}</small></button>`; }).join('')}</nav>`;
-  const list = g.monsters.map(e => D.MON[e.id]).filter(m => m && (m.tier ?? D.huntTierOf(m.hl)) === UI.huntTier);
-  const choices = list.map(m => { const id = m.id, known = (S().beast.kills[id] || 0) > 0, wanted = Q.questWantsAnimal(id), lvlOk = L >= m.hl || wanted, open = (here || wanted) && lvlOk, need = open ? Q.huntKitNeed(id) : '', pct = Math.round(Q.huntCatch(id) * 100);
+  const T = D.HUNT_TIERS[UI.huntTier], L = Q.huntLevel();
+  const ttabs = UI.huntTierTabs(UI.huntTier, 'hunttier', L);
+  const choices = Q.groundTier(UI.huntTier).map(m => { const id = m.id, known = (S().beast.kills[id] || 0) > 0, wanted = Q.questWantsAnimal(id), open = L >= m.hl || wanted, need = open ? Q.huntKitNeed(id) : '', pct = Math.round(Q.huntCatch(id) * 100);
     const drops = (m.drops || []).map(d => d[0]).filter((k, i, a) => D.ITEMS[k] && a.indexOf(k) === i && Q.itemDiscovered(k));
-    const why = !here && !wanted ? `Reach ${D.TOWN[g.town].name}` : !lvlOk ? `Requires Hunting ${m.hl}` : need;
+    const why = !open ? `Requires Hunting ${m.hl}` : need;
     /* an animal you have not caught yet stays ??? (UI rules: unmet creatures are never named) */
-    return { id, name: known ? m.name : '???', artKind: 'creature', artId: id, yieldId: null, locked: !open, revealed: false, blocked: !open || !!need, reason: why, short: !open ? (!here && !wanted ? `Lv ${m.hl} · Reach ${D.TOWN[g.town].name}` : 'Lv ' + m.hl) : '',
+    return { id, name: known ? m.name : '???', artKind: 'creature', artId: id, yieldId: null, locked: !open, revealed: false, blocked: !open || !!need, reason: why, short: !open ? 'Lv ' + m.hl : '',
       caption: `Hunting ${m.hl}${wanted ? ' · Quest' : ''}`, stateText: !open ? 'Locked' : need ? need.replace(/^Needs /, 'No ') : `${pct}% catch`,
       info: `<div class="hunt-steps">${D.HUNT_STEPS.map(s => `<span>${ico(s[2])}${s[0]}</span>`).join('<i aria-hidden="true">→</i>')}</div>${kitLine(T)}<p class="dim">${pct}% chance the strike lands; otherwise it slips away and you start tracking again. ${Q.huntXpShown(id, true)} Hunting XP a catch, ${Q.huntXpShown(id, false)} if it gets away.</p>${drops.length ? `<div class="hunt-drops"><span class="k">Drops</span>${drops.map(k => `<span class="cw-drop" data-tip="item:${k}">${Q.itemIco(D.ITEMS[k])}</span>`).join('')}</div>` : ''}` }; });
-  if (!choices.length) return gtabs + ttabs + `<section class="panel empty"><p>No ${esc(T.name.toLowerCase())} animals here.</p></section>`;
-  /* the catalogue's corner names the ground's own town, not the one you are standing in */
-  return gtabs + ttabs + UI.taskPanel('hunting', `${g.name} · ${T.name}`, 'hunt', choices, 'Hunt').replace(`>${D.TOWN[S().town].name}</small>`, `>${esc(D.TOWN[g.town].name)}</small>`);
+  if (!choices.length) return ttabs + `<section class="panel empty"><p>No ${esc(T.name.toLowerCase())} animals here.</p></section>`;
+  /* the catalogue's corner gives the tier's level band, not a town: the ground is the same from everywhere */
+  return ttabs + UI.taskPanel('hunting', `Hunting ground · ${T.name}`, 'hunt', choices, 'Hunt').replace(`>${D.TOWN[S().town].name}</small>`, `>Hunting ${T.lo}–${T.hi}</small>`);
 };
 UI.V.hunting = () => {
   if (!Q.skillUnlocked('hunting')) return UI.lockedPage('hunting');
@@ -26023,6 +26107,212 @@ Q.on('huntresult', res => {
   const sc = document.querySelector('#view .activity-scene.hunt'); if (sc) { sc.dataset.result = res.c ? 'caught' : 'escaped'; sc.dataset.step = '2'; }
   paint(); showTimer = setTimeout(() => { showing = null; const s2 = document.querySelector('#view .activity-scene.hunt'); if (s2) delete s2.dataset.result; paint(); }, 1600);
 });
+})();
+
+</script>
+<script>
+/* Idlewick: Beastmastery captures, and eggs as lucky finds (owner, 26 Nov 2026).
+   "Hunting and beastmastery should be two defined things: hunting you are simply going out to try and trap and kill
+   creatures for their drops. Beastmastery is the ability to trap and capture animals to keep them, have them as
+   companions and level them up. Eggs should be random drops in combat or skills, not the only way to get beasts."
+   The owner chose: "Capture replaces expeditions. Beastmastery gets a Capture task like a hunt (track -> set live
+   trap -> coax), but a success keeps the animal instead of killing it. Any animal you've hunted can be caught; better
+   Beastmastery = better odds. Eggs become rare random drops from combat and all skills. Expeditions go (one already
+   out still comes back)."
+
+   Capture (KIND_EXT.capture, id = creature id). The same machinery as a hunt (hunt_stalk.js), so offline work, the
+   queue and the Now card behave the same way:
+     - three steps: Tracking 40%, Setting the live trap 30%, Coaxing 30% of the cycle (8 s + 0.09 s per Hunting level
+       of the animal, before speed bonuses and field-guide entries);
+     - any animal you have caught at least once while hunting (S.beast.kills) can be captured, from any town;
+     - odds: 55% + 2.5% per Beastmastery level above the animal's Hunting level, between 35% and 90%;
+     - kit by tier: a live trap (wooden trap; padded live trap; padded live trap; rune trap; rune trap), which goes
+       home with the animal you keep and is not used up otherwise, and from Intermediate up the hunting tier's bait,
+       one per try (scent bait, honey bait, smoked lure, moonlit lure);
+     - Beastmastery XP per try on the same scale as Hunting XP (an escape pays 30%);
+     - a success keeps the animal as a beast (DQ.awardPet('wild_<id>', { hatched: true })): it goes straight to your
+       pens, no egg. An animal you already own is tagged and let go instead: full XP, no duplicate, the trap is kept.
+   Never in a forecast; offline captures appear in the welcome-back summary from the beast events.
+
+   Expeditions (the Trapper) are retired: nothing can be sent, and an expedition already out still comes back once at
+   its saved time (beastmastery.js resolveBeastTrap, untouched).
+
+   Eggs as lucky finds: any skilling action (gathering, making, farming, sailing, fieldwork, drills, captures) has a
+   1 in 2,000 chance and any victory or catch a 1 in 500 chance of an egg, from the beasts that used to come only from
+   the Trapper (D.BEAST_SPECIES) whose Hero level you have reached in a town you have visited. Never in forecasts. The
+   Collection page shows these odds. Every existing egg source (skill pets, harvest, bosses, wild signature beasts,
+   fieldwork) is unchanged. */
+(() => {
+const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S, { esc, ico, fmt } = Q;
+if (!D.HUNT_TIERS || !Q.KIND_EXT || !Q.KIND_EXT.hunt) return;
+D.CAPTURE_STEPS = [['Tracking', .40, 'paw'], ['Setting the live trap', .30, 'pin'], ['Coaxing', .30, 'heart']];
+D.CAPTURE_KIT = [{ trap: 'wooden_trap', bait: null }, { trap: 'live_trap', bait: 'scent_bait' }, { trap: 'live_trap', bait: 'honey_bait' }, { trap: 'rune_trap', bait: 'smoked_lure' }, { trap: 'rune_trap', bait: 'moonlit_lure' }];
+D.EGG_DROP = { action: 1 / 2000, kill: 1 / 500 };
+const FAIL = ['Lost the trail', 'It sniffed the trap', 'It would not come'];
+const areaOf = id => Object.values(D.AREAS).flat().find(a => a.hunt && a.monsters.some(e => e.id === id)) || null;
+const animal = id => { const m = D.MON[id]; return m && m.hl && areaOf(id) ? m : null; };
+const hunted = id => ((S().beast.kills || {})[id] || 0) > 0;
+const pid = id => 'wild_' + id;
+const owned = id => !!(S().pets.owned[pid(id)] || (Q.eggOf && Q.eggOf(pid(id))));
+const rec = () => { const p = S().pets; const C = p.capture = p.capture && typeof p.capture === 'object' ? p.capture : {}; C.recent = Array.isArray(C.recent) ? C.recent : []; C.tries = C.tries && typeof C.tries === 'object' ? C.tries : {}; return C; };
+Q.captureKit = id => { const m = animal(id); return m ? D.CAPTURE_KIT[m.tier ?? D.huntTierOf(m.hl)] : null; };
+Q.captureChance = id => { const m = animal(id); if (!m) return 0; return Math.max(.35, Math.min(.9, .55 + .025 * (Q.lvl('beastmastery') - m.hl))); };
+const rawDur = id => { const m = animal(id); return m ? 8000 + m.hl * 90 : 8000; };
+Q.captureXp = (id, ok) => { const m = animal(id); if (!m) return 0; const L = Q.lvl('beastmastery');
+  return Math.max(1, Math.round(8 * (5 + .35 * L) * (rawDur(id) / 8000) * (1 + m.hl / 100) / .75 * (ok ? 1 : .3))); };
+Q.captureXpShown = (id, ok) => Math.max(1, Math.round(Q.captureXp(id, ok) * (Q.xpMult ? Q.xpMult('beastmastery') : 1) * (Q.catchUp ? Q.catchUp('beastmastery') : 1)));
+Q.captureStep = (a = Q.act) => { if (!a || a.kind !== 'capture') return null; const p = Math.min(1, Math.max(0, (Date.now() - a.t0) / (a.dur || 1)));
+  let acc = 0; for (const s of D.CAPTURE_STEPS) { acc += s[1]; if (p < acc) return s; } return D.CAPTURE_STEPS[2]; };
+/* what stands between you and a capture, as one short reason, or '' */
+Q.captureNeed = id => { const m = animal(id); if (!m) return 'Choose an animal';
+  if (!hunted(id)) return 'Hunt one first';
+  const K = Q.captureKit(id); if (K.trap && !Q.have(K.trap)) return `Needs ${D.ITEMS[K.trap].name}`; if (K.bait && !Q.have(K.bait)) return `Needs ${D.ITEMS[K.bait].name}`; return ''; };
+const named = m => hunted(m.id) ? m.name.toLowerCase() : 'animal';
+const event = (kind, id, text) => { if (Q.forecasting) return; const p = S().pets; p.events = Array.isArray(p.events) ? p.events : []; p.events.push({ kind, id, text, t: Date.now() }); if (p.events.length > 40) p.events.splice(0, p.events.length - 40); if (Q.journal) Q.journal('beast', text, 'paw'); };
+Q.KIND_EXT.capture = {
+  valid: id => !!animal(id),
+  skill: 'beastmastery', page: 'beastmastery', skillFor: () => 'beastmastery', pageFor: () => 'beastmastery',
+  label: a => { const m = animal(a.id), s = Q.captureStep(a); return m ? `${s ? s[0] : 'Capturing'}: ${named(m)}` : 'Capturing'; },
+  dur: id => rawDur(id),
+  check: id => { const m = animal(id); if (!m) return 'Choose an animal'; if (!Q.skillUnlocked('beastmastery')) return 'Learn Beastmastery first'; return Q.captureNeed(id); },
+  done: a => {
+    const m = animal(a.id); if (!m) return Q.stopAct(false, 'That animal is not here.');
+    const K = Q.captureKit(a.id), C = rec(), ok = Q.chance(Q.captureChance(a.id)), had = owned(m.id), keep = ok && !had && !Q.forecasting;
+    if (K.bait && Q.have(K.bait)) Q.take(K.bait, 1);
+    Q.addXp('beastmastery', Q.captureXp(a.id, ok));
+    C.tries[m.id] = (C.tries[m.id] || 0) + 1;
+    const failAt = ok ? -1 : (r => r < .3 ? 0 : r < .6 ? 1 : 2)(Math.random());
+    const res = { id: m.id, c: ok ? 1 : 0, f: failAt, k: keep ? 1 : 0, t: Date.now() }; C.recent = [...C.recent, { c: res.c, f: failAt, k: res.k }].slice(-12); a.lastCapture = res;
+    const stopIfOut = () => { const need = Q.captureNeed(a.id); if (need && Q.act === a) Q.stopAct(false, `${need} to keep capturing.`); };
+    if (!Q.sim.on && !Q.forecasting) Q.emit('captureresult', res, m);
+    Q.eggDrop('action');
+    if (!ok) { C.escaped = (C.escaped || 0) + 1; if (!Q.sim.on && !Q.forecasting) Q.log(`The ${named(m)} would not be caught. Back to tracking.`); stopIfOut(); return; }
+    a.count++;
+    if (keep) {
+      if (K.trap) Q.take(K.trap, 1);
+      Q.awardPet(pid(m.id), { hatched: true, quiet: true }); if (S().pets.owned[pid(m.id)]) S().pets.owned[pid(m.id)].caught = Date.now(); if (Q.migrateBeasts) Q.migrateBeasts(S());
+      C.kept = (C.kept || 0) + 1; S().stats.captures = (S().stats.captures || 0) + 1; Q.qev('capture', m.id);
+      const p = D.PET[pid(m.id)], text = `You caught a ${m.name.toLowerCase()} alive. It is in your pens.`;
+      event('capture', pid(m.id), text);
+      if (!Q.sim.on) { Q.log(text, 'quest'); Q.sfx && Q.sfx('gem');
+        Q.notify({ kind: 'unlock', key: 'capture:' + m.id, icon: 'paw', col: m.col, title: `Caught: ${m.name}`, text: `In your pens. As your companion: ${p ? p.text : 'a small bonus'}.`, sound: false, burst: true, ttl: 9000,
+          action: S().pets.active === pid(m.id) ? { label: 'See the ranch', fn: () => { UI.beastMode = 'beasts'; Q.go('beastmastery'); } } : { label: 'Make companion', fn: () => Q.setPet(pid(m.id)) } });
+        Q.emit('pets'); Q.emit('capturekept', m); }
+    } else if (!Q.forecasting) {
+      C.released = (C.released || 0) + 1;
+      if (!Q.sim.on) Q.log(`You coax the ${m.name.toLowerCase()} into the trap, check it over and let it go. You already have one.`);
+    }
+    stopIfOut();
+  }
+};
+/* capture shares the trap-line district; its field-guide topic is Captures (guide_materials.js), counted per success */
+const du0 = Q.districtUrl; if (du0) Q.districtUrl = (town, kind, ...r) => du0(town, kind === 'capture' ? 'train' : kind, ...r);
+const verb0 = Q.mastVerb; if (verb0) Q.mastVerb = (kind, id) => kind === 'capture' ? 'Capture' : verb0(kind, id);
+const name0 = Q.mastName; if (name0) Q.mastName = (kind, id) => kind === 'capture' ? (D.MON[id] ? D.MON[id].name : id) : name0(kind, id);
+
+/* ---------- expeditions are retired: nothing new can be sent; one already out still resolves (beastmastery.js) ---------- */
+Q.beastTrapReason = () => 'The Trapper has retired: capture animals instead';
+Q.sendBeastTrap = () => false;
+if (D.ITEMS.live_trap) D.ITEMS.live_trap.sub = 'Beastmastery: a live trap for Intermediate and Skilled captures. It goes home with the animal you keep.';
+if (D.ITEMS.rune_trap) D.ITEMS.rune_trap.sub = 'Craft at Crafting 55 or find on regional bosses. A live trap for Expert and Master captures.';
+if (D.ITEMS.wooden_trap) D.ITEMS.wooden_trap.sub = 'Fieldwork gear (25% break chance) and the live trap for Beginner captures in Beastmastery.';
+/* why you need a trap or bait now (item_uses.js): the capture tiers it opens */
+const uses0 = Q.usesOf;
+if (uses0) Q.usesOf = id => { const out = uses0(id); if (!Q.skillUnlocked('beastmastery') || out.length >= 3) return out;
+  const tiers = D.CAPTURE_KIT.map((k, i) => (k.trap === id || k.bait === id) ? D.HUNT_TIERS[i].name : null).filter(Boolean);
+  if (tiers.length) out.push({ k: 'capture', text: `${D.CAPTURE_KIT.some(k => k.trap === id) ? 'Live trap' : 'Bait'} for ${tiers.join(' and ')} captures`, go: { do: 'capturetier', a: String(D.CAPTURE_KIT.findIndex(k => k.trap === id || k.bait === id)), label: 'Beastmastery' } });
+  return out.slice(0, 3); };
+
+/* ---------- eggs as lucky finds ---------- */
+Q.eggPool = () => Object.entries(D.BEAST_SPECIES || {}).filter(([id, s]) => D.PET[id] && !S().pets.owned[id] && !(Q.eggOf && Q.eggOf(id)) && Q.advLvl() >= s.hero && !!(S().towns[s.town] && S().towns[s.town].visited)).map(([id]) => id);
+Q.eggDrop = kind => {
+  if (Q.forecasting || !Q.S || !S().pets) return false;
+  const pool = Q.eggPool(), p = D.EGG_DROP[kind] || 0; if (!pool.length || !p || !Q.chance(p)) return false;
+  return Q.awardPet(pool[Math.floor(Math.random() * pool.length)]);
+};
+const roll0 = Q.petRoll; Q.petRoll = (type, key) => { const r = roll0(type, key); if (type === 'skill' || type === 'harvest') Q.eggDrop('action'); return r; };
+(Q.killHooks = Q.killHooks || []).push(() => Q.eggDrop('kill'));
+for (const k of ['train', 'drill']) { const ext = Q.KIND_EXT[k]; if (!ext || ext._eggs) continue; const done0 = ext.done; ext.done = a => { const before = a.count; const r = done0(a); if (a.count > before || k === 'drill') Q.eggDrop('action'); return r; }; ext._eggs = true; }
+/* egg sources and odds, truthfully: a Trapper species is now a lucky find */
+const src0 = Q.eggSource; if (src0) Q.eggSource = id => { const p = D.PET[id] || {}; if ((p.src || {}).type === 'beasttrap') return 'A lucky find'; const m = (p.src || {}).type === 'hunt' && D.MON[p.src.mon]; if (m && m.hl) return `A ${m.name.toLowerCase()} from the hunting ground`; return src0(id); };
+const odds0 = Q.petOdds;
+if (odds0) Q.petOdds = id => { const p = D.PET[id], s = (p && p.src) || {}, spec = (D.BEAST_SPECIES || {})[id];
+  if (spec) { const pool = Q.eggPool(), n = Math.max(1, pool.length), here = pool.includes(id);
+    return { where: here ? `Lucky find · any skill or fight (one of ${n} eggs)` : `Lucky find · from Hero ${spec.hero} in ${D.TOWN[spec.town].name}`, luck: true, p: here ? D.EGG_DROP.action / n : 0, per: 'action', tries: 0, go: 'beastmastery', kill: D.EGG_DROP.kill / n }; }
+  const m = s.type === 'hunt' && D.MON[s.mon];
+  if (m && m.hl) return { where: `Capture it in Beastmastery${hunted(m.id) ? '' : ' once you have hunted one'}`, p: hunted(m.id) ? Q.captureChance(m.id) : 0, per: 'try', tries: rec().tries[m.id] || 0, unit: 'tries', go: 'beastmastery' };
+  return odds0(id); };
+
+/* a caught beast's journey starts with the catch, not an egg (eggs.js UI.beastJourney) */
+const journey0 = UI.beastJourney;
+if (journey0) UI.beastJourney = id => { const h = journey0(id), o = S().pets.owned[id]; if (!h || !o || !o.caught) return h;
+  const day = new Date(o.caught).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  return h.replace(/<li class="on"[^>]*>[\s\S]*?<\/li>/, `<li class="on" data-tip="text:Caught alive · ${esc(day)}"><span class="bj-ic">${ico('paw')}</span><small>Caught</small></li>`)
+    .replace(/(<li class="on"[^>]*><span class="bj-ic">[\s\S]*?<\/span><small>)Hatched(<\/small>)/, '$1In your pens$2'); };
+/* ---------- the Capture tab ---------- */
+const defaultTier = () => { let t = 0; for (let i = 0; i < 5; i++) if (listFor(i).some(m => hunted(m.id))) t = i; return t; };
+const listFor = i => { const ids = new Set(Q.groundTier ? Q.groundTier(i).map(m => m.id) : []);
+  /* an animal that left the hunting ground can still be captured once you have caught one */
+  for (const m of D.MONLIST) if (m.hl && m.tier === i && hunted(m.id) && animal(m.id)) ids.add(m.id);
+  return [...ids].map(id => D.MON[id]).sort((a, b) => a.hl - b.hl); };
+UI.DO.capturetier = i => { UI.captureTier = Math.max(0, Math.min(4, +i || 0)); UI.beastMode = 'capture'; UI.view === 'beastmastery' ? UI.render(false) : Q.go('beastmastery'); };
+UI.DO.capturepick = id => { const m = animal(id); if (!m) return; UI.beastMode = 'capture'; UI.captureTier = m.tier ?? D.huntTierOf(m.hl); UI.taskChoice.beastmastery = id; UI.view === 'beastmastery' ? UI.render(false) : Q.go('beastmastery'); };
+const nowAct0 = UI.DO.nowactivity; UI.DO.nowactivity = (...a) => Q.act && Q.act.kind === 'capture' ? UI.DO.capturepick(Q.act.id) : nowAct0(...a);
+const part = id => UI.huntKitPart ? UI.huntKitPart(id) : '';
+const kitLine = K => `<div class="hunt-kit"><span class="k">Kit</span>${K.trap ? part(K.trap) : ''}${K.bait ? part(K.bait) : ''}<small class="dim">The trap goes home with the animal you keep${K.bait ? '; one bait per try' : ''}.</small></div>`;
+const expeditionLine = () => { const j = S().pets.expedition; if (!j || !D.PET[j.species]) return '';
+  return `<span class="capture-old-trap">${ico('clock')}Old trap out for ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span></span>`; };
+UI.captureView = () => {
+  if (UI.captureTier === undefined) UI.captureTier = defaultTier();
+  const T = D.HUNT_TIERS[UI.captureTier], K = D.CAPTURE_KIT[UI.captureTier], L = Q.lvl('beastmastery'), C = rec();
+  const all = D.MONLIST.filter(m => m.hl && (Q.animalListed ? Q.animalListed(m) : true)), mine = all.filter(m => S().pets.owned[pid(m.id)]).length;
+  /* one row above the workspace, like Hunting's: the tier tabs, then how many you have caught (and the last tries) */
+  const tabs = UI.huntTierTabs ? UI.huntTierTabs(UI.captureTier, 'capturetier', Math.max(L, Q.huntLevel ? Q.huntLevel() : 1)) : '';
+  const sum = `<span class="capture-sum" data-tip="text:Animals you have hunted can be caught and kept. Higher Beastmastery, better odds."><span class="k">Caught alive</span><b class="mono">${mine}/${all.length}</b></span>${C.recent.length ? `<span class="hunt-recent" aria-label="Last captures"><span class="k">Last ${C.recent.length}</span>${C.recent.map(r => `<i class="${r.c ? 'ok' : 'fail'}" title="${r.c ? (r.k ? 'Kept' : 'Let go') : FAIL[r.f]}"></i>`).join('')}<b class="mono">${C.recent.filter(r => r.c).length}/${C.recent.length}</b></span>` : ''}${expeditionLine()}`;
+  const head = `<div class="capture-bar">${tabs}<div class="capture-head">${sum}</div></div>`;
+  const choices = listFor(UI.captureTier).map(m => { const id = m.id, got = hunted(id), mineNow = owned(id), need = got ? Q.captureNeed(id) : '', pct = Math.round(Q.captureChance(id) * 100), p = D.PET[pid(id)];
+    return { id, name: got ? m.name : '???', artKind: 'creature', artId: id, yieldId: null, locked: !got, revealed: false, blocked: !got || !!need, reason: got ? need : 'Hunt one on the Hunting ground first', short: got ? '' : 'Hunt one first',
+      caption: mineNow ? 'In your pens' : `Lv ${m.hl}`, stateText: need ? need.replace(/^Needs /, 'No ') : mineNow ? `${pct}% · tag & release` : `${pct}% capture`,
+      info: `<div class="hunt-steps">${D.CAPTURE_STEPS.map(s => `<span>${ico(s[2])}${s[0]}</span>`).join('<i aria-hidden="true">→</i>')}</div>${kitLine(K)}<p class="dim">${pct}% chance it walks into the trap; otherwise it wanders off and you track it again. ${Q.captureXpShown(id, true)} Beastmastery XP a capture, ${Q.captureXpShown(id, false)} if it gets away.</p><p class="capture-gives">${mineNow ? `${ico('paw')} Already yours: a capture is let go again, for the XP.` : `${ico('paw')} Keep it as a beast. As your companion: ${esc(p ? p.text : 'a small bonus')}.`}</p>` }; });
+  if (!choices.length) return head + `<section class="panel empty"><p>No ${esc(T.name.toLowerCase())} animals yet.</p></section>`;
+  const h = UI.taskPanel('beastmastery', `Capture · ${T.name}`, 'capture', choices, 'Capture')
+    .replace(`>${D.TOWN[S().town].name}</small>`, `>Hunting ${T.lo}–${T.hi}</small>`).replace('activity-scene capture ', 'activity-scene capture hunt ')
+    .replace('<h2>Choose your spot</h2>', '<h2>Choose an animal</h2>');
+  return head + h;
+};
+
+/* ---------- the stage: three steps, how the last try went, the trap in the scene ---------- */
+let showing = null, showTimer = 0;
+const stripHtml = () => `<div class="hunt-track capture-track" role="status" aria-live="polite"><ol class="hunt-track-steps">${D.CAPTURE_STEPS.map((s, i) => `<li data-i="${i}"><span class="ht-ico">${ico(s[2])}</span><span class="ht-name">${['Track', 'Set live trap', 'Coax'][i]}</span><span class="ht-mark" aria-hidden="true"></span></li>`).join('')}</ol><div class="hunt-track-out"></div></div>`;
+const paint = () => {
+  if (UI.view !== 'beastmastery' || UI.beastMode !== 'capture') return;
+  const stage = document.querySelector('#view .activity-stage'), sc = stage && stage.querySelector('.activity-scene.capture'); if (!sc) return;
+  const a0 = Q.act && Q.act.kind === 'capture' ? Q.act : null, a = a0 && sc.dataset.task === a0.id ? a0 : null;
+  if (!a && !(showing && sc.dataset.task === showing.id)) { stage.querySelector('.hunt-track')?.remove(); sc.querySelector('.hunt-steptag')?.remove(); delete sc.dataset.step; return; }
+  let el = stage.querySelector('.hunt-track');
+  if (!el) { const after = stage.querySelector('.activity-progress'); if (!after) return; after.insertAdjacentHTML('afterend', stripHtml()); el = stage.querySelector('.hunt-track'); }
+  const lis = el.querySelectorAll('.hunt-track-steps li'), out = el.querySelector('.hunt-track-out');
+  if (showing) {
+    lis.forEach((li, i) => { const st = showing.c ? 'ok' : i < showing.f ? 'ok' : i === showing.f ? 'fail' : 'skip'; if (li.dataset.st !== st) { li.dataset.st = st; li.querySelector('.ht-mark').textContent = st === 'ok' ? '✓' : st === 'fail' ? '✗' : ''; } });
+    const txt = showing.c ? (showing.k ? 'Caught! It’s yours.' : 'Caught, checked over and let go.') : `${FAIL[showing.f]}. It got away.`; if (out.textContent !== txt) { out.textContent = txt; out.dataset.r = showing.c ? 'ok' : 'fail'; }
+  } else {
+    const step = D.CAPTURE_STEPS.indexOf(Q.captureStep(a));
+    lis.forEach((li, i) => { const st = i < step ? 'done' : i === step ? 'now' : 'next'; if (li.dataset.st !== st) { li.dataset.st = st; li.querySelector('.ht-mark').textContent = st === 'done' ? '✓' : ''; } });
+    const txt = `${Q.captureStep(a)[0]}…`; if (out.textContent !== txt) { out.textContent = txt; out.dataset.r = ''; }
+    const k = String(step); if (sc.dataset.step !== k) sc.dataset.step = k;
+    let t = sc.querySelector('.hunt-steptag'); if (!t) { sc.insertAdjacentHTML('beforeend', '<span class="hunt-steptag"></span>'); t = sc.querySelector('.hunt-steptag'); }
+    const s = Q.captureStep(a); if (t.dataset.s !== s[0]) { t.dataset.s = s[0]; t.innerHTML = `${ico(s[2])}${s[0]}`; }
+  }
+  if (!sc.querySelector('.hunt-trap')) { const K = Q.captureKit(sc.dataset.task), id = (K && K.trap) || 'wooden_trap'; if (D.ITEMS[id]) sc.insertAdjacentHTML('beforeend', `<span class="hunt-trap" aria-hidden="true">${Q.itemIco(D.ITEMS[id])}</span>`); }
+};
+Q.on('ui', paint);
+Q.on('captureresult', res => {
+  showing = res; clearTimeout(showTimer);
+  const sc = document.querySelector('#view .activity-scene.capture'); if (sc) { sc.dataset.result = res.c ? (res.k ? 'kept' : 'caught') : 'escaped'; sc.dataset.step = '2'; if (Q.floatAt) Q.floatAt(sc, res.c ? (res.k ? 'Caught alive!' : 'Let it go') : 'It got away!', res.c ? '#f3d58a' : '#d9a066'); }
+  paint(); showTimer = setTimeout(() => { showing = null; const s2 = document.querySelector('#view .activity-scene.capture'); if (s2) delete s2.dataset.result; paint(); }, 1600);
+});
+/* a capture that keeps the animal redraws the tab, so the card says "In your pens" */
+Q.on('capturekept', () => { if (UI.view === 'beastmastery' && UI.beastMode === 'capture') setTimeout(() => UI.render(false), 1700); });
 })();
 
 </script>
@@ -26437,7 +26727,8 @@ UI.bossChecklistHtml = step => {
    that activity stop together, the next queued task still starts, other skills are untouched and nothing earned is
    removed. Only skills with a real content gate in the code are capped:
      fishing, woodcutting, mining, thieving: the highest node level (D.NODES) among the towns reached;
-     hunting: the highest Hunting level (m.hl) among the animals of the towns reached;
+     hunting: the highest Hunting level (m.hl) on the one hunting ground (26 Nov 2026: the ground no longer belongs to
+       towns, so this is the top animal's level, 98, whatever the region; the tier kit is the real gate);
      melee, ranged, magic, defence, health (fights): the highest creature combat level among the towns reached
        (areas, challenges and bosses; trial towers excluded).
    Every other skill has no clean gate and is listed in docs/offline-ceiling.md for the owner's decision. */
@@ -26448,7 +26739,8 @@ const COMBAT = ['melee', 'ranged', 'magic', 'defence', 'hitpoints'];
 const reached = town => Q.townUnlocked(town);
 Q.progressCeiling = skill => {
   if (NODE_KIND[skill]) { const ls = D.NODES[NODE_KIND[skill]].filter(n => reached(n.town)).map(n => n.lvl || 1); return ls.length ? Math.max(...ls) : null; }
-  if (skill === 'hunting') { const ls = D.MONLIST.filter(m => m.hl && !m.tower && reached(m.town)).map(m => m.hl); return ls.length ? Math.max(...ls) : null; }
+  /* one hunting ground for every town (26 Nov 2026): its content reaches the top animal's level whatever the region */
+  if (skill === 'hunting') { const ls = D.MONLIST.filter(m => m.hl && !m.tower && (D.HUNT_GROUND ? m.ground : reached(m.town))).map(m => m.hl); return ls.length ? Math.max(...ls) : null; }
   if (COMBAT.includes(skill)) { const ls = D.MONLIST.filter(m => !m.hl && !m.tower && m.cl && reached(m.town)).map(m => m.cl); return ls.length ? Math.max(...ls) : null; }
   return null; /* unmapped: no gate in the code maps cleanly onto this skill */
 };

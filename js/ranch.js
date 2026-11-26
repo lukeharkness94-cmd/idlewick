@@ -10,11 +10,12 @@ const MAX = 10, page0 = UI.V.beastmastery;
 const phone = () => innerWidth <= 860, tight = () => /\b(short|lw-1600)\b/.test(document.documentElement.className) && !phone();
 const K = () => phone() ? 2 : (innerHeight / (Q.zoom || 1) >= 900 ? 3 : 2), PER = () => phone() ? 1 : 6; /* whole-number pen scale: 3x when the window is tall enough for two rows, else 2x */
 UI.beastPenPage = 0; UI.beastFood = null;
-const view = () => UI.beastMode === 'field' ? 'field' : (UI.beastMode === 'capture' || UI.beastMode === 'shed') ? 'shed' : 'ranch';
+/* two tabs since 26 Nov 2026: the ranch, and Capture (beast_capture.js), which replaced the Trapper's expeditions */
+const view = () => UI.beastMode === 'field' ? 'field' : (UI.beastMode === 'capture' || UI.beastMode === 'shed') ? (UI.captureView ? 'capture' : 'shed') : 'ranch';
 const owned = () => D.PETS.filter(p => S().pets.owned[p.id]);
 const foodsHeld = () => (Q.foods ? Q.foods() : []).filter(id => Q.have(id) > 0 && D.ITEMS[id] && D.ITEMS[id].heal > 0);
 const chosenFood = () => { const f = foodsHeld(); if (UI.beastFood && f.includes(UI.beastFood) && Q.have(UI.beastFood) >= 2) return UI.beastFood; return f.find(id => Q.have(id) >= 2) || f[0] || null; };
-const tabs = v => `<div class="beast-tabs btnrow ranch-tabs" role="tablist">${[['ranch', 'Ranch · beasts and eggs'], ['shed', 'Trapper · send for an egg'], ['field', 'Wooden traps · search a region']].map(([k, l]) => `<button class="btn ${v === k ? 'on' : ''}" role="tab" aria-selected="${v === k}" data-do="beastmode" data-a="${k}">${l}</button>`).join('')}</div>`;
+const tabs = v => `<div class="beast-tabs btnrow ranch-tabs" role="tablist">${(UI.captureView ? [['ranch', 'Ranch · beasts and eggs'], ['capture', 'Capture · catch an animal']] : [['ranch', 'Ranch · beasts and eggs'], ['shed', 'Trapper · send for an egg'], ['field', 'Wooden traps · search a region']]).map(([k, l]) => `<button class="btn ${v === k ? 'on' : ''}" role="tab" aria-selected="${v === k}" data-do="beastmode" data-a="${k}">${l}</button>`).join('')}</div>`;
 const stateOf = id => { const t = Q.beastTraining(id, chosenFood()), o = S().pets.owned[id];
   if (Q.petLevel(id) >= MAX) return { k: 'max', text: 'Fully bonded', t };
   if (t.left > 0) return { k: 'nap', until: o.trainingUntil, t };
@@ -33,7 +34,7 @@ const penHtml = (p, k, sel) => {
       ${st.k === 'ready' ? `<span class="pen-want" aria-hidden="true">♥</span>` : ''}
       <span class="pen-bond"><b>Bond ${lv}</b><span class="bar"><i style="width:${pct}%"></i></span></span></button>
     <div class="pen-name"><b>${esc(o.evolved && Q.beastSpec(id) ? Q.beastSpec(id).evolution : p.name)}</b><small class="ps-${st.k}">${note}</small></div></div>`; };
-const emptyPen = k => `<div class="pen-cell"><button class="pen empty" data-do="beastmode" data-a="shed" style="--k:${k};width:${96 * k}px;height:${64 * k}px" aria-label="Empty pen. Hatch an egg to fill it."><img class="pen-back" src="${A.penBackUrl('empty', '#9a9a9a')}" width="${96 * k}" height="${64 * k}" alt="" draggable="false"><img class="pen-front" src="${A.penFrontUrl()}" width="${96 * k}" height="${64 * k}" alt="" draggable="false"><span class="pen-sign">Empty pen<small>Hatch an egg to fill it</small></span></button></div>`;
+const emptyPen = k => `<div class="pen-cell"><button class="pen empty" data-do="beastmode" data-a="${UI.captureView ? 'capture' : 'shed'}" style="--k:${k};width:${96 * k}px;height:${64 * k}px" aria-label="Empty pen. ${UI.captureView ? 'Capture an animal or hatch an egg' : 'Hatch an egg'} to fill it."><img class="pen-back" src="${A.penBackUrl('empty', '#9a9a9a')}" width="${96 * k}" height="${64 * k}" alt="" draggable="false"><img class="pen-front" src="${A.penFrontUrl()}" width="${96 * k}" height="${64 * k}" alt="" draggable="false"><span class="pen-sign">Empty pen<small>${UI.captureView ? 'Catch or hatch a beast' : 'Hatch an egg to fill it'}</small></span></button></div>`;
 const shelf = () => { const f = foodsHeld(), cur = chosenFood();
   const tiles = f.length ? f.map(id => { const it = D.ITEMS[id]; return `<button class="shelf-food ${id === cur ? 'on' : ''}" data-do="beastfood" data-a="${id}" aria-pressed="${id === cur}" data-tip="item:${id}">${Q.itemIco(it)}<span><b>${esc(it.name)}</b><small>×${fmt(Q.have(id))} · +${it.heal}</small></span></button>`; }).join('')
     : `<span class="shelf-none">The shelf is bare. Cook fish in Cooking, or buy bread at the shop: each session uses 2 cooked food.</span>`;
@@ -49,7 +50,10 @@ const sheet = id => { const p = D.PET[id], o = S().pets.owned[id], lv = Q.petLev
     <div class="beast-milestones">${D.BOND_MILESTONES.map(n => `<span class="tag ${lv >= n ? 'ok' : ''}" data-tip="text:Bond ${n}: ${n === 10 ? 'evolves · final upgrade' : 'passive upgrade'}">${lv >= n ? '✓' : '◇'} ${n}</span>`).join('')}</div>
     <p class="sm dim rs-cost">${lv >= MAX ? 'This bond is complete.' : `${t.coins} coins + 2 ${esc(foodName)} → +${t.xp} bond XP · 45 min nap`}</p>
     <div class="btnrow wrap"><button class="btn primary" data-do="beastfeed" data-a="${id}" ${t.ok ? '' : 'disabled'}>${t.ok ? `Feed & train · +${t.xp} bond XP` : esc(t.reason)}</button>${active ? `<span class="rs-with">★ Companion</span>` : `<button class="btn" data-do="setpet" data-a="${id}">Make companion</button>`}</div></section>`; };
-const shedTeaser = () => { const j = S().pets.expedition; return `<section class="panel ranch-shedcard"><span class="k">Trapper</span><p>${j ? `<b>Trap out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'No trap is out. Send one and it brings back an egg.'}</p><button class="btn" data-do="beastmode" data-a="shed">Open the shed</button><button class="linkish ranch-eggs-link" data-do="eggways">Where do eggs come from?</button></section>`; };
+const shedTeaser = () => { const j = S().pets.expedition;
+  /* captures replaced the Trapper (26 Nov 2026); an expedition sent before then still comes back by itself */
+  if (UI.captureView) return `<section class="panel ranch-shedcard"><span class="k">Capture</span><p>${j && D.PET[j.species] ? `<b>An old trap is out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'Catch an animal you have hunted and keep it.'}</p><button class="btn" data-do="beastmode" data-a="capture">Capture an animal</button><button class="linkish ranch-eggs-link" data-do="eggways">Where do eggs come from?</button></section>`;
+  return `<section class="panel ranch-shedcard"><span class="k">Trapper</span><p>${j ? `<b>Trap out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'No trap is out. Send one and it brings back an egg.'}</p><button class="btn" data-do="beastmode" data-a="shed">Open the shed</button><button class="linkish ranch-eggs-link" data-do="eggways">Where do eggs come from?</button></section>`; };
 const ranch = () => {
   const list = owned(), k = K(), per = PER(), pages = Math.max(1, Math.ceil(list.length / per)); UI.beastPenPage = Math.min(UI.beastPenPage, pages - 1);
   const sel = list.find(p => p.id === UI.beastSelected) || list.find(p => p.id === S().pets.active) || list[0];
@@ -57,17 +61,19 @@ const ranch = () => {
   const cells = slice.map(p => penHtml(p, k, sel && p.id === sel.id)).join('') + (phone() ? '' : Array.from({ length: Math.max(0, per - slice.length) }, () => emptyPen(k)).join(''));
   const nav = pages > 1 ? `<div class="pen-pages" role="group" aria-label="Pens">${Array.from({ length: pages }, (_, i) => `<button class="btn sm ${i === UI.beastPenPage ? 'on' : ''}" data-do="beastpenpage" data-a="${i}">${phone() ? (i + 1) + ' of ' + pages : i + 1}</button>`).join('')}</div>` : '';
   const board = `<section class="ranch-board" style="--k:${k}"><div class="ranch-strip" style="background-image:url(${A.ranchStripUrl()});--k:${k}" role="img" aria-label="Your ranch"><h2 class="ranch-sign">Your ranch</h2></div>
-    ${list.length ? `<div class="pen-grid">${cells}</div>${nav}` : `<div class="ranch-empty"><p><b>The pens are empty.</b> Every beast starts as an egg. Send a trap from the shed to bring home your first.</p><button class="btn primary" data-do="beastmode" data-a="shed">Open the Trapper's shed</button></div>`}${list.length ? shelf() : ''}</section>`;
+    ${list.length ? `<div class="pen-grid">${cells}</div>${nav}` : UI.captureView ? `<div class="ranch-empty"><p><b>The pens are empty.</b> Catch an animal you have hunted, or find an egg while you work and fight.</p><button class="btn primary" data-do="beastmode" data-a="capture">Capture an animal</button></div>` : `<div class="ranch-empty"><p><b>The pens are empty.</b> Every beast starts as an egg. Send a trap from the shed to bring home your first.</p><button class="btn primary" data-do="beastmode" data-a="shed">Open the Trapper's shed</button></div>`}${list.length ? shelf() : ''}</section>`;
   return `<div class="ranch-layout"><div class="ranch-main">${board}</div><div class="ranch-side">${sel ? sheet(sel.id) : ''}${shedTeaser()}</div></div>`; };
 UI.V.beastmastery = () => {
   if (!Q.skillUnlocked('beastmastery')) return page0();
   const v = view(); let h;
   if (v === 'ranch') h = ranch();
+  /* the capture workspace sits directly in the view, like Hunting's, so only its list of animals scrolls */
+  else if (v === 'capture') h = UI.captureView();
   else { const keep = UI.beastMode; UI.beastMode = v === 'shed' ? 'beasts' : 'field'; try { h = page0(); } finally { UI.beastMode = keep; } h = `<div class="beast-subpage mode-${v}">${h.replace(/<div class="beast-tabs[^>]*>[\s\S]*?<\/div>/, '')}</div>`; }
   return tabs(v) + h; };
 UI.DO.beastfood = id => { UI.beastFood = id; UI.render(false); };
 UI.DO.beastpenpage = i => { UI.beastPenPage = Math.max(0, +i || 0); UI.render(false); };
-const mode0 = UI.DO.beastmode; UI.DO.beastmode = a => { UI.beastMode = a === 'ranch' ? 'beasts' : a; if (mode0 && !['ranch', 'shed', 'field'].includes(a)) return mode0(a); UI.render(false); };
+const mode0 = UI.DO.beastmode; UI.DO.beastmode = a => { if (a === 'shed' && UI.captureView) a = 'capture'; UI.beastMode = a === 'ranch' ? 'beasts' : a; if (mode0 && !['ranch', 'shed', 'field'].includes(a)) return mode0(a); UI.render(false); };
 const sel0 = UI.DO.beastselect; UI.DO.beastselect = a => { UI.beastSelected = a; const i = owned().findIndex(p => p.id === a); if (i >= 0) UI.beastPenPage = Math.floor(i / PER()); UI.beastMode = view() === 'ranch' ? UI.beastMode : 'beasts'; UI.render(false); };
 /* feeding: the food flies from the shelf to the bowl, the beast hops the hurdle, hearts and the bond XP rise */
 const calm = () => !!(S().settings.reduceFx || document.documentElement.classList.contains('calm') || (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches));

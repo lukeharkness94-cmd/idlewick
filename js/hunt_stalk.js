@@ -1,6 +1,8 @@
 /* Idlewick: hunting is its own activity, not a fight (owner, 23 Nov 2026: "it's not a fight, it's about tracking,
    laying the trap and then quickly killing. Sometimes we shouldn't successfully kill them and so we go back to hunting").
-   Hunting → Hunting ground: choose an animal from your town's hunting ground. Each hunt is one repeating task in three
+   Hunting → Hunting ground: one ground for the whole world (owner, 26 Nov 2026), five tier tabs, ten animals in each
+   (D.HUNT_GROUND); what you can hunt depends on your Hunting level and the tier's kit, never on the town you are in.
+   Choose an animal and hunt it. Each hunt is one repeating task in three
    steps: Tracking, Setting the trap, Strike. The strike lands or the animal slips away; either way the next hunt starts
    with tracking again. It uses DQ.KIND_EXT (kind 'hunt', id = creature id), so offline work, the queue and the Now card
    work as for any other task.
@@ -33,7 +35,6 @@ const tierOf = m => D.HUNT_TIERS ? D.HUNT_TIERS[m.tier ?? D.huntTierOf(m.hl)] : 
 Q.huntTierOf = id => { const m = animal(id); return m ? tierOf(m) : null; };
 /* any active quest that wants this animal, in any town: such hunts never need the level or the kit */
 Q.questWantsAnimal = id => Q.questWantsKill(id);
-const reached = town => !!(S().towns[town] && S().towns[town].visited);
 /* what stands between you and this hunt, as one short reason, or '' */
 Q.huntKitNeed = id => { const m = animal(id), T = m && tierOf(m); if (!T || Q.questWantsAnimal(id)) return '';
   if (T.trap && !Q.have(T.trap)) return `Needs ${D.ITEMS[T.trap].name}`;
@@ -49,8 +50,9 @@ Q.KIND_EXT.hunt = {
   label: a => { const m = animal(a.id), s = Q.huntStep(a); return m ? `${s ? s[0] : 'Hunting'}: ${(S().beast.kills[m.id] || 0) > 0 ? m.name.toLowerCase() : 'unknown quarry'}` : 'Hunting'; },
   dur: id => Q.huntDur(id),
   check: id => { const m = animal(id); if (!m) return 'Choose an animal'; if (!Q.skillUnlocked('hunting')) return 'Learn Hunting first';
-    /* every hunting ground can be worked from anywhere once you have reached its town */
-    const g = areaOf(id), wanted = Q.questWantsAnimal(id); if (!reached(g.town) && !wanted) return `Reach ${D.TOWN[g.town].name} first`;
+    /* one hunting ground for every town (owner, 26 Nov 2026): no travelling, only the Hunting level and the tier's kit.
+       An animal that is no longer on the ground can still be hunted while a quest asks for it. */
+    const wanted = Q.questWantsAnimal(id); if (!m.ground && !wanted) return 'Not on the hunting ground';
     if (Q.huntLevel() < m.hl && !wanted && !(Q.canHunt && Q.canHunt(m) && Q.questHuntTarget && Q.questHuntTarget() === id)) return `Requires Hunting ${m.hl}`;
     return Q.huntKitNeed(id); },
   done: a => { const m = animal(a.id); if (!m) return Q.stopAct(false, 'That animal is not here.');
@@ -85,11 +87,12 @@ const start0 = Q.startHunt;
 Q.startHunt = (areaId, target = null, forQuest = false) => {
   const area = Object.values(D.AREAS).flat().find(a => a.id === areaId);
   /* before Hunting is learned, a quest's animal can still be fought the old way, so the quest stays reachable */
-  if (area && area.hunt && Q.skillUnlocked('hunting')) { const id = target && animal(target) ? target : (area.monsters.find(e => Q.canHunt(D.MON[e.id])) || {}).id; if (!id) return false;
+  /* with no target, the best animal on the one ground you can hunt right now */
+  if (area && area.hunt && Q.skillUnlocked('hunting')) { const id = target && animal(target) ? target : [...(D.HUNT_GROUND || [])].reverse().find(k => !Q.KIND_EXT.hunt.check(k)); if (!id) return false;
     pick(id); return Q.startAct('hunt', id); }
   return start0(areaId, target, forQuest);
 };
-const pick = id => { const m = animal(id); if (!m) return; UI.huntMode = 'ground'; UI.huntGroundAt = areaOf(id).town; UI.huntTier = m.tier ?? D.huntTierOf(m.hl); UI.taskChoice.hunting = id; };
+const pick = id => { const m = animal(id); if (!m) return; UI.huntMode = 'ground'; UI.huntTier = m.tier ?? D.huntTierOf(m.hl); UI.taskChoice.hunting = id; };
 const openHunting = () => UI.view === 'hunting' ? UI.render(false) : Q.go('hunting');
 const huntAnimal = id => { if (!animal(id) || !Q.skillUnlocked('hunting')) return false; UI.DO.huntground(id); return true; };
 UI.DO.huntground = id => { if (!Q.skillUnlocked('hunting')) return Q.go('hunting'); UI.huntMode = 'ground'; if (id && animal(id)) pick(id); openHunting(); };
@@ -103,7 +106,11 @@ Q.resumeAfterLoad = (...args) => {
   if (a?.kind === 'fight' && animal(a.id) && Q.skillUnlocked('hunting')) {
     S().act = { ...a, kind: 'hunt', progress: 0 };
   }
-  return resume0(...args);
+  /* a hunt saved before the ground was made one (26 Nov 2026) for an animal no longer listed stops with a note */
+  const b = S().act, gone = b && b.kind === 'hunt' && animal(b.id) && !D.MON[b.id].ground && !Q.questWantsAnimal(b.id);
+  const r = resume0(...args);
+  if (gone && !Q.act && Q.log) Q.log(`The ${(S().beast.kills[b.id] || 0) > 0 ? D.MON[b.id].name.toLowerCase() : 'animal'} you were hunting is no longer on the hunting ground, so that hunt has stopped. Pick another from Hunting.`);
+  return r;
 };
 UI.focusHuntingActivity = a => {
   if (a.kind === 'hunt') pick(a.id);
@@ -119,36 +126,37 @@ const cw0 = UI.DO.cwtab; if (cw0) UI.DO.cwtab = t => t === 'hunt' ? UI.DO.huntgr
 /* ---------- the Hunting page: Hunting ground | Fieldwork ---------- */
 const field0 = UI.V.hunting;
 UI.DO.huntmode = mode => { UI.huntMode = mode === 'field' ? 'field' : 'ground'; UI.render(false); };
-/* every hunting ground, from any town (owner, 23 Nov 2026): a row of grounds, then the five tiers, then that tier's animals */
-const grounds = () => D.TOWNS.map(t => Q.huntGround ? Q.huntGround(t.id) : null).filter(Boolean);
+/* one hunting ground with five tier tabs (owner, 26 Nov 2026: "get rid of there being different towns for each ... Just
+   have the different tiers"). Which tier opens first follows your Hunting level. */
 const defaultTier = () => { const L = Q.huntLevel(); let t = 0; D.HUNT_TIERS.forEach((T, i) => { if (L >= T.lo) t = i; }); return t; };
-UI.DO.huntgroundat = town => { UI.huntGroundAt = town; UI.render(false); };
+/* the animals listed in a tier: the ground's own, plus any other animal an active quest still asks for */
+Q.groundTier = i => { const ids = (D.HUNT_GROUND || []).filter(id => D.MON[id].tier === i);
+  for (const m of D.MONLIST) if (m.hl && !m.ground && m.tier === i && animal(m.id) && Q.questWantsAnimal(m.id) && !ids.includes(m.id)) ids.push(m.id);
+  return ids.map(id => D.MON[id]).sort((a, b) => a.hl - b.hl); };
 UI.DO.hunttier = i => { UI.huntTier = Math.max(0, Math.min(4, +i || 0)); UI.render(false); };
-UI.DO.huntkit = id => { const r = D.RECIPES['craft_' + id] || D.RECIPES['cook_' + id]; if (!r) return; UI.returnTo = { page: 'hunting', label: 'Hunting' }; UI.focusTask(r.skill, r.id, r.tab, r.skill); };
+UI.DO.huntkit = id => { const r = D.RECIPES['craft_' + id] || D.RECIPES['cook_' + id]; if (!r) return; const bm = UI.view === 'beastmastery'; UI.returnTo = { page: bm ? 'beastmastery' : 'hunting', label: bm ? 'Beastmastery' : 'Hunting' }; UI.focusTask(r.skill, r.id, r.tab, r.skill); };
 /* kit counts update live while you hunt (owner, 26 Nov 2026: "need to be able to see how many traps I have left") */
 const part = id => { const n = Q.have(id), it = D.ITEMS[id]; return `<button type="button" class="hunt-kit-item ${n ? 'ok' : 'miss'}" data-do="huntkit" data-a="${id}" data-tip="item:${id}" aria-label="${esc(it.name)}: ${n} held, make more">${Q.itemIco(it)}<span>${esc(it.name)}</span><b class="mono" data-b="count:${id}">${n}</b></button>`; };
+UI.huntKitPart = part;
+/* the five tier tabs, shared with Beastmastery's Capture tab (beast_capture.js) */
+UI.huntTierTabs = (cur, action, level) => `<nav class="hunt-tiers btnrow" role="tablist" aria-label="Tiers">${D.HUNT_TIERS.map((t, i) => { const on = i === cur, open = level >= t.lo;
+  return `<button type="button" class="btn sm ${on ? 'on' : ''}" role="tab" aria-selected="${on}" data-do="${action}" data-a="${i}">${open ? '' : ico('lock')}${esc(t.name)}<small class="mono">${t.lo}–${t.hi}</small></button>`; }).join('')}</nav>`;
 const kitLine = T => { if (!T || (!T.trap && !T.bait)) return D.ITEMS.wooden_trap ? `<div class="hunt-kit"><span class="k">Kit</span>${part('wooden_trap')}<small class="dim">Optional: a wooden trap helps the strike.</small></div>` : `<p class="hunt-kit dim">No kit needed.</p>`;
   return `<div class="hunt-kit"><span class="k">${esc(T.name)} kit</span>${part(T.trap)}${part(T.bait)}<small class="dim">Trap is kept; one bait per hunt.</small></div>`; };
 const groundPage = () => {
-  const all = grounds(); if (!all.length) return `<section class="panel empty"><p>No hunting grounds.</p></section>`;
-  if (!all.some(g => g.town === UI.huntGroundAt)) UI.huntGroundAt = S().town;
   if (UI.huntTier === undefined) UI.huntTier = defaultTier();
-  const g = all.find(x => x.town === UI.huntGroundAt) || all[0], T = D.HUNT_TIERS[UI.huntTier], L = Q.huntLevel(), here = reached(g.town);
-  const gtabs = `<nav class="hunt-grounds btnrow" role="tablist" aria-label="Hunting grounds">${all.map(x => { const ok = reached(x.town), on = x.town === g.town;
-    return `<button type="button" class="btn sm ${on ? 'on' : ''} ${ok ? '' : 'locked'}" role="tab" aria-selected="${on}" data-do="huntgroundat" data-a="${x.town}" data-tip="text:${esc(x.name)} · ${esc(D.TOWN[x.town].name)}${ok ? '' : ' · reach it first'}">${ok ? '' : ico('lock')}<span>${esc(x.name)}</span><small>${esc(D.TOWN[x.town].name)}</small></button>`; }).join('')}</nav>`;
-  const ttabs = `<nav class="hunt-tiers btnrow" role="tablist" aria-label="Tiers">${D.HUNT_TIERS.map((t, i) => { const on = i === UI.huntTier, open = L >= t.lo;
-    return `<button type="button" class="btn sm ${on ? 'on' : ''}" role="tab" aria-selected="${on}" data-do="hunttier" data-a="${i}">${open ? '' : ico('lock')}${esc(t.name)}<small class="mono">${t.lo}–${t.hi}</small></button>`; }).join('')}</nav>`;
-  const list = g.monsters.map(e => D.MON[e.id]).filter(m => m && (m.tier ?? D.huntTierOf(m.hl)) === UI.huntTier);
-  const choices = list.map(m => { const id = m.id, known = (S().beast.kills[id] || 0) > 0, wanted = Q.questWantsAnimal(id), lvlOk = L >= m.hl || wanted, open = (here || wanted) && lvlOk, need = open ? Q.huntKitNeed(id) : '', pct = Math.round(Q.huntCatch(id) * 100);
+  const T = D.HUNT_TIERS[UI.huntTier], L = Q.huntLevel();
+  const ttabs = UI.huntTierTabs(UI.huntTier, 'hunttier', L);
+  const choices = Q.groundTier(UI.huntTier).map(m => { const id = m.id, known = (S().beast.kills[id] || 0) > 0, wanted = Q.questWantsAnimal(id), open = L >= m.hl || wanted, need = open ? Q.huntKitNeed(id) : '', pct = Math.round(Q.huntCatch(id) * 100);
     const drops = (m.drops || []).map(d => d[0]).filter((k, i, a) => D.ITEMS[k] && a.indexOf(k) === i && Q.itemDiscovered(k));
-    const why = !here && !wanted ? `Reach ${D.TOWN[g.town].name}` : !lvlOk ? `Requires Hunting ${m.hl}` : need;
+    const why = !open ? `Requires Hunting ${m.hl}` : need;
     /* an animal you have not caught yet stays ??? (UI rules: unmet creatures are never named) */
-    return { id, name: known ? m.name : '???', artKind: 'creature', artId: id, yieldId: null, locked: !open, revealed: false, blocked: !open || !!need, reason: why, short: !open ? (!here && !wanted ? `Lv ${m.hl} · Reach ${D.TOWN[g.town].name}` : 'Lv ' + m.hl) : '',
+    return { id, name: known ? m.name : '???', artKind: 'creature', artId: id, yieldId: null, locked: !open, revealed: false, blocked: !open || !!need, reason: why, short: !open ? 'Lv ' + m.hl : '',
       caption: `Hunting ${m.hl}${wanted ? ' · Quest' : ''}`, stateText: !open ? 'Locked' : need ? need.replace(/^Needs /, 'No ') : `${pct}% catch`,
       info: `<div class="hunt-steps">${D.HUNT_STEPS.map(s => `<span>${ico(s[2])}${s[0]}</span>`).join('<i aria-hidden="true">→</i>')}</div>${kitLine(T)}<p class="dim">${pct}% chance the strike lands; otherwise it slips away and you start tracking again. ${Q.huntXpShown(id, true)} Hunting XP a catch, ${Q.huntXpShown(id, false)} if it gets away.</p>${drops.length ? `<div class="hunt-drops"><span class="k">Drops</span>${drops.map(k => `<span class="cw-drop" data-tip="item:${k}">${Q.itemIco(D.ITEMS[k])}</span>`).join('')}</div>` : ''}` }; });
-  if (!choices.length) return gtabs + ttabs + `<section class="panel empty"><p>No ${esc(T.name.toLowerCase())} animals here.</p></section>`;
-  /* the catalogue's corner names the ground's own town, not the one you are standing in */
-  return gtabs + ttabs + UI.taskPanel('hunting', `${g.name} · ${T.name}`, 'hunt', choices, 'Hunt').replace(`>${D.TOWN[S().town].name}</small>`, `>${esc(D.TOWN[g.town].name)}</small>`);
+  if (!choices.length) return ttabs + `<section class="panel empty"><p>No ${esc(T.name.toLowerCase())} animals here.</p></section>`;
+  /* the catalogue's corner gives the tier's level band, not a town: the ground is the same from everywhere */
+  return ttabs + UI.taskPanel('hunting', `Hunting ground · ${T.name}`, 'hunt', choices, 'Hunt').replace(`>${D.TOWN[S().town].name}</small>`, `>Hunting ${T.lo}–${T.hi}</small>`);
 };
 UI.V.hunting = () => {
   if (!Q.skillUnlocked('hunting')) return UI.lockedPage('hunting');

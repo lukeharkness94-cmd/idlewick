@@ -1,5 +1,10 @@
 # Beast bonds and the November 10 UI update
 
+> **26 November 2026: captures replace expeditions.** The owner split the two skills: Hunting goes out to trap and
+> kill animals for their drops; Beastmastery catches animals alive and keeps them. Read "Captures and lucky eggs"
+> at the end first. The expedition rules below are history: nothing can be sent any more, and an expedition already
+> out still resolves once at its saved time. Bonds, training, evolution, companions and hatching are unchanged.
+
 Baseline: main at bc6d491b7a37fb8c471011795799e0e448d18a5a (8 November 2026). Changes are local; no publication or push.
 
 ## Decisions and tuning
@@ -46,3 +51,44 @@ Browser fixtures grant test resources explicitly; they are not evidence of norma
 Observe whether players understand fieldwork versus expeditions, choose beasts for their passives, notice deaths between identical enemies and can follow a missing ingredient through travel back to its objective. Check whether 45-minute training and 1–4-hour expeditions feel rewarding without obligations. Observe a mature farm and full research collection using real player saves. No human enjoyment or retention results are claimed.
 
 Windows/macOS native packaging, a real Steam App ID, Cloud setup and cross-device conflict testing remain release work. Browser/storage tests do not validate Steam Cloud.
+
+## Captures and lucky eggs (26 November 2026)
+
+Owner decision, chosen verbatim: "Capture replaces expeditions: Beastmastery gets a Capture task like a hunt (track →
+set live trap → coax), but a success keeps the animal instead of killing it. Any animal you've hunted in a reached
+ground can be caught; better Beastmastery = better odds. Eggs become rare random drops from combat and all skills.
+Expeditions go (one already out still comes back)." Hunting now has one ground with tier tabs, so "in a reached
+ground" became "any animal you have hunted".
+
+- **Capture task** (`js/beast_capture.js`, `KIND_EXT.capture`, id = creature id). Steps: Tracking 40%, Setting the
+  live trap 30%, Coaxing 30% of the cycle. Cycle 8 s + 0.09 s per Hunting level of the animal, then the usual speed
+  bonuses and the Captures field-guide entries (2% faster each).
+- **Who can be caught**: an animal with a kill on record (`S.beast.kills`), from any town. Animals not yet hunted show
+  as blacked-out ??? cards with "Hunt one first".
+- **Odds**: 55% + 2.5% per Beastmastery level above the animal's Hunting level, between 35% and 90%.
+- **Kit**: Beginner wooden trap; Intermediate and Skilled padded live trap; Expert and Master rune trap. The trap goes
+  home with the animal you keep and is not used otherwise. From Intermediate up, one of the hunting tier's bait per try
+  (scent bait, honey bait, smoked lure, moonlit lure). Running out stops the task with the reason.
+- **XP**: Beastmastery XP on the same scale as Hunting (`8 × (5 + 0.35 × level) × cycle/8 s × (1 + animal level/100) /
+  0.75`); an escape pays 30%. Expected XP per hour is about 95% of hunting the same animal at the same level (for
+  example 21.2k against 21.9k at level 3 on the chicken, 232k against 244k at level 80 on the griffin, before skill
+  multipliers).
+- **A success** keeps the animal as `wild_<id>` straight in a pen (`DQ.awardPet(id, { hatched: true, quiet: true })`,
+  no egg), with a beast event, a journal line and a "Caught" note offering Make companion. If you already own that
+  beast, it is checked over and let go: full XP, no duplicate, trap kept. Captures never add bond XP.
+- **Never in forecasts.** Offline catch-up uses the same task, and offline captures appear in Welcome Back as beast
+  events. Live-sized steps and one long catch-up give the same result (tests/beast-capture.cjs).
+- **Expeditions**: `DQ.sendBeastTrap` always refuses; the Trapper's tab is gone (the ranch has Ranch and Capture). An
+  expedition saved before this still resolves once at its deadline, with its original odds and pity, and its line
+  shows on the ranch card and the Capture tab until then.
+- **Lucky eggs**: every skilling action has a 1 in 2,000 chance and every victory or catch a 1 in 500 chance of an
+  egg. The egg is one of the former Trapper beasts (Hearthwolf, Bramble boar, Duskwatch owl, Honeyclaw) that you do
+  not own or already have in the hatchery, whose Hero level you have reached and whose town you have visited, chosen
+  evenly. Hooks: `DQ.petRoll` for gathering, making, thieving, sailing and harvests; `DQ.killHooks` for fights and
+  hunt catches; and the fieldwork, drill and capture tasks. Never in forecasts. The Collection page shows each beast's
+  odds per action and per fight. The skill pets, harvest, boss, signature wild beasts and fieldwork eggs are unchanged.
+
+Verification: `tests/beast-capture.cjs` (browser, isolated hero with granted levels and items) covers the gate, odds and
+bounds, keeping once, letting go, failures, kit and stopping, forecasts, offline parity, save and reload, the old
+expedition resolving once, egg hooks and rates, Collection odds and the Capture tab. These are scripted checks, not
+human playtesting: whether captures feel worth it and how often lucky eggs land in real play needs players.

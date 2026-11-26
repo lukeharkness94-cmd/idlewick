@@ -559,7 +559,7 @@ Menu: Home, Quests, World, Village, Hero, **Guide**, Shop. Left rail: Now card, 
 - Menu counts still show available actions only, so Guide carries no badge.
 
 ### Current test list
-`node tests/regression.cjs` (108), `tests/story.cjs`, `tests/beastmastery.cjs`, `tests/art-pixel.cjs`, `tests/desktop-storage.cjs`; with a preview server and `IDLEWICK_URL`: `ui-fit`, `ui-current`, `ui-audit`, `ux-roles`, `ui-journeys`, `ui-adventure`, `ui-effects`, `ui-farming`, `ux-update`, `beastmastery-ui`, `ranch`, `shape-rule` (the 26 Nov shape rule: clickable = 8px outlined rectangle, not clickable = no outline; `css/shape.css`). `tests/story-ui.cjs` has a known, older failure at the `bl_ledger` step.
+`node tests/regression.cjs` (108), `tests/story.cjs`, `tests/beastmastery.cjs`, `tests/art-pixel.cjs`, `tests/desktop-storage.cjs`; with a preview server and `IDLEWICK_URL`: `ui-fit`, `ui-current`, `ui-audit`, `ux-roles`, `ui-journeys`, `ui-adventure`, `ui-effects`, `ui-farming`, `ux-update`, `beastmastery-ui`, `ranch`, `beast-capture`, `hunt-stalk`, `creature-roster`. `tests/story-ui.cjs` has a known, older failure at the `bl_ledger` step. `shape-rule`, `css/shape.css`
 
 
 ## World Life update (Dec 2026)
@@ -1043,3 +1043,31 @@ Owner request: "can these random events come up as a full-screen pop up. When id
 - **Decisions.** Fights from hindsight need you in the event's town (disabled with "Back in <town>"), because event creatures belong to a town and `startAct` enforces it. Choices that cannot be afforded show disabled with the reason ("Need 60 coins", "Need 3 cooked food"). The raid gained "Leave it to the watch", so every event keeps a free choice now that ignoring it no longer resolves it. The event creature had been built from hunting-ground animals since the 23 Nov tiers (a level-125 "Road bandits" in Willowbrook); `topCreature` now skips hunting animals, tower floors and event creatures.
 - **Limits.** The idle threshold (5 minutes) and the cap (three) are my choices, not the owner's. Browser checks are not a human playtest; the scene was inspected at 1440 × 900 (light) and 390 × 844 (dark).
 - **Tests.** `tests/world-events-hindsight.cjs` (new, preview server), `tests/world-life.cjs` (updated for the scene), `tests/regression.cjs` T2/T3 rewritten and T9/T10 added.
+
+## Hunting and Beastmastery split (Claude, 26 Nov 2026)
+
+Branch `claude/hunt-beasts` from `claude/part-b-c` (68eb716). Owner decisions: Hunting kills animals for their drops;
+Beastmastery catches them alive to keep. "Capture replaces expeditions"; eggs become lucky finds from any skill or
+fight; and one hunting ground with tier tabs, no towns ("even if this means reducing the monster count").
+
+- **One ground** (`D.HUNT_GROUND`, js/hunt_tiers_data.js; page in js/hunt_stalk.js): 50 animals, ten per tier, each
+  on its own Hunting level two apart (1, 2, 4 … 98). Classic animals at the bottom (chicken, rabbit, pheasant, sheep,
+  cow, boar, crab, thimblefox, red deer, belladonna hare), griffin, sky stag, moon hare, star stag, eclipse roc and
+  celestial unicorn at the top. Every quest animal is on it. Levels of shown animals were moved onto the even ladder
+  (e.g. sheep 4→6, cow 7→8, boar 8→10, crab 10→12); ids, drops and kills are unchanged. The other 150 animals stay in
+  the data and the per-town `<town>:hunt` areas (fieldwork materials and the pre-Hunting quest fights use them) but
+  are not listed as quarry. A save hunting one of them stops on load with a log line; an active quest can still send
+  you after one.
+- **Listings follow the ground** (`DQ.animalListed`): field guide has one "Hunting ground" topic and no animals in town
+  topics; the museum's creature wing and the Beast Master achievement count only animals you can still meet (or have
+  caught); the atlas counts fights per town plus a Hunting ground row; item sources skip animals off the ground.
+  Eight older animals on the ground got field-guide notes for the first time.
+- **Capture** (js/beast_capture.js, Beastmastery → Capture tab, css/beasts.css): see docs/beastmastery.md, "Captures
+  and lucky eggs", for the numbers. A Captures field-guide topic counts successes.
+- **Expeditions retired**; one already out still comes back once. The ranch's shed card became a Capture card.
+- **Lucky eggs**: 1 in 2,000 actions, 1 in 500 victories or catches, from the former Trapper beasts you qualify for.
+- **Offline ceiling**: Hunting is capped by the top ground animal (98) rather than regions, so in practice it is
+  uncapped while away; Beastmastery stays uncapped. Both are for the owner to revisit (docs/offline-ceiling.md).
+- Not changed: js/world_events.js (another agent's file) still picks a town's highest-level creature for some events,
+  which can be an animal now off the ground; tests/combat-hunting-qa.cjs already failed on `claude/part-b-c` before
+  this work (its fresh-hero opening) and was not repaired here.
