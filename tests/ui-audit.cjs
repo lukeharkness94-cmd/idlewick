@@ -27,7 +27,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
  await p.evaluate(()=>DQ.go('combat'));await p.waitForTimeout(900);await p.screenshot({path:'/tmp/idlewick-audit-combat.png'});
  // Real unlock path and help on demand.
  /* Part B (Task 12): unlock reveals are opt-in. By default the earned unlock goes to the bell without a pop-up; with Settings → Celebrate new systems on, it is revealed. */
- const earn=reveals=>p.evaluate(on=>{DQ.closeModal();DQ.S=DQ.newState('Unlock');DQ.S.settings.muted=true;DQ.S.settings.notify=true;DQ.S.settings.unlockReveals=on;DQ.S.stats.chop=20;DQ.S.inv.wooden_trap=3;for(const k of ['attack','strength','defence','hitpoints'])DQ.S.xp[k]=DQ.data.XPF[10];const before=DQ.noteLog.length;DQ.checkActionUnlocks();return DQ.noteLog.slice(0,Math.max(0,DQ.noteLog.length-before)).concat(DQ.noteLog).filter(e=>/^unlock:/.test(e.o.key||'')).map(e=>e.o.key);},reveals);
+ const earn=reveals=>p.evaluate(on=>{DQ.closeModal();DQ.S=DQ.newState('Unlock');DQ.S.settings.muted=true;DQ.S.settings.notify=true;DQ.S.settings.unlockReveals=on;DQ.S.stats.chop=20;DQ.S.inv.wooden_trap=3;for(const k of ['attack','strength','defence','hitpoints'])DQ.S.xp[k]=DQ.data.XPF[10];const before=DQ.noteLog.length;DQ.checkActionUnlocks();return DQ.noteLog.slice(0,DQ.noteLog.length-before).filter(e=>/^unlock:/.test(e.o.key||'')).map(e=>e.o.key);},reveals);
  const quietUnlocks=await earn(false);assert.ok(quietUnlocks.length>0,'the earned unlock is recorded in the bell');assert.equal(await p.locator('.modal').count(),0,'unlocks stay quiet unless reveals are switched on');
  await earn(true);
  assert.equal(await p.locator('.modal .lr-unlock').count(),1,'the earned unlock is visible when reveals are switched on');
