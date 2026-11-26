@@ -15254,6 +15254,9 @@ UI.lockedPage = sk => {
 UI.taskChoice = {};
 UI.taskToolbar = {};
 UI.taskPanel = (key, title, kind, choices, verb) => {
+  /* open choices first, then locked ones, keeping each group's own order (owner, 26 Nov 2026: nothing locked above
+     something you can use, on any activity page); Array.prototype.sort is stable */
+  choices = [...choices].sort((a, b) => (a.locked ? 1 : 0) - (b.locked ? 1 : 0));
   const active = DQ.act && DQ.act.kind === kind && choices.find(c => c.id === DQ.act.id);
   const vis = choices.filter(c => c.visible !== false), pool = vis.length ? vis : choices;
   let choice = pool.find(c => c.id === UI.taskChoice[key]) || (active && pool.includes(active) ? active : null) || pool.find(c => !c.locked && !c.missing) || pool.find(c => !c.locked) || pool[0];
@@ -15283,7 +15286,8 @@ const KIND_OF = { fishing: 'fish', woodcutting: 'wood', mining: 'mine', thieving
 UI.thiefPerks = () => { const L = DQ.thiefLvl(), chip = (ic, t, on) => `<span class="thief-perk ${on ? '' : 'off'}">${ico(ic)}${t}</span>`;
   return `<div class="thief-perks">${chip('shop', `Shops ${(L * .15).toFixed(0)}% cheaper · sell ${(L * .2).toFixed(0)}% higher`, L >= 1)}${chip('pouch', L >= 20 ? `Chests +${L}% coins${L >= 30 ? ' · extra gem' : ''}` : 'Lockpicking at 20', L >= 20)}${chip('lock', L >= 25 ? `Pick locked chests · ${Math.round(DQ.pickChance() * 100)}%` : 'Pick locks at 25', L >= 25)}</div>`; };
 UI.V.gather = sk => {
-  const kind=KIND_OF[sk],nodes=[...D.NODES[kind]].sort((a,b)=>a.lvl-b.lvl);
+  /* what you can use comes first, then what is still locked, each by level (owner, 26 Nov: nothing locked above something open) */
+  const kind=KIND_OF[sk],openNode=n=>DQ.lvl(sk)>=n.lvl&&DQ.townUnlocked(n.town),nodes=[...D.NODES[kind]].sort((a,b)=>(openNode(b)-openNode(a))||a.lvl-b.lvl);
   const choices=nodes.map(n=>{
     const away=!DQ.nodeHere(n)&&DQ.townUnlocked(n.town),levelLocked=DQ.lvl(sk)<n.lvl,townLocked=!DQ.townUnlocked(n.town),regional=DQ.nodeRegional(n);
     const town=D.TOWN[n.town],prev=D.TOWNS[town.idx-1];
@@ -15336,7 +15340,8 @@ UI.V.recipes = sk => {
   /* Categories by material, then by type (Nov 2026): Smithing groups by metal (weapons / armour), Crafting by what you
      make (armour by hide, wood by bows / staves / shields). Each chip says how many are ready, or the level it opens at. */
   /* every list in level order, so new additions never trail at the end */
-  const list=D.RLIST[sk].filter(r=>!DQ.recipeShown||DQ.recipeShown(r)).sort((a,b)=>a.lvl-b.lvl||a.name.localeCompare(b.name)),grp=r=>DQ.recipeGroup(r),order=['Fish','Fish suppers','Farmhouse','Smelting','Bronze','Iron','Steel','Mithril','Adamant','Rune','Astral','Basics','Armour','Wood','Arrows','Jewellery','Charms','Tools','Discovered recipes'],groups=[...new Set(list.map(r=>grp(r).g))].sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
+  const openRecipe=r=>DQ.recipeLvlOk(r)&&DQ.recipeDiscovered(r)?1:0; /* unlocked before locked, then by level (owner, 26 Nov) */
+  const list=D.RLIST[sk].filter(r=>!DQ.recipeShown||DQ.recipeShown(r)).sort((a,b)=>(openRecipe(b)-openRecipe(a))||a.lvl-b.lvl||a.name.localeCompare(b.name)),grp=r=>DQ.recipeGroup(r),order=['Fish','Fish suppers','Farmhouse','Smelting','Bronze','Iron','Steel','Mithril','Adamant','Rune','Astral','Basics','Armour','Wood','Arrows','Jewellery','Charms','Tools','Discovered recipes'],groups=[...new Set(list.map(r=>grp(r).g))].sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
   const g=UI.tab[sk]=groups.includes(UI.tab[sk])?UI.tab[sk]:(groups.find(x=>list.some(r=>grp(r).g===x&&DQ.recipeLvlOk(r)&&DQ.recipeDiscovered(r)&&DQ.canMake(r)))||groups[0]);
   const subs=[...new Set(list.filter(r=>grp(r).g===g).map(r=>grp(r).s).filter(Boolean))],sub=UI.tab[sk+'sub']=subs.includes(UI.tab[sk+'sub'])?UI.tab[sk+'sub']:subs[0],only=UI.tab[sk+'ready'];
   const inG=(r,x,y)=>grp(r).g===x&&(!y||grp(r).s===y),chip=(x,y,on,act,b)=>{const rs=list.filter(r=>inG(r,x,y)),ready=rs.filter(r=>DQ.recipeLvlOk(r)&&DQ.recipeDiscovered(r)&&DQ.canMake(r)).length,min=Math.min(...rs.map(r=>r.lvl)),locked=(DQ.lvl(sk)<min&&!rs.some(r=>DQ.recipeLvlOk(r)))||rs.every(r=>!DQ.recipeDiscovered(r)&&!(r.secret&&DQ.recipeKnown(r.secret)));
