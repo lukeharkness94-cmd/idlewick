@@ -83,7 +83,7 @@ Q.artsBook = style => {
     focus = `<h2>${esc(cur.name)}</h2><p>${esc(cur.text)}</p><p class="dim">Used whenever you fight with ${tab === 'melee' ? 'a melee weapon' : 'a bow'}${st === tab ? '' : `. You are holding ${st === 'magic' ? 'a staff' : st === 'ranged' ? 'a bow' : 'a melee weapon'} now`}.</p>`;
   }
   const next = (tab === 'magic' ? D.SPELLS : D.ARTS[tab]).find(x => Q.lvl(tab) < x.lvl);
-  return `<div class="arts-page"><section class="panel arts-focus"><span class="k">In use</span>${focus}${next ? `<p class="arts-next">Next · Lv ${next.lvl} ${esc(UI.unlockShort ? 'Something new' : '')}</p>` : ''}</section>
+  return `<div class="arts-page"><section class="panel arts-focus"><span class="k">In use</span>${focus}${next ? `<p class="arts-next">Next · Lv ${next.lvl}</p>` : ''}</section>
   <section class="panel arts-book"><div class="illustrated-choices arts-grid">${cards}</div></section></div>`;
 };
 /* the old Combat arts tab now opens the book of the style you fight with */

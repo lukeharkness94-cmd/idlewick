@@ -99,9 +99,10 @@ UI.markNow = () => { const n = $('#nowcard .now'); if (n) n.classList.toggle('he
 
 /* ---------- The skills menu: a second menu, always in reach, so the things people open most are one click away ---------- */
 /* what the next level of a skill opens, for the left-menu tooltip */
-/* what the next level brings, without spoiling locked content: perks by name, everything else as "something new" */
-UI.unlockShort = nx => { if (!nx) return ''; const all = String(nx.what).split(/, (?![^()]*\))/), perks = all.filter(x => /\(.+\)$/.test(x) && !/^Technique:/.test(x)), other = all.length - perks.length;
-  return [...perks, other ? (other === 1 ? 'Something new' : `${other} new things`) : ''].filter(Boolean).join(' · '); };
+/* what the next level brings, without spoiling locked content: perks by name; anything else is not named and leaves no
+   placeholder (Part C Task 26: a preview names a real reward or says nothing), so callers drop the clause on '' */
+UI.unlockShort = nx => { if (!nx) return ''; const all = String(nx.what).split(/, (?![^()]*\))/), perks = all.filter(x => /\(.+\)$/.test(x) && !/^Technique:/.test(x));
+  return perks.join(' · '); };
 UI.nextUnlock = sk => { const L = DQ.lvl(sk), u = D.UNL && D.UNL[sk]; if (!u) return null; const lvl = Object.keys(u).map(Number).filter(l => l > L).sort((a, b) => a - b)[0]; return lvl ? { lvl, what: [].concat(u[lvl]).join(', ') } : null; };
 // Stable progression order: starter activities, early making, then linked and regional unlocks.
 const dockOrder=['fishing','woodcutting','cooking','mining','farming','crafting','smithing','hunting','carpentry','beastmastery','exploration','thieving','research','herbalism','magic','enchanting','sailing'];
@@ -228,7 +229,7 @@ UI.V.overview = () => {
 };
 const skillSummaryRows = skills => skills.map(skill => {
   const locked = !DQ.skillUnlocked(skill.id);
-  return `<button class="skrow ${locked ? 'locked' : ''}" data-do="go" data-a="${skill.page}" style="--c:${skill.col}">${locked ? ico('lock') : DQ.artImage('skill',skill.id,32,'skill-emblem',skill.name)}<span>${skill.name}</span>${locked ? `<small>${esc(DQ.unlockHow(skill.id))}</small>` : `<b class="mono" data-b="lvl:${skill.id}"></b><span class="bar"><i data-b="xpbar:${skill.id}"></i></span>${(nx => nx ? `<small class="sk-next">Lv ${nx.lvl} · ${esc(UI.unlockShort(nx))}</small>` : '')(UI.nextUnlock && UI.nextUnlock(skill.id))}`}</button>`;
+  return `<button class="skrow ${locked ? 'locked' : ''}" data-do="go" data-a="${skill.page}" style="--c:${skill.col}">${locked ? ico('lock') : DQ.artImage('skill',skill.id,32,'skill-emblem',skill.name)}<span>${skill.name}</span>${locked ? `<small>${esc(DQ.unlockHow(skill.id))}</small>` : `<b class="mono" data-b="lvl:${skill.id}"></b><span class="bar"><i data-b="xpbar:${skill.id}"></i></span>${(nx => nx ? `<small class="sk-next">Lv ${nx.lvl}${UI.unlockShort(nx) ? ` · ${esc(UI.unlockShort(nx))}` : ''}</small>` : '')(UI.nextUnlock && UI.nextUnlock(skill.id))}`}</button>`;
 }).join('');
 UI.V.skillsummary = () => {
   const open = D.SKILLS.filter(skill => DQ.skillUnlocked(skill.id));

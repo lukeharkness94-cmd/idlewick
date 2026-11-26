@@ -13012,7 +13012,7 @@ function onLevel(sk, from, to) {
   if (!details.length) {
     const next = Object.keys(D.UNL[sk] || {}).map(Number).filter(level => level > to).sort((a,b) => a-b)[0];
     details.push(`Experience bonus is now +${Math.round(((DQ.xpBonusBase ? DQ.xpBonusBase(sk) : DQ.xpMult(sk)) - 1) * 100)}%.`);
-    if (next) details.push(`Next at level ${next}: ${DQ.ui && DQ.ui.unlockShort ? DQ.ui.unlockShort({ what: D.UNL[sk][next].join(', ') }) : 'something new'}.`);
+    if (next) { const short = DQ.ui && DQ.ui.unlockShort ? DQ.ui.unlockShort({ what: D.UNL[sk][next].join(', ') }) : ''; if (short) details.push(`Next at level ${next}: ${short}.`); }
   }
   if (DQ.sim.on) DQ.sim.levels.push([sk, to]);
   else { DQ.log(`${sd.name} level ${to} reached.`, 'quest'); DQ.emit('levelup', sk, to); }
@@ -14531,7 +14531,7 @@ DQ.goals = () => {
     const L = DQ.lvl(s.id), U = D.UNL[s.id] || {}, next = Object.keys(U).map(Number).filter(l => l > L).sort((a, b) => a - b)[0];
     if (next) {
       const p = lvlProg(s.id, next), names = U[next], node = Object.values(D.NODE).find(n => n.skill === s.id && n.lvl === next);
-      add({ id: 'unl:' + s.id, cat: 'Skills', icon: s.id, col: s.col, title: DQ.ui && DQ.ui.unlockShort ? DQ.ui.unlockShort({ what: names.join(', ') }) : 'Something new', sub: `${s.name} ${L} → ${next}${where(node)}`, pct: p.pct, eta: etaXp(s.id, p.need), go: s.page, big: true, hint: `Train ${s.name} to see how long` });
+      add({ id: 'unl:' + s.id, cat: 'Skills', icon: s.id, col: s.col, title: (DQ.ui && DQ.ui.unlockShort && DQ.ui.unlockShort({ what: names.join(', ') })) || `${s.name} ${next}`, sub: `${s.name} ${L} → ${next}${where(node)}`, pct: p.pct, eta: etaXp(s.id, p.need), go: s.page, big: true, hint: `Train ${s.name} to see how long` });
     }
     const perk = D.GATHER_SKILLS.includes(s.id) && D.PERKS.find(pk => pk.lvl > L);
     if (perk) { const p = lvlProg(s.id, perk.lvl); add({ id: 'perk:' + s.id, cat: 'Skills', icon: 'star', col: s.col, title: `Perk: ${perk.name}`, sub: `${s.name} ${perk.lvl} · ${perk.speed ? Math.round(perk.speed * 100) + '% faster' : Math.round(perk.dbl * 100) + '% double yield'}`, pct: p.pct, eta: etaXp(s.id, p.need), go: s.page, minor: true, hint: `Train ${s.name} to see how long` }); }
@@ -17816,9 +17816,10 @@ UI.markNow = () => { const n = $('#nowcard .now'); if (n) n.classList.toggle('he
 
 /* ---------- The skills menu: a second menu, always in reach, so the things people open most are one click away ---------- */
 /* what the next level of a skill opens, for the left-menu tooltip */
-/* what the next level brings, without spoiling locked content: perks by name, everything else as "something new" */
-UI.unlockShort = nx => { if (!nx) return ''; const all = String(nx.what).split(/, (?![^()]*\))/), perks = all.filter(x => /\(.+\)$/.test(x) && !/^Technique:/.test(x)), other = all.length - perks.length;
-  return [...perks, other ? (other === 1 ? 'Something new' : `${other} new things`) : ''].filter(Boolean).join(' · '); };
+/* what the next level brings, without spoiling locked content: perks by name; anything else is not named and leaves no
+   placeholder (Part C Task 26: a preview names a real reward or says nothing), so callers drop the clause on '' */
+UI.unlockShort = nx => { if (!nx) return ''; const all = String(nx.what).split(/, (?![^()]*\))/), perks = all.filter(x => /\(.+\)$/.test(x) && !/^Technique:/.test(x));
+  return perks.join(' · '); };
 UI.nextUnlock = sk => { const L = DQ.lvl(sk), u = D.UNL && D.UNL[sk]; if (!u) return null; const lvl = Object.keys(u).map(Number).filter(l => l > L).sort((a, b) => a - b)[0]; return lvl ? { lvl, what: [].concat(u[lvl]).join(', ') } : null; };
 // Stable progression order: starter activities, early making, then linked and regional unlocks.
 const dockOrder=['fishing','woodcutting','cooking','mining','farming','crafting','smithing','hunting','carpentry','beastmastery','exploration','thieving','research','herbalism','magic','enchanting','sailing'];
@@ -17945,7 +17946,7 @@ UI.V.overview = () => {
 };
 const skillSummaryRows = skills => skills.map(skill => {
   const locked = !DQ.skillUnlocked(skill.id);
-  return `<button class="skrow ${locked ? 'locked' : ''}" data-do="go" data-a="${skill.page}" style="--c:${skill.col}">${locked ? ico('lock') : DQ.artImage('skill',skill.id,32,'skill-emblem',skill.name)}<span>${skill.name}</span>${locked ? `<small>${esc(DQ.unlockHow(skill.id))}</small>` : `<b class="mono" data-b="lvl:${skill.id}"></b><span class="bar"><i data-b="xpbar:${skill.id}"></i></span>${(nx => nx ? `<small class="sk-next">Lv ${nx.lvl} · ${esc(UI.unlockShort(nx))}</small>` : '')(UI.nextUnlock && UI.nextUnlock(skill.id))}`}</button>`;
+  return `<button class="skrow ${locked ? 'locked' : ''}" data-do="go" data-a="${skill.page}" style="--c:${skill.col}">${locked ? ico('lock') : DQ.artImage('skill',skill.id,32,'skill-emblem',skill.name)}<span>${skill.name}</span>${locked ? `<small>${esc(DQ.unlockHow(skill.id))}</small>` : `<b class="mono" data-b="lvl:${skill.id}"></b><span class="bar"><i data-b="xpbar:${skill.id}"></i></span>${(nx => nx ? `<small class="sk-next">Lv ${nx.lvl}${UI.unlockShort(nx) ? ` · ${esc(UI.unlockShort(nx))}` : ''}</small>` : '')(UI.nextUnlock && UI.nextUnlock(skill.id))}`}</button>`;
 }).join('');
 UI.V.skillsummary = () => {
   const open = D.SKILLS.filter(skill => DQ.skillUnlocked(skill.id));
@@ -18875,7 +18876,7 @@ DQ.tips.rail=sk=>{const s=D.SK[sk];if(!s)return '';const lock=!DQ.skillUnlocked(
   if(lock&&s.quest){const q=D.QM[s.quest];return head+`<div class="tt-k">Taught by a quest</div><ul class="tt-list"><li><span class="tt-pic">${ico('quest')}</span><span class="tt-l">${esc(q.name)}<small>${esc(q.giver)}, ${esc(D.TOWN[q.town].name)}${DQ.advLvl()<q.adv?` · from Hero ${q.adv}`:''}</small></span></li></ul>`;}
   if(lock)return head+`<p class="tt-p">${esc(DQ.unlockHow(sk))}</p>`;
   const L=DQ.lvl(sk),need=L>=99?0:Math.max(0,D.XPF[L+1]-(S().xp[sk]||0)),nx=UI.nextUnlock&&UI.nextUnlock(sk);
-  return head+`<div class="tt-xp"><span class="bar"><i style="width:${DQ.pctNext(sk).toFixed(1)}%;background:${s.col}"></i></span><small>${L>=99?'Maximum level':`${fmt(need)} XP to level ${L+1}`}</small></div>${nx?`<div class="tt-k">At level ${nx.lvl}</div><ul class="tt-list">${String(nx.what).split(/, (?![^()]*\))/).slice(0,4).map(n=>/\(.+\)$/.test(n)&&!/^Technique:/.test(n)?`<li><span class="tt-pic">${ico('star')}</span><span class="tt-l">${esc(n)}</span></li>`:`<li><span class="tt-pic blackout">${nextArt(sk,n)}</span><span class="tt-l">Something new</span></li>`).join('')}</ul>`:''}`;};
+  return head+`<div class="tt-xp"><span class="bar"><i style="width:${DQ.pctNext(sk).toFixed(1)}%;background:${s.col}"></i></span><small>${L>=99?'Maximum level':`${fmt(need)} XP to level ${L+1}`}</small></div>${nx?`<div class="tt-k">At level ${nx.lvl}</div><ul class="tt-list">${String(nx.what).split(/, (?![^()]*\))/).slice(0,4).map(n=>/\(.+\)$/.test(n)&&!/^Technique:/.test(n)?`<li><span class="tt-pic">${ico('star')}</span><span class="tt-l">${esc(n)}</span></li>`:`<li><span class="tt-pic blackout">${nextArt(sk,n)}</span><span class="tt-l">???</span></li>`).join('')}</ul>`:''}`;};
 UI.unlocksAheadPanel=()=>{const statSkill={harvest:'farming',craft:'crafting',smith:'smithing',cook:'cooking',mine:'mining'},blocked=x=>{const [k,a]=x.stat.split(':'),need=k==='skill'?a:statSkill[k]||(k==='own'||k==='use'?(Object.values(D.RECIPES).find(r=>r.out[a])||{}).skill:null);return need&&!DQ.skillUnlocked(need)&&x.have<x.need?2:0;},near=sk=>-DQ.actionProgress(sk.id).reduce((a,x)=>a+(1-Math.min(1,x.have/x.need))*(x.kind==='level'?1.5:1)+blocked(x),0),all=D.SKILLS.filter(s=>s.actionReq&&!DQ.skillUnlocked(s.id)).sort((a,b)=>near(b)-near(a)),locked=UI.view==='overview'?all.slice(0,2):all,more=all.length-locked.length;if(!locked.length&&UI.closeToPanel)return UI.closeToPanel();return `<section class="panel unlock-roadmap"><div class="phead"><div><span class="k">Progression</span><h2>${locked.length?'Unlocks ahead':'Action skills discovered'}</h2></div><button class="btn sm" data-do="go" data-a="skillsummary">All skills</button></div>${locked.length?`<p class="hint">${more?`Your two nearest. ${more} more in All skills.`:'Complete their requirements in any order.'}</p><div class="unlock-grid">${locked.map(sk=>`<article style="--c:${sk.col}"><div class="unlock-title">${ico('lock')}<span><b>${esc(sk.name)}</b><small>${esc(sk.blurb)}</small></span></div>${reqHtml(sk)}</article>`).join('')}</div>`:'<p>Every action-earned skill is unlocked. Their next levels remain visible in the Skills menu.</p>'}</section>`;};
 /* once every skill is open, Home shows what is nearest: the next level that opens something, and the field guide entries nearly earned */
 UI.closeToPanel=()=>{const KS={fish:'fishing',wood:'woodcutting',mine:'mining',thieve:'thieving',crop:'farming',animal:'farming',brew:'herbalism',sail:'sailing',train:'beastmastery'},emb=sk=>{const x=D.SKILLS.find(s=>s.id===sk);return x?DQ.artImage('skill',x.id,32,'skill-emblem',x.name):ico('book');};
@@ -18883,7 +18884,7 @@ UI.closeToPanel=()=>{const KS={fish:'fishing',wood:'woodcutting',mine:'mining',t
  const ms=Object.keys(S().mast||{}).map(k=>{const i=k.indexOf(':'),kind=k.slice(0,i),id=k.slice(i+1);if(kind==='fight'||kind==='alch')return null;const m=DQ.mastInfo(kind,id);if(!m.next)return null;const sk=kind==='recipe'?(D.RECIPES&&D.RECIPES[id]||{}).skill:DQ.KIND_EXT?.[kind]?.skillFor?.(id)||KS[kind];return{kind,id,m,sk,name:DQ.mastName(kind,id)||id};}).filter(Boolean).sort((a,b)=>b.m.pct-a.m.pct).slice(0,3);
  if(!lv.length&&!ms.length)return '';
  const card=(sk,title,line,pct,go,tip)=>`<button class="close-card" data-do="go" data-a="${go}" title="${esc(tip)}">${emb(sk)}<span><b>${esc(title)}</b><small>${esc(line)}</small>${DQ.studyBar?DQ.studyBar(pct,false,tip):''}</span></button>`;
- return `<section class="panel close-to"><div class="phead"><div><span class="k">Close to</span><h2>Nearly there</h2></div><button class="btn sm" data-do="go" data-a="skillsummary">All skills</button></div><div class="close-grid">${lv.map(x=>card(x.sk.id,`${x.sk.name} Lv ${x.nx.lvl}`,UI.unlockShort(x.nx),x.pct,x.sk.page,`${x.sk.name} Lv ${x.nx.lvl}: ${UI.unlockShort(x.nx)}`)).join('')}${ms.map(x=>card(x.sk,x.name,`${DQ.ENTRY_NAMES[x.m.stars]} · ${x.m.next-x.m.n} more`,x.m.pct,'bestiary',`Field guide: ${DQ.entryPerk(x.kind,x.m.stars+1)}`)).join('')}</div></section>`;};
+ return `<section class="panel close-to"><div class="phead"><div><span class="k">Close to</span><h2>Nearly there</h2></div><button class="btn sm" data-do="go" data-a="skillsummary">All skills</button></div><div class="close-grid">${lv.map(x=>card(x.sk.id,`${x.sk.name} Lv ${x.nx.lvl}`,UI.unlockShort(x.nx)||`${Math.floor(x.pct)}%`,x.pct,x.sk.page,`${x.sk.name} Lv ${x.nx.lvl}${UI.unlockShort(x.nx)?': '+UI.unlockShort(x.nx):''}`)).join('')}${ms.map(x=>card(x.sk,x.name,`${DQ.ENTRY_NAMES[x.m.stars]} · ${x.m.next-x.m.n} more`,x.m.pct,'bestiary',`Field guide: ${DQ.entryPerk(x.kind,x.m.stars+1)}`)).join('')}</div></section>`;};
 UI.homeSections.push(UI.unlocksAheadPanel);
 DQ.on('lvl',()=>DQ.checkActionUnlocks());DQ.on('quests',()=>DQ.checkActionUnlocks());
 {const r0=UI.render;UI.render=f=>{try{DQ.checkActionUnlocks();}catch(e){}return r0(f);};}
@@ -19824,7 +19825,7 @@ DQ.returnChoices = () => {
       `Ready to deliver: ${lists(need)}. ${project.reward}`, action: 'openproject', a: id, art: 'project:' + id });
   }
   const near = D.SKILLS.filter(sk => DQ.skillUnlocked(sk.id) && D.UNL[sk.id]).map(sk => { const L = DQ.lvl(sk.id), nextLvl = Object.keys(D.UNL[sk.id]).map(Number).find(l => l > L); return nextLvl === L + 1 ? { sk, nextLvl, pct: DQ.pctNext(sk.id), what: D.UNL[sk.id][nextLvl] } : null; }).filter(Boolean).sort((a, b) => b.pct - a.pct)[0];
-  if (near && near.pct >= 50) out.push({ title: `${near.sk.name} ${near.nextLvl} is close`, text: `${Math.round(near.pct)}% of the way there; next: ${(UI.unlockShort ? UI.unlockShort({ what: [].concat(near.what).join(', ') }) : 'something new')}.`, action: 'go', a: near.sk.page, art: 'skill:' + near.sk.id });
+  if (near && near.pct >= 50) out.push({ title: `${near.sk.name} ${near.nextLvl} is close`, text: (short => `${Math.round(near.pct)}% of the way there${short ? `; next: ${short}` : ''}.`)(UI.unlockShort ? UI.unlockShort({ what: [].concat(near.what).join(', ') }) : ''), action: 'go', a: near.sk.page, art: 'skill:' + near.sk.id });
   return out;
 };
 UI.returnChoices = () => { const L = DQ.returnChoices(); return L.length ? `<div class="k" style="margin:14px 0 6px">Other good options</div><div class="return-choices">${L.map(x => `<div><b>${esc(x.title)}</b><small>${esc(x.text)}</small><button class="btn sm" data-do="returnpick" data-a="${x.action}" data-b="${x.a}">Open</button></div>`).join('')}</div>` : ''; };
@@ -23187,7 +23188,7 @@ DQ.mastTick = (a, ...rest) => { const r = tick0 ? tick0(a, ...rest) : undefined;
 /* ---------- the skill page says what is next ---------- */
 UI.floLine = sk => D.FLOURISH[sk] ? ` · <span class="flo-chance" title="${DQ.esc(`${(DQ.flourishChance(sk) * 100).toFixed(1)}% chance each action of “${D.FLOURISH[sk]}”: its XP and output again`)}">✦ ${(DQ.flourishChance(sk) * 100).toFixed(1)}%</span>` : '';
 UI.goalLine = sk => { const nx = UI.nextUnlock && UI.nextUnlock(sk); if (!nx) return ''; const short = UI.unlockShort ? UI.unlockShort(nx) : nx.what;
-  return `<button class="sk-goal" data-do="perktrack" data-a="${sk}" title="${DQ.esc(`${D.SK[sk].name} Lv ${nx.lvl}: ${short} · every perk`)}"><span>Next · Lv ${nx.lvl}</span> <b>${DQ.esc(short)}</b></button>`; };
+  return `<button class="sk-goal" data-do="perktrack" data-a="${sk}" title="${DQ.esc(`${D.SK[sk].name} Lv ${nx.lvl}${short ? ': ' + short : ''} · every perk`)}"><span>Next · Lv ${nx.lvl}</span>${short ? ` <b>${DQ.esc(short)}</b>` : ''}</button>`; };
 /* the whole ladder of a skill's perks: earned, next and ahead (reference detail, so it lives in a pop-up) */
 UI.DO = UI.DO || {};
 UI.DO.perktrack = sk => {
@@ -23201,7 +23202,7 @@ if (UI && UI.skillHero) {
   UI.skillHero = (sk, extra = '') => {
     const h = hero0(sk, extra), i = h.lastIndexOf('</section>'), nx = UI.nextUnlock && UI.nextUnlock(sk), fl = (S().flourish || {})[sk] || 0;
     if (i < 0 || (!nx && !D.FLOURISH[sk])) return h;
-    const next = nx ? `<button class="sh-next-btn" data-do="perktrack" data-a="${sk}"><span class="sh-next-k">Next · Lv ${nx.lvl}</span> <b>${DQ.esc(UI.unlockShort ? UI.unlockShort(nx) : nx.what)}</b></button>` : '';
+    const next = nx ? `<button class="sh-next-btn" data-do="perktrack" data-a="${sk}"><span class="sh-next-k">Next · Lv ${nx.lvl}</span>${(s => s ? ` <b>${DQ.esc(s)}</b>` : '')(UI.unlockShort ? UI.unlockShort(nx) : '')}</button>` : '';
     const flo = D.FLOURISH[sk] ? `<span class="sh-flo" title="${DQ.esc(`Each action: ${(DQ.flourishChance(sk) * 100).toFixed(1)}% chance of “${D.FLOURISH[sk]}”, which repeats its XP and output`)}">✦ ${(DQ.flourishChance(sk) * 100).toFixed(1)}%${fl ? ` · ${DQ.fmt(fl)}` : ''}</span>` : '';
     return h.slice(0, i) + `<div class="sh-next">${next}${flo}</div>` + h.slice(i);
   };
@@ -25247,7 +25248,7 @@ Q.artsBook = style => {
     focus = `<h2>${esc(cur.name)}</h2><p>${esc(cur.text)}</p><p class="dim">Used whenever you fight with ${tab === 'melee' ? 'a melee weapon' : 'a bow'}${st === tab ? '' : `. You are holding ${st === 'magic' ? 'a staff' : st === 'ranged' ? 'a bow' : 'a melee weapon'} now`}.</p>`;
   }
   const next = (tab === 'magic' ? D.SPELLS : D.ARTS[tab]).find(x => Q.lvl(tab) < x.lvl);
-  return `<div class="arts-page"><section class="panel arts-focus"><span class="k">In use</span>${focus}${next ? `<p class="arts-next">Next · Lv ${next.lvl} ${esc(UI.unlockShort ? 'Something new' : '')}</p>` : ''}</section>
+  return `<div class="arts-page"><section class="panel arts-focus"><span class="k">In use</span>${focus}${next ? `<p class="arts-next">Next · Lv ${next.lvl}</p>` : ''}</section>
   <section class="panel arts-book"><div class="illustrated-choices arts-grid">${cards}</div></section></div>`;
 };
 /* the old Combat arts tab now opens the book of the style you fight with */

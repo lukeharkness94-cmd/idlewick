@@ -122,7 +122,7 @@ DQ.mastTick = (a, ...rest) => { const r = tick0 ? tick0(a, ...rest) : undefined;
 /* ---------- the skill page says what is next ---------- */
 UI.floLine = sk => D.FLOURISH[sk] ? ` · <span class="flo-chance" title="${DQ.esc(`${(DQ.flourishChance(sk) * 100).toFixed(1)}% chance each action of “${D.FLOURISH[sk]}”: its XP and output again`)}">✦ ${(DQ.flourishChance(sk) * 100).toFixed(1)}%</span>` : '';
 UI.goalLine = sk => { const nx = UI.nextUnlock && UI.nextUnlock(sk); if (!nx) return ''; const short = UI.unlockShort ? UI.unlockShort(nx) : nx.what;
-  return `<button class="sk-goal" data-do="perktrack" data-a="${sk}" title="${DQ.esc(`${D.SK[sk].name} Lv ${nx.lvl}: ${short} · every perk`)}"><span>Next · Lv ${nx.lvl}</span> <b>${DQ.esc(short)}</b></button>`; };
+  return `<button class="sk-goal" data-do="perktrack" data-a="${sk}" title="${DQ.esc(`${D.SK[sk].name} Lv ${nx.lvl}${short ? ': ' + short : ''} · every perk`)}"><span>Next · Lv ${nx.lvl}</span>${short ? ` <b>${DQ.esc(short)}</b>` : ''}</button>`; };
 /* the whole ladder of a skill's perks: earned, next and ahead (reference detail, so it lives in a pop-up) */
 UI.DO = UI.DO || {};
 UI.DO.perktrack = sk => {
@@ -136,7 +136,7 @@ if (UI && UI.skillHero) {
   UI.skillHero = (sk, extra = '') => {
     const h = hero0(sk, extra), i = h.lastIndexOf('</section>'), nx = UI.nextUnlock && UI.nextUnlock(sk), fl = (S().flourish || {})[sk] || 0;
     if (i < 0 || (!nx && !D.FLOURISH[sk])) return h;
-    const next = nx ? `<button class="sh-next-btn" data-do="perktrack" data-a="${sk}"><span class="sh-next-k">Next · Lv ${nx.lvl}</span> <b>${DQ.esc(UI.unlockShort ? UI.unlockShort(nx) : nx.what)}</b></button>` : '';
+    const next = nx ? `<button class="sh-next-btn" data-do="perktrack" data-a="${sk}"><span class="sh-next-k">Next · Lv ${nx.lvl}</span>${(s => s ? ` <b>${DQ.esc(s)}</b>` : '')(UI.unlockShort ? UI.unlockShort(nx) : '')}</button>` : '';
     const flo = D.FLOURISH[sk] ? `<span class="sh-flo" title="${DQ.esc(`Each action: ${(DQ.flourishChance(sk) * 100).toFixed(1)}% chance of “${D.FLOURISH[sk]}”, which repeats its XP and output`)}">✦ ${(DQ.flourishChance(sk) * 100).toFixed(1)}%${fl ? ` · ${DQ.fmt(fl)}` : ''}</span>` : '';
     return h.slice(0, i) + `<div class="sh-next">${next}${flo}</div>` + h.slice(i);
   };
