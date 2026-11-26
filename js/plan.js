@@ -335,7 +335,8 @@ DQ.resolveEvent = (id, opt) => {
   const before = snap(), shown = !!document.querySelector('#inboxbox'), toast0 = DQ.toast; if (shown) DQ.toast = () => {};
   const coins = n => { DQ.addCoins(n); }, pay = n => { if (S().coins < n) { DQ.toast = toast0; toast0('Not enough coins', true); return false; } S().coins -= n; return true; };
   const it = e.item && D.ITEMS[e.item];
-  if(EVENTS[e.type]?.resolve){msg=EVENTS[e.type].resolve(e,opt);if(msg===null){DQ.toast=toast0;toast0('You no longer have the supplies for that choice.',true);return false;}} else switch (e.type + ':' + opt) {
+  const kind=EVENTS[e.type]||DQ.inboxKinds?.[e.type];/* other modules' inbox rows (world_events.js) resolve here too */
+  if(kind?.resolve){msg=kind.resolve(e,opt);if(msg===null){DQ.toast=toast0;toast0('You no longer have the supplies for that choice.',true);return false;}} else switch (e.type + ':' + opt) {
     case 'trader:sell': { const n = Math.min(e.n, DQ.have(e.item)); DQ.take(e.item, n); const c = Math.round(it.val * 1.5 * n); coins(c); msg = `Sold ${fmt(n)} for ${fmt(c)} coins.`; break; }
     case 'trader:haggle': if (chance(.5)) { const n = Math.min(e.n, DQ.have(e.item)); DQ.take(e.item, n); const c = Math.round(it.val * 2.2 * n); coins(c); msg = `Haggled hard: ${fmt(c)} coins!`; } else { msg = 'The trader shrugs and leaves.'; bad = true; } break;
     case 'chest:force': if (chance(.65)) { const c = rnd(60, 160) * (tIdx() + 1); coins(c); DQ.grant(DQ.weighted(D.GEM_WEIGHTS)); msg = `It opens: ${fmt(c)} coins and a gem.`; } else { const d = Math.ceil(DQ.maxHp() * .35); S().hp = Math.max(1, S().hp - d); msg = `A needle trap! You lose ${d} health.`; bad = true; } break;

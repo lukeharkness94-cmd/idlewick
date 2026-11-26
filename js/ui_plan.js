@@ -84,13 +84,14 @@ const optSub = (e, k, sub) => { const it = D.ITEMS[e.item];
   if (e.type === 'rare' && k === 'buy') return `Pay ${fmt(e.price)} coins`;
   return sub || (['no', 'pass', 'decline'].includes(k) ? 'Nothing happens' : ''); };
 UI.inboxHtml = () => {
+ DQ.inboxRefresh?.();
  const L=S().inbox||[],R=DQ.eventResults||[],all=[...L,...R],ids=new Set(all.map(e=>String(e.id)));
  DQ.eventDisplayOrder=(DQ.eventDisplayOrder||[]).filter(id=>ids.has(id));
  for(const e of all)if(!DQ.eventDisplayOrder.includes(String(e.id)))DQ.eventDisplayOrder.push(String(e.id));
- const card=e=>`<div class="event" data-event-id="${esc(e.id)}" style="--c:${e.col}"><span class="ev-ic">${ico(e.ic)}</span><div class="ev-b"><b class="ev-t">${esc(e.title)}</b><p>${esc(e.text)}</p>${dealHtml(e)}<div class="ev-opts" role="group" aria-label="Choose one">${e.opts.map(([k, l, sub]) => (sub = optSub(e, k, sub), 0) || `<button class="btn ev-opt" data-do="decide" data-a="${e.id}" data-b="${k}"><b>${esc(l)}</b><small>${esc(sub)}</small></button>`).join('')}</div></div></div>`;
+ const card=e=>`<div class="event" data-event-id="${esc(e.id)}" style="--c:${e.col}"><span class="ev-ic">${ico(e.ic)}</span><div class="ev-b"><b class="ev-t">${esc(e.title)}</b><p>${esc(e.text)}</p>${dealHtml(e)}<div class="ev-opts" role="group" aria-label="Choose one">${e.opts.map(([k, l, sub, no]) => (sub = optSub(e, k, sub), 0) || `<button class="btn ev-opt ${no ? 'ev-no' : ''}" data-do="decide" data-a="${e.id}" data-b="${k}" ${no ? 'disabled' : ''}><b>${esc(l)}</b><small>${esc(no ? `${sub ? sub + ' · ' : ''}${no}` : sub)}</small></button>`).join('')}</div></div></div>`;
  return DQ.eventDisplayOrder.map(id=>{const r=R.find(e=>String(e.id)===id);return r?UI.eventResultHtml(r):card(L.find(e=>String(e.id)===id));}).join('');
 };
-UI.inboxPanel = () => (S().inbox || []).length || (DQ.eventResults || []).length ? `<section class="panel inboxp fancy"><div class="phead"><h2>Decisions waiting</h2><small>From your time away</small></div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></section>` : '';
+UI.inboxPanel = () => (S().inbox || []).length || (DQ.eventResults || []).length ? `<section class="panel inboxp fancy"><div class="phead"><h2>Decisions waiting</h2><small>${(S().inbox || []).some(e => e.type === 'world') ? 'Choose whenever you like; nothing here runs out' : 'From your time away'}</small></div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></section>` : '';
 UI.returnExtras = sum => {
   const L = S().inbox || [], tips = [];
   const raw = Object.keys(sum.items || {}).filter(id => id.startsWith('raw_') && DQ.have(id));

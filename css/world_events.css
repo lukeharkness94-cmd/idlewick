@@ -1,0 +1,18 @@
+/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
+   encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
+   the "it waited for you" label and the unavailable-choice reason. Motion is opacity/translate only, off when calm. */
+.modal.event-fullscreen.world-moment{padding:0}
+.modal.event-fullscreen.world-moment>.m-card.wide{width:100%;height:var(--vh100,100dvh);max-height:none;border-radius:0;border:0;padding:20px clamp(16px,4vw,56px)}
+.world-moment .event-panorama{max-height:none;min-height:180px}
+.world-moment .encounter-moment .events{max-width:1200px;width:100%;margin:0 auto}
+.world-moment .m-act{max-width:1200px;width:100%;margin-left:auto;margin-right:auto}
+.world-moment .event-subject{display:flex;flex-direction:column;align-items:center;gap:10px}
+.world-moment .we-art{display:flex;align-items:flex-end;justify-content:center;gap:18px}
+.world-moment .we-when{font-family:var(--f-ui);font-size:14px;padding:4px 12px;border-radius:999px;background:#101a24cc;color:#f4ead2;letter-spacing:.02em}
+.world-moment .m-act{justify-content:flex-end}
+.event .ev-opt.ev-no small,.ev-opt[disabled] small{color:var(--warn,#c9833a);opacity:1}
+html:not(.calm) .world-moment .we-art{animation:we-arrive .5s ease-out both}
+@keyframes we-arrive{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
+@media (prefers-reduced-motion:reduce){html .world-moment .we-art{animation:none}}
+@media (max-width:860px){.world-moment .we-art{gap:10px}.world-moment .event-subject :is(img,svg,.ic){width:96px!important;height:96px!important}}
+.world-moment .we-art{padding:14px 28px;border-radius:50%;background:radial-gradient(closest-side,#f4ead2e6 55%,#f4ead200)}

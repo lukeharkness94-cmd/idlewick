@@ -46,7 +46,7 @@
       ${stopped}${next}
       <div class="wb-activities">${activities.map(activityCard).join('')}</div>
       ${project ? `<p class="wb-restoration">${esc(project.title)} · ${esc(project.text)}</p>` : ''}
-      ${pending ? `<button class="btn sm wb-encounter-count" data-do="returnpick" data-a="go" data-b="activity">${pending} away encounter${pending === 1 ? '' : 's'} waiting · View</button>` : ''}
+      ${pending ? `<button class="btn sm wb-encounter-count" data-do="returnpick" data-a="go" data-b="activity">${pending} decision${pending === 1 ? '' : 's'} waiting · View</button>` : ''}
     </div>`;
   };
 })();
