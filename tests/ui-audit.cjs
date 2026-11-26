@@ -37,7 +37,11 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
  await p.locator('.page-help [data-do="pagehelp"]').click();
  assert.match(await p.locator('.modal .m-body').innerText(),/Try this/);
  await p.evaluate(()=>{DQ.closeModal();DQ.go('overview');DQ.go('hunting');});
- assert.equal(await p.locator('.modal').count(),0,'revisiting Hunting stays quiet');
+ /* 26 Nov 2026 (owner): a first-visit guide shows once when it is safe to; after Got it, revisits stay quiet */
+ await p.waitForTimeout(400);
+ if(await p.locator('.modal .first-visit').count()){await p.locator('.modal .m-act .btn').first().click();}
+ await p.evaluate(()=>{DQ.go('overview');DQ.go('hunting');});await p.waitForTimeout(400);
+ assert.equal(await p.locator('.modal').count(),0,'revisiting Hunting stays quiet once its guide has been seen');
  assert.deepEqual(errors,[]);console.log(`PASS ${count} page/state/theme/viewport combinations; sidebar fit, unlocks and on-demand help.`);
  }finally{await b.close();}
 })().catch(e=>{console.error(e);process.exit(1)});
