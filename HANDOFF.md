@@ -559,7 +559,7 @@ Menu: Home, Quests, World, Village, Hero, **Guide**, Shop. Left rail: Now card, 
 - Menu counts still show available actions only, so Guide carries no badge.
 
 ### Current test list
-`node tests/regression.cjs` (108), `tests/story.cjs`, `tests/beastmastery.cjs`, `tests/art-pixel.cjs`, `tests/desktop-storage.cjs`; with a preview server and `IDLEWICK_URL`: `ui-fit`, `ui-current`, `ui-audit`, `ux-roles`, `ui-journeys`, `ui-adventure`, `ui-effects`, `ui-farming`, `ux-update`, `beastmastery-ui`, `ranch`. `tests/story-ui.cjs` has a known, older failure at the `bl_ledger` step.
+`node tests/regression.cjs` (108), `tests/story.cjs`, `tests/beastmastery.cjs`, `tests/art-pixel.cjs`, `tests/desktop-storage.cjs`; with a preview server and `IDLEWICK_URL`: `ui-fit`, `ui-current`, `ui-audit`, `ux-roles`, `ui-journeys`, `ui-adventure`, `ui-effects`, `ui-farming`, `ux-update`, `beastmastery-ui`, `ranch`, `beast-capture`, `hunt-stalk`, `creature-roster`. `tests/story-ui.cjs` has a known, older failure at the `bl_ledger` step.
 
 
 ## World Life update (Dec 2026)
@@ -1025,3 +1025,30 @@ Details are in docs/part-b-hours-3-to-5.md.
 - An offline ceiling for skills without a content gate. The proposed formulas are in docs/offline-ceiling.md.
 - Staff's 61-minute gap before Old Tusk.
 
+## Hunting and Beastmastery split (Claude, 26 Nov 2026)
+
+Branch `claude/hunt-beasts` from `claude/part-b-c` (68eb716). Owner decisions: Hunting kills animals for their drops;
+Beastmastery catches them alive to keep. "Capture replaces expeditions"; eggs become lucky finds from any skill or
+fight; and one hunting ground with tier tabs, no towns ("even if this means reducing the monster count").
+
+- **One ground** (`D.HUNT_GROUND`, js/hunt_tiers_data.js; page in js/hunt_stalk.js): 50 animals, ten per tier, each
+  on its own Hunting level two apart (1, 2, 4 … 98). Classic animals at the bottom (chicken, rabbit, pheasant, sheep,
+  cow, boar, crab, thimblefox, red deer, belladonna hare), griffin, sky stag, moon hare, star stag, eclipse roc and
+  celestial unicorn at the top. Every quest animal is on it. Levels of shown animals were moved onto the even ladder
+  (e.g. sheep 4→6, cow 7→8, boar 8→10, crab 10→12); ids, drops and kills are unchanged. The other 150 animals stay in
+  the data and the per-town `<town>:hunt` areas (fieldwork materials and the pre-Hunting quest fights use them) but
+  are not listed as quarry. A save hunting one of them stops on load with a log line; an active quest can still send
+  you after one.
+- **Listings follow the ground** (`DQ.animalListed`): field guide has one "Hunting ground" topic and no animals in town
+  topics; the museum's creature wing and the Beast Master achievement count only animals you can still meet (or have
+  caught); the atlas counts fights per town plus a Hunting ground row; item sources skip animals off the ground.
+  Eight older animals on the ground got field-guide notes for the first time.
+- **Capture** (js/beast_capture.js, Beastmastery → Capture tab, css/beasts.css): see docs/beastmastery.md, "Captures
+  and lucky eggs", for the numbers. A Captures field-guide topic counts successes.
+- **Expeditions retired**; one already out still comes back once. The ranch's shed card became a Capture card.
+- **Lucky eggs**: 1 in 2,000 actions, 1 in 500 victories or catches, from the former Trapper beasts you qualify for.
+- **Offline ceiling**: Hunting is capped by the top ground animal (98) rather than regions, so in practice it is
+  uncapped while away; Beastmastery stays uncapped. Both are for the owner to revisit (docs/offline-ceiling.md).
+- Not changed: js/world_events.js (another agent's file) still picks a town's highest-level creature for some events,
+  which can be an animal now off the ground; tests/combat-hunting-qa.cjs already failed on `claude/part-b-c` before
+  this work (its fresh-hero opening) and was not repaired here.

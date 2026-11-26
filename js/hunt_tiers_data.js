@@ -3,6 +3,7 @@
    the further up you go ... this will require new traps and materials to capture them").
    Five tiers by Hunting level. Every hunting ground holds five animals in every tier (8 grounds x 5 tiers x 5 = 200;
    the 39 animals already in the game keep their ids, levels, kills and field-guide pages and fill their own tier).
+   Since 26 Nov 2026 only D.HUNT_GROUND (below: one ground, ten a tier) is listed as quarry; the rest stay as data.
    Kit: from Intermediate up, a hunt needs that tier's trap in your pack (kept, never used up) and one bait per hunt
    (used whether the strike lands or not). Beginner needs nothing; a wooden trap still helps the strike.
      Beginner      Hunting 1-19   no kit
@@ -263,6 +264,31 @@ for (const town of TOWNS) {
   /* the ground lists its animals lowest first */
   r.hunt[1].sort((a, b) => (D.MON[a]?.hl || 0) - (D.MON[b]?.hl || 0));
 }
+/* ---------- one hunting ground (owner, 26 Nov 2026: "get rid of there being different towns for each - even if this
+   means reducing the monster count. Just have the different tiers") ----------
+   Hunting → Hunting ground is one place with five tier tabs. Ten animals per tier, each on its own Hunting level
+   (two apart, so no two share a rung of the ladder), plain farm and hedgerow animals at the bottom and the things of
+   legend at the top. Every quest's animal is on it (boar, crab, belladonna hare, chimehorn, candletoad, glassback,
+   storm hawk, prism kite). The other animals keep their ids, drops, kills, field-guide pages and pets: they are simply
+   not listed as quarry any more (an active quest could still send you after one; hunt_stalk.js allows that). */
+D.HUNT_GROUND = [
+  /* Beginner 1-19 */ ['chicken', 1], ['rabbit', 2], ['pheasant', 4], ['sheep', 6], ['cow', 8], ['boar', 10], ['crab', 12], ['thimblefox', 14], ['red_deer', 16], ['bellhare', 18],
+  /* Intermediate 20-39 */ ['seal', 20], ['mountain_goat', 22], ['tideglass', 24], ['badger', 26], ['chimehorn', 28], ['red_fox', 30], ['snow_hare', 32], ['woolly_yak', 34], ['barn_owl', 36], ['ice_elk', 38],
+  /* Skilled 40-59 */ ['fallow_deer', 40], ['black_bear', 42], ['marsh_heron', 44], ['walrus', 46], ['fen_boar', 48], ['lynx', 50], ['candletoad', 52], ['cinder_lizard', 54], ['moose', 56], ['ember_stag', 58],
+  /* Expert 60-79 */ ['golden_pheasant', 60], ['ashen_boar', 62], ['glassback', 64], ['moss_bear', 66], ['firebird', 68], ['hawk', 70], ['nimbusgrazer', 72], ['mist_stag', 74], ['prismkite', 76], ['twilight_unicorn', 78],
+  /* Master 80-99 */ ['griffin', 80], ['sunwheat_stag', 82], ['sky_stag', 84], ['moon_hare', 86], ['sun_phoenix', 88], ['star_stag', 90], ['thunderbird', 92], ['shadow_lynx', 94], ['eclipse_roc', 96], ['celestial_unicorn', 98]
+].filter(([id]) => D.MON[id] && D.MON[id].hl).map(([id, hl]) => { const m = D.MON[id]; m.hl = hl; m.tier = D.huntTierOf(hl); m.ground = true; return id; });
+/* the older animals on the ground that never had a field-guide note */
+Object.assign(D.HUNT_NOTES = D.HUNT_NOTES || {}, {
+  thimblefox: 'A fox no bigger than a teapot that steals thimbles, buttons and anything else small and shiny. Its den looks like a sewing basket.',
+  bellhare: 'Lives in the belladonna patch and has a call like a little bell. Nobody knows why it is not poisoned, and it is not telling.',
+  tideglass: 'A skittering shore thing with a shell like sea glass. Children collect the shells. The skitters would like them back.',
+  chimehorn: 'A goat whose horns ring like chimes when it butts something. Ironpeak always knows when one is annoyed, which is always.',
+  candletoad: 'A fat fen toad with a glow in its throat like a candle. Fen folk used them as lanterns until the toads started wandering off with the light.',
+  glassback: 'A lizard whose back has cooled into black glass in the Emberfall heat. Smiths say it is good luck. The lizard says nothing and bites.',
+  nimbusgrazer: 'A big woolly cloud of a beast that grazes the sky meadows. When it lies down it is hard to tell from the weather.',
+  prismkite: 'A thin bright bird that splits the sunlight into rainbows as it flies. Skyreach washing is very colourful and never quite dry.'
+});
 /* field-guide notes in the house voice (villains.js writes the roster's; these are the hunt tiers') */
 const notes = () => { if (!D.LORE) return; for (const [id, note] of Object.entries(D.HUNT_NOTES || {})) if (!D.LORE[id]) D.LORE[id] = { note, legend: note }; };
 notes(); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', notes);

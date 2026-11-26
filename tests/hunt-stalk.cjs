@@ -58,16 +58,24 @@ const { chromium } = require('playwright'), assert = require('node:assert/strict
     const r9 = await p.evaluate(() => { const b = document.querySelector('#view .cw-foe-id>b'), s = document.querySelector('#view .cw-foe-id>small'); return b && s ? [b.getClientRects().length, getComputedStyle(b).whiteSpace, getComputedStyle(s).whiteSpace] : null; });
     if (r9) assert.deepEqual(r9.slice(1), ['nowrap', 'nowrap']);
     await p.evaluate(() => { DQ.stopAct(); DQ.paused = true; });
-    /* 10. tiers: 200 animals, every ground holds five in each of the five tiers; every one has a sprite and a note */
-    const r10 = await p.evaluate(() => { const D = DQ.data, g = Object.values(D.AREAS).flat().filter(a => a.hunt), A = DQ.pixelArt;
-      return { grounds: g.length, total: g.reduce((n, a) => n + a.monsters.length, 0), cells: g.every(a => [0, 1, 2, 3, 4].every(t => a.monsters.filter(e => D.MON[e.id].tier === t).length === 5)),
-        art: g.every(a => a.monsters.every(e => A.hasCreature(e.id))), notes: D.HUNT_NEW.length === 161 && D.HUNT_NEW.every(id => D.LORE[id]), bands: g.every(a => a.monsters.every(e => { const m = D.MON[e.id], T = D.HUNT_TIERS[m.tier]; return m.hl >= T.lo && m.hl <= T.hi; })) }; });
-    assert.deepEqual(r10, { grounds: 8, total: 200, cells: true, art: true, notes: true, bands: true });
-    /* 11. every ground is listed from any town; one you have reached can be hunted without travelling */
-    const r11 = await p.evaluate(() => { const S = DQ.S; S.town = 'willowbrook'; S.towns.saltmere = { visited: true, boss: false }; S.xp.hunting = DQ.data.XPF[15]; DQ.ui.huntMode = 'ground'; DQ.ui.huntGroundAt = 'willowbrook'; DQ.go('hunting');
-      const tabs = document.querySelectorAll('#view .hunt-grounds button').length, locked = document.querySelectorAll('#view .hunt-grounds button.locked').length;
-      const crab = DQ.KIND_EXT.hunt.check('crab'), far = DQ.KIND_EXT.hunt.check('moon_hare'); return { tabs, locked, crab, far }; });
-    assert.equal(r11.tabs, 8); assert.ok(r11.locked >= 5); assert.equal(r11.crab, ''); assert.match(r11.far, /^Reach /);
+    /* 10. one hunting ground (owner, 26 Nov 2026): ten animals in each of the five tiers, every one on its own level and
+       inside its tier's band, with a sprite and a note; all 200 animals stay in the data (old kills, pets, guide pages);
+       every quest's animal is on the ground */
+    const r10 = await p.evaluate(() => { const D = DQ.data, g = Object.values(D.AREAS).flat().filter(a => a.hunt), A = DQ.pixelArt, G = D.HUNT_GROUND.map(id => D.MON[id]);
+      const questAnimals = [...new Set(D.QUESTS.flatMap(q => q.obj.filter(o => o.ev === 'kill' && D.MON[o.key] && D.MON[o.key].hl).map(o => o.key)))];
+      return { total: g.reduce((n, a) => n + a.monsters.length, 0), ground: G.length, cells: [0, 1, 2, 3, 4].map(t => G.filter(m => m.tier === t).length).join(','), levels: new Set(G.map(m => m.hl)).size,
+        art: G.every(m => A.hasCreature(m.id)), notes: G.every(m => D.LORE[m.id] && D.LORE[m.id].note), bands: G.every(m => { const T = D.HUNT_TIERS[m.tier]; return m.hl >= T.lo && m.hl <= T.hi; }),
+        quests: questAnimals.every(id => D.MON[id].ground), classic: ['chicken', 'rabbit', 'sheep', 'cow', 'red_deer', 'boar', 'griffin', 'star_stag', 'eclipse_roc'].every(id => D.MON[id].ground) }; });
+    assert.deepEqual(r10, { total: 200, ground: 50, cells: '10,10,10,10,10', levels: 50, art: true, notes: true, bands: true, quests: true, classic: true });
+    /* 11. no towns: tier tabs only, the same animals from any town, gated by level; an animal off the ground is not
+       hunted unless a quest asks for it */
+    const r11 = await p.evaluate(() => { const S = DQ.S; S.town = 'willowbrook'; S.xp.hunting = DQ.data.XPF[15]; DQ.ui.huntMode = 'ground'; DQ.ui.huntTier = 0; DQ.go('hunting');
+      const grounds = document.querySelectorAll('#view .hunt-grounds').length, tiers = document.querySelectorAll('#view .hunt-tiers button').length, cards = document.querySelectorAll('#view .illustrated-card').length;
+      const crab = DQ.KIND_EXT.hunt.check('crab'), far = DQ.KIND_EXT.hunt.check('moon_hare'), off = DQ.KIND_EXT.hunt.check('marmot');
+      S.town = 'hollow'; const crabHollow = DQ.KIND_EXT.hunt.check('crab'); S.town = 'willowbrook';
+      return { grounds, tiers, cards, crab, far, off, crabHollow }; });
+    assert.equal(r11.grounds, 0); assert.equal(r11.tiers, 5); assert.equal(r11.cards, 10); assert.equal(r11.crab, ''); assert.equal(r11.crabHollow, '');
+    assert.match(r11.far, /^Requires Hunting 86/); assert.equal(r11.off, 'Not on the hunting ground');
     /* 12. kit: an Intermediate animal needs the reinforced trap and scent bait; a hunt uses one bait; out of bait stops */
     const r12 = await p.evaluate(() => { const S = DQ.S; S.towns.ironpeak = { visited: true, boss: false }; S.xp.hunting = DQ.data.XPF[30]; delete S.inv.reinforced_trap; delete S.inv.scent_bait;
       const noTrap = DQ.KIND_EXT.hunt.check('mountain_goat'); S.inv.reinforced_trap = 1; const noBait = DQ.KIND_EXT.hunt.check('mountain_goat'); S.inv.scent_bait = 2;
@@ -81,6 +89,6 @@ const { chromium } = require('playwright'), assert = require('node:assert/strict
     assert.equal(r13.live, true); assert.equal(r13.fail, '1'); assert.match(r13.out, /Dodged the trap/);
     await p.evaluate(() => DQ.stopAct());
     assert.deepEqual(errors, []);
-    console.log('PASS hunting ground (catch/escape/steps/routes/fallback), 200 animals in five tiers on eight grounds visible from anywhere, kit and bait, the progress strip, stage follows foe, night tint under fighters, foe card single lines.');
+    console.log('PASS hunting ground (catch/escape/steps/routes/fallback), one ground of 50 animals in five tiers of ten on distinct levels, the same from every town, kit and bait, the progress strip, stage follows foe, night tint under fighters, foe card single lines.');
   } finally { await b.close(); }
 })().catch(e => { console.error(e); process.exit(1); });

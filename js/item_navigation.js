@@ -11,7 +11,7 @@ Q.itemNavigation=id=>{
  }
  if(Object.values(D.SHOPS).some(s=>s.includes(id)))add(get,'shop','shop','shop',id,'Shop',ico('shop'));
  if(!Q.exclusiveLoot(id)&&(Object.values(D.TOWN_RARE_GEAR).some(s=>s.includes(id))||Object.values(D.TOWN_SPECIALS).some(s=>s.includes(id))))add(get,'rare','shop','rare',id,'Rare wares',ico('shop'));
- for(const m of D.MONLIST)if(m.first===id||m.drops?.some(d=>d[0]===id)){
+ for(const m of D.MONLIST)if((!m.hl||m.ground)&&(m.first===id||m.drops?.some(d=>d[0]===id))){/* animals off the one hunting ground (26 Nov 2026) are no source */
   const known=(Q.S.beast.kills[m.id]||0)>0,group=m.boss?'boss':m.tower?'tower':'creature';
   add(get,group,'combat','creature',m.id,known?m.name:(m.boss?'Boss reward':'Creature drop'),known?Q.monSprite(m,32):ico(m.boss?'trophy':'paw'));
  }

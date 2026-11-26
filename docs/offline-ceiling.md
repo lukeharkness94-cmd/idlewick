@@ -25,7 +25,7 @@ as your current quests and regions reach. Beat a boss or unlock a region to push
 | Skill | Gate already tracked by the code | Fresh hero (Willowbrook only) |
 | --- | --- | --- |
 | Fishing, Woodcutting, Mining, Thieving | Highest `D.NODES` level among towns reached | 10 / 15 / 10 / 10 |
-| Hunting | Highest animal Hunting level (`m.hl`) among towns reached | Willowbrook's top animal |
+| Hunting | Highest Hunting level (`m.hl`) on the one hunting ground (26 Nov 2026: the ground no longer belongs to towns, so this is 98 whatever the region; the tier kit is the real gate) | the top ground animal |
 | Melee, Ranged, Magic, Defence, Health | Highest creature combat level among towns reached (areas, challenges, bosses; towers excluded) | Willowbrook's top creature |
 
 ## Fixture results (tests/offline-ceiling.cjs, granted browser fixture)

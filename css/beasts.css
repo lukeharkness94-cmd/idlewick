@@ -1,0 +1,21 @@
+/* Beastmastery → Capture (js/beast_capture.js, 26 Nov 2026). The page is laid out like Hunting → Hunting ground: the
+   workspace is a direct child of the view, so the activity-page rules keep the window still and scroll only the list
+   of animals. The stage reuses the hunt's step strip, trap and scene classes from hearthside.css (the capture scene
+   also carries .hunt); this file adds the one row above the workspace (tier tabs, then the counts) and a kept animal
+   settling beside the trap instead of fading out. */
+.capture-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;margin:0 0 8px;flex:none}
+.capture-bar>.hunt-tiers{margin:0}
+.capture-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:14px}
+.capture-sum{display:inline-flex;align-items:center;gap:6px}
+.capture-sum .k{margin:0}
+.capture-head .hunt-recent{font-size:14px}
+.capture-old-trap{display:inline-flex;align-items:center;gap:5px;color:var(--mute)}
+.capture-old-trap .ic{width:16px;height:16px}
+.capture-gives{display:flex;align-items:center;gap:6px;margin:6px 0 0}
+.capture-gives .ic{width:18px;height:18px;flex:none}
+.activity-scene.capture[data-result="kept"] .scene-target{animation:capture-kept 1.2s ease-out both}
+@keyframes capture-kept{0%{translate:0 0}30%{translate:20px -8px}60%{translate:40px 0}100%{translate:40px 2px}}
+html.calm .activity-scene.capture .scene-target{animation:none!important}
+@media (prefers-reduced-motion:reduce){.activity-scene.capture .scene-target{animation:none!important}}
+/* the same proportions as the Hunting ground's workspace (style.css, .skill-hunting) */
+@media(min-width:861px){#view>.activity-workspace:has(.skill-beastmastery){grid-template-columns:minmax(360px,480px) minmax(0,1fr)}#view>.activity-workspace:has(.skill-beastmastery) .activity-caption{padding:12px}#view>.activity-workspace:has(.skill-beastmastery) .task-summary p{margin:6px 0}html.short #view>.activity-workspace:has(.skill-beastmastery) .activity-scene{height:160px}}

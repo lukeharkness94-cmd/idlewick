@@ -9,7 +9,8 @@
    that activity stop together, the next queued task still starts, other skills are untouched and nothing earned is
    removed. Only skills with a real content gate in the code are capped:
      fishing, woodcutting, mining, thieving: the highest node level (D.NODES) among the towns reached;
-     hunting: the highest Hunting level (m.hl) among the animals of the towns reached;
+     hunting: the highest Hunting level (m.hl) on the one hunting ground (26 Nov 2026: the ground no longer belongs to
+       towns, so this is the top animal's level, 98, whatever the region; the tier kit is the real gate);
      melee, ranged, magic, defence, health (fights): the highest creature combat level among the towns reached
        (areas, challenges and bosses; trial towers excluded).
    Every other skill has no clean gate and is listed in docs/offline-ceiling.md for the owner's decision. */
@@ -20,7 +21,8 @@ const COMBAT = ['melee', 'ranged', 'magic', 'defence', 'hitpoints'];
 const reached = town => Q.townUnlocked(town);
 Q.progressCeiling = skill => {
   if (NODE_KIND[skill]) { const ls = D.NODES[NODE_KIND[skill]].filter(n => reached(n.town)).map(n => n.lvl || 1); return ls.length ? Math.max(...ls) : null; }
-  if (skill === 'hunting') { const ls = D.MONLIST.filter(m => m.hl && !m.tower && reached(m.town)).map(m => m.hl); return ls.length ? Math.max(...ls) : null; }
+  /* one hunting ground for every town (26 Nov 2026): its content reaches the top animal's level whatever the region */
+  if (skill === 'hunting') { const ls = D.MONLIST.filter(m => m.hl && !m.tower && (D.HUNT_GROUND ? m.ground : reached(m.town))).map(m => m.hl); return ls.length ? Math.max(...ls) : null; }
   if (COMBAT.includes(skill)) { const ls = D.MONLIST.filter(m => !m.hl && !m.tower && m.cl && reached(m.town)).map(m => m.cl); return ls.length ? Math.max(...ls) : null; }
   return null; /* unmapped: no gate in the code maps cleanly onto this skill */
 };

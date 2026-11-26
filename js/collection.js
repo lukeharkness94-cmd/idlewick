@@ -19,9 +19,10 @@ Q.petOdds = id => { const p = D.PET[id], s = p.src || {}, spec = (D.BEAST_SPECIE
 const meter = (tries, p) => { const exp = Math.max(1, Math.round(1 / p)), pct = Math.min(100, Math.round(tries / exp * 100)); return `<span class="col-meter ${tries > exp ? 'over' : ''}"><span class="bar"><i style="width:${pct}%"></i></span></span>`; };
 const petRow = p => { const own = S().pets.owned[p.id], egg = Q.eggOf && Q.eggOf(p.id), o = Q.petOdds(p.id), kind = Q.eggKind ? Q.eggKind(p.id) : { name: 'Egg' };
   const art = own ? Q.petSprite(p, 48) : `<span class="${egg ? 'egg-wobble' : 'col-unk'}">${Q.eggImg ? Q.eggImg(p.id, 48) : ''}</span>`;
-  const state = own ? `<span class="tag ok">✓ Hatched</span>` : egg ? `<span class="tag warn">In the hatchery · <span data-beast-due="${egg.due}">${Q.fmtTime(Math.max(0, egg.due - Date.now()))}</span></span>` : '';
-  const odds = o.price ? `${fmt(o.price)} coins` : o.trap ? `${o.tracks}/5 tracks` : o.p ? `${oneIn(o.p)} per ${o.per}` : '';
-  const tries = !own && !egg && o.p ? `<small class="col-tries"><b class="mono">${fmt(o.tries)}</b> ${o.unit} so far${meter(o.tries, o.p)}</small>` : '';
+  const state = own ? `<span class="tag ok">✓ ${own.caught ? 'Caught' : 'Hatched'}</span>` : egg ? `<span class="tag warn">In the hatchery · <span data-beast-due="${egg.due}">${Q.fmtTime(Math.max(0, egg.due - Date.now()))}</span></span>` : '';
+  /* a lucky-find egg (beast_capture.js) has two odds, per action and per fight; a capture shows its chance per try */
+  const odds = o.price ? `${fmt(o.price)} coins` : o.luck ? (o.p ? `${oneIn(o.p)} per action · ${oneIn(o.kill)} per fight` : '') : o.per === 'try' && o.p ? `${Math.round(o.p * 100)}% per try` : o.trap ? `${o.tracks}/5 tracks` : o.p ? `${oneIn(o.p)} per ${o.per}` : '';
+  const tries = !own && !egg && o.p && !o.luck ?`<small class="col-tries"><b class="mono">${fmt(o.tries)}</b> ${o.unit} so far${meter(o.tries, o.p)}</small>` : '';
   return `<article class="col-row ${own ? 'got' : egg ? 'egg' : ''}" style="--c:${p.col}"><span class="col-art">${art}</span><div class="col-t"><b>${own ? esc(p.name) : esc(kind.name)}</b><small>${own ? esc(p.text) : esc(o.where)}</small></div><div class="col-o">${state || `<b>${odds}</b>`}${tries}</div></article>`; };
 const dropRows = () => { const out = [];
   for (const m of D.MONLIST.filter(m => (m.boss || m.mini) && !m.tower).sort((a, b) => a.cl - b.cl)) { const kills = S().beast.kills[m.id] || 0, met = kills > 0 || Q.combatLvl() >= (m.boss || m.mini).req;
@@ -36,6 +37,6 @@ UI.V.collection = () => { const pets = Q.collectiblePets ? Q.collectiblePets() :
   const body = tab === 'eggs' ? `<p class="col-note">Bar: your tries against the average needed.</p><div class="col-list">${pets.slice().sort((a, b) => order(a) - order(b)).map(petRow).join('')}</div>`
     : tab === 'drops' ? `<div class="col-list">${dropRows()}</div>`
     : `<div class="col-list">${workRows()}</div>`;
-  return `<section class="panel shophead col-head"><div><span class="k">Collection log</span><h2>${own} of ${pets.length} beasts hatched</h2></div><div class="tabs">${[['eggs', 'Beast eggs'], ['drops', 'Rare drops'], ['work', 'Lucky finds']].map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="coltab" data-a="${k}">${n}</button>`).join('')}</div></section><section class="panel col-panel">${body}</section>`; };
+  return `<section class="panel shophead col-head"><div><span class="k">Collection log</span><h2>${own} of ${pets.length} beasts at your ranch</h2></div><div class="tabs">${[['eggs', 'Beast eggs'], ['drops', 'Rare drops'], ['work', 'Lucky finds']].map(([k, n]) => `<button class="tab ${tab === k ? 'on' : ''}" data-do="coltab" data-a="${k}">${n}</button>`).join('')}</div></section><section class="panel col-panel">${body}</section>`; };
 UI.DO.coltab = a => { UI.colTab = a; UI.render(false); };
 })();

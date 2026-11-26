@@ -339,7 +339,7 @@ DQ.optionalGoals = () => {
   }
   const chase = D.MONLIST.find(m => m.town === town && !m.boss && (S().beast.kills[m.id] || 0) > 0 && m.drops.some(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique && !(S().uniqFound || {})[d[0]]));
   if (chase && DQ.uniqueSource) { const id = chase.drops.find(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique)[0], src = DQ.uniqueSource(id); out.push({ span: 'Long', text: `${D.ITEMS[id].name} from ${DQ.plural(chase.name)}: ${src.need - Math.min(src.have, src.need)} more defeats at most`, action: 'guide', a: chase.id }); }
-  else if (DQ.understanding) { const mons = D.MONLIST.filter(m => m.town === town), u = mons.filter(m => DQ.understanding(m).done).length; if (u < mons.length && mons.some(m => S().beast.kills[m.id])) out.push({ span: 'Long', text: `${D.TOWN[town].name} field guide: ${u} / ${mons.length} creatures understood`, action: 'go', a: 'bestiary' }); }
+  else if (DQ.understanding) { const mons = D.MONLIST.filter(m => m.town === town && !m.hl), u = mons.filter(m => DQ.understanding(m).done).length; if (u < mons.length && mons.some(m => S().beast.kills[m.id])) out.push({ span: 'Long', text: `${D.TOWN[town].name} field guide: ${u} / ${mons.length} creatures understood`, action: 'go', a: 'bestiary' }); }
   return out.slice(0, 3);
 };
 DQ.finishProject = id => {

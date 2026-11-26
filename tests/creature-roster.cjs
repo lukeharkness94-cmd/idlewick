@@ -31,8 +31,19 @@ const r=await p.evaluate(()=>{const S=DQ.S,D=DQ.data;S.settings.notify=false;for
  S.xp.hunting=0;DQ.ui.DO.huntground();out.locks=document.querySelectorAll('#view .activity-choices .locked, #view .activity-choices [aria-disabled="true"], #view .activity-choices .blackout').length;
  /* a hunt is its own activity (hunt_stalk.js): a catch pays Hunting; an ordinary fight pays no Hunting at all */
  let before=S.xp.hunting;DQ.startHunt('willowbrook:hunt','chicken');out.huntKind=DQ.act&&DQ.act.kind;const rnd=Math.random;Math.random=()=>.01;DQ.KIND_EXT.hunt.done(DQ.act);Math.random=rnd;out.huntXp=S.xp.hunting-before;DQ.stopAct();before=S.xp.hunting;DQ.startHunt('willowbrook:0','mudling');DQ.nextEncounter(D.MON.mudling);out.fightXp=S.xp.hunting-before;DQ.stopAct();
+ /* one hunting ground, tiers only (owner, 26 Nov 2026): the Hunting page lists the same ten animals of a tier from any
+    town; animals no longer on the ground are never listed as quarry, in town field-guide pages, the atlas or the museum */
+ S.xp.hunting=D.XPF[20];DQ.ui.huntMode='ground';DQ.ui.huntTier=0;const ids=()=>[...document.querySelectorAll('#view .illustrated-card')].map(c=>c.dataset.taskId).sort().join(',');
+ S.town='willowbrook';DQ.go('hunting');const atHome=ids();S.towns.ironpeak={visited:true,boss:false};S.town='ironpeak';DQ.ui.render(false);out.sameEverywhere=atHome===ids()&&atHome.split(',').length===10;S.town='willowbrook';
+ out.onlyGround=atHome.split(',').every(id=>D.MON[id].ground);
+ out.townSummary=D.TOWNS.every(t=>DQ.explorationSummary(t.id).creatures.every(m=>!m.hl));
+ out.listed=DQ.animalListed(D.MON.marmot)===false&&DQ.animalListed(D.MON.chicken)===true;S.beast.kills.marmot=1;out.listedAfterKill=DQ.animalListed(D.MON.marmot);delete S.beast.kills.marmot;
+ const wing=D.WINGS.find(w=>w.id==='creatures').entries().map(e=>e.mon);out.wing=!wing.includes('marmot')&&wing.includes('chicken')&&wing.includes('goblin');
+ out.ach=D.ACH.find(a=>a.id==='beast_master').goal===D.MONLIST.filter(m=>!m.hl||m.ground).length;
+ S.unlocked.exploration=true;DQ.ui.tab['cross:exploration']='atlas';DQ.go('exploration');out.atlasRow=!!document.querySelector('#view .hunt-ground-row');
  return out;});
+for(const k of ['sameEverywhere','onlyGround','townSummary','listed','listedAfterKill','wing','ach','atlasRow'])assert.ok(r[k],k);
 assert.ok(r.cowBlocked,'cow needs Hunting 7');assert.ok(r.chickenOk,'chicken huntable at 1');assert.equal(r.picks,1,'only the chicken at Hunting 1');assert.ok(r.picksLater>=5,'all farm animals at Hunting 10');
 assert.deepEqual(r.window,['Meadow Path','Goblin Thicket']);assert.ok(r.locks>=3,'locked animals shown locked');assert.equal(r.huntKind,'hunt','animals are hunted, not fought');assert.ok(r.huntXp>0&&r.huntXp>r.fightXp,'a catch pays Hunting '+r.huntXp+' vs '+r.fightXp);
-assert.deepEqual(errors,[]);console.log('PASS creature roster: hostile combat areas, hunting grounds by Hunting level, sources and quests intact');
+assert.deepEqual(errors,[]);console.log('PASS creature roster: hostile combat areas, one hunting ground by tier and Hunting level (same from every town), unlisted animals kept out of quarry/atlas/museum, sources and quests intact');
 }finally{await b.close();}})().catch(e=>{console.error(e);process.exit(1);});

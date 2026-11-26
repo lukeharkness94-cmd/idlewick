@@ -6,13 +6,13 @@
 (() => {
 const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S, { esc, ico, fmt } = Q;
 if (!Q.mastInfo) return;
-const NODE_SK = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' }, VERB = { fish: 'caught', wood: 'cut', mine: 'mined', thieve: 'picked', recipe: 'made', crop: 'harvested', animal: 'collected', brew: 'brewed', sail: 'voyages', train: 'traps laid', drill: 'drills' };
+const NODE_SK = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving' }, VERB = { fish: 'caught', wood: 'cut', mine: 'mined', thieve: 'picked', recipe: 'made', crop: 'harvested', animal: 'collected', brew: 'brewed', sail: 'voyages', train: 'traps laid', drill: 'drills', capture: 'coaxed' };
 const PAGE = { crop: 'farming', animal: 'farming', brew: 'brewery', sail: 'sailing', train: 'beastmastery' };
 const studyQ = m => D.QUESTS.find(q => S().q[q.id] && ['active', 'new'].includes(S().q[q.id].s) && q.obj.some((o, j) => o.ev === 'guide' && o.key === m.id && Q.objProg(q, S().q[q.id], j) < o.n));
 /* ---------- one shape for everything in the book ---------- */
 const creature = m => { const r = Q.research(m), R = D.RESEARCH.ranks, seen = r.rank > 0, sq = studyQ(m), prev = r.rank ? r.T[Math.min(r.rank, r.T.length) - 1] : 0;
   return { key: m.id, kind: 'creature', name: seen || sq ? m.name : '???', known: seen, quest: sq, filled: r.rank, total: R.length, n: r.kills, pct: r.next ? Math.max(0, Math.min(100, (r.kills - prev) / Math.max(1, r.next - prev) * 100)) : 100, left: r.next ? r.need : 0,
-    art: size => Q.monSprite(m, size, seen || sq ? '' : 'sil'), sub: seen ? `Level ${m.cl}${m.boss ? ' boss' : m.mini ? ' challenge' : ''} · ${fmt(r.kills)} defeated` : `${D.TOWN[m.town].name}`,
+    art: size => Q.monSprite(m, size, seen || sq ? '' : 'sil'), sub: m.hl ? (seen ? `Hunting ${m.hl} · ${fmt(r.kills)} caught` : `Hunting ${m.hl}`) : seen ? `Level ${m.cl}${m.boss ? ' boss' : m.mini ? ' challenge' : ''} · ${fmt(r.kills)} defeated` : `${D.TOWN[m.town].name}`,
     ladder: R.map((x, i) => ({ name: x[1], text: x[2], at: r.T[i], done: r.rank > i })), unit: 'defeated', m }; };
 const material = (kind, x, sk, o = {}) => { const m = Q.mastInfo(kind, x.id), lvl = o.lvl != null ? o.lvl : x.lvl, open = ((o.open != null ? o.open : Q.lvl(sk) >= lvl) || m.n > 0) && (kind!=='recipe'||Q.recipeDiscovered(x)), itemId = o.itemId || (kind === 'recipe' ? Object.keys(x.out)[0] : x.item), it = D.ITEMS[itemId], need = kind==='recipe'&&Q.recipeDiscovery(x)?Q.recipeDiscovery(x).reason:o.need || `${D.SK[sk].name} ${lvl}`;
   const art = size => { try { if (o.art) return `<span class="${open ? '' : 'blackout'}">${o.art(size)}</span>`; if (kind === 'wood' || kind === 'mine' || kind === 'thieve') return `<span class="${open ? '' : 'blackout'}">${Q.artImage(kind, x.id, size, open ? '' : 'sil', x.name)}</span>`; } catch (e) {} return `<span aria-hidden="${!open}" class="activity-item-art guide-item ${open ? '' : 'blackout'}" style="--art-size:${size >= 96 ? 64 : size >= 64 ? 48 : 32}px">${it ? Q.itemIco(it) : ico('book')}</span>`; };
@@ -20,7 +20,11 @@ const material = (kind, x, sk, o = {}) => { const m = Q.mastInfo(kind, x.id), lv
     sub: `${need}${m.n ? ` · ${fmt(m.n)} ${VERB[kind]}` : ''}`, itemId,
     ladder: Q.ENTRY_NAMES.map((nm, i) => ({ name: nm, text: Q.entryPerk(kind, i + 1), at: D.MASTERY_STEPS[i], done: m.stars > i })), unit: VERB[kind] }; };
 const topics = () => { const t = [];
-  for (const town of D.TOWNS) if (S().towns[town.id] && S().towns[town.id].visited) t.push({ id: 'c:' + town.id, group: 'Creatures', name: town.name, ic: 'attack', items: () => D.MONLIST.filter(m => m.town === town.id && !m.tower).sort((a, b) => a.cl - b.cl).map(creature) });
+  for (const town of D.TOWNS) if (S().towns[town.id] && S().towns[town.id].visited) t.push({ id: 'c:' + town.id, group: 'Creatures', name: town.name, ic: 'attack', items: () => D.MONLIST.filter(m => m.town === town.id && !m.tower && !m.hl).sort((a, b) => a.cl - b.cl).map(creature) });
+  /* animals are on the one hunting ground (26 Nov 2026), so they have one page, by Hunting level; an animal that has
+     left the ground stays here once you have caught one */
+  const animals = () => D.MONLIST.filter(m => m.hl && (Q.animalListed ? Q.animalListed(m) : true)).sort((a, b) => a.hl - b.hl);
+  if (Q.skillUnlocked('hunting') || animals().some(m => S().beast.kills[m.id])) t.push({ id: 'c:hunt', group: 'Creatures', name: 'Hunting ground', ic: 'hunting', items: () => animals().map(creature) });
   for (const [kind, sk] of Object.entries(NODE_SK)) if ((D.NODES[kind] || []).length && Q.skillUnlocked(sk)) t.push({ id: kind, group: 'Gathering', name: D.SK[sk].name, ic: sk, items: () => [...D.NODES[kind]].sort((a, b) => a.lvl - b.lvl).map(x => material(kind, x, sk)) });
   const seen = new Set(); for (const r of Object.values(D.RECIPES)) if (!seen.has(r.skill) && D.SK[r.skill] && Q.skillUnlocked(r.skill)) { seen.add(r.skill); const sk = r.skill; t.push({ id: 'recipe:' + sk, group: 'Making', name: D.SK[sk].name, ic: sk, items: () => Object.values(D.RECIPES).filter(x => x.skill === sk && (!x.secret || (Q.recipeKnown && Q.recipeKnown(x.secret)))).sort((a, b) => a.lvl - b.lvl).map(x => material('recipe', x, sk)) }); }
   /* everything else you repeat: crops, livestock, potions, voyages and trap lines */
@@ -29,6 +33,9 @@ const topics = () => { const t = [];
   if (D.POTION_RECIPES && Q.skillUnlocked('herbalism')) t.push({ id: 'brew', group: 'Making', name: 'Potions', ic: 'herbalism', items: () => D.POTION_RECIPES.map(r => material('brew', { id: r.id, name: (D.ITEMS[r.id] || {}).name || r.id }, 'herbalism', { itemId: r.id, lvl: 1, open: !!(Q.canBrew && Q.canBrew(r)), need: 'Research its recipe' })) });
   if (D.VOYAGES && Q.skillUnlocked('sailing')) t.push({ id: 'sail', group: 'Gathering', name: 'Sailing', ic: 'sailing', items: () => [...D.VOYAGES].sort((a, b) => a.lvl - b.lvl).map(v => material('sail', v, 'sailing', { art: size => Q.artImage('skill', 'sailing', Math.min(64, size), '', v.name) })) });
   if (Q.lureLvl && (Q.skillUnlocked('beastmastery')||(Q.fieldAccessLevel&&Q.skillUnlocked('hunting')))) t.push({ id: 'train', group: 'Gathering', name: 'Trap lines', ic: Q.fieldAccessLevel?'hunting':'beastmastery', items: () => D.TOWNS.map(tw => material('train', { id: 'lure:' + tw.id, name: tw.name }, Q.fieldAccessLevel?'hunting':'beastmastery', { lvl: Q.lureLvl(tw.id), open: (Q.fieldAccessLevel?Q.fieldAccessLevel():Q.lvl('beastmastery')) >= Q.lureLvl(tw.id) && !!(S().towns[tw.id] && S().towns[tw.id].visited), art: size => Q.artImage('skill', Q.fieldAccessLevel?'hunting':'beastmastery', Math.min(64, size), '', tw.name) })) });
+  /* Beastmastery captures (beast_capture.js): each animal you have hunted can be coaxed into a live trap */
+  if (Q.KIND_EXT.capture && Q.skillUnlocked('beastmastery')) t.push({ id: 'capture', group: 'Gathering', name: 'Captures', ic: 'beastmastery', items: () => animals().map(m => { const open = (S().beast.kills[m.id] || 0) > 0;
+    return material('capture', { id: m.id, name: m.name, lvl: m.hl }, 'beastmastery', { open, need: open ? `Hunting ${m.hl} animal` : 'Hunt one first', art: size => Q.monSprite(m, Math.min(64, size), open ? '' : 'sil') }); }) });
   /* practice yards (combat_skills.js): one topic per style you have practised or can practise */
   if (D.DRILLS) for (const [st, rows] of Object.entries(D.DRILLS)) t.push({ id: 'drill:' + st, group: 'Practice', name: D.SK[st].name, ic: st, items: () => rows.map(r => material('drill', { id: st + ':' + r.id, name: r.name, lvl: r.lvl }, st, { itemId: r.art })) });
   const order = ['Creatures', 'Gathering', 'Growing', 'Making', 'Practice']; t.sort((x, y) => order.indexOf(x.group) - order.indexOf(y.group));
@@ -58,7 +65,7 @@ UI.DO.guidepick = a => { UI.guideSel[UI.guideTopic] = a; UI.render(false); };
 /* older links that named a region still land on it */
 UI.DO.guidetown = id => { UI.guideTopic = 'c:' + id; UI.render(false); };
 /* a material's page takes you to it, selected, like any other route */
-UI.DO.guidemat = (kind, id) => { if (kind === 'drill') { const st = String(id).split(':')[0]; if (UI.DO.styletab) UI.DO.styletab(st, 'drill'); UI.taskChoice[st] = id; return Q.go(st); } if (PAGE[kind]) { if (kind === 'animal' && UI.tab) UI.tab.farmSection = 'livestock'; return Q.go(PAGE[kind]); } const sk = kind === 'recipe' ? D.RECIPES[id].skill : NODE_SK[kind]; if (!sk) return; UI.taskChoice[sk] = id; Q.go(D.SK[sk].page || sk); };
+UI.DO.guidemat = (kind, id) => { if (kind === 'capture' && UI.DO.capturepick) return UI.DO.capturepick(id); if (kind === 'drill') { const st = String(id).split(':')[0]; if (UI.DO.styletab) UI.DO.styletab(st, 'drill'); UI.taskChoice[st] = id; return Q.go(st); } if (PAGE[kind]) { if (kind === 'animal' && UI.tab) UI.tab.farmSection = 'livestock'; return Q.go(PAGE[kind]); } const sk = kind === 'recipe' ? D.RECIPES[id].skill : NODE_SK[kind]; if (!sk) return; UI.taskChoice[sk] = id; Q.go(D.SK[sk].page || sk); };
 /* brewing fills a potion's page; its entries are a chance of a second bottle */
 const brew0 = Q.brew; if (brew0) Q.brew = id => { const ok = brew0(id); if (ok) { Q.mastTick({ kind: 'brew', id }); if (Q.chance(Q.mastExtra('brew', id))) { Q.give(id, 1); Q.toast && Q.toast('A second bottle!'); } } return ok; };
 })();

@@ -8,7 +8,8 @@ const lore = id => { const L = (D.LORE || {})[id]; return L ? (L.note || '').spl
 const held = id => DQ.have(id) > 0 || ((S().bank || {})[id] || 0) > 0;
 D.WINGS = [
   { id: 'creatures', name: 'Hall of Creatures', bonus: { xpAll: .01 }, gives: '+1% XP',
-    entries: () => D.MONLIST.filter(m => !m.boss && !m.mini).map(m => ({ key: 'c:' + m.id, name: m.name, text: lore(m.id), mon: m.id, have: () => (S().beast.kills[m.id] || 0) > 0 })) },
+    /* animals that have left the one hunting ground (26 Nov 2026) only count once you have caught one */
+    entries: () => D.MONLIST.filter(m => !m.boss && !m.mini && (!DQ.animalListed || DQ.animalListed(m))).map(m => ({ key: 'c:' + m.id, name: m.name, text: lore(m.id), mon: m.id, have: () => (S().beast.kills[m.id] || 0) > 0 })) },
   { id: 'beasts', name: 'The Menagerie', bonus: { coin: .02 }, gives: '+2% coins',
     entries: () => (DQ.collectiblePets ? DQ.collectiblePets() : D.PETS).flatMap(p => [{ key: 'b:' + p.id, name: p.name, text: p.text, pet: p.id, have: () => !!S().pets.owned[p.id] }]
       .concat((D.BEAST_SPECIES || {})[p.id] ? [{ key: 'e:' + p.id, name: D.BEAST_SPECIES[p.id].evolution, text: `${p.name}, at Bond 10.`, pet: p.id, evolved: true, have: () => !!(S().pets.owned[p.id] && S().pets.owned[p.id].evolved) }] : [])) },
