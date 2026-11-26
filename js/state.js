@@ -155,6 +155,12 @@ function candidateState(o) {
   if(result.hunt.loopVersion!==undefined&&result.hunt.loopVersion!==1)throw new Error('Unsupported hunting loop');
   if(result.hunt.fieldFocus!=null&&(typeof result.hunt.fieldFocus!=='string'||!D.ITEMS[result.hunt.fieldFocus]))throw new Error('Invalid hunting focus');
   migrate(result);
+  if (!Number.isSafeInteger(result.villageProceedsAt) || result.villageProceedsAt <= 0) {
+    delete result.villageProceedsAt;
+    if (Object.keys(result.projects).some(id => result.projects[id] && D.PROJECTS[id] && !D.PROJECTS[id].relic)) {
+      result.villageProceedsAt = Number.isSafeInteger(result.lastSeen) && result.lastSeen > 0 ? Math.min(result.lastSeen, Date.now()) : Date.now();
+    }
+  }
   DQ.reconcileMainQuests?.(result);
   return result;
 }

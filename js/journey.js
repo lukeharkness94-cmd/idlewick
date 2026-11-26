@@ -98,6 +98,30 @@ DQ.projectsForTown = town => Object.entries(D.PROJECTS).filter(([,p])=>p.town===
    holds what has been delivered; nothing is consumed until it is handed over. */
 const given = id => (S().projectGiven && S().projectGiven[id]) || {};
 DQ.projectNeed = id => { const p = D.PROJECTS[id], g = given(id), out = {}; if (!p) return out; if (S().projects[id]) return out; for (const [k, n] of Object.entries(p.cost)) { const left = n - (g[k] || 0); if (left > 0) out[k] = left; } return out; };
+const alternates = { well: { log_normal: ['log_oak'] }, inn: { shrimp: ['sardine'] }, market: { flax: ['wool'] } };
+const bundleLabel = (id, item) => ({
+  'well:log_normal': 'Winch timber', 'inn:shrimp': 'Supper for the inn',
+  'market:flax': 'Market canvas', 'jetty:raw_sardine': 'The dockhands’ catch',
+}[id + ':' + item] || (item === 'coins' ? 'Builders’ wages' : D.ITEMS[item].name + ' delivery'));
+const bundleOptions = (id, item) => [item, ...(alternates[id]?.[item] || [])];
+DQ.projectShortfall = id => Object.entries(DQ.projectNeed(id)).map(([item, need]) =>
+  [item, Math.max(0, need - bundleOptions(id, item).reduce((n, option) => n + held(option), 0))]
+).filter(([, need]) => need > 0);
+DQ.projectReady = id => !S().projects[id] && DQ.projectShortfall(id).length === 0;
+DQ.bundleNeeds = item => Object.entries(D.PROJECTS).flatMap(([id, project]) => {
+  if (project.relic || !DQ.townUnlocked(project.town)) return [];
+  return Object.entries(DQ.projectNeed(id)).filter(([material]) => bundleOptions(id, material).includes(item))
+    .map(([material, count]) => ({ id, label: bundleLabel(id, material), count }));
+});
+UI.bundleLabel = item => {
+  const needed = DQ.bundleNeeds(item)[0];
+  return needed ? `<span class="bundle-indicator">${ico('house')} ${esc(needed.label)}</span>` : '';
+};
+UI.bundleLinks = item => DQ.bundleNeeds(item).map(({ id, label, count }) =>
+  `<button class="btn sm" data-do="openproject" data-a="${id}">${ico('house')}${esc(label)} · ${fmt(count)} needed</button>`).join('');
+DQ.closestRestoration = () => DQ.projectsForTown(S().town).filter(([id, p]) => !S().projects[id] && !p.relic)
+  .sort(([x], [y]) => missingValue(x) - missingValue(y))[0]?.[0];
+const missingValue = id => DQ.projectShortfall(id).reduce((sum, [item, n]) => sum + n * (D.ITEMS[item]?.val || 1), 0);
 DQ.projectProgress = id => { const p = D.PROJECTS[id]; if (!p) return 0; if (S().projects[id]) return 1; const g = given(id), lines = Object.entries(p.cost); return lines.reduce((a, [k, n]) => a + Math.min(1, (g[k] || 0) / n), 0) / lines.length; };
 /* 0 ruin · 1 site cleared, foundations · 2 walls rising · 3 nearly there · 4 restored */
 DQ.projectStage = id => { if (S().projects[id]) return 4; const f = DQ.projectProgress(id); return f <= 0 ? 0 : f < 1 / 3 ? 1 : f < 2 / 3 ? 2 : 3; };
@@ -106,10 +130,27 @@ const STAGE_LINES = ['', 'Builders clear the site of %s and lay the first stones
 const held = k => k === 'coins' ? S().coins : DQ.have(k);
 DQ.projectGive = (id, item) => {
   const p = D.PROJECTS[id]; if (!p || S().projects[id] || S().town !== p.town) return 0;
-  const items = item ? [item] : Object.keys(DQ.projectNeed(id)), before = DQ.projectStage(id); let total = 0;
+  const need = DQ.projectNeed(id), before = DQ.projectStage(id);
+  const items = item ? [[Object.keys(need).find(material => bundleOptions(id, material).includes(item)), [item]]] :
+    Object.keys(need).map(material => [material, bundleOptions(id, material)]);
+  let total = 0;
   S().projectGiven = S().projectGiven || {}; const g = S().projectGiven[id] = S().projectGiven[id] || {};
-  for (const k of items) { const left = DQ.projectNeed(id)[k] || 0, n = Math.min(left, Math.floor(held(k))); if (n <= 0) continue;
-    if (k === 'coins') S().coins -= n; else DQ.take(k, n); g[k] = (g[k] || 0) + n; total += n; }
+  const earned = [];
+  for (const [material, options] of items) {
+    if (!material) continue;
+    for (const k of options) {
+      const left = p.cost[material] - (g[material] || 0), n = Math.min(left, Math.floor(held(k)));
+      if (n <= 0) continue;
+      if (k === 'coins') S().coins -= n; else DQ.take(k, n);
+      g[material] = (g[material] || 0) + n;
+      total += n;
+      if (g[material] === p.cost[material] && !p.relic) earned.push(material);
+    }
+  }
+  for (const material of earned) {
+    DQ.give('bread', 1);
+    DQ.log(`${bundleLabel(id, material)} complete. The crew shared a loaf of bread.`, 'good');
+  }
   if (!total) return 0;
   if (!Object.keys(DQ.projectNeed(id)).length) { completeProject(id); return total; }
   const after = DQ.projectStage(id);
@@ -118,10 +159,18 @@ DQ.projectGive = (id, item) => {
 };
 /* What you could hand over to a site right now, and which of three states it is in (Nov 2026): "needs" (nothing in
    hand it can use), "can" (something you hold goes in), "ready" (you hold all that is left, so it can be finished). */
-DQ.projectContribution = id => { const need = DQ.projectNeed(id), out = [];
-  for (const [k, n] of Object.entries(need)) { const h = Math.floor(held(k)); if (h <= 0) continue; if (k === 'coins' && h < n) continue; out.push([k, Math.min(n, h)]); }
-  return out; };
-DQ.projectState = id => { if (S().projects[id]) return 'done'; const need = DQ.projectNeed(id); if (!Object.keys(need).length || DQ.canAfford(need)) return 'ready'; return DQ.projectContribution(id).some(([k]) => k !== 'coins') ? 'can' : 'needs'; }; /* coins alone never make a site look workable: it is the materials that are missing */
+DQ.projectContribution = id => Object.entries(DQ.projectNeed(id)).flatMap(([item, need]) => {
+  if (item === 'coins' && held(item) < need) return [];
+  const possible = [];
+  for (const option of bundleOptions(id, item)) {
+    const n = Math.min(need, Math.floor(held(option)));
+    if (n > 0) possible.push([option, n]);
+    need -= n;
+  }
+  return possible;
+});
+DQ.projectState = id => S().projects[id] ? 'done' : DQ.projectReady(id) ? 'ready' :
+  DQ.projectContribution(id).some(([item]) => item !== 'coins') ? 'can' : 'needs';
 DQ.PROJECT_STATE = { needs: ['Needs supplies', 'crafting'], can: ['Can contribute', 'hammer'], ready: ['Ready to finish', 'star'], done: ['Restored', 'check'] };
 DQ.contributionText = id => DQ.projectContribution(id).map(([k, n]) => k === 'coins' ? `${fmt(n)} coins` : `${fmt(n)} ${D.ITEMS[k].name.toLowerCase()}`).join(', ');
 /* The opening arc: what each Willowbrook villager says when you finish their job, and what it changed. Shown on
@@ -263,7 +312,7 @@ DQ.optionalGoals = () => {
   else if (DQ.loadouts && !DQ.loadouts().length && DQ.advLvl() >= 15) out.push({ span: 'Short', text: 'Save your current gear as a preparation, then try another', action: 'go', a: 'character' });
   const proj = DQ.projectsForTown(town).filter(([id]) => !S().projects[id]).sort((a, c) => (a[1].cost.coins || 0) - (c[1].cost.coins || 0))[0];
   if (proj) {
-    const ready = DQ.canAfford(DQ.projectNeed(proj[0]));
+    const ready = DQ.projectReady(proj[0]);
     out.push({ span: ready ? 'Ready to restore' : 'Village project', text: `${proj[1].name} · ${proj[1].reward}`, action: 'openproject', a: proj[0] });
   }
   const chase = D.MONLIST.find(m => m.town === town && !m.boss && (S().beast.kills[m.id] || 0) > 0 && m.drops.some(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique && !(S().uniqFound || {})[d[0]]));
@@ -273,19 +322,23 @@ DQ.optionalGoals = () => {
 };
 DQ.finishProject = id => {
   const project = D.PROJECTS[id];
-  if (!project || S().projects[id] || S().town !== project.town || !DQ.canAfford(DQ.projectNeed(id))) return false;
+  if (!project || S().projects[id] || S().town !== project.town || !DQ.projectReady(id)) return false;
   if (!Object.keys(DQ.projectNeed(id)).length) { completeProject(id); return true; }
   DQ.projectGive(id); return !!S().projects[id];
 };
 function completeProject(id) {
   const project = D.PROJECTS[id];
   S().projects[id] = true; if (S().projectGiven) delete S().projectGiven[id]; DQ.fxDirty();
+  if (!project.relic && !S().villageProceedsAt) S().villageProceedsAt = Date.now();
   DQ.log(project.story, 'good');
   const voice = D.PROJECT_VOICES[id];
   DQ.notify({ kind: 'quest', page: 'projects', key: 'project:' + id, title: project.name, text: project.story + ' ' + project.reward + (voice ? ` ${voice[0]}: “${voice[1]}”` : ''), icon: 'house', sound: 'restore' });
   DQ.emit('project', id);
   DQ.save(); return true;
 }
+const proceedsInterval = 5 * 60000;
+DQ.villageProceeds = (now = Date.now()) => S().villageProceedsAt ?
+  Math.max(0, Math.floor((now - S().villageProceedsAt) / proceedsInterval)) : 0;
 const actionHtml = next => `<button class="btn primary" data-do="${next.action}" data-a="${next.a || ''}" data-b="${next.b || ''}">${next.action==='qstart'?'Accept quest':esc(next.title)}</button>`;
 const pinButton = id => `<button class="btn sm" data-do="pinproject" data-a="${id}" aria-pressed="${S().pinnedProject === id}">${ico('pin')}${S().pinnedProject === id ? 'Unpin project' : 'Pin project'}</button>`;
 UI.projectPinHtml = () => {
@@ -348,10 +401,10 @@ UI.projectsPanel = () => {
   const town = S().town, entries = DQ.projectsForTown(town);
   const id = entries.some(([key]) => key === UI.tab.projectChoice) ? UI.tab.projectChoice : (entries.find(([k]) => !S().projects[k]) || entries[0])[0], project = D.PROJECTS[id];
   UI.tab.projectChoice = id;
-  const done = S().projects[id], need = DQ.projectNeed(id), canFinish = !done && S().town === project.town && DQ.canAfford(need);
+  const done = S().projects[id], canFinish = !done && S().town === project.town && DQ.projectReady(id);
   const changes = (town==='willowbrook'?['first_steps', 'hungry_cook']:[]).filter(q => S().q[q] && S().q[q].s === 'done');
   const stage = DQ.projectStage(id), pct = Math.round(DQ.projectProgress(id) * 100), g = (S().projectGiven || {})[id] || {};
-  const canGive = !done && Object.keys(need).some(k => held(k) > 0), voice = D.PROJECT_VOICES[id];
+  const canGive = !done && DQ.projectContribution(id).length > 0, voice = D.PROJECT_VOICES[id];
   const A = DQ.pixelArt, W = (A && A.SCENE_W) || 320, H = (A && A.SCENE_H) || 180, shown = new Set(entries.map(([k]) => k));
   const spots = A && A.siteLayout ? A.siteLayout(town).filter(sp => shown.has(sp.id)).map(sp => { const st = DQ.projectStage(sp.id), p = D.PROJECTS[sp.id], ps = DQ.projectState(sp.id), [lab, ic] = DQ.PROJECT_STATE[ps], give = DQ.contributionText(sp.id);
     return `<button class="site-spot ps-${ps} ${ps === 'ready' ? 'deliver-ready' : ''} st${st} ${sp.id === id ? 'on' : ''}" style="left:${((sp.X - 5) / W * 100).toFixed(3)}%;top:${((sp.Y - 6) / H * 100).toFixed(3)}%;width:${(42 / W * 100).toFixed(3)}%;height:${(42 / H * 100).toFixed(3)}%" data-do="projectpick" data-a="${sp.id}" aria-pressed="${sp.id === id}" aria-label="${esc(p.name)}: ${esc(lab)}${give && ps !== 'done' ? '. You can give ' + esc(give) : ''}" data-tip="text:${esc(p.name)} · ${esc(lab)}${give && ps !== 'done' ? ': you can give ' + esc(give) : ''}"><span class="site-mark">${ico(ic)}<span class="sm-t">${esc(lab)}</span></span></button>`; }).join('') : '';
@@ -361,11 +414,19 @@ UI.projectsPanel = () => {
   const siteNow = done ? '' : `<p class="site-now ps-${now}">${ico(DQ.PROJECT_STATE[now][1])}<b>${esc(project.name)}</b> · ${esc(DQ.PROJECT_STATE[now][0])}${nowGive && now !== 'needs' ? `: you can give ${esc(nowGive)} now.` : `. ${nowGive ? 'Your coins are ready, but it still needs materials.' : 'Gather what it lists on the right.'}`}</p>`;
   const story = done ? `<p class="proj-story">${esc(project.story)}</p>${voice ? `<p class="villager-line"><b>${esc(voice[0])}:</b> “${esc(voice[1])}”</p>` : ''}`
     : `<p class="proj-story">${esc(project.before || (stage ? `Work is under way. ${voice ? voice[0] + ' comes by most days to see how it is going.' : ''}` : `It has stood like this for years.${voice ? ` ${voice[0]} is hoping someone will take it on.` : ''}`))} Once it is done: ${esc(project.story.charAt(0).toLowerCase() + project.story.slice(1))}</p>`;
-  const lines = done ? '' : `<div class="proj-lines">${Object.entries(project.cost).map(([item, n]) => { const got = Math.min(n, g[item] || 0), left = n - got, have = held(item), unknown=item!=='coins'&&DQ.itemDiscovered&&!DQ.itemDiscovered(item),name = item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase();
-    return `<div class="proj-line ${left ? '' : 'ok'}"><span class="proj-ic">${item === 'coins' ? ico('coin') : unknown?ico('lock'):DQ.itemIco(D.ITEMS[item])}</span><span class="proj-t"><b>${fmt(got)} / ${fmt(n)} ${esc(name)}</b><small>${unknown?esc(DQ.ingredientDiscovery(item).label):left ? `${fmt(have)} held` : '✓ Delivered'}</small><span class="bar"><i style="width:${Math.round(got / n * 100)}%"></i></span></span>${left ? (have > 0 ? `<button class="btn sm" data-do="projectgive" data-a="${id}|${item}">Deliver ${fmt(Math.min(left, Math.floor(have)))}</button>` : (item !== 'coins' && UI.routeChip ? UI.routeChip(item) : '')) : ''}</div>`; }).join('')}</div>`;
+  const lines = done ? '' : `<div class="proj-lines" aria-label="Restoration bundles">${Object.entries(project.cost).map(([material, n]) => {
+    const got = Math.min(n, g[material] || 0), left = n - got;
+    const options = bundleOptions(id, material).map(item => {
+      const name = item === 'coins' ? 'Coins' : D.ITEMS[item].name;
+      const amount = Math.min(left, Math.floor(held(item)));
+      return `<div class="bundle-option"><span>${item === 'coins' ? ico('coin') : DQ.itemIco(D.ITEMS[item])}${esc(name)}</span>${amount > 0 ? `<button class="btn sm" data-do="projectgive" data-a="${id}|${item}">Deliver ${fmt(amount)}</button>` : item !== 'coins' ? UI.routeChip?.(item) || '' : ''}</div>`;
+    }).join('');
+    return `<section class="proj-line project-bundle ${left ? '' : 'ok'}"><h3>${esc(bundleLabel(id, material))}</h3><span class="proj-t"><b>${fmt(got)} / ${fmt(n)}</b> · ${left ? (project.relic ? 'Needed' : 'Reward: 1 Bread') : '✓ Delivered'}</span>${left ? options : ''}</section>`;
+  }).join('')}</div>`;
   const restored = entries.filter(([k]) => S().projects[k]).length;
   return `<div class="village-projects"><section class="panel town-projects village-map"><div class="phead"><h2>A living ${esc(D.TOWN[town].name)}</h2><small>${restored} of ${entries.length} restored · click a building</small></div>
       <div class="village-pan"><div class="village-scene">${UI.scene(town)}${spots}</div></div>${legend}${siteNow}
+      ${S().villageProceedsAt ? `<button class="btn sm" data-do="villageproceeds" ${DQ.villageProceeds() ? '' : 'disabled'}>Collect village proceeds · ${fmt(DQ.villageProceeds())} coins</button>` : ''}
       ${changes.length ? `<div class="village-changes">${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}</div>` : ''}</section>
     <section class="panel project-card ${done ? 'done' : ''}"><div class="phead"><div><small>${esc(D.TOWN[town].name)} · restoration</small><h2>${esc(project.name)}</h2></div>${pinButton(id)}</div>
       ${story}<p class="proj-benefit"><span class="k">${done ? 'Benefit, active' : 'Benefit'}</span> ${esc(project.reward)}</p>
@@ -385,14 +446,13 @@ UI.returnPlan = sum => {
    trade-off; nothing is shown as affordable unless it is, and nothing here is timed or expires. */
 DQ.returnChoices = () => {
   const out = [];
-  const projects = DQ.projectsForTown(S().town).filter(([id]) => !S().projects[id]);
-  const ready = projects.find(([pid]) => DQ.canAfford(DQ.projectNeed(pid)));
-  if (ready) { const [id, p] = ready; out.push({ title: `Restore ${p.name.toLowerCase()}`, text: `You hold everything it needs${p.cost.coins ? `, including ${fmt(p.cost.coins)} coins you could otherwise put towards gear` : ''}. ${p.reward}`, action: 'openproject', a: id, art: 'project:' + id }); }
-  else if (projects.length) {
-    const short = ([pid]) => Object.entries(DQ.projectNeed(pid)).reduce((n, [k, q]) => n + Math.max(0, q - (k === 'coins' ? S().coins : DQ.have(k))) * (k === 'coins' ? 1 : (D.ITEMS[k]?.val || 1)), 0);
-    const [id, p] = projects.slice().sort((a, b) => short(a) - short(b))[0];
-    const miss = Object.entries(DQ.projectNeed(id)).map(([k, q]) => [k, q - (k === 'coins' ? S().coins : DQ.have(k))]).filter(([, n]) => n > 0).map(([k, n]) => k === 'coins' ? `${fmt(n)} coins` : `${fmt(n)} ${D.ITEMS[k].name.toLowerCase()}`);
-    out.push({ title: `Closest restoration: ${p.name.toLowerCase()}`, text: `Still needed: ${miss.join(', ')}.`, action: 'openproject', a: id, art: 'project:' + id });
+  const id = DQ.closestRestoration();
+  if (id) {
+    const project = D.PROJECTS[id], shortfall = DQ.projectShortfall(id);
+    const need = Object.entries(DQ.projectNeed(id));
+    const lists = entries => entries.map(([item, n]) => `${fmt(n)} ${item === 'coins' ? 'coins' : bundleOptions(id, item).map(id => D.ITEMS[id].name).join(' or ')}`).join(', ');
+    out.push({ title: project.name, text: shortfall.length ? `Still to gather: ${lists(shortfall)}.` :
+      `Ready to deliver: ${lists(need)}. ${project.reward}`, action: 'openproject', a: id, art: 'project:' + id });
   }
   const near = D.SKILLS.filter(sk => DQ.skillUnlocked(sk.id) && D.UNL[sk.id]).map(sk => { const L = DQ.lvl(sk.id), nextLvl = Object.keys(D.UNL[sk.id]).map(Number).find(l => l > L); return nextLvl === L + 1 ? { sk, nextLvl, pct: DQ.pctNext(sk.id), what: D.UNL[sk.id][nextLvl] } : null; }).filter(Boolean).sort((a, b) => b.pct - a.pct)[0];
   if (near && near.pct >= 50) out.push({ title: `${near.sk.name} ${near.nextLvl} is close`, text: `${Math.round(near.pct)}% of the way there; next: ${(UI.unlockShort ? UI.unlockShort({ what: [].concat(near.what).join(', ') }) : 'something new')}.`, action: 'go', a: near.sk.page, art: 'skill:' + near.sk.id });
@@ -413,6 +473,20 @@ Object.assign(UI.DO, {
   journeytask: (kind, id) => { DQ.closeModal(); if (DQ.startAct(kind, id, { quiet: true })) DQ.go(DQ.actPage()); else { const page = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving', fight: 'combat' }[kind] || (kind === 'recipe' && D.RECIPES[id] ? D.SK[D.RECIPES[id].skill].page : null); if (page) { if (UI.taskChoice) UI.taskChoice[page] = id; DQ.go(page); } } },
   journeytravel: id => { DQ.closeModal(); DQ.travel(id); DQ.go('overview'); },
   projectfinish: id => { if (DQ.finishProject(id)) UI.render(false); },
+  villageproceeds: () => {
+    const amount = DQ.villageProceeds();
+    if (!amount) return;
+    const state = S(), previous = state.villageProceedsAt;
+    state.villageProceedsAt += amount * proceedsInterval;
+    state.coins += amount;
+    if (!DQ.save()) {
+      state.villageProceedsAt = previous;
+      state.coins -= amount;
+      return;
+    }
+    DQ.log(`Collected ${fmt(amount)} coins from restored village businesses.`, 'good');
+    UI.render(false);
+  },
   projectpick: id => { if (!D.PROJECTS[id]) return; UI.tab.projectChoice = id; UI.render(false); },
   projectgive: arg => { const [id, item] = String(arg).split('|'); if (DQ.projectGive(id, item || null)) UI.render(false); },
   safetyexport: () => DQ.downloadSave(),

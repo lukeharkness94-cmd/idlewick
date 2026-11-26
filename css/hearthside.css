@@ -790,3 +790,11 @@ html:has(.home-glance) #hud .h-stats,html:has(.home-glance) #hud .h-task,html:ha
 .item-deltas{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 6px;line-height:1.2;font-size:.79em}
 .slot:has(.item-deltas){width:auto!important;min-height:74px;padding:6px 4px!important;display:grid;justify-items:center;align-content:center}
 .slot .item-deltas{grid-column:1/-1}
+.project-bundle{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.project-bundle h3{margin:0}
+.bundle-option{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bundle-option>span{display:inline-flex;align-items:center;gap:6px}
+.bundle-indicator{font-size:.83em;line-height:1.25}
+.bundle-indicator .ico{animation:bundle-beacon 1.6s ease-in-out 3}
+@keyframes bundle-beacon{50%{opacity:.48}}
+@media(prefers-reduced-motion:reduce){.bundle-indicator .ico{animation:none}}

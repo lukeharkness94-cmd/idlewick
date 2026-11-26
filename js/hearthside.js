@@ -45,7 +45,11 @@ const homeRate = () => {
  return `${Q.actLabel()} · Running · ${rate}`;
 };
 U.V.overview = () => {
- const town = D.TOWN[S().town], next = Q.journeyNext(), goal = Q.mainQuestProgress?.();
+ const town = D.TOWN[S().town], next = Q.journeyNext(), main = Q.mainQuestProgress?.();
+ const project = [S().journey, S().pinnedProject, !main && Q.closestRestoration()].find(id => D.PROJECTS[id]?.town === town.id && !S().projects[id]);
+ const goal = project ? { name: D.PROJECTS[project].name, label: 'Bundles complete',
+   have: Object.keys(D.PROJECTS[project].cost).length - Object.keys(Q.projectNeed(project)).length,
+   need: Object.keys(D.PROJECTS[project].cost).length } : main;
  const button = `<button class="btn primary" data-do="${next.action}" data-a="${esc(next.a || '')}" data-b="${esc(next.b || '')}">${esc(next.title)}</button>`;
  const count = S().inbox?.length || 0;
  const flag = count ? `<button class="btn" data-do="go" data-a="activity">${count} away ${count === 1 ? 'decision' : 'decisions'}</button>` :
@@ -55,7 +59,8 @@ U.V.overview = () => {
   <div class="home-glance-row"><button class="panel home-state" data-home-unit="activity" data-do="${Q.act ? 'nowactivity' : 'go'}" data-a="${Q.act ? '' : 'activity'}">${ico('clock')}<b data-b="homerate"></b></button>
   <div class="panel home-coins" data-home-unit="coins">${ico('coin')}<b data-b="coins"></b><span>coins</span></div></div>
   <section class="panel journey home-next" data-home-unit="goal"><h2>${esc(goal?.name || 'Your next step')}</h2>
-  ${goal ? `<span>${esc(goal.label)} <b>${goal.have} / ${goal.need}</b></span><progress value="${goal.have}" max="${goal.need}" aria-label="${esc(goal.label)}"></progress>` : ''}
+ ${goal ? `<span>${esc(goal.label)} <b>${goal.have} / ${goal.need}</b></span><progress value="${goal.have}" max="${goal.need}" aria-label="${esc(goal.label)}"></progress>` : ''}
+ ${project ? `<span>${Object.entries(Q.projectNeed(project)).map(([id, n]) => `${Q.fmt(n)} ${id === 'coins' ? 'coins' : esc(D.ITEMS[id].name)}`).join(' · ')}</span>` : ''}
   <div class="btnrow">${button}<button class="btn" data-do="go" data-a="activity">Activity &amp; goals</button></div></section>
   ${flag ? `<div data-home-unit="flag">${flag}</div>` : ''}</div>`;
 };
