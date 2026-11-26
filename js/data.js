@@ -526,7 +526,7 @@ const seeds = (...ids) => ids.map(c => 'seed_' + c);
 D.SHOPS = {
   willowbrook: ['bread', 'feather', 'rune', 'feed', 'ore_copper', ...seeds('potato', 'onion'), ...tools(1), ...metal(0), ...arrows(0), ...bows(0), ...robes(0)],
   mossbarrow:  ['bread', 'feather', 'rune', 'feed', ...seeds('potato', 'onion', 'cabbage', 'wheat', 'strawberry', 'pumpkin'), ...tools(1, 2), ...metal(0, 1), ...arrows(0, 1), ...bows(0, 1), ...robes(0)],
-  saltmere:    ['bread', 'feather', 'rune', 'feed', ...seeds('cabbage', 'wheat'), ...tools(1, 2), ...metal(1), ...arrows(1), ...bows(1), ...robes(1)],
+  saltmere:    ['bread', 'feather', 'rune', 'feed', ...seeds('cabbage', 'wheat'), ...tools(1, 2), ...metal(1), ...arrows(0, 1), ...bows(1), ...robes(1)],
   ironpeak:    ['bread', 'feather', 'rune', 'feed', ...seeds('pumpkin', 'goldleaf'), ...tools(2, 3), ...metal(2), ...arrows(2), ...bows(2), ...robes(1, 2)],
   gloomfen:    ['bread', 'feather', 'rune', 'feed', ...seeds('goldleaf', 'sunbloom'), ...tools(3, 4), ...metal(3), ...arrows(3), ...bows(3, 4), ...robes(2, 3)],
   emberfall:   ['bread', 'feather', 'rune', 'feed', ...seeds('sunbloom', 'moonmelon'), ...tools(4, 5), ...metal(4, 5), ...arrows(4, 5), ...bows(5), ...robes(3)],
