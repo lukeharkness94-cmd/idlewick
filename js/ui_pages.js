@@ -269,7 +269,11 @@ UI.V.settings = () => {
 function welcome(sum, gap) {
   DQ.holdNotes = true;
   const body = UI.welcomeBody ? UI.welcomeBody(sum, gap) : `<p>${DQ.offlinePolicy()}</p>`;
-  const dialog = DQ.modal({ title: 'Welcome back', wide: true, body, actions: [{ label: 'Continue', primary: true }] });
+  /* every waiting encounter can be put off at once (Part C Task 25): they stay in Activity → Decisions waiting, never expire
+     and are never counted as missed */
+  const waiting = (DQ.S.inbox || []).length;
+  const later = waiting ? [{ label: 'Decide later', fn: () => { DQ.S.decideLater = Date.now(); DQ.save && DQ.save(); DQ.toast && DQ.toast(`${waiting} ${waiting === 1 ? 'decision' : 'decisions'} kept for later · Activity`); } }] : [];
+  const dialog = DQ.modal({ title: 'Welcome back', wide: true, body, actions: [...later, { label: 'Continue', primary: true }] });
   dialog.classList.add('welcome-digest');
 }
 

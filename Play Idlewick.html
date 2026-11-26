@@ -5636,6 +5636,9 @@ html:has(.home-glance) #hud .h-stats{display:revert}
 /* Now card label (Part C Task 24 B): the activity wraps to a second line instead of cutting off ("Fighting Mudling",
    "Fishing shrimp" read in full at 1440 × 900); same font size */
 #nowcard .now-go b{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;text-overflow:clip;overflow-wrap:normal;word-break:normal;line-height:1.15}
+
+/* while a pop-up is open, toasts drop in from the top so they never cover its Continue / Decide later footer (Part C Task 25) */
+body:has(.modal) #toastlayer .toast{top:calc(14px + env(safe-area-inset-top,0px));bottom:auto}
 </style>
 
 </head>
@@ -15652,7 +15655,11 @@ UI.V.settings = () => {
 function welcome(sum, gap) {
   DQ.holdNotes = true;
   const body = UI.welcomeBody ? UI.welcomeBody(sum, gap) : `<p>${DQ.offlinePolicy()}</p>`;
-  const dialog = DQ.modal({ title: 'Welcome back', wide: true, body, actions: [{ label: 'Continue', primary: true }] });
+  /* every waiting encounter can be put off at once (Part C Task 25): they stay in Activity → Decisions waiting, never expire
+     and are never counted as missed */
+  const waiting = (DQ.S.inbox || []).length;
+  const later = waiting ? [{ label: 'Decide later', fn: () => { DQ.S.decideLater = Date.now(); DQ.save && DQ.save(); DQ.toast && DQ.toast(`${waiting} ${waiting === 1 ? 'decision' : 'decisions'} kept for later · Activity`); } }] : [];
+  const dialog = DQ.modal({ title: 'Welcome back', wide: true, body, actions: [...later, { label: 'Continue', primary: true }] });
   dialog.classList.add('welcome-digest');
 }
 
