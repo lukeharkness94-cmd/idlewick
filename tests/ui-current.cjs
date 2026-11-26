@@ -103,7 +103,7 @@ const fs=require('node:fs');
   assert.equal(await page.locator('.encounter-arena [data-prog]').count(),0);
   await page.evaluate(()=>{DQ.ui.questTab='available';DQ.go('quests');DQ.ui.render(false);});
   for(let i=0;i<2;i++){
-   await page.evaluate(()=>{for(let k=0;k<4;k++)DQ.closeModal&&DQ.closeModal();const q=DQ.data.QUESTS.find(q=>DQ.questState(q)==='new');DQ.ui.tab.questSelected=q&&q.id;DQ.ui.render(false);}); /* a story scene may still be open from earlier steps; Current lists quests under way first, so pick a new offer */
+   await page.evaluate(()=>{for(let k=0;k<4;k++)DQ.closeModal&&DQ.closeModal();/* Part B: one active main chapter (js/campaign.js), so pick an offer that can be accepted now */const q=DQ.data.QUESTS.find(q=>DQ.questState(q)==='new'&&!(q.main&&DQ.currentMainQuest()));DQ.ui.tab.questSelected=q&&q.id;DQ.ui.render(false);}); /* a story scene may still be open from earlier steps; Current lists quests under way first, so pick a new offer */
    const accept=page.locator('#view [data-do="qstart"]').first();
    const id=await accept.getAttribute('data-a');await accept.click();await page.evaluate(()=>{for(let k=0;k<4;k++)DQ.closeModal&&DQ.closeModal();}); /* accepting a main quest opens its skippable story scene */
    assert.equal(await page.evaluate(()=>DQ.ui.questTab),'current');
@@ -129,24 +129,30 @@ const fs=require('node:fs');
    const sprites=Object.values(DQ.data.ITEMS).map(it=>DQ.gearIconUrl(it.id)||DQ.artUrl('item',it.id));
    return new Set(sprites).size===sprites.length;
   }),true);
-  await page.evaluate(()=>{document.querySelectorAll('#notes .note').forEach(n=>n.remove());DQ.S.settings.notify=true;DQ.go('mining');DQ.notify({kind:'unlock',key:'unlock:mining',title:'Mining unlocked',text:'Try mining',page:'mining',sound:false});});
-  /* a new skill is a big moment: it gets the full reveal dialog (owner request, Nov 2026) */
+  await page.evaluate(()=>{document.querySelectorAll('#notes .note').forEach(n=>n.remove());for(let i=0;i<4;i++)DQ.closeModal();DQ.S.settings.notify=true;DQ.S.settings.unlockReveals=false;DQ.go('mining');DQ.notify({kind:'unlock',key:'unlock:mining',title:'Mining unlocked',text:'Try mining',page:'mining',sound:false});});
+  /* Part B (Task 12): reveals are opt-in; by default a new skill does not take over the screen */
+  assert.equal(await page.locator('.modal').count(),0);
+  await page.evaluate(()=>{DQ.S.settings.unlockReveals=true;DQ.notify({kind:'unlock',key:'unlock:mining',title:'Mining unlocked',text:'Try mining',page:'mining',sound:false});});
+  /* a new skill is a big moment: with Celebrate new systems on it gets the full reveal dialog (owner request, Nov 2026) */
   assert.equal(await page.locator('.modal .lr-unlock').count(),1);
   assert.ok((await page.locator('.modal').innerText()).includes('Mining'));
   await page.evaluate(()=>DQ.closeModal());
   await page.evaluate(()=>{DQ.notify({kind:'ach',key:'ach:quiet',title:'Routine achievement',sound:false});DQ.openBell();});
   assert.ok((await page.locator('.modal').innerText()).includes('Routine achievement'));
-  assert.ok(!(await page.locator('.modal').innerText()).includes('Mining unlocked'));
+  /* Part B: new skills and systems are always listed in the bell too (Settings → Celebrate new systems hint) */
+  assert.ok((await page.locator('.modal').innerText()).includes('Mining unlocked'));
   await page.evaluate(()=>{
    DQ.closeModal();document.querySelector('.note:not(.out) .n-x')?.click();
    DQ.S.xp.fishing=DQ.data.XPF[5]-1;DQ.fxDirty();DQ.go('fishing');
   });
   await page.waitForTimeout(400);
   await page.evaluate(()=>DQ.addXp('fishing',1,{raw:true}));
-  const level=page.locator('#notes .note.level');
-  assert.equal(await level.count(),1);assert.ok((await level.innerText()).includes('Sardine'));
+  /* Part B (Task 12): level-ups are routine, so they go to the bell's quiet digest instead of a live note, still naming what the level opens */
+  assert.equal(await page.locator('#notes .note.level').count(),0);
   assert.equal(await page.locator('.modal').count(),0);
-  await level.locator('.n-x').click();
+  const levelNote=await page.evaluate(()=>{const e=DQ.noteLog.find(e=>e.o.key==='lvl:fishing');return e?{title:e.o.title,text:e.o.text||''}:null;});
+  assert.ok(levelNote,'the level-up is recorded in the bell');assert.ok((levelNote.title+' '+levelNote.text).includes('Sardine'),JSON.stringify(levelNote));
+  await page.evaluate(()=>DQ.openBell());assert.ok((await page.locator('.modal .bell-list').innerText()).includes(levelNote.title));await page.evaluate(()=>DQ.closeModal());
   // A completed work event produces local feedback, with no particle buildup.
   await page.evaluate(()=>{DQ.S.settings.notify=false;DQ.paused=true;DQ.go('woodcutting');DQ.startAct('wood','normal',{quiet:true});DQ.ui.render(false);});
   assert.ok(await page.locator('.scene-worker').isVisible());

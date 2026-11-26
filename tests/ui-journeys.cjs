@@ -13,14 +13,16 @@ const URL=process.env.IDLEWICK_URL||'http://127.0.0.1:8765/';
  try{
   /* 1. Normal progression: first task through first useful upgrade */
   {const {ctx,page,errors}=await fresh();
-   assert.match(await page.locator('.journey h2').innerText(),/Meet Elder Wren/);
-   await page.locator('.journey .btn.primary').click();await page.waitForTimeout(300);
-   await page.evaluate(()=>{DQ.go('overview');});assert.match(await page.locator('.hs-home').innerText(),/0\s*\/\s*5/);
+   /* Part B compact Home (.home-glance): the goal card's heading names the chapter and its primary button names the action */
+   assert.match(await page.locator('.home-next h2').innerText(),/First Steps/);assert.match(await page.locator('.home-next .btn.primary').innerText(),/Meet Elder Wren/);
+   await page.locator('.home-next .btn.primary').click();await page.waitForTimeout(300);assert.equal(await page.evaluate(()=>DQ.S.q.first_steps?.s),'active','Meet Elder Wren accepts First Steps');
+   await page.evaluate(()=>{DQ.go('overview');});assert.match(await page.locator('.home-glance').innerText(),/0\s*\/\s*5/);
    await page.evaluate(()=>{DQ.startAct('fish','shrimp',{quiet:true});DQ.simulate(5*60000);DQ.startAct('wood','normal',{quiet:true});DQ.simulate(4*60000);DQ.ui.render(true);});
-   assert.match(await page.locator('.journey h2').innerText(),/Claim First Steps/);
+   /* a ready main chapter: the action returns to its giver to claim (js/campaign.js) */
+   assert.match(await page.locator('.home-next .btn.primary').innerText(),/Return to Elder Wren/);assert.equal(await page.locator('.home-next .btn.primary').getAttribute('data-do'),'qclaim');
    await page.evaluate(()=>{DQ.stopAct&&DQ.stopAct(true);DQ.ui.render(true);for(let i=0;i<4;i++)DQ.closeModal&&DQ.closeModal();document.querySelectorAll('.note').forEach(n=>n.remove());});assert.equal(await page.evaluate(()=>DQ.skillUnlocked('cooking')),true,'First Steps teaches the cooking fire');
    await page.waitForTimeout(1500);await page.evaluate(()=>{for(let i=0;i<4;i++)DQ.closeModal&&DQ.closeModal();document.querySelectorAll('.note').forEach(n=>n.remove());});await page.waitForTimeout(600);
-   await page.locator('.journey .btn.primary').click();await page.waitForTimeout(300);
+   await page.locator('.home-next .btn.primary').click();await page.waitForTimeout(300);
    assert.equal(await page.evaluate(()=>DQ.S.q.first_steps.s),'done');
    /* the first useful upgrade: the boss advice now offers armour the purse can buy */
    const adv=await page.evaluate(()=>{DQ.S.coins=200;return DQ.prepAdvice('grubnash').map(x=>x.title);});assert.ok(adv.some(t=>/armour/i.test(t)),adv.join(' | '));
@@ -28,9 +30,9 @@ const URL=process.env.IDLEWICK_URL||'http://127.0.0.1:8765/';
 
   /* 2. First boss: preparation, an attempt, and what a defeat says (seeded: combat 8 reached, no armour, little food) */
   {const {ctx,page,errors}=await fresh();
-   await page.evaluate(()=>{const S=DQ.S,D=DQ.data;for(const k of ['attack','strength','defence'])S.xp[k]=D.XPF[8];S.xp.hitpoints=D.XPF[11];S.inv.shrimp=2;S.settings.notify=true;DQ.go('combat');});
+   await page.evaluate(()=>{const S=DQ.S,D=DQ.data;for(const k of ['attack','strength','defence'])S.xp[k]=D.XPF[8];S.xp.hitpoints=D.XPF[11];S.inv.shrimp=2;S.settings.notify=true;S.tut.prepareCombat=false;/* seeded past the fresh hero's first-fight preparation (Part B) */DQ.go('combat');});
    const steps=await page.locator('.prep-steps li').allInnerTexts();assert.ok(steps.length>=2,'boss card lists concrete steps');
-   const msg=await page.evaluate(async()=>{let seen=null;DQ.on('notified',()=>{});const n0=DQ.notify;DQ.S.inv={};DQ.S.hp=3;DQ.startAct('fight','grubnash',{quiet:true});for(let i=0;i<180&&DQ.act;i++)DQ.advanceTime(1000,1000,DQ.act?DQ.act.progress||0:0);await new Promise(r=>setTimeout(r,400));return [...document.querySelectorAll('#notes .note')].map(e=>e.innerText).join(' | ')+' || '+JSON.stringify(DQ.noteLog?DQ.noteLog.slice(0,3).map(e=>e.o.text):[]);});
+   const msg=await page.evaluate(async()=>{let seen=null;DQ.on('notified',()=>{});const n0=DQ.notify;DQ.S.inv={};DQ.S.hp=3;if(!DQ.startAct('fight','grubnash',{quiet:true}))return 'the Grubnash fight did not start';for(let i=0;i<180&&DQ.act;i++)DQ.advanceTime(1000,1000,DQ.act?DQ.act.progress||0:0);await new Promise(r=>setTimeout(r,400));return [...document.querySelectorAll('#notes .note')].map(e=>e.innerText).join(' | ')+' || '+JSON.stringify(DQ.noteLog?DQ.noteLog.slice(0,3).map(e=>e.o.text):[]);});
    assert.match(msg,/Most useful change/,'a defeat names the most useful change: '+msg);
    assert.deepEqual(errors,[]);await ctx.close();done.push('first boss: concrete steps on the card; a defeat names the most useful change (seeded)');}
 
