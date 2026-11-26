@@ -37,6 +37,12 @@ const itemOf = el => { const kind = el.dataset.kind, task = el.dataset.task; if 
 const render0 = UI.render;
 UI.render = function (...a) { const r = render0.apply(this, a);
   try { const sc = document.querySelector('#view .activity-scene[data-task]'), box = sc && document.querySelector('#view .activity-caption .task-summary');
-    if (sc && box && !box.querySelector('.item-uses')) { const id = itemOf(sc); const h = id && Q.usesHtml(id); if (h) box.insertAdjacentHTML('afterbegin', h); } } catch (e) { /* the page is still usable without it */ }
+    if (sc && box && !box.querySelector('.item-uses')) { const id = itemOf(sc); const h = id && Q.usesHtml(id); if (h) box.insertAdjacentHTML('afterbegin', h); }
+    /* gear you can make shows its stats against what you wear (owner, 26 Nov 2026: "smithing an item or weapon doesn't
+       show you its stats if you were to smith it, let alone compared to your own") */
+    const r = sc && sc.dataset.kind === 'recipe' ? D.RECIPES[sc.dataset.task] : sc && D.RECIPES[sc.dataset.task];
+    const oid = r && Object.keys(r.out)[0], o = oid && D.ITEMS[oid];
+    if (box && o && (o.slot || o.type === 'tool') && !(Q.recipeDiscovery && Q.recipeDiscovery(r)) && UI.compareHtml && !box.querySelector('.recipe-gear')) { const c = UI.compareHtml(oid); if (c) box.insertAdjacentHTML('beforeend', `<div class="recipe-gear">${c}</div>`); }
+  } catch (e) { /* the page is still usable without it */ }
   return r; };
 })();
