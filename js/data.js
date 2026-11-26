@@ -459,7 +459,11 @@ mon('hollowking', 'The Hollow King', 'hollow', 126, 1065, 50, 104, 100, [25000, 
 /* ---------- Combat loot: every monster also rolls on its town's loot table ---------- */
 mk('coin_pouch', { name: 'Coin pouch', ic: 'pouch', col: '#f3d58a', val: 0, type: 'container' });
 mk('treasure_chest', { name: 'Treasure chest', ic: 'pouch', col: '#ffb84a', val: 0, type: 'container', rare: 1 });
-D.RARITY = [['common', 'Common', '#c9c3b3', .2], ['uncommon', 'Uncommon', '#5cc08a', .05], ['rare', 'Rare', '#5f9bff', .012], ['epic', 'Epic', '#c07aff', 0]];
+/* rarity labels are bands of one number, a drop entry's own chance per kill (Part C Task 19): each creature carries many
+   low-chance entries, so the bands were moved until the first hour's counts fall in name order (Common > Uncommon > Rare
+   > Epic, Epic in single digits; scripts/audit-rarity.cjs, tests/rarity-tiers.cjs). Only the labels moved: no chance changed. */
+D.RARITY = [['common', 'Common', '#c9c3b3', .1], ['uncommon', 'Uncommon', '#5cc08a', .02], ['rare', 'Rare', '#5f9bff', .005], ['epic', 'Epic', '#c07aff', 0]];
+D.RARITY_BEFORE = [.2, .05, .012]; /* the old bands, kept for the audit's before/after table */
 D.rarityOf = p => D.RARITY.find(r => p >= r[3]);
 const TOWN_LOOT = {
   willowbrook: { gear: [0], extra: [['seed_potato', [1, 3], .04], ['bread', [1, 2], .03], ['gem_sapphire', [1, 1], .008]] },

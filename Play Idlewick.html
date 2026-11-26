@@ -6281,7 +6281,11 @@ mon('hollowking', 'The Hollow King', 'hollow', 126, 1065, 50, 104, 100, [25000, 
 /* ---------- Combat loot: every monster also rolls on its town's loot table ---------- */
 mk('coin_pouch', { name: 'Coin pouch', ic: 'pouch', col: '#f3d58a', val: 0, type: 'container' });
 mk('treasure_chest', { name: 'Treasure chest', ic: 'pouch', col: '#ffb84a', val: 0, type: 'container', rare: 1 });
-D.RARITY = [['common', 'Common', '#c9c3b3', .2], ['uncommon', 'Uncommon', '#5cc08a', .05], ['rare', 'Rare', '#5f9bff', .012], ['epic', 'Epic', '#c07aff', 0]];
+/* rarity labels are bands of one number, a drop entry's own chance per kill (Part C Task 19): each creature carries many
+   low-chance entries, so the bands were moved until the first hour's counts fall in name order (Common > Uncommon > Rare
+   > Epic, Epic in single digits; scripts/audit-rarity.cjs, tests/rarity-tiers.cjs). Only the labels moved: no chance changed. */
+D.RARITY = [['common', 'Common', '#c9c3b3', .1], ['uncommon', 'Uncommon', '#5cc08a', .02], ['rare', 'Rare', '#5f9bff', .005], ['epic', 'Epic', '#c07aff', 0]];
+D.RARITY_BEFORE = [.2, .05, .012]; /* the old bands, kept for the audit's before/after table */
 D.rarityOf = p => D.RARITY.find(r => p >= r[3]);
 const TOWN_LOOT = {
   willowbrook: { gear: [0], extra: [['seed_potato', [1, 3], .04], ['bread', [1, 2], .03], ['gem_sapphire', [1, 1], .008]] },
@@ -21817,8 +21821,10 @@ const go0 = DQ.go; DQ.go = (...a) => { if (a[0] !== 'quests') { reveal = null; U
     const other = outsideActivities(sum, activities);
     if (total(other.xp) || total(other.items)) activities.push(other);
     const running = Q.act ? `${esc(Q.actLabel())} · still going` : sum.label ? 'Your previous task has ended.' : 'Nothing was running.';
-    const stopped = sum.stopped && sum.stop ?
-      `<p class="wb-status warn">Stopped after ${Q.fmtTime(sum.stop.after)} · ${esc(sum.stop.reason)}</p>` : '';
+    /* the progression ceiling (offline_ceiling.js) is a gate, not a fault: its own line, naming how to raise it */
+    const ceiling = sum.ceiling ? `<p class="wb-status wb-ceiling">${esc(Q.ceilingText(sum.ceiling.skill, sum.ceiling.lvl))}</p>` : '';
+    const stopped = ceiling || (sum.stopped && sum.stop ?
+      `<p class="wb-status warn">Stopped after ${Q.fmtTime(sum.stop.after)} · ${esc(sum.stop.reason)}</p>` : '');
     const pending = Q.S.inbox.length;
     const project = Q.returnChoices?.().find(choice => choice.art?.startsWith('project:'));
     const next = quest ? `<section class="wb-sec wb-main-quest"><h3>${esc(quest.name)}</h3><p>${esc(quest.label)} · <b>${quest.have} / ${quest.need}</b></p></section>` : '';
@@ -25862,6 +25868,54 @@ UI.bossChecklistHtml = step => {
   if (!step || !step.checklist) return '';
   return `<ul class="boss-checklist" aria-label="${esc(step.title)}">${step.checklist.items.map(i => `<li class="${i.done ? 'done' : ''}" data-check="${i.key}"><span class="bc-mark" aria-hidden="true">${i.done ? '✓' : ''}</span><span class="bc-label">${esc(i.label)}</span>${!i.done && i.action ? `<button class="btn sm" data-do="${i.action.do}" data-a="${esc(i.action.a)}">${esc(i.action.text)}</button>` : ''}</li>`).join('')}</ul>`;
 };
+})();
+
+</script>
+<script>
+/* Idlewick: the progression ceiling for time away (Part C Task 20).
+   Before this file, offline earnings were limited only by time: DQ.simulate (engine.js) runs DQ.advanceTime for
+   DQ.offlineEff(gap) = min(gap, 24 h) at full rate, and each completed action pays its full XP and items whatever the
+   skill's level. Nothing compared a skill with the content the player had reached, so a two-minute hero left fishing for
+   six hours came back far above anything they had unlocked.
+   The ceiling is a second, separate limit, applied after counted time and only while catching up on time away (a
+   report-mode DQ.simulate, never a forecast, never live play): an activity stops when its skill reaches the highest
+   level requirement of the content the player has unlocked. Stopping is the existing DQ.stopAct, so XP and items from
+   that activity stop together, the next queued task still starts, other skills are untouched and nothing earned is
+   removed. Only skills with a real content gate in the code are capped:
+     fishing, woodcutting, mining, thieving: the highest node level (D.NODES) among the towns reached;
+     hunting: the highest Hunting level (m.hl) among the animals of the towns reached;
+     melee, ranged, magic, defence, health (fights): the highest creature combat level among the towns reached
+       (areas, challenges and bosses; trial towers excluded).
+   Every other skill has no clean gate and is listed in docs/offline-ceiling.md for the owner's decision. */
+(() => {
+const Q = window.DQ, D = Q.data, S = () => Q.S;
+const NODE_KIND = { fishing: 'fish', woodcutting: 'wood', mining: 'mine', thieving: 'thieve' };
+const COMBAT = ['melee', 'ranged', 'magic', 'defence', 'hitpoints'];
+const reached = town => Q.townUnlocked(town);
+Q.progressCeiling = skill => {
+  if (NODE_KIND[skill]) { const ls = D.NODES[NODE_KIND[skill]].filter(n => reached(n.town)).map(n => n.lvl || 1); return ls.length ? Math.max(...ls) : null; }
+  if (skill === 'hunting') { const ls = D.MONLIST.filter(m => m.hl && !m.tower && reached(m.town)).map(m => m.hl); return ls.length ? Math.max(...ls) : null; }
+  if (COMBAT.includes(skill)) { const ls = D.MONLIST.filter(m => !m.hl && !m.tower && m.cl && reached(m.town)).map(m => m.cl); return ls.length ? Math.max(...ls) : null; }
+  return null; /* unmapped: no gate in the code maps cleanly onto this skill */
+};
+Q.CEILING_SKILLS = [...Object.keys(NODE_KIND), 'hunting', ...COMBAT];
+const away = () => Q.sim && Q.sim.on && Q.sim.activities && !Q.forecasting;
+const skillOf = a => { const sk = Q.actSkill(a); return sk === 'health' ? 'hitpoints' : sk; };
+Q.ceilingText = (skill, lvl) => `${D.SK[skill] ? D.SK[skill].name : skill} stopped at level ${lvl}. That is as far as your current quests and regions reach. Beat a boss or unlock a region to push it further.`;
+const check = () => {
+  const a = Q.act; if (!a || !away()) return false;
+  const sk = skillOf(a), cap = Q.progressCeiling(sk); if (!cap || Q.lvl(sk) < cap) return false;
+  Q.sim.ceiling = { skill: sk, lvl: Q.lvl(sk), cap };
+  Q.stopAct(true, Q.ceilingText(sk, Q.lvl(sk)));
+  return true;
+};
+Q.checkCeiling = check;
+/* after each XP gain while away: the action that reaches the ceiling is the last one */
+const addXp0 = Q.addXp;
+Q.addXp = (...args) => { const r = addXp0(...args); if (away() && Q.act && skillOf(Q.act) === args[0]) check(); return r; };
+/* a skill already at or past its ceiling earns nothing more while away: stop before the first action */
+const advance0 = Q.advanceTime;
+Q.advanceTime = (...args) => { if (away()) { let n = 0; while (check() && n++ < 10); } return advance0(...args); };
 })();
 
 </script>

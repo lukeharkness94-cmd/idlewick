@@ -32,8 +32,10 @@
     const other = outsideActivities(sum, activities);
     if (total(other.xp) || total(other.items)) activities.push(other);
     const running = Q.act ? `${esc(Q.actLabel())} · still going` : sum.label ? 'Your previous task has ended.' : 'Nothing was running.';
-    const stopped = sum.stopped && sum.stop ?
-      `<p class="wb-status warn">Stopped after ${Q.fmtTime(sum.stop.after)} · ${esc(sum.stop.reason)}</p>` : '';
+    /* the progression ceiling (offline_ceiling.js) is a gate, not a fault: its own line, naming how to raise it */
+    const ceiling = sum.ceiling ? `<p class="wb-status wb-ceiling">${esc(Q.ceilingText(sum.ceiling.skill, sum.ceiling.lvl))}</p>` : '';
+    const stopped = ceiling || (sum.stopped && sum.stop ?
+      `<p class="wb-status warn">Stopped after ${Q.fmtTime(sum.stop.after)} · ${esc(sum.stop.reason)}</p>` : '');
     const pending = Q.S.inbox.length;
     const project = Q.returnChoices?.().find(choice => choice.art?.startsWith('project:'));
     const next = quest ? `<section class="wb-sec wb-main-quest"><h3>${esc(quest.name)}</h3><p>${esc(quest.label)} · <b>${quest.have} / ${quest.need}</b></p></section>` : '';
