@@ -30,13 +30,18 @@ const fs=require('node:fs');
   if(process.env.ENTRANCE_PREVIEW){await page.setViewportSize({width:738,height:800});await page.screenshot({path:process.env.ENTRANCE_PREVIEW});}
   await page.locator('#cr-go').click();await page.waitForTimeout(1000);
   await page.evaluate(()=>{DQ.S.tut.hidden=true;DQ.go('overview');DQ.ui.render(false);document.querySelectorAll('.note').forEach(el=>el.remove());});
+  /* Part B: Home is the compact glance (one goal, one action); the unlock roadmap sits on Activity & goals, and Cooking is a starter skill (the first fight needs a cooked meal) */
+  assert.equal(await page.locator('.home-glance').count(),1);assert.equal(await page.locator('#view .unlock-roadmap').count(),0);
+  assert.equal(await page.evaluate(()=>DQ.skillUnlocked('cooking')),true,'Cooking is open from the start');
+  await page.locator('.home-next [data-do="go"][data-a="activity"]').click();assert.equal(await page.evaluate(()=>DQ.ui.view),'activity');
   const roadmap=await page.locator('.unlock-roadmap').innerText();
-  assert.match(roadmap,/Cooking/);assert.match(roadmap,/0\/5\s*Fish caught/i);assert.match(roadmap,/0\/5\s*Gathering actions/i);
-  await page.evaluate(()=>{DQ.S.stats.catch=5;DQ.S.stats.chop=5;DQ.checkActionUnlocks();});
-  assert.equal(await page.evaluate(()=>DQ.skillUnlocked('cooking')&&DQ.S.unlocked.cooking),true);
+  assert.doesNotMatch(roadmap,/Cooking/);assert.match(roadmap,/Mining/);assert.match(roadmap,/0\/10\s*Gathering actions/i);
+  await page.evaluate(()=>{DQ.S.stats.chop=10;DQ.give('tool_'+DQ.toolKey('mining')+'_'+DQ.data.TOOL_ORDER[0],1);DQ.checkActionUnlocks();});
+  assert.equal(await page.evaluate(()=>DQ.skillUnlocked('mining')&&DQ.S.unlocked.mining),true);
   await page.evaluate(()=>{DQ.closeModal();document.querySelectorAll('.note').forEach(el=>el.remove());});
   await page.evaluate(()=>{
    DQ.S.settings.muted=true;DQ.S.settings.notify=false;DQ.S.tut.hidden=true;
+   DQ.S.tut.prepareCombat=false; /* granted late-game fixture: the fresh hero's first-fight preparation (Part B) is covered by tests/opening-skill-gates.cjs */
    for(const sk of Object.keys(DQ.S.xp)){DQ.S.xp[sk]=300000;DQ.S.unlocked[sk]=true;}
    DQ.S.research.done.herbalism=true;
    DQ.fxDirty();DQ.ui.renderHud();DQ.ui.renderRail();
@@ -81,7 +86,7 @@ const fs=require('node:fs');
   {const r=await page.evaluate(()=>{const S=DQ.S;S.beast.kills.goblin=1;/* out of combat the stage is the Where to fight window (20 Nov), so check the three agree during a fight */S.town='willowbrook';DQ.startAct('fight','goblin',{quiet:true});DQ.go('combat');DQ.ui.render(true);
     const nm=document.querySelector('#av-foe')?.closest('.side')?.querySelector('.nm')?.innerText||'',brief=document.querySelector('.battle-brief h3')?.innerText||'',ctl=document.querySelector('.arena-ctl')?.innerText||'',danger=document.querySelector('.battle-brief .danger')?.innerText||'';
     const at=S.settings.eatAt;DQ.ui.DO.eatstep('10');const after=S.settings.eatAt;S.settings.eatAt=at;
-    S.journey='boss';S.journeyTarget='grubnash';const was=S.towns.willowbrook.boss;S.towns.willowbrook.boss=true;DQ.go('overview');DQ.ui.render(true);const home=document.querySelector('.journey')?.innerText||'';S.towns.willowbrook.boss=was;DQ.stopAct(true);
+    S.journey='boss';S.journeyTarget='grubnash';const was=S.towns.willowbrook.boss;S.towns.willowbrook.boss=true;/* Part B: the goal panel moved from the compact Home to Activity & goals */DQ.go('activity');DQ.ui.render(true);const home=document.querySelector('.home-activity-details .journey')?.innerText||'';S.towns.willowbrook.boss=was;DQ.stopAct(true);
     return {nm,brief,ctl,danger,at,after,home};});
    assert.match(r.nm,/Goblin/);assert.match(r.brief,/Goblin/);assert.match(r.ctl,/Goblin/);assert.match(r.danger,/danger/i);assert.equal(r.after,Math.min(70,r.at+10));
    assert.match(r.home,/Goal complete/i);assert.match(r.home,/Choose another goal/);}
