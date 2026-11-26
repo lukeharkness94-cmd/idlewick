@@ -971,3 +971,12 @@ html.calm .village-scene .site-spot.ps-ready{animation:none}
 #view .combat-abils .cx-art b{white-space:nowrap;overflow:visible}
 #view .combat-abils .kit-head .cx-art-line{display:inline-flex;align-items:center;gap:4px;margin-left:auto;margin-right:8px;white-space:nowrap}
 #view .combat-abils .kit-head .cx-art-line .ic{width:16px;height:16px}
+
+/* Petting (js/pet_stroke.js): a hand strokes the animal twice; the animal leans in; no size change */
+img.pet-hand{position:fixed;z-index:60;image-rendering:pixelated;pointer-events:none;animation:pet-stroke 1.2s ease-in-out forwards}
+@keyframes pet-stroke{0%{opacity:0;translate:0 -6px}12%{opacity:1;translate:0 0}38%{translate:var(--stroke) 3px}50%{translate:var(--stroke) 0}62%{translate:0 0}88%{translate:var(--stroke) 3px;opacity:1}100%{translate:var(--stroke) -4px;opacity:0}}
+.petted,.petted img{animation:pet-lean 1.2s ease-in-out}
+@keyframes pet-lean{0%,100%{rotate:0deg;translate:0 0}25%{rotate:-4deg;translate:0 2px}50%{rotate:2deg;translate:0 1px}75%{rotate:-4deg;translate:0 2px}}
+.pen .pspr:active,.pen .pspr.petted,.hud-pet:active,.hud-pet.petted{scale:1!important;transform:none}
+html.calm .petted,html.calm .petted img{animation:none}
+@media (prefers-reduced-motion:reduce){.petted,.petted img,img.pet-hand{animation:none}}
