@@ -32,8 +32,9 @@
   };
 
   const questBlockers = Q.questBlockers;
-  Q.questBlockers = q => Q.S.q[q.id]?.queuedMain ?
-    ['Continue the current main quest first. Your objectives here are saved.'] : questBlockers(q);
+  Q.questBlockers = q => { if (Q.S.q[q.id]?.queuedMain) return ['Continue the current main quest first. Your objectives here are saved.'];
+    const out = questBlockers(q), current = q.main && !Q.S.q[q.id] && Q.currentMainQuest();
+    return current && current.id !== q.id ? [...out, `Finish “${current.name}” first`] : out; };
 
   const startQuest = Q.startQuest;
   Q.startQuest = id => {

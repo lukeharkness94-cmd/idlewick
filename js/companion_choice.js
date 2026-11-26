@@ -23,7 +23,7 @@ Q.beastCompare = id => { const g = gives(id), cur = S().pets.active, cg = cur &&
     : `Different job from your ${esc(D.PET[cur].name)}: a ${esc(g.job.role.toLowerCase())} (${pct(g.now)} ${esc(g.job.what)}) instead of a ${esc(cg.job.role.toLowerCase())} (${pct(cg.now)} ${esc(cg.job.what)}). Swap whenever your goal changes.`; };
 const previewHtml = id => { const g = gives(id), got = !!S().pets.owned[id]; if (!g) return '';
   const p = D.PET[id], tr = S().pets.tracks[id] || 0;
-  return `<section class="panel beast-preview"><div class="bp-head"><span class="bp-art ${got ? '' : 'blackout'}">${Q.petSprite(p, 64, got ? '' : 'sil')}</span><div><span class="k">${got ? 'Your companion' : 'Why choose it'} · ${esc(g.job.role)}</span><h3>${esc(p.name)}</h3></div></div>
+  return `<section class="panel beast-preview"><div class="bp-head"><span class="bp-art ${got ? '' : 'blackout'}">${Q.petSprite(p, 64, got ? '' : 'sil')}</span><div><span class="k">${S().pets.active === id ? 'Your companion' : got ? 'Your beast' : 'Why choose it'} · ${esc(g.job.role)}</span><h3>${esc(p.name)}</h3></div></div>
     <p class="bp-line"><b>${pct(g.now)} ${esc(g.job.what)}</b> at Bond 1, growing to <b>${pct(g.max)}</b> at Bond 10${g.sp.evolution ? `, when it evolves into the ${esc(g.sp.evolution)}` : ''}.</p>
     <p class="bp-fit">${esc(g.job.fit)}</p><p class="bp-cmp">${Q.beastCompare(id)}</p>
     <p class="sm dim">Found around ${esc(D.TOWN[g.sp.town].name)} from Hero ${g.sp.hero}${got ? '' : ` · ${tr}/5 tracks toward a certain capture`}.</p></section>`; };

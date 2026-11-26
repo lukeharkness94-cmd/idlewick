@@ -319,7 +319,7 @@ DQ.closeModal = () => {
   if (DQ.holdNotes) { DQ.holdNotes = false; setTimeout(pump, 250); }
 };
 /* Older discovery callers supply a title and a route. Keep those in the digest. */
-DQ.popupQueue = o => DQ.notify({ kind: 'discovery', title: o.title, action: o.actions?.find(a => a.fn) });
+DQ.popupQueue = o => DQ.notify({ kind: 'discovery', title: o.title, text: o.text || (o.body ? String(o.body).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 220) : ''), action: o.actions?.find(a => a.fn) });
 DQ.modal = o => {
   DQ.hideTip?.();
   DQ.closeModal(); modalTrigger = document.activeElement;

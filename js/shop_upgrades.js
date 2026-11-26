@@ -48,10 +48,11 @@ const stableShop=raw=>{
  const controls=task.querySelector('.shop-controls')||task.querySelector('[data-do="localqty"]')?.parentElement;
  let actions=task.querySelector('.shop-action');const local=task.querySelector('[data-do="localbuy"]');
  if(!actions&&local){actions=document.createElement('div');actions.className='shop-action';actions.append(local);}
+ const inline=!actions&&task.querySelector('.inline-buy');if(inline){actions=document.createElement('div');actions.className='shop-action';actions.append(inline);}
  if(controls)controls.remove();if(actions)actions.remove();
  const body=document.createElement('div');body.className='shop-detail-body';body.append(...task.childNodes);
  const footer=document.createElement('div');footer.className='shop-detail-actions';
- const qty=document.createElement('div');qty.className='shop-quantity-slot';if(controls)qty.append(controls);else qty.innerHTML=UI.shopTab==='buy'&&UI.shopCategory==='tools'?'<span class="sm">One permanent tool upgrade</span>':'<span class="sm">Choose an item from this shelf.</span>';
+ const qty=document.createElement('div');qty.className='shop-quantity-slot';if(controls)qty.append(controls);else qty.innerHTML=UI.shopTab==='buy'&&UI.shopCategory==='tools'?'<span class="sm">One permanent tool upgrade</span>':actions?'':'<span class="sm">Choose an item from this shelf.</span>';
  footer.append(qty);if(actions)footer.append(actions);task.append(body,footer);
  return shopHeader()+tmp.innerHTML;
 };

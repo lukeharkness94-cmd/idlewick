@@ -89,7 +89,7 @@ Q.on('project',id=>{if(S().projects[id]){const s=Object.values(defs).find(s=>s.p
 const notify0=Q.notify;
 Q.notify=o=>{const r=notify0(o);/* The main quest claim owns the victory scene, preventing duplicate celebrations. */return r;};
 let ticks=0;
-Q.on('ui',()=>{if(++ticks%5||!pending)return;const id=pending;pending=null;if(S().settings.storyScenes!==false&&!quiet()&&Q.started&&!seen(id)&&Q.allowAutomaticReveal())Q.openStory(id);});
+Q.on('ui',()=>{if(++ticks%5||!pending)return;const id=pending;if(S().settings.storyScenes===false||seen(id)){pending=null;return;}/* wait (keeping the scene) while a reveal is open, so reading a reward slowly never loses the scene */if(!quiet()&&Q.started&&Q.allowAutomaticReveal()){pending=null;Q.openStory(id);}});
 /* Present existing consequential choices as scenes rather than introducing another decision system. */
 for(const [id,d]of Object.entries(D.DISCOVERIES).filter(([,d])=>d.choices))defs['discovery_'+id]={id:'discovery_'+id,title:d.name,town:d.place,type:'discovery',source:id,eligible:()=>Q.discovered(id),frames:()=>[{speaker:'Narrator',shot:'wide',text:d.text}],choices:d.choices.map(c=>({...c,effect:c.needItem?`Uses one ${D.ITEMS[c.needItem].name}. ${c.label}`:c.need?`Uses ${c.need} cooked meals. ${c.label}`:c.label}))};
 const discovery0=UI.openDiscovery;

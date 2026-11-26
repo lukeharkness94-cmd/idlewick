@@ -5648,6 +5648,9 @@ button.linkish{display:inline-flex;align-items:center}
 /* on desktop the page can be zoomed to 85% (js/scale.js), so controls outside the fixed-height activity panels are 28
    design px to stay at least 24 CSS px */
 @media (min-width:861px){button.tog,button[data-do="theme"],button.linkish{min-height:28px}}
+
+/* the bell's unread count meets the 13px text floor (ui-rules R5) */
+.belldot{font-size:13px!important;line-height:18px!important;min-width:18px!important;height:18px!important;border-radius:9px!important}
 </style>
 
 </head>
@@ -12868,7 +12871,7 @@ DQ.closeModal = () => {
   if (DQ.holdNotes) { DQ.holdNotes = false; setTimeout(pump, 250); }
 };
 /* Older discovery callers supply a title and a route. Keep those in the digest. */
-DQ.popupQueue = o => DQ.notify({ kind: 'discovery', title: o.title, action: o.actions?.find(a => a.fn) });
+DQ.popupQueue = o => DQ.notify({ kind: 'discovery', title: o.title, text: o.text || (o.body ? String(o.body).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 220) : ''), action: o.actions?.find(a => a.fn) });
 DQ.modal = o => {
   DQ.hideTip?.();
   DQ.closeModal(); modalTrigger = document.activeElement;
@@ -15695,6 +15698,7 @@ const DO = {
   qstart: a => {
     const q = D.QM[a]; if (!q || DQ.questState(q) !== 'new') return;
     DQ.startQuest(a);
+    if (DQ.questState(q) !== 'active' && DQ.questState(q) !== 'ready') { UI.render(false); return; }
     if (DQ.toast) DQ.toast(`Accepted: ${q.name}. It is now under Active.`);
     if (!D.QUESTS.some(q => DQ.questState(q) === 'new')) {
       UI.questTab = 'active'; UI.tab.questSelected = a;
@@ -22303,7 +22307,7 @@ Q.on('project',id=>{if(S().projects[id]){const s=Object.values(defs).find(s=>s.p
 const notify0=Q.notify;
 Q.notify=o=>{const r=notify0(o);/* The main quest claim owns the victory scene, preventing duplicate celebrations. */return r;};
 let ticks=0;
-Q.on('ui',()=>{if(++ticks%5||!pending)return;const id=pending;pending=null;if(S().settings.storyScenes!==false&&!quiet()&&Q.started&&!seen(id)&&Q.allowAutomaticReveal())Q.openStory(id);});
+Q.on('ui',()=>{if(++ticks%5||!pending)return;const id=pending;if(S().settings.storyScenes===false||seen(id)){pending=null;return;}/* wait (keeping the scene) while a reveal is open, so reading a reward slowly never loses the scene */if(!quiet()&&Q.started&&Q.allowAutomaticReveal()){pending=null;Q.openStory(id);}});
 /* Present existing consequential choices as scenes rather than introducing another decision system. */
 for(const [id,d]of Object.entries(D.DISCOVERIES).filter(([,d])=>d.choices))defs['discovery_'+id]={id:'discovery_'+id,title:d.name,town:d.place,type:'discovery',source:id,eligible:()=>Q.discovered(id),frames:()=>[{speaker:'Narrator',shot:'wide',text:d.text}],choices:d.choices.map(c=>({...c,effect:c.needItem?`Uses one ${D.ITEMS[c.needItem].name}. ${c.label}`:c.need?`Uses ${c.need} cooked meals. ${c.label}`:c.label}))};
 const discovery0=UI.openDiscovery;
@@ -22357,7 +22361,7 @@ const page = v => v / (Q.zoom || 1);
 const snapshot = (arg, finish) => {
   const [id, item] = String(arg).split('|'), lines = [...document.querySelectorAll('.village-projects .proj-line')];
   const src = lines.filter(l => { const b = l.querySelector('[data-do="projectgive"]'); return b && (finish || !item || String(b.dataset.a).split('|')[1] === item); })
-    .map(l => { const ic = l.querySelector('.proj-ic'), r = ic.getBoundingClientRect(); return { html: ic.innerHTML, x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+    .map(l => { const ic = l.querySelector('.proj-ic') || l.querySelector('[data-do="projectgive"] .bundle-option > span') || l.querySelector('[data-do="projectgive"]'); if (!ic) return null; const r = ic.getBoundingClientRect(); return { html: ic.innerHTML, x: r.left + r.width / 2, y: r.top + r.height / 2 }; }).filter(Boolean);
   const img = document.querySelector('.village-scene > img.scene');
   return { id, src, old: img ? img.src : null, was: !!S().projects[id] };
 };
@@ -22602,7 +22606,7 @@ Q.beastCompare = id => { const g = gives(id), cur = S().pets.active, cg = cur &&
     : `Different job from your ${esc(D.PET[cur].name)}: a ${esc(g.job.role.toLowerCase())} (${pct(g.now)} ${esc(g.job.what)}) instead of a ${esc(cg.job.role.toLowerCase())} (${pct(cg.now)} ${esc(cg.job.what)}). Swap whenever your goal changes.`; };
 const previewHtml = id => { const g = gives(id), got = !!S().pets.owned[id]; if (!g) return '';
   const p = D.PET[id], tr = S().pets.tracks[id] || 0;
-  return `<section class="panel beast-preview"><div class="bp-head"><span class="bp-art ${got ? '' : 'blackout'}">${Q.petSprite(p, 64, got ? '' : 'sil')}</span><div><span class="k">${got ? 'Your companion' : 'Why choose it'} · ${esc(g.job.role)}</span><h3>${esc(p.name)}</h3></div></div>
+  return `<section class="panel beast-preview"><div class="bp-head"><span class="bp-art ${got ? '' : 'blackout'}">${Q.petSprite(p, 64, got ? '' : 'sil')}</span><div><span class="k">${S().pets.active === id ? 'Your companion' : got ? 'Your beast' : 'Why choose it'} · ${esc(g.job.role)}</span><h3>${esc(p.name)}</h3></div></div>
     <p class="bp-line"><b>${pct(g.now)} ${esc(g.job.what)}</b> at Bond 1, growing to <b>${pct(g.max)}</b> at Bond 10${g.sp.evolution ? `, when it evolves into the ${esc(g.sp.evolution)}` : ''}.</p>
     <p class="bp-fit">${esc(g.job.fit)}</p><p class="bp-cmp">${Q.beastCompare(id)}</p>
     <p class="sm dim">Found around ${esc(D.TOWN[g.sp.town].name)} from Hero ${g.sp.hero}${got ? '' : ` · ${tr}/5 tracks toward a certain capture`}.</p></section>`; };
@@ -23806,10 +23810,11 @@ const stableShop=raw=>{
  const controls=task.querySelector('.shop-controls')||task.querySelector('[data-do="localqty"]')?.parentElement;
  let actions=task.querySelector('.shop-action');const local=task.querySelector('[data-do="localbuy"]');
  if(!actions&&local){actions=document.createElement('div');actions.className='shop-action';actions.append(local);}
+ const inline=!actions&&task.querySelector('.inline-buy');if(inline){actions=document.createElement('div');actions.className='shop-action';actions.append(inline);}
  if(controls)controls.remove();if(actions)actions.remove();
  const body=document.createElement('div');body.className='shop-detail-body';body.append(...task.childNodes);
  const footer=document.createElement('div');footer.className='shop-detail-actions';
- const qty=document.createElement('div');qty.className='shop-quantity-slot';if(controls)qty.append(controls);else qty.innerHTML=UI.shopTab==='buy'&&UI.shopCategory==='tools'?'<span class="sm">One permanent tool upgrade</span>':'<span class="sm">Choose an item from this shelf.</span>';
+ const qty=document.createElement('div');qty.className='shop-quantity-slot';if(controls)qty.append(controls);else qty.innerHTML=UI.shopTab==='buy'&&UI.shopCategory==='tools'?'<span class="sm">One permanent tool upgrade</span>':actions?'':'<span class="sm">Choose an item from this shelf.</span>';
  footer.append(qty);if(actions)footer.append(actions);task.append(body,footer);
  return shopHeader()+tmp.innerHTML;
 };
@@ -25719,8 +25724,9 @@ UI.render = (...a) => {
   };
 
   const questBlockers = Q.questBlockers;
-  Q.questBlockers = q => Q.S.q[q.id]?.queuedMain ?
-    ['Continue the current main quest first. Your objectives here are saved.'] : questBlockers(q);
+  Q.questBlockers = q => { if (Q.S.q[q.id]?.queuedMain) return ['Continue the current main quest first. Your objectives here are saved.'];
+    const out = questBlockers(q), current = q.main && !Q.S.q[q.id] && Q.currentMainQuest();
+    return current && current.id !== q.id ? [...out, `Finish “${current.name}” first`] : out; };
 
   const startQuest = Q.startQuest;
   Q.startQuest = id => {

@@ -299,6 +299,7 @@ const DO = {
   qstart: a => {
     const q = D.QM[a]; if (!q || DQ.questState(q) !== 'new') return;
     DQ.startQuest(a);
+    if (DQ.questState(q) !== 'active' && DQ.questState(q) !== 'ready') { UI.render(false); return; }
     if (DQ.toast) DQ.toast(`Accepted: ${q.name}. It is now under Active.`);
     if (!D.QUESTS.some(q => DQ.questState(q) === 'new')) {
       UI.questTab = 'active'; UI.tab.questSelected = a;

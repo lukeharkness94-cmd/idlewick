@@ -886,3 +886,6 @@ button.linkish{display:inline-flex;align-items:center}
 /* on desktop the page can be zoomed to 85% (js/scale.js), so controls outside the fixed-height activity panels are 28
    design px to stay at least 24 CSS px */
 @media (min-width:861px){button.tog,button[data-do="theme"],button.linkish{min-height:28px}}
+
+/* the bell's unread count meets the 13px text floor (ui-rules R5) */
+.belldot{font-size:13px!important;line-height:18px!important;min-width:18px!important;height:18px!important;border-radius:9px!important}

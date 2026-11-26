@@ -10,7 +10,7 @@ const page = v => v / (Q.zoom || 1);
 const snapshot = (arg, finish) => {
   const [id, item] = String(arg).split('|'), lines = [...document.querySelectorAll('.village-projects .proj-line')];
   const src = lines.filter(l => { const b = l.querySelector('[data-do="projectgive"]'); return b && (finish || !item || String(b.dataset.a).split('|')[1] === item); })
-    .map(l => { const ic = l.querySelector('.proj-ic'), r = ic.getBoundingClientRect(); return { html: ic.innerHTML, x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+    .map(l => { const ic = l.querySelector('.proj-ic') || l.querySelector('[data-do="projectgive"] .bundle-option > span') || l.querySelector('[data-do="projectgive"]'); if (!ic) return null; const r = ic.getBoundingClientRect(); return { html: ic.innerHTML, x: r.left + r.width / 2, y: r.top + r.height / 2 }; }).filter(Boolean);
   const img = document.querySelector('.village-scene > img.scene');
   return { id, src, old: img ? img.src : null, was: !!S().projects[id] };
 };
