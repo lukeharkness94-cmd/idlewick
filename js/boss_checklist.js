@@ -87,11 +87,15 @@ Q.regionalChallengeStep = () => {
 };
 Q.bossPrepStep = () => {
   const b = boss(); if (!b || S().town !== b.town || Q.combatLvl() < b.boss.req || prep()[b.id]) return null;
+  const bq = D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === b.id)); if (bq && ['new', 'ready'].includes(Q.questState(bq))) return null;
   const c = Q.bossChecklist(); if (!c || allDone(c)) return null;
   return { title: `Before ${b.boss.short || b.name}`, detail: 'Three quick checks before the fight. Each one ticks itself off.', action: 'bossprepskip', a: b.id, checklist: c, skip: true };
 };
 const region0 = Q.regionNext;
 Q.regionNext = () => { const s = Q.bossPrepStep() || Q.regionalChallengeStep(); return s || region0(); };
+/* the checklist holds the equip and slot steps plan.js would otherwise offer one at a time, so at the boss it comes first */
+const next0 = Q.journeyNext;
+Q.journeyNext = (...a) => { const n = next0(...a); if ((a[0] && D.PROJECTS[a[0]]) || !n || n.checklist) return n; if (['equip', 'abil'].includes(n.action)) { const s = Q.bossPrepStep(); if (s) return s; } return n; };
 /* the checklist, rendered inside the Home goal card (and anywhere a journey step is drawn with UI.bossChecklistHtml) */
 UI.bossChecklistHtml = step => {
   if (!step || !step.checklist) return '';

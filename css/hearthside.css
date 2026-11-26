@@ -855,3 +855,13 @@ html:has(.home-glance) #hud .h-stats{display:revert}
 .inline-buy .btn b{font-weight:600}
 .inline-buy .btn small{white-space:nowrap}
 .inline-buy.one{grid-template-columns:minmax(0,1fr)}
+
+/* Before <boss> checklist (boss_checklist.js) */
+.boss-checklist{list-style:none;margin:4px 0;padding:0;display:grid;gap:6px}
+.boss-checklist li{display:flex;align-items:center;gap:8px;min-width:0;padding:6px 8px;border:1px solid var(--line2);border-radius:8px;background:color-mix(in srgb,var(--panel2) 50%,transparent)}
+.boss-checklist .bc-mark{flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;border:2px solid var(--line2);font-weight:700;color:var(--good,#4a8a4a)}
+.boss-checklist li.done .bc-mark{border-color:var(--good,#4a8a4a)}
+.boss-checklist .bc-label{flex:1 1 auto;min-width:0}
+.boss-checklist li.done .bc-label{color:var(--mute)}
+.boss-checklist .btn{flex:none}
+.bc-title{margin:6px 0 0;font:600 17px var(--f-display)}

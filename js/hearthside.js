@@ -51,7 +51,10 @@ const homeGlance = () => {
  const goal = project ? { name: D.PROJECTS[project].name, label: 'Bundles complete',
    have: Object.keys(D.PROJECTS[project].cost).length - Object.keys(Q.projectNeed(project)).length,
    need: Object.keys(D.PROJECTS[project].cost).length } : main;
- const button = `<button class="btn primary" data-do="${next.action}" data-a="${esc(next.a || '')}" data-b="${esc(next.b || '')}">${esc(next.title)}</button>`;
+ /* a checklist step (boss_checklist.js): its first open item is the main action, then Skip; the list sits in the card */
+ const todo = next.checklist && next.checklist.items.find(i => !i.done && i.action);
+ const button = next.checklist ? `${todo ? `<button class="btn primary" data-do="${todo.action.do}" data-a="${esc(todo.action.a)}">${esc(todo.key === 'armour' || todo.key === 'ability' ? todo.label : todo.action.text)}</button>` : ''}<button class="btn" data-do="bossprepskip" data-a="${esc(next.a || '')}">Skip checks</button>`
+   : `<button class="btn primary" data-do="${next.action}" data-a="${esc(next.a || '')}" data-b="${esc(next.b || '')}">${esc(next.title)}</button>`;
  const count = S().inbox?.length || 0;
  const local = (town.id !== 'willowbrook' || S().q.goblin_menace?.s === 'done') && Q.closestRestoration();
  const flag = count ? `<button class="btn" data-do="go" data-a="activity">${count} away ${count === 1 ? 'decision' : 'decisions'}</button>` :
@@ -63,6 +66,7 @@ const homeGlance = () => {
   <div class="panel home-coins" data-home-unit="coins">${ico('coin')}<b data-b="coins"></b><span>coins</span></div></div>
   <section class="panel journey home-next" data-home-unit="goal"><h2>${esc(goal?.name || 'Your next step')}</h2>
  ${goal ? `<span>${esc(goal.label)} <b>${goal.have} / ${goal.need}</b></span><progress value="${goal.have}" max="${goal.need}" aria-label="${esc(goal.label)}"></progress>` : ''}
+ ${next.checklist ? `<h3 class="bc-title">${esc(next.title)}</h3>${U.bossChecklistHtml(next)}` : ''}
  ${project ? `<span>${Object.entries(Q.projectNeed(project)).map(([id, n]) => `${Q.fmt(n)} ${id === 'coins' ? 'coins' : esc(D.ITEMS[id].name)}`).join(' · ')}</span>` : ''}
   <div class="btnrow">${button}<button class="btn" data-do="go" data-a="activity">Activity &amp; goals</button></div></section>
   ${flag ? `<div data-home-unit="flag">${flag}</div>` : ''}</div>`;
