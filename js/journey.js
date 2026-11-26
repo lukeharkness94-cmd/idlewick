@@ -291,7 +291,20 @@ DQ.regionNext = () => {
   const targets = D.MONLIST.filter(m => m.town === b.town && !m.boss && !m.mini && !m.hl && !m.tower);
   const foe = targets.filter(m => m.cl <= DQ.combatLvl() + 2).sort((a, c) => c.cl - a.cl)[0] || targets[0];
   const train = detail => task(`Train for ${short}`, `${detail}${foe ? ` Fight ${DQ.plural(foe.name).toLowerCase()} to improve your current style.` : ''}`, 'fight', foe?.id || b.id);
-  if (DQ.combatLvl() < req) return train(`Combat ${DQ.combatLvl()} / ${req}.`);
+  if (DQ.combatLvl() < req) {
+    const detail = `Combat ${DQ.combatLvl()} / ${req}.`;
+    if (foe && DQ.weaponStyle() === 'melee') {
+      const routes = DQ.combatProgress().routes;
+      const defence = routes.find(route => route.skill === 'defence');
+      const melee = routes.find(route => route.skill === 'melee');
+      if (defence && melee) {
+        const defend = defence.xp / 4 < melee.xp / 2, focus = defend ? 'defensive' : 'aggressive';
+        if (S().style.melee !== focus) return step(`Train ${defend ? 'Defence' : 'Melee'} for ${short}`,
+          `${detail} Switch to train the skill closest to raising your Combat level.`, 'journeytrain', focus, foe.id);
+      }
+    }
+    return train(detail);
+  }
   const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
   if (f && f.winRate >= .75) return task(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'fight', b.id);
   const tip = DQ.prepAdvice?.(b.id, f).find(x => x.action && !x.info && x.actionable !== false && (x.afford !== false || x.preparing) && x.a !== 'combat');

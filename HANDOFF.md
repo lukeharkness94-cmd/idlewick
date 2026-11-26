@@ -965,4 +965,6 @@ Combat's phone tabs include Magic. Fight entry shows missing arrows or runes, pr
 
 ## Part B of the v4 experience pass
 
-Draft PR #7 starts from `036ecef`. The changes cover starter skill prerequisites, one active main chapter, full-speed 24-hour return summaries, the Mossbarrow and Saltmere preparation routes, request-based help, a quiet notification digest, exact level-stop targets, a compact Home view, inline purchases, linked restoration bundles, daily errands and save-string recovery. Read [the Part B verification report](docs/part-b-verification.md) for checks, measured results and limitations. Human playtesting and platform validation are separate.
+The Part B changes developed in PR #7 start from `036ecef`. The changes cover starter skill prerequisites, one active main chapter, full-speed 24-hour return summaries, the Mossbarrow and Saltmere preparation routes, request-based help, a quiet notification digest, exact level-stop targets, a compact Home view, inline purchases, linked restoration bundles, daily errands and save-string recovery. Read [the Part B verification report](docs/part-b-verification.md) for checks, measured results and limitations. Human playtesting and platform validation are separate.
+
+For the next implementation session, follow [the Claude handoff](docs/claude-handoff.md). The final no-grant Sword replay reached Saltmere and turned in Crab Cull. Part B is a development checkpoint with focused verification. The broader browser failures, 82½-minute reward interval and global accessibility audit are open.

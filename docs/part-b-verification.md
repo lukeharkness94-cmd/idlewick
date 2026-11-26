@@ -1,6 +1,6 @@
 # Idlewick Part B
 
-Part B started from main commit `036ecef`. The work lives in draft pull request #7. All gameplay observations below came from automated runs and controlled fixtures. Human playtesting follows this implementation pass.
+Part B started from main commit `036ecef`. The work was developed in pull request #7 and prepared as a main-branch handoff. All gameplay observations below came from automated runs and controlled fixtures. Human playtesting follows this implementation pass.
 
 | Task | Changes | Main source and evidence |
 | --- | --- | --- |
@@ -27,4 +27,4 @@ The scripted browser opening recorded 259 events in its first 60 in-game minutes
 
 The 390px Home audit measured 18px body text, 36px in the doubled-text test, no horizontal overflow, and no undersized Home buttons. Panel text contrast measured 12.5:1 in light and 10.9:1 in dark. These measurements cover the scoped surfaces described above.
 
-The main regression suite has 122 checks. The standalone artwork and desktop-save checks passed. Browser walkthroughs passed for starter unlocks, exact quest routing, regional preparation, four offline durations, quiet routine rewards, exact level stops and the combined Home, Shop, restoration and save-string checks. The wider browser suite still has failures in older fixtures and layouts. Keep the PR in draft until they are triaged. The hours-three-to-five map records the remaining reward gap and the automated route from a fresh hero to Saltmere.
+The main regression suite has 122 checks. The standalone artwork and desktop-save checks passed. Browser walkthroughs passed for starter unlocks, exact quest routing, regional preparation, four offline durations, quiet routine rewards, exact level stops and the combined Home, Shop, restoration and save-string checks. The wider browser suite still has failures in older fixtures and layouts. Treat this as a development checkpoint and triage those failures before a release. The hours-three-to-five map records the remaining reward gap and the automated route from a fresh hero to Saltmere.

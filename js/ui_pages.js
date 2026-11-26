@@ -142,7 +142,7 @@ UI.V.shop = () => {
 /* One progress calculation for journal rows, detail summaries and the pinned objective. */
 UI.questProgress = q => {
   const state = DQ.questState(q), p = S().q[q.id], values = q.obj.map((o,j) => state === 'done' ? o.n : Math.min(o.n,DQ.objProg(q,p,j)));
-  const index = Math.max(0, q.obj.findIndex((o,j) => values[j] < o.n));
+  const index = Math.max(0, q.obj.indexOf(DQ.unfinishedObjective(q)));
   return { state, values, index, complete: values.filter((v,j)=>v>=q.obj[j].n).length, pct: Math.round(values.reduce((a,v,j)=>a+v/q.obj[j].n,0)/q.obj.length*100) };
 };
 UI.questSummary = q => {
