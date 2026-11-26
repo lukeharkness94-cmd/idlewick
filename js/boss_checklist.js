@@ -103,7 +103,7 @@ const start0 = Q.startAct;
 Q.startAct = (kind, id, o) => { const r = start0(kind, id, o); if (r && kind === 'fight' && D.MON[id] && D.MON[id].boss && !Q.forecasting && !(Q.sim && Q.sim.on && !Q.sim.activities)) prep()[id] = prep()[id] || 'tried'; return r; };
 /* Follow-up restoration (owner, 26 Nov 2026: close Staff's 61-minute gap before Old Tusk). Once 30 minutes of play have
    passed since the last reward (ahead of another try at a challenge), Home offers one more of the town's existing restorations
-   (at most two beyond the first), and only when every material can be had now: already carried, gathered at the hero's level
+   and only when every material can be had now: already carried, gathered at the hero's level
    here, or sold in this town's shop. The step is the project's own journey step; nothing new is added. */
 /* how the hero can get what a project still needs, and what it costs in coins: null when something cannot be had now or
    the whole lot (the project's coins plus anything bought) is more than the hero carries */
@@ -121,10 +121,9 @@ const beat = () => { if (!Q.forecasting) S().lastBeatAt = S().gameTime || 0; };
 for (const f of ['claimQuest', 'finishProject']) { const f0 = Q[f]; if (f0) Q[f] = (...a) => { const r = f0(...a); beat(); return r; }; }
 Q.followupRestorationStep = () => {
   const b = boss(); if (!b || S().town !== b.town) return null;
-  /* only once half an hour of play has passed without a reward, and at most two beyond the town's first restoration */
+  /* only once half an hour of play has passed without a reward (that gate spaces them out; no fixed cap) */
   if ((S().gameTime || 0) - (S().lastBeatAt ?? (S().gameTime || 0)) < Q.BEAT_GAP_MS) return null;
   const list = Object.entries(D.PROJECTS).filter(([, p]) => p.town === b.town && !p.relic);
-  if (list.filter(([id]) => S().projects[id]).length >= 3) return null;
   const open = list.find(([id]) => !S().projects[id] && plan(id));
   if (!open) return null;
   /* a material only the town's supply shelf sells: route there with it selected (the player presses Buy) */
