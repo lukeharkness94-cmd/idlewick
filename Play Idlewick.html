@@ -25929,8 +25929,8 @@ Q.bossPrepStep = () => {
 /* the checklist is for the first attempt: once a fight with the boss has started it does not come back */
 const start0 = Q.startAct;
 Q.startAct = (kind, id, o) => { const r = start0(kind, id, o); if (r && kind === 'fight' && D.MON[id] && D.MON[id].boss && !Q.forecasting && !(Q.sim && Q.sim.on && !Q.sim.activities)) prep()[id] = prep()[id] || 'tried'; return r; };
-/* Follow-up restoration (owner, 26 Nov 2026: close Staff's 61-minute gap before Old Tusk). When no challenge is on offer
-   and 30 minutes of play have passed since the last reward, Home offers one more of the town's existing restorations
+/* Follow-up restoration (owner, 26 Nov 2026: close Staff's 61-minute gap before Old Tusk). Once 30 minutes of play have
+   passed since the last reward (ahead of another try at a challenge), Home offers one more of the town's existing restorations
    (at most two beyond the first), and only when every material can be had now: already carried, gathered at the hero's level
    here, or sold in this town's shop. The step is the project's own journey step; nothing new is added. */
 /* how the hero can get what a project still needs, and what it costs in coins: null when something cannot be had now or
@@ -25961,7 +25961,8 @@ Q.followupRestorationStep = () => {
   const step = Q.journeyNext(open[0]); return step && step.action ? { ...step, detail: `${D.PROJECTS[open[0]].name} while you train for ${b.boss.short || b.name}. ${step.detail || ''}`.trim(), restoration: open[0] } : null;
 };
 const region0 = Q.regionNext;
-Q.regionNext = () => { const c = Q.regionalChallengeStep(); if (c && c.action === 'qclaim') return c; return Q.bossPrepStep() || c || Q.followupRestorationStep() || region0(); };
+/* after 30 minutes without a reward, a restoration that is sure to pay comes before another try at a challenge */
+Q.regionNext = () => { const c = Q.regionalChallengeStep(); if (c && c.action === 'qclaim') return c; return Q.bossPrepStep() || Q.followupRestorationStep() || c || region0(); };
 /* the checklist holds the equip and slot steps plan.js would otherwise offer one at a time, so at the boss it comes first */
 const next0 = Q.journeyNext;
 Q.journeyNext = (...a) => { const n = next0(...a); if ((a[0] && D.PROJECTS[a[0]]) || !n || n.checklist) return n; if (['equip', 'abil'].includes(n.action)) { const s = Q.bossPrepStep(); if (s) return s; } return n; };
