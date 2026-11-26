@@ -9,8 +9,8 @@ Q.objProg=(q,st,i)=>{const o=q.obj[i],n=objectiveProgress0(q,st,i);return st&&o.
 Q.recipeGate=r=>{
  if(!r?.cross)return '';
  if(r.once&&known(Object.keys(r.out)[0]))return 'Already completed · kept permanently';
- if(r.town&&(!S().towns[r.town]?.visited||!Q.townUnlocked(r.town)))return 'Visit '+D.TOWN[r.town].name+' first';
- if(r.town&&S().town!==r.town)return 'Survey from '+D.TOWN[r.town].name;
+ /* a survey works from anywhere once its town is unlocked (owner, 26 Nov 2026) */
+ if(r.town&&!Q.townUnlocked(r.town))return 'Reach '+D.TOWN[r.town].name+' first';
  if(r.chart&&!known(r.chart))return 'Complete the '+D.ITEMS[r.chart].name+' first';
  if(r.project&&(!S().projects[r.project]||S().damaged?.[r.project]))return 'Restore '+D.PROJECTS[r.project].name+' to use this commission';
  if(r.facility&&!known(r.facility)&&!(r.facility==='workshop_jig'&&(S().house.furn.toolrack||0)>0))return 'Make '+D.ITEMS[r.facility].name+' in Carpentry';

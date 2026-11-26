@@ -464,15 +464,15 @@ test('a chosen boss goal completes when that boss falls and is never silently re
  S.journeyTarget=null;assert.equal(q.goalTarget().id,'oldtusk','an older save adopts the next undefeated boss');assert.equal(q.goalDone(),false);
  S.journey='house';S.house.owned=false;assert.equal(q.goalDone('house'),false);S.house.owned=true;assert.equal(q.goalDone('house'),true);
 });
-test('ordinary gathering works from any visited town; thieving and signature resources stay regional',()=>{
+test('gathering works from any town once its own town is reached; thieving and signature spots too (owner, 26 Nov 2026)',()=>{
  const {q}=harness();const S=q.S,D=q.data;S.unlocked.fishing=true;
  const herring=D.NODE['fish:herring'],carp=D.NODE['fish:carp'],farmer=D.NODE['thieve:farmer'];
  S.town='mossbarrow';S.towns.mossbarrow={visited:true};S.towns.willowbrook.visited=true;
  assert.ok(q.nodeHere(herring),'Willowbrook herring can be fished from Mossbarrow once discovered');
  S.town='willowbrook';delete S.towns.mossbarrow;assert.ok(!q.nodeHere(carp),'Mossbarrow carp needs one visit first');
  S.towns.mossbarrow={visited:true};assert.ok(q.nodeHere(carp));
- S.town='mossbarrow';assert.ok(!q.nodeHere(farmer),'thieving targets are local people');
- S.towns.skyreach={visited:true};assert.ok(!q.nodeHere(D.NODE['fish:skyfin']),'signature fish stays in Skyreach');
+ S.town='mossbarrow';assert.ok(q.nodeHere(farmer),'Willowbrook thieving targets work from Mossbarrow');
+ S.towns.skyreach={visited:true};assert.ok(q.nodeHere(D.NODE['fish:skyfin']),'the signature fish works from anywhere once Skyreach is reached');
  S.xp.fishing=D.XPF[5];assert.equal(q.startAct('fish','sardine',{quiet:true}),true,'starts a Willowbrook spot from Mossbarrow');q.stopAct&&q.stopAct(true);
 });
 test('practical skill unlocks: requirements, routes, consumption, no cycles, older saves keep their skills',()=>{

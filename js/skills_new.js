@@ -40,7 +40,7 @@ DQ.lureLvl = town => (D.TOWN[town] ? D.TOWN[town].idx : 0) * 10 || 1;
 DQ.befriendChance = town => Math.min(.25, .03 + DQ.lvl('beastmastery') * .0015 + Math.max(0, DQ.lvl('beastmastery') - DQ.lureLvl(town)) * .002);
 const lureLoot = town => { const out = []; for (const m of D.MONLIST.filter(m => m.town === town && !m.boss && !m.mini)) for (const [k] of m.drops || []) { const it = D.ITEMS[k]; if (it && !it.slot && it.type !== 'container' && !it.unique && !out.includes(k)) out.push(k); } return out.length ? out : ['feather']; };
 const trainCheck = id => {
-  if (String(id).startsWith('lure:')) { const town = id.slice(5); if (!D.TOWN[town]) return 'There is no such region'; if (!DQ.townUnlocked(town) || !(S().towns[town] && S().towns[town].visited)) return `Reach ${D.TOWN[town].name} first`; if (DQ.lvl('beastmastery') < DQ.lureLvl(town)) return `Requires Beastmastery ${DQ.lureLvl(town)}`; if (DQ.have('wooden_trap') < 1) return 'You need a wooden trap (Crafting makes them)'; return ''; }
+  if (String(id).startsWith('lure:')) { const town = id.slice(5); if (!D.TOWN[town]) return 'There is no such region'; if (!DQ.townUnlocked(town)) return `Reach ${D.TOWN[town].name} first`; if (DQ.lvl('beastmastery') < DQ.lureLvl(town)) return `Requires Beastmastery ${DQ.lureLvl(town)}`; if (DQ.have('wooden_trap') < 1) return 'You need a wooden trap (Crafting makes them)'; return ''; }
   return !D.PET[id] ? 'There is no such beast' : !S().pets.owned[id] ? 'You have not hatched that beast yet' : '';
 };
 DQ.KIND_EXT.train = {

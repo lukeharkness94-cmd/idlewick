@@ -427,8 +427,11 @@ DQ.weaponStyle = () => { const w = D.ITEMS[DQ.S.equip.weapon]; return (w && w.st
    Exceptions stay regional: thieving targets (they are people in that town) and the signature resources below.
    Discoveries and adventures still depend on where you actually are. Revert: make nodeHere return n.town === S().town. */
 D.SIGNATURE_NODES = new Set(['skyfin', 'voideel', 'elder', 'gloomwood', 'astralite', 'voidstone']);
-DQ.nodeRegional = n => !!n && (n.skill === 'thieving' || D.SIGNATURE_NODES.has(n.id));
-DQ.nodeDiscovered = n => !!n && (n.town === DQ.S.town || !!(DQ.S.towns[n.town] && DQ.S.towns[n.town].visited));
+/* 26 Nov 2026 (owner: "Once I've unlocked that town, I can do that thing ... at any time across all skills. The towns
+   should only really be part of the town projects, combat etc"): no gathering spot is regional any more, thieving
+   targets and signature resources included, and a spot is yours once its town is unlocked, visited or not. */
+DQ.nodeRegional = () => false;
+DQ.nodeDiscovered = n => !!n && (n.town === DQ.S.town || DQ.townUnlocked(n.town) || !!(DQ.S.towns[n.town] && DQ.S.towns[n.town].visited));
 DQ.nodeHere = n => !!n && (n.town === DQ.S.town || (!DQ.nodeRegional(n) && DQ.nodeDiscovered(n)));
 DQ.toolKey = sk => { const t = D.TOOLS.find(t => t[1] === sk); return t && t[0]; };
 DQ.toolTier = sk => { const k = DQ.toolKey(sk); if (!k) return 0; for (const t of [...D.TOOL_ORDER].reverse()) if (DQ.have(`tool_${k}_${t}`)) return t; return 0; };
