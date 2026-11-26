@@ -26,3 +26,19 @@ The gap threshold in the brief is over 10 minutes without affordable progress fo
 In a five-hour no-grant Sword run (seed 19), Grubnash fell at 21½ minutes, the Mossbarrow patrol finished at 27½ minutes and Scholarship unlocked at 46½ minutes. On reaching Combat 18 at roughly 106 minutes the route equipped a bow and bought arrows. From minute 107 until the five-hour cut-off, the primary Home recommendation sent the hero to the same combat page to read an incompatible ability warning. The hero had no mission change or later reward beat, and Old Tusk was never attempted. A warning about an optional ability is now shown in preparation details while Home chooses a route that can change the player's state.
 
 The approved market project uses 12 logs, 6 flax and 100 coins. Saltmere's jetty uses 16 logs, 12 raw sardines and 200 coins. Crops and oak previously delivered to those projects transfer to the new ingredient at equivalent progress, rounded up within the new limit. The existing regional patrols combine Woodcutting and Combat, with Cooking also included for Wynn. Boss preparation shows the counter type, current effective max hit and a rough carried-food check. The detailed forecast remains available for a tailored estimate.
+
+## No-grant browser replay
+
+| Milestone | Control | Revised route with optional restoration |
+| --- | ---: | ---: |
+| First Steps turned in | 2 min | 2 min |
+| Grubnash defeated | 21½ min | 21½ min |
+| Tusks and Trouble turned in | 27½ min | 28 min |
+| Market shelter restored | — | 29 min |
+| Scholarship unlocked | 46½ min | 50½ min |
+| Old Tusk defeated | Not attempted within five hours | 133 min |
+| Saltmere jetty restored | — | 135 min |
+
+The replay explicitly took the available restoration detours and did not grant resources, levels, unlocks or bosses. The stretch from Scholarship to Old Tusk still took 82½ minutes on this policy. It fell outside the requested 60-minute reward window. The revised hero reached four crab victories before running out of bronze arrows. Saltmere now sells the same standard bronze arrows as the first two towns. The focused patrol test checks the exact resupply route.
+
+Reproduce the restoration policy with `RESTORE=1 MIN=240 KITS=sword EVIDENCE=/tmp/idlewick-regional.json node scripts/review-opening.cjs` against the packaged build. Progression times exclude menu reading and are neither a player average nor a promise.

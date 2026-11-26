@@ -962,3 +962,7 @@ covered the fighters, and the Your foe card wrapped and overlapped. Test: tests/
 Ingredient links select the exact source without starting an activity. Quarry drops prefer eligible hunts, and early cowhide routes to the Goblin raider. Quest Continue and the pinned objective share the same route, including the Mossbarrow boars and their pre-Hunting combat fallback. Explore instead clears the fixed target and starts rolling weighted encounters in the same area after the current foe.
 
 Combat's phone tabs include Magic. Fight entry shows missing arrows or runes, practice requires the matching equipped weapon, and archery practice uses no arrows. Now restores the running quarry, Fieldwork or practice target. The old arts link goes to the equipped style's book. Save validation accepts those tasks, preserves pre-Hunting quest fights, and migrates the two renamed quarry IDs in running tasks, the queue and the field guide. Focused browser coverage lives in tests/combat-hunting-qa.cjs.
+
+## Part B of the v4 experience pass
+
+Draft PR #7 starts from `036ecef`. The changes cover starter skill prerequisites, one active main chapter, full-speed 24-hour return summaries, the Mossbarrow and Saltmere preparation routes, request-based help, a quiet notification digest, exact level-stop targets, a compact Home view, inline purchases, linked restoration bundles, daily errands and save-string recovery. Read [the Part B verification report](docs/part-b-verification.md) for checks, measured results and limitations. Human playtesting and platform validation are separate.

@@ -2287,7 +2287,7 @@ body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)
    One type scale: 16.5px body, 16px button labels, Alegreya SC headings (bundled locally), meta text at 14px.
    Supersedes the "Density at 100% zoom" step-down. Panels keep tight padding so larger text does not add empty space.
    Revert by deleting this block. */
-:root{--t-body:16.5px;--t-meta:14px;--t-btn:16px;--t-h2:20px;--t-h3:17px}
+:root{--t-body:18px;--t-meta:14px;--t-btn:16px;--t-h2:20px;--t-h3:17px}
 body{font-size:var(--t-body)!important;line-height:1.5}
 h1,h2,h3,.phead h2,.panel h2{font-family:var(--f-display)!important;font-weight:700;letter-spacing:.01em}
 .panel h2,.phead h2,h2{font-size:var(--t-h2)!important}
@@ -4765,7 +4765,7 @@ html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,ht
 :root[data-theme="light"]{--ground:#e9e2d4;--panel:#fbf7ee;--panel2:#f1eadb;--line:#d8cdb9;--line2:#baac92;--ink:#2e3028;--mute:#606355;--brass:#91652c;--brass-hi:#785121;--brass-lo:#bb945a;--good:#386747;--bad:#a33f35;--warn:#865d20;--hs-action-ink:#fff9ef;--hs-paper-shadow:rgba(73,51,24,.07);--backdrop-wash:rgba(233,226,212,.94)}
 :root.type-hearthside{--f-display:'Cinzel','Alegreya SC',Georgia,serif;--f-body:'Alegreya Sans',system-ui,sans-serif;--f-ui:'Alegreya Sans',system-ui,sans-serif;--f-mono:'Alegreya Sans',system-ui,sans-serif}
 .type-sample-hearthside b{font-family:'Cinzel',serif}.type-sample-hearthside span{font-family:'Alegreya Sans',sans-serif}
-:root.type-hearthside body{font-size:17px;font-weight:400}
+:root.type-hearthside body{font-size:18px;font-weight:400}
 :root.type-hearthside :is(button,input,textarea){font-weight:500;font-variant-numeric:lining-nums tabular-nums}
 :root.type-hearthside :is(h1,h2,h3){font-weight:500;letter-spacing:.015em}
 :root.type-hearthside .mono{font-variant-numeric:lining-nums tabular-nums;font-weight:500}
@@ -5530,6 +5530,71 @@ html.calm .activity-scene.hunt .scene-target,html.calm .activity-scene.hunt .hun
 .welcome-digest .m-card{display:flex;flex-direction:column;overflow:hidden}
 .welcome-digest .m-body{min-height:0;overflow-y:auto;scrollbar-width:thin}
 .welcome-digest :is(.m-act,h2){flex:none}
+
+.home-glance{display:grid;gap:12px;min-width:0;align-content:start}
+.home-scene{position:relative;padding:0;overflow:hidden}
+.home-scene .scene{display:block;width:100%;height:clamp(112px,30dvb,300px);object-fit:cover}
+.home-scene>.btn{position:absolute;left:12px;bottom:12px}
+.home-glance-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px}
+.home-state,.home-coins{display:flex;align-items:center;gap:8px;text-align:left}
+.home-next{display:grid;gap:8px;margin:0}
+.home-next h2{margin:0}
+.home-next progress{width:100%;accent-color:var(--brass)}
+.home-activity-details{display:grid;gap:12px;margin-block:12px}
+html:has(.home-glance) #hud .h-stats,html:has(.home-glance) #hud .h-task,html:has(.home-glance) #view>#nowcard{display:none}
+@media(max-width:520px){.home-glance-row{grid-template-columns:minmax(0,1fr)}.home-next .btnrow{flex-wrap:wrap}}
+.activity-caption:has(.activity-progress){border-inline-start:4px solid var(--brass);padding-inline-start:12px}
+#view .shop-stock .illustrated-choices:has(.stock-item){grid-auto-rows:auto!important;align-items:stretch}
+.stock-item{min-width:0;display:grid;align-content:start;gap:5px}
+.inline-buy{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.inline-buy .btn{padding:6px 3px;min-width:0;white-space:normal}
+.inline-buy small{display:block}
+.item-deltas{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 6px;line-height:1.2;font-size:.79em}
+.slot:has(.item-deltas){width:auto!important;min-height:74px;padding:6px 4px!important;display:grid;justify-items:center;align-content:center}
+.slot .item-deltas{grid-column:1/-1}
+.project-bundle{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.project-bundle h3{margin:0}
+.bundle-option{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bundle-option>span{display:inline-flex;align-items:center;gap:6px}
+.bundle-indicator{font-size:.83em;line-height:1.25}
+.bundle-indicator .ico{animation:bundle-beacon 1.6s ease-in-out 3}
+@keyframes bundle-beacon{50%{opacity:.48}}
+@media(prefers-reduced-motion:reduce){.bundle-indicator .ico{animation:none}}
+.daily-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
+.daily-list section{display:grid;gap:12px;align-content:start;min-width:0}
+.daily-list progress{width:100%;accent-color:var(--brass)}
+#save-string{display:block;box-sizing:border-box;width:100%;margin-top:8px;overflow-wrap:anywhere}
+.home-glance,.daily-errands,.welcome-digest .m-body,.bell-list,.project-bundle{font-size:18px;line-height:1.4}
+.home-glance :is(button,.home-coins),.daily-errands button,.project-bundle button,.inline-buy button,.digest-settings button,.welcome-digest button,.bell-list button{min-height:48px;min-inline-size:min(48px,100%)}
+.home-glance .primary,.welcome-digest .primary,.daily-errands .primary{min-height:56px}
+@media(max-width:430px){
+ .home-glance,.daily-errands,.welcome-digest,.bell-list,.project-bundle{overflow-wrap:anywhere}
+ .home-glance .btnrow,.project-bundle,.daily-list{grid-template-columns:minmax(0,1fr)}
+ .home-glance .btnrow>*{white-space:normal}
+}
+.home-scene .scene{position:static}
+@media(max-width:520px){
+ .home-scene .scene{height:112px}
+ .home-glance-row{grid-template-columns:minmax(0,1fr) auto;gap:7px}
+ .home-glance{gap:8px}
+ .home-glance :is(.home-state,.home-coins,.home-next){padding:9px}
+ .home-glance .btnrow .btn{min-height:48px!important}
+ .home-glance .btnrow .primary{min-height:56px!important}
+}
+@media(max-width:860px){
+ .visual-shop:has(.stock-item)>.shop-task{grid-row:auto}
+ .visual-shop:has(.stock-item) .shop-detail-actions:has(.shop-quantity-slot:only-child){display:none}
+}
+@media(max-width:860px){
+ #view .shop-stock .stock-item .illustrated-card{
+  display:grid!important;grid-template-columns:52px minmax(0,1fr) auto;justify-items:start;text-align:start;
+  height:auto!important;min-height:70px!important;max-height:none!important;
+ }
+ #view .stock-item .illustrated-card>.choice-art{grid-row:1/span 2;height:48px!important;min-height:48px!important}
+ #view .stock-item .illustrated-card>b{min-width:0;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+ #view .stock-item :is(.item-deltas,.bundle-indicator,.req-chips){grid-column:2/-1;justify-content:start}
+ #view .stock-item .stock-price{grid-column:3;grid-row:1}
+}
 </style>
 
 </head>
@@ -5562,7 +5627,17 @@ const DQ = window.DQ;
 DQ.$ = (s, r = document) => r.querySelector(s);
 DQ.$$ = (s, r = document) => [...r.querySelectorAll(s)];
 DQ.fmt = n => Math.floor(n).toLocaleString('en-US');
-DQ.fmtK = n => { n = Math.floor(n); if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B'; if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 1 : 2) + 'M'; if (n >= 1e5) return Math.floor(n / 1e3) + 'K'; return n.toLocaleString('en-US'); };
+DQ.fmtK = n => {
+  n = Math.floor(n);
+  const notation = DQ.S?.settings?.numberNotation;
+  if (Math.abs(n) >= 1000 && notation === 'scientific') return n.toExponential(1).replace('e+', 'e');
+  if (Math.abs(n) >= 1000 && notation === 'suffix') return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(n).toLowerCase();
+  if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 1 : 2) + 'M';
+  if (n >= 1e5) return Math.floor(n / 1e3) + 'K';
+  return n.toLocaleString('en-US');
+};
+DQ.formatCoins = n => ['suffix', 'scientific'].includes(DQ.S?.settings?.numberNotation) ? DQ.fmtK(n) : DQ.fmt(n);
 DQ.rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 DQ.pick = a => a[Math.floor(Math.random() * a.length)];
 DQ.clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -6241,7 +6316,7 @@ const seeds = (...ids) => ids.map(c => 'seed_' + c);
 D.SHOPS = {
   willowbrook: ['bread', 'feather', 'rune', 'feed', 'ore_copper', ...seeds('potato', 'onion'), ...tools(1), ...metal(0), ...arrows(0), ...bows(0), ...robes(0)],
   mossbarrow:  ['bread', 'feather', 'rune', 'feed', ...seeds('potato', 'onion', 'cabbage', 'wheat', 'strawberry', 'pumpkin'), ...tools(1, 2), ...metal(0, 1), ...arrows(0, 1), ...bows(0, 1), ...robes(0)],
-  saltmere:    ['bread', 'feather', 'rune', 'feed', ...seeds('cabbage', 'wheat'), ...tools(1, 2), ...metal(1), ...arrows(1), ...bows(1), ...robes(1)],
+  saltmere:    ['bread', 'feather', 'rune', 'feed', ...seeds('cabbage', 'wheat'), ...tools(1, 2), ...metal(1), ...arrows(0, 1), ...bows(1), ...robes(1)],
   ironpeak:    ['bread', 'feather', 'rune', 'feed', ...seeds('pumpkin', 'goldleaf'), ...tools(2, 3), ...metal(2), ...arrows(2), ...bows(2), ...robes(1, 2)],
   gloomfen:    ['bread', 'feather', 'rune', 'feed', ...seeds('goldleaf', 'sunbloom'), ...tools(3, 4), ...metal(3), ...arrows(3), ...bows(3, 4), ...robes(2, 3)],
   emberfall:   ['bread', 'feather', 'rune', 'feed', ...seeds('sunbloom', 'moonmelon'), ...tools(4, 5), ...metal(4, 5), ...arrows(4, 5), ...bows(5), ...robes(3)],
@@ -6268,12 +6343,15 @@ D.QUESTS = [
     [{ ev: 'harvest', key: 'potato', n: 10, label: 'Harvest 10 potatoes' }], { xp: { farming: 300 }, coins: 200, items: { seed_onion: 6, feed: 20 } }),
   Q('egg_hunt', 'mossbarrow', 'Egg Hunt', 'Granny Bramble', 11, 'seeds_of_hope', 'The hens are laying well, but somebody needs to collect the eggs and give the animals a little attention. Would you see to it, dear? Ten eggs will do for the market. And do spend a moment with the animals while you’re there. Duchess behaves better when she thinks she’s important.',
     [{ ev: 'collect', key: 'egg', n: 10, label: 'Collect 10 eggs' }, { ev: 'pet', key: '*', n: 5, label: 'Pet your animals 5 times' }], { xp: { farming: 600 }, coins: 400 }),
-  Q('boar_hunt', 'mossbarrow', 'Tusks and Trouble', 'Hunter Wynn', 7, null, 'The boars are tearing up the planted fields. Wolves have started following them out of the woods, too. We need to drive both away before the farmers lose the crop. Watch how they move before you go in. A boar doesn’t turn quickly, but a wolf will.',
-    [{ ev: 'kill', key: 'boar', n: 10, label: 'Defeat 10 wild boars' }, { ev: 'kill', key: 'wolf', n: 6, label: 'Defeat 6 grey wolves' }], { xp: { attack: 500, defence: 500 }, coins: 300 }),
+  Q('boar_hunt', 'mossbarrow', 'Tusks and Trouble', 'Hunter Wynn', 7, null, 'The boars have flattened the field fence, and wolves are following them out of the woods. Cut six logs for the repair and cook a few shrimp for your patrol. A boar takes a while to turn. A wolf won’t give you the chance.',
+    [{ ev: 'kill', key: 'boar', n: 10, label: 'Defeat 10 wild boars' }, { ev: 'kill', key: 'wolf', n: 6, label: 'Defeat 6 grey wolves' },
+      { ev: 'chop', key: 'normal', n: 6, label: 'Cut 6 logs for the field fence' }, { ev: 'cook', key: 'shrimp', n: 4, label: 'Cook 4 shrimp for the patrol' }],
+    { xp: { attack: 500, defence: 500 }, coins: 300, items: { bread: 6 } }),
   Q('king_of_the_wood', 'mossbarrow', 'King of the Wood', 'Hunter Wynn', 10, 'boar_hunt', 'Old Tusk has been knocking down fences here for forty winters. I carved my first bow from a branch he snapped. Been waiting a long time to settle that. Read up on him and prepare a bow before you try. You need combat level 18 to face him.',
     [{ ev: 'boss', key: 'oldtusk', n: 1, label: 'Defeat Old Tusk the Boar King' }], { xp: { attack: 1500, strength: 1500, defence: 1000 }, coins: 700 }),
-  Q('crab_cull', 'saltmere', 'Crab Cull', 'Harbourmaster Ilsa', 8, null, 'Rock crabs are chewing through the pier supports. If they carry on, the next ship will have to moor to a floating pile of planks. Clear ten of them away from the posts. Then I can send the repair crew underneath without having to count their fingers afterwards.',
-    [{ ev: 'kill', key: 'crab', n: 10, label: 'Defeat 10 rock crabs' }], { xp: { defence: 700, hitpoints: 300 }, coins: 250 }),
+  Q('crab_cull', 'saltmere', 'Crab Cull', 'Harbourmaster Ilsa', 8, null, 'Rock crabs have been chewing through the jetty posts. Cut eight logs while I round up a repair crew. Once you’ve cleared the crabs away, I can send the crew under the jetty without counting their fingers afterwards.',
+    [{ ev: 'kill', key: 'crab', n: 10, label: 'Defeat 10 rock crabs' }, { ev: 'chop', key: 'normal', n: 8, label: 'Cut 8 logs for the jetty' }],
+    { xp: { defence: 700, hitpoints: 300 }, coins: 250, items: { raw_sardine: 6 } }),
   Q('quick_fingers', 'saltmere', 'Quick Fingers', 'Whisper', 9, 'mq_thieving', 'The people on the docks have been relieving travellers of their purses. I thought you might relieve them of a little of the proceeds. Get some practice in and keep your eyes open. If anybody asks, I’m a perfectly respectable woman who has never met you.',
     [{ ev: 'thieve', key: '*', n: 15, label: 'Steal successfully 15 times' }], { xp: { thieving: 600 }, coins: 300 }),
   Q('salt_cod', 'saltmere', 'The Salt Cod Supper', 'Chef Piers', 10, null, 'I had planned a magnificent salt-cod supper. The delivery has failed to arrive, so we are going to demonstrate the great culinary virtue of using what we actually have. Cook twenty fish for the harbour feast. Any suitable fish will do. If anyone complains, I shall call it the chef’s selection.',
@@ -11626,6 +11704,7 @@ Q.uiIconUrl=id=>Q.uiIconCanvas(id).toDataURL();
 (() => {
 const DQ = window.DQ, D = DQ.data, { clamp } = DQ;
 const SAVE_KEY = 'dashboard-quest-save-v2';
+const RECOVERY_KEY = SAVE_KEY + '-previous';
 // Steam desktop supplies durable, account-scoped files through a narrow bridge.
 // Browser builds retain their existing save key and localStorage behavior.
 const store = DQ.storage = window.idlewickDesktop?.storage || {
@@ -11652,7 +11731,7 @@ DQ.newState = (name = 'Adventurer', look, starter = 'sword') => {
     q: {}, ach: {}, seen: {}, unlocked: {}, toolUpgrades: {}, skillUpgrades: {},
     unlockRules: 2,
     stats: { carve: 0, voyage: 0, train: 0, harvest: 0, collect: 0, pets: 0, furnish: 0, hired: 0, catch: 0, chop: 0, mine: 0, thieve: 0, cook: 0, burn: 0, smelt: 0, smith: 0, craft: 0, alch: 0, brew: 0, enchant: 0, kill: 0, earned: 0, deaths: 0, bought: 0, sold: 0, equipped: 0, tools: 0, rare: 0 },
-    settings: { masterVol: 1, ambience: true, ambVol: .45, theme: 'light', lettering: 'hearthside', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, storyScenes: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
+    settings: { masterVol: 1, ambience: true, ambVol: .45, theme: 'light', lettering: 'hearthside', snd: { ui: true, combat: true, rewards: true }, haptics: true, dev: false, sfx: true, music: true, muted: false, vol: .7, musicVol: .4, taskSounds: 'varied', notify: true, unlockReveals: false, digest: { loot: true, levels: true, discoveries: true, achievements: true, folk: true }, storyScenes: true, reduceFx: false, autoEat: true, eatAt: 50, tips: true },
     style: { melee: 'aggressive', ranged: 'offense', magic: 'offense' }, spell: 'spark',
     act: null, log: [], tut: { done: {}, hidden: false },
     gameTime: 0, farm: { plots: [{ crop: null }, { crop: null }, { crop: null }], plotsBought: 3, animals: [], pensBought: 2, feed: 0, autoReplant: true, last: 'potato', next: null },
@@ -11724,6 +11803,11 @@ function candidateState(o) {
     }
   }
   const result = merge(base, o);
+  const daily = result.dailyErrands;
+  if (daily && (!Number.isSafeInteger(daily.day) || daily.day < 0 || !Array.isArray(daily.rows) || daily.rows.length !== 3 ||
+    new Set(daily.rows.map(row => row?.event)).size !== 3 ||
+    daily.rows.some(row => !record(row) || !['catch', 'chop', 'cook', 'mine', 'kill'].includes(row.event) ||
+      !Number.isSafeInteger(row.have) || row.have < 0 || row.have > 8 || typeof row.paid !== 'boolean'))) delete result.dailyErrands;
   if (!Object.prototype.hasOwnProperty.call(o.xp,'research') && DQ.researchXp) {
     result.xp.research = Object.keys(result.research.done).reduce((sum,id)=>sum+(result.research.done[id]&&D.TECH[id]?DQ.researchXp(D.TECH[id]):0),0);
   }
@@ -11732,6 +11816,14 @@ function candidateState(o) {
   if (result.pinnedProject !== null && !(typeof result.pinnedProject === 'string' && Object.prototype.hasOwnProperty.call(D.PROJECTS || {}, result.pinnedProject))) result.pinnedProject = null;
   /* partial deliveries to projects: unknown projects or items are dropped, quantities must be whole and non-negative */
   if (!result.projectGiven || typeof result.projectGiven !== 'object' || Array.isArray(result.projectGiven)) result.projectGiven = {};
+  for (const [id, before, after, oldCap, newCap] of [['market', 'crop_potato', 'flax', 15, 6], ['jetty', 'plank_oak', 'log_normal', 40, 16], ['jetty', 'log_oak', 'log_normal', 40, 16]]) {
+    const delivery = result.projectGiven[id];
+    if (delivery && Number.isFinite(delivery[before]) && delivery[before] > 0) {
+      delivery[after] = (Number.isFinite(delivery[after]) ? delivery[after] : 0) +
+        Math.ceil(Math.min(delivery[before], oldCap) / oldCap * newCap);
+      delete delivery[before];
+    }
+  }
   for (const [pid, g] of Object.entries(result.projectGiven)) { const pj = (D.PROJECTS || {})[pid];
     if (!pj || !g || typeof g !== 'object' || result.projects[pid]) { delete result.projectGiven[pid]; continue; }
     for (const [k, n] of Object.entries(g)) { if (!(k in pj.cost) && k.startsWith('log_') && ('plank_' + k.slice(4)) in pj.cost && Number.isFinite(n)) { g['plank_' + k.slice(4)] = (g['plank_' + k.slice(4)] || 0) + n; delete g[k]; continue; }
@@ -11771,17 +11863,39 @@ function candidateState(o) {
   if(result.hunt.loopVersion!==undefined&&result.hunt.loopVersion!==1)throw new Error('Unsupported hunting loop');
   if(result.hunt.fieldFocus!=null&&(typeof result.hunt.fieldFocus!=='string'||!D.ITEMS[result.hunt.fieldFocus]))throw new Error('Invalid hunting focus');
   migrate(result);
+  if (!Number.isSafeInteger(result.villageProceedsAt) || result.villageProceedsAt <= 0) {
+    delete result.villageProceedsAt;
+    if (Object.keys(result.projects).some(id => result.projects[id] && D.PROJECTS[id] && !D.PROJECTS[id].relic)) {
+      result.villageProceedsAt = Number.isSafeInteger(result.lastSeen) && result.lastSeen > 0 ? Math.min(result.lastSeen, Date.now()) : Date.now();
+    }
+  }
   DQ.reconcileMainQuests?.(result);
   return result;
 }
 DQ.validateSave = candidateState;
 DQ.hasSave = () => { try { return !!store.getItem(SAVE_KEY); } catch (e) { return false; } };
 DQ.load = () => {
+  let raw;
   try {
-    const raw = store.getItem(SAVE_KEY); if (!raw) return false;
+    raw = store.getItem(SAVE_KEY); if (!raw) return false;
     const next = candidateState(JSON.parse(raw));
     DQ.S = next; observedSave = raw; return true;
-  } catch (e) { DQ.saveHealth = 'The saved hero could not be loaded. Keep a copy before starting again.'; return false; }
+  } catch (e) {
+    if (!window.idlewickDesktop) {
+      try {
+        const previous = store.getItem(RECOVERY_KEY);
+        if (previous) {
+          DQ.S = candidateState(JSON.parse(previous));
+          observedSave = raw;
+          recoveredSave = true;
+          DQ.saveHealth = 'Opened the previous verified save.';
+          return true;
+        }
+      } catch (backupError) {}
+    }
+    DQ.saveHealth = 'The saved hero could not be loaded. Keep a copy before starting again.';
+    return false;
+  }
 };
 function migrate(S) {
   /* Attack + Strength became Melee (Nov 2026): Melee takes the higher of the two; the lower still counts towards Hero level */
@@ -11812,8 +11926,19 @@ function migrate(S) {
 }
 DQ.saveHealth = '';
 DQ.saveLocation = () => window.idlewickDesktop?.storage ? 'desktop' : window.self !== window.top ? 'preview' : 'browser';
-let observedSave;
+let observedSave, recoveredSave = false;
 try { observedSave = store.getItem(SAVE_KEY); } catch (e) {}
+const writeSave = (current, next) => {
+  if (current && !recoveredSave && !window.idlewickDesktop) {
+    try { store.setItem(RECOVERY_KEY, current); } catch (error) {
+      // The browser commits each key atomically. A full recovery slot should not prevent saving.
+      if (error?.name !== 'QuotaExceededError') throw error;
+    }
+  }
+  store.setItem(SAVE_KEY, next);
+  if (store.getItem(SAVE_KEY) !== next) throw new Error('Save write could not be verified');
+  recoveredSave = false;
+};
 DQ.save = () => {
   if (DQ.forecasting) return false; // Trial progression must never reach the real save.
   try {
@@ -11824,8 +11949,7 @@ DQ.save = () => {
       return false;
     }
     const next = JSON.stringify({ ...DQ.S, lastSeen: Date.now() });
-    store.setItem(SAVE_KEY, next);
-    if (store.getItem(SAVE_KEY) !== next) throw new Error('Save write could not be verified');
+    writeSave(current, next);
     observedSave = next; DQ.S.lastSeen = JSON.parse(next).lastSeen; DQ.saveHealth = '';
     return true;
   } catch (e) {
@@ -11834,7 +11958,7 @@ DQ.save = () => {
   }
 };
 window.idlewickDesktop?.onBeforeClose?.(() => !DQ.started || DQ.save());
-DQ.eraseSave = () => { try { store.removeItem(SAVE_KEY); observedSave = null; } catch (e) {} };
+DQ.eraseSave = () => { try { if (!window.idlewickDesktop) store.removeItem(RECOVERY_KEY); store.removeItem(SAVE_KEY); observedSave = null; recoveredSave = false; } catch (e) {} };
 DQ.exportSave = () => btoa(unescape(encodeURIComponent(JSON.stringify(DQ.S))));
 DQ.importSave = text => {
   try {
@@ -11842,8 +11966,7 @@ DQ.importSave = text => {
     const current = store.getItem(SAVE_KEY);
     if (observedSave !== undefined && current !== observedSave) return false;
     const raw = JSON.stringify({ ...next, lastSeen: Date.now() });
-    store.setItem(SAVE_KEY, raw);
-    if (store.getItem(SAVE_KEY) !== raw) throw new Error('Imported save write could not be verified');
+    writeSave(current, raw);
     observedSave = raw; DQ.S = next; DQ.S.lastSeen = JSON.parse(raw).lastSeen; DQ.saveHealth = ''; return true;
   } catch (e) { return false; }
 };
@@ -12469,8 +12592,21 @@ DQ.toast = (msg, bad) => {
 const queue = [], MAX_NOW = 1;
 const live = () => $$('.note', notesEl).filter(n => !n.classList.contains('out'));
 const nowLive = () => live().length;
-DQ.noteLog = []; DQ.noteMissed = 0;
-DQ.notificationTier = o => ['level', 'adv', 'unlock', 'death', 'warn', 'boss'].includes(o.kind) || o.thanks || /^(qr:|qo:|qnew$|project:)/.test(o.key || '') ? 'now' : 'quiet';
+DQ.noteLog = [];
+DQ.unreadNotes = 0;
+DQ.digestCategories = { loot: 'Loot', levels: 'Level-ups', discoveries: 'Discoveries', achievements: 'Achievements', folk: 'Folk notes' };
+const category = o => {
+  const key = o.key || '';
+  if (o.kind === 'loot') return 'loot';
+  if (['level', 'adv', 'perk'].includes(o.kind) || /^(creature:|mastery$)/.test(key)) return 'levels';
+  if (o.kind === 'folk') return 'folk';
+  if (o.kind === 'ach' || /^(slayer:|wing:|guildinvite:)/.test(key)) return 'achievements';
+  if (o.kind === 'discovery' || /^(beast:|research:|tech:|unique:|recipe:|pet:|egg:|feature:discovery-)/.test(key)) return 'discoveries';
+  return null;
+};
+const majorUnlock = o => o.kind === 'unlock' && /^(unlock:|feature:(?!discovery-)|plan$)/.test(o.key || '');
+DQ.notificationTier = o => !category(o) && !majorUnlock(o) &&
+  (['death', 'warn', 'boss'].includes(o.kind) || o.thanks || /^(qr:|qo:|qnew$|project:)/.test(o.key || '')) ? 'now' : 'quiet';
 DQ.notificationPage = o => {
   if (o.page) return o.page;
   const k = o.key || '', D = DQ.data;
@@ -12498,7 +12634,7 @@ DQ.actionTargets = page => {
   // Home and Activity are summaries/history, not duplicate quest-action menus.
   if(page==='quests')return D.QUESTS.filter(q=>['new','ready'].includes(DQ.questState(q))).sort((a,b)=>(DQ.questState(b)==='ready')-(DQ.questState(a)==='ready')).map(q=>({page,id:q.id,kind:DQ.questState(q)==='ready'?'quest-ready':'quest-new'}));
   // Village signals only a project you can finish now, not one you could merely add to (20 Nov, owner).
-  if(page==='projects')return Object.entries(D.PROJECTS||{}).filter(([id,p])=>p.town===s.town&&!s.projects[id]&&DQ.canAfford(DQ.projectNeed?DQ.projectNeed(id):p.cost)).map(([id])=>({page,id}));
+  if(page==='projects')return Object.entries(D.PROJECTS||{}).filter(([id,p])=>p.town===s.town&&!s.projects[id]&&(DQ.projectReady ? DQ.projectReady(id) : DQ.canAfford(p.cost))).map(([id])=>({page,id}));
   if(page==='farming'&&DQ.skillUnlocked('farming'))return [...s.farm.plots.map((p,i)=>DQ.plotRipe(p)?{page,id:i,kind:'crop'}:null),...s.farm.animals.map((a,i)=>a.stored>0?{page,id:i,kind:'animal'}:null)].filter(Boolean);
   if(page==='research'&&DQ.scholarOpen?.()&&DQ.researchSlots){const free=Math.max(0,DQ.researchSlots()-(s.research?.active||[]).length);return D.TECHS.filter(t=>!DQ.techReason(t)&&DQ.techCanAfford(t)).slice(0,free).map(t=>({page,id:t.id}));}
   return [];
@@ -12510,74 +12646,76 @@ DQ.markNoticesRead = page => {
   if (DQ.S.noticeBadges) delete DQ.S.noticeBadges[page];
   $$('.note', notesEl).filter(el => el.dataset.page === page && !['unlock','level','adv'].includes(el.dataset.kind)).forEach(dismiss);
 };
-const logNote = o => { DQ.noteLog.unshift({ t: Date.now(), o, silent: false }); if (DQ.noteLog.length > 40) DQ.noteLog.pop(); };
-const markSilent = (o, count) => { const e = DQ.noteLog.find(x => x.o === o); if (e) { e.silent = true; if (count) DQ.noteMissed++; } };
-/* A new skill is a big moment: it gets the same full reveal as a level-up (queued behind any open dialog), with what
-   the skill does and a button straight to it. */
-const showSkillUnlock=o=>{
-  if(modalEl){levelQueue.push(Object.assign({__unlock:true},o));pumpLevel();return true;}
-  const id=(o.key||'').slice(7),sk=DQ.data.SK[id];if(!sk)return false;
-  const art=DQ.artImage('skill',id,96,'',sk.name)||ico(id);
-  const open=o.action&&o.action.fn?o.action.fn:()=>DQ.go(sk.page);
-  DQ.modal({title:`${sk.name} unlocked`,wide:true,sticky:true,body:`<div class="level-reveal lr-v2 lr-unlock" style="--c:${o.col||sk.col||'#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><span class="lr-ripple" aria-hidden="true"></span><span class="lr-ripple r2" aria-hidden="true"></span><span class="lr-ripple r3" aria-hidden="true"></span><span class="lr-rays" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><span class="lr-ribbon">New skill</span><h2>${esc(sk.name)}</h2><p>${esc(String(o.text||'').replace(/<[^>]+>/g,'').trim()||sk.blurb||'')}</p></div>`,actions:[{label:`Open ${sk.name}`,primary:true,fn:()=>{DQ.closeModal();open();setTimeout(pumpLevel,180);}},{label:'Later',fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
-  DQ.sfx('unlock');setTimeout(()=>DQ.burstEl(document.querySelector('.level-emblem'),o.col||sk.col||'#d8a64a',44),100);return true;
+const logNote = o => {
+  const silent = DQ.notificationTier(o) === 'quiet';
+  DQ.noteLog.unshift({ t: Date.now(), o, silent });
+  if (DQ.noteLog.length > 150) DQ.noteLog.pop();
+  if (silent) DQ.unreadNotes++;
 };
-const levelQueue=[];let levelRetry=0;
-const pumpLevel=()=>{clearTimeout(levelRetry);if(!levelQueue.length)return;if(modalEl){levelRetry=setTimeout(pumpLevel,300);return;}const n=levelQueue.shift();if(n.__unlock)showSkillUnlock(n);else showLevelReveal(n);};
-/* the painted star, re-centred on its own centre of mass (its source crop carries stray edge pixels that pull it off-centre) */
-let starUrl=null;
-const centredStar=()=>{
-  if(!starUrl&&DQ.pixelArt){starUrl=DQ.pixelArt.bigStarUrl?DQ.pixelArt.bigStarUrl():DQ.pixelArt.iconUrl('star');}if(starUrl)return `<img class="lr-star-img pxa" src="${starUrl}" width="96" height="96" alt="" draggable="false">`;if(!starUrl){const raw=null;if(!raw)return '';
-    try{const W=raw.width,H=raw.height,a=raw.getContext('2d').getImageData(0,0,W,H).data;let n=0,sx=0,sy=0;
-      for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(a[(y*W+x)*4+3]>128){n++;sx+=x;sy+=y;}
-      const cx=sx/n,cy=sy/n;let R=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(a[(y*W+x)*4+3]>128){const d=Math.hypot(x-cx,y-cy);if(d>R&&d<Math.min(W,H)*.62)R=d;}
-      const S=256,c=document.createElement('canvas');c.width=c.height=S;const k=(S/2*.94)/R,x=c.getContext('2d');x.imageSmoothingQuality='high';
-      /* only the star itself: clip to its radius so stray edge pixels never show */
-      x.beginPath();x.arc(S/2,S/2,S/2,0,Math.PI*2);x.clip();x.drawImage(raw,S/2-cx*k,S/2-cy*k,W*k,H*k);starUrl=c.toDataURL();}catch(e){return '';}}
-  return `<img class="lr-star-img" src="${starUrl}" width="104" height="104" alt="" draggable="false">`;
+const markSilent = o => { const e = DQ.noteLog.find(x => x.o === o); if (e) e.silent = true; };
+let loot = new Map(), lootMinute = -1, batchTimer;
+DQ.flushItemDigest = () => {
+  const minute = Math.floor((DQ.S.playtime || 0) / 60000);
+  if (lootMinute === minute || !loot.size) return;
+  clearTimeout(batchTimer);
+  lootMinute = minute;
+  const text = [...loot].map(([id, count]) => `×${DQ.fmt(count)} ${DQ.data.ITEMS[id].name}`).join(', ');
+  loot = new Map();
+  DQ.notify({ kind: 'loot', key: 'loot:digest', icon: 'pouch', title: 'Items gained', text, sound: false });
 };
-DQ.heroRevealWorthy=o=>!Number.isFinite(o.to)||(o.gains||[]).length>0||o.to%5===0;
-const showLevelReveal=o=>{
-  if(modalEl){levelQueue.push(o);pumpLevel();return true;}
-  const sk=o.skill&&DQ.data.SK[o.skill],hero=o.kind==='adv',name=hero?'Hero':(sk?.name||'Skill'),level=o.to||String(o.title||'').match(/\d+/)?.[0]||'';
-  const art=hero?`<span class="level-star">${centredStar()||ico('star')}</span>`:DQ.artImage('skill',o.skill,112,'',name);
-  DQ.modal({title:`${name} level up`,wide:true,sticky:true,body:`<div class="level-reveal lr-v2" style="--c:${o.col||'#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><span class="lr-ripple" aria-hidden="true"></span><span class="lr-ripple r2" aria-hidden="true"></span><span class="lr-ripple r3" aria-hidden="true"></span><span class="lr-rays" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><span class="lr-ribbon">Level up</span><h2>${esc(name)} <b>${esc(level)}</b></h2><p>${esc(o.text||'Your training has paid off.')}</p></div>`,actions:[{label:'Continue',primary:true,fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
-  DQ.sfx(o.sound||'level');setTimeout(()=>DQ.burstEl(document.querySelector('.level-emblem'),o.col||'#d8a64a',38),100);return true;
+DQ.noteItemGain = (id, count) => {
+  if (DQ.S.settings.digest?.loot === false) return;
+  const minute = Math.floor((DQ.S.playtime || 0) / 60000);
+  if (lootMinute !== -1 && minute !== lootMinute && loot.size) DQ.flushItemDigest();
+  loot.set(id, (loot.get(id) || 0) + count);
+  clearTimeout(batchTimer);
+  batchTimer = setTimeout(DQ.flushItemDigest, 60000 - (DQ.S.playtime || 0) % 60000);
+};
+DQ.on('ui', DQ.flushItemDigest);
+let openingReveals = 0, revealHero;
+DQ.allowAutomaticReveal = () => {
+  if (modalEl || document.querySelector('#intro,.quest-reveal') || document.hidden) return false;
+  if (revealHero !== DQ.S) { revealHero = DQ.S; openingReveals = 0; }
+  if ((DQ.S.playtime || 0) >= 5 * 60000) return true;
+  if (openingReveals >= 3) return false;
+  openingReveals++;
+  return true;
+};
+const showUnlock = o => {
+  const id = (o.key || '').slice(7), sk = DQ.data.SK[id];
+  const art = (sk && DQ.artImage('skill', id, 96, '', sk.name)) || ico(o.icon || 'star');
+  const action = inferActions(o)[0];
+  DQ.modal({ title: o.title, wide: true, body: `<div class="level-reveal lr-v2 lr-unlock" style="--c:${o.col || '#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><p>${esc(o.text || '')}</p></div>`,
+    actions: [...(action ? [{ ...action, primary: true, fn: () => { DQ.closeModal(); action.fn(); } }] : []), { label: 'Later' }] });
+  DQ.sfx('unlock');
 };
 DQ.notify = o => {
   if (DQ.sim.on) { DQ.sim.notes.push(o); return; }
-  if (o.kind === 'level') {
-    const previous = queue.find(n => n.key === o.key) || $$('.note', notesEl).find(n => n.dataset.key === o.key)?._notification;
-    if (previous?.kind === 'level' && Number.isFinite(previous.from) && previous.to <= o.to) {
-      o = { ...o, from: previous.from, unlocks: [...new Set([...(previous.unlocks || []), ...(o.unlocks || [])])] };
-      o.title = `${DQ.data.SK[o.skill]?.name || 'Skill'} levels ${o.from + 1}–${o.to}!`;
-      if (o.unlocks.length) o.text = o.unlocks.join(' ');
+  const s = DQ.S.settings, group = category(o);
+  if (group && s.digest?.[group] === false) return;
+  logNote(o);
+  if (group || !majorUnlock(o) && o.kind === 'unlock') return;
+  if (majorUnlock(o)) {
+    const id = o.key.startsWith('unlock:') ? o.key.slice(7) : o.key.startsWith('feature:') ? o.key.slice(8) : null;
+    if (id) {
+      DQ.S.seen['tutorial:' + id] = true;
+      if (DQ.S.tut?.done) delete DQ.S.tut.done['lesson:' + id];
     }
+    if (s.notify && s.unlockReveals === true && DQ.allowAutomaticReveal()) showUnlock(o);
+    return;
   }
-  const s = DQ.S.settings; logNote(o);
-  if(o.kind==='unlock'){
-    const id=(o.key||'').startsWith('unlock:')?o.key.slice(7):(o.key||'').startsWith('feature:')?o.key.slice(8):null;
-    if(id){DQ.S.seen['tutorial:'+id]=true;if(DQ.S.tut?.done)delete DQ.S.tut.done['lesson:'+id];}
-  }
-  if(o.kind==='unlock'&&(o.key||'').startsWith('unlock:')&&showSkillUnlock(o))return;
-  /* a new creature companion is a moment: it opens its own pop-up (queued behind any open dialog) instead of a card */
-  if(o.popup&&DQ.popupQueue){markSilent(o,false);if(o.sound!==false)DQ.sfx(o.sound||'notify');DQ.popupQueue(o.popup);return;}
-  /* Skill levels use compact bottom cards; only the overall Hero level takes over. */
-  /* The full Hero reveal is kept for levels that unlock something and every fifth level; the others arrive as a
-     compact card that is always shown (even with notifications off), so no Hero level passes unseen. */
-  if(o.kind==='adv'&&DQ.heroRevealWorthy(o)&&showLevelReveal(o))return;
-  if(o.kind==='adv')o={...o,force:true};
+  if (o.popup) return;
   if (DQ.ui && DQ.ui.view === DQ.notificationPage(o) && !['unlock','level','adv'].includes(o.kind)) {
-    markSilent(o, false);
+    markSilent(o);
     if (DQ.notificationTier(o) === 'now') {
       DQ.ui.pageNotice = { page: DQ.notificationPage(o), title: String(o.title || ''), text: String(o.text || '') };
       if (DQ.ui.renderPageNotice) DQ.ui.renderPageNotice();
     }
     return;
   }
-  if (!s.notify && !o.force && o.kind!=='unlock') { markSilent(o, false); return; }
+  if (!s.notify && !o.force && o.kind!=='unlock') { markSilent(o); return; }
   const tier = DQ.notificationTier(o);
-  if (tier === 'quiet') { markSilent(o, true); return; }
+  if (tier === 'quiet') { markSilent(o); return; }
   if (o.key) { $$('.note', notesEl).filter(n => n.dataset.key === o.key).forEach(n => n.remove()); const i = queue.findIndex(q => q.key === o.key); if (i >= 0) queue.splice(i, 1); }
   if (document.hidden || DQ.holdNotes || nowLive() >= MAX_NOW) { queue.push(o); return; }
   showNote(o);
@@ -12589,8 +12727,8 @@ const trunc = (t, n) => { t = String(t || '').replace(/<[^>]+>/g, ''); return t.
 /* The bell keeps routine information; actionable alerts appear in context. */
 const ago = t => { const s = Math.round((Date.now() - t) / 1000); return s < 60 ? 'just now' : s < 3600 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`; };
 DQ.openBell = () => {
-  DQ.noteMissed = 0; const L = DQ.noteLog.filter(e => DQ.notificationTier(e.o) === 'quiet').slice(0, 25);
-  const body = L.length ? `<div class="bell-list">${L.map((e, i) => { const o = e.o, a = inferActions(o)[0]; return `<div class="bell-row ${e.silent ? 'quiet' : ''}" style="--c:${o.col || '#d8a64a'}"><span class="n-ic">${DQ.data.ITEMS[o.icon] ? DQ.itemIco(DQ.data.ITEMS[o.icon]) : DQ.data.SK[o.icon] && DQ.artImage ? DQ.artImage('skill', o.icon, 32, '', '') : ico(o.icon || 'star')}</span><div class="bell-t"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(trunc(o.text, 140))}</span>` : ''}<small>${ago(e.t)}</small></div>${a ? `<button class="btn sm" data-i="${i}">${esc(a.label)}</button>` : ''}</div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing yet. Routine progress and finds will be listed here.</p>';
+  DQ.flushItemDigest(); DQ.unreadNotes = 0; const L = DQ.noteLog.filter(e => DQ.notificationTier(e.o) === 'quiet');
+  const body = L.length ? `<div class="bell-list">${L.map((e, i) => { const o = e.o, a = inferActions(o)[0]; return `<div class="bell-row ${e.silent ? 'quiet' : ''}" style="--c:${o.col || '#d8a64a'}"><span class="n-ic">${DQ.data.ITEMS[o.icon] ? DQ.itemIco(DQ.data.ITEMS[o.icon]) : DQ.data.SK[o.icon] && DQ.artImage ? DQ.artImage('skill', o.icon, 32, '', '') : ico(o.icon || 'star')}</span><div class="bell-t"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(o.kind === 'loot' ? o.text : trunc(o.text, 190))}</span>` : ''}<small>${ago(e.t)}</small></div>${a ? `<button class="btn sm" data-i="${i}">${esc(a.label)}</button>` : ''}</div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing yet. Routine progress and finds will be listed here.</p>';
   DQ.modal({ title: 'Recent activity', wide: true, body, actions: [{ label: 'Close', primary: true }] });
   $$('.bell-row .btn').forEach(b => b.onclick = () => { const e = L[+b.dataset.i], a = e && inferActions(e.o)[0]; DQ.closeModal(); a && a.fn && a.fn(); });
 };
@@ -12658,13 +12796,9 @@ DQ.closeModal = () => {
   inertBefore.clear();
   if (modalTrigger && modalTrigger.isConnected) modalTrigger.focus();
   if (DQ.holdNotes) { DQ.holdNotes = false; setTimeout(pump, 250); }
-  closeQueued();
 };
-/* pop-ups that must not replace a dialog already open: shown one at a time, each after the last one closes */
-const popups = [];
-const nextPopup = () => { if (!popups.length) return; if (document.querySelector('.modal')) { setTimeout(nextPopup, 600); return; } DQ.modal(popups.shift()); };
-DQ.popupQueue = o => { popups.push(o); if (popups.length === 1) setTimeout(nextPopup, 250); };
-const closeQueued = () => { if (popups.length) setTimeout(nextPopup, 350); };
+/* Older discovery callers supply a title and a route. Keep those in the digest. */
+DQ.popupQueue = o => DQ.notify({ kind: 'discovery', title: o.title, action: o.actions?.find(a => a.fn) });
 DQ.modal = o => {
   DQ.hideTip?.();
   DQ.closeModal(); modalTrigger = document.activeElement;
@@ -12851,13 +12985,14 @@ DQ.grant = (id, n = 1) => {
   const it = D.ITEMS[id], seen = S().seen.items || (S().seen.items = {});
   if (!Object.keys(seen).length) Object.keys({ ...S().inv, ...S().bank, ...S().equip }).forEach(k => { if (D.ITEMS[k]) seen[k] = 1; });
   const fresh = !seen[id] && DQ.have(id) === 0; DQ.give(id, n);
-  if (fresh) { seen[id] = 1; if (!DQ.sim.on && !DQ.forecasting) { DQ.sfx('discover'); DQ.toast(`New item discovered: ${it.name}`); DQ.notify({ kind: 'discovery', key: 'discovery:' + id, icon: it.ic, col: it.col, title: 'New item discovered', text: it.name, sound: false }); } }
+  if (fresh) { seen[id] = 1; if (!DQ.sim.on && !DQ.forecasting) { if (S().settings.digest?.discoveries !== false) DQ.sfx('discover'); DQ.notify({ kind: 'discovery', key: 'discovery:' + id, icon: it.ic, col: it.col, title: 'New item discovered', text: it.name, sound: false }); } }
   if (DQ.sim.on) {
     DQ.sim.items[id] = (DQ.sim.items[id] || 0) + n;
     const card = DQ.sim.activeSummary;
     if (card) card.items[id] = (card.items[id] || 0) + n;
   }
-  if (it.rare) { S().stats.rare++; DQ.notify({ kind: 'loot', key: 'rare:' + id, icon: it.ic, col: it.col, title: 'Rare find', text: `You found ${it.name}.`, sound: 'gem', burst: true, ttl: 9000 }); }
+  if (!DQ.sim.on && !DQ.forecasting) DQ.noteItemGain?.(id, n);
+  if (it.rare) S().stats.rare++;
   return it;
 };
 DQ.on('overflow', () => DQ.notify({ kind: 'info', key: 'overflow', icon: 'bank', col: '#8fa09e', title: 'Your backpack is full', text: 'New kinds of item now go straight to your bank. Sell or bank things to make room.', sound: 'notify', ttl: 10000 }));
@@ -13050,6 +13185,7 @@ DQ.startAct = (kind, id, o = {}) => {
   DQ.act = { kind, id, t0: Date.now(), pace, rule, count: 0, elapsed: 0, progress: 0, limit: o.limit || 0 }; DQ.act.dur = DQ.actDur(DQ.act);
   const sk = DQ.actSkill(DQ.act); DQ.act.lvlTarget = sk ? Math.min(99, DQ.lvl(sk) + 1) : 0;
   S().act = { kind, id, pace, rule, count: 0, elapsed: 0, lvlTarget: DQ.act.lvlTarget, limit: o.limit || 0 }; S().lastPace = pace;
+  if (!DQ.forecasting) delete S().lastPlannedStop;
   if (!DQ.forecasting) { S().seen.firstTask = true; DQ.sfx('start'); DQ.log(DQ.actLabel() + '.'); DQ.emit('act'); } return true;
 };
 DQ.combatInterval = () => {
@@ -13065,6 +13201,7 @@ DQ.actDur = a => {
 DQ.stopAct = (silent, why, done) => { /* done: a batch finished as planned, shown as good news, not a warning */
   if (!DQ.act) return;
   const stopped = DQ.act, stoppedPage = EXT[stopped.kind] ? (EXT[stopped.kind].pageFor?.(stopped.id) || EXT[stopped.kind].page) : stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
+  if (why && !DQ.forecasting) S().lastPlannedStop = why;
   if (DQ.sim.on && DQ.sim.activities) {
     DQ.sim.stop = { after: DQ.sim.elapsed, reason: why || (DQ.sim.died ? 'defeated in combat' : 'activity finished') };
   }
@@ -13094,7 +13231,14 @@ function gatherDone(kind, n) {
   DQ.sfx(kind); DQ.petRoll('skill', sk); const k = extraCoins() * DQ.coinMult();
   if (kind === 'fish') {
     if (chance(D.ECONOMY.fishPouchChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(8, 25) * k * (T('comb') ? 1.5 : 1))); if (T('comb')) fxHit('comb'); DQ.addCoins(c); DQ.floatAt(document.querySelector('.card.active'), `${ico('pouch')}+${c} coins`, '#f3d58a'); DQ.log(`You fish up a sodden coin pouch (${c} coins).`, 'good'); DQ.sfx('coin'); }
-    if (chance(D.ECONOMY.fishChestChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(120, 260) * k)); DQ.addCoins(c); DQ.grant(DQ.weighted(D.GEM_WEIGHTS)); S().stats.rare++; DQ.log(`You haul up a sunken chest! ${c} coins and a gem.`, 'good'); DQ.notify({ kind: 'loot', key: 'chest', icon: 'pouch', col: '#f3d58a', title: 'Sunken chest', text: `You found ${c} coins and a gem.`, sound: 'gem', burst: true }); }
+    if (chance(D.ECONOMY.fishChestChance * (1 + DQ.fx().find))) {
+      const coins = Math.max(1, Math.round(rnd(120, 260) * k));
+      const gem = DQ.weighted(D.GEM_WEIGHTS);
+      DQ.addCoins(coins);
+      DQ.grant(gem);
+      S().stats.rare++;
+      DQ.log(`You haul up a sunken chest with ${coins} coins and ${itemName(gem).toLowerCase()}.`, 'good');
+    }
   } else if (kind === 'wood') {
     if (chance(D.ECONOMY.woodNestChance * (1 + DQ.fx().find) * (T('nuts') ? 2 : 1))) { if (T('nuts')) fxHit('nuts');
       if (chance(.5)) { const c = Math.max(1, Math.round(rnd(15, 45) * k)); DQ.addCoins(c); DQ.log(`A bird's nest holds ${c} coins.`, 'good'); DQ.floatAt(document.querySelector('.card.active'), `${ico('nest')}+${c} coins`, '#f3d58a'); DQ.sfx('coin'); }
@@ -13217,6 +13361,7 @@ function autoEat() {
   DQ.eat(fit, true);
 }
 function die() {
+  if (!DQ.forecasting) S().lastPlannedStop = 'Stopped after a combat defeat.';
   DQ.stopAct(true); S().hp = DQ.maxHp(); S().stats.deaths++; DQ.achDirty = true;
   if (!DQ.sim.on) { DQ.log('Oh dear, you are dead! You wake by the campfire.', 'bad'); DQ.sfx('death'); }
   else DQ.sim.died = true;
@@ -13380,11 +13525,9 @@ function kill(m) {
       const gl = (D.TOWN_GEAR[m.town] || []).filter(g => !DQ.lockedSkillFor(g)), gi = gl.length && chance(.35) ? DQ.pick(gl) : null; if (gi) DQ.grant(gi);
       drops.push({ id, n: cc, rar, coins: true }, { id: gem, n: 1, rar: D.RARITY[2] }); if (gi) drops.push({ id: gi, n: 1, rar: D.RARITY[3] });
       loot.push(`a treasure chest (${fmt(cc)} coins, ${itemName(gem).toLowerCase()}${gi ? ', ' + itemName(gi).toLowerCase() : ''})`);
-      DQ.notify({ kind: 'loot', key: 'chest', icon: 'pouch', col: '#ffb84a', title: 'Treasure chest!', text: `${fmt(cc)} coins, a ${itemName(gem).toLowerCase()}${gi ? ' and ' + itemName(gi) : ''}.`, sound: 'gem', burst: true });
       continue;
     }
-    const it = DQ.grant(id, n); drops.push({ id, n, rar }); loot.push(`${n > 1 ? n + ' ' : ''}${itemName(id).toLowerCase()}`);
-    if (!it.rare && (rar[0] === 'rare' || rar[0] === 'epic')) DQ.notify({ kind: 'loot', key: 'drop:' + id, icon: it.ic, col: rar[2], title: `${rar[1]} drop!`, text: `${m.name} dropped ${n > 1 ? n + ' ' : 'a '}${it.name.toLowerCase()}.`, sound: 'gem', burst: rar[0] === 'epic' });
+    DQ.grant(id, n); drops.push({ id, n, rar }); loot.push(`${n > 1 ? n + ' ' : ''}${itemName(id).toLowerCase()}`);
   }
   if (extraCoins) DQ.addCoins(extraCoins);
   if (!DQ.sim.on) DQ.emit('loot', m, drops, c);
@@ -13484,7 +13627,45 @@ DQ.sell = (id, qty, from) => {
   const coins = DQ.sellPrice(id) * qty;
   DQ.addCoins(coins); S().stats.sold += qty; DQ.sfx('sell'); DQ.achDirty = true; DQ.emit('shop'); return coins;
 };
-DQ.sellJunk = () => { let c = 0; Object.keys({ ...S().inv, ...S().bank }).forEach(id => { if (D.ITEMS[id] && D.ITEMS[id].type === 'junk' && DQ.sellable(id)) c += DQ.sell(id, DQ.have(id)) || 0; }); return c; };
+DQ.junkSale = () => {
+  const required = new Set();
+  for (const quest of D.QUESTS.filter(q => ['active', 'ready'].includes(DQ.questState(q)))) {
+    for (const objective of quest.obj) {
+      if (objective.ev === 'deliver') required.add(objective.key);
+      for (const task of DQ.questObjectiveTasks?.(objective) || []) {
+        if (task.kind === 'recipe') for (const input of Object.keys(D.RECIPES[task.id]?.in || {})) required.add(input);
+      }
+    }
+  }
+  const equipped = new Set([...Object.values(S().equip), S().ammo.id]);
+  const entries = Object.keys({ ...S().inv, ...S().bank }).filter(id => D.ITEMS[id]?.type === 'junk' && DQ.sellable(id) &&
+    !equipped.has(id) && !required.has(id) && !(DQ.bundleNeeds?.(id).length) &&
+    !Object.keys(D.PROJECTS || {}).some(project => DQ.projectNeed(project)[id] > 0)).map(id => [id, DQ.have(id)]);
+  return { entries, quantity: entries.reduce((sum, [, n]) => sum + n, 0),
+    coins: entries.reduce((sum, [id, n]) => sum + n * DQ.sellPrice(id), 0) };
+};
+DQ.sellJunk = () => DQ.junkSale().entries.reduce((total, [id, n]) => total + (DQ.sell(id, n) || 0), 0);
+
+DQ.buyMax = id => {
+  const item = D.ITEMS[id];
+  if (!item || !Number.isFinite(item.buy) || item.buy <= 0 || DQ.shopBuyLock(id)) return 0;
+  const materials = Object.entries(DQ.shopMaterialCost?.(id) || {}).map(([key, n]) => Math.floor(DQ.have(key) / n));
+  // Normal stacks can overflow to the bank. Explicit item limits still bound the purchase.
+  const cap = Number.isFinite(item.stackLimit) ? Math.max(0, item.stackLimit - DQ.have(id)) : Number.MAX_SAFE_INTEGER;
+  return Math.max(0, Math.min(cap, item.type === 'tool' ? DQ.have(id) ? 0 : 1 : cap,
+    Math.floor(S().coins / DQ.buyPrice(id)), ...materials));
+};
+DQ.shopBuyLock = id => {
+  const item = D.ITEMS[id], locked = DQ.lockedSkillFor(id);
+  if (!item) return 'Unavailable';
+  if (locked) return `Learn ${D.SK[locked].name}`;
+  if (item.slot && item.slot !== 'ammo') {
+    const requirement = Object.entries(item.req || {}).find(([skill, level]) => D.SK[skill] && DQ.lvl(skill) < level);
+    if (requirement) return `${D.SK[requirement[0]].name} ${requirement[1]}`;
+  }
+  return '';
+};
+
 
 /* ---------- Offline and catch-up simulation ---------- */
 /* Count one elapsed budget at the live rate, up to the published cap. */
@@ -13977,7 +14158,14 @@ DQ.checkRule = () => {
   if (R.type === 'time') done = a.elapsed >= R.n * 60000;
   else if (R.type === 'count') done = a.count >= R.n;
   else if (R.type === 'level') { const sk = DQ.actSkill(a); done = sk && DQ.lvl(sk) >= a.lvlTarget; }
-  if (done) { const label = DQ.actLabel(); DQ.stopAct(true); DQ.notify({ kind: 'info', key: 'taskdone', icon: 'check', col: '#5cc08a', title: 'Task finished', text: `${label}: ${DQ.ruleText(a.rule, a)}, done.`, sound: 'perk', ttl: 6000 }); DQ.log(`Finished: ${label.toLowerCase()}.`, 'good'); DQ.advanceQueue(); }
+  if (done) {
+    const label = DQ.actLabel();
+    if (R.type === 'level' && !DQ.forecasting) S().lastPlannedStop = `${label} stopped at level ${a.lvlTarget}.`;
+    DQ.stopAct(true, DQ.sim.on ? S().lastPlannedStop : undefined, true);
+    DQ.notify({ kind: 'info', key: 'taskdone', icon: 'check', col: '#5cc08a', title: 'Task finished', text: S().lastPlannedStop || `Finished ${label.toLowerCase()}.`, sound: 'perk', ttl: 6000 });
+    DQ.log(`Finished: ${label.toLowerCase()}.`, 'good');
+    DQ.advanceQueue();
+  }
 };
 DQ.queueAdd = (kind, id, rule = 'time:30', pace) => {
   const Q = S().queue = S().queue || [];
@@ -14442,6 +14630,21 @@ DQ.questLinks = (kind, id) => {
 
 /* ---------- Item comparison: what changes if you equip this? ---------- */
 const BONUS_NAMES = { atk: 'Accuracy', str: 'Power', def: 'Defence', rng: 'Ranged', rngStr: 'Arrow power', mag: 'Magic' };
+DQ.itemBonuses = id => {
+  const item = D.ITEMS[id], slot = item?.slot;
+  if (!slot) return [];
+  const equippedId = slot === 'ammo' ? S().ammo.id : S().equip[slot];
+  if (equippedId === id) return [];
+  const equipped = equippedId && D.ITEMS[equippedId];
+  return Object.entries(BONUS_NAMES).flatMap(([key, name]) => {
+    const value = (item.b?.[key] || 0) - (equipped?.b?.[key] || 0);
+    return value ? [{ name, value, compared: !!equipped }] : [];
+  });
+};
+DQ.itemBonusHtml = id => {
+  const rows = DQ.itemBonuses(id);
+  return rows.length ? `<span class="item-deltas">${rows.map(({ name, value, compared }) => `<span class="${compared ? value > 0 ? 'ok' : 'bad' : ''}">${compared && value > 0 ? '+' : ''}${value} ${name}</span>`).join('')}</span>` : '';
+};
 DQ.compareItem = id => {
   const it = D.ITEMS[id]; if (!it) return null; const st = S();
   if (it.type === 'tool' && it.toolSkill) {
@@ -14755,7 +14958,7 @@ const B = UI.B = {
   xpbar: (e, a) => { const w = DQ.pctNext(a).toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; },
   xpline: (e, a) => set(e, `${fmt(S().xp[a])} XP`),
   bonus: (e, a) => { const c = ['melee', 'attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].includes(a) ? DQ.combatCatchUp() : 0; const ep = DQ.earlyPace ? DQ.earlyPace(a) : 1, bon = Math.round((DQ.xpBonusBase(a) / ep - 1) * 100); set(e, `${bon > 0 ? `+${bon}% XP` : 'Normal XP'}${ep < 1 ? ` · early levels ${Math.round(ep * 100)}% pace` : ''}${c > 0 ? ` · catch-up +${Math.round(c * 100)}%` : ''}`); },
-  coins: e => set(e, fmt(S().coins)),
+  coins: e => set(e, DQ.formatCoins(S().coins)),
   combat: e => set(e, DQ.combatLvl()),
   combatbar: e => { const w = DQ.combatProgress().pct.toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; },
   combatnext: e => { const c = DQ.combatProgress(); set(e, c.best ? `${Math.floor(c.pct)}% to ${c.next}` : 'Max'); },
@@ -14894,7 +15097,7 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
   }).join('') || '<p class="dim">No recipes match. Try another category.</p>'}</div></section>`;
   if(kind==='fight')return `<section class="panel encounter-controls"><div class="phead"><h2>${esc(choice.name)}</h2><small>Combat <b data-b="combat"></b></small></div>${action}<div class="task-summary">${choice.info||''}</div></section>${cards}`;
   const stage = `<section class="panel activity-stage ${running?'working':''}" style="--c:${D.SK[key]?.col||'var(--brass)'};--work-beat:${Math.max(900,Math.min(1700,(DQ.act?.dur||3600)/3))}ms"><div class="activity-scene ${kind} skill-${key}" data-kind="${kind}" data-task="${choice.id}" style="--landscape:url('${DQ.districtUrl ? DQ.districtUrl(S().town, kind, key, choice) : DQ.sceneUrl ? DQ.sceneUrl(S().town) : ''}')"><span class="scene-target">${art(choice, choice.artKind==='item' ? 48 : kind==='wood' ? 144 : kind==='train' ? 64 : 96)}</span>${choice.yieldId&&kind!=='fish'?`<span class="scene-yield"><small>Produces</small>${DQ.itemIco(D.ITEMS[choice.yieldId])}</span>`:''}${running?`<span class="scene-worker" aria-hidden="true"><img class="px" src="${DQ.heroWorkFigureUrl?DQ.heroWorkFigureUrl(S().look):DQ.heroFigureUrl(S().look)}" width="72" height="96" alt=""></span><span class="action-tool" aria-hidden="true">${(t => t ? DQ.itemIco(D.ITEMS[t]) : ico({wood:'woodcutting',mine:'mining',fish:'rod',thieve:'glove',recipe:{cooking:'cooking',smithing:'hammer',crafting:'crafting'}[key],alch:'staff'}[kind]||key))((k => { const n = k && DQ.toolTier(key); return n && D.ITEMS[`tool_${k}_${n}`] ? `tool_${k}_${n}` : null; })(DQ.toolKey && DQ.toolKey(key)))}</span><span class="work-atmosphere" aria-hidden="true"><i></i><i></i><i></i><i></i></span>`:''}</div>
-    <div class="activity-caption"><div class="phead"><div><small>${esc(title)} · Level <b data-b="lvl:${key}"></b></small><h2>${esc(choice.name)}</h2></div><span class="activity-state ${running?'ok':'dim'}">${running?'● Working':choice.blocked?'Preview':'Ready'}</span></div>${running?'<span class="bar prog activity-progress"><i data-prog="@"></i></span>':''}${action}${!choice.blackout && DQ.mastLine ? DQ.mastLine(kind, choice.id) : ''}<div class="task-summary">${choice.info||''}${choice.blocked&&!running&&!choice.blackout?`<p class="bad">${esc(choice.reason)}</p>`:''}</div></div></section>`;
+    <div class="activity-caption"><div class="phead"><div><small>${esc(title)} · Level <b data-b="lvl:${key}"></b></small><h2>${esc(running ? DQ.actLabel() : choice.name)}</h2></div><span class="activity-state ${running?'ok':'dim'}">${running?'▶ Running':choice.blocked?'Preview':'Ready'}</span></div>${running?'<span class="bar prog activity-progress" role="img" aria-label="Current action progress"><i data-prog="@"></i></span>':''}${action}${!choice.blackout && DQ.mastLine ? DQ.mastLine(kind, choice.id) : ''}<div class="task-summary">${choice.info||''}${choice.blocked&&!running&&!choice.blackout?`<p class="bad">${esc(choice.reason)}</p>`:''}</div></div></section>`;
   return `<div class="activity-workspace task-panel">${stage}${cards}</div>`;
 };
 
@@ -15130,7 +15333,11 @@ const catOf = it => it.type === 'tool' ? 'tool' : it.type === 'ammo' ? 'weapon' 
 /* "Crafting items" is a lens, not a box: anything that some recipe uses, wherever it also sits (ores, logs, bars, fish, crops …) */
 const inCat = (id, f) => f === 'all' || (f === 'craft' ? ING.has(id) : catOf(D.ITEMS[id]) === f);
 const byCat = (a, b) => CAT_ORDER.indexOf(catOf(D.ITEMS[a])) - CAT_ORDER.indexOf(catOf(D.ITEMS[b])) || D.ITEMS[a].name.localeCompare(D.ITEMS[b].name);
-UI.catTabs = (store, cur, act) => `${UI.choiceButtons(`<select id="${act}-select" data-in="itemfilter" data-a="${act}" aria-label="${act === 'packfilter' ? 'Backpack' : 'Bank'} category">${Object.entries(CAT).filter(([k]) => k === 'all' || k === cur || Object.keys(store).filter(id => !DQ.isTool(id)).some(id => inCat(id, k))).map(([k, n]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${n} (${k === 'all' ? Object.keys(store).filter(id => !DQ.isTool(id)).length : Object.keys(store).filter(id => !DQ.isTool(id)).filter(id => inCat(id, k)).length})</option>`).join('')}</select>`)}`;
+UI.catTabs = (store, cur, act) => {
+  const ids = Object.keys(store).filter(id => !DQ.isTool(id));
+  return Object.entries(CAT).filter(([id]) => id !== 'tool').map(([id, label]) =>
+    `<button class="tab ${cur === id ? 'on' : ''}" data-do="${act}" data-a="${id}" aria-pressed="${cur === id}">${label} (${ids.filter(item => inCat(item, id)).length})</button>`).join('');
+};
 
 /* ---------- Map ---------- */
 const MAP_LAND = 'M40 330C50 210 170 130 320 110C470 90 590 56 760 70C900 82 950 190 944 300C938 404 884 462 760 452C640 470 520 430 400 450C280 480 140 470 80 420C52 394 40 362 40 330Z';
@@ -15218,6 +15425,7 @@ UI.travelAnim = to => {
 /* ---------- Shop ---------- */
 UI.itemSub = it => { const b = UI.statLine(it.b), r = Object.entries(it.req || {}).map(([sk, l]) => `<span class="${DQ.skillUnlocked(sk) && DQ.lvl(sk) >= l ? 'ok' : 'bad'}">${D.SK[sk].name} ${l}</span>`).join(' '); return [it.type === 'relic' ? `${esc(it.desc || '')} Keepsake: it cannot be sold.` : '', it.heal ? `Heals ${it.heal}` : '', it.type === 'tool' ? it.toolSkill?`${+(D.TOOL_SPEED[it.tier]*100).toFixed(1)}% faster ${D.SK[it.toolSkill].name.toLowerCase()}`:esc(it.sub||'Kept tool') : '', b, r].filter(Boolean).join(' · '); };
 UI.shopSelected = {};
+let recentPurchase = null;
 UI.shopTabs = tab => `<div class="tabs">${[['buy','Buy'], ['rare','Rare wares'], ['sell','Sell']].map(([value, label]) => `<button class="tab ${tab === value ? 'on' : ''}" data-do="shoptab" data-a="${value}">${label}</button>`).join('')}</div>`;
 /* what an item asks of you before you can use it: gear requirements, a seed's Farming level (Nov 2026, from the player) */
 DQ.itemReqs = id => { const it = D.ITEMS[id]; if (!it) return []; const out = Object.entries(it.req || {}).filter(([sk]) => D.SK[sk]);
@@ -15226,22 +15434,28 @@ DQ.itemReqs = id => { const it = D.ITEMS[id]; if (!it) return []; const out = Ob
 UI.reqChips = id => DQ.itemReqs(id).map(r => `<span class="req-chip ${r.ok ? 'ok' : 'bad'}">${r.ok ? '' : ico('lock')}${esc(D.SK[r.sk].name)} ${r.l}</span>`).join('');
 UI.shopPreview = id => {
   const it = D.ITEMS[id];
-  return `<div class="shop-item-preview"><span class="shop-item-art">${DQ.itemIco(it)}</span><div><h3>${esc(it.name)}</h3><p class="item-base-stats">${UI.statLine(it.b) || UI.itemSub(it)}</p><small>${DQ.have(id)} owned${it.slot ? ' · ' + DQ.SLOT_NAMES[it.slot] : ''}</small>${DQ.itemReqs(id).length ? `<p class="shop-req">${DQ.itemReqs(id).every(r => r.ok) ? 'Requires' : 'You need'} ${UI.reqChips(id)}${DQ.itemReqs(id).some(r => !r.ok) ? `<small>You can buy it now and ${it.slot ? 'wear' : 'use'} it once you reach ${DQ.itemReqs(id).filter(r => !r.ok).map(r => `${D.SK[r.sk].name} ${r.l} (you are ${DQ.lvl(r.sk)})`).join(' and ')}.</small>` : ''}</p>` : ''}</div></div>`;
+  return `<div class="shop-item-preview"><span class="shop-item-art">${DQ.itemIco(it)}</span><div><h3>${esc(it.name)}</h3><p class="item-base-stats">${UI.statLine(it.b) || UI.itemSub(it)}</p><small>${DQ.have(id)} owned${it.slot ? ' · ' + DQ.SLOT_NAMES[it.slot] : ''}</small>${DQ.itemReqs(id).length ? `<p class="shop-req">${DQ.itemReqs(id).every(r => r.ok) ? 'Requires' : 'You need'} ${UI.reqChips(id)}${DQ.itemReqs(id).some(r => !r.ok) ? `<small>Required level: ${DQ.itemReqs(id).filter(r => !r.ok).map(r => `${D.SK[r.sk].name} ${r.l} (you are ${DQ.lvl(r.sk)})`).join(' and ')}.</small>` : ''}</p>` : ''}</div></div>`;
+};
+UI.inlineBuy = id => {
+  const reason = DQ.shopBuyLock(id), max = DQ.buyMax(id), price = DQ.buyPrice(id);
+  if (reason) return `<button class="btn" disabled>${ico('lock')}${esc(reason)}</button>`;
+  const purchase = (n, label) => `<button class="btn" data-do="buy" data-a="${id}" data-b="${n}" ${n > max || n === 0 ? 'disabled' : ''}>${label}<small>${n > 0 && n <= max ? UI.money(n * price) : 'Need supplies or coins'}</small></button>`;
+  return `<div class="inline-buy" aria-label="Buy ${esc(D.ITEMS[id].name)}">${purchase(1, 'Buy 1')}${purchase(10, 'Buy 10')}${purchase(max, 'Buy max (' + fmt(max) + ')')}</div>`;
 };
 UI.V.shop = () => {
   const tab = UI.shopTab, buying = tab === 'buy', qty = UI.shopQty;
   const stock = buying ? D.SHOPS[S().town] : [], held = stock.filter(id => DQ.lockedSkillFor(id));
-  const ids = buying ? stock.filter(id => !DQ.lockedSkillFor(id)&&(!UI.shopCatalogFilter||UI.shopCatalogFilter(id))) : Object.keys({ ...S().inv, ...S().bank }).filter(DQ.sellable);
+  const ids = buying ? stock.filter(id => (!UI.shopCatalogFilter||UI.shopCatalogFilter(id))) : Object.keys({ ...S().inv, ...S().bank }).filter(DQ.sellable);
   if(buying&&UI.shopCategory==='equipment')ids.sort((a,b)=>Math.max(1,...Object.values(D.ITEMS[a].req||{}))-Math.max(1,...Object.values(D.ITEMS[b].req||{}))||DQ.buyPrice(a)-DQ.buyPrice(b)||D.ITEMS[a].name.localeCompare(D.ITEMS[b].name));
   const later = [...new Set(held.map(DQ.lockedSkillFor))].map(sk => `<p class="shop-later">${ico('lock')} <b>${D.SK[sk].name}</b> gear is sold here once you learn ${D.SK[sk].name}. ${esc(DQ.skillTeacher(sk))}.</p>`).join('');
   const id = ids.includes(UI.shopSelected[tab]) ? UI.shopSelected[tab] : ids[0], it = id && D.ITEMS[id];
   UI.shopSelected[tab] = id;
   const owned = it ? DQ.have(id) : 0, tool = it && it.type === 'tool', count = tool ? 1 : qty;
   const cost = it ? (buying ? DQ.buyPrice(id) * count : DQ.sellPrice(id) * Math.min(count, owned)) : 0;
-  const disabled = !it || (buying && (S().coins < cost || (tool && owned)|| (DQ.shopMaterialsAffordable&&!DQ.shopMaterialsAffordable(id,count))));
-  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span>${DQ.gearMark ? DQ.gearMark(item) : ''}<b>${esc(D.ITEMS[item].name)}</b><span class="stock-price">${buying&&UI.shopCardCost?UI.shopCardCost(item):UI.money(buying?DQ.buyPrice(item):DQ.sellPrice(item))}</span>${buying&&DQ.itemReqs(item).length?`<span class="req-chips">${UI.reqChips(item)}</span>`:''}${buying?'':'<small>'+DQ.have(item)+' held</small>'}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
-    ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}${buying&&DQ.shopMaterialCost?UI.needTiles(Object.fromEntries(Object.entries(DQ.shopMaterialCost(id)).map(([k,n])=>[k,n*count]))):''}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
-      <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} ${disabled ? 'disabled' : ''}>${tool && owned && buying ? 'Already owned' : (buying ? 'Buy' : 'Sell')+' ×'+(buying?count:Math.min(count,owned))} ${tool && owned && buying ? '' : UI.money(cost)}</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all ${UI.money(DQ.sellPrice(id) * owned)}</button>` : ''}</div>
+
+  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<div class="stock-item"><button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span>${DQ.gearMark ? DQ.gearMark(item) : ''}<b>${esc(D.ITEMS[item].name)}</b>${DQ.itemBonusHtml(item)}${UI.bundleLabel?.(item)||''}<span class="stock-price">${buying&&UI.shopCardCost?UI.shopCardCost(item):UI.money(buying?DQ.buyPrice(item):DQ.sellPrice(item))}</span>${buying&&DQ.itemReqs(item).length?`<span class="req-chips">${UI.reqChips(item)}</span>`:''}${buying?'':'<small>'+DQ.have(item)+' held</small>'}</button>${buying ? UI.inlineBuy(item) : ''}</div>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
+    ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}${UI.bundleLinks?.(id)||''}${buying&&DQ.shopMaterialCost?UI.needTiles(Object.fromEntries(Object.entries(DQ.shopMaterialCost(id)).map(([k,n])=>[k,n*count]))):''}${buying ? UI.inlineBuy(id) : `<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
+      <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} >${tool && owned && buying ? 'Already owned' : (buying ? 'Buy' : 'Sell')+' ×'+(buying?count:Math.min(count,owned))} ${tool && owned && buying ? '' : UI.money(cost)}</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all ${UI.money(DQ.sellPrice(id) * owned)}</button>` : ''}</div>`}
       ${buying && S().coins < cost ? `<p class="bad">Need ${UI.money(cost - S().coins)} more.</p>` : ''}
       </div><div class="shop-comparison">${UI.compareHtml ? UI.compareHtml(id) : ''}</div></div>` : '<p>Nothing to sell. Gather resources or visit your bank.</p>'}
     ${later}</section></div>`;
@@ -15309,7 +15523,7 @@ UI.inventoryPicker = () => '';
 UI.packGrid = () => {
   const ids = UI.packVisible();
   if (!ids.length) return `<p class="dim" style="grid-column:1/-1;margin:6px 0">${UI.packSorted().length ? 'No matches.' : 'Your backpack is empty.'}</p>`;
-  return ids.map(id => { const spare = D.ITEMS[id].slot !== 'ammo' && S().equip[D.ITEMS[id].slot] === id; return `<button class="slot ${UI.sel === id && UI.selFrom === 'pack' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="pack" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().inv[id]} ${spare ? 'spare copies' : 'in backpack'}">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().inv[id])}</span>${spare ? '<span class="spare-tag">Spare</span>' : ''}${DQ.gearMark ? DQ.gearMark(id) : ''}</button>`; }).join('');
+  return ids.map(id => { const spare = D.ITEMS[id].slot !== 'ammo' && S().equip[D.ITEMS[id].slot] === id; return `<button class="slot ${UI.sel === id && UI.selFrom === 'pack' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="pack" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().inv[id]} ${spare ? 'spare copies' : 'in backpack'}">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().inv[id])}</span>${spare ? '<span class="spare-tag">Spare</span>' : ''}${DQ.itemBonusHtml(id)}${UI.bundleLabel?.(id)||''}</button>`; }).join('');
 };
 UI.detail = (id, from) => {
   if (!id || !DQ.have(id)) return `<div class="detail detail-empty"><span class="k">Item details</span><p class="dim">Select an item.</p></div>`;
@@ -15321,7 +15535,7 @@ UI.detail = (id, from) => {
   else btns.push(`<button class="btn" data-do="deposit" data-a="${id}" data-b="all">Bank ${esc(it.name)}</button>`);
   if (!DQ.sellable(id)) btns.push(`<p class="keepsake-note">${ico('lock')} ${esc(DQ.KEEPSAKE_NOTE)}</p>`);
   else btns.push(`<button class="btn" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell 1 ${UI.money(DQ.sellPrice(id))}</button>${n > 1 ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all ${UI.money(DQ.sellPrice(id) * n)}</button>` : ''}`);
-  return `<div class="detail"><div class="dt-h">${itm(id)}<div><b style="color:${it.col}">${esc(it.name)}</b><small>${fmt(n)} in ${from === 'bank' ? 'bank' : 'pack'}</small></div></div><div class="btnrow wrap">${btns.join('')}</div><div class="detail-info">${(DQ.tips && DQ.tips.item ? DQ.tips.item(id) : '') || `<p class="sm">${UI.itemSub(it) || DQ.cap(it.type)}</p>`}</div></div>`;
+  return `<div class="detail"><div class="dt-h">${itm(id)}<div><b style="color:${it.col}">${esc(it.name)}</b><small>${fmt(n)} in ${from === 'bank' ? 'bank' : 'pack'}</small></div></div><div class="btnrow wrap">${btns.join('')}</div>${UI.bundleLinks?.(id)||''}<div class="detail-info">${(DQ.tips && DQ.tips.item ? DQ.tips.item(id) : '') || `<p class="sm">${UI.itemSub(it) || DQ.cap(it.type)}</p>`}</div></div>`;
 };
 UI.V.character = () => {
   const s = S(), b = DQ.bonus(), ps = DQ.pstats(), marks = DQ.heroMarks();
@@ -15332,13 +15546,13 @@ UI.V.character = () => {
         <p class="equip-fightline">${DQ.cap(ps.style)} · max hit <b class="mono">${ps.max}</b> · <b class="mono">${Math.round(ps.red * 100)}%</b> less damage taken <button class="linkish" data-do="go" data-a="combat">${ico('attack')}Fight</button></p>
       </section>
       <section data-reference="true" class="equipment-appearance" id="equipment-appearance"><h3 id="equipment-appearance-toggle">Appearance &amp; sharing</h3>${marks.length ? `<div class="fig-marks">${marks.map(mark => `<span class="fig-mark" data-tip="text:${esc(mark.sub)}">${ico(mark.ic)}${esc(mark.t)}</span>`).join('')}</div>` : ''}<p class="hint">Capes at skill 30 / 60 / 99 · medals at Hero 10 / 25 / 50 / 75.</p><button class="btn sm" data-do="share">${ico('star')}Share hero</button></section></section>
-    <div class="col"><section class="panel"><div class="phead"><h2>Backpack</h2><span><small class="mono" data-b="packn"></small> <button class="btn sm" data-do="go" data-a="bank">${ico('bank')}Open bank (${Object.keys(S().bank).length})</button> <button class="btn sm" data-do="depositall">Bank all</button></span></div><div class="filtbar"><div class="tabs">${UI.catTabs(s.inv, UI.packFilter, 'packfilter')}</div><input id="packq" class="search" data-in="packq" placeholder="Search backpack" value="${esc(UI.packQ)}" aria-label="Search backpack"></div>${UI.inventoryPicker('pack')}<div class="slots" id="packgrid">${UI.packGrid()}</div><p class="hint">${DQ.packMax()} slots · overflow goes to the <b>bank</b>.</p></section>
+    <div class="col"><section class="panel"><div class="phead"><h2>Backpack</h2><span><small class="mono" data-b="packn"></small> <button class="btn sm" data-do="go" data-a="bank">${ico('bank')}Open bank (${Object.keys(S().bank).length})</button> <button class="btn sm" data-do="depositall">Bank all</button> <button class="btn sm" data-do="sellall" ${DQ.junkSale().quantity ? '' : 'disabled'}>Sell junk</button></span></div><div class="filtbar"><div class="tabs">${UI.catTabs(s.inv, UI.packFilter, 'packfilter')}</div><input id="packq" class="search" data-in="packq" placeholder="Search backpack" value="${esc(UI.packQ)}" aria-label="Search backpack"></div>${UI.inventoryPicker('pack')}<div class="slots" id="packgrid">${UI.packGrid()}</div><p class="hint">${DQ.packMax()} slots · overflow goes to the <b>bank</b>.</p></section>
     <section class="panel" id="detailbox">${UI.detail(UI.sel, UI.selFrom)}</section></div></div>`;
 };
 
 /* ---------- Bank ---------- */
 const bankIds = () => Object.keys(S().bank).filter(id => !DQ.isTool(id) && inCat(id, UI.bankFilter) && D.ITEMS[id].name.toLowerCase().includes(UI.bankQ.toLowerCase())).sort(byCat);
-UI.bankGrid = () => { const ids = bankIds(); return ids.length ? ids.map(id => `<button class="slot ${UI.sel === id && UI.selFrom === 'bank' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="bank" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().bank[id]} in bank">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().bank[id])}</span>${DQ.gearMark ? DQ.gearMark(id) : ''}</button>`).join('') : `<p class="dim" style="grid-column:1/-1">${Object.keys(S().bank).length ? 'Nothing matches that filter.' : 'Your bank is empty. Overflow and deposits end up here.'}</p>`; };
+UI.bankGrid = () => { const ids = bankIds(); return ids.length ? ids.map(id => `<button class="slot ${UI.sel === id && UI.selFrom === 'bank' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="bank" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().bank[id]} in bank">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().bank[id])}</span>${DQ.itemBonusHtml(id)}${UI.bundleLabel?.(id)||''}</button>`).join('') : `<p class="dim" style="grid-column:1/-1">${Object.keys(S().bank).length ? 'Nothing matches that filter.' : 'Your bank is empty. Overflow and deposits end up here.'}</p>`; };
 UI.V.bank = () => `<section class="panel shophead"><div><h2>Bank</h2><small class="dim">${Object.keys(S().bank).filter(id => !DQ.isTool(id)).length} item types · Used automatically by tasks</small></div><button class="btn" data-do="depositall">${ico('bank')}Deposit backpack</button></section>
   <div class="chargrid"><section class="panel"><div class="phead bank-filters"><div class="tabs">${UI.catTabs(S().bank, UI.bankFilter, 'bankfilter')}</div><input id="bankq" class="search" data-in="bankq" placeholder="Search" value="${esc(UI.bankQ)}" aria-label="Search bank"></div>${UI.inventoryPicker('bank')}<div class="slots big" id="bankgrid">${UI.bankGrid()}</div></section>
   <section class="panel" id="detailbox">${UI.detail(UI.sel, UI.selFrom)}</section></div>`;
@@ -15357,9 +15571,11 @@ const tog = (k, label, sub) => `<button class="tog ${S().settings[k] ? 'on' : ''
 const slider = (k, label) => `<label class="slide"><span>${label}</span><input type="range" min="0" max="100" value="${Math.round(S().settings[k] * 100)}" data-in="${k}" aria-label="${label}"><b class="mono">${Math.round(S().settings[k] * 100)}%</b></label>`;
 UI.V.settings = () => {
   const s = S().settings;
+  const digest = Object.entries(DQ.digestCategories).map(([id, label]) => `<button class="tog ${s.digest?.[id] !== false ? 'on' : ''}" data-do="digestsetting" data-a="${id}" aria-pressed="${s.digest?.[id] !== false}"><span class="sw"></span><span><b>${label}</b></span></button>`).join('');
   return `<div class="setgrid"><section class="panel"><div class="phead"><h2>Audio</h2></div><div class="stack">${tog('muted', 'Mute everything', 'Shortcut: M')}${slider('masterVol', 'Master volume')}${tog('sfx', 'Sound effects')}${slider('vol', 'Effects volume')}${tog('music', 'Ambient music', 'A slow, generated score that changes with each town')}${slider('musicVol', 'Music volume')}${tog('ambience', 'Nature ambience', 'Wind, birds, water and fire for each region')}${slider('ambVol', 'Ambience volume')}
       <div><div class="k" style="margin-bottom:6px">Task sounds</div><div class="seg">${[['off', 'Off'], ['calm', 'Calm'], ['varied', 'Varied']].map(([k, n]) => `<button class="${s.taskSounds === k ? 'on' : ''}" data-do="tasksound" data-a="${k}">${n}</button>`).join('')}</div><small class="dim">Controls how often finished tasks make a sound. Sounds are always varied so they do not repeat exactly.</small></div></div></section>
-    <section class="panel"><div class="phead"><h2>Interface</h2></div><div class="stack">${tog('notify', 'Notifications', 'Show level-ups, unlocks and important alerts. Routine finds and achievements stay in the bell.')}${tog('tips', 'Tooltips')}${tog('reduceFx', 'Reduce effects', 'Turns off click ripples, particles and bouncy animations')}
+    <section class="panel"><div class="phead"><h2>Interface</h2></div><div class="stack">${tog('notify', 'Important alerts')}${tog('unlockReveals', 'Celebrate new systems in a popup', 'New skills and systems are always in the bell.')}${tog('tips', 'Tooltips')}${tog('reduceFx', 'Reduce effects', 'Turns off click ripples, particles and bouncy animations')}
+      <div class="digest-settings"><h3>Recent activity digest</h3><div class="stack tight">${digest}</div></div>
       <label class="nameedit"><span class="k">Hero name</span><input id="heroname" data-in="name" maxlength="20" value="${esc(S().name)}"></label></div></section>
     <section class="panel"><div class="phead"><h2>Gameplay</h2></div><div class="stack">${tog('autoEat', 'Eat automatically in combat', `Eats at ${s.eatAt}% health. Change it on the Combat page.`)}<p class="sm dim">You can close the game at any time. Your current task, your crops, animals and workers keep going while you are away, and you get a summary when you come back. ${DQ.offlinePolicy()}</p></div></section>
     <section class="panel"><div class="phead"><h2>Save data</h2><small class="mono">Autosaves every 10s</small></div><div class="stack"><div class="btnrow wrap"><button class="btn" data-do="export">${ico('save')}Export save</button><button class="btn" data-do="import">Import save</button><button class="btn" data-do="savenow">Save now</button></div>
@@ -15435,7 +15651,16 @@ const DO = {
   shopselect: a => { UI.shopSelected[UI.shopTab] = a; UI.render(false); if (innerWidth <= 860) document.querySelector('.shop-task')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); },
   rareselect: a => { UI.tab.rareChoice = a; UI.render(false); if (innerWidth <= 860) document.querySelector('.shop-task')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); },
   shoptab: a => { UI.shopTab = a; UI.render(false); }, shopqty: a => { UI.shopQty = +a; UI.render(false); },
-  buy: a => { const it = D.ITEMS[a]; if (DQ.buy(a, it.type === 'tool' ? 1 : UI.shopQty)) { DQ.log(`You buy ${it.type === 'tool' ? '' : UI.shopQty + '× '}${it.name.toLowerCase()}.`); UI.render(false); } },
+  buy: (id, quantity) => {
+    const count = +quantity || UI.shopQty;
+    if (quantity && (!Number.isSafeInteger(count) || count < 1 || count > DQ.buyMax(id))) return;
+    if (recentPurchase?.id === id && recentPurchase.count === count && performance.now() - recentPurchase.at < 350) return;
+    if (DQ.buy(id, count)) {
+      recentPurchase = { id, count, at: performance.now() };
+      DQ.log(`You buy ${count}× ${D.ITEMS[id].name.toLowerCase()}.`);
+      UI.render(false);
+    }
+  },
   sell: (a, b, el) => {
     const from = el && el.dataset.from, store = from === 'pack' ? S().inv : from === 'bank' ? S().bank : null;
     const available = store ? store[a] || 0 : DQ.have(a), n = Math.min(b === 'all' ? available : +b, available);
@@ -15444,7 +15669,24 @@ const DO = {
     if (!(store ? store[a] : DQ.have(a)) && UI.sel === a) UI.sel = null;
     UI.render(false);
   },
-  sellall: () => { const c = DQ.sellJunk(); if (c) DQ.log(`You sell your junk for ${fmt(c)} coins.`, 'good'); UI.render(false); },
+  sellall: () => {
+    const quote = DQ.junkSale();
+    if (!quote.quantity) return DQ.toast('There is no junk to sell.');
+    const sale = () => {
+      const now = DQ.junkSale();
+      if (JSON.stringify(now.entries) !== JSON.stringify(quote.entries) || now.coins !== quote.coins) {
+        DQ.closeModal();
+        UI.DO.sellall();
+        return false;
+      }
+      const coins = DQ.sellJunk();
+      DQ.log(`You sell your junk for ${fmt(coins)} coins.`, 'good');
+      UI.render(false);
+    };
+    DQ.modal({ title: 'Sell junk', body: `<p>Sell ${fmt(quote.quantity)} items for ${fmt(quote.coins)} coins.</p>`, actions: [
+      { label: 'Cancel' }, { label: `Sell ${fmt(quote.quantity)} items for ${fmt(quote.coins)} coins`, fn: sale, primary: true }
+    ] });
+  },
   sel: (a, b) => { UI.sel = a; UI.selFrom = b || 'pack'; DQ.sfx('tab'); $$('.slot.sel').forEach(e => e.classList.remove('sel')); const el = $(`.slot[data-a="${a}"][data-b="${UI.selFrom}"]`); if (el) el.classList.add('sel'); const d = $('#detailbox'); if (d) d.innerHTML = UI.detail(a, UI.selFrom); },
   equip: a => { const r = DQ.equipItem(a); if (!r.ok) return DQ.toast(r.why, true); DQ.sfx('equip'); DQ.log(`You equip ${D.ITEMS[a].name.toLowerCase()}.`); UI.sel = null; UI.renderHud(); UI.render(false); },
   unequip: a => { if (DQ.unequip(a)) { DQ.sfx('equip'); UI.renderHud(); UI.render(false); } },
@@ -15456,6 +15698,14 @@ const DO = {
   achfilter: a => { UI.achFilter = a; UI.render(false); },
   hidetut: () => { S().tut.hidden = true; UI.render(false); },
   set: a => { const s = S().settings; s[a] = !s[a]; DQ.audioApply(); DQ.musicRefresh(); UI.renderHud(); UI.render(false); },
+  digestsetting: id => {
+    if (!Object.hasOwn(DQ.digestCategories, id)) return;
+    const digest = S().settings.digest ||= {};
+    digest[id] = digest[id] === false;
+    DQ.save();
+    UI.render(false);
+    document.querySelector(`[data-do="digestsetting"][data-a="${id}"]`)?.focus();
+  },
   tasksound: a => { S().settings.taskSounds = a; DQ.audioInit(); UI.render(false); },
   savenow: () => { const ok = DQ.save(); DQ.toast(ok ? (DQ.saveLocation() === 'desktop' ? 'Saved on this device' : 'Saved in this browser location') : (DQ.saveHealth || 'Save failed. Download a backup before closing.'), !ok); },
   export: () => DQ.modal({ title: 'Export save', wide: true, body: `<p class="sm dim">Copy this text somewhere safe. You can paste it into Import save on any device.</p><textarea id="expta" readonly rows="6">${DQ.exportSave()}</textarea>`, actions: [{ label: 'Copy', primary: true, fn: () => { const t = $('#expta'); t.select(); try { navigator.clipboard.writeText(t.value).then(() => DQ.toast('Copied to clipboard')).catch(() => DQ.toast('Press Ctrl+C to copy')); } catch (e) { DQ.toast('Press Ctrl+C to copy'); } return false; } }, { label: 'Close' }] }),
@@ -15512,10 +15762,18 @@ document.addEventListener('change', e => {
 });
 
 /* ---------- Keyboard ---------- */
-const KEYS = { m: 'mute', t: 'map', s: 'shop', q: 'quests', c: 'character', b: 'bank', f: 'farming', h: 'house' };
+const KEYS = { m: 'mute', t: 'map', s: 'shop', q: 'quests', c: 'character', b: 'bank', f: 'farming', h: 'house', v: 'projects', g: 'bestiary' };
 const NUM = ['overview', 'fishing', 'woodcutting', 'mining', 'thieving', 'cooking', 'smithing', 'crafting', 'magic', 'combat'];
 addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || !DQ.started) return;
+  const modal = document.querySelector('.modal');
+  if (modal) {
+    if (modal.classList.contains('welcome-digest') && e.key === 'Enter' && !e.target.closest('button, a')) {
+      e.preventDefault();
+      modal.querySelector('.m-act .primary')?.click();
+    }
+    return;
+  }
   const k = e.key.toLowerCase();
   if (k === ' ' && !e.target.closest('button')) { e.preventDefault(); DQ.act ? DQ.stopAct() : DO.resume(); }
   else if (k === 'm') DO.mute();
@@ -16479,7 +16737,7 @@ DQ.on('act', () => {
 
 /* ---------- Combat loot: session log, flying loot and loot-table tooltips ---------- */
 DQ.lootLog = []; DQ.lootSum = { kills: 0, coins: 0, items: 0 };
-const lootRow = e => { const it = D.ITEMS[e.id], where = e.coins ? 'Coins' : e.where || 'Backpack'; return `<div class="lootrow" style="--c:${e.rar[2]}" ${e.coins ? '' : `data-do="showitem" data-a="${e.id}" data-tip="text:Open it in your ${where.toLowerCase()}"`}><span class="itm sm" style="--c:${it.col}" data-tip="item:${e.id}">${DQ.itemIco(it)}</span><span class="ln">${e.coins ? `${it.name} <b class="mono">${fmt(e.n)} coins</b>` : `${e.n > 1 ? `<b class="mono">${fmtK(e.n)}×</b> ` : ''}${it.name}`}</span><span class="rar">${e.rar[1]}<small class="where ${where === 'Bank' ? 'bank' : ''}">${where === 'Bank' ? '→ Bank (backpack full)' : where === 'Coins' ? '' : '→ ' + where}</small></span></div>`; };
+const lootRow = e => { const it = D.ITEMS[e.id], where = e.coins ? 'Coins' : e.where || 'Backpack'; return `<div class="lootrow" style="--c:${e.rar[2]}" ${e.coins ? '' : `data-do="showitem" data-a="${e.id}" data-tip="text:Open it in your ${where.toLowerCase()}"`}><span class="itm sm" style="--c:${it.col}" data-tip="item:${e.id}">${DQ.itemIco(it)}</span><span class="ln">${e.coins ? `${it.name} <b class="mono">${fmt(e.n)} coins</b>` : `${e.n > 1 ? `<b class="mono">${fmtK(e.n)}×</b> ` : ''}${it.name}${DQ.itemBonusHtml(e.id)}${UI.bundleLinks?.(e.id)||''}`}</span><span class="rar">${e.rar[1]}<small class="where ${where === 'Bank' ? 'bank' : ''}">${where === 'Bank' ? '→ Bank (backpack full)' : where === 'Coins' ? '' : '→ ' + where}</small></span></div>`; };
 UI.lootPanel = () => `<section class="panel lootp"><div class="phead"><h2>Loot</h2><small class="mono" id="lootsum">${DQ.lootSum.kills} defeated · ${fmt(DQ.lootSum.coins)} coins · ${DQ.lootSum.items} items this session</small></div><div class="lootlist" id="lootbox">${DQ.lootLog.length ? DQ.lootLog.slice(0, 8).map(lootRow).join('') : '<p class="dim sm" style="margin:0">Monsters drop coins, gear, gems, seeds and the odd treasure chest. Hover one to see its drops.</p>'}</div></section>`;
 DQ.on('loot', (m, drops, c) => {
   DQ.lootSum.kills++; DQ.lootSum.coins += c + drops.filter(d => d.coins).reduce((a, d) => a + d.n, 0); DQ.lootSum.items += drops.filter(d => !d.coins).length;
@@ -16597,12 +16855,17 @@ function awayPreview(action, supplies) {
     (supplies ? 'Supplies depend on the tasks and encounters ahead.' : 'This activity has no material cost per action.');
   return `<div class="plan-away"><h4>While you are away</h4><p>${esc(DQ.offlinePolicy())}</p><p>${esc(rates)}</p><p>${esc(duration)}</p></div>`;
 }
+UI.levelStopHtml = a => {
+  const skill = a && DQ.actSkill(a), level = skill ? DQ.lvl(skill) : 99;
+  return level < 99 ? `<div class="plan-row"><label for="plan-target-level">Reach level</label><input type="number" id="plan-target-level" min="${level + 1}" max="99" step="1" value="${a.rule === 'level' && a.lvlTarget > level ? a.lvlTarget : level + 1}"><button class="btn" data-do="setlevelstop">Set level target</button></div>` : '';
+};
 UI.planHtml = () => {
   const a = DQ.act, Q = S().queue || [], slots = DQ.queueSlots();
   const prog = a && DQ.ruleProgress(a), sup = a && DQ.supplyInfo(a);
   const cur = a ? `<div class="plan-cur"><div class="k">Now</div><h3>${DQ.actLabel()}</h3>
       <div class="plan-row"><span class="k">Pace</span>${paceSeg(a.pace || 'steady', 'setpace')}</div><p class="sm dim">${D.PACE[a.pace || 'steady'].text}</p>
       <div class="plan-row"><span class="k">Stop</span>${ruleChips(a.rule || 'none', 'setrule')}</div>
+      ${UI.levelStopHtml(a)}
       ${prog ? `<div class="sm">Progress: <b class="mono">${fmt(prog[0])} / ${fmt(prog[1])} ${prog[2]}</b></div>` : ''}
       ${sup ? `<div class="sm ${sup.n ? '' : 'bad'}">${ico('bag')} Supplies: ${sup.label}${sup.ms ? ` (about ${DQ.fmtTime(sup.ms)})` : ''}</div>` : ''}${awayPreview(a, sup)}</div>`
     : `<p class="dim">Nothing is running. Queue a task with the <b>+</b> button on any card, or just click a card to start it.</p>`;
@@ -16719,12 +16982,20 @@ UI.specialLine = m => {
   return `<p class="sm special-line">${ico('info')} <b>${esc(sp.name)}</b> every ${sp.every}th attack: a sure hit of about ${hit} before armour. Softened or stopped by ${stops.join(', ')}.</p>`;
 };
 UI.lastForecast = {};
+UI.bossReadiness = m => {
+  const weak = DQ.weakOf(m).weak.map(t => D.DTYPES[t].name).join(' / ');
+  const max = DQ.damageEstimate(m).max;
+  const supply = DQ.foods().reduce((hp, id) => hp + D.ITEMS[id].heal * DQ.have(id), 0);
+  const target = Math.round(DQ.maxHp() * 2.5);
+  const warning = !S().settings.autoEat ? 'Auto-eat is off' : supply < target ? `Bring more food (aim for ${target} healing)` : '';
+  return `<div class="boss-readiness sm"><span>Counter <b>${esc(weak || 'See fight details')}${m.id === 'hollowking' ? ' (opening phase)' : ''}</b></span> · <span>Your max hit <b>${max}</b></span> · <span>Food <b>${fmt(supply)} healing</b></span>${warning ? `<div class="warn">${warning}</div>` : ''}</div>`;
+};
 UI.bossIntel = m => {
   const B = D.BOSSMECH[m.id]; if (!B) return '';
   const w = DQ.weakOf(m), mu = DQ.matchup(m);
   const alternatives = Object.keys({ ...S().inv, ...S().bank }).filter(id => D.ITEMS[id].slot && D.ITEMS[id].slot !== 'ammo' && DQ.canEquip(id).ok && S().equip[D.ITEMS[id].slot] !== id);
   const compare = alternatives.length ? `<section data-reference="true"><h3>Compare an equipment change</h3><p class="sm">Simulated with your current health and food.</p><div class="btnrow wrap">${alternatives.map(id => `<button class="btn sm" data-do="comparegear" data-a="${m.id}" data-b="${id}">${esc(D.ITEMS[id].name)}</button>`).join('')}</div></section>` : '';
-  return `<div class="intel"><div class="k">Prepare for this fight</div><p class="sm">Health ${Math.ceil(S().hp)} / ${DQ.maxHp()} · ${DQ.supplyInfo({kind:'fight'})?.label || 'No supplies'}. Auto-eat ${S().settings.autoEat ? 'on' : 'off'}.</p>${UI.prepSteps(m)}<p class="sm">${B.text}</p>${UI.specialLine(m)}
+  return `<div class="intel"><div class="k">Prepare for this fight</div>${UI.bossReadiness(m)}${UI.prepSteps(m)}<p class="sm">${B.text}</p>${UI.specialLine(m)}
     ${m.id === 'hollowking' ? '' : `<div class="chips">${w.weak.map(t => dchip(t, 'weak')).join('')}${w.resist.map(t => dchip(t, 'res')).join('')}</div>`}
     <div class="sm"><b>Counters:</b> ${B.counters.join(' · ')}</div>
     <div class="match">${mu.map(([k, t]) => `<div class="${k === 'good' ? 'ok' : k === 'bad' ? 'bad' : 'dim'}">${k === 'good' ? '✓' : k === 'bad' ? '✗' : '•'} ${t}</div>`).join('')}</div>
@@ -16744,6 +17015,16 @@ Object.assign(UI.DO, {
   plan: () => UI.openPlan(),
   setpace: a => { if (!DQ.act) return; DQ.act.pace = a; S().act.pace = a; S().lastPace = a; DQ.act.dur = DQ.actDur(DQ.act); DQ.sfx('tab'); replan(); },
   setrule: a => { if (!DQ.act) return; DQ.act.rule = a; S().act.rule = a; DQ.act.count = 0; DQ.act.elapsed = 0; const sk = DQ.actSkill(DQ.act); DQ.act.lvlTarget = sk ? DQ.lvl(sk) + 1 : 0; S().act.lvlTarget = DQ.act.lvlTarget; DQ.sfx('tab'); replan(); },
+  setlevelstop: () => {
+    const input = $('#plan-target-level');
+    if (!DQ.act || !input || !input.reportValidity()) return;
+    const level = input.valueAsNumber, skill = DQ.actSkill(DQ.act);
+    if (!skill || !Number.isInteger(level) || level <= DQ.lvl(skill) || level > 99) return;
+    for (const act of [DQ.act, S().act]) Object.assign(act, { rule: 'level', lvlTarget: level });
+    DQ.save();
+    replan();
+    $('[data-do="setlevelstop"]')?.focus();
+  },
   defpace: a => { S().defPace = a; DQ.sfx('tab'); replan(); },
   /* queueing asks how long, as plain buttons, so a chain is planned in one go: "200 oak logs, then planks" */
   queueadd: (a, b) => { if (!DQ.planUnlocked()) return DQ.toast(`The task queue unlocks at Hero level ${D.PLAN_ADV}`, true);
@@ -17519,14 +17800,14 @@ UI.renderHud = () => {
       <button type="button" class="h-tic" data-do="plan" aria-label="Task plan" data-tip="text:Pace, stop rule and queue">${taskArt}</button>
       <button class="h-tb" data-do="nowactivity" data-tip="text:Go to this activity"><span class="h-t1"><b>${esc(DQ.actLabel().replace(/ rock$/, ''))}</b><span class="h-meta"><span data-b="hud:eta"></span><span data-b="hud:rate"></span></span></span><span class="bar prog" role="img" aria-label="This action"><i data-prog="@"></i></span>${sk ? `<span class="bar h-xp" role="img" aria-label="${esc(s.name)} level progress" data-tip="text:${esc(s.name)} level progress"><i data-b="xpbar:${sk}"></i></span>` : ''}<span class="h-t3"><small>${fight ? `Combat <b class="mono" data-b="combat"></b> vs Lv ${fight.cl} · ` : s ? `${s.name} <b class="mono" data-b="lvl:${sk}"></b> · ` : ''}${D.PACE[a.pace || 'steady'].name}${(S().queue || []).length ? ` · ${S().queue.length} queued` : ''} · <span data-b="hud:count"></span></small><span class="hq hb" data-b="hudbuff" hidden></span></span></button>
       <button class="h-stop" data-do="stop" aria-label="Stop this task" data-tip="text:Stop this task (Space)"><i class="stop-sq" aria-hidden="true"></i><span>Stop</span></button></div>`
-    : `<div class="h-task idle"><span class="h-tic">${ico('clock')}</span><div class="h-tb"><b>Nothing running</b><small>Choose your next step on Home</small><span class="hq hb" data-b="hudbuff" hidden></span></div>${S().lastAct ? `<button class="btn sm primary" data-do="resume">Resume</button>` : `<button class="btn sm" data-do="go" data-a="overview">Your destination</button>`}</div>`;
+    : `<div class="h-task idle"><span class="h-tic">${ico('clock')}</span><div class="h-tb"><b>Nothing running</b><small>${esc(S().lastPlannedStop || 'Choose your next step on Home')}</small><span class="hq hb" data-b="hudbuff" hidden></span></div>${S().lastAct ? `<button class="btn sm primary" data-do="resume">Resume</button>` : `<button class="btn sm" data-do="go" data-a="overview">Your destination</button>`}</div>`;
   const nowEl = $('#nowcard');
   if (nowEl) nowEl.innerHTML = a ? `<div class="now" style="--c:${s ? s.col : '#d8a64a'}">
       <span class="now-k">Now<i> · on this page</i>${(S().queue || []).length ? `<em class="now-next"> · then ${esc(DQ.actLabel(S().queue[0]).replace(/ rock$/, ''))}${S().queue.length > 1 ? ` +${S().queue.length - 1}` : ''}</em>` : ''}</span>
       <button class="now-go" data-do="nowactivity" data-tip="text:Go to this activity"><span class="now-ic">${taskArt}</span><b>${esc(DQ.actLabel().replace(/ rock$/, ''))}</b></button>
       <span class="bar prog" role="img" aria-label="This action"><i data-prog="@"></i></span>
       <span class="now-f"><button class="now-plan" data-do="plan" data-tip="text:Pace, stop rule and queue"><span data-b="hud:count"></span><span class="hq hb" data-b="hudbuff" hidden></span></button><button class="now-stop" data-do="stop" aria-label="${fight ? 'Retreat' : 'Stop this task'}" data-tip="text:${fight ? 'Retreat' : 'Stop this task'} (Space)"><i class="stop-sq" aria-hidden="true"></i><span class="now-sl">${fight ? 'Retreat' : 'Stop'}</span></button></span></div>`
-    : `<div class="now idle"><span class="now-k">Now</span><b class="now-idle">Nothing running</b>${S().lastAct ? `<button class="btn sm primary" data-do="resume">Resume</button>` : `<small>Pick a skill below to start</small>`}</div>`;
+    : `<div class="now idle"><span class="now-k">Now</span><b class="now-idle">Nothing running</b>${S().lastPlannedStop ? `<small>${esc(S().lastPlannedStop)}</small>` : ''}${S().lastAct ? `<button class="btn sm primary" data-do="resume">Resume</button>` : `<small>Pick a skill below to start</small>`}</div>`;
   $('#hud').innerHTML = `<button class="h-hero" data-do="go" data-a="character" data-tip="text:Your inventory">${UI.portrait(48)}<span class="h-lv mono" data-b="adv"></span></button>
     <div class="h-name"><b>${esc(S().name)}</b><span class="bar" role="img" aria-label="Hero level progress"><i data-b="advbar"></i></span><small>${DQ.heroTitle() ? `<i class="h-title">${esc(DQ.heroTitle())}</i>` : `Hero level <span data-b="adv"></span> · <span data-b="advline"></span>`}</small><div class="hp h-hp" data-tip="text:Health"><span class="bar" role="img" aria-label="Health"><i data-b="hpbar"></i></span><small class="mono" data-b="hptxt"></small></div></div>
     ${UI.petBadge ? UI.petBadge() : ''}${topNav()}${task}
@@ -17710,7 +17991,7 @@ const TEASERS = {
 });
 /* planning (pace, stop rules, the queue) arrives at Hero level D.PLAN_ADV (8) */
 const origPlan = UI.planHtml;
-UI.planHtml = () => DQ.planUnlocked() ? origPlan() : UI.teaser({ ic: 'clock', title: 'Task planning', adv: D.PLAN_ADV, col: '#8fc7ff', blurb: 'Tell your hero how to work, and what to do next.', bullets: ['Pace: careful, steady or pushing hard', 'Stop rules: for 30 minutes, until 200 done, until the next level', 'A queue, so the next task starts by itself, even while you are away'] });
+UI.planHtml = () => DQ.planUnlocked() ? origPlan() : (UI.levelStopHtml(DQ.act) || '') + UI.teaser({ ic: 'clock', title: 'Advanced task planning', adv: D.PLAN_ADV, col: '#8fc7ff', blurb: 'Tell your hero how to work, and what to do next.', bullets: ['Pace: careful, steady or pushing hard', 'Stop rules: for 30 minutes, until 200 done, until the next level', 'A queue, so the next task starts by itself, even while you are away'] });
 
 /* tabs: lock chip while locked, "New" until visited */
 UI.tabState = p => {
@@ -18696,7 +18977,7 @@ const bkCard = () => {
 UI.homeNotices = () => awayCard() + bkCard();
 
 /* ---------- The bell: recent activity, and a dot when something skipped the corner ---------- */
-UI.B.belldot = e => { const n = DQ.noteMissed || 0; e.hidden = !n; UI.set(e, n > 9 ? '9+' : String(n)); };
+UI.B.belldot = e => { const n = DQ.unreadNotes || 0; e.hidden = !n; UI.set(e, n > 9 ? '9+' : String(n)); };
 Object.assign(UI.DO, { bell: () => DQ.openBell() });
 
 /* ---------- Balance sheet (Settings > Show tuning tools) ---------- */
@@ -19022,8 +19303,8 @@ D.PROJECT_VOICES = {
 /* Regional projects use that region's own materials and give a distinct benefit. Every regional project also keeps the
    original +2% resting recovery, so players who finished one before this change keep exactly what they had. */
 const regionalProjects = [
- ['mossbarrow','market','Repair the market shelter','The market stalls are sheltered and traders can return.',{coins:150,log_normal:30,crop_potato:15},{coin:.03},'+3% coins from every source.'],
- ['saltmere','jetty','Rebuild the fishing jetty','Fishing boats can unload safely at the repaired jetty.',{coins:500,log_oak:40,raw_sardine:25},{speed_fishing:.05},'Fishing is 5% faster.'],
+ ['mossbarrow','market','Repair the market shelter','The market stalls are sheltered and traders can return.',{coins:100,log_normal:12,flax:6},{coin:.03},'+3% coins from every source.'],
+ ['saltmere','jetty','Rebuild the fishing jetty','Fishing boats can unload safely at the repaired jetty.',{coins:200,log_normal:16,raw_sardine:12},{speed_fishing:.05},'Fishing is 5% faster.'],
  ['ironpeak','hearth','Relight the communal hearth','The hold has a warm refuge for returning miners.',{coins:1200,log_willow:30,ore_coal:25},{speed_mining:.05},'Mining is 5% faster.'],
  ['gloomfen','lanterns','Restore the marsh lanterns','Lanterns mark a safe path through the marsh.',{coins:2500,log_maple:30,bar_iron:15},{dr:.03},'Monsters deal 3% less damage.'],
  ['emberfall','cistern','Repair the cooling cistern','Fresh water reaches the citadel courtyards again.',{coins:5000,log_yew:30,bar_steel:15},{heal:.05},'Food restores 5% more health.'],
@@ -19081,7 +19362,7 @@ const moreProjects = {
 for (const [town, list] of Object.entries(moreProjects)) for (const [id, art, name, story, cost, fx, reward, voice] of list) { D.PROJECTS[id] = { town, art, name, story, cost, fx, reward }; D.PROJECT_VOICES[id] = voice; }
 /* Carpentry (Nov 2026): from Saltmere on, restoration is built with sawn planks rather than raw logs; Willowbrook and
    Mossbarrow keep logs, since Carpentry may not be learned yet. Logs already handed over are converted on load. */
-for (const p of Object.values(D.PROJECTS)) { const t = D.TOWN[p.town]; if (!t || t.idx < 2 || p.relic) continue;
+for (const [id, p] of Object.entries(D.PROJECTS)) { const t = D.TOWN[p.town]; if (!t || t.idx < 2 || p.relic || id === 'jetty') continue;
   for (const k of Object.keys(p.cost)) if (k.startsWith('log_') && D.ITEMS['plank_' + k.slice(4)]) { p.cost['plank_' + k.slice(4)] = p.cost[k]; delete p.cost[k]; } }
 DQ.projectsForTown = town => Object.entries(D.PROJECTS).filter(([,p])=>p.town===town);
 /* Projects are built in deliveries (Nov 2026): each material can be handed over whenever you have some, the building
@@ -19089,6 +19370,30 @@ DQ.projectsForTown = town => Object.entries(D.PROJECTS).filter(([,p])=>p.town===
    holds what has been delivered; nothing is consumed until it is handed over. */
 const given = id => (S().projectGiven && S().projectGiven[id]) || {};
 DQ.projectNeed = id => { const p = D.PROJECTS[id], g = given(id), out = {}; if (!p) return out; if (S().projects[id]) return out; for (const [k, n] of Object.entries(p.cost)) { const left = n - (g[k] || 0); if (left > 0) out[k] = left; } return out; };
+const alternates = { well: { log_normal: ['log_oak'] }, inn: { shrimp: ['sardine'] }, market: { flax: ['wool'] } };
+const bundleLabel = (id, item) => ({
+  'well:log_normal': 'Winch timber', 'inn:shrimp': 'Supper for the inn',
+  'market:flax': 'Market canvas', 'jetty:raw_sardine': 'The dockhands’ catch',
+}[id + ':' + item] || (item === 'coins' ? 'Builders’ wages' : D.ITEMS[item].name + ' delivery'));
+const bundleOptions = (id, item) => [item, ...(alternates[id]?.[item] || [])];
+DQ.projectShortfall = id => Object.entries(DQ.projectNeed(id)).map(([item, need]) =>
+  [item, Math.max(0, need - bundleOptions(id, item).reduce((n, option) => n + held(option), 0))]
+).filter(([, need]) => need > 0);
+DQ.projectReady = id => !S().projects[id] && DQ.projectShortfall(id).length === 0;
+DQ.bundleNeeds = item => Object.entries(D.PROJECTS).flatMap(([id, project]) => {
+  if (project.relic || !DQ.townUnlocked(project.town)) return [];
+  return Object.entries(DQ.projectNeed(id)).filter(([material]) => bundleOptions(id, material).includes(item))
+    .map(([material, count]) => ({ id, label: bundleLabel(id, material), count }));
+});
+UI.bundleLabel = item => {
+  const needed = DQ.bundleNeeds(item)[0];
+  return needed ? `<span class="bundle-indicator">${ico('house')} ${esc(needed.label)}</span>` : '';
+};
+UI.bundleLinks = item => DQ.bundleNeeds(item).map(({ id, label, count }) =>
+  `<button class="btn sm" data-do="openproject" data-a="${id}">${ico('house')}${esc(label)} · ${fmt(count)} needed</button>`).join('');
+DQ.closestRestoration = () => DQ.projectsForTown(S().town).filter(([id, p]) => !S().projects[id] && !p.relic)
+  .sort(([x], [y]) => missingValue(x) - missingValue(y))[0]?.[0];
+const missingValue = id => DQ.projectShortfall(id).reduce((sum, [item, n]) => sum + n * (D.ITEMS[item]?.val || 1), 0);
 DQ.projectProgress = id => { const p = D.PROJECTS[id]; if (!p) return 0; if (S().projects[id]) return 1; const g = given(id), lines = Object.entries(p.cost); return lines.reduce((a, [k, n]) => a + Math.min(1, (g[k] || 0) / n), 0) / lines.length; };
 /* 0 ruin · 1 site cleared, foundations · 2 walls rising · 3 nearly there · 4 restored */
 DQ.projectStage = id => { if (S().projects[id]) return 4; const f = DQ.projectProgress(id); return f <= 0 ? 0 : f < 1 / 3 ? 1 : f < 2 / 3 ? 2 : 3; };
@@ -19097,10 +19402,27 @@ const STAGE_LINES = ['', 'Builders clear the site of %s and lay the first stones
 const held = k => k === 'coins' ? S().coins : DQ.have(k);
 DQ.projectGive = (id, item) => {
   const p = D.PROJECTS[id]; if (!p || S().projects[id] || S().town !== p.town) return 0;
-  const items = item ? [item] : Object.keys(DQ.projectNeed(id)), before = DQ.projectStage(id); let total = 0;
+  const need = DQ.projectNeed(id), before = DQ.projectStage(id);
+  const items = item ? [[Object.keys(need).find(material => bundleOptions(id, material).includes(item)), [item]]] :
+    Object.keys(need).map(material => [material, bundleOptions(id, material)]);
+  let total = 0;
   S().projectGiven = S().projectGiven || {}; const g = S().projectGiven[id] = S().projectGiven[id] || {};
-  for (const k of items) { const left = DQ.projectNeed(id)[k] || 0, n = Math.min(left, Math.floor(held(k))); if (n <= 0) continue;
-    if (k === 'coins') S().coins -= n; else DQ.take(k, n); g[k] = (g[k] || 0) + n; total += n; }
+  const earned = [];
+  for (const [material, options] of items) {
+    if (!material) continue;
+    for (const k of options) {
+      const left = p.cost[material] - (g[material] || 0), n = Math.min(left, Math.floor(held(k)));
+      if (n <= 0) continue;
+      if (k === 'coins') S().coins -= n; else DQ.take(k, n);
+      g[material] = (g[material] || 0) + n;
+      total += n;
+      if (g[material] === p.cost[material] && !p.relic) earned.push(material);
+    }
+  }
+  for (const material of earned) {
+    DQ.give('bread', 1);
+    DQ.log(`${bundleLabel(id, material)} complete. The crew shared a loaf of bread.`, 'good');
+  }
   if (!total) return 0;
   if (!Object.keys(DQ.projectNeed(id)).length) { completeProject(id); return total; }
   const after = DQ.projectStage(id);
@@ -19109,10 +19431,18 @@ DQ.projectGive = (id, item) => {
 };
 /* What you could hand over to a site right now, and which of three states it is in (Nov 2026): "needs" (nothing in
    hand it can use), "can" (something you hold goes in), "ready" (you hold all that is left, so it can be finished). */
-DQ.projectContribution = id => { const need = DQ.projectNeed(id), out = [];
-  for (const [k, n] of Object.entries(need)) { const h = Math.floor(held(k)); if (h <= 0) continue; if (k === 'coins' && h < n) continue; out.push([k, Math.min(n, h)]); }
-  return out; };
-DQ.projectState = id => { if (S().projects[id]) return 'done'; const need = DQ.projectNeed(id); if (!Object.keys(need).length || DQ.canAfford(need)) return 'ready'; return DQ.projectContribution(id).some(([k]) => k !== 'coins') ? 'can' : 'needs'; }; /* coins alone never make a site look workable: it is the materials that are missing */
+DQ.projectContribution = id => Object.entries(DQ.projectNeed(id)).flatMap(([item, need]) => {
+  if (item === 'coins' && held(item) < need) return [];
+  const possible = [];
+  for (const option of bundleOptions(id, item)) {
+    const n = Math.min(need, Math.floor(held(option)));
+    if (n > 0) possible.push([option, n]);
+    need -= n;
+  }
+  return possible;
+});
+DQ.projectState = id => S().projects[id] ? 'done' : DQ.projectReady(id) ? 'ready' :
+  DQ.projectContribution(id).some(([item]) => item !== 'coins') ? 'can' : 'needs';
 DQ.PROJECT_STATE = { needs: ['Needs supplies', 'crafting'], can: ['Can contribute', 'hammer'], ready: ['Ready to finish', 'star'], done: ['Restored', 'check'] };
 DQ.contributionText = id => DQ.projectContribution(id).map(([k, n]) => k === 'coins' ? `${fmt(n)} coins` : `${fmt(n)} ${D.ITEMS[k].name.toLowerCase()}`).join(', ');
 /* The opening arc: what each Willowbrook villager says when you finish their job, and what it changed. Shown on
@@ -19150,17 +19480,18 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
     const project = D.PROJECTS[id];
     if (S().projects[id]) return step('Project complete', project.story + ' ' + project.reward, 'go', 'map');
     if (S().town !== project.town) return step('Return to '+D.TOWN[project.town].name, 'Your neighbours are ready to help.', 'journeytravel', project.town);
-    if (id === 'inn' && DQ.have('shrimp') < (DQ.projectNeed(id).shrimp||0)) {
+    const shortfall = DQ.projectShortfall(id);
+    if (!shortfall.length) return step('Complete the project', project.reward + ' Hand over the last materials.', 'projectfinish', id);
+    if (id === 'inn' && shortfall.some(([item]) => item === 'shrimp')) {
       if (!DQ.skillUnlocked('cooking')) return (S().stats.catch || 0) < 5 ? task('Learn Cooking', `Catch five fish and chop five logs for a cooking fire. ${DQ.unlockHow('cooking')}.`, 'fish', 'shrimp') : task('Learn Cooking', `Chop logs for a cooking fire. ${DQ.unlockHow('cooking')}.`, 'wood', 'normal');
       if (!DQ.have('raw_shrimp')) return task('Catch shrimp for the inn', 'The inn still needs '+DQ.projectNeed(id).shrimp+' cooked shrimp. Gather raw shrimp first.', 'fish', 'shrimp');
       return task('Cook for the inn', fmt(DQ.have('shrimp')) + ' / '+DQ.projectNeed(id).shrimp+' cooked shrimp ready. Some attempts may burn.', 'recipe', 'cook_shrimp');
     }
     /* the first missing material, routed to where it comes from */
-    const need = DQ.projectNeed(id), deliverable = Object.entries(need).some(([k]) => held(k) > 0);
-    if (deliverable && Object.entries(need).every(([k, n]) => held(k) >= n)) return step('Complete the project', project.reward + ' Hand over the last materials.', 'projectfinish', id);
-    const missing = Object.entries(need).find(([item, n]) => item !== 'coins' && DQ.have(item) < n);
+    const need = DQ.projectNeed(id);
+    const missing = shortfall.find(([item]) => item !== 'coins');
     if (missing) {
-      const [item, n] = missing, it = D.ITEMS[item], src = DQ.sourceOf ? DQ.sourceOf(item) : null, detail = fmt(DQ.have(item)) + ' / ' + n + ' ' + it.name.toLowerCase() + ' ready for ' + project.name.toLowerCase() + '.';
+      const [item, gap] = missing, n = need[item], it = D.ITEMS[item], src = DQ.sourceOf ? DQ.sourceOf(item) : null, detail = fmt(n - gap) + ' / ' + n + ' materials ready for ' + project.name.toLowerCase() + '.';
       if (item === 'log_normal') return task('Gather timber', fmt(DQ.have(item)) + ' / ' + n + ' logs ready.', 'wood', 'normal');
       if (src && src.skill && !DQ.skillUnlocked(src.skill)) return step('Unlock ' + D.SK[src.skill].name, it.name + ' comes from ' + D.SK[src.skill].name + '. ' + DQ.unlockHow(src.skill) + '.', 'go', src.page);
       const verb = { fish: 'Catch', wood: 'Chop', mine: 'Mine', thieve: 'Steal', recipe: 'Make', fight: 'Hunt for' }[src && src.kind];
@@ -19229,12 +19560,22 @@ DQ.regionNext = () => {
   if (bq && DQ.questState(bq) === 'new') return step(`Accept “${bq.name}”`, `${bq.giver} asks you to face ${short}. Accepting makes the victory count.`, 'qstart', bq.id);
   const req = b.boss.req;
   if (DQ.combatLvl() < req) { const fs = DQ.foodStep && DQ.foodStep(`Training here hits back harder than mudlings.`); if (fs) return fs; }
-  if (DQ.combatLvl() < req) { const foe = D.MONLIST.filter(m => m.town === b.town && !m.boss && !m.mini && !m.hl && !m.tower && m.cl <= DQ.combatLvl() + 2).sort((a, c) => c.cl - a.cl)[0] || D.MONLIST.find(m => m.town === b.town && !m.boss && !m.hl);
-    return task(`Train for ${short}`, `Combat ${DQ.combatLvl()} / ${req}. ${foe ? `${DQ.plural ? DQ.plural(foe.name) : foe.name + 's'} are a fair fight here.` : ''}`, 'fight', foe ? foe.id : b.id); }
+  const targets = D.MONLIST.filter(m => m.town === b.town && !m.boss && !m.mini && !m.hl && !m.tower);
+  const foe = targets.filter(m => m.cl <= DQ.combatLvl() + 2).sort((a, c) => c.cl - a.cl)[0] || targets[0];
+  const train = detail => task(`Train for ${short}`, `${detail}${foe ? ` Fight ${DQ.plural(foe.name).toLowerCase()} to improve your current style.` : ''}`, 'fight', foe?.id || b.id);
+  if (DQ.combatLvl() < req) return train(`Combat ${DQ.combatLvl()} / ${req}.`);
   const f = DQ.bossForecast ? DQ.bossForecast(b.id) : null;
   if (f && f.winRate >= .75) return task(`Challenge ${short}`, `The battle forecast wins ${Math.round(f.winRate * 100)}% of fights with your current preparation.`, 'fight', b.id);
-  const tip = DQ.prepAdvice ? DQ.prepAdvice(b.id, f).find(x=>x.actionable!==false) : null;
-  return tip ? step(tip.title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${tip.text}`, tip.action || 'go', tip.a || 'combat') : step(`Challenge ${short}`, 'You are ready by level. Check the forecast on the Combat page.', 'go', 'combat');
+  const tip = DQ.prepAdvice?.(b.id, f).find(x => x.action && !x.info && x.actionable !== false && (x.afford !== false || x.preparing) && x.a !== 'combat');
+  if (tip?.key === 'food') {
+    const recipe = Object.values(D.RECIPES).find(r => r.skill === 'cooking' && DQ.canMake(r) &&
+      DQ.recipeDiscovered(r) && DQ.recipeLvlOk(r) && !DQ.recipeGate?.(r) &&
+      Object.keys(r.out).some(id => D.ITEMS[id]?.heal));
+    return recipe ? task(tip.title, tip.text, 'recipe', recipe.id) : task('Catch shrimp for your provisions', tip.text, 'fish', 'shrimp');
+  }
+  if (tip) return step(tip.title, `${f ? `Forecast: ${Math.round(f.winRate * 100)}% wins (an estimate). ` : ''}${tip.text}`, tip.action, tip.a);
+  const food = DQ.foodStep?.(`Bring enough food to train for ${short}.`);
+  return food || train('Your current build could use more practice. Check the boss preview for its counter and your max hit.');
 };
 /* Optional goals beside the one primary action: something short, something over a few sessions, a long pursuit */
 DQ.optionalGoals = () => {
@@ -19243,7 +19584,10 @@ DQ.optionalGoals = () => {
   if (q) out.push({ span: 'Short', text: `Finish “${q.name}” for ${q.giver}`, action: 'go', a: 'quests' });
   else if (DQ.loadouts && !DQ.loadouts().length && DQ.advLvl() >= 15) out.push({ span: 'Short', text: 'Save your current gear as a preparation, then try another', action: 'go', a: 'character' });
   const proj = DQ.projectsForTown(town).filter(([id]) => !S().projects[id]).sort((a, c) => (a[1].cost.coins || 0) - (c[1].cost.coins || 0))[0];
-  if (proj) out.push({ span: 'A few sessions', text: `${proj[1].name}: ${proj[1].reward}`, action: 'openproject', a: proj[0] });
+  if (proj) {
+    const ready = DQ.projectReady(proj[0]);
+    out.push({ span: ready ? 'Ready to restore' : 'Village project', text: `${proj[1].name} · ${proj[1].reward}`, action: 'openproject', a: proj[0] });
+  }
   const chase = D.MONLIST.find(m => m.town === town && !m.boss && (S().beast.kills[m.id] || 0) > 0 && m.drops.some(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique && !(S().uniqFound || {})[d[0]]));
   if (chase && DQ.uniqueSource) { const id = chase.drops.find(d => D.ITEMS[d[0]] && D.ITEMS[d[0]].unique)[0], src = DQ.uniqueSource(id); out.push({ span: 'Long', text: `${D.ITEMS[id].name} from ${DQ.plural(chase.name)}: ${src.need - Math.min(src.have, src.need)} more defeats at most`, action: 'guide', a: chase.id }); }
   else if (DQ.understanding) { const mons = D.MONLIST.filter(m => m.town === town), u = mons.filter(m => DQ.understanding(m).done).length; if (u < mons.length && mons.some(m => S().beast.kills[m.id])) out.push({ span: 'Long', text: `${D.TOWN[town].name} field guide: ${u} / ${mons.length} creatures understood`, action: 'go', a: 'bestiary' }); }
@@ -19251,19 +19595,23 @@ DQ.optionalGoals = () => {
 };
 DQ.finishProject = id => {
   const project = D.PROJECTS[id];
-  if (!project || S().projects[id] || S().town !== project.town || !DQ.canAfford(DQ.projectNeed(id))) return false;
+  if (!project || S().projects[id] || S().town !== project.town || !DQ.projectReady(id)) return false;
   if (!Object.keys(DQ.projectNeed(id)).length) { completeProject(id); return true; }
   DQ.projectGive(id); return !!S().projects[id];
 };
 function completeProject(id) {
   const project = D.PROJECTS[id];
   S().projects[id] = true; if (S().projectGiven) delete S().projectGiven[id]; DQ.fxDirty();
+  if (!project.relic && !S().villageProceedsAt) S().villageProceedsAt = Date.now();
   DQ.log(project.story, 'good');
   const voice = D.PROJECT_VOICES[id];
   DQ.notify({ kind: 'quest', page: 'projects', key: 'project:' + id, title: project.name, text: project.story + ' ' + project.reward + (voice ? ` ${voice[0]}: “${voice[1]}”` : ''), icon: 'house', sound: 'restore' });
   DQ.emit('project', id);
   DQ.save(); return true;
 }
+const proceedsInterval = 5 * 60000;
+DQ.villageProceeds = (now = Date.now()) => S().villageProceedsAt ?
+  Math.max(0, Math.floor((now - S().villageProceedsAt) / proceedsInterval)) : 0;
 const actionHtml = next => `<button class="btn primary" data-do="${next.action}" data-a="${next.a || ''}" data-b="${next.b || ''}">${next.action==='qstart'?'Accept quest':esc(next.title)}</button>`;
 const pinButton = id => `<button class="btn sm" data-do="pinproject" data-a="${id}" aria-pressed="${S().pinnedProject === id}">${ico('pin')}${S().pinnedProject === id ? 'Unpin project' : 'Pin project'}</button>`;
 UI.projectPinHtml = () => {
@@ -19326,10 +19674,10 @@ UI.projectsPanel = () => {
   const town = S().town, entries = DQ.projectsForTown(town);
   const id = entries.some(([key]) => key === UI.tab.projectChoice) ? UI.tab.projectChoice : (entries.find(([k]) => !S().projects[k]) || entries[0])[0], project = D.PROJECTS[id];
   UI.tab.projectChoice = id;
-  const done = S().projects[id], need = DQ.projectNeed(id), canFinish = !done && S().town === project.town && DQ.canAfford(need);
+  const done = S().projects[id], canFinish = !done && S().town === project.town && DQ.projectReady(id);
   const changes = (town==='willowbrook'?['first_steps', 'hungry_cook']:[]).filter(q => S().q[q] && S().q[q].s === 'done');
   const stage = DQ.projectStage(id), pct = Math.round(DQ.projectProgress(id) * 100), g = (S().projectGiven || {})[id] || {};
-  const canGive = !done && Object.keys(need).some(k => held(k) > 0), voice = D.PROJECT_VOICES[id];
+  const canGive = !done && DQ.projectContribution(id).length > 0, voice = D.PROJECT_VOICES[id];
   const A = DQ.pixelArt, W = (A && A.SCENE_W) || 320, H = (A && A.SCENE_H) || 180, shown = new Set(entries.map(([k]) => k));
   const spots = A && A.siteLayout ? A.siteLayout(town).filter(sp => shown.has(sp.id)).map(sp => { const st = DQ.projectStage(sp.id), p = D.PROJECTS[sp.id], ps = DQ.projectState(sp.id), [lab, ic] = DQ.PROJECT_STATE[ps], give = DQ.contributionText(sp.id);
     return `<button class="site-spot ps-${ps} ${ps === 'ready' ? 'deliver-ready' : ''} st${st} ${sp.id === id ? 'on' : ''}" style="left:${((sp.X - 5) / W * 100).toFixed(3)}%;top:${((sp.Y - 6) / H * 100).toFixed(3)}%;width:${(42 / W * 100).toFixed(3)}%;height:${(42 / H * 100).toFixed(3)}%" data-do="projectpick" data-a="${sp.id}" aria-pressed="${sp.id === id}" aria-label="${esc(p.name)}: ${esc(lab)}${give && ps !== 'done' ? '. You can give ' + esc(give) : ''}" data-tip="text:${esc(p.name)} · ${esc(lab)}${give && ps !== 'done' ? ': you can give ' + esc(give) : ''}"><span class="site-mark">${ico(ic)}<span class="sm-t">${esc(lab)}</span></span></button>`; }).join('') : '';
@@ -19339,11 +19687,20 @@ UI.projectsPanel = () => {
   const siteNow = done ? '' : `<p class="site-now ps-${now}">${ico(DQ.PROJECT_STATE[now][1])}<b>${esc(project.name)}</b> · ${esc(DQ.PROJECT_STATE[now][0])}${nowGive && now !== 'needs' ? `: you can give ${esc(nowGive)} now.` : `. ${nowGive ? 'Your coins are ready, but it still needs materials.' : 'Gather what it lists on the right.'}`}</p>`;
   const story = done ? `<p class="proj-story">${esc(project.story)}</p>${voice ? `<p class="villager-line"><b>${esc(voice[0])}:</b> “${esc(voice[1])}”</p>` : ''}`
     : `<p class="proj-story">${esc(project.before || (stage ? `Work is under way. ${voice ? voice[0] + ' comes by most days to see how it is going.' : ''}` : `It has stood like this for years.${voice ? ` ${voice[0]} is hoping someone will take it on.` : ''}`))} Once it is done: ${esc(project.story.charAt(0).toLowerCase() + project.story.slice(1))}</p>`;
-  const lines = done ? '' : `<div class="proj-lines">${Object.entries(project.cost).map(([item, n]) => { const got = Math.min(n, g[item] || 0), left = n - got, have = held(item), unknown=item!=='coins'&&DQ.itemDiscovered&&!DQ.itemDiscovered(item),name = item === 'coins' ? 'coins' : D.ITEMS[item].name.toLowerCase();
-    return `<div class="proj-line ${left ? '' : 'ok'}"><span class="proj-ic">${item === 'coins' ? ico('coin') : unknown?ico('lock'):DQ.itemIco(D.ITEMS[item])}</span><span class="proj-t"><b>${fmt(got)} / ${fmt(n)} ${esc(name)}</b><small>${unknown?esc(DQ.ingredientDiscovery(item).label):left ? `${fmt(have)} held` : '✓ Delivered'}</small><span class="bar"><i style="width:${Math.round(got / n * 100)}%"></i></span></span>${left ? (have > 0 ? `<button class="btn sm" data-do="projectgive" data-a="${id}|${item}">Deliver ${fmt(Math.min(left, Math.floor(have)))}</button>` : (item !== 'coins' && UI.routeChip ? UI.routeChip(item) : '')) : ''}</div>`; }).join('')}</div>`;
+  const lines = done ? '' : `<div class="proj-lines" aria-label="Restoration bundles">${Object.entries(project.cost).map(([material, n]) => {
+    const got = Math.min(n, g[material] || 0), left = n - got;
+    const options = bundleOptions(id, material).map(item => {
+      const name = item === 'coins' ? 'Coins' : D.ITEMS[item].name;
+      const amount = Math.min(left, Math.floor(held(item)));
+      const art = item === 'coins' ? ico('coin') : DQ.itemDiscovered?.(item) ? DQ.itemIco(D.ITEMS[item]) : ico('lock');
+      return `<div class="bundle-option"><span>${art}${esc(name)}</span>${amount > 0 ? `<button class="btn sm" data-do="projectgive" data-a="${id}|${item}">Deliver ${fmt(amount)}</button>` : item !== 'coins' ? UI.routeChip?.(item) || '' : ''}</div>`;
+    }).join('');
+    return `<section class="proj-line project-bundle ${left ? '' : 'ok'}"><h3>${esc(bundleLabel(id, material))}</h3><span class="proj-t"><b>${fmt(got)} / ${fmt(n)}</b> · ${left ? (project.relic ? 'Needed' : 'Reward: 1 Bread') : '✓ Delivered'}</span>${left ? options : ''}</section>`;
+  }).join('')}</div>`;
   const restored = entries.filter(([k]) => S().projects[k]).length;
   return `<div class="village-projects"><section class="panel town-projects village-map"><div class="phead"><h2>A living ${esc(D.TOWN[town].name)}</h2><small>${restored} of ${entries.length} restored · click a building</small></div>
       <div class="village-pan"><div class="village-scene">${UI.scene(town)}${spots}</div></div>${legend}${siteNow}
+      ${S().villageProceedsAt ? `<button class="btn sm" data-do="villageproceeds" ${DQ.villageProceeds() ? '' : 'disabled'}>Collect village proceeds · ${fmt(DQ.villageProceeds())} coins</button>` : ''}
       ${changes.length ? `<div class="village-changes">${changes.map(q=>`<p class="village-change">✓ ${esc(D.QM[q].name)} · ${esc(DQ.questImpact(q))}</p>`).join('')}</div>` : ''}</section>
     <section class="panel project-card ${done ? 'done' : ''}"><div class="phead"><div><small>${esc(D.TOWN[town].name)} · restoration</small><h2>${esc(project.name)}</h2></div>${pinButton(id)}</div>
       ${story}<p class="proj-benefit"><span class="k">${done ? 'Benefit, active' : 'Benefit'}</span> ${esc(project.reward)}</p>
@@ -19363,14 +19720,13 @@ UI.returnPlan = sum => {
    trade-off; nothing is shown as affordable unless it is, and nothing here is timed or expires. */
 DQ.returnChoices = () => {
   const out = [];
-  const projects = DQ.projectsForTown(S().town).filter(([id]) => !S().projects[id]);
-  const ready = projects.find(([pid]) => DQ.canAfford(DQ.projectNeed(pid)));
-  if (ready) { const [id, p] = ready; out.push({ title: `Restore ${p.name.toLowerCase()}`, text: `You hold everything it needs${p.cost.coins ? `, including ${fmt(p.cost.coins)} coins you could otherwise put towards gear` : ''}. ${p.reward}`, action: 'openproject', a: id, art: 'project:' + id }); }
-  else if (projects.length) {
-    const short = ([pid]) => Object.entries(DQ.projectNeed(pid)).reduce((n, [k, q]) => n + Math.max(0, q - (k === 'coins' ? S().coins : DQ.have(k))) * (k === 'coins' ? 1 : (D.ITEMS[k]?.val || 1)), 0);
-    const [id, p] = projects.slice().sort((a, b) => short(a) - short(b))[0];
-    const miss = Object.entries(DQ.projectNeed(id)).map(([k, q]) => [k, q - (k === 'coins' ? S().coins : DQ.have(k))]).filter(([, n]) => n > 0).map(([k, n]) => k === 'coins' ? `${fmt(n)} coins` : `${fmt(n)} ${D.ITEMS[k].name.toLowerCase()}`);
-    out.push({ title: `Closest restoration: ${p.name.toLowerCase()}`, text: `Still needed: ${miss.join(', ')}.`, action: 'openproject', a: id, art: 'project:' + id });
+  const id = DQ.closestRestoration();
+  if (id) {
+    const project = D.PROJECTS[id], shortfall = DQ.projectShortfall(id);
+    const need = Object.entries(DQ.projectNeed(id));
+    const lists = entries => entries.map(([item, n]) => `${fmt(n)} ${item === 'coins' ? 'coins' : bundleOptions(id, item).map(id => D.ITEMS[id].name).join(' or ')}`).join(', ');
+    out.push({ title: project.name, text: shortfall.length ? `Still to gather: ${lists(shortfall)}.` :
+      `Ready to deliver: ${lists(need)}. ${project.reward}`, action: 'openproject', a: id, art: 'project:' + id });
   }
   const near = D.SKILLS.filter(sk => DQ.skillUnlocked(sk.id) && D.UNL[sk.id]).map(sk => { const L = DQ.lvl(sk.id), nextLvl = Object.keys(D.UNL[sk.id]).map(Number).find(l => l > L); return nextLvl === L + 1 ? { sk, nextLvl, pct: DQ.pctNext(sk.id), what: D.UNL[sk.id][nextLvl] } : null; }).filter(Boolean).sort((a, b) => b.pct - a.pct)[0];
   if (near && near.pct >= 50) out.push({ title: `${near.sk.name} ${near.nextLvl} is close`, text: `${Math.round(near.pct)}% of the way there; next: ${(UI.unlockShort ? UI.unlockShort({ what: [].concat(near.what).join(', ') }) : 'something new')}.`, action: 'go', a: near.sk.page, art: 'skill:' + near.sk.id });
@@ -19391,6 +19747,20 @@ Object.assign(UI.DO, {
   journeytask: (kind, id) => { DQ.closeModal(); if (DQ.startAct(kind, id, { quiet: true })) DQ.go(DQ.actPage()); else { const page = { fish: 'fishing', wood: 'woodcutting', mine: 'mining', thieve: 'thieving', fight: 'combat' }[kind] || (kind === 'recipe' && D.RECIPES[id] ? D.SK[D.RECIPES[id].skill].page : null); if (page) { if (UI.taskChoice) UI.taskChoice[page] = id; DQ.go(page); } } },
   journeytravel: id => { DQ.closeModal(); DQ.travel(id); DQ.go('overview'); },
   projectfinish: id => { if (DQ.finishProject(id)) UI.render(false); },
+  villageproceeds: () => {
+    const amount = DQ.villageProceeds();
+    if (!amount) return;
+    const state = S(), previous = state.villageProceedsAt;
+    state.villageProceedsAt += amount * proceedsInterval;
+    state.coins += amount;
+    if (!DQ.save()) {
+      state.villageProceedsAt = previous;
+      state.coins -= amount;
+      return;
+    }
+    DQ.log(`Collected ${fmt(amount)} coins from restored village businesses.`, 'good');
+    UI.render(false);
+  },
   projectpick: id => { if (!D.PROJECTS[id]) return; UI.tab.projectChoice = id; UI.render(false); },
   projectgive: arg => { const [id, item] = String(arg).split('|'); if (DQ.projectGive(id, item || null)) UI.render(false); },
   safetyexport: () => DQ.downloadSave(),
@@ -19399,6 +19769,7 @@ Object.assign(UI.DO, {
 let lastJourney = '';
 DQ.on('ui', () => {
   if (UI.view !== 'overview') return;
+  if (document.querySelector('.home-glance')) return;
   const next = DQ.journeyNext(), signature = JSON.stringify(next);
   if (signature === lastJourney) return;
   lastJourney = signature;
@@ -21807,7 +22178,11 @@ addEventListener('keydown',e=>{
  if(line&&(e.key===' '||e.key==='Enter')){e.preventDefault();e.stopImmediatePropagation();UI.DO.storyadvance();return;}
  if(!['Tab','Escape'].includes(e.key))e.stopImmediatePropagation();
 },true);
-function offer(id){if(quiet()||!Q.started||S().settings.storyScenes===false||seen(id)||!defs[id]?.eligible()||!Q.storyCinematic(defs[id]))return;if(pending&&defs[pending]?.choices?.length&&!choiceOf(defs[pending]))return;pending=id;}
+function offer(id){
+ if(quiet()||!Q.started||S().settings.storyScenes===false||seen(id)||!defs[id]?.eligible()||!Q.storyCinematic(defs[id]))return;
+ if(document.querySelector('.modal,.quest-reveal,#intro')||document.hidden)return;
+ pending=id;
+}
 /* Only a new major event can queue a scene; loading an advanced save never replays a backlog. */
 const start0=Q.startQuest;
 Q.startQuest=id=>{const before=D.QM[id]&&Q.questState(D.QM[id]);const r=start0(id);if(before==='new'&&['active','ready'].includes(Q.questState(D.QM[id]))){const scene=Object.values(defs).find(s=>s.quest===id);if(scene)offer(scene.id);}return r;};
@@ -21819,7 +22194,7 @@ Q.on('project',id=>{if(S().projects[id]){const s=Object.values(defs).find(s=>s.p
 const notify0=Q.notify;
 Q.notify=o=>{const r=notify0(o);/* The main quest claim owns the victory scene, preventing duplicate celebrations. */return r;};
 let ticks=0;
-Q.on('ui',()=>{if(++ticks%5||!pending||S().settings.storyScenes===false||quiet()||!Q.started||document.hidden||document.querySelector('.modal,.quest-reveal,#intro'))return;const id=pending;pending=null;if(!seen(id))Q.openStory(id);});
+Q.on('ui',()=>{if(++ticks%5||!pending)return;const id=pending;pending=null;if(S().settings.storyScenes!==false&&!quiet()&&Q.started&&!seen(id)&&Q.allowAutomaticReveal())Q.openStory(id);});
 /* Present existing consequential choices as scenes rather than introducing another decision system. */
 for(const [id,d]of Object.entries(D.DISCOVERIES).filter(([,d])=>d.choices))defs['discovery_'+id]={id:'discovery_'+id,title:d.name,town:d.place,type:'discovery',source:id,eligible:()=>Q.discovered(id),frames:()=>[{speaker:'Narrator',shot:'wide',text:d.text}],choices:d.choices.map(c=>({...c,effect:c.needItem?`Uses one ${D.ITEMS[c.needItem].name}. ${c.label}`:c.need?`Uses ${c.need} cooked meals. ${c.label}`:c.label}))};
 const discovery0=UI.openDiscovery;
@@ -22890,7 +23265,8 @@ UI.V.settings=()=>{
  const name=take(iface,'.nameedit'),dev=take(about,'[data-do="devtog"]');
  const size=body(get('Interface size'));
  const backdrop=body(get('Backdrop'));
- const display=[card('Appearance',themeHtml+`<div class="settings-field"><h3>Interface size</h3>${size}<small class="dim">Size preference applies on desktop.</small></div><div class="settings-field"><h3>Backdrop</h3>${backdrop}</div>`),card('Lettering',body(get('Lettering')),'lettering-set'),card('Notifications & accessibility',body(iface))];
+ const notation = `<div class="settings-field"><h3>Number notation</h3><div class="btnrow wrap">${[['default','Default'],['suffix','Suffix · 1.2k'],['scientific','Scientific · 1.2e3']].map(([id, label]) => `<button class="btn" data-do="numbernotation" data-a="${id}" aria-pressed="${(Q.S.settings.numberNotation || 'default') === id}">${label}</button>`).join('')}</div></div>`;
+ const display=[card('Appearance',themeHtml+`<div class="settings-field"><h3>Interface size</h3>${size}<small class="dim">Size preference applies on desktop.</small></div><div class="settings-field"><h3>Backdrop</h3>${backdrop}</div>`),card('Lettering',body(get('Lettering'))+notation,'lettering-set'),card('Notifications & accessibility',body(iface))];
  const volume=take(audio,'[data-do="set"][data-a="muted"]')+['masterVol','vol','musicVol','ambVol'].map(k=>take(audio,`label:has([data-in="${k}"])`)).join('');
  const musicLabel=audio?.querySelector('[data-do="set"][data-a="music"] b');if(musicLabel)musicLabel.textContent='Music';
  const layers=['music','ambience','sfx'].map(k=>take(audio,`[data-do="set"][data-a="${k}"]`)).join('');
@@ -22905,8 +23281,8 @@ UI.V.settings=()=>{
  const danger=take(save,'[data-do="newgame"]'),backupList=save?.querySelector('.bklist')?.parentElement;
  const backupHtml=backupList?.outerHTML||'<p class="dim">No automatic backups yet. Your recent backups on this device will appear here.</p>';backupList?.remove();
  const autosave=save?.querySelector('.phead small')?.textContent||'';
- const saveCards=[card('Backup & transfer',`<p class="sm dim">${esc(autosave)}</p>`+body(save)),card('Automatic backups',backupHtml),card('Start over','<p>Make a backup before starting a new hero.</p>'+danger,'settings-danger')];
- const shortcuts=get('Shortcuts');shortcuts?.querySelector('.keys')?.insertAdjacentHTML('beforeend','<dt><kbd>L</kbd></dt><dd>Switch light/dark theme</dd>');
+ const saveCards=[card('Backup & transfer',`<p class="sm dim">${esc(autosave)}</p>`+body(save)+'<div class="btnrow wrap"><button class="btn" data-do="copystring">Copy save string</button><button class="btn" data-do="pastestring">Import save string</button></div>'),card('Automatic backups',backupHtml),card('Start over','<p>Make a backup before starting a new hero.</p>'+danger,'settings-danger')];
+ const shortcuts=get('Shortcuts');shortcuts?.querySelector('.keys')?.insertAdjacentHTML('beforeend','<dt><kbd>L</kbd></dt><dd>Switch light/dark theme</dd><dt><kbd>Enter</kbd> or <kbd>Esc</kbd></dt><dd>Continue from Welcome Back</dd><dt><kbd>V</kbd> / <kbd>G</kbd></dt><dd>Village / Guide</dd>');
  const tools=card('Testing & artwork',body(get('Playtest'))+body(get('Art showcase'))+dev);
  const helpCards=[card('Keyboard shortcuts',body(shortcuts)),card('About Idlewick',body(about)),tools];
  for(const[name,p]of panels)if(!used.has(name))helpCards.push(card(esc(name),body(p)));
@@ -22918,6 +23294,29 @@ UI.V.settings=()=>{
 UI.after.settings=()=>{};
 const render0=UI.render;UI.render=(...args)=>{const r=render0(...args);if(UI.view==='settings'){const nav=document.getElementById('subnav');if(nav?.querySelectorAll('.stab').length===1&&nav.querySelector('[data-a="settings"]'))nav.innerHTML='';}return r;};
 UI.DO.settingsgroup=id=>{if(groups.some(g=>g[0]===id)){UI.tab.settingsPanel=id;UI.render(false);document.querySelector('.settings-navigation [data-a="'+id+'"]')?.focus({preventScroll:true});}};
+UI.DO.numbernotation = id => {
+ if (!['default', 'suffix', 'scientific'].includes(id)) return;
+ Q.S.settings.numberNotation = id;
+ Q.save(); UI.renderHud(); UI.render(false);
+};
+UI.DO.copystring = () => {
+ const value = Q.exportSave();
+ Q.modal({ title: 'Copy save string', body: `<label for="save-string">Save string</label><textarea id="save-string" readonly rows="6">${esc(value)}</textarea>`,
+   actions: [{ label: 'Done' }, { label: 'Copy', primary: true, fn: () => {
+     const field = document.querySelector('#save-string');
+     field.focus(); field.select();
+     navigator.clipboard?.writeText(value).then(() => Q.toast('Save string copied.'), () => Q.toast('Use your device’s Copy command.'));
+     return false;
+   } }] });
+};
+UI.DO.pastestring = () => {
+ Q.modal({ title: 'Import save string', body: '<p>This replaces the hero on this device.</p><label for="save-string">Paste the save string</label><textarea id="save-string" rows="6"></textarea>',
+   actions: [{ label: 'Cancel' }, { label: 'Replace and reload', primary: true, fn: () => {
+     const value = document.querySelector('#save-string').value.trim();
+     if (!Q.importSave(value)) { Q.toast('That save could not be imported.', true); return false; }
+     location.reload();
+   } }] });
+};
 })();
 
 </script>
@@ -23566,18 +23965,60 @@ U.journeyPanel=()=>{
  return panel.outerHTML;
 };
 const i=U.homeSections.indexOf(journey0);if(i>=0)U.homeSections[i]=U.journeyPanel;
-const home0=U.V.overview;
-U.V.overview=()=>{
- const t=document.createElement('template');t.innerHTML=home0();const journey=t.content.querySelector('.journey');if(!journey)return home0();
- journey.remove();const town=D.TOWN[S().town],restored=Q.projectsForTown(S().town).filter(([id])=>S().projects[id]).length;
- const secondary=[...t.content.children].map(el=>el.outerHTML).join('');
- return `<div class="hs-home"><header class="hs-home-heading"><div><h1>${Q.goalDone()?'A good day’s work':'One good deed at a time'}</h1><p>${esc(town.name)} · A useful next step, at your own pace.</p></div></header><div class="hs-home-primary">${journey.outerHTML}</div><aside class="hs-home-side"><section class="panel hs-town-card">${U.scene(S().town)}<div class="hs-town-caption"><h2>${esc(town.name)}</h2><p>${restored?`${restored} restored ${restored===1?'site':'sites'} · Your work is changing the village.`:'A village worth bringing back to life.'}</p><button class="btn" data-do="go" data-a="projects">${ico('town')}View the village</button></div></section><div class="hs-home-reference" aria-label="Other opportunities">${secondary}</div></aside></div>`;
+const home0 = U.V.overview, activity0 = U.V.activity;
+const homeRate = () => {
+ const act = Q.act;
+ if (!act) return S().lastPlannedStop || 'No activity running';
+ const skill = Q.actSkill(act), node = D.NODE[act.kind + ':' + act.id], recipe = act.kind === 'recipe' && D.RECIPES[act.id];
+ const xp = (recipe || node)?.xp;
+ const rate = xp && skill && act.kind !== 'thieve' && !recipe?.burn ? `${Q.fmt(xp * Q.xpMult(skill) * 3600000 / Q.actDur(act))} XP/hour estimated` : 'Earnings vary';
+ return `${Q.actLabel()} · Running · ${rate}`;
 };
+const homeGlance = () => {
+ const town = D.TOWN[S().town], main = Q.mainQuestProgress?.();
+ const project = [S().journey, S().pinnedProject, !main && Q.closestRestoration()].find(id => D.PROJECTS[id]?.town === town.id && !S().projects[id]);
+ const next = Q.journeyNext(project || S().journey);
+ const goal = project ? { name: D.PROJECTS[project].name, label: 'Bundles complete',
+   have: Object.keys(D.PROJECTS[project].cost).length - Object.keys(Q.projectNeed(project)).length,
+   need: Object.keys(D.PROJECTS[project].cost).length } : main;
+ const button = `<button class="btn primary" data-do="${next.action}" data-a="${esc(next.a || '')}" data-b="${esc(next.b || '')}">${esc(next.title)}</button>`;
+ const count = S().inbox?.length || 0;
+ const local = (town.id !== 'willowbrook' || S().q.goblin_menace?.s === 'done') && Q.closestRestoration();
+ const flag = count ? `<button class="btn" data-do="go" data-a="activity">${count} away ${count === 1 ? 'decision' : 'decisions'}</button>` :
+   S().lastAway && !S().lastAway.gone ? '<button class="btn" data-do="go" data-a="activity">Welcome Back summary</button>' :
+   local && local !== project ? `<button class="btn" data-do="openproject" data-a="${local}">${ico('house')}${esc(D.PROJECTS[local].name)}${Q.projectReady(local) ? ' · Ready' : ''}</button>` : '';
+ return `<div class="home-glance">
+  <section class="panel home-scene" data-home-unit="scene">${U.scene(town.id)}<button class="btn" data-do="go" data-a="projects">${ico('house')}${esc(town.name)}</button></section>
+  <div class="home-glance-row"><button class="panel home-state" data-home-unit="activity" data-do="${Q.act ? 'nowactivity' : 'go'}" data-a="${Q.act ? '' : 'activity'}">${ico('clock')}<b data-b="homerate"></b></button>
+  <div class="panel home-coins" data-home-unit="coins">${ico('coin')}<b data-b="coins"></b><span>coins</span></div></div>
+  <section class="panel journey home-next" data-home-unit="goal"><h2>${esc(goal?.name || 'Your next step')}</h2>
+ ${goal ? `<span>${esc(goal.label)} <b>${goal.have} / ${goal.need}</b></span><progress value="${goal.have}" max="${goal.need}" aria-label="${esc(goal.label)}"></progress>` : ''}
+ ${project ? `<span>${Object.entries(Q.projectNeed(project)).map(([id, n]) => `${Q.fmt(n)} ${id === 'coins' ? 'coins' : esc(D.ITEMS[id].name)}`).join(' · ')}</span>` : ''}
+  <div class="btnrow">${button}<button class="btn" data-do="go" data-a="activity">Activity &amp; goals</button></div></section>
+  ${flag ? `<div data-home-unit="flag">${flag}</div>` : ''}</div>`;
+};
+U.V.overview = homeGlance;
+U.B.homerate = e => U.set(e, homeRate());
+let lastHomeHtml = '', lastHomeCheck = 0;
+Q.on('ui', () => {
+ if (U.view !== 'overview' || performance.now() - lastHomeCheck < 400) return;
+ lastHomeCheck = performance.now();
+ const goal = document.querySelector('.home-next');
+ if (!goal || goal.contains(document.activeElement) || goal.matches(':hover')) return;
+ const html = homeGlance();
+ if (html === lastHomeHtml) return;
+ lastHomeHtml = html;
+ const next = document.createElement('template');
+ next.innerHTML = html;
+ const replacement = next.content.querySelector('.home-next');
+ if (replacement?.outerHTML !== goal.outerHTML) goal.replaceWith(replacement);
+});
+U.V.activity = () => activity0() + `<section class="home-activity-details" aria-label="Goals and opportunities">${home0()}</section>`;
 // The chapter's primary route is labelled; small ingredient/source shortcuts remain icon-first.
 const render0=U.render;
 U.render=(...args)=>{const result=render0(...args);if(U.view==='quests'){
  const button=document.querySelector('.quest-actions [data-do="questcontinue"]'),q=button&&D.QM[button.dataset.a];
- if(button&&q){const p=U.questProgress(q),o=q.obj[p.index];button.classList.remove('route-icon');button.classList.add('hs-continue');button.innerHTML=U.objectiveIcon(q,o)+'<span>Continue: '+esc(o.label)+'</span>';}
+ if(button&&q){const o=Q.unfinishedObjective(q)||q.obj[0];button.classList.remove('route-icon');button.classList.add('hs-continue');button.innerHTML=U.objectiveIcon(q,o)+'<span>Continue: '+esc(o.label)+'</span>';}
 }return result;};
 })();
 
@@ -23889,13 +24330,6 @@ Q.questSkillNeeds=q=>{
 };
 // Only ordinary level unlocks appear in the level-up list. Found patterns have their own shelf.
 for(const [sk,levels]of Object.entries(D.UNL))for(const [lv,names]of Object.entries(levels)){levels[lv]=names.filter(name=>!D.SECRET_RECIPES.some(r=>D.RECIPES[r.rec]?.name===name));if(!levels[lv].length)delete levels[lv];}
-const learn=Q.learnRecipe;
-Q.learnRecipe=(id,quiet)=>{
- const learned=learn(id,quiet),r=D.SECRET[id];if(!learned||quiet||Q.sim.on||Q.forecasting||S().settings.notify===false)return learned;
- const rec=D.RECIPES[r.rec],item=D.ITEMS[r.output||id];
- Q.popupQueue({title:'A recipe worth keeping',body:`<div class="recipe-reveal"><span class="recipe-reveal-art">${Q.itemIco(item)}</span><span class="k">Discovered recipe · kept permanently</span><h2>${esc(rec.name)}</h2><p>${esc(r.found)}.</p><p>${D.SK[r.skill].name} ${r.lvl} · available on the Discovered recipes shelf. A discovered recipe, now yours to keep.</p></div>`,actions:[{label:'Open recipe',primary:true,fn:()=>U.focusTask(D.SK[r.skill].page,r.rec,rec.tab,r.skill)},{label:'Later'}]});
- return learned;
-};
 // Live Guide progress: update only fills/pips, without rebuilding the activity or its controls.
 for(const key of ['mastBadge','mastLine']){const fn=Q[key];Q[key]=(kind,id)=>fn(kind,id).replace(/^<([a-z]+) /,`<$1 data-study-kind="${kind}" data-study-id="${id}" `);}
 Q.on('ui',()=>{for(const el of document.querySelectorAll('[data-study-kind]')){const m=Q.mastInfo(el.dataset.studyKind,el.dataset.studyId);el.style.setProperty('--p',m.pct+'%');el.classList.toggle('full',!m.next);el.classList.toggle('max',!m.next);el.classList.toggle('near',!!m.next&&m.pct>=90);const fill=el.querySelector('.bar>i');if(fill)fill.style.width=m.pct+'%';el.querySelectorAll('.mast-pips>i').forEach((p,i)=>p.classList.toggle('on',i<m.stars));el.dataset.tip='text:'+Q.mastTip(el.dataset.studyKind,el.dataset.studyId);if(el.classList.contains('mast-line'))el.setAttribute('aria-label',Q.mastTip(el.dataset.studyKind,el.dataset.studyId));}});
@@ -23942,7 +24376,7 @@ U.render=(...args)=>{const result=render(...args);
    const town=S().town,have=Q.localStanding(town),max=Object.values(D.PROJECTS).filter(p=>p.town===town&&!p.relic).length*10;
    wrap.querySelector('small')?.remove();wrap.insertAdjacentHTML('beforeend',`<div class="village-standing" role="group" aria-label="Village standing"><b>Local standing ${have} / ${max}</b><span class="bar"><i style="width:${max?have/max*100:0}%"></i></span><small>Restore buildings to open local supplies. Standing is permanent and never spent.</small></div>`);
   }
-  if(!S().tut.hidden&&!S().tut.done.projects){S().tut.done.projects=true;Q.save();Q.popupQueue({title:'Bring the village back to life',body:'<p>Town projects turn your gathered materials into restored buildings and useful local supplies.</p><p>Select a building to see its requirements. Deliver what you can; contributions are kept. Restoring a building raises this village’s standing and changes its scenery.</p><p>Pin a project to keep its next material within reach. You can return whenever you like.</p>',actions:[{label:'Explore town projects',primary:true}]});}
+
  }
  return result;
 };
@@ -24110,7 +24544,7 @@ if (coins0) UI.B.coins = e => {
   const from = st.now, start = performance.now(), dur = Math.min(900, 380 + Math.log10(target - from + 1) * 120);
   if (st.raf) cancelAnimationFrame(st.raf);
   const step = t => { const k = Math.min(1, (t - start) / dur), ease = 1 - Math.pow(1 - k, 3), v = Math.round(from + (target - from) * ease);
-    st.now = v; UI.set(e, DQ.fmt(v)); st.raf = k < 1 ? requestAnimationFrame(step) : 0; if (k >= 1) { e.classList.remove('fin-roll'); } };
+    st.now = v; UI.set(e, DQ.formatCoins(v)); st.raf = k < 1 ? requestAnimationFrame(step) : 0; if (k >= 1) { e.classList.remove('fin-roll'); } };
   Object.assign(st, { to: target }); e.classList.add('fin-roll'); st.raf = requestAnimationFrame(step);
 };
 
@@ -25138,9 +25572,16 @@ UI.render = (...a) => {
   for (const town of D.TOWNS) visit(D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === town.boss)));
   const main = [...chain, ...D.QUESTS.filter(q => q.main && !chain.includes(q))];
   const isActive = status => status === 'active' || status === 'ready';
+  const regionalPreparation = { boar_hunt: 2, crab_cull: 1 };
 
   Q.currentMainQuest = () => main.find(q => isActive(Q.S.q[q.id]?.s)) || null;
   Q.reconcileMainQuests = state => {
+    for (const [id, start] of Object.entries(regionalPreparation)) {
+      const record = state.q[id], objectives = D.QM[id].obj;
+      if (record?.p?.length !== start) continue;
+      const earned = ['ready', 'done'].includes(record.queuedMain || record.s);
+      record.p.push(...objectives.slice(start).map(o => earned ? o.n : 0));
+    }
     const active = main.filter(q => isActive(state.q[q.id]?.s));
     for (const quest of active.slice(1)) {
       const record = state.q[quest.id];
@@ -25197,10 +25638,13 @@ UI.render = (...a) => {
 
   const questEntry = q => {
     const record = Q.S.q[q.id];
-    const index = q.obj.findIndex((o, i) => Q.objProg(q, record, i) < o.n);
+    const incomplete = (o, i) => Q.objProg(q, record, i) < o.n;
+    const preparation = q.obj.findIndex((o, i) => regionalPreparation[q.id] !== undefined && i >= regionalPreparation[q.id] && incomplete(o, i));
+    const index = preparation >= 0 ? preparation : q.obj.findIndex(incomplete);
     const objective = q.obj[index];
     return { q, record, index, objective };
   };
+  Q.unfinishedObjective = q => q ? questEntry(q).objective : undefined;
 
   Q.mainQuestProgress = () => {
     const q = Q.currentMainQuest() || chain.find(q => Q.questState(q) === 'new');
@@ -25229,14 +25673,91 @@ UI.render = (...a) => {
     if (!objective || objective.ev === 'boss') return guidance;
     const detail = `${quest.name} · ${Q.objProg(quest, record, index)} / ${objective.n}`;
     if (objective.ev === 'kill') {
-      return Q.openingCombatNeed?.() || Q.foodStep?.('Bring enough food to finish your patrol.') ||
+      const hunt = Q.isAnimal?.(objective.key) && Q.skillUnlocked('hunting');
+      const supplies = hunt ? null : Q.combatSupplyStep?.();
+      return Q.openingCombatNeed?.() || supplies || Q.foodStep?.('Bring enough food to finish your patrol.') ||
         step(objective.label, detail, 'huntquest', objective.key);
+    }
+    if (objective.ev === 'cook' && objective.key === 'shrimp') {
+      return Q.have('raw_shrimp') ?
+        step(objective.label, detail, 'journeytask', 'recipe', 'cook_shrimp') :
+        step('Catch shrimp for the patrol', detail, 'journeytask', 'fish', 'shrimp');
     }
     const kind = { catch: 'fish', chop: 'wood', mine: 'mine', thieve: 'thieve' }[objective.ev];
     if (kind && D.NODE[kind + ':' + objective.key]) {
       return step(objective.label, detail, 'journeytask', kind, objective.key);
     }
     return step(objective.label, detail, 'questcontinue', quest.id);
+  };
+})();
+
+</script>
+<script>
+/* Optional daily errands use the quest event stream and carry no streak or completion bonus. */
+(() => {
+  const Q = window.DQ, D = Q.data, UI = Q.ui, { esc, fmt } = Q;
+  const errands = [
+    { event: 'catch', skill: 'fishing', task: 'shrimp', label: 'Make 8 catches', target: 8, reward: 15 },
+    { event: 'chop', skill: 'woodcutting', task: 'normal', label: 'Gather 8 woodcutting resources', target: 8, reward: 15 },
+    { event: 'cook', skill: 'cooking', task: 'cook_shrimp', label: 'Cook 4 meals', target: 4, reward: 20 },
+    { event: 'mine', skill: 'mining', task: 'copper', label: 'Mine 8 ore', target: 8, reward: 20 },
+    { event: 'kill', skill: 'combat', task: null, label: 'Defeat 6 creatures', target: 6, reward: 25 },
+  ];
+  const dayId = now => Math.floor(now / 86400000);
+  const available = e => e.skill === 'combat' ? !Q.openingCombatNeed() && Q.S.stats.kill > 0 : Q.skillUnlocked(e.skill);
+  const stateFor = now => {
+    const day = dayId(now);
+    if (!Q.S.dailyErrands || Q.S.dailyErrands.day < day) {
+      const eligible = errands.filter(available);
+      const start = day % eligible.length;
+      const rows = [...eligible.slice(start), ...eligible.slice(0, start)].slice(0, 3);
+      Q.S.dailyErrands = { day, rows: rows.map(e => ({ event: e.event, have: 0, paid: false })) };
+    }
+    return Q.S.dailyErrands;
+  };
+  Q.dailyOffers = (now = Date.now()) => stateFor(now).rows.flatMap(row => {
+    const errand = errands.find(e => e.event === row.event);
+    return errand ? [{ ...errand, ...row }] : [];
+  });
+
+  const questEvent = Q.qev;
+  Q.qev = (event, key, count = 1) => {
+    const result = questEvent(event, key, count);
+    if (!Q.forecasting && Number.isSafeInteger(count) && count > 0) {
+      const errand = errands.find(e => e.event === event);
+      if (!errand) return result;
+      const row = stateFor(Date.now()).rows.find(r => r.event === event);
+      if (row && !row.paid) {
+        row.have = Math.min(errand.target, row.have + count);
+        if (row.have === errand.target) {
+          row.paid = true;
+          Q.addCoins(errand.reward);
+          Q.log(`Daily errand complete. Earned ${fmt(errand.reward)} coins.`, 'good');
+        }
+      }
+    }
+    return result;
+  };
+  const quests = UI.V.quests;
+  UI.V.quests = () => {
+    const daily = UI.tab.dailyErrands;
+    const toggle = `<button class="btn" data-do="dailyerrands">${daily ? 'Quest journal' : 'Daily errands'}</button>`;
+    if (!daily) return quests().replace('<nav class="tabs" aria-label="Quest status">', '<nav class="tabs" aria-label="Quest status">' + toggle);
+    return `<section class="panel daily-errands"><div class="phead"><h2>Daily errands</h2>${toggle}</div><p>Three optional jobs. Each pays when you finish it.</p><div class="daily-list">${Q.dailyOffers().map(e =>
+      `<section class="panel"><h3>${esc(e.label)}</h3><p>${e.have} / ${e.target} · ${e.paid ? '✓ Paid' : fmt(e.reward) + ' coins'}</p><progress value="${e.have}" max="${e.target}" aria-label="${esc(e.label)}"></progress>${e.paid ? '' :
+        `<button class="btn" data-do="dailyroute" data-a="${e.event}">Open ${esc(D.SK[e.skill]?.name || 'Combat')}</button>`}</section>`).join('')}</div></section>`;
+  };
+  UI.DO.dailyerrands = () => { UI.tab.dailyErrands = !UI.tab.dailyErrands; UI.render(false); };
+  const openQuest = UI.DO.openquest;
+  UI.DO.openquest = (...args) => {
+    UI.tab.dailyErrands = false;
+    return openQuest(...args);
+  };
+  UI.DO.dailyroute = event => {
+    const e = errands.find(row => row.event === event);
+    if (!e) return;
+    if (!e.task) Q.go(e.skill);
+    else UI.focusTask(e.skill, e.task);
   };
 })();
 
