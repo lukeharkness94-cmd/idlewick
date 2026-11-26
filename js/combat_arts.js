@@ -98,11 +98,16 @@ Object.assign(UI.DO, {
   artpick: (style, id) => { if (Q.setArt(style, id)) { Q.sfx && Q.sfx('tab'); UI.render(false); } },
   artspell: id => { const sp = D.SPELLS.find(s => s.id === id); if (!sp || Q.lvl('magic') < sp.lvl) return; S().spell = id; Q.save(); Q.sfx && Q.sfx('tab'); UI.render(false); }
 });
-/* the combat page's Fighting style panel names the art in use and opens the book */
+/* the combat page's Abilities panel shows the technique, shot or spell in use as its first tile, beside the abilities
+   (owner, 26 Nov 2026: "techniques unlocked in melee, ranged and magic should be included in the abilities section");
+   it opens that style's book. Before 26 Nov this was a link in the Fighting style panel. */
 const render0 = UI.render;
-const place = () => { if (UI.view !== 'combat') return; const box = document.querySelector('#view .hud-train'); if (!box || box.querySelector('.cx-art')) return;
+const place = () => { if (UI.view !== 'combat') return; const box = document.querySelector('#view .combat-abils'); if (!box || box.querySelector('.cx-art')) return;
   const st = Q.weaponStyle(), art = st === 'magic' ? (D.SPELLS.find(s => s.id === S().spell && Q.lvl('magic') >= s.lvl) || D.SPELLS[0]) : Q.artFor(st); if (!art) return;
-  const html = `<button type="button" class="linkish cx-art" data-do="go" data-a="${st === 'magic' ? 'magic' : st}" data-tip="text:Choose a ${st === 'magic' ? 'spell' : st === 'ranged' ? 'shot' : 'technique'}">${ico('book')}<span>${esc(art.name)}</span></button>`;
-  const dps = box.querySelector('[data-b="dps"]'); if (dps) { const row = document.createElement('div'); row.className = 'cx-dpsrow'; dps.before(row); row.append(dps); row.insertAdjacentHTML('beforeend', html); } else box.querySelector('.kit-head')?.insertAdjacentHTML('afterend', html); };
+  const kind = st === 'magic' ? 'Spell' : st === 'ranged' ? 'Shot' : 'Technique', page = st === 'magic' ? 'magic' : st;
+  const html = `<button type="button" class="ab-tile on cx-art" data-do="go" data-a="${page}" data-tip="text:${esc(kind)}: ${esc(art.name)}${art.text ? ' · ' + esc(art.text) : ''} · choose another in ${esc(D.SK[page] ? D.SK[page].name : page)}">${ico('book')}<b>${esc(art.name)}</b><small>${kind}</small></button>`;
+  /* short windows (html.short): on the panel's heading line, so the column never scrolls */
+  if (document.documentElement.classList.contains('short')) { box.querySelector('.kit-head .k')?.insertAdjacentHTML('afterend', `<button type="button" class="linkish cx-art cx-art-line" data-do="go" data-a="${page}" data-tip="text:${esc(kind)}: ${esc(art.name)}${art.text ? ' · ' + esc(art.text) : ''}">${ico('book')}<span>${esc(art.name)}</span></button>`); return; }
+  const grid = box.querySelector('.ab-tile')?.parentElement; if (grid) grid.insertAdjacentHTML('afterbegin', html); else box.querySelector('.kit-head')?.insertAdjacentHTML('afterend', html); };
 UI.render = (...a) => { const r = render0(...a); try { place(); setTimeout(place, 0); } catch (e) {} return r; };
 })();

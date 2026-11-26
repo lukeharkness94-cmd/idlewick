@@ -89,7 +89,10 @@ DQ.actPage = () => { const a = DQ.act; if (!a) return null; if (DQ.KIND_EXT && D
 UI.upd = () => { $$('[data-b]').forEach(e => { const [k, a, b] = e.dataset.b.split(':'); if (B[k]) B[k](e, a, b); }); };
 let progEls = [];
 UI.collectProg = () => { progEls = $$('[data-prog]'); for (const el of progEls) if (!el.dataset.ring) { el.style.width='100%'; el.style.transformOrigin='left'; el.style.transform=`scaleX(${progOf(el.dataset.prog)})`; } };
-const progOf = key => { const a = DQ.act; if (!a) return 0; if (key !== '@' && key !== a.kind + ':' + a.id) return 0; return clamp((Date.now() - a.t0) / a.dur, 0, 1); };
+/* while a fight is still tracking its foe, the bar shows how far the tracking has got, never an attack (owner, 26 Nov) */
+const progOf = key => { const a = DQ.act; if (!a) return 0; if (key !== '@' && key !== a.kind + ':' + a.id) return 0; const f = clamp((Date.now() - a.t0) / a.dur, 0, 1);
+  const tr = a.kind === 'fight' && DQ.fight && DQ.fight.tracking > 0 && DQ.trackRounds ? DQ.trackRounds() : 0;
+  return tr ? clamp((tr - DQ.fight.tracking + f) / tr, 0, 1) : f; };
 UI.frame = () => {
   for (const e of progEls) { const p = progOf(e.dataset.prog); if (e.dataset.ring) e.style.strokeDashoffset = 289 * (1 - p); else e.style.transform = `scaleX(${p})`; }
   requestAnimationFrame(UI.frame);

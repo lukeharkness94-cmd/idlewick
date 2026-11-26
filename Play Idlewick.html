@@ -5725,6 +5725,14 @@ html.calm .village-scene .site-spot.ps-ready{animation:none}
 .site-legend .ps-ready .sl-sign{background:#2f8a3e;color:#fff;border:2px solid #d8ffc0}
 .site-legend .ps-can .sl-sign{background:#2a66b0;color:#fff;border:2px solid #cfe6ff}
 .site-legend .ps-needs .sl-sign{background:#efe6d2;color:#6a5a44;border:2px dashed #a8987a}
+
+/* Combat and creature levels are labels, not buttons: no ring (owner, 26 Nov 2026) */
+#view .lvchip,#view .lvchip.you{border:0!important;border-radius:4px!important;box-shadow:none!important;background:color-mix(in srgb,var(--ink,#3a2a1a) 10%,transparent)}
+/* the technique/shot/spell in use heads the Abilities panel on its own row (owner, 26 Nov 2026) */
+#view .combat-abils .cx-art{grid-column:1/-1}
+#view .combat-abils .cx-art b{white-space:nowrap;overflow:visible}
+#view .combat-abils .kit-head .cx-art-line{display:inline-flex;align-items:center;gap:4px;margin-left:auto;margin-right:8px;white-space:nowrap}
+#view .combat-abils .kit-head .cx-art-line .ic{width:16px;height:16px}
 </style>
 
 </head>
@@ -15165,7 +15173,10 @@ DQ.actPage = () => { const a = DQ.act; if (!a) return null; if (DQ.KIND_EXT && D
 UI.upd = () => { $$('[data-b]').forEach(e => { const [k, a, b] = e.dataset.b.split(':'); if (B[k]) B[k](e, a, b); }); };
 let progEls = [];
 UI.collectProg = () => { progEls = $$('[data-prog]'); for (const el of progEls) if (!el.dataset.ring) { el.style.width='100%'; el.style.transformOrigin='left'; el.style.transform=`scaleX(${progOf(el.dataset.prog)})`; } };
-const progOf = key => { const a = DQ.act; if (!a) return 0; if (key !== '@' && key !== a.kind + ':' + a.id) return 0; return clamp((Date.now() - a.t0) / a.dur, 0, 1); };
+/* while a fight is still tracking its foe, the bar shows how far the tracking has got, never an attack (owner, 26 Nov) */
+const progOf = key => { const a = DQ.act; if (!a) return 0; if (key !== '@' && key !== a.kind + ':' + a.id) return 0; const f = clamp((Date.now() - a.t0) / a.dur, 0, 1);
+  const tr = a.kind === 'fight' && DQ.fight && DQ.fight.tracking > 0 && DQ.trackRounds ? DQ.trackRounds() : 0;
+  return tr ? clamp((tr - DQ.fight.tracking + f) / tr, 0, 1) : f; };
 UI.frame = () => {
   for (const e of progEls) { const p = progOf(e.dataset.prog); if (e.dataset.ring) e.style.strokeDashoffset = 289 * (1 - p); else e.style.transform = `scaleX(${p})`; }
   requestAnimationFrame(UI.frame);
@@ -21365,7 +21376,7 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
   };
   const foodPanel = () => {
     const foods = (DQ.foods ? DQ.foods() : []).filter(id => DQ.have(id) > 0), heal = foodHeal(), at = S().settings.eatAt || 50;
-    const tiles = foods.map(id => { const it = D.ITEMS[id]; return `<button class="food-tile" data-do="eat" data-a="${id}" data-tip="item:${id}">${DQ.itemIco(it)}<span><b>${esc(it.name)} <span class="mono" data-b="count:${id}"></span></b><small>+${it.heal} each</small></span></button>`; }).join('');
+    const tiles = foods.map(id => { const it = D.ITEMS[id]; return `<button class="food-tile" data-do="eat" data-a="${id}" data-tip="item:${id}">${DQ.itemIco(it)}<span><b>${esc(it.name)} <span class="mono" data-b="count:${id}"></span></b><small>+${it.heal} HP each</small></span></button>`; }).join('');
     return `<section class="panel combat-food"><div class="kit-head"><span class="k">Food <b class="mono">${heal}</b> <small>health</small></span><button class="tog ${S().settings.autoEat ? 'on' : ''}" data-do="autoeat"><span class="sw"></span>Auto-eat</button></div>
       <div class="food-tiles">${tiles || '<p class="food-none">None carried. Cook fish or buy bread.</p>'}</div>
       <div class="eat-step" role="group" aria-label="Eat below this health"><span>Eat below</span><button type="button" class="btn sm" data-do="eatstep" data-a="-10" aria-label="Eat at lower health">−</button><output class="mono">${at}%</output><button type="button" class="btn sm" data-do="eatstep" data-a="10" aria-label="Eat at higher health">+</button></div></section>`;
@@ -25436,12 +25447,17 @@ Object.assign(UI.DO, {
   artpick: (style, id) => { if (Q.setArt(style, id)) { Q.sfx && Q.sfx('tab'); UI.render(false); } },
   artspell: id => { const sp = D.SPELLS.find(s => s.id === id); if (!sp || Q.lvl('magic') < sp.lvl) return; S().spell = id; Q.save(); Q.sfx && Q.sfx('tab'); UI.render(false); }
 });
-/* the combat page's Fighting style panel names the art in use and opens the book */
+/* the combat page's Abilities panel shows the technique, shot or spell in use as its first tile, beside the abilities
+   (owner, 26 Nov 2026: "techniques unlocked in melee, ranged and magic should be included in the abilities section");
+   it opens that style's book. Before 26 Nov this was a link in the Fighting style panel. */
 const render0 = UI.render;
-const place = () => { if (UI.view !== 'combat') return; const box = document.querySelector('#view .hud-train'); if (!box || box.querySelector('.cx-art')) return;
+const place = () => { if (UI.view !== 'combat') return; const box = document.querySelector('#view .combat-abils'); if (!box || box.querySelector('.cx-art')) return;
   const st = Q.weaponStyle(), art = st === 'magic' ? (D.SPELLS.find(s => s.id === S().spell && Q.lvl('magic') >= s.lvl) || D.SPELLS[0]) : Q.artFor(st); if (!art) return;
-  const html = `<button type="button" class="linkish cx-art" data-do="go" data-a="${st === 'magic' ? 'magic' : st}" data-tip="text:Choose a ${st === 'magic' ? 'spell' : st === 'ranged' ? 'shot' : 'technique'}">${ico('book')}<span>${esc(art.name)}</span></button>`;
-  const dps = box.querySelector('[data-b="dps"]'); if (dps) { const row = document.createElement('div'); row.className = 'cx-dpsrow'; dps.before(row); row.append(dps); row.insertAdjacentHTML('beforeend', html); } else box.querySelector('.kit-head')?.insertAdjacentHTML('afterend', html); };
+  const kind = st === 'magic' ? 'Spell' : st === 'ranged' ? 'Shot' : 'Technique', page = st === 'magic' ? 'magic' : st;
+  const html = `<button type="button" class="ab-tile on cx-art" data-do="go" data-a="${page}" data-tip="text:${esc(kind)}: ${esc(art.name)}${art.text ? ' · ' + esc(art.text) : ''} · choose another in ${esc(D.SK[page] ? D.SK[page].name : page)}">${ico('book')}<b>${esc(art.name)}</b><small>${kind}</small></button>`;
+  /* short windows (html.short): on the panel's heading line, so the column never scrolls */
+  if (document.documentElement.classList.contains('short')) { box.querySelector('.kit-head .k')?.insertAdjacentHTML('afterend', `<button type="button" class="linkish cx-art cx-art-line" data-do="go" data-a="${page}" data-tip="text:${esc(kind)}: ${esc(art.name)}${art.text ? ' · ' + esc(art.text) : ''}">${ico('book')}<span>${esc(art.name)}</span></button>`); return; }
+  const grid = box.querySelector('.ab-tile')?.parentElement; if (grid) grid.insertAdjacentHTML('afterbegin', html); else box.querySelector('.kit-head')?.insertAdjacentHTML('afterend', html); };
 UI.render = (...a) => { const r = render0(...a); try { place(); setTimeout(place, 0); } catch (e) {} return r; };
 })();
 

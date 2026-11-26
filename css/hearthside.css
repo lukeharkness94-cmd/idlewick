@@ -963,3 +963,11 @@ html.calm .village-scene .site-spot.ps-ready{animation:none}
 .site-legend .ps-ready .sl-sign{background:#2f8a3e;color:#fff;border:2px solid #d8ffc0}
 .site-legend .ps-can .sl-sign{background:#2a66b0;color:#fff;border:2px solid #cfe6ff}
 .site-legend .ps-needs .sl-sign{background:#efe6d2;color:#6a5a44;border:2px dashed #a8987a}
+
+/* Combat and creature levels are labels, not buttons: no ring (owner, 26 Nov 2026) */
+#view .lvchip,#view .lvchip.you{border:0!important;border-radius:4px!important;box-shadow:none!important;background:color-mix(in srgb,var(--ink,#3a2a1a) 10%,transparent)}
+/* the technique/shot/spell in use heads the Abilities panel on its own row (owner, 26 Nov 2026) */
+#view .combat-abils .cx-art{grid-column:1/-1}
+#view .combat-abils .cx-art b{white-space:nowrap;overflow:visible}
+#view .combat-abils .kit-head .cx-art-line{display:inline-flex;align-items:center;gap:4px;margin-left:auto;margin-right:8px;white-space:nowrap}
+#view .combat-abils .kit-head .cx-art-line .ic{width:16px;height:16px}
