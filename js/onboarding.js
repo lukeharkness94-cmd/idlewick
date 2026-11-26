@@ -28,6 +28,9 @@ Object.assign(lessons,{
  house:{towards:'Your home provides lasting benefits and a place to display things you’ve earned.',title:'Your home',text:'Buy a home, then add rooms and furniture as you gather the materials. Each improvement shows its cost and the benefit it gives you.',goal:'A storage chest is a useful early improvement if you need more backpack space.',art:['skill','woodcutting']},
  hirelings:{towards:'A finite job can collect a quantity you need and stop when it’s finished, without spending the output for you.',title:'Workers',text:'Hire a worker and assign a job. Workers gather supplies while you do other things, but they need wages to keep working.',goal:'Choose a material you’re short of, check the wage and assign a worker to gather it.',art:['skill','farming']},
  research:{towards:'Completed studies can unlock recipes or give lasting improvements. Each project explains what changes before you commit the supplies.',title:'Scholarship',text:'Choose a research project and provide its cost to begin studying it. Available research slots limit how many projects can run at once.',goal:'Start with a useful study you can afford, then carry on with another activity while it progresses.',art:['item','rune']},
+ museum:{title:'The museum',text:'Every creature you meet, beast you raise, relic you find and trophy you earn gets a spot here, once, by itself. You do not hand anything in.',towards:'Fill a whole wing and the curator gives you a small permanent bonus. The empty plinths are the hint.',goal:'Look for the wing closest to full and see what it is missing.'},
+ collection:{title:'Your collection',text:'The real odds of eggs, rare boss drops and lucky finds, and how many tries you have had so far. Nothing here changes the odds; it just stops you guessing.',towards:'Useful when you are deciding whether one more fight is worth it.',goal:'Pick a rare drop and see how close you are to the usual number of tries.'},
+ achievements:{title:'Achievements',text:'Milestones you reach just by playing: catches, kills, restorations and odder things. They tick themselves off.',towards:'Some come with a title you can wear.',goal:'Find the one closest to done.'},
  bestiary:{towards:'Research reveals weaknesses, loot, behaviour and creature stories, so it can help you prepare for later encounters.',title:'Your field guide',text:'Every victory helps you learn about the creature you fought. Select its field-guide entry to see what you know and what the next research stage will reveal.',goal:'Choose a creature you’ve met and check how close you are to its next entry.',art:['creature','lanternmoth']}
 });
 DQ.skillLessons=lessons;
@@ -60,7 +63,14 @@ UI.render=fresh=>{
   render(fresh);
   const view=document.getElementById('view');if(!view)return;
   if(UI.view==='overview'&&!S().tut.hidden&&!S().tut.done.intro&&S().tut.restarted)view.insertAdjacentHTML('afterbegin',intro());
+  /* the first visit to a skill or feature page opens its short guide once (owner, 26 Nov 2026: "the first time I
+     experience something is gone (the museum, the field guide etc)"; supersedes Part B's Help-button-only rule). Same
+     content as Help; seen once, then only on Help. Settings → Help & learning can switch guides off. */
+  if(fresh!==false&&UI.view!==firstSeenView){firstSeenView=UI.view;const L=DQ.lessonForPage(UI.view);
+    if(L&&DQ.unlockRevealsOn&&DQ.unlockRevealsOn()&&DQ.allowAutomaticReveal&&DQ.allowAutomaticReveal()){DQ.acknowledgeLesson(L.id);
+      setTimeout(()=>{if(document.querySelector('.modal'))return;DQ.modal({title:L.title,wide:true,body:`<div class="first-visit">${L.text?`<p>${DQ.esc(L.text)}</p>`:''}${L.towards?`<p>${DQ.esc(L.towards)}</p>`:''}${L.goal?`<p><b>Try this:</b> ${DQ.esc(L.goal)}</p>`:''}</div>`,actions:[{label:'Got it',primary:true}]});},250);}}
 };
+let firstSeenView=null;
 Object.assign(UI.DO,{
   introskip:()=>{S().tut.done.intro=true;DQ.save();UI.render(false);},
   introstart:()=>{S().tut.done.intro=true;DQ.save();if(DQ.questState(D.QM.first_steps)==='new')DQ.startQuest('first_steps');DQ.go('fishing');},

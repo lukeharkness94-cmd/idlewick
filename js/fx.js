@@ -191,6 +191,12 @@ DQ.noteItemGain = (id, count) => {
 };
 DQ.on('ui', DQ.flushItemDigest);
 let openingReveals = 0, revealHero;
+/* New skills and first-time features (the museum, the field guide, ...) open their celebration pop-up again by default
+   (owner, 26 Nov 2026: "the pop up for unlocking new skills is gone, also the first time I experience something is gone");
+   only an explicit Off in Settings stops them. Automated browsers skip them unless a test asks (as the opening does). */
+/* a stored false counts only when the player switched it off themselves (settings.unlockRevealsChosen); Part B saves
+   stored false by default and get the pop-ups back */
+DQ.unlockRevealsOn = () => { const s = DQ.S.settings, v = s.unlockReveals === false && !s.unlockRevealsChosen ? undefined : s.unlockReveals; return v === true || (v == null && (!navigator.webdriver || localStorage.getItem('idlewick.reveals') === '1')); };
 DQ.allowAutomaticReveal = () => {
   if (modalEl || document.querySelector('#intro,.quest-reveal') || document.hidden) return false;
   if (revealHero !== DQ.S) { revealHero = DQ.S; openingReveals = 0; }
@@ -219,7 +225,7 @@ DQ.notify = o => {
       DQ.S.seen['tutorial:' + id] = true;
       if (DQ.S.tut?.done) delete DQ.S.tut.done['lesson:' + id];
     }
-    if (s.notify && s.unlockReveals === true && DQ.allowAutomaticReveal()) showUnlock(o);
+    if (s.notify && DQ.unlockRevealsOn() && DQ.allowAutomaticReveal()) showUnlock(o);
     return;
   }
   if (o.popup) return;

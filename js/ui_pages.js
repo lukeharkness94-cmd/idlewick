@@ -248,7 +248,7 @@ UI.V.achievements = () => {
 };
 
 /* ---------- Settings ---------- */
-const tog = (k, label, sub) => `<button class="tog ${S().settings[k] ? 'on' : ''}" data-do="set" data-a="${k}"><span class="sw"></span><span><b>${label}</b>${sub ? `<small>${sub}</small>` : ''}</span></button>`;
+const tog = (k, label, sub) => `<button class="tog ${(k === 'unlockReveals' ? !(S().settings[k] === false && S().settings.unlockRevealsChosen) : S().settings[k]) ? 'on' : ''}" data-do="set" data-a="${k}"><span class="sw"></span><span><b>${label}</b>${sub ? `<small>${sub}</small>` : ''}</span></button>`;
 const slider = (k, label) => `<label class="slide"><span>${label}</span><input type="range" min="0" max="100" value="${Math.round(S().settings[k] * 100)}" data-in="${k}" aria-label="${label}"><b class="mono">${Math.round(S().settings[k] * 100)}%</b></label>`;
 UI.V.settings = () => {
   const s = S().settings;
@@ -383,7 +383,7 @@ const DO = {
   packfilter: a => { UI.packFilter = a; UI.render(false); },
   achfilter: a => { UI.achFilter = a; UI.render(false); },
   hidetut: () => { S().tut.hidden = true; UI.render(false); },
-  set: a => { const s = S().settings; s[a] = !s[a]; DQ.audioApply(); DQ.musicRefresh(); UI.renderHud(); UI.render(false); },
+  set: a => { const s = S().settings; if (a === 'unlockReveals') { const on = !(s[a] === false && s.unlockRevealsChosen); s[a] = !on; s.unlockRevealsChosen = true; } else s[a] = !s[a]; DQ.audioApply(); DQ.musicRefresh(); UI.renderHud(); UI.render(false); },
   digestsetting: id => {
     if (!Object.hasOwn(DQ.digestCategories, id)) return;
     const digest = S().settings.digest ||= {};

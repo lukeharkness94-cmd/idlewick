@@ -14,12 +14,12 @@ const path = require('node:path');
       await p.locator('#t-new').click(); await p.locator('#cr-go').click();
       await p.waitForFunction(() => DQ.started && document.querySelector('#title').hidden);
       const open = fam => p.evaluate(f => { for (let i = 0; i < 12; i++) DQ.closeModal(); const U = DQ.ui; U.shopTab = 'buy'; U.shopCategory = 'tools'; U.skillCommissionSelected = null; U.shopToolFamily = f; DQ.go('shop'); U.render(true); }, fam);
-      const state = () => p.evaluate(() => ({ on: document.querySelector('.shop-tools .filter-toggle')?.getAttribute('aria-checked'), cards: document.querySelectorAll('.shop-tools [data-tool]').length,
+      const state = () => p.evaluate(() => ({ ready: DQ.data.TOOL_ORDER.map(t => 'tool_' + DQ.ui.shopToolFamily + '_' + t).filter(id => DQ.shopUpgradeState(id).ready).length, on: document.querySelector('.shop-tools .filter-toggle')?.getAttribute('aria-checked'), cards: document.querySelectorAll('.shop-tools [data-tool]').length,
         line: (document.querySelector('.shop-tools .avail-hidden') || {}).textContent || '', overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth }));
       const fam = await p.evaluate(() => DQ.data.TOOLS[0][0]);
       await open(fam);
       const s1 = await state();
-      assert.equal(s1.on, 'true', `${w}: ON for a fresh hero`); assert.ok(s1.cards < 10, 'only available tiers'); assert.match(s1.line, /^\d+ higher tiers? hidden · turn off Available only to preview them$/);
+      assert.equal(s1.on, 'true', `${w}: ON for a fresh hero`); assert.ok(s1.cards < 10, 'only tiers you can make now'); assert.equal(s1.cards, s1.ready, 'exactly the affordable tiers (26 Nov: coins, materials and level)'); assert.match(s1.line, /^\d+ tiers? you can't make yet hidden · turn off Available only to see them$/);
       if (process.env.SHOT_DIR) await p.screenshot({ path: path.join(process.env.SHOT_DIR, `shop-available-${w}.png`) });
       await p.locator('.shop-tools .filter-toggle').click();
       const s2 = await state(); assert.equal(s2.on, 'false'); assert.equal(s2.cards, 10, `${w}: OFF shows all ten tiers`); assert.equal(s2.line, '');
