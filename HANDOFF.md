@@ -972,3 +972,56 @@ For the next implementation session, follow [the Claude handoff](docs/claude-han
 ### Part C in the Claude handoff
 
 After stabilizing Part B, continue with Tasks 17–26. Start with the first-hour harness audit and verify each historical finding against current main. The [Claude handoff](docs/claude-handoff.md) links to the [original Part C brief](docs/claude-part-c-brief.md) with all requirements and acceptance checks.
+
+## Part C delivered, Part B stabilised (Claude, 26 Nov 2026)
+
+Branch `claude/part-b-c`, starting from `f2ab3a7`. The rules are summarised at the end of AGENTS.md. Simulated times are scripted replays, not player averages.
+
+### Part C, Tasks 17–26
+
+| Task | What changed | Evidence |
+| --- | --- | --- |
+| 17 | First-hour harness: fixed `SEED`, console errors logged, loot tier counts, allow-list audited | `scripts/play-first-hour.cjs`, docs/first-hour.md |
+| 18 | "Before <boss>" checklist (armour, ability, food/auto-eat) before the first attempt; Skip never blocks | `js/boss_checklist.js`, tests/boss-checklist.cjs |
+| 19 | Rarity labels re-banded (0.1 / 0.02 / 0.005). Seed 7 hour: Common 99 > Uncommon 47 > Rare 43 > Epic 7. Drop chances unchanged; identical seeded item totals | tests/rarity-tiers.cjs, scripts/audit-rarity.cjs |
+| 20 | Offline progression ceiling. Two-minute hero away 6 h: Hero 30 / Fishing 33 / 14,062 shrimp before, Hero 6 / Fishing 10 / 498 after; counter-fixture still reaches 33 | `js/offline_ceiling.js`, tests/offline-ceiling.cjs, docs/offline-ceiling.md |
+| 21 | Live notes leave after 6 s, one at a time, at most three per burst, never over a fight | tests/live-notes.cjs |
+| 22 | Patrol counter: already present; fixed freezing while the pointer rests on the card. 0→6 live at 1440 and 390 | tests/patrol-counter.cjs |
+| 23 | "Available only" ON by default per shelf family until you own one; "N higher tiers hidden" line | tests/shop-available-default.cjs |
+| 24 | Floating combat text on dark chips above the fighter; Now label wraps; no rail names cut | tests/readability-sweep.cjs |
+| 25 | Welcome Back: Decide later for every waiting encounter; Continue always visible; toasts clear pop-up footers | tests/viewport-fit-return.cjs |
+| 26 | "Something new" previews removed (a named perk or no clause; locked content still unnamed) | tests/next-preview.cjs |
+
+### Part B
+
+**Reward gap.** While a hero trains for a region boss, Home offers the region's existing challenge mini-bosses. A challenge needs its Combat level met and a battle forecast of at least 60% (50% in Saltmere, owner decision). Won challenges are claimed first.
+
+Five-hour replays, seed 19:
+
+| Kit | Longest gap, Scholarship to Old Tusk | Old Tusk | Barnacle / Saltmere challenges |
+| --- | ---: | ---: | --- |
+| Sword | 43½ min (was 82½) | 121 | Brinemaw 166½, Lanternjack 198, Barnacle 225½ |
+| Bow | 43½ min | 139½ | Saltmere challenges 237 and 241½, Barnacle 262 |
+| Staff | 61 min | 219½ | Crab Cull 227 |
+
+Details are in docs/part-b-hours-3-to-5.md.
+
+**Staff dead end.** A staff hero told to switch to a mallet sat on "Elemental Focus does nothing with this weapon" for 4½ hours. That step's button now swaps the ability (`abilswap`).
+
+**Accessibility.** See docs/accessibility-audit.md. There is no overflow at 390 or 1280 × 720. Controls are now at least 24 CSS px. Remaining exceptions are listed there.
+
+**Browser suite triage.** Ten suites failed. Six of them already failed on `f2ab3a7`, because Part B had moved recipe finds and unlocks into the bell, made Home compact and added the starter-weapon step. Those tests now assert the current behaviour. The triage also found real bugs, which are now fixed:
+
+- the First Steps scene was lost if you read the reward slowly;
+- Village Deliver and Complete threw before acting, so no restoration could be made from Village;
+- the shop footer said "Choose an item" while an item was selected;
+- the bell count was 10.5 px;
+- "Accepted" appeared for a blocked main quest, whose Accept button is now disabled with its reason;
+- bell rows for hatchings had no text;
+- owned beasts were labelled "Your companion".
+
+### Waiting on the owner
+
+- An offline ceiling for skills without a content gate. The proposed formulas are in docs/offline-ceiling.md.
+- Staff's 61-minute gap before Old Tusk.
+
