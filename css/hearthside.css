@@ -941,3 +941,25 @@ canvas.town-walkers{position:absolute;pointer-events:none;image-rendering:pixela
 html.calm .obj-pic .qp-cell.pop{animation:none}
 @media (prefers-reduced-motion:reduce){.obj-pic .qp-cell.pop{animation:none}.obj-pic .qp-cell img{transition:none}}
 @media (max-width:860px){.quest-obj-build{grid-template-columns:1fr}.quest-build{order:-1}}
+
+/* Village site markers, option A (owner, 26 Nov 2026): always-visible signs, one look per state */
+.village-scene .site-spot .sm-t{display:inline}
+.village-scene .site-spot.ps-done .sm-t{display:none}
+.village-scene .site-spot .site-mark{top:-10px;translate:0 -100%;gap:6px;font:700 15px var(--f-ui);line-height:1}
+.village-scene .site-spot .site-mark .sm-item{display:block;image-rendering:pixelated;width:32px;height:32px}
+.village-scene .site-spot .site-mark .ic{width:22px;height:22px}
+.village-scene .site-spot.ps-ready{outline:3px solid #9ad375;border-radius:10px;animation:site-ready 1.8s ease-in-out infinite}
+.village-scene .site-spot.ps-ready .site-mark{background:#2f8a3e;color:#fff;border:2px solid #d8ffc0;border-radius:999px;padding:5px 11px 5px 7px;box-shadow:0 0 0 4px #9ad37588,0 3px 10px #0008}
+.village-scene .site-spot.ps-can{outline:none}
+.village-scene .site-spot.ps-can .site-mark{background:#2a66b0;color:#fff;border:2px solid #cfe6ff;border-radius:999px;padding:3px 11px 3px 4px;box-shadow:0 3px 10px #0008}
+.village-scene .site-spot.ps-needs .site-mark{background:#efe6d2;color:#6a5a44;border:2px dashed #a8987a;border-radius:999px;padding:2px 9px 2px 4px;font-size:14px;box-shadow:0 2px 6px #0005;opacity:.92}
+.village-scene .site-spot.ps-needs .site-mark .sm-item,.village-scene .site-spot.ps-needs .site-mark .ic{filter:grayscale(1) opacity(.55)}
+.village-scene .site-spot.on .site-mark{outline:3px solid var(--brass,#c8a04a);outline-offset:2px}
+html.calm .village-scene .site-spot.ps-ready{animation:none}
+@media (max-width:860px){.village-scene .site-spot .site-mark{font-size:14px}}
+.site-legend .sl{gap:7px;background:var(--panel2);border-color:var(--line2,#c8b896)}
+.site-legend .sl b{color:var(--ink);font-size:15px}
+.site-legend .sl-sign{display:inline-block;font:700 14px var(--f-ui);line-height:1;padding:4px 9px;border-radius:999px}
+.site-legend .ps-ready .sl-sign{background:#2f8a3e;color:#fff;border:2px solid #d8ffc0}
+.site-legend .ps-can .sl-sign{background:#2a66b0;color:#fff;border:2px solid #cfe6ff}
+.site-legend .ps-needs .sl-sign{background:#efe6d2;color:#6a5a44;border:2px dashed #a8987a}

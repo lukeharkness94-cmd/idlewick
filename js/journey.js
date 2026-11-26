@@ -172,6 +172,14 @@ DQ.projectContribution = id => Object.entries(DQ.projectNeed(id)).flatMap(([item
 DQ.projectState = id => S().projects[id] ? 'done' : DQ.projectReady(id) ? 'ready' :
   DQ.projectContribution(id).some(([item]) => item !== 'coins') ? 'can' : 'needs';
 DQ.PROJECT_STATE = { needs: ['Needs supplies', 'crafting'], can: ['Can contribute', 'hammer'], ready: ['Ready to finish', 'star'], done: ['Restored', 'check'] };
+/* Village site markers (owner chose option A for every state, 26 Nov 2026): always-visible signs. Finish (green,
+   the site glows), Give (blue, the item you can hand in now) and Needs (faint dashed parchment, the next missing item
+   greyed out; a lock if you have never come across it, so undiscovered materials stay hidden). */
+const SITE_WORD = { ready: 'Finish', can: 'Give', needs: 'Needs' };
+const siteMarkArt = (id, ps, ic) => { const itemArt = k => D.ITEMS[k] && DQ.pixelArt && DQ.pixelArt.itemUrl ? `<img class="sm-item" src="${DQ.pixelArt.itemUrl(k)}" width="32" height="32" alt="" draggable="false">` : '';
+  if (ps === 'can') { const k = (DQ.projectContribution(id).find(([i]) => i !== 'coins') || [])[0]; return itemArt(k) || ico(ic); }
+  if (ps === 'needs') { const k = Object.keys(DQ.projectNeed(id)).find(i => i !== 'coins'); return k && (!DQ.itemDiscovered || DQ.itemDiscovered(k)) ? itemArt(k) || ico(ic) : ico('lock'); }
+  return ico(ic); };
 DQ.contributionText = id => DQ.projectContribution(id).map(([k, n]) => k === 'coins' ? `${fmt(n)} coins` : `${fmt(n)} ${D.ITEMS[k].name.toLowerCase()}`).join(', ');
 /* The opening arc: what each Willowbrook villager says when you finish their job, and what it changed. Shown on
    the quest-complete card (not the bell), so the first half hour has visible acknowledgement. Words only. */
@@ -421,9 +429,9 @@ UI.projectsPanel = () => {
   const canGive = !done && DQ.projectContribution(id).length > 0, voice = D.PROJECT_VOICES[id];
   const A = DQ.pixelArt, W = (A && A.SCENE_W) || 320, H = (A && A.SCENE_H) || 180, shown = new Set(entries.map(([k]) => k));
   const spots = A && A.siteLayout ? A.siteLayout(town).filter(sp => shown.has(sp.id)).map(sp => { const st = DQ.projectStage(sp.id), p = D.PROJECTS[sp.id], ps = DQ.projectState(sp.id), [lab, ic] = DQ.PROJECT_STATE[ps], give = DQ.contributionText(sp.id);
-    return `<button class="site-spot ps-${ps} ${ps === 'ready' ? 'deliver-ready' : ''} st${st} ${sp.id === id ? 'on' : ''}" style="left:${((sp.X - 5) / W * 100).toFixed(3)}%;top:${((sp.Y - 6) / H * 100).toFixed(3)}%;width:${(42 / W * 100).toFixed(3)}%;height:${(42 / H * 100).toFixed(3)}%" data-do="projectpick" data-a="${sp.id}" aria-pressed="${sp.id === id}" aria-label="${esc(p.name)}: ${esc(lab)}${give && ps !== 'done' ? '. You can give ' + esc(give) : ''}" data-tip="text:${esc(p.name)} · ${esc(lab)}${give && ps !== 'done' ? ': you can give ' + esc(give) : ''}"><span class="site-mark">${ico(ic)}<span class="sm-t">${esc(lab)}</span></span></button>`; }).join('') : '';
+    return `<button class="site-spot ps-${ps} ${ps === 'ready' ? 'deliver-ready' : ''} st${st} ${sp.id === id ? 'on' : ''}" style="left:${((sp.X - 5) / W * 100).toFixed(3)}%;top:${((sp.Y - 6) / H * 100).toFixed(3)}%;width:${(42 / W * 100).toFixed(3)}%;height:${(42 / H * 100).toFixed(3)}%" data-do="projectpick" data-a="${sp.id}" aria-pressed="${sp.id === id}" aria-label="${esc(p.name)}: ${esc(lab)}${give && ps !== 'done' ? '. You can give ' + esc(give) : ''}" data-tip="text:${esc(p.name)} · ${esc(lab)}${give && ps !== 'done' ? ': you can give ' + esc(give) : ''}"><span class="site-mark">${siteMarkArt(sp.id, ps, ic)}<span class="sm-t">${esc(SITE_WORD[ps] || lab)}</span></span></button>`; }).join('') : '';
   const states = ['needs', 'can', 'ready'].map(k => ({ k, n: entries.filter(([key]) => DQ.projectState(key) === k).length }));
-  const legend = `<div class="site-legend" role="list" aria-label="What each site needs">${states.map(({ k, n }) => `<span class="sl ps-${k}" role="listitem">${ico(DQ.PROJECT_STATE[k][1])}<b>${n}</b> ${esc(DQ.PROJECT_STATE[k][0])}</span>`).join('')}</div>`;
+  const legend = `<div class="site-legend" role="list" aria-label="What each site needs">${states.map(({ k, n }) => `<span class="sl ps-${k}" role="listitem"><span class="sl-sign">${esc(SITE_WORD[k])}</span><b>${n}</b> ${esc(DQ.PROJECT_STATE[k][0])}</span>`).join('')}</div>`;
   const now = DQ.projectState(id), nowGive = DQ.contributionText(id);
   const siteNow = done ? '' : `<p class="site-now ps-${now}">${ico(DQ.PROJECT_STATE[now][1])}<b>${esc(project.name)}</b> · ${esc(DQ.PROJECT_STATE[now][0])}${nowGive && now !== 'needs' ? `: you can give ${esc(nowGive)} now.` : `. ${nowGive ? 'Your coins are ready, but it still needs materials.' : 'Gather what it lists on the right.'}`}</p>`;
   const story = done ? `<p class="proj-story">${esc(project.story)}</p>${voice ? `<p class="villager-line"><b>${esc(voice[0])}:</b> “${esc(voice[1])}”</p>` : ''}`
