@@ -102,6 +102,7 @@ UI.travelAnim = to => {
 /* ---------- Shop ---------- */
 UI.itemSub = it => { const b = UI.statLine(it.b), r = Object.entries(it.req || {}).map(([sk, l]) => `<span class="${DQ.skillUnlocked(sk) && DQ.lvl(sk) >= l ? 'ok' : 'bad'}">${D.SK[sk].name} ${l}</span>`).join(' '); return [it.type === 'relic' ? `${esc(it.desc || '')} Keepsake: it cannot be sold.` : '', it.heal ? `Heals ${it.heal}` : '', it.type === 'tool' ? it.toolSkill?`${+(D.TOOL_SPEED[it.tier]*100).toFixed(1)}% faster ${D.SK[it.toolSkill].name.toLowerCase()}`:esc(it.sub||'Kept tool') : '', b, r].filter(Boolean).join(' · '); };
 UI.shopSelected = {};
+let recentPurchase = null;
 UI.shopTabs = tab => `<div class="tabs">${[['buy','Buy'], ['rare','Rare wares'], ['sell','Sell']].map(([value, label]) => `<button class="tab ${tab === value ? 'on' : ''}" data-do="shoptab" data-a="${value}">${label}</button>`).join('')}</div>`;
 /* what an item asks of you before you can use it: gear requirements, a seed's Farming level (Nov 2026, from the player) */
 DQ.itemReqs = id => { const it = D.ITEMS[id]; if (!it) return []; const out = Object.entries(it.req || {}).filter(([sk]) => D.SK[sk]);
@@ -330,7 +331,9 @@ const DO = {
   buy: (id, quantity) => {
     const count = +quantity || UI.shopQty;
     if (quantity && (!Number.isSafeInteger(count) || count < 1 || count > DQ.buyMax(id))) return;
+    if (recentPurchase?.id === id && recentPurchase.count === count && performance.now() - recentPurchase.at < 350) return;
     if (DQ.buy(id, count)) {
+      recentPurchase = { id, count, at: performance.now() };
       DQ.log(`You buy ${count}× ${D.ITEMS[id].name.toLowerCase()}.`);
       UI.render(false);
     }
@@ -436,10 +439,18 @@ document.addEventListener('change', e => {
 });
 
 /* ---------- Keyboard ---------- */
-const KEYS = { m: 'mute', t: 'map', s: 'shop', q: 'quests', c: 'character', b: 'bank', f: 'farming', h: 'house' };
+const KEYS = { m: 'mute', t: 'map', s: 'shop', q: 'quests', c: 'character', b: 'bank', f: 'farming', h: 'house', v: 'projects', g: 'bestiary' };
 const NUM = ['overview', 'fishing', 'woodcutting', 'mining', 'thieving', 'cooking', 'smithing', 'crafting', 'magic', 'combat'];
 addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || !DQ.started) return;
+  const modal = document.querySelector('.modal');
+  if (modal) {
+    if (modal.classList.contains('welcome-digest') && e.key === 'Enter' && !e.target.closest('button, a')) {
+      e.preventDefault();
+      modal.querySelector('.m-act .primary')?.click();
+    }
+    return;
+  }
   const k = e.key.toLowerCase();
   if (k === ' ' && !e.target.closest('button')) { e.preventDefault(); DQ.act ? DQ.stopAct() : DO.resume(); }
   else if (k === 'm') DO.mute();

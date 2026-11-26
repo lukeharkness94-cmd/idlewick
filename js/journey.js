@@ -420,7 +420,8 @@ UI.projectsPanel = () => {
     const options = bundleOptions(id, material).map(item => {
       const name = item === 'coins' ? 'Coins' : D.ITEMS[item].name;
       const amount = Math.min(left, Math.floor(held(item)));
-      return `<div class="bundle-option"><span>${item === 'coins' ? ico('coin') : DQ.itemIco(D.ITEMS[item])}${esc(name)}</span>${amount > 0 ? `<button class="btn sm" data-do="projectgive" data-a="${id}|${item}">Deliver ${fmt(amount)}</button>` : item !== 'coins' ? UI.routeChip?.(item) || '' : ''}</div>`;
+      const art = item === 'coins' ? ico('coin') : DQ.itemDiscovered?.(item) ? DQ.itemIco(D.ITEMS[item]) : ico('lock');
+      return `<div class="bundle-option"><span>${art}${esc(name)}</span>${amount > 0 ? `<button class="btn sm" data-do="projectgive" data-a="${id}|${item}">Deliver ${fmt(amount)}</button>` : item !== 'coins' ? UI.routeChip?.(item) || '' : ''}</div>`;
     }).join('');
     return `<section class="proj-line project-bundle ${left ? '' : 'ok'}"><h3>${esc(bundleLabel(id, material))}</h3><span class="proj-t"><b>${fmt(got)} / ${fmt(n)}</b> · ${left ? (project.relic ? 'Needed' : 'Reward: 1 Bread') : '✓ Delivered'}</span>${left ? options : ''}</section>`;
   }).join('')}</div>`;

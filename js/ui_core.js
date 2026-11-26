@@ -58,7 +58,7 @@ const B = UI.B = {
   xpbar: (e, a) => { const w = DQ.pctNext(a).toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; },
   xpline: (e, a) => set(e, `${fmt(S().xp[a])} XP`),
   bonus: (e, a) => { const c = ['melee', 'attack', 'strength', 'defence', 'hitpoints', 'ranged', 'magic'].includes(a) ? DQ.combatCatchUp() : 0; const ep = DQ.earlyPace ? DQ.earlyPace(a) : 1, bon = Math.round((DQ.xpBonusBase(a) / ep - 1) * 100); set(e, `${bon > 0 ? `+${bon}% XP` : 'Normal XP'}${ep < 1 ? ` · early levels ${Math.round(ep * 100)}% pace` : ''}${c > 0 ? ` · catch-up +${Math.round(c * 100)}%` : ''}`); },
-  coins: e => set(e, fmt(S().coins)),
+  coins: e => set(e, DQ.formatCoins(S().coins)),
   combat: e => set(e, DQ.combatLvl()),
   combatbar: e => { const w = DQ.combatProgress().pct.toFixed(1) + '%'; if (e.style.width !== w) e.style.width = w; },
   combatnext: e => { const c = DQ.combatProgress(); set(e, c.best ? `${Math.floor(c.pct)}% to ${c.next}` : 'Max'); },

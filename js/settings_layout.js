@@ -17,7 +17,8 @@ UI.V.settings=()=>{
  const name=take(iface,'.nameedit'),dev=take(about,'[data-do="devtog"]');
  const size=body(get('Interface size'));
  const backdrop=body(get('Backdrop'));
- const display=[card('Appearance',themeHtml+`<div class="settings-field"><h3>Interface size</h3>${size}<small class="dim">Size preference applies on desktop.</small></div><div class="settings-field"><h3>Backdrop</h3>${backdrop}</div>`),card('Lettering',body(get('Lettering')),'lettering-set'),card('Notifications & accessibility',body(iface))];
+ const notation = `<div class="settings-field"><h3>Number notation</h3><div class="btnrow wrap">${[['default','Default'],['suffix','Suffix · 1.2k'],['scientific','Scientific · 1.2e3']].map(([id, label]) => `<button class="btn" data-do="numbernotation" data-a="${id}" aria-pressed="${(Q.S.settings.numberNotation || 'default') === id}">${label}</button>`).join('')}</div></div>`;
+ const display=[card('Appearance',themeHtml+`<div class="settings-field"><h3>Interface size</h3>${size}<small class="dim">Size preference applies on desktop.</small></div><div class="settings-field"><h3>Backdrop</h3>${backdrop}</div>`),card('Lettering',body(get('Lettering'))+notation,'lettering-set'),card('Notifications & accessibility',body(iface))];
  const volume=take(audio,'[data-do="set"][data-a="muted"]')+['masterVol','vol','musicVol','ambVol'].map(k=>take(audio,`label:has([data-in="${k}"])`)).join('');
  const musicLabel=audio?.querySelector('[data-do="set"][data-a="music"] b');if(musicLabel)musicLabel.textContent='Music';
  const layers=['music','ambience','sfx'].map(k=>take(audio,`[data-do="set"][data-a="${k}"]`)).join('');
@@ -32,8 +33,8 @@ UI.V.settings=()=>{
  const danger=take(save,'[data-do="newgame"]'),backupList=save?.querySelector('.bklist')?.parentElement;
  const backupHtml=backupList?.outerHTML||'<p class="dim">No automatic backups yet. Your recent backups on this device will appear here.</p>';backupList?.remove();
  const autosave=save?.querySelector('.phead small')?.textContent||'';
- const saveCards=[card('Backup & transfer',`<p class="sm dim">${esc(autosave)}</p>`+body(save)),card('Automatic backups',backupHtml),card('Start over','<p>Make a backup before starting a new hero.</p>'+danger,'settings-danger')];
- const shortcuts=get('Shortcuts');shortcuts?.querySelector('.keys')?.insertAdjacentHTML('beforeend','<dt><kbd>L</kbd></dt><dd>Switch light/dark theme</dd>');
+ const saveCards=[card('Backup & transfer',`<p class="sm dim">${esc(autosave)}</p>`+body(save)+'<div class="btnrow wrap"><button class="btn" data-do="copystring">Copy save string</button><button class="btn" data-do="pastestring">Import save string</button></div>'),card('Automatic backups',backupHtml),card('Start over','<p>Make a backup before starting a new hero.</p>'+danger,'settings-danger')];
+ const shortcuts=get('Shortcuts');shortcuts?.querySelector('.keys')?.insertAdjacentHTML('beforeend','<dt><kbd>L</kbd></dt><dd>Switch light/dark theme</dd><dt><kbd>Enter</kbd> or <kbd>Esc</kbd></dt><dd>Continue from Welcome Back</dd><dt><kbd>V</kbd> / <kbd>G</kbd></dt><dd>Village / Guide</dd>');
  const tools=card('Testing & artwork',body(get('Playtest'))+body(get('Art showcase'))+dev);
  const helpCards=[card('Keyboard shortcuts',body(shortcuts)),card('About Idlewick',body(about)),tools];
  for(const[name,p]of panels)if(!used.has(name))helpCards.push(card(esc(name),body(p)));
@@ -45,4 +46,27 @@ UI.V.settings=()=>{
 UI.after.settings=()=>{};
 const render0=UI.render;UI.render=(...args)=>{const r=render0(...args);if(UI.view==='settings'){const nav=document.getElementById('subnav');if(nav?.querySelectorAll('.stab').length===1&&nav.querySelector('[data-a="settings"]'))nav.innerHTML='';}return r;};
 UI.DO.settingsgroup=id=>{if(groups.some(g=>g[0]===id)){UI.tab.settingsPanel=id;UI.render(false);document.querySelector('.settings-navigation [data-a="'+id+'"]')?.focus({preventScroll:true});}};
+UI.DO.numbernotation = id => {
+ if (!['default', 'suffix', 'scientific'].includes(id)) return;
+ Q.S.settings.numberNotation = id;
+ Q.save(); UI.renderHud(); UI.render(false);
+};
+UI.DO.copystring = () => {
+ const value = Q.exportSave();
+ Q.modal({ title: 'Copy save string', body: `<label for="save-string">Save string</label><textarea id="save-string" readonly rows="6">${esc(value)}</textarea>`,
+   actions: [{ label: 'Done' }, { label: 'Copy', primary: true, fn: () => {
+     const field = document.querySelector('#save-string');
+     field.focus(); field.select();
+     navigator.clipboard?.writeText(value).then(() => Q.toast('Save string copied.'), () => Q.toast('Use your device’s Copy command.'));
+     return false;
+   } }] });
+};
+UI.DO.pastestring = () => {
+ Q.modal({ title: 'Import save string', body: '<p>This replaces the hero on this device.</p><label for="save-string">Paste the save string</label><textarea id="save-string" rows="6"></textarea>',
+   actions: [{ label: 'Cancel' }, { label: 'Replace and reload', primary: true, fn: () => {
+     const value = document.querySelector('#save-string').value.trim();
+     if (!Q.importSave(value)) { Q.toast('That save could not be imported.', true); return false; }
+     location.reload();
+   } }] });
+};
 })();

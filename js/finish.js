@@ -54,7 +54,7 @@ if (coins0) UI.B.coins = e => {
   const from = st.now, start = performance.now(), dur = Math.min(900, 380 + Math.log10(target - from + 1) * 120);
   if (st.raf) cancelAnimationFrame(st.raf);
   const step = t => { const k = Math.min(1, (t - start) / dur), ease = 1 - Math.pow(1 - k, 3), v = Math.round(from + (target - from) * ease);
-    st.now = v; UI.set(e, DQ.fmt(v)); st.raf = k < 1 ? requestAnimationFrame(step) : 0; if (k >= 1) { e.classList.remove('fin-roll'); } };
+    st.now = v; UI.set(e, DQ.formatCoins(v)); st.raf = k < 1 ? requestAnimationFrame(step) : 0; if (k >= 1) { e.classList.remove('fin-roll'); } };
   Object.assign(st, { to: target }); e.classList.add('fin-roll'); st.raf = requestAnimationFrame(step);
 };
 

@@ -2203,7 +2203,7 @@ body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)
    One type scale: 16.5px body, 16px button labels, Alegreya SC headings (bundled locally), meta text at 14px.
    Supersedes the "Density at 100% zoom" step-down. Panels keep tight padding so larger text does not add empty space.
    Revert by deleting this block. */
-:root{--t-body:16.5px;--t-meta:14px;--t-btn:16px;--t-h2:20px;--t-h3:17px}
+:root{--t-body:18px;--t-meta:14px;--t-btn:16px;--t-h2:20px;--t-h3:17px}
 body{font-size:var(--t-body)!important;line-height:1.5}
 h1,h2,h3,.phead h2,.panel h2{font-family:var(--f-display)!important;font-weight:700;letter-spacing:.01em}
 .panel h2,.phead h2,h2{font-size:var(--t-h2)!important}

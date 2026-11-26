@@ -5,7 +5,17 @@ const DQ = window.DQ;
 DQ.$ = (s, r = document) => r.querySelector(s);
 DQ.$$ = (s, r = document) => [...r.querySelectorAll(s)];
 DQ.fmt = n => Math.floor(n).toLocaleString('en-US');
-DQ.fmtK = n => { n = Math.floor(n); if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B'; if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 1 : 2) + 'M'; if (n >= 1e5) return Math.floor(n / 1e3) + 'K'; return n.toLocaleString('en-US'); };
+DQ.fmtK = n => {
+  n = Math.floor(n);
+  const notation = DQ.S?.settings?.numberNotation;
+  if (Math.abs(n) >= 1000 && notation === 'scientific') return n.toExponential(1).replace('e+', 'e');
+  if (Math.abs(n) >= 1000 && notation === 'suffix') return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(n).toLowerCase();
+  if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 1 : 2) + 'M';
+  if (n >= 1e5) return Math.floor(n / 1e3) + 'K';
+  return n.toLocaleString('en-US');
+};
+DQ.formatCoins = n => ['suffix', 'scientific'].includes(DQ.S?.settings?.numberNotation) ? DQ.fmtK(n) : DQ.fmt(n);
 DQ.rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 DQ.pick = a => a[Math.floor(Math.random() * a.length)];
 DQ.clamp = (v, a, b) => Math.min(b, Math.max(a, v));

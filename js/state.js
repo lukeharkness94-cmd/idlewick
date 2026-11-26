@@ -2,6 +2,7 @@
 (() => {
 const DQ = window.DQ, D = DQ.data, { clamp } = DQ;
 const SAVE_KEY = 'dashboard-quest-save-v2';
+const RECOVERY_KEY = SAVE_KEY + '-previous';
 // Steam desktop supplies durable, account-scoped files through a narrow bridge.
 // Browser builds retain their existing save key and localStorage behavior.
 const store = DQ.storage = window.idlewickDesktop?.storage || {
@@ -100,6 +101,11 @@ function candidateState(o) {
     }
   }
   const result = merge(base, o);
+  const daily = result.dailyErrands;
+  if (daily && (!Number.isSafeInteger(daily.day) || daily.day < 0 || !Array.isArray(daily.rows) || daily.rows.length !== 3 ||
+    new Set(daily.rows.map(row => row?.event)).size !== 3 ||
+    daily.rows.some(row => !record(row) || !['catch', 'chop', 'cook', 'mine', 'kill'].includes(row.event) ||
+      !Number.isSafeInteger(row.have) || row.have < 0 || row.have > 8 || typeof row.paid !== 'boolean'))) delete result.dailyErrands;
   if (!Object.prototype.hasOwnProperty.call(o.xp,'research') && DQ.researchXp) {
     result.xp.research = Object.keys(result.research.done).reduce((sum,id)=>sum+(result.research.done[id]&&D.TECH[id]?DQ.researchXp(D.TECH[id]):0),0);
   }
@@ -167,11 +173,27 @@ function candidateState(o) {
 DQ.validateSave = candidateState;
 DQ.hasSave = () => { try { return !!store.getItem(SAVE_KEY); } catch (e) { return false; } };
 DQ.load = () => {
+  let raw;
   try {
-    const raw = store.getItem(SAVE_KEY); if (!raw) return false;
+    raw = store.getItem(SAVE_KEY); if (!raw) return false;
     const next = candidateState(JSON.parse(raw));
     DQ.S = next; observedSave = raw; return true;
-  } catch (e) { DQ.saveHealth = 'The saved hero could not be loaded. Keep a copy before starting again.'; return false; }
+  } catch (e) {
+    if (!window.idlewickDesktop) {
+      try {
+        const previous = store.getItem(RECOVERY_KEY);
+        if (previous) {
+          DQ.S = candidateState(JSON.parse(previous));
+          observedSave = raw;
+          recoveredSave = true;
+          DQ.saveHealth = 'Opened the previous verified save.';
+          return true;
+        }
+      } catch (backupError) {}
+    }
+    DQ.saveHealth = 'The saved hero could not be loaded. Keep a copy before starting again.';
+    return false;
+  }
 };
 function migrate(S) {
   /* Attack + Strength became Melee (Nov 2026): Melee takes the higher of the two; the lower still counts towards Hero level */
@@ -202,8 +224,19 @@ function migrate(S) {
 }
 DQ.saveHealth = '';
 DQ.saveLocation = () => window.idlewickDesktop?.storage ? 'desktop' : window.self !== window.top ? 'preview' : 'browser';
-let observedSave;
+let observedSave, recoveredSave = false;
 try { observedSave = store.getItem(SAVE_KEY); } catch (e) {}
+const writeSave = (current, next) => {
+  if (current && !recoveredSave && !window.idlewickDesktop) {
+    try { store.setItem(RECOVERY_KEY, current); } catch (error) {
+      // The browser commits each key atomically. A full recovery slot should not prevent saving.
+      if (error?.name !== 'QuotaExceededError') throw error;
+    }
+  }
+  store.setItem(SAVE_KEY, next);
+  if (store.getItem(SAVE_KEY) !== next) throw new Error('Save write could not be verified');
+  recoveredSave = false;
+};
 DQ.save = () => {
   if (DQ.forecasting) return false; // Trial progression must never reach the real save.
   try {
@@ -214,8 +247,7 @@ DQ.save = () => {
       return false;
     }
     const next = JSON.stringify({ ...DQ.S, lastSeen: Date.now() });
-    store.setItem(SAVE_KEY, next);
-    if (store.getItem(SAVE_KEY) !== next) throw new Error('Save write could not be verified');
+    writeSave(current, next);
     observedSave = next; DQ.S.lastSeen = JSON.parse(next).lastSeen; DQ.saveHealth = '';
     return true;
   } catch (e) {
@@ -224,7 +256,7 @@ DQ.save = () => {
   }
 };
 window.idlewickDesktop?.onBeforeClose?.(() => !DQ.started || DQ.save());
-DQ.eraseSave = () => { try { store.removeItem(SAVE_KEY); observedSave = null; } catch (e) {} };
+DQ.eraseSave = () => { try { if (!window.idlewickDesktop) store.removeItem(RECOVERY_KEY); store.removeItem(SAVE_KEY); observedSave = null; recoveredSave = false; } catch (e) {} };
 DQ.exportSave = () => btoa(unescape(encodeURIComponent(JSON.stringify(DQ.S))));
 DQ.importSave = text => {
   try {
@@ -232,8 +264,7 @@ DQ.importSave = text => {
     const current = store.getItem(SAVE_KEY);
     if (observedSave !== undefined && current !== observedSave) return false;
     const raw = JSON.stringify({ ...next, lastSeen: Date.now() });
-    store.setItem(SAVE_KEY, raw);
-    if (store.getItem(SAVE_KEY) !== raw) throw new Error('Imported save write could not be verified');
+    writeSave(current, raw);
     observedSave = raw; DQ.S = next; DQ.S.lastSeen = JSON.parse(raw).lastSeen; DQ.saveHealth = ''; return true;
   } catch (e) { return false; }
 };
