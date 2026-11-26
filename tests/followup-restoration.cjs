@@ -1,7 +1,8 @@
 /* Part B reward gap, follow-up restoration (owner, 26 Nov 2026). Granted fixture: Grubnash beaten, in Mossbarrow with
    the market restored, both regional challenges beaten, Combat 15 (< Old Tusk's 18), Woodcutting 17, 900 coins.
    Home then offers the windmill: first a route to the supply shelf's wool (selected, never bought by the route), then the
-   project's own steps; once it is restored no further restoration is offered for this boss. */
+   project's own steps. Offered only after 30 minutes of play without a reward (S.lastBeatAt); restoring the windmill is a
+   reward, so nothing more is offered straight after. */
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 (async () => {
@@ -16,7 +17,7 @@ const { chromium } = require('playwright');
       S.towns.willowbrook.boss = true; S.towns.mossbarrow = { visited: true, boss: false }; S.town = 'mossbarrow'; S.projects.market = true; S.minis = { gnarlroot: true, rookmother: true };
       const bq = D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === 'oldtusk')); S.q[bq.id] = { s: 'active', p: bq.obj.map(() => 0) };
       for (const sk of ['melee', 'defence', 'hitpoints']) { let n = 0; while (Q.combatLvl() < 15 && n++ < 500) Q.addXp(sk, 200, { quiet: true }); }
-      for (let i = 0; i < 60; i++) Q.addXp('woodcutting', 300, { quiet: true }); S.coins = 900; Q.give('bread', 30);
+      for (let i = 0; i < 60; i++) Q.addXp('woodcutting', 300, { quiet: true }); S.coins = 900; Q.give('bread', 30); S.lastBeatAt = (S.gameTime || 0) - 31 * 60e3;
       const out = { steps: [] }; const coins0 = S.coins;
       let n = Q.journeyNext(); out.steps.push(n.title);
       Q.ui.DO[n.action](n.a, n.b); out.routeSpent = coins0 - S.coins; out.view = Q.ui.view; out.selected = Q.ui.localSupply;
@@ -28,7 +29,7 @@ const { chromium } = require('playwright');
     console.log(JSON.stringify(r));
     assert.match(r.steps[0], /^Buy 8 wool for the windmill sails$/); assert.equal(r.routeSpent, 0, 'the route spends nothing');
     assert.equal(r.view, 'shop'); assert.equal(r.selected, 'market:wool'); assert.ok(r.bought);
-    assert.ok(r.done, 'windmill restored'); assert.equal(r.offered, null, 'one follow-up restoration per boss');
+    assert.ok(r.done, 'windmill restored'); assert.equal(r.offered, null, 'not offered again right after a reward');
     assert.match(r.after, /Old Tusk/);
     assert.deepEqual(errors, []);
     console.log('followup-restoration: ok');

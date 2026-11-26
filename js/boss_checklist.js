@@ -101,18 +101,23 @@ Q.bossPrepStep = () => {
 /* the checklist is for the first attempt: once a fight with the boss has started it does not come back */
 const start0 = Q.startAct;
 Q.startAct = (kind, id, o) => { const r = start0(kind, id, o); if (r && kind === 'fight' && D.MON[id] && D.MON[id].boss && !Q.forecasting && !(Q.sim && Q.sim.on && !Q.sim.activities)) prep()[id] = prep()[id] || 'tried'; return r; };
-/* Follow-up restoration (owner, 26 Nov 2026: close Staff's 61-minute gap before Old Tusk). Once the region's challenges
-   are done and the hero is still training for its boss, Home offers one more of the town's existing restorations, but
-   only one beyond the first, and only when every material can be had now: already carried, gathered at the hero's level
+/* Follow-up restoration (owner, 26 Nov 2026: close Staff's 61-minute gap before Old Tusk). When no challenge is on offer
+   and 30 minutes of play have passed since the last reward, Home offers one more of the town's existing restorations
+   (at most two beyond the first), and only when every material can be had now: already carried, gathered at the hero's level
    here, or sold in this town's shop. The step is the project's own journey step; nothing new is added. */
 const gettable = (id, n) => { if (id === 'coins') return true; if (Q.have(id) >= n) return true;
   for (const kind of ['fish', 'wood', 'mine', 'thieve']) if ((D.NODES[kind] || []).some(x => x.item === id && Q.skillUnlocked(x.skill) && Q.lvl(x.skill) >= x.lvl && (!Q.nodeHere || Q.nodeHere(x)))) return true;
   return (D.SHOPS[S().town] || []).includes(id) || (D.LOCAL_SUPPLIES || []).some(o => o.item === id && Q.localSupplyReason && !Q.localSupplyReason(o)); };
+/* the last reward beat, in game time: a claimed quest or a restored building (offline catch-up counts too) */
+Q.BEAT_GAP_MS = 30 * 60e3;
+const beat = () => { if (!Q.forecasting) S().lastBeatAt = S().gameTime || 0; };
+for (const f of ['claimQuest', 'finishProject']) { const f0 = Q[f]; if (f0) Q[f] = (...a) => { const r = f0(...a); beat(); return r; }; }
 Q.followupRestorationStep = () => {
-  const b = boss(); if (!b || S().town !== b.town || Q.combatLvl() >= b.boss.req) return null;
-  if (minisFor(b.town).some(m => !beaten(m))) return null;
+  const b = boss(); if (!b || S().town !== b.town) return null;
+  /* only once half an hour of play has passed without a reward, and at most two beyond the town's first restoration */
+  if ((S().gameTime || 0) - (S().lastBeatAt ?? (S().gameTime || 0)) < Q.BEAT_GAP_MS) return null;
   const list = Object.entries(D.PROJECTS).filter(([, p]) => p.town === b.town && !p.relic);
-  if (list.filter(([id]) => S().projects[id]).length >= 2) return null;
+  if (list.filter(([id]) => S().projects[id]).length >= 3) return null;
   const open = list.find(([id]) => !S().projects[id] && Object.entries(Q.projectNeed(id)).every(([k, n]) => gettable(k, n)) && (Q.projectNeed(id).coins || 0) <= S().coins + 400);
   if (!open) return null;
   /* a material only the town's supply shelf sells: route there with it selected (the player presses Buy) */
