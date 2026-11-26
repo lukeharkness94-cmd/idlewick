@@ -5595,6 +5595,28 @@ html:has(.home-glance) #hud .h-stats,html:has(.home-glance) #hud .h-task,html:ha
  #view .stock-item :is(.item-deltas,.bundle-indicator,.req-chips){grid-column:2/-1;justify-content:start}
  #view .stock-item .stock-price{grid-column:3;grid-row:1}
 }
+
+/* locked rail rows: a quiet bar showing how close the skill is to being learned */
+#skilldock .dk.locked .bar.dk-req{display:block;opacity:.85}
+#skilldock .dk.locked .bar.dk-req i{background:color-mix(in srgb,var(--c) 55%,var(--mute))}
+
+/* Home fits the window on desktop (review 26 Nov): the village on the left, the running task, coins, the goal and any
+   flag on the right; nothing below the fold at 1440x900 or 1280x720. The picture is cropped, never stretched. */
+@media (min-width:861px){
+ #view .home-glance{grid-template-columns:minmax(0,1fr) minmax(340px,440px);grid-template-rows:auto auto 1fr;align-items:start;height:calc(var(--vh100,100vh) - 190px);min-height:420px}
+ #view .home-glance>.home-scene{grid-column:1;grid-row:1/-1;height:100%;align-self:stretch}
+ #view .home-glance>.home-scene .scene{height:100%!important;aspect-ratio:auto!important;object-fit:cover;object-position:center 60%}
+ #view .home-glance>:not(.home-scene){grid-column:2}
+ #view .home-glance>.home-glance-row{grid-template-columns:minmax(0,1fr) auto}
+ #view .home-glance>[data-home-unit="flag"]{align-self:start}
+}
+/* the top bar keeps its coin count on Home too, like every other page */
+html:has(.home-glance) #hud .h-stats{display:revert}
+/* inline buy buttons: one line of label, one of price */
+.inline-buy .btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;white-space:nowrap;line-height:1.15}
+.inline-buy .btn b{font-weight:600}
+.inline-buy .btn small{white-space:nowrap}
+.inline-buy.one{grid-template-columns:minmax(0,1fr)}
 </style>
 
 </head>
@@ -15276,13 +15298,15 @@ UI.renderLog = () => {
   el.innerHTML = S().log.slice(0, 14).map(l => { const d = new Date(l.t); return `<li class="${esc(l.k || '')}"><time>${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}</time><span>${esc(l.m)}</span></li>`; }).join('') || `<li><time></time><span class="dim">Your adventures will be written here.</span></li>`;
 };
 UI.chart = () => {
-  const W = 600, H = 150, L = 36, T = 8, bw = (W - L) / 60, bk = DQ.hist.slice(-60), off = 60 - bk.length;
+  /* the chart is drawn at its container's own width so its labels keep their size (a fixed 600-wide viewBox blew
+     them up to ~30px on a wide Activity page) */
+  const cw = ($('#chart') && $('#chart').clientWidth) || 600, W = Math.max(300, Math.min(2400, Math.round(cw))), H = 150, L = 36, T = 8, bw = (W - L) / 60, bk = DQ.hist.slice(-60), off = 60 - bk.length;
   const sums = bk.map(b => Object.values(b).reduce((a, v) => a + v, 0)), top = Math.max(50, Math.ceil(Math.max(50, ...sums) / 50) * 50), ph = H - T - 16;
   let g = '', bars = '';
   for (let i = 0; i <= 2; i++) { const y = T + ph - ph * i / 2; g += `<line class="gl" x1="${L}" x2="${W}" y1="${y}" y2="${y}"/><text x="${L - 6}" y="${y + 3}" text-anchor="end">${DQ.fmtK(top * i / 2)}</text>`; }
   bk.forEach((b, i) => { let y = T + ph; D.SKILLS.forEach(k => { const v = b[k.id]; if (!v) return; const h = v / top * ph; y -= h; bars += `<rect x="${(L + (off + i) * bw + 1).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${h.toFixed(1)}" rx="1.5" fill="${k.col}"/>`; }); });
   const tot = bk.reduce((a, b) => a + Object.values(b).reduce((x, v) => x + v, 0), 0), secs = Math.max(30, Math.min(300, bk.length * 5));
-  const c = $('#chart'), sig = bk.length + ':' + sums.join(',') + ':' + top;
+  const c = $('#chart'), sig = bk.length + ':' + sums.join(',') + ':' + top + ':' + W;
   if (c && !(c.firstChild && (c.dataset.sig === sig || Date.now() - (+c.dataset.at || 0) < 6000))) { c.dataset.at = Date.now(); c.dataset.sig = sig; c.innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Experience gained over the last five minutes">${g}${bars}<text x="${L}" y="${H - 2}">5 min ago</text><text x="${W}" y="${H - 2}" text-anchor="end">now</text></svg>`; }
   const xph = $('#xph'); if (xph) UI.set(xph, `${DQ.fmt(tot / secs * 3600)} XP / hr`);
 };
@@ -15439,8 +15463,12 @@ UI.shopPreview = id => {
 UI.inlineBuy = id => {
   const reason = DQ.shopBuyLock(id), max = DQ.buyMax(id), price = DQ.buyPrice(id);
   if (reason) return `<button class="btn" disabled>${ico('lock')}${esc(reason)}</button>`;
-  const purchase = (n, label) => `<button class="btn" data-do="buy" data-a="${id}" data-b="${n}" ${n > max || n === 0 ? 'disabled' : ''}>${label}<small>${n > 0 && n <= max ? UI.money(n * price) : 'Need supplies or coins'}</small></button>`;
-  return `<div class="inline-buy" aria-label="Buy ${esc(D.ITEMS[id].name)}">${purchase(1, 'Buy 1')}${purchase(10, 'Buy 10')}${purchase(max, 'Buy max (' + fmt(max) + ')')}</div>`;
+  /* short labels so three buttons fit a card without wrapping (review 26 Nov); the full wording is in each button's
+     accessible name and tooltip. Gear is bought one at a time, so it gets a single Buy button. */
+  const it = D.ITEMS[id], why = 'Not enough coins or supplies';
+  const purchase = (n, label, full) => { const ok = n > 0 && n <= max; return `<button class="btn" data-do="buy" data-a="${id}" data-b="${n}" ${ok ? '' : 'disabled'} aria-label="${esc(full)}${ok ? '' : ': ' + why}" data-tip="text:${esc(ok ? full : why)}"><b>${label}</b><small>${ok ? UI.money(n * price) : '—'}</small></button>`; };
+  if (it && it.slot && it.type !== 'ammo') return `<div class="inline-buy one" aria-label="Buy ${esc(it.name)}">${purchase(1, 'Buy', 'Buy 1')}</div>`;
+  return `<div class="inline-buy" aria-label="Buy ${esc(D.ITEMS[id].name)}">${purchase(1, '×1', 'Buy 1')}${purchase(10, '×10', 'Buy 10')}${purchase(max, `Max ×${fmt(max)}`, `Buy max (${fmt(max)})`)}</div>`;
 };
 UI.V.shop = () => {
   const tab = UI.shopTab, buying = tab === 'buy', qty = UI.shopQty;
@@ -16973,7 +17001,7 @@ const showForecast = (id, text) => {
 UI.prepSteps = (m, fc) => {
   const steps = DQ.prepAdvice(m.id, fc || UI.lastForecast[m.id]).slice(0, 3);
   if (!steps.length) return `<p class="sm ok">✓ Nothing obvious to prepare: full health, armour in every slot and enough food.</p>`;
-  return `<ol class="prep-steps">${steps.map(x => `<li><b>${esc(x.title)}</b><small>${esc(x.text)}</small>${x.action ? `<button class="btn sm" data-do="${x.action}" data-a="${x.a}">${x.a === 'shop' ? 'Open shop' : x.a === 'character' ? 'Equipment' : x.a === 'combat' ? 'Train' : 'Go to ' + esc(D.SK[x.a] ? D.SK[x.a].name : x.a)}</button>` : ''}</li>`).join('')}</ol>`;
+  return `<ol class="prep-steps">${steps.map(x => `<li><b>${esc(x.title)}</b><small>${esc(x.text)}</small>${x.action ? `<button class="btn sm" data-do="${x.action}" data-a="${x.a}">${x.a === 'shop' ? 'Open shop' : x.a === 'character' ? 'Equipment' : x.a === 'combat' ? 'Train' : (D.SK[x.a] ? 'Go to ' + esc(D.SK[x.a].name) : D.ITEMS[x.a] ? 'Get ' + esc(D.ITEMS[x.a].name.toLowerCase()) : D.TOWN && D.TOWN[x.a] ? 'Go to ' + esc(D.TOWN[x.a].name) : 'Go there')}</button>` : ''}</li>`).join('')}</ol>`;
 };
 /* The boss special, spelled out: when it lands, how hard, and what stops it. */
 UI.specialLine = m => {
@@ -17755,10 +17783,18 @@ UI.skillDockOrder=()=>D.SKILLS.filter(s=>s.group!=='combat').sort((a,b)=>{
  const starter=s=>!s.quest&&!s.actionReq&&s.unlock<=1;
  return Number(starter(b))-Number(starter(a))||(dockOrder.indexOf(a.id)<0?999:dockOrder.indexOf(a.id))-(dockOrder.indexOf(b.id)<0?999:dockOrder.indexOf(b.id));
 });
-UI.skillDockVisible = () => UI.skillDockOrder().filter(skill => S().tut.showLockedSkills || DQ.skillUnlocked(skill.id));
+/* every skill stays in the rail, locked ones with their lock and requirement (owner, 26 Nov 2026: "I absolutely do not
+   want them collapsed or invisible, I want people to be able to see what they're unlocking") */
+UI.skillDockVisible = () => UI.skillDockOrder();
+/* how far a locked skill's requirements are met, averaged over its live counters (0-100) */
+UI.unlockPct = sk => { try { const s = D.SK[sk]; let parts = [];
+  if (s.actionReq && DQ.actionProgress) parts = DQ.actionProgress(sk).map(r => Math.min(1, (r.have || 0) / Math.max(1, r.need || 1)));
+  else if (s.quest && D.QM[s.quest]) { const q = D.QM[s.quest], p = S().q[q.id]; parts = p && p.s === 'done' ? [1] : q.obj.map((o, i) => p && DQ.objProg ? Math.min(1, DQ.objProg(q, p, i) / o.n) : 0); }
+  else if (s.unlock) parts = [Math.min(1, (DQ.advLvl ? DQ.advLvl() : 1) / s.unlock)];
+  return parts.length ? Math.round(100 * parts.reduce((a, b) => a + b, 0) / parts.length) : 0; } catch (e) { return 0; } };
 UI.lockedSkillsLink = (action = 'go') => {
   const count = UI.skillDockOrder().filter(skill => !DQ.skillUnlocked(skill.id)).length;
-  return count ? `<button class="btn sm dk-requirements" data-do="${action}" data-a="skillsummary">Locked skills · ${count}</button>` : '';
+  return count && action !== 'go' ? `<button class="btn sm dk-requirements" data-do="${action}" data-a="skillsummary">Locked skills · ${count}</button>` : '';
 };
 UI.renderDock = () => {
   const el = $('#skilldock'); if (!el) return;
@@ -17767,7 +17803,7 @@ UI.renderDock = () => {
     const lock = !DQ.skillUnlocked(s.id);
     const lv=DQ.lvl(s.id),need=lv>=99?0:Math.max(0,D.XPF[lv+1]-(S().xp[s.id]||0));
     const pop = UI.levelPop[s.id], popping = pop && Date.now() - pop < 1600;
-    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''} ${DQ.act && DQ.act.kind !== 'fight' && DQ.actSkill && DQ.actSkill() === s.id ? 'working' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" data-tip="rail:${s.id}" data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span><span class="notice-badge" data-b="notice:${s.page}" hidden></span>${!lock && S().unlocked[s.id] && S().newSkills && S().newSkills[s.id] ? '<span class="dk-new">New</span>' : ''}${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span>`}</span>${!lock && ap === s.page ? '<i class="dk-live" aria-label="Working"></i>' : ''}</button>`;
+    return `<button class="dk ${cur === s.page ? 'on' : ''} ${lock ? 'locked' : ''} ${popping ? 'lvl-pop' : ''} ${DQ.act && DQ.act.kind !== 'fight' && DQ.actSkill && DQ.actSkill() === s.id ? 'working' : ''}" style="--c:${s.col}${popping ? `;--pop-delay:-${Date.now() - pop}ms` : ''}" data-tip="rail:${s.id}" data-do="go" data-a="${s.page}" aria-label="${s.name}${lock ? ": " + esc(DQ.unlockHow(s.id)) : ""}">${DQ.artImage('skill',s.id,40,'skill-emblem',s.name)}<span class="dk-info"><span class="dk-top"><span class="dk-n">${s.name}</span><span class="notice-badge" data-b="notice:${s.page}" hidden></span>${!lock && S().unlocked[s.id] && S().newSkills && S().newSkills[s.id] ? '<span class="dk-new">New</span>' : ''}${lock?ico('lock'):`<b class="mono" data-b="lvl:${s.id}">${lv}</b>`}</span>${lock?`<span class="bar dk-req" title="Progress toward learning it"><i style="width:${UI.unlockPct(s.id)}%"></i></span>`:''}${lock?'':`<span class="bar"><i data-b="xpbar:${s.id}" style="width:${DQ.pctNext(s.id)}%"></i></span>`}</span>${!lock && ap === s.page ? '<i class="dk-live" aria-label="Working"></i>' : ''}</button>`;
   }).join('') + UI.lockedSkillsLink();
   UI.upd();
 };
@@ -17872,7 +17908,7 @@ UI.V.skillsummary = () => {
   const open = D.SKILLS.filter(skill => DQ.skillUnlocked(skill.id));
   const locked = D.SKILLS.filter(skill => !DQ.skillUnlocked(skill.id));
   return `<section class="panel skill-summary"><div class="phead"><h2>Your skills</h2><small>Total level <b data-b="totlvl"></b></small>
-    <button class="btn sm" data-do="skiponboarding" aria-pressed="${!!S().tut.showLockedSkills}">${S().tut.showLockedSkills ? 'Show learned skills in navigation' : 'Skip onboarding'}</button></div>
+    <button class="btn sm" data-do="skiponboarding" aria-pressed="${!!S().tut.showLockedSkills}">${S().tut.showLockedSkills ? 'Onboarding skipped' : 'Skip onboarding'}</button></div>
     <div class="skill-summary-scroll"><div class="skl">${skillSummaryRows(open)}</div>
     ${locked.length ? `<section class="skill-requirement-group"><h3>Locked skills · requirements</h3><div class="skl">${skillSummaryRows(locked)}</div></section>` : ''}</div></section>`;
 };
@@ -17952,6 +17988,9 @@ DQ.on('act', () => UI.packWarn(true));
 })();
 /* Inventory on desktop: Appearance & sharing sits under Preparations in the right column, so the equipment column fits short windows */
 (() => { const UI = window.DQ.ui; const r0 = UI.render; UI.render = (...a) => { const r = r0(...a); try { if (UI.view === 'character' && innerWidth > 860) { const ap = document.getElementById('equipment-appearance'), col = document.querySelector('#view .character-layout>.col'); if (ap && col && ap.parentElement !== col) { ap.classList.add('panel', 'appearance-side'); col.appendChild(ap); } } } catch (e) {} return r; }; })();
+/* keep the locked rows' requirement bars live as logs, fish and kills come in */
+(() => { const DQ = window.DQ, UI = DQ.ui; const upd = () => { document.querySelectorAll('#skilldock .dk.locked').forEach(b => { const i = b.querySelector('.dk-req i'), sk = (b.dataset.tip || '').replace('rail:', ''); if (i && sk && UI.unlockPct) i.style.width = UI.unlockPct(sk) + '%'; }); };
+  DQ.on('workcycle', upd); DQ.on('kill', upd); DQ.on('ui', () => { if (Math.random() < .2) upd(); }); })();
 
 </script>
 <script>
@@ -18912,7 +18951,7 @@ const ago = t => { const m = Math.round((Date.now() - t) / 60000); return m < 1 
 const savePanel = () => {
   const last = S().exportedAt, L = DQ.backups(), desktop = DQ.saveLocation() === 'desktop';
   return `<section class="panel"><div class="phead"><h2>Save data</h2><small class="mono">Autosaves every 10s</small></div><div class="stack">
-    <p class="sm dim" style="margin:0">${desktop ? 'Your game saves to this device’s Idlewick profile.' : 'Your game saves only in this browser location. Embedded previews may use temporary or separate storage when reopened or rebuilt. Saves do not sync with your ChatGPT account or project files.'} ${last ? `Last backup file: <b>${ago(last)}</b>.` : '<b>You have not made a backup file yet.</b>'} A file keeps your hero safe if you clear browser data or change device.</p>
+    <p class="sm dim" style="margin:0">${desktop ? 'Your game saves to this device’s Idlewick profile.' : 'Your game saves only in this browser location. Embedded previews may use temporary or separate storage when reopened or rebuilt. Saves are not shared between browsers or devices.'} ${last ? `Last backup file: <b>${ago(last)}</b>.` : '<b>You have not made a backup file yet.</b>'} A file keeps your hero safe if you clear browser data or change device.</p>
     <div class="btnrow wrap"><button class="btn primary" data-do="dlsave">${ico('save')}Download backup file</button><button class="btn" data-do="ulsave">Load from file</button><input type="file" id="impfile" accept=".txt,.idlewick,text/plain" hidden></div>
     <div class="btnrow wrap"><button class="btn sm" data-do="export">Copy save text</button><button class="btn sm" data-do="import">Paste save text</button><button class="btn sm" data-do="savenow">Save now</button></div>
     ${L.length ? `<div><div class="k" style="margin-bottom:6px">Automatic backups in this save location</div><p class="sm dim">${desktop ? 'Download a file to transfer your hero to another device.' : 'These share the same browser storage. Download a file before changing previews, browsers or devices.'}</p><div class="bklist">${L.map((b, i) => `<div class="bkrow"><span><b>${esc(b.name || 'Hero')}</b> · Hero ${b.hero}<small>${ago(b.t)} · ${b.reason}</small></span><button class="btn sm" data-do="bkrestore" data-a="${i}">Restore</button></div>`).join('')}</div></div>` : ''}
