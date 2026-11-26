@@ -12625,7 +12625,12 @@ DQ.toast = (msg, bad) => {
 
 /* Routine progress stays in the interface and recent activity.
    Unlocks, interruptions and boss victories receive a corner card. */
-const queue = [], MAX_NOW = 1;
+/* Live notes (Part C Task 21): one on screen at a time (the existing rise-from-the-bottom design), at most two more
+   waiting (three in any burst), the rest go straight to the bell; every note leaves after NOTE_TTL, whatever its kind;
+   and none overlays the Combat page during a fight (its Food and ability panels sit where notes rise). */
+const queue = [], MAX_NOW = 1, MAX_WAIT = 2, NOTE_TTL = 6000;
+DQ.NOTE_TTL = NOTE_TTL; DQ.NOTE_CAP = MAX_NOW + MAX_WAIT;
+const inFight = () => DQ.ui && DQ.ui.view === 'combat' && DQ.act && DQ.act.kind === 'fight';
 const live = () => $$('.note', notesEl).filter(n => !n.classList.contains('out'));
 const nowLive = () => live().length;
 DQ.noteLog = [];
@@ -12753,11 +12758,12 @@ DQ.notify = o => {
   const tier = DQ.notificationTier(o);
   if (tier === 'quiet') { markSilent(o); return; }
   if (o.key) { $$('.note', notesEl).filter(n => n.dataset.key === o.key).forEach(n => n.remove()); const i = queue.findIndex(q => q.key === o.key); if (i >= 0) queue.splice(i, 1); }
-  if (document.hidden || DQ.holdNotes || nowLive() >= MAX_NOW) { queue.push(o); return; }
+  if (inFight()) { markSilent(o); return; }
+  if (document.hidden || DQ.holdNotes || nowLive() >= MAX_NOW) { if (queue.length < MAX_WAIT) queue.push(o); else markSilent(o); return; }
   showNote(o);
 };
 /* Cards wait behind the welcome-back summary, then follow it one at a time. */
-function pump() { if (document.hidden || DQ.holdNotes) return; while (queue.length && nowLive() < MAX_NOW) showNote(queue.shift()); }
+function pump() { if (document.hidden || DQ.holdNotes) return; while (queue.length && nowLive() < MAX_NOW) { const o = queue.shift(); if (inFight()) markSilent(o); else showNote(o); } }
 
 const trunc = (t, n) => { t = String(t || '').replace(/<[^>]+>/g, ''); return t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t; };
 /* The bell keeps routine information; actionable alerts appear in context. */
@@ -12803,7 +12809,7 @@ function showNote(o) {
   el.setAttribute('role', 'status'); el.dataset.page = DQ.notificationPage(o); el.dataset.kind = o.kind || ''; el._notification = o;
   el.innerHTML = `<span class="n-ic">${ico(o.icon || 'star')}</span><div class="n-b"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(o.text)}</span>` : ''}${acts.length ? `<span class="n-acts">${acts.map((a, i) => `<button class="n-act" data-i="${i}">${esc(a.label)}</button>`).join('')}</span>` : ''}</div><button class="n-x" aria-label="Dismiss">${ico('close')}</button><i class="n-t"></i>`;
   notesEl.appendChild(el);
-  const ttl = o.ttl || 7500; let timer, left = ttl, started = performance.now();
+  const ttl = NOTE_TTL; let timer, left = ttl, started = performance.now();
   const bar = $('.n-t', el); bar.style.animationDuration = ttl + 'ms'; bar.style.animationPlayState = 'paused';
   const arm = () => { if (timer || document.hidden || el.contains(document.activeElement) || el.matches(':hover')) return; started = performance.now(); timer = setTimeout(() => dismiss(el), left); bar.style.animationPlayState = 'running'; };
   const pause = () => { if (timer) { clearTimeout(timer); timer = null; left = Math.max(0, left - (performance.now() - started)); } bar.style.animationPlayState = 'paused'; };
@@ -12820,6 +12826,8 @@ document.addEventListener('visibilitychange', () => {
   live().forEach(el => document.hidden ? el._pauseNote?.() : el._resumeNote?.());
   if (!document.hidden) pump();
 });
+/* a note already up when a fight starts on the Combat page leaves the screen (its bell entry stays) */
+DQ.on && DQ.on('ui', () => { if (inFight()) live().forEach(dismiss); });
 function dismiss(el) { if (!el || el.classList.contains('out')) return; el.classList.add('out'); setTimeout(() => { el.remove(); pump(); }, 320); }
 
 /* ---------- modal ---------- */
