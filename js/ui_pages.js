@@ -215,7 +215,7 @@ UI.detail = (id, from) => {
   if (from === 'bank') btns.push(`<button class="btn" data-do="withdraw" data-a="${id}" data-b="1">Take 1</button>${n > 1 ? `<button class="btn" data-do="withdraw" data-a="${id}" data-b="10">Take 10</button><button class="btn" data-do="withdraw" data-a="${id}" data-b="all">Take all</button>` : ''}`);
   else btns.push(`<button class="btn" data-do="deposit" data-a="${id}" data-b="all">Bank ${esc(it.name)}</button>`);
   if (!DQ.sellable(id)) btns.push(`<p class="keepsake-note">${ico('lock')} ${esc(DQ.KEEPSAKE_NOTE)}</p>`);
-  else btns.push(`<button class="btn" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell 1 ${UI.money(DQ.sellPrice(id))}</button>${n > 1 ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all ${UI.money(DQ.sellPrice(id) * n)}</button>` : ''}`);
+  else btns.push(`<button class="btn" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell 1 ${UI.money(DQ.sellPrice(id))}</button>${n > 1 ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all ${UI.money(DQ.sellPrice(id) * n)}</button>` : ''}${n > 2 ? `<button class="btn" data-do="sell" data-a="${id}" data-b="keep1" data-from="${from}">Sell all but 1 ${UI.money(DQ.sellPrice(id) * (n - 1))}</button>` : ''}`);
   return `<div class="detail"><div class="dt-h">${itm(id)}<div><b style="color:${it.col}">${esc(it.name)}</b><small>${fmt(n)} in ${from === 'bank' ? 'bank' : 'pack'}</small></div></div><div class="btnrow wrap">${btns.join('')}</div>${UI.bundleLinks?.(id)||''}<div class="detail-info">${(DQ.tips && DQ.tips.item ? DQ.tips.item(id) : '') || `<p class="sm">${UI.itemSub(it) || DQ.cap(it.type)}</p>`}</div></div>`;
 };
 UI.V.character = () => {
@@ -349,7 +349,7 @@ const DO = {
   },
   sell: (a, b, el) => {
     const from = el && el.dataset.from, store = from === 'pack' ? S().inv : from === 'bank' ? S().bank : null;
-    const available = store ? store[a] || 0 : DQ.have(a), n = Math.min(b === 'all' ? available : +b, available);
+    const available = store ? store[a] || 0 : DQ.have(a), n = Math.min(b === 'all' ? available : b === 'keep1' ? Math.max(0, available - 1) : +b, available); /* keep1: Sell all but 1 (owner, 26 Nov) */
     const coins = DQ.sell(a, n, from);
     if (coins !== undefined) DQ.log(`You sell ${n}× ${D.ITEMS[a].name.toLowerCase()} for ${fmt(coins)} coins.`, 'good');
     if (!(store ? store[a] : DQ.have(a)) && UI.sel === a) UI.sel = null;

@@ -196,7 +196,7 @@ UI.toolsPanel = () => {
       <small>${D.SK[sk].name}${open ? ` ${DQ.lvl(sk)}` : ' (locked)'} · ${t ? `${pct}% faster` : 'normal speed'}</small><span class="pips" aria-label="Upgrade ${D.TOOL_ORDER.indexOf(t)+1} of ${D.TOOL_ORDER.length}">${D.TOOL_ORDER.map(i => `<i class="${i <= t ? 'on' : ''}"></i>`).join('')}</span></div>
       ${next ? `<button class="btn sm" data-do="go" data-a="shop" data-tip="text:${esc(next.name)}: ${fmt(next.buy)} coins. Opens the shop.">Upgrade ${DQ.fmtK ? DQ.fmtK(next.buy) : fmt(next.buy)}</button>` : '<span class="max">Best</span>'}</div>`;
   }).join('');
-  return `<section data-reference="true" class="panel toolsp" id="inventory-tools"><h3>Gathering tools</h3><p class="hint">Best tool is used automatically.</p><div class="toolrows">${rows}</div></section>`;
+  return `<section data-reference="true" class="panel toolsp" id="inventory-tools"><h3>Gathering tools</h3><div class="toolrows">${rows}</div></section>`;
 };
 const origChar = UI.V.character;
 UI.V.character = () => { const h = origChar().replace('<div class="slots" id="packgrid">', '<div class="selbar" id="selbar"></div><div class="slots" id="packgrid">'), tail = '</section></div></div>', i = h.lastIndexOf(tail); return h; };
@@ -266,6 +266,7 @@ UI.selbarHtml = (id, from) => {
   if (!DQ.sellable(id)) b.push(`<span class="keepsake-note" data-tip="text:${esc(DQ.KEEPSAKE_NOTE)}">${ico('lock')} Keepsake</span>`);
   else b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="1" data-from="${from}">Sell ${UI.money(it.val || 0)}</button>`);
   if (n > 1 && DQ.sellable(id)) b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="all" data-from="${from}">Sell all ${UI.money((it.val || 0) * n)}</button>`);
+  if (n > 2 && DQ.sellable(id)) b.push(`<button class="btn sm" data-do="sell" data-a="${id}" data-b="keep1" data-from="${from}">Sell all but 1 ${UI.money((it.val || 0) * (n - 1))}</button>`);
   return `<span class="sb-ic" style="--c:${it.col}">${DQ.itemIco(it)}</span><span class="sb-n"><b style="color:${it.col}">${esc(it.name)}</b> <small class="mono dim">x${fmt(n)}</small><span class="sb-l">${line}</span></span><span class="sb-b">${b.join('')}</span>`;
 };
 const syncSheet = () => {
