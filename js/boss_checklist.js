@@ -69,6 +69,7 @@ UI.DO.bossshop = id => { UI.shopTab = 'buy'; UI.shopCategory = 'equipment'; UI.s
 UI.DO.bossfood = () => { const r = Object.values(D.RECIPES).find(x => x.skill === 'cooking' && Q.canMake && Q.canMake(x) && Object.keys(x.out).some(id => D.ITEMS[id] && D.ITEMS[id].heal));
   if (r && UI.focusTask) return UI.focusTask('cooking', r.id, r.tab, 'cooking');
   UI.shopTab = 'buy'; UI.shopCategory = 'supplies'; UI.shopSelected = UI.shopSelected || {}; UI.shopSelected.buy = 'bread'; Q.go('shop'); };
+UI.DO.localroute = (id, n) => { UI.shopTab = 'local'; UI.localSupply = id; UI.localQty = +n || 1; UI.returnTo = { page: UI.view, label: 'Home' }; Q.go('shop'); };
 UI.DO.bossprepskip = id => { prep()[id || (boss() || {}).id] = 'skip'; Q.save && Q.save(); UI.render(false); };
 /* ---------- Next step: challenges on the way, then the checklist, then the boss ---------- */
 const minisFor = town => D.MONLIST.filter(m => m.mini && !m.tower && m.town === town).sort((a, c) => (a.mini.req || 0) - (c.mini.req || 0));
@@ -100,8 +101,29 @@ Q.bossPrepStep = () => {
 /* the checklist is for the first attempt: once a fight with the boss has started it does not come back */
 const start0 = Q.startAct;
 Q.startAct = (kind, id, o) => { const r = start0(kind, id, o); if (r && kind === 'fight' && D.MON[id] && D.MON[id].boss && !Q.forecasting && !(Q.sim && Q.sim.on && !Q.sim.activities)) prep()[id] = prep()[id] || 'tried'; return r; };
+/* Follow-up restoration (owner, 26 Nov 2026: close Staff's 61-minute gap before Old Tusk). Once the region's challenges
+   are done and the hero is still training for its boss, Home offers one more of the town's existing restorations, but
+   only one beyond the first, and only when every material can be had now: already carried, gathered at the hero's level
+   here, or sold in this town's shop. The step is the project's own journey step; nothing new is added. */
+const gettable = (id, n) => { if (id === 'coins') return true; if (Q.have(id) >= n) return true;
+  for (const kind of ['fish', 'wood', 'mine', 'thieve']) if ((D.NODES[kind] || []).some(x => x.item === id && Q.skillUnlocked(x.skill) && Q.lvl(x.skill) >= x.lvl && (!Q.nodeHere || Q.nodeHere(x)))) return true;
+  return (D.SHOPS[S().town] || []).includes(id) || (D.LOCAL_SUPPLIES || []).some(o => o.item === id && Q.localSupplyReason && !Q.localSupplyReason(o)); };
+Q.followupRestorationStep = () => {
+  const b = boss(); if (!b || S().town !== b.town || Q.combatLvl() >= b.boss.req) return null;
+  if (minisFor(b.town).some(m => !beaten(m))) return null;
+  const list = Object.entries(D.PROJECTS).filter(([, p]) => p.town === b.town && !p.relic);
+  if (list.filter(([id]) => S().projects[id]).length >= 2) return null;
+  const open = list.find(([id]) => !S().projects[id] && Object.entries(Q.projectNeed(id)).every(([k, n]) => gettable(k, n)) && (Q.projectNeed(id).coins || 0) <= S().coins + 400);
+  if (!open) return null;
+  /* a material only the town's supply shelf sells: route there with it selected (the player presses Buy) */
+  for (const [k, n] of Object.entries(Q.projectNeed(open[0]))) { if (k === 'coins' || Q.have(k) >= n) continue;
+    const nodeOk = ['fish', 'wood', 'mine', 'thieve'].some(kind => (D.NODES[kind] || []).some(x => x.item === k && Q.skillUnlocked(x.skill) && Q.lvl(x.skill) >= x.lvl));
+    const o = !nodeOk && !(D.SHOPS[S().town] || []).includes(k) && (D.LOCAL_SUPPLIES || []).find(x => x.item === k && Q.localSupplyReason && !Q.localSupplyReason(x));
+    if (o) { const m = n - Q.have(k); return { title: `Buy ${m} ${D.ITEMS[k].name.toLowerCase()} for the ${D.PROJECTS[open[0]].name.replace(/^\w+ the /, '').toLowerCase()}`, detail: `${D.PROJECTS[open[0]].name} while you train for ${b.boss.short || b.name}. The ${D.TOWN[S().town].name} supply shelf sells it.`, action: 'localroute', a: o.id, b: String(m), restoration: open[0] }; } }
+  const step = Q.journeyNext(open[0]); return step && step.action ? { ...step, detail: `${D.PROJECTS[open[0]].name} while you train for ${b.boss.short || b.name}. ${step.detail || ''}`.trim(), restoration: open[0] } : null;
+};
 const region0 = Q.regionNext;
-Q.regionNext = () => { const c = Q.regionalChallengeStep(); if (c && c.action === 'qclaim') return c; return Q.bossPrepStep() || c || region0(); };
+Q.regionNext = () => { const c = Q.regionalChallengeStep(); if (c && c.action === 'qclaim') return c; return Q.bossPrepStep() || c || Q.followupRestorationStep() || region0(); };
 /* the checklist holds the equip and slot steps plan.js would otherwise offer one at a time, so at the boss it comes first */
 const next0 = Q.journeyNext;
 Q.journeyNext = (...a) => { const n = next0(...a); if ((a[0] && D.PROJECTS[a[0]]) || !n || n.checklist) return n; if (['equip', 'abil'].includes(n.action)) { const s = Q.bossPrepStep(); if (s) return s; } return n; };
