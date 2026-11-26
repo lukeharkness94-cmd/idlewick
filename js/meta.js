@@ -96,6 +96,21 @@ DQ.questLinks = (kind, id) => {
 
 /* ---------- Item comparison: what changes if you equip this? ---------- */
 const BONUS_NAMES = { atk: 'Accuracy', str: 'Power', def: 'Defence', rng: 'Ranged', rngStr: 'Arrow power', mag: 'Magic' };
+DQ.itemBonuses = id => {
+  const item = D.ITEMS[id], slot = item?.slot;
+  if (!slot) return [];
+  const equippedId = slot === 'ammo' ? S().ammo.id : S().equip[slot];
+  if (equippedId === id) return [];
+  const equipped = equippedId && D.ITEMS[equippedId];
+  return Object.entries(BONUS_NAMES).flatMap(([key, name]) => {
+    const value = (item.b?.[key] || 0) - (equipped?.b?.[key] || 0);
+    return value ? [{ name, value, compared: !!equipped }] : [];
+  });
+};
+DQ.itemBonusHtml = id => {
+  const rows = DQ.itemBonuses(id);
+  return rows.length ? `<span class="item-deltas">${rows.map(({ name, value, compared }) => `<span class="${compared ? value > 0 ? 'ok' : 'bad' : ''}">${compared && value > 0 ? '+' : ''}${value} ${name}</span>`).join('')}</span>` : '';
+};
 DQ.compareItem = id => {
   const it = D.ITEMS[id]; if (!it) return null; const st = S();
   if (it.type === 'tool' && it.toolSkill) {

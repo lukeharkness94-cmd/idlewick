@@ -10,7 +10,11 @@ const catOf = it => it.type === 'tool' ? 'tool' : it.type === 'ammo' ? 'weapon' 
 /* "Crafting items" is a lens, not a box: anything that some recipe uses, wherever it also sits (ores, logs, bars, fish, crops …) */
 const inCat = (id, f) => f === 'all' || (f === 'craft' ? ING.has(id) : catOf(D.ITEMS[id]) === f);
 const byCat = (a, b) => CAT_ORDER.indexOf(catOf(D.ITEMS[a])) - CAT_ORDER.indexOf(catOf(D.ITEMS[b])) || D.ITEMS[a].name.localeCompare(D.ITEMS[b].name);
-UI.catTabs = (store, cur, act) => `${UI.choiceButtons(`<select id="${act}-select" data-in="itemfilter" data-a="${act}" aria-label="${act === 'packfilter' ? 'Backpack' : 'Bank'} category">${Object.entries(CAT).filter(([k]) => k === 'all' || k === cur || Object.keys(store).filter(id => !DQ.isTool(id)).some(id => inCat(id, k))).map(([k, n]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${n} (${k === 'all' ? Object.keys(store).filter(id => !DQ.isTool(id)).length : Object.keys(store).filter(id => !DQ.isTool(id)).filter(id => inCat(id, k)).length})</option>`).join('')}</select>`)}`;
+UI.catTabs = (store, cur, act) => {
+  const ids = Object.keys(store).filter(id => !DQ.isTool(id));
+  return Object.entries(CAT).filter(([id]) => id !== 'tool').map(([id, label]) =>
+    `<button class="tab ${cur === id ? 'on' : ''}" data-do="${act}" data-a="${id}" aria-pressed="${cur === id}">${label} (${ids.filter(item => inCat(item, id)).length})</button>`).join('');
+};
 
 /* ---------- Map ---------- */
 const MAP_LAND = 'M40 330C50 210 170 130 320 110C470 90 590 56 760 70C900 82 950 190 944 300C938 404 884 462 760 452C640 470 520 430 400 450C280 480 140 470 80 420C52 394 40 362 40 330Z';
@@ -106,22 +110,28 @@ DQ.itemReqs = id => { const it = D.ITEMS[id]; if (!it) return []; const out = Ob
 UI.reqChips = id => DQ.itemReqs(id).map(r => `<span class="req-chip ${r.ok ? 'ok' : 'bad'}">${r.ok ? '' : ico('lock')}${esc(D.SK[r.sk].name)} ${r.l}</span>`).join('');
 UI.shopPreview = id => {
   const it = D.ITEMS[id];
-  return `<div class="shop-item-preview"><span class="shop-item-art">${DQ.itemIco(it)}</span><div><h3>${esc(it.name)}</h3><p class="item-base-stats">${UI.statLine(it.b) || UI.itemSub(it)}</p><small>${DQ.have(id)} owned${it.slot ? ' · ' + DQ.SLOT_NAMES[it.slot] : ''}</small>${DQ.itemReqs(id).length ? `<p class="shop-req">${DQ.itemReqs(id).every(r => r.ok) ? 'Requires' : 'You need'} ${UI.reqChips(id)}${DQ.itemReqs(id).some(r => !r.ok) ? `<small>You can buy it now and ${it.slot ? 'wear' : 'use'} it once you reach ${DQ.itemReqs(id).filter(r => !r.ok).map(r => `${D.SK[r.sk].name} ${r.l} (you are ${DQ.lvl(r.sk)})`).join(' and ')}.</small>` : ''}</p>` : ''}</div></div>`;
+  return `<div class="shop-item-preview"><span class="shop-item-art">${DQ.itemIco(it)}</span><div><h3>${esc(it.name)}</h3><p class="item-base-stats">${UI.statLine(it.b) || UI.itemSub(it)}</p><small>${DQ.have(id)} owned${it.slot ? ' · ' + DQ.SLOT_NAMES[it.slot] : ''}</small>${DQ.itemReqs(id).length ? `<p class="shop-req">${DQ.itemReqs(id).every(r => r.ok) ? 'Requires' : 'You need'} ${UI.reqChips(id)}${DQ.itemReqs(id).some(r => !r.ok) ? `<small>Required level: ${DQ.itemReqs(id).filter(r => !r.ok).map(r => `${D.SK[r.sk].name} ${r.l} (you are ${DQ.lvl(r.sk)})`).join(' and ')}.</small>` : ''}</p>` : ''}</div></div>`;
+};
+UI.inlineBuy = id => {
+  const reason = DQ.shopBuyLock(id), max = DQ.buyMax(id), price = DQ.buyPrice(id);
+  if (reason) return `<button class="btn" disabled>${ico('lock')}${esc(reason)}</button>`;
+  const purchase = (n, label) => `<button class="btn" data-do="buy" data-a="${id}" data-b="${n}" ${n > max || n === 0 ? 'disabled' : ''}>${label}<small>${n > 0 && n <= max ? UI.money(n * price) : 'Need supplies or coins'}</small></button>`;
+  return `<div class="inline-buy" aria-label="Buy ${esc(D.ITEMS[id].name)}">${purchase(1, 'Buy 1')}${purchase(10, 'Buy 10')}${purchase(max, 'Buy max (' + fmt(max) + ')')}</div>`;
 };
 UI.V.shop = () => {
   const tab = UI.shopTab, buying = tab === 'buy', qty = UI.shopQty;
   const stock = buying ? D.SHOPS[S().town] : [], held = stock.filter(id => DQ.lockedSkillFor(id));
-  const ids = buying ? stock.filter(id => !DQ.lockedSkillFor(id)&&(!UI.shopCatalogFilter||UI.shopCatalogFilter(id))) : Object.keys({ ...S().inv, ...S().bank }).filter(DQ.sellable);
+  const ids = buying ? stock.filter(id => (!UI.shopCatalogFilter||UI.shopCatalogFilter(id))) : Object.keys({ ...S().inv, ...S().bank }).filter(DQ.sellable);
   if(buying&&UI.shopCategory==='equipment')ids.sort((a,b)=>Math.max(1,...Object.values(D.ITEMS[a].req||{}))-Math.max(1,...Object.values(D.ITEMS[b].req||{}))||DQ.buyPrice(a)-DQ.buyPrice(b)||D.ITEMS[a].name.localeCompare(D.ITEMS[b].name));
   const later = [...new Set(held.map(DQ.lockedSkillFor))].map(sk => `<p class="shop-later">${ico('lock')} <b>${D.SK[sk].name}</b> gear is sold here once you learn ${D.SK[sk].name}. ${esc(DQ.skillTeacher(sk))}.</p>`).join('');
   const id = ids.includes(UI.shopSelected[tab]) ? UI.shopSelected[tab] : ids[0], it = id && D.ITEMS[id];
   UI.shopSelected[tab] = id;
   const owned = it ? DQ.have(id) : 0, tool = it && it.type === 'tool', count = tool ? 1 : qty;
   const cost = it ? (buying ? DQ.buyPrice(id) * count : DQ.sellPrice(id) * Math.min(count, owned)) : 0;
-  const disabled = !it || (buying && (S().coins < cost || (tool && owned)|| (DQ.shopMaterialsAffordable&&!DQ.shopMaterialsAffordable(id,count))));
-  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span>${DQ.gearMark ? DQ.gearMark(item) : ''}<b>${esc(D.ITEMS[item].name)}</b><span class="stock-price">${buying&&UI.shopCardCost?UI.shopCardCost(item):UI.money(buying?DQ.buyPrice(item):DQ.sellPrice(item))}</span>${buying&&DQ.itemReqs(item).length?`<span class="req-chips">${UI.reqChips(item)}</span>`:''}${buying?'':'<small>'+DQ.have(item)+' held</small>'}</button>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
-    ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}${buying&&DQ.shopMaterialCost?UI.needTiles(Object.fromEntries(Object.entries(DQ.shopMaterialCost(id)).map(([k,n])=>[k,n*count]))):''}<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
-      <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} ${disabled ? 'disabled' : ''}>${tool && owned && buying ? 'Already owned' : (buying ? 'Buy' : 'Sell')+' ×'+(buying?count:Math.min(count,owned))} ${tool && owned && buying ? '' : UI.money(cost)}</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all ${UI.money(DQ.sellPrice(id) * owned)}</button>` : ''}</div>
+
+  return `<div class="visual-shop"><section class="panel shop-stock"><div class="phead"><h2>Shop</h2><small>${D.TOWN[S().town].name}</small></div>${UI.shopTabs(tab)}<div class="illustrated-choices">${ids.map(item=>`<div class="stock-item"><button class="illustrated-card ${item===id?'selected':''}" data-do="shopselect" data-a="${item}" aria-pressed="${item===id}"><span class="choice-art">${DQ.itemIco(D.ITEMS[item])}</span>${DQ.gearMark ? DQ.gearMark(item) : ''}<b>${esc(D.ITEMS[item].name)}</b>${DQ.itemBonusHtml(item)}${UI.bundleLabel?.(item)||''}<span class="stock-price">${buying&&UI.shopCardCost?UI.shopCardCost(item):UI.money(buying?DQ.buyPrice(item):DQ.sellPrice(item))}</span>${buying&&DQ.itemReqs(item).length?`<span class="req-chips">${UI.reqChips(item)}</span>`:''}${buying?'':'<small>'+DQ.have(item)+' held</small>'}</button>${buying ? UI.inlineBuy(item) : ''}</div>`).join('')}</div></section><section class="panel shop-task"><div class="phead"><h2>${buying?'Buy':'Sell'} selected item</h2></div>
+    ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}${buying&&DQ.shopMaterialCost?UI.needTiles(Object.fromEntries(Object.entries(DQ.shopMaterialCost(id)).map(([k,n])=>[k,n*count]))):''}${buying ? UI.inlineBuy(id) : `<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
+      <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} >${tool && owned && buying ? 'Already owned' : (buying ? 'Buy' : 'Sell')+' ×'+(buying?count:Math.min(count,owned))} ${tool && owned && buying ? '' : UI.money(cost)}</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all ${UI.money(DQ.sellPrice(id) * owned)}</button>` : ''}</div>`}
       ${buying && S().coins < cost ? `<p class="bad">Need ${UI.money(cost - S().coins)} more.</p>` : ''}
       </div><div class="shop-comparison">${UI.compareHtml ? UI.compareHtml(id) : ''}</div></div>` : '<p>Nothing to sell. Gather resources or visit your bank.</p>'}
     ${later}</section></div>`;
@@ -189,7 +199,7 @@ UI.inventoryPicker = () => '';
 UI.packGrid = () => {
   const ids = UI.packVisible();
   if (!ids.length) return `<p class="dim" style="grid-column:1/-1;margin:6px 0">${UI.packSorted().length ? 'No matches.' : 'Your backpack is empty.'}</p>`;
-  return ids.map(id => { const spare = D.ITEMS[id].slot !== 'ammo' && S().equip[D.ITEMS[id].slot] === id; return `<button class="slot ${UI.sel === id && UI.selFrom === 'pack' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="pack" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().inv[id]} ${spare ? 'spare copies' : 'in backpack'}">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().inv[id])}</span>${spare ? '<span class="spare-tag">Spare</span>' : ''}${DQ.gearMark ? DQ.gearMark(id) : ''}</button>`; }).join('');
+  return ids.map(id => { const spare = D.ITEMS[id].slot !== 'ammo' && S().equip[D.ITEMS[id].slot] === id; return `<button class="slot ${UI.sel === id && UI.selFrom === 'pack' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="pack" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().inv[id]} ${spare ? 'spare copies' : 'in backpack'}">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().inv[id])}</span>${spare ? '<span class="spare-tag">Spare</span>' : ''}${DQ.itemBonusHtml(id)}${UI.bundleLabel?.(id)||''}</button>`; }).join('');
 };
 UI.detail = (id, from) => {
   if (!id || !DQ.have(id)) return `<div class="detail detail-empty"><span class="k">Item details</span><p class="dim">Select an item.</p></div>`;
@@ -212,13 +222,13 @@ UI.V.character = () => {
         <p class="equip-fightline">${DQ.cap(ps.style)} · max hit <b class="mono">${ps.max}</b> · <b class="mono">${Math.round(ps.red * 100)}%</b> less damage taken <button class="linkish" data-do="go" data-a="combat">${ico('attack')}Fight</button></p>
       </section>
       <section data-reference="true" class="equipment-appearance" id="equipment-appearance"><h3 id="equipment-appearance-toggle">Appearance &amp; sharing</h3>${marks.length ? `<div class="fig-marks">${marks.map(mark => `<span class="fig-mark" data-tip="text:${esc(mark.sub)}">${ico(mark.ic)}${esc(mark.t)}</span>`).join('')}</div>` : ''}<p class="hint">Capes at skill 30 / 60 / 99 · medals at Hero 10 / 25 / 50 / 75.</p><button class="btn sm" data-do="share">${ico('star')}Share hero</button></section></section>
-    <div class="col"><section class="panel"><div class="phead"><h2>Backpack</h2><span><small class="mono" data-b="packn"></small> <button class="btn sm" data-do="go" data-a="bank">${ico('bank')}Open bank (${Object.keys(S().bank).length})</button> <button class="btn sm" data-do="depositall">Bank all</button></span></div><div class="filtbar"><div class="tabs">${UI.catTabs(s.inv, UI.packFilter, 'packfilter')}</div><input id="packq" class="search" data-in="packq" placeholder="Search backpack" value="${esc(UI.packQ)}" aria-label="Search backpack"></div>${UI.inventoryPicker('pack')}<div class="slots" id="packgrid">${UI.packGrid()}</div><p class="hint">${DQ.packMax()} slots · overflow goes to the <b>bank</b>.</p></section>
+    <div class="col"><section class="panel"><div class="phead"><h2>Backpack</h2><span><small class="mono" data-b="packn"></small> <button class="btn sm" data-do="go" data-a="bank">${ico('bank')}Open bank (${Object.keys(S().bank).length})</button> <button class="btn sm" data-do="depositall">Bank all</button> <button class="btn sm" data-do="sellall" ${DQ.junkSale().quantity ? '' : 'disabled'}>Sell junk</button></span></div><div class="filtbar"><div class="tabs">${UI.catTabs(s.inv, UI.packFilter, 'packfilter')}</div><input id="packq" class="search" data-in="packq" placeholder="Search backpack" value="${esc(UI.packQ)}" aria-label="Search backpack"></div>${UI.inventoryPicker('pack')}<div class="slots" id="packgrid">${UI.packGrid()}</div><p class="hint">${DQ.packMax()} slots · overflow goes to the <b>bank</b>.</p></section>
     <section class="panel" id="detailbox">${UI.detail(UI.sel, UI.selFrom)}</section></div></div>`;
 };
 
 /* ---------- Bank ---------- */
 const bankIds = () => Object.keys(S().bank).filter(id => !DQ.isTool(id) && inCat(id, UI.bankFilter) && D.ITEMS[id].name.toLowerCase().includes(UI.bankQ.toLowerCase())).sort(byCat);
-UI.bankGrid = () => { const ids = bankIds(); return ids.length ? ids.map(id => `<button class="slot ${UI.sel === id && UI.selFrom === 'bank' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="bank" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().bank[id]} in bank">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().bank[id])}</span>${DQ.gearMark ? DQ.gearMark(id) : ''}</button>`).join('') : `<p class="dim" style="grid-column:1/-1">${Object.keys(S().bank).length ? 'Nothing matches that filter.' : 'Your bank is empty. Overflow and deposits end up here.'}</p>`; };
+UI.bankGrid = () => { const ids = bankIds(); return ids.length ? ids.map(id => `<button class="slot ${UI.sel === id && UI.selFrom === 'bank' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="bank" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().bank[id]} in bank">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().bank[id])}</span>${DQ.itemBonusHtml(id)}${UI.bundleLabel?.(id)||''}</button>`).join('') : `<p class="dim" style="grid-column:1/-1">${Object.keys(S().bank).length ? 'Nothing matches that filter.' : 'Your bank is empty. Overflow and deposits end up here.'}</p>`; };
 UI.V.bank = () => `<section class="panel shophead"><div><h2>Bank</h2><small class="dim">${Object.keys(S().bank).filter(id => !DQ.isTool(id)).length} item types · Used automatically by tasks</small></div><button class="btn" data-do="depositall">${ico('bank')}Deposit backpack</button></section>
   <div class="chargrid"><section class="panel"><div class="phead bank-filters"><div class="tabs">${UI.catTabs(S().bank, UI.bankFilter, 'bankfilter')}</div><input id="bankq" class="search" data-in="bankq" placeholder="Search" value="${esc(UI.bankQ)}" aria-label="Search bank"></div>${UI.inventoryPicker('bank')}<div class="slots big" id="bankgrid">${UI.bankGrid()}</div></section>
   <section class="panel" id="detailbox">${UI.detail(UI.sel, UI.selFrom)}</section></div>`;
@@ -317,7 +327,14 @@ const DO = {
   shopselect: a => { UI.shopSelected[UI.shopTab] = a; UI.render(false); if (innerWidth <= 860) document.querySelector('.shop-task')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); },
   rareselect: a => { UI.tab.rareChoice = a; UI.render(false); if (innerWidth <= 860) document.querySelector('.shop-task')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); },
   shoptab: a => { UI.shopTab = a; UI.render(false); }, shopqty: a => { UI.shopQty = +a; UI.render(false); },
-  buy: a => { const it = D.ITEMS[a]; if (DQ.buy(a, it.type === 'tool' ? 1 : UI.shopQty)) { DQ.log(`You buy ${it.type === 'tool' ? '' : UI.shopQty + '× '}${it.name.toLowerCase()}.`); UI.render(false); } },
+  buy: (id, quantity) => {
+    const count = +quantity || UI.shopQty;
+    if (quantity && (!Number.isSafeInteger(count) || count < 1 || count > DQ.buyMax(id))) return;
+    if (DQ.buy(id, count)) {
+      DQ.log(`You buy ${count}× ${D.ITEMS[id].name.toLowerCase()}.`);
+      UI.render(false);
+    }
+  },
   sell: (a, b, el) => {
     const from = el && el.dataset.from, store = from === 'pack' ? S().inv : from === 'bank' ? S().bank : null;
     const available = store ? store[a] || 0 : DQ.have(a), n = Math.min(b === 'all' ? available : +b, available);
@@ -326,7 +343,24 @@ const DO = {
     if (!(store ? store[a] : DQ.have(a)) && UI.sel === a) UI.sel = null;
     UI.render(false);
   },
-  sellall: () => { const c = DQ.sellJunk(); if (c) DQ.log(`You sell your junk for ${fmt(c)} coins.`, 'good'); UI.render(false); },
+  sellall: () => {
+    const quote = DQ.junkSale();
+    if (!quote.quantity) return DQ.toast('There is no junk to sell.');
+    const sale = () => {
+      const now = DQ.junkSale();
+      if (JSON.stringify(now.entries) !== JSON.stringify(quote.entries) || now.coins !== quote.coins) {
+        DQ.closeModal();
+        UI.DO.sellall();
+        return false;
+      }
+      const coins = DQ.sellJunk();
+      DQ.log(`You sell your junk for ${fmt(coins)} coins.`, 'good');
+      UI.render(false);
+    };
+    DQ.modal({ title: 'Sell junk', body: `<p>Sell ${fmt(quote.quantity)} items for ${fmt(quote.coins)} coins.</p>`, actions: [
+      { label: 'Cancel' }, { label: `Sell ${fmt(quote.quantity)} items for ${fmt(quote.coins)} coins`, fn: sale, primary: true }
+    ] });
+  },
   sel: (a, b) => { UI.sel = a; UI.selFrom = b || 'pack'; DQ.sfx('tab'); $$('.slot.sel').forEach(e => e.classList.remove('sel')); const el = $(`.slot[data-a="${a}"][data-b="${UI.selFrom}"]`); if (el) el.classList.add('sel'); const d = $('#detailbox'); if (d) d.innerHTML = UI.detail(a, UI.selFrom); },
   equip: a => { const r = DQ.equipItem(a); if (!r.ok) return DQ.toast(r.why, true); DQ.sfx('equip'); DQ.log(`You equip ${D.ITEMS[a].name.toLowerCase()}.`); UI.sel = null; UI.renderHud(); UI.render(false); },
   unequip: a => { if (DQ.unequip(a)) { DQ.sfx('equip'); UI.renderHud(); UI.render(false); } },

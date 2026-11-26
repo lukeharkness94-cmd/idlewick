@@ -738,7 +738,45 @@ DQ.sell = (id, qty, from) => {
   const coins = DQ.sellPrice(id) * qty;
   DQ.addCoins(coins); S().stats.sold += qty; DQ.sfx('sell'); DQ.achDirty = true; DQ.emit('shop'); return coins;
 };
-DQ.sellJunk = () => { let c = 0; Object.keys({ ...S().inv, ...S().bank }).forEach(id => { if (D.ITEMS[id] && D.ITEMS[id].type === 'junk' && DQ.sellable(id)) c += DQ.sell(id, DQ.have(id)) || 0; }); return c; };
+DQ.junkSale = () => {
+  const required = new Set();
+  for (const quest of D.QUESTS.filter(q => ['active', 'ready'].includes(DQ.questState(q)))) {
+    for (const objective of quest.obj) {
+      if (objective.ev === 'deliver') required.add(objective.key);
+      for (const task of DQ.questObjectiveTasks?.(objective) || []) {
+        if (task.kind === 'recipe') for (const input of Object.keys(D.RECIPES[task.id]?.in || {})) required.add(input);
+      }
+    }
+  }
+  const equipped = new Set([...Object.values(S().equip), S().ammo.id]);
+  const entries = Object.keys({ ...S().inv, ...S().bank }).filter(id => D.ITEMS[id]?.type === 'junk' && DQ.sellable(id) &&
+    !equipped.has(id) && !required.has(id) && !(DQ.bundleNeeds?.(id).length) &&
+    !Object.keys(D.PROJECTS || {}).some(project => DQ.projectNeed(project)[id] > 0)).map(id => [id, DQ.have(id)]);
+  return { entries, quantity: entries.reduce((sum, [, n]) => sum + n, 0),
+    coins: entries.reduce((sum, [id, n]) => sum + n * DQ.sellPrice(id), 0) };
+};
+DQ.sellJunk = () => DQ.junkSale().entries.reduce((total, [id, n]) => total + (DQ.sell(id, n) || 0), 0);
+
+DQ.buyMax = id => {
+  const item = D.ITEMS[id];
+  if (!item || item.buy <= 0 || DQ.shopBuyLock(id)) return 0;
+  const materials = Object.entries(DQ.shopMaterialCost?.(id) || {}).map(([key, n]) => Math.floor(DQ.have(key) / n));
+  // Normal stacks can overflow to the bank. Explicit item limits still bound the purchase.
+  const cap = Number.isFinite(item.stackLimit) ? Math.max(0, item.stackLimit - DQ.have(id)) : Number.MAX_SAFE_INTEGER;
+  return Math.max(0, Math.min(cap, item.type === 'tool' ? DQ.have(id) ? 0 : 1 : cap,
+    Math.floor(S().coins / DQ.buyPrice(id)), ...materials));
+};
+DQ.shopBuyLock = id => {
+  const item = D.ITEMS[id], locked = DQ.lockedSkillFor(id);
+  if (!item) return 'Unavailable';
+  if (locked) return `Learn ${D.SK[locked].name}`;
+  if (item.slot && item.slot !== 'ammo') {
+    const requirement = Object.entries(item.req || {}).find(([skill, level]) => D.SK[skill] && DQ.lvl(skill) < level);
+    if (requirement) return `${D.SK[requirement[0]].name} ${requirement[1]}`;
+  }
+  return '';
+};
+
 
 /* ---------- Offline and catch-up simulation ---------- */
 /* Count one elapsed budget at the live rate, up to the published cap. */

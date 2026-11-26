@@ -782,3 +782,11 @@ html.calm .activity-scene.hunt .scene-target,html.calm .activity-scene.hunt .hun
 html:has(.home-glance) #hud .h-stats,html:has(.home-glance) #hud .h-task,html:has(.home-glance) #view>#nowcard{display:none}
 @media(max-width:520px){.home-glance-row{grid-template-columns:minmax(0,1fr)}.home-next .btnrow{flex-wrap:wrap}}
 .activity-caption:has(.activity-progress){border-inline-start:4px solid var(--brass);padding-inline-start:12px}
+#view .shop-stock .illustrated-choices:has(.stock-item){grid-auto-rows:auto!important;align-items:stretch}
+.stock-item{min-width:0;display:grid;align-content:start;gap:5px}
+.inline-buy{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.inline-buy .btn{padding:6px 3px;min-width:0;white-space:normal}
+.inline-buy small{display:block}
+.item-deltas{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 6px;line-height:1.2;font-size:.79em}
+.slot:has(.item-deltas){width:auto!important;min-height:74px;padding:6px 4px!important;display:grid;justify-items:center;align-content:center}
+.slot .item-deltas{grid-column:1/-1}
