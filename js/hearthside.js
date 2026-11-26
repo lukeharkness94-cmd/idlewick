@@ -35,17 +35,36 @@ U.journeyPanel=()=>{
  return panel.outerHTML;
 };
 const i=U.homeSections.indexOf(journey0);if(i>=0)U.homeSections[i]=U.journeyPanel;
-const home0=U.V.overview;
-U.V.overview=()=>{
- const t=document.createElement('template');t.innerHTML=home0();const journey=t.content.querySelector('.journey');if(!journey)return home0();
- journey.remove();const town=D.TOWN[S().town],restored=Q.projectsForTown(S().town).filter(([id])=>S().projects[id]).length;
- const secondary=[...t.content.children].map(el=>el.outerHTML).join('');
- return `<div class="hs-home"><header class="hs-home-heading"><div><h1>${Q.goalDone()?'A good day’s work':'One good deed at a time'}</h1><p>${esc(town.name)} · A useful next step, at your own pace.</p></div></header><div class="hs-home-primary">${journey.outerHTML}</div><aside class="hs-home-side"><section class="panel hs-town-card">${U.scene(S().town)}<div class="hs-town-caption"><h2>${esc(town.name)}</h2><p>${restored?`${restored} restored ${restored===1?'site':'sites'} · Your work is changing the village.`:'A village worth bringing back to life.'}</p><button class="btn" data-do="go" data-a="projects">${ico('town')}View the village</button></div></section><div class="hs-home-reference" aria-label="Other opportunities">${secondary}</div></aside></div>`;
+const home0 = U.V.overview, activity0 = U.V.activity;
+const homeRate = () => {
+ const act = Q.act;
+ if (!act) return S().lastPlannedStop || 'No activity running';
+ const skill = Q.actSkill(act), node = D.NODE[act.kind + ':' + act.id], recipe = act.kind === 'recipe' && D.RECIPES[act.id];
+ const xp = (recipe || node)?.xp;
+ const rate = xp && skill && act.kind !== 'thieve' && !recipe?.burn ? `${Q.fmt(xp * Q.xpMult(skill) * 3600000 / Q.actDur(act))} XP/hour estimated` : 'Earnings vary';
+ return `${Q.actLabel()} · Running · ${rate}`;
 };
+U.V.overview = () => {
+ const town = D.TOWN[S().town], next = Q.journeyNext(), goal = Q.mainQuestProgress?.();
+ const button = `<button class="btn primary" data-do="${next.action}" data-a="${esc(next.a || '')}" data-b="${esc(next.b || '')}">${esc(next.title)}</button>`;
+ const count = S().inbox?.length || 0;
+ const flag = count ? `<button class="btn" data-do="go" data-a="activity">${count} away ${count === 1 ? 'decision' : 'decisions'}</button>` :
+   S().lastAway && !S().lastAway.gone ? '<button class="btn" data-do="go" data-a="activity">Welcome Back summary</button>' : '';
+ return `<div class="home-glance">
+  <section class="panel home-scene" data-home-unit="scene">${U.scene(town.id)}<button class="btn" data-do="go" data-a="projects">${ico('house')}${esc(town.name)}</button></section>
+  <div class="home-glance-row"><button class="panel home-state" data-home-unit="activity" data-do="${Q.act ? 'nowactivity' : 'go'}" data-a="${Q.act ? '' : 'activity'}">${ico('clock')}<b data-b="homerate"></b></button>
+  <div class="panel home-coins" data-home-unit="coins">${ico('coin')}<b data-b="coins"></b><span>coins</span></div></div>
+  <section class="panel journey home-next" data-home-unit="goal"><h2>${esc(goal?.name || 'Your next step')}</h2>
+  ${goal ? `<span>${esc(goal.label)} <b>${goal.have} / ${goal.need}</b></span><progress value="${goal.have}" max="${goal.need}" aria-label="${esc(goal.label)}"></progress>` : ''}
+  <div class="btnrow">${button}<button class="btn" data-do="go" data-a="activity">Activity &amp; goals</button></div></section>
+  ${flag ? `<div data-home-unit="flag">${flag}</div>` : ''}</div>`;
+};
+U.B.homerate = e => U.set(e, homeRate());
+U.V.activity = () => activity0() + `<section class="home-activity-details" aria-label="Goals and opportunities">${home0()}</section>`;
 // The chapter's primary route is labelled; small ingredient/source shortcuts remain icon-first.
 const render0=U.render;
 U.render=(...args)=>{const result=render0(...args);if(U.view==='quests'){
  const button=document.querySelector('.quest-actions [data-do="questcontinue"]'),q=button&&D.QM[button.dataset.a];
- if(button&&q){const p=U.questProgress(q),o=q.obj[p.index];button.classList.remove('route-icon');button.classList.add('hs-continue');button.innerHTML=U.objectiveIcon(q,o)+'<span>Continue: '+esc(o.label)+'</span>';}
+ if(button&&q){const o=Q.unfinishedObjective(q)||q.obj[0];button.classList.remove('route-icon');button.classList.add('hs-continue');button.innerHTML=U.objectiveIcon(q,o)+'<span>Continue: '+esc(o.label)+'</span>';}
 }return result;};
 })();
