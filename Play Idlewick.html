@@ -12395,6 +12395,8 @@ DQ.have = id => (DQ.S.inv[id] || 0) + (DQ.S.bank[id] || 0);
 DQ.isTool = id => !!(DQ.data.ITEMS[id] && DQ.data.ITEMS[id].type === 'tool');
 DQ.packSlots = () => Object.keys(DQ.S.inv).filter(id => !DQ.isTool(id)).length;
 DQ.give = (id, n = 1) => {
+  /* an id that is not an item never enters the pack: it would leave a nameless tile that breaks the backpack and combat lists */
+  if (!DQ.data.ITEMS[id]) { if (window.console) console.warn('DQ.give: no such item', id); return; }
   if(n>0&&DQ.rememberItem)DQ.rememberItem(id);
   const S = DQ.S; if (n <= 0) return;
   if (S.inv[id]) S.inv[id] += n;
