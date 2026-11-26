@@ -7,7 +7,8 @@
 const DQ = window.DQ, D = DQ.data, UI = DQ.ui;
 const calm = () => document.documentElement.classList.contains('calm') || (DQ.S && DQ.S.settings && DQ.S.settings.reduceFx) || matchMedia('(prefers-reduced-motion: reduce)').matches;
 const page = v => DQ.toPage ? DQ.toPage(v) : v;
-const owned = id => (id && D.ITEMS[id] ? DQ.have(id) : 0) + (DQ.S.toolUpgrades && DQ.S.toolUpgrades[id] ? 1 : 0);
+/* a tool counts once: buying one both records the upgrade and puts the tool in the pack (owner saw "Bought ×2", 26 Nov) */
+const owned = id => { const n = id && D.ITEMS[id] ? DQ.have(id) : 0; return DQ.S.toolUpgrades && DQ.S.toolUpgrades[id] ? Math.max(n, 1) : n; };
 const artFor = (btn, id) => {
   const scope = document.querySelector('#view .shop-task') || document;
   return scope.querySelector(`[data-tip="item:${id}"] img, .shop-preview img, .dt-h img, img.item-art`) || (btn && btn.closest('.illustrated-card,.shop-task')?.querySelector('img'));
