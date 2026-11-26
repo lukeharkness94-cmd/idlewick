@@ -106,13 +106,14 @@ DQ.grant = (id, n = 1) => {
   const it = D.ITEMS[id], seen = S().seen.items || (S().seen.items = {});
   if (!Object.keys(seen).length) Object.keys({ ...S().inv, ...S().bank, ...S().equip }).forEach(k => { if (D.ITEMS[k]) seen[k] = 1; });
   const fresh = !seen[id] && DQ.have(id) === 0; DQ.give(id, n);
-  if (fresh) { seen[id] = 1; if (!DQ.sim.on && !DQ.forecasting) { DQ.sfx('discover'); DQ.toast(`New item discovered: ${it.name}`); DQ.notify({ kind: 'discovery', key: 'discovery:' + id, icon: it.ic, col: it.col, title: 'New item discovered', text: it.name, sound: false }); } }
+  if (fresh) { seen[id] = 1; if (!DQ.sim.on && !DQ.forecasting) { if (S().settings.digest?.discoveries !== false) DQ.sfx('discover'); DQ.notify({ kind: 'discovery', key: 'discovery:' + id, icon: it.ic, col: it.col, title: 'New item discovered', text: it.name, sound: false }); } }
   if (DQ.sim.on) {
     DQ.sim.items[id] = (DQ.sim.items[id] || 0) + n;
     const card = DQ.sim.activeSummary;
     if (card) card.items[id] = (card.items[id] || 0) + n;
   }
-  if (it.rare) { S().stats.rare++; DQ.notify({ kind: 'loot', key: 'rare:' + id, icon: it.ic, col: it.col, title: 'Rare find', text: `You found ${it.name}.`, sound: 'gem', burst: true, ttl: 9000 }); }
+  if (!DQ.sim.on && !DQ.forecasting) DQ.noteItemGain?.(id, n);
+  if (it.rare) S().stats.rare++;
   return it;
 };
 DQ.on('overflow', () => DQ.notify({ kind: 'info', key: 'overflow', icon: 'bank', col: '#8fa09e', title: 'Your backpack is full', text: 'New kinds of item now go straight to your bank. Sell or bank things to make room.', sound: 'notify', ttl: 10000 }));
@@ -305,6 +306,7 @@ DQ.startAct = (kind, id, o = {}) => {
   DQ.act = { kind, id, t0: Date.now(), pace, rule, count: 0, elapsed: 0, progress: 0, limit: o.limit || 0 }; DQ.act.dur = DQ.actDur(DQ.act);
   const sk = DQ.actSkill(DQ.act); DQ.act.lvlTarget = sk ? Math.min(99, DQ.lvl(sk) + 1) : 0;
   S().act = { kind, id, pace, rule, count: 0, elapsed: 0, lvlTarget: DQ.act.lvlTarget, limit: o.limit || 0 }; S().lastPace = pace;
+  if (!DQ.forecasting) delete S().lastPlannedStop;
   if (!DQ.forecasting) { S().seen.firstTask = true; DQ.sfx('start'); DQ.log(DQ.actLabel() + '.'); DQ.emit('act'); } return true;
 };
 DQ.combatInterval = () => {
@@ -349,7 +351,6 @@ function gatherDone(kind, n) {
   DQ.sfx(kind); DQ.petRoll('skill', sk); const k = extraCoins() * DQ.coinMult();
   if (kind === 'fish') {
     if (chance(D.ECONOMY.fishPouchChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(8, 25) * k * (T('comb') ? 1.5 : 1))); if (T('comb')) fxHit('comb'); DQ.addCoins(c); DQ.floatAt(document.querySelector('.card.active'), `${ico('pouch')}+${c} coins`, '#f3d58a'); DQ.log(`You fish up a sodden coin pouch (${c} coins).`, 'good'); DQ.sfx('coin'); }
-    if (chance(D.ECONOMY.fishChestChance * (1 + DQ.fx().find))) { const c = Math.max(1, Math.round(rnd(120, 260) * k)); DQ.addCoins(c); DQ.grant(DQ.weighted(D.GEM_WEIGHTS)); S().stats.rare++; DQ.log(`You haul up a sunken chest! ${c} coins and a gem.`, 'good'); DQ.notify({ kind: 'loot', key: 'chest', icon: 'pouch', col: '#f3d58a', title: 'Sunken chest', text: `You found ${c} coins and a gem.`, sound: 'gem', burst: true }); }
   } else if (kind === 'wood') {
     if (chance(D.ECONOMY.woodNestChance * (1 + DQ.fx().find) * (T('nuts') ? 2 : 1))) { if (T('nuts')) fxHit('nuts');
       if (chance(.5)) { const c = Math.max(1, Math.round(rnd(15, 45) * k)); DQ.addCoins(c); DQ.log(`A bird's nest holds ${c} coins.`, 'good'); DQ.floatAt(document.querySelector('.card.active'), `${ico('nest')}+${c} coins`, '#f3d58a'); DQ.sfx('coin'); }
@@ -635,11 +636,9 @@ function kill(m) {
       const gl = (D.TOWN_GEAR[m.town] || []).filter(g => !DQ.lockedSkillFor(g)), gi = gl.length && chance(.35) ? DQ.pick(gl) : null; if (gi) DQ.grant(gi);
       drops.push({ id, n: cc, rar, coins: true }, { id: gem, n: 1, rar: D.RARITY[2] }); if (gi) drops.push({ id: gi, n: 1, rar: D.RARITY[3] });
       loot.push(`a treasure chest (${fmt(cc)} coins, ${itemName(gem).toLowerCase()}${gi ? ', ' + itemName(gi).toLowerCase() : ''})`);
-      DQ.notify({ kind: 'loot', key: 'chest', icon: 'pouch', col: '#ffb84a', title: 'Treasure chest!', text: `${fmt(cc)} coins, a ${itemName(gem).toLowerCase()}${gi ? ' and ' + itemName(gi) : ''}.`, sound: 'gem', burst: true });
       continue;
     }
-    const it = DQ.grant(id, n); drops.push({ id, n, rar }); loot.push(`${n > 1 ? n + ' ' : ''}${itemName(id).toLowerCase()}`);
-    if (!it.rare && (rar[0] === 'rare' || rar[0] === 'epic')) DQ.notify({ kind: 'loot', key: 'drop:' + id, icon: it.ic, col: rar[2], title: `${rar[1]} drop!`, text: `${m.name} dropped ${n > 1 ? n + ' ' : 'a '}${it.name.toLowerCase()}.`, sound: 'gem', burst: rar[0] === 'epic' });
+    DQ.grant(id, n); drops.push({ id, n, rar }); loot.push(`${n > 1 ? n + ' ' : ''}${itemName(id).toLowerCase()}`);
   }
   if (extraCoins) DQ.addCoins(extraCoins);
   if (!DQ.sim.on) DQ.emit('loot', m, drops, c);

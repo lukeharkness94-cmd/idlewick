@@ -237,9 +237,11 @@ const tog = (k, label, sub) => `<button class="tog ${S().settings[k] ? 'on' : ''
 const slider = (k, label) => `<label class="slide"><span>${label}</span><input type="range" min="0" max="100" value="${Math.round(S().settings[k] * 100)}" data-in="${k}" aria-label="${label}"><b class="mono">${Math.round(S().settings[k] * 100)}%</b></label>`;
 UI.V.settings = () => {
   const s = S().settings;
+  const digest = Object.entries(DQ.digestCategories).map(([id, label]) => `<button class="tog ${s.digest?.[id] !== false ? 'on' : ''}" data-do="digestsetting" data-a="${id}" aria-pressed="${s.digest?.[id] !== false}"><span class="sw"></span><span><b>${label}</b></span></button>`).join('');
   return `<div class="setgrid"><section class="panel"><div class="phead"><h2>Audio</h2></div><div class="stack">${tog('muted', 'Mute everything', 'Shortcut: M')}${slider('masterVol', 'Master volume')}${tog('sfx', 'Sound effects')}${slider('vol', 'Effects volume')}${tog('music', 'Ambient music', 'A slow, generated score that changes with each town')}${slider('musicVol', 'Music volume')}${tog('ambience', 'Nature ambience', 'Wind, birds, water and fire for each region')}${slider('ambVol', 'Ambience volume')}
       <div><div class="k" style="margin-bottom:6px">Task sounds</div><div class="seg">${[['off', 'Off'], ['calm', 'Calm'], ['varied', 'Varied']].map(([k, n]) => `<button class="${s.taskSounds === k ? 'on' : ''}" data-do="tasksound" data-a="${k}">${n}</button>`).join('')}</div><small class="dim">Controls how often finished tasks make a sound. Sounds are always varied so they do not repeat exactly.</small></div></div></section>
-    <section class="panel"><div class="phead"><h2>Interface</h2></div><div class="stack">${tog('notify', 'Notifications', 'Show level-ups, unlocks and important alerts. Routine finds and achievements stay in the bell.')}${tog('tips', 'Tooltips')}${tog('reduceFx', 'Reduce effects', 'Turns off click ripples, particles and bouncy animations')}
+    <section class="panel"><div class="phead"><h2>Interface</h2></div><div class="stack">${tog('notify', 'Important alerts')}${tog('unlockReveals', 'Celebrate new systems in a popup', 'New skills and systems are always in the bell.')}${tog('tips', 'Tooltips')}${tog('reduceFx', 'Reduce effects', 'Turns off click ripples, particles and bouncy animations')}
+      <div class="digest-settings"><h3>Recent activity digest</h3><div class="stack tight">${digest}</div></div>
       <label class="nameedit"><span class="k">Hero name</span><input id="heroname" data-in="name" maxlength="20" value="${esc(S().name)}"></label></div></section>
     <section class="panel"><div class="phead"><h2>Gameplay</h2></div><div class="stack">${tog('autoEat', 'Eat automatically in combat', `Eats at ${s.eatAt}% health. Change it on the Combat page.`)}<p class="sm dim">You can close the game at any time. Your current task, your crops, animals and workers keep going while you are away, and you get a summary when you come back. ${DQ.offlinePolicy()}</p></div></section>
     <section class="panel"><div class="phead"><h2>Save data</h2><small class="mono">Autosaves every 10s</small></div><div class="stack"><div class="btnrow wrap"><button class="btn" data-do="export">${ico('save')}Export save</button><button class="btn" data-do="import">Import save</button><button class="btn" data-do="savenow">Save now</button></div>
@@ -336,6 +338,14 @@ const DO = {
   achfilter: a => { UI.achFilter = a; UI.render(false); },
   hidetut: () => { S().tut.hidden = true; UI.render(false); },
   set: a => { const s = S().settings; s[a] = !s[a]; DQ.audioApply(); DQ.musicRefresh(); UI.renderHud(); UI.render(false); },
+  digestsetting: id => {
+    if (!Object.hasOwn(DQ.digestCategories, id)) return;
+    const digest = S().settings.digest ||= {};
+    digest[id] = digest[id] === false;
+    DQ.save();
+    UI.render(false);
+    document.querySelector(`[data-do="digestsetting"][data-a="${id}"]`)?.focus();
+  },
   tasksound: a => { S().settings.taskSounds = a; DQ.audioInit(); UI.render(false); },
   savenow: () => { const ok = DQ.save(); DQ.toast(ok ? (DQ.saveLocation() === 'desktop' ? 'Saved on this device' : 'Saved in this browser location') : (DQ.saveHealth || 'Save failed. Download a backup before closing.'), !ok); },
   export: () => DQ.modal({ title: 'Export save', wide: true, body: `<p class="sm dim">Copy this text somewhere safe. You can paste it into Import save on any device.</p><textarea id="expta" readonly rows="6">${DQ.exportSave()}</textarea>`, actions: [{ label: 'Copy', primary: true, fn: () => { const t = $('#expta'); t.select(); try { navigator.clipboard.writeText(t.value).then(() => DQ.toast('Copied to clipboard')).catch(() => DQ.toast('Press Ctrl+C to copy')); } catch (e) { DQ.toast('Press Ctrl+C to copy'); } return false; } }, { label: 'Close' }] }),

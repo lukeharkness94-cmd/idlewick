@@ -100,8 +100,21 @@ DQ.toast = (msg, bad) => {
 const queue = [], MAX_NOW = 1;
 const live = () => $$('.note', notesEl).filter(n => !n.classList.contains('out'));
 const nowLive = () => live().length;
-DQ.noteLog = []; DQ.noteMissed = 0;
-DQ.notificationTier = o => ['level', 'adv', 'unlock', 'death', 'warn', 'boss'].includes(o.kind) || o.thanks || /^(qr:|qo:|qnew$|project:)/.test(o.key || '') ? 'now' : 'quiet';
+DQ.noteLog = [];
+DQ.unreadNotes = 0;
+DQ.digestCategories = { loot: 'Loot', levels: 'Level-ups', discoveries: 'Discoveries', achievements: 'Achievements', folk: 'Folk notes' };
+const category = o => {
+  const key = o.key || '';
+  if (o.kind === 'loot') return 'loot';
+  if (['level', 'adv', 'perk'].includes(o.kind) || /^(creature:|mastery$)/.test(key)) return 'levels';
+  if (o.kind === 'folk') return 'folk';
+  if (o.kind === 'ach' || /^(slayer:|wing:|guildinvite:)/.test(key)) return 'achievements';
+  if (o.kind === 'discovery' || /^(beast:|research:|tech:|unique:|recipe:|pet:|egg:|feature:discovery-)/.test(key)) return 'discoveries';
+  return null;
+};
+const majorUnlock = o => o.kind === 'unlock' && /^(unlock:|feature:(?!discovery-)|plan$)/.test(o.key || '');
+DQ.notificationTier = o => !category(o) && !majorUnlock(o) &&
+  (['death', 'warn', 'boss'].includes(o.kind) || o.thanks || /^(qr:|qo:|qnew$|project:)/.test(o.key || '')) ? 'now' : 'quiet';
 DQ.notificationPage = o => {
   if (o.page) return o.page;
   const k = o.key || '', D = DQ.data;
@@ -141,74 +154,75 @@ DQ.markNoticesRead = page => {
   if (DQ.S.noticeBadges) delete DQ.S.noticeBadges[page];
   $$('.note', notesEl).filter(el => el.dataset.page === page && !['unlock','level','adv'].includes(el.dataset.kind)).forEach(dismiss);
 };
-const logNote = o => { DQ.noteLog.unshift({ t: Date.now(), o, silent: false }); if (DQ.noteLog.length > 40) DQ.noteLog.pop(); };
-const markSilent = (o, count) => { const e = DQ.noteLog.find(x => x.o === o); if (e) { e.silent = true; if (count) DQ.noteMissed++; } };
-/* A new skill is a big moment: it gets the same full reveal as a level-up (queued behind any open dialog), with what
-   the skill does and a button straight to it. */
-const showSkillUnlock=o=>{
-  if(modalEl){levelQueue.push(Object.assign({__unlock:true},o));pumpLevel();return true;}
-  const id=(o.key||'').slice(7),sk=DQ.data.SK[id];if(!sk)return false;
-  const art=DQ.artImage('skill',id,96,'',sk.name)||ico(id);
-  const open=o.action&&o.action.fn?o.action.fn:()=>DQ.go(sk.page);
-  DQ.modal({title:`${sk.name} unlocked`,wide:true,sticky:true,body:`<div class="level-reveal lr-v2 lr-unlock" style="--c:${o.col||sk.col||'#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><span class="lr-ripple" aria-hidden="true"></span><span class="lr-ripple r2" aria-hidden="true"></span><span class="lr-ripple r3" aria-hidden="true"></span><span class="lr-rays" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><span class="lr-ribbon">New skill</span><h2>${esc(sk.name)}</h2><p>${esc(String(o.text||'').replace(/<[^>]+>/g,'').trim()||sk.blurb||'')}</p></div>`,actions:[{label:`Open ${sk.name}`,primary:true,fn:()=>{DQ.closeModal();open();setTimeout(pumpLevel,180);}},{label:'Later',fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
-  DQ.sfx('unlock');setTimeout(()=>DQ.burstEl(document.querySelector('.level-emblem'),o.col||sk.col||'#d8a64a',44),100);return true;
+const logNote = o => {
+  const silent = DQ.notificationTier(o) === 'quiet';
+  DQ.noteLog.unshift({ t: Date.now(), o, silent });
+  if (DQ.noteLog.length > 150) DQ.noteLog.pop();
+  if (silent) DQ.unreadNotes++;
 };
-const levelQueue=[];let levelRetry=0;
-const pumpLevel=()=>{clearTimeout(levelRetry);if(!levelQueue.length)return;if(modalEl){levelRetry=setTimeout(pumpLevel,300);return;}const n=levelQueue.shift();if(n.__unlock)showSkillUnlock(n);else showLevelReveal(n);};
-/* the painted star, re-centred on its own centre of mass (its source crop carries stray edge pixels that pull it off-centre) */
-let starUrl=null;
-const centredStar=()=>{
-  if(!starUrl&&DQ.pixelArt){starUrl=DQ.pixelArt.bigStarUrl?DQ.pixelArt.bigStarUrl():DQ.pixelArt.iconUrl('star');}if(starUrl)return `<img class="lr-star-img pxa" src="${starUrl}" width="96" height="96" alt="" draggable="false">`;if(!starUrl){const raw=null;if(!raw)return '';
-    try{const W=raw.width,H=raw.height,a=raw.getContext('2d').getImageData(0,0,W,H).data;let n=0,sx=0,sy=0;
-      for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(a[(y*W+x)*4+3]>128){n++;sx+=x;sy+=y;}
-      const cx=sx/n,cy=sy/n;let R=0;for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(a[(y*W+x)*4+3]>128){const d=Math.hypot(x-cx,y-cy);if(d>R&&d<Math.min(W,H)*.62)R=d;}
-      const S=256,c=document.createElement('canvas');c.width=c.height=S;const k=(S/2*.94)/R,x=c.getContext('2d');x.imageSmoothingQuality='high';
-      /* only the star itself: clip to its radius so stray edge pixels never show */
-      x.beginPath();x.arc(S/2,S/2,S/2,0,Math.PI*2);x.clip();x.drawImage(raw,S/2-cx*k,S/2-cy*k,W*k,H*k);starUrl=c.toDataURL();}catch(e){return '';}}
-  return `<img class="lr-star-img" src="${starUrl}" width="104" height="104" alt="" draggable="false">`;
+const markSilent = o => { const e = DQ.noteLog.find(x => x.o === o); if (e) e.silent = true; };
+let loot = new Map(), lootMinute = -1, batchTimer;
+DQ.flushItemDigest = () => {
+  const minute = Math.floor((DQ.S.playtime || 0) / 60000);
+  if (lootMinute === minute || !loot.size) return;
+  clearTimeout(batchTimer);
+  lootMinute = minute;
+  const text = [...loot].map(([id, count]) => `×${DQ.fmt(count)} ${DQ.data.ITEMS[id].name}`).join(', ');
+  loot = new Map();
+  DQ.notify({ kind: 'loot', key: 'loot:digest', icon: 'pouch', title: 'Items gained', text, sound: false });
 };
-DQ.heroRevealWorthy=o=>!Number.isFinite(o.to)||(o.gains||[]).length>0||o.to%5===0;
-const showLevelReveal=o=>{
-  if(modalEl){levelQueue.push(o);pumpLevel();return true;}
-  const sk=o.skill&&DQ.data.SK[o.skill],hero=o.kind==='adv',name=hero?'Hero':(sk?.name||'Skill'),level=o.to||String(o.title||'').match(/\d+/)?.[0]||'';
-  const art=hero?`<span class="level-star">${centredStar()||ico('star')}</span>`:DQ.artImage('skill',o.skill,112,'',name);
-  DQ.modal({title:`${name} level up`,wide:true,sticky:true,body:`<div class="level-reveal lr-v2" style="--c:${o.col||'#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><span class="lr-ripple" aria-hidden="true"></span><span class="lr-ripple r2" aria-hidden="true"></span><span class="lr-ripple r3" aria-hidden="true"></span><span class="lr-rays" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><span class="lr-ribbon">Level up</span><h2>${esc(name)} <b>${esc(level)}</b></h2><p>${esc(o.text||'Your training has paid off.')}</p></div>`,actions:[{label:'Continue',primary:true,fn:()=>{DQ.closeModal();setTimeout(pumpLevel,180);}}]});
-  DQ.sfx(o.sound||'level');setTimeout(()=>DQ.burstEl(document.querySelector('.level-emblem'),o.col||'#d8a64a',38),100);return true;
+DQ.noteItemGain = (id, count) => {
+  if (DQ.S.settings.digest?.loot === false) return;
+  const minute = Math.floor((DQ.S.playtime || 0) / 60000);
+  if (lootMinute !== -1 && minute !== lootMinute && loot.size) DQ.flushItemDigest();
+  loot.set(id, (loot.get(id) || 0) + count);
+  clearTimeout(batchTimer);
+  batchTimer = setTimeout(DQ.flushItemDigest, 60000 - (DQ.S.playtime || 0) % 60000);
+};
+DQ.on('ui', DQ.flushItemDigest);
+let openingReveals = 0;
+DQ.allowAutomaticReveal = () => {
+  if (modalEl || document.querySelector('#intro,.quest-reveal') || document.hidden) return false;
+  if ((DQ.S.playtime || 0) >= 5 * 60000) return true;
+  if (openingReveals >= 3) return false;
+  openingReveals++;
+  return true;
+};
+const showUnlock = o => {
+  const id = (o.key || '').slice(7), sk = DQ.data.SK[id];
+  const art = (sk && DQ.artImage('skill', id, 96, '', sk.name)) || ico(o.icon || 'star');
+  const action = inferActions(o)[0];
+  DQ.modal({ title: o.title, wide: true, body: `<div class="level-reveal lr-v2 lr-unlock" style="--c:${o.col || '#d8a64a'}"><div class="lr-stage"><span class="lr-glow" aria-hidden="true"></span><div class="level-emblem">${art}</div></div><p>${esc(o.text || '')}</p></div>`,
+    actions: [...(action ? [{ ...action, primary: true, fn: () => { DQ.closeModal(); action.fn(); } }] : []), { label: 'Later' }] });
+  DQ.sfx('unlock');
 };
 DQ.notify = o => {
   if (DQ.sim.on) { DQ.sim.notes.push(o); return; }
-  if (o.kind === 'level') {
-    const previous = queue.find(n => n.key === o.key) || $$('.note', notesEl).find(n => n.dataset.key === o.key)?._notification;
-    if (previous?.kind === 'level' && Number.isFinite(previous.from) && previous.to <= o.to) {
-      o = { ...o, from: previous.from, unlocks: [...new Set([...(previous.unlocks || []), ...(o.unlocks || [])])] };
-      o.title = `${DQ.data.SK[o.skill]?.name || 'Skill'} levels ${o.from + 1}–${o.to}!`;
-      if (o.unlocks.length) o.text = o.unlocks.join(' ');
+  const s = DQ.S.settings, group = category(o);
+  if (group && s.digest?.[group] === false) return;
+  logNote(o);
+  if (group || !majorUnlock(o) && o.kind === 'unlock') return;
+  if (majorUnlock(o)) {
+    const id = o.key.startsWith('unlock:') ? o.key.slice(7) : o.key.startsWith('feature:') ? o.key.slice(8) : null;
+    if (id) {
+      DQ.S.seen['tutorial:' + id] = true;
+      if (DQ.S.tut?.done) delete DQ.S.tut.done['lesson:' + id];
     }
+    if (s.notify && s.unlockReveals === true && DQ.allowAutomaticReveal()) showUnlock(o);
+    return;
   }
-  const s = DQ.S.settings; logNote(o);
-  if(o.kind==='unlock'){
-    const id=(o.key||'').startsWith('unlock:')?o.key.slice(7):(o.key||'').startsWith('feature:')?o.key.slice(8):null;
-    if(id){DQ.S.seen['tutorial:'+id]=true;if(DQ.S.tut?.done)delete DQ.S.tut.done['lesson:'+id];}
-  }
-  if(o.kind==='unlock'&&(o.key||'').startsWith('unlock:')&&showSkillUnlock(o))return;
-  /* a new creature companion is a moment: it opens its own pop-up (queued behind any open dialog) instead of a card */
-  if(o.popup&&DQ.popupQueue){markSilent(o,false);if(o.sound!==false)DQ.sfx(o.sound||'notify');DQ.popupQueue(o.popup);return;}
-  /* Skill levels use compact bottom cards; only the overall Hero level takes over. */
-  /* The full Hero reveal is kept for levels that unlock something and every fifth level; the others arrive as a
-     compact card that is always shown (even with notifications off), so no Hero level passes unseen. */
-  if(o.kind==='adv'&&DQ.heroRevealWorthy(o)&&showLevelReveal(o))return;
-  if(o.kind==='adv')o={...o,force:true};
+  if (o.popup) return;
   if (DQ.ui && DQ.ui.view === DQ.notificationPage(o) && !['unlock','level','adv'].includes(o.kind)) {
-    markSilent(o, false);
+    markSilent(o);
     if (DQ.notificationTier(o) === 'now') {
       DQ.ui.pageNotice = { page: DQ.notificationPage(o), title: String(o.title || ''), text: String(o.text || '') };
       if (DQ.ui.renderPageNotice) DQ.ui.renderPageNotice();
     }
     return;
   }
-  if (!s.notify && !o.force && o.kind!=='unlock') { markSilent(o, false); return; }
+  if (!s.notify && !o.force && o.kind!=='unlock') { markSilent(o); return; }
   const tier = DQ.notificationTier(o);
-  if (tier === 'quiet') { markSilent(o, true); return; }
+  if (tier === 'quiet') { markSilent(o); return; }
   if (o.key) { $$('.note', notesEl).filter(n => n.dataset.key === o.key).forEach(n => n.remove()); const i = queue.findIndex(q => q.key === o.key); if (i >= 0) queue.splice(i, 1); }
   if (document.hidden || DQ.holdNotes || nowLive() >= MAX_NOW) { queue.push(o); return; }
   showNote(o);
@@ -220,8 +234,8 @@ const trunc = (t, n) => { t = String(t || '').replace(/<[^>]+>/g, ''); return t.
 /* The bell keeps routine information; actionable alerts appear in context. */
 const ago = t => { const s = Math.round((Date.now() - t) / 1000); return s < 60 ? 'just now' : s < 3600 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`; };
 DQ.openBell = () => {
-  DQ.noteMissed = 0; const L = DQ.noteLog.filter(e => DQ.notificationTier(e.o) === 'quiet').slice(0, 25);
-  const body = L.length ? `<div class="bell-list">${L.map((e, i) => { const o = e.o, a = inferActions(o)[0]; return `<div class="bell-row ${e.silent ? 'quiet' : ''}" style="--c:${o.col || '#d8a64a'}"><span class="n-ic">${DQ.data.ITEMS[o.icon] ? DQ.itemIco(DQ.data.ITEMS[o.icon]) : DQ.data.SK[o.icon] && DQ.artImage ? DQ.artImage('skill', o.icon, 32, '', '') : ico(o.icon || 'star')}</span><div class="bell-t"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(trunc(o.text, 140))}</span>` : ''}<small>${ago(e.t)}</small></div>${a ? `<button class="btn sm" data-i="${i}">${esc(a.label)}</button>` : ''}</div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing yet. Routine progress and finds will be listed here.</p>';
+  DQ.flushItemDigest(); DQ.unreadNotes = 0; const L = DQ.noteLog.filter(e => DQ.notificationTier(e.o) === 'quiet');
+  const body = L.length ? `<div class="bell-list">${L.map((e, i) => { const o = e.o, a = inferActions(o)[0]; return `<div class="bell-row ${e.silent ? 'quiet' : ''}" style="--c:${o.col || '#d8a64a'}"><span class="n-ic">${DQ.data.ITEMS[o.icon] ? DQ.itemIco(DQ.data.ITEMS[o.icon]) : DQ.data.SK[o.icon] && DQ.artImage ? DQ.artImage('skill', o.icon, 32, '', '') : ico(o.icon || 'star')}</span><div class="bell-t"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(o.kind === 'loot' ? o.text : trunc(o.text, 190))}</span>` : ''}<small>${ago(e.t)}</small></div>${a ? `<button class="btn sm" data-i="${i}">${esc(a.label)}</button>` : ''}</div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing yet. Routine progress and finds will be listed here.</p>';
   DQ.modal({ title: 'Recent activity', wide: true, body, actions: [{ label: 'Close', primary: true }] });
   $$('.bell-row .btn').forEach(b => b.onclick = () => { const e = L[+b.dataset.i], a = e && inferActions(e.o)[0]; DQ.closeModal(); a && a.fn && a.fn(); });
 };
@@ -289,13 +303,9 @@ DQ.closeModal = () => {
   inertBefore.clear();
   if (modalTrigger && modalTrigger.isConnected) modalTrigger.focus();
   if (DQ.holdNotes) { DQ.holdNotes = false; setTimeout(pump, 250); }
-  closeQueued();
 };
-/* pop-ups that must not replace a dialog already open: shown one at a time, each after the last one closes */
-const popups = [];
-const nextPopup = () => { if (!popups.length) return; if (document.querySelector('.modal')) { setTimeout(nextPopup, 600); return; } DQ.modal(popups.shift()); };
-DQ.popupQueue = o => { popups.push(o); if (popups.length === 1) setTimeout(nextPopup, 250); };
-const closeQueued = () => { if (popups.length) setTimeout(nextPopup, 350); };
+/* Older discovery callers supply a title and a route. Keep those in the digest. */
+DQ.popupQueue = o => DQ.notify({ kind: 'discovery', title: o.title, action: o.actions?.find(a => a.fn) });
 DQ.modal = o => {
   DQ.hideTip?.();
   DQ.closeModal(); modalTrigger = document.activeElement;

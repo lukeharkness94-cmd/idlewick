@@ -91,7 +91,14 @@ DQ.checkRule = () => {
   if (R.type === 'time') done = a.elapsed >= R.n * 60000;
   else if (R.type === 'count') done = a.count >= R.n;
   else if (R.type === 'level') { const sk = DQ.actSkill(a); done = sk && DQ.lvl(sk) >= a.lvlTarget; }
-  if (done) { const label = DQ.actLabel(); DQ.stopAct(true); DQ.notify({ kind: 'info', key: 'taskdone', icon: 'check', col: '#5cc08a', title: 'Task finished', text: `${label}: ${DQ.ruleText(a.rule, a)}, done.`, sound: 'perk', ttl: 6000 }); DQ.log(`Finished: ${label.toLowerCase()}.`, 'good'); DQ.advanceQueue(); }
+  if (done) {
+    const label = DQ.actLabel();
+    if (R.type === 'level' && !DQ.forecasting) S().lastPlannedStop = `${label} stopped at level ${a.lvlTarget}.`;
+    DQ.stopAct(true, DQ.sim.on ? S().lastPlannedStop : undefined, true);
+    DQ.notify({ kind: 'info', key: 'taskdone', icon: 'check', col: '#5cc08a', title: 'Task finished', text: S().lastPlannedStop || `Finished ${label.toLowerCase()}.`, sound: 'perk', ttl: 6000 });
+    DQ.log(`Finished: ${label.toLowerCase()}.`, 'good');
+    DQ.advanceQueue();
+  }
 };
 DQ.queueAdd = (kind, id, rule = 'time:30', pace) => {
   const Q = S().queue = S().queue || [];

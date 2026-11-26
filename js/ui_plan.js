@@ -26,9 +26,12 @@ function awayPreview(action, supplies) {
 UI.planHtml = () => {
   const a = DQ.act, Q = S().queue || [], slots = DQ.queueSlots();
   const prog = a && DQ.ruleProgress(a), sup = a && DQ.supplyInfo(a);
+  const skill = a && DQ.actSkill(a), level = skill ? DQ.lvl(skill) : 99;
+  const levelStop = level < 99 ? `<div class="plan-row"><label for="plan-target-level">Reach level</label><input type="number" id="plan-target-level" min="${level + 1}" max="99" step="1" value="${a.rule === 'level' && a.lvlTarget > level ? a.lvlTarget : level + 1}"><button class="btn" data-do="setlevelstop">Set level target</button></div>` : '';
   const cur = a ? `<div class="plan-cur"><div class="k">Now</div><h3>${DQ.actLabel()}</h3>
       <div class="plan-row"><span class="k">Pace</span>${paceSeg(a.pace || 'steady', 'setpace')}</div><p class="sm dim">${D.PACE[a.pace || 'steady'].text}</p>
       <div class="plan-row"><span class="k">Stop</span>${ruleChips(a.rule || 'none', 'setrule')}</div>
+      ${levelStop}
       ${prog ? `<div class="sm">Progress: <b class="mono">${fmt(prog[0])} / ${fmt(prog[1])} ${prog[2]}</b></div>` : ''}
       ${sup ? `<div class="sm ${sup.n ? '' : 'bad'}">${ico('bag')} Supplies: ${sup.label}${sup.ms ? ` (about ${DQ.fmtTime(sup.ms)})` : ''}</div>` : ''}${awayPreview(a, sup)}</div>`
     : `<p class="dim">Nothing is running. Queue a task with the <b>+</b> button on any card, or just click a card to start it.</p>`;
@@ -178,6 +181,16 @@ Object.assign(UI.DO, {
   plan: () => UI.openPlan(),
   setpace: a => { if (!DQ.act) return; DQ.act.pace = a; S().act.pace = a; S().lastPace = a; DQ.act.dur = DQ.actDur(DQ.act); DQ.sfx('tab'); replan(); },
   setrule: a => { if (!DQ.act) return; DQ.act.rule = a; S().act.rule = a; DQ.act.count = 0; DQ.act.elapsed = 0; const sk = DQ.actSkill(DQ.act); DQ.act.lvlTarget = sk ? DQ.lvl(sk) + 1 : 0; S().act.lvlTarget = DQ.act.lvlTarget; DQ.sfx('tab'); replan(); },
+  setlevelstop: () => {
+    const input = $('#plan-target-level');
+    if (!DQ.act || !input || !input.reportValidity()) return;
+    const level = input.valueAsNumber, skill = DQ.actSkill(DQ.act);
+    if (!skill || !Number.isInteger(level) || level <= DQ.lvl(skill) || level > 99) return;
+    for (const act of [DQ.act, S().act]) Object.assign(act, { rule: 'level', lvlTarget: level });
+    DQ.save();
+    replan();
+    $('[data-do="setlevelstop"]')?.focus();
+  },
   defpace: a => { S().defPace = a; DQ.sfx('tab'); replan(); },
   /* queueing asks how long, as plain buttons, so a chain is planned in one go: "200 oak logs, then planks" */
   queueadd: (a, b) => { if (!DQ.planUnlocked()) return DQ.toast(`The task queue unlocks at Hero level ${D.PLAN_ADV}`, true);

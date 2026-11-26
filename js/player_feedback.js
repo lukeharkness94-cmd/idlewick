@@ -16,13 +16,6 @@ Q.questSkillNeeds=q=>{
 };
 // Only ordinary level unlocks appear in the level-up list. Found patterns have their own shelf.
 for(const [sk,levels]of Object.entries(D.UNL))for(const [lv,names]of Object.entries(levels)){levels[lv]=names.filter(name=>!D.SECRET_RECIPES.some(r=>D.RECIPES[r.rec]?.name===name));if(!levels[lv].length)delete levels[lv];}
-const learn=Q.learnRecipe;
-Q.learnRecipe=(id,quiet)=>{
- const learned=learn(id,quiet),r=D.SECRET[id];if(!learned||quiet||Q.sim.on||Q.forecasting||S().settings.notify===false)return learned;
- const rec=D.RECIPES[r.rec],item=D.ITEMS[r.output||id];
- Q.popupQueue({title:'A recipe worth keeping',body:`<div class="recipe-reveal"><span class="recipe-reveal-art">${Q.itemIco(item)}</span><span class="k">Discovered recipe · kept permanently</span><h2>${esc(rec.name)}</h2><p>${esc(r.found)}.</p><p>${D.SK[r.skill].name} ${r.lvl} · available on the Discovered recipes shelf. A discovered recipe, now yours to keep.</p></div>`,actions:[{label:'Open recipe',primary:true,fn:()=>U.focusTask(D.SK[r.skill].page,r.rec,rec.tab,r.skill)},{label:'Later'}]});
- return learned;
-};
 // Live Guide progress: update only fills/pips, without rebuilding the activity or its controls.
 for(const key of ['mastBadge','mastLine']){const fn=Q[key];Q[key]=(kind,id)=>fn(kind,id).replace(/^<([a-z]+) /,`<$1 data-study-kind="${kind}" data-study-id="${id}" `);}
 Q.on('ui',()=>{for(const el of document.querySelectorAll('[data-study-kind]')){const m=Q.mastInfo(el.dataset.studyKind,el.dataset.studyId);el.style.setProperty('--p',m.pct+'%');el.classList.toggle('full',!m.next);el.classList.toggle('max',!m.next);el.classList.toggle('near',!!m.next&&m.pct>=90);const fill=el.querySelector('.bar>i');if(fill)fill.style.width=m.pct+'%';el.querySelectorAll('.mast-pips>i').forEach((p,i)=>p.classList.toggle('on',i<m.stars));el.dataset.tip='text:'+Q.mastTip(el.dataset.studyKind,el.dataset.studyId);if(el.classList.contains('mast-line'))el.setAttribute('aria-label',Q.mastTip(el.dataset.studyKind,el.dataset.studyId));}});
@@ -69,7 +62,7 @@ U.render=(...args)=>{const result=render(...args);
    const town=S().town,have=Q.localStanding(town),max=Object.values(D.PROJECTS).filter(p=>p.town===town&&!p.relic).length*10;
    wrap.querySelector('small')?.remove();wrap.insertAdjacentHTML('beforeend',`<div class="village-standing" role="group" aria-label="Village standing"><b>Local standing ${have} / ${max}</b><span class="bar"><i style="width:${max?have/max*100:0}%"></i></span><small>Restore buildings to open local supplies. Standing is permanent and never spent.</small></div>`);
   }
-  if(!S().tut.hidden&&!S().tut.done.projects){S().tut.done.projects=true;Q.save();Q.popupQueue({title:'Bring the village back to life',body:'<p>Town projects turn your gathered materials into restored buildings and useful local supplies.</p><p>Select a building to see its requirements. Deliver what you can; contributions are kept. Restoring a building raises this village’s standing and changes its scenery.</p><p>Pin a project to keep its next material within reach. You can return whenever you like.</p>',actions:[{label:'Explore town projects',primary:true}]});}
+
  }
  return result;
 };

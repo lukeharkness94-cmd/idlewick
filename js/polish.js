@@ -125,7 +125,7 @@ const bkCard = () => {
 UI.homeNotices = () => awayCard() + bkCard();
 
 /* ---------- The bell: recent activity, and a dot when something skipped the corner ---------- */
-UI.B.belldot = e => { const n = DQ.noteMissed || 0; e.hidden = !n; UI.set(e, n > 9 ? '9+' : String(n)); };
+UI.B.belldot = e => { const n = DQ.unreadNotes || 0; e.hidden = !n; UI.set(e, n > 9 ? '9+' : String(n)); };
 Object.assign(UI.DO, { bell: () => DQ.openBell() });
 
 /* ---------- Balance sheet (Settings > Show tuning tools) ---------- */

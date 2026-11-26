@@ -73,7 +73,11 @@ addEventListener('keydown',e=>{
  if(line&&(e.key===' '||e.key==='Enter')){e.preventDefault();e.stopImmediatePropagation();UI.DO.storyadvance();return;}
  if(!['Tab','Escape'].includes(e.key))e.stopImmediatePropagation();
 },true);
-function offer(id){if(quiet()||!Q.started||S().settings.storyScenes===false||seen(id)||!defs[id]?.eligible()||!Q.storyCinematic(defs[id]))return;if(pending&&defs[pending]?.choices?.length&&!choiceOf(defs[pending]))return;pending=id;}
+function offer(id){
+ if(quiet()||!Q.started||S().settings.storyScenes===false||seen(id)||!defs[id]?.eligible()||!Q.storyCinematic(defs[id]))return;
+ if(document.querySelector('.modal,.quest-reveal,#intro')||document.hidden)return;
+ pending=id;
+}
 /* Only a new major event can queue a scene; loading an advanced save never replays a backlog. */
 const start0=Q.startQuest;
 Q.startQuest=id=>{const before=D.QM[id]&&Q.questState(D.QM[id]);const r=start0(id);if(before==='new'&&['active','ready'].includes(Q.questState(D.QM[id]))){const scene=Object.values(defs).find(s=>s.quest===id);if(scene)offer(scene.id);}return r;};
@@ -85,7 +89,7 @@ Q.on('project',id=>{if(S().projects[id]){const s=Object.values(defs).find(s=>s.p
 const notify0=Q.notify;
 Q.notify=o=>{const r=notify0(o);/* The main quest claim owns the victory scene, preventing duplicate celebrations. */return r;};
 let ticks=0;
-Q.on('ui',()=>{if(++ticks%5||!pending||S().settings.storyScenes===false||quiet()||!Q.started||document.hidden||document.querySelector('.modal,.quest-reveal,#intro'))return;const id=pending;pending=null;if(!seen(id))Q.openStory(id);});
+Q.on('ui',()=>{if(++ticks%5||!pending)return;const id=pending;pending=null;if(S().settings.storyScenes!==false&&!quiet()&&Q.started&&!seen(id)&&Q.allowAutomaticReveal())Q.openStory(id);});
 /* Present existing consequential choices as scenes rather than introducing another decision system. */
 for(const [id,d]of Object.entries(D.DISCOVERIES).filter(([,d])=>d.choices))defs['discovery_'+id]={id:'discovery_'+id,title:d.name,town:d.place,type:'discovery',source:id,eligible:()=>Q.discovered(id),frames:()=>[{speaker:'Narrator',shot:'wide',text:d.text}],choices:d.choices.map(c=>({...c,effect:c.needItem?`Uses one ${D.ITEMS[c.needItem].name}. ${c.label}`:c.need?`Uses ${c.need} cooked meals. ${c.label}`:c.label}))};
 const discovery0=UI.openDiscovery;
