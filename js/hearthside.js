@@ -78,13 +78,21 @@ Q.on('ui', () => {
  if (U.view !== 'overview' || performance.now() - lastHomeCheck < 400) return;
  lastHomeCheck = performance.now();
  const goal = document.querySelector('.home-next');
- if (!goal || goal.contains(document.activeElement) || goal.matches(':hover')) return;
+ if (!goal) return;
  const html = homeGlance();
  if (html === lastHomeHtml) return;
- lastHomeHtml = html;
  const next = document.createElement('template');
  next.innerHTML = html;
  const replacement = next.content.querySelector('.home-next');
+ /* under the pointer or keyboard focus the card is not swapped (it would steal the click), but its count and bar still
+    move, so a patrol reads 3 / 6 while you watch it (Part C Task 22) */
+ if (goal.contains(document.activeElement) || goal.matches(':hover')) {
+  const same = replacement && replacement.querySelector('h2')?.textContent === goal.querySelector('h2')?.textContent;
+  if (same) { const b0 = goal.querySelector(':scope > span > b'), b1 = replacement.querySelector(':scope > span > b'), p0 = goal.querySelector('progress'), p1 = replacement.querySelector('progress');
+   if (b0 && b1) b0.textContent = b1.textContent; if (p0 && p1) { p0.value = p1.value; p0.max = p1.max; } }
+  return;
+ }
+ lastHomeHtml = html;
  if (replacement?.outerHTML !== goal.outerHTML) goal.replaceWith(replacement);
 });
 U.V.activity = () => activity0() + `<section class="home-activity-details" aria-label="Goals and opportunities">${home0()}</section>`;
