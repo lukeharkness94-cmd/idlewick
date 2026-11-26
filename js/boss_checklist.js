@@ -91,6 +91,9 @@ Q.bossPrepStep = () => {
   const c = Q.bossChecklist(); if (!c || allDone(c)) return null;
   return { title: `Before ${b.boss.short || b.name}`, detail: 'Three quick checks before the fight. Each one ticks itself off.', action: 'bossprepskip', a: b.id, checklist: c, skip: true };
 };
+/* the checklist is for the first attempt: once a fight with the boss has started it does not come back */
+const start0 = Q.startAct;
+Q.startAct = (kind, id, o) => { const r = start0(kind, id, o); if (r && kind === 'fight' && D.MON[id] && D.MON[id].boss && !Q.forecasting && !(Q.sim && Q.sim.on && !Q.sim.activities)) prep()[id] = prep()[id] || 'tried'; return r; };
 const region0 = Q.regionNext;
 Q.regionNext = () => { const s = Q.bossPrepStep() || Q.regionalChallengeStep(); return s || region0(); };
 /* the checklist holds the equip and slot steps plan.js would otherwise offer one at a time, so at the boss it comes first */
