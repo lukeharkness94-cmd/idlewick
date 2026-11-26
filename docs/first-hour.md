@@ -26,9 +26,23 @@ player feedback. Human sessions should still follow `docs/playtest-plan.md`, esp
 
 ## After
 
-Guided beginner, first hour: First Steps in 1 minute, Grubnash defeated first try at about 30 minutes (after
-equipping bronze, slotting Power Strike and cooking food), the next main quest offered, Hero 11 and combat 10 at the
-hour, one knock-out in Mossbarrow. Levels arrive about every 90 seconds early on, slowing naturally.
+Guided beginner, first hour. The earlier claim here ("Grubnash defeated first try at about 30 minutes") could not be
+verified: the harness's button allow-list lacked `huntquest`, so it never clicked "Patrol the east farms" and stayed on
+Mudlings. The fixed harness (Part C Task 17, 26 Nov 2026) replays the guided path with these scripted, simulated-time
+results (Sword, fresh hero, `MIN=60 node scripts/play-first-hour.cjs` against the packaged build; one run, not a player
+average):
+
+| | Broken harness (historical) | Fixed harness |
+| --- | --- | --- |
+| Goblin Menace | still active, 0/6 | complete at 5.1 min |
+| Grubnash first challengeable | never reached | 20.5 min ("Challenge Grubnash" became the Next step) |
+| Grubnash challenged | no | yes, at 20.5, 21.5 and 26.0 min |
+| Grubnash defeated | no | at 26.5 min, on the third try: the first two were knocked out with no armour; the guide then equipped bronze armour from the pack and he fell |
+| End state at 60 min | Hero 10, Combat 11, 4,562 coins, 17 inventory items, 1,278 Mudlings | Hero 12, Combat 13, 7,553 coins, 26 inventory items, 436 kills in all; Tusks and Trouble done in Mossbarrow, King of the Wood active |
+| Page and console errors | 0 | 0 |
+
+So Grubnash is reached and beaten inside the first hour, but not first try: two knock-outs before armour went on.
+Task 18's "Before Grubnash" checklist addresses that.
 
 Returning after six hours: the welcome-back summary shows the task, the two-hour taper, XP, coins, loot, level-ups,
 three away decisions (duel, pedlar, trader), a discovery and journal lines, then Home's Next step.
