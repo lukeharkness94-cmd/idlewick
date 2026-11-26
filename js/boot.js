@@ -115,7 +115,7 @@ function start(isNew) {
   D.SKILLS.forEach(s => { if (DQ.skillUnlocked(s.id)) S.unlocked[s.id] = true; });
   DQ.resumeAfterLoad(); DQ.ui.init();
   const h = location.hash.slice(1); if (h && (DQ.ui.V[h] || D.SK[h]) && !isNew) { DQ.ui.view = h; DQ.ui.render(true); }
-  if (!isNew && away > 30000) { const eff = DQ.offlineEff(away); DQ.noteAway(away, eff); const sum = DQ.simulate(eff, Math.min(away, DQ.OFFLINE_CAP)); DQ.makeAwayEvents(sum, away); DQ.emit('welcome', sum, away); }
+  if (!isNew && away > 30000) { const eff = DQ.offlineEff(away); DQ.noteAway(away, eff); const sum = DQ.simulate(eff, Math.min(away, DQ.OFFLINE_CAP), { report: true }); DQ.makeAwayEvents(sum, away); DQ.emit('welcome', sum, away); }
   S.tele = S.tele || { adv: {}, skill: {}, first: {}, away: [], sessions: 0 }; S.tele.sessions++; DQ.sessMs = 0; DQ.sessStart = Date.now();
   DQ.startLoop(); DQ.checkAch();
   if (isNew) {

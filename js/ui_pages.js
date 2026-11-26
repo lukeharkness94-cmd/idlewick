@@ -241,7 +241,7 @@ UI.V.settings = () => {
       <div><div class="k" style="margin-bottom:6px">Task sounds</div><div class="seg">${[['off', 'Off'], ['calm', 'Calm'], ['varied', 'Varied']].map(([k, n]) => `<button class="${s.taskSounds === k ? 'on' : ''}" data-do="tasksound" data-a="${k}">${n}</button>`).join('')}</div><small class="dim">Controls how often finished tasks make a sound. Sounds are always varied so they do not repeat exactly.</small></div></div></section>
     <section class="panel"><div class="phead"><h2>Interface</h2></div><div class="stack">${tog('notify', 'Notifications', 'Show level-ups, unlocks and important alerts. Routine finds and achievements stay in the bell.')}${tog('tips', 'Tooltips')}${tog('reduceFx', 'Reduce effects', 'Turns off click ripples, particles and bouncy animations')}
       <label class="nameedit"><span class="k">Hero name</span><input id="heroname" data-in="name" maxlength="20" value="${esc(S().name)}"></label></div></section>
-    <section class="panel"><div class="phead"><h2>Gameplay</h2></div><div class="stack">${tog('autoEat', 'Eat automatically in combat', `Eats at ${s.eatAt}% health. Change it on the Combat page.`)}<p class="sm dim">You can close the game at any time. Your current task, your crops, animals and workers keep going while you are away (full speed for 2 hours, then half speed, up to 8 hours), and you get a summary when you come back.</p></div></section>
+    <section class="panel"><div class="phead"><h2>Gameplay</h2></div><div class="stack">${tog('autoEat', 'Eat automatically in combat', `Eats at ${s.eatAt}% health. Change it on the Combat page.`)}<p class="sm dim">You can close the game at any time. Your current task, your crops, animals and workers keep going while you are away, and you get a summary when you come back. ${DQ.offlinePolicy()}</p></div></section>
     <section class="panel"><div class="phead"><h2>Save data</h2><small class="mono">Autosaves every 10s</small></div><div class="stack"><div class="btnrow wrap"><button class="btn" data-do="export">${ico('save')}Export save</button><button class="btn" data-do="import">Import save</button><button class="btn" data-do="savenow">Save now</button></div>
       <button class="btn danger" data-do="newgame">Erase and start a new game</button></div></section>
     <section class="panel"><div class="phead"><h2>Shortcuts</h2></div><dl class="keys">${[['Space', 'Stop or resume your task'], ['M', 'Mute or unmute'], ['1 – 9, 0', 'Home, Fishing … Combat'], ['T', 'Map'], ['S', 'Shop'], ['Q', 'Quests'], ['F', 'Farm'], ['H', 'House'], ['C', 'Inventory'], ['B', 'Bank'], ['Esc', 'Close dialogs']].map(([k, d]) => `<dt><kbd>${k}</kbd></dt><dd>${d}</dd>`).join('')}</dl></section>
@@ -250,16 +250,9 @@ UI.V.settings = () => {
 
 /* ---------- Welcome back ---------- */
 function welcome(sum, gap) {
-
-  const xp = Object.entries(sum.xp).sort((a, b) => b[1] - a[1]), items = Object.entries(sum.items).sort((a, b) => D.ITEMS[b[0]].val * b[1] - D.ITEMS[a[0]].val * a[1]).slice(0, 8);
-  const capped = gap > DQ.OFFLINE_CAP, eff = DQ.offlineEff(gap), taper = eff < Math.min(gap, DQ.OFFLINE_CAP);
-  const body = (UI.returnPlan ? UI.returnPlan(sum) : '') + `<p class="sm dim">You were away for <b>${DQ.fmtTime(gap)}</b>${taper || capped ? `, which counted as <b>${DQ.fmtTime(eff)}</b> of work (full speed for the first 2 hours, half speed after that${capped ? ', and nothing past 8 hours' : ''})` : ''}. ${sum.label ? `You were: <b>${sum.label.toLowerCase()}</b>.` : ''} ${sum.stopped ? '<b>Your task stopped early:</b> you ran out of materials, food or health.' : ''} ${sum.died ? 'You were defeated.' : ''}</p>
-    ${xp.length ? `<div class="rws">${xp.map(([k, v]) => `<span class="rw" style="--c:${D.SK[k].col}">${ico(k)}${fmt(v)} XP</span>`).join('')}${sum.coins ? `<span class="rw" style="--c:#f3d58a">${ico('coin')}${fmt(sum.coins)} coins</span>` : ''}${sum.kills ? `<span class="rw" style="--c:#e0564f">${ico('attack')}${fmt(sum.kills)} defeated</span>` : ''}</div>` : '<p class="dim">Nothing happened while you were away. Start a task before you leave and it will keep going.</p>'}
-    ${items.length ? `<div class="k" style="margin:12px 0 6px">Gained</div><div class="rws">${items.map(([id, n]) => `<span class="rw" style="--c:${D.ITEMS[id].col}">${ico(D.ITEMS[id].ic)}${fmt(n)}× ${D.ITEMS[id].name}</span>`).join('')}</div>` : ''}
-    ${sum.levels.length ? `<div class="k" style="margin:12px 0 6px">Level-ups</div><div class="rws">${Object.entries(sum.levels.reduce((a, [k, l]) => (a[k] = l, a), {})).map(([k, l]) => `<span class="rw" style="--c:${D.SK[k].col}">${ico(k)}${D.SK[k].name} ${l}</span>`).join('')}</div>` : ''}`;
   DQ.holdNotes = true;
-  if (UI.welcomeBody) return DQ.modal({ title: 'Welcome back', wide: true, body: UI.welcomeBody(sum, gap), actions: [{ label: 'Continue', primary: true }] });
-  DQ.modal({ title: 'Welcome back', wide: true, body: body + UI.returnExtras(sum), actions: [{ label: 'Continue', primary: true }] });
+  const body = UI.welcomeBody ? UI.welcomeBody(sum, gap) : `<p>${DQ.offlinePolicy()}</p>`;
+  return DQ.modal({ title: 'Welcome back', wide: true, body, actions: [{ label: 'Continue', primary: true }] });
 }
 
 /* ---------- Actions ---------- */

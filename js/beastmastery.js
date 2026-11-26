@@ -97,7 +97,7 @@ Q.resolveBeastTrap=(now=Date.now())=>{if(Q.forecasting)return false;const p=ensu
  });};
 /* Resolve real deadlines after offline work, never during forecasts or by consuming the effective-work cap. */
 const simulate0=Q.simulate;
-Q.simulate=(ms,real=ms)=>{const p=ensure(),before=new Set(p.events.map(e=>JSON.stringify(e))),summary=simulate0(ms,real);if(!Q.forecasting){Q.resolveBeastTrap();summary.beastEvents=ensure().events.filter(e=>!before.has(JSON.stringify(e))&&e.kind!=='sent');}return summary;};
+Q.simulate=(ms,real=ms,options)=>{const p=ensure(),before=new Set(p.events.map(e=>JSON.stringify(e))),summary=simulate0(ms,real,options);if(!Q.forecasting){Q.resolveBeastTrap();summary.beastEvents=ensure().events.filter(e=>!before.has(JSON.stringify(e))&&e.kind!=='sent');}return summary;};
 const world0=Q.advanceWorld;let wallPoll=0;
 Q.advanceWorld=dt=>{world0(dt);if(!Q.sim.on&&!Q.forecasting&&(wallPoll+=dt)>=1000){wallPoll=0;if(Q.resolveBeastTrap()&&UI.view==='beastmastery')UI.render(false);}};
 /* Training is a deliberate purchase, not an endlessly repeating paid task. Existing fieldwork lures are preserved. */

@@ -2,7 +2,7 @@
 (() => {
 const DQ = window.DQ, D = DQ.data, { rnd, pick, chance, clamp, ico, fmt } = DQ;
 const S = () => DQ.S;
-const OFFLINE_CAP = 8 * 3600 * 1000;
+const OFFLINE_CAP = 24 * 3600 * 1000;
 const DMG_DIV = 400;
 DQ.act = null; DQ.fight = null; DQ.hist = [{}];
 
@@ -35,7 +35,15 @@ DQ.addXp = (sk, base, o = {}) => {
   const amt = (o.raw ? base : base * DQ.xpMult(sk)) * DQ.catchUp(sk), before = DQ.lvl(sk), advB = DQ.advLvl();
   S().xp[sk] = Math.min(2e8, S().xp[sk] + amt);
   if (!DQ.sim.on) DQ.hist[DQ.hist.length - 1][sk] = (DQ.hist[DQ.hist.length - 1][sk] || 0) + amt;
-  if (DQ.sim.on) DQ.sim.xp[sk] = (DQ.sim.xp[sk] || 0) + amt; else DQ.pulse(`[data-skill="${sk}"]`);
+  if (DQ.sim.on) {
+    DQ.sim.xp[sk] = (DQ.sim.xp[sk] || 0) + amt;
+    const card = DQ.sim.activeSummary;
+    if (card) {
+      card.xp[sk] = (card.xp[sk] || 0) + amt;
+      card.levels[sk] ||= { from: before, to: before };
+      card.levels[sk].to = DQ.lvl(sk);
+    }
+  } else DQ.pulse(`[data-skill="${sk}"]`);
   const after = DQ.lvl(sk);
   if (after > before) onLevel(sk, before, after);
   const advA = DQ.advLvl(); if (advA > advB) onAdv(advB, advA);
@@ -99,7 +107,11 @@ DQ.grant = (id, n = 1) => {
   if (!Object.keys(seen).length) Object.keys({ ...S().inv, ...S().bank, ...S().equip }).forEach(k => { if (D.ITEMS[k]) seen[k] = 1; });
   const fresh = !seen[id] && DQ.have(id) === 0; DQ.give(id, n);
   if (fresh) { seen[id] = 1; if (!DQ.sim.on && !DQ.forecasting) { DQ.sfx('discover'); DQ.toast(`New item discovered: ${it.name}`); DQ.notify({ kind: 'discovery', key: 'discovery:' + id, icon: it.ic, col: it.col, title: 'New item discovered', text: it.name, sound: false }); } }
-  if (DQ.sim.on) DQ.sim.items[id] = (DQ.sim.items[id] || 0) + n;
+  if (DQ.sim.on) {
+    DQ.sim.items[id] = (DQ.sim.items[id] || 0) + n;
+    const card = DQ.sim.activeSummary;
+    if (card) card.items[id] = (card.items[id] || 0) + n;
+  }
   if (it.rare) { S().stats.rare++; DQ.notify({ kind: 'loot', key: 'rare:' + id, icon: it.ic, col: it.col, title: 'Rare find', text: `You found ${it.name}.`, sound: 'gem', burst: true, ttl: 9000 }); }
   return it;
 };
@@ -308,6 +320,9 @@ DQ.actDur = a => {
 DQ.stopAct = (silent, why, done) => { /* done: a batch finished as planned, shown as good news, not a warning */
   if (!DQ.act) return;
   const stopped = DQ.act, stoppedPage = EXT[stopped.kind] ? (EXT[stopped.kind].pageFor?.(stopped.id) || EXT[stopped.kind].page) : stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
+  if (DQ.sim.on && DQ.sim.activities) {
+    DQ.sim.stop = { after: DQ.sim.elapsed, reason: why || (DQ.sim.died ? 'defeated in combat' : 'activity finished') };
+  }
   DQ.act = null; DQ.fight = null; S().act = null;
   /* while catching up on time away the next queued task starts at once; live, it waits for the current call to finish */
   if (why && !DQ.forecasting) { if (DQ.sim.on) { if (!DQ.act && DQ.advanceQueue) DQ.advanceQueue(); } else setTimeout(() => { if (!DQ.act) DQ.advanceQueue(); }, 0); }
@@ -360,8 +375,12 @@ function thieveDone(n) {
     if (S().hp <= 0) return die(); autoEat();
   }
 }
+const missingRecipeInput = r => Object.entries(r.in).find(([id, n]) => DQ.have(id) < n)?.[0];
 function recipeDone(r) {
-  if (!DQ.canMake(r)) return DQ.stopAct(false, `Out of materials for ${r.name.toLowerCase()}. Restock from the bank or shop.`);
+  if (!DQ.canMake(r)) {
+    const missing = missingRecipeInput(r);
+    return DQ.stopAct(false, missing ? `Out of ${itemName(missing).toLowerCase()}.` : 'Recipe requirements changed.');
+  }
   Object.entries(r.in).forEach(([k, n]) => DQ.take(k, n));
   const outId = Object.keys(r.out)[0];
   if (DQ.act) DQ.act.count++;
@@ -377,7 +396,10 @@ function recipeDone(r) {
   }
   const made = DQ.act ? DQ.act.count : 0;
   if (DQ.act && DQ.act.limit && made >= DQ.act.limit) DQ.stopAct(false, `${made} ${r.name.toLowerCase()} made, as planned. Your pack is ready.`, true);
-  else if (!DQ.canMake(r)) DQ.stopAct(false, `${made} ${r.name.toLowerCase()} made: that was every ingredient you had.`, true);
+  else if (!DQ.canMake(r)) {
+    const missing = missingRecipeInput(r);
+    DQ.stopAct(false, missing ? `Out of ${itemName(missing).toLowerCase()}.` : 'Recipe requirements changed.', true);
+  }
 }
 DQ.alchSpell = () => [...D.ALCH].reverse().find(a => DQ.lvl('magic') >= a.lvl);
 function alchDone(id) {
@@ -720,10 +742,17 @@ DQ.sell = (id, qty, from) => {
 DQ.sellJunk = () => { let c = 0; Object.keys({ ...S().inv, ...S().bank }).forEach(id => { if (D.ITEMS[id] && D.ITEMS[id].type === 'junk' && DQ.sellable(id)) c += DQ.sell(id, DQ.have(id)) || 0; }); return c; };
 
 /* ---------- Offline and catch-up simulation ---------- */
-/* Time away: full speed for the first two hours, half speed after that, capped at 8 hours */
-const OFFLINE_FULL = 2 * 3600 * 1000, OFFLINE_RATE = .5;
-DQ.OFFLINE_CAP = OFFLINE_CAP; DQ.OFFLINE_FULL = OFFLINE_FULL; DQ.OFFLINE_RATE = OFFLINE_RATE;
-DQ.offlineEff = gap => { const c = Math.min(gap, OFFLINE_CAP); return Math.round(Math.min(c, OFFLINE_FULL) + Math.max(0, c - OFFLINE_FULL) * OFFLINE_RATE); };
+/* Count one elapsed budget at the live rate, up to the published cap. */
+DQ.OFFLINE_CAP = OFFLINE_CAP;
+DQ.offlineEff = gap => Math.round(Math.min(Math.max(0, gap), OFFLINE_CAP));
+DQ.offlinePolicy = () => `Up to ${OFFLINE_CAP / 3600000} hours at full speed while away.`;
+const activitySummary = a => {
+  const key = a.kind + ':' + (a.area || a.id);
+  if (!DQ.sim.activities[key]) {
+    DQ.sim.activities[key] = { label: DQ.actLabel(a), worked: 0, xp: {}, levels: {}, items: {} };
+  }
+  return DQ.sim.activities[key];
+};
 /* Count time spent outside the app (every absence over 5 seconds), and remember the last few for the playtest report */
 DQ.noteAway = (gap, eff) => {
   const st = S(); st.awayMs = (st.awayMs || 0) + gap; st.awayEff = (st.awayEff || 0) + eff;
@@ -747,12 +776,17 @@ DQ.advanceTime = (effectiveMs, realMs = effectiveMs, partial = 0) => {
       S().hp = Math.min(DQ.maxHp(), S().hp + Math.ceil(DQ.maxHp() / 50) * (1 + DQ.fx().regen) * worked / 3000);
     }
     progress += a ? worked : 0;
+    const card = DQ.sim.on && DQ.sim.activities && a ? activitySummary(a) : null;
+    if (DQ.sim.on && DQ.sim.activities) DQ.sim.elapsed += step;
+    if (card) card.worked += worked;
     DQ.advanceWorld(step);
     realLeft = Math.max(0, realLeft - step);
     effectiveLeft = Math.max(0, effectiveLeft - worked);
     if (a && DQ.act === a && progress + .001 >= duration) {
       a.dur = duration;
-      complete(); actions++;
+      if (card) DQ.sim.activeSummary = card;
+      try { complete(); } finally { if (card) DQ.sim.activeSummary = null; }
+      actions++;
       progress = 0;
     }
     if (DQ.act !== a) progress = 0;
@@ -765,15 +799,12 @@ DQ.advanceTime = (effectiveMs, realMs = effectiveMs, partial = 0) => {
   }
   return actions;
 };
-DQ.simulate = (ms, real = ms) => {
+DQ.simulate = (ms, real = ms, { report = false } = {}) => {
   const sim = DQ.sim = { on: true, xp: {}, items: {}, coins: 0, kills: 0, levels: [], notes: [], adv: null, ms, real, advFrom: DQ.advLvl(), eaten: 0, died: false, label: DQ.act ? DQ.actLabel() : '' };
+  if (report) { sim.activities = {}; sim.elapsed = 0; }
   try {
     const partial = DQ.act ? DQ.act.progress || 0 : 0;
-    /* Real absences use the same two-hour taper shown to the player. */
-    if (real > OFFLINE_FULL && ms === DQ.offlineEff(real)) {
-      sim.actions = DQ.advanceTime(OFFLINE_FULL, OFFLINE_FULL, partial);
-      sim.actions += DQ.advanceTime(ms - OFFLINE_FULL, real - OFFLINE_FULL, DQ.act ? DQ.act.progress || 0 : 0);
-    } else sim.actions = DQ.advanceTime(ms, real, partial);
+    sim.actions = DQ.advanceTime(ms, real, partial);
     sim.stopped = !DQ.act;
   } finally { sim.on = false; }
   if (!DQ.forecasting) DQ.checkAch();
@@ -796,7 +827,7 @@ DQ.simulate = (ms, real = ms) => {
     summaries.set(key, n);
   }
   const keep = [...summaries.values()];
-  if (!DQ.forecasting) setTimeout(() => keep.forEach((n, i) => setTimeout(() => DQ.notify(Object.assign({}, n, { burst: false })), i * 700)), 900);
+  if (!DQ.forecasting && !report) setTimeout(() => keep.forEach((n, i) => setTimeout(() => DQ.notify(Object.assign({}, n, { burst: false })), i * 700)), 900);
   if (!DQ.forecasting) DQ.emit('act'); return sim;
 };
 
@@ -815,7 +846,7 @@ DQ.tick = () => {
   if (DQ.paused) return;
   if (gap > 5000) {
     const real = Math.min(gap, OFFLINE_CAP), eff = DQ.offlineEff(gap); DQ.noteAway(gap, eff);
-    const sum = DQ.simulate(eff, real); DQ.makeAwayEvents(sum, gap); if (gap > 30000) DQ.emit('welcome', sum, gap); return;
+    const sum = DQ.simulate(eff, real, { report: gap > 30000 }); DQ.makeAwayEvents(sum, gap); if (gap > 30000) DQ.emit('welcome', sum, gap); return;
   }
   S().playtime += gap; DQ.sessMs = (DQ.sessMs || 0) + gap;
   try { DQ.advanceTime(gap, gap, DQ.act ? DQ.act.progress || 0 : 0); errRun = 0; }

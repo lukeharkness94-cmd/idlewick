@@ -87,8 +87,11 @@ test('potion expiry is consistent across long and short runs', () => {
   a.simulate(60000); for(let i=0;i<60;i++)b.simulate(1000);
   assert.equal(a.S.xp.fishing,b.S.xp.fishing); assert.ok(Math.abs(a.act.progress-b.act.progress)<.01);
 });
-test('offline cap and taper match the player-facing promise', () => {
-  const {q}=harness(); assert.equal(q.offlineEff(8*3600000),5*3600000); assert.equal(q.offlineEff(24*3600000),5*3600000);
+test('offline time uses full speed up to the published cap', () => {
+  const {q}=harness(); const hour=3600000;
+  for(const elapsed of [1,6,12,24]) assert.equal(q.offlineEff(elapsed*hour),elapsed*hour);
+  assert.equal(q.offlineEff(32*hour),24*hour);
+  assert.match(q.offlinePolicy(),/24 hours at full speed/);
 });
 test('town projects consume supplies once and grant lasting benefits', () => {
   const {q}=harness(); q.S.inv.log_normal=30; q.S.inv.shrimp=12; q.S.coins=100;
@@ -314,8 +317,8 @@ test('Scholarship gates tiers by skill level and retains legacy second slots',()
  assert.match(q.techReason(t),/Scholarship 10/);q.S.xp.research=q.data.XPF[10];for(const id of t.req)q.S.research.done[id]=1;assert.equal(q.techReason(t),'');
  assert.equal(q.researchSlots(),2);q.S.xp.fishing=0;q.S.xp.research=q.data.XPF[20];assert.equal(q.researchSlots(),2);
 });
-test('reward tuning covers every town and 32-hour absences keep the existing cap',()=>{
- const {q}=harness();assert.equal(q.offlineEff(32*3600000),5*3600000);
+test('reward tuning covers every town and 32-hour absences respect the published cap',()=>{
+ const {q}=harness();assert.equal(q.offlineEff(32*3600000),24*3600000);
  assert.equal(q.data.ECONOMY.gatherTownScale.length,q.data.TOWNS.length);
  assert.ok(q.data.ECONOMY.gatherTownScale.every(Number.isFinite));assert.equal(q.data.ECONOMY.mineGemChance,.004);
  for(const m of q.data.MONLIST)assert.ok(m.coins.every(n=>Number.isFinite(n)&&n>=0));

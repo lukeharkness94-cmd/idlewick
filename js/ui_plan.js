@@ -6,6 +6,23 @@ const S = () => DQ.S;
 /* ---------- Plan window ---------- */
 const paceSeg = (cur, act) => `<div class="seg pace">${Object.entries(D.PACE).map(([k, p]) => `<button class="${cur === k ? 'on' : ''}" data-do="${act}" data-a="${k}" data-tip="text:${p.name}: ${esc(p.text)}">${p.name}</button>`).join('')}</div>`;
 const ruleChips = (cur, act, extra = '') => `<div class="chips rules">${D.STOP_RULES.map(([k, n]) => `<button class="chip ${cur === k ? 'on' : ''}" data-do="${act}" data-a="${k}" ${extra}>${n}</button>`).join('')}</div>`;
+function awayPreview(action, supplies) {
+  const node = D.NODE[action.kind + ':' + action.id];
+  const recipe = action.kind === 'recipe' && D.RECIPES[action.id];
+  const skill = DQ.actSkill(action);
+  const actions = 3600000 / DQ.actDur(action);
+  const success = recipe?.burn ? 1 - Math.min(.92, DQ.burnChance(recipe) * D.PACE[action.pace || 'steady'].risk) :
+    action.kind === 'thieve' ? DQ.riskFail(DQ.successChance('thieve', node)) : 1;
+  const xp = (recipe || node)?.xp;
+  const output = recipe ? Object.entries(recipe.out) : node?.item ? [[node.item, 1]] : [];
+  const expectedYield = skill ? 1 + DQ.dblChance(skill) + (DQ.mastExtra?.(action.kind, action.id) || 0) : 1;
+  const items = output.map(([id, n]) => `${fmt(n * actions * success * expectedYield)} ${D.ITEMS[id].name}`).join(' · ');
+  const rates = xp && skill ? `${fmt(xp * actions * success * DQ.xpMult(skill))} XP per hour${items ? ' · ' + items + ' per hour' : ''}` : 'XP and item rates vary with encounters and outcomes.';
+  const duration = supplies?.ms ? (supplies.ms >= DQ.OFFLINE_CAP ? 'Supplies are estimated to last through the offline cap.' :
+    `Supplies may run out after ${DQ.fmtTime(supplies.ms)}.`) :
+    (supplies ? 'Supplies depend on the tasks and encounters ahead.' : 'This activity has no material cost per action.');
+  return `<div class="plan-away"><h4>While you are away</h4><p>${esc(DQ.offlinePolicy())}</p><p>${esc(rates)}</p><p>${esc(duration)}</p></div>`;
+}
 UI.planHtml = () => {
   const a = DQ.act, Q = S().queue || [], slots = DQ.queueSlots();
   const prog = a && DQ.ruleProgress(a), sup = a && DQ.supplyInfo(a);
@@ -13,7 +30,7 @@ UI.planHtml = () => {
       <div class="plan-row"><span class="k">Pace</span>${paceSeg(a.pace || 'steady', 'setpace')}</div><p class="sm dim">${D.PACE[a.pace || 'steady'].text}</p>
       <div class="plan-row"><span class="k">Stop</span>${ruleChips(a.rule || 'none', 'setrule')}</div>
       ${prog ? `<div class="sm">Progress: <b class="mono">${fmt(prog[0])} / ${fmt(prog[1])} ${prog[2]}</b></div>` : ''}
-      ${sup ? `<div class="sm ${sup.n ? '' : 'bad'}">${ico('bag')} Supplies: ${sup.label}${sup.ms ? ` (about ${DQ.fmtTime(sup.ms)})` : ''}</div>` : ''}</div>`
+      ${sup ? `<div class="sm ${sup.n ? '' : 'bad'}">${ico('bag')} Supplies: ${sup.label}${sup.ms ? ` (about ${DQ.fmtTime(sup.ms)})` : ''}</div>` : ''}${awayPreview(a, sup)}</div>`
     : `<p class="dim">Nothing is running. Queue a task with the <b>+</b> button on any card, or just click a card to start it.</p>`;
   const rows = Q.map((t, i) => `<div class="qitem"><span class="qn mono">${i + 1}</span><div class="qbody"><b>${DQ.actLabel(t)}</b>
       <div class="qctl">${UI.choiceButtons(`<select data-in="qrule" data-i="${i}" aria-label="Stop rule">${D.STOP_RULES.filter(r => r[0] !== 'none').map(([k, n]) => `<option value="${k}" ${t.rule === k ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}

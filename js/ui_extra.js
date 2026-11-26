@@ -182,7 +182,7 @@ DQ.on('pets', () => { UI.renderHud(); if (UI.view === 'bestiary' || UI.view === 
 /* A plain reminder that the game carries on while closed */
 DQ.on('act', () => {
   if (!DQ.act || S().seen.offlineTip || S().playtime < 240000) return; S().seen.offlineTip = 1;
-  setTimeout(() => DQ.notify({ kind: 'info', key: 'offline', icon: 'clock', col: '#8fc7ff', title: 'You can close the game', text: `You will keep ${DQ.actLabel().toLowerCase()} while you are away: full speed for 2 hours, then half speed, up to 8 hours. Crops, animals and workers keep going too.`, sound: false, ttl: 12000 }), 1500);
+  setTimeout(() => DQ.notify({ kind: 'info', key: 'offline', icon: 'clock', col: '#8fc7ff', title: 'You can close the game', text: `You will keep ${DQ.actLabel().toLowerCase()} while you are away. ${DQ.offlinePolicy()}`, sound: false, ttl: 12000 }), 1500);
 });
 
 /* ---------- Combat loot: session log, flying loot and loot-table tooltips ---------- */

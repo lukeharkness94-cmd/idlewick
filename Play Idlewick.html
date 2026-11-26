@@ -5520,6 +5520,12 @@ html.calm .activity-scene.hunt .scene-target,html.calm .activity-scene.hunt .hun
  #view>.skill-summary{min-height:0;max-height:100%;display:flex;flex-direction:column}
  .skill-summary-scroll{min-height:0;overflow-y:auto;scrollbar-width:thin}
 }
+
+.wb-totals,.wb-activities{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.wb-totals>b,.wb-activity{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px}
+.wb-activity h3,.wb-activity p,.wb-main-quest h3,.wb-main-quest p,.plan-away p{margin:0 0 6px}
+.wb-activity ul{margin:6px 0;padding-inline-start:1.1em}
+.plan-away{margin-top:8px;padding:8px 0;border-top:1px solid var(--line)}
 </style>
 
 </head>
@@ -12737,7 +12743,7 @@ function initTips() {
 (() => {
 const DQ = window.DQ, D = DQ.data, { rnd, pick, chance, clamp, ico, fmt } = DQ;
 const S = () => DQ.S;
-const OFFLINE_CAP = 8 * 3600 * 1000;
+const OFFLINE_CAP = 24 * 3600 * 1000;
 const DMG_DIV = 400;
 DQ.act = null; DQ.fight = null; DQ.hist = [{}];
 
@@ -12770,7 +12776,15 @@ DQ.addXp = (sk, base, o = {}) => {
   const amt = (o.raw ? base : base * DQ.xpMult(sk)) * DQ.catchUp(sk), before = DQ.lvl(sk), advB = DQ.advLvl();
   S().xp[sk] = Math.min(2e8, S().xp[sk] + amt);
   if (!DQ.sim.on) DQ.hist[DQ.hist.length - 1][sk] = (DQ.hist[DQ.hist.length - 1][sk] || 0) + amt;
-  if (DQ.sim.on) DQ.sim.xp[sk] = (DQ.sim.xp[sk] || 0) + amt; else DQ.pulse(`[data-skill="${sk}"]`);
+  if (DQ.sim.on) {
+    DQ.sim.xp[sk] = (DQ.sim.xp[sk] || 0) + amt;
+    const card = DQ.sim.activeSummary;
+    if (card) {
+      card.xp[sk] = (card.xp[sk] || 0) + amt;
+      card.levels[sk] ||= { from: before, to: before };
+      card.levels[sk].to = DQ.lvl(sk);
+    }
+  } else DQ.pulse(`[data-skill="${sk}"]`);
   const after = DQ.lvl(sk);
   if (after > before) onLevel(sk, before, after);
   const advA = DQ.advLvl(); if (advA > advB) onAdv(advB, advA);
@@ -12834,7 +12848,11 @@ DQ.grant = (id, n = 1) => {
   if (!Object.keys(seen).length) Object.keys({ ...S().inv, ...S().bank, ...S().equip }).forEach(k => { if (D.ITEMS[k]) seen[k] = 1; });
   const fresh = !seen[id] && DQ.have(id) === 0; DQ.give(id, n);
   if (fresh) { seen[id] = 1; if (!DQ.sim.on && !DQ.forecasting) { DQ.sfx('discover'); DQ.toast(`New item discovered: ${it.name}`); DQ.notify({ kind: 'discovery', key: 'discovery:' + id, icon: it.ic, col: it.col, title: 'New item discovered', text: it.name, sound: false }); } }
-  if (DQ.sim.on) DQ.sim.items[id] = (DQ.sim.items[id] || 0) + n;
+  if (DQ.sim.on) {
+    DQ.sim.items[id] = (DQ.sim.items[id] || 0) + n;
+    const card = DQ.sim.activeSummary;
+    if (card) card.items[id] = (card.items[id] || 0) + n;
+  }
   if (it.rare) { S().stats.rare++; DQ.notify({ kind: 'loot', key: 'rare:' + id, icon: it.ic, col: it.col, title: 'Rare find', text: `You found ${it.name}.`, sound: 'gem', burst: true, ttl: 9000 }); }
   return it;
 };
@@ -13043,6 +13061,9 @@ DQ.actDur = a => {
 DQ.stopAct = (silent, why, done) => { /* done: a batch finished as planned, shown as good news, not a warning */
   if (!DQ.act) return;
   const stopped = DQ.act, stoppedPage = EXT[stopped.kind] ? (EXT[stopped.kind].pageFor?.(stopped.id) || EXT[stopped.kind].page) : stopped.kind === 'recipe' ? D.RECIPES[stopped.id].skill : stopped.kind === 'fight' ? 'combat' : stopped.kind === 'alch' ? 'magic' : KIND_SKILL[stopped.kind];
+  if (DQ.sim.on && DQ.sim.activities) {
+    DQ.sim.stop = { after: DQ.sim.elapsed, reason: why || (DQ.sim.died ? 'defeated in combat' : 'activity finished') };
+  }
   DQ.act = null; DQ.fight = null; S().act = null;
   /* while catching up on time away the next queued task starts at once; live, it waits for the current call to finish */
   if (why && !DQ.forecasting) { if (DQ.sim.on) { if (!DQ.act && DQ.advanceQueue) DQ.advanceQueue(); } else setTimeout(() => { if (!DQ.act) DQ.advanceQueue(); }, 0); }
@@ -13095,8 +13116,12 @@ function thieveDone(n) {
     if (S().hp <= 0) return die(); autoEat();
   }
 }
+const missingRecipeInput = r => Object.entries(r.in).find(([id, n]) => DQ.have(id) < n)?.[0];
 function recipeDone(r) {
-  if (!DQ.canMake(r)) return DQ.stopAct(false, `Out of materials for ${r.name.toLowerCase()}. Restock from the bank or shop.`);
+  if (!DQ.canMake(r)) {
+    const missing = missingRecipeInput(r);
+    return DQ.stopAct(false, missing ? `Out of ${itemName(missing).toLowerCase()}.` : 'Recipe requirements changed.');
+  }
   Object.entries(r.in).forEach(([k, n]) => DQ.take(k, n));
   const outId = Object.keys(r.out)[0];
   if (DQ.act) DQ.act.count++;
@@ -13112,7 +13137,10 @@ function recipeDone(r) {
   }
   const made = DQ.act ? DQ.act.count : 0;
   if (DQ.act && DQ.act.limit && made >= DQ.act.limit) DQ.stopAct(false, `${made} ${r.name.toLowerCase()} made, as planned. Your pack is ready.`, true);
-  else if (!DQ.canMake(r)) DQ.stopAct(false, `${made} ${r.name.toLowerCase()} made: that was every ingredient you had.`, true);
+  else if (!DQ.canMake(r)) {
+    const missing = missingRecipeInput(r);
+    DQ.stopAct(false, missing ? `Out of ${itemName(missing).toLowerCase()}.` : 'Recipe requirements changed.', true);
+  }
 }
 DQ.alchSpell = () => [...D.ALCH].reverse().find(a => DQ.lvl('magic') >= a.lvl);
 function alchDone(id) {
@@ -13455,10 +13483,17 @@ DQ.sell = (id, qty, from) => {
 DQ.sellJunk = () => { let c = 0; Object.keys({ ...S().inv, ...S().bank }).forEach(id => { if (D.ITEMS[id] && D.ITEMS[id].type === 'junk' && DQ.sellable(id)) c += DQ.sell(id, DQ.have(id)) || 0; }); return c; };
 
 /* ---------- Offline and catch-up simulation ---------- */
-/* Time away: full speed for the first two hours, half speed after that, capped at 8 hours */
-const OFFLINE_FULL = 2 * 3600 * 1000, OFFLINE_RATE = .5;
-DQ.OFFLINE_CAP = OFFLINE_CAP; DQ.OFFLINE_FULL = OFFLINE_FULL; DQ.OFFLINE_RATE = OFFLINE_RATE;
-DQ.offlineEff = gap => { const c = Math.min(gap, OFFLINE_CAP); return Math.round(Math.min(c, OFFLINE_FULL) + Math.max(0, c - OFFLINE_FULL) * OFFLINE_RATE); };
+/* Count one elapsed budget at the live rate, up to the published cap. */
+DQ.OFFLINE_CAP = OFFLINE_CAP;
+DQ.offlineEff = gap => Math.round(Math.min(Math.max(0, gap), OFFLINE_CAP));
+DQ.offlinePolicy = () => `Up to ${OFFLINE_CAP / 3600000} hours at full speed while away.`;
+const activitySummary = a => {
+  const key = a.kind + ':' + (a.area || a.id);
+  if (!DQ.sim.activities[key]) {
+    DQ.sim.activities[key] = { label: DQ.actLabel(a), worked: 0, xp: {}, levels: {}, items: {} };
+  }
+  return DQ.sim.activities[key];
+};
 /* Count time spent outside the app (every absence over 5 seconds), and remember the last few for the playtest report */
 DQ.noteAway = (gap, eff) => {
   const st = S(); st.awayMs = (st.awayMs || 0) + gap; st.awayEff = (st.awayEff || 0) + eff;
@@ -13482,12 +13517,17 @@ DQ.advanceTime = (effectiveMs, realMs = effectiveMs, partial = 0) => {
       S().hp = Math.min(DQ.maxHp(), S().hp + Math.ceil(DQ.maxHp() / 50) * (1 + DQ.fx().regen) * worked / 3000);
     }
     progress += a ? worked : 0;
+    const card = DQ.sim.on && DQ.sim.activities && a ? activitySummary(a) : null;
+    if (DQ.sim.on && DQ.sim.activities) DQ.sim.elapsed += step;
+    if (card) card.worked += worked;
     DQ.advanceWorld(step);
     realLeft = Math.max(0, realLeft - step);
     effectiveLeft = Math.max(0, effectiveLeft - worked);
     if (a && DQ.act === a && progress + .001 >= duration) {
       a.dur = duration;
-      complete(); actions++;
+      if (card) DQ.sim.activeSummary = card;
+      try { complete(); } finally { if (card) DQ.sim.activeSummary = null; }
+      actions++;
       progress = 0;
     }
     if (DQ.act !== a) progress = 0;
@@ -13500,15 +13540,12 @@ DQ.advanceTime = (effectiveMs, realMs = effectiveMs, partial = 0) => {
   }
   return actions;
 };
-DQ.simulate = (ms, real = ms) => {
+DQ.simulate = (ms, real = ms, { report = false } = {}) => {
   const sim = DQ.sim = { on: true, xp: {}, items: {}, coins: 0, kills: 0, levels: [], notes: [], adv: null, ms, real, advFrom: DQ.advLvl(), eaten: 0, died: false, label: DQ.act ? DQ.actLabel() : '' };
+  if (report) { sim.activities = {}; sim.elapsed = 0; }
   try {
     const partial = DQ.act ? DQ.act.progress || 0 : 0;
-    /* Real absences use the same two-hour taper shown to the player. */
-    if (real > OFFLINE_FULL && ms === DQ.offlineEff(real)) {
-      sim.actions = DQ.advanceTime(OFFLINE_FULL, OFFLINE_FULL, partial);
-      sim.actions += DQ.advanceTime(ms - OFFLINE_FULL, real - OFFLINE_FULL, DQ.act ? DQ.act.progress || 0 : 0);
-    } else sim.actions = DQ.advanceTime(ms, real, partial);
+    sim.actions = DQ.advanceTime(ms, real, partial);
     sim.stopped = !DQ.act;
   } finally { sim.on = false; }
   if (!DQ.forecasting) DQ.checkAch();
@@ -13531,7 +13568,7 @@ DQ.simulate = (ms, real = ms) => {
     summaries.set(key, n);
   }
   const keep = [...summaries.values()];
-  if (!DQ.forecasting) setTimeout(() => keep.forEach((n, i) => setTimeout(() => DQ.notify(Object.assign({}, n, { burst: false })), i * 700)), 900);
+  if (!DQ.forecasting && !report) setTimeout(() => keep.forEach((n, i) => setTimeout(() => DQ.notify(Object.assign({}, n, { burst: false })), i * 700)), 900);
   if (!DQ.forecasting) DQ.emit('act'); return sim;
 };
 
@@ -13550,7 +13587,7 @@ DQ.tick = () => {
   if (DQ.paused) return;
   if (gap > 5000) {
     const real = Math.min(gap, OFFLINE_CAP), eff = DQ.offlineEff(gap); DQ.noteAway(gap, eff);
-    const sum = DQ.simulate(eff, real); DQ.makeAwayEvents(sum, gap); if (gap > 30000) DQ.emit('welcome', sum, gap); return;
+    const sum = DQ.simulate(eff, real, { report: gap > 30000 }); DQ.makeAwayEvents(sum, gap); if (gap > 30000) DQ.emit('welcome', sum, gap); return;
   }
   S().playtime += gap; DQ.sessMs = (DQ.sessMs || 0) + gap;
   try { DQ.advanceTime(gap, gap, DQ.act ? DQ.act.progress || 0 : 0); errRun = 0; }
@@ -15320,7 +15357,7 @@ UI.V.settings = () => {
       <div><div class="k" style="margin-bottom:6px">Task sounds</div><div class="seg">${[['off', 'Off'], ['calm', 'Calm'], ['varied', 'Varied']].map(([k, n]) => `<button class="${s.taskSounds === k ? 'on' : ''}" data-do="tasksound" data-a="${k}">${n}</button>`).join('')}</div><small class="dim">Controls how often finished tasks make a sound. Sounds are always varied so they do not repeat exactly.</small></div></div></section>
     <section class="panel"><div class="phead"><h2>Interface</h2></div><div class="stack">${tog('notify', 'Notifications', 'Show level-ups, unlocks and important alerts. Routine finds and achievements stay in the bell.')}${tog('tips', 'Tooltips')}${tog('reduceFx', 'Reduce effects', 'Turns off click ripples, particles and bouncy animations')}
       <label class="nameedit"><span class="k">Hero name</span><input id="heroname" data-in="name" maxlength="20" value="${esc(S().name)}"></label></div></section>
-    <section class="panel"><div class="phead"><h2>Gameplay</h2></div><div class="stack">${tog('autoEat', 'Eat automatically in combat', `Eats at ${s.eatAt}% health. Change it on the Combat page.`)}<p class="sm dim">You can close the game at any time. Your current task, your crops, animals and workers keep going while you are away (full speed for 2 hours, then half speed, up to 8 hours), and you get a summary when you come back.</p></div></section>
+    <section class="panel"><div class="phead"><h2>Gameplay</h2></div><div class="stack">${tog('autoEat', 'Eat automatically in combat', `Eats at ${s.eatAt}% health. Change it on the Combat page.`)}<p class="sm dim">You can close the game at any time. Your current task, your crops, animals and workers keep going while you are away, and you get a summary when you come back. ${DQ.offlinePolicy()}</p></div></section>
     <section class="panel"><div class="phead"><h2>Save data</h2><small class="mono">Autosaves every 10s</small></div><div class="stack"><div class="btnrow wrap"><button class="btn" data-do="export">${ico('save')}Export save</button><button class="btn" data-do="import">Import save</button><button class="btn" data-do="savenow">Save now</button></div>
       <button class="btn danger" data-do="newgame">Erase and start a new game</button></div></section>
     <section class="panel"><div class="phead"><h2>Shortcuts</h2></div><dl class="keys">${[['Space', 'Stop or resume your task'], ['M', 'Mute or unmute'], ['1 – 9, 0', 'Home, Fishing … Combat'], ['T', 'Map'], ['S', 'Shop'], ['Q', 'Quests'], ['F', 'Farm'], ['H', 'House'], ['C', 'Inventory'], ['B', 'Bank'], ['Esc', 'Close dialogs']].map(([k, d]) => `<dt><kbd>${k}</kbd></dt><dd>${d}</dd>`).join('')}</dl></section>
@@ -15329,16 +15366,9 @@ UI.V.settings = () => {
 
 /* ---------- Welcome back ---------- */
 function welcome(sum, gap) {
-
-  const xp = Object.entries(sum.xp).sort((a, b) => b[1] - a[1]), items = Object.entries(sum.items).sort((a, b) => D.ITEMS[b[0]].val * b[1] - D.ITEMS[a[0]].val * a[1]).slice(0, 8);
-  const capped = gap > DQ.OFFLINE_CAP, eff = DQ.offlineEff(gap), taper = eff < Math.min(gap, DQ.OFFLINE_CAP);
-  const body = (UI.returnPlan ? UI.returnPlan(sum) : '') + `<p class="sm dim">You were away for <b>${DQ.fmtTime(gap)}</b>${taper || capped ? `, which counted as <b>${DQ.fmtTime(eff)}</b> of work (full speed for the first 2 hours, half speed after that${capped ? ', and nothing past 8 hours' : ''})` : ''}. ${sum.label ? `You were: <b>${sum.label.toLowerCase()}</b>.` : ''} ${sum.stopped ? '<b>Your task stopped early:</b> you ran out of materials, food or health.' : ''} ${sum.died ? 'You were defeated.' : ''}</p>
-    ${xp.length ? `<div class="rws">${xp.map(([k, v]) => `<span class="rw" style="--c:${D.SK[k].col}">${ico(k)}${fmt(v)} XP</span>`).join('')}${sum.coins ? `<span class="rw" style="--c:#f3d58a">${ico('coin')}${fmt(sum.coins)} coins</span>` : ''}${sum.kills ? `<span class="rw" style="--c:#e0564f">${ico('attack')}${fmt(sum.kills)} defeated</span>` : ''}</div>` : '<p class="dim">Nothing happened while you were away. Start a task before you leave and it will keep going.</p>'}
-    ${items.length ? `<div class="k" style="margin:12px 0 6px">Gained</div><div class="rws">${items.map(([id, n]) => `<span class="rw" style="--c:${D.ITEMS[id].col}">${ico(D.ITEMS[id].ic)}${fmt(n)}× ${D.ITEMS[id].name}</span>`).join('')}</div>` : ''}
-    ${sum.levels.length ? `<div class="k" style="margin:12px 0 6px">Level-ups</div><div class="rws">${Object.entries(sum.levels.reduce((a, [k, l]) => (a[k] = l, a), {})).map(([k, l]) => `<span class="rw" style="--c:${D.SK[k].col}">${ico(k)}${D.SK[k].name} ${l}</span>`).join('')}</div>` : ''}`;
   DQ.holdNotes = true;
-  if (UI.welcomeBody) return DQ.modal({ title: 'Welcome back', wide: true, body: UI.welcomeBody(sum, gap), actions: [{ label: 'Continue', primary: true }] });
-  DQ.modal({ title: 'Welcome back', wide: true, body: body + UI.returnExtras(sum), actions: [{ label: 'Continue', primary: true }] });
+  const body = UI.welcomeBody ? UI.welcomeBody(sum, gap) : `<p>${DQ.offlinePolicy()}</p>`;
+  return DQ.modal({ title: 'Welcome back', wide: true, body, actions: [{ label: 'Continue', primary: true }] });
 }
 
 /* ---------- Actions ---------- */
@@ -16439,7 +16469,7 @@ DQ.on('pets', () => { UI.renderHud(); if (UI.view === 'bestiary' || UI.view === 
 /* A plain reminder that the game carries on while closed */
 DQ.on('act', () => {
   if (!DQ.act || S().seen.offlineTip || S().playtime < 240000) return; S().seen.offlineTip = 1;
-  setTimeout(() => DQ.notify({ kind: 'info', key: 'offline', icon: 'clock', col: '#8fc7ff', title: 'You can close the game', text: `You will keep ${DQ.actLabel().toLowerCase()} while you are away: full speed for 2 hours, then half speed, up to 8 hours. Crops, animals and workers keep going too.`, sound: false, ttl: 12000 }), 1500);
+  setTimeout(() => DQ.notify({ kind: 'info', key: 'offline', icon: 'clock', col: '#8fc7ff', title: 'You can close the game', text: `You will keep ${DQ.actLabel().toLowerCase()} while you are away. ${DQ.offlinePolicy()}`, sound: false, ttl: 12000 }), 1500);
 });
 
 /* ---------- Combat loot: session log, flying loot and loot-table tooltips ---------- */
@@ -16545,6 +16575,23 @@ const S = () => DQ.S;
 /* ---------- Plan window ---------- */
 const paceSeg = (cur, act) => `<div class="seg pace">${Object.entries(D.PACE).map(([k, p]) => `<button class="${cur === k ? 'on' : ''}" data-do="${act}" data-a="${k}" data-tip="text:${p.name}: ${esc(p.text)}">${p.name}</button>`).join('')}</div>`;
 const ruleChips = (cur, act, extra = '') => `<div class="chips rules">${D.STOP_RULES.map(([k, n]) => `<button class="chip ${cur === k ? 'on' : ''}" data-do="${act}" data-a="${k}" ${extra}>${n}</button>`).join('')}</div>`;
+function awayPreview(action, supplies) {
+  const node = D.NODE[action.kind + ':' + action.id];
+  const recipe = action.kind === 'recipe' && D.RECIPES[action.id];
+  const skill = DQ.actSkill(action);
+  const actions = 3600000 / DQ.actDur(action);
+  const success = recipe?.burn ? 1 - Math.min(.92, DQ.burnChance(recipe) * D.PACE[action.pace || 'steady'].risk) :
+    action.kind === 'thieve' ? DQ.riskFail(DQ.successChance('thieve', node)) : 1;
+  const xp = (recipe || node)?.xp;
+  const output = recipe ? Object.entries(recipe.out) : node?.item ? [[node.item, 1]] : [];
+  const expectedYield = skill ? 1 + DQ.dblChance(skill) + (DQ.mastExtra?.(action.kind, action.id) || 0) : 1;
+  const items = output.map(([id, n]) => `${fmt(n * actions * success * expectedYield)} ${D.ITEMS[id].name}`).join(' · ');
+  const rates = xp && skill ? `${fmt(xp * actions * success * DQ.xpMult(skill))} XP per hour${items ? ' · ' + items + ' per hour' : ''}` : 'XP and item rates vary with encounters and outcomes.';
+  const duration = supplies?.ms ? (supplies.ms >= DQ.OFFLINE_CAP ? 'Supplies are estimated to last through the offline cap.' :
+    `Supplies may run out after ${DQ.fmtTime(supplies.ms)}.`) :
+    (supplies ? 'Supplies depend on the tasks and encounters ahead.' : 'This activity has no material cost per action.');
+  return `<div class="plan-away"><h4>While you are away</h4><p>${esc(DQ.offlinePolicy())}</p><p>${esc(rates)}</p><p>${esc(duration)}</p></div>`;
+}
 UI.planHtml = () => {
   const a = DQ.act, Q = S().queue || [], slots = DQ.queueSlots();
   const prog = a && DQ.ruleProgress(a), sup = a && DQ.supplyInfo(a);
@@ -16552,7 +16599,7 @@ UI.planHtml = () => {
       <div class="plan-row"><span class="k">Pace</span>${paceSeg(a.pace || 'steady', 'setpace')}</div><p class="sm dim">${D.PACE[a.pace || 'steady'].text}</p>
       <div class="plan-row"><span class="k">Stop</span>${ruleChips(a.rule || 'none', 'setrule')}</div>
       ${prog ? `<div class="sm">Progress: <b class="mono">${fmt(prog[0])} / ${fmt(prog[1])} ${prog[2]}</b></div>` : ''}
-      ${sup ? `<div class="sm ${sup.n ? '' : 'bad'}">${ico('bag')} Supplies: ${sup.label}${sup.ms ? ` (about ${DQ.fmtTime(sup.ms)})` : ''}</div>` : ''}</div>`
+      ${sup ? `<div class="sm ${sup.n ? '' : 'bad'}">${ico('bag')} Supplies: ${sup.label}${sup.ms ? ` (about ${DQ.fmtTime(sup.ms)})` : ''}</div>` : ''}${awayPreview(a, sup)}</div>`
     : `<p class="dim">Nothing is running. Queue a task with the <b>+</b> button on any card, or just click a card to start it.</p>`;
   const rows = Q.map((t, i) => `<div class="qitem"><span class="qn mono">${i + 1}</span><div class="qbody"><b>${DQ.actLabel(t)}</b>
       <div class="qctl">${UI.choiceButtons(`<select data-in="qrule" data-i="${i}" aria-label="Stop rule">${D.STOP_RULES.filter(r => r[0] !== 'none').map(([k, n]) => `<option value="${k}" ${t.rule === k ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}
@@ -21298,65 +21345,55 @@ const go0 = DQ.go; DQ.go = (...a) => { if (a[0] !== 'quests') { reveal = null; U
 
 </script>
 <script>
-/* Welcome back, at a glance (Nov 2026): a banner with your hero, how long you were away and how the task ended; a row
-   of picture tiles for what you earned (skills, coins, creatures, items, level-ups) with big pixel numbers; one card
-   for the next step; picture cards for other good options; your decisions; chips for anything waiting (quest
-   rewards, research). Sentences only where a sentence helps. */
+/* One offline report, using the same quest progress as Home. */
 (() => {
-const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S, { esc, fmt, ico } = DQ;
-const num = n => (n = Math.round(n), n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : n >= 1e4 ? (n / 1e3).toFixed(n >= 1e5 ? 0 : 1) + 'k' : fmt(n));
-const tile = (art, value, label, col, cls = '') => `<div class="wb-tile ${cls}" style="--c:${col}"><span class="wb-art">${art}</span><b class="wb-num">${value}</b><small>${esc(label)}</small></div>`;
-const skillArt = k => DQ.artImage ? DQ.artImage('skill', k, 64) || ico(k) : ico(k);
-UI.welcomeBody = (sum, gap) => {
-  UI.welcomeOwnsChips = true;
-  const eff = DQ.offlineEff(gap), capped = gap > DQ.OFFLINE_CAP, taper = eff < Math.min(gap, DQ.OFFLINE_CAP);
-  const status = sum.died ? ['bad', 'skull', 'You were defeated'] : sum.stopped ? ['warn', 'clock', 'Your task stopped early'] : DQ.act ? ['ok', 'check', `${DQ.actLabel()} · still going`] : ['', 'clock', sum.label ? `You were ${sum.label.toLowerCase()}` : 'Nothing was running'];
-  const banner = `<div class="wb-banner"><span class="wb-face">${UI.portrait ? UI.portrait(72) : ''}</span><div class="wb-hello"><span class="k">${esc(S().name || 'Hero')} · Hero ${DQ.advLvl()}</span><div class="wb-time">${esc(DQ.fmtTime(gap))}<small>away</small></div>${taper || capped ? `<small class="dim">counted as ${esc(DQ.fmtTime(eff))} of work</small>` : ''}</div><span class="wb-status ${status[0]}">${ico(status[1])}${esc(status[2])}</span></div>`;
-  /* what you earned, as tiles */
-  const xp = Object.entries(sum.xp || {}).sort((a, b) => b[1] - a[1]), items = Object.entries(sum.items || {}).filter(([id]) => D.ITEMS[id]).sort((a, b) => D.ITEMS[b[0]].val * b[1] - D.ITEMS[a[0]].val * a[1]).slice(0, 8);
-  const levels = Object.entries((sum.levels || []).reduce((a, [k, l]) => (a[k] = l, a), {}));
-  const tiles = [...levels.map(([k, l]) => tile(skillArt(k), `Lv ${l}`, `${D.SK[k].name} level up`, D.SK[k].col, 'level')),
-    ...xp.map(([k, v]) => tile(skillArt(k), '+' + num(v), `${D.SK[k].name} XP`, D.SK[k].col)),
-    sum.coins ? tile(`<span class="wb-coin">${ico('coin')}</span>`, '+' + num(sum.coins), 'coins', '#f3d58a') : '',
-    sum.kills ? tile(`<span class="wb-coin">${ico('attack')}</span>`, num(sum.kills), 'defeated', '#e0564f') : '',
-    ...items.map(([id, n]) => tile(DQ.itemIco(D.ITEMS[id]), '×' + num(n), D.ITEMS[id].name, D.ITEMS[id].col || '#c8b890'))].filter(Boolean);
-  const earned = tiles.length ? `<div class="wb-sec"><span class="k">While you were away</span><div class="wb-tiles">${tiles.join('')}</div></div>`
-    : `<div class="wb-sec"><div class="wb-empty">${ico('clock')}<span><b>Nothing happened.</b> Start a task before you leave and it keeps going.</span></div></div>`;
-  /* the next step */
-  const next = DQ.journeyNext();
-  const goal = DQ.destLabel ? DQ.destLabel(S().journey) : 'Your goal';
-  const nextCard = `<div class="wb-next"><span class="wb-next-ic">${ico('star')}</span><div><span class="k">${esc(goal)}</span><b>${esc(next.title)}</b><small>${esc(next.detail)}</small></div><button class="btn primary" data-do="${next.action}" data-a="${next.a || ''}" data-b="${next.b || ''}">${esc(next.title.length > 22 ? 'Go' : next.title)}</button></div>`;
-  /* other good options, each with a picture */
-  const opts = (DQ.returnChoices ? DQ.returnChoices() : []).map(x => { const [kind, id] = String(x.art || '').split(':');
-    const art = kind === 'skill' ? skillArt(id) : kind === 'project' && DQ.pixelArt && DQ.pixelArt.stagePiece ? DQ.pixelArt.img(DQ.pixelArt.url('wb-site:' + id + ':' + (DQ.projectStage ? DQ.projectStage(id) : 0), () => DQ.pixelArt.stagePiece((D.PROJECTS[id] || {}).art || id, DQ.projectStage ? DQ.projectStage(id) : 0)), 32, 32, 64, '', '') : ico('star');
-    return `<button class="wb-opt" data-do="returnpick" data-a="${x.action}" data-b="${x.a}"><span class="wb-art">${art}</span><span><b>${esc(x.title)}</b><small>${esc(x.text)}</small></span></button>`; }).join('');
-  /* anything waiting for you */
-  const ready = D.QUESTS.filter(q => DQ.questState(q) === 'ready').length, research = DQ.awayDone || [];
-  const chips = [ready ? `<button class="wb-chip" data-do="returnpick" data-a="go" data-b="quests">${ico('quest')}<b class="wb-num">${ready}</b> quest reward${ready > 1 ? 's' : ''} to claim</button>` : '', research.length ? `<span class="wb-chip">${ico('research')}Research finished: ${research.map(esc).join(', ')}</span>` : ''].filter(Boolean).join('');
-  /* decisions straight after what you earned: they need an answer, everything below is optional */
-  const nDec = (S().inbox || []).length, decide = nDec || (DQ.eventResults || []).length ? `<div class="wb-sec wb-decide"><div class="wb-decide-h"><span class="k">${nDec ? `Decide · ${nDec} thing${nDec > 1 ? 's' : ''} happened while you were away` : 'Decided'}</span></div><div class="events" id="inboxbox">${UI.inboxHtml()}</div></div>` : '';
-  const extras = UI.returnExtras(sum);
-  /* 20 Nov (owner): decisions first, then clear "what next" actions, then three more things to do, then what you earned */
-  const act = (label, title, detail, btn, doAct, a = '', b = '', primary = false) => `<div class="wb-do"><span class="wb-do-k">${esc(label)}</span><div><b>${esc(title)}</b>${detail ? `<small>${esc(detail)}</small>` : ''}</div><button class="btn ${primary ? 'primary' : ''}" data-do="returnpick" data-a="${doAct}" data-b="${esc(String(a))}"${b ? ` data-c="${esc(String(b))}"` : ''}>${esc(btn)}</button></div>`;
-  const readyQ = D.QUESTS.filter(q => DQ.questState(q) === 'ready'), rows = [];
-  if (readyQ.length) rows.push(act('Claim', readyQ.length > 1 ? `${readyQ.length} quest rewards are ready` : `“${readyQ[0].name}” is ready`, readyQ.length > 1 ? readyQ.slice(0, 3).map(q => q.name).join(', ') : `Return to ${readyQ[0].giver}`, readyQ.length > 1 ? 'Claim rewards' : 'Claim reward', 'openquest', readyQ[0].id, '', true));
-  if (DQ.act) rows.push(act('Continue', DQ.actLabel(), 'Still going', 'Watch', 'go', DQ.actPage() || 'overview'));
-  else if (S().lastAct) rows.push(act('Continue', `Your last task: ${DQ.actLabel(S().lastAct) || 'carry on'}`, sum.stopped ? 'It stopped while you were away' : '', 'Start again', 'resume', '', '', !readyQ.length));
-  rows.push(act('Your quest', next.title, `${goal} · ${next.detail}`, next.title.length > 22 ? 'Go' : next.title, next.action, next.a || '', next.b || '', !readyQ.length && !!DQ.act));
-  const whatNext = `<div class="wb-sec"><span class="k">What next</span><div class="wb-dos">${rows.join('')}</div></div>`;
-  /* three more things: closest restoration, a skill about to level, the nearest quest, or one not started yet */
-  const more = (DQ.returnChoices ? DQ.returnChoices() : []).map(x => ({ ...x }));
-  const journeyQ = S().journey && D.QM[S().journey] ? S().journey : null;
-  const named = `${next.title} ${next.detail}`, activeQ = D.QUESTS.filter(q => DQ.questState(q) === 'active' && q.id !== journeyQ && !named.includes(q.name)).map(q => ({ q, pct: UI.questProgress ? UI.questProgress(q).pct : 0 })).sort((a, b) => b.pct - a.pct)[0];
-  if (activeQ) more.push({ title: `Nearly there: ${activeQ.q.name}`, text: `${Math.round(activeQ.pct)}% done · ${activeQ.q.giver}`, action: 'openquest', a: activeQ.q.id, art: 'quest' });
-  const newQ = D.QUESTS.find(q => DQ.questState(q) === 'new' && q.town === S().town && !named.includes(q.name));
-  if (newQ) more.push({ title: `New: ${newQ.name}`, text: `${newQ.giver} has a job for you`, action: 'openquest', a: newQ.id, art: 'quest' });
-  const opt3 = more.slice(0, 3).map(x => { const [kind, id] = String(x.art || '').split(':');
-    const art = kind === 'skill' ? skillArt(id) : kind === 'project' && DQ.pixelArt && DQ.pixelArt.stagePiece ? DQ.pixelArt.img(DQ.pixelArt.url('wb-site:' + id + ':' + (DQ.projectStage ? DQ.projectStage(id) : 0), () => DQ.pixelArt.stagePiece((D.PROJECTS[id] || {}).art || id, DQ.projectStage ? DQ.projectStage(id) : 0)), 32, 32, 64, '', '') : ico(kind === 'quest' ? 'quest' : 'star');
-    return `<button class="wb-opt" data-do="returnpick" data-a="${x.action}" data-b="${x.a}"><span class="wb-art">${art}</span><span><b>${esc(x.title)}</b><small>${esc(x.text)}</small></span></button>`; }).join('');
-  const research_ = research.length ? `<div class="wb-chips"><span class="wb-chip">${ico('research')}Research finished: ${research.map(esc).join(', ')}</span></div>` : '';
-  return `<div class="wb">${banner}${decide}${whatNext}${opt3 ? `<div class="wb-sec"><span class="k">More to do</span><div class="wb-opts">${opt3}</div></div>` : ''}${research_}${earned}${extras}${capped ? `<p class="sm dim wb-fine">Full speed for the first 2 hours away, half speed after that, and nothing past 8 hours.</p>` : ''}</div>`;
-};
+  const Q = window.DQ, D = Q.data, UI = Q.ui;
+  const { esc, fmt } = Q;
+  const total = values => Object.values(values).reduce((sum, n) => sum + n, 0);
+  const list = (items, label) => items.length ? `<ul aria-label="${label}">${items.map(s => `<li>${s}</li>`).join('')}</ul>` : '';
+
+  function activityCard(activity) {
+    const xp = Object.entries(activity.xp).map(([id, n]) => `${fmt(n)} ${esc(D.SK[id].name)} XP`);
+    const levels = Object.entries(activity.levels).filter(([, level]) => level.to > level.from)
+      .map(([id, level]) => `${esc(D.SK[id].name)} ${level.from} → ${level.to}`);
+    const items = Object.entries(activity.items).map(([id, n]) => `${fmt(n)} × ${esc(D.ITEMS[id].name)}`);
+    const rate = activity.worked ? `<p>${fmt(total(activity.xp) * 3600000 / activity.worked)} XP per hour</p>` : '';
+    return `<article class="wb-activity"><h3>${esc(activity.label)}</h3>${rate}${list(xp, 'Experience earned')}${list(levels, 'Levels gained')}${list(items, 'Items found')}</article>`;
+  }
+
+  function outsideActivities(sum, activities) {
+    const residual = name => {
+      const map = { ...sum[name] };
+      for (const activity of activities) {
+        for (const [id, n] of Object.entries(activity[name])) map[id] -= n;
+      }
+      return Object.fromEntries(Object.entries(map).filter(([, n]) => n > .01));
+    };
+    return { label: 'Village and other progress', xp: residual('xp'), items: residual('items'), levels: {} };
+  }
+
+  UI.welcomeBody = (sum, gap) => {
+    UI.welcomeOwnsChips = true;
+    const effective = Q.offlineEff(gap), quest = Q.mainQuestProgress?.();
+    const activities = Object.values(sum.activities || {}).filter(a => total(a.xp) || total(a.items));
+    const other = outsideActivities(sum, activities);
+    if (total(other.xp) || total(other.items)) activities.push(other);
+    const running = Q.act ? `${esc(Q.actLabel())} · still going` : sum.label ? 'Your previous task has ended.' : 'Nothing was running.';
+    const stopped = sum.stopped && sum.stop ?
+      `<p class="wb-status warn">Stopped after ${Q.fmtTime(sum.stop.after)} · ${esc(sum.stop.reason)}</p>` : '';
+    const pending = Q.S.inbox.length;
+    const project = Q.returnChoices?.().find(choice => choice.art?.startsWith('project:'));
+    const next = quest ? `<section class="wb-sec wb-main-quest"><h3>${esc(quest.name)}</h3><p>${esc(quest.label)} · <b>${quest.have} / ${quest.need}</b></p></section>` : '';
+    return `<div class="wb wb-digest">
+      <div class="wb-banner"><div class="wb-hello"><div class="wb-time">${Q.fmtTime(gap)} <small>away</small></div>
+      <p>${Q.fmtTime(effective)} counted at full speed. ${Q.offlinePolicy()}</p></div><span class="wb-status">${running}</span></div>
+      <div class="wb-totals"><b>${fmt(total(sum.xp || {}))} XP</b><b>${fmt(sum.coins || 0)} coins</b></div>
+      ${stopped}${next}
+      <div class="wb-activities">${activities.map(activityCard).join('')}</div>
+      ${project ? `<p class="wb-restoration">${esc(project.title)} · ${esc(project.text)}</p>` : ''}
+      ${pending ? `<button class="btn sm wb-encounter-count" data-do="returnpick" data-a="go" data-b="activity">${pending} away encounter${pending === 1 ? '' : 's'} waiting · View</button>` : ''}
+    </div>`;
+  };
 })();
 
 </script>
@@ -21460,7 +21497,7 @@ Q.resolveBeastTrap=(now=Date.now())=>{if(Q.forecasting)return false;const p=ensu
  });};
 /* Resolve real deadlines after offline work, never during forecasts or by consuming the effective-work cap. */
 const simulate0=Q.simulate;
-Q.simulate=(ms,real=ms)=>{const p=ensure(),before=new Set(p.events.map(e=>JSON.stringify(e))),summary=simulate0(ms,real);if(!Q.forecasting){Q.resolveBeastTrap();summary.beastEvents=ensure().events.filter(e=>!before.has(JSON.stringify(e))&&e.kind!=='sent');}return summary;};
+Q.simulate=(ms,real=ms,options)=>{const p=ensure(),before=new Set(p.events.map(e=>JSON.stringify(e))),summary=simulate0(ms,real,options);if(!Q.forecasting){Q.resolveBeastTrap();summary.beastEvents=ensure().events.filter(e=>!before.has(JSON.stringify(e))&&e.kind!=='sent');}return summary;};
 const world0=Q.advanceWorld;let wallPoll=0;
 Q.advanceWorld=dt=>{world0(dt);if(!Q.sim.on&&!Q.forecasting&&(wallPoll+=dt)>=1000){wallPoll=0;if(Q.resolveBeastTrap()&&UI.view==='beastmastery')UI.render(false);}};
 /* Training is a deliberate purchase, not an endlessly repeating paid task. Existing fieldwork lures are preserved. */
@@ -25317,7 +25354,7 @@ function start(isNew) {
   D.SKILLS.forEach(s => { if (DQ.skillUnlocked(s.id)) S.unlocked[s.id] = true; });
   DQ.resumeAfterLoad(); DQ.ui.init();
   const h = location.hash.slice(1); if (h && (DQ.ui.V[h] || D.SK[h]) && !isNew) { DQ.ui.view = h; DQ.ui.render(true); }
-  if (!isNew && away > 30000) { const eff = DQ.offlineEff(away); DQ.noteAway(away, eff); const sum = DQ.simulate(eff, Math.min(away, DQ.OFFLINE_CAP)); DQ.makeAwayEvents(sum, away); DQ.emit('welcome', sum, away); }
+  if (!isNew && away > 30000) { const eff = DQ.offlineEff(away); DQ.noteAway(away, eff); const sum = DQ.simulate(eff, Math.min(away, DQ.OFFLINE_CAP), { report: true }); DQ.makeAwayEvents(sum, away); DQ.emit('welcome', sum, away); }
   S.tele = S.tele || { adv: {}, skill: {}, first: {}, away: [], sessions: 0 }; S.tele.sessions++; DQ.sessMs = 0; DQ.sessStart = Date.now();
   DQ.startLoop(); DQ.checkAch();
   if (isNew) {
