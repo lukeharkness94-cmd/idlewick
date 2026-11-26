@@ -19370,6 +19370,17 @@ Q.on('splat',(side,text,kind,delay=0)=>{
   };setTimeout(impact,timing.impact);
  },Math.max(0,delay-180));
 });
+/* the catch: the output rises from the target and flies toward the yield, and a fish leaps. Both stay inside the
+   scene (the flight is clamped below its top edge) and both survive a redraw of the scene part-way through (owner,
+   26 Nov 2026: "the animations of the fish being caught are chopped sometimes"): a redraw shortly after a catch
+   (first catch, a level, a field-guide entry) used to throw the half-played animation away. */
+let catchFx=null;
+const playCatch=(scene,age)=>{const f=catchFx;if(!f)return;const target=scene.querySelector('.scene-target');if(!target)return;const at=point(target,scene);
+ const rise=Math.min(110,Math.max(24,at.y-14)),output=effect(scene,'work-result',f.html,at.x,at.y);
+ fly(output,[{transform:'translate(-50%,-30%) scale(.6)',opacity:0},{transform:'translate(-50%,-75%) scale(1)',opacity:1,offset:.25},{transform:`translate(65px,${-rise}px) scale(.6)`,opacity:0}],{duration:850,delay:-age,easing:'cubic-bezier(.2,.65,.4,1)'});
+ if(f.kind==='fish'&&age<600)animate(target,[{transform:'translateY(0) rotate(0)'},{transform:'translateY(-18px) rotate(-8deg)',offset:.4},{transform:'translateY(0) rotate(0)'}],{duration:600,delay:-age,easing:'cubic-bezier(.22,.7,.3,1)'});};
+const resumeCatch=()=>{const f=catchFx;if(!f||calm()||document.hidden)return;const age=performance.now()-f.t;if(age>=850){catchFx=null;return;}
+ const scene=document.querySelector('.activity-scene');if(!scene||scene===f.scene||scene.dataset.kind!==f.kind||scene.dataset.task!==f.id)return;f.scene=scene;playCatch(scene,age);};
 Q.on('workcycle',event=>{
  if(calm()||document.hidden||Q.sim.on)return;
  const scene=document.querySelector('.activity-scene');if(!scene||scene.dataset.kind!==event.kind||scene.dataset.task!==event.id)return;
@@ -19377,15 +19388,17 @@ Q.on('workcycle',event=>{
  if(event.quantity>0){
   const node=Q.data.NODE[event.kind+':'+event.id],recipe=Q.data.RECIPES[event.id];
   const item=node?.item||recipe&&Object.keys(recipe.out)[0];
-  const output=effect(scene,'work-result',item?Q.itemIco(Q.data.ITEMS[item]):Q.ico('coin'),at.x,at.y);
-  fly(output,[{transform:'translate(-50%,-30%) scale(.6)',opacity:0},{transform:'translate(-50%,-75%) scale(1)',opacity:1,offset:.25},{transform:'translate(65px,-110px) scale(.6)',opacity:0}],{duration:850,easing:'cubic-bezier(.2,.65,.4,1)'});
+  const html=item?Q.itemIco(Q.data.ITEMS[item]):Q.ico('coin');
+  catchFx={t:performance.now(),kind:event.kind,id:event.id,html,scene};playCatch(scene,0);
   const yieldIcon=scene.querySelector('.scene-yield');if(yieldIcon)animate(yieldIcon,[{filter:'brightness(1)'},{filter:'brightness(1.4)',offset:.4},{filter:'brightness(1)'}],{duration:450});
   if(event.kind==='wood'||event.kind==='mine')sparks(scene,at.x-25,at.y+25,event.kind==='wood'?'#c5a06a':'#d8c69d');
-  if(event.kind==='fish')animate(target,[{transform:'translateY(0) rotate(0)'},{transform:'translateY(-18px) rotate(-8deg)',offset:.4},{transform:'translateY(0) rotate(0)'}],{duration:600,easing:'cubic-bezier(.22,.7,.3,1)'});
+
  }else if(event.kind==='thieve')animate(target,[{filter:'brightness(1)'},{filter:'brightness(.8)',offset:.4},{filter:'brightness(1)'}],{duration:400});
 });
 const render=UI.render;
-UI.render=fresh=>{render(fresh);if(calm())for(const a of [...active])a.cancel();};
+UI.render=fresh=>{render(fresh);if(calm())for(const a of [...active])a.cancel();else resumeCatch();};
+/* partial redraws replace the scene without UI.render: pick the catch up on whichever scene is now showing */
+new MutationObserver(()=>{if(catchFx)resumeCatch();}).observe(document.documentElement,{childList:true,subtree:true});
 document.addEventListener('visibilitychange',()=>{
  document.body.classList.toggle('scene-paused',document.hidden);
  if(document.hidden)for(const a of [...active])a.cancel();
