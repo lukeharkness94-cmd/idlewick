@@ -115,7 +115,7 @@ DQ.bundleNeeds = item => Object.entries(D.PROJECTS).flatMap(([id, project]) => {
 });
 UI.bundleLabel = item => {
   const needed = DQ.bundleNeeds(item)[0];
-  return needed ? `<span class="bundle-indicator">${ico('house')} ${esc(needed.label)}</span>` : '';
+  return needed ? `<span class="bundle-indicator" data-tip="text:${esc(needed.label)}">${ico('house')}<span class="bi-t"> ${esc(needed.label)}</span></span>` : '';
 };
 UI.bundleLinks = item => DQ.bundleNeeds(item).map(({ id, label, count }) =>
   `<button class="btn sm" data-do="openproject" data-a="${id}">${ico('house')}${esc(label)} · ${fmt(count)} needed</button>`).join('');

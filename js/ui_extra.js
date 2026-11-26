@@ -7,6 +7,11 @@ const GT = () => S().gameTime || 0;
 const left = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`; };
 const plotArt = (p, st) => { const c = p.crop && D.CROP[p.crop]; return c ? DQ.plantSprite(Math.max(0, st), c.col, 64) : DQ.plantSprite(0, '#000', 64); };
 const plotLabel = (p, st) => { const c = p.crop && D.CROP[p.crop]; return !c ? 'Empty plot: plant a seed' : st === 3 ? `${c.name}: ready to harvest` : `${c.name}: growing, ${Math.floor(DQ.plotPct(p) * 100)}%`; };
+/* what clicking a plot does, said on the plot itself (owner, 26 Nov 2026: "the farm to be clearer as harvesting, planting
+   etc in their buttons") */
+const plotAction = (p, st) => { const c = p.crop && D.CROP[p.crop];
+  if (!c) { const sd = UI.seed && D.CROP[UI.seed]; return sd ? ['plant', `Plant ${sd.name}`] : ['none', 'Pick a seed']; }
+  return st === 3 ? ['harvest', 'Harvest'] : ['grow', `Growing · ${left(p.at + p.dur - GT())}`]; };
 const stageOf = p => !p.crop ? -1 : DQ.plotRipe(p) ? 3 : DQ.plotPct(p) < .08 ? 0 : DQ.plotPct(p) < .45 ? 1 : 2;
 const costChips = cost => UI.needTiles(cost);
 
@@ -23,8 +28,10 @@ Object.assign(UI.B, {
       e.setAttribute('aria-label', plotLabel(p, st));
     }
     const bar = $('.pbar i', e); if (bar) bar.style.width = (DQ.plotPct(p) * 100) + '%';
-    const t = $('.ptime', e); if (t) set(t, !c ? 'Empty' : st === 3 ? 'Ready to harvest' : left(p.at + p.dur - GT()));
+    const t = $('.ptime', e); if (t) set(t, !c ? 'Empty' : st === 3 ? 'Ripe' : left(p.at + p.dur - GT()));
+    const pa = $('.plot-act', e), [k, txt] = plotAction(p, st); if (pa) { if (pa.textContent !== txt) pa.textContent = txt; pa.className = 'plot-act ' + k; }
   },
+  pencount: (e, a) => { const an = S().farm.animals[a]; if (!an) return; set(e, an.stored); const btn = e.closest('button'); if (btn) btn.disabled = !an.stored; },
   pen: (e, a) => {
     const an = S().farm.animals[a]; if (!an) return; const per = DQ.animalPeriod(an);
     const bar = $('.pbar i', e); if (bar) bar.style.width = (an.stored >= 5 ? 100 : clamp(an.t / per, 0, 1) * 100) + '%';
@@ -49,7 +56,7 @@ UI.V.farming = () => {
     const c = p.crop && D.CROP[p.crop], st = stageOf(p);
     return `<button class="plot ${c ? '' : 'empty'} ${st === 3 ? 'ripe' : ''}" data-i="${i}" data-b="plot:${i}" data-do="plot" data-a="${i}" aria-label="${esc(plotLabel(p, st))}" style="--c:${c ? c.col : '#7a5230'}">
       <span class="pspr">${plotArt(p, st)}</span>
-      <b>${c ? c.name : 'Empty plot'}</b><small class="ptime mono"></small><span class="bar pbar"><i></i></span></button>`;
+      <b>${c ? c.name : 'Empty plot'}</b><small class="ptime mono"></small><span class="bar pbar"><i></i></span><span class="plot-act ${plotAction(p, st)[0]}">${plotAction(p, st)[1]}</span></button>`;
   }).join('');
   const nextPlot = D.PLOT_PRICES[F.plotsBought];
 
@@ -58,7 +65,7 @@ UI.V.farming = () => {
     const A = D.ANIMAL[an.id], pr = D.ITEMS[A.prod];
     return `<div class="pen" data-i="${i}" data-b="pen:${i}" style="--c:${A.col}"><button class="pspr" data-do="petanimal" data-a="${i}" data-tip="text:Pet ${esc(an.name)}: +25% speed for 3 min">${DQ.animalSprite(A, 64, 'bob')}</button>
       <div class="pen-t"><b>${esc(an.name)}</b><small>${A.name} · makes ${pr.name.toLowerCase()} every ${left(DQ.animalPeriod(an))}</small><span class="bar pbar"><i></i></span><small><span class="pst mono"></span> ${pr.name.toLowerCase()} ready <span class="tag hungrytag">Hungry</span><span class="tag happytag">Happy</span></small></div>
-      <button class="btn sm" data-do="collect" data-a="${i}">Collect</button><button class="btn sm pen-sell" data-do="sellanimal" data-a="${i}" data-tip="text:Sell to free this pen · ${fmt(DQ.animalSellPrice(i))} coins">Sell</button></div>`;
+      <button class="btn sm pen-collect" data-do="collect" data-a="${i}">Collect <span class="mono" data-b="pencount:${i}">${an.stored}</span></button><button class="btn sm pen-sell" data-do="sellanimal" data-a="${i}" data-tip="text:Sell to free this pen · ${fmt(DQ.animalSellPrice(i))} coins">Sell</button></div>`;
   }).join('');
   const nextPen = D.PEN_PRICES[F.pensBought], mossOpen = DQ.townUnlocked('mossbarrow');
   const market = D.ANIMALS.map(a => { const lock = DQ.lvl('farming') < a.lvl; return `<div class="srow ${lock || S().coins < a.price ? 'cant' : ''}" id="buy-${a.id}"><span class="mini">${DQ.animalSprite(a, 40)}</span><div class="sr-t"><b>${a.name}</b><small>Makes ${D.ITEMS[a.prod].name.toLowerCase()} (${fmt(D.ITEMS[a.prod].val)} coins) · <span class="${lock ? 'bad' : 'ok'}">Farming ${a.lvl}</span></small></div><span class="price mono">${ico('coin')}${fmt(a.price)}</span><button class="btn sm ${lock ? '' : 'primary'}" data-do="buyanimal" data-a="${a.id}" ${lock ? 'disabled' : ''}>Buy</button></div>`; }).join('');
