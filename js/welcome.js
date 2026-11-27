@@ -25,6 +25,20 @@
     return { label: 'Village and other progress', xp: residual('xp'), items: residual('items'), levels: {} };
   }
 
+  /* a few lines from the hero's diary (owner, 27 Nov 2026: a journal-style Welcome back), written from the real report:
+     the hour and weather in town now, what kept them busy, the level it brought, and who kept the fire. Then the totals. */
+  function diary(sum, activities) {
+    const town = Q.S.town, tn = D.TOWN[town] ? D.TOWN[town].name : 'town', h = Q.townHour ? Q.townHour() : new Date().getHours();
+    const phase = Q.townLight ? Q.townLight(h).phase : 'day', when = phase === 'night' ? 'Late' : phase === 'dawn' ? 'Early morning' : phase === 'dusk' ? 'Evening' : h < 12 ? 'Morning' : 'Afternoon';
+    const wx = Q.townWeather ? Q.townWeather(town) : 'clear', weather = { rain: ', and raining', snow: ', and snowing', mist: ', and misty', cloud: ', under a low cloud' }[wx] || '';
+    const top = activities.filter(a => a.label !== 'Village and other progress').sort((a, b) => total(b.xp) - total(a.xp))[0];
+    const item = top && Object.entries(top.items).sort((a, b) => b[1] - a[1])[0];
+    const lv = top && Object.entries(top.levels).find(([, l]) => l.to > l.from);
+    const did = top ? `Kept at ${esc(top.label.charAt(0).toLowerCase() + top.label.slice(1))}${item && D.ITEMS[item[0]] ? `: ${fmt(item[1])} ${esc(D.ITEMS[item[0]].name.toLowerCase())}` : ''}${lv ? `, and ${esc(D.SK[lv[0]].name)} went from ${lv[1].from} to ${lv[1].to}` : ''}.` : 'Nothing much got done, which is its own kind of holiday.';
+    const pet = Q.S.pets && Q.S.pets.active && D.PET[Q.S.pets.active], keeper = pet ? `${esc(pet.name)} kept the fire company the whole time.` : 'The fire was still in when I got back.';
+    return `<p class="wb-diary"><span>${when} in ${esc(tn)}${weather}.</span> ${did} ${keeper}</p>`;
+  }
+
   UI.welcomeBody = (sum, gap) => {
     UI.welcomeOwnsChips = true;
     const effective = Q.offlineEff(gap), quest = Q.mainQuestProgress?.();
@@ -42,6 +56,7 @@
     return `<div class="wb wb-digest">
       <div class="wb-banner"><div class="wb-hello"><div class="wb-time">${Q.fmtTime(gap)} <small>away</small></div>
       <p>${Q.fmtTime(effective)} counted at full speed. ${Q.offlinePolicy()}</p></div><span class="wb-status">${running}</span></div>
+      ${diary(sum, activities)}
       <div class="wb-totals"><b>${fmt(total(sum.xp || {}))} XP</b><b>${fmt(sum.coins || 0)} coins</b></div>
       ${stopped}${next}
       <div class="wb-activities">${activities.map(activityCard).join('')}</div>

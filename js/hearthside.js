@@ -51,6 +51,7 @@ const homeGlance = () => {
  const goal = project ? { name: D.PROJECTS[project].name, label: 'Bundles complete',
    have: Object.keys(D.PROJECTS[project].cost).length - Object.keys(Q.projectNeed(project)).length,
    need: Object.keys(D.PROJECTS[project].cost).length } : main;
+ Q.homeGoalNow = goal; /* the hearth's notice board pins the same goal (js/hearth.js) */
  /* a checklist step (boss_checklist.js): its first open item is the main action, then Skip; the list sits in the card */
  const todo = next.checklist && next.checklist.items.find(i => !i.done && i.action);
  const button = next.checklist ? `${todo ? `<button class="btn primary" data-do="${todo.action.do}" data-a="${esc(todo.action.a)}">${esc(todo.key === 'armour' || todo.key === 'ability' ? todo.label : todo.action.text)}</button>` : ''}<button class="btn" data-do="bossprepskip" data-a="${esc(next.a || '')}">Skip checks</button>`

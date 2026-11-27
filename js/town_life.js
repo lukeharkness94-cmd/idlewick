@@ -40,7 +40,10 @@ const tintOf = ({ dark, warm }) => { const w = [255, 255, 255], sun = [255, 168,
 const WEATHER = { willowbrook: [['rain', .2]], mossbarrow: [['rain', .25]], saltmere: [['mist', .3], ['rain', .15]], ironpeak: [['snow', .65]],
   gloomfen: [['mist', .45], ['rain', .2]], emberfall: [], skyreach: [['snow', .25], ['cloud', .5]], hollow: [['mist', .25]] };
 Q.townWeather = (town, now = Date.now()) => { if (Q.townWeatherOverride !== undefined) return Q.townWeatherOverride; if (S() && S().settings && S().settings.townWeather === false) return 'clear';
-  const r = (hash(town + ':' + Math.floor(now / 2.4e6)) % 1000) / 1000; let acc = 0; for (const [k, p] of WEATHER[town] || []) { acc += p; if (r < acc) return k; } return 'clear'; };
+  const r = (hash(town + ':' + Math.floor(now / 2.4e6)) % 1000) / 1000; let acc = 0;
+  /* in winter the lowland towns see snow too */
+  const table = (Q.season && Q.season() === 'winter' && !/ironpeak|skyreach|emberfall/.test(town) ? [['snow', .3]] : []).concat(WEATHER[town] || []);
+  for (const [k, p] of table) { acc += p; if (r < acc) return k; } return 'clear'; };
 
 /* ---------- little animals, drawn at town scale (5 to 7 px), two frames each ---------- */
 const px = (x, c, X, Y, w = 1, h = 1) => { x.fillStyle = c; x.fillRect(Math.round(X), Math.round(Y), w, h); };
@@ -73,6 +76,9 @@ const build = (town, meta) => { const rnd = seeded(hash(town + ':life')), share 
   if (st.sea) { for (let i = 0; i < 26; i++) L.glints.push({ x: rnd() * W, y: 84 + rnd() * 36, p: rnd() * 6.28, w: 3 + Math.floor(rnd() * 4) }); for (let i = 0; i < 22; i++) L.glints.push({ x: rnd() * W, y: 332 + rnd() * 26, p: rnd() * 6.28, w: 3 + Math.floor(rnd() * 4) }); }
   for (const c of meta.chimneys || []) L.puffs.push(...[0, 1, 2].map(k => ({ cx: c[0], cy: c[1] - 18, age: k * 1.6 + rnd() * 1.6, life: 4.8, drift: .4 + rnd() * .6 })));
   for (let i = 0; i < 22; i++) L.flies.push({ x: rnd() * W, y: 150 + rnd() * 170, p: rnd() * 6.28, s: .6 + rnd() * .8 });
+  /* the season (Q.season, js/hearth.js): leaves in autumn, blossom in spring, butterflies in summer */
+  L.fall = Array.from({ length: 34 }, () => ({ x: rnd() * W, y: rnd() * H, p: rnd() * 6.28, s: 8 + rnd() * 8, c: Math.floor(rnd() * 3) }));
+  L.flutter = Array.from({ length: 5 }, () => ({ x: 40 + rnd() * (W - 80), y: 280 + rnd() * 40, p: rnd() * 6.28, c: Math.floor(rnd() * 3) }));
   L.weather = '';
   return L; };
 
@@ -91,7 +97,9 @@ const step = (L, dt) => { L.t += dt; const W = L.meta.W, H = L.meta.H, wx = Q.to
   if (L.drops.length < want) for (let i = 0; i < Math.min(8, want - L.drops.length); i++) L.drops.push({ x: Math.random() * (W + 60) - 30, y: -Math.random() * H * .5, kind: wx, s: wx === 'rain' ? 150 + Math.random() * 60 : 14 + Math.random() * 12, p: Math.random() * 6.28, big: Math.random() < .2 });
   L.drops = L.drops.filter(d => { if (d.kind === 'rain') { d.y += d.s * dt; d.x -= d.s * .18 * dt; } else { d.y += d.s * dt; d.x += Math.sin(L.t * 1.3 + d.p) * 6 * dt; }
     if (d.y > H) { if (L.drops.length > want) return false; d.y = -4; d.x = Math.random() * (W + 60) - 30; } return true; });
-  L.weather = wx;
+  L.weather = wx; L.season = Q.season ? Q.season() : '';
+  if (L.season === 'autumn' || L.season === 'spring') for (const f of L.fall) { f.y += f.s * dt; f.x += Math.sin(L.t * 1.1 + f.p) * 9 * dt - 3 * dt; if (f.y > H || f.x < -4) { f.y = -4; f.x = Math.random() * (W + 40); } }
+  if (L.season === 'summer') for (const b of L.flutter) { b.x += Math.cos(L.t * .7 + b.p) * 10 * dt; b.y += Math.sin(L.t * 1.3 + b.p) * 6 * dt; }
   if (L.birds) { L.birds.x += L.birds.dir * 22 * dt; if (L.birds.x < -40 || L.birds.x > W + 40) L.birds = null; }
   else if ((L.birdWait -= dt) <= 0) { const dir = Math.random() < .5 ? -1 : 1; L.birds = { x: dir > 0 ? -20 : W + 20, y: 18 + Math.random() * 34, dir, n: 3 + Math.floor(Math.random() * 3) }; L.birdWait = 25 + Math.random() * 35; } };
 
@@ -104,6 +112,10 @@ const drawUnder = (L, x, moving) => { const { W, H, style: st = {} } = L.meta; x
   for (const p of L.puffs) { const k = p.age / p.life, a = .42 * (1 - k) * Math.min(1, p.age * 2); if (a <= .02) continue; ell(x, `rgba(234,234,238,${a.toFixed(3)})`, p.cx + k * 14 * p.drift + Math.sin(p.age * 1.4) * 1.2, p.cy - k * 26, 1.6 + k * 2.6, 1.2 + k * 1.6); }
   for (const a of L.animals) { if (a.kind === 'gull') { ART.bird(x, a.cx + Math.cos(a.a) * a.r * 1.6, a.cy + Math.sin(a.a) * a.r * .5, Math.floor(L.t * 4 + a.r) % 2, 1, '#f8f8f8'); continue; } ART[a.kind](x, a.x, a.y, a.f, a.dir, a.col); }
   if (L.birds) for (let i = 0; i < L.birds.n; i++) ART.bird(x, L.birds.x - L.birds.dir * i * 6, L.birds.y + (i % 2) * 3 + Math.sin(L.t * 2 + i) * 1.5, Math.floor(L.t * 5 + i) % 2, L.birds.dir, st.stars ? '#2a2238' : '#3a3a44');
+  /* the season */
+  const LEAF = L.season === 'spring' ? ['#f4c4d0', '#f8dce4', '#ffffff'] : ['#d8782a', '#c8482a', '#e8b040'];
+  if (L.season === 'autumn' || L.season === 'spring') for (const f of L.fall) { px(x, LEAF[f.c], f.x, f.y, 2, 1); if (Math.sin(L.t * 3 + f.p) > 0) px(x, LEAF[f.c], f.x + 1, f.y + 1); }
+  if (L.season === 'summer' && L.lightDark < .4) for (const b of L.flutter) { const up = Math.floor(L.t * 8 + b.p) % 2, c = ['#f0d060', '#f4f0f4', '#e09040'][b.c]; px(x, c, b.x - 1, b.y - up); px(x, c, b.x + 1, b.y - up); px(x, '#3a3030', b.x, b.y); }
   /* weather */
   if (L.weather === 'mist' || L.weather === 'cloud') { const top = L.weather === 'cloud' ? 96 : 120; for (let i = 0; i < 6; i++) { const y = top + i * 34 + Math.sin(L.t * .2 + i) * 4, off = (L.t * (6 + i) + i * 97) % (W + 260) - 130;
     x.fillStyle = L.weather === 'cloud' ? 'rgba(246,251,252,.55)' : 'rgba(230,236,240,.16)'; x.fillRect(Math.round(off), Math.round(y), 180, 8); x.fillRect(Math.round(off + 16), Math.round(y - 4), 140, 4); x.fillRect(Math.round(off - 120 + W / 2), Math.round(y + 12), 220, 6); } }
@@ -139,7 +151,7 @@ const attach = img => { if (img.dataset.life || img.classList.contains('scene-ol
     const L = Object.assign(build(town, meta), { img, under, tint, glow, over, ux: under.getContext('2d'), ox: over.getContext('2d'), home: !!img.closest('.home-scene') });
     if (window.ResizeObserver) { L.ro = new ResizeObserver(() => fit(L)); L.ro.observe(img); if (L.home) L.ro.observe(img.parentElement); } fit(L); layers.add(L); paint(L, 0); requestAnimationFrame(() => tint.classList.add('eased')); tick.start(); };
   if (img.complete) go(); else img.addEventListener('load', go, { once: true }); };
-const paint = (L, dt) => { const moving = !still(); if (moving && dt) step(L, dt); const light = Q.townLight(Q.townHour()), [r, g, b] = tintOf(light);
+const paint = (L, dt) => { const moving = !still(); if (moving && dt) step(L, dt); const light = Q.townLight(Q.townHour()), [r, g, b] = tintOf(light); L.lightDark = light.dark;
   L.tint.style.backgroundColor = `rgb(${r},${g},${b})`; L.tint.dataset.phase = light.phase;
   /* the low sun warms the sky (an overlay, so a blue sky turns gold and rose rather than brown) */
   const sw = light.warm * (1 - light.dark * .5); L.glow.style.background = sw > .02 ? `linear-gradient(to bottom, rgba(255,128,72,${(sw * .85).toFixed(3)}) 0%, rgba(255,176,96,${(sw * .55).toFixed(3)}) 34%, rgba(255,190,120,${(sw * .25).toFixed(3)}) 60%, rgba(255,190,120,0) 85%)` : 'none'; drawUnder(L, L.ux, moving); drawOver(L, L.ox, light, moving); };

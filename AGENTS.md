@@ -148,7 +148,10 @@ dated line to the history file.
   fighter, then This fight and Food. Same-page refreshes keep the arena and training DOM (`UI.updateEncounter`) and
   never shake the page; hit numbers wait for the visible impact (`UI.afterImpact`).
 - **Home**: the live journey, selected goal, real giver and objective progress (`js/hearthside.js`), one clear main
-  action, the town scene with walking townsfolk, "Nearly there" once every skill is open, and the Before <boss>
+  action, the hearth (`js/hearth.js`, owner 27 Nov: the hero's room by the fire at a whole-number scale; today's goal
+  pinned to the board; chest, bookshelf, map, desk, companion and window open their pages; "Step outside" shows the town
+  scene with walking townsfolk, remembered in `settings.homeView`; automated browsers see the town unless
+  `localStorage['idlewick.hearth'] = '1'`), "Nearly there" once every skill is open, and the Before <boss>
   checklist when it applies. **Village**: town scene with always-visible, colour-only site signs: Finish (green, site
   glows), Give (blue, the item you can hand in), Needs (pale, missing item greyed, a lock if never found); standing
   appears once in the map header.
@@ -279,7 +282,10 @@ dated line to the history file.
   at most three (`DQ.WORLD_CAP`); choices resolve atomically, unaffordable ones show why, fights need the event's town,
   every event has a free choice. Buildings can be damaged, never destroyed; repair is cheap. No spendable reputation.
 - **Away encounters** (plan.js, 21 types): least-seen first, never discarded at capacity, outcomes replace their slot,
-  chosen in a large scene; Welcome Back offers Decide later and puts totals and quest progress first.
+  chosen in a large scene; Welcome Back opens with a two-line diary entry written from the real report (town, hour and
+  weather now, the main task, the level it brought), then offers Decide later and puts totals and quest progress first.
+- **Seasons** follow the real month (`DQ.season()`): autumn leaves, spring blossom, summer butterflies, winter snow in
+  the lowland towns and seasonal touches in the hearth. Visual only; no seasonal recipes or balance without the owner.
 - **Connected systems** (docs/connected-systems.md, docs/cross-skill-update.md, docs/base-game-equipment.md): shop
   tonic 30 min, one per 6 game hours; brewing 3 bottles × 60 min; refits cost 75 coins + 5 runes per rank and consume the
   source enchantments; each tower has its own preparation profile (`js/preparation_roles.js`); secret recipes may output

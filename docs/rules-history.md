@@ -276,3 +276,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   parchment-style fantasy game ... moving town scenes, animated animals and characters ... cosy, logical and like a warm
   dashboard", then chose "1 and 2" (materials and polish; living towns with day and night). Added the materials line
   to the Hearthside Journal rule and the living-towns line to the towns rule.
+- 27 Nov 2026 (owner): "let's now do 3, 4, 5 and 6" (personality, smoother motion, a homely flow, room sound). Home
+  now opens in the hearth, Welcome Back starts with a diary entry, and seasons follow the real month. The owner also
+  asked where every menu should sit: proposal in docs/navigation-review.md, not yet decided.

@@ -22,7 +22,7 @@ const URL = process.env.IDLEWICK_URL || 'http://127.0.0.1:8765/';
    - .pen-bowl / .pen-flag / .pen-sign / .work-atmosphere / .tower-cutaway / .combat-projectile: drawn scene art and
      effects, whose dark edges are the pixel-art outline, not a frame
    Text fields count as clickable: they take the same 8px outlined shape. */
-const ALLOW_CLICK = ['.site-spot', '.tc-room', 'svg', '.encounter-arena #av-foe'];
+const ALLOW_CLICK = ['.site-spot', '.tc-room', '.hearth-spot', 'svg', '.encounter-arena #av-foe'];
 const ALLOW_FLAT = ['svg', '.tc-room', '.pen-bowl', '.pen-flag', '.pen-sign', '.work-atmosphere', '.tower-cutaway', '.combat-projectile', '#title'];
 /* the menus you navigate with keep their outline (css/shape.css lists the same) */
 const NAV = '#topnav .tnav,#pagebar button,#pagebar [data-do],#combatnav button,#combatnav [data-do],#skilldock .dk,#dock .dk,.cg-tile,#hud .iconb,#hud .packchip,#hud .h-hero,[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]';

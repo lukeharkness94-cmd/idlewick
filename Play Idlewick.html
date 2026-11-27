@@ -5859,6 +5859,29 @@ html.calm .petted,html.calm .petted img{animation:none}
 
 /* the town picture's frame: its sky colour stops at the padding, so no pale rim shows round the scene */
 .home-scene{background-clip:padding-box!important;background-image:none!important}
+
+/* the hearth (js/hearth.js): your room at a whole-number scale, cropped by Home's scene card; the objects are scene
+   hotspots that glow when pointed at, the goal is a note pinned to the board */
+.home-scene.is-hearth{background-color:#3a2a1e!important}
+.hearth{position:absolute;inset:0;overflow:hidden}
+.hearth>img.hearth-room,.hearth>canvas.hearth-lights,.hearth>.hearth-dim{position:absolute;image-rendering:pixelated;pointer-events:none;max-width:none}
+.hearth>.hearth-dim{mix-blend-mode:multiply;z-index:1;transition:background-color 4s linear}
+.hearth>canvas.hearth-lights{z-index:2}
+.hearth-spot{position:absolute;z-index:4;padding:0;margin:0;border:0!important;border-radius:var(--r-act,8px);background:transparent!important;box-shadow:none!important;cursor:pointer;transition:background-color .2s,box-shadow .2s}
+.hearth-spot:is(:hover,:focus-visible){background-color:rgba(255,214,140,.16)!important;box-shadow:0 0 22px 2px rgba(255,190,110,.35)!important}
+.hearth-note{position:absolute;z-index:5;display:grid;gap:2px;padding:7px 9px 8px;text-align:left;font:600 14px/1.25 var(--f-body);color:#3a2a18;
+  background:#f6ecd2!important;background-image:var(--paper-grain)!important;background-blend-mode:multiply;rotate:-2deg;box-shadow:0 2px 3px rgba(40,20,0,.35),0 8px 14px -8px rgba(40,20,0,.5)!important;border-color:transparent!important}
+.hearth-note::before{content:"";position:absolute;top:-4px;left:50%;width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#f08070,#b8382e 55%,#6a1a14);translate:-50% 0}
+.hearth-note b{font:700 15px/1.2 var(--f-display);color:#4a2e14}
+.hearth-note span{font-size:13.5px;color:#5a4630}
+.hearth-note:hover{translate:0 -1px}
+.home-scene>.home-viewswap{left:auto;right:12px;bottom:auto;top:12px;z-index:6}
+html.calm .hearth>.hearth-dim{transition:none}
+@media (max-width:860px){.hearth-note{font-size:13px;padding:5px 7px}.hearth-note b{font-size:13.5px}.home-scene>.home-viewswap{top:auto;bottom:12px;right:12px}}
+
+/* Welcome back opens with a few handwritten lines from the hero's diary (js/welcome.js diary()) */
+.wb-diary{margin:2px 2px 4px;padding:10px 14px;font:italic 500 17px/1.45 var(--f-body);color:color-mix(in srgb,var(--ink) 88%,var(--brass));background:color-mix(in srgb,var(--brass) 7%,transparent);border-radius:var(--r-info,4px)}
+.wb-diary span{font-weight:700;font-style:normal;font-family:var(--f-display);letter-spacing:.02em}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
@@ -5961,7 +5984,7 @@ html.calm .activity-scene.capture .scene-target{animation:none!important}
   /* ---------- navigation: an 8px rounded rectangle with a 2px outline ----------
      The menus you move around with keep the outline (owner, 27 Nov 2026: "Unless it's a menu item to navigate"): the
      top menu and the HUD buttons beside it, page tabs, tab rows inside a page, the skill rail. */
-  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(img,.site-spot,.tc-room,svg *){
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(img,.site-spot,.tc-room,.hearth-spot,svg *){
     border-radius:var(--r-act)!important;border-width:var(--act-w)!important;border-style:solid!important;border-color:var(--act-line)!important}
   :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(:disabled,.locked):hover{border-color:var(--act-line-hi)!important}
   :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):is(.on,.selected,.active,.current,.here,[aria-selected=true],[aria-pressed=true],[aria-current=page]){border-color:var(--act-on)!important}
@@ -5972,14 +5995,14 @@ html.calm .activity-scene.capture .scene-target{animation:none!important}
      on --act-fill (a plain layer declaration, so any background the control already has wins); hovering lifts it;
      selected, ready, warning and danger change its fill, never add a line. Zero-specificity selectors (:where) so any
      more specific rule below, such as a ripe plot's glow, still wins. */
-  :where(button,[data-do],[role=button],[role=switch],a.btn,.btn):not(:where(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily],img,.site-spot,.tc-room,svg *)){
+  :where(button,[data-do],[role=button],[role=switch],a.btn,.btn):not(:where(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily],img,.site-spot,.tc-room,.hearth-spot,svg *)){
     border-radius:var(--r-act)!important;border-width:var(--act-w)!important;border-style:solid!important;border-color:transparent!important;
     outline-color:transparent!important;box-shadow:var(--act-lift)!important;background-color:var(--act-fill)}
-  :where(button,[data-do],[role=button],[role=switch],a.btn,.btn):not(:where(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily],img,.site-spot,.tc-room,svg *,:disabled,.disabled)):hover{box-shadow:var(--act-lift-hi)!important;translate:0 -1px}
+  :where(button,[data-do],[role=button],[role=switch],a.btn,.btn):not(:where(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily],img,.site-spot,.tc-room,.hearth-spot,svg *,:disabled,.disabled)):hover{box-shadow:var(--act-lift-hi)!important;translate:0 -1px}
   html.calm :where(button,[data-do],[role=button],[role=switch],a.btn,.btn):hover{translate:none}
   @media (prefers-reduced-motion:reduce){:where(button,[data-do],[role=button],[role=switch],a.btn,.btn):hover{translate:none}}
   /* selected, current and pressed: a brass-tinted fill and a soft brass glow */
-  :where(button,[data-do],[role=button],[role=switch],a.btn,.btn):where(.on,.selected,.active,.current,.here,.sel,[aria-selected=true],[aria-pressed=true],[aria-current=page]):not(:where(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily],.primary,.task-primary,[role=switch],.tog,.site-spot,.tc-room,svg *)){
+  :where(button,[data-do],[role=button],[role=switch],a.btn,.btn):where(.on,.selected,.active,.current,.here,.sel,[aria-selected=true],[aria-pressed=true],[aria-current=page]):not(:where(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily],.primary,.task-primary,[role=switch],.tog,.site-spot,.tc-room,.hearth-spot,svg *)){
     background-color:var(--act-fill-on)!important;box-shadow:var(--act-lift),0 0 16px -5px var(--act-glow)!important}
   /* status tones tint the fill */
   :where(button,[data-do],[role=button]):where(.ready,.deliver-ready,.ok,.enough,.can):not(:where(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily],.primary,.site-spot)){background-color:color-mix(in srgb,var(--good) 15%,var(--panel))!important}
@@ -6058,7 +6081,7 @@ html.calm .activity-scene.capture .scene-target{animation:none!important}
     .story-stage-person img,.study-note,.swatch,.tab,.tabchip,.tag,.tbtn,.tech,.tech-family,.thief-perk,.thief-perk.off,
     .tile,.tile.locked,.tm-c,.toast,.tog .sw,.toolrow,.trophy,.tw-dot,.tw-floor,.tw-floor.later,.tw-n,.tw-prize,
     .understanding,.understanding.done,.unlock-grid > article,.wb-activity,.wb-banner,.wb-beds .bed,.wb-chip,.wb-decide,
-    .wb-do,.wb-face .portrait,.wb-next,.wb-opt,.wb-status,.wb-tile,.wb-totals > b,.wc,.wc-pill,.wh-mini,.wh-quest):not(button,[data-do],[role=button],[role=tab],[role=switch],a[href],input,textarea,select,.btn,.site-spot,.tc-room){
+    .wb-do,.wb-face .portrait,.wb-next,.wb-opt,.wb-status,.wb-tile,.wb-totals > b,.wc,.wc-pill,.wh-mini,.wh-quest):not(button,[data-do],[role=button],[role=tab],[role=switch],a[href],input,textarea,select,.btn,.site-spot,.tc-room,.hearth-spot){
     border-color:transparent!important;outline-color:transparent!important}
   .fancy::before,.fancy::after{border-color:transparent!important}
 
@@ -23080,6 +23103,20 @@ const go0 = DQ.go; DQ.go = (...a) => { if (a[0] !== 'quests') { reveal = null; U
     return { label: 'Village and other progress', xp: residual('xp'), items: residual('items'), levels: {} };
   }
 
+  /* a few lines from the hero's diary (owner, 27 Nov 2026: a journal-style Welcome back), written from the real report:
+     the hour and weather in town now, what kept them busy, the level it brought, and who kept the fire. Then the totals. */
+  function diary(sum, activities) {
+    const town = Q.S.town, tn = D.TOWN[town] ? D.TOWN[town].name : 'town', h = Q.townHour ? Q.townHour() : new Date().getHours();
+    const phase = Q.townLight ? Q.townLight(h).phase : 'day', when = phase === 'night' ? 'Late' : phase === 'dawn' ? 'Early morning' : phase === 'dusk' ? 'Evening' : h < 12 ? 'Morning' : 'Afternoon';
+    const wx = Q.townWeather ? Q.townWeather(town) : 'clear', weather = { rain: ', and raining', snow: ', and snowing', mist: ', and misty', cloud: ', under a low cloud' }[wx] || '';
+    const top = activities.filter(a => a.label !== 'Village and other progress').sort((a, b) => total(b.xp) - total(a.xp))[0];
+    const item = top && Object.entries(top.items).sort((a, b) => b[1] - a[1])[0];
+    const lv = top && Object.entries(top.levels).find(([, l]) => l.to > l.from);
+    const did = top ? `Kept at ${esc(top.label.charAt(0).toLowerCase() + top.label.slice(1))}${item && D.ITEMS[item[0]] ? `: ${fmt(item[1])} ${esc(D.ITEMS[item[0]].name.toLowerCase())}` : ''}${lv ? `, and ${esc(D.SK[lv[0]].name)} went from ${lv[1].from} to ${lv[1].to}` : ''}.` : 'Nothing much got done, which is its own kind of holiday.';
+    const pet = Q.S.pets && Q.S.pets.active && D.PET[Q.S.pets.active], keeper = pet ? `${esc(pet.name)} kept the fire company the whole time.` : 'The fire was still in when I got back.';
+    return `<p class="wb-diary"><span>${when} in ${esc(tn)}${weather}.</span> ${did} ${keeper}</p>`;
+  }
+
   UI.welcomeBody = (sum, gap) => {
     UI.welcomeOwnsChips = true;
     const effective = Q.offlineEff(gap), quest = Q.mainQuestProgress?.();
@@ -23097,6 +23134,7 @@ const go0 = DQ.go; DQ.go = (...a) => { if (a[0] !== 'quests') { reveal = null; U
     return `<div class="wb wb-digest">
       <div class="wb-banner"><div class="wb-hello"><div class="wb-time">${Q.fmtTime(gap)} <small>away</small></div>
       <p>${Q.fmtTime(effective)} counted at full speed. ${Q.offlinePolicy()}</p></div><span class="wb-status">${running}</span></div>
+      ${diary(sum, activities)}
       <div class="wb-totals"><b>${fmt(total(sum.xp || {}))} XP</b><b>${fmt(sum.coins || 0)} coins</b></div>
       ${stopped}${next}
       <div class="wb-activities">${activities.map(activityCard).join('')}</div>
@@ -25458,6 +25496,7 @@ const homeGlance = () => {
  const goal = project ? { name: D.PROJECTS[project].name, label: 'Bundles complete',
    have: Object.keys(D.PROJECTS[project].cost).length - Object.keys(Q.projectNeed(project)).length,
    need: Object.keys(D.PROJECTS[project].cost).length } : main;
+ Q.homeGoalNow = goal; /* the hearth's notice board pins the same goal (js/hearth.js) */
  /* a checklist step (boss_checklist.js): its first open item is the main action, then Skip; the list sits in the card */
  const todo = next.checklist && next.checklist.items.find(i => !i.done && i.action);
  const button = next.checklist ? `${todo ? `<button class="btn primary" data-do="${todo.action.do}" data-a="${esc(todo.action.a)}">${esc(todo.key === 'armour' || todo.key === 'ability' ? todo.label : todo.action.text)}</button>` : ''}<button class="btn" data-do="bossprepskip" data-a="${esc(next.a || '')}">Skip checks</button>`
@@ -27766,7 +27805,10 @@ const tintOf = ({ dark, warm }) => { const w = [255, 255, 255], sun = [255, 168,
 const WEATHER = { willowbrook: [['rain', .2]], mossbarrow: [['rain', .25]], saltmere: [['mist', .3], ['rain', .15]], ironpeak: [['snow', .65]],
   gloomfen: [['mist', .45], ['rain', .2]], emberfall: [], skyreach: [['snow', .25], ['cloud', .5]], hollow: [['mist', .25]] };
 Q.townWeather = (town, now = Date.now()) => { if (Q.townWeatherOverride !== undefined) return Q.townWeatherOverride; if (S() && S().settings && S().settings.townWeather === false) return 'clear';
-  const r = (hash(town + ':' + Math.floor(now / 2.4e6)) % 1000) / 1000; let acc = 0; for (const [k, p] of WEATHER[town] || []) { acc += p; if (r < acc) return k; } return 'clear'; };
+  const r = (hash(town + ':' + Math.floor(now / 2.4e6)) % 1000) / 1000; let acc = 0;
+  /* in winter the lowland towns see snow too */
+  const table = (Q.season && Q.season() === 'winter' && !/ironpeak|skyreach|emberfall/.test(town) ? [['snow', .3]] : []).concat(WEATHER[town] || []);
+  for (const [k, p] of table) { acc += p; if (r < acc) return k; } return 'clear'; };
 
 /* ---------- little animals, drawn at town scale (5 to 7 px), two frames each ---------- */
 const px = (x, c, X, Y, w = 1, h = 1) => { x.fillStyle = c; x.fillRect(Math.round(X), Math.round(Y), w, h); };
@@ -27799,6 +27841,9 @@ const build = (town, meta) => { const rnd = seeded(hash(town + ':life')), share 
   if (st.sea) { for (let i = 0; i < 26; i++) L.glints.push({ x: rnd() * W, y: 84 + rnd() * 36, p: rnd() * 6.28, w: 3 + Math.floor(rnd() * 4) }); for (let i = 0; i < 22; i++) L.glints.push({ x: rnd() * W, y: 332 + rnd() * 26, p: rnd() * 6.28, w: 3 + Math.floor(rnd() * 4) }); }
   for (const c of meta.chimneys || []) L.puffs.push(...[0, 1, 2].map(k => ({ cx: c[0], cy: c[1] - 18, age: k * 1.6 + rnd() * 1.6, life: 4.8, drift: .4 + rnd() * .6 })));
   for (let i = 0; i < 22; i++) L.flies.push({ x: rnd() * W, y: 150 + rnd() * 170, p: rnd() * 6.28, s: .6 + rnd() * .8 });
+  /* the season (Q.season, js/hearth.js): leaves in autumn, blossom in spring, butterflies in summer */
+  L.fall = Array.from({ length: 34 }, () => ({ x: rnd() * W, y: rnd() * H, p: rnd() * 6.28, s: 8 + rnd() * 8, c: Math.floor(rnd() * 3) }));
+  L.flutter = Array.from({ length: 5 }, () => ({ x: 40 + rnd() * (W - 80), y: 280 + rnd() * 40, p: rnd() * 6.28, c: Math.floor(rnd() * 3) }));
   L.weather = '';
   return L; };
 
@@ -27817,7 +27862,9 @@ const step = (L, dt) => { L.t += dt; const W = L.meta.W, H = L.meta.H, wx = Q.to
   if (L.drops.length < want) for (let i = 0; i < Math.min(8, want - L.drops.length); i++) L.drops.push({ x: Math.random() * (W + 60) - 30, y: -Math.random() * H * .5, kind: wx, s: wx === 'rain' ? 150 + Math.random() * 60 : 14 + Math.random() * 12, p: Math.random() * 6.28, big: Math.random() < .2 });
   L.drops = L.drops.filter(d => { if (d.kind === 'rain') { d.y += d.s * dt; d.x -= d.s * .18 * dt; } else { d.y += d.s * dt; d.x += Math.sin(L.t * 1.3 + d.p) * 6 * dt; }
     if (d.y > H) { if (L.drops.length > want) return false; d.y = -4; d.x = Math.random() * (W + 60) - 30; } return true; });
-  L.weather = wx;
+  L.weather = wx; L.season = Q.season ? Q.season() : '';
+  if (L.season === 'autumn' || L.season === 'spring') for (const f of L.fall) { f.y += f.s * dt; f.x += Math.sin(L.t * 1.1 + f.p) * 9 * dt - 3 * dt; if (f.y > H || f.x < -4) { f.y = -4; f.x = Math.random() * (W + 40); } }
+  if (L.season === 'summer') for (const b of L.flutter) { b.x += Math.cos(L.t * .7 + b.p) * 10 * dt; b.y += Math.sin(L.t * 1.3 + b.p) * 6 * dt; }
   if (L.birds) { L.birds.x += L.birds.dir * 22 * dt; if (L.birds.x < -40 || L.birds.x > W + 40) L.birds = null; }
   else if ((L.birdWait -= dt) <= 0) { const dir = Math.random() < .5 ? -1 : 1; L.birds = { x: dir > 0 ? -20 : W + 20, y: 18 + Math.random() * 34, dir, n: 3 + Math.floor(Math.random() * 3) }; L.birdWait = 25 + Math.random() * 35; } };
 
@@ -27830,6 +27877,10 @@ const drawUnder = (L, x, moving) => { const { W, H, style: st = {} } = L.meta; x
   for (const p of L.puffs) { const k = p.age / p.life, a = .42 * (1 - k) * Math.min(1, p.age * 2); if (a <= .02) continue; ell(x, `rgba(234,234,238,${a.toFixed(3)})`, p.cx + k * 14 * p.drift + Math.sin(p.age * 1.4) * 1.2, p.cy - k * 26, 1.6 + k * 2.6, 1.2 + k * 1.6); }
   for (const a of L.animals) { if (a.kind === 'gull') { ART.bird(x, a.cx + Math.cos(a.a) * a.r * 1.6, a.cy + Math.sin(a.a) * a.r * .5, Math.floor(L.t * 4 + a.r) % 2, 1, '#f8f8f8'); continue; } ART[a.kind](x, a.x, a.y, a.f, a.dir, a.col); }
   if (L.birds) for (let i = 0; i < L.birds.n; i++) ART.bird(x, L.birds.x - L.birds.dir * i * 6, L.birds.y + (i % 2) * 3 + Math.sin(L.t * 2 + i) * 1.5, Math.floor(L.t * 5 + i) % 2, L.birds.dir, st.stars ? '#2a2238' : '#3a3a44');
+  /* the season */
+  const LEAF = L.season === 'spring' ? ['#f4c4d0', '#f8dce4', '#ffffff'] : ['#d8782a', '#c8482a', '#e8b040'];
+  if (L.season === 'autumn' || L.season === 'spring') for (const f of L.fall) { px(x, LEAF[f.c], f.x, f.y, 2, 1); if (Math.sin(L.t * 3 + f.p) > 0) px(x, LEAF[f.c], f.x + 1, f.y + 1); }
+  if (L.season === 'summer' && L.lightDark < .4) for (const b of L.flutter) { const up = Math.floor(L.t * 8 + b.p) % 2, c = ['#f0d060', '#f4f0f4', '#e09040'][b.c]; px(x, c, b.x - 1, b.y - up); px(x, c, b.x + 1, b.y - up); px(x, '#3a3030', b.x, b.y); }
   /* weather */
   if (L.weather === 'mist' || L.weather === 'cloud') { const top = L.weather === 'cloud' ? 96 : 120; for (let i = 0; i < 6; i++) { const y = top + i * 34 + Math.sin(L.t * .2 + i) * 4, off = (L.t * (6 + i) + i * 97) % (W + 260) - 130;
     x.fillStyle = L.weather === 'cloud' ? 'rgba(246,251,252,.55)' : 'rgba(230,236,240,.16)'; x.fillRect(Math.round(off), Math.round(y), 180, 8); x.fillRect(Math.round(off + 16), Math.round(y - 4), 140, 4); x.fillRect(Math.round(off - 120 + W / 2), Math.round(y + 12), 220, 6); } }
@@ -27865,7 +27916,7 @@ const attach = img => { if (img.dataset.life || img.classList.contains('scene-ol
     const L = Object.assign(build(town, meta), { img, under, tint, glow, over, ux: under.getContext('2d'), ox: over.getContext('2d'), home: !!img.closest('.home-scene') });
     if (window.ResizeObserver) { L.ro = new ResizeObserver(() => fit(L)); L.ro.observe(img); if (L.home) L.ro.observe(img.parentElement); } fit(L); layers.add(L); paint(L, 0); requestAnimationFrame(() => tint.classList.add('eased')); tick.start(); };
   if (img.complete) go(); else img.addEventListener('load', go, { once: true }); };
-const paint = (L, dt) => { const moving = !still(); if (moving && dt) step(L, dt); const light = Q.townLight(Q.townHour()), [r, g, b] = tintOf(light);
+const paint = (L, dt) => { const moving = !still(); if (moving && dt) step(L, dt); const light = Q.townLight(Q.townHour()), [r, g, b] = tintOf(light); L.lightDark = light.dark;
   L.tint.style.backgroundColor = `rgb(${r},${g},${b})`; L.tint.dataset.phase = light.phase;
   /* the low sun warms the sky (an overlay, so a blue sky turns gold and rose rather than brown) */
   const sw = light.warm * (1 - light.dark * .5); L.glow.style.background = sw > .02 ? `linear-gradient(to bottom, rgba(255,128,72,${(sw * .85).toFixed(3)}) 0%, rgba(255,176,96,${(sw * .55).toFixed(3)}) 34%, rgba(255,190,120,${(sw * .25).toFixed(3)}) 60%, rgba(255,190,120,0) 85%)` : 'none'; drawUnder(L, L.ux, moving); drawOver(L, L.ox, light, moving); };
@@ -27891,6 +27942,160 @@ UI.DO.townweather = () => { const s = S().settings; s.townWeather = s.townWeathe
 
 const render0 = UI.render;
 UI.render = (...a) => { const r = render0(...a); try { Q.townLifeScan(); } catch (e) { /* the scene stays as painted */ } return r; };
+})();
+
+</script>
+<script>
+/* Idlewick: the hearth (owner, 27 Nov 2026: "cosy, logical and like a warm dashboard we can feel at home in"; the Home
+   view of your own room). Home opens inside: your hero by the fire, your companion asleep on the rug, a notice board
+   with today's goal pinned to it, a desk, a bookshelf, a chest, the map on the wall and a window onto the town as it is
+   right now (the hour's light and weather from js/town_life.js). Every object is a way into its page: the note opens
+   Quests, the chest your backpack, the bookshelf the Guide, the map the World, the window steps outside to the town
+   scene (with its walking townsfolk), the companion its pen. The view is remembered in settings.homeView.
+   Drawn in code in the house style at 320 x 240 room pixels, shown at a whole-number scale (3x on desktop, 1x on phones)
+   and cropped by its card; the fire, the firelight and the candle move with elapsed time at native refresh; under
+   Reduce effects and prefers-reduced-motion they hold still and the room keeps its light. tests/hearth.cjs. */
+(() => {
+const Q = window.DQ, D = Q.data, UI = Q.ui, A = Q.pixelArt, S = () => Q.S, esc = Q.esc, ico = Q.ico;
+if (!A || !A.townPainter) return;
+const RW = 320, RH = 280, OY = 40, mix = A.mix; /* the room is drawn 240 tall, OY below a strip of upper wall and a hanging lantern */
+const still = () => document.documentElement.classList.contains('calm') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+/* automated browsers keep the town view (the suite measures it) unless a test asks for the hearth */
+Q.homeView = () => { const v = S() && S().settings && S().settings.homeView; if (v) return v; return navigator.webdriver && localStorage.getItem('idlewick.hearth') !== '1' ? 'town' : 'hearth'; };
+Q.season = (d = new Date()) => (Q.seasonOverride || ['winter', 'winter', 'spring', 'spring', 'spring', 'summer', 'summer', 'summer', 'autumn', 'autumn', 'autumn', 'winter'][d.getMonth()]);
+
+/* where things stand in the room (room pixels); hotspots and the note use the same numbers */
+const SPOTS = {
+  window: { x: 206, y: 46, w: 96, h: 72, label: 'Step outside', act: ['homeview', 'town'] },
+  board: { x: 152, y: 52, w: 46, h: 62, label: "Today's goal: open Quests", act: ['go', 'quests'] },
+  shelf: { x: 6, y: 62, w: 40, h: 114, label: 'Bookshelf: the Guide', act: ['go', 'bestiary'] },
+  map: { x: 6, y: 20, w: 40, h: 36, label: 'Map of the world', act: ['go', 'map'] },
+  chest: { x: 162, y: 182, w: 38, h: 26, label: 'Chest: your backpack', act: ['go', 'character'] },
+  desk: { x: 208, y: 146, w: 92, h: 40, label: 'Desk: activity and goals', act: ['go', 'activity'] },
+  pet: { x: 92, y: 196, w: 40, h: 26, label: 'Your companion', act: ['go', 'beastmastery'] }
+};
+const FIRE = { x: 72, y: 128, w: 56, h: 44 }, HERO = { x: 140, y: 172 }, PET = { x: 96, y: 216 };
+
+/* ---------- the room itself (redrawn when the quarter hour, weather, season or companion changes) ---------- */
+const load = src => new Promise(r => { if (!src) return r(null); const im = new Image(); im.onload = () => r(im); im.onerror = () => r(null); im.src = src; });
+const room = async (town, light, weather, season, petId) => {
+  const c = document.createElement('canvas'); c.width = RW; c.height = RH; const x = c.getContext('2d'), P = A.townPainter(x, RW, RH), { f, ell } = P;
+  const plaster = '#d8c6a0', beam = '#5a3e26', beamLt = '#7a5636', stone = '#8a8278', stoneDk = '#615a52', wood = '#8a5e3a', woodDk = '#5e3e24', woodLt = '#a87a4e';
+  /* the upper wall and the rafters, with a lantern on a chain */
+  f(mix(plaster, '#5a3e26', .18), 0, 0, RW, OY); for (const bx of [0, 96, 192, 288]) { f(beam, bx, 0, 10, OY); f(beamLt, bx, 0, 2, OY); } f(beam, 0, 6, RW, 6); f(beamLt, 0, 6, RW, 1);
+  f('#3a3030', 250, 12, 1, 22); f('#3a3030', 245, 34, 11, 2); f('#f6d880', 247, 36, 7, 8); f('#3a3030', 246, 36, 1, 8); f('#3a3030', 254, 36, 1, 8); f('#3a3030', 245, 44, 11, 2);
+  x.save(); x.translate(0, OY);
+  /* wall: plaster between timber, a ceiling beam, a skirting board */
+  f(plaster, 0, 0, RW, 176); for (let i = 0; i < 260; i++) f(mix(plaster, i % 2 ? '#ffffff' : '#7a5a3a', .12), (i * 97) % RW, (i * 53) % 172, 2, 1);
+  f(beam, 0, 0, RW, 12); f(beamLt, 0, 0, RW, 2); f(mix(beam, '#000000', .3), 0, 11, RW, 1);
+  for (const bx of [0, 48, 148, 200, 304]) { f(beam, bx, 12, 8, 164); f(beamLt, bx, 12, 2, 164); }
+  f(woodDk, 0, 172, RW, 4); f(woodLt, 0, 172, RW, 1);
+  /* floor: planks catching the firelight */
+  for (let y = 176, k = 0; y < RH; y += 8, k++) { f(k % 2 ? wood : mix(wood, '#000000', .08), 0, y, RW, 8); f(woodDk, 0, y + 7, RW, 1); for (let q = (k * 37) % 60; q < RW; q += 60 + (k % 3) * 10) f(woodDk, q, y, 1, 7); }
+  /* the window onto the town: the scene's own pixels, in the hour's light and weather */
+  const W = SPOTS.window, scene = await load(Q.sceneUrl(town));
+  f(beam, W.x - 4, W.y - 4, W.w + 8, W.h + 8); f(beamLt, W.x - 4, W.y - 4, W.w + 8, 1);
+  if (scene) x.drawImage(scene, 272, 112, W.w, W.h, W.x, W.y, W.w, W.h); else f('#9cc8e8', W.x, W.y, W.w, W.h);
+  if (light) { x.save(); x.globalCompositeOperation = 'multiply'; x.fillStyle = `rgb(${light.tint.join(',')})`; x.fillRect(W.x, W.y, W.w, W.h); x.restore();
+    if (light.dark > .5) for (let i = 0; i < 14; i++) f(`rgba(255,250,232,${(light.dark - .5) * 1.6})`, W.x + (i * 41) % W.w, W.y + (i * 13) % 20, 1, 1); }
+  if (weather === 'rain') for (let i = 0; i < 26; i++) f('rgba(210,224,244,.6)', W.x + (i * 29) % W.w, W.y + (i * 17) % (W.h - 3), 1, 3);
+  if (weather === 'snow' || season === 'winter') { for (let i = 0; i < 22; i++) f('rgba(255,255,255,.85)', W.x + (i * 23) % W.w, W.y + (i * 31) % W.h, 1, 1); f('#f4f8fc', W.x, W.y + W.h - 3, W.w, 3); }
+  f(beam, W.x + W.w / 2 - 1, W.y, 3, W.h); f(beam, W.x, W.y + W.h / 2 - 1, W.w, 3);
+  f('#b8483a', W.x - 10, W.y - 6, 9, W.h + 14); f('#8a2e26', W.x - 4, W.y - 6, 3, W.h + 14); f('#b8483a', W.x + W.w + 1, W.y - 6, 9, W.h + 14); f('#8a2e26', W.x + W.w + 1, W.y - 6, 3, W.h + 14);
+  f(woodLt, W.x - 6, W.y + W.h + 2, W.w + 12, 4); f(woodDk, W.x - 6, W.y + W.h + 6, W.w + 12, 1);
+  /* fireplace: a stone surround, the mantel, the hearth stone */
+  f(stone, 52, 70, 96, 106); for (let y = 72; y < 174; y += 6) for (let q = 52 + ((y / 6) % 2) * 6; q < 146; q += 12) { f(mix(stone, '#ffffff', .12), q, y, 11, 1); f(stoneDk, q + 11, y, 1, 6); f(stoneDk, q, y + 5, 12, 1); }
+  f(stoneDk, 54, 14, 92, 56); for (let y = 16; y < 70; y += 6) for (let q = 54 + ((y / 6) % 2) * 6; q < 144; q += 12) f(mix(stoneDk, '#000000', .2), q + 11, y, 1, 6);
+  f('#2a1a14', FIRE.x, FIRE.y, FIRE.w, FIRE.h); f('#1a100c', FIRE.x + 4, FIRE.y + 4, FIRE.w - 8, FIRE.h - 8);
+  f(woodDk, 46, 98, 108, 8); f(woodLt, 46, 98, 108, 2); f(mix(woodDk, '#000000', .3), 46, 105, 108, 1);
+  f('#6a6a74', 44, 172, 112, 6); f('#8a8a94', 44, 172, 112, 1);
+  f('#4a2e1e', FIRE.x + 8, FIRE.y + FIRE.h - 8, 40, 5); f('#6a4228', FIRE.x + 12, FIRE.y + FIRE.h - 12, 32, 5);
+  /* on the mantel: a candle, a jar, a little clock; the season's own touch */
+  f('#f0ead8', 60, 88, 4, 10); f('#e8b048', 61, 85, 2, 3); f('#6a8aa8', 120, 90, 8, 8); f('#9ab8d0', 121, 90, 2, 4); f('#c8a050', 96, 88, 10, 10); f('#f4ecd8', 98, 90, 6, 6); f('#3a2414', 100, 92, 1, 3); f('#3a2414', 101, 93, 2, 1);
+  if (season === 'winter') { for (let q = 48; q < 152; q += 4) { f('#2f6a3a', q, 96, 4, 3); if (q % 12 === 0) f('#c8382e', q + 1, 97, 2, 2); } }
+  if (season === 'autumn') { ell('#d8782a', 36, 170, 7, 5); ell('#e8923a', 34, 168, 3, 2); f('#5a7a3a', 36, 164, 1, 2); ell('#c8a040', 156, 171, 5, 4); f('#5a7a3a', 156, 166, 1, 2); }
+  if (season === 'spring' || season === 'summer') { f('#6a8aa8', 280, 136, 6, 8); for (const [dx, col] of [[-2, '#e0607a'], [3, '#f0d060'], [7, '#f4f0f4'], [1, season === 'summer' ? '#f0a030' : '#a07ae0']]) { f('#5a8a4a', 282 + dx / 2, 130, 1, 6); f(col, 280 + dx, 127, 3, 3); } }
+  /* map on the wall, rolled at the edges */
+  const M = SPOTS.map; f('#e8d8b0', M.x + 2, M.y + 2, M.w - 4, M.h - 4); f('#c8b088', M.x, M.y, 3, M.h); f('#c8b088', M.x + M.w - 3, M.y, 3, M.h);
+  f('#8ab06a', M.x + 6, M.y + 8, 14, 10); f('#6aa8d8', M.x + 22, M.y + 6, 10, 20); f('#8a909a', M.x + 8, M.y + 20, 8, 8); f('#b8483a', M.x + 12, M.y + 12, 2, 2); f('#8a6a42', M.x + 14, M.y + 14, 10, 1);
+  /* bookshelf */
+  const B = SPOTS.shelf; f(woodDk, B.x, B.y, B.w, B.h); f(wood, B.x + 2, B.y + 2, B.w - 4, B.h - 4);
+  const books = ['#7a3a2a', '#3a5a7a', '#5a7a3a', '#8a6a2a', '#5a3a6a', '#2a4a4a', '#9a4a3a'];
+  for (let s = 0; s < 4; s++) { const sy = B.y + 6 + s * 27; f(woodDk, B.x + 2, sy + 22, B.w - 4, 3); for (let q = B.x + 4, k = s; q < B.x + B.w - 6; k++) { const bw = 3 + (k % 3), bh = 14 + ((k * 5) % 7); f(books[k % books.length], q, sy + 22 - bh, bw, bh); f(mix(books[k % books.length], '#ffffff', .25), q, sy + 22 - bh, 1, bh); q += bw + 1; } }
+  /* notice board with pins (the goal note itself is a card laid over it) */
+  const N = SPOTS.board; f(woodDk, N.x, N.y, N.w, N.h); f('#b08a5a', N.x + 3, N.y + 3, N.w - 6, N.h - 6); for (let i = 0; i < 40; i++) f('#9a764a', N.x + 4 + (i * 13) % (N.w - 8), N.y + 4 + (i * 7) % (N.h - 8), 1, 1);
+  f('#f4ecd8', N.x + 6, N.y + 40, 14, 12); f('#e8dcb8', N.x + 26, N.y + 44, 12, 10); f('#c8382e', N.x + 12, N.y + 40, 1, 1); f('#3a6ac8', N.x + 31, N.y + 44, 1, 1);
+  /* desk under the window: candle, inkpot and quill, an open book */
+  const K = SPOTS.desk; f(woodDk, K.x, K.y + 4, K.w, 5); f(woodLt, K.x, K.y + 4, K.w, 1); f(woodDk, K.x + 4, K.y + 9, 4, 28); f(woodDk, K.x + K.w - 8, K.y + 9, 4, 28);
+  f('#f4ecd8', K.x + 30, K.y - 2, 22, 6); f('#d8ccb0', K.x + 41, K.y - 2, 1, 6); f('#2a2a3a', K.x + 60, K.y, 5, 4); f('#f4f4f4', K.x + 63, K.y - 8, 1, 8); f('#f0ead8', K.x + 10, K.y - 8, 4, 12);
+  /* chest */
+  const C = SPOTS.chest; f(woodDk, C.x, C.y + 6, C.w, C.h - 6); f(wood, C.x + 2, C.y + 8, C.w - 4, C.h - 10); f(woodDk, C.x - 1, C.y, C.w + 2, 8); f(woodLt, C.x, C.y + 1, C.w, 2); f('#c8a050', C.x + C.w / 2 - 2, C.y + 8, 4, 5); f('#8a6a2a', C.x + 4, C.y, 3, C.h); f('#8a6a2a', C.x + C.w - 7, C.y, 3, C.h);
+  /* rug in front of the fire */
+  ell('#8a2e26', 100, 214, 62, 14); ell('#b8483a', 100, 214, 56, 11); ell('#d8a050', 100, 214, 44, 7); ell('#b8483a', 100, 214, 38, 5);
+  /* the hero by the fire, the companion (or the house cat) asleep on the rug */
+  const hero = await load(Q.heroFigureUrl && Q.heroFigureUrl(S().look)); if (hero) x.drawImage(hero, HERO.x, HERO.y - 32, 24, 32);
+  const petUrl = petId && A.creatureUrl ? A.creatureUrl(String((D.PET[petId] && (D.PET[petId].mon || D.PET[petId].id)) || petId).replace(/^wild_/, '')) : null, pet = await load(petUrl);
+  if (pet) x.drawImage(pet, PET.x, PET.y - 32 + 6, 32, 32);
+  else { const cat = '#7a7480'; ell(cat, PET.x + 14, PET.y - 4, 9, 4); f(cat, PET.x + 4, PET.y - 9, 6, 5); f(cat, PET.x + 4, PET.y - 11, 2, 2); f(cat, PET.x + 8, PET.y - 11, 2, 2); f(mix(cat, '#000000', .3), PET.x + 18, PET.y - 3, 8, 2); }
+  x.restore(); return c.toDataURL();
+};
+
+/* ---------- the living parts: fire, firelight, embers, candle, sleeping breaths ---------- */
+const lights = (x, t, dark, moving) => { x.clearRect(0, 0, RW, RH); x.save(); x.translate(0, OY); const fl = moving ? .5 + .5 * Math.sin(t * 9) * Math.sin(t * 5.3 + 1) : .6;
+  const glow = (cx, cy, rx, ry, a) => { for (let k = 6; k >= 1; k--) { x.fillStyle = `rgba(255,170,80,${(a / k * .5).toFixed(3)})`; const w = rx * k / 6, h = ry * k / 6; x.beginPath(); x.ellipse(cx, cy, w, h, 0, 0, 6.283); x.fill(); } };
+  glow(100, 176, 150, 50, .16 + .1 * dark + .05 * fl); glow(100, 150, 90, 70, .08 + .08 * dark);
+  /* flames: three tongues and a bed of coals, a frame every ~70 ms so they flicker like pixel flame */
+  const fr = moving ? Math.floor(t * 14) : 0, base = FIRE.y + FIRE.h - 10;
+  for (let i = 0; i < 7; i++) { const cx = FIRE.x + 12 + i * 5.5, h = 8 + ((fr * 7 + i * 13) % 9) + (i === 3 ? 6 : 0); for (let j = 0; j < h; j++) { const w = Math.max(1, Math.round(3 - j * 2.6 / h)); x.fillStyle = j < h * .35 ? '#ffe08a' : j < h * .7 ? '#ff9a3a' : '#d8482a'; x.fillRect(Math.round(cx - w / 2 + Math.sin(j * .6 + fr + i) * .8), base - j, w, 1); } }
+  x.fillStyle = '#ffb04a'; for (let i = 0; i < 10; i++) x.fillRect(FIRE.x + 10 + ((i * 7 + fr) % 36), base + 2 + (i % 2), 2, 1);
+  if (moving) for (let i = 0; i < 4; i++) { const k = ((t * .35 + i * .27) % 1); x.fillStyle = `rgba(255,${180 - k * 80 | 0},80,${(1 - k).toFixed(2)})`; x.fillRect(Math.round(FIRE.x + 24 + Math.sin(t * 2 + i) * 6), Math.round(base - 12 - k * 40), 1, 1); }
+  /* candles on the mantel and the desk */
+  for (const [cx, cy] of [[61, 84], [SPOTS.desk.x + 11, SPOTS.desk.y - 11]]) { glow(cx + 1, cy + 1, 16, 12, .1 + .1 * dark); x.fillStyle = '#ffe08a'; x.fillRect(cx, cy - (moving && Math.sin(t * 11 + cx) > .6 ? 1 : 0), 2, 3); }
+  /* the companion breathing in its sleep, and a slow z now and then */
+  if (moving) { const z = (t * .4) % 1; if (z < .7) { x.fillStyle = `rgba(250,246,236,${(.9 - z).toFixed(2)})`; const zx = PET.x + 28 + z * 10, zy = PET.y - 22 - z * 18; x.fillRect(zx, zy, 4, 1); x.fillRect(zx + 2, zy + 1, 1, 1); x.fillRect(zx + 1, zy + 2, 1, 1); x.fillRect(zx, zy + 3, 4, 1); } }
+  /* the lantern's warm pool on the rafters */
+  glow(250.5, 40 - OY, 26, 18, .1 + .14 * dark);
+  x.restore(); };
+
+/* ---------- the Home card ---------- */
+const st = { key: '', url: '', busy: false, raf: 0, last: 0, t: 0 };
+const lightNow = () => { const town = S().town, h = Q.townHour ? Q.townHour() : 13, L = Q.townLight ? Q.townLight(h) : { dark: 0, warm: 0 };
+  const night = [46, 58, 120], sun = [255, 168, 104], tint = [255, 255, 255].map((v, i) => Math.round(v + (sun[i] - v) * L.warm * .62)).map((v, i) => Math.round(v + (night[i] - v) * L.dark * .8 * (1 - L.warm * .45)));
+  return { town, dark: L.dark, warm: L.warm, tint, weather: Q.townWeather ? Q.townWeather(town) : 'clear', quarter: Math.floor(h * 4) }; };
+const goalNote = () => { const g = Q.homeGoalNow; return g ? `<b>${esc(g.name)}</b><span>${esc(g.label)} ${g.have} / ${g.need}</span>` : '<b>Your next step</b><span>See Quests</span>'; };
+UI.hearth = () => `<div class="hearth" data-hearth><img class="hearth-room" alt="Your room by the fire" draggable="false"><canvas class="hearth-lights" width="${RW}" height="${RH}" aria-hidden="true"></canvas><div class="hearth-dim" aria-hidden="true"></div>
+  <button class="hearth-note" data-do="go" data-a="quests" data-tip="text:Today's goal · open Quests">${goalNote()}</button>
+  ${Object.entries(SPOTS).filter(([k]) => k !== 'board' && (k !== 'pet' || (S().pets && S().pets.active))).map(([k, s]) => `<button class="hearth-spot" data-spot="${k}" data-do="${s.act[0]}" data-a="${s.act[1]}" aria-label="${esc(s.label)}" data-tip="text:${esc(s.label)}"></button>`).join('')}</div>`;
+const place = () => { const box = document.querySelector('.home-scene'), H = box && box.querySelector('.hearth'); if (!H) return;
+  const img = H.querySelector('.hearth-room'), bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) return;
+  const k = Math.max(1, Math.floor(Math.max(bw / RW, bh / RH))), w = RW * k, h = RH * k, left = Math.round((bw - w) / 2), top = bh - h;
+  /* with priority: the page's sprite snapper and scene rules size pictures with !important */
+  for (const el of [img, H.querySelector('.hearth-lights'), H.querySelector('.hearth-dim')]) for (const [k2, v] of Object.entries({ left: left + 'px', top: top + 'px', width: w + 'px', height: h + 'px' })) el.style.setProperty(k2, v, 'important');
+  H.dataset.scale = k;
+  for (const b of H.querySelectorAll('.hearth-spot')) { const s = SPOTS[b.dataset.spot]; Object.assign(b.style, { left: left + s.x * k + 'px', top: top + (s.y + OY) * k + 'px', width: s.w * k + 'px', height: s.h * k + 'px' }); }
+  const n = H.querySelector('.hearth-note'), N = SPOTS.board; Object.assign(n.style, { left: left + (N.x + 2) * k + 'px', top: top + (N.y + OY + 3) * k + 'px', width: Math.max(150, (N.w - 2) * k) + 'px' }); };
+const refresh = async (force) => { const H = document.querySelector('.home-scene .hearth'); if (!H) return; const L = lightNow(), season = Q.season(), pet = S().pets && S().pets.active;
+  const key = [L.town, L.quarter, L.weather, season, pet, JSON.stringify(S().look || {}), S().equip && S().equip.weapon].join('|');
+  const dim = H.querySelector('.hearth-dim'); dim.style.backgroundColor = `rgb(${[255, 255, 255].map((v, i) => Math.round(v + ([150, 112, 84][i] - v) * L.dark * .55)).join(',')})`;
+  if (key !== st.key || force) { if (st.busy) return; st.busy = true; try { st.url = await room(L.town, L, L.weather, season, pet); st.key = key; } finally { st.busy = false; } }
+  const img = H.querySelector('.hearth-room'); if (img.getAttribute('src') !== st.url) img.src = st.url; st.dark = L.dark; };
+const tick = n => { st.raf = 0; const H = document.querySelector('.home-scene .hearth'); if (!H) return; const dt = Math.min(.1, Math.max(0, (n - st.last) / 1000)); st.last = n; const moving = !still(); if (moving) st.t += dt;
+  const cv = H.querySelector('.hearth-lights'); lights(cv.getContext('2d'), st.t, st.dark || 0, moving);
+  if (Math.floor(n / 30000) !== st.minute) { st.minute = Math.floor(n / 30000); refresh(); }
+  if (moving || !st.drawnStill) { st.drawnStill = !moving; } st.raf = requestAnimationFrame(tick); };
+const start = () => { place(); refresh(); if (!st.raf) { st.last = performance.now(); st.raf = requestAnimationFrame(tick); } };
+Q.hearthLive = () => { const H = document.querySelector('.home-scene .hearth'); return H ? { scale: +H.dataset.scale, spots: [...H.querySelectorAll('.hearth-spot')].map(b => b.dataset.spot), note: H.querySelector('.hearth-note').innerText, src: !!H.querySelector('.hearth-room').getAttribute('src'), t: st.t } : null; };
+
+UI.DO.homeview = v => { if (!['hearth', 'town'].includes(v)) return; S().settings.homeView = v; Q.save && Q.save(); UI.render(true); };
+/* Home's scene card: the hearth or the town, with a way to the other */
+const swap = () => { const box = document.querySelector('#view .home-scene'); if (!box || box.dataset.hearthDone === Q.homeView()) return;
+  box.dataset.hearthDone = Q.homeView();
+  if (Q.homeView() === 'hearth') { box.querySelector('img.scene')?.remove(); box.querySelectorAll('canvas.town-walkers,canvas.town-life,.town-tint,.town-glow').forEach(e => e.remove()); box.insertAdjacentHTML('afterbegin', UI.hearth()); box.classList.add('is-hearth'); box.style.removeProperty('background-color');
+    box.insertAdjacentHTML('beforeend', `<button class="btn home-viewswap" data-do="homeview" data-a="town">${ico('map')}Step outside</button>`); }
+  else box.insertAdjacentHTML('beforeend', `<button class="btn home-viewswap" data-do="homeview" data-a="hearth">${ico('house')}Go inside</button>`); };
+const render0 = UI.render;
+UI.render = (...a) => { const r = render0(...a); try { if (UI.view === 'overview') { swap(); if (document.querySelector('#view .hearth')) start(); } } catch (e) { console.error('hearth', e); } return r; };
+let fitRaf = 0; addEventListener('resize', () => { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(place); });
 })();
 
 </script>

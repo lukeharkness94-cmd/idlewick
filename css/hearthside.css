@@ -1086,3 +1086,26 @@ html.calm .petted,html.calm .petted img{animation:none}
 
 /* the town picture's frame: its sky colour stops at the padding, so no pale rim shows round the scene */
 .home-scene{background-clip:padding-box!important;background-image:none!important}
+
+/* the hearth (js/hearth.js): your room at a whole-number scale, cropped by Home's scene card; the objects are scene
+   hotspots that glow when pointed at, the goal is a note pinned to the board */
+.home-scene.is-hearth{background-color:#3a2a1e!important}
+.hearth{position:absolute;inset:0;overflow:hidden}
+.hearth>img.hearth-room,.hearth>canvas.hearth-lights,.hearth>.hearth-dim{position:absolute;image-rendering:pixelated;pointer-events:none;max-width:none}
+.hearth>.hearth-dim{mix-blend-mode:multiply;z-index:1;transition:background-color 4s linear}
+.hearth>canvas.hearth-lights{z-index:2}
+.hearth-spot{position:absolute;z-index:4;padding:0;margin:0;border:0!important;border-radius:var(--r-act,8px);background:transparent!important;box-shadow:none!important;cursor:pointer;transition:background-color .2s,box-shadow .2s}
+.hearth-spot:is(:hover,:focus-visible){background-color:rgba(255,214,140,.16)!important;box-shadow:0 0 22px 2px rgba(255,190,110,.35)!important}
+.hearth-note{position:absolute;z-index:5;display:grid;gap:2px;padding:7px 9px 8px;text-align:left;font:600 14px/1.25 var(--f-body);color:#3a2a18;
+  background:#f6ecd2!important;background-image:var(--paper-grain)!important;background-blend-mode:multiply;rotate:-2deg;box-shadow:0 2px 3px rgba(40,20,0,.35),0 8px 14px -8px rgba(40,20,0,.5)!important;border-color:transparent!important}
+.hearth-note::before{content:"";position:absolute;top:-4px;left:50%;width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#f08070,#b8382e 55%,#6a1a14);translate:-50% 0}
+.hearth-note b{font:700 15px/1.2 var(--f-display);color:#4a2e14}
+.hearth-note span{font-size:13.5px;color:#5a4630}
+.hearth-note:hover{translate:0 -1px}
+.home-scene>.home-viewswap{left:auto;right:12px;bottom:auto;top:12px;z-index:6}
+html.calm .hearth>.hearth-dim{transition:none}
+@media (max-width:860px){.hearth-note{font-size:13px;padding:5px 7px}.hearth-note b{font-size:13.5px}.home-scene>.home-viewswap{top:auto;bottom:12px;right:12px}}
+
+/* Welcome back opens with a few handwritten lines from the hero's diary (js/welcome.js diary()) */
+.wb-diary{margin:2px 2px 4px;padding:10px 14px;font:italic 500 17px/1.45 var(--f-body);color:color-mix(in srgb,var(--ink) 88%,var(--brass));background:color-mix(in srgb,var(--brass) 7%,transparent);border-radius:var(--r-info,4px)}
+.wb-diary span{font-weight:700;font-style:normal;font-family:var(--f-display);letter-spacing:.02em}
