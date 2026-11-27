@@ -559,6 +559,8 @@ Menu: Home, Quests, World, Village, Hero, **Guide**, Shop. Left rail: Now card, 
 - Menu counts still show available actions only, so Guide carries no badge.
 
 ### Current test list
+Run everything with `node scripts/run-tests.cjs` (own preview server per run, several tests at once, summary of failures; see DEVELOPMENT.md). The list below is for finding the test that covers an area.
+
 `node tests/regression.cjs` (108), `tests/story.cjs`, `tests/beastmastery.cjs`, `tests/art-pixel.cjs`, `tests/desktop-storage.cjs`; with a preview server and `IDLEWICK_URL`: `ui-fit`, `ui-current`, `ui-audit`, `ux-roles`, `ui-journeys`, `ui-adventure`, `ui-effects`, `ui-farming`, `ux-update`, `beastmastery-ui`, `ranch`, `beast-capture`, `hunt-stalk`, `creature-roster`. `tests/story-ui.cjs` has a known, older failure at the `bl_ledger` step. `shape-rule`, `css/shape.css`
 
 
@@ -972,6 +974,10 @@ For the next implementation session, follow [the Claude handoff](docs/claude-han
 ### Part C in the Claude handoff
 
 After stabilizing Part B, continue with Tasks 17–26. Start with the first-hour harness audit and verify each historical finding against current main. The [Claude handoff](docs/claude-handoff.md) links to the [original Part C brief](docs/claude-part-c-brief.md) with all requirements and acceptance checks.
+
+## Rulebook and test runner (Claude, 27 Nov 2026)
+- AGENTS.md is now one current rulebook (about a third of its old length), grouped as How to work, Look and art, Screen layout, Words, Game rules and Tests. Rules that later owner decisions replaced were dropped from it; the full earlier text, with every owner quote and "supersedes" note, is kept in `docs/rules-history.md`. New owner decisions change the rule in place and add a dated line to the history file.
+- `scripts/run-tests.cjs` runs the suite: it rebuilds the game, starts its own preview server on a free port, points every test at it (`IDLEWICK_URL`, `SHOT_DIR`), runs several files at once (slowest first, using durations remembered in the OS temp folder) and prints failures with their last lines. Two runs on one machine no longer collide.
 
 ## Owner feedback round, 26 Nov 2026 (Claude, later the same day)
 Delivered on `claude/part-b-c` (see the matching AGENTS.md section for the rules): smithing stats and scene, museum icon, walking townsfolk, quest pictures, Village Finish/Give/Needs signs, choice order, unique levels (js/level_spread.js), town-independent gathering/surveys/fieldwork, crops 4x/6x, combat screen fixes (technique in Abilities, +N HP each, flat level tags, tracking bar), live trap counts, Fought/Hunted atlas, Sell all but 1, "Bought" once, petting hand, fishing catch redraw fix, real-size card art, no district bystanders.

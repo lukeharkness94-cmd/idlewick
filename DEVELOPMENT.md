@@ -12,6 +12,12 @@ Run engine and save regression checks with:
 
     node tests/regression.cjs
 
+Run the whole suite (rebuilds the game, starts its own preview on a free port, runs several tests at a time, prints a summary; safe alongside your own preview):
+
+    node scripts/run-tests.cjs
+
+Only some files: `node scripts/run-tests.cjs ui- shop`. More or fewer at once: `--jobs N`.
+
 For each focused change, inspect its normal interaction at desktop and phone widths, check the other theme, and rerun relevant regressions. Keep release summaries short and state any unverified behavior.
 
 Create a ZIP or publish a hosted release when requested. The local preview and standalone file are the everyday development and play workflow.
