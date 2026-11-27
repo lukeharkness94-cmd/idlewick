@@ -195,7 +195,10 @@ dated line to the history file.
   its effect follows from the item (`D.TOOL_PURPOSE`, `D.SKILL_COMMISSIONS`). Workshop ranks give +3/6/9% XP; Smithing
   has six anvils (speed) and six hammers (double chance), `S.smithGear`. Anything you can craft, buy, upgrade or get
   from a quest is named for its alloy or wood (Iron sword, Runite dagger, Oak shortbow, Fine steel longsword); named
-  weapons exist only as rare drops from rare creatures, mini-bosses, bosses and towers (`tests/weapon-names.cjs`).
+  weapons exist only as rare drops from rare creatures, mini-bosses, bosses and towers (`tests/weapon-names.cjs`). The
+  29 in `js/rare_weapons.js` (docs/named-weapons.md) each have hand-drawn art, a fitting source, stats a little under the
+  smithed weapon of their level and a signature (`unique.fx` with its own numbers, applied through `DQ.rareFx`); a new
+  one needs all four, a row in `tests/ui-effects.cjs` and `node scripts/sim-uniques.cjs` evidence.
 - **Perks and flourishes** (`js/skill_perks.js`): every skill gets something new at least every five levels plus a 99
   capstone, written into `D.UNL`; effects go only through `DQ.extraXp`, `DQ.extraSpeed`, `DQ.dblChance`, `DQ.fx`,
   `DQ.researchRate`, `DQ.brew`. Flourishes (`D.FLOURISH`) repeat an action's XP and output, never in forecasts or for

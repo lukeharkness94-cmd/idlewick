@@ -45,9 +45,13 @@ const fs=require('node:fs');
    fortune:['saltmere',[...melee,'rune_sword','smugglers_knot'],'fight','pirate'],
    laststand:['ironpeak',['salamander_coat','bronze_sword'],'fight','frostmaw']
   };
+  /* the 29 named weapons (js/rare_weapons.js, 27 Nov 2026): each signature fires in live play, offline and a forecast,
+     and stops when the weapon is taken off; level 99 so the late ones can be wielded */
+  const rare=await page.evaluate(()=>{const S=DQ.S,D=DQ.data;for(const k of Object.keys(S.xp))S.xp[k]=D.XPF[99];DQ.fxDirty();return D.RARE_WEAPONS.map(id=>[D.ITEMS[id].unique.key,id,D.ITEMS[id].style]);});
+  for(const [key,id,style] of rare)U[key]=['ironpeak',[...melee,id,...(style==='ranged'?['arrow_rune']:[])],'fight','troll'];
   for(const [key,[town,gear,kind,id]] of Object.entries(U)){
    const r=await page.evaluate(([town,gear,kind,id,key])=>{
-    const S=DQ.S,run=mode=>{window.__setup(town,gear,null,key==='laststand'?(S)=>{S.settings.autoEat=false;}:null);
+    const S=DQ.S,run=mode=>{window.__setup(town,gear,null,key==='laststand'||key==='holdline'?(S)=>{S.settings.autoEat=false;}:null);
      if(mode==='forecast'){let f=null;/* chance effects (riposte) can miss in one short forecast now melee wins quickly: up to four forecasts */for(let i=0;i<4;i++){S.hp=Math.ceil(DQ.maxHp()/2);f=DQ.forecast(id);const h=window.__hits();if(!f||f.blocked||(h[key]||0)>0)break;}return {hits:window.__hits(),blocked:!f||f.blocked};}
      if(!DQ.startAct(kind,id,{quiet:true}))return {hits:{},blocked:true};
      if(mode==='live'){for(let i=0;i<600;i++)DQ.advanceTime(1000,1000,DQ.act?DQ.act.progress||0:0);}else DQ.simulate(DQ.offlineEff(3*3600e3),3*3600e3);
@@ -63,6 +67,7 @@ const fs=require('node:fs');
    if(key!=='fortune')assert.ok(r.fc.blocked||n('fc')>0,`${key}: fires inside a forecast`);
    assert.equal(r.without[key]||0,0,`${key}: stops when the item is removed`);
   }
+  await page.evaluate(()=>{const S=DQ.S,D=DQ.data;for(const k of Object.keys(S.xp))S.xp[k]=D.XPF[90];DQ.fxDirty();}); /* back to the shared level-90 fixture */
   /* Healing draught: drunk once, automatically, when food is gone and health is low */
   const draught=await page.evaluate(()=>{window.__setup('ironpeak',['bronze_sword'],null,S=>{S.inv={potion_heal:3};S.settings.autoEat=true;});DQ.S.inv.shark=0;DQ.startAct('fight','frostmaw',{quiet:true});for(let i=0;i<120&&DQ.act;i++)DQ.advanceTime(1000,1000,DQ.act?DQ.act.progress||0:0);const h=window.__hits().draught||0;const left=DQ.have('potion_heal');DQ.stopAct(true);return {h,left};});
   assert.equal(draught.h,1,'the draught is drunk once in the fight');assert.equal(draught.left,2,'exactly one draught used');

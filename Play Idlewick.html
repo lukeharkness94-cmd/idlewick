@@ -6640,7 +6640,7 @@ Object.entries({
   chief_helm: U('roar', 'Battle roar', 'First enemy attack each fight misses'),
   tusk_charm: U('hide', 'Thick hide', 'Normal attacks: −15% damage taken'),
   barnacle_cutlass: U('riposte', 'Riposte', 'When hit: 20% chance to counter for up to max hit'),
-  frostmaw_pendant: U('slow', 'Frostbite', 'Enemies attack 15% slower'),
+  frostmaw_pendant: U('slow', 'Rime', 'Enemies attack 15% slower'), /* 'Frostbite' is now a named dagger (js/rare_weapons.js) */
   witch_staff: U('curse', 'Bog hex', 'Spell hits: enemy −5% damage per stack (max 15%)'),
   emberfang_bow: U('ember', 'Ember arrows', 'Each shot: + fire damage up to 25% of max hit'),
   storm_feather: U('swift', 'Gale', '+10% attack speed'),
@@ -12507,7 +12507,10 @@ DQ.unequip = slot => {
   delete S.equip[slot]; DQ.give(id, 1); DQ.invDirty = true; return true;
 };
 /* keys of the unique effects on equipped gear (data.js `unique`) */
-DQ.uniqueFx = () => { const o = {}; for (const [slot, id] of Object.entries(DQ.S.equip || {})) { const u = slot !== 'ammo' && D.ITEMS[id] && D.ITEMS[id].unique; if (u) o[u.key] = true; } return o; };
+DQ.uniqueFx = () => { const o = {}; for (const [slot, id] of Object.entries(DQ.S.equip || {})) { const u = slot !== 'ammo' && D.ITEMS[id] && D.ITEMS[id].unique; if (u) o[u.key] = u; } return o; };
+/* the equipped named weapon's signature (js/rare_weapons.js): { key, fx, ...its own numbers }, or null. Only the weapon
+   slot carries these, so at most one is active. */
+DQ.rareFx = () => { const id = DQ.S.equip && DQ.S.equip.weapon, u = id && D.ITEMS[id] && D.ITEMS[id].unique; return u && u.fx ? u : null; };
 DQ.bonus = () => {
   const out = { atk: 0, str: 0, def: 0, rng: 0, rngStr: 0, mag: 0 };
   const add = id => { const b = D.ITEMS[id] && D.ITEMS[id].b; if (b) for (const k in b) out[k] += b[k]; };
@@ -13629,7 +13632,7 @@ DQ.startAct = (kind, id, o = {}) => {
 };
 DQ.combatInterval = () => {
   const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword;
-  return Math.round(W.speed*(1-Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003))*(DQ.uniqueFx&&DQ.uniqueFx().swift?.9:1));
+  return Math.round(W.speed*(1-Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003))*(DQ.uniqueFx&&DQ.uniqueFx().swift?.9:1)*(DQ.rareFx&&DQ.rareFx()&&DQ.rareFx().fx==='quick'?1-DQ.rareFx().spd:1));
 };
 DQ.combatSpeedText = () => { const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword,ms=DQ.combatInterval(),lv=Math.round(Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003)*100),gale=DQ.uniqueFx&&DQ.uniqueFx().swift; return `${W.name}: ${(ms/1000).toFixed(2)}s per attack · ${lv}% faster from Combat level${gale?' · 10% faster from Gale':''}`; };
 DQ.actDur = a => {
@@ -13814,7 +13817,7 @@ DQ.TRACK_MS = 4000;
 DQ.trackRounds = () => Math.max(1, Math.round(DQ.TRACK_MS / Math.max(600, DQ.combatInterval())));
 function combatRound() {
   if (DQ.fight && DQ.fight.tracking > 0) { DQ.fight.tracking--; return; }
-  const f = DQ.fight, m = D.MON[f.id], ps = DQ.pstats(), A = DQ.ability, U = DQ.uniqueFx(); DQ.lastFoe = f.id; f.round++; f.pa = (f.pa || 0) + 1;
+  const f = DQ.fight, m = D.MON[f.id], ps = DQ.pstats(), A = DQ.ability, U = DQ.uniqueFx(), RX = DQ.rareFx(), rx = k => RX && RX.fx === k; DQ.lastFoe = f.id; f.round++; f.pa = (f.pa || 0) + 1;
   const sty = ps.style, W = D.WTYPES[D.weaponType()], mhp = m.hp;
   if (sty === 'ranged') {
     if (S().ammo.n <= 0 && S().ammo.id && DQ.have(S().ammo.id)) { const n = Math.min(DQ.have(S().ammo.id), 500); DQ.take(S().ammo.id, n); S().ammo.n += n; }
@@ -13822,7 +13825,7 @@ function combatRound() {
     if (!(ps.tech && ps.tech.free && chance(ps.tech.free))) S().ammo.n--; if (S().ammo.n <= 0 && !DQ.have(S().ammo.id)) { S().ammo = { id: null, n: 0 }; delete S().equip.ammo; }
   } else if (sty === 'magic') {
     const sp = pickSpell(); if (!sp) return DQ.stopAct(false, 'Out of Arcane runes. Buy more from the shop.');
-    ps.spell = sp; ps.max = Math.round((sp.max + Math.floor(DQ.lvl('magic') * ((D.STYLE_TUNE && D.STYLE_TUNE.level) || 1) / 10) + Math.floor(DQ.bonus().mag / 12)) * (1 + DQ.fx().dmg + (ps.tech ? ps.tech.dmg : 0)) * DQ.buffMult('weak')); if (!(ps.tech && ps.tech.free && chance(ps.tech.free))) DQ.take('rune', sp.runes);
+    ps.spell = sp; ps.max = Math.round((sp.max + Math.floor(DQ.lvl('magic') * ((D.STYLE_TUNE && D.STYLE_TUNE.level) || 1) / 10) + Math.floor(DQ.bonus().mag / 12)) * (1 + DQ.fx().dmg + (ps.tech ? ps.tech.dmg : 0)) * DQ.buffMult('weak') * (rx('runesave') ? 1 + RX.dmg : 1)); if (!(ps.tech && ps.tech.free && chance(ps.tech.free)) && !(rx('runesave') && chance(RX.p) && (fxHit(RX.key), true))) DQ.take('rune', sp.runes);
   }
   const dtype = sty === 'magic' ? D.SPELL_EL[ps.spell.id] : (ps.dtype || W.dtype); f.lastEl = dtype; /* a combat art can change the damage type (combat_arts.js) */
   /* Hollow King changes form */
@@ -13845,13 +13848,38 @@ function combatRound() {
     /* unique gear (data.js unique.key) */
     if (U.marked && f.pa <= 3) { sure = true; max *= 1.5; fxHit('marked'); }
     if (U.fury) { max *= 1.1 + .3 * (1 - clamp(S().hp / DQ.maxHp(), 0, 1)); fxHit('fury'); } /* always +10%, up to +40% as health falls */
-    const mDef = (m.def + 8) * (64 + m.def);
+    /* named weapons (js/rare_weapons.js): each applies its own signature with its own numbers */
+    let everyNow = false;
+    if (RX) {
+      if (rx('opener') && f.pa <= RX.n) { sure = true; max *= RX.m; fxHit(RX.key); }
+      if (rx('every') && f.pa % RX.n === 0) { everyNow = true; if (RX.sure) sure = true; max *= RX.m; if (RX.pierce && mult < 1) max /= mult; fxHit(RX.key); }
+      if (rx('reap') && f.hp < mhp * RX.below) { max *= RX.m; fxHit(RX.key); }
+      if (rx('momentum') && f.streak) { max *= 1 + Math.min(RX.cap, RX.step * f.streak); fxHit(RX.key); }
+      if (rx('snowball') && f.landed) { max *= 1 + Math.min(RX.cap, RX.step * f.landed); fxHit(RX.key); }
+      if (rx('quick')) { max *= 1 - RX.dmg; fxHit(RX.key); }
+      if (rx('stunplus') && f.stunBonus) { max *= 1 + RX.bonus; f.stunBonus = 0; }
+    }
+    const defCut = Math.min(.6, (rx('breach') ? RX.d : 0) + (rx('sunder') ? f.sunder || 0 : 0)), effDef = m.def * (1 - defCut); if (defCut && rx('breach')) fxHit(RX.key);
+    const mDef = (effDef + 8) * (64 + effDef);
     if (sure || Math.random() < hitChance(acc, mDef)) dealt = rnd(1, Math.max(1, Math.round(max)));
     if (dealt && A('deadeye')) dealt = Math.max(dealt, Math.ceil(max / 2));
     f.streak = dealt ? (f.streak || 0) + 1 : 0;
     if (dealt && ((A('cleave') && f.pa % 5 === 0) || (A('volley') && f.pa % 4 === 0))) { dealt += rnd(1, Math.max(1, Math.round(max))); tag += ' twin'; DQ.splat('foe', A('cleave') ? 'Cleave' : 'Volley', 'hit', 180); }
     if (dealt && A('echo') && chance(.2)) { dealt += Math.max(1, Math.round(dealt * .5)); DQ.splat('foe', 'Echo', 'hit', 180); }
     if (dealt && A('pin')) f.pinned = 2;
+    if (dealt && RX) {
+      if (rx('floor')) { const lo = Math.ceil(max * RX.f); if (dealt < lo) { dealt = lo; fxHit(RX.key); } }
+      if (rx('crit') && chance(RX.p)) { dealt = Math.max(1, Math.round(dealt * RX.m)); tag += ' power'; fxHit(RX.key); DQ.splat('foe', RX.name, 'hit', 150); }
+      if (rx('double') && chance(RX.p)) { dealt += rnd(1, Math.max(1, Math.round(max * RX.m))); tag += ' twin'; fxHit(RX.key); DQ.splat('foe', RX.name, 'hit', 180); }
+      if (rx('volley') && f.pa % RX.every === 0) { for (let i = 0; i < RX.n; i++) dealt += rnd(1, Math.max(1, Math.round(max * RX.m))); tag += ' twin'; fxHit(RX.key); DQ.splat('foe', RX.name, 'hit', 180); }
+      if (rx('spellshot') && chance(RX.p)) { const best = (D.SPELLS || []).filter(x => DQ.lvl('magic') >= x.lvl).pop() || (D.SPELLS || [])[0], el = best && D.SPELL_EL[best.id], wr2 = DQ.weakOf(m, f); let e = rnd(1, Math.max(1, Math.round(ps.max * RX.f))); if (el && wr2.weak.includes(el)) e = Math.round(e * 1.5); else if (el && wr2.resist.includes(el)) e = Math.max(1, Math.round(e * .5)); dealt += e; fxHit(RX.key); DQ.splat('foe', RX.name, 'hit', 200); }
+      if (rx('chill') && chance(RX.p)) { f.chill = RX.n; fxHit(RX.key); }
+      if (rx('stunplus') && chance(RX.p)) { f.stun = 1; f.stunBonus = 1; fxHit(RX.key); }
+      if (everyNow && RX.stun) f.stun = 1;
+      if (rx('sunder')) { f.sunder = Math.min(RX.cap, (f.sunder || 0) + RX.step); fxHit(RX.key); }
+      if (rx('dot')) f.dot = Math.min(RX.max, (f.dot || 0) + 1);
+    }
+    if (dealt) f.landed = (f.landed || 0) + 1;
     if (dealt && U.twin && chance(.2)) { dealt += rnd(1, Math.max(1, Math.round(max))); tag += ' twin'; fxHit('twin'); DQ.splat('foe', 'Twin cut', 'hit', 180); }
     if (dealt && U.arc && sty === 'magic' && chance(.2)) { dealt += Math.max(1, Math.round(dealt * .5)); fxHit('arc'); DQ.splat('foe', 'Arc', 'hit', 180); }
     if (dealt && U.stun && chance(.12)) { f.stun = 1; fxHit('stun'); }
@@ -13861,9 +13889,12 @@ function combatRound() {
     if (DQ.beastHeroHit) dealt = DQ.beastHeroHit(dealt, m, f);
   }
   /* XP counts the damage the creature could actually take: overkill on weak creatures teaches nothing extra */
-  const xpDealt = Math.min(dealt, Math.max(0, f.hp));
+  const xpDealt = Math.min(dealt, Math.max(0, f.hp)) * (rx('scholar') ? RX.m : 1); if (xpDealt && rx('scholar')) fxHit(RX.key);
   f.hp -= dealt; DQ.splat('foe', dealt, dealt ? 'hit ' + tag : 'miss', 0);
   if (dealt && (U.lifesteal || U.sovereign)) { const before = S().hp; S().hp = Math.min(DQ.maxHp(), S().hp + Math.max(1, Math.round(dealt * (U.lifesteal ? .2 : .08)))); const h = Math.round(S().hp - before); if (h > 0) { fxHit(U.lifesteal ? 'lifesteal' : 'sovereign'); DQ.splat('you', '+' + h, 'heal', 300); } }
+  if (dealt && rx('drain') && f.hp + dealt < mhp * RX.below) { const before = S().hp; S().hp = Math.min(DQ.maxHp(), S().hp + Math.max(1, Math.round(dealt * RX.p))); const h = Math.round(S().hp - before); if (h > 0) { fxHit(RX.key); DQ.splat('you', '+' + h, 'heal', 300); } }
+  if (dealt && rx('dawn') && f.pa % RX.n === 0) { const before = S().hp; S().hp = Math.min(DQ.maxHp(), S().hp + dealt); const h = Math.round(S().hp - before); if (h > 0) { fxHit(RX.key); DQ.splat('you', '+' + h, 'heal', 300); } }
+  if (rx('blaze') && sty === 'magic' && dealt) { const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(2, Math.round(ps.max * RX.f))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 300); fxHit(RX.key); }
   if (U.ember && sty === 'ranged') { const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(2, Math.round(ps.max * .25))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 300); fxHit('ember'); }
   if (DQ.trick && DQ.trick('charge') && f.round === 1) { fxHit('charge'); const c = Math.max(1, Math.round(ps.max * W.dmg * .5)); f.hp -= c; DQ.splat('foe', c, 'hit power', 250); }
   if (DQ.trick && DQ.trick('ember') && f.pa % 6 === 0) { fxHit('trickember'); const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(1, Math.round(ps.max * .5))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 320); }
@@ -13879,11 +13910,13 @@ function combatRound() {
   if (DQ.beastAttack) { f.hp -= DQ.beastAttack(f, m); if (f.hp <= 0) return kill(m); }
   /* the monster attacks on its own clock: faster weapons get more swings in between */
   f.mt = (f.mt || 0) + (DQ.act ? DQ.act.dur * D.PACE[DQ.act.pace || 'steady'].speed : 2000);
-  const clock = (m.attackMs || 2000) * (U.slow ? 1.15 : 1); if (U.slow) fxHit('slow');
+  const clock = (m.attackMs || 2000) * (U.slow ? 1.15 : 1) * (f.chill > 0 && rx('chill') ? 1 + RX.slow : 1); if (U.slow) fxHit('slow');
   while (f.mt >= clock && DQ.fight) { f.mt -= clock; if (monsterAttack(f, m, ps, sty) === 'dead') return; }
 }
 function monsterAttack(f, m, ps, sty) {
-  const A = DQ.ability, U = DQ.uniqueFx(); f.ma = (f.ma || 0) + 1;
+  const A = DQ.ability, U = DQ.uniqueFx(), RX = DQ.rareFx(), rx = k => RX && RX.fx === k; f.ma = (f.ma || 0) + 1;
+  if (f.chill > 0) f.chill--;
+  if (f.dot && rx('dot')) { const pd = f.dot * Math.max(1, Math.round(ps.max * RX.per)); f.hp -= pd; DQ.splat('foe', pd, 'hit poison', 300); fxHit(RX.key); if (f.hp <= 0) { kill(m); return 'dead'; } }
   if (f.poison) { const pd = f.poison * Math.max(1, Math.round(ps.max * .12)); f.hp -= pd; DQ.splat('foe', pd, 'hit poison', 300); fxHit('poisontick'); if (f.hp <= 0) { kill(m); return 'dead'; } }
   if (f.stun) { f.stun = 0; DQ.splat('foe', 'Stunned', 'miss', 600); return; }
   if (U.roar && !f.roared) { f.roared = 1; fxHit('roar'); DQ.splat('you', 'Roar!', 'miss', 600); return; }
@@ -13891,6 +13924,7 @@ function monsterAttack(f, m, ps, sty) {
   if (special && A('bash') && f.ma - (f.lastBash || -99) >= 8) { f.lastBash = f.ma; if (!DQ.forecasting) beastNote('answered', m.id); DQ.splat('you', 'Bash!', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your shield bash interrupts ${sp.name}!`, 'good'); return; }
   if (special && A('ward') && f.ma - (f.lastWard || -99) >= 6) { f.lastWard = f.ma; if (!DQ.forecasting) beastNote('answered', m.id); DQ.splat('you', 'Ward', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your ward absorbs ${sp.name}.`, 'good'); return; }
   if (DQ.trick && DQ.trick('heckle') && !f.heckled && f.ma >= 2) { f.heckled = 1; fxHit('heckle'); DQ.splat('you', 'Oi!', 'miss', 600); if (!DQ.sim.on) DQ.trickNote('heckled it into missing!', document.getElementById('av-foe')); return; }
+  if (!special && rx('parry') && chance(RX.p)) { fxHit(RX.key); DQ.splat('you', RX.name, 'miss', 600); return; }
   let acc = hitChance((m.att + 8) * (64 + m.att), ps.defRoll); if (f.pinned > 0) { acc *= .75; f.pinned--; }
   let taken = 0;
   if (special || Math.random() < acc) {
@@ -13912,6 +13946,9 @@ function monsterAttack(f, m, ps, sty) {
       if (m.id === 'morwenna') f.hex = 4;
     } else { if (A('kite')) taken *= .7; if (A('fortress')) taken *= .85; if (U.hide) { taken *= .85; fxHit('hide'); } }
     if (f.curse) { taken *= 1 - .05 * f.curse; fxHit('cursed'); }
+    if (rx('guard') && (f.guarded || 0) < RX.n) { f.guarded = (f.guarded || 0) + 1; taken *= 1 - RX.red; fxHit(RX.key); }
+    if (rx('rally') && S().hp < DQ.maxHp() * RX.below) { taken *= 1 - RX.red; fxHit(RX.key); }
+    if (rx('dot') && RX.weaken && f.dot) taken *= 1 - RX.weaken * f.dot;
     taken *= DQ.buffMult('guard');
     taken = Math.max(1, Math.round(taken * (1 - ps.red) * ({ careful: .85, steady: 1, push: 1.25 }[(DQ.act && DQ.act.pace) || 'steady'])));
   }
@@ -13944,7 +13981,10 @@ function kill(m) {
   if (DQ.beastVictory) DQ.beastVictory(f, m);
   if (!DQ.sim.on && !DQ.forecasting) DQ.emit('foedefeated', m);
   if (f && !DQ.forecasting) { const wr = DQ.weakOf(m, f); if (f.lastEl && wr.weak.includes(f.lastEl)) beastNote('weakWins', m.id); } S().stats.kill++; if (DQ.act) DQ.act.count++;
-  const c = Math.round(rnd(m.coins[0], m.coins[1]) * DQ.coinMult()); DQ.addCoins(c);
+  const RX = DQ.rareFx(), rx = k => RX && RX.fx === k;
+  const c = Math.round(rnd(m.coins[0], m.coins[1]) * DQ.coinMult() * (rx('steal') ? 1 + RX.coin : 1)); DQ.addCoins(c); if (rx('steal') && c) fxHit(RX.key);
+  if (rx('steal') && D.ITEMS.coin_pouch && chance(RX.pouch)) DQ.give('coin_pouch', 1);
+  if (rx('feast')) { const before = S().hp; S().hp = Math.min(DQ.maxHp(), S().hp + Math.round(DQ.maxHp() * RX.heal)); if (S().hp > before) { fxHit(RX.key); DQ.splat('you', '+' + Math.round(S().hp - before), 'heal', 300); } }
   const loot = c ? [`${fmt(c)} coins`] : [], got = [], drops = [];
   const first = m.boss && !(S().towns[m.town] && S().towns[m.town].boss), firstMini = m.mini && !(S().minis && S().minis[m.id]);
   if (DQ.uniqueFx().fortune) fxHit('fortune');
@@ -16922,6 +16962,151 @@ if (A && A.CREATURE_SPECS) {
 
 </script>
 <script>
+/* Idlewick: the named weapons (owner, 27 Nov 2026: "bring all the retired names as rare drops with unique art - make them
+   all feel genuinely unique and cool").
+   The fantasy names that used to sit on smithed gear (Soldier's Blade, Glacier Fang, Starsunder...) are now rare drops
+   from one fitting creature each: a regular creature (about 1 in 120 to 1 in 260), a mini-boss (1 in 25), a tower
+   boss (1 in 12) or the Hollow King (1 in 40). The engine's bad-luck guarantee gives the first copy after about 2.5x
+   the expected number of victories. Viper's kiss already existed as a drop, so 29 names come back here.
+   Stats sit a little under the smithed weapon of the same level (stat(), 92%), so wearing one is a choice; what makes
+   each one worth it is its signature: `unique.fx` names a mechanic the combat engine applies with this weapon's own
+   numbers (engine.js, DQ.rareFx). Art: js/pixel_items.js (one hand-drawn sprite per weapon). Balance evidence:
+   node scripts/sim-uniques.cjs. Nothing here is crafted, sold or given by a quest (tests/weapon-names.cjs). */
+(() => {
+const DQ = window.DQ, D = DQ.data, ITEMS = D.ITEMS;
+/* the smithed ladder each kind of weapon is measured against (req level -> stats), from the shipped items */
+const LADDER = {
+  sword: ['bronze_sword', 'iron_sword', 'steel_sword', 'mithril_sword', 'adamant_sword', 'rune_sword', 'astral_sword'],
+  dagger: ['bronze_dagger', 'iron_dagger', 'steel_dagger', 'mithril_dagger', 'adamant_dagger', 'rune_dagger', 'astral_dagger'],
+  hammer: ['bronze_hammer', 'iron_hammer', 'steel_hammer', 'mithril_hammer', 'adamant_hammer', 'rune_hammer', 'astral_hammer'],
+  bow: ['bow_normal', 'bow_oak', 'bow_willow', 'bow_maple', 'bow_yew', 'bow_magic', 'bow_elder'],
+  staff: ['staff_normal', 'staff_oak', 'staff_willow', 'staff_maple', 'staff_yew', 'staff_magic', 'staff_elder'],
+};
+const reqOf = it => Object.values(it.req || {})[0] || 1;
+/* stats for a weapon of this kind at level L: interpolated along the ladder; past the top rung they grow 0.6% a level */
+const stat = (kind, L, k = .92) => {
+  const rungs = LADDER[kind].map(id => ITEMS[id]).filter(Boolean), keys = Object.keys(rungs[0].b), out = {};
+  let lo = rungs[0], hi = rungs[rungs.length - 1], t = 0, past = 1;
+  if (L >= reqOf(hi)) { lo = hi; past = 1 + (L - reqOf(hi)) * .006; }
+  else for (let i = 0; i < rungs.length - 1; i++) if (L >= reqOf(rungs[i]) && L < reqOf(rungs[i + 1])) { lo = rungs[i]; hi = rungs[i + 1]; t = (L - reqOf(lo)) / (reqOf(hi) - reqOf(lo)); break; }
+  for (const s of keys) out[s] = Math.max(1, Math.round(((lo.b[s] || 0) + ((hi.b[s] || 0) - (lo.b[s] || 0)) * t) * past * k));
+  const val = Math.round(((lo.val || 1) + ((hi.val || 1) - (lo.val || 1)) * t) * past * 3);
+  return { b: out, val: Math.min(60000, Math.max(150, val)) };
+};
+const KIND = { sword: { ic: 'sword', wtype: 'sword', style: 'melee', skill: 'attack' }, dagger: { ic: 'dagger', wtype: 'dagger', style: 'melee', skill: 'attack' },
+  hammer: { ic: 'hammer', wtype: 'hammer', style: 'melee', skill: 'attack' }, bow: { ic: 'bow', style: 'ranged', skill: 'ranged' }, staff: { ic: 'staff', style: 'magic', skill: 'magic' } };
+/* [id, name, kind, level, source creature, chance, colour, signature, what it is good for, flavour] */
+const W = [
+  /* Willowbrook */
+  ['alley_knife', 'Alley Knife', 'dagger', 6, 'goblin_raider', 1 / 120, '#8a7a6a',
+    { key: 'pickpocket', name: 'Pickpocket', fx: 'steal', coin: .4, pouch: .08, text: '+40% coins from victories · 8% chance of an extra coin pouch' },
+    'emptying pockets mid-fight', 'Every town has an alley and every alley has one of these. This one has notches on the handle, and none of them are for goblins.'],
+  ['acolytes_staff', "Acolyte's Staff", 'staff', 6, 'goblin_hexer', 1 / 120, '#c8a86a',
+    { key: 'study', name: 'Diligent study', fx: 'scholar', m: 1.15, text: '+15% combat XP' },
+    'levelling faster while the fights are easy', 'A temple apprentice’s practice staff, chewed at one end. The hexer was using it to stir soup.'],
+  ['smiths_maul', "Smith's Maul", 'hammer', 9, 'goblin_brute', 1 / 130, '#a86a3a',
+    { key: 'truestrike', name: 'True strike', fx: 'floor', f: .4, text: 'Every hit lands for at least 40% of max hit' },
+    'steady damage with no feeble hits', 'Willowbrook’s smith lost it in the spring raid and has been hitting horseshoes with a rock ever since. He would like it back. He will not get it back.'],
+  /* Mossbarrow */
+  ['hunters_bow', "Hunter's Bow", 'bow', 11, 'poacher', 1 / 140, '#8a6a3a',
+    { key: 'fielddress', name: 'Field dressing', fx: 'feast', heal: .12, text: 'Heal 12% of max health on each victory' },
+    'long runs of short fights', 'Oiled, strung and looked after better than the poacher looked after anything else. There is a tally of rabbits on the grip.'],
+  ['soldiers_blade', "Soldier's Blade", 'sword', 13, 'barrow_ghoul', 1 / 150, '#9aa4b0',
+    { key: 'holdline', name: 'Hold the line', fx: 'rally', below: .5, red: .25, text: 'Below half health: take 25% less damage' },
+    'fights that go badly before they go well', 'Buried with a soldier who expected to need it. The ghoul has been minding it since, badly.'],
+  ['quickfang', 'Quickfang', 'dagger', 16, 'dire_wolf', 1 / 160, '#d8d0c0',
+    { key: 'quickbite', name: 'Quick bite', fx: 'quick', spd: .15, dmg: .07, text: '+15% attack speed · −7% damage' },
+    'enemies that die before they get going', 'A wolf’s tooth the length of your hand, bound to a grip. Someone made this to prove a point. The point is very sharp.'],
+  ['willowshade_staff', 'Willowshade Staff', 'staff', 17, 'bramble_witch', 1 / 160, '#7aa86a',
+    { key: 'willowward', name: 'Willow ward', fx: 'guard', n: 3, red: .5, text: 'The first 3 hits each fight deal half damage' },
+    'hard openings and short fights', 'Green wood that never quite dried out. Leaves still sprout from it in spring, which the witch found embarrassing.'],
+  ['whisperwood_bow', 'Whisperwood Bow', 'bow', 19, 'rookmother', 1 / 25, '#5a6a5a',
+    { key: 'silentshot', name: 'Silent shot', fx: 'opener', n: 2, m: 1.75, text: 'First 2 shots each fight: sure hits, +75% damage' },
+    'opening on tough targets', 'Strung with something the Rookmother pulled out of her own nest. It makes no sound at all, which is unsettling the first few times.'],
+  /* Saltmere */
+  ['siegebreaker', 'Siegebreaker', 'hammer', 22, 'pirate_bosun', 1 / 180, '#6a7a8a',
+    { key: 'breach', name: 'Breach', fx: 'breach', d: .35, text: 'Ignores 35% of enemy defence' },
+    'armoured, hard-to-hit enemies', 'Built to knock in castle doors. The bosun uses it to knock in barrels, which is a waste, but rum is rum.'],
+  ['spellstring', 'Spellstring', 'bow', 23, 'sea_hag', 1 / 180, '#8a6ac8',
+    { key: 'runedstring', name: 'Runed string', fx: 'spellshot', p: .25, f: .4, text: '25% chance: a bolt of your strongest spell’s element for up to 40% of max hit' },
+    'enemies weak to magic', 'A bowstring of twisted kelp with runes knotted into it. The sea hag swore it would sing. It hums, mostly off-key.'],
+  ['knights_longsword', "Knight's Longsword", 'sword', 25, 'brinemaw', 1 / 25, '#c8d0e0',
+    { key: 'parry', name: 'Parry', fx: 'parry', p: .15, text: '15% chance to turn aside an ordinary hit' },
+    'enemies that hit hard and often', 'The Brinemaw swallowed a knight whole, armour and all. It kept the sword. It would like to keep you too.'],
+  ['nightglint', 'Nightglint', 'dagger', 29, 'lanternjack', 1 / 25, '#3a3a6a',
+    { key: 'glint', name: 'Glint', fx: 'crit', p: .18, m: 2, text: '18% chance to strike for double damage' },
+    'big swings of luck', 'A black blade that catches light that isn’t there. Lanternjack kept it in his lamp, where it was very hard to see.'],
+  /* Ironpeak */
+  ['glacier_fang', 'Glacier Fang', 'sword', 35, 'icewolf', 1 / 200, '#a8d8f0',
+    { key: 'glacialbite', name: 'Glacial bite', fx: 'chill', p: .25, slow: .4, n: 2, text: '25% chance on hit: the enemy’s next 2 attacks come 40% slower' },
+    'fast-attacking enemies', 'Ice that will not melt, ground to an edge. Your hand goes numb if you hold it too long, so don’t.'],
+  ['frostbite', 'Frostbite', 'dagger', 37, 'ice_wight', 1 / 200, '#d0e8f8',
+    { key: 'coldfinish', name: 'Cold finish', fx: 'reap', below: .35, m: 1.6, text: '+60% damage against enemies under 35% health' },
+    'finishing what you started', 'The ice wight held this for so long it froze to its hand. That turned out to be the wight’s problem, not yours.'],
+  ['earthshaker', 'Earthshaker', 'hammer', 43, 'yeti', 1 / 220, '#8a6a4a',
+    { key: 'tremor', name: 'Tremor', fx: 'every', n: 4, m: 1.8, stun: 1, text: 'Every 4th attack: +80% damage and the enemy skips its next attack' },
+    'heavy hitters you would like to interrupt', 'A boulder on a pine trunk. The yeti did not make it so much as find it and refuse to let go.'],
+  ['avalanche', 'Avalanche', 'hammer', 48, 'tw_rimebeard', 1 / 12, '#e8f0f8',
+    { key: 'avalanche', name: 'Avalanche', fx: 'snowball', step: .04, cap: .4, text: 'Each hit: +4% damage for the rest of the fight (up to +40%)' },
+    'long fights against big health pools', 'Jarl Rimebeard’s maul. He named his best attack after it and has never once been asked about it at parties.'],
+  /* Gloomfen */
+  ['nightyew_longbow', 'Nightyew Longbow', 'bow', 52, 'reedstalker', 1 / 220, '#3a4a3a',
+    { key: 'steadydraw', name: 'Steady draw', fx: 'momentum', step: .06, cap: .3, text: 'Each hit in a row: +6% damage (up to +30%); a miss resets it' },
+    'patient, accurate shooting', 'Yew grown in the dark under the fen. The reedstalker used it to stand very still. You will find it works for shooting too.'],
+  ['yewbound_staff', 'Yewbound Staff', 'staff', 54, 'bog_hag', 1 / 220, '#5a7a3a',
+    { key: 'rootrot', name: 'Rootrot', fx: 'dot', per: .12, max: 3, el: 'nature', text: 'Each spell plants a creeping root (max 3); each deals 12% of max hit when the enemy attacks' },
+    'long fights you want to end sooner', 'A staff with roots still wrapped round it. They are still growing. Do not leave it in the umbrella stand.'],
+  ['whisperblade', 'Whisperblade', 'dagger', 57, 'gallowmoth', 1 / 25, '#c8c0d8',
+    { key: 'secondwhisper', name: 'Second whisper', fx: 'double', p: .25, m: .6, text: '25% chance to cut again for up to 60% of max hit' },
+    'quick, steady damage', 'So thin you can read through it. The Gallowmoth wore it like a wing, which explains a lot about the Gallowmoth.'],
+  ['emerald_reaver', 'Emerald Reaver', 'sword', 61, 'wraith', 1 / 240, '#3ac87a',
+    { key: 'reave', name: 'Reave', fx: 'drain', p: .25, below: .5, text: 'Against enemies under half health: heal 25% of damage dealt' },
+    'fights where food is short', 'A green blade that drinks. The fen wraith used it for centuries and still looked terrible, so it is clearly not a beauty treatment.'],
+  /* Emberfall */
+  ['autumn_recurve', 'Autumn Recurve', 'bow', 63, 'ashveil', 1 / 240, '#d87a3a',
+    { key: 'leafstorm', name: 'Leaf storm', fx: 'volley', every: 3, n: 2, m: .5, text: 'Every 3rd shot looses 2 extra arrows for up to 50% each' },
+    'steady damage against anything', 'Maple from the last tree on the mountain, the colour of a bonfire. The ashveil kept it as a reminder of trees.'],
+  ['emberwood_staff', 'Emberwood Staff', 'staff', 65, 'ash_cultist', 1 / 240, '#e85a2a',
+    { key: 'kindle', name: 'Kindle', fx: 'blaze', f: .3, text: 'Each spell adds fire damage up to 30% of max hit' },
+    'enemies weak to fire', 'Charred black and still warm at the core. The cultists kept it lit for a hundred years. Please stop blowing on it.'],
+  ['worldbreaker', 'Worldbreaker', 'hammer', 75, 'slagmaw', 1 / 25, '#ff8a3a',
+    { key: 'shatter', name: 'Shatter', fx: 'sunder', step: .06, cap: .36, text: 'Each hit cracks the enemy’s armour: −6% defence (up to −36%)' },
+    'bosses and armoured giants', 'Slagmaw swallowed the mountain’s forge hammer and grew around it. Getting it back was messy. It still glows where the crack runs.'],
+  /* Skyreach */
+  ['skyforged_saber', 'Skyforged Saber', 'sword', 87, 'sky_pirate', 1 / 250, '#9ad8ff',
+    { key: 'skyfire', name: 'Skyfire', fx: 'every', n: 3, m: 1.45, sure: 1, text: 'Every 3rd attack: a sure hit for +45% damage' },
+    'reliable damage against evasive enemies', 'Forged in a storm on purpose. The sky pirates stole it from the smith who did it, who was by then very tired.'],
+  ['thunderhead', 'Thunderhead', 'hammer', 92, 'stormram', 1 / 25, '#e8d84a',
+    { key: 'thunderhead', name: 'Thunderhead', fx: 'stunplus', p: .18, bonus: .5, text: '18% chance on hit: stun, and your next hit deals +50%' },
+    'stopping big attacks before they land', 'Cut from the Stormcrown Ram’s own horn. It crackles before a storm, and during, and after, and at breakfast.'],
+  ['aetherwood_staff', 'Aetherwood Staff', 'staff', 90, 'cloud_giant', 1 / 250, '#c8a8ff',
+    { key: 'aetherwell', name: 'Aether well', fx: 'runesave', p: .35, dmg: .08, text: '35% chance a spell costs no runes · +8% spell damage' },
+    'long runs on a rune budget', 'Wood that grew above the clouds and never saw soil. The giant used it as a toothpick. Wipe it first.'],
+  /* the Hollow */
+  ['elderthorn_greatbow', 'Elderthorn Greatbow', 'bow', 93, 'void_stalker', 1 / 260, '#6a3a4a',
+    { key: 'thornvolley', name: 'Thornvolley', fx: 'dot', per: .06, max: 5, weaken: .04, el: 'nature', text: 'Each hit lodges a thorn (max 5): 6% of max hit as the enemy attacks, and −4% enemy damage per thorn' },
+    'long fights against hard hitters', 'The oldest elder in the world, strung with a vine that is still alive. Arrows come out of it already angry.'],
+  ['elderlight', 'Elderlight', 'staff', 95, 'threadsaint', 1 / 260, '#fff0b0',
+    { key: 'dawnlight', name: 'Dawnlight', fx: 'dawn', n: 4, text: 'Every 4th spell also heals you for the damage it deals' },
+    'outlasting anything', 'A staff of pale elder with a light at the tip that does not flicker, even in the Hollow. The threadbare saint was guarding it from the dark, or the other way round.'],
+  ['starsunder', 'Starsunder', 'sword', 96, 'hollowking', 1 / 40, '#4a3a8a',
+    { key: 'starfall', name: 'Starfall', fx: 'every', n: 4, m: 2.5, sure: 1, pierce: 1, text: 'Every 4th attack calls down a star: a sure hit for +150% that ignores resistances' },
+    'the hardest fights in the world', 'Forged from a falling star by someone who caught it. The Hollow King had it hung over his throne. He never once swung it. You should.'],
+];
+D.RARE_WEAPONS = W.map(r => r[0]);
+D.UNIQUE_USE = D.UNIQUE_USE || {};
+for (const [id, name, kind, L, mon, p, col, u, use, flavour] of W) {
+  const K = KIND[kind], s = stat(kind, L);
+  ITEMS[id] = Object.assign({ id, name, ic: K.ic, col, type: 'gear', rare: 1, slot: 'weapon', style: K.style, req: { [K.skill]: L }, b: s.b, val: s.val, unique: u, flavour, named: 1 }, K.wtype ? { wtype: K.wtype } : {});
+  D.UNIQUE_USE[u.key] = use;
+  const m = D.MON[mon]; if (m) (m.drops = m.drops || []).push([id, [1, 1], p]);
+}
+/* tower bosses are built in towers.js; this file loads after it in the page. The simulators load it without towers,
+   where Avalanche simply has no source. */
+})();
+
+</script>
+<script>
 /* Carpentry, Sailing and Beastmastery (Nov 2026): behaviour and pages. Data in skills_new_data.js, art in
    skills_new_art.js. Sailing ('sail') and Beastmastery ('train') are activity kinds registered on DQ.KIND_EXT, so
    they run, queue, stop and catch up offline exactly like every other task. */
@@ -19062,7 +19247,7 @@ const house0 = UI.V.house;
 if (house0) UI.V.house = () => house0() + (S().house.owned ? UI.trophyWallHtml() : '');
 /* where a unique comes from (shown with the item, in tooltips, the comparison and the field guide) */
 DQ.uniqueSource = id => {
-  const m = D.MONLIST.find(x => !x.boss && (x.drops || []).some(d => d[0] === id)), b = D.MONLIST.find(x => x.boss && x.boss.first === id);
+  const b = D.MONLIST.find(x => x.boss && x.boss.first === id), m = D.MONLIST.find(x => (x.drops || []).some(d => d[0] === id) && x !== b); /* bosses can drop a rare weapon too (Starsunder from the Hollow King) */
   if (b) return { boss: b, text: `Always dropped by ${b.name} the first time you defeat it.` };
   if (!m) return null; const p = m.drops.find(d => d[0] === id)[2], need = Math.ceil(2.5 / p), have = (S().upity || {})[id] || 0, met = (S().beast.kills[m.id] || 0) > 0, found = (S().uniqFound || {})[id];
   return { mon: m, need, have, met, found, text: met ? `Dropped by ${m.name} in ${D.TOWN[m.town].name}, rarely.${found ? '' : ` Your first copy is guaranteed within ${need} defeats (${Math.min(have, need)} so far).`}` : `Found somewhere in ${D.TOWN[m.town].name}.` };

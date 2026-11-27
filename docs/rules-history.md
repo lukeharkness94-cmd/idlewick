@@ -258,4 +258,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   follow (Soldier's Blade, Starsunder and 31 others were crafted and sold).
 - 27 Nov 2026 (owner): "I like that until you've caught the animal, you don't know its name. Even if it is just a
   chicken." Animals stay ??? until the first catch, even when reachable; the visual audit had suggested naming them.
-
+- 27 Nov 2026 (owner): "yes, bring all the 33 retired names as rare drops with unique art - make them all feel genuinely
+  unique and cool - take inspiration from other fantasy armour where possible". 29 named weapons added as rare drops
+  (30 retired fantasy names; Viper's kiss already existed; the three plain bronze names stay retired).

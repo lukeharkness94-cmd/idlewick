@@ -316,7 +316,7 @@ DQ.combatInterval = () => {
   const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword;
   return Math.round(W.speed*(1-Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003))*(DQ.uniqueFx&&DQ.uniqueFx().swift?.9:1)*(DQ.rareFx&&DQ.rareFx()&&DQ.rareFx().fx==='quick'?1-DQ.rareFx().spd:1));
 };
-DQ.combatSpeedText = () => { const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword,ms=DQ.combatInterval(),lv=Math.round(Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003)*100),gale=DQ.uniqueFx&&DQ.uniqueFx().swift; return `${W.name}: ${(ms/1000).toFixed(2)}s per attack · ${lv}% faster from Combat level${gale?' · 10% faster from Gale':''}`; };
+DQ.combatSpeedText = () => { const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword,ms=DQ.combatInterval(),lv=Math.round(Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003)*100),gale=DQ.uniqueFx&&DQ.uniqueFx().swift,RX=DQ.rareFx&&DQ.rareFx(),quick=RX&&RX.fx==='quick'; return `${W.name}: ${(ms/1000).toFixed(2)}s per attack · ${lv}% faster from Combat level${gale?' · 10% faster from Gale':''}${quick?` · ${Math.round(RX.spd*100)}% faster from ${RX.name}`:''}`; };
 DQ.actDur = a => {
   let d = DQ.durFor(a.kind, a.id);
   if (a.kind === 'fight') d = DQ.combatInterval();
@@ -538,7 +538,7 @@ function combatRound() {
       if (rx('reap') && f.hp < mhp * RX.below) { max *= RX.m; fxHit(RX.key); }
       if (rx('momentum') && f.streak) { max *= 1 + Math.min(RX.cap, RX.step * f.streak); fxHit(RX.key); }
       if (rx('snowball') && f.landed) { max *= 1 + Math.min(RX.cap, RX.step * f.landed); fxHit(RX.key); }
-      if (rx('quick')) max *= 1 - RX.dmg;
+      if (rx('quick')) { max *= 1 - RX.dmg; fxHit(RX.key); }
       if (rx('stunplus') && f.stunBonus) { max *= 1 + RX.bonus; f.stunBonus = 0; }
     }
     const defCut = Math.min(.6, (rx('breach') ? RX.d : 0) + (rx('sunder') ? f.sunder || 0 : 0)), effDef = m.def * (1 - defCut); if (defCut && rx('breach')) fxHit(RX.key);
