@@ -20,7 +20,6 @@ function celebrate(id, gained, from) {
   /* on the shared animation clock (util.js); returning false ends it */
   const hold = (dt, t) => { const b = pick(); if (b) { if (t < until) { if (!b.classList.contains('just-bought')) { keep.set(b, b.innerHTML); b.classList.add('just-bought'); b.innerHTML = text; } return; } if (b.classList.contains('just-bought')) { b.classList.remove('just-bought'); if (keep.has(b)) b.innerHTML = keep.get(b); else UI.render(false); } return false; } if (t >= until) return false; };
   DQ.frame.add(hold);
-  if (DQ.sfx) DQ.sfx('buy');
   if (chip) {
     const plus = document.createElement('b'); plus.className = 'pack-plus'; plus.textContent = '+' + Math.max(1, gained); chip.appendChild(plus);
     chip.classList.remove('pack-pop'); void chip.offsetWidth; chip.classList.add('pack-pop');
@@ -40,13 +39,16 @@ function celebrate(id, gained, from) {
   ], { duration: 650, easing: 'cubic-bezier(.4,.1,.3,1)' });
   anim.onfinish = anim.oncancel = () => fly.remove();
 }
+const chimes = () => (DQ.audioStats ? DQ.audioStats().played.buy || 0 : 0);
 const wrap = (name, idOf) => {
   const f = UI.DO[name]; if (typeof f !== 'function') return;
   UI.DO[name] = (...a) => {
     const id = idOf(...a), btn = document.activeElement, art = artFor(btn, id), rect = art ? { src: art.src, ...art.getBoundingClientRect().toJSON() } : null;
-    const coins = DQ.S.coins, had = owned(id), r = f(...a);
+    const coins = DQ.S.coins, had = owned(id), chimed = chimes(), r = f(...a);
     const gained = owned(id) - had;
-    if (DQ.S.coins < coins || gained > 0) requestAnimationFrame(() => celebrate(id, Math.max(gained, 1), rect));
+    /* one chime per purchase: only when the purchase itself did not already chime (timing the two apart failed when a
+       slow redraw pushed this one past the 250 ms merge window, and a purchase chimed twice) */
+    if (DQ.S.coins < coins || gained > 0) { if (DQ.sfx && chimes() === chimed) DQ.sfx('buy'); requestAnimationFrame(() => celebrate(id, Math.max(gained, 1), rect)); }
     return r;
   };
 };

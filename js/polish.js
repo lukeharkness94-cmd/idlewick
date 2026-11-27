@@ -11,7 +11,7 @@ const S = () => DQ.S;
 const SAVE_KEY = 'dashboard-quest-save-v2', BK_KEY = 'dashboard-quest-backups';
 
 /* ---------- Sound by category, and vibration on touch devices ---------- */
-const CAT = { tab: 'ui', page: 'ui', quill: 'ui', click: 'ui', error: 'ui', equip: 'ui', buy: 'ui', sell: 'ui', coin: 'ui', start: 'ui', stop: 'ui', travel: 'ui',
+const CAT = { tab: 'ui', page: 'ui', quill: 'ui', click: 'ui', error: 'ui', equip: 'ui', mat_metal: 'ui', mat_leather: 'ui', mat_cloth: 'ui', mat_wood: 'ui', mat_paper: 'ui', mat_gem: 'ui', mat_food: 'ui', mat_potion: 'ui', buy: 'ui', sell: 'ui', coin: 'ui', start: 'ui', stop: 'ui', travel: 'ui',
   hit: 'combat', miss: 'combat', hurt: 'combat', eat: 'combat', boss: 'combat', death: 'combat',
   level: 'rewards', perk: 'rewards', ach: 'rewards', quest: 'rewards', unlock: 'rewards', gem: 'rewards', notify: 'rewards' };
 const BUZZ = { level: [18, 40, 18], perk: [14, 30, 14], ach: [18, 40, 18], quest: [18, 40, 18], unlock: [12, 30, 12], gem: [14], boss: [40], death: [90] };
@@ -73,7 +73,7 @@ const togBtn = (on, act, arg, label, sub) => `<button class="tog ${on ? 'on' : '
 UI.V.settings = () => {
   const st = S().settings, snd = st.snd || {};
   let h = origSet();
-  const cats = `<div><div class="k" style="margin-bottom:6px">Which sounds</div><div class="stack tight">${togBtn(snd.ui !== false, 'sndcat', 'ui', 'Interface', 'Clicks, page turns, quests accepted, buying, coins')}${togBtn(snd.combat !== false, 'sndcat', 'combat', 'Combat', 'Hits, damage, eating, bosses')}${togBtn(snd.rewards !== false, 'sndcat', 'rewards', 'Rewards', 'Level-ups, quests, achievements, unlocks')}${togBtn(snd.room !== false, 'sndcat', 'room', 'Room', 'The hearth on Home, market murmur, crickets at night, rain')}</div></div>`;
+  const cats = `<div><div class="k" style="margin-bottom:6px">Which sounds</div><div class="stack tight">${togBtn(snd.ui !== false, 'sndcat', 'ui', 'Interface', 'Clicks, page turns, quests accepted, buying, coins, gear and items by what they are made of')}${togBtn(snd.combat !== false, 'sndcat', 'combat', 'Combat', 'Hits, damage, eating, bosses')}${togBtn(snd.rewards !== false, 'sndcat', 'rewards', 'Rewards', 'Level-ups, quests, achievements, unlocks')}${togBtn(snd.room !== false, 'sndcat', 'room', 'Room', 'The hearth on Home, market murmur, crickets at night, rain, town bells on the hour')}</div></div>`;
   h = h.replace('Sounds are always varied so they do not repeat exactly.</small></div>', 'Sounds are always varied so they do not repeat exactly.</small></div>' + cats);
   if (navigator.vibrate) h = h.replace(/(<section class="panel"><div class="phead"><h2>Interface<\/h2><\/div><div class="stack">)/, `$1${togBtn(st.haptics !== false, 'hapt', 'x', 'Vibration', 'A short buzz for level-ups and boss fights on phones')}`);
   h = h.replace(/<section class="panel"><div class="phead"><h2>Save data<\/h2>[\s\S]*?<\/section>/, savePanel());

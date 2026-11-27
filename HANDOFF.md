@@ -1001,6 +1001,39 @@ Everything is synthesised in `js/audio.js`; nobody has listened to it yet, so le
   Interface peaks: paper turn −35, quill −35, coin chime −32, against the old `tab` blip −29 and `start` −25.
 - Test: `tests/room-sound.cjs` (browser, real AudioContext with the autoplay flag; skips if none runs).
 
+## Sound polish: town bells, the hush, item materials (Claude, 27 Nov 2026)
+Owner: subtle polish, "Let's do all 15"; these are items 11 to 13, all in `js/audio.js`.
+- **Town bells** (`D.TOWN_BELLS`, `DQ.bellPlan(town, hour)`, `DQ.bellTick()`, `DQ.bellState()`): checked every 2 s with
+  the ambience. When the player's clock (`DQ.townHour`) has just crossed an hour, and it is the first two minutes of
+  it, the current town's bell rings once, on the Home and Town hubs only, on the ambience bus through a per-town
+  low-pass and a reverb send (a convolver on the ambience bus, sharing the music reverb's impulse). Off with Always
+  daytime (`settings.townTime 'day'`, and in a test browser left at daytime), Mute, Nature ambience off, the Room
+  filter, a hidden tab, simulations and forecasts, the title screen and before the first click. An hour that passes
+  silently (another page, hidden) is not rung late; no hour rings twice (keyed by date and hour). Willowbrook a church
+  bell counting the hour (E4, minor-third bell partials, slow-beating doubled hum, 2.4 s apart); Mossbarrow a yard bell
+  shaken six times; Saltmere a foghorn (87 Hz sawtooths and a sub square through a low-pass that opens as it swells)
+  then the harbour bell counting the hour in ship's-bell pairs; Ironpeak a 73 Hz gong whose upper partials bloom in;
+  Gloomfen three hollow wooden knocks; Emberfall one bronze clang; Skyreach a five-note chime run in its Lydian key; the
+  Hollow two strokes of a cracked bell (mistuned upper partials buzzing through a 31 Hz flutter, heard far off).
+  Measured on the ambience bus at default volumes (Chromium): bell peaks −36 to −29 dBFS, about the same as the
+  village's own detail sounds (peaks −40 to −29 in the same windows), so a bell is heard but never stands out.
+  `DQ.ambienceLevel()` is the meter.
+- **Pop-ups hush the world** (`D.HUSH`, `DQ.hushState()`): music and ambience now pass through a hush gain and a
+  low-pass (Q .5) before master; effects do not. A MutationObserver on `body` children asks whether any `.modal` is open
+  (every `DQ.modal`, so the story conversation and full-screen world events too) and glides to −9 dB with the cutoff at
+  1.8 kHz over 250 ms (exponential ramps), and back to unity and 20 kHz over 600 ms. One state: a pop-up replacing
+  another, or two at once, never deepens it. Mute and the volumes are on other nodes.
+- **Item materials** (`DQ.itemMaterial(id)`, `DQ.itemSound(id)`, `DQ.itemSoundStats()`): `DQ.equipItem`,
+  `DQ.unequip`, `DQ.deposit` and `DQ.withdraw` are wrapped in audio.js, so every caller (Hero page, bank, combat
+  equipment, saved preparations) sounds; the old `equip` thump and `tab` blip were removed from those UI actions
+  (`equip` stays for abilities and saving a preparation). Material comes from type, slot, weapon style, the wood flag,
+  icon and the words in the id and name; eight sounds `mat_metal` … `mat_potion` in the Interface filter. Moves are
+  gathered for 35 ms and sound once, as the most common material (Bank everything is one sound).
+- `js/purchase_feedback.js` asks for the purchase chime only when the purchase itself did not already chime: under a
+  slow redraw its chime could land after the 250 ms merge window and a purchase chimed twice (room-sound failed about
+  one run in three on main).
+- Test: `tests/polish-sound.cjs`.
+
 ## Rulebook and test runner (Claude, 27 Nov 2026)
 - AGENTS.md is now one current rulebook (about a third of its old length), grouped as How to work, Look and art, Screen layout, Words, Game rules and Tests. Rules that later owner decisions replaced were dropped from it; the full earlier text, with every owner quote and "supersedes" note, is kept in `docs/rules-history.md`. New owner decisions change the rule in place and add a dated line to the history file.
 - `scripts/run-tests.cjs` runs the suite: it rebuilds the game, starts its own preview server on a free port, points every test at it (`IDLEWICK_URL`, `SHOT_DIR`), runs several files at once (slowest first, using durations remembered in the OS temp folder) and prints failures with their last lines. Two runs on one machine no longer collide.

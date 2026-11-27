@@ -374,11 +374,12 @@ const DO = {
     ] });
   },
   sel: (a, b) => { UI.sel = a; UI.selFrom = b || 'pack'; DQ.sfx('tab'); $$('.slot.sel').forEach(e => e.classList.remove('sel')); const el = $(`.slot[data-a="${a}"][data-b="${UI.selFrom}"]`); if (el) el.classList.add('sel'); const d = $('#detailbox'); if (d) d.innerHTML = UI.detail(a, UI.selFrom); },
-  equip: a => { const r = DQ.equipItem(a); if (!r.ok) return DQ.toast(r.why, true); DQ.sfx('equip'); DQ.log(`You equip ${D.ITEMS[a].name.toLowerCase()}.`); UI.sel = null; UI.renderHud(); UI.render(false); },
-  unequip: a => { if (DQ.unequip(a)) { DQ.sfx('equip'); UI.renderHud(); UI.render(false); } },
-  deposit: (a, b) => { DQ.deposit(a, b === 'all' ? S().inv[a] : +b); DQ.sfx('tab'); UI.sel = null; UI.render(false); },
-  withdraw: (a, b) => { const r = DQ.withdraw(a, b === 'all' ? S().bank[a] : +b); if (r < 0) DQ.toast('Your backpack is full', true); else DQ.sfx('tab'); if (!S().bank[a]) UI.sel = null; UI.render(false); },
-  depositall: () => { Object.keys(S().inv).filter(id => !DQ.isTool(id)).forEach(id => DQ.deposit(id, S().inv[id])); DQ.sfx('tab'); UI.sel = null; UI.render(false); },
+  /* equip, unequip and bank moves sound by the item's material (js/audio.js wraps the moves themselves) */
+  equip: a => { const r = DQ.equipItem(a); if (!r.ok) return DQ.toast(r.why, true); DQ.log(`You equip ${D.ITEMS[a].name.toLowerCase()}.`); UI.sel = null; UI.renderHud(); UI.render(false); },
+  unequip: a => { if (DQ.unequip(a)) { UI.renderHud(); UI.render(false); } },
+  deposit: (a, b) => { DQ.deposit(a, b === 'all' ? S().inv[a] : +b); UI.sel = null; UI.render(false); },
+  withdraw: (a, b) => { const r = DQ.withdraw(a, b === 'all' ? S().bank[a] : +b); if (r < 0) DQ.toast('Your backpack is full', true); if (!S().bank[a]) UI.sel = null; UI.render(false); },
+  depositall: () => { Object.keys(S().inv).filter(id => !DQ.isTool(id)).forEach(id => DQ.deposit(id, S().inv[id])); UI.sel = null; UI.render(false); },
   bankfilter: a => { UI.bankFilter = a; UI.render(false); },
   packfilter: a => { UI.packFilter = a; UI.render(false); },
   achfilter: a => { UI.achFilter = a; UI.render(false); },

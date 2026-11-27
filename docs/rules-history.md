@@ -294,3 +294,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 27 Nov 2026 (owner): "the number of traps I'm using when hunting isn't changing", then chose "Wear out". Replaces
   "that tier's trap kept in the pack": a hunt's trap breaks 1 hunt in 60 to 1 in 120 (about one every 7-10 minutes of hunting; the "1 in 8" first
   offered would have broken ~75 traps an hour, as hunts take 5-9 s).
+- 27 Nov 2026 (owner, subtle polish: "Let's do all 15"): sound items 11 to 13. Town bells on the hour by the player's
+  clock, pop-ups hush music and ambience, and gear and item moves sound by material. Replaces the single equip thump
+  for equip/unequip and the tab blip for bank moves.

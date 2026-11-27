@@ -84,8 +84,8 @@ UI.loadoutPanel = () => {
 };
 Object.assign(UI.DO, {
   losave: () => { const el = document.getElementById('lo-name'), name = (el && el.value.trim()) || `Preparation ${DQ.loadouts().length + 1}`; if (!DQ.loadoutSave(name)) return DQ.toast(`You can keep ${MAX} preparations. Delete one first.`, true); DQ.sfx('equip'); UI.render(false); },
-  loapply: i => { const lo = DQ.loadouts()[+i]; if (!lo) return; const r = DQ.loadoutApply(lo); DQ.sfx('equip'); UI.renderHud && UI.renderHud(); UI.render(false); if (r.skipped.length) DQ.toast(`Applied “${lo.name}”. Skipped: ${r.skipped.join(', ')}`); else DQ.toast(`Applied “${lo.name}”`); },
-  loprev: () => { const lo = S().loadoutPrev; if (!lo) return; const r = DQ.loadoutApply(lo); DQ.sfx('equip'); UI.renderHud && UI.renderHud(); UI.render(false); DQ.toast(r.skipped.length ? `Back to your previous preparation. Skipped: ${r.skipped.join(', ')}` : 'Back to your previous preparation'); },
+  loapply: i => { const lo = DQ.loadouts()[+i]; if (!lo) return; const r = DQ.loadoutApply(lo); UI.renderHud && UI.renderHud(); UI.render(false); if (r.skipped.length) DQ.toast(`Applied “${lo.name}”. Skipped: ${r.skipped.join(', ')}`); else DQ.toast(`Applied “${lo.name}”`); },
+  loprev: () => { const lo = S().loadoutPrev; if (!lo) return; const r = DQ.loadoutApply(lo); UI.renderHud && UI.renderHud(); UI.render(false); DQ.toast(r.skipped.length ? `Back to your previous preparation. Skipped: ${r.skipped.join(', ')}` : 'Back to your previous preparation'); },
   lodelete: i => { DQ.loadoutDelete(+i); UI.render(false); },
   copybuild: () => DQ.copyText(DQ.buildText(), 'Build')
 });
