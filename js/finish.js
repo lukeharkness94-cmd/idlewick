@@ -33,7 +33,9 @@ const ink = (box, active, key) => {
   const fresh = !bar;
   if (fresh) { bar = document.createElement('i'); bar.className = 'fin-ink'; bar.setAttribute('aria-hidden', 'true'); box.appendChild(bar); }
   const x = active.offsetLeft, w = active.offsetWidth, y = active.offsetTop + active.offsetHeight - 3, before = memory.get(key);
-  const place = (px, pw, py) => { bar.style.transform = `translate(${px}px, ${py}px)`; bar.style.width = pw + 'px'; };
+  /* a position remembered from another page's tab row can lie past this row's edge; kept inside, the sliding bar never
+     widens the page on phones (27 Nov 2026: a horizontal scroll flashed mid-slide) */
+  const place = (px, pw, py) => { px = Math.max(0, Math.min(px, Math.max(0, box.clientWidth - pw))); bar.style.transform = `translate(${px}px, ${py}px)`; bar.style.width = pw + 'px'; };
   if (fresh && before && !calm()) { bar.style.transition = 'none'; place(before.x, before.w, before.y); void bar.offsetWidth; bar.style.transition = ''; }
   else if (fresh) { bar.style.transition = 'none'; place(x, w, y); void bar.offsetWidth; bar.style.transition = ''; }
   bar.style.opacity = '1'; place(x, w, y);

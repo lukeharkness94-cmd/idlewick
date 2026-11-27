@@ -25098,9 +25098,9 @@ U.updateEncounter=()=>{
 };
 /* the next creature waits until the killing blow has visibly landed and the defeated one has faded (27 Nov 2026 audit:
    on a busy frame the swing started after the redraw, so the blow and the "slain" flash landed on the new creature).
-   The hold starts when the kill is announced (at most 2 s), then shortens to the death fade once the impact shows;
+   The hold starts when the kill is announced (at most 1.1 s), then shortens to the death fade once the impact shows;
    fight timing is unchanged (the next creature is tracked first). */
-Q.on('slain',()=>{if(Q.sim.on||Q.forecasting||calm())return;U.deathHold=performance.now()+2000;U.afterImpact(()=>{U.deathHold=performance.now()+480;},Q.battleTiming?.impact||390);});
+Q.on('slain',()=>{if(Q.sim.on||Q.forecasting||calm())return;const end=performance.now()+1100;U.deathHold=end;U.afterImpact(()=>{U.deathHold=Math.min(end,performance.now()+480);},Q.battleTiming?.impact||390);});
 Q.on('splat',(side,text,kind,delay=0)=>{if(side==='foe'&&/^\d/.test(String(text))&&!kind.includes('miss')&&!Q.sim.on&&!Q.forecasting&&!calm())U.impactUntil=performance.now()+Math.max(0,delay-180)+(Q.battleTiming?.impact||390);});
 for(const key of ['fhp','fhptxt']){const bind=U.B[key];U.B[key]=(e,...a)=>{if(performance.now()<(U.impactUntil||0)||U.impactFlights?.size)return;bind(e,...a);};}
 const render=U.render;
@@ -25260,7 +25260,9 @@ const ink = (box, active, key) => {
   const fresh = !bar;
   if (fresh) { bar = document.createElement('i'); bar.className = 'fin-ink'; bar.setAttribute('aria-hidden', 'true'); box.appendChild(bar); }
   const x = active.offsetLeft, w = active.offsetWidth, y = active.offsetTop + active.offsetHeight - 3, before = memory.get(key);
-  const place = (px, pw, py) => { bar.style.transform = `translate(${px}px, ${py}px)`; bar.style.width = pw + 'px'; };
+  /* a position remembered from another page's tab row can lie past this row's edge; kept inside, the sliding bar never
+     widens the page on phones (27 Nov 2026: a horizontal scroll flashed mid-slide) */
+  const place = (px, pw, py) => { px = Math.max(0, Math.min(px, Math.max(0, box.clientWidth - pw))); bar.style.transform = `translate(${px}px, ${py}px)`; bar.style.width = pw + 'px'; };
   if (fresh && before && !calm()) { bar.style.transition = 'none'; place(before.x, before.w, before.y); void bar.offsetWidth; bar.style.transition = ''; }
   else if (fresh) { bar.style.transition = 'none'; place(x, w, y); void bar.offsetWidth; bar.style.transition = ''; }
   bar.style.opacity = '1'; place(x, w, y);
