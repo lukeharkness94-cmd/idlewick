@@ -48,7 +48,15 @@ const { chromium } = require('playwright');
     /* 7 */
     const text = await p.evaluate(() => { DQ.S = DQ.newState('Fresh'); DQ.S.settings.notify = false; DQ.noteLog.length = 0; DQ.S.xp.fishing = DQ.data.XPF[2] - 1; DQ.addXp('fishing', 50); return JSON.stringify(DQ.noteLog.slice(-5)); });
     assert.ok(!/\+-\d/.test(text), 'no "+-N%" in level-up text: ' + text.slice(0, 200));
+    /* 8 after a kill, the next creature of the same kind is visible (the death fade hid the shared sprite, 27 Nov 2026) */
+    await p.setViewportSize({ width: 1440, height: 900 });
+    await p.evaluate(() => { const S = DQ.S, D = DQ.data; for (const k of Object.keys(S.xp)) S.xp[k] = D.XPF[99]; S.settings.reduceFx = false; S.equip = {}; for (const g of ['rune_sword', 'rune_helm', 'rune_body', 'rune_legs']) { DQ.give(g, 1); DQ.equipItem(g); } DQ.fxDirty(); S.hp = DQ.maxHp(); S.town = 'willowbrook'; DQ.paused = false; DQ.go('combat'); DQ.startAct('fight', 'goblin', { quiet: true }); DQ.ui.render(true); window.__k0 = S.stats.kill; });
+    await p.waitForFunction(() => DQ.S.stats.kill >= window.__k0 + 2, null, { timeout: 30000 });
+    await p.waitForTimeout(1500);
+    const foe = await p.evaluate(() => { const img = document.querySelector('#av-foe img'); const cs = img && getComputedStyle(img); return img ? { vis: cs.visibility, op: +cs.opacity, id: document.querySelector('#av-foe').dataset.a, cur: DQ.fight && DQ.fight.id } : null; });
+    assert.ok(foe && foe.vis === 'visible' && foe.op > .5, 'the next creature is visible after a kill: ' + JSON.stringify(foe));
+    await p.evaluate(() => { DQ.stopAct(true); DQ.paused = true; });
     assert.deepEqual(errors, []);
-    console.log('PASS visual audit regressions: no bystanders, corner badges, skill icons, tool shelf keeps every tier, doll slots clickable at 1280x720, tower floors, level-up wording');
+    console.log('PASS visual audit regressions: no bystanders, corner badges, skill icons, tool shelf keeps every tier, doll slots clickable at 1280x720, tower floors, level-up wording, next creature visible after a kill');
   } finally { await b.close(); }
 })().catch(e => { console.error(e); process.exit(1); });

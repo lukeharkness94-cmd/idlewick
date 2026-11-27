@@ -6,6 +6,12 @@ The 30 fantasy names that used to sit on smithed gear came back as rare drops. V
 so 29 are new (`js/rare_weapons.js`). Bronze shortsword, Bronze knife and Bronze mallet were plain names, not
 fantasy ones, so they stayed retired. Smithed and sold weapons keep their alloy names (`tests/weapon-names.cjs`).
 
+## Art
+
+Each has its own hand-drawn 16×16 sprite in `js/pixel_items.js`, drawn in the house style and checked by
+`tests/art-pixel.cjs`, which now loads these weapons. The hero holds them by weapon type, so a named dagger or hammer
+is held as a dagger or hammer (`slotSpec` in `js/pixel_runtime.js` reads `wtype`, not the id).
+
 ## How they work
 
 - **Source:** one fitting creature each, at about 1 in 120–260 for regular creatures, 1 in 25 for mini-bosses, 1 in

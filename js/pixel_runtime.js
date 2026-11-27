@@ -60,7 +60,7 @@ const slotSpec = (slot, id) => { const it = id && D.ITEMS[id]; if (!it) return n
   if (slot === 'body') return { type: /robe_/.test(id) ? 'robe' : (it.lth || /vest/.test(id)) ? 'vest' : 'plate', col };
   if (slot === 'legs') return { type: /robe_/.test(id) ? 'robe' : (it.lth || /chaps/.test(id)) ? 'chaps' : 'plate', col };
   if (slot === 'shield') return { col };
-  if (slot === 'weapon') { const type = it.style === 'ranged' ? 'bow' : it.style === 'magic' ? 'staff' : id === 'barnacle_cutlass' ? 'cutlass' : /dagger/.test(id) ? 'dagger' : /hammer/.test(id) ? 'hammer' : 'sword'; return { type, col, orb: type === 'staff' ? (id === 'witch_staff' ? '#b79cff' : '#8fc0ff') : null }; }
+  if (slot === 'weapon') { const type = it.style === 'ranged' ? 'bow' : it.style === 'magic' ? 'staff' : id === 'barnacle_cutlass' ? 'cutlass' : (it.wtype === 'dagger' || /dagger/.test(id)) ? 'dagger' : (it.wtype === 'hammer' || /hammer/.test(id)) ? 'hammer' : 'sword'; /* by weapon type, not the id: named daggers and hammers (Leechfang, Avalanche...) were held as swords */ return { type, col, orb: type === 'staff' ? (id === 'witch_staff' ? '#b79cff' : '#8fc0ff') : null }; }
   return null; };
 const heroOpts = (look, extra = {}) => {
   const o = Q.heroLook ? Q.heroLook(look || (Q.S && Q.S.look) || {}) : { eq: {} }, eq = o.eq || {}, L = look || (Q.S && Q.S.look) || {};
