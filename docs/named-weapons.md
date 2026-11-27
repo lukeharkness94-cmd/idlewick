@@ -92,3 +92,6 @@ than they would against a plain sword. Viper's kiss and the Barnacle cutlass sho
 went from +60% to +45% on its third attack and Emerald Reaver from 30% to 25% healing after the first run.
 Alley Knife shows no source in the sim because its goblin raider is defined in a file the sim does not load; its
 signature is coins, which the sim does not measure anyway. Simulations are evidence, not playtests.
+
+`node scripts/sim-bosses.cjs` gives identical output before and after the engine changes, so fights without a named
+weapon are unchanged.
