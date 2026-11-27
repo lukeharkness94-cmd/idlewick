@@ -268,3 +268,7 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   forbids rings, outlines and frames on anything you can't click and any line inside a control; it had only covered
   borders on the main pages, so about 250 rules (combat chips, the unlock pop-up ring, Welcome back boxes, ringed menu
   dots, the hero level badge) still drew lines.
+- 27 Nov 2026 (owner): "Still circles around a lot of things. Unless it's a menu item to navigate, we can just either
+  make it float on over or have a slight backdrop so its obvious it's clickable." Replaces "anything you can click has a
+  2px outline": only navigation (top menu and HUD buttons, page tabs, tab rows, skill rail) keeps the outline; every
+  other control floats on a raised fill with a soft shadow and lifts on hover. Village signs became colour only.

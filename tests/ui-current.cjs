@@ -18,7 +18,7 @@ const fs=require('node:fs');
     const style=selector=>getComputedStyle(document.querySelector(selector));
     return {name:style('#crname').color,nameBg:style('#crname').backgroundColor,back:style('#cr-back').color,backBg:style('#cr-back').backgroundColor,begin:style('#tmenu .tbtn.primary').color,primary:getComputedStyle(document.documentElement).getPropertyValue('--brass').trim(),form:style('#crname').fontFamily,logo:style('.logo h1').fontFamily,overflow:document.documentElement.scrollWidth>innerWidth};
    });
-   const rgb=c=>c.startsWith('#')?c.slice(1).match(/../g).map(x=>parseInt(x,16)):c.match(/[\d.]+/g).slice(0,3).map(Number);
+   const rgb=c=>c.startsWith('#')?c.slice(1).match(/../g).map(x=>parseInt(x,16)):c.startsWith('color(')?c.match(/[\d.]+/g).slice(0,3).map(x=>Number(x)*255):c.match(/[\d.]+/g).slice(0,3).map(Number); /* color(srgb r g b) from color-mix() is 0-1 */
    const lum=c=>rgb(c).map(x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4;}).reduce((a,x,i)=>a+x*[.2126,.7152,.0722][i],0);
    const contrast=(a,b)=>{const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
    assert.ok(contrast(entrance.name,entrance.nameBg)>=4.5,`${theme} entrance name contrast`);

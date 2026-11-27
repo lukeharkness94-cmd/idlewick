@@ -1,8 +1,11 @@
-/* node tests/shape-rule.cjs: the shape rule (owner, 26 Nov 2026) and no lines around anything you can't click (owner,
-   27 Nov 2026: "Get rid of them unless it's a button ... I despise seeing physical lines around things"). Checked on every
-   page, in a fight and in the common pop-ups, in both themes at 1440 x 900. Needs the preview server (IDLEWICK_URL).
-   S1  anything you can click (button, [data-do], [role=button], [role=tab], [role=switch], a[href], text fields) wider than 20px is an
-       8px rounded rectangle (all four corners) with a visible outline on all four sides (border, or a 2px inset ring)
+/* node tests/shape-rule.cjs: the shape rule (owner, 26 Nov 2026), no lines around anything you can't click and only
+   navigation outlined (owner, 27 Nov 2026: "I despise seeing physical lines around things"; "Unless it's a menu item to
+   navigate, we can just either make it float on over or have a slight backdrop so its obvious it's clickable").
+   Checked on every page, in a fight and in the common pop-ups, in both themes at 1440 x 900. Needs the preview server.
+   S1  anything you can click (button, [data-do], [role=button], [role=tab], [role=switch], a[href], text fields) wider
+       than 20px is an 8px rounded rectangle (all four corners). Navigation (NAV below) has a visible outline on all four
+       sides (border, or a 2px inset ring); every other control has no outline and floats: a shadow, or a fill that
+       differs from what it sits on (a disabled control may sit flat)
    S2  anything you can't click draws no line around itself: no border on three or more sides (a one-sided divider or
        accent stripe is not an outline), no border at all on a round thing, no outline and no box-shadow ring; the same
        for its ::before and ::after
@@ -14,14 +17,15 @@ const { chromium } = require('playwright');
 const URL = process.env.IDLEWICK_URL || 'http://127.0.0.1:8765/';
 /* Exceptions (selectors matched with Element.closest):
    - .site-spot / .tc-room / svg: hotspots drawn on the pixel scenes (Village town scene, the tower cutaway, the SVG map);
-     an outline would box the art, and AGENTS.md keeps the scenes as drawn. The Village signs are those hotspots' faces.
+     they glow or tint when chosen instead of floating, so the art stays as drawn
    - #av-foe in the combat stage: the creature itself is the hotspot; a box round it would frame the fight
-   - .site-legend .sl-sign: the Village legend's swatches copy the scene's site signs, so they keep the signs' borders
    - .pen-bowl / .pen-flag / .pen-sign / .work-atmosphere / .tower-cutaway / .combat-projectile: drawn scene art and
      effects, whose dark edges are the pixel-art outline, not a frame
    Text fields count as clickable: they take the same 8px outlined shape. */
 const ALLOW_CLICK = ['.site-spot', '.tc-room', 'svg', '.encounter-arena #av-foe'];
-const ALLOW_FLAT = ['svg', '.site-spot', '.tc-room', '.site-legend .sl-sign', '.pen-bowl', '.pen-flag', '.pen-sign', '.work-atmosphere', '.tower-cutaway', '.combat-projectile', '#title'];
+const ALLOW_FLAT = ['svg', '.tc-room', '.pen-bowl', '.pen-flag', '.pen-sign', '.work-atmosphere', '.tower-cutaway', '.combat-projectile', '#title'];
+/* the menus you navigate with keep their outline (css/shape.css lists the same) */
+const NAV = '#topnav .tnav,#pagebar button,#pagebar [data-do],#combatnav button,#combatnav [data-do],#skilldock .dk,#dock .dk,.cg-tile,#hud .iconb,#hud .packchip,#hud .h-hero,[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]';
 const problems = [];
 
 const MODALS = {
@@ -54,7 +58,7 @@ const MODALS = {
       }, theme);
       const check = async label => {
         await p.evaluate(() => document.querySelectorAll('#notes > *').forEach(e => e.remove()));
-        const out = await p.evaluate(({ AC, AF }) => {
+        const out = await p.evaluate(({ AC, AF, NAV }) => {
           const CLICK = 'button,[data-do],[role=button],[role=tab],[role=switch],a[href],input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=hidden]),textarea';
           const sig = e => e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + [...e.classList].slice(0, 3).map(c => '.' + c).join('');
           const where = e => { const a = e.parentElement && e.parentElement.closest('[id],[class]'); return a ? sig(a) : ''; };
@@ -76,8 +80,15 @@ const MODALS = {
             const cs = getComputedStyle(e);
             const rad = ['TopLeft', 'TopRight', 'BottomRight', 'BottomLeft'].map(k => cs[`border${k}Radius`]);
             const okR = rad.every(v => v === '8px');
-            const okB = sides(cs) === 4 || ring(cs) || outline(cs);
-            if (!okR || !okB) r.click.push(sig(e) + ' < ' + where(e) + (okR ? '' : ' radius=' + [...new Set(rad)].join('/')) + (okB ? '' : ' no-outline'));
+            let okB, why;
+            if (e.matches(NAV)) { okB = sides(cs) === 4 || ring(cs) || outline(cs); why = ' nav without its outline'; }
+            else {
+              const lined = sides(cs) > 0 || ring(cs) || outline(cs);
+              const bg = c => { for (let a = c; a; a = a.parentElement) { const s = getComputedStyle(a); if (alpha(s.backgroundColor) > 0.05) return s.backgroundColor; } return ''; };
+              const floats = cs.boxShadow !== 'none' || (alpha(cs.backgroundColor) > 0.05 && cs.backgroundColor !== bg(e.parentElement)) || cs.backgroundImage !== 'none' || e.disabled;
+              okB = !lined && floats; why = lined ? ' outlined (only navigation is)' : ' does not float (no shadow or fill)';
+            }
+            if (!okR || !okB) r.click.push(sig(e) + ' < ' + where(e) + (okR ? '' : ' radius=' + [...new Set(rad)].join('/')) + (okB ? '' : why));
           }
           for (const e of document.querySelectorAll('body *:not(script):not(style)')) {
             if (clicks.has(e) || !vis(e) || AF.some(s => e.closest(s))) continue;
@@ -88,7 +99,7 @@ const MODALS = {
             for (const ps of ['::before', '::after']) { const pc = getComputedStyle(e, ps); if (pc.content === 'none' || pc.display === 'none' || pc.visibility === 'hidden' || +pc.opacity < 0.05) continue; const w = parseFloat(pc.width) || rect.width, h = parseFloat(pc.height) || rect.height; if (w < 3 || h < 3) continue; const l = lined(pc, w, h); if (l) list.push(sig(e) + ps + ' [' + l + '] < ' + where(e)); }
           }
           return r;
-        }, { AC: ALLOW_CLICK, AF: ALLOW_FLAT });
+        }, { AC: ALLOW_CLICK, AF: ALLOW_FLAT, NAV });
         const tally = a => { const m = new Map(); a.forEach(x => m.set(x, (m.get(x) || 0) + 1)); return [...m].map(([k, n]) => n > 1 ? `${k} x${n}` : k); };
         for (const x of tally(out.click)) problems.push(`S1 ${theme}/${label}: ${x}`);
         for (const x of tally(out.flat)) problems.push(`S2 ${theme}/${label}: ${x}`);

@@ -849,9 +849,11 @@ html:has(.home-glance) #hud .h-stats,html:has(.home-glance) #hud .h-task,html:ha
   height:auto!important;min-height:70px!important;max-height:none!important;
  }
  #view .stock-item .illustrated-card>.choice-art{grid-row:1/span 2;height:48px!important;min-height:48px!important}
- #view .stock-item .illustrated-card>b{min-width:0;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+ /* the name gets the card's full width and may take two lines; the price sits under it (it used to share the first
+    row, which clipped long names at both ends: "ine bronze fitted bo") */
+ #view .stock-item .illustrated-card>b{grid-column:2/-1;display:block;min-width:0;max-width:100%;min-height:0;white-space:normal!important;overflow:visible;text-align:start;overflow-wrap:anywhere}
  #view .stock-item :is(.item-deltas,.bundle-indicator,.req-chips){grid-column:2/-1;justify-content:start}
- #view .stock-item .stock-price{grid-column:3;grid-row:1}
+ #view .stock-item .stock-price{grid-column:2/-1;grid-row:auto;justify-self:start}
 }
 
 /* locked rail rows: a quiet bar showing how close the skill is to being learned */

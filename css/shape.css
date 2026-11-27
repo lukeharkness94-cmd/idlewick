@@ -1,8 +1,10 @@
 /* ===================== Shape rule (owner, 26 Nov 2026) =====================
-   One shape for everything you can click, no outline on anything you can't.
-   - Clickable (buttons, tabs, choice cards, item tiles, slots, quest rows, rail rows, clickable portraits, chips that act,
-     a toggle's outer button, top-menu entries, page tabs): an 8px rounded rectangle (--r-act) with a 2px outline in
-     --act-line. States change the colour (hover, selected, primary, ready, warning, danger), never the shape.
+   One shape for everything you can click; a line only round the menus you navigate with.
+   - Navigation (top-menu entries and the HUD buttons beside them, page tabs, tab rows, rail rows): an 8px rounded
+     rectangle (--r-act) with a 2px outline in --act-line; states change the outline's colour.
+   - Every other control (buttons, choice cards, item tiles, slots, quest rows, clickable portraits, chips that act, a
+     toggle's outer button): the same 8px rectangle with no outline, floating on a raised fill (--act-fill) with a soft
+     shadow (--act-lift) that lifts on hover; states change the fill (selected brass, ready green, warning, danger).
    - Not clickable: panels are soft fills with a 12px corner (--r-panel) and no border; labels, chips, badges, counts,
      tags and status pills are flat tinted fills with a 4px corner (--r-info) and no border.
    - Circles only for round things you don't click: progress pips and dots, notification dots. Bars keep 2-3px.
@@ -10,13 +12,19 @@
    every unlayered !important, so the rule holds whatever the older sheets set, without enumerating their selectors.
    Inside the layer every declaration must be !important: a plain one loses to any unlayered rule.
    Exceptions: hotspots drawn on the pixel scenes (village site spots, the tower cutaway's rooms, the SVG map) keep the
-   scene's own look; images that act get an outline ring instead of a border, so their art keeps its whole-number scale.
+   scene's own look; images that act float on a backdrop instead of taking a border, so their art keeps its scale.
    tests/shape-rule.cjs checks the main pages in both themes. */
 :root{--r-act:8px;--r-panel:12px;--r-info:4px;--act-w:2px;
   --act-line:#71856e;--act-line-hi:#a7b39a;--act-on:var(--brass);--act-strong:var(--brass-hi);
-  --info-fill:color-mix(in srgb,var(--mute) 14%,transparent);--pip-off:color-mix(in srgb,var(--mute) 30%,var(--panel))}
+  --info-fill:color-mix(in srgb,var(--mute) 14%,transparent);--pip-off:color-mix(in srgb,var(--mute) 30%,var(--panel));
+  --act-fill:color-mix(in srgb,#ffffff 7%,var(--panel));--act-fill-on:color-mix(in srgb,var(--brass) 26%,var(--panel));
+  --act-glow:color-mix(in srgb,var(--brass) 80%,transparent);
+  --act-lift:0 1px 2px rgba(0,0,0,.35),0 4px 10px -6px rgba(0,0,0,.65);--act-lift-hi:0 2px 4px rgba(0,0,0,.4),0 9px 18px -8px rgba(0,0,0,.7)}
 :root[data-theme="light"]{--act-line:#b09d7c;--act-line-hi:#8c7650;--act-on:var(--brass);--act-strong:#6f4a1c;
-  --info-fill:color-mix(in srgb,var(--mute) 11%,transparent);--pip-off:color-mix(in srgb,var(--mute) 26%,var(--panel))}
+  --info-fill:color-mix(in srgb,var(--mute) 11%,transparent);--pip-off:color-mix(in srgb,var(--mute) 26%,var(--panel));
+  --act-fill:color-mix(in srgb,#a07a40 9%,var(--panel));--act-fill-on:color-mix(in srgb,var(--brass) 20%,var(--panel));
+  --act-glow:color-mix(in srgb,var(--brass) 70%,transparent);
+  --act-lift:0 1px 2px rgba(80,55,20,.16),0 4px 10px -6px rgba(80,55,20,.42);--act-lift-hi:0 2px 4px rgba(80,55,20,.18),0 9px 18px -8px rgba(80,55,20,.5)}
 
 @layer shape {
   /* ---------- not clickable: panels are soft fills, 12px, no border ---------- */
@@ -28,6 +36,8 @@
   :is(.panel,.sidebar,.m-card,.now,.qlayout,.ach,.col-row,.tech,.tech-family,.cw-area,.cw-window,.estate-fields,.proj-line,
       .ranch-board,.explore-left,.ench-row,.aslot){border-radius:var(--r-panel)!important}
   #hud.panel{border-radius:var(--r-panel)!important}
+  /* a panel you can click is a control: the 8px corner */
+  :is(button,[data-do]).panel{border-radius:var(--r-act)!important}
   /* empty equipment places on Hero are not clickable: a flat tinted place, no dashed outline */
   .eq.empty:not(button,[data-do]){border-color:transparent!important;background:var(--info-fill)!important;border-radius:var(--r-act)!important}
 
@@ -45,37 +55,49 @@
   .ench-pips i{border-color:transparent!important;border-radius:50%!important;transform:none!important;width:9px!important;height:9px!important;background-color:color-mix(in srgb,#9d7ce8 30%,transparent)!important}
   .ench-pips i.on{background-color:#b48cff!important}
 
-  /* ---------- clickable: one shape, 8px, 2px outline ---------- */
-  :is(button,[data-do],[role=button],[role=tab],[role=switch],a.btn,.btn):not(img,.site-spot,.tc-room,svg *){
+  /* ---------- navigation: an 8px rounded rectangle with a 2px outline ----------
+     The menus you move around with keep the outline (owner, 27 Nov 2026: "Unless it's a menu item to navigate"): the
+     top menu and the HUD buttons beside it, page tabs, tab rows inside a page, the skill rail. */
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(img,.site-spot,.tc-room,svg *){
     border-radius:var(--r-act)!important;border-width:var(--act-w)!important;border-style:solid!important;border-color:var(--act-line)!important}
-  /* fields you type into are interactive too */
-  :is(input:not([type=checkbox],[type=radio],[type=range],[type=color],[type=hidden]),textarea){
-    border-radius:var(--r-act)!important;border:var(--act-w) solid var(--act-line)!important}
-  :is(input,textarea):focus{border-color:var(--act-on)!important}
-  /* empty slots you can fill keep their dashed outline */
-  :is(button,[data-do]):is(.eq.empty,.aslot.empty,.ab-tile.empty,.plot.empty,.slot.empty){border-style:dashed!important}
-  /* hover and keyboard focus brighten the outline */
-  :is(button,[data-do],[role=button],[role=tab],[role=switch],.btn):not(:disabled,.locked,.site-spot,.tc-room,svg *):hover{border-color:var(--act-line-hi)!important}
-  /* selected, current and pressed */
-  :is(button,[data-do],[role=button],[role=tab],[role=switch],.btn):is(.on,.selected,.active,.current,.here,[aria-selected=true],[aria-pressed=true],[aria-current=page],[aria-checked=true]):not(.site-spot,.tc-room,svg *){
-    border-color:var(--act-on)!important}
-  /* the one main action: the strongest tone */
-  :is(button,[data-do],.btn):is(.primary,.task-primary):not(:disabled){border-color:var(--act-strong)!important}
-  /* status tones */
-  :is(button,[data-do],[role=button]):is(.ready,.ps-ready,.deliver-ready,.ok,.enough,.can){border-color:color-mix(in srgb,var(--good) 70%,var(--act-line))!important}
-  :is(button,[data-do],[role=button]):is(.warn,.short,.low){border-color:color-mix(in srgb,var(--warn) 75%,var(--act-line))!important}
-  :is(button,[data-do],.btn).danger{border-color:color-mix(in srgb,var(--bad) 70%,var(--act-line))!important}
-  :is(button,[data-do],.btn):is(.on,.selected).danger{border-color:var(--bad)!important}
-  /* a control you can't use right now: same shape, faded outline (27 Nov 2026 audit: a disabled Queue beside a
-     disabled primary looked usable) */
-  :is(button,.btn):disabled:not(.primary,.task-primary,.illustrated-card,.locked){border-color:color-mix(in srgb,var(--act-line) 40%,transparent)!important;opacity:.55}
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(:disabled,.locked):hover{border-color:var(--act-line-hi)!important}
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):is(.on,.selected,.active,.current,.here,[aria-selected=true],[aria-pressed=true],[aria-current=page]){border-color:var(--act-on)!important}
 
-  /* text-only controls become small outlined buttons instead of underlined words */
+  /* ---------- every other control floats: no outline, a raised fill and a soft shadow ----------
+     (owner, 27 Nov 2026: "we can just either make it float on over or have a slight backdrop so its obvious it's
+     clickable"). The border keeps its width, transparent, so nothing moves. A control without its own background sits
+     on --act-fill (a plain layer declaration, so any background the control already has wins); hovering lifts it;
+     selected, ready, warning and danger change its fill, never add a line. Zero-specificity selectors (:where) so any
+     more specific rule below, such as a ripe plot's glow, still wins. */
+  :where(button,[data-do],[role=button],[role=switch],a.btn,.btn):not(:where(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily],img,.site-spot,.tc-room,svg *)){
+    border-radius:var(--r-act)!important;border-width:var(--act-w)!important;border-style:solid!important;border-color:transparent!important;
+    outline-color:transparent!important;box-shadow:var(--act-lift)!important;background-color:var(--act-fill)}
+  :where(button,[data-do],[role=button],[role=switch],a.btn,.btn):not(:where(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily],img,.site-spot,.tc-room,svg *,:disabled,.disabled)):hover{box-shadow:var(--act-lift-hi)!important;translate:0 -1px}
+  html.calm :where(button,[data-do],[role=button],[role=switch],a.btn,.btn):hover{translate:none}
+  @media (prefers-reduced-motion:reduce){:where(button,[data-do],[role=button],[role=switch],a.btn,.btn):hover{translate:none}}
+  /* selected, current and pressed: a brass-tinted fill and a soft brass glow */
+  :where(button,[data-do],[role=button],[role=switch],a.btn,.btn):where(.on,.selected,.active,.current,.here,.sel,[aria-selected=true],[aria-pressed=true],[aria-current=page]):not(:where(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily],.primary,.task-primary,[role=switch],.tog,.site-spot,.tc-room,svg *)){
+    background-color:var(--act-fill-on)!important;box-shadow:var(--act-lift),0 0 16px -5px var(--act-glow)!important}
+  /* status tones tint the fill */
+  :where(button,[data-do],[role=button]):where(.ready,.deliver-ready,.ok,.enough,.can):not(:where(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily],.primary,.site-spot)){background-color:color-mix(in srgb,var(--good) 15%,var(--panel))!important}
+  :where(button,[data-do],[role=button]):where(.warn,.short,.low):not(:where(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily],.primary)){background-color:color-mix(in srgb,var(--warn) 16%,var(--panel))!important}
+  :where(button,[data-do],.btn).danger{background-color:color-mix(in srgb,var(--bad) 14%,var(--panel))!important}
+  :where(button,[data-do],.btn):where(.on,.selected).danger{background-color:color-mix(in srgb,var(--bad) 26%,var(--panel))!important}
+  /* a control you can't use right now sits flat and faded: no lift, so it doesn't read as clickable */
+  :is(button,.btn):disabled:not(.primary,.task-primary,.illustrated-card,.locked){box-shadow:none!important;opacity:.55}
+  :is(button,.btn):disabled:is(.primary,.task-primary){box-shadow:none!important}
+  /* fields you type into: a sunken fill, a brass glow while typing */
+  :is(input:not([type=checkbox],[type=radio],[type=range],[type=color],[type=hidden]),textarea){
+    border-radius:var(--r-act)!important;border:var(--act-w) solid transparent!important;background-color:var(--act-fill)!important;
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.16)!important}
+  :is(input,textarea):focus{box-shadow:inset 0 1px 3px rgba(0,0,0,.16),0 0 14px -4px var(--act-glow)!important}
+
+  /* text-only controls become small raised buttons instead of underlined words */
   button:is(.linkish,.tog,.sk-goal,.sh-next-btn,.now-go,.now-plan,.gi,.ss-weapon,.cw-mon-art,.voy-item){padding-inline:8px!important}
   button.linkish{text-decoration:none!important}
-  /* portrait buttons frame their picture: the outline goes around it, never over it (the art keeps its size) */
+  /* portrait buttons: the picture fills the button (the art keeps its size) */
   button:is(.h-hero,.quest-face){padding:0!important;box-sizing:content-box!important}
-  /* the Now card's task button gained an outline it did not have: it takes it from the card's padding, not the rail's height */
+  /* the Now card's task button takes its border room from the card's padding, not the rail's height */
   #nowcard .now:has(.now-go){padding-block:4px!important}
   .tool-families .btn{padding-inline:7px!important}
   button.tog{padding-block:3px!important}
@@ -85,13 +107,13 @@
   /* a picture or name that became a route (ux_update.js) reads as one small button */
   .voy-item{display:inline-flex!important;align-items:center!important;gap:7px!important;margin-right:6px!important}
   span.requirement-route{display:inline-flex!important;align-items:center!important;gap:4px!important;padding:1px 3px!important;vertical-align:middle!important}
-  /* images that act: an outline ring, so the art is never resized by a border */
-  img:is([data-do],[role=button]){border:0!important;outline:var(--act-w) solid var(--act-line)!important;outline-offset:1px!important;border-radius:var(--r-act)!important}
-  img:is([data-do],[role=button]):hover{outline-color:var(--act-line-hi)!important}
-  /* a control inside a control: the outer one carries the outline */
-  :is(button,[data-do],[role=button]) img:is([data-do],[role=button]){outline:0!important}
+  /* images that act float like any control: a backdrop and a soft shadow, never a border (the art keeps its scale) */
+  img:is([data-do],[role=button]){border:0!important;outline:0!important;border-radius:var(--r-act)!important;background-color:var(--act-fill)!important;box-shadow:var(--act-lift)!important}
+  img:is([data-do],[role=button]):hover{box-shadow:var(--act-lift-hi)!important}
+  /* a control inside a control: the outer one carries the lift */
+  :is(button,[data-do],[role=button]) img:is([data-do],[role=button]){box-shadow:none!important;background-color:transparent!important}
 
-  /* keyboard focus keeps its own ring outside the outline */
+  /* keyboard focus keeps its own ring (keyboard only; a pointer click never shows it) */
   :is(button,[data-do],[role=button],[role=tab],[role=switch],.btn):focus-visible{outline:2px solid var(--brass-hi)!important;outline-offset:2px!important}
   /* rail rows: the outline is drawn inside the row (an inset ring), so the 180px rail keeps its full width for
      names like Scholarship beside a badge and the level */
@@ -152,13 +174,20 @@
   .ranch-board{box-shadow:inset 0 2px 0 #96724a,0 10px 30px -12px #000!important}
   /* selected and current states of things you can't click read as a stronger tint instead of a ring */
   .now.here{background-color:color-mix(in srgb,var(--brass) 12%,var(--panel))!important}
-  /* a selected pen is a control: its state shows in its outline's colour, like every other control */
-  :is(button,[data-do],[role=button]).sel{border-color:var(--act-on)!important}
 
   /* the unlock pop-up: a tinted disc with a soft glow, no ring and no rippling circles */
   .lr-v2 .level-emblem{border-color:transparent!important;box-shadow:0 0 40px -6px color-mix(in srgb,var(--c) 55%,transparent)!important;
     background:color-mix(in srgb,var(--c) 16%,var(--panel))!important}
   .lr-v2 .lr-ripple{display:none!important}
+
+  /* Village signs are colour only (Finish green with a glow, Give blue, Needs a pale tag with the item greyed); the
+     finished site glows instead of being boxed; the chosen site's sign glows brass */
+  :is(.site-spot .site-mark,.site-legend .sl-sign){border-color:transparent!important;outline:0!important}
+  .village-scene .site-spot.ps-ready .site-mark{box-shadow:0 0 16px 2px #9ad37599,0 3px 10px #0008!important}
+  .site-spot{outline:0!important;border-color:transparent!important}
+  .site-spot:is(:hover,:focus-visible){background-color:color-mix(in srgb,var(--brass) 16%,transparent)!important}
+  .site-spot.on{background-color:color-mix(in srgb,var(--brass) 18%,transparent)!important;box-shadow:0 0 20px 2px color-mix(in srgb,var(--brass) 45%,transparent)!important}
+  .village-scene .site-spot.on .site-mark{box-shadow:0 0 16px 3px color-mix(in srgb,var(--brass,#c8a04a) 85%,transparent),0 3px 10px #0008!important}
 
   /* the creature on the combat stage is a scene hotspot: no box round it; hovering brightens it instead */
   .encounter-arena #av-foe.foe-guide{border-color:transparent!important;background:none!important;box-shadow:none!important}
