@@ -33,14 +33,16 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
  assert.equal(await p.locator('.modal .lr-unlock').count(),1,'the earned unlock is visible when reveals are switched on');
  assert.equal(await p.locator('.modal .lr-guide').count(),0,'the player chooses when to read the guide');
  await p.evaluate(()=>{DQ.closeModal();DQ.go('hunting');});
- assert.equal(await p.locator('.modal').count(),0,'opening Hunting does not interrupt play');
+ /* 26 Nov 2026 (owner): the first visit to a page opens its short guide once, 250 ms after the page draws (this test
+    used to click Help straight away under the older Help-only rule, which raced the guide on a busy machine) */
+ await p.locator('.modal .first-visit').waitFor({timeout:5000});
+ assert.match(await p.locator('.modal .m-body').innerText(),/Try this/);
+ await p.locator('.modal .m-act .btn').first().click();
+ await p.waitForFunction(()=>!document.querySelector('.modal'),null,{timeout:5000});
+ /* Help opens the same guide whenever the player wants it */
  await p.locator('.page-help [data-do="pagehelp"]').click();
  assert.match(await p.locator('.modal .m-body').innerText(),/Try this/);
- await p.evaluate(()=>{DQ.closeModal();DQ.go('overview');DQ.go('hunting');});
- /* 26 Nov 2026 (owner): a first-visit guide shows once when it is safe to; after Got it, revisits stay quiet */
- await p.waitForTimeout(400);
- if(await p.locator('.modal .first-visit').count()){await p.locator('.modal .m-act .btn').first().click();}
- await p.evaluate(()=>{DQ.go('overview');DQ.go('hunting');});await p.waitForTimeout(400);
+ await p.evaluate(()=>{DQ.closeModal();DQ.go('overview');DQ.go('hunting');});await p.waitForTimeout(400);
  assert.equal(await p.locator('.modal').count(),0,'revisiting Hunting stays quiet once its guide has been seen');
  assert.deepEqual(errors,[]);console.log(`PASS ${count} page/state/theme/viewport combinations; sidebar fit, unlocks and on-demand help.`);
  }finally{await b.close();}
