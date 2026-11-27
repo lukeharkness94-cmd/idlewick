@@ -276,3 +276,5 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   parchment-style fantasy game ... moving town scenes, animated animals and characters ... cosy, logical and like a warm
   dashboard", then chose "1 and 2" (materials and polish; living towns with day and night). Added the materials line
   to the Hearthside Journal rule and the living-towns line to the towns rule.
+- 27 Nov 2026 (owner): "characters and animals with personality" so the game feels cosy and alive. Added the idle-life
+  line to the Motion rule (js/personality.js).

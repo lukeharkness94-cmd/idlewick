@@ -174,3 +174,22 @@ html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,ht
 }
 .calm .battle-rig,.calm .battle-bone,.calm .rig-hand-anchor::before { animation:none!important; }
 .calm .rig-hand-anchor::before { display:none!important; }
+
+/* Personality (js/personality.js, owner 27 Nov 2026: "characters and animals with personality"). The hero and the
+   companion breathe wherever they stand; a sleeping companion breathes slower under a small pixel Zzz. Transform
+   properties only (`translate`, so the scripted swings, hops and wind-ups add on top), off under Reduce effects and
+   reduced motion. Blinks, yawns, stretches, brow wipes and ear flicks are drawn frames swapped by the script. */
+.fig-stage .fig-img { animation:lw-breathe 3.6s ease-in-out infinite; }
+.scene-worker img { animation:lw-breathe 3s ease-in-out infinite; }
+.fig-pet img:not(.lw-z),.scene-pet img,.battle-companion img:not(.lw-z) { animation:lw-breathe 2.7s ease-in-out infinite; }
+.lw-asleep img:not(.lw-z) { animation-duration:4.8s; }
+@keyframes lw-breathe { 0%,100% { translate:0 0; } 50% { translate:0 -1px; } }
+.lw-zzz { position:absolute; left:50%; bottom:70%; width:28px; height:30px; pointer-events:none; z-index:3; }
+.lw-zzz .lw-z { position:absolute; left:0; bottom:0; opacity:0; animation:lw-zzz 3.6s linear infinite; animation-delay:calc(var(--z) * -1.2s); }
+@keyframes lw-zzz { 0% { opacity:0; transform:translate(0,0); } 15% { opacity:1; } 70% { opacity:.8; } 100% { opacity:0; transform:translate(-10px,-24px); } }
+html.calm .fig-stage .fig-img,html.calm .fig-pet img,html.calm .scene-pet img,html.calm .battle-companion img,html.calm .lw-zzz .lw-z { animation:none!important; }
+html.calm .lw-zzz { display:none; }
+@media (prefers-reduced-motion:reduce) {
+ .fig-stage .fig-img,.fig-pet img,.scene-pet img,.battle-companion img,.lw-zzz .lw-z { animation:none!important; }
+ .lw-zzz { display:none; }
+}

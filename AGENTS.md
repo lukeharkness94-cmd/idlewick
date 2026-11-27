@@ -95,7 +95,10 @@ dated line to the history file.
   and drawn scene art keeps its pixel-art outlines. `tests/shape-rule.cjs` checks every page, a fight and the pop-ups.
 - **Motion** (`js/finish.js`, Finish layer in css/style.css): browser timelines at native refresh, elapsed-time motion,
   no stepped easing or 60 Hz loops; hover lifts use `translate`, not `transform`; everything transform/opacity only and
-  off under `html.calm` and `prefers-reduced-motion`.
+  off under `html.calm` and `prefers-reduced-motion`. Characters and animals have idle life (`js/personality.js`, owner
+  27 Nov): the hero breathes, blinks, fidgets when idle and wipes their brow between strikes (never over one); the
+  companion breathes, flicks, hops on wins and sleeps when nothing runs; creatures wind up before each blow and stagger
+  when hit. Expressions are drawn frames on the same sprite; impacts and hit numbers keep `UI.afterImpact`.
 - **Music and sound are synthesised** (`js/audio.js`, no audio files): one theme per region plus title, combat and boss
   (`D.MUSIC`), played lo-fi (`D.MUSIC_LOFI`); ambience per town with ruined/mending/restored tiers (`D.AMBIENCE`). A new
   region needs a theme row and ambience. Work sounds land on each visible strike (`js/strike_sync.js`). Quest and boss
