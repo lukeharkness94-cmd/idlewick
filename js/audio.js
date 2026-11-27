@@ -47,6 +47,15 @@ function noise(dur, o = {}) {
   const g = ctx.createGain(); g.gain.setValueAtTime(o.v || .15, t); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
   src.connect(f); f.connect(g); g.connect(sfxG); src.start(t);
 }
+/* paper and quill: noise whose loudness jumps every few milliseconds (the grain of a crinkle or a nib on paper), through
+   a band-pass that can sweep, with a quick rise and a soft tail. grain = milliseconds per crinkle (default 4–9) */
+function paper(dur, o = {}) {
+  if (!ctx) return; const t = ctx.currentTime + (o.at || 0), sr = ctx.sampleRate, n = Math.floor(sr * dur), buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
+  let amp = 1, next = 0; for (let i = 0; i < n; i++) { if (i >= next) { amp = .25 + Math.random() * .75; next = i + Math.floor(sr * (o.grain || (4 + Math.random() * 5)) / 1000); } const k = i / n; d[i] = (Math.random() * 2 - 1) * amp * Math.min(1, k * 14) * Math.pow(1 - k, 1.6); }
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.setValueAtTime(o.f || 3000, t); if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t + dur); f.Q.value = o.q || .7;
+  const g = ctx.createGain(); g.gain.value = o.v || .05; src.connect(f); f.connect(g); g.connect(sfxG); src.start(t);
+}
 const jit = (f, r = .06) => f * (1 + (Math.random() * 2 - 1) * r);
 const note = (root, deg) => mtof(root + PENT[deg % 5] + 12 * Math.floor(deg / 5));
 
@@ -75,7 +84,13 @@ const SFX = {
   gem: () => { [0, 2, 4, 7].forEach((d, i) => tone(note(84, d), .3, { v: .05, at: i * .05 })); },
   eat: () => { noise(.06, { f: 900, v: .12 }); noise(.06, { f: 700, v: .1, at: .1 }); },
   equip: () => { noise(.06, { type: 'lowpass', f: 900, v: .14 }); tone(jit(180), .12, { type: 'triangle', v: .1, to: 120 }); bell(jit(1320, .03), .05, .025); },
-  buy: () => { tone(988, .09, { v: .08, type: 'triangle' }); tone(1318, .18, { v: .07, at: .07, type: 'triangle' }); },
+  /* a purchase (27 Nov 2026, "sound that sits in the room"): two small coins touching, then a soft bell on top. It
+     replaces the old bright two-note buy blip, so a purchase still makes exactly one sound */
+  buy: () => { const c = jit(2637, .03); tone(c, .07, { v: .03 }); tone(c * 1.5, .05, { v: .014 }); tone(jit(2960, .03), .09, { v: .026, at: .075 }); tone(c * 1.33, .06, { v: .012, at: .075 }); bell(jit(1568, .02), .12, .022); },
+  /* a page or tab turning: a short crinkle of paper (grainy noise, band-passed high) with a softer lower swish */
+  page: () => { paper(.2, { f: 3200, q: .6, v: .05 }); paper(.14, { f: 1100, q: .8, v: .025, at: .04 }); },
+  /* a quest accepted: two quick quill strokes and a dot, scratchy noise swept down through a narrow band */
+  quill: () => { [[0, .1, 4200, 2700], [.13, .08, 3900, 2900]].forEach(([at, d, f, to]) => paper(d, { f, to, q: 4, v: .09, at, grain: 2 })); paper(.025, { f: 2400, q: 3, v: .06, at: .28, grain: 1 }); },
   sell: () => { tone(1318, .09, { v: .08, type: 'triangle' }); tone(988, .18, { v: .07, at: .07, type: 'triangle' }); },
   level: () => { const r = pick([60, 62, 64, 65]); [0, 4, 7, 12].forEach((d, i) => tone(mtof(r + d), .55, { v: .08, at: i * .09, type: 'triangle', wet: true })); bell(mtof(r + 24), .36, .045); },
   perk: () => { const r = pick([67, 69]); [0, 7, 12, 16].forEach((d, i) => tone(mtof(r + d), .5, { v: .06, at: i * .07 })); },
@@ -95,31 +110,36 @@ const SFX = {
 };
 /* Sounds that fire once per finished task are thinned out and varied so they never become a metronome */
 const TASK = new Set(['fish', 'wood', 'mine', 'thieve', 'sizzle', 'anvil', 'stitch', 'cast', 'bow', 'hit', 'miss']);
+/* soft interface sounds wait longer before they repeat, so rapid clicks never machine-gun (and a purchase that two
+   systems both announce still sounds once) */
+const GAP = { page: 350, quill: 400, buy: 250 };
+const played = {};
+const quiet = () => !!(DQ.sim.on || DQ.forecasting);
 DQ.sfx = name => {
-  const s = S(); if (!s.sfx || s.muted || DQ.sim.on) return;
+  const s = S(); if (!s.sfx || s.muted || quiet()) return;
   if (!ctx) return; const now = performance.now();
   if (TASK.has(name)) {
     if (s.taskSounds === 'off' || DQ.strikeLive === name) return;
     const gap = s.taskSounds === 'varied' ? 450 : 900, prob = s.taskSounds === 'varied' ? .78 : .45;
     if (now - (last[name] || 0) < gap && name !== 'hit' && name !== 'miss') return;
     if (Math.random() > prob && name !== 'hit') return;
-  } else if (now - (last[name] || 0) < 60) return;
+  } else if (now - (last[name] || 0) < (GAP[name] || 60)) return;
   const IMPORTANT = new Set(['level', 'quest', 'boss', 'death', 'restore', 'region', 'adventure', 'discover', 'unlock', 'ach', 'collection', 'unique']);
   recent.push(now); while (recent.length && now - recent[0] > 400) recent.shift();
   if (recent.length > 5 && !IMPORTANT.has(name)) return;
-  last[name] = now; try { SFX[name] && SFX[name](); } catch (e) {}
+  last[name] = now; played[name] = (played[name] || 0) + 1; try { SFX[name] && SFX[name](); } catch (e) {}
 };
 /* Strike sounds (20 Nov 2026): js/strike_sync.js plays the work sound as each swing lands on screen. While it does,
    the once-per-finished-task sound for that kind stays quiet so nothing doubles up. */
 DQ.strikeLive = null;
 DQ.sfxStrike = name => {
-  const s = S(); if (!s.sfx || s.muted || DQ.sim.on || !ctx || s.taskSounds === 'off') return;
+  const s = S(); if (!s.sfx || s.muted || quiet() || !ctx || s.taskSounds === 'off') return;
   const now = performance.now(); if (now - (last['strike:' + name] || 0) < 140) return;
   last['strike:' + name] = now; try { SFX[name] && SFX[name](); } catch (e) {}
 };
 DQ.audioInit = init;
 DQ.audioApply = applyVolumes;
-DQ.setMuted = m => { DQ.S.settings.muted = m; applyVolumes(); DQ.emit('settings'); };
+DQ.setMuted = m => { DQ.S.settings.muted = m; applyVolumes(); DQ.roomRefresh && DQ.roomRefresh(); DQ.emit('settings'); };
 
 /* ---------- Music: a theme for every region, combat and bosses (21 Nov 2026, owner: "something different for combat
    and each region"). Synthesised, no files. Each theme is data: key and mode, tempo, metre (4/4 in sixteenths or 6/8 in
@@ -335,7 +355,7 @@ function startAmbience(town, plan) {
 }
 /* follows the current town (crossfading on travel) and the ambience setting */
 /* read-only counters for long-session checks */
-DQ.audioStats = () => ({ ambienceTimers: ambTimers.size, ambienceNodes: ambNodes.length, town: ambTown, key: ambKey, state: ctx ? ctx.state : 'none' });
+DQ.audioStats = () => ({ ambienceTimers: ambTimers.size, ambienceNodes: ambNodes.length, town: ambTown, key: ambKey, state: ctx ? ctx.state : 'none', played: Object.assign({}, played), roomLayers: Object.keys(room).length });
 DQ.ambienceRefresh = () => {
   if (!ctx) return; applyVolumes();
   const st = DQ.audioState(), want = S().ambience === false ? null : st.town;
@@ -343,7 +363,144 @@ DQ.ambienceRefresh = () => {
   const plan = want && DQ.ambiencePlan(want, st.tier, { festival: !!(DQ.worldFestival && DQ.worldFestival()), calm: !!S().reduceFx });
   if (!want) { if (ambTown) { stopAmbience(); ambTown = null; ambKey = null; } }
   else if (plan.key !== ambKey) startAmbience(want, plan);
+  DQ.roomRefresh();
 };
+
+/* ---------- Room sound (owner, 27 Nov 2026: "cosy ... like a warm dashboard we can feel at home in") ----------
+   Continuous layers that sit under the village ambience, on the same ambience bus, so they follow Master volume,
+   Ambience volume, the Nature ambience switch, Mute and the fight dip. Settings → Audio → Sound filters → Room sounds
+   turns just these off. Each layer is one gain node that fades in and out over a few seconds; a layer that is already
+   playing is only re-levelled, never started twice, so re-renders and refreshes cannot stack copies.
+   - hearth: on the Home pages, a fire in the grate: a low brown-noise roar, a breathy band of flame that flickers,
+     and sparse random crackle pops (now and then a bigger snap).
+   - chatter: a market murmur in every town (band-passed noise with slow swells and the odd distant voice: a buzzy
+     tone through two vowel formants). Its level and how often a voice carries follow the restoration tier; on the
+     Home pages it is heard through the wall, at under half.
+   - night (town clock dark > .6): two crickets chirping at their own pitches and the odd owl; day (dark < .35):
+     a light bird phrase now and then. Dusk and dawn are hushed.
+   - rain (town weather 'rain'): a soft hiss, a bed of tiny drop ticks and the odd drip off the eaves.
+   - snow: a soft, slowly moving wind.
+   Nothing here plays before the first click (no AudioContext yet), on the title screen, in a simulation or forecast,
+   or while the tab is hidden. Reduce effects spaces the details out, as it does for the rest of the ambience.
+   Levels (gain on the ambience bus, before the bus's own Ambience volume): */
+D.ROOM_SOUND = {
+  fade: 1.1, /* time constant in seconds: a layer is most of the way in or out after about 3 s, settled by 5 */
+  hearth: { level: .045, hubs: ['home'] },
+  chatter: { level: .03, tiers: { ruined: .22, mending: .55, restored: 1 }, voices: { ruined: [22, 44], mending: [8, 16], restored: [2.5, 7] }, indoors: .45 },
+  night: { level: .022, from: .6, owl: [28, 75] },
+  day: { level: .016, below: .35, gap: [9, 24], none: ['emberfall', 'hollow'] },
+  rain: { level: .03 },
+  snow: { level: .032 },
+};
+/* which room layers a moment wants, as plain data: { layer: level }. o = { page, hub, town, tier, dark, weather } */
+DQ.roomPlan = (o = {}) => { const R = D.ROOM_SOUND, out = {}, home = o.hub === 'home' || o.page === 'overview';
+  if (R.hearth.hubs.includes(o.hub) || o.page === 'overview') out.hearth = R.hearth.level;
+  const tier = R.chatter.tiers[o.tier] != null ? o.tier : 'mending'; out.chatter = R.chatter.level * R.chatter.tiers[tier] * (home ? R.chatter.indoors : 1);
+  const dark = o.dark || 0; if (dark > R.night.from) out.night = R.night.level; else if (dark < R.day.below && !R.day.none.includes(o.town)) out.day = R.day.level;
+  if (o.weather === 'rain') out.rain = R.rain.level; if (o.weather === 'snow') out.snow = R.snow.level;
+  return out; };
+const roomInputs = () => { const st = DQ.S, UI = DQ.ui || {}, page = UI.view, town = (st && st.town) || 'willowbrook';
+  let dark = 0; try { dark = DQ.townLight && DQ.townHour ? DQ.townLight(DQ.townHour()).dark : 0; } catch (e) {}
+  let weather = 'clear'; try { weather = DQ.townWeather ? DQ.townWeather(town) : 'clear'; } catch (e) {}
+  return { page, hub: UI.hubOf && page ? UI.hubOf(page).id : null, town, tier: DQ.restorationTier(town), dark, weather }; };
+const roomOn = () => { const st = DQ.S, s = st && st.settings; return !!(s && modeId !== 'title' && s.ambience !== false && !s.muted && !(s.snd && s.snd.room === false)); };
+const room = {};
+const R = () => D.ROOM_SOUND;
+const nbuf = {}; /* three seconds of looped noise, made once per colour */
+const noiseOf = kind => { if (nbuf[kind]) return nbuf[kind]; const n = ctx.sampleRate * 3, b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); let l = 0;
+  for (let i = 0; i < n; i++) { const w = Math.random() * 2 - 1; if (kind === 'brown') { l = (l + .02 * w) / 1.02; d[i] = l * 3.5; } else d[i] = w; } return (nbuf[kind] = b); };
+const bandOf = (type, f, q = .7) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = q; return b; };
+const gainOf = v => { const g = ctx.createGain(); g.gain.value = v; return g; };
+/* a looping noise source through a chain of nodes into the layer */
+const bedOf = (L, kind, chain) => { const s = ctx.createBufferSource(); s.buffer = noiseOf(kind); s.loop = true; let n = s; for (const c of chain) { n.connect(c); n = c; } n.connect(L.g); s.start(ctx.currentTime, Math.random() * 2.5); L.srcs.push(s); return s; };
+/* a detail on its own loose timer; it only sounds while the layer is live, the tab is visible and nothing is being simulated */
+const every = (L, gap, fn) => { const calm = () => (DQ.S && DQ.S.settings.reduceFx ? 2 : 1), span = () => (typeof gap === 'function' ? gap() : gap);
+  let id = 0; const wait = ms => { id = setTimeout(next, ms); L.timers.add(id); };
+  function next() { L.timers.delete(id); if (L.dead) return; if (!L.dying && ctx.state === 'running' && !document.hidden && !quiet()) { try { fn(ctx.currentTime + .02); L.events = (L.events || 0) + 1; } catch (e) { L.errors = (L.errors || 0) + 1; } }
+    const [lo, hi] = span(); wait((lo + Math.random() * (hi - lo)) * calm() * 1000); }
+  wait(span()[0] * Math.random() * 1000); };
+/* a short envelope on a gain: up in a, down to nothing by d */
+const blip = (g, t, a, d, v) => { g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + a); g.gain.exponentialRampToValueAtTime(.0005, t + d); };
+const ROOM = {
+  hearth: L => {
+    const roar = gainOf(.8), flame = gainOf(.07);
+    bedOf(L, 'brown', [bandOf('lowpass', 380, .5), roar]);
+    bedOf(L, 'white', [bandOf('bandpass', 1100, .7), flame]);
+    /* the fire breathes: the roar and the flame band wander a little, never on a beat */
+    every(L, [.35, .9], t => { roar.gain.setTargetAtTime(.55 + Math.random() * .45, t, .25); flame.gain.setTargetAtTime(.035 + Math.random() * .08, t, .15); });
+    /* crackle: one to three pops close together; one in ten is a bigger snap with a little thump under it */
+    every(L, [.12, .95], t => { const k = 1 + Math.floor(Math.random() * 3), snap = Math.random() < .1;
+      for (let i = 0; i < k; i++) { const at = t + i * (.012 + Math.random() * .05), len = .006 + Math.random() * (snap ? .03 : .016), s = ctx.createBufferSource(); s.buffer = noiseOf('white');
+        const hp = bandOf('highpass', 1200 + Math.random() * 2200), g = ctx.createGain(); blip(g, at, .001, len, (snap ? .9 : .3) + Math.random() * .45); s.connect(hp); hp.connect(g); g.connect(L.g); s.start(at, Math.random() * 2.5, len + .02); }
+      if (snap) { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(190, t); o.frequency.exponentialRampToValueAtTime(70, t + .05); blip(g, t, .002, .06, .5); o.connect(g); g.connect(L.g); o.start(t); o.stop(t + .08); } });
+  },
+  chatter: L => {
+    const murmur = gainOf(.8), band = bandOf('bandpass', 520, .9);
+    bedOf(L, 'white', [band, bandOf('lowpass', 1500, .5), murmur]);
+    bedOf(L, 'brown', [bandOf('bandpass', 300, 1), gainOf(.6)]);
+    /* slow swells as people come and go, and the crowd's centre drifts */
+    every(L, [1.8, 4.5], t => { murmur.gain.setTargetAtTime(.4 + Math.random() * .6, t, 1.1); band.frequency.setTargetAtTime(420 + Math.random() * 260, t, 1.6); });
+    /* the odd distant voice: a buzzy tone through two vowel formants, one to three syllables, muffled by distance */
+    const VOWEL = [[700, 1200], [450, 800], [400, 2000], [600, 1700], [300, 870]];
+    every(L, () => R().chatter.voices[L.tier] || R().chatter.voices.mending, t => { const f0 = 115 + Math.random() * 120, n = 1 + Math.floor(Math.random() * 3), far = bandOf('lowpass', 1800, .5); far.connect(L.g);
+      for (let i = 0; i < n; i++) { const at = t + i * (.16 + Math.random() * .1), d = .1 + Math.random() * .14, o = ctx.createOscillator(), g = ctx.createGain(), [f1, f2] = VOWEL[Math.floor(Math.random() * VOWEL.length)];
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(f0 * (.95 + Math.random() * .12), at); o.frequency.linearRampToValueAtTime(f0 * (.85 + Math.random() * .3), at + d);
+        const b1 = bandOf('bandpass', f1, 7), b2 = bandOf('bandpass', f2, 7), g2 = gainOf(.6); o.connect(b1); o.connect(b2); b1.connect(g); b2.connect(g2); g2.connect(g);
+        blip(g, at, .03, d, 1.4 + Math.random() * .6); g.connect(far); o.start(at); o.stop(at + d + .05); } });
+  },
+  night: L => {
+    /* two crickets, each at its own pitch: a train of three or four 22 ms chirps, then a breath, sometimes a longer rest */
+    [4400 + Math.random() * 200, 4750 + Math.random() * 200].forEach(f => every(L, () => Math.random() < .2 ? [3, 6] : [.7, 1.6], t => {
+      const o = ctx.createOscillator(), g = ctx.createGain(), n = 3 + Math.floor(Math.random() * 2), v = .45 + Math.random() * .35; o.frequency.value = f; g.gain.setValueAtTime(0, t);
+      for (let i = 0; i < n; i++) { const at = t + i * .05; g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(v, at + .006); g.gain.linearRampToValueAtTime(0, at + .022); }
+      o.connect(g); g.connect(L.g); o.start(t); o.stop(t + n * .05 + .05); }));
+    /* the odd owl, far off: hoo ... hoo-hoo, a soft sine falling a little, with a quiet overtone */
+    every(L, R().night.owl, t => { const lp = bandOf('lowpass', 900, .5); lp.connect(L.g);
+      [[0, .38], [.62, .2], [.88, .42]].forEach(([at, d]) => { const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), g2 = gainOf(.15), f = 360 + Math.random() * 30;
+        o.frequency.setValueAtTime(f, t + at); o.frequency.linearRampToValueAtTime(f * .9, t + at + d); o2.frequency.setValueAtTime(f * 2, t + at); o2.frequency.linearRampToValueAtTime(f * 1.8, t + at + d);
+        blip(g, t + at, .07, d + .12, 1.2); o.connect(g); o2.connect(g2); g2.connect(g); g.connect(lp); [o, o2].forEach(x => { x.start(t + at); x.stop(t + at + d + .2); }); }); });
+  },
+  day: L => {
+    /* a light phrase: two to five quick chirps, rising or falling */
+    every(L, R().day.gap, t => { const b = 2400 + Math.random() * 1800, n = 2 + Math.floor(Math.random() * 4), up = Math.random() < .6;
+      for (let i = 0; i < n; i++) { const at = t + i * (.09 + Math.random() * .07), d = .06 + Math.random() * .06, o = ctx.createOscillator(), g = ctx.createGain(), f = b * (1 + Math.random() * .1);
+        o.frequency.setValueAtTime(f, at); o.frequency.exponentialRampToValueAtTime(f * (up ? 1.15 + Math.random() * .25 : .78), at + d); blip(g, at, .008, d, .7 + Math.random() * .3); o.connect(g); g.connect(L.g); o.start(at); o.stop(at + d + .03); } });
+  },
+  rain: L => {
+    const hiss = gainOf(.5);
+    bedOf(L, 'white', [bandOf('highpass', 700, .5), bandOf('lowpass', 5000, .5), hiss]);
+    /* a bed of tiny drop ticks: a looped five-second buffer of random clicks, too dense and irregular to hear the loop */
+    const sr = ctx.sampleRate, n = sr * 5, b = ctx.createBuffer(1, n, sr), d = b.getChannelData(0);
+    for (let k = 0; k < 900; k++) { const at = Math.floor(Math.random() * (n - 400)), len = Math.floor(sr * (.002 + Math.random() * .004)), a = .2 + Math.random() * .8; for (let i = 0; i < len; i++) d[at + i] += (Math.random() * 2 - 1) * a * (1 - i / len); }
+    const s = ctx.createBufferSource(); s.buffer = b; s.loop = true; const bp = bandOf('bandpass', 2600, .5), g = gainOf(.7); s.connect(bp); bp.connect(g); g.connect(L.g); s.start(); L.srcs.push(s);
+    every(L, [3, 6], t => hiss.gain.setTargetAtTime(.38 + Math.random() * .24, t, 1.5));
+    /* the odd heavier drip off the eaves */
+    every(L, [.4, 1.6], t => { const o = ctx.createOscillator(), g2 = ctx.createGain(), f = 1300 + Math.random() * 700; o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f * .55, t + .05); blip(g2, t, .002, .06, .45); o.connect(g2); g2.connect(L.g); o.start(t); o.stop(t + .08); });
+  },
+  snow: L => {
+    const g = gainOf(.7), bp = bandOf('bandpass', 420, 1.4);
+    bedOf(L, 'brown', [bp, g]);
+    every(L, [2, 4], t => { bp.frequency.setTargetAtTime(260 + Math.random() * 460, t, 1.5); g.gain.setTargetAtTime(.4 + Math.random() * .6, t, 1.8); });
+  },
+};
+const roomEnd = L => { L.dead = true; L.timers.forEach(clearTimeout); L.timers.clear(); L.srcs.forEach(s => { try { s.stop(); } catch (e) {} }); try { L.g.disconnect(); } catch (e) {} if (room[L.name] === L) delete room[L.name]; };
+const roomLevel = (L, v) => { L.target = v; if (L.dying) { clearTimeout(L.kill); L.dying = false; } L.g.gain.setTargetAtTime(v, ctx.currentTime, R().fade); };
+const roomFade = L => { if (L.dying) return; L.dying = true; L.target = 0; L.g.gain.setTargetAtTime(0, ctx.currentTime, R().fade); L.kill = setTimeout(() => roomEnd(L), R().fade * 5000); };
+/* brings the layers to what the moment wants: starts missing ones, re-levels live ones, fades out the rest */
+DQ.roomRefresh = () => {
+  if (!ctx || quiet()) return;
+  const inp = roomInputs(), want = roomOn() ? DQ.roomPlan(inp) : {};
+  for (const name of Object.keys(ROOM)) {
+    const L = room[name], v = want[name] || 0;
+    if (v > 0) { const live = L || (room[name] = { name, g: gainOf(0), srcs: [], timers: new Set(), target: 0 });
+      if (name === 'chatter') live.tier = R().chatter.tiers[inp.tier] != null ? inp.tier : 'mending';
+      if (!L) { live.g.connect(ambG); try { ROOM[name](live); } catch (e) {} }
+      if (live.target !== v || live.dying) roomLevel(live, v); }
+    else if (L) roomFade(L);
+  }
+};
+/* read-only: each room layer's wanted level, its gain right now, and whether it is fading out (tests, long sessions) */
+DQ.roomState = () => { const out = {}; for (const [k, L] of Object.entries(room)) out[k] = { target: L.target, gain: L.g.gain.value, dying: !!L.dying, timers: L.timers.size, tier: L.tier || null, events: L.events || 0, errors: L.errors || 0 }; return { on: roomOn(), inputs: DQ.S ? roomInputs() : null, layers: out }; };
 const ambWatch = () => { if (!ambLoop) ambLoop = setInterval(() => { if (ctx && !document.hidden) DQ.ambienceRefresh(); }, 2000); };
 
 DQ.musicMode = id => { modeId = id === 'title' ? 'title' : 'game'; if (ctx) musicTick(); };

@@ -281,3 +281,5 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   asked where every menu should sit: proposal in docs/navigation-review.md, not yet decided.
 - 27 Nov 2026 (owner): "go with the five-place navigation proposal". Replaces the seven-menu top bar (Home, Quests,
   World, Village, Hero, Guide, Shop) and the eight-tab phone bar with number badges.
+- 27 Nov 2026 (owner): "make the game feel cosy ... like a warm dashboard we can feel at home in", with sound that sits
+  in the room. Added the room-sound and soft interface-sound sentences to the Music and sound rule.
