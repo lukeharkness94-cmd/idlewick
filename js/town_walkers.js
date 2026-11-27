@@ -67,7 +67,8 @@ const fitHome = () => { const img = document.querySelector('.home-scene img.scen
   const bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) return;
   const W = img.naturalWidth, H = img.naturalHeight, k = Math.max(1, Math.ceil(bw / W)), w = W * k, h = H * k;
   box.style.height = bh + 'px'; const c = skyOf(img); if (c) box.style.setProperty('background', c, 'important');
-  Object.assign(img.style, { position: 'absolute', maxWidth: 'none', width: w + 'px', height: h + 'px', left: Math.round((bw - w) / 2) + 'px', top: (h <= bh ? bh - h : Math.round((bh - h) * .6)) + 'px', objectFit: 'fill' });
+  /* with priority: the page's stylesheets size this picture with !important (height:100%), which squashed it */
+  for (const [k2, v] of Object.entries({ position: 'absolute', 'max-width': 'none', 'max-height': 'none', 'aspect-ratio': 'auto', width: w + 'px', height: h + 'px', left: Math.round((bw - w) / 2) + 'px', top: (h <= bh ? bh - h : Math.round((bh - h) * .6)) + 'px', 'object-fit': 'fill' })) img.style.setProperty(k2, v, 'important');
   img.dataset.scale = k; for (const L of layers) if (L.img === img) fit(L); };
 Q.fitHomeScene = fitHome;
 let fitRaf = 0; addEventListener('resize', () => { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(fitHome); });

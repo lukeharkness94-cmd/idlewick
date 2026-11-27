@@ -56,7 +56,8 @@ Combat
 - Challenge in the Boss pop-up left the pop-up covering the whole fight. Starting any fight now closes the pop-up.
 - Phantom "hurt" sounds: forecasts scheduled them and they played for real. Fixed.
 - Trial tower floors used hunting-ground animals (a Lv 107 bear on Mossbarrow floor 1). Floors are the town's own
-  fighting creatures again. `TOWERS=1 node scripts/sim-bosses.cjs` was compared with main; see below.
+  fighting creatures again. `TOWERS=1 node scripts/sim-bosses.cjs` gives identical results before and after: the sim
+  never loads the hunting roster, so it was always tuning these creature floors, and the game now matches it.
 - On phones the foe was drawn at 6× next to a 4× hero and spilled out of its frame. It is now 4×.
 - XP floats appeared while the arrow or spell was still in flight. They now wait for the impact.
 - The fighter stood tilted 2° at rest, which jagged its pixels. It now stands upright.
@@ -100,6 +101,7 @@ Home, Quests, Village, World
   slots; the boss victory scene repeats Wren's line and still shows "Grubnash · Ready"; the practice yard swings the
   bow like an axe and draws the hay-bale butts as an arrow; drill pages have two tab rows; the "Your fighter" column
   arrives about 80 ms after the page; `snapAll` rescans the whole page on every DOM change (a likely jank source).
+- Combat: in a town whose boss is already beaten, the Next boss panel is an empty box.
 - Village: after a delivery, the button under the pointer becomes a route chip; "Deliver 12" shows what you hold
   rather than what's needed; "Collect proceeds · 0 coins" is enabled with nothing to collect; "Complete project" is
   7px below the window at 1280×720.

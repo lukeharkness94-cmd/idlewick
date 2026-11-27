@@ -5358,6 +5358,9 @@ html.lw-1600 #view .combat-x.cw-reorg .combat-targets .cx-styles{grid-template-c
 html.lw-1600 #view .combat-x.cw-reorg .combat-targets .cx-styles .ss-btn{grid-template-columns:minmax(0,1fr)!important;padding:6px 8px!important}
 html.lw-1600 #view .combat-x.cw-reorg .combat-targets .cx-styles .ss-btn>.ic{display:none}
 html.short #view .combat-x.cw-reorg .combat-targets .ab-future-slot{display:none}
+/* on short windows the DPS line (also under Combat level → Breakdown) and the stat tiles' padding give the doll its room */
+html.short #view .combat-x.cw-reorg .combat-targets .hud-train .combat-dps[data-b]{display:none!important}
+html.short #view .combat-x.cw-reorg .combat-targets .cx-stats>*{min-height:0!important;padding-block:4px!important}
 #view .combat-x.cw-reorg .combat-targets>.hud-train,#view .combat-x.cw-reorg .combat-targets>.combat-abils{flex:none;margin:0;padding:10px}
 #view .combat-x.cw-reorg .combat-targets .hud-train .kit-head{flex-wrap:wrap;row-gap:4px}
 #view .combat-x.cw-reorg .combat-targets .style-strip{display:flex;flex-direction:column;gap:6px}
@@ -24489,7 +24492,7 @@ Q.recipeGate=r=>{
  /* a survey works from anywhere once its town is unlocked (owner, 26 Nov 2026) */
  if(r.town&&!Q.townUnlocked(r.town))return 'Reach '+D.TOWN[r.town].name+' first';
  if(r.chart&&!known(r.chart))return 'Complete the '+D.ITEMS[r.chart].name+' first';
- if(r.project&&(!S().projects[r.project]||S().damaged?.[r.project]))return D.PROJECTS[r.project].name+' first';/* project names are already verbs ("Rekindle the village forge"); "Restore Rekindle…" doubled them (27 Nov 2026 audit) */
+ if(r.project&&!S().projects[r.project])return D.PROJECTS[r.project].name+' first';if(r.project&&S().damaged?.[r.project])return 'Repair the damaged building first';/* project names are already verbs ("Rekindle the village forge"); "Restore Rekindle…" doubled them (27 Nov 2026 audit) */
  if(r.facility&&!known(r.facility)&&!(r.facility==='workshop_jig'&&(S().house.furn.toolrack||0)>0))return 'Make '+D.ITEMS[r.facility].name+' in Carpentry';
  if(r.study&&!Q.techDone(r.study))return 'Study '+D.TECH[r.study].name+' in Scholarship';
  if(r.lead==='plans'&&Q.mastCount('thieve','merchant')<25&&!Q.surveyKnown('mossbarrow'))return '25 merchant pickpockets OR the Mossbarrow survey';
@@ -25068,7 +25071,9 @@ Q.damageEstimate=(m=Q.combatFocus?.())=>{
  return {dps:(1+max)/2*chance/seconds,max,chance,seconds};
 };
 Q.combatGrowth=(sk,from)=>{if(!['melee','ranged','magic'].includes(sk)||Q.weaponStyle()!==sk)return '';const now=Q.pstats(),xp=S().xp[sk];let before;try{S().xp[sk]=D.XPF[from];Q.fxDirty();before=Q.pstats();}finally{S().xp[sk]=xp;Q.fxDirty();}return `Equipped max hit ${before.max} → ${now.max}; accuracy ${Math.round(before.acc)} → ${Math.round(now.acc)}. A level can improve accuracy before the next whole point of damage.`;};
-U.B.dps=e=>{const d=Q.damageEstimate(),dt=Q.myDtype&&D.DTYPES[Q.myDtype()];U.set(e,`${dt?dt.name+' · ':''}${d.dps.toFixed(2)} DPS · ${Math.round(d.chance*100)}% hit · max ${d.max}`);};
+U.B.dps=e=>{const d=Q.damageEstimate(),dt=Q.myDtype&&D.DTYPES[Q.myDtype()],line=`${dt?dt.name+' · ':''}${d.dps.toFixed(2)} DPS · ${Math.round(d.chance*100)}% hit · max ${d.max}`;U.set(e,line);
+ /* short windows hide this line to keep the doll whole; the weapon button's tooltip carries it there (27 Nov 2026) */
+ const w=e.closest('.hud-train')?.querySelector('.ss-weapon');if(w){const tip=`text:${line} · Weapon sets the style: blade = Melee, bow = Ranged, staff = Magic`;if(w.dataset.tip!==tip)w.dataset.tip=tip;}};
 // Preserve the arena, training bars and equipment controls across consecutive opponents and level ticks.
 let encounterTimer;
 U.afterImpact=(fn,delay=0)=>{
@@ -26927,7 +26932,8 @@ const fitHome = () => { const img = document.querySelector('.home-scene img.scen
   const bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) return;
   const W = img.naturalWidth, H = img.naturalHeight, k = Math.max(1, Math.ceil(bw / W)), w = W * k, h = H * k;
   box.style.height = bh + 'px'; const c = skyOf(img); if (c) box.style.setProperty('background', c, 'important');
-  Object.assign(img.style, { position: 'absolute', maxWidth: 'none', width: w + 'px', height: h + 'px', left: Math.round((bw - w) / 2) + 'px', top: (h <= bh ? bh - h : Math.round((bh - h) * .6)) + 'px', objectFit: 'fill' });
+  /* with priority: the page's stylesheets size this picture with !important (height:100%), which squashed it */
+  for (const [k2, v] of Object.entries({ position: 'absolute', 'max-width': 'none', 'max-height': 'none', 'aspect-ratio': 'auto', width: w + 'px', height: h + 'px', left: Math.round((bw - w) / 2) + 'px', top: (h <= bh ? bh - h : Math.round((bh - h) * .6)) + 'px', 'object-fit': 'fill' })) img.style.setProperty(k2, v, 'important');
   img.dataset.scale = k; for (const L of layers) if (L.img === img) fit(L); };
 Q.fitHomeScene = fitHome;
 let fitRaf = 0; addEventListener('resize', () => { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(fitHome); });

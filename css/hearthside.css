@@ -585,6 +585,9 @@ html.lw-1600 #view .combat-x.cw-reorg .combat-targets .cx-styles{grid-template-c
 html.lw-1600 #view .combat-x.cw-reorg .combat-targets .cx-styles .ss-btn{grid-template-columns:minmax(0,1fr)!important;padding:6px 8px!important}
 html.lw-1600 #view .combat-x.cw-reorg .combat-targets .cx-styles .ss-btn>.ic{display:none}
 html.short #view .combat-x.cw-reorg .combat-targets .ab-future-slot{display:none}
+/* on short windows the DPS line (also under Combat level → Breakdown) and the stat tiles' padding give the doll its room */
+html.short #view .combat-x.cw-reorg .combat-targets .hud-train .combat-dps[data-b]{display:none!important}
+html.short #view .combat-x.cw-reorg .combat-targets .cx-stats>*{min-height:0!important;padding-block:4px!important}
 #view .combat-x.cw-reorg .combat-targets>.hud-train,#view .combat-x.cw-reorg .combat-targets>.combat-abils{flex:none;margin:0;padding:10px}
 #view .combat-x.cw-reorg .combat-targets .hud-train .kit-head{flex-wrap:wrap;row-gap:4px}
 #view .combat-x.cw-reorg .combat-targets .style-strip{display:flex;flex-direction:column;gap:6px}

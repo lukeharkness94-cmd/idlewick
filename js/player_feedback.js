@@ -29,7 +29,9 @@ Q.damageEstimate=(m=Q.combatFocus?.())=>{
  return {dps:(1+max)/2*chance/seconds,max,chance,seconds};
 };
 Q.combatGrowth=(sk,from)=>{if(!['melee','ranged','magic'].includes(sk)||Q.weaponStyle()!==sk)return '';const now=Q.pstats(),xp=S().xp[sk];let before;try{S().xp[sk]=D.XPF[from];Q.fxDirty();before=Q.pstats();}finally{S().xp[sk]=xp;Q.fxDirty();}return `Equipped max hit ${before.max} → ${now.max}; accuracy ${Math.round(before.acc)} → ${Math.round(now.acc)}. A level can improve accuracy before the next whole point of damage.`;};
-U.B.dps=e=>{const d=Q.damageEstimate(),dt=Q.myDtype&&D.DTYPES[Q.myDtype()];U.set(e,`${dt?dt.name+' · ':''}${d.dps.toFixed(2)} DPS · ${Math.round(d.chance*100)}% hit · max ${d.max}`);};
+U.B.dps=e=>{const d=Q.damageEstimate(),dt=Q.myDtype&&D.DTYPES[Q.myDtype()],line=`${dt?dt.name+' · ':''}${d.dps.toFixed(2)} DPS · ${Math.round(d.chance*100)}% hit · max ${d.max}`;U.set(e,line);
+ /* short windows hide this line to keep the doll whole; the weapon button's tooltip carries it there (27 Nov 2026) */
+ const w=e.closest('.hud-train')?.querySelector('.ss-weapon');if(w){const tip=`text:${line} · Weapon sets the style: blade = Melee, bow = Ranged, staff = Magic`;if(w.dataset.tip!==tip)w.dataset.tip=tip;}};
 // Preserve the arena, training bars and equipment controls across consecutive opponents and level ticks.
 let encounterTimer;
 U.afterImpact=(fn,delay=0)=>{
