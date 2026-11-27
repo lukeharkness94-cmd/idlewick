@@ -143,9 +143,9 @@ dated line to the history file.
   never shake the page; hit numbers wait for the visible impact (`UI.afterImpact`).
 - **Home**: the live journey, selected goal, real giver and objective progress (`js/hearthside.js`), one clear main
   action, the town scene with walking townsfolk, "Nearly there" once every skill is open, and the Before <boss>
-  checklist when it applies. **Village**: town scene with always-visible site signs: Finish (green, site glows), Give
-  (blue, the item you can hand in), Needs (faint dashed, missing item greyed, a lock if never found); standing appears
-  once in the map header.
+  checklist when it applies. **Village**: town scene with always-visible, colour-only site signs: Finish (green, site
+  glows), Give (blue, the item you can hand in), Needs (pale, missing item greyed, a lock if never found); standing
+  appears once in the map header.
 - **Settings** are composed by `js/settings_layout.js` into five groups (Display, Audio, Gameplay, Saves & backups,
   Help & extras); add new controls to a group, reuse existing option keys.
 
