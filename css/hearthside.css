@@ -1028,3 +1028,6 @@ html.calm .petted,html.calm .petted img{animation:none}
 .pen:hover{transform:none;translate:0 -2px}
 /* phones: the hero portrait in the top bar shows the whole 48px face, not its top-left corner */
 @media(max-width:860px){#hud .portrait.px-portrait{width:48px!important;height:48px!important}}
+/* the queued task wraps rather than being cut off ("Now · then Fishing s…"), in normal case */
+.now .now-k:has(.now-next){white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
+.now .now-next{text-transform:none;letter-spacing:0}
