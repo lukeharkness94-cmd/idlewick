@@ -131,11 +131,11 @@ const refresh = async (force) => { const H = document.querySelector('.home-scene
   const dim = H.querySelector('.hearth-dim'); dim.style.backgroundColor = `rgb(${[255, 255, 255].map((v, i) => Math.round(v + ([150, 112, 84][i] - v) * L.dark * .55)).join(',')})`;
   if (key !== st.key || force) { if (st.busy) return; st.busy = true; try { st.url = await room(L.town, L, L.weather, season, pet); st.key = key; } finally { st.busy = false; } }
   const img = H.querySelector('.hearth-room'); if (img.getAttribute('src') !== st.url) img.src = st.url; st.dark = L.dark; };
-const tick = n => { st.raf = 0; const H = document.querySelector('.home-scene .hearth'); if (!H) return; const dt = Math.min(.1, Math.max(0, (n - st.last) / 1000)); st.last = n; const moving = !still(); if (moving) st.t += dt;
-  const cv = H.querySelector('.hearth-lights'); lights(cv.getContext('2d'), st.t, st.dark || 0, moving);
-  if (Math.floor(n / 30000) !== st.minute) { st.minute = Math.floor(n / 30000); refresh(); }
-  if (moving || !st.drawnStill) { st.drawnStill = !moving; } st.raf = requestAnimationFrame(tick); };
-const start = () => { place(); refresh(); if (!st.raf) { st.last = performance.now(); st.raf = requestAnimationFrame(tick); } };
+/* one subscriber on the shared clock (DQ.frame, js/util.js): elapsed time at native refresh, paused while hidden */
+const tick = (dt, now) => { const H = document.querySelector('.home-scene .hearth'); if (!H) { st.on = false; return false; } const moving = !still(); if (moving) st.t += dt;
+  lights(H.querySelector('.hearth-lights').getContext('2d'), st.t, st.dark || 0, moving);
+  const n = now || performance.now(); if (Math.floor(n / 30000) !== st.minute) { st.minute = Math.floor(n / 30000); refresh(); } };
+const start = () => { place(); refresh(); if (!st.on) { st.on = true; if (Q.frame) Q.frame.add(tick); else { const loop = n => { if (tick(1 / 60, n) !== false) requestAnimationFrame(loop); }; requestAnimationFrame(loop); } } };
 Q.hearthLive = () => { const H = document.querySelector('.home-scene .hearth'); return H ? { scale: +H.dataset.scale, spots: [...H.querySelectorAll('.hearth-spot')].map(b => b.dataset.spot), note: H.querySelector('.hearth-note').innerText, src: !!H.querySelector('.hearth-room').getAttribute('src'), t: st.t } : null; };
 
 UI.DO.homeview = v => { if (!['hearth', 'town'].includes(v)) return; S().settings.homeView = v; Q.save && Q.save(); UI.render(true); };

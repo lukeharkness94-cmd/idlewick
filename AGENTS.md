@@ -95,7 +95,11 @@ dated line to the history file.
   and drawn scene art keeps its pixel-art outlines. `tests/shape-rule.cjs` checks every page, a fight and the pop-ups.
 - **Motion** (`js/finish.js`, Finish layer in css/style.css): browser timelines at native refresh, elapsed-time motion,
   no stepped easing or 60 Hz loops; hover lifts use `translate`, not `transform`; everything transform/opacity only and
-  off under `html.calm` and `prefers-reduced-motion`. Characters and animals have idle life (`js/personality.js`, owner
+  off under `html.calm` and `prefers-reduced-motion`. Continuous script animation subscribes to the one clock
+  `DQ.frame.add(fn)` (js/util.js; `fn(dt, now)`, return false to stop; paused while hidden, no catch-up), never its own
+  requestAnimationFrame loop or interval, and per-frame work never searches the whole page. Changing page turns the
+  main view (View Transitions, ~200 ms, `finish.js`); off under calm, reduced motion and in automated browsers unless
+  `localStorage['idlewick.transitions'] = '1'` (`tests/motion-clock.cjs`, docs/motion-performance.md). Characters and animals have idle life (`js/personality.js`, owner
   27 Nov): the hero breathes, blinks, fidgets when idle and wipes their brow between strikes (never over one); the
   companion breathes, flicks, hops on wins and sleeps when nothing runs; creatures wind up before each blow and stagger
   when hit. Expressions are drawn frames on the same sprite; impacts and hit numbers keep `UI.afterImpact`.
@@ -316,4 +320,4 @@ The runner covers everything; these are the ones to read when you touch an area.
 `card-packing-ui`, `catalogue-cards-ui`, `menu-density-ui`, `scripts/audit-overflow.cjs`. Art: `art-pixel`. Systems:
 `connected-systems`, `crosslinks`, `quest-progression`, `beastmastery`, `beast-capture`, `hunt-stalk`, `creature-roster`,
 `world-life`, `world-events-hindsight`, `story`, `combat-arts`, `base-gear`, `unique-levels`, `choice-order`,
-`offline-ceiling`, `live-notes`, `music`. HANDOFF.md has the full list.
+`offline-ceiling`, `live-notes`, `music`, `motion-clock`. HANDOFF.md has the full list.

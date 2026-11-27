@@ -52,12 +52,13 @@ const coins0 = UI.B && UI.B.coins;
 if (coins0) UI.B.coins = e => {
   const target = DQ.S.coins, st = shown.get(e);
   if (st && target === st.to) { if (!st.raf) coins0(e); return; }
-  if (!st || calm() || target < st.to || target - st.to > 1e7) { if (st && st.raf) cancelAnimationFrame(st.raf); shown.set(e, { from: target, to: target, now: target }); return coins0(e); }
+  if (!st || calm() || target < st.to || target - st.to > 1e7) { if (st && st.raf) DQ.frame.remove(st.raf); shown.set(e, { from: target, to: target, now: target }); return coins0(e); }
   const from = st.now, start = performance.now(), dur = Math.min(900, 380 + Math.log10(target - from + 1) * 120);
-  if (st.raf) cancelAnimationFrame(st.raf);
-  const step = t => { const k = Math.min(1, (t - start) / dur), ease = 1 - Math.pow(1 - k, 3), v = Math.round(from + (target - from) * ease);
-    st.now = v; UI.set(e, DQ.formatCoins(v)); st.raf = k < 1 ? requestAnimationFrame(step) : 0; if (k >= 1) { e.classList.remove('fin-roll'); } };
-  Object.assign(st, { to: target }); e.classList.add('fin-roll'); st.raf = requestAnimationFrame(step);
+  if (st.raf) DQ.frame.remove(st.raf);
+  /* on the shared animation clock (util.js): st.raf holds the running step, and returning false ends it */
+  const step = (dt, t) => { const k = Math.min(1, (t - start) / dur), ease = 1 - Math.pow(1 - k, 3), v = Math.round(from + (target - from) * ease);
+    st.now = v; UI.set(e, DQ.formatCoins(v)); if (k >= 1) { st.raf = 0; e.classList.remove('fin-roll'); return false; } };
+  Object.assign(st, { to: target }); e.classList.add('fin-roll'); st.raf = step; DQ.frame.add(step);
 };
 
 const render0 = UI.render;
@@ -74,4 +75,47 @@ UI.render = (...a) => {
   return r;
 };
 addEventListener('resize', () => { try { inks(); } catch (e) {} });
+
+/* page turns (27 Nov 2026, owner: "more logical flow"): changing page from the top menu, the page tabs, the rail or a
+   route chip turns the main view like a page of the journal. The old page fades and slides away, the new one comes in
+   from the side you moved towards (about 200 ms; the View Transitions API, so it is the browser's own snapshot and
+   timeline). Only #view moves: the top bar, rail and pop-ups change at once, and nothing in the layout shifts.
+   The browser animates only after it has painted the old page, so the click itself is replayed one frame later inside
+   the transition (state and DOM still change together, synchronously, for every listener). A click that turns out
+   not to change page skips the animation. Off where the API is missing, under Reduce effects (html.calm) and the
+   device's reduced-motion setting, and in automated browsers (the tests measure layout straight after navigating)
+   unless localStorage['idlewick.transitions'] is '1'. */
+const NAV = new Set(['go', 'hub', 'route', 'routeback', 'openquest', 'openproject', 'nowactivity']);
+UI.pageTurnsOn = () => {
+  if (typeof document.startViewTransition !== 'function' || calm() || document.hidden) return false;
+  if (navigator.webdriver) { try { return localStorage.getItem('idlewick.transitions') === '1'; } catch (e) { return false; } }
+  return true;
+};
+/* towards the right of the menu, tab row or rail (or a route onward) the page comes in from the right; back from the left */
+const dirOf = t => {
+  if (t.dataset.do === 'routeback') return 'back';
+  const row = t.closest('#topnav, #subnav, #rail, #dock'), on = row && [...row.querySelectorAll('.on')].find(x => x !== t);
+  return on && (on.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_PRECEDING) ? 'back' : 'fwd';
+};
+let replaying = false, turning = null;
+const replay = (t, e) => {
+  replaying = true;
+  try {
+    if (t.isConnected) t.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window, clientX: e.clientX, clientY: e.clientY, button: e.button }));
+    else { DQ.audioInit && DQ.audioInit(); const f = UI.DO[t.dataset.do]; if (f) f(t.dataset.a, t.dataset.b, t); } /* redrawn meanwhile: the same action */
+  } catch (err) { console.error(err); } finally { replaying = false; }
+};
+document.addEventListener('click', e => {
+  if (replaying || e.defaultPrevented) return;
+  const t = e.target.closest && e.target.closest('[data-do]');
+  if (!t || t.disabled || !NAV.has(t.dataset.do) || (t.dataset.do === 'go' && t.dataset.a === UI.view) || !UI.pageTurnsOn()) return;
+  e.stopImmediatePropagation(); e.preventDefault();
+  const root = document.documentElement, from = UI.view;
+  root.dataset.pageTurn = dirOf(t); root.classList.add('page-turning');
+  const vt = document.startViewTransition(() => { replay(t, e); if (UI.view === from) vt.skipTransition(); });
+  turning = vt;
+  const done = () => { if (turning !== vt) return; turning = null; root.classList.remove('page-turning'); delete root.dataset.pageTurn; };
+  vt.finished.then(done, done); vt.ready.catch(() => {}); vt.updateCallbackDone.catch(() => {});
+}, true);
+UI.pageTurning = () => !!turning;
 })();

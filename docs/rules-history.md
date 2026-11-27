@@ -285,3 +285,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   in the room. Added the room-sound and soft interface-sound sentences to the Music and sound rule.
 - 27 Nov 2026 (owner): "characters and animals with personality" so the game feels cosy and alive. Added the idle-life
   line to the Motion rule (js/personality.js).
+- 27 Nov 2026 (owner): "smoother and higher FPS animations, more logical flow". Added to the motion rule: continuous
+  script animation runs on the one clock `DQ.frame` (no per-module rAF loops, nothing while hidden, no catch-up), no
+  whole-page searches per frame, and page changes turn the main view with a short View Transition.

@@ -67,7 +67,7 @@ DQ.burstAt = (x, y, col, n = 30) => {
     const a = Math.random() * 6.283, v = 1.5 + Math.random() * 5;
     parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 2.5, life: 1, d: .012 + Math.random() * .014, s: 2.5 + Math.random() * 3.5, c: Math.random() < .6 ? col : '#f3d58a' });
   }
-  if (!running) { running = true; particleTime=performance.now(); requestAnimationFrame(loop); }
+  if (!running) { running = true; particleTime=performance.now(); DQ.frame.add(loop); }
 };
 DQ.burstEl = (el, col, n) => { if (!el) return; const r = el.getBoundingClientRect(); DQ.burstAt(r.left + r.width / 2, r.top + r.height / 2, col, n); };
 /* Exact time-based integration keeps the same motion at 60, 120 or 144 Hz. */
@@ -76,13 +76,13 @@ DQ.stepParticle = (p, ms) => {
   p.x+=p.vx*(1-drag)/rate;p.vx*=drag;
   p.y+=p.vy*frames+.08*frames*frames;p.vy+=.16*frames;p.life-=p.d*frames;
 };
-function loop(now) {
+function loop(dt0, now) { /* on the shared animation clock (util.js); returning false ends it */
   const dt=Math.max(0,Math.min(100,now-particleTime));particleTime=now;
-  if(document.hidden||calm()){parts=[];running=false;cx.clearRect(0,0,innerWidth,innerHeight);return;}
+  if(document.hidden||calm()){parts=[];running=false;cx.clearRect(0,0,innerWidth,innerHeight);return false;}
   cx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); cx.clearRect(0, 0, innerWidth, innerHeight);
   parts = parts.filter(p => p.life > 0);
   for (const p of parts) { DQ.stepParticle(p,dt); cx.globalAlpha = Math.max(0, p.life); cx.fillStyle = p.c; cx.fillRect(p.x, p.y, p.s, p.s * .6); }
-  if (parts.length) requestAnimationFrame(loop); else { running = false; cx.clearRect(0, 0, innerWidth, innerHeight); }
+  if (!parts.length) { running = false; cx.clearRect(0, 0, innerWidth, innerHeight); return false; }
 }
 
 /* ---------- toast ---------- */

@@ -42,8 +42,8 @@ const attach = img => { if (img.dataset.walkers || img.classList.contains('scene
 Q.townWalkersScan = () => { if (still()) return; document.querySelectorAll('.home-scene img.scene[data-town], .village-scene>img.scene[data-town]').forEach(attach); };
 Q.townWalkersLive = () => [...layers].filter(L => L.cv.isConnected).map(L => ({ town: L.img.dataset.town, walkers: L.walkers.map(w => ({ x: Math.round(w.x), y: w.y })) }));
 
-const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performance.now(); this.raf = requestAnimationFrame(t => this.run(t)); } },
-  run(t) { this.raf = 0; const dt = Math.min(.1, Math.max(0, (t - this.last) / 1000)); this.last = t; /* a hidden tab never catches up */
+const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performance.now(); this.raf = Q.frame.add((dt, t) => this.run(t)); } }, /* the shared animation clock (util.js) */
+  run(t) { const dt = Math.min(.1, Math.max(0, (t - this.last) / 1000)); this.last = t; /* a hidden tab never catches up */
     for (const L of layers) { if (!L.cv.isConnected) { L.ro && L.ro.disconnect(); layers.delete(L); continue; }
       if (still()) { L.cv.remove(); continue; }
       for (const w of L.walkers) { if (w.rest > 0) { w.rest -= dt; continue; }
@@ -52,7 +52,7 @@ const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performan
         if (Math.random() < dt * .06) { w.rest = 1 + Math.random() * 3; if (Math.random() < .4) w.dir = -w.dir; } }
       const key = L.walkers.map(w => Math.round(w.x) + ':' + (w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2) + w.dir).join(',');
       if (key !== L.key) { L.key = key; L.x.clearRect(0, 0, L.cv.width, L.cv.height); for (const w of L.walkers) draw(L.x, w); } }
-    if (layers.size) this.raf = requestAnimationFrame(n => this.run(n)); } };
+    if (!layers.size) { this.raf = 0; return false; } } };
 
 /* Home's town scene at a whole-number scale (27 Nov 2026 audit: object-fit:cover showed it at 2.36x, 1.78x and 0.56x;
    the art rule allows a fitted scale only on the Village page). The picture takes the smallest whole scale that covers

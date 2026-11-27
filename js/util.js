@@ -129,3 +129,38 @@ DQ.injectSprite = () => {
   document.body.prepend(el.firstChild);
 };
 })();
+
+/* ---------- the animation clock (27 Nov 2026, owner: "smoother and higher FPS animations") ----------
+   Every continuous animation in the game (progress bars, the strike beat, town life and walkers, particles, coin
+   rolls, quest reveals, the title's fireflies) runs from this one requestAnimationFrame loop instead of a loop each,
+   so the page does one callback per frame at the display's own refresh (60, 120 or 144 Hz). Each subscriber gets
+   (dt, now): dt in seconds since the last frame, capped at 0.1 so a stall never jumps a scene, and the frame's
+   timestamp. Returning false unsubscribes. Nothing runs while the tab is hidden, and coming back never catches up:
+   the first frame after a return has dt 0. A subscriber that throws is dropped (as its own loop would have died). */
+(() => {
+const DQ = window.DQ, subs = new Set();
+const hasRaf = typeof requestAnimationFrame === 'function', hidden = () => typeof document !== 'undefined' && !!document.hidden;
+let raf = 0, last = 0, frames = 0, calls = 0, busy = 0;
+const wake = () => { if (!raf && hasRaf && subs.size && !hidden()) raf = requestAnimationFrame(run); };
+function run(now) {
+  raf = 0; if (hidden()) { last = 0; return; }
+  const dt = last ? Math.min(.1, Math.max(0, (now - last) / 1000)) : 0; last = now; frames++;
+  const t0 = performance.now();
+  for (const fn of [...subs]) { if (!subs.has(fn)) continue; calls++;
+    let keep; try { keep = fn(dt, now); } catch (e) { keep = false; console.error(e); }
+    if (keep === false) subs.delete(fn); }
+  busy += performance.now() - t0;
+  if (subs.size) wake(); else last = 0;
+}
+DQ.frame = {
+  add(fn) { if (typeof fn === 'function') { subs.add(fn); wake(); } return () => subs.delete(fn); },
+  remove(fn) { return subs.delete(fn); },
+  has: fn => subs.has(fn),
+  get size() { return subs.size; },
+  get running() { return !!raf; },
+  /* for tests and docs/motion-performance.md: frames run, subscriber calls and time spent */
+  stats: () => ({ frames, calls, busyMs: Math.round(busy * 10) / 10, subscribers: subs.size, running: !!raf, hidden: hidden() })
+};
+if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('visibilitychange', () => {
+  if (hidden()) { if (raf && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(raf); raf = 0; last = 0; } else wake(); });
+})();

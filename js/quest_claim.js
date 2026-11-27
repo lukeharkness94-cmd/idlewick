@@ -48,14 +48,14 @@ const html = () => {
 const animate = () => {
   if (S().settings.reduceFx) return;
   const start = performance.now(), STAGGER = 160, POP = 260, COUNT = 700;
-  const step = now => {
-    const els = document.querySelectorAll('.quest-reveal [data-count]'); if (!els.length || !reveal) return;
+  const step = (dt, now) => { /* on the shared animation clock (util.js); returning false ends it */
+    const els = document.querySelectorAll('.quest-reveal [data-count]'); if (!els.length || !reveal) return false;
     let busy = false;
     els.forEach(el => { const i = +el.closest('.qrv-tile').style.getPropertyValue('--i') || 0, t = (now - start - i * STAGGER - POP) / COUNT, k = Math.max(0, Math.min(1, t)), e = 1 - Math.pow(1 - k, 3), n = Math.round(+el.dataset.count * e), u = el.dataset.unit;
       el.textContent = el.dataset.pre ? fmt(n) + u : fmt(n) + u; if (k < 1) busy = true; });
-    if (busy) requestAnimationFrame(step);
+    if (!busy) return false;
   };
-  requestAnimationFrame(step);
+  DQ.frame.add(step);
 };
 const view0 = UI.V.quests;
 UI.V.quests = () => {

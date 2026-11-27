@@ -119,26 +119,50 @@ A.coverage = () => {
    CSS sizes boxes for layout; a pixel sprite inside must still be drawn at an exact multiple of its own size, or its
    pixels smear (1.5x) or vanish (0.94x) and it reads as low-res. After any change to the page, each sprite is snapped
    to the nearest whole multiple of its native size (large scenes round down so they never overflow), and kept from
-   being squeezed by flex layouts. Reads first, then writes, once per frame. */
-const NAT_ICON = 16;
-const snapAll = root => {
-  const els = [...(root || document).querySelectorAll('img.pxa, i.ic.pxi')], plan = [];
+   being squeezed by flex layouts. Reads first, then writes.
+   27 Nov 2026 (visual audit: the snapper rescanned the whole page, forcing a layout, on every DOM change, several
+   times a second): only the sprites a change touches are measured now, and only once the browser has laid them out.
+   The MutationObserver's records name the added subtrees (and sprites whose src or class changed); each such sprite
+   is handed to a ResizeObserver, which reports it in the same frame after layout, so reading its size forces nothing
+   and it is snapped before it is painted. A sprite with no size yet (inside a hidden tab or panel) stays observed and
+   is snapped the moment it gets one; a picture that loads late is observed again when it loads; a resize remeasures
+   every sprite. The result is the same as the old full rescan. */
+const NAT_ICON = 16, SEL = 'img.pxa, i.ic.pxi';
+const unsized = new Set(), listening = new WeakSet(), stats = { flushes: 0, measured: 0, ms: 0 };
+let ro = null;
+const watch = (el, fresh) => { if (!ro) return; if (fresh) ro.unobserve(el); ro.observe(el); };
+/* a picture still loading (or given a new src) is measured once it has its size */
+const onLoad = el => { if (listening.has(el)) return; listening.add(el); el.addEventListener('load', () => { listening.delete(el); watch(el, true); }, { once: true }); };
+const snapEls = els => {
+  const plan = [];
   for (const el of els) {
-    if (el.closest('.combat-d .avatar')) continue; /* the fight sizes its fighters to whole multiples in CSS by the stage's height */
+    const done = () => { unsized.delete(el); if (ro) ro.unobserve(el); };
+    if (!el.isConnected) { done(); continue; }
+    if (el.closest('.combat-d .avatar')) { done(); continue; } /* the fight sizes its fighters to whole multiples in CSS by the stage's height */
     const lg = el.tagName === 'IMG' && el.naturalWidth && A.logicalOf && A.logicalOf(el.currentSrc || el.src), nat = el.tagName === 'IMG' ? (lg ? lg[0] : el.naturalWidth) : NAT_ICON, natH = el.tagName === 'IMG' ? (lg ? lg[1] : el.naturalHeight) : NAT_ICON;
-    if (!nat) { if (el.tagName === 'IMG' && !el.dataset.snapWait) { el.dataset.snapWait = 1; el.addEventListener('load', () => queue(), { once: true }); } continue; }
-    const w = el.offsetWidth; if (!w) continue;
+    if (!nat) { done(); if (el.tagName === 'IMG') { el.dataset.snapWait = 1; onLoad(el); } continue; }
+    const w = el.offsetWidth; if (!w) { unsized.add(el); continue; } /* stays observed: snapped when it is shown */
+    done();
     const hh = el.offsetHeight, byH = hh && hh / natH < w / nat, ratio = byH ? hh / natH : w / nat, k = nat >= 64 || byH ? Math.max(1, Math.floor(ratio + .001)) : Math.max(1, Math.round(ratio - .01));
     const want = nat * k; if (Math.abs(w - want) < .5 && el.dataset.snapped) continue;
     plan.push([el, want, natH * k]);
   }
   for (const [el, w, h] of plan) { el.style.setProperty('width', w + 'px', 'important'); el.style.setProperty('height', h + 'px', 'important'); el.style.setProperty('flex-shrink', '0'); el.style.setProperty('max-width', 'none', 'important'); el.style.setProperty('max-height', 'none', 'important'); el.dataset.snapped = 1; }
+  return els.length;
 };
-let pending = 0; const queue = () => { if (pending) return; pending = requestAnimationFrame(() => { pending = 0; snapAll(document); }); };
-if (typeof MutationObserver === 'function' && typeof document !== 'undefined' && document.documentElement) {
-  const start = () => { new MutationObserver(queue).observe(document.body, { childList: true, subtree: true }); queue(); };
+/* every sprite under root (the whole page by default), measured now: for tests */
+const snapAll = root => snapEls([...(root || document).querySelectorAll(SEL)]);
+const collect = node => { if (node.nodeType !== 1) return; if (node.matches(SEL)) watch(node); if (node.firstElementChild) for (const el of node.querySelectorAll(SEL)) watch(el); };
+const observed = records => { for (const r of records) { if (r.type === 'childList') { for (const n of r.addedNodes) collect(n); }
+  else if (r.target.matches && r.target.matches(SEL)) { watch(r.target, true); if (r.attributeName === 'src' && r.target.tagName === 'IMG') onLoad(r.target); } } };
+if (typeof MutationObserver === 'function' && typeof ResizeObserver === 'function' && typeof document !== 'undefined' && document.documentElement) {
+  ro = new ResizeObserver(entries => { const t0 = performance.now(); stats.flushes++; stats.measured += snapEls(entries.map(e => e.target)); stats.ms += performance.now() - t0; });
+  const all = () => document.querySelectorAll(SEL).forEach(el => watch(el, true));
+  const start = () => { new MutationObserver(observed).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'class'] }); all(); };
   if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
-  addEventListener('resize', () => { document.querySelectorAll('[data-snapped]').forEach(el => { el.style.removeProperty('width'); el.style.removeProperty('height'); delete el.dataset.snapped; }); queue(); });
+  addEventListener('resize', () => { document.querySelectorAll('[data-snapped]').forEach(el => { el.style.removeProperty('width'); el.style.removeProperty('height'); delete el.dataset.snapped; }); all(); });
 }
+/* for tests and docs/motion-performance.md: batches measured, sprites measured, time spent, sprites waiting to be shown */
+Q.snapStats = () => ({ flushes: stats.flushes, measured: stats.measured, ms: Math.round(stats.ms * 10) / 10, unsized: unsized.size });
 Q.snapPixels = snapAll;
 })();

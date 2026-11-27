@@ -2137,20 +2137,22 @@ body[data-tod="dawn"] .tod-tint{background:linear-gradient(#ffb08a30,#ffd8a018 6
 body[data-tod="dusk"] .tod-tint{background:linear-gradient(#ff8a5a38,#7a4a8a30)}
 body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)}
 /* weather */
-.weather{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+.weather{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2;container-type:size}
+/* 27 Nov 2026: the drops travel by transform alone (cqh/cqw are the weather box's own height and width), so a
+   rainy scene no longer lays out every particle on every frame; the paths are the same as the old top/left ones */
 .weather i{position:absolute;left:var(--x);top:-10%;display:block;animation:wx-fall var(--d) linear var(--t) infinite}
 .w-rain i{width:1px;height:10px;background:#cfe6ff99;animation-duration:calc(var(--d) * .25)}
 .w-snow i{width:3px;height:3px;background:#fff;box-shadow:0 0 0 1px #ffffff40}
-.w-pollen i{width:2px;height:2px;background:#fff6b0cc;animation-name:wx-drift}
-.w-leaves i{width:4px;height:3px;background:#c8803a;animation-name:wx-drift}
+.w-pollen i{width:2px;height:2px;background:#fff6b0cc;top:-5%;animation-name:wx-drift}
+.w-leaves i{width:4px;height:3px;background:#c8803a;top:-5%;animation-name:wx-drift}
 .w-embers i{width:2px;height:2px;background:#ffb04a;top:auto;bottom:-5%;animation-name:wx-rise}
 .w-motes i{width:2px;height:2px;background:#c0a0ff;top:auto;bottom:-5%;animation-name:wx-rise}
 .w-wind i{width:18px;height:1px;background:#ffffff70;left:-20%;top:var(--x);animation-name:wx-wind}
 .w-mist i{width:40%;height:22%;background:radial-gradient(#d0e0d840,transparent 70%);top:55%;animation-name:wx-mist;animation-duration:calc(var(--d) * 4)}
-@keyframes wx-fall{to{transform:translate(-12px,130%) ;top:110%}}
-@keyframes wx-drift{0%{top:-5%;transform:translateX(0)}50%{transform:translateX(16px)}100%{top:105%;transform:translateX(-8px)}}
-@keyframes wx-rise{0%{bottom:-5%;opacity:0}20%{opacity:1}100%{bottom:105%;opacity:0;transform:translateX(10px)}}
-@keyframes wx-wind{to{left:120%}}
+@keyframes wx-fall{to{transform:translate(-12px,calc(120cqh + 130%))}}
+@keyframes wx-drift{0%{transform:translate(0,0)}50%{transform:translate(16px,55cqh)}100%{transform:translate(-8px,110cqh)}}
+@keyframes wx-rise{0%{opacity:0;transform:translate(0,0)}20%{opacity:1}100%{opacity:0;transform:translate(10px,-110cqh)}}
+@keyframes wx-wind{to{transform:translateX(140cqw)}}
 @keyframes wx-mist{0%,100%{transform:translateX(-10%)}50%{transform:translateX(40%)}}
 /* villagers, your weapon and your companion in the work scene (3x like the hero; companion 2x) */
 .scene-folk{position:absolute;bottom:12px;z-index:1;animation:folk-idle 3.2s ease-in-out infinite}
@@ -3960,6 +3962,21 @@ button.sk-goal:hover b,.sh-next-btn:hover b{color:var(--brass);text-decoration:u
 @keyframes finIn{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
 #view.fin-enter [style*="--fin-i"]{animation:finIn .34s var(--ease-out) both;animation-delay:calc(var(--fin-i) * 45ms)}
 
+/* page turns (js/finish.js): only the main view moves, ~200 ms, transform and opacity on the browser's snapshots;
+   the view's box snaps to the new page (no size morph), so nothing stretches or shifts */
+html.page-turning #view{view-transition-name:idw-page}
+::view-transition-group(idw-page){animation:none}
+::view-transition-old(idw-page){animation:idwPageOut 170ms cubic-bezier(.4,0,.9,.6) both}
+::view-transition-new(idw-page){animation:idwPageIn 210ms cubic-bezier(.2,.7,.3,1) both}
+html[data-page-turn="back"]::view-transition-old(idw-page){animation-name:idwPageOutBack}
+html[data-page-turn="back"]::view-transition-new(idw-page){animation-name:idwPageInBack}
+@keyframes idwPageOut{to{opacity:0;translate:-14px 0}}
+@keyframes idwPageIn{from{opacity:0;translate:18px 0}}
+@keyframes idwPageOutBack{to{opacity:0;translate:14px 0}}
+@keyframes idwPageInBack{from{opacity:0;translate:-18px 0}}
+html.calm::view-transition-old(idw-page),html.calm::view-transition-new(idw-page){animation:none}
+@media(prefers-reduced-motion:reduce){::view-transition-old(idw-page),::view-transition-new(idw-page){animation:none}}
+
 /* the sliding ink under the top menu and the page tabs */
 #topnav,#subnav .subnav{position:relative}
 .fin-ink{position:absolute;left:0;top:0;height:3px;border-radius:3px;pointer-events:none;z-index:2;opacity:0;
@@ -3990,12 +4007,15 @@ button.sk-goal:hover b,.sh-next-btn:hover b{color:var(--brass);text-decoration:u
 .illustrated-card:hover:not(.locked) .choice-art img{translate:0 -2px}
 .illustrated-card.locked:hover{translate:0 -1px}
 .illustrated-card:active:not(.locked){translate:0 -1px;transition-duration:.06s}
-@keyframes finGlow{0%,100%{box-shadow:0 0 0 1px var(--brass),0 0 10px -4px var(--glow)}50%{box-shadow:0 0 0 1px var(--brass-hi),0 0 22px -4px var(--glow)}}
-.illustrated-card.selected{animation:finGlow 3.4s ease-in-out infinite}
+/* (27 Nov 2026: the chosen card's breathing glow is gone; the shape layer's !important shadow already hid it, so it
+   only cost a style pass every frame. The chosen card shows by its brass fill.) */
 
 /* the task you are doing: a slow light runs along its progress bar */
-@keyframes finGlint{from{background-position:-40% 0,0 0}to{background-position:140% 0,0 0}}
-.bar.prog>i{background-color:var(--c,var(--brass));background-image:linear-gradient(90deg,transparent,#ffffff55,transparent),linear-gradient(180deg,#ffffff22,transparent 60%);background-size:30% 100%,100% 100%;background-repeat:no-repeat;animation:finGlint 1.8s linear infinite}
+/* the light is its own layer sliding by transform (27 Nov 2026: it was a background-position loop, a repaint a frame);
+   same path: a 30%-wide gleam from -28% to 98% of the bar */
+@keyframes finGlint{from{translate:-93.33% 0}to{translate:326.67% 0}}
+.bar.prog>i{position:relative;background-color:var(--c,var(--brass));background-image:linear-gradient(180deg,#ffffff22,transparent 60%);background-repeat:no-repeat;overflow:hidden}
+.bar.prog>i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:30%;pointer-events:none;background:linear-gradient(90deg,transparent,#ffffff55,transparent);animation:finGlint 1.8s linear infinite}
 
 
 /* pop-ups and tooltips arrive instead of appearing */
@@ -4008,13 +4028,13 @@ button.sk-goal:hover b,.sh-next-btn:hover b{color:var(--brass);text-decoration:u
 /* the skill rail answers the pointer; the skill you are training breathes */
 .dk{transition:background .2s,translate .18s var(--ease-out)}
 .dk:hover{translate:2px 0}
-@keyframes finBreath{0%,100%{box-shadow:inset 3px 0 0 var(--c,var(--brass))}50%{box-shadow:inset 3px 0 0 var(--c,var(--brass)),inset 0 0 18px -8px var(--c,var(--brass))}}
-.dk.working{animation:finBreath 2.8s ease-in-out infinite}
+/* (27 Nov 2026: the training skill's breathing shadow is gone; the shape layer's !important outline already hid it, so it
+   only cost a style pass every frame) */
 
-html.calm #view.fin-enter [style*="--fin-i"],html.calm .illustrated-card.selected,html.calm .bar.prog>i,html.calm .modal .m-card,html.calm .dk{animation:none!important}
+html.calm #view.fin-enter [style*="--fin-i"],html.calm .illustrated-card.selected,html.calm .bar.prog>i,html.calm .bar.prog>i::after,html.calm .modal .m-card,html.calm .dk{animation:none!important}
 html.calm .fin-ink{transition:none}
 @media (prefers-reduced-motion:reduce){
-  #view.fin-enter [style*="--fin-i"],.illustrated-card.selected,.bar.prog>i,.modal .m-card,.dk{animation:none!important}
+  #view.fin-enter [style*="--fin-i"],.illustrated-card.selected,.bar.prog>i,.bar.prog>i::after,.modal .m-card,.dk{animation:none!important}
   .fin-ink,.illustrated-card,.illustrated-card .choice-art img,.btn.primary::after,.tnav .ic,.dk{transition:none!important}
   .illustrated-card:hover,.btn:hover,.dk:hover,.tnav:hover .ic,.tnav.on .ic,.illustrated-card:hover .choice-art img{translate:none!important}
 }
@@ -6313,6 +6333,41 @@ DQ.injectSprite = () => {
   el.innerHTML = `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>${s}</defs></svg>`;
   document.body.prepend(el.firstChild);
 };
+})();
+
+/* ---------- the animation clock (27 Nov 2026, owner: "smoother and higher FPS animations") ----------
+   Every continuous animation in the game (progress bars, the strike beat, town life and walkers, particles, coin
+   rolls, quest reveals, the title's fireflies) runs from this one requestAnimationFrame loop instead of a loop each,
+   so the page does one callback per frame at the display's own refresh (60, 120 or 144 Hz). Each subscriber gets
+   (dt, now): dt in seconds since the last frame, capped at 0.1 so a stall never jumps a scene, and the frame's
+   timestamp. Returning false unsubscribes. Nothing runs while the tab is hidden, and coming back never catches up:
+   the first frame after a return has dt 0. A subscriber that throws is dropped (as its own loop would have died). */
+(() => {
+const DQ = window.DQ, subs = new Set();
+const hasRaf = typeof requestAnimationFrame === 'function', hidden = () => typeof document !== 'undefined' && !!document.hidden;
+let raf = 0, last = 0, frames = 0, calls = 0, busy = 0;
+const wake = () => { if (!raf && hasRaf && subs.size && !hidden()) raf = requestAnimationFrame(run); };
+function run(now) {
+  raf = 0; if (hidden()) { last = 0; return; }
+  const dt = last ? Math.min(.1, Math.max(0, (now - last) / 1000)) : 0; last = now; frames++;
+  const t0 = performance.now();
+  for (const fn of [...subs]) { if (!subs.has(fn)) continue; calls++;
+    let keep; try { keep = fn(dt, now); } catch (e) { keep = false; console.error(e); }
+    if (keep === false) subs.delete(fn); }
+  busy += performance.now() - t0;
+  if (subs.size) wake(); else last = 0;
+}
+DQ.frame = {
+  add(fn) { if (typeof fn === 'function') { subs.add(fn); wake(); } return () => subs.delete(fn); },
+  remove(fn) { return subs.delete(fn); },
+  has: fn => subs.has(fn),
+  get size() { return subs.size; },
+  get running() { return !!raf; },
+  /* for tests and docs/motion-performance.md: frames run, subscriber calls and time spent */
+  stats: () => ({ frames, calls, busyMs: Math.round(busy * 10) / 10, subscribers: subs.size, running: !!raf, hidden: hidden() })
+};
+if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('visibilitychange', () => {
+  if (hidden()) { if (raf && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(raf); raf = 0; last = 0; } else wake(); });
 })();
 
 </script>
@@ -13778,7 +13833,7 @@ DQ.burstAt = (x, y, col, n = 30) => {
     const a = Math.random() * 6.283, v = 1.5 + Math.random() * 5;
     parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 2.5, life: 1, d: .012 + Math.random() * .014, s: 2.5 + Math.random() * 3.5, c: Math.random() < .6 ? col : '#f3d58a' });
   }
-  if (!running) { running = true; particleTime=performance.now(); requestAnimationFrame(loop); }
+  if (!running) { running = true; particleTime=performance.now(); DQ.frame.add(loop); }
 };
 DQ.burstEl = (el, col, n) => { if (!el) return; const r = el.getBoundingClientRect(); DQ.burstAt(r.left + r.width / 2, r.top + r.height / 2, col, n); };
 /* Exact time-based integration keeps the same motion at 60, 120 or 144 Hz. */
@@ -13787,13 +13842,13 @@ DQ.stepParticle = (p, ms) => {
   p.x+=p.vx*(1-drag)/rate;p.vx*=drag;
   p.y+=p.vy*frames+.08*frames*frames;p.vy+=.16*frames;p.life-=p.d*frames;
 };
-function loop(now) {
+function loop(dt0, now) { /* on the shared animation clock (util.js); returning false ends it */
   const dt=Math.max(0,Math.min(100,now-particleTime));particleTime=now;
-  if(document.hidden||calm()){parts=[];running=false;cx.clearRect(0,0,innerWidth,innerHeight);return;}
+  if(document.hidden||calm()){parts=[];running=false;cx.clearRect(0,0,innerWidth,innerHeight);return false;}
   cx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); cx.clearRect(0, 0, innerWidth, innerHeight);
   parts = parts.filter(p => p.life > 0);
   for (const p of parts) { DQ.stepParticle(p,dt); cx.globalAlpha = Math.max(0, p.life); cx.fillStyle = p.c; cx.fillRect(p.x, p.y, p.s, p.s * .6); }
-  if (parts.length) requestAnimationFrame(loop); else { running = false; cx.clearRect(0, 0, innerWidth, innerHeight); }
+  if (!parts.length) { running = false; cx.clearRect(0, 0, innerWidth, innerHeight); return false; }
 }
 
 /* ---------- toast ---------- */
@@ -16284,8 +16339,7 @@ const progOf = key => { const a = DQ.act; if (!a) return 0; if (key !== '@' && k
   return tr ? clamp((tr - DQ.fight.tracking + f) / tr, 0, 1) : f; };
 UI.frame = () => {
   for (const e of progEls) { const p = progOf(e.dataset.prog); if (e.dataset.ring) e.style.strokeDashoffset = 289 * (1 - p); else e.style.transform = `scaleX(${p})`; }
-  requestAnimationFrame(UI.frame);
-};
+}; /* runs on the shared clock (DQ.frame, util.js) from UI.init */
 
 /* ---------- Portrait ---------- */
 UI.portrait = (px = 48, cls = '') => {
@@ -16720,15 +16774,15 @@ UI.travelAnim = to => {
   const a = D.TOWN[from].idx, b = D.TOWN[to].idx, step = a < b ? 1 : -1, path = []; for (let i = a; i !== b; i += step) path.push(step > 0 ? [i, false] : [i - 1, true]);
   const pin = $('#hero-pin'); if (!pin || DQ.S.settings.reduceFx) return DQ.travel(to);
   UI.traveling = true; DQ.sfx('travel'); let k = 0, t0 = performance.now(); const per = 650;
-  const go = () => {
+  const go = () => { /* on the shared animation clock (util.js); returning false ends it */
     const [si, rev] = path[k], p = $('#seg' + si);
-    if (!p || !pin.isConnected) { UI.traveling = false; DQ.travel(to); return; }
+    if (!p || !pin.isConnected) { UI.traveling = false; DQ.travel(to); return false; }
     const len = p.getTotalLength(), f = clamp((performance.now() - t0) / per, 0, 1), e = f * f * (3 - 2 * f), pt = p.getPointAtLength((rev ? 1 - e : e) * len);
     pin.setAttribute('transform', `translate(${pt.x} ${pt.y - 40 - Math.sin(f * Math.PI) * 10})`);
     if (f >= 1) { k++; t0 = performance.now(); }
-    if (k < path.length) requestAnimationFrame(go); else { UI.traveling = false; DQ.travel(to); }
+    if (k >= path.length) { UI.traveling = false; DQ.travel(to); return false; }
   };
-  requestAnimationFrame(go);
+  DQ.frame.add(go);
 };
 
 /* ---------- Shop ---------- */
@@ -17165,7 +17219,7 @@ UI.init = () => {
     const impact=Math.max(0,(delay||0)-180)+(DQ.battleTiming?.impact||390),show=()=>{if(!box.isConnected||document.hidden)return;const el=document.createElement('div');el.className='splat '+kind;el.textContent=text;box.appendChild(el);setTimeout(()=>el.remove(),1400);};if(side==='foe')UI.afterImpact(show,impact);else setTimeout(show,impact);
   });
   DQ.on('slain', () => { const foe=$('#av-foe');UI.afterImpact(()=>{if(foe?.isConnected)DQ.flash(foe,'slain');},DQ.battleTiming?.impact||390); });
-  THEME(); UI.renderHud(); UI.renderRail(); UI.render(true); requestAnimationFrame(UI.frame);
+  THEME(); UI.renderHud(); UI.renderRail(); UI.render(true); DQ.frame.add(UI.frame);
 };
 DQ.on('itemfound',()=>{if(['cooking','smithing','crafting','carpentry','brewery','enchanting','research','projects','magic','bestiary'].includes(UI.view))UI.refresh();});
 })();
@@ -22833,27 +22887,51 @@ A.coverage = () => {
    CSS sizes boxes for layout; a pixel sprite inside must still be drawn at an exact multiple of its own size, or its
    pixels smear (1.5x) or vanish (0.94x) and it reads as low-res. After any change to the page, each sprite is snapped
    to the nearest whole multiple of its native size (large scenes round down so they never overflow), and kept from
-   being squeezed by flex layouts. Reads first, then writes, once per frame. */
-const NAT_ICON = 16;
-const snapAll = root => {
-  const els = [...(root || document).querySelectorAll('img.pxa, i.ic.pxi')], plan = [];
+   being squeezed by flex layouts. Reads first, then writes.
+   27 Nov 2026 (visual audit: the snapper rescanned the whole page, forcing a layout, on every DOM change, several
+   times a second): only the sprites a change touches are measured now, and only once the browser has laid them out.
+   The MutationObserver's records name the added subtrees (and sprites whose src or class changed); each such sprite
+   is handed to a ResizeObserver, which reports it in the same frame after layout, so reading its size forces nothing
+   and it is snapped before it is painted. A sprite with no size yet (inside a hidden tab or panel) stays observed and
+   is snapped the moment it gets one; a picture that loads late is observed again when it loads; a resize remeasures
+   every sprite. The result is the same as the old full rescan. */
+const NAT_ICON = 16, SEL = 'img.pxa, i.ic.pxi';
+const unsized = new Set(), listening = new WeakSet(), stats = { flushes: 0, measured: 0, ms: 0 };
+let ro = null;
+const watch = (el, fresh) => { if (!ro) return; if (fresh) ro.unobserve(el); ro.observe(el); };
+/* a picture still loading (or given a new src) is measured once it has its size */
+const onLoad = el => { if (listening.has(el)) return; listening.add(el); el.addEventListener('load', () => { listening.delete(el); watch(el, true); }, { once: true }); };
+const snapEls = els => {
+  const plan = [];
   for (const el of els) {
-    if (el.closest('.combat-d .avatar')) continue; /* the fight sizes its fighters to whole multiples in CSS by the stage's height */
+    const done = () => { unsized.delete(el); if (ro) ro.unobserve(el); };
+    if (!el.isConnected) { done(); continue; }
+    if (el.closest('.combat-d .avatar')) { done(); continue; } /* the fight sizes its fighters to whole multiples in CSS by the stage's height */
     const lg = el.tagName === 'IMG' && el.naturalWidth && A.logicalOf && A.logicalOf(el.currentSrc || el.src), nat = el.tagName === 'IMG' ? (lg ? lg[0] : el.naturalWidth) : NAT_ICON, natH = el.tagName === 'IMG' ? (lg ? lg[1] : el.naturalHeight) : NAT_ICON;
-    if (!nat) { if (el.tagName === 'IMG' && !el.dataset.snapWait) { el.dataset.snapWait = 1; el.addEventListener('load', () => queue(), { once: true }); } continue; }
-    const w = el.offsetWidth; if (!w) continue;
+    if (!nat) { done(); if (el.tagName === 'IMG') { el.dataset.snapWait = 1; onLoad(el); } continue; }
+    const w = el.offsetWidth; if (!w) { unsized.add(el); continue; } /* stays observed: snapped when it is shown */
+    done();
     const hh = el.offsetHeight, byH = hh && hh / natH < w / nat, ratio = byH ? hh / natH : w / nat, k = nat >= 64 || byH ? Math.max(1, Math.floor(ratio + .001)) : Math.max(1, Math.round(ratio - .01));
     const want = nat * k; if (Math.abs(w - want) < .5 && el.dataset.snapped) continue;
     plan.push([el, want, natH * k]);
   }
   for (const [el, w, h] of plan) { el.style.setProperty('width', w + 'px', 'important'); el.style.setProperty('height', h + 'px', 'important'); el.style.setProperty('flex-shrink', '0'); el.style.setProperty('max-width', 'none', 'important'); el.style.setProperty('max-height', 'none', 'important'); el.dataset.snapped = 1; }
+  return els.length;
 };
-let pending = 0; const queue = () => { if (pending) return; pending = requestAnimationFrame(() => { pending = 0; snapAll(document); }); };
-if (typeof MutationObserver === 'function' && typeof document !== 'undefined' && document.documentElement) {
-  const start = () => { new MutationObserver(queue).observe(document.body, { childList: true, subtree: true }); queue(); };
+/* every sprite under root (the whole page by default), measured now: for tests */
+const snapAll = root => snapEls([...(root || document).querySelectorAll(SEL)]);
+const collect = node => { if (node.nodeType !== 1) return; if (node.matches(SEL)) watch(node); if (node.firstElementChild) for (const el of node.querySelectorAll(SEL)) watch(el); };
+const observed = records => { for (const r of records) { if (r.type === 'childList') { for (const n of r.addedNodes) collect(n); }
+  else if (r.target.matches && r.target.matches(SEL)) { watch(r.target, true); if (r.attributeName === 'src' && r.target.tagName === 'IMG') onLoad(r.target); } } };
+if (typeof MutationObserver === 'function' && typeof ResizeObserver === 'function' && typeof document !== 'undefined' && document.documentElement) {
+  ro = new ResizeObserver(entries => { const t0 = performance.now(); stats.flushes++; stats.measured += snapEls(entries.map(e => e.target)); stats.ms += performance.now() - t0; });
+  const all = () => document.querySelectorAll(SEL).forEach(el => watch(el, true));
+  const start = () => { new MutationObserver(observed).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'class'] }); all(); };
   if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
-  addEventListener('resize', () => { document.querySelectorAll('[data-snapped]').forEach(el => { el.style.removeProperty('width'); el.style.removeProperty('height'); delete el.dataset.snapped; }); queue(); });
+  addEventListener('resize', () => { document.querySelectorAll('[data-snapped]').forEach(el => { el.style.removeProperty('width'); el.style.removeProperty('height'); delete el.dataset.snapped; }); all(); });
 }
+/* for tests and docs/motion-performance.md: batches measured, sprites measured, time spent, sprites waiting to be shown */
+Q.snapStats = () => ({ flushes: stats.flushes, measured: stats.measured, ms: Math.round(stats.ms * 10) / 10, unsized: unsized.size });
 Q.snapPixels = snapAll;
 })();
 
@@ -23252,14 +23330,14 @@ const html = () => {
 const animate = () => {
   if (S().settings.reduceFx) return;
   const start = performance.now(), STAGGER = 160, POP = 260, COUNT = 700;
-  const step = now => {
-    const els = document.querySelectorAll('.quest-reveal [data-count]'); if (!els.length || !reveal) return;
+  const step = (dt, now) => { /* on the shared animation clock (util.js); returning false ends it */
+    const els = document.querySelectorAll('.quest-reveal [data-count]'); if (!els.length || !reveal) return false;
     let busy = false;
     els.forEach(el => { const i = +el.closest('.qrv-tile').style.getPropertyValue('--i') || 0, t = (now - start - i * STAGGER - POP) / COUNT, k = Math.max(0, Math.min(1, t)), e = 1 - Math.pow(1 - k, 3), n = Math.round(+el.dataset.count * e), u = el.dataset.unit;
       el.textContent = el.dataset.pre ? fmt(n) + u : fmt(n) + u; if (k < 1) busy = true; });
-    if (busy) requestAnimationFrame(step);
+    if (!busy) return false;
   };
-  requestAnimationFrame(step);
+  DQ.frame.add(step);
 };
 const view0 = UI.V.quests;
 UI.V.quests = () => {
@@ -26297,12 +26375,13 @@ const coins0 = UI.B && UI.B.coins;
 if (coins0) UI.B.coins = e => {
   const target = DQ.S.coins, st = shown.get(e);
   if (st && target === st.to) { if (!st.raf) coins0(e); return; }
-  if (!st || calm() || target < st.to || target - st.to > 1e7) { if (st && st.raf) cancelAnimationFrame(st.raf); shown.set(e, { from: target, to: target, now: target }); return coins0(e); }
+  if (!st || calm() || target < st.to || target - st.to > 1e7) { if (st && st.raf) DQ.frame.remove(st.raf); shown.set(e, { from: target, to: target, now: target }); return coins0(e); }
   const from = st.now, start = performance.now(), dur = Math.min(900, 380 + Math.log10(target - from + 1) * 120);
-  if (st.raf) cancelAnimationFrame(st.raf);
-  const step = t => { const k = Math.min(1, (t - start) / dur), ease = 1 - Math.pow(1 - k, 3), v = Math.round(from + (target - from) * ease);
-    st.now = v; UI.set(e, DQ.formatCoins(v)); st.raf = k < 1 ? requestAnimationFrame(step) : 0; if (k >= 1) { e.classList.remove('fin-roll'); } };
-  Object.assign(st, { to: target }); e.classList.add('fin-roll'); st.raf = requestAnimationFrame(step);
+  if (st.raf) DQ.frame.remove(st.raf);
+  /* on the shared animation clock (util.js): st.raf holds the running step, and returning false ends it */
+  const step = (dt, t) => { const k = Math.min(1, (t - start) / dur), ease = 1 - Math.pow(1 - k, 3), v = Math.round(from + (target - from) * ease);
+    st.now = v; UI.set(e, DQ.formatCoins(v)); if (k >= 1) { st.raf = 0; e.classList.remove('fin-roll'); return false; } };
+  Object.assign(st, { to: target }); e.classList.add('fin-roll'); st.raf = step; DQ.frame.add(step);
 };
 
 const render0 = UI.render;
@@ -26319,6 +26398,49 @@ UI.render = (...a) => {
   return r;
 };
 addEventListener('resize', () => { try { inks(); } catch (e) {} });
+
+/* page turns (27 Nov 2026, owner: "more logical flow"): changing page from the top menu, the page tabs, the rail or a
+   route chip turns the main view like a page of the journal. The old page fades and slides away, the new one comes in
+   from the side you moved towards (about 200 ms; the View Transitions API, so it is the browser's own snapshot and
+   timeline). Only #view moves: the top bar, rail and pop-ups change at once, and nothing in the layout shifts.
+   The browser animates only after it has painted the old page, so the click itself is replayed one frame later inside
+   the transition (state and DOM still change together, synchronously, for every listener). A click that turns out
+   not to change page skips the animation. Off where the API is missing, under Reduce effects (html.calm) and the
+   device's reduced-motion setting, and in automated browsers (the tests measure layout straight after navigating)
+   unless localStorage['idlewick.transitions'] is '1'. */
+const NAV = new Set(['go', 'hub', 'route', 'routeback', 'openquest', 'openproject', 'nowactivity']);
+UI.pageTurnsOn = () => {
+  if (typeof document.startViewTransition !== 'function' || calm() || document.hidden) return false;
+  if (navigator.webdriver) { try { return localStorage.getItem('idlewick.transitions') === '1'; } catch (e) { return false; } }
+  return true;
+};
+/* towards the right of the menu, tab row or rail (or a route onward) the page comes in from the right; back from the left */
+const dirOf = t => {
+  if (t.dataset.do === 'routeback') return 'back';
+  const row = t.closest('#topnav, #subnav, #rail, #dock'), on = row && [...row.querySelectorAll('.on')].find(x => x !== t);
+  return on && (on.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_PRECEDING) ? 'back' : 'fwd';
+};
+let replaying = false, turning = null;
+const replay = (t, e) => {
+  replaying = true;
+  try {
+    if (t.isConnected) t.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window, clientX: e.clientX, clientY: e.clientY, button: e.button }));
+    else { DQ.audioInit && DQ.audioInit(); const f = UI.DO[t.dataset.do]; if (f) f(t.dataset.a, t.dataset.b, t); } /* redrawn meanwhile: the same action */
+  } catch (err) { console.error(err); } finally { replaying = false; }
+};
+document.addEventListener('click', e => {
+  if (replaying || e.defaultPrevented) return;
+  const t = e.target.closest && e.target.closest('[data-do]');
+  if (!t || t.disabled || !NAV.has(t.dataset.do) || (t.dataset.do === 'go' && t.dataset.a === UI.view) || !UI.pageTurnsOn()) return;
+  e.stopImmediatePropagation(); e.preventDefault();
+  const root = document.documentElement, from = UI.view;
+  root.dataset.pageTurn = dirOf(t); root.classList.add('page-turning');
+  const vt = document.startViewTransition(() => { replay(t, e); if (UI.view === from) vt.skipTransition(); });
+  turning = vt;
+  const done = () => { if (turning !== vt) return; turning = null; root.classList.remove('page-turning'); delete root.dataset.pageTurn; };
+  vt.finished.then(done, done); vt.ready.catch(() => {}); vt.updateCallbackDone.catch(() => {});
+}, true);
+UI.pageTurning = () => !!turning;
 })();
 
 </script>
@@ -26486,8 +26608,9 @@ function celebrate(id, gained, from) {
   const chip = document.querySelector('.packchip'), pick = () => document.querySelector('#view .shop-detail-actions .btn.primary, #view [data-do="buy"].primary, #view [data-do="buyupgrade"], #view [data-do="localbuy"]');
   /* the shop redraws itself after a purchase, so the "Bought" label follows whichever Buy button is on screen */
   const until = performance.now() + 1100, text = `✓ Bought${gained > 1 ? ' ×' + gained : ''}`, keep = new WeakMap();
-  const hold = t => { const b = pick(); if (b) { if (t < until) { if (!b.classList.contains('just-bought')) { keep.set(b, b.innerHTML); b.classList.add('just-bought'); b.innerHTML = text; } requestAnimationFrame(hold); } else if (b.classList.contains('just-bought')) { b.classList.remove('just-bought'); if (keep.has(b)) b.innerHTML = keep.get(b); else UI.render(false); } } else if (t < until) requestAnimationFrame(hold); };
-  requestAnimationFrame(hold);
+  /* on the shared animation clock (util.js); returning false ends it */
+  const hold = (dt, t) => { const b = pick(); if (b) { if (t < until) { if (!b.classList.contains('just-bought')) { keep.set(b, b.innerHTML); b.classList.add('just-bought'); b.innerHTML = text; } return; } if (b.classList.contains('just-bought')) { b.classList.remove('just-bought'); if (keep.has(b)) b.innerHTML = keep.get(b); else UI.render(false); } return false; } if (t >= until) return false; };
+  DQ.frame.add(hold);
   if (DQ.sfx) DQ.sfx('buy');
   if (chip) {
     const plus = document.createElement('b'); plus.className = 'pack-plus'; plus.textContent = '+' + Math.max(1, gained); chip.appendChild(plus);
@@ -26590,9 +26713,13 @@ const soundOf = act => {
   return null;
 };
 let stageEl = null, beatSet = 0, lastStrike = -1, lastAct = null;
+/* the working stage inside #view (what '#view .activity-stage.working' finds), from a live list the browser keeps
+   current, so a frame never searches the whole page (27 Nov 2026: that search was the biggest per-frame cost in a fight) */
+let viewEl = null, stages = null;
+const findStage = () => { const v = document.getElementById('view'); if (v !== viewEl) { viewEl = v; stages = v ? v.getElementsByClassName('activity-stage') : null; }
+  if (stages) for (const s of stages) if (s.classList.contains('working')) return s; return null; };
 const loop = () => {
-  requestAnimationFrame(loop);
-  const act = DQ.act, name = soundOf(act), stage = document.querySelector('#view .activity-stage.working');
+  const act = DQ.act, name = soundOf(act), stage = name && findStage();
   if (!name || !stage || document.hidden || !act.dur) { DQ.strikeLive = null; stageEl = null; return; }
   const dur = act.dur, swings = Math.max(1, Math.round(dur / 1200)), beat = dur / swings;
   const elapsed = Math.max(0, (Date.now() - act.t0) % dur);
@@ -26607,7 +26734,7 @@ const loop = () => {
   const strike = Math.floor(elapsed / beat - IMPACT);
   if (strike !== lastStrike) { if (strike >= 0) DQ.sfxStrike && DQ.sfxStrike(name); lastStrike = strike; } /* -1 is the wind-up before the first swing lands */
 };
-requestAnimationFrame(loop);
+DQ.frame.add(loop); /* the shared animation clock (util.js) */
 })();
 
 </script>
@@ -27927,8 +28054,8 @@ const attach = img => { if (img.dataset.walkers || img.classList.contains('scene
 Q.townWalkersScan = () => { if (still()) return; document.querySelectorAll('.home-scene img.scene[data-town], .village-scene>img.scene[data-town]').forEach(attach); };
 Q.townWalkersLive = () => [...layers].filter(L => L.cv.isConnected).map(L => ({ town: L.img.dataset.town, walkers: L.walkers.map(w => ({ x: Math.round(w.x), y: w.y })) }));
 
-const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performance.now(); this.raf = requestAnimationFrame(t => this.run(t)); } },
-  run(t) { this.raf = 0; const dt = Math.min(.1, Math.max(0, (t - this.last) / 1000)); this.last = t; /* a hidden tab never catches up */
+const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performance.now(); this.raf = Q.frame.add((dt, t) => this.run(t)); } }, /* the shared animation clock (util.js) */
+  run(t) { const dt = Math.min(.1, Math.max(0, (t - this.last) / 1000)); this.last = t; /* a hidden tab never catches up */
     for (const L of layers) { if (!L.cv.isConnected) { L.ro && L.ro.disconnect(); layers.delete(L); continue; }
       if (still()) { L.cv.remove(); continue; }
       for (const w of L.walkers) { if (w.rest > 0) { w.rest -= dt; continue; }
@@ -27937,7 +28064,7 @@ const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performan
         if (Math.random() < dt * .06) { w.rest = 1 + Math.random() * 3; if (Math.random() < .4) w.dir = -w.dir; } }
       const key = L.walkers.map(w => Math.round(w.x) + ':' + (w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2) + w.dir).join(',');
       if (key !== L.key) { L.key = key; L.x.clearRect(0, 0, L.cv.width, L.cv.height); for (const w of L.walkers) draw(L.x, w); } }
-    if (layers.size) this.raf = requestAnimationFrame(n => this.run(n)); } };
+    if (!layers.size) { this.raf = 0; return false; } } };
 
 /* Home's town scene at a whole-number scale (27 Nov 2026 audit: object-fit:cover showed it at 2.36x, 1.78x and 0.56x;
    the art rule allows a fitted scale only on the Village page). The picture takes the smallest whole scale that covers
@@ -28128,13 +28255,13 @@ Q.townLifeScan = () => document.querySelectorAll('.home-scene img.scene[data-tow
 Q.townLifeLive = () => [...layers].filter(L => L.img.isConnected).map(L => ({ town: L.town, phase: L.tint.dataset.phase, tint: L.tint.style.backgroundColor, weather: L.weather, windows: (L.meta.windows || []).length, chimneys: (L.meta.chimneys || []).length,
   animals: L.animals.map(a => ({ kind: a.kind, x: Math.round(a.kind === 'gull' ? a.cx + Math.cos(a.a) * a.r * 1.6 : a.x) })), drops: L.drops.length }));
 
-const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performance.now(); this.raf = requestAnimationFrame(t => this.run(t)); } },
-  run(t) { this.raf = 0; const dt = Math.min(.1, Math.max(0, (t - this.last) / 1000)); this.last = t; /* a hidden tab never catches up */
+const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performance.now(); this.raf = Q.frame.add((dt, t) => this.run(t)); } }, /* the shared animation clock (util.js) */
+  run(t) { const dt = Math.min(.1, Math.max(0, (t - this.last) / 1000)); this.last = t; /* a hidden tab never catches up */
     const calm = still();
     for (const L of layers) { if (!L.img.isConnected) { L.ro && L.ro.disconnect(); layers.delete(L); continue; }
       /* still: nothing moves; the light is brought up to the hour twice a minute */
       if (!calm) { paint(L, dt); L.calmAt = 0; } else if (!L.calmAt || t - L.calmAt > 30000) { paint(L, 0); L.calmAt = t; } }
-    if (layers.size) this.raf = requestAnimationFrame(n => this.run(n)); } };
+    if (!layers.size) { this.raf = 0; return false; } } };
 
 /* ---------- Settings → Display → Town life ---------- */
 Q.townLifeSettings = () => { const s = S().settings, clock = s.townTime !== 'day', wet = s.townWeather !== false;
@@ -28282,11 +28409,11 @@ const refresh = async (force) => { const H = document.querySelector('.home-scene
   const dim = H.querySelector('.hearth-dim'); dim.style.backgroundColor = `rgb(${[255, 255, 255].map((v, i) => Math.round(v + ([150, 112, 84][i] - v) * L.dark * .55)).join(',')})`;
   if (key !== st.key || force) { if (st.busy) return; st.busy = true; try { st.url = await room(L.town, L, L.weather, season, pet); st.key = key; } finally { st.busy = false; } }
   const img = H.querySelector('.hearth-room'); if (img.getAttribute('src') !== st.url) img.src = st.url; st.dark = L.dark; };
-const tick = n => { st.raf = 0; const H = document.querySelector('.home-scene .hearth'); if (!H) return; const dt = Math.min(.1, Math.max(0, (n - st.last) / 1000)); st.last = n; const moving = !still(); if (moving) st.t += dt;
-  const cv = H.querySelector('.hearth-lights'); lights(cv.getContext('2d'), st.t, st.dark || 0, moving);
-  if (Math.floor(n / 30000) !== st.minute) { st.minute = Math.floor(n / 30000); refresh(); }
-  if (moving || !st.drawnStill) { st.drawnStill = !moving; } st.raf = requestAnimationFrame(tick); };
-const start = () => { place(); refresh(); if (!st.raf) { st.last = performance.now(); st.raf = requestAnimationFrame(tick); } };
+/* one subscriber on the shared clock (DQ.frame, js/util.js): elapsed time at native refresh, paused while hidden */
+const tick = (dt, now) => { const H = document.querySelector('.home-scene .hearth'); if (!H) { st.on = false; return false; } const moving = !still(); if (moving) st.t += dt;
+  lights(H.querySelector('.hearth-lights').getContext('2d'), st.t, st.dark || 0, moving);
+  const n = now || performance.now(); if (Math.floor(n / 30000) !== st.minute) { st.minute = Math.floor(n / 30000); refresh(); } };
+const start = () => { place(); refresh(); if (!st.on) { st.on = true; if (Q.frame) Q.frame.add(tick); else { const loop = n => { if (tick(1 / 60, n) !== false) requestAnimationFrame(loop); }; requestAnimationFrame(loop); } } };
 Q.hearthLive = () => { const H = document.querySelector('.home-scene .hearth'); return H ? { scale: +H.dataset.scale, spots: [...H.querySelectorAll('.hearth-spot')].map(b => b.dataset.spot), note: H.querySelector('.hearth-note').innerText, src: !!H.querySelector('.hearth-room').getAttribute('src'), t: st.t } : null; };
 
 UI.DO.homeview = v => { if (!['hearth', 'town'].includes(v)) return; S().settings.homeView = v; Q.save && Q.save(); UI.render(true); };
@@ -28378,9 +28505,9 @@ UI.B.qbuild = (cv, id) => { const q = D.QM[id]; if (!q) return; const pr = UI.qu
     if (was < 0 || n <= was || still()) { anim.delete(cv); return paint(cv, P, n); }
     /* new blocks fall a few pixels into place, staggered, timed by elapsed time */
     const t0 = performance.now(), fresh = Array.from({ length: n - was }, (_, i) => was + i); anim.set(cv, 1);
-    const step = t => { const drop = {}; let busy = false; fresh.forEach((i, k) => { const u = Math.min(1, Math.max(0, (t - t0 - k * 70) / 260)); if (u < 1) busy = true; drop[i] = Math.round((1 - u * u) * 6); });
-      paint(cv, P, n, drop); if (busy && cv.isConnected) requestAnimationFrame(step); else anim.delete(cv); };
-    requestAnimationFrame(step); }); };
+    const step = (dt, t) => { const drop = {}; /* on the shared animation clock (util.js) */ let busy = false; fresh.forEach((i, k) => { const u = Math.min(1, Math.max(0, (t - t0 - k * 70) / 260)); if (u < 1) busy = true; drop[i] = Math.round((1 - u * u) * 6); });
+      paint(cv, P, n, drop); if (!(busy && cv.isConnected)) { anim.delete(cv); return false; } };
+    Q.frame.add(step); }); };
 
 /* ---------- put them on the quest card ---------- */
 const decorate = () => { const card = document.querySelector('#view .quest-journal[id^="q-"]'); if (!card || card.dataset.pics) return; const q = D.QM[card.id.slice(2)]; if (!q) return;
@@ -28794,14 +28921,13 @@ function fireflies(cv) {
   /* reduced motion: one still frame of fireflies, no drifting (27 Nov 2026 audit: the loop ignored the setting) */
   const still = () => (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) || (DQ.S && DQ.S.settings && DQ.S.settings.reduceFx);
   let drawnStill = false;
-  const loop = t => {
-    if (!cv.isConnected) return;
-    if (still()) { if (drawnStill) { requestAnimationFrame(loop); return; } drawnStill = true; t = 0; } else drawnStill = false;
+  const loop = (dt, t) => { /* on the shared animation clock (util.js); returning false ends it */
+    if (!cv.isConnected) return false;
+    if (still()) { if (drawnStill) return; drawnStill = true; t = 0; } else drawnStill = false;
     const frames=Math.max(0,Math.min(3,(t-lastFrame)/(1000/60)));lastFrame=t; cx.clearRect(0, 0, w, h);
     for (const f of fl) { f.x += Math.sin(t / 2400 + f.p) * .0004 * frames; f.y -= f.s * .0006 * frames; if (f.y < -.02) { f.y = 1.02; f.x = Math.random(); } const a = .35 + .65 * Math.abs(Math.sin(t / 900 + f.p)); cx.fillStyle = `rgba(${tint},${a * .85})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r, 0, 6.3); cx.fill(); cx.fillStyle = `rgba(${tint},${a * .12})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r * 6, 0, 6.3); cx.fill(); }
-    requestAnimationFrame(loop);
   };
-  requestAnimationFrame(loop);
+  DQ.frame.add(loop);
 }
 
 /* The title (20 Nov 2026 redo): it follows the player's theme like the rest of the game. Behind a parchment card,
