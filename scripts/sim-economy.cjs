@@ -23,6 +23,8 @@ function boot() {
   ['engine', 'systems', 'plan', 'meta', 'mastery'].forEach(load);
   q.ui = { V: {}, DO: {}, B: {}, homeSections: [], render() {}, tabState: () => null }; q.tips = { item: () => '' }; q.goals = () => [];
   ['research', 'journey', 'local_standing', ...(process.env.NO_PERKS ? [] : ['skill_perks'])].forEach(load);
+  /* the game loads this last, after every ladder is defined: each gathering spot and recipe on its own level */
+  if (!process.env.NO_SPREAD) load('level_spread');
   q.S = q.newState(); q.fxDirty(); return q;
 }
 const q = boot(), D = q.data, S = q.S; S.settings.notify = false;

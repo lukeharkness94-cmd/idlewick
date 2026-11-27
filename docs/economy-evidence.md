@@ -180,3 +180,20 @@ Sailing XP runs at roughly 75–110% of Fishing at the same level while the haul
 ## Skill perks and flourishes (Nov 2026)
 
 `node scripts/sim-economy.cjs 24` with and without `NO_PERKS=1`: 24 h coins 588,099 → 622,131 (+6%), hero 65 → 66, first hour 3,992 → 4,850 coins. Boss ladder (`sim-bosses.cjs`) identical with and without perks.
+
+## Unique levels, town-independent gathering, crops, Capture (27 Nov 2026)
+
+`node scripts/sim-economy.cjs 24` now loads `js/level_spread.js` as the game does (`NO_SPREAD=1` to leave it out). Run
+against the code before this round (52a6786) and now: identical, 24 h coins 622,131, hero 66, first hour 4,850. That is
+the expected result, not a missing effect: of the gathering spots only Tin moved (Mining 1 → 2), and the bot always
+works the best spot it can use; it already ignored the town for that choice, so "towns open content everywhere" changes
+nothing it measures.
+
+What the sim does not cover and what the rules imply instead:
+- **Crops** grow 4× longer with 6× XP and unchanged yields: per plot, Farming XP an hour ×1.5 and crop coins an hour
+  ×0.25. Crops stop being a coin source worth timing and become an XP source; nothing in the opening's money depends on
+  them (the first-hour run sells fish, logs and ore).
+- **Capture** replaces expeditions; eggs are now 1 in 2,000 skilling actions and 1 in 500 victories or catches. No coin
+  income came from expeditions, so purse milestones are unaffected.
+- **Sell all but 1** is a button; prices are unchanged.
+- Hunting's single ground (50 animals, five tiers) is not simulated; drop values per animal are unchanged.
