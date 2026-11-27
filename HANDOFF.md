@@ -975,6 +975,31 @@ For the next implementation session, follow [the Claude handoff](docs/claude-han
 
 After stabilizing Part B, continue with Tasks 17–26. Start with the first-hour harness audit and verify each historical finding against current main. The [Claude handoff](docs/claude-handoff.md) links to the [original Part C brief](docs/claude-part-c-brief.md) with all requirements and acceptance checks.
 
+## Room sound (Claude, 27 Nov 2026)
+Owner: "make the game feel cosy ... like a warm dashboard we can feel at home in", with sound that sits in the room.
+Everything is synthesised in `js/audio.js`; nobody has listened to it yet, so levels and timbres need a human ear.
+- **Room layers** (`D.ROOM_SOUND`, `DQ.roomPlan(inputs)` pure, `DQ.roomRefresh()`, read-only `DQ.roomState()`): each
+  layer is one gain node on the ambience bus (so Master, Ambience volume, the Nature ambience switch, Mute and the
+  fight dip all apply), started once, re-levelled with a 1.1 s time constant (about 3 s to cross) and stopped 5.5 s
+  after it fades out; asking for a fading layer revives it, so nothing stacks. Refreshed with the ambience (every 2 s),
+  on every page change and on mute. Layers: hearth (Home hub), chatter (always; ruined .22 / mending .55 / restored 1
+  of its level, voices every 22–44 / 8–16 / 2.5–7 s, × .45 on Home "through the wall"), night (town clock dark > .6:
+  crickets and an owl every 28–75 s), day (dark < .35, not Emberfall or the Hollow: a bird phrase every 9–24 s),
+  rain and snow (from `DQ.townWeather`). Off on the title screen, before the first click, in simulations and
+  forecasts, while the tab is hidden, and with Settings → Audio → Sound filters → Room sounds (`settings.snd.room`).
+  Reduce effects doubles the gaps between details, as it already does for the village ambience.
+- **Interface sounds**: `page` (paper rustle) on every page change (`DQ.go`) and in-page tab (`UI.DO.tab`, only when
+  the tab changes), replacing the old `tab` blip there; `quill` in `DQ.startQuest` (every Accept quest route),
+  replacing the `start` blip there; `buy` redesigned as a coin chime (it was already the single purchase sound, and the
+  shop and the purchase animation both announce it, so a 250 ms gap keeps it to one). Minimum gaps: page 350 ms, quill
+  400 ms, buy 250 ms. All three are in the Interface filter. `DQ.sfx` and strike sounds are now also silent while
+  `DQ.forecasting`. `DQ.audioStats().played` counts sounds actually synthesised.
+- Measured on the master output at default volumes (Chromium, ambience bus only, everything else silenced): village
+  ambience (Willowbrook) about −51 dBFS RMS, peaks −33; hearth −54 RMS, pops peak −35; chatter −75 (ruined), −66
+  (mending), −60 (restored); rain −56; snow wind −67; night −64 with cricket peaks −41; day bird phrases peak −47.
+  Interface peaks: paper turn −35, quill −35, coin chime −32, against the old `tab` blip −29 and `start` −25.
+- Test: `tests/room-sound.cjs` (browser, real AudioContext with the autoplay flag; skips if none runs).
+
 ## Rulebook and test runner (Claude, 27 Nov 2026)
 - AGENTS.md is now one current rulebook (about a third of its old length), grouped as How to work, Look and art, Screen layout, Words, Game rules and Tests. Rules that later owner decisions replaced were dropped from it; the full earlier text, with every owner quote and "supersedes" note, is kept in `docs/rules-history.md`. New owner decisions change the rule in place and add a dated line to the history file.
 - `scripts/run-tests.cjs` runs the suite: it rebuilds the game, starts its own preview server on a free port, points every test at it (`IDLEWICK_URL`, `SHOT_DIR`), runs several files at once (slowest first, using durations remembered in the OS temp folder) and prints failures with their last lines. Two runs on one machine no longer collide.

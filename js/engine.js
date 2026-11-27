@@ -173,7 +173,7 @@ function announceQuests() {
 }
 DQ.startQuest = id => {
   const q = D.QM[id]; if (DQ.questState(q) !== 'new') return;
-  S().q[id] = { s: 'active', p: q.obj.map(() => 0) }; DQ.sfx('start');
+  S().q[id] = { s: 'active', p: q.obj.map(() => 0) }; DQ.sfx('quill'); /* the quill signs you up (27 Nov 2026) */
   const P = S().pins = S().pins || []; if (!P.includes(id)) { P.unshift(id); if (P.length > 3) P.pop(); } DQ.log(`Quest started: ${q.name}.`, 'quest');
   checkQuests(); DQ.emit('quests');
 };

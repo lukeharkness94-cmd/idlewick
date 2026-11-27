@@ -99,7 +99,12 @@ dated line to the history file.
 - **Music and sound are synthesised** (`js/audio.js`, no audio files): one theme per region plus title, combat and boss
   (`D.MUSIC`), played lo-fi (`D.MUSIC_LOFI`); ambience per town with ruined/mending/restored tiers (`D.AMBIENCE`). A new
   region needs a theme row and ambience. Work sounds land on each visible strike (`js/strike_sync.js`). Quest and boss
-  chimes play even when their card is skipped.
+  chimes play even when their card is skipped. Room sound (owner, 27 Nov; `D.ROOM_SOUND`, `DQ.roomPlan`): a hearth
+  under the Home pages, a market murmur that rises with the restoration tier, crickets and an owl at night, birds by
+  day, rain and snow wind with the town weather, on the ambience bus and the Room sounds filter; layers re-level and
+  crossfade, never stack. Soft interface sounds: a paper turn for pages and tabs, a quill for Accept quest, one coin
+  chime per purchase, debounced and in the Interface filter. Nothing plays in a simulation or forecast
+  (`tests/room-sound.cjs`).
 
 ## 3. Screen layout
 

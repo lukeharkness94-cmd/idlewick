@@ -276,3 +276,5 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   parchment-style fantasy game ... moving town scenes, animated animals and characters ... cosy, logical and like a warm
   dashboard", then chose "1 and 2" (materials and polish; living towns with day and night). Added the materials line
   to the Hearthside Journal rule and the living-towns line to the towns rule.
+- 27 Nov 2026 (owner): "make the game feel cosy ... like a warm dashboard we can feel at home in", with sound that sits
+  in the room. Added the room-sound and soft interface-sound sentences to the Music and sound rule.

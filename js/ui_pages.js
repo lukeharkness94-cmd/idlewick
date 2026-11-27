@@ -289,7 +289,7 @@ const DO = {
   stop: () => DQ.stopAct(),
   resume: () => { const l = S().lastAct; if (l) DQ.startAct(l.kind, l.id); },
   mute: () => { DQ.audioInit(); DQ.setMuted(!S().settings.muted); },
-  tab: (a, b) => { UI.tab[a] = b; UI.render(false); },
+  tab: (a, b) => { if (UI.tab[a] !== b) DQ.sfx('page'); UI.tab[a] = b; UI.render(false); },
   readyonly: a => { UI.tab[a + 'ready'] = !UI.tab[a + 'ready']; UI.render(false); },
   style: (a, b) => { if (a === 'melee' || a === 'ranged' || a === 'magic') { S().style[a] = b; UI.render(false); } },
   autoeat: () => { S().settings.autoEat = !S().settings.autoEat; UI.render(false); },
@@ -506,7 +506,7 @@ UI.render = fresh => {
 };
 DQ.go = id => {
   if (!UI.V[id] && !D.SK[id]) return; if (id === UI.view) return;
-  UI.view = id; try { location.hash = id; } catch (e) {} DQ.sfx('tab'); UI.render(true);
+  UI.view = id; try { location.hash = id; } catch (e) {} DQ.sfx('page'); UI.render(true); DQ.roomRefresh && DQ.roomRefresh(); /* the hearth follows Home at once, not at the next ambience tick */
 };
 addEventListener('hashchange', () => { const h = location.hash.slice(1); if (h && (UI.V[h] || D.SK[h]) && h !== UI.view && DQ.started) { UI.view = h; UI.render(true); } });
 const THEME = () => { document.body.dataset.town = S().town; };
