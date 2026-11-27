@@ -83,6 +83,13 @@ Home, Quests, Village, World
 - Title-screen fireflies ignored reduced motion. They hold still now.
 - The planning unlock pop-up said "Tap" on desktop. The wording now works on any device.
 
+Lines around things (owner, 27 Nov: "I despise seeing physical lines around things")
+- Nothing you can't click draws a border, ring or outline any more, and nothing inside a button does either: combat
+  chips, drops and the foe's damage tags, the box round the creature on the stage, the unlock pop-up's ring and ripples,
+  Welcome back's boxes, the bell's rows, the hero level badge, ringed menu dots, technique dots, quest-row portraits,
+  boss faces on the map, field-guide numbers, the ranch board's frame. Tints and soft glows show state instead.
+- Dark theme: locked silhouettes are pale shapes instead of black ones with a drawn edge.
+
 ## Still open (bugs)
 
 - Farming: the "Empty plot" label overlaps the soil sprite on short windows. The livestock icons look washed out.
@@ -95,7 +102,7 @@ Home, Quests, Village, World
 - The item detail repeats the stat block, and its title is pale in the light theme.
 - The Now card grows by about 13px when a task starts, which shifts the rail.
 - Phones: the "Combat" card and an empty panel sit above the header on several pages; the Now card text is cut off.
-- Dark theme: locked silhouettes and tab icons are hard to see on dark green.
+- Dark theme: tab icons are hard to see on dark green.
 - Combat: sounds play at the round tick rather than at the visible impact (`strike_sync.js` covers work only);
   leftover "+XP" floats after a defeat; truncated ability names ("Second …"); the world-event pill covers the ability
   slots; the boss victory scene repeats Wren's line and still shows "Grubnash · Ready"; the practice yard swings the
@@ -105,15 +112,14 @@ Home, Quests, Village, World
 - Village: after a delivery, the button under the pointer becomes a route chip; "Deliver 12" shows what you hold
   rather than what's needed; "Collect proceeds · 0 coins" is enabled with nothing to collect; "Complete project" is
   7px below the window at 1280×720.
-- Welcome Back and Settings draw non-clickable information as outlined boxes (shape rule). The Settings segmented
-  buttons use 13px text.
+- The Settings segmented buttons use 13px text.
 - World events: after choosing, the only exit is still "Decide later"; "Track it · Lv 14" is enabled for a level-1
   hero; unaffordable choices read "150 coins · Need 150 coins".
 - Bell history: the buttons for "Waiting in Activity" and "Items gained" open Home.
 - Quests: the page notice covers the tab row for 9 seconds; Daily errands hides the tab row.
 - Notes appear under a pop-up's dimmed backdrop. Coins jump in the top bar before the claim animation counts up.
 - The world map at 1280 shows region labels about 5px tall.
-- Unlock and quest-reward icons are 16px inside 110px rings.
+- Quest-reward icons are 16px inside large discs.
 
 ## Owner decisions (27 Nov 2026)
 

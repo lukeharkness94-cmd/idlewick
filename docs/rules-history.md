@@ -263,4 +263,8 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   (30 retired fantasy names; Viper's kiss already existed; the three plain bronze names stay retired).
 - 27 Nov 2026 (owner): "for things like this where you notice obvious changes need making, make them yourself." Obvious
   fixes noticed while working are made, not offered.
-
+- 27 Nov 2026 (owner): "Why have we still got random circles around things? Get rid of them unless it's a button. Either
+  use a slightly different colour or something, I despise seeing physical lines around things." The shape rule now also
+  forbids rings, outlines and frames on anything you can't click and any line inside a control; it had only covered
+  borders on the main pages, so about 250 rules (combat chips, the unlock pop-up ring, Welcome back boxes, ringed menu
+  dots, the hero level badge) still drew lines.

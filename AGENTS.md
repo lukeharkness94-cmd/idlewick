@@ -78,11 +78,14 @@ dated line to the history file.
   `--f-display/--f-body/--f-ui/--f-mono` variables, never a hard-coded family. Silkscreen only for big numbers and short
   headlines. Type: 16.5px body, 16px buttons, 14px meta; nothing visible under 13px in the design.
 - **Shape rule** (owner, 26 Nov, chose 8px): anything you can click is one shape, an 8px rounded rectangle (`--r-act`)
-  with a 2px outline (`--act-line`); states change only its colour. Anything you can't click has no outline: panels are
-  12px soft fills, labels/chips/badges/counts are flat 4px tinted fills. Circles only for round things you don't click
-  (pips, dots). `css/shape.css` (linked last, one `@layer shape`) applies it by role; rail rows draw the outline inset so
-  the 180px rail keeps its width. Exceptions: hotspots on pixel scenes (Village sites, tower rooms, the SVG map).
-  `tests/shape-rule.cjs`.
+  with a 2px outline (`--act-line`); states change only its colour. Anything you can't click draws no line round itself
+  (owner, 27 Nov): no border, ring, outline or frame, and inside a control its outline is the only line (no ring round a
+  dot, frame round a portrait, dashed label). A tint or soft glow carries state instead: panels are 12px soft fills,
+  labels/chips/badges/counts are flat 4px tinted fills. Circles only for round things you don't click (pips, dots).
+  `css/shape.css` (linked last, one `@layer shape`) applies it by role; rail rows draw the outline inset so the 180px rail
+  keeps its width. Exceptions: hotspots on pixel scenes (Village sites and their signs, tower rooms, the SVG map, the
+  creature on the combat stage) and drawn scene art, whose edges are pixel-art outlines. `tests/shape-rule.cjs` checks
+  every page, a fight and the pop-ups.
 - **Motion** (`js/finish.js`, Finish layer in css/style.css): browser timelines at native refresh, elapsed-time motion,
   no stepped easing or 60 Hz loops; hover lifts use `translate`, not `transform`; everything transform/opacity only and
   off under `html.calm` and `prefers-reduced-motion`.

@@ -98,3 +98,79 @@
   #skilldock .dk,#dock .dk{border-width:0!important;box-shadow:inset 0 0 0 var(--act-w) var(--act-line)!important}
   #skilldock .dk:is(.on,:hover),#dock .dk:is(.on,:hover){box-shadow:inset 0 0 0 var(--act-w) var(--act-on)!important}
 }
+
+/* ===================== No lines around things you can't click (owner, 27 Nov 2026) =====================
+   "Get rid of them unless it's a button. Either use a slightly different colour or something, I despise seeing physical
+   lines around things." Every rule below that drew a border, ring or outline around something you can't click keeps its
+   size (the border stays, transparent, so nothing moves) and loses the line; a tint or a soft glow carries the meaning.
+   The guard keeps every control's own 8px outline. Lines inside a control (a ring round a dot, a frame round a
+   portrait, a dashed label inside a plot) go too: the control's outline is the only line. Pixel-scene art keeps its
+   drawn outlines (Village signs, the pens' plaques and bowls, the tower cutaway, scene bubbles).
+   tests/shape-rule.cjs (S2, S3) checks borders, rings, outlines and ::before/::after on every page and the pop-ups. */
+@layer shape {
+  :is(#combatnav .cg-tile,#combatnav .combat-entry,#fx .fl,#hud .h-stop,#title .cr-greet,#title .cr-letter,#title .cr-slot,
+    #title .cr-steps button b,#title .title-card,#view .combat-x .boss-foot,#view .combat-x .combat-equipped,
+    #view .combat-x .cw-window,#view .combat-x .cx-head,#view .combat-x .cx-stats > *,#view .skrow,.ab-add,.ab-tile,
+    .ab-tile.empty,.ab-tile.on.idle,.abil,.abil-slot,.abil-slot.full,.abil.idle,.ach,.activity-scene.hunt .hunt-steptag,
+    .area-card,.arena-ctl,.aslot,.aslot.empty,.avatar,.bd-opt,.beast,.beast-choice,.bell-row,.bj-ic,.bkrow,.bonuses div,
+    .boss-checklist .bc-mark,.boss-checklist li,.boss-foot,.bossrow,.cache,.cand,.card,.chip,.chip-d,.chipx,.cl-num,
+    .close-card,.cmp,.combat-equipped-slot,.combat-gear-item,.copy-box,.create,.creature-ability,.ct-btn,.cw-area,
+    .cw-chip,.cw-drop,.cw-dt,.cw-foe-pic,.cw-quest,.cw-trackmsg,.defeat-caption,.dg-row,.dg-row.more,.disc-card,.else,
+    .ench-gain,.ench-pips i,.ench-row,.est-count,.estate-fields,.estate-fields .plot,.estate-pasture,.estate-pasture .pen,
+    .estate-route-target,.ev-deal,.ev-result,.event,.evr-tile,.explore-left,.field-tool,.fig-mark,.filter-toggle,
+    .filter-toggle.on,.first-animal,.flyloot,.folk-card,.folk-head .folk-face.big,.food-tile,.furn,.gbtn,.gl-dot,
+    .gladder li,.goal,.goal-choice,.gsprite,.gt,.gt.unk,.guild-row,.guild-seal,.h-lv,.h-stop,.h-task,.hfurn,
+    .hfurn .pips i,.homestats div,.hq,.hroom,.hunt-kit-item,.hunt-recent i.fail,.hunt-steps > span,.hunt-track-steps li,
+    .iconb,.in-road li i,.in-skip,.ingredient,.intel,.item-uses,.itm,.kit-abil,.kit-abil.empty,.kit-abil.on.idle,.kit-add,
+    .lad,.letter-opt,.lo-card,.lvchip,.lvlban,.m-card,.mini-card,.mq-box,.msk,.mtitle,.mu-t,.mu-t.on,.need-tile,.note,
+    .now,.now-stop,.nt-n,.pack-plus,.packbar,.packchip,.painted-portrait,.pen,.pen.buypen,.perk,.petc,.pinbtn,.pinchip,
+    .pips i,.pk,.plot,.plot-act,.plot-act.none,.plot.buyplot,.proj-done-tag,.proj-line,.qadd,.qitem,.qr-face,.qrec,
+    .qrv-face,.qrv-tile,.quest-face,.quest-hunt,.quest-journal-layout,.ranch-board,.ranch-shedcard,.ranch-sheet,
+    .ranch-shelf,.ranch-sign,.rare-teaser,.ready-line,.region-row,.req-chip,.restoration-feedback,
+    .restoration-feedback.rf-card,.return-choices > div,.route-chip,.route-travel,.rpips i,.rw.short,.save-health,
+    .scene-yield,.search,.seed-choice,.seg,.selbar,.sh-level,.shelf-food,.skill-coach,.skill-commission-locks > span,
+    .spell,.srow,.ss-cl,.ss-hp,.ss-weapon,.stab,.stage-glyph,.story-location,.story-restoration,.story-stage,
+    .story-stage-person img,.study-note,.swatch,.tab,.tabchip,.tag,.tbtn,.tech,.tech-family,.thief-perk,.thief-perk.off,
+    .tile,.tile.locked,.tm-c,.toast,.tog .sw,.toolrow,.trophy,.tw-dot,.tw-floor,.tw-floor.later,.tw-n,.tw-prize,
+    .understanding,.understanding.done,.unlock-grid > article,.wb-activity,.wb-banner,.wb-beds .bed,.wb-chip,.wb-decide,
+    .wb-do,.wb-face .portrait,.wb-next,.wb-opt,.wb-status,.wb-tile,.wb-totals > b,.wc,.wc-pill,.wh-mini,.wh-quest):not(button,[data-do],[role=button],[role=tab],[role=switch],a[href],input,textarea,select,.btn,.site-spot,.tc-room){
+    border-color:transparent!important;outline-color:transparent!important}
+  .fancy::before,.fancy::after{border-color:transparent!important}
+
+  /* rings drawn with box-shadow: the line goes, any soft glow stays */
+  :is(.nav.on,.hub.on,.swatch,.swatch.on,.goal-choice.on,.region-row.on,.ss-btn.on,.bd-opt.on,.mini-card.on,.letter-opt.on,
+      .beast-choice.on,.gt.on,.mu-t.sel,.beast.quest-study,.now.here,.cw-dt,.cw-dt.mine,.art-card .art-dot,#topnav .tnav .hubdot){
+    box-shadow:none!important}
+  .pen.sel{outline:0!important}
+  .avatar.boss{box-shadow:0 0 28px -4px var(--c)!important}
+  .plot.ripe{box-shadow:0 0 22px -6px var(--c)!important}
+  :is(.pin.ready,.pinchip.ready){box-shadow:0 0 18px -6px var(--brass)!important}
+  .goal.ready{box-shadow:0 0 20px -8px var(--c)!important}
+  .carrot.ready{box-shadow:0 0 22px -8px var(--brass)!important}
+  #detailbox{box-shadow:inset 3px 0 0 var(--brass)!important}
+  .srow.spotlight{box-shadow:0 -12px 34px -8px rgba(0,0,0,.55)!important}
+  .ranch-board{box-shadow:inset 0 2px 0 #96724a,0 10px 30px -12px #000!important}
+  /* selected and current states of things you can't click read as a stronger tint instead of a ring */
+  .now.here{background-color:color-mix(in srgb,var(--brass) 12%,var(--panel))!important}
+  /* a selected pen is a control: its state shows in its outline's colour, like every other control */
+  :is(button,[data-do],[role=button]).sel{border-color:var(--act-on)!important}
+
+  /* the unlock pop-up: a tinted disc with a soft glow, no ring and no rippling circles */
+  .lr-v2 .level-emblem{border-color:transparent!important;box-shadow:0 0 40px -6px color-mix(in srgb,var(--c) 55%,transparent)!important;
+    background:color-mix(in srgb,var(--c) 16%,var(--panel))!important}
+  .lr-v2 .lr-ripple{display:none!important}
+
+  /* the creature on the combat stage is a scene hotspot: no box round it; hovering brightens it instead */
+  .encounter-arena #av-foe.foe-guide{border-color:transparent!important;background:none!important;box-shadow:none!important}
+  .encounter-arena #av-foe.foe-guide:hover{filter:brightness(1.08)}
+
+  /* dark theme: a locked silhouette is a pale shape, not a black one with a drawn edge */
+  :root:not([data-theme="light"]) :is(.sil,img.sil){filter:brightness(0) invert(.86) opacity(.3)!important}
+
+  /* things whose outline was all they had now sit on a soft tint */
+  :is(.wb-activity,.wb-totals>b,.gl-dot,.tw-floor:not(.done) .tw-n,.tw-dot:not(.part,.on),.boss-checklist li:not(.done) .bc-mark,.need-tile:not(button),.tw-prize){background-color:var(--info-fill)!important}
+  .boss-checklist li.done .bc-mark{background-color:color-mix(in srgb,var(--good,#4a8a4a) 22%,transparent)!important}
+  .tw-prize.got{background-color:color-mix(in srgb,var(--brass) 14%,transparent)!important}
+  .hunt-recent i.fail{background-color:color-mix(in srgb,var(--bad,#b04a3a) 55%,transparent)!important}
+  .tog .sw{border-color:transparent!important}
+}
