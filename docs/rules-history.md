@@ -247,3 +247,15 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - **Eggs as lucky finds**: any skilling action 1 in 2,000 (`D.EGG_DROP.action`), any victory or catch 1 in 500 (`D.EGG_DROP.kill`), from the old Trapper beasts (`D.BEAST_SPECIES`) whose Hero level you have and whose town you have visited, chosen evenly. Hooked through `DQ.petRoll`, `DQ.killHooks` and the fieldwork, drill and capture tasks; never in forecasts. Collection shows the per-beast odds. Every older egg source is unchanged.
 - **Offline ceiling**: Hunting's cap is now the top ground animal (98), so it no longer depends on regions; Beastmastery is still uncapped (owner decision pending, docs/offline-ceiling.md).
 - Tests: `tests/beast-capture.cjs` (new), `tests/hunt-stalk.cjs`, `tests/creature-roster.cjs`, `tests/ranch.cjs`, `tests/beastmastery-ui.cjs`, `tests/hunting-loop-ui.cjs`, `tests/ux-roles.cjs`.
+
+---
+
+## Rule changes after the consolidation
+
+- 27 Nov 2026 (owner): "The rare named weapons should only be get-able from drops from rare combat fights, bosses etc -
+  rare loot drops. The craftable and upgradeable ones should follow the relevant smithing alloy naming convention."
+  Replaces "Ordinary gear uses material/grade names; fantasy names are for earned rarities", which the game did not
+  follow (Soldier's Blade, Starsunder and 31 others were crafted and sold).
+- 27 Nov 2026 (owner): "I like that until you've caught the animal, you don't know its name. Even if it is just a
+  chicken." Animals stay ??? until the first catch, even when reachable; the visual audit had suggested naming them.
+

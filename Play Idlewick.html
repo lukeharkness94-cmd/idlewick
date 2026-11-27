@@ -6771,7 +6771,7 @@ D.QUESTS.unshift(
     [{ ev: 'deliver', key: 'cowhide', n: 8, label: 'Bring 8 cowhides to practise on' }, { ev: 'deliver', key: 'feather', n: 20, label: 'Bring 20 feathers for her quills' }, { ev: 'chop', key: 'birch', n: 10, label: 'Chop 10 birch logs for her frames' }],
     { xp: { crafting: 150 }, coins: 150, items: { cowhide: 6 } }),
   MQ('mq_ranged', 'ranged', 'mossbarrow', 'A Hunter’s Bow', 'Hunter Wynn', 18, null,
-    'A sword is useful. Not arguing with that. But when Old Tusk charges, I’d rather have a bow and a bit of distance. Bring birch for the stave and feathers for the arrows. Then we’ll practise on the boars. I’ll give you a wooden shortbow and arrows. The oak Hunter’s Bow is a later upgrade at Ranged 10. I’m better at showing you than explaining it.',
+    'A sword is useful. Not arguing with that. But when Old Tusk charges, I’d rather have a bow and a bit of distance. Bring birch for the stave and feathers for the arrows. Then we’ll practise on the boars. I’ll give you a wooden shortbow and arrows. An oak shortbow is a later upgrade at Ranged 10. I’m better at showing you than explaining it.',
     [{ ev: 'deliver', key: 'log_birch', n: 10, label: 'Bring 10 birch logs for the bow stave' }, { ev: 'deliver', key: 'feather', n: 40, label: 'Bring 40 feathers to fletch arrows' }, { ev: 'kill', key: 'boar', n: 6, label: 'Track down 6 wild boars as practice' }],
     { xp: { ranged: 150 }, items: { bow_normal: 1, arrow_bronze: 150 } }),
   MQ('mq_magic', 'magic', 'saltmere', 'The Drowned Library', 'Archivist Merrow', 28, null,
@@ -7710,7 +7710,7 @@ for(const [key,sk,ic,label]of D.TOOLS)for(let i=0;i<10;i++){
 // Ordinary bows and staves need forged fittings as well as their wood and casting supplies.
 for(const r of D.RLIST.crafting)for(const id of Object.keys(r.out)){const it=D.ITEMS[id];if(it.slot==='weapon'&&Number.isInteger(it.tier)){const bar='bar_'+D.TIERS[it.tier].id;r.in[bar]=Math.max(1,r.in[bar]||1);}}
 const families={sword:D.TIERS.map(t=>t.id+'_sword'),dagger:D.TIERS.map(t=>t.id+'_dagger'),hammer:D.TIERS.map(t=>t.id+'_hammer'),bow:['normal','oak','willow','maple','yew','magic','elder'].map(x=>'bow_'+x),staff:['normal','oak','willow','maple','yew','magic','elder'].map(x=>'staff_'+x)};
-const extra=[3,5,15,25,35,45,55],labels=['Tempered bronze','Fine bronze','Fine iron','Fine steel','Fine mithril','Fine adamant','Fine rune'],nouns={sword:'longsword',dagger:'dagger',hammer:'warhammer',bow:'fitted bow',staff:'banded staff'};
+const extra=[3,5,15,25,35,45,55],labels=['Tempered bronze','Fine bronze','Fine iron','Fine steel','Fine mithril','Fine adamant','Fine runite'],nouns={sword:'longsword',dagger:'dagger',hammer:'warhammer',bow:'fitted bow',staff:'banded staff'};
 D.WEAPON_BRIDGES=[];
 for(const [family,ids]of Object.entries(families))for(let i=0;i<extra.length;i++){
  const level=extra[i],hi=ids.findIndex(id=>Math.max(...Object.values(D.ITEMS[id].req))>level),a=D.ITEMS[ids[hi-1]],b=D.ITEMS[ids[hi]],la=Math.max(...Object.values(a.req)),lb=Math.max(...Object.values(b.req)),t=(level-la)/(lb-la),id=`fine_${family}_${level}`,stats={};
@@ -7990,27 +7990,25 @@ for(const r of [
 (() => {
 const DQ = window.DQ, D = DQ.data;
 
-/* ---------- Weapons: plain names for starter gear, grander ones as the metal improves ---------- */
-/* plain names in sentence case like the armour ("Bronze full helm"), 27 Nov 2026 audit */
+/* ---------- Weapons: what you can make, buy or upgrade is named for its alloy or wood ---------- */
+/* Owner, 27 Nov 2026: "The rare named weapons should only be get-able from drops from rare combat fights, bosses etc -
+   rare loot drops. The craftable and upgradeable ones should follow the relevant smithing alloy naming convention."
+   So every smithed weapon keeps its base name from the data (Iron sword, Steel dagger, Mithril warhammer, Oak shortbow,
+   Yew staff); only plain wood reads "Wooden". Named weapons (Saltbitten Cutlass, Leechfang, Morwenna's Hexstaff...)
+   exist only as rare drops, never in a recipe, a shop or a quest reward (tests/weapon-names.cjs). */
 const T = ['bronze', 'iron', 'steel', 'mithril', 'adamant', 'rune', 'astral'];
-const WEAPON_NAMES = {
-  sword: ['Bronze shortsword', "Soldier's Blade", "Knight's Longsword", 'Skyforged Saber', 'Emerald Reaver', 'Glacier Fang', 'Starsunder'],
-  dagger: ['Bronze knife', 'Alley Knife', 'Quickfang', 'Whisperblade', "Viper's Kiss", 'Frostbite', 'Nightglint'],
-  hammer: ['Bronze mallet', "Smith's Maul", 'Siegebreaker', 'Thunderhead', 'Earthshaker', 'Avalanche', 'Worldbreaker'],
-};
-const W = {};
-T.forEach((t, i) => Object.entries(WEAPON_NAMES).forEach(([k, names]) => { W[`${t}_${k}`] = names[i]; }));
-Object.assign(W, {
-  bow_normal: 'Wooden shortbow', bow_oak: "Hunter's Bow", bow_willow: 'Whisperwood Bow', bow_maple: 'Autumn Recurve', bow_yew: 'Nightyew Longbow', bow_magic: 'Spellstring', bow_elder: 'Elderthorn Greatbow',
-  staff_normal: 'Wooden staff', staff_oak: "Acolyte's Staff", staff_willow: 'Willowshade Staff', staff_maple: 'Emberwood Staff', staff_yew: 'Yewbound Staff', staff_magic: 'Aetherwood Staff', staff_elder: 'Elderlight',
+const W = {
+  bow_normal: 'Wooden shortbow', staff_normal: 'Wooden staff',
   barnacle_cutlass: 'Saltbitten Cutlass', witch_staff: "Morwenna's Hexstaff", emberfang_bow: 'Emberfang, the Wyrm Bow',
-});
+};
 D.WEAPON_NAMES = W;
 const FL_METAL = ['Plain and practical.', 'Issued to town guards.', "A knight's pride.", 'It hums faintly when drawn.', 'Cold and green as a deep pool.', 'Etched with old magic.', 'Forged from falling stars.'];
 const FL_WOOD = ['Cut from a roadside tree.', 'Strong and steady.', 'Supple and quick.', 'Fine-grained and sweet-smelling.', 'The longbow everyone trusts.', 'Wood that remembers spells.', 'Older than the towns.'];
 const WOODS = ['normal', 'oak', 'willow', 'maple', 'yew', 'magic', 'elder'];
-Object.keys(W).forEach(id => {
-  const it = D.ITEMS[id]; if (!it) return; it.name = W[id];
+/* every metal and wood weapon gets its flavour line; only the ids in W are renamed */
+const flavoured = Object.keys(D.ITEMS).filter(id => /^(bronze|iron|steel|mithril|adamant|rune|astral)_(sword|dagger|hammer)$|^(bow|staff)_(normal|oak|willow|maple|yew|magic|elder)$/.test(id) || W[id]);
+flavoured.forEach(id => {
+  const it = D.ITEMS[id]; if (!it) return; if (W[id]) it.name = W[id];
   const m = id.match(/^(bronze|iron|steel|mithril|adamant|rune|astral)_/), w = id.match(/^(?:bow|staff)_(\w+)$/);
   it.flavour = m ? FL_METAL[T.indexOf(m[1])] : w ? FL_WOOD[WOODS.indexOf(w[1])] : { barnacle_cutlass: 'A salt-stained cutlass with a worn grip. Its previous owner was not known for returning borrowed things.', witch_staff: 'The cauldron may have been involved.', emberfang_bow: 'The string is the colour of a sunset in a bad mood.' }[id];
 });
@@ -24151,7 +24149,7 @@ D.MASTERY_GUILDS={
  farming:g('The Good Earth Table','Granny Bramble','mossbarrow','Keeper of the Turning Year','A prize pumpkin is lovely, dear. A farm that feeds people when pumpkins are out of season is lovelier.',[work('harvest','potato',3,'Harvest 3 potato plots'),work('harvest','wheat',3,'Harvest 3 wheat plots')],'A Table in Every Season',[work('harvest','moonmelon',2,'Harvest 2 moonmelon plots'),work('harvest','starfruit',2,'Harvest 2 starfruit plots'),work('collect','milk',5,'Collect 5 milk')]),
  cooking:g('The Extra Place','Mabel the Cook','willowbrook','The Welcome at Every Table','There is no silver hat. There is supper for somebody who needs it. Start there, love.',[work('cook','shrimp',8,'Cook 8 shrimp for the first table'),work('cook','bread',4,'Bake 4 loaves of bread')],'A Supper Worth Coming Home For',[work('cook','lobster',5,'Cook 5 lobster'),work('cook','shark',5,'Cook 5 shark')]),
  smithing:g('The True Ring','Smith Grotta','ironpeak','The Ring of Sound Steel','Smelt good steel, then make a helmet and a shield from it. They ought to look like they belong to the same set. I can show you what I mean. That’s easier than making a speech.',[work('smelt','bar_steel',6,'Smelt 6 steel bars'),work('smith','steel_shield',1,'Smith a steel shield'),work('smith','steel_helm',1,'Smith a steel helm')],'The Set That Comes Home',[work('smith','rune_shield',1,'Smith a runite shield'),work('smith','rune_body',1,'Smith runite body armour'),work('smith','rune_helm',1,'Smith a runite helm')]),
- crafting:g('The Hidden Stitch','Seamstress Hettie','mossbarrow','The Hand Behind the Finish','Show me how you make string and traps, dear. I want to see the joins and knots, including the ones tucked out of sight. Those are often what make the difference between a thing that looks finished and a thing that lasts.',[work('craft','string',8,'Craft 8 lengths of string'),work('craft','wooden_trap',3,'Craft 3 wooden traps')],'The Unseen Work',[work('craft','staff_elder',1,'Craft Elderlight, an elderwood staff'),work('craft','drake_vest',1,'Craft drakehide body armour'),work('deliver','gem_diamond',1,'Bring Hettie a diamond for her inspection')]),
+ crafting:g('The Hidden Stitch','Seamstress Hettie','mossbarrow','The Hand Behind the Finish','Show me how you make string and traps, dear. I want to see the joins and knots, including the ones tucked out of sight. Those are often what make the difference between a thing that looks finished and a thing that lasts.',[work('craft','string',8,'Craft 8 lengths of string'),work('craft','wooden_trap',3,'Craft 3 wooden traps')],'The Unseen Work',[work('craft','staff_elder',1,'Craft an elder staff'),work('craft','drake_vest',1,'Craft drakehide body armour'),work('deliver','gem_diamond',1,'Bring Hettie a diamond for her inspection')]),
  magic:g('The Open Page','Archivist Merrow','saltmere','Reader of the Living Spell','A spell is not understood merely because it has exploded. Admittedly, that is often a useful first indication.',[combat('magic','goblin',4,'Defeat 4 goblins using Magic'),combat('magic','troll',2,'Defeat 2 trolls using Magic')],'Words That Answer Back',[combat('magic','wyvern',4,'Defeat 4 wyverns using Magic')]),
  research:g('The Listening Room','Abbot Seren','skyreach','The Question Kept Open','Bring a question you can test, and an observation that might prove you wrong.',[task('study','field_notes',1,'Complete one Field notes study','research'),work('guide','goblin',1,'Read and report on the goblin field guide')],'A Question for the Road',[task('study','field_notes',2,'Complete two further Field notes studies','research'),work('guide','wyvern',1,'Read and report on the wyvern field guide')]),
  melee:g('The Kept Promise','Captain Hrod','ironpeak','The Blade That Brings Us Home','We do not award membership for a grand last stand. We prefer you to return and explain what worked.',[combat('melee','goblin',5,'Defeat 5 goblins using Melee'),combat('melee','troll',2,'Defeat 2 trolls using Melee')],'No Glorious Last Stand',[combat('melee','wyvern',4,'Defeat 4 wyverns using Melee')]),

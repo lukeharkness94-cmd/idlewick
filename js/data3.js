@@ -191,7 +191,7 @@ for(const [key,sk,ic,label]of D.TOOLS)for(let i=0;i<10;i++){
 // Ordinary bows and staves need forged fittings as well as their wood and casting supplies.
 for(const r of D.RLIST.crafting)for(const id of Object.keys(r.out)){const it=D.ITEMS[id];if(it.slot==='weapon'&&Number.isInteger(it.tier)){const bar='bar_'+D.TIERS[it.tier].id;r.in[bar]=Math.max(1,r.in[bar]||1);}}
 const families={sword:D.TIERS.map(t=>t.id+'_sword'),dagger:D.TIERS.map(t=>t.id+'_dagger'),hammer:D.TIERS.map(t=>t.id+'_hammer'),bow:['normal','oak','willow','maple','yew','magic','elder'].map(x=>'bow_'+x),staff:['normal','oak','willow','maple','yew','magic','elder'].map(x=>'staff_'+x)};
-const extra=[3,5,15,25,35,45,55],labels=['Tempered bronze','Fine bronze','Fine iron','Fine steel','Fine mithril','Fine adamant','Fine rune'],nouns={sword:'longsword',dagger:'dagger',hammer:'warhammer',bow:'fitted bow',staff:'banded staff'};
+const extra=[3,5,15,25,35,45,55],labels=['Tempered bronze','Fine bronze','Fine iron','Fine steel','Fine mithril','Fine adamant','Fine runite'],nouns={sword:'longsword',dagger:'dagger',hammer:'warhammer',bow:'fitted bow',staff:'banded staff'};
 D.WEAPON_BRIDGES=[];
 for(const [family,ids]of Object.entries(families))for(let i=0;i<extra.length;i++){
  const level=extra[i],hi=ids.findIndex(id=>Math.max(...Object.values(D.ITEMS[id].req))>level),a=D.ITEMS[ids[hi-1]],b=D.ITEMS[ids[hi]],la=Math.max(...Object.values(a.req)),lb=Math.max(...Object.values(b.req)),t=(level-la)/(lb-la),id=`fine_${family}_${level}`,stats={};

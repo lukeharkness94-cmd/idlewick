@@ -895,7 +895,7 @@ test('first-hour polish: combat XP stops at the creature\'s health, and a first 
 });
 test('gear arrows follow the stat table: gains outweighing losses are green, the reverse red, for every slot', () => {
   const {q}=harness();const D=q.data,S=q.S;for(const k of Object.keys(S.xp))S.xp[k]=D.XPF[99];q.fxDirty();
-  S.equip.weapon='bronze_dagger';assert.equal(q.gearVerdict('iron_sword'),'up','Soldier\'s Blade beats the Bronze Knife on Attack and Strength, even though it swings slower');
+  S.equip.weapon='bronze_dagger';assert.equal(q.gearVerdict('iron_sword'),'up','The iron sword beats the bronze dagger on Attack and Strength, even though it swings slower');
   const gear=Object.values(D.ITEMS).filter(i=>i.slot&&i.slot!=='ammo'&&i.type!=='tool');let n=0;
   for(const it of gear){const others=gear.filter(g=>g.slot===it.slot&&g.id!==it.id);S.equip[it.slot]=others[0]&&others[0].id;if(!S.equip[it.slot])continue;
     const v=q.gearVerdict(it.id),net=q.gearNet(it.id);if(v==null&&!q.canEquip(it.id).ok)continue;n++;

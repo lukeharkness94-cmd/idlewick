@@ -145,7 +145,7 @@ dated line to the history file.
 
 ## 4. Words
 
-- **Voice**: keep the fantasy names (Mithril, Starsunder, the Ember Wyrm, the Hollow King) but write plain, grounded and
+- **Voice**: keep the fantasy names (Mithril, Saltbitten Cutlass, the Ember Wyrm, the Hollow King) but write plain, grounded and
   comic: specific everyday detail, dry jokes, no epic register; let the heartfelt line land straight. Quest requests
   sound like a person speaking, with a clear referent and a truthful task, rendered once through `questVoice`. Character
   voices live in js/folk_personality.js. Boss quests keep their plain requirement sentence ("You need combat level 25.").
@@ -193,8 +193,9 @@ dated line to the history file.
   metal and colour, the first pickaxe included (Willowbrook's shop sells copper ore so Mining can start); all 50 tools
   have Smithing routes (rods and gloves also Crafting); acquired tools can't be rebought. Every purchase explains why
   its effect follows from the item (`D.TOOL_PURPOSE`, `D.SKILL_COMMISSIONS`). Workshop ranks give +3/6/9% XP; Smithing
-  has six anvils (speed) and six hammers (double chance), `S.smithGear`. Ordinary gear uses material/grade names; fantasy
-  names are for earned rarities.
+  has six anvils (speed) and six hammers (double chance), `S.smithGear`. Anything you can craft, buy, upgrade or get
+  from a quest is named for its alloy or wood (Iron sword, Runite dagger, Oak shortbow, Fine steel longsword); named
+  weapons exist only as rare drops from rare creatures, mini-bosses, bosses and towers (`tests/weapon-names.cjs`).
 - **Perks and flourishes** (`js/skill_perks.js`): every skill gets something new at least every five levels plus a 99
   capstone, written into `D.UNL`; effects go only through `DQ.extraXp`, `DQ.extraSpeed`, `DQ.dblChance`, `DQ.fx`,
   `DQ.researchRate`, `DQ.brew`. Flourishes (`D.FLOURISH`) repeat an action's XP and output, never in forecasts or for
@@ -222,8 +223,9 @@ dated line to the history file.
   and the tier's kit matter, never the town. A hunt tracks (45%), sets the trap (30%) and strikes (25%); the strike lands
   with `DQ.huntCatch` (45–92%), otherwise it slips away for 30% XP. Kit from Intermediate up: that tier's trap kept in the
   pack and one bait per hunt; counts update live. A catch gives drops, quest kills and the wild-companion chance, never
-  combat XP or food. Animals off the ground keep their ids, kills, guide pages and pets and are listed only once caught
-  (`DQ.animalListed`); an active quest can still send you after one. Fieldwork lays traps for a region's materials.
+  combat XP or food. An animal's name stays ??? until your first catch, even at
+  your level and even a chicken (owner, 27 Nov). Animals off the ground keep their ids, kills, guide pages and pets
+  and are listed only once caught (`DQ.animalListed`); an active quest can still send you after one. Fieldwork lays traps for a region's materials.
 - **Beastmastery Capture** (`js/beast_capture.js`): any animal you have hunted can be caught alive and kept. Track 40%,
   live trap 30%, coax 30%; odds 55% + 2.5% per Beastmastery level above the animal (35–90%); one bait per try, the trap
   used only on a keep; a success is a `wild_<id>` beast straight to a pen (`DQ.awardPet(id, { hatched: true })`); one you

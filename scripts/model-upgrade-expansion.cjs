@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),{setup}=require('../tests/hunting-loop.cjs');
 const extraLevels=[3,5,15,25,35,45,55],families={sword:['bronze','iron','steel','mithril','adamant','rune','astral'].map(x=>x+'_sword'),dagger:['bronze','iron','steel','mithril','adamant','rune','astral'].map(x=>x+'_dagger'),hammer:['bronze','iron','steel','mithril','adamant','rune','astral'].map(x=>x+'_hammer'),bow:['normal','oak','willow','maple','yew','magic','elder'].map(x=>'bow_'+x),staff:['normal','oak','willow','maple','yew','magic','elder'].map(x=>'staff_'+x)};
 // Ordinary equipment advertises material and grade; unique names belong to earned special rewards.
-const grades=['Tempered bronze','Fine bronze','Fine iron','Fine steel','Fine mithril','Fine adamant','Fine rune'];
+const grades=['Tempered bronze','Fine bronze','Fine iron','Fine steel','Fine mithril','Fine adamant','Fine runite'];
 const nouns={sword:'longsword',dagger:'dagger',hammer:'warhammer',bow:'fitted bow',staff:'banded staff'};
 const names=Object.fromEntries(Object.keys(families).map(f=>[f,grades.map(g=>g+' '+nouns[f])]));
 const bridgeBars=['bar_bronze','bar_bronze','bar_iron','bar_steel','bar_mithril','bar_adamant','bar_rune'];

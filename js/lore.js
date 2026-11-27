@@ -2,27 +2,25 @@
 (() => {
 const DQ = window.DQ, D = DQ.data;
 
-/* ---------- Weapons: plain names for starter gear, grander ones as the metal improves ---------- */
-/* plain names in sentence case like the armour ("Bronze full helm"), 27 Nov 2026 audit */
+/* ---------- Weapons: what you can make, buy or upgrade is named for its alloy or wood ---------- */
+/* Owner, 27 Nov 2026: "The rare named weapons should only be get-able from drops from rare combat fights, bosses etc -
+   rare loot drops. The craftable and upgradeable ones should follow the relevant smithing alloy naming convention."
+   So every smithed weapon keeps its base name from the data (Iron sword, Steel dagger, Mithril warhammer, Oak shortbow,
+   Yew staff); only plain wood reads "Wooden". Named weapons (Saltbitten Cutlass, Leechfang, Morwenna's Hexstaff...)
+   exist only as rare drops, never in a recipe, a shop or a quest reward (tests/weapon-names.cjs). */
 const T = ['bronze', 'iron', 'steel', 'mithril', 'adamant', 'rune', 'astral'];
-const WEAPON_NAMES = {
-  sword: ['Bronze shortsword', "Soldier's Blade", "Knight's Longsword", 'Skyforged Saber', 'Emerald Reaver', 'Glacier Fang', 'Starsunder'],
-  dagger: ['Bronze knife', 'Alley Knife', 'Quickfang', 'Whisperblade', "Viper's Kiss", 'Frostbite', 'Nightglint'],
-  hammer: ['Bronze mallet', "Smith's Maul", 'Siegebreaker', 'Thunderhead', 'Earthshaker', 'Avalanche', 'Worldbreaker'],
-};
-const W = {};
-T.forEach((t, i) => Object.entries(WEAPON_NAMES).forEach(([k, names]) => { W[`${t}_${k}`] = names[i]; }));
-Object.assign(W, {
-  bow_normal: 'Wooden shortbow', bow_oak: "Hunter's Bow", bow_willow: 'Whisperwood Bow', bow_maple: 'Autumn Recurve', bow_yew: 'Nightyew Longbow', bow_magic: 'Spellstring', bow_elder: 'Elderthorn Greatbow',
-  staff_normal: 'Wooden staff', staff_oak: "Acolyte's Staff", staff_willow: 'Willowshade Staff', staff_maple: 'Emberwood Staff', staff_yew: 'Yewbound Staff', staff_magic: 'Aetherwood Staff', staff_elder: 'Elderlight',
+const W = {
+  bow_normal: 'Wooden shortbow', staff_normal: 'Wooden staff',
   barnacle_cutlass: 'Saltbitten Cutlass', witch_staff: "Morwenna's Hexstaff", emberfang_bow: 'Emberfang, the Wyrm Bow',
-});
+};
 D.WEAPON_NAMES = W;
 const FL_METAL = ['Plain and practical.', 'Issued to town guards.', "A knight's pride.", 'It hums faintly when drawn.', 'Cold and green as a deep pool.', 'Etched with old magic.', 'Forged from falling stars.'];
 const FL_WOOD = ['Cut from a roadside tree.', 'Strong and steady.', 'Supple and quick.', 'Fine-grained and sweet-smelling.', 'The longbow everyone trusts.', 'Wood that remembers spells.', 'Older than the towns.'];
 const WOODS = ['normal', 'oak', 'willow', 'maple', 'yew', 'magic', 'elder'];
-Object.keys(W).forEach(id => {
-  const it = D.ITEMS[id]; if (!it) return; it.name = W[id];
+/* every metal and wood weapon gets its flavour line; only the ids in W are renamed */
+const flavoured = Object.keys(D.ITEMS).filter(id => /^(bronze|iron|steel|mithril|adamant|rune|astral)_(sword|dagger|hammer)$|^(bow|staff)_(normal|oak|willow|maple|yew|magic|elder)$/.test(id) || W[id]);
+flavoured.forEach(id => {
+  const it = D.ITEMS[id]; if (!it) return; if (W[id]) it.name = W[id];
   const m = id.match(/^(bronze|iron|steel|mithril|adamant|rune|astral)_/), w = id.match(/^(?:bow|staff)_(\w+)$/);
   it.flavour = m ? FL_METAL[T.indexOf(m[1])] : w ? FL_WOOD[WOODS.indexOf(w[1])] : { barnacle_cutlass: 'A salt-stained cutlass with a worn grip. Its previous owner was not known for returning borrowed things.', witch_staff: 'The cauldron may have been involved.', emberfang_bow: 'The string is the colour of a sunset in a bad mood.' }[id];
 });

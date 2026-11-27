@@ -39,7 +39,7 @@ Shop, skills and Hero
 - The next-perk chip ran past the panel edge. It wraps.
 - Farming: "Harvest ripe crops" was the main action on an empty field. It leads only while something is ripe (live),
   and planting leads when plots are empty and a seed is chosen.
-- Starter weapons are written in sentence case like the armour (Bronze shortsword, Wooden staff…).
+- Starter weapons are written in sentence case like the armour (Bronze sword, Wooden staff…).
 - Local supplies said "Requirements unmet". They now name the step.
 - Hero → Tools showed the undiscounted price. It now shows the shop's price after the Thieving discount.
 - The phone bottom bar used 12px labels and 11px counts. Both are now 13px.
@@ -86,7 +86,7 @@ Home, Quests, Village, World
 ## Still open (bugs)
 
 - Farming: the "Empty plot" label overlaps the soil sprite on short windows. The livestock icons look washed out.
-- Shop → Equipment: Bronze shortsword has no stat line, lock icons in cost rows are twice the size of the other cost
+- Shop → Equipment: Bronze sword has no stat line, lock icons in cost rows are twice the size of the other cost
   icons, and "Buy —" is disabled with no reason. Rare wares offers 1/10/100 for one-of-a-kind items. Cost rows need
   gaps between the amounts.
 - Sailing: Gull Rock floats at the top of the sea scene, and survey-chart cards have no picture.
@@ -115,14 +115,13 @@ Home, Quests, Village, World
 - The world map at 1280 shows region labels about 5px tall.
 - Unlock and quest-reward icons are 16px inside 110px rings.
 
-## Decisions for the owner
+## Owner decisions (27 Nov 2026)
 
-1. **Weapon names.** The rules say ordinary gear uses material names, but every metal weapon after bronze has a fantasy
-   name (Soldier's Blade, Knight's Longsword, Skyforged Saber…; `js/lore.js`). Renaming them touches quests and story
-   text. Options: plain names everywhere (Iron sword, Steel sword), or keep the fantasy names and change the rule.
-2. **Animals at your Hunting level.** The ground shows them in full colour but names them ??? until the first catch
-   (`tests/ui-rules.cjs` treats them as unmet creatures). Fish and trees are named once their level is reached. Options:
-   name animals once reachable (as fish), or keep ??? and show the picture as a silhouette too.
+1. **Weapon names: decided.** Anything you can craft, buy, upgrade or get from a quest is named for its alloy or wood
+   (Iron sword, Runite dagger, Oak shortbow, Fine steel longsword). Named weapons exist only as rare drops. The 33
+   crafted and sold weapons that had fantasy names (Soldier's Blade, Starsunder…) now use their alloy names; the
+   named uniques were already drop-only. `tests/weapon-names.cjs` holds both halves.
+2. **Animals at your Hunting level: decided, no change.** They stay ??? until the first catch, even a chicken.
 
 ## Suggestions
 
