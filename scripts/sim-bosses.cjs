@@ -2,9 +2,11 @@
    For each region boss, builds a hero standing exactly at the boss's combat requirement (even melee levels), wearing
    the best melee set they can equip that drops in the region, carrying 15 of the best food they could cook, then runs
    the game's own fight forecast. A second row adds 3 levels. Spikes show up as a sudden drop in the win rate.
-   Deterministic (seeded). Evidence for balancing only; it changes nothing. */
+   Deterministic (seeded). Evidence for balancing only; it changes nothing.
+   Use --report for the exact-entry, three-style comparison with the current combat arts. */
 const fs = require('node:fs'), vm = require('node:vm'), path = require('node:path');
 const root = path.join(__dirname, '..', 'js');
+const report = process.argv.includes('--report');
 let seed = 7; const math = Object.create(Math); math.random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
 const el = () => ({ setAttribute() {}, classList: { add() {}, remove() {}, toggle() {} }, appendChild() {}, style: {}, querySelector() {}, querySelectorAll: () => [], addEventListener() {} });
 const store = new Map();
@@ -22,6 +24,12 @@ q.ui = { V: {}, DO: {}, B: {}, homeSections: [], render() {}, tabState: () => nu
 /* the same gameplay systems the shipped page composes on top: field guide, enchantments, adventures, companion tricks */
 for (const n of ['secret_recipes', 'lore', 'hunting', 'minibosses', 'towers', 'museum', 'bestiary', 'skill_expansion', 'adventures', 'companions', 'preparation_roles', ...(process.env.NO_PERKS ? [] : ['skill_perks'])]) { try { load(n); } catch (e) { console.error('sim-bosses: could not load ' + n + ': ' + e.message); process.exit(1); } }
 const D = q.data;
+if (report) {
+  load('combat_arts');
+  const { bossReport } = require('./boss-report.cjs');
+  for (const section of bossReport(q, value => { seed = value; }, process.env.ONLY)) console.log(section);
+  process.exit(0);
+}
 if (process.env.MELEE_K) D.STYLE_TUNE.meleeLevel = +process.env.MELEE_K;
 const cookLvl = id => { const r = Object.values(D.RECIPES).find(r => r.out && r.out[id]); return r ? r.lvl : 1; };
 const run = (boss, extra, useCounter) => {

@@ -2,13 +2,54 @@
 
 Evidence from the game's own fight forecast (96 seeded fights per row). Reproduce with:
 
-- `node scripts/sim-bosses.cjs`: boss ladder, a plain melee hero exactly at each boss's combat requirement
+- `node scripts/sim-bosses.cjs --report`: exact-entry regional boss forecasts for Melee, Ranged and Magic, with general and counter builds
+- `node scripts/sim-bosses.cjs`: legacy melee ladder, which prints the actual build level alongside the boss requirement
 - `CSCALE=1.333 COUNTER=1 node scripts/sim-bosses.cjs`: the field guide's counter build at a fair level
 - `COMPARE=1 node scripts/sim-bosses.cjs`: general / counter / extra preparation / +5 levels
 - `PARITY=1 node scripts/sim-bosses.cjs`: melee, ranged and magic at the same combat level
 - `node scripts/sim-uniques.cjs` (new): each unique against the regular gear it replaces
 
-## Findings and changes
+## v4 Task 3 — Exact-entry forecasts
+
+`node scripts/sim-bosses.cjs --report` measures the regional bosses at the actual entry requirement.
+Use `ONLY=grubnash,oldtusk` to narrow the output. The older ladder starts from skill level 10 and
+can therefore overlevel the earliest hero. Its output remains available for comparison with historical runs.
+
+The new report raises the active combat skill, Defence and Health in rotation from the starter levels,
+stops at the exact entry requirement, and supplies 15 meals. The test heroes use standard gear from the
+current and previous region, stocked arrows or sufficient runes, and the game's automatic ability selection.
+They use the current combat arts and spellbook. The general builds use a sword, bow or staff with a strong
+eligible spell. The comparison builds prioritise matching a weakness, then avoiding resistance. The report
+keeps the boss's specials and phase changes. For a matched type, it runs the same build again with only that
+type's weakness removed, using the same seed. Food and time per win are averages over victories. Each row
+uses 24 trials, so small differences deserve another sample before making a balance decision.
+
+### Current results
+
+General win rates use the real boss rules. The last column gives the largest measured weakness benefit per boss, prioritising wins and then food saved.
+
+| Boss | Combat | Melee | Ranged | Magic | Matched counter compared with its own weakness-off control |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Grubnash | 8 | 24/24 (100%) | 24/24 (100%) | 24/24 (100%) | Melee crush 4.6 → 3.2 food per win |
+| Old Tusk | 18 | 24/24 (100%) | 24/24 (100%) | 24/24 (100%) | Ranged pierce 3.2 → 2.0 food per win |
+| Barnacle | 25 | 24/24 (100%) | 24/24 (100%) | 24/24 (100%) | Magic storm 7.5 → 4.0 food per win |
+| Frostmaw | 45 | 8/24 (33%) | 20/24 (83%) | 3/24 (13%) | Magic fire 23/24 → 24/24 wins |
+| Morwenna | 65 | 22/24 (92%) | 24/24 (100%) | 18/24 (75%) | Melee stab 22/24 → 24/24 wins |
+| Pyrrhax | 85 | 19/24 (79%) | 24/24 (100%) | 24/24 (100%) | Magic frost 7.2 → 2.7 food per win |
+| Zephyrion | 95 | 24/24 (100%) | 24/24 (100%) | 24/24 (100%) | Magic storm 5.8 → 2.9 food per win |
+| The Hollow King | 97 | 24/24 (100%) | 24/24 (100%) | 24/24 (100%) | Melee crush 23/24 → 24/24 wins |
+
+Frostmaw is particularly sensitive to choosing fire. The general Magic build used resisted frost and won 3/24, while the fire build won 24/24. Fire also prevents a lost attack when frozen, and that still applies in the controlled comparison. The Hollow King results combine all three forms, including the forms that resist a chosen type.
+
+The full run measured 36 live loadouts and 15 weakness-off comparisons for 1,224 forecasts.
+
+**Decision:** hold the proposed +10% health increase from Frostmaw onward for human testing. Revisit it if
+multiple players at the entry requirement, with ordinary regional gear and food, repeatedly win later fights
+comfortably and describe the specials and preparation choices as inconsequential. Record their style, gear,
+food used, deaths and whether they acted on a weakness or special. Check the evidence for each boss before
+testing the health change as a separate proposal.
+
+## Historical findings and changes
 
 | Finding | Change |
 |---|---|
