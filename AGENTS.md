@@ -67,14 +67,20 @@ dated line to the history file.
 - **Towns to one scale** (`js/towns.js`): each town scene is 640 × 360 with townsfolk ~10px, homes two to three times
   that, restoration pieces 32px among them and landmarks at 2×. Things you own appear in the scene (boats at Saltmere,
   traps, crops); add them through `extras` and the scene cache key in pixel_runtime.js. Townsfolk walk the two roads on
-  Home and Village (`js/town_walkers.js`; more as the town is restored; off under Reduce effects).
+  Home and Village (`js/town_walkers.js`; more as the town is restored; off under Reduce effects). Towns live
+  (`js/town_life.js`, owner 27 Nov): the player's clock sets dawn, day, dusk and night (windows and lanterns glow after
+  dark, stars come out), each town has its weather (rain, snow, sea mist), smoke rises and animals potter (more as the
+  town is restored); `sceneFor` records windows, chimneys and lanterns in `A.sceneMeta` for it. Settings → Display →
+  Town life (follow my clock / always daytime, weather). Under Reduce effects nothing moves; the hour's light stays.
 - **Activity backdrops**: each activity shows a close-up district (`districtFor`, 240 × 100) at 3× with the 3× hero
   (72 × 96) and target on one ground line; the 17 skill workplaces are in skill_backdrops.js. Any new activity kind or
   recipe skill needs a district. The page backdrop (`js/backdrop.js`) is Starlit hills or Twilight forest; combat shows
   the area's own scene (two per region, keyed like `saltmere:1`); a new area needs a recipe there.
 - **Hearthside Journal** (owner, 18 Nov) is the whole game's look: light parchment and Hearthside lettering by default
   (local Cinzel + Alegreya Sans), dark theme available; `css/hearthside.css` is the shared presentation layer (extend it,
-  don't add per-page skins). Lettering presets (Storybook, Adventurer, Pixel, Original) stay in Settings; use the
+  don't add per-page skins). Modern but old-world (owner, 27 Nov): panels are paper (a fine grain and soft mottle drawn
+  with an SVG noise filter, aged edges), the dark theme is candlelit leather, headings are letterpressed, a quest ready
+  to hand in carries a wax seal; soft shadows, smooth easing and clean spacing keep it modern. Lettering presets (Storybook, Adventurer, Pixel, Original) stay in Settings; use the
   `--f-display/--f-body/--f-ui/--f-mono` variables, never a hard-coded family. Silkscreen only for big numbers and short
   headlines. Type: 16.5px body, 16px buttons, 14px meta; nothing visible under 13px in the design.
 - **Shape rule** (owner, 26–27 Nov): anything you can click is an 8px rounded rectangle (`--r-act`). Only navigation

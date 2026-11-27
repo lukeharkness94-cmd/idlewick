@@ -19,6 +19,7 @@ UI.V.settings=()=>{
  const backdrop=body(get('Backdrop'));
  const notation = `<div class="settings-field"><h3>Number notation</h3><div class="btnrow wrap">${[['default','Default'],['suffix','Suffix · 1.2k'],['scientific','Scientific · 1.2e3']].map(([id, label]) => `<button class="btn" data-do="numbernotation" data-a="${id}" aria-pressed="${(Q.S.settings.numberNotation || 'default') === id}">${label}</button>`).join('')}</div></div>`;
  const display=[card('Appearance',themeHtml+`<div class="settings-field"><h3>Interface size</h3>${size}<small class="dim">Size preference applies on desktop.</small></div><div class="settings-field"><h3>Backdrop</h3>${backdrop}</div>`),card('Lettering',body(get('Lettering'))+notation,'lettering-set'),card('Notifications & accessibility',body(iface))];
+ if(Q.townLifeSettings)display.splice(1,0,card('Town life',Q.townLifeSettings()));
  const volume=take(audio,'[data-do="set"][data-a="muted"]')+['masterVol','vol','musicVol','ambVol'].map(k=>take(audio,`label:has([data-in="${k}"])`)).join('');
  const musicLabel=audio?.querySelector('[data-do="set"][data-a="music"] b');if(musicLabel)musicLabel.textContent='Music';
  const layers=['music','ambience','sfx'].map(k=>take(audio,`[data-do="set"][data-a="${k}"]`)).join('');

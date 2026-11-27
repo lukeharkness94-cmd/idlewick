@@ -946,7 +946,20 @@ button.linkish{display:inline-flex;align-items:center}
 .activity-scene.skill-smithing .scene-target img{width:48px;height:48px}
 
 /* Townsfolk walking over the Home and Village town scenes (js/town_walkers.js): same box and crop as the picture */
-canvas.town-walkers{position:absolute;pointer-events:none;image-rendering:pixelated;margin:0;display:block}
+canvas.town-walkers{position:absolute;pointer-events:none;image-rendering:pixelated;margin:0;display:block;z-index:1}
+/* living towns (js/town_life.js): smoke, weather and animals under the light, the hour's light multiplied over the
+   scene and its walkers, then lit windows, lanterns and stars above it; the Village's signs and Home's button stay on top */
+canvas.town-life,.town-tint,.town-glow{position:absolute;pointer-events:none;margin:0;display:block}
+canvas.town-life{image-rendering:pixelated}
+canvas.town-life-under{z-index:1}
+.town-tint{z-index:2;mix-blend-mode:multiply}
+/* the light eases between hours, but a scene opens straight into the hour it is */
+.town-tint.eased{transition:background-color 4s linear}
+.town-glow{z-index:2;mix-blend-mode:overlay}
+canvas.town-life-over{z-index:3}
+.village-scene .site-spot{z-index:5}
+.home-scene>.btn{z-index:5}
+html.calm .town-tint{transition:none}
 
 /* Quest progress pictures (js/quest_pictures.js): a row of the thing each objective asks for, filling in colour,
    and a blueprint of what the quest makes that assembles as it fills */
@@ -1036,3 +1049,40 @@ html.calm .petted,html.calm .petted img{animation:none}
 /* the held weapon's own sprite on the Fighting style card and the fighter panel: 16px art at 2x */
 .ss-wart{display:grid;place-items:center;width:32px;height:32px;flex:none;line-height:0}
 .ss-wart img{width:32px!important;height:32px!important;max-width:none!important;image-rendering:pixelated}
+
+/* ===================== Materials (owner, 27 Nov 2026: "modern ... but it feels like a ye olde parchment-style
+   fantasy game ... cosy ... a warm dashboard we can feel at home in") =====================
+   Panels are paper: a fine fibre grain and a soft mottle (both drawn in code with an SVG noise filter, nothing
+   loaded), slightly aged towards the edges. The dark theme is worn leather by candlelight. Headings are letterpressed
+   into the page; a quest that is ready to hand in carries a wax seal. The modern half stays: soft shadows, smooth easing,
+   clean spacing; nothing here draws a line round anything. */
+:root{
+  --paper-grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .30  0 0 0 0 .16  0 0 0 .9 -.32'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+  --paper-mottle:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='.008' numOctaves='3' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .40  0 0 0 0 .18  0 0 0 .3 -.1'/></filter><rect width='100%' height='100%' filter='url(%23m)'/></svg>");
+  --paper-edge:inset 0 0 34px -10px rgba(0,0,0,.45);
+  --paper-lift:0 2px 4px rgba(0,0,0,.18),0 14px 30px -20px rgba(0,0,0,.55);
+  --press:0 1px 0 rgba(0,0,0,.45);
+}
+:root[data-theme="light"]{
+  --paper-edge:inset 0 0 40px -12px rgba(150,104,40,.30);
+  --paper-lift:0 1px 2px rgba(90,62,24,.10),0 14px 30px -20px rgba(90,62,24,.42);
+  --press:0 1px 0 rgba(255,255,255,.75);
+}
+/* paper (light): the panel's own colour under a mottle and a grain */
+:root[data-theme="light"] .panel:not(.panel .panel,.home-scene){background-color:var(--panel);background-image:var(--paper-mottle),var(--paper-grain);background-blend-mode:multiply,multiply;box-shadow:var(--paper-edge),var(--paper-lift)}
+/* leather (dark): the same grain, deeper, and a candle's warmth from the top left */
+:root:not([data-theme="light"]) .panel:not(.panel .panel,.home-scene){background-color:var(--panel);background-image:radial-gradient(ellipse at 12% 0%,rgba(255,196,120,.07),transparent 60%),var(--paper-grain);background-blend-mode:normal,soft-light;box-shadow:var(--paper-edge),var(--paper-lift)}
+/* pop-ups are a sheet laid on the page */
+:root[data-theme="light"] .modal>.m-card{background-image:var(--paper-mottle),var(--paper-grain);background-blend-mode:multiply,multiply}
+.modal>.m-card>h2{text-shadow:var(--press)}
+/* the rail and top bar are the same paper */
+:root[data-theme="light"] :is(#hud,.sidebar){background-image:var(--paper-grain);background-blend-mode:multiply}
+/* headings pressed into the paper */
+:is(.phead h2,.panel>h1,.panel h1,.settings-navigation h1){text-shadow:var(--press)}
+/* a quest ready to hand in carries a red wax seal */
+.qrow .state.ready{color:#8a2a22!important;background:color-mix(in srgb,#b8483a 12%,transparent)!important;display:inline-flex;align-items:center;gap:6px}
+.qrow .state.ready::before{content:"";flex:none;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 38% 34%,#e07a6a 0 18%,#b8483a 40%,#7a221c 100%);box-shadow:0 1px 1px rgba(60,10,8,.45)}
+:root:not([data-theme="light"]) .qrow .state.ready{color:#f2a598!important}
+
+/* the town picture's frame: its sky colour stops at the padding, so no pale rim shows round the scene */
+.home-scene{background-clip:padding-box!important;background-image:none!important}

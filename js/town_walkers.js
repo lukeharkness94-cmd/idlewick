@@ -63,10 +63,10 @@ const skyOf = img => { const k = img.currentSrc || img.src; if (sky.has(k)) retu
   try { const cv = document.createElement('canvas'); cv.width = 1; cv.height = 1; const x = cv.getContext('2d'); x.drawImage(img, Math.floor(img.naturalWidth / 2), 1, 1, 1, 0, 0, 1, 1); const d = x.getImageData(0, 0, 1, 1).data; c = `rgb(${d[0]},${d[1]},${d[2]})`; } catch (e) { /* a tainted image keeps the panel colour */ }
   sky.set(k, c); return c; };
 const fitHome = () => { const img = document.querySelector('.home-scene img.scene'); if (!img || !img.naturalWidth) return; const box = img.parentElement;
-  img.removeAttribute('style'); box.style.height = ''; box.style.removeProperty('background');
+  img.removeAttribute('style'); box.style.height = ''; box.style.removeProperty('background-color');
   const bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) return;
   const W = img.naturalWidth, H = img.naturalHeight, k = Math.max(1, Math.ceil(bw / W)), w = W * k, h = H * k;
-  box.style.height = bh + 'px'; const c = skyOf(img); if (c) box.style.setProperty('background', c, 'important');
+  box.style.height = bh + 'px'; const c = skyOf(img); if (c) box.style.setProperty('background-color', c, 'important');
   /* with priority: the page's stylesheets size this picture with !important (height:100%), which squashed it */
   for (const [k2, v] of Object.entries({ position: 'absolute', 'max-width': 'none', 'max-height': 'none', 'aspect-ratio': 'auto', width: w + 'px', height: h + 'px', left: Math.round((bw - w) / 2) + 'px', top: (h <= bh ? bh - h : Math.round((bh - h) * .6)) + 'px', 'object-fit': 'fill' })) img.style.setProperty(k2, v, 'important');
   img.dataset.scale = k; for (const L of layers) if (L.img === img) fit(L); };

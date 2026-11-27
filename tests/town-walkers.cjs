@@ -14,7 +14,7 @@ const { chromium } = require('playwright');
     await p.evaluate(() => { DQ.paused = true; for (let i = 0; i < 12; i++) DQ.closeModal(); DQ.go('overview'); DQ.ui.render(true); });
     await p.waitForFunction(() => DQ.townWalkersLive().length > 0, null, { timeout: 5000 });
     /* (1) overlay matches the picture's box and pixel size, and ignores the pointer */
-    const box = await p.evaluate(() => { const img = document.querySelector('.home-scene img.scene'), cv = img.nextElementSibling, a = img.getBoundingClientRect(), c = cv.getBoundingClientRect(), cs = getComputedStyle(cv);
+    const box = await p.evaluate(() => { const img = document.querySelector('.home-scene img.scene'), cv = img.parentElement.querySelector('canvas.town-walkers'), a = img.getBoundingClientRect(), c = cv.getBoundingClientRect(), cs = getComputedStyle(cv);
       return { cls: cv.className, w: [img.naturalWidth, cv.width], h: [img.naturalHeight, cv.height], dx: Math.abs(a.left - c.left) + Math.abs(a.top - c.top) + Math.abs(a.width - c.width) + Math.abs(a.height - c.height), pe: cs.pointerEvents, fit: [getComputedStyle(img).objectFit, cs.objectFit] }; });
     assert.equal(box.cls, 'town-walkers'); assert.equal(box.w[0], box.w[1]); assert.equal(box.h[0], box.h[1]);
     assert.ok(box.dx < 1.5, 'canvas sits exactly over the scene: ' + box.dx); assert.equal(box.pe, 'none'); assert.equal(box.fit[0], box.fit[1]);

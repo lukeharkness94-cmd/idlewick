@@ -5719,7 +5719,20 @@ button.linkish{display:inline-flex;align-items:center}
 .activity-scene.skill-smithing .scene-target img{width:48px;height:48px}
 
 /* Townsfolk walking over the Home and Village town scenes (js/town_walkers.js): same box and crop as the picture */
-canvas.town-walkers{position:absolute;pointer-events:none;image-rendering:pixelated;margin:0;display:block}
+canvas.town-walkers{position:absolute;pointer-events:none;image-rendering:pixelated;margin:0;display:block;z-index:1}
+/* living towns (js/town_life.js): smoke, weather and animals under the light, the hour's light multiplied over the
+   scene and its walkers, then lit windows, lanterns and stars above it; the Village's signs and Home's button stay on top */
+canvas.town-life,.town-tint,.town-glow{position:absolute;pointer-events:none;margin:0;display:block}
+canvas.town-life{image-rendering:pixelated}
+canvas.town-life-under{z-index:1}
+.town-tint{z-index:2;mix-blend-mode:multiply}
+/* the light eases between hours, but a scene opens straight into the hour it is */
+.town-tint.eased{transition:background-color 4s linear}
+.town-glow{z-index:2;mix-blend-mode:overlay}
+canvas.town-life-over{z-index:3}
+.village-scene .site-spot{z-index:5}
+.home-scene>.btn{z-index:5}
+html.calm .town-tint{transition:none}
 
 /* Quest progress pictures (js/quest_pictures.js): a row of the thing each objective asks for, filling in colour,
    and a blueprint of what the quest makes that assembles as it fills */
@@ -5809,6 +5822,43 @@ html.calm .petted,html.calm .petted img{animation:none}
 /* the held weapon's own sprite on the Fighting style card and the fighter panel: 16px art at 2x */
 .ss-wart{display:grid;place-items:center;width:32px;height:32px;flex:none;line-height:0}
 .ss-wart img{width:32px!important;height:32px!important;max-width:none!important;image-rendering:pixelated}
+
+/* ===================== Materials (owner, 27 Nov 2026: "modern ... but it feels like a ye olde parchment-style
+   fantasy game ... cosy ... a warm dashboard we can feel at home in") =====================
+   Panels are paper: a fine fibre grain and a soft mottle (both drawn in code with an SVG noise filter, nothing
+   loaded), slightly aged towards the edges. The dark theme is worn leather by candlelight. Headings are letterpressed
+   into the page; a quest that is ready to hand in carries a wax seal. The modern half stays: soft shadows, smooth easing,
+   clean spacing; nothing here draws a line round anything. */
+:root{
+  --paper-grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .30  0 0 0 0 .16  0 0 0 .9 -.32'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+  --paper-mottle:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='.008' numOctaves='3' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .40  0 0 0 0 .18  0 0 0 .3 -.1'/></filter><rect width='100%' height='100%' filter='url(%23m)'/></svg>");
+  --paper-edge:inset 0 0 34px -10px rgba(0,0,0,.45);
+  --paper-lift:0 2px 4px rgba(0,0,0,.18),0 14px 30px -20px rgba(0,0,0,.55);
+  --press:0 1px 0 rgba(0,0,0,.45);
+}
+:root[data-theme="light"]{
+  --paper-edge:inset 0 0 40px -12px rgba(150,104,40,.30);
+  --paper-lift:0 1px 2px rgba(90,62,24,.10),0 14px 30px -20px rgba(90,62,24,.42);
+  --press:0 1px 0 rgba(255,255,255,.75);
+}
+/* paper (light): the panel's own colour under a mottle and a grain */
+:root[data-theme="light"] .panel:not(.panel .panel,.home-scene){background-color:var(--panel);background-image:var(--paper-mottle),var(--paper-grain);background-blend-mode:multiply,multiply;box-shadow:var(--paper-edge),var(--paper-lift)}
+/* leather (dark): the same grain, deeper, and a candle's warmth from the top left */
+:root:not([data-theme="light"]) .panel:not(.panel .panel,.home-scene){background-color:var(--panel);background-image:radial-gradient(ellipse at 12% 0%,rgba(255,196,120,.07),transparent 60%),var(--paper-grain);background-blend-mode:normal,soft-light;box-shadow:var(--paper-edge),var(--paper-lift)}
+/* pop-ups are a sheet laid on the page */
+:root[data-theme="light"] .modal>.m-card{background-image:var(--paper-mottle),var(--paper-grain);background-blend-mode:multiply,multiply}
+.modal>.m-card>h2{text-shadow:var(--press)}
+/* the rail and top bar are the same paper */
+:root[data-theme="light"] :is(#hud,.sidebar){background-image:var(--paper-grain);background-blend-mode:multiply}
+/* headings pressed into the paper */
+:is(.phead h2,.panel>h1,.panel h1,.settings-navigation h1){text-shadow:var(--press)}
+/* a quest ready to hand in carries a red wax seal */
+.qrow .state.ready{color:#8a2a22!important;background:color-mix(in srgb,#b8483a 12%,transparent)!important;display:inline-flex;align-items:center;gap:6px}
+.qrow .state.ready::before{content:"";flex:none;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 38% 34%,#e07a6a 0 18%,#b8483a 40%,#7a221c 100%);box-shadow:0 1px 1px rgba(60,10,8,.45)}
+:root:not([data-theme="light"]) .qrow .state.ready{color:#f2a598!important}
+
+/* the town picture's frame: its sky colour stops at the padding, so no pale rim shows round the scene */
+.home-scene{background-clip:padding-box!important;background-image:none!important}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
@@ -12073,6 +12123,9 @@ Object.assign(A, { workerSprite, treeSprite, rockSprite, piece, sceneFor, landma
 (() => {
 const DQ = window.DQ, D = DQ.data, A = DQ.pixelArt; if (!A || !A.piece) return;
 const { mix } = A, W = 640, H = 360;
+/* what the living-town layer (js/town_life.js) needs to know about the picture: lit windows, chimneys, lanterns, the
+   landmark, homes and water, recorded while sceneFor paints (it never changes what is painted) */
+let META = null;
 const seeded = s => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967296; }; };
 
 /* ---------- a restoration piece at its construction stage ---------- */
@@ -12126,7 +12179,7 @@ const home = (P, X, base, w, h, st, lived, rnd) => {
   /* missing tiles on an empty house */
   if (!lived) { f(mix(roof, '#000000', .55), X + Math.floor(w * .55), top - Math.floor(rh * .6), 3, 2); }
   const glow = st.glow || '#f6d880', win = (wx, wy) => {
-    f(frame, wx - 1, wy - 1, 6, 6); f(lived ? glow : '#2a2830', wx, wy, 4, 4);
+    f(frame, wx - 1, wy - 1, 6, 6); f(lived ? glow : '#2a2830', wx, wy, 4, 4); if (lived && META) META.windows.push([wx, wy, glow]);
     if (lived) { f(mix(glow, '#ffffff', .45), wx, wy, 2, 1); f(frame, wx + 2, wy, 1, 4); f(frame, wx, wy + 2, 4, 1); if (rnd() < .5) { f(pick(['#4a6a9a', '#9a4a3a', '#4a7a4a'], rnd), wx - 2, wy, 1, 4); f(pick(['#4a6a9a', '#9a4a3a', '#4a7a4a'], rnd), wx + 5, wy, 1, 4); } if (rnd() < .45) { f('#7a5236', wx - 1, wy + 5, 6, 1); f(pick(FLOWERS, rnd), wx, wy + 4, 1, 1); f(pick(FLOWERS, rnd), wx + 3, wy + 4, 1, 1); } }
     else { f('#7a5a3a', wx - 1, wy + 1, 6, 1); f('#7a5a3a', wx - 1, wy + 3, 6, 1); }
     f(lt, wx - 1, wy + 5, 6, 1); };
@@ -12136,6 +12189,7 @@ const home = (P, X, base, w, h, st, lived, rnd) => {
   if (lived) f('#e6c060', dx + 3, base - Math.ceil(dh / 2), 1, 1); else { f('#6a4a30', dx - 1, base - dh + 2, dw + 2, 1); f('#6a4a30', dx - 1, base - 3, dw + 2, 1); }
   f(mix(wall, '#8a8478', .5), dx - 1, base, dw + 2, 1);
   if (rnd() < .75) { const cx = X + (rnd() < .5 ? 3 : w - 7), cy = top - Math.round(rh * .75); f(mix(st.walls[0], '#3a2e28', .55), cx, cy, 4, top - cy - 1); f(mix(st.walls[0], '#1e1a18', .6), cx - 1, cy - 1, 6, 2);
+    if (lived && META) META.chimneys.push([cx + 2, cy - 1]);
     if (lived) for (let k = 0; k < 4; k++) P.ell(`rgba(232,232,236,${.75 - k * .16})`, cx + 2 + k * 2, cy - 4 - k * 5, 2 + k * .6, 1.6 + k * .4); }
 };
 /* trees at town scale: 14 to 28 px */
@@ -12186,6 +12240,7 @@ const siteLayout = town => { const sites = Object.keys(D.PROJECTS || {}).filter(
 function sceneFor(town, stages = {}, extras = {}) {
   const T = A.TOWN[town] || A.TOWN.willowbrook, st = Object.assign({ ground: T.ground }, STYLE[town] || STYLE.willowbrook), rnd = seeded(town);
   const c = make(), x = c.getContext('2d'), P = painter(x), { f, ell, ridge, put } = P;
+  META = { town, W, H, windows: [], chimneys: [], lamps: [], homes: [], ponds: [], style: st };
   /* sky */
   f(T.sky[0], 0, 0, W, 30); f(T.sky[1], 0, 30, W, 28); f(T.sky[2], 0, 58, W, 50);
   if (st.stars) for (let i = 0; i < 90; i++) f(i % 5 ? '#c8c0ff' : '#ffffff', Math.floor(rnd() * W), Math.floor(rnd() * 80), 1, 1);
@@ -12205,6 +12260,7 @@ function sceneFor(town, stages = {}, extras = {}) {
     for (const [bx, by, t] of [[70, 104, 2], [220, 96, 3], [360, 110, 1]]) ship(P, bx, by, t, '#7a5236'); }
   if (st.clouds) for (const [cx, cy, w] of [[0, 120, 120], [180, 128, 140], [400, 118, 180]]) { f('#f6fbfc', cx, cy, w, 9); f('#f6fbfc', cx + 12, cy - 5, w - 24, 5); }
   if (st.fields) for (let r = 0; r < 6; r++) { f(r % 2 ? '#c8b058' : '#8aa850', 0, 112 + r * 4, 240, 3); f(r % 2 ? '#d8c068' : '#9ab860', 440, 112 + r * 4, 200, 3); }
+  if (st.swamp) META.ponds = [[120, 196, 50], [520, 168, 56], [330, 272, 40]];
   if (st.swamp) for (const [px, py, rx] of [[120, 196, 50], [520, 168, 56], [330, 272, 40]]) { ell('#3a4a3a', px, py, rx, 7); ell('#4a5a4a', px - 8, py - 2, rx * .5, 2.5); for (let k = 0; k < 4; k++) f('#5a8a4a', px - rx * .6 + k * rx * .4, py - 1, 3, 1); }
   if (st.lava) { f('#e8583a', 0, 128, W, 4); f('#ffb04a', 0, 128, W, 1); for (let i = 0; i < 20; i++) f('#ff8a3a', Math.floor(rnd() * W), 130 + Math.floor(rnd() * 3), 5, 1); }
   /* streets: two long roads and the lanes between them */
@@ -12215,7 +12271,7 @@ function sceneFor(town, stages = {}, extras = {}) {
   ell(mix(road, '#ffffff', .06), 320, 200, 34, 9);
   /* landmark (a landmark is a big building: drawn at twice its sprite size so it stands two to three homes tall) */
   const lm = st.landmark, LMK = 2;
-  if (lm) { const s = A.landmark(lm[0]); if (lm[0] === 'lighthouse') { ell('#7a746a', lm[1] + 48, lm[2] - 2, 26, 6); ell('#9a9488', lm[1] + 44, lm[2] - 4, 18, 3); } put(s, lm[1], lm[2] - s.h * LMK, LMK); }
+  if (lm) { const s = A.landmark(lm[0]); if (lm[0] === 'lighthouse') { ell('#7a746a', lm[1] + 48, lm[2] - 2, 26, 6); ell('#9a9488', lm[1] + 44, lm[2] - 4, 18, 3); } put(s, lm[1], lm[2] - s.h * LMK, LMK); META.landmark = { kind: lm[0], x: lm[1], y: lm[2] - s.h * LMK, w: s.w * LMK, h: s.h * LMK }; }
   const cottage = town === 'willowbrook' ? [296, 156] : null;
   if (cottage) { const s = A.sprites.cottage(); put(s, cottage[0], cottage[1] - s.h); if (extras.farm) for (let r = 0; r < 4; r++) { f('#6a4a2e', 350, 140 + r * 4, 34, 3); for (let q = 0; q < 8; q++) f(r % 2 ? '#7ab04a' : '#5f9a45', 352 + q * 4, 140 + r * 4, 2, 2); } }
   /* homes in rows among the restoration sites; the more of the town is restored, the more of them are lived in */
@@ -12233,14 +12289,14 @@ function sceneFor(town, stages = {}, extras = {}) {
     if (hx + w > W - 4 || blocked(hx - 2, w + 4, hb)) continue; homes.push([hx, hb, w, hgt]); }
   /* gardens and fences in front of some homes */
   homes.forEach(([hx, hb, hw], k) => { if (k % 3 === 0) { f(mix(T.ground, '#3a2a1a', .35), hx, hb + 1, hw, 3); for (let q = 1; q < hw; q += 3) f(k % 2 ? st.leaf : pick(FLOWERS, rnd), hx + q, hb + 1, 2, 1); } else if (k % 3 === 1) { const fc = mix(st.walls[0], '#5a3a26', .6); for (let q = -3; q < hw + 3; q += 3) f(fc, hx + q, hb + 1, 1, 3); f(fc, hx - 3, hb + 2, hw + 6, 1); } });
-  homes.sort((a, b) => a[1] - b[1]).forEach(([hx, hb, hw, hh]) => home(P, hx, hb, hw, hh, st, rnd() < lived, rnd));
+  homes.sort((a, b) => a[1] - b[1]).forEach(([hx, hb, hw, hh]) => { const on = rnd() < lived; META.homes.push([hx, hb, hw, hh, on]); home(P, hx, hb, hw, hh, st, on, rnd); });
   /* trees between the homes and along the edges */
   for (let i = 0; i < st.trees + 16; i++) { const tx = Math.floor(rnd() * W), tb = 132 + Math.floor(rnd() * 190); if (blocked(tx - 8, 16, tb, 26)) continue; if (st.pines) pine(P, tx, tb, 16 + Math.floor(rnd() * 12), st.leaf); else tree(P, tx, tb, 16 + Math.floor(rnd() * 10), st.leaf, rnd); }
   /* the town's trade: market stalls, carts, lanterns, banners */
   const clear = (sx, w, base) => !blocked(sx, w, base, 26);
   if (st.stalls) for (const sx of [292, 330]) { f('#7a5236', sx, 214, 26, 8); f('#5a3a26', sx, 221, 26, 1); f('#5a3a26', sx + 1, 202, 2, 12); f('#5a3a26', sx + 23, 202, 2, 12); for (let k = 0; k < 4; k++) f(k % 2 ? '#f4ecd8' : '#b8483a', sx - 1 + k * 7, 198, 7, 6); for (let k = 0; k < 5; k++) f(pick(['#e0405a', '#f0d060', '#7ab04a', '#c87a3a'], rnd), sx + 3 + k * 4, 212, 3, 2); }
   else { ell(mix(st.walls[0], '#5a5048', .5), 320, 200, 10, 3); f(mix(st.walls[0], '#5a5048', .4), 316, 190, 8, 9); f('#6aa8d8', 317, 191, 6, 2); f(mix(st.walls[0], '#5a5048', .3), 319, 184, 2, 6); f('#9cd0f0', 318, 182, 4, 2); }
-  if (st.swamp || town === 'hollow') for (const lx of [50, 190, 270, 470, 610]) if (clear(lx - 4, 10, 246)) { f('#5a4a3a', lx, 220, 2, 26); f('#3a2e24', lx - 2, 218, 6, 2); f(st.glow, lx - 2, 212, 6, 6); f(mix(st.glow, '#ffffff', .5), lx - 1, 213, 2, 2); }
+  if (st.swamp || town === 'hollow') for (const lx of [50, 190, 270, 470, 610]) if (clear(lx - 4, 10, 246)) { f('#5a4a3a', lx, 220, 2, 26); f('#3a2e24', lx - 2, 218, 6, 2); f(st.glow, lx - 2, 212, 6, 6); f(mix(st.glow, '#ffffff', .5), lx - 1, 213, 2, 2); META.lamps.push([lx + 1, 215, st.glow]); }
   if (town === 'emberfall') for (const bx of [170, 300, 440, 580]) if (clear(bx, 14, 236)) { f('#3a2420', bx, 190, 2, 46); f('#c8483c', bx + 2, 192, 10, 16); f('#8a2a24', bx + 9, 192, 3, 16); f('#ffb04a', bx + 5, 197, 4, 4); }
   if (town === 'ironpeak') for (const cx of [172, 226, 400]) if (clear(cx, 22, 248)) { f('#6a6a74', cx, 237, 20, 9); f('#8a8a94', cx, 237, 20, 1); f('#3a3a40', cx + 2, 246, 4, 4); f('#3a3a40', cx + 14, 246, 4, 4); f('#8a7a5a', cx + 3, 234, 6, 3); f('#b87a4a', cx + 10, 233, 6, 4); }
   if (town === 'skyreach') for (let k = 0; k < 44; k++) f(['#c8483c', '#f0d060', '#3f7fbf', '#7ab04a'][k % 4], 10 + k * 14, 116 + Math.round(Math.sin(k / 2.2) * 3), 6, 5);
@@ -12282,6 +12338,7 @@ function sceneFor(town, stages = {}, extras = {}) {
   if (extras.traps) for (const [tx, ty] of st.sea ? [[574, 327], [600, 327], [622, 327]] : [[200, 346], [330, 352], [456, 344]]) { if (st.sea) f('#8a8478', tx - 2, ty - 1, 12, 1); trapSmall(P, tx, ty); }
   /* foreground: big trees framing the edges (nearer, so larger) */
   if (!st.sea) for (const [tx, sz] of [[8, 46], [W - 10, 40]]) { if (st.pines) pine(P, tx, H + 2, sz, mix(st.leaf, '#000000', .1)); else tree(P, tx, H + 4, sz, mix(st.leaf, '#000000', .1), rnd); }
+  META.lived = lived; META.ruined = !!st.ruined; (A.sceneMeta = A.sceneMeta || {})[town] = META; c.meta = META; META = null;
   return c;
 }
 
@@ -24677,6 +24734,7 @@ UI.V.settings=()=>{
  const backdrop=body(get('Backdrop'));
  const notation = `<div class="settings-field"><h3>Number notation</h3><div class="btnrow wrap">${[['default','Default'],['suffix','Suffix · 1.2k'],['scientific','Scientific · 1.2e3']].map(([id, label]) => `<button class="btn" data-do="numbernotation" data-a="${id}" aria-pressed="${(Q.S.settings.numberNotation || 'default') === id}">${label}</button>`).join('')}</div></div>`;
  const display=[card('Appearance',themeHtml+`<div class="settings-field"><h3>Interface size</h3>${size}<small class="dim">Size preference applies on desktop.</small></div><div class="settings-field"><h3>Backdrop</h3>${backdrop}</div>`),card('Lettering',body(get('Lettering'))+notation,'lettering-set'),card('Notifications & accessibility',body(iface))];
+ if(Q.townLifeSettings)display.splice(1,0,card('Town life',Q.townLifeSettings()));
  const volume=take(audio,'[data-do="set"][data-a="muted"]')+['masterVol','vol','musicVol','ambVol'].map(k=>take(audio,`label:has([data-in="${k}"])`)).join('');
  const musicLabel=audio?.querySelector('[data-do="set"][data-a="music"] b');if(musicLabel)musicLabel.textContent='Music';
  const layers=['music','ambience','sfx'].map(k=>take(audio,`[data-do="set"][data-a="${k}"]`)).join('');
@@ -27648,10 +27706,10 @@ const skyOf = img => { const k = img.currentSrc || img.src; if (sky.has(k)) retu
   try { const cv = document.createElement('canvas'); cv.width = 1; cv.height = 1; const x = cv.getContext('2d'); x.drawImage(img, Math.floor(img.naturalWidth / 2), 1, 1, 1, 0, 0, 1, 1); const d = x.getImageData(0, 0, 1, 1).data; c = `rgb(${d[0]},${d[1]},${d[2]})`; } catch (e) { /* a tainted image keeps the panel colour */ }
   sky.set(k, c); return c; };
 const fitHome = () => { const img = document.querySelector('.home-scene img.scene'); if (!img || !img.naturalWidth) return; const box = img.parentElement;
-  img.removeAttribute('style'); box.style.height = ''; box.style.removeProperty('background');
+  img.removeAttribute('style'); box.style.height = ''; box.style.removeProperty('background-color');
   const bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) return;
   const W = img.naturalWidth, H = img.naturalHeight, k = Math.max(1, Math.ceil(bw / W)), w = W * k, h = H * k;
-  box.style.height = bh + 'px'; const c = skyOf(img); if (c) box.style.setProperty('background', c, 'important');
+  box.style.height = bh + 'px'; const c = skyOf(img); if (c) box.style.setProperty('background-color', c, 'important');
   /* with priority: the page's stylesheets size this picture with !important (height:100%), which squashed it */
   for (const [k2, v] of Object.entries({ position: 'absolute', 'max-width': 'none', 'max-height': 'none', 'aspect-ratio': 'auto', width: w + 'px', height: h + 'px', left: Math.round((bw - w) / 2) + 'px', top: (h <= bh ? bh - h : Math.round((bh - h) * .6)) + 'px', 'object-fit': 'fill' })) img.style.setProperty(k2, v, 'important');
   img.dataset.scale = k; for (const L of layers) if (L.img === img) fit(L); };
@@ -27662,6 +27720,177 @@ const render0 = UI.render;
 UI.render = (...a) => { const r = render0(...a);
   try { const img = document.querySelector('.home-scene img.scene'); if (img) { if (img.complete) fitHome(); else img.addEventListener('load', fitHome, { once: true }); } } catch (e) { /* the scene keeps its CSS fit */ }
   try { Q.townWalkersScan(); } catch (e) { /* the scene stays as painted */ } return r; };
+})();
+
+</script>
+<script>
+/* Idlewick: living towns (owner, 27 Nov 2026: "moving town scenes, animated animals and characters, smoother and higher
+   FPS animations ... cosy, logical and like a warm dashboard we can feel at home in").
+   The town scene (js/towns.js) is one still picture; while it paints, it records where its lit windows, chimneys,
+   lanterns, homes, ponds and landmark are (A.sceneMeta[town]). This file lays three things over the Home and Village
+   scenes, at the scene's own pixels so they scale with the picture exactly (whole scene pixels, never smoothed):
+   - under the light: smoke rising from lived-in chimneys, the weather (rain, snow, sea mist, drifting cloud), animals
+     (chickens pecking, sheep in their pens, a cat by a door, gulls over Saltmere, ducks on Gloomfen's ponds, birds
+     crossing the sky), glints on the water;
+   - the light: a tint for the time of day from the player's own clock (dawn, day, dusk, night), multiplied over the
+     scene and the townsfolk walking in it (js/town_walkers.js);
+   - over the light: windows and lanterns that glow at dusk and night, stars, fireflies, Emberfall's embers and the
+     Hollow's motes.
+   Positions come from elapsed browser time at the screen's own refresh rate; a hidden tab does not catch up. More
+   animals as the town is restored. Settings → Display → Town life: follow my clock or always daytime; weather on or
+   off. Under Reduce effects and prefers-reduced-motion nothing moves: the light for the hour, lit windows and stars
+   stay, still. Nothing here is clickable or saved. tests/town-life.cjs. */
+(() => {
+const Q = window.DQ, D = Q.data, UI = Q.ui, A = Q.pixelArt, S = () => Q.S;
+if (!A) return;
+const still = () => document.documentElement.classList.contains('calm') || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const hash = s => [...String(s)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+const seeded = seed => () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const lerp = (a, b, t) => a + (b - a) * t, clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const smooth = (e0, e1, x) => { const t = clamp((x - e0) / (e1 - e0)); return t * t * (3 - 2 * t); };
+const restoredShare = town => { const ids = Object.keys(D.PROJECTS || {}).filter(k => D.PROJECTS[k].town === town && !D.PROJECTS[k].relic); return ids.length ? ids.filter(k => S().projects && S().projects[k]).length / ids.length : 0; };
+
+/* ---------- the hour and its light ---------- */
+/* settings.townTime: 'clock' (default) or 'day'; automated browsers show daytime unless a test sets DQ.townTimeOverride */
+Q.townHour = () => { if (Q.townTimeOverride != null) return Q.townTimeOverride; const set = S() && S().settings && S().settings.townTime;
+  if (set === 'day' || (set == null && navigator.webdriver)) return 13; const d = new Date(); return d.getHours() + d.getMinutes() / 60; };
+/* dark: 0 by day, 1 at night; warm: the low sun at dawn and dusk */
+Q.townLight = h => { const dark = h < 12 ? 1 - smooth(4.8, 7.4, h) : smooth(17.6, 21.2, h);
+  const warm = Math.max(1 - Math.abs(h - 18.9) / 1.9, 1 - Math.abs(h - 6.1) / 1.5, 0);
+  return { dark, warm, phase: dark > .8 ? 'night' : warm > .2 ? (h < 12 ? 'dawn' : 'dusk') : dark > .3 ? (h < 12 ? 'dawn' : 'dusk') : 'day' }; };
+const tintOf = ({ dark, warm }) => { const w = [255, 255, 255], sun = [255, 168, 104], night = [46, 58, 120];
+  const a = w.map((v, i) => lerp(v, sun[i], warm * .62)); return a.map((v, i) => Math.round(lerp(v, night[i], dark * .8 * (1 - warm * .45)))); };
+
+/* ---------- weather: a fresh roll every 40 minutes, by town ---------- */
+const WEATHER = { willowbrook: [['rain', .2]], mossbarrow: [['rain', .25]], saltmere: [['mist', .3], ['rain', .15]], ironpeak: [['snow', .65]],
+  gloomfen: [['mist', .45], ['rain', .2]], emberfall: [], skyreach: [['snow', .25], ['cloud', .5]], hollow: [['mist', .25]] };
+Q.townWeather = (town, now = Date.now()) => { if (Q.townWeatherOverride !== undefined) return Q.townWeatherOverride; if (S() && S().settings && S().settings.townWeather === false) return 'clear';
+  const r = (hash(town + ':' + Math.floor(now / 2.4e6)) % 1000) / 1000; let acc = 0; for (const [k, p] of WEATHER[town] || []) { acc += p; if (r < acc) return k; } return 'clear'; };
+
+/* ---------- little animals, drawn at town scale (5 to 7 px), two frames each ---------- */
+const px = (x, c, X, Y, w = 1, h = 1) => { x.fillStyle = c; x.fillRect(Math.round(X), Math.round(Y), w, h); };
+const ART = {
+  chicken: (x, X, Y, f, dir) => { const o = dir < 0 ? -1 : 1, hx = dir < 0 ? X : X + 2; px(x, '#f4f0e8', X, Y - 2, 3, 2); px(x, '#d8d0c0', X, Y - 1, 3, 1);
+    if (f) { px(x, '#f4f0e8', hx + o, Y - 1); px(x, '#e04030', hx + o, Y - 2); px(x, '#e0a030', hx + 2 * o, Y); } else { px(x, '#f4f0e8', hx, Y - 3); px(x, '#e04030', hx, Y - 4); px(x, '#e0a030', hx + o, Y - 3); }
+    px(x, '#e0a030', X + 1, Y); },
+  sheep: (x, X, Y, f, dir) => { px(x, '#f2eee4', X, Y - 4, 6, 3); px(x, '#ffffff', X + 1, Y - 4, 3, 1); px(x, '#d8d2c4', X, Y - 2, 6, 1);
+    const hx = dir < 0 ? X - 2 : X + 6; px(x, '#3a3030', hx, f ? Y - 3 : Y - 4, 2, 2); px(x, '#3a3030', X + 1, Y - 1, 1, 1); px(x, '#3a3030', X + 4, Y - 1, 1, 1); },
+  cat: (x, X, Y, f, dir, col) => { const dk = '#00000040'; px(x, col, X, Y - 3, 4, 3); px(x, col, dir < 0 ? X - 1 : X + 3, Y - 5, 2, 2); px(x, col, dir < 0 ? X - 1 : X + 3, Y - 6); px(x, col, dir < 0 ? X : X + 4, Y - 6);
+    const tx = dir < 0 ? X + 4 : X - 1; px(x, col, tx, Y - (f ? 4 : 2), 1, f ? 3 : 2); px(x, dk, X, Y - 1, 4, 1); },
+  duck: (x, X, Y, f, dir) => { px(x, '#8a6a42', X, Y - 2, 4, 2); const hx = dir < 0 ? X - 1 : X + 3; px(x, '#3a7a4a', hx, Y - 4, 2, 2); px(x, '#e0a030', dir < 0 ? hx - 1 : hx + 2, Y - 3); px(x, '#ffffff60', X - 1, Y, 6, 1); },
+  bird: (x, X, Y, f, dir, col) => { px(x, col, X, Y); px(x, col, X - 1, Y - (f ? 1 : 0)); px(x, col, X + 1, Y - (f ? 1 : 0)); if (f) { px(x, col, X - 2, Y - 1); px(x, col, X + 2, Y - 1); } else { px(x, col, X - 2, Y + 1); px(x, col, X + 2, Y + 1); } }
+};
+
+/* ---------- one town's life ---------- */
+const build = (town, meta) => { const rnd = seeded(hash(town + ':life')), share = restoredShare(town), st = meta.style || {}, W = meta.W, H = meta.H;
+  const L = { town, meta, animals: [], puffs: [], drops: [], stars: [], flies: [], glints: [], birds: null, birdWait: 6 + rnd() * 20, t: 0 };
+  const skyMax = st.snow ? 40 : 62;
+  for (let i = 0; i < 70; i++) L.stars.push({ x: Math.floor(rnd() * W), y: Math.floor(rnd() * skyMax), p: rnd() * 6.28, big: rnd() < .12 });
+  const front = st.sea ? null : [292, 316];
+  if (front && !meta.ruined && town !== 'hollow') for (let i = 0, n = 3 + Math.round(3 * share); i < n; i++) L.animals.push({ kind: 'chicken', x: 30 + rnd() * (W - 60), y: front[0] + rnd() * (front[1] - front[0]), x0: 20, x1: W - 20, dir: rnd() < .5 ? -1 : 1, pace: 4, mode: 'idle', wait: rnd() * 3, f: 0 });
+  /* sheep in the fenced pens at the meadow's edge, and in Mossbarrow's fields */
+  if (!st.sea && !meta.ruined && /willowbrook|mossbarrow|skyreach/.test(town)) for (const [a, b] of [[6, 82], [566, 632]]) for (let i = 0; i < 1 + Math.round(share); i++) L.animals.push({ kind: 'sheep', x: a + rnd() * (b - a - 8), y: 348 + rnd() * 6, x0: a, x1: b - 8, dir: rnd() < .5 ? -1 : 1, pace: 2, mode: 'idle', wait: rnd() * 5, f: 0 });
+  if (st.fields) for (let i = 0; i < 3 + Math.round(2 * share); i++) { const right = i % 2; L.animals.push({ kind: 'sheep', x: (right ? 450 : 10) + rnd() * 170, y: 116 + rnd() * 16, x0: right ? 444 : 4, x1: right ? 630 : 230, dir: rnd() < .5 ? -1 : 1, pace: 2, mode: 'idle', wait: rnd() * 5, f: 0 }); }
+  /* a cat by the door of a lived-in home */
+  const homes = (meta.homes || []).filter(h => h[4]); if (homes.length && town !== 'hollow') { const h = homes[Math.floor(rnd() * homes.length)]; L.animals.push({ kind: 'cat', x: h[0] + h[2] + 2, y: h[1] + 1, x0: h[0] - 6, x1: h[0] + h[2] + 8, dir: -1, pace: 3, mode: 'idle', wait: 4, f: 0, col: ['#e0a060', '#5a5050', '#f4f0e8'][Math.floor(rnd() * 3)], sits: true }); }
+  for (const [cx, cy, rx] of meta.ponds || []) L.animals.push({ kind: 'duck', x: cx - rx * .4, y: cy + 1, x0: cx - rx * .7, x1: cx + rx * .6, dir: 1, pace: 3, mode: 'walk', wait: 0, f: 0 });
+  if (st.sea) for (let i = 0; i < 3 + Math.round(2 * share); i++) L.animals.push({ kind: 'gull', cx: 80 + rnd() * 480, cy: 70 + rnd() * 30, r: 14 + rnd() * 20, a: rnd() * 6.28, sp: (.35 + rnd() * .3) * (rnd() < .5 ? -1 : 1) });
+  if (st.sea) { for (let i = 0; i < 26; i++) L.glints.push({ x: rnd() * W, y: 84 + rnd() * 36, p: rnd() * 6.28, w: 3 + Math.floor(rnd() * 4) }); for (let i = 0; i < 22; i++) L.glints.push({ x: rnd() * W, y: 332 + rnd() * 26, p: rnd() * 6.28, w: 3 + Math.floor(rnd() * 4) }); }
+  for (const c of meta.chimneys || []) L.puffs.push(...[0, 1, 2].map(k => ({ cx: c[0], cy: c[1] - 18, age: k * 1.6 + rnd() * 1.6, life: 4.8, drift: .4 + rnd() * .6 })));
+  for (let i = 0; i < 22; i++) L.flies.push({ x: rnd() * W, y: 150 + rnd() * 170, p: rnd() * 6.28, s: .6 + rnd() * .8 });
+  L.weather = '';
+  return L; };
+
+/* ---------- moving everything on (dt in seconds) ---------- */
+const step = (L, dt) => { L.t += dt; const W = L.meta.W, H = L.meta.H, wx = Q.townWeather(L.town);
+  for (const a of L.animals) {
+    if (a.kind === 'gull') { a.a += a.sp * dt; continue; }
+    if (a.mode === 'idle') { a.wait -= dt; a.f = a.kind === 'chicken' ? (Math.sin(L.t * 7 + a.x) > .4 ? 1 : 0) : a.kind === 'cat' ? (Math.sin(L.t * 1.3 + a.x) > .6 ? 1 : 0) : (Math.sin(L.t * 2 + a.x) > .7 ? 1 : 0);
+      if (a.wait <= 0) { a.mode = 'walk'; a.goal = clamp(a.x + (Math.random() - .5) * (a.kind === 'sheep' ? 24 : 40), a.x0, a.x1); a.dir = a.goal < a.x ? -1 : 1; } }
+    else { const d = a.pace * dt; a.x += a.dir * d; a.f = Math.floor(L.t * 6) % 2;
+      if (a.kind === 'duck') { if (a.x > a.x1 || a.x < a.x0) { a.dir = -a.dir; a.x = clamp(a.x, a.x0, a.x1); } continue; }
+      if ((a.dir > 0 && a.x >= a.goal) || (a.dir < 0 && a.x <= a.goal)) { a.mode = 'idle'; a.wait = (a.kind === 'cat' ? 6 : 2) + Math.random() * (a.kind === 'sheep' ? 8 : 4); } } }
+  for (const p of L.puffs) { p.age += dt; if (p.age > p.life) p.age -= p.life; }
+  /* weather particles: spawn while the weather lasts; the ones in the air finish their fall when it stops */
+  const want = wx === 'rain' ? 150 : wx === 'snow' ? 110 : 0;
+  if (L.drops.length < want) for (let i = 0; i < Math.min(8, want - L.drops.length); i++) L.drops.push({ x: Math.random() * (W + 60) - 30, y: -Math.random() * H * .5, kind: wx, s: wx === 'rain' ? 150 + Math.random() * 60 : 14 + Math.random() * 12, p: Math.random() * 6.28, big: Math.random() < .2 });
+  L.drops = L.drops.filter(d => { if (d.kind === 'rain') { d.y += d.s * dt; d.x -= d.s * .18 * dt; } else { d.y += d.s * dt; d.x += Math.sin(L.t * 1.3 + d.p) * 6 * dt; }
+    if (d.y > H) { if (L.drops.length > want) return false; d.y = -4; d.x = Math.random() * (W + 60) - 30; } return true; });
+  L.weather = wx;
+  if (L.birds) { L.birds.x += L.birds.dir * 22 * dt; if (L.birds.x < -40 || L.birds.x > W + 40) L.birds = null; }
+  else if ((L.birdWait -= dt) <= 0) { const dir = Math.random() < .5 ? -1 : 1; L.birds = { x: dir > 0 ? -20 : W + 20, y: 18 + Math.random() * 34, dir, n: 3 + Math.floor(Math.random() * 3) }; L.birdWait = 25 + Math.random() * 35; } };
+
+/* ---------- drawing ---------- */
+const ell = (x, c, cx, cy, rx, ry) => { x.fillStyle = c; for (let j = -Math.ceil(ry); j <= Math.ceil(ry); j++) { const w = Math.round(rx * Math.sqrt(Math.max(0, 1 - (j * j) / (ry * ry + .01)))); if (w > 0) x.fillRect(Math.round(cx - w), Math.round(cy + j), w * 2, 1); } };
+const drawUnder = (L, x, moving) => { const { W, H, style: st = {} } = L.meta; x.clearRect(0, 0, W, H); if (!moving) return;
+  /* glints on the water */
+  for (const g of L.glints) { const a = (Math.sin(L.t * 1.7 + g.p) + 1) / 2; if (a < .45) continue; px(x, `rgba(240,250,255,${(a - .45) * 1.4})`, g.x + Math.sin(L.t * .4 + g.p) * 3, g.y, g.w, 1); }
+  /* chimney smoke above the painted wisps: a puff swells, drifts with the wind and thins out */
+  for (const p of L.puffs) { const k = p.age / p.life, a = .42 * (1 - k) * Math.min(1, p.age * 2); if (a <= .02) continue; ell(x, `rgba(234,234,238,${a.toFixed(3)})`, p.cx + k * 14 * p.drift + Math.sin(p.age * 1.4) * 1.2, p.cy - k * 26, 1.6 + k * 2.6, 1.2 + k * 1.6); }
+  for (const a of L.animals) { if (a.kind === 'gull') { ART.bird(x, a.cx + Math.cos(a.a) * a.r * 1.6, a.cy + Math.sin(a.a) * a.r * .5, Math.floor(L.t * 4 + a.r) % 2, 1, '#f8f8f8'); continue; } ART[a.kind](x, a.x, a.y, a.f, a.dir, a.col); }
+  if (L.birds) for (let i = 0; i < L.birds.n; i++) ART.bird(x, L.birds.x - L.birds.dir * i * 6, L.birds.y + (i % 2) * 3 + Math.sin(L.t * 2 + i) * 1.5, Math.floor(L.t * 5 + i) % 2, L.birds.dir, st.stars ? '#2a2238' : '#3a3a44');
+  /* weather */
+  if (L.weather === 'mist' || L.weather === 'cloud') { const top = L.weather === 'cloud' ? 96 : 120; for (let i = 0; i < 6; i++) { const y = top + i * 34 + Math.sin(L.t * .2 + i) * 4, off = (L.t * (6 + i) + i * 97) % (W + 260) - 130;
+    x.fillStyle = L.weather === 'cloud' ? 'rgba(246,251,252,.55)' : 'rgba(230,236,240,.16)'; x.fillRect(Math.round(off), Math.round(y), 180, 8); x.fillRect(Math.round(off + 16), Math.round(y - 4), 140, 4); x.fillRect(Math.round(off - 120 + W / 2), Math.round(y + 12), 220, 6); } }
+  for (const d of L.drops) if (d.kind === 'rain') { px(x, 'rgba(206,220,240,.55)', d.x, d.y, 1, 3); px(x, 'rgba(206,220,240,.35)', d.x + 1, d.y - 2, 1, 2); } else px(x, 'rgba(250,252,255,.9)', d.x, d.y, d.big ? 2 : 1, d.big ? 2 : 1); };
+
+const drawOver = (L, x, light, moving) => { const { W, H, style: st = {} } = L.meta, dk = light.dark, t = moving ? L.t : 0; x.clearRect(0, 0, W, H);
+  /* stars come out as the sky darkens (the Hollow's are painted in) */
+  if (dk > .45 && !st.stars) for (const s of L.stars) { const a = (dk - .45) / .55 * (.55 + .45 * Math.sin(t * 1.5 + s.p)); px(x, `rgba(255,250,232,${a.toFixed(3)})`, s.x, s.y, s.big ? 2 : 1, 1); }
+  /* lit windows and lanterns glow above the darkened town; each flickers a little like a candle */
+  const glow = clamp((dk - .2) / .6);
+  if (glow > 0) { const halo = (X, Y, w, h, col, a, r) => { const [R, G, B] = rgb(col); for (let k = r; k >= 1; k--) px(x, `rgba(${R},${G},${B},${(a * .16 / k).toFixed(3)})`, X - k, Y - k, w + 2 * k, h + 2 * k); px(x, `rgba(${R},${G},${B},${a.toFixed(3)})`, X, Y, w, h); };
+    for (const [wx, wy, col] of L.meta.windows || []) { const f = moving ? .85 + .15 * Math.sin(t * 3.1 + wx * .7 + wy) : 1; halo(wx, wy, 4, 4, col, glow * f, 2); }
+    for (const [lx, ly, col] of L.meta.lamps || []) halo(lx - 2, ly - 2, 4, 4, col, glow * (moving ? .85 + .15 * Math.sin(t * 2.3 + lx) : 1), 4);
+    const lm = L.meta.landmark; if (lm && lm.kind === 'lighthouse') { const bx = lm.x + Math.round(lm.w / 2), by = lm.y + 10; halo(bx - 2, by - 2, 4, 4, '#fff2b0', glow, 5);
+      if (moving) { const sw = Math.sin(t * .8); x.fillStyle = `rgba(255,242,176,${(.10 * glow).toFixed(3)})`; for (let i = 1; i < 26; i++) x.fillRect(Math.round(bx + sw * i * 6), by - 1 - Math.floor(i / 9), 6, 2 + Math.floor(i / 9)); } } }
+  if (!moving) return;
+  /* fireflies over Gloomfen and the meadows on a summer night; embers over Emberfall; motes in the Hollow */
+  if ((/gloomfen|willowbrook|mossbarrow/.test(L.town) && dk > .6) || L.town === 'gloomfen') for (const f of L.flies) { const a = (Math.sin(t * 2.2 * f.s + f.p) + 1) / 2; if (a < .5) continue; px(x, `rgba(214,255,140,${((a - .5) * 1.6 * Math.max(dk, L.town === 'gloomfen' ? .5 : 0)).toFixed(3)})`, f.x + Math.sin(t * .5 * f.s + f.p) * 10, f.y + Math.cos(t * .4 * f.s + f.p) * 6, 1, 1); }
+  if (st.lava) for (const f of L.flies) { const k = ((t * f.s * .18 + f.p) % 1), y = 132 - k * 110 + (f.y - 150) * .1; px(x, `rgba(255,${150 + Math.round(60 * (1 - k))},70,${(.9 * (1 - k)).toFixed(3)})`, f.x + Math.sin(t + f.p) * 4, y, 1, 1); }
+  if (st.stars) for (const f of L.flies) { const a = (Math.sin(t * 1.4 * f.s + f.p) + 1) / 2; if (a < .6) continue; px(x, `rgba(200,168,255,${((a - .6) * 2).toFixed(3)})`, f.x + Math.sin(t * .3 + f.p) * 14, f.y - ((t * 4 * f.s) % 60), 1, 1); } };
+
+/* ---------- layers over each scene image ---------- */
+const layers = new Set();
+const place = (el, img, cover) => { const cs = getComputedStyle(img), box = img.parentElement;
+  if (cover) Object.assign(el.style, { left: -box.clientLeft + 'px', top: -box.clientTop + 'px', width: box.offsetWidth + 'px', height: box.offsetHeight + 'px', borderRadius: getComputedStyle(box).borderRadius });
+  else Object.assign(el.style, { left: img.offsetLeft + 'px', top: img.offsetTop + 'px', width: img.offsetWidth + 'px', height: img.offsetHeight + 'px', objectFit: cs.objectFit, objectPosition: cs.objectPosition, borderRadius: cs.borderRadius }); };
+const fit = L => { if (!L.img.isConnected) return; place(L.under, L.img); place(L.over, L.img); place(L.tint, L.img, L.home); place(L.glow, L.img, L.home); };
+const attach = img => { if (img.dataset.life || img.classList.contains('scene-old') || !img.dataset.town) return;
+  const go = () => { if (!img.isConnected || img.dataset.life) return; const town = img.dataset.town, meta = A.sceneMeta && A.sceneMeta[town]; if (!meta || !img.naturalWidth) return;
+    img.dataset.life = '1'; const mk = (tag, cls) => { const e = document.createElement(tag); e.className = cls; e.setAttribute('aria-hidden', 'true'); if (tag === 'canvas') { e.width = meta.W; e.height = meta.H; } return e; };
+    const under = mk('canvas', 'town-life town-life-under'), tint = mk('div', 'town-tint'), glow = mk('div', 'town-glow'), over = mk('canvas', 'town-life town-life-over');
+    img.after(under, tint, glow, over);
+    const L = Object.assign(build(town, meta), { img, under, tint, glow, over, ux: under.getContext('2d'), ox: over.getContext('2d'), home: !!img.closest('.home-scene') });
+    if (window.ResizeObserver) { L.ro = new ResizeObserver(() => fit(L)); L.ro.observe(img); if (L.home) L.ro.observe(img.parentElement); } fit(L); layers.add(L); paint(L, 0); requestAnimationFrame(() => tint.classList.add('eased')); tick.start(); };
+  if (img.complete) go(); else img.addEventListener('load', go, { once: true }); };
+const paint = (L, dt) => { const moving = !still(); if (moving && dt) step(L, dt); const light = Q.townLight(Q.townHour()), [r, g, b] = tintOf(light);
+  L.tint.style.backgroundColor = `rgb(${r},${g},${b})`; L.tint.dataset.phase = light.phase;
+  /* the low sun warms the sky (an overlay, so a blue sky turns gold and rose rather than brown) */
+  const sw = light.warm * (1 - light.dark * .5); L.glow.style.background = sw > .02 ? `linear-gradient(to bottom, rgba(255,128,72,${(sw * .85).toFixed(3)}) 0%, rgba(255,176,96,${(sw * .55).toFixed(3)}) 34%, rgba(255,190,120,${(sw * .25).toFixed(3)}) 60%, rgba(255,190,120,0) 85%)` : 'none'; drawUnder(L, L.ux, moving); drawOver(L, L.ox, light, moving); };
+Q.townLifeScan = () => document.querySelectorAll('.home-scene img.scene[data-town], .village-scene>img.scene[data-town]').forEach(attach);
+/* for tests: what each layer is showing right now */
+Q.townLifeLive = () => [...layers].filter(L => L.img.isConnected).map(L => ({ town: L.town, phase: L.tint.dataset.phase, tint: L.tint.style.backgroundColor, weather: L.weather, windows: (L.meta.windows || []).length, chimneys: (L.meta.chimneys || []).length,
+  animals: L.animals.map(a => ({ kind: a.kind, x: Math.round(a.kind === 'gull' ? a.cx + Math.cos(a.a) * a.r * 1.6 : a.x) })), drops: L.drops.length }));
+
+const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performance.now(); this.raf = requestAnimationFrame(t => this.run(t)); } },
+  run(t) { this.raf = 0; const dt = Math.min(.1, Math.max(0, (t - this.last) / 1000)); this.last = t; /* a hidden tab never catches up */
+    const calm = still();
+    for (const L of layers) { if (!L.img.isConnected) { L.ro && L.ro.disconnect(); layers.delete(L); continue; }
+      /* still: nothing moves; the light is brought up to the hour twice a minute */
+      if (!calm) { paint(L, dt); L.calmAt = 0; } else if (!L.calmAt || t - L.calmAt > 30000) { paint(L, 0); L.calmAt = t; } }
+    if (layers.size) this.raf = requestAnimationFrame(n => this.run(n)); } };
+
+/* ---------- Settings → Display → Town life ---------- */
+Q.townLifeSettings = () => { const s = S().settings, clock = s.townTime !== 'day', wet = s.townWeather !== false;
+  return `<div class="settings-field"><h3>Time of day in town</h3><div class="btnrow wrap"><button class="btn ${clock ? 'on' : ''}" data-do="townclock" data-a="clock" aria-pressed="${clock}">Follow my clock</button><button class="btn ${clock ? '' : 'on'}" data-do="townclock" data-a="day" aria-pressed="${!clock}">Always daytime</button></div><small class="dim">Dawn, dusk and night with lit windows, from your device's clock.</small></div>
+  <button class="tog ${wet ? 'on' : ''}" data-do="townweather" role="switch" aria-checked="${wet}"><span class="sw"></span><span><b>Weather</b><small>Rain, snow and sea mist come and go in each town.</small></span></button>`; };
+UI.DO.townclock = v => { if (!['clock', 'day'].includes(v)) return; S().settings.townTime = v; Q.save && Q.save(); UI.render(false); for (const L of layers) paint(L, 0); };
+UI.DO.townweather = () => { const s = S().settings; s.townWeather = s.townWeather === false; Q.save && Q.save(); UI.render(false); };
+
+const render0 = UI.render;
+UI.render = (...a) => { const r = render0(...a); try { Q.townLifeScan(); } catch (e) { /* the scene stays as painted */ } return r; };
 })();
 
 </script>

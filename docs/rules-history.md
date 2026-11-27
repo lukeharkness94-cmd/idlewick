@@ -272,3 +272,7 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   make it float on over or have a slight backdrop so its obvious it's clickable." Replaces "anything you can click has a
   2px outline": only navigation (top menu and HUD buttons, page tabs, tab rows, skill rail) keeps the outline; every
   other control floats on a raised fill with a soft shadow and lifts on hover. Village signs became colour only.
+- 27 Nov 2026 (owner): "The whole UI needs to feel modern in that it was built in 2026 but that it feels like a ye olde
+  parchment-style fantasy game ... moving town scenes, animated animals and characters ... cosy, logical and like a warm
+  dashboard", then chose "1 and 2" (materials and polish; living towns with day and night). Added the materials line
+  to the Hearthside Journal rule and the living-towns line to the towns rule.
