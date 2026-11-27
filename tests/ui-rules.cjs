@@ -56,6 +56,9 @@ const SETUP = {
       if (ok !== true) { bad('ERR', tag, ok); continue; }
       await p.waitForTimeout(250);
       await p.evaluate(() => { for (let i = 0; i < 6; i++) if (document.querySelector('.modal')) DQ.closeModal(); document.querySelectorAll('#notes > *, #worldcard').forEach(e => e.remove()); });
+      /* the pixel snapper settles sprites to whole scales on the next frame after a change; let it run before measuring
+         (27 Nov 2026: R6 flaked on a route icon measured mid-snap on a busy machine) */
+      await p.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
       const out = await p.evaluate(({ desktop }) => {
         const D = DQ.data, S = DQ.S, UI = DQ.ui, L = sk => DQ.skillUnlocked(sk) ? DQ.lvl(sk) : 0, r = [];
         const vis = el => { const s = getComputedStyle(el), q = el.getBoundingClientRect(); return s.visibility !== 'hidden' && s.display !== 'none' && q.width > 0 && q.height > 0; };
