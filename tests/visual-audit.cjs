@@ -52,7 +52,9 @@ const { chromium } = require('playwright');
     await p.setViewportSize({ width: 1440, height: 900 });
     await p.evaluate(() => { const S = DQ.S, D = DQ.data; for (const k of Object.keys(S.xp)) S.xp[k] = D.XPF[99]; S.settings.reduceFx = false; S.equip = {}; for (const g of ['rune_sword', 'rune_helm', 'rune_body', 'rune_legs']) { DQ.give(g, 1); DQ.equipItem(g); } DQ.fxDirty(); S.hp = DQ.maxHp(); S.town = 'willowbrook'; DQ.paused = false; DQ.go('combat'); DQ.startAct('fight', 'goblin', { quiet: true }); DQ.ui.render(true); window.__k0 = S.stats.kill; });
     await p.waitForFunction(() => DQ.S.stats.kill >= window.__k0 + 2, null, { timeout: 30000 });
-    await p.waitForTimeout(1500);
+    /* the next creature fades in over ~320 ms after each kill; wait for it rather than sampling a fixed moment, which
+       could land mid-fade right after another kill on a loaded machine */
+    await p.waitForFunction(() => { const img = document.querySelector('#av-foe img'); return img && getComputedStyle(img).visibility === 'visible' && +getComputedStyle(img).opacity > .5; }, null, { timeout: 4000 }).catch(() => {});
     const foe = await p.evaluate(() => { const img = document.querySelector('#av-foe img'); const cs = img && getComputedStyle(img); return img ? { vis: cs.visibility, op: +cs.opacity, id: document.querySelector('#av-foe').dataset.a, cur: DQ.fight && DQ.fight.id } : null; });
     assert.ok(foe && foe.vis === 'visible' && foe.op > .5, 'the next creature is visible after a kill: ' + JSON.stringify(foe));
     await p.evaluate(() => { DQ.stopAct(true); DQ.paused = true; });

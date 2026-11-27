@@ -83,10 +83,10 @@ dated line to the history file.
   to hand in carries a wax seal; soft shadows, smooth easing and clean spacing keep it modern. Lettering presets (Storybook, Adventurer, Pixel, Original) stay in Settings; use the
   `--f-display/--f-body/--f-ui/--f-mono` variables, never a hard-coded family. Silkscreen only for big numbers and short
   headlines. Type: 16.5px body, 16px buttons, 14px meta; nothing visible under 13px in the design.
-- **Shape rule** (owner, 26–27 Nov): anything you can click is an 8px rounded rectangle (`--r-act`). Only navigation
-  has a line: the top menu and the HUD buttons beside it, page tabs, tab rows inside a page and the skill rail keep a 2px
-  outline (`--act-line`) whose colour shows the state. Every other control (buttons, choice cards, item tiles, slots,
-  quest rows, portraits) has no outline and floats: a raised fill (`--act-fill`) and soft shadow (`--act-lift`) that
+- **Shape rule** (owner, 26–27 Nov): anything you can click is an 8px rounded rectangle (`--r-act`) with no outline,
+  menus included ("I HATE lines like this around menus or buttons"). Menu items (top menu and HUD buttons, page tabs,
+  tab rows, the skill rail) float, and the page you're on is a warm brass button (`--nav-on`) with a soft glow. Every
+  other control (buttons, choice cards, item tiles, slots, quest rows, portraits) floats too: a raised fill (`--act-fill`) and soft shadow (`--act-lift`) that
   lifts on hover; selected, ready, warning and danger change the fill (brass, green…), disabled sits flat. Anything you
   can't click draws no line round itself (no border, ring, outline or frame), and nothing inside a control does either:
   panels are 12px soft fills, labels/chips/badges/counts flat 4px tinted fills. Circles only for round things you don't
@@ -255,8 +255,9 @@ dated line to the history file.
 - **Hunting** kills animals for their drops. One hunting ground with five tier tabs (`D.HUNT_GROUND`, js/hunt_stalk.js):
   ten animals per tier, each on its own level two apart, plain animals low and mythic ones high; only the Hunting level
   and the tier's kit matter, never the town. A hunt tracks (45%), sets the trap (30%) and strikes (25%); the strike lands
-  with `DQ.huntCatch` (45–92%), otherwise it slips away for 30% XP. Kit from Intermediate up: that tier's trap kept in the
-  pack and one bait per hunt; counts update live. A catch gives drops, quest kills and the wild-companion chance, never
+  with `DQ.huntCatch` (45–92%), otherwise it slips away for 30% XP. Kit from Intermediate up: that tier's trap in the
+  pack and one bait per hunt; the trap you set wears out (owner, 27 Nov: 1 hunt in 60 for the wooden trap to 1 in 120
+  for the sturdiest, about one every 7-10 minutes of hunting, `DQ.trapWear`); counts update live. A catch gives drops, quest kills and the wild-companion chance, never
   combat XP or food. An animal's name stays ??? until your first catch, even at
   your level and even a chicken (owner, 27 Nov). Animals off the ground keep their ids, kills, guide pages and pets
   and are listed only once caught (`DQ.animalListed`); an active quest can still send you after one. Fieldwork lays traps for a region's materials.

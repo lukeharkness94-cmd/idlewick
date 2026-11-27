@@ -16,8 +16,11 @@ D.HUNT_STEPS = [['Tracking', .45, 'paw'], ['Setting the trap', .30, 'pin'], ['St
 const areaOf = id => Object.values(D.AREAS).flat().find(a => a.hunt && a.monsters.some(e => e.id === id)) || null;
 const animal = id => { const m = D.MON[id]; return m && m.hl && areaOf(id) ? m : null; };
 Q.isAnimal = id => !!animal(id);
-/* better field traps help the strike: +4% per trap tier owned and usable (never consumed by a hunt) */
+/* better field traps help the strike: +4% per trap tier owned and usable */
 const trapBonus = () => { const t = Q.fieldTrap ? Q.fieldTrap() : null; return t ? .04 * (D.FIELD_TRAPS.indexOf(t) + 1) : 0; };
+/* hunts take 5-9 s, so about 400-700 an hour: these rates break roughly one trap every 7-10 minutes of hunting
+   (wooden 12 an hour, reinforced 8-9, precision 6, ironjaw cage 4-5, starwoven net 3) */
+Q.trapWear = id => ({ wooden_trap: 1 / 60, reinforced_trap: 1 / 70, precision_trap: 1 / 85, ironjaw_cage: 1 / 100, starwoven_net: 1 / 120 }[id] || 1 / 80) * (Q.buffMult ? Q.buffMult('trapCare') : 1);
 Q.huntCatch = id => { const m = animal(id); if (!m) return 0; const L = Q.huntLevel ? Q.huntLevel() : Q.lvl('hunting');
   return Math.max(.45, Math.min(.92, .6 + .025 * (L - m.hl) + trapBonus())); };
 Q.huntDur = id => { const m = animal(id); if (!m) return 6000;
@@ -59,6 +62,12 @@ Q.KIND_EXT.hunt = {
     const caught = Q.chance(Q.huntCatch(a.id)), H = S().hunt = S().hunt || {}, T = tierOf(m);
     /* one bait per hunt, caught or not (a quest's animal can be hunted without, but uses one if you have it) */
     if (T && T.bait && Q.have(T.bait)) Q.take(T.bait, 1);
+    /* traps wear out (owner, 27 Nov 2026: "the number of traps I'm using when hunting isn't changing"; chose wear): the
+       trap you set can break, about 1 hunt in 60 for the wooden trap down to 1 in 120 for the sturdiest (one every 7-10
+       minutes of hunting); the count drops live and the log says so */
+    const setTrap = T && T.trap ? T.trap : (Q.fieldTrap && Q.fieldTrap() ? Q.fieldTrap().id : null);
+    if (setTrap && Q.have(setTrap) && Q.chance(Q.trapWear(setTrap))) { Q.take(setTrap, 1);
+      if (!Q.sim.on && !Q.forecasting) Q.log(`Your ${D.ITEMS[setTrap].name.toLowerCase()} broke. ${Q.have(setTrap) ? Q.have(setTrap) + ' left.' : 'That was your last one.'}`, 'warn'); }
     const stopIfOut = () => { const need = Q.huntKitNeed(a.id); if (need && Q.act === a) Q.stopAct(false, `${need} to keep hunting.`); };
     Q.addXp('hunting', Q.huntXp(a.id, caught));
     /* which step decided it: a miss is put down to losing the trail, the trap being dodged or the strike missing */
@@ -141,8 +150,8 @@ UI.huntKitPart = part;
 /* the five tier tabs, shared with Beastmastery's Capture tab (beast_capture.js) */
 UI.huntTierTabs = (cur, action, level) => `<nav class="hunt-tiers btnrow" role="tablist" aria-label="Tiers">${D.HUNT_TIERS.map((t, i) => { const on = i === cur, open = level >= t.lo;
   return `<button type="button" class="btn sm ${on ? 'on' : ''}" role="tab" aria-selected="${on}" data-do="${action}" data-a="${i}">${open ? '' : ico('lock')}${esc(t.name)}<small class="mono">${t.lo}–${t.hi}</small></button>`; }).join('')}</nav>`;
-const kitLine = T => { if (!T || (!T.trap && !T.bait)) return D.ITEMS.wooden_trap ? `<div class="hunt-kit"><span class="k">Kit</span>${part('wooden_trap')}<small class="dim">Optional: a wooden trap helps the strike.</small></div>` : `<p class="hunt-kit dim">No kit needed.</p>`;
-  return `<div class="hunt-kit"><span class="k">${esc(T.name)} kit</span>${part(T.trap)}${part(T.bait)}<small class="dim">Trap is kept; one bait per hunt.</small></div>`; };
+const kitLine = T => { if (!T || (!T.trap && !T.bait)) return D.ITEMS.wooden_trap ? `<div class="hunt-kit"><span class="k">Kit</span>${part('wooden_trap')}<small class="dim">Optional: a trap helps the strike, and wears out now and then.</small></div>` : `<p class="hunt-kit dim">No kit needed.</p>`;
+  return `<div class="hunt-kit"><span class="k">${esc(T.name)} kit</span>${part(T.trap)}${part(T.bait)}<small class="dim">One bait per hunt; a trap breaks about 1 hunt in ${Math.round(1 / Q.trapWear(T.trap))}.</small></div>`; };
 const groundPage = () => {
   if (UI.huntTier === undefined) UI.huntTier = defaultTier();
   const T = D.HUNT_TIERS[UI.huntTier], L = Q.huntLevel();

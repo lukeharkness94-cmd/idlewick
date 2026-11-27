@@ -1,7 +1,7 @@
 /* ===================== Shape rule (owner, 26 Nov 2026) =====================
    One shape for everything you can click; a line only round the menus you navigate with.
-   - Navigation (top-menu entries and the HUD buttons beside them, page tabs, tab rows, rail rows): an 8px rounded
-     rectangle (--r-act) with a 2px outline in --act-line; states change the outline's colour.
+   - Navigation (top-menu entries and the HUD buttons beside them, page tabs, tab rows, rail rows) floats like every
+     control; the page you're on is a warm brass button (--nav-on) with a soft glow.
    - Every other control (buttons, choice cards, item tiles, slots, quest rows, clickable portraits, chips that act, a
      toggle's outer button): the same 8px rectangle with no outline, floating on a raised fill (--act-fill) with a soft
      shadow (--act-lift) that lifts on hover; states change the fill (selected brass, ready green, warning, danger).
@@ -19,11 +19,13 @@
   --info-fill:color-mix(in srgb,var(--mute) 14%,transparent);--pip-off:color-mix(in srgb,var(--mute) 30%,var(--panel));
   --act-fill:color-mix(in srgb,#ffffff 7%,var(--panel));--act-fill-on:color-mix(in srgb,var(--brass) 26%,var(--panel));
   --act-glow:color-mix(in srgb,var(--brass) 80%,transparent);
+  --nav-on:color-mix(in srgb,var(--brass) 46%,var(--panel));--nav-on-hi:color-mix(in srgb,var(--brass) 30%,var(--panel));
   --act-lift:0 1px 2px rgba(0,0,0,.35),0 4px 10px -6px rgba(0,0,0,.65);--act-lift-hi:0 2px 4px rgba(0,0,0,.4),0 9px 18px -8px rgba(0,0,0,.7)}
 :root[data-theme="light"]{--act-line:#b09d7c;--act-line-hi:#8c7650;--act-on:var(--brass);--act-strong:#6f4a1c;
   --info-fill:color-mix(in srgb,var(--mute) 11%,transparent);--pip-off:color-mix(in srgb,var(--mute) 26%,var(--panel));
   --act-fill:color-mix(in srgb,#a07a40 9%,var(--panel));--act-fill-on:color-mix(in srgb,var(--brass) 20%,var(--panel));
   --act-glow:color-mix(in srgb,var(--brass) 70%,transparent);
+  --nav-on:color-mix(in srgb,var(--brass) 42%,var(--panel));--nav-on-hi:color-mix(in srgb,var(--brass) 24%,var(--panel));
   --act-lift:0 1px 2px rgba(80,55,20,.16),0 4px 10px -6px rgba(80,55,20,.42);--act-lift-hi:0 2px 4px rgba(80,55,20,.18),0 9px 18px -8px rgba(80,55,20,.5)}
 
 @layer shape {
@@ -55,13 +57,18 @@
   .ench-pips i{border-color:transparent!important;border-radius:50%!important;transform:none!important;width:9px!important;height:9px!important;background-color:color-mix(in srgb,#9d7ce8 30%,transparent)!important}
   .ench-pips i.on{background-color:#b48cff!important}
 
-  /* ---------- navigation: an 8px rounded rectangle with a 2px outline ----------
-     The menus you move around with keep the outline (owner, 27 Nov 2026: "Unless it's a menu item to navigate"): the
-     top menu and the HUD buttons beside it, page tabs, tab rows inside a page, the skill rail. */
+  /* ---------- navigation floats too (owner, 27 Nov 2026: "get rid of all the borders around the menu items ... They
+     should feel stylised"): the top menu and the HUD buttons, page tabs, tab rows and the skill rail have no outline;
+     a raised fill and soft shadow like every control, lifting on hover; the page you're on is a warm brass button
+     with a soft glow. ---------- */
   :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(img,.site-spot,.tc-room,.hearth-spot,svg *){
-    border-radius:var(--r-act)!important;border-width:var(--act-w)!important;border-style:solid!important;border-color:var(--act-line)!important}
-  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(:disabled,.locked):hover{border-color:var(--act-line-hi)!important}
-  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):is(.on,.selected,.active,.current,.here,[aria-selected=true],[aria-pressed=true],[aria-current=page]){border-color:var(--act-on)!important}
+    border-radius:var(--r-act)!important;border-width:var(--act-w)!important;border-style:solid!important;border-color:transparent!important;
+    outline-color:transparent!important;box-shadow:var(--act-lift)!important}
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(img,.site-spot,.tc-room,.hearth-spot,svg *,.on,.selected,.active,.current,.here,[aria-selected=true],[aria-pressed=true],[aria-current=page]){background-color:var(--act-fill)}
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(:disabled,.locked):hover{box-shadow:var(--act-lift-hi)!important;translate:0 -1px}
+  html.calm :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):hover{translate:none}
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):is(.on,.selected,.active,.current,.here,[aria-selected=true],[aria-pressed=true],[aria-current=page]){
+    background:linear-gradient(180deg,var(--nav-on-hi),var(--nav-on))!important;color:var(--ink)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),var(--act-lift),0 0 18px -6px var(--act-glow)!important}
 
   /* ---------- every other control floats: no outline, a raised fill and a soft shadow ----------
      (owner, 27 Nov 2026: "we can just either make it float on over or have a slight backdrop so its obvious it's
@@ -115,10 +122,9 @@
 
   /* keyboard focus keeps its own ring (keyboard only; a pointer click never shows it) */
   :is(button,[data-do],[role=button],[role=tab],[role=switch],.btn):focus-visible{outline:2px solid var(--brass-hi)!important;outline-offset:2px!important}
-  /* rail rows: the outline is drawn inside the row (an inset ring), so the 180px rail keeps its full width for
+  /* rail rows float like every control; no border, so the 180px rail keeps its full width for
      names like Scholarship beside a badge and the level */
-  #skilldock .dk,#dock .dk{border-width:0!important;box-shadow:inset 0 0 0 var(--act-w) var(--act-line)!important}
-  #skilldock .dk:is(.on,:hover),#dock .dk:is(.on,:hover){box-shadow:inset 0 0 0 var(--act-w) var(--act-on)!important}
+  #skilldock .dk,#dock .dk{border-width:0!important}
 }
 
 /* ===================== No lines around things you can't click (owner, 27 Nov 2026) =====================

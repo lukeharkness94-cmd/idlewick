@@ -3,9 +3,8 @@
    navigate, we can just either make it float on over or have a slight backdrop so its obvious it's clickable").
    Checked on every page, in a fight and in the common pop-ups, in both themes at 1440 x 900. Needs the preview server.
    S1  anything you can click (button, [data-do], [role=button], [role=tab], [role=switch], a[href], text fields) wider
-       than 20px is an 8px rounded rectangle (all four corners). Navigation (NAV below) has a visible outline on all four
-       sides (border, or a 2px inset ring); every other control has no outline and floats: a shadow, or a fill that
-       differs from what it sits on (a disabled control may sit flat)
+       than 20px is an 8px rounded rectangle (all four corners) with no outline that floats: a shadow, or a fill that
+       differs from what it sits on (a disabled control may sit flat). Menus too (owner, 27 Nov 2026)
    S2  anything you can't click draws no line around itself: no border on three or more sides (a one-sided divider or
        accent stripe is not an outline), no border at all on a round thing, no outline and no box-shadow ring; the same
        for its ::before and ::after
@@ -81,12 +80,11 @@ const MODALS = {
             const rad = ['TopLeft', 'TopRight', 'BottomRight', 'BottomLeft'].map(k => cs[`border${k}Radius`]);
             const okR = rad.every(v => v === '8px');
             let okB, why;
-            if (e.matches(NAV)) { okB = sides(cs) === 4 || ring(cs) || outline(cs); why = ' nav without its outline'; }
-            else {
+            { /* navigation floats too (owner, 27 Nov 2026: "get rid of all the borders around the menu items") */
               const lined = sides(cs) > 0 || ring(cs) || outline(cs);
               const bg = c => { for (let a = c; a; a = a.parentElement) { const s = getComputedStyle(a); if (alpha(s.backgroundColor) > 0.05) return s.backgroundColor; } return ''; };
               const floats = cs.boxShadow !== 'none' || (alpha(cs.backgroundColor) > 0.05 && cs.backgroundColor !== bg(e.parentElement)) || cs.backgroundImage !== 'none' || e.disabled;
-              okB = !lined && floats; why = lined ? ' outlined (only navigation is)' : ' does not float (no shadow or fill)';
+              okB = !lined && floats; why = lined ? ' outlined' : ' does not float (no shadow or fill)';
             }
             if (!okR || !okB) r.click.push(sig(e) + ' < ' + where(e) + (okR ? '' : ' radius=' + [...new Set(rad)].join('/')) + (okB ? '' : why));
           }

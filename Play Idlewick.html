@@ -5975,8 +5975,8 @@ html.calm .activity-scene.capture .scene-target{animation:none!important}
 </style>
 <style>/* ===================== Shape rule (owner, 26 Nov 2026) =====================
    One shape for everything you can click; a line only round the menus you navigate with.
-   - Navigation (top-menu entries and the HUD buttons beside them, page tabs, tab rows, rail rows): an 8px rounded
-     rectangle (--r-act) with a 2px outline in --act-line; states change the outline's colour.
+   - Navigation (top-menu entries and the HUD buttons beside them, page tabs, tab rows, rail rows) floats like every
+     control; the page you're on is a warm brass button (--nav-on) with a soft glow.
    - Every other control (buttons, choice cards, item tiles, slots, quest rows, clickable portraits, chips that act, a
      toggle's outer button): the same 8px rectangle with no outline, floating on a raised fill (--act-fill) with a soft
      shadow (--act-lift) that lifts on hover; states change the fill (selected brass, ready green, warning, danger).
@@ -5994,11 +5994,13 @@ html.calm .activity-scene.capture .scene-target{animation:none!important}
   --info-fill:color-mix(in srgb,var(--mute) 14%,transparent);--pip-off:color-mix(in srgb,var(--mute) 30%,var(--panel));
   --act-fill:color-mix(in srgb,#ffffff 7%,var(--panel));--act-fill-on:color-mix(in srgb,var(--brass) 26%,var(--panel));
   --act-glow:color-mix(in srgb,var(--brass) 80%,transparent);
+  --nav-on:color-mix(in srgb,var(--brass) 46%,var(--panel));--nav-on-hi:color-mix(in srgb,var(--brass) 30%,var(--panel));
   --act-lift:0 1px 2px rgba(0,0,0,.35),0 4px 10px -6px rgba(0,0,0,.65);--act-lift-hi:0 2px 4px rgba(0,0,0,.4),0 9px 18px -8px rgba(0,0,0,.7)}
 :root[data-theme="light"]{--act-line:#b09d7c;--act-line-hi:#8c7650;--act-on:var(--brass);--act-strong:#6f4a1c;
   --info-fill:color-mix(in srgb,var(--mute) 11%,transparent);--pip-off:color-mix(in srgb,var(--mute) 26%,var(--panel));
   --act-fill:color-mix(in srgb,#a07a40 9%,var(--panel));--act-fill-on:color-mix(in srgb,var(--brass) 20%,var(--panel));
   --act-glow:color-mix(in srgb,var(--brass) 70%,transparent);
+  --nav-on:color-mix(in srgb,var(--brass) 42%,var(--panel));--nav-on-hi:color-mix(in srgb,var(--brass) 24%,var(--panel));
   --act-lift:0 1px 2px rgba(80,55,20,.16),0 4px 10px -6px rgba(80,55,20,.42);--act-lift-hi:0 2px 4px rgba(80,55,20,.18),0 9px 18px -8px rgba(80,55,20,.5)}
 
 @layer shape {
@@ -6030,13 +6032,18 @@ html.calm .activity-scene.capture .scene-target{animation:none!important}
   .ench-pips i{border-color:transparent!important;border-radius:50%!important;transform:none!important;width:9px!important;height:9px!important;background-color:color-mix(in srgb,#9d7ce8 30%,transparent)!important}
   .ench-pips i.on{background-color:#b48cff!important}
 
-  /* ---------- navigation: an 8px rounded rectangle with a 2px outline ----------
-     The menus you move around with keep the outline (owner, 27 Nov 2026: "Unless it's a menu item to navigate"): the
-     top menu and the HUD buttons beside it, page tabs, tab rows inside a page, the skill rail. */
+  /* ---------- navigation floats too (owner, 27 Nov 2026: "get rid of all the borders around the menu items ... They
+     should feel stylised"): the top menu and the HUD buttons, page tabs, tab rows and the skill rail have no outline;
+     a raised fill and soft shadow like every control, lifting on hover; the page you're on is a warm brass button
+     with a soft glow. ---------- */
   :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(img,.site-spot,.tc-room,.hearth-spot,svg *){
-    border-radius:var(--r-act)!important;border-width:var(--act-w)!important;border-style:solid!important;border-color:var(--act-line)!important}
-  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(:disabled,.locked):hover{border-color:var(--act-line-hi)!important}
-  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):is(.on,.selected,.active,.current,.here,[aria-selected=true],[aria-pressed=true],[aria-current=page]){border-color:var(--act-on)!important}
+    border-radius:var(--r-act)!important;border-width:var(--act-w)!important;border-style:solid!important;border-color:transparent!important;
+    outline-color:transparent!important;box-shadow:var(--act-lift)!important}
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(img,.site-spot,.tc-room,.hearth-spot,svg *,.on,.selected,.active,.current,.here,[aria-selected=true],[aria-pressed=true],[aria-current=page]){background-color:var(--act-fill)}
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(:disabled,.locked):hover{box-shadow:var(--act-lift-hi)!important;translate:0 -1px}
+  html.calm :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):hover{translate:none}
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):is(.on,.selected,.active,.current,.here,[aria-selected=true],[aria-pressed=true],[aria-current=page]){
+    background:linear-gradient(180deg,var(--nav-on-hi),var(--nav-on))!important;color:var(--ink)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),var(--act-lift),0 0 18px -6px var(--act-glow)!important}
 
   /* ---------- every other control floats: no outline, a raised fill and a soft shadow ----------
      (owner, 27 Nov 2026: "we can just either make it float on over or have a slight backdrop so its obvious it's
@@ -6090,10 +6097,9 @@ html.calm .activity-scene.capture .scene-target{animation:none!important}
 
   /* keyboard focus keeps its own ring (keyboard only; a pointer click never shows it) */
   :is(button,[data-do],[role=button],[role=tab],[role=switch],.btn):focus-visible{outline:2px solid var(--brass-hi)!important;outline-offset:2px!important}
-  /* rail rows: the outline is drawn inside the row (an inset ring), so the 180px rail keeps its full width for
+  /* rail rows float like every control; no border, so the 180px rail keeps its full width for
      names like Scholarship beside a badge and the level */
-  #skilldock .dk,#dock .dk{border-width:0!important;box-shadow:inset 0 0 0 var(--act-w) var(--act-line)!important}
-  #skilldock .dk:is(.on,:hover),#dock .dk:is(.on,:hover){box-shadow:inset 0 0 0 var(--act-w) var(--act-on)!important}
+  #skilldock .dk,#dock .dk{border-width:0!important}
 }
 
 /* ===================== No lines around things you can't click (owner, 27 Nov 2026) =====================
@@ -27152,8 +27158,11 @@ D.HUNT_STEPS = [['Tracking', .45, 'paw'], ['Setting the trap', .30, 'pin'], ['St
 const areaOf = id => Object.values(D.AREAS).flat().find(a => a.hunt && a.monsters.some(e => e.id === id)) || null;
 const animal = id => { const m = D.MON[id]; return m && m.hl && areaOf(id) ? m : null; };
 Q.isAnimal = id => !!animal(id);
-/* better field traps help the strike: +4% per trap tier owned and usable (never consumed by a hunt) */
+/* better field traps help the strike: +4% per trap tier owned and usable */
 const trapBonus = () => { const t = Q.fieldTrap ? Q.fieldTrap() : null; return t ? .04 * (D.FIELD_TRAPS.indexOf(t) + 1) : 0; };
+/* hunts take 5-9 s, so about 400-700 an hour: these rates break roughly one trap every 7-10 minutes of hunting
+   (wooden 12 an hour, reinforced 8-9, precision 6, ironjaw cage 4-5, starwoven net 3) */
+Q.trapWear = id => ({ wooden_trap: 1 / 60, reinforced_trap: 1 / 70, precision_trap: 1 / 85, ironjaw_cage: 1 / 100, starwoven_net: 1 / 120 }[id] || 1 / 80) * (Q.buffMult ? Q.buffMult('trapCare') : 1);
 Q.huntCatch = id => { const m = animal(id); if (!m) return 0; const L = Q.huntLevel ? Q.huntLevel() : Q.lvl('hunting');
   return Math.max(.45, Math.min(.92, .6 + .025 * (L - m.hl) + trapBonus())); };
 Q.huntDur = id => { const m = animal(id); if (!m) return 6000;
@@ -27195,6 +27204,12 @@ Q.KIND_EXT.hunt = {
     const caught = Q.chance(Q.huntCatch(a.id)), H = S().hunt = S().hunt || {}, T = tierOf(m);
     /* one bait per hunt, caught or not (a quest's animal can be hunted without, but uses one if you have it) */
     if (T && T.bait && Q.have(T.bait)) Q.take(T.bait, 1);
+    /* traps wear out (owner, 27 Nov 2026: "the number of traps I'm using when hunting isn't changing"; chose wear): the
+       trap you set can break, about 1 hunt in 60 for the wooden trap down to 1 in 120 for the sturdiest (one every 7-10
+       minutes of hunting); the count drops live and the log says so */
+    const setTrap = T && T.trap ? T.trap : (Q.fieldTrap && Q.fieldTrap() ? Q.fieldTrap().id : null);
+    if (setTrap && Q.have(setTrap) && Q.chance(Q.trapWear(setTrap))) { Q.take(setTrap, 1);
+      if (!Q.sim.on && !Q.forecasting) Q.log(`Your ${D.ITEMS[setTrap].name.toLowerCase()} broke. ${Q.have(setTrap) ? Q.have(setTrap) + ' left.' : 'That was your last one.'}`, 'warn'); }
     const stopIfOut = () => { const need = Q.huntKitNeed(a.id); if (need && Q.act === a) Q.stopAct(false, `${need} to keep hunting.`); };
     Q.addXp('hunting', Q.huntXp(a.id, caught));
     /* which step decided it: a miss is put down to losing the trail, the trap being dodged or the strike missing */
@@ -27277,8 +27292,8 @@ UI.huntKitPart = part;
 /* the five tier tabs, shared with Beastmastery's Capture tab (beast_capture.js) */
 UI.huntTierTabs = (cur, action, level) => `<nav class="hunt-tiers btnrow" role="tablist" aria-label="Tiers">${D.HUNT_TIERS.map((t, i) => { const on = i === cur, open = level >= t.lo;
   return `<button type="button" class="btn sm ${on ? 'on' : ''}" role="tab" aria-selected="${on}" data-do="${action}" data-a="${i}">${open ? '' : ico('lock')}${esc(t.name)}<small class="mono">${t.lo}–${t.hi}</small></button>`; }).join('')}</nav>`;
-const kitLine = T => { if (!T || (!T.trap && !T.bait)) return D.ITEMS.wooden_trap ? `<div class="hunt-kit"><span class="k">Kit</span>${part('wooden_trap')}<small class="dim">Optional: a wooden trap helps the strike.</small></div>` : `<p class="hunt-kit dim">No kit needed.</p>`;
-  return `<div class="hunt-kit"><span class="k">${esc(T.name)} kit</span>${part(T.trap)}${part(T.bait)}<small class="dim">Trap is kept; one bait per hunt.</small></div>`; };
+const kitLine = T => { if (!T || (!T.trap && !T.bait)) return D.ITEMS.wooden_trap ? `<div class="hunt-kit"><span class="k">Kit</span>${part('wooden_trap')}<small class="dim">Optional: a trap helps the strike, and wears out now and then.</small></div>` : `<p class="hunt-kit dim">No kit needed.</p>`;
+  return `<div class="hunt-kit"><span class="k">${esc(T.name)} kit</span>${part(T.trap)}${part(T.bait)}<small class="dim">One bait per hunt; a trap breaks about 1 hunt in ${Math.round(1 / Q.trapWear(T.trap))}.</small></div>`; };
 const groundPage = () => {
   if (UI.huntTier === undefined) UI.huntTier = defaultTier();
   const T = D.HUNT_TIERS[UI.huntTier], L = Q.huntLevel();

@@ -288,3 +288,9 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 27 Nov 2026 (owner): "smoother and higher FPS animations, more logical flow". Added to the motion rule: continuous
   script animation runs on the one clock `DQ.frame` (no per-module rAF loops, nothing while hidden, no catch-up), no
   whole-page searches per frame, and page changes turn the main view with a short View Transition.
+- 27 Nov 2026 (owner): "get rid of all the borders around the menu items - make them the old style buttons. I HATE lines
+  like this around menus or buttons if not necesary. They should feel stylised." Replaces "only navigation keeps a 2px
+  outline": menus float like every control; the current page is a brass button.
+- 27 Nov 2026 (owner): "the number of traps I'm using when hunting isn't changing", then chose "Wear out". Replaces
+  "that tier's trap kept in the pack": a hunt's trap breaks 1 hunt in 60 to 1 in 120 (about one every 7-10 minutes of hunting; the "1 in 8" first
+  offered would have broken ~75 traps an hour, as hunts take 5-9 s).

@@ -79,9 +79,14 @@ const { chromium } = require('playwright'), assert = require('node:assert/strict
     /* 12. kit: an Intermediate animal needs the reinforced trap and scent bait; a hunt uses one bait; out of bait stops */
     const r12 = await p.evaluate(() => { const S = DQ.S; S.towns.ironpeak = { visited: true, boss: false }; S.xp.hunting = DQ.data.XPF[30]; delete S.inv.reinforced_trap; delete S.inv.scent_bait;
       const noTrap = DQ.KIND_EXT.hunt.check('mountain_goat'); S.inv.reinforced_trap = 1; const noBait = DQ.KIND_EXT.hunt.check('mountain_goat'); S.inv.scent_bait = 2;
-      const ok = DQ.startAct('hunt', 'mountain_goat'); const rnd = Math.random; Math.random = () => .01; DQ.KIND_EXT.hunt.done(DQ.act); const left = S.inv.scent_bait; DQ.KIND_EXT.hunt.done(DQ.act); Math.random = rnd;
-      return { noTrap, noBait, ok, left, trap: S.inv.reinforced_trap, stopped: !DQ.act }; });
-    assert.match(r12.noTrap, /Reinforced field trap/); assert.match(r12.noBait, /Scent bait/); assert.equal(r12.ok, true); assert.equal(r12.left, 1); assert.equal(r12.trap, 1, 'the trap is kept'); assert.equal(r12.stopped, true, 'stops when the bait runs out');
+      /* a roll of .5 catches the goat (about 70%) and spares the trap (it breaks 1 hunt in 70) */
+      const ok = DQ.startAct('hunt', 'mountain_goat'); const rnd = Math.random; Math.random = () => .5; DQ.KIND_EXT.hunt.done(DQ.act); const left = S.inv.scent_bait; DQ.KIND_EXT.hunt.done(DQ.act);
+      const trap = S.inv.reinforced_trap, stopped = !DQ.act;
+      /* traps wear out (owner, 27 Nov 2026): an unlucky roll breaks the last trap and the hunt stops for want of one */
+      S.inv.scent_bait = 5; DQ.startAct('hunt', 'mountain_goat'); Math.random = () => .01; DQ.KIND_EXT.hunt.done(DQ.act); Math.random = rnd;
+      return { noTrap, noBait, ok, left, trap, stopped, broke: S.inv.reinforced_trap || 0, stoppedNoTrap: !DQ.act }; });
+    assert.match(r12.noTrap, /Reinforced field trap/); assert.match(r12.noBait, /Scent bait/); assert.equal(r12.ok, true); assert.equal(r12.left, 1); assert.equal(r12.trap, 1, 'a lucky trap survives'); assert.equal(r12.stopped, true, 'stops when the bait runs out');
+    assert.equal(r12.broke, 0, 'a trap can break'); assert.equal(r12.stoppedNoTrap, true, 'stops when the last trap breaks');
     /* 13. the progress strip: the running hunt shows its step, and a result marks the failed step */
     const r13 = await p.evaluate(() => new Promise(res => { DQ.paused = true; DQ.ui.huntGroundAt = 'willowbrook'; DQ.ui.huntTier = 0; DQ.startAct('hunt', 'chicken'); DQ.ui.taskChoice.hunting = 'chicken'; DQ.ui.render(false); DQ.emit('ui');
       const live = !!document.querySelector('#view .hunt-track'); DQ.emit('huntresult', { id: 'chicken', c: 0, f: 1 }, DQ.data.MON.chicken);
