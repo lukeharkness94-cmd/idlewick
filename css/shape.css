@@ -66,6 +66,9 @@
   :is(button,[data-do],[role=button]):is(.warn,.short,.low){border-color:color-mix(in srgb,var(--warn) 75%,var(--act-line))!important}
   :is(button,[data-do],.btn).danger{border-color:color-mix(in srgb,var(--bad) 70%,var(--act-line))!important}
   :is(button,[data-do],.btn):is(.on,.selected).danger{border-color:var(--bad)!important}
+  /* a control you can't use right now: same shape, faded outline (27 Nov 2026 audit: a disabled Queue beside a
+     disabled primary looked usable) */
+  :is(button,.btn):disabled:not(.primary,.task-primary,.illustrated-card,.locked){border-color:color-mix(in srgb,var(--act-line) 40%,transparent)!important;opacity:.55}
 
   /* text-only controls become small outlined buttons instead of underlined words */
   button:is(.linkish,.tog,.sk-goal,.sh-next-btn,.now-go,.now-plan,.gi,.ss-weapon,.cw-mon-art,.voy-item){padding-inline:8px!important}

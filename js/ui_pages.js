@@ -181,7 +181,7 @@ UI.V.quests = () => {
   }).join(''):'';
   const done=D.QUESTS.filter(groups.done).length;
   const sections=[['Main story',list.filter(q=>q.main)],['Side stories',list.filter(q=>!q.main)]].filter(([,qs])=>qs.length).map(([label,qs])=>`<h3 class="journal-section">${label} <small>${qs.length}</small></h3>${qs.map(rowOf).join('')}`).join('');
-  return `<section class="panel shophead journal-header"><div><span class="k">Quest journal</span><h2>Your stories</h2><small>${done} stories completed</small></div><nav class="tabs" aria-label="Quest status">${Object.entries(names).map(([k,n])=>`<button class="tab ${tab===k?'on':''}" data-do="qtab" data-a="${k}" aria-pressed="${tab===k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</nav></section>${list.length?`<div class="qlayout quest-journal-layout"><nav class="qlist" aria-label="${names[tab]} quests">${sections}</nav><div class="qdetail">${cards}</div></div>`:`<section class="panel journal-empty"><h2>${{active:'No stories underway',available:'No new requests here',upcoming:'No upcoming requests',done:'Your story is just beginning'}[tab]}</h2><p>${{active:'Choose an available story and someone to help.',available:'Check Upcoming to see what opens the next story.',upcoming:'Explore the realm and meet its people.',done:'Completed stories and their acknowledgements will stay here.'}[tab]}</p><button class="btn" data-do="qtab" data-a="${tab==='available'?'upcoming':'available'}">${tab==='available'?'See upcoming stories':'Browse available stories'}</button></section>`}`;
+  return `<section class="panel shophead journal-header"><div><span class="k">Quest journal</span><h2>Your stories</h2><small>${done} ${done === 1 ? 'story' : 'stories'} completed</small></div><nav class="tabs" aria-label="Quest status">${Object.entries(names).map(([k,n])=>`<button class="tab ${tab===k?'on':''}" data-do="qtab" data-a="${k}" aria-pressed="${tab===k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</nav></section>${list.length?`<div class="qlayout quest-journal-layout"><nav class="qlist" aria-label="${names[tab]} quests">${sections}</nav><div class="qdetail">${cards}</div></div>`:`<section class="panel journal-empty"><h2>${{active:'No stories underway',available:'No new requests here',upcoming:'No upcoming requests',done:'Your story is just beginning'}[tab]}</h2><p>${{active:'Choose an available story and someone to help.',available:'Check Upcoming to see what opens the next story.',upcoming:'Explore the realm and meet its people.',done:'Completed stories and their acknowledgements will stay here.'}[tab]}</p><button class="btn" data-do="qtab" data-a="${tab==='available'?'upcoming':'available'}">${tab==='available'?'See upcoming stories':'Browse available stories'}</button></section>`}`;
 };
 
 /* ---------- Character ---------- */
@@ -300,7 +300,7 @@ const DO = {
     const q = D.QM[a]; if (!q || DQ.questState(q) !== 'new') return;
     DQ.startQuest(a);
     if (DQ.questState(q) !== 'active' && DQ.questState(q) !== 'ready') { UI.render(false); return; }
-    if (DQ.toast) DQ.toast(`Accepted: ${q.name}. It is now under Active.`);
+    if (DQ.toast) DQ.toast(`Accepted: ${q.name}. It is now under Current.`);
     if (!D.QUESTS.some(q => DQ.questState(q) === 'new')) {
       UI.questTab = 'active'; UI.tab.questSelected = a;
       if (UI.view !== 'quests') return DQ.go('quests');
@@ -334,7 +334,7 @@ const DO = {
   },
   mapsel: a => { UI.mapSel = a; DQ.sfx('tab'); UI.render(false); },
   travel: a => UI.travelAnim(a),
-  shopselect: a => { UI.shopSelected[UI.shopTab] = a; UI.render(false); if (innerWidth <= 860) document.querySelector('.shop-task')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); },
+  shopselect: a => { UI.shopPinned = null; UI.shopSelected[UI.shopTab] = a; UI.render(false); if (innerWidth <= 860) document.querySelector('.shop-task')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); },
   rareselect: a => { UI.tab.rareChoice = a; UI.render(false); if (innerWidth <= 860) document.querySelector('.shop-task')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); },
   shoptab: a => { UI.shopTab = a; UI.render(false); }, shopqty: a => { UI.shopQty = +a; UI.render(false); },
   buy: (id, quantity) => {

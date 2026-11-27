@@ -104,7 +104,7 @@
         : `<button class="ab-tile empty" data-do="combatmore" data-a="abilities" aria-label="Choose ability for slot ${i+1}">${ico('star')}<b>Empty</b><small>${spare.length ? 'Choose an ability' : 'Slot ' + (i + 1)}</small></button>`; }).join('');
     const nextSlot = slots < 3 ? `<small class="ab-future-slot">Slot 3 · Combat 40</small>` : slots < 4 ? `<small class="ab-future-slot">Slot 4 · Combat 70</small>` : '';
     const nxt = next ? (() => { const need = D.XPF[next.lvl] || 1, have = S().xp[next.skill] || 0; return `<div class="ab-next"><span>${ready.length ? 'Next' : 'First ability'}: <b>${esc(next.name)}</b> at ${esc(D.SK[next.skill].name)} ${next.lvl}</span><span class="bar"><i style="width:${Math.min(100, Math.round(have / need * 100))}%"></i></span></div>`; })() : '';
-    return `<section class="panel combat-abils"><div class="kit-head"><span class="k">Abilities <b class="mono">${on.length}/${slots}</b></span><button class="linkish" data-do="combatmore" data-a="abilities">Manage</button></div>
+    return `<section class="panel combat-abils"><div class="kit-head"><span class="k"${slots < 4 ? ` data-tip="text:Slot ${slots + 1} opens at Combat ${slots < 3 ? 40 : 70}"` : ''}>Abilities <b class="mono">${on.length}/${slots}</b></span><button class="linkish" data-do="combatmore" data-a="abilities">Manage</button></div>
       <div class="ab-slots">${slotHtml}</div>${nextSlot}${ready.length ? '' : nxt}</section>`;
   };
   const foodPanel = () => {

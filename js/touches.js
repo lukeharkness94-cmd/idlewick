@@ -22,14 +22,9 @@ const weatherHtml = town => {
   return `<span class="weather w-${w}" aria-hidden="true">${Array.from({ length: n }, (_, i) => { const r = hash(town + i), r2 = hash(i + town + 'b'); return `<i style="--x:${Math.round(r * 100)}%;--d:${(2 + r2 * 4).toFixed(2)}s;--t:-${(r * 6).toFixed(2)}s;--s:${(.6 + r2 * .8).toFixed(2)}"></i>`; }).join('')}</span>`;
 };
 
-/* ---------- 1. villagers return to restored places ---------- */
-const TOWNSFOLK = { willowbrook: ['villager', 'farmer'], mossbarrow: ['farmhand', 'villager'], saltmere: ['dockhand', 'merchant'], ironpeak: ['dwarf', 'dockhand'], gloomfen: ['witch', 'villager'], emberfall: ['fireguard', 'dwarf'], skyreach: ['monk', 'villager'], hollow: ['monk', 'fireguard'] };
-const villagersHtml = town => {
-  /* people come back when a town is restored, or when the threat over it is gone */
-  const restored = Object.entries(D.PROJECTS || {}).filter(([id, p]) => p.town === town && S().projects[id]).length + (S().towns[town] && S().towns[town].boss ? 1 : 0); if (!restored) return '';
-  const folk = (TOWNSFOLK[town] || ['villager']).slice(0, Math.min(2, restored)).filter(id => DQ.pixelArt && DQ.pixelArt.hasCreature(id));
-  return folk.map((id, i) => `<span class="scene-folk f${i}" aria-hidden="true">${DQ.artImage('creature', id, 96, '', '')}</span>`).join('');
-};
+/* ---------- 1. (retired 27 Nov 2026) villagers used to stand in the activity scenes once a town was restored; the owner's
+   rule is that activity backdrops have no bystanders, and townsfolk now walk the Home and Village scenes instead
+   (js/town_walkers.js) ---------- */
 
 /* ---------- 5. your companion keeps you company (work scenes show your tool, never your weapon) ---------- */
 const petHtml = () => { const p = S().pets.active && D.PET[S().pets.active]; return p ? `<span class="scene-pet ${['fish', 'ghost', 'bird'].includes(p.spr) ? 'floats' : ''}" aria-hidden="true">${DQ.petSprite(p, 64)}</span>` : ''; };
@@ -42,7 +37,7 @@ UI.render = fresh => {
   render0(fresh);
   const town = S().town, scene = document.querySelector('.activity-scene');
   if (scene && !scene.querySelector('.weather')) {
-    scene.insertAdjacentHTML('beforeend', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town) + (scene.classList.contains('fish') ? '' : villagersHtml(town)) + (scene.querySelector('.scene-worker') ? petHtml() : ''));
+    scene.insertAdjacentHTML('beforeend', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town) + (scene.querySelector('.scene-worker') ? petHtml() : ''));
   }
   const arena = document.querySelector('.encounter-arena');
   if (arena && !arena.querySelector('.weather')) arena.insertAdjacentHTML('afterbegin', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town));

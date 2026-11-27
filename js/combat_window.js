@@ -147,3 +147,7 @@ setTimeout(wrapUpdate, 0);
 DQ.on('act', () => { if (UI.view === 'combat') setTimeout(() => { try { shape(); } catch (e) {} }, 0); });
 DQ.on('encounter', () => { if (UI.view === 'combat') setTimeout(() => { try { shape(); } catch (e) {} }, 0); });
 })();
+/* starting a fight from a pop-up (the Boss card's Challenge, a field guide's Fight it) closes the pop-up first, so the
+   fight itself is what you see (27 Nov 2026 audit: the boss, its special and the victory all played behind it) */
+(() => { const UI = DQ.ui, act0 = UI.DO.act; if (!act0 || act0._closesModal) return;
+  UI.DO.act = (k, ...r) => { if (k === 'fight' && document.querySelector('.modal')) DQ.closeModal(); return act0(k, ...r); }; UI.DO.act._closesModal = true; })();

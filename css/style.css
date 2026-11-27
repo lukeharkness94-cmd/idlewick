@@ -2397,6 +2397,9 @@ body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
   .sidebar{gap:6px!important}
   .now{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:'go stop' 'bar bar' 'plan plan';gap:4px 6px;padding:7px 8px}
   .now .now-k{display:none}
+  /* ...except when something is queued: "then Oak planks" has nowhere else to go (27 Nov 2026 audit) */
+  .now:has(.now-next){grid-template-areas:'k k' 'go stop' 'bar bar' 'plan plan'}
+  .now .now-k:has(.now-next){display:block;grid-area:k}
   .now .now-go{grid-area:go}
   .now .bar.prog{grid-area:bar;height:5px}
   .now .now-f{display:contents}
@@ -3187,7 +3190,7 @@ button.rl-i:hover{border-color:var(--brass-hi)}
 @keyframes noticeRise{from{opacity:0;transform:translateY(36px) scale(.985)}to{opacity:1;transform:none}}@keyframes noticeLeave{to{opacity:0;transform:translateY(16px)}}
 @media(max-width:860px){#notes{bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}}
 .calm #notes .note{animation:none!important}@media(prefers-reduced-motion:reduce){#notes .note{animation:none!important}}
-.foe-death-ghost{position:fixed;z-index:290;pointer-events:none;display:grid;place-items:center}.foe-death-ghost img{max-width:100%;max-height:100%}.defeat-caption{position:fixed;transform:translateX(-50%);z-index:295;color:#fff0bc;background:#10242deb;border:1px solid #b89c57;border-radius:20px;padding:6px 15px;font-weight:700;pointer-events:none;white-space:nowrap}
+.foe-death-ghost{position:absolute;z-index:2;pointer-events:none;image-rendering:pixelated}.defeat-caption{position:fixed;transform:translateX(-50%);z-index:295;color:#fff0bc;background:#10242deb;border:1px solid #b89c57;border-radius:20px;padding:6px 15px;font-weight:700;pointer-events:none;white-space:nowrap}
 .tech-family{min-width:0;border:1px solid var(--line2);border-radius:10px;background:var(--panel2)}.tech-ranks{display:flex;gap:5px;flex-wrap:wrap;padding:8px}.tech-family>.tech{border:0!important;box-shadow:none!important;background:transparent!important}.route-travel{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 12px;border:1px solid var(--brass);border-radius:8px;flex:none!important}.requirement-route{cursor:pointer}.requirement-route:hover,.requirement-route:focus-visible{outline:2px solid var(--brass);outline-offset:2px}.qrow.ready{border-color:var(--good)!important;box-shadow:inset 4px 0 var(--good)}.qrow.ready .state{color:var(--good);font-weight:700}.qrow.done .state{color:var(--good)}
 .farm-estate{display:flex;flex-direction:column;gap:10px;min-height:0;flex:1;height:100%}.estate-controls{padding:10px 14px;flex:none}.estate-controls .phead{margin-bottom:6px}.estate-controls p{margin:4px 0}.estate-actions{display:flex;gap:8px;flex-wrap:wrap}.estate-actions .farm-actions{margin:0;gap:6px}.estate-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px;flex:1;min-height:0}.estate-land{position:relative;overflow:hidden;padding:10px;display:flex;flex-direction:column;min-height:0;background:#5a7948}.estate-scenery{height:32%;min-height:100px;background-size:cover;background-position:center top;image-rendering:pixelated;border-radius:8px}.estate-zones{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;min-height:0;margin-top:10px}.estate-zones h3{display:flex;align-items:center;justify-content:space-between;color:#fff2d6;margin:0 0 8px}.estate-fields,.estate-pasture{display:flex;flex-direction:column;min-height:0;padding:10px;border-radius:6px}.estate-fields{background:repeating-linear-gradient(0deg,#735034 0 9px,#825c3f 9px 12px);border:3px solid #a0804d}.estate-pasture{background:#749c53;border:5px double #e4c58a}.estate-fields>.plots{grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-rows:minmax(0,1fr);gap:6px;flex:1;min-height:0}.estate-fields .plot{padding:5px!important;min-height:0!important;background:#523f2d;color:#fff0d1;border:1px solid #b79561}.estate-fields .plot .pspr{height:48px}.estate-fields .plot .pspr img{max-height:48px;max-width:48px}.estate-fields .plot b{font-size:14px}.estate-pasture>.pens{display:grid;grid-template-columns:1fr 1fr!important;grid-auto-rows:minmax(0,1fr);gap:8px;flex:1;min-height:0}.estate-pasture .pen{display:flex;flex-direction:column;gap:3px;padding:5px!important;min-height:0!important;background:#3f6439;color:#fff1ce;border:3px double #ddc38c}.estate-pasture .pen>.pspr{width:48px;height:48px}.estate-pasture .pen>.pspr img{max-width:48px;max-height:48px}.estate-pasture .pen .pen-t small:first-of-type{display:none}.estate-pasture .pen .pen-sell{font-size:13px;padding:2px 6px}.estate-pasture .pen .pen-t b{font-size:14px}.estate-supplies{padding:12px;min-height:0;display:flex;flex-direction:column;gap:8px}.estate-supplies .seed-choices{display:grid;grid-template-columns:1fr;gap:5px}.estate-supplies .seed-choice{padding:4px 8px}.estate-supplies .seed-choice img{max-width:32px;max-height:32px}.estate-supplies #livestock-market{padding:0}.estate-supplies .srows{gap:4px}.estate-supplies .srow{padding:6px;gap:5px}.estate-supplies .mini img{max-width:32px;max-height:32px}.estate-pages{display:inline-flex;gap:4px}.estate-pages .btn{padding:3px 8px}.farm-estate [hidden]{display:none!important}
 @media(min-width:861px){html.short .estate-scenery{height:21%;min-height:65px}html.short .estate-fields .plot .pspr{height:32px}html.short .estate-pasture .pen>.pspr{height:32px;width:32px}html.short .estate-pasture .pen>.pspr img{max-height:32px;max-width:32px}html.short .estate-supplies{gap:5px;padding:8px}html.short .estate-supplies .seed-choice{padding:2px 6px}html.short .estate-controls .phead{margin:0}}
@@ -3540,7 +3543,8 @@ html.short .bp-art{width:56px;height:56px}
 /* the queue shows in the Now card: "Now · then Oak planks +1" (no extra line) */
 .now .now-k{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 .now .now-next{font-style:normal;color:var(--brass,#d8a64a)}
-.now.here .now-k i+.now-next{display:none}
+/* with a queue, "then …" wins the line over "on this page" (27 Nov 2026 audit: the queue was never visible) */
+.now.here .now-k i:has(+.now-next){display:none}
 .queue-rules{margin:6px 0 10px}
 
 /* ---------- Eggs, the hatchery and the collection log ---------- */
@@ -3833,7 +3837,9 @@ html.short #view .trophy-wall .trophy{padding:6px 4px;gap:2px}
 /* Skill goals (js/skill_perks.js): the next unlock and the flourish chance, quietly under the action */
 .sk-goal{display:flex;gap:6px;align-items:baseline;margin:2px 0;font-size:14px;min-width:0}
 .sk-goal>span{color:var(--mute);white-space:nowrap}
-.sk-goal>b{color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sk-goal>b{color:var(--ink);font-weight:600;white-space:normal;min-width:0}
+/* the next perk wraps inside its panel instead of running past the edge (27 Nov 2026 audit) */
+button.sk-goal{max-width:100%;text-align:start}
 .flo-chance,.sh-flo{color:var(--brass);white-space:nowrap}
 .sh-next{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:14px;margin-top:4px}
 .sh-next .sh-next-k{color:var(--mute)}

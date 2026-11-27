@@ -41,7 +41,8 @@ D.TOWER_FLOORS = 5;
 const HP = [1.6, 1.9, 2.2, 2.5], MAX = [1.05, 1.1, 1.15, 1.2];
 for (const [town, T] of Object.entries(D.TOWERS)) {
   if (!D.TOWN[town]) { delete D.TOWERS[town]; continue; }
-  const local = D.MONLIST.filter(m => m.town === town && !m.boss && !m.mini).sort((a, b) => a.cl - b.cl).slice(-4), boss = D.MON[D.TOWN[town].boss];
+  /* floors are the town's own fighting creatures, never hunting-ground animals (27 Nov 2026 audit: Mossbarrow floor 1 was a Lv 107 bear) */
+  const local = D.MONLIST.filter(m => m.town === town && !m.boss && !m.mini && !m.hl && !m.huntKind && !(DQ.isAnimal && DQ.isAnimal(m.id))).sort((a, b) => a.cl - b.cl).slice(-4), boss = D.MON[D.TOWN[town].boss];
   T.town = town; T.floors = []; T.rec = Math.min(110, boss.boss.req + (T.up == null ? 8 : T.up)); /* tuned on node scripts/sim-bosses.cjs with TOWERS=1 */
   const add = (id, name, floor, base, hp, max, k, col, extra) => { const m = { id, name, town, cl: base.cl + floor * 2, hp: Math.round(base.hp * hp), max: Math.max(1, Math.round(base.max * max)), att: Math.round(base.att * k), def: Math.round(base.def * k), coins: [base.coins[0] * 3, base.coins[1] * 4], col, drops: extra.drops || [], tower: { town, floor }, mini: Object.assign({ short: name, req: 0 }, extra.mini || {}) }; D.MON[id] = m; D.MONLIST.push(m); T.floors.push(id); return m; };
   local.forEach((b, i) => add(`tw_${town}_${i + 1}`, `${b.name} of the tower`, i + 1, b, HP[i], MAX[i], 1.08 + i * .03, b.col, { art: b.id, mini: { won: `Floor ${i + 1} of ${T.name} is clear.` }, drops: [['coin_pouch', [1, 2], .5], ['treasure_chest', [1, 1], .06 + i * .02]] }).base = b.id);

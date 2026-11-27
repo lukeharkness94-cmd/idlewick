@@ -105,12 +105,14 @@ html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,ht
 .skill-cooking .work-atmosphere i { width:5px; height:13px; background:#e8e3c8; animation:steam-rise 2s ease-in-out infinite; }
 .skill-crafting .work-atmosphere i,.alch .work-atmosphere i { background:#dac0ec; animation:magic-motes 2.4s ease-in-out infinite; }
 .thieve .work-atmosphere { display:none; }
-@keyframes worker-effort { 0%,70%,100%{transform:rotate(0)} 20%{transform:rotate(-3deg) translateY(-2px)} 42%{transform:rotate(5deg) translateX(2px)} }
+/* the hero's body only moves in whole steps of position, never rotates: a few degrees of rotation smeared its pixels
+   (27 Nov 2026 audit); the tool still swings */
+@keyframes worker-effort { 0%,70%,100%{transform:translate(0,0)} 20%{transform:translate(-1px,-3px)} 42%{transform:translate(3px,0)} }
 @keyframes tool-strike { 0%,75%,100%{transform:rotate(-20deg)} 22%{transform:rotate(-70deg) translate(-3px,-6px)} 42%{transform:rotate(32deg) translate(6px,5px)} 55%{transform:rotate(18deg)} }
-@keyframes worker-fish { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-3deg)} 48%{transform:rotate(3deg)} 75%{transform:rotate(1deg)} }
+@keyframes worker-fish { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-2px,0)} 48%{transform:translate(2px,-1px)} 75%{transform:translate(1px,0)} }
 @keyframes rod-cast { 0%,100%{transform:rotate(0)} 24%{transform:rotate(-32deg)} 42%{transform:rotate(16deg)} 75%{transform:rotate(8deg)} }
 @keyframes fish-swim { 0%,100%{transform:translate(0,0) rotate(0)} 35%{transform:translate(5px,2px) rotate(2deg)} 65%{transform:translate(-4px,-2px) rotate(-2deg)} }
-@keyframes worker-sneak { 0%,100%{transform:translateX(0) rotate(-2deg)} 45%,65%{transform:translateX(6px) rotate(4deg)} }
+@keyframes worker-sneak { 0%,100%{transform:translate(0,1px)} 45%,65%{transform:translate(6px,-1px)} }
 @keyframes hand-reach { 0%,100%{transform:translateX(0) rotate(-10deg)} 45%,60%{transform:translate(18px,-3px) rotate(12deg)} }
 @keyframes stir-pot { 0%,100%{transform:translate(0,0) rotate(-12deg)} 30%{transform:translate(7px,2px) rotate(8deg)} 65%{transform:translate(3px,-4px) rotate(18deg)} }
 @keyframes craft-turn { 0%,100%{transform:rotate(-12deg)} 35%{transform:rotate(15deg) translate(4px,-2px)} 65%{transform:rotate(4deg) translate(2px,2px)} }
@@ -148,7 +150,7 @@ html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,ht
 .battle-bone > img { display:block; width:100%; height:100%; max-width:none; image-rendering:pixelated; object-fit:fill; pointer-events:none; }
 .rig-cape { transform:rotate(0); }
 .rig-head { transform:rotate(2deg); }
-.rig-torso { transform:rotate(-2deg); }
+.rig-torso { transform:none; } /* the whole hero sprite: upright at rest, square pixels (27 Nov 2026 audit) */
 .rig-leg-left { transform:rotate(4deg); }
 .rig-leg-right { transform:rotate(-4deg); }
 .rig-arm-left { transform:rotate(12deg); }

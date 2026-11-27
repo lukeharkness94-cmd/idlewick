@@ -8,8 +8,12 @@ function fireflies(cv) {
   const cx = cv.getContext('2d'); let w, h; const fit = () => { w = cv.width = innerWidth; h = cv.height = innerHeight; }; fit(); addEventListener('resize', fit);
   const fl = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), r: .6 + Math.random() * 1.8, p: Math.random() * 6, s: .02 + Math.random() * .05 }));
   let lastFrame=performance.now();
+  /* reduced motion: one still frame of fireflies, no drifting (27 Nov 2026 audit: the loop ignored the setting) */
+  const still = () => (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) || (DQ.S && DQ.S.settings && DQ.S.settings.reduceFx);
+  let drawnStill = false;
   const loop = t => {
     if (!cv.isConnected) return;
+    if (still()) { if (drawnStill) { requestAnimationFrame(loop); return; } drawnStill = true; t = 0; } else drawnStill = false;
     const frames=Math.max(0,Math.min(3,(t-lastFrame)/(1000/60)));lastFrame=t; cx.clearRect(0, 0, w, h);
     for (const f of fl) { f.x += Math.sin(t / 2400 + f.p) * .0004 * frames; f.y -= f.s * .0006 * frames; if (f.y < -.02) { f.y = 1.02; f.x = Math.random(); } const a = .35 + .65 * Math.abs(Math.sin(t / 900 + f.p)); cx.fillStyle = `rgba(${tint},${a * .85})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r, 0, 6.3); cx.fill(); cx.fillStyle = `rgba(${tint},${a * .12})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r * 6, 0, 6.3); cx.fill(); }
     requestAnimationFrame(loop);

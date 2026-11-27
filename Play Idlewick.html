@@ -2481,6 +2481,9 @@ body,#view p,#view li,small,.sm,.hint,.dim,#tip,.m-body{font-weight:500}
   .sidebar{gap:6px!important}
   .now{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:'go stop' 'bar bar' 'plan plan';gap:4px 6px;padding:7px 8px}
   .now .now-k{display:none}
+  /* ...except when something is queued: "then Oak planks" has nowhere else to go (27 Nov 2026 audit) */
+  .now:has(.now-next){grid-template-areas:'k k' 'go stop' 'bar bar' 'plan plan'}
+  .now .now-k:has(.now-next){display:block;grid-area:k}
   .now .now-go{grid-area:go}
   .now .bar.prog{grid-area:bar;height:5px}
   .now .now-f{display:contents}
@@ -3271,7 +3274,7 @@ button.rl-i:hover{border-color:var(--brass-hi)}
 @keyframes noticeRise{from{opacity:0;transform:translateY(36px) scale(.985)}to{opacity:1;transform:none}}@keyframes noticeLeave{to{opacity:0;transform:translateY(16px)}}
 @media(max-width:860px){#notes{bottom:calc(82px + env(safe-area-inset-bottom,0px))!important}}
 .calm #notes .note{animation:none!important}@media(prefers-reduced-motion:reduce){#notes .note{animation:none!important}}
-.foe-death-ghost{position:fixed;z-index:290;pointer-events:none;display:grid;place-items:center}.foe-death-ghost img{max-width:100%;max-height:100%}.defeat-caption{position:fixed;transform:translateX(-50%);z-index:295;color:#fff0bc;background:#10242deb;border:1px solid #b89c57;border-radius:20px;padding:6px 15px;font-weight:700;pointer-events:none;white-space:nowrap}
+.foe-death-ghost{position:absolute;z-index:2;pointer-events:none;image-rendering:pixelated}.defeat-caption{position:fixed;transform:translateX(-50%);z-index:295;color:#fff0bc;background:#10242deb;border:1px solid #b89c57;border-radius:20px;padding:6px 15px;font-weight:700;pointer-events:none;white-space:nowrap}
 .tech-family{min-width:0;border:1px solid var(--line2);border-radius:10px;background:var(--panel2)}.tech-ranks{display:flex;gap:5px;flex-wrap:wrap;padding:8px}.tech-family>.tech{border:0!important;box-shadow:none!important;background:transparent!important}.route-travel{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 12px;border:1px solid var(--brass);border-radius:8px;flex:none!important}.requirement-route{cursor:pointer}.requirement-route:hover,.requirement-route:focus-visible{outline:2px solid var(--brass);outline-offset:2px}.qrow.ready{border-color:var(--good)!important;box-shadow:inset 4px 0 var(--good)}.qrow.ready .state{color:var(--good);font-weight:700}.qrow.done .state{color:var(--good)}
 .farm-estate{display:flex;flex-direction:column;gap:10px;min-height:0;flex:1;height:100%}.estate-controls{padding:10px 14px;flex:none}.estate-controls .phead{margin-bottom:6px}.estate-controls p{margin:4px 0}.estate-actions{display:flex;gap:8px;flex-wrap:wrap}.estate-actions .farm-actions{margin:0;gap:6px}.estate-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px;flex:1;min-height:0}.estate-land{position:relative;overflow:hidden;padding:10px;display:flex;flex-direction:column;min-height:0;background:#5a7948}.estate-scenery{height:32%;min-height:100px;background-size:cover;background-position:center top;image-rendering:pixelated;border-radius:8px}.estate-zones{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;min-height:0;margin-top:10px}.estate-zones h3{display:flex;align-items:center;justify-content:space-between;color:#fff2d6;margin:0 0 8px}.estate-fields,.estate-pasture{display:flex;flex-direction:column;min-height:0;padding:10px;border-radius:6px}.estate-fields{background:repeating-linear-gradient(0deg,#735034 0 9px,#825c3f 9px 12px);border:3px solid #a0804d}.estate-pasture{background:#749c53;border:5px double #e4c58a}.estate-fields>.plots{grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-rows:minmax(0,1fr);gap:6px;flex:1;min-height:0}.estate-fields .plot{padding:5px!important;min-height:0!important;background:#523f2d;color:#fff0d1;border:1px solid #b79561}.estate-fields .plot .pspr{height:48px}.estate-fields .plot .pspr img{max-height:48px;max-width:48px}.estate-fields .plot b{font-size:14px}.estate-pasture>.pens{display:grid;grid-template-columns:1fr 1fr!important;grid-auto-rows:minmax(0,1fr);gap:8px;flex:1;min-height:0}.estate-pasture .pen{display:flex;flex-direction:column;gap:3px;padding:5px!important;min-height:0!important;background:#3f6439;color:#fff1ce;border:3px double #ddc38c}.estate-pasture .pen>.pspr{width:48px;height:48px}.estate-pasture .pen>.pspr img{max-width:48px;max-height:48px}.estate-pasture .pen .pen-t small:first-of-type{display:none}.estate-pasture .pen .pen-sell{font-size:13px;padding:2px 6px}.estate-pasture .pen .pen-t b{font-size:14px}.estate-supplies{padding:12px;min-height:0;display:flex;flex-direction:column;gap:8px}.estate-supplies .seed-choices{display:grid;grid-template-columns:1fr;gap:5px}.estate-supplies .seed-choice{padding:4px 8px}.estate-supplies .seed-choice img{max-width:32px;max-height:32px}.estate-supplies #livestock-market{padding:0}.estate-supplies .srows{gap:4px}.estate-supplies .srow{padding:6px;gap:5px}.estate-supplies .mini img{max-width:32px;max-height:32px}.estate-pages{display:inline-flex;gap:4px}.estate-pages .btn{padding:3px 8px}.farm-estate [hidden]{display:none!important}
 @media(min-width:861px){html.short .estate-scenery{height:21%;min-height:65px}html.short .estate-fields .plot .pspr{height:32px}html.short .estate-pasture .pen>.pspr{height:32px;width:32px}html.short .estate-pasture .pen>.pspr img{max-height:32px;max-width:32px}html.short .estate-supplies{gap:5px;padding:8px}html.short .estate-supplies .seed-choice{padding:2px 6px}html.short .estate-controls .phead{margin:0}}
@@ -3624,7 +3627,8 @@ html.short .bp-art{width:56px;height:56px}
 /* the queue shows in the Now card: "Now · then Oak planks +1" (no extra line) */
 .now .now-k{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 .now .now-next{font-style:normal;color:var(--brass,#d8a64a)}
-.now.here .now-k i+.now-next{display:none}
+/* with a queue, "then …" wins the line over "on this page" (27 Nov 2026 audit: the queue was never visible) */
+.now.here .now-k i:has(+.now-next){display:none}
 .queue-rules{margin:6px 0 10px}
 
 /* ---------- Eggs, the hatchery and the collection log ---------- */
@@ -3917,7 +3921,9 @@ html.short #view .trophy-wall .trophy{padding:6px 4px;gap:2px}
 /* Skill goals (js/skill_perks.js): the next unlock and the flourish chance, quietly under the action */
 .sk-goal{display:flex;gap:6px;align-items:baseline;margin:2px 0;font-size:14px;min-width:0}
 .sk-goal>span{color:var(--mute);white-space:nowrap}
-.sk-goal>b{color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sk-goal>b{color:var(--ink);font-weight:600;white-space:normal;min-width:0}
+/* the next perk wraps inside its panel instead of running past the edge (27 Nov 2026 audit) */
+button.sk-goal{max-width:100%;text-align:start}
 .flo-chance,.sh-flo{color:var(--brass);white-space:nowrap}
 .sh-next{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:14px;margin-top:4px}
 .sh-next .sh-next-k{color:var(--mute)}
@@ -4695,12 +4701,14 @@ html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,ht
 .skill-cooking .work-atmosphere i { width:5px; height:13px; background:#e8e3c8; animation:steam-rise 2s ease-in-out infinite; }
 .skill-crafting .work-atmosphere i,.alch .work-atmosphere i { background:#dac0ec; animation:magic-motes 2.4s ease-in-out infinite; }
 .thieve .work-atmosphere { display:none; }
-@keyframes worker-effort { 0%,70%,100%{transform:rotate(0)} 20%{transform:rotate(-3deg) translateY(-2px)} 42%{transform:rotate(5deg) translateX(2px)} }
+/* the hero's body only moves in whole steps of position, never rotates: a few degrees of rotation smeared its pixels
+   (27 Nov 2026 audit); the tool still swings */
+@keyframes worker-effort { 0%,70%,100%{transform:translate(0,0)} 20%{transform:translate(-1px,-3px)} 42%{transform:translate(3px,0)} }
 @keyframes tool-strike { 0%,75%,100%{transform:rotate(-20deg)} 22%{transform:rotate(-70deg) translate(-3px,-6px)} 42%{transform:rotate(32deg) translate(6px,5px)} 55%{transform:rotate(18deg)} }
-@keyframes worker-fish { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-3deg)} 48%{transform:rotate(3deg)} 75%{transform:rotate(1deg)} }
+@keyframes worker-fish { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-2px,0)} 48%{transform:translate(2px,-1px)} 75%{transform:translate(1px,0)} }
 @keyframes rod-cast { 0%,100%{transform:rotate(0)} 24%{transform:rotate(-32deg)} 42%{transform:rotate(16deg)} 75%{transform:rotate(8deg)} }
 @keyframes fish-swim { 0%,100%{transform:translate(0,0) rotate(0)} 35%{transform:translate(5px,2px) rotate(2deg)} 65%{transform:translate(-4px,-2px) rotate(-2deg)} }
-@keyframes worker-sneak { 0%,100%{transform:translateX(0) rotate(-2deg)} 45%,65%{transform:translateX(6px) rotate(4deg)} }
+@keyframes worker-sneak { 0%,100%{transform:translate(0,1px)} 45%,65%{transform:translate(6px,-1px)} }
 @keyframes hand-reach { 0%,100%{transform:translateX(0) rotate(-10deg)} 45%,60%{transform:translate(18px,-3px) rotate(12deg)} }
 @keyframes stir-pot { 0%,100%{transform:translate(0,0) rotate(-12deg)} 30%{transform:translate(7px,2px) rotate(8deg)} 65%{transform:translate(3px,-4px) rotate(18deg)} }
 @keyframes craft-turn { 0%,100%{transform:rotate(-12deg)} 35%{transform:rotate(15deg) translate(4px,-2px)} 65%{transform:rotate(4deg) translate(2px,2px)} }
@@ -4738,7 +4746,7 @@ html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,ht
 .battle-bone > img { display:block; width:100%; height:100%; max-width:none; image-rendering:pixelated; object-fit:fill; pointer-events:none; }
 .rig-cape { transform:rotate(0); }
 .rig-head { transform:rotate(2deg); }
-.rig-torso { transform:rotate(-2deg); }
+.rig-torso { transform:none; } /* the whole hero sprite: upright at rest, square pixels (27 Nov 2026 audit) */
 .rig-leg-left { transform:rotate(4deg); }
 .rig-leg-right { transform:rotate(-4deg); }
 .rig-arm-left { transform:rotate(12deg); }
@@ -5093,8 +5101,10 @@ html.calm .events .ev-result{animation:none}
 .event-fullscreen{padding:20px;background:#07101aea}.event-fullscreen>.m-card.wide{width:min(1200px,100%);max-width:none;height:calc(100dvh - 40px);display:flex;flex-direction:column}.event-fullscreen .m-body{flex:1;min-height:0;display:flex}.encounter-moment{display:flex;flex-direction:column;flex:1;min-width:0}.event-panorama{background-image:linear-gradient(transparent,#101a2470),var(--event-scene);background-size:cover;background-position:center 65%;image-rendering:pixelated;min-height:120px;flex:1;max-height:45vh;border-radius:8px}.encounter-moment .events{flex:none;padding-top:12px}.encounter-moment .event,.encounter-moment .ev-result{margin:0}.encounter-moment .ev-t{font-size:24px}.encounter-moment .ev-b>p{font-size:20px;max-width:75ch}.encounter-moment .ev-opts{display:flex;flex-wrap:wrap;gap:12px}.encounter-moment .ev-opt{flex:1;min-width:180px;min-height:64px}.event-fullscreen .m-act{margin-top:12px}
 @media(min-width:861px){
  .workspace-focus>.activity-stage{display:flex;flex-direction:column;min-height:0;max-height:100%;position:static}
- .workspace-focus>.activity-stage>.activity-scene{height:clamp(110px,22vh,220px);min-height:100px;flex:1 1 160px}
- .workspace-focus>.activity-stage>.activity-caption{flex:0 0 auto;min-height:min-content;min-width:0;padding:12px}
+ .workspace-focus>.activity-stage>.activity-scene{height:clamp(110px,22vh,220px);min-height:100px;flex:1 8 160px}
+ /* on short windows the scene gives up its height first; whatever still doesn't fit scrolls inside the details instead
+    of being cut off mid-line (27 Nov 2026 audit: a locked survey's reason and Smithing's stats were hidden at 1280x720) */
+ .workspace-focus>.activity-stage>.activity-caption{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;min-width:0;padding:12px}
  .activity-caption .task-summary{margin-top:8px}.activity-caption .recipe-ingredients{display:flex;flex-wrap:wrap;gap:6px 12px}
  .activity-caption .activity-actions{margin:8px 0}
  .magic-runes .magic-body>.activity-workspace{display:grid;grid-template-columns:minmax(300px,.85fr) minmax(0,1.5fr);gap:16px}
@@ -5260,7 +5270,9 @@ html.calm .illustrated-card.just-unlocked{box-shadow:0 0 0 3px var(--brass)}
 .cw-head>small{color:var(--mute);font-size:14px}
 .cw-quest{margin-left:auto;display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--brass);border-radius:10px;background:color-mix(in srgb,var(--brass) 10%,var(--panel));cursor:pointer;color:var(--ink);font:inherit}
 .cw-quest small{display:block;font-size:13px;color:var(--brass);text-transform:uppercase;letter-spacing:.06em}.cw-quest b{font-size:15px}
-.cw-areas{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;min-height:0;flex:1}
+.cw-areas{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;min-height:0;flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+/* the places are the stage's list of choices: when a second row of creatures doesn't fit (1280x720), the list scrolls
+   rather than cutting off their Track buttons (27 Nov 2026 audit) */
 .cw-area{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);min-height:0}
 .cw-area-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .cw-area-h b{display:block;font-size:17px}.cw-area-h small{font-size:14px;font-weight:600}
@@ -5338,7 +5350,14 @@ html.short .cw-foe{gap:5px;padding:7px!important}html.short .cw-foe-h img{width:
 @media (min-width:861px){
 #view .combat-x.cw-reorg .combat-targets{display:flex;flex-direction:column;gap:8px;min-height:0;overflow:hidden}
 #view .combat-x.cw-reorg .combat-targets>.step-h{flex:none}
-#view .combat-x.cw-reorg .combat-targets>.combat-equipped{flex:1 1 0;min-height:96px;overflow:hidden}
+/* the doll never gives up its own height: its slots are controls (27 Nov 2026 audit: at 1280x720 Legs, Ammo and the
+   Weapon slot were cut off); the two training buttons share a row and the future-slot line moves into the heading's
+   tooltip on short windows, which frees the room */
+#view .combat-x.cw-reorg .combat-targets>.combat-equipped{flex:1 0 auto;min-height:min-content;overflow:hidden}
+html.lw-1600 #view .combat-x.cw-reorg .combat-targets .cx-styles{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html.lw-1600 #view .combat-x.cw-reorg .combat-targets .cx-styles .ss-btn{grid-template-columns:minmax(0,1fr)!important;padding:6px 8px!important}
+html.lw-1600 #view .combat-x.cw-reorg .combat-targets .cx-styles .ss-btn>.ic{display:none}
+html.short #view .combat-x.cw-reorg .combat-targets .ab-future-slot{display:none}
 #view .combat-x.cw-reorg .combat-targets>.hud-train,#view .combat-x.cw-reorg .combat-targets>.combat-abils{flex:none;margin:0;padding:10px}
 #view .combat-x.cw-reorg .combat-targets .hud-train .kit-head{flex-wrap:wrap;row-gap:4px}
 #view .combat-x.cw-reorg .combat-targets .style-strip{display:flex;flex-direction:column;gap:6px}
@@ -5563,6 +5582,12 @@ html:has(.home-glance) #hud .h-stats,html:has(.home-glance) #hud .h-task,html:ha
 .bundle-indicator .ico{animation:bundle-beacon 1.6s ease-in-out 3}
 @keyframes bundle-beacon{50%{opacity:.48}}
 @media(prefers-reduced-motion:reduce){.bundle-indicator .ico{animation:none}}
+/* on a fixed-size shop card the restoration that wants this item is a corner badge with its name in the tooltip: as a
+   text line it pushed "25 held" out of the 170px card (27 Nov 2026 audit) */
+#view .illustrated-card:has(>.bundle-indicator){position:relative}
+#view .illustrated-card>.bundle-indicator{position:absolute;left:8px;top:8px;display:grid;place-items:center;width:24px;height:24px;border-radius:4px;background:color-mix(in srgb,var(--brass) 18%,var(--panel));line-height:1;margin:0}
+#view .illustrated-card>.bundle-indicator .ic{width:16px!important;height:16px!important;margin:0}
+#view .illustrated-card>.bundle-indicator .bi-t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .daily-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
 .daily-list section{display:grid;gap:12px;align-content:start;min-width:0}
 .daily-list progress{width:100%;accent-color:var(--brass)}
@@ -5663,7 +5688,9 @@ button.linkish{display:inline-flex;align-items:center}
 /* Overflow sweep fixes (26 Nov 2026, scripts/audit-overflow.cjs): nothing spills out of its tile or button */
 .ss-weapon span{min-width:0}
 .ss-weapon b{white-space:normal;overflow-wrap:anywhere}
-.slot .bundle-indicator{position:absolute;left:3px;bottom:2px;line-height:1}
+.slot .bundle-indicator{position:absolute;left:3px;bottom:3px;line-height:1;display:grid;place-items:center;width:20px;height:20px;border-radius:4px;background:var(--panel)}
+/* the "a restoration needs this" badge is a corner mark, never the slot's 48px picture size (27 Nov 2026 audit: it covered half the pack) */
+#packgrid .slot .bundle-indicator .ic,.slots .slot .bundle-indicator .ic,.slot .bundle-indicator .ic{width:16px!important;height:16px!important;margin:0}
 .slot .bundle-indicator .bi-t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #view .skrow small.sk-next{white-space:normal;overflow:visible;text-overflow:clip;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 #view .combat-x .hud-train .ss-weapon b{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.15}
@@ -5749,6 +5776,28 @@ html.calm .petted,html.calm .petted img{animation:none}
 /* Gathering cards (js/card_scale.js): a 96 px art box; the sprite stands on its ground line at its own whole-number scale */
 #view .illustrated-choices .illustrated-card.card-scaled>.choice-art{height:96px!important;min-height:96px!important;place-items:end center;padding-bottom:2px}
 #view .illustrated-card.card-scaled>.choice-art img{image-rendering:pixelated;object-fit:fill}
+/* phone bottom bar: labels and counts at the 13px floor (27 Nov 2026 audit measured 12px labels and 11px counts) */
+@media(max-width:860px){.hub>span{font-size:13px!important;letter-spacing:-.01em}.hub .hubdot.num{font-size:13px!important;line-height:16px}}
+/* why the last task stopped: two lines at most in the rail, the whole sentence in its tooltip (27 Nov 2026 audit: a
+   long stop reason pushed rail rows under their 34px floor and Sailing off the window) */
+.now.idle .now-why{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.modal .bc-btn~.progw{display:none}/* the fight-progress strip belongs to the page card, not the pop-up copy (27 Nov 2026 audit) */
+/* phones: the foe at the hero's 4x (32px art -> 128px), not 6x in a 143px box (27 Nov 2026 audit) */
+@media(max-width:860px){#view .encounter-arena #av-foe img.pxa{width:128px!important;height:128px!important}}
+/* ---------- 27 Nov 2026 visual audit: small fixes ---------- */
+/* quest pictures not yet earned: a light ghost on the dark theme (black at 16% vanished on dark panels) */
+:root[data-theme="dark"] .obj-pic .qp-cell img{filter:brightness(0) invert(1) opacity(.22)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .obj-pic .qp-cell img{filter:brightness(0) invert(1) opacity(.22)}}
+.obj-pic .qp-cell.got img{filter:none!important}
+/* story dialogue: the clickable line keeps its text off its outline */
+.story-conversation .story-line{padding:10px 14px}
+/* requirement rows: text off the outline */
+.unlock-step{padding-inline:10px}
+/* hover lifts move with translate, never transform (motion rule) */
+.slot:not(.blank):hover{transform:none;translate:0 -2px}.slot:not(.blank):active{transform:none;scale:.96}
+.pen:hover{transform:none;translate:0 -2px}
+/* phones: the hero portrait in the top bar shows the whole 48px face, not its top-left corner */
+@media(max-width:860px){#hud .portrait.px-portrait{width:48px!important;height:48px!important}}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
@@ -5859,6 +5908,9 @@ html.calm .activity-scene.capture .scene-target{animation:none!important}
   :is(button,[data-do],[role=button]):is(.warn,.short,.low){border-color:color-mix(in srgb,var(--warn) 75%,var(--act-line))!important}
   :is(button,[data-do],.btn).danger{border-color:color-mix(in srgb,var(--bad) 70%,var(--act-line))!important}
   :is(button,[data-do],.btn):is(.on,.selected).danger{border-color:var(--bad)!important}
+  /* a control you can't use right now: same shape, faded outline (27 Nov 2026 audit: a disabled Queue beside a
+     disabled primary looked usable) */
+  :is(button,.btn):disabled:not(.primary,.task-primary,.illustrated-card,.locked){border-color:color-mix(in srgb,var(--act-line) 40%,transparent)!important;opacity:.55}
 
   /* text-only controls become small outlined buttons instead of underlined words */
   button:is(.linkish,.tog,.sk-goal,.sh-next-btn,.now-go,.now-plan,.gi,.ss-weapon,.cw-mon-art,.voy-item){padding-inline:8px!important}
@@ -6713,7 +6765,7 @@ D.QUESTS.unshift(
     [{ ev: 'deliver', key: 'cowhide', n: 8, label: 'Bring 8 cowhides to practise on' }, { ev: 'deliver', key: 'feather', n: 20, label: 'Bring 20 feathers for her quills' }, { ev: 'chop', key: 'birch', n: 10, label: 'Chop 10 birch logs for her frames' }],
     { xp: { crafting: 150 }, coins: 150, items: { cowhide: 6 } }),
   MQ('mq_ranged', 'ranged', 'mossbarrow', 'A Hunter’s Bow', 'Hunter Wynn', 18, null,
-    'A sword is useful. Not arguing with that. But when Old Tusk charges, I’d rather have a bow and a bit of distance. Bring birch for the stave and feathers for the arrows. Then we’ll practise on the boars. I’ll give you a Wooden Shortbow and arrows. The oak Hunter’s Bow is a later upgrade at Ranged 10. I’m better at showing you than explaining it.',
+    'A sword is useful. Not arguing with that. But when Old Tusk charges, I’d rather have a bow and a bit of distance. Bring birch for the stave and feathers for the arrows. Then we’ll practise on the boars. I’ll give you a wooden shortbow and arrows. The oak Hunter’s Bow is a later upgrade at Ranged 10. I’m better at showing you than explaining it.',
     [{ ev: 'deliver', key: 'log_birch', n: 10, label: 'Bring 10 birch logs for the bow stave' }, { ev: 'deliver', key: 'feather', n: 40, label: 'Bring 40 feathers to fletch arrows' }, { ev: 'kill', key: 'boar', n: 6, label: 'Track down 6 wild boars as practice' }],
     { xp: { ranged: 150 }, items: { bow_normal: 1, arrow_bronze: 150 } }),
   MQ('mq_magic', 'magic', 'saltmere', 'The Drowned Library', 'Archivist Merrow', 28, null,
@@ -7933,17 +7985,18 @@ for(const r of [
 const DQ = window.DQ, D = DQ.data;
 
 /* ---------- Weapons: plain names for starter gear, grander ones as the metal improves ---------- */
+/* plain names in sentence case like the armour ("Bronze full helm"), 27 Nov 2026 audit */
 const T = ['bronze', 'iron', 'steel', 'mithril', 'adamant', 'rune', 'astral'];
 const WEAPON_NAMES = {
-  sword: ['Bronze Shortsword', "Soldier's Blade", "Knight's Longsword", 'Skyforged Saber', 'Emerald Reaver', 'Glacier Fang', 'Starsunder'],
-  dagger: ['Bronze Knife', 'Alley Knife', 'Quickfang', 'Whisperblade', "Viper's Kiss", 'Frostbite', 'Nightglint'],
-  hammer: ['Bronze Mallet', "Smith's Maul", 'Siegebreaker', 'Thunderhead', 'Earthshaker', 'Avalanche', 'Worldbreaker'],
+  sword: ['Bronze shortsword', "Soldier's Blade", "Knight's Longsword", 'Skyforged Saber', 'Emerald Reaver', 'Glacier Fang', 'Starsunder'],
+  dagger: ['Bronze knife', 'Alley Knife', 'Quickfang', 'Whisperblade', "Viper's Kiss", 'Frostbite', 'Nightglint'],
+  hammer: ['Bronze mallet', "Smith's Maul", 'Siegebreaker', 'Thunderhead', 'Earthshaker', 'Avalanche', 'Worldbreaker'],
 };
 const W = {};
 T.forEach((t, i) => Object.entries(WEAPON_NAMES).forEach(([k, names]) => { W[`${t}_${k}`] = names[i]; }));
 Object.assign(W, {
-  bow_normal: 'Wooden Shortbow', bow_oak: "Hunter's Bow", bow_willow: 'Whisperwood Bow', bow_maple: 'Autumn Recurve', bow_yew: 'Nightyew Longbow', bow_magic: 'Spellstring', bow_elder: 'Elderthorn Greatbow',
-  staff_normal: 'Wooden Staff', staff_oak: "Acolyte's Staff", staff_willow: 'Willowshade Staff', staff_maple: 'Emberwood Staff', staff_yew: 'Yewbound Staff', staff_magic: 'Aetherwood Staff', staff_elder: 'Elderlight',
+  bow_normal: 'Wooden shortbow', bow_oak: "Hunter's Bow", bow_willow: 'Whisperwood Bow', bow_maple: 'Autumn Recurve', bow_yew: 'Nightyew Longbow', bow_magic: 'Spellstring', bow_elder: 'Elderthorn Greatbow',
+  staff_normal: 'Wooden staff', staff_oak: "Acolyte's Staff", staff_willow: 'Willowshade Staff', staff_maple: 'Emberwood Staff', staff_yew: 'Yewbound Staff', staff_magic: 'Aetherwood Staff', staff_elder: 'Elderlight',
   barnacle_cutlass: 'Saltbitten Cutlass', witch_staff: "Morwenna's Hexstaff", emberfang_bow: 'Emberfang, the Wyrm Bow',
 });
 D.WEAPON_NAMES = W;
@@ -13046,6 +13099,8 @@ let openingReveals = 0, revealHero;
 DQ.unlockRevealsOn = () => { const s = DQ.S.settings, v = s.unlockReveals === false && !s.unlockRevealsChosen ? undefined : s.unlockReveals; return v === true || (v == null && (!navigator.webdriver || localStorage.getItem('idlewick.reveals') === '1')); };
 DQ.allowAutomaticReveal = () => {
   if (modalEl || document.querySelector('#intro,.quest-reveal') || document.hidden) return false;
+  /* not over a fight you are watching (27 Nov 2026 audit: "Task planning unlocked" covered a boss); the bell keeps it */
+  if (DQ.act && DQ.act.kind === 'fight' && DQ.ui && DQ.ui.view === 'combat') return false;
   if (revealHero !== DQ.S) { revealHero = DQ.S; openingReveals = 0; }
   if ((DQ.S.playtime || 0) >= 5 * 60000) return true;
   if (openingReveals >= 3) return false;
@@ -13327,7 +13382,10 @@ function onLevel(sk, from, to) {
   const unlockedDetails = details.slice();
   if (!details.length) {
     const next = Object.keys(D.UNL[sk] || {}).map(Number).filter(level => level > to).sort((a,b) => a-b)[0];
-    details.push(`Experience bonus is now +${Math.round(((DQ.xpBonusBase ? DQ.xpBonusBase(sk) : DQ.xpMult(sk)) - 1) * 100)}%.`);
+    /* the same figure as the skill's "+N% XP" chip: the opening's slower pace is not a penalty to report (27 Nov 2026
+       audit: a fresh hero read "Experience bonus is now +-66%") */
+    const bon = Math.round(((DQ.xpBonusBase ? DQ.xpBonusBase(sk) : DQ.xpMult(sk)) / (DQ.earlyPace ? DQ.earlyPace(sk) : 1) - 1) * 100);
+    if (bon > 0) details.push(`Experience bonus is now +${bon}%.`);
     if (next) { const short = DQ.ui && DQ.ui.unlockShort ? DQ.ui.unlockShort({ what: D.UNL[sk][next].join(', ') }) : ''; if (short) details.push(`Next at level ${next}: ${short}.`); }
   }
   if (DQ.sim.on) DQ.sim.levels.push([sk, to]);
@@ -13810,7 +13868,8 @@ function combatRound() {
     let first = null;
     DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, xpDealt * per); f.heroXp = (f.heroXp || 0) + x; if (!i) first = [sk, x]; });
     f.heroXp = (f.heroXp || 0) + DQ.addXp('hitpoints', xpDealt * 1.33);
-    if (first) DQ.floatAt(document.getElementById('av-foe'), `${ico(first[0])}+${fmt(first[1])} XP`, D.SK[first[0]].col);
+    /* the XP shows when the blow visibly lands, not while the arrow or spell is still in flight (27 Nov 2026 audit) */
+    if (first) { const fl = () => DQ.floatAt(document.getElementById('av-foe'), `${ico(first[0])}+${fmt(first[1])} XP`, D.SK[first[0]].col); if (DQ.ui && DQ.ui.afterImpact && !DQ.sim.on && !DQ.forecasting) DQ.ui.afterImpact(fl, DQ.battleTiming?.impact || 390); else fl(); }
   }
   if (f.hp <= 0) return kill(m);
   if (DQ.beastAttack) { f.hp -= DQ.beastAttack(f, m); if (f.hp <= 0) return kill(m); }
@@ -13858,7 +13917,9 @@ function monsterAttack(f, m, ps, sty) {
   S().hp -= taken; DQ.splat('you', special ? taken + '!' : taken, taken ? 'hit' : 'miss', 900);
   if (S().hp <= 0 && A('unbreakable') && !f.unbroken) { f.unbroken = 1; S().hp = 1; DQ.splat('you', 'Unbreakable!', 'miss', 1000); }
   if (S().hp <= 0 && U.laststand && !f.last) { f.last = 1; S().hp = 1; fxHit('laststand'); DQ.splat('you', 'Last stand!', 'miss', 1000); }
-  if (taken) setTimeout(() => DQ.sfx('hurt'), 900);
+  /* never from a forecast or simulation: the delayed call used to fire after the forecast flag was cleared, so the
+     hero "got hurt" out loud while untouched (27 Nov 2026 audit) */
+  if (taken && !DQ.sim.on && !DQ.forecasting) setTimeout(() => DQ.sfx('hurt'), 900);
   if (special && !DQ.sim.on) { DQ.log(`${m.name} unleashes ${sp.name}!`, 'bad'); DQ.emit('bossSpecial', m); }
   if (!DQ.sim.on && (m.boss || m.mini) && (m.boss || m.mini).special) DQ.emit('bossTell', m, (f.ma + 1) % (m.boss || m.mini).special.every === 0);
   if (S().hp <= 0) { die(); return 'dead'; }
@@ -14692,7 +14753,7 @@ DQ.prepAdvice = (monId, fc) => {
 
 /* a defeat names the most useful change for next time, from the same advice as the boss card */
 const notifyPrep0 = DQ.notify;
-DQ.notify = o => { if (o && o.kind === 'death' && DQ.lastFoe && !DQ.forecasting) { const m = D.MON[DQ.lastFoe], tip = m && DQ.prepAdvice(m.id).find(x => x.key !== 'rest'); if (tip) o = Object.assign({}, o, { text: `${m.name} won this time. Most useful change: ${tip.title.charAt(0).toLowerCase() + tip.title.slice(1)}.` }); } return notifyPrep0(o); };
+DQ.notify = o => { if (o && o.kind === 'death' && DQ.lastFoe && !DQ.forecasting) { const m = D.MON[DQ.lastFoe], advice = m ? DQ.prepAdvice(m.id).filter(x => x.key !== 'rest') : [], tip = advice.find(x => x.key === 'food') || advice.find(x => !/^remove /i.test(x.title || '')) || advice[0]; /* food first; dropping a heal is never the headline tip (27 Nov 2026 audit) */ if (tip) o = Object.assign({}, o, { text: `${m.name} won this time. Most useful change: ${tip.title.charAt(0).toLowerCase() + tip.title.slice(1)}.` }); } return notifyPrep0(o); };
 
 /* ---------- Away events: things that happened while you were gone, each with a choice ---------- */
 const tIdx = () => D.TOWN[S().town].idx;
@@ -15473,7 +15534,7 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
   if (choice.locked && !choice.revealed) choice = Object.assign({}, choice, { name: '???', blackout: true, blocked: true, info: `${choice.info||''}<p class="locked-why">${ico('lock')} ${esc(choice.reason || 'Not unlocked yet')}</p>${choice.discoverItem&&!String(choice.info||'').includes(`data-do="route" data-a="${choice.discoverItem}"`)?`<button class="btn" data-do="route" data-a="${choice.discoverItem}">Find this ingredient</button>`:''}` });
   const running = DQ.act && DQ.act.kind === kind && DQ.act.id === choice.id;
   const art = (c, size=96) => `<span class="${c.locked && !c.revealed || c.blackout ? 'blackout' : ''}" ${c.locked||c.blackout?'aria-hidden="true"':''}>${c.artKind === 'item' ? `<span class="activity-item-art" style="--art-size:${size}px">${DQ.itemIco(D.ITEMS[c.artId || c.id])}</span>` : DQ.artImage(c.artKind || (kind==='fight'?'creature':kind),c.artId || c.id,size,c.locked&&['fight','thieve'].includes(kind)?'sil':'',c.locked||c.blackout?'Locked':c.name)}</span>`;
-  const action = `<div class="activity-actions">${choice.away?`<button class="btn primary" data-do="taskmap" data-a="${choice.town}">View ${esc(D.TOWN[choice.town].name)}</button>`:''}<button class="btn primary task-primary" data-do="act" data-a="${kind}" data-b="${choice.id}" ${!running && choice.blocked ? 'disabled' : ''}>${running ? kind === 'fight' ? 'Retreat' : 'Stop' : choice.blackout ? 'Locked' : esc((verb?verb+' ':'')+choice.name.replace(/^(Cook|Bars|Weapons|Armour) · /,''))}</button>${DQ.planUnlocked && DQ.planUnlocked() ? `<button class="btn" data-do="queueadd" data-a="${kind}" data-b="${choice.id}" ${choice.locked||choice.away ? 'disabled' : ''}>Queue</button>` : ''}</div>`;
+  const action = `<div class="activity-actions">${choice.away?`<button class="btn primary" data-do="taskmap" data-a="${choice.town}">View ${esc(D.TOWN[choice.town].name)}</button>`:''}<button class="btn primary task-primary" data-do="act" data-a="${kind}" data-b="${choice.id}" ${!running && choice.blocked ? 'disabled' : ''}>${running ? kind === 'fight' ? 'Retreat' : 'Stop' : choice.blackout ? 'Locked' : esc((verb?verb+(choice.name==='???'?'':' '):'')+(choice.name==='???'&&verb?'':choice.name.replace(/^(Cook|Bars|Weapons|Armour) · /,'')))}</button>${DQ.planUnlocked && DQ.planUnlocked() ? `<button class="btn" data-do="queueadd" data-a="${kind}" data-b="${choice.id}" ${choice.locked||choice.away ? 'disabled' : ''}>Queue</button>` : ''}</div>`;
   const cards = `<section class="panel activity-choices"><div class="phead"><h2>${kind==='fight'?'Choose an opponent':kind==='recipe'?(key==='exploration'?'Choose a survey':'Choose what to make'):kind==='alch'?'Choose an item':({fish:'Fish catalogue',wood:'Trees',mine:'Ore deposits',thieve:'Targets',sail:'Islands',train:'Trap lines',hunt:'Choose your quarry'}[kind]||'Choose your spot')}</h2><small>${choices.some(c=>c.town)?`${choices.length} resources · all regions`:D.TOWN[S().town].name}</small></div>${UI.taskToolbar[key] || ''}<div class="illustrated-choices">${choices.filter(c=>c.visible!==false).map(c=>{
     const working=DQ.act&&DQ.act.kind===kind&&DQ.act.id===c.id;
     const requirementText=c.short?String(c.short).replace(/^Needs /,''):String(c.reason||'Not unlocked yet').replace(/^Requires [A-Za-z ]+? (\d+)/,'Lv $1').replace(/^Requires /,'');
@@ -15556,7 +15617,11 @@ UI.V.recipes = sk => {
   const subs=[...new Set(list.filter(r=>grp(r).g===g).map(r=>grp(r).s).filter(Boolean))],sub=UI.tab[sk+'sub']=subs.includes(UI.tab[sk+'sub'])?UI.tab[sk+'sub']:subs[0],only=UI.tab[sk+'ready'];
   const inG=(r,x,y)=>grp(r).g===x&&(!y||grp(r).s===y),chip=(x,y,on,act,b)=>{const rs=list.filter(r=>inG(r,x,y)),ready=rs.filter(r=>DQ.recipeLvlOk(r)&&DQ.recipeDiscovered(r)&&DQ.canMake(r)).length,min=Math.min(...rs.map(r=>r.lvl)),locked=(DQ.lvl(sk)<min&&!rs.some(r=>DQ.recipeLvlOk(r)))||rs.every(r=>!DQ.recipeDiscovered(r)&&!(r.secret&&DQ.recipeKnown(r.secret)));
     const metalBar=!y&&sk==='smithing'&&METAL_BAR[x],pic=metalBar&&D.ITEMS[metalBar]?metalBar:x==='Tools'&&sk==='smithing'?'tool_pick_1':Object.keys((rs[0]||{out:{}}).out)[0],art=pic&&D.ITEMS[pic]?`<span class="rc-art ${locked||rs[0]&&!DQ.recipeDiscovered(rs[0])?'blackout':''}">${DQ.itemIco(D.ITEMS[pic])}</span>`:'';
-    return `<button class="chip rc-chip ${on?'on':''} ${locked?'locked':''}" data-do="tab" data-a="${act}" data-b="${esc(b)}" aria-pressed="${on}">${art}${locked?ico('lock'):''}<span>${esc(y||x)}</span><small>${locked?`Lv ${min}`:ready?`${ready} ready`:''}</small></button>`;};
+    /* a category can be locked by level or by an ingredient not found yet; say which (27 Nov 2026 audit: "Steel Lv 30"
+       showed greyed at Smithing 30 when the real lock was Coal ore) */
+    const byLvl=DQ.lvl(sk)<min&&!rs.some(r=>DQ.recipeLvlOk(r)),first=rs.reduce((a,r)=>r.lvl<a.lvl?r:a,rs[0]),disc=locked&&!byLvl&&first?DQ.recipeDiscovery(first):null,
+      lockLabel=byLvl||!disc?`Lv ${min}`:`Find ${D.ITEMS[disc.item].name}`,lockTip=byLvl||!disc?`Opens at ${D.SK[sk].name} ${min}`:disc.reason;
+    return `<button class="chip rc-chip ${on?'on':''} ${locked?'locked':''}" data-do="tab" data-a="${act}" data-b="${esc(b)}" aria-pressed="${on}"${locked?` data-tip="text:${esc(lockTip)}"`:''}>${art}${locked?ico('lock'):''}<span>${esc(y||x)}</span><small>${locked?esc(lockLabel):ready?`${ready} ready`:''}</small></button>`;};
   UI.taskToolbar[sk]=`<div class="recipe-categories" role="group" aria-label="Category">${groups.map(x=>chip(x,null,x===g,sk,x)).join('')}<span class="filter-sep" aria-hidden="true"></span><button class="filter-toggle ${only?'on':''}" role="switch" aria-checked="${only?'true':'false'}" data-do="readyonly" data-a="${sk}"><span class="ft-track" aria-hidden="true"><span class="ft-knob"></span></span><span>Ready to make</span><b>${only?'On':'Off'}</b></button></div>${subs.length>1?`<div class="recipe-categories recipe-sub" role="group" aria-label="Type">${subs.map(y=>chip(g,y,y===sub,sk+'sub',y)).join('')}</div>`:''}`;
   const missingOf=r=>Object.entries(r.in).filter(([id,n])=>DQ.have(id)<n).map(([id,n])=>`${n-DQ.have(id)} ${D.ITEMS[id].name.toLowerCase()}`);
   const choices=list.map(r=>{if(r.secret&&DQ.recipeUsable&&!DQ.recipeUsable(r))return {id:r.id,name:'???',artKind:'item',artId:Object.keys(r.out)[0],visible:inG(r,g,subs.length>1?sub:null)&&!only,locked:true,blocked:true,short:'A rumour',reason:D.SECRET[r.secret].rumour};const outId=Object.keys(r.out)[0],it=D.ITEMS[outId],discovery=DQ.recipeDiscovery(r),undiscovered=!!discovery,gate=DQ.recipeGate?.(r)||'',complete=!!r.once&&DQ.itemDiscovered(outId),lvlLock=!complete&&(!DQ.skillUnlocked(sk)||!DQ.recipeLvlOk(r)||undiscovered||!!gate),miss=lvlLock||complete?[]:missingOf(r);
@@ -15897,7 +15962,7 @@ UI.V.quests = () => {
   }).join(''):'';
   const done=D.QUESTS.filter(groups.done).length;
   const sections=[['Main story',list.filter(q=>q.main)],['Side stories',list.filter(q=>!q.main)]].filter(([,qs])=>qs.length).map(([label,qs])=>`<h3 class="journal-section">${label} <small>${qs.length}</small></h3>${qs.map(rowOf).join('')}`).join('');
-  return `<section class="panel shophead journal-header"><div><span class="k">Quest journal</span><h2>Your stories</h2><small>${done} stories completed</small></div><nav class="tabs" aria-label="Quest status">${Object.entries(names).map(([k,n])=>`<button class="tab ${tab===k?'on':''}" data-do="qtab" data-a="${k}" aria-pressed="${tab===k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</nav></section>${list.length?`<div class="qlayout quest-journal-layout"><nav class="qlist" aria-label="${names[tab]} quests">${sections}</nav><div class="qdetail">${cards}</div></div>`:`<section class="panel journal-empty"><h2>${{active:'No stories underway',available:'No new requests here',upcoming:'No upcoming requests',done:'Your story is just beginning'}[tab]}</h2><p>${{active:'Choose an available story and someone to help.',available:'Check Upcoming to see what opens the next story.',upcoming:'Explore the realm and meet its people.',done:'Completed stories and their acknowledgements will stay here.'}[tab]}</p><button class="btn" data-do="qtab" data-a="${tab==='available'?'upcoming':'available'}">${tab==='available'?'See upcoming stories':'Browse available stories'}</button></section>`}`;
+  return `<section class="panel shophead journal-header"><div><span class="k">Quest journal</span><h2>Your stories</h2><small>${done} ${done === 1 ? 'story' : 'stories'} completed</small></div><nav class="tabs" aria-label="Quest status">${Object.entries(names).map(([k,n])=>`<button class="tab ${tab===k?'on':''}" data-do="qtab" data-a="${k}" aria-pressed="${tab===k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</nav></section>${list.length?`<div class="qlayout quest-journal-layout"><nav class="qlist" aria-label="${names[tab]} quests">${sections}</nav><div class="qdetail">${cards}</div></div>`:`<section class="panel journal-empty"><h2>${{active:'No stories underway',available:'No new requests here',upcoming:'No upcoming requests',done:'Your story is just beginning'}[tab]}</h2><p>${{active:'Choose an available story and someone to help.',available:'Check Upcoming to see what opens the next story.',upcoming:'Explore the realm and meet its people.',done:'Completed stories and their acknowledgements will stay here.'}[tab]}</p><button class="btn" data-do="qtab" data-a="${tab==='available'?'upcoming':'available'}">${tab==='available'?'See upcoming stories':'Browse available stories'}</button></section>`}`;
 };
 
 /* ---------- Character ---------- */
@@ -16016,7 +16081,7 @@ const DO = {
     const q = D.QM[a]; if (!q || DQ.questState(q) !== 'new') return;
     DQ.startQuest(a);
     if (DQ.questState(q) !== 'active' && DQ.questState(q) !== 'ready') { UI.render(false); return; }
-    if (DQ.toast) DQ.toast(`Accepted: ${q.name}. It is now under Active.`);
+    if (DQ.toast) DQ.toast(`Accepted: ${q.name}. It is now under Current.`);
     if (!D.QUESTS.some(q => DQ.questState(q) === 'new')) {
       UI.questTab = 'active'; UI.tab.questSelected = a;
       if (UI.view !== 'quests') return DQ.go('quests');
@@ -16050,7 +16115,7 @@ const DO = {
   },
   mapsel: a => { UI.mapSel = a; DQ.sfx('tab'); UI.render(false); },
   travel: a => UI.travelAnim(a),
-  shopselect: a => { UI.shopSelected[UI.shopTab] = a; UI.render(false); if (innerWidth <= 860) document.querySelector('.shop-task')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); },
+  shopselect: a => { UI.shopPinned = null; UI.shopSelected[UI.shopTab] = a; UI.render(false); if (innerWidth <= 860) document.querySelector('.shop-task')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); },
   rareselect: a => { UI.tab.rareChoice = a; UI.render(false); if (innerWidth <= 860) document.querySelector('.shop-task')?.scrollIntoView({ block: 'start', behavior: 'smooth' }); },
   shoptab: a => { UI.shopTab = a; UI.render(false); }, shopqty: a => { UI.shopQty = +a; UI.render(false); },
   buy: (id, quantity) => {
@@ -16785,7 +16850,8 @@ D.TOWER_FLOORS = 5;
 const HP = [1.6, 1.9, 2.2, 2.5], MAX = [1.05, 1.1, 1.15, 1.2];
 for (const [town, T] of Object.entries(D.TOWERS)) {
   if (!D.TOWN[town]) { delete D.TOWERS[town]; continue; }
-  const local = D.MONLIST.filter(m => m.town === town && !m.boss && !m.mini).sort((a, b) => a.cl - b.cl).slice(-4), boss = D.MON[D.TOWN[town].boss];
+  /* floors are the town's own fighting creatures, never hunting-ground animals (27 Nov 2026 audit: Mossbarrow floor 1 was a Lv 107 bear) */
+  const local = D.MONLIST.filter(m => m.town === town && !m.boss && !m.mini && !m.hl && !m.huntKind && !(DQ.isAnimal && DQ.isAnimal(m.id))).sort((a, b) => a.cl - b.cl).slice(-4), boss = D.MON[D.TOWN[town].boss];
   T.town = town; T.floors = []; T.rec = Math.min(110, boss.boss.req + (T.up == null ? 8 : T.up)); /* tuned on node scripts/sim-bosses.cjs with TOWERS=1 */
   const add = (id, name, floor, base, hp, max, k, col, extra) => { const m = { id, name, town, cl: base.cl + floor * 2, hp: Math.round(base.hp * hp), max: Math.max(1, Math.round(base.max * max)), att: Math.round(base.att * k), def: Math.round(base.def * k), coins: [base.coins[0] * 3, base.coins[1] * 4], col, drops: extra.drops || [], tower: { town, floor }, mini: Object.assign({ short: name, req: 0 }, extra.mini || {}) }; D.MON[id] = m; D.MONLIST.push(m); T.floors.push(id); return m; };
   local.forEach((b, i) => add(`tw_${town}_${i + 1}`, `${b.name} of the tower`, i + 1, b, HP[i], MAX[i], 1.08 + i * .03, b.col, { art: b.id, mini: { won: `Floor ${i + 1} of ${T.name} is clear.` }, drops: [['coin_pouch', [1, 2], .5], ['treasure_chest', [1, 1], .06 + i * .02]] }).base = b.id);
@@ -16974,6 +17040,13 @@ const costChips = cost => UI.needTiles(cost);
 
 /* ---------- Live binders for the new pages ---------- */
 Object.assign(UI.B, {
+  /* "Harvest ripe crops" is the main action only while something is ripe (27 Nov 2026 audit: it was primary on an
+     empty field); planting takes the lead when plots are empty and a seed is chosen */
+  farmlead: (e, a) => {
+    const plots = S().farm.plots, ripe = plots.some(p => stageOf(p) === 3), lead = a === 'harvest' ? ripe : !ripe && !!UI.seed && plots.some(p => !p.crop);
+    if (e.classList.contains('primary') !== lead) e.classList.toggle('primary', lead);
+    if (a === 'harvest') { if (e.disabled === ripe) e.disabled = !ripe; const tip = ripe ? '' : 'text:Nothing is ripe yet'; if ((e.dataset.tip || '') !== tip) { if (tip) e.dataset.tip = tip; else delete e.dataset.tip; } }
+  },
   plot: (e, a) => {
     const p = S().farm.plots[a]; if (!p) return; const st = stageOf(p), c = p.crop && D.CROP[p.crop];
     /* live growth: re-render through the shared plant renderer (painted or fallback) whenever the crop or its stage changes */
@@ -17028,7 +17101,7 @@ UI.V.farming = () => {
   const market = D.ANIMALS.map(a => { const lock = DQ.lvl('farming') < a.lvl; return `<div class="srow ${lock || S().coins < a.price ? 'cant' : ''}" id="buy-${a.id}"><span class="mini">${DQ.animalSprite(a, 40)}</span><div class="sr-t"><b>${a.name}</b><small>Makes ${D.ITEMS[a.prod].name.toLowerCase()} (${fmt(D.ITEMS[a.prod].val)} coins) · <span class="${lock ? 'bad' : 'ok'}">Farming ${a.lvl}</span></small></div><span class="price mono">${ico('coin')}${fmt(a.price)}</span><button class="btn sm ${lock ? '' : 'primary'}" data-do="buyanimal" data-a="${a.id}" ${lock ? 'disabled' : ''}>Buy</button></div>`; }).join('');
   return `<div class="farm-workspace"><section class="panel farm-task"><div class="phead"><h2>Fields</h2><small>Farming level <b data-b="lvl:farming"></b></small></div>
     <div class="seed-choices" role="group" aria-label="Choose a seed">${D.CROPS.filter(c=>DQ.have('seed_'+c.id)).map(c=>`<button class="seed-choice ${UI.seed===c.id?'on':''}" data-do="seed" data-a="${c.id}" aria-pressed="${UI.seed===c.id}" ${DQ.lvl('farming')<c.lvl?'disabled':''}>${DQ.itemIco(D.ITEMS['seed_'+c.id])}<span>${c.name}<small>${DQ.have('seed_'+c.id)} seeds · ${DQ.lvl('farming')<c.lvl?`Needs Farming ${c.lvl}`:`Level ${c.lvl}`}</small></span></button>`).join('')}</div>
-        <div class="btnrow wrap farm-actions"><button class="btn primary" data-do="harvestall">Harvest ripe crops</button><button class="btn" data-do="plantall" ${UI.seed ? '' : 'disabled'}>Plant empty plots</button></div>${UI.seed ? `<p>Grows in ${left(DQ.growDur(D.CROP[UI.seed]))}. Crops keep growing while you are away.</p>` : '<p>No seeds available. Buy seeds in the shop.</p>'}
+        <div class="btnrow wrap farm-actions"><button class="btn" data-do="harvestall" data-b="farmlead:harvest">Harvest ripe crops</button><button class="btn" data-do="plantall" data-b="farmlead:plant" ${UI.seed ? '' : 'disabled'}>Plant empty plots</button></div>${UI.seed ? `<p>Grows in ${left(DQ.growDur(D.CROP[UI.seed]))}. Crops keep growing while you are away.</p>` : '<p>No seeds available. Buy seeds in the shop.</p>'}
         <div class="plots">${plots}${nextPlot !== undefined ? `<button class="plot buyplot" data-do="buyplot"><span>${ico('crop')}</span><b>Buy a plot</b><small>${fmt(nextPlot)} coins</small></button>` : ''}</div>
         <section data-reference="true" id="farm-settings"><h3>Planting settings</h3><button class="tog ${F.autoReplant ? 'on' : ''}" data-do="autoreplant"><span class="sw"></span>Replant after harvest</button></section></section><section class="panel farm-animals"><div class="phead"><h2>Animals</h2></div><div class="btnrow wrap farm-actions"><button class="btn primary" data-do="collectall">Collect all produce</button><button class="btn" data-do="filltrough">Fill feed trough</button><button class="btn" data-do="makefeed" data-tip="text:Quick feed uses at most five of one available crop, never your whole pantry.">Quick feed</button><button class="btn route-icon" data-do="crossrecipe" data-a="cook_feed" aria-label="Plan feed batches in Cooking" data-tip="text:Make feed batches in Cooking">${ico('cooking')}</button></div><p>Trough <b class="mono" data-b="trough"></b> feed · ${fmtK(DQ.have('feed'))} feed in storage</p>
       ${!F.animals.some(Boolean) ? `<div class="first-animal" role="note"><span class="fa-art">${DQ.animalSprite(D.ANIMAL.hen, 48)}</span><div><b>Your pens are empty</b><small>${mossOpen ? `A hen is the easiest start: ${fmt(D.ANIMAL.hen.price)} coins, and she lays eggs while you do other things.` : 'Defeat Grubnash and travel to Mossbarrow to meet the livestock trader.'}</small></div>${mossOpen ? `<button class="btn sm primary" data-do="farmmarket" data-a="hen">Find a hen</button>` : ''}</div>` : ''}<div class="pens">${pens}${nextPen !== undefined ? `<button class="pen buypen" data-do="buypen">Build a pen · ${fmt(nextPen)} coins</button>` : ''}</div>
@@ -18232,7 +18305,7 @@ UI.renderHud = () => {
       <button class="now-go" data-do="nowactivity" data-tip="text:Go to this activity"><span class="now-ic">${taskArt}</span><b>${esc(DQ.actLabel().replace(/ rock$/, ''))}</b></button>
       <span class="bar prog" role="img" aria-label="This action"><i data-prog="@"></i></span>
       <span class="now-f"><button class="now-plan" data-do="plan" data-tip="text:Pace, stop rule and queue"><span data-b="hud:count"></span><span class="hq hb" data-b="hudbuff" hidden></span></button><button class="now-stop" data-do="stop" aria-label="${fight ? 'Retreat' : 'Stop this task'}" data-tip="text:${fight ? 'Retreat' : 'Stop this task'} (Space)"><i class="stop-sq" aria-hidden="true"></i><span class="now-sl">${fight ? 'Retreat' : 'Stop'}</span></button></span></div>`
-    : `<div class="now idle"><span class="now-k">Now</span><b class="now-idle">Nothing running</b>${S().lastPlannedStop ? `<small>${esc(S().lastPlannedStop)}</small>` : ''}${S().lastAct ? `<button class="btn sm primary" data-do="resume">Resume</button>` : `<small>Pick a skill below to start</small>`}</div>`;
+    : `<div class="now idle"><span class="now-k">Now</span><b class="now-idle">Nothing running</b>${S().lastPlannedStop ? `<small class="now-why" data-tip="text:${esc(S().lastPlannedStop)}">${esc(S().lastPlannedStop)}</small>` : ''}${S().lastAct ? `<button class="btn sm primary" data-do="resume">Resume</button>` : `<small>Pick a skill below to start</small>`}</div>`;
   $('#hud').innerHTML = `<button class="h-hero" data-do="go" data-a="character" data-tip="text:Your inventory">${UI.portrait(48)}<span class="h-lv mono" data-b="adv"></span></button>
     <div class="h-name"><b>${esc(S().name)}</b><span class="bar" role="img" aria-label="Hero level progress"><i data-b="advbar"></i></span><small>${DQ.heroTitle() ? `<i class="h-title">${esc(DQ.heroTitle())}</i>` : `Hero level <span data-b="adv"></span> · <span data-b="advline"></span>`}</small><div class="hp h-hp" data-tip="text:Health"><span class="bar" role="img" aria-label="Health"><i data-b="hpbar"></i></span><small class="mono" data-b="hptxt"></small></div></div>
     ${UI.petBadge ? UI.petBadge() : ''}${topNav()}${task}
@@ -18439,7 +18512,7 @@ UI.render = fresh => {
 DQ.on('ui', () => {
   const st = S(); if (!DQ.started || !st || !st.seenTabs || st.seenTabs.plan || !DQ.planUnlocked()) return;
   st.seenTabs.plan = 1;
-  DQ.notify({ kind: 'unlock', key: 'plan', icon: 'clock', col: '#8fc7ff', title: 'Task planning unlocked', text: 'Choose a pace, set stop rules and queue the next task. Tap the count on the Now card (top left), or the arrow on any card.', action: { label: 'Open plan', fn: () => UI.openPlan() }, sound: 'unlock', ttl: 14000 });
+  DQ.notify({ kind: 'unlock', key: 'plan', icon: 'clock', col: '#8fc7ff', title: 'Task planning unlocked', text: 'Choose a pace, set stop rules and queue the next task. Open it from the count on the Now card (top left), or the arrow on any card.', action: { label: 'Open plan', fn: () => UI.openPlan() }, sound: 'unlock', ttl: 14000 });
 });
 
 
@@ -18550,7 +18623,7 @@ DQ.on('equip', () => {});
 UI.skillHero = (sk, extra = '') => {
   const s = D.SK[sk], l = DQ.lvl(sk);
   const perks = D.GATHER_SKILLS.includes(sk) ? `<div class="perks"><span class="k">Perks</span>${D.PERKS.map(p => `<span class="perk ${l >= p.lvl ? 'on' : ''}" data-tip="text:${p.name} at ${s.name} ${p.lvl}: ${p.speed ? Math.round(p.speed * 100) + '% speed' : Math.round(p.dbl * 100) + '% double'}">${p.lvl}</span>`).join('')}</div>` : '';
-  return `<section class="panel skillhero compact" style="--c:${s.col};--sc:${s.col}"><div class="big sm">${ico(sk)}</div>
+  return `<section class="panel skillhero compact" style="--c:${s.col};--sc:${s.col}"><div class="big sm">${(DQ.artImage && DQ.artImage('skill', sk, 32, '', '')) || ico(sk)}</div>
     <div class="sk-main"><div class="sk-top"><h2>${s.name}</h2><b class="mono sk-lv" data-b="lvl:${sk}"></b><span class="chipx" data-tip="skill:${sk}"><span data-b="bonus:${sk}"></span></span></div>
       <span class="bar big"><i data-b="xpbar:${sk}"></i></span><div class="sh-line mono"><span data-b="toNext:${sk}"></span><span data-b="eta:${sk}"></span></div></div>
     <div class="sk-side">${perks}</div>${extra}</section>`;
@@ -18579,7 +18652,7 @@ UI.toolsPanel = () => {
     const t = DQ.toolTier(sk), own = t ? D.ITEMS[`tool_${k}_${t}`] : null, next = D.ITEMS[`tool_${k}_${D.TOOL_ORDER.find(n=>n>t)}`] || null, open = DQ.skillUnlocked(sk), pct = +(D.TOOL_SPEED[t]*100).toFixed(1);
     return `<div class="toolrow ${open ? '' : 'locked'}" style="--c:${D.SK[sk].col}"><span class="ti">${ico(ic)}</span><div class="tb"><b>${own ? own.name : `No ${label.toLowerCase()}`}</b>
       <small>${D.SK[sk].name}${open ? ` ${DQ.lvl(sk)}` : ' (locked)'} · ${t ? `${pct}% faster` : 'normal speed'}</small><span class="pips" aria-label="Upgrade ${D.TOOL_ORDER.indexOf(t)+1} of ${D.TOOL_ORDER.length}">${D.TOOL_ORDER.map(i => `<i class="${i <= t ? 'on' : ''}"></i>`).join('')}</span></div>
-      ${next ? `<button class="btn sm" data-do="go" data-a="shop" data-tip="text:${esc(next.name)}: ${fmt(next.buy)} coins. Opens the shop.">Upgrade ${DQ.fmtK ? DQ.fmtK(next.buy) : fmt(next.buy)}</button>` : '<span class="max">Best</span>'}</div>`;
+      ${next ? `<button class="btn sm" data-do="go" data-a="shop" data-tip="text:${esc(next.name)}: ${fmt(DQ.buyPrice ? DQ.buyPrice(next.id) : next.buy)} coins. Opens the shop.">Upgrade ${(p => DQ.fmtK ? DQ.fmtK(p) : fmt(p))(DQ.buyPrice ? DQ.buyPrice(next.id) : next.buy)}</button>` : '<span class="max">Best</span>'}</div>`;
   }).join('');
   return `<section data-reference="true" class="panel toolsp" id="inventory-tools"><h3>Gathering tools</h3><div class="toolrows">${rows}</div></section>`;
 };
@@ -21402,14 +21475,9 @@ const weatherHtml = town => {
   return `<span class="weather w-${w}" aria-hidden="true">${Array.from({ length: n }, (_, i) => { const r = hash(town + i), r2 = hash(i + town + 'b'); return `<i style="--x:${Math.round(r * 100)}%;--d:${(2 + r2 * 4).toFixed(2)}s;--t:-${(r * 6).toFixed(2)}s;--s:${(.6 + r2 * .8).toFixed(2)}"></i>`; }).join('')}</span>`;
 };
 
-/* ---------- 1. villagers return to restored places ---------- */
-const TOWNSFOLK = { willowbrook: ['villager', 'farmer'], mossbarrow: ['farmhand', 'villager'], saltmere: ['dockhand', 'merchant'], ironpeak: ['dwarf', 'dockhand'], gloomfen: ['witch', 'villager'], emberfall: ['fireguard', 'dwarf'], skyreach: ['monk', 'villager'], hollow: ['monk', 'fireguard'] };
-const villagersHtml = town => {
-  /* people come back when a town is restored, or when the threat over it is gone */
-  const restored = Object.entries(D.PROJECTS || {}).filter(([id, p]) => p.town === town && S().projects[id]).length + (S().towns[town] && S().towns[town].boss ? 1 : 0); if (!restored) return '';
-  const folk = (TOWNSFOLK[town] || ['villager']).slice(0, Math.min(2, restored)).filter(id => DQ.pixelArt && DQ.pixelArt.hasCreature(id));
-  return folk.map((id, i) => `<span class="scene-folk f${i}" aria-hidden="true">${DQ.artImage('creature', id, 96, '', '')}</span>`).join('');
-};
+/* ---------- 1. (retired 27 Nov 2026) villagers used to stand in the activity scenes once a town was restored; the owner's
+   rule is that activity backdrops have no bystanders, and townsfolk now walk the Home and Village scenes instead
+   (js/town_walkers.js) ---------- */
 
 /* ---------- 5. your companion keeps you company (work scenes show your tool, never your weapon) ---------- */
 const petHtml = () => { const p = S().pets.active && D.PET[S().pets.active]; return p ? `<span class="scene-pet ${['fish', 'ghost', 'bird'].includes(p.spr) ? 'floats' : ''}" aria-hidden="true">${DQ.petSprite(p, 64)}</span>` : ''; };
@@ -21422,7 +21490,7 @@ UI.render = fresh => {
   render0(fresh);
   const town = S().town, scene = document.querySelector('.activity-scene');
   if (scene && !scene.querySelector('.weather')) {
-    scene.insertAdjacentHTML('beforeend', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town) + (scene.classList.contains('fish') ? '' : villagersHtml(town)) + (scene.querySelector('.scene-worker') ? petHtml() : ''));
+    scene.insertAdjacentHTML('beforeend', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town) + (scene.querySelector('.scene-worker') ? petHtml() : ''));
   }
   const arena = document.querySelector('.encounter-arena');
   if (arena && !arena.querySelector('.weather')) arena.insertAdjacentHTML('afterbegin', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town));
@@ -21599,7 +21667,7 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
         : `<button class="ab-tile empty" data-do="combatmore" data-a="abilities" aria-label="Choose ability for slot ${i+1}">${ico('star')}<b>Empty</b><small>${spare.length ? 'Choose an ability' : 'Slot ' + (i + 1)}</small></button>`; }).join('');
     const nextSlot = slots < 3 ? `<small class="ab-future-slot">Slot 3 · Combat 40</small>` : slots < 4 ? `<small class="ab-future-slot">Slot 4 · Combat 70</small>` : '';
     const nxt = next ? (() => { const need = D.XPF[next.lvl] || 1, have = S().xp[next.skill] || 0; return `<div class="ab-next"><span>${ready.length ? 'Next' : 'First ability'}: <b>${esc(next.name)}</b> at ${esc(D.SK[next.skill].name)} ${next.lvl}</span><span class="bar"><i style="width:${Math.min(100, Math.round(have / need * 100))}%"></i></span></div>`; })() : '';
-    return `<section class="panel combat-abils"><div class="kit-head"><span class="k">Abilities <b class="mono">${on.length}/${slots}</b></span><button class="linkish" data-do="combatmore" data-a="abilities">Manage</button></div>
+    return `<section class="panel combat-abils"><div class="kit-head"><span class="k"${slots < 4 ? ` data-tip="text:Slot ${slots + 1} opens at Combat ${slots < 3 ? 40 : 70}"` : ''}>Abilities <b class="mono">${on.length}/${slots}</b></span><button class="linkish" data-do="combatmore" data-a="abilities">Manage</button></div>
       <div class="ab-slots">${slotHtml}</div>${nextSlot}${ready.length ? '' : nxt}</section>`;
   };
   const foodPanel = () => {
@@ -21732,6 +21800,9 @@ Q.poseBattle = (avatar, style, phase, animate) => { const root = avatar && avata
 
 /* ---------- icons: every .pxi class gets its pixel icon; ids without one keep the code-drawn line glyph ---------- */
 const installIcons = () => {
+  /* every skill has pixel icon art; register the ones the old line-glyph list lacked (research, melee, hunting,
+     exploration, herbalism, enchanting) so ico(skill) draws them instead of the placeholder dot (27 Nov 2026 audit) */
+  for (const sk of (Q.data && Q.data.SKILLS) || []) if (Q.ICONS && !(sk.id in Q.ICONS) && A.iconUrl(sk.id)) Q.ICONS[sk.id] = Q.ICONS.bit;
   const rules = Object.keys(Q.ICONS || {}).map(id => { const u = A.iconUrl(id); return u ? `.pxi-${id}{background:transparent url(${u}) center/contain no-repeat!important;-webkit-mask:none!important;mask:none!important;image-rendering:pixelated!important}` : ''; }).join('');
   let st = document.getElementById('pixel-icons'); if (!st) { st = document.createElement('style'); st.id = 'pixel-icons'; document.head.appendChild(st); } st.textContent = rules;
 };
@@ -22486,8 +22557,12 @@ UI.DO.taskmap=town=>{const page=UI.view,id=UI.taskChoice[page],node=Object.value
 Q.on('beaststrike',()=>{const el=document.querySelector('.battle-companion');if(el&&!calm())el.animate([{transform:'translateX(0)'},{transform:'translateX(12px)',offset:.4},{transform:'translateX(0)'}],{duration:400});});
 Q.on('foedefeated',m=>{const show=()=>{if(UI.view!=='combat'||Q.sim.on)return;const foe=document.getElementById('av-foe');if(!foe)return;const rect=foe.getBoundingClientRect(),layer=document.getElementById('toastlayer')||document.body;
  const label=document.createElement('div');label.className='defeat-caption';label.textContent=m.name+' defeated';label.setAttribute('role','status');label.style.left=pagePx(rect.left+rect.width/2)+'px';label.style.top=pagePx(Math.max(120,rect.top-24))+'px';layer.appendChild(label);setTimeout(()=>label.remove(),1100);
- if(calm())return;const ghost=foe.cloneNode(true);ghost.removeAttribute('id');ghost.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));ghost.className='foe-death-ghost';Object.assign(ghost.style,{left:pagePx(rect.left)+'px',top:pagePx(rect.top)+'px',width:pagePx(rect.width)+'px',height:pagePx(rect.height)+'px'});layer.appendChild(ghost);ghost.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(22px) rotate(8deg)'}],{duration:480,easing:'ease-in',fill:'forwards'});setTimeout(()=>ghost.remove(),510);
- requestAnimationFrame(()=>{const next=document.getElementById('av-foe');if(next)next.animate([{opacity:0},{opacity:0,offset:.35},{opacity:1}],{duration:650});});
+ /* the fade copies only the creature's picture at its drawn size and stays inside the fight stage (27 Nov 2026 audit:
+    a copy of the whole card in the toast layer lost the stage's sprite sizing, grew 2-3x and covered the Food panel
+    and pop-ups); the original hides while it plays, until the next creature is drawn */
+ if(calm()||document.querySelector('.modal'))return;const arena=foe.closest('.encounter-arena'),spr=foe.querySelector('img,canvas');if(!arena||!spr)return;const sr=spr.getBoundingClientRect(),ar=arena.getBoundingClientRect(),z=Q.zoom||1;
+ const ghost=spr.cloneNode(true);ghost.removeAttribute('id');ghost.className='foe-death-ghost';Object.assign(ghost.style,{position:'absolute',left:(sr.left-ar.left)/z+'px',top:(sr.top-ar.top)/z+'px',width:sr.width/z+'px',height:sr.height/z+'px',margin:'0',maxWidth:'none',maxHeight:'none'});arena.appendChild(ghost);spr.style.visibility='hidden';ghost.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(22px) rotate(8deg)'}],{duration:480,easing:'ease-in',fill:'forwards'});setTimeout(()=>ghost.remove(),510);
+ /* the next creature fades in when it is drawn (UI.updateEncounter, after the hold) */
 };UI.afterImpact(show);
 });
 /* One Scholarship family card, with visible rank buttons and the selected rank's unchanged cost/action. */
@@ -22513,7 +22588,7 @@ UI.render=fresh=>{render0(fresh);document.documentElement.classList.toggle('comp
    if(hero){const hr=hero.getBoundingClientRect(),hh=hr.height/z,k=Math.max(2,Math.round(hh*.62/32)),sz=32*k,img=comp.querySelector('img');if(img){img.style.width=img.style.height=sz+'px';img.style.maxWidth=img.style.maxHeight='none';}
     comp.style.left=((hr.right-ar.left)/z-sz*.15)+'px';comp.style.bottom=((ar.bottom-hr.bottom)/z-4)+'px';comp.style.transform='none';comp.classList.add('placed');}}}
  const src=UI.routeSource;if(src&&src.page===UI.view){const n=D.NODE[src.kind+':'+src.id],needs=src.town&&src.town!==S().town&&(src.kind==='shop'||src.kind==='fight'||src.kind==='recipe'&&D.RECIPES[src.id]?.town||(n&&!Q.nodeHere(n)));if(needs&&!view.querySelector('.route-travel')){const row=document.createElement('div');row.className='route-travel';row.innerHTML=`<span>${esc(D.ITEMS[src.item]?.name||src.name||'This activity')} · ${esc(D.TOWN[src.town].name)}</span><button class="btn primary" data-do="routetravel" data-a="${src.town}" ${Q.townUnlocked(src.town)?'':'disabled'}>${Q.townUnlocked(src.town)?'Travel & return to this task':'Road not open yet'}</button>`;view.prepend(row);}}
- for(const e of view.querySelectorAll('[data-tip^="item:"]')){if(e.matches('.need-tile')||e.closest('button,a')||e.querySelector('button,a,[data-tip^="item:"]')||e.matches('input'))continue;/* a wrapper whose picture carries the same tip leaves the route to the picture: one outlined control, not one inside another (shape rule, 26 Nov) */const id=e.dataset.tip.slice(5);if(!Q.sourceOf(id))continue;/* one route per item: skip when its row already has a route button for it (review 20 Nov) */if(e.closest('.blackout,.sil,[aria-hidden="true"]'))continue;/* never link (or name) a concealed picture */const row=e.parentElement&&(e.parentElement.closest('.need-tile,.need,.need-row,.req,.needs,li,.activity-caption p,.rw')||e.parentElement);if(row&&row.querySelector('[data-do="route"]'))continue;/* the row already has its route (one per requirement) */e.classList.add('requirement-route');e.setAttribute('role','button');e.tabIndex=0;e.dataset.do='route';e.dataset.a=id;e.setAttribute('aria-label',`Obtain ${D.ITEMS[id]?.name||id}`);}
+ for(const e of view.querySelectorAll('[data-tip^="item:"]')){if(e.matches('.need-tile')||e.closest('button,a')||e.closest('.activity-scene')/* the target in a work scene is part of the picture, not a control (27 Nov 2026 audit) */||e.querySelector('button,a,[data-tip^="item:"]')||e.matches('input'))continue;/* a wrapper whose picture carries the same tip leaves the route to the picture: one outlined control, not one inside another (shape rule, 26 Nov) */const id=e.dataset.tip.slice(5);if(!Q.sourceOf(id))continue;/* one route per item: skip when its row already has a route button for it (review 20 Nov) */if(e.closest('.blackout,.sil,[aria-hidden="true"]'))continue;/* never link (or name) a concealed picture */const row=e.parentElement&&(e.parentElement.closest('.need-tile,.need,.need-row,.req,.needs,li,.activity-caption p,.rw')||e.parentElement);if(row&&row.querySelector('[data-do="route"]'))continue;/* the row already has its route (one per requirement) */e.classList.add('requirement-route');e.setAttribute('role','button');e.tabIndex=0;e.dataset.do='route';e.dataset.a=id;e.setAttribute('aria-label',`Obtain ${D.ITEMS[id]?.name||id}`);}
  if(UI.view==='shop'&&UI.routeShopItem){UI.shopSelected.buy=UI.routeShopItem;UI.sel=UI.routeShopItem;}
 };
 })();
@@ -23830,7 +23905,8 @@ for(const town of D.TOWNS){let rank=0;for(const [id,p]of Object.entries(D.PROJEC
  for(const item of items)D.LOCAL_SUPPLIES.push({id:id+':'+item,project:id,town:town.id,item,standing,price:Math.max(4,Math.ceil(D.ITEMS[item].val*(D.ITEMS[item].heal||D.ITEMS[item].drink?.heal?4:2.5))),carry:D.ITEMS[item].drink?.heal?3:D.ITEMS[item].heal?12:null});
  p.reward=`+10 local standing. Supplies at the ${town.name} shop: ${items.map(k=>D.ITEMS[k].name.toLowerCase()).join(', ')} (${standing} standing and this building restored).`;
 }}
-Q.localSupplyReason=o=>!o||o.town!==S().town?'Visit this town first':!S().projects[o.project]?`Restore: ${D.PROJECTS[o.project].name}`:S().damaged?.[o.project]?'Repair this building first':Q.localStanding(o.town)<o.standing?`Local standing ${Q.localStanding(o.town)}/${o.standing}`:'';
+/* the reason names the actual step (27 Nov 2026 audit: cards said "Requirements unmet", which the rules ban) */
+Q.localSupplyReason=o=>!o||o.town!==S().town?'Visit this town first':!S().projects[o.project]?`${D.PROJECTS[o.project].name} first`:S().damaged?.[o.project]?'Repair this building first':Q.localStanding(o.town)<o.standing?`Local standing ${Q.localStanding(o.town)}/${o.standing}`:'';
 Q.localSupplyPrice=o=>Math.max(1,Math.ceil(o.price*(1-(Q.thiefLvl?Q.thiefLvl():0)*.0015)));
 Q.buyLocalSupply=(key,n=1)=>{
  const o=D.LOCAL_SUPPLIES.find(o=>o.id===key);if(!o||Q.localSupplyReason(o)||!Number.isSafeInteger(n)||n<1||n>10000)return false;
@@ -23847,7 +23923,7 @@ UI.V.shop=()=>{
  if(UI.shopTab!=='local')return shop0();
  const offers=D.LOCAL_SUPPLIES.filter(o=>o.town===S().town),o=offers.find(o=>o.id===UI.localSupply)||offers[0];if(!o)return shop0();
  const it=D.ITEMS[o.item],why=Q.localSupplyReason(o),n=[1,5,10].includes(UI.localQty)?UI.localQty:1,cost=Q.localSupplyPrice(o)*n,carry=o.carry&&Q.have(o.item)+n>o.carry,available=!why&&!carry&&S().coins>=cost;
- return `<div class="visual-shop"><section class="panel shop-stock local-stock"><div class="phead"><h2>${esc(D.TOWN[S().town].name)} supplies</h2><small>Standing ${Q.localStanding()}</small></div>${UI.shopTabs('local')}<div class="illustrated-choices">${offers.map(x=>`<button class="illustrated-card ${x.id===o.id?'selected':''}" data-do="localpick" data-a="${x.id}" aria-pressed="${x.id===o.id}"><span class="choice-art">${Q.itemIco(D.ITEMS[x.item])}</span><b>${esc(D.ITEMS[x.item].name)}</b><small>${x.standing} standing · ${esc(D.PROJECTS[x.project].name)}</small><span class="choice-state">${Q.localSupplyReason(x)?'Requirements unmet':'Available'} · ${fmt(Q.localSupplyPrice(x))} coins</span></button>`).join('')}</div></section><section class="panel shop-task"><h2>${esc(it.name)}</h2><div class="local-picture">${Q.itemIco(it)}</div><p>${esc(D.PROJECTS[o.project].story)}</p><p class="${why?'warn':'ok'}">${Q.localStanding()>=o.standing?'✓':'◇'} Standing ${Q.localStanding()} / ${o.standing}<br>${S().projects[o.project]?'✓':'◇'} ${esc(D.PROJECTS[o.project].name)}${S().damaged?.[o.project]?' · needs repair':''}</p>${!S().projects[o.project]||S().damaged?.[o.project]?`<button class="btn" data-do="openproject" data-a="${o.project}">Open building</button>`:''}<p>${o.carry?`Emergency reserve: carry up to ${o.carry}. ${it.drink?.heal?'Brew or discover a recipe for sustained supply.':'Cook for longer expeditions.'}`:'Local ingredients for your own crafting. No stock timer or daily visit required.'}</p><div class="btnrow">${[1,5,10].map(v=>`<button class="btn ${n===v?'on':''}" data-do="localqty" data-a="${v}">${v}</button>`).join('')}</div><button class="btn primary" data-do="localbuy" data-a="${o.id}" data-b="${n}" ${available?'':'disabled'}>${why?'Requirements unmet':carry?'Food reserve full':`Buy ${n} · ${fmt(cost)} coins`}</button><small>${Q.have(o.item)} held</small></section></div>`;
+ return `<div class="visual-shop"><section class="panel shop-stock local-stock"><div class="phead"><h2>${esc(D.TOWN[S().town].name)} supplies</h2><small>Standing ${Q.localStanding()}</small></div>${UI.shopTabs('local')}<div class="illustrated-choices">${offers.map(x=>`<button class="illustrated-card ${x.id===o.id?'selected':''}" data-do="localpick" data-a="${x.id}" aria-pressed="${x.id===o.id}"><span class="choice-art">${Q.itemIco(D.ITEMS[x.item])}</span><b>${esc(D.ITEMS[x.item].name)}</b><small>${x.standing} standing · ${esc(D.PROJECTS[x.project].name)}</small><span class="choice-state">${esc(Q.localSupplyReason(x)||'Available · '+fmt(Q.localSupplyPrice(x))+' coins')}</span></button>`).join('')}</div></section><section class="panel shop-task"><h2>${esc(it.name)}</h2><div class="local-picture">${Q.itemIco(it)}</div><p>${esc(D.PROJECTS[o.project].story)}</p><p class="${why?'warn':'ok'}">${Q.localStanding()>=o.standing?'✓':'◇'} Standing ${Q.localStanding()} / ${o.standing}<br>${S().projects[o.project]?'✓':'◇'} ${esc(D.PROJECTS[o.project].name)}${S().damaged?.[o.project]?' · needs repair':''}</p>${!S().projects[o.project]||S().damaged?.[o.project]?`<button class="btn" data-do="openproject" data-a="${o.project}">Open building</button>`:''}<p>${o.carry?`Emergency reserve: carry up to ${o.carry}. ${it.drink?.heal?'Brew or discover a recipe for sustained supply.':'Cook for longer expeditions.'}`:'Local ingredients for your own crafting. No stock timer or daily visit required.'}</p><div class="btnrow">${[1,5,10].map(v=>`<button class="btn ${n===v?'on':''}" data-do="localqty" data-a="${v}">${v}</button>`).join('')}</div><button class="btn primary" data-do="localbuy" data-a="${o.id}" data-b="${n}" ${available?'':'disabled'}>${why?esc(why):carry?'Food reserve full':`Buy ${n} · ${fmt(cost)} coins`}</button><small>${Q.have(o.item)} held</small></section></div>`;
 };
 Object.assign(UI.DO,{localpick:id=>{UI.localSupply=id;UI.render(false);},localqty:n=>{UI.localQty=+n;UI.render(false);},localbuy:(id,n)=>{const ok=Q.buyLocalSupply(id,+n);if(!ok&&Q.saveHealth)Q.toast(Q.saveHealth,true);UI.render(false);},projectshop:id=>{const o=D.LOCAL_SUPPLIES.find(o=>o.project===id);if(o){UI.shopTab='local';UI.localSupply=o.id;Q.go('shop');}}});
 const projects0=UI.projectsPanel;UI.projectsPanel=()=>{
@@ -24301,6 +24377,7 @@ UI.shopTabs=tab=>tabs0(tab)+`<nav class="shop-categories" aria-label="Shop categ
 UI.shopSkillExtraNav=()=>'';
 const familyNav=()=>`<nav class="tool-families" aria-label="Skill upgrades">${families.map(f=>`<button class="btn ${UI.shopTab==='buy'&&UI.shopCategory==='tools'&&f.key===UI.shopToolFamily?'on':''}" data-do="toolfamily" data-a="${f.key}" aria-pressed="${UI.shopTab==='buy'&&UI.shopCategory==='tools'&&f.key===UI.shopToolFamily}">${UI.activityIcon(f.sk)}<span>${esc(f.label)}</span>${cues(f.ids)}</button>`).join('')}${UI.shopSkillExtraNav()}</nav>`;
 const shopHeader=()=>{const t=document.createElement('template');t.innerHTML=UI.shopTabs(UI.shopTab);const categories=t.content.querySelector('.shop-categories');const primary=categories?.outerHTML||'';categories?.remove();return `<section class="panel shop-upgrade-header"><div class="phead"><h2>Shop</h2><small>${esc(D.TOWN[S().town].name)}</small></div>${primary}<div class="shop-shelf-actions">${t.innerHTML}</div></section>`;};
+UI.shopHeader=shopHeader;
 // One scaffold for every shelf: navigation never sits inside a changing item panel.
 const stableShop=raw=>{
  const tmp=document.createElement('template');tmp.innerHTML=raw;
@@ -24320,13 +24397,16 @@ const stableShop=raw=>{
 };
 const shop0=UI.V.shop;
 UI.V.shop=()=>{
- if(UI.routeShopItem&&D.ITEMS[UI.routeShopItem]){const it=D.ITEMS[UI.routeShopItem];UI.shopCategory=it.type==='tool'?'tools':it.slot||it.type==='ammo'?'equipment':'supplies';if(it.toolSkill)UI.shopToolFamily=Q.toolKey(it.toolSkill);UI.routeShopItem=null;}
+ if(UI.routeShopItem&&D.ITEMS[UI.routeShopItem]){const it=D.ITEMS[UI.routeShopItem];UI.shopCategory=it.type==='tool'?'tools':it.slot||it.type==='ammo'?'equipment':'supplies';if(it.toolSkill)UI.shopToolFamily=Q.toolKey(it.toolSkill);if(it.type==='tool')UI.shopPinned=UI.routeShopItem;UI.routeShopItem=null;}
  if(UI.shopTab!=='buy'||UI.shopCategory!=='tools')return stableShop(shop0());
  /* every tier stays on the shelf; the "Available only" switch (like Ready to make) hides tiers that need a region or skill you don't have yet */
- const F=families.find(f=>f.key===UI.shopToolFamily)||families[0],open=id=>Q.shopUpgradeState(id).ready,all=F.ids.filter(id=>!Q.toolUpgradeOwned(id)),only=UI.availOnly('tool:'+F.key,F.ids.some(Q.toolUpgradeOwned)),ids=only?all.filter(open):all,hidden=all.length-ids.length,selected=ids.includes(UI.shopSelected.buy)?UI.shopSelected.buy:ids[0];UI.shopSelected.buy=selected;
- const detail=selected?(()=>{const it=D.ITEMS[selected],state=Q.shopUpgradeState(selected);return `<div class="phead"><h2>Tool upgrade</h2></div>${UI.shopPreview(selected)}<p class="upgrade-purpose">${esc(it.purpose||'')}</p><p>${+(D.TOOL_SPEED[it.tier]*100).toFixed(1)}% faster ${esc(D.SK[F.sk].name)}.</p>${UI.needTiles({coins:Q.buyPrice(selected),...state.cost})}<p class="${state.ready?'ok':'dim'}">${state.lock?'Learn '+esc(D.SK[state.lock].name)+' first.':!state.reachable?'Reach '+esc(D.TOWN[state.region].name)+' to unlock this commission.':state.ready?'You have the supplies for this upgrade.':'Gather the missing supplies, then return here to upgrade.'}</p><div class="shop-action"><button class="btn primary" data-do="buyupgrade" data-a="${selected}" ${state.ready?'':'disabled'}>Upgrade</button></div>`;})():all.length?'<h2>Nothing to make yet</h2><p>No tier here is affordable right now. Turn off Available only to see every tier and what it needs.</p>':'<h2>Every upgrade acquired</h2><p>Your best tool is already in use.</p>';
+ const F=families.find(f=>f.key===UI.shopToolFamily)||families[0],open=id=>Q.shopUpgradeState(id).ready,/* 27 Nov 2026 audit: owned tiers stay on the shelf marked Owned (they used to vanish, so a purchase moved the
+    selection onto the next tier under a "Bought" label); a route to a tool keeps that tool on the shelf even with
+    Available only on, until the player picks another card or flips the switch */
+ owned=Q.toolUpgradeOwned,all=F.ids.filter(id=>!owned(id)),only=UI.availOnly('tool:'+F.key,F.ids.some(owned)),ids=only?all.filter(id=>open(id)||id===UI.shopPinned):F.ids,hidden=all.length-ids.filter(id=>!owned(id)).length,selected=ids.includes(UI.shopSelected.buy)?UI.shopSelected.buy:(ids.find(id=>!owned(id))||ids[0]);UI.shopSelected.buy=selected;
+ const detail=selected&&owned(selected)?(()=>{const it=D.ITEMS[selected];return `<div class="phead"><h2>Tool upgrade</h2></div>${UI.shopPreview(selected)}<p class="upgrade-purpose">${esc(it.purpose||'')}</p><p>${+(D.TOOL_SPEED[it.tier]*100).toFixed(1)}% faster ${esc(D.SK[F.sk].name)}.</p><p class="ok">✓ Owned. ${Q.toolTier(it.toolSkill)>it.tier?'A better tier has replaced it.':'This is the tool you work with now.'}</p><div class="shop-action"><button class="btn primary" disabled>Owned</button></div>`;})():selected?(()=>{const it=D.ITEMS[selected],state=Q.shopUpgradeState(selected);return `<div class="phead"><h2>Tool upgrade</h2></div>${UI.shopPreview(selected)}<p class="upgrade-purpose">${esc(it.purpose||'')}</p><p>${+(D.TOOL_SPEED[it.tier]*100).toFixed(1)}% faster ${esc(D.SK[F.sk].name)}.</p>${UI.needTiles({coins:Q.buyPrice(selected),...state.cost})}<p class="${state.ready?'ok':'dim'}">${state.lock?'Learn '+esc(D.SK[state.lock].name)+' first.':!state.reachable?'Reach '+esc(D.TOWN[state.region].name)+' to unlock this commission.':state.ready?'You have the supplies for this upgrade.':'Gather the missing supplies, then return here to upgrade.'}</p><div class="shop-action"><button class="btn primary" data-do="buyupgrade" data-a="${selected}" ${state.ready?'':'disabled'}>Upgrade</button></div>`;})():all.length?'<h2>Nothing to make yet</h2><p>No tier here is affordable right now. Turn off Available only to see every tier and what it needs.</p>':'<h2>Every upgrade acquired</h2><p>Your best tool is already in use.</p>';
  const toggle=`<div class="shop-filter-row"><button class="filter-toggle ${only?'on':''}" role="switch" aria-checked="${only}" data-do="shopavailonly" data-a="tool:${F.key}" data-b="${only?1:0}" data-tip="text:Show only what you can make right now: enough coins, materials and level"><span class="ft-track" aria-hidden="true"><span class="ft-knob"></span></span><span>Available only</span><b>${only?'On':'Off'}</b></button>${only&&hidden?`<small class="dim avail-hidden">${hidden} ${hidden===1?'tier':'tiers'} you can't make yet hidden · turn off Available only to see them</small>`:''}</div>`;
- return stableShop(`<div class="visual-shop shop-tools"><section class="panel shop-stock">${all.length?toggle:''}<div class="illustrated-choices">${ids.map(id=>{const it=D.ITEMS[id],state=Q.shopUpgradeState(id);return `<button class="illustrated-card ${id===selected?'selected':''}" data-tool="${id}" data-do="shopselect" data-a="${id}" aria-pressed="${id===selected}"><span class="choice-art">${Q.itemIco(it)}</span><b>${esc(it.name)}</b><small>${+(D.TOOL_SPEED[it.tier]*100).toFixed(1)}% faster</small><span class="stock-price">${UI.shopCardCost(id)}</span><span class="choice-state ${state.ready?'ok':''}">${state.ready?'✓ Ready to upgrade':state.lock?'Skill required':!state.reachable?'Region required':'Supplies needed'}</span></button>`;}).join('')||(all.length?'<p>Nothing here you can make yet. Turn off Available only to see every tier and what it needs.</p>':'<p>You have acquired every upgrade in this family.</p>')}</div></section><section class="panel shop-task">${detail}</section></div>`);
+ return stableShop(`<div class="visual-shop shop-tools"><section class="panel shop-stock">${all.length?toggle:''}<div class="illustrated-choices">${ids.map(id=>{const it=D.ITEMS[id],state=Q.shopUpgradeState(id),have=owned(id);return `<button class="illustrated-card ${id===selected?'selected':''} ${have?'owned':''}" data-tool="${id}" data-do="shopselect" data-a="${id}" aria-pressed="${id===selected}"><span class="choice-art">${Q.itemIco(it)}</span><b>${esc(it.name)}</b><small>${+(D.TOOL_SPEED[it.tier]*100).toFixed(1)}% faster</small><span class="stock-price">${have?'':UI.shopCardCost(id)}</span><span class="choice-state ${have||state.ready?'ok':''}">${have?'✓ Owned':state.ready?'✓ Ready to upgrade':state.lock?'Skill required':!state.reachable?'Region required':'Supplies needed'}</span></button>`;}).join('')||(all.length?'<p>Nothing here you can make yet. Turn off Available only to see every tier and what it needs.</p>':'<p>You have acquired every upgrade in this family.</p>')}</div></section><section class="panel shop-task">${detail}</section></div>`);
 };
 /* "Available only" per shelf family (Part C Task 23): ON by default until the hero owns something from that family, then
    whatever the player last chose; the choice is kept in settings.availOnly, so it lasts between sessions. */
@@ -24334,7 +24414,7 @@ UI.availOnly=(fam,owns)=>{const m=Q.S.settings.availOnly||{};return fam in m?!!m
 UI.setAvailOnly=(fam,on)=>{(Q.S.settings.availOnly=Q.S.settings.availOnly||{})[fam]=!!on;Q.save&&Q.save();};
 Object.assign(UI.DO,{
  shopcategory:id=>{if(!['tools','equipment','supplies'].includes(id))return;UI.shopTab='buy';UI.shopCategory=id;UI.shopSelected.buy=null;if(id==='tools'){const f=families.find(f=>f.ids.some(id=>Q.shopUpgradeState(id).ready));if(f){UI.shopToolFamily=f.key;selectReadyTool(f.key);}}UI.render(false);},
- shopavailonly:(fam,now)=>{if(fam){UI.setAvailOnly(fam,now!=="1");}else UI.shopAvailableOnly=!UI.shopAvailableOnly;UI.render(false);},
+ shopavailonly:(fam,now)=>{UI.shopPinned=null;if(fam){UI.setAvailOnly(fam,now!=="1");}else UI.shopAvailableOnly=!UI.shopAvailableOnly;UI.render(false);},
  toolfamily:id=>{if(!families.some(f=>f.key===id))return;UI.shopTab='buy';UI.shopCategory='tools';UI.shopToolFamily=id;selectReadyTool(id);UI.render(false);},
  toolshop:id=>{const it=D.ITEMS[id];UI.shopTab='buy';UI.shopCategory='tools';UI.shopToolFamily=Q.toolKey(it?.toolSkill)||'axe';UI.shopSelected.buy=id;if(UI.view==='shop')UI.render(false);else Q.go('shop');},
  buyupgrade:id=>{if(!Q.buy(id,1)&&Q.saveHealth)Q.toast(Q.saveHealth,true);UI.renderHud();UI.renderRail();UI.render(false);}
@@ -24409,7 +24489,7 @@ Q.recipeGate=r=>{
  /* a survey works from anywhere once its town is unlocked (owner, 26 Nov 2026) */
  if(r.town&&!Q.townUnlocked(r.town))return 'Reach '+D.TOWN[r.town].name+' first';
  if(r.chart&&!known(r.chart))return 'Complete the '+D.ITEMS[r.chart].name+' first';
- if(r.project&&(!S().projects[r.project]||S().damaged?.[r.project]))return 'Restore '+D.PROJECTS[r.project].name+' to use this commission';
+ if(r.project&&(!S().projects[r.project]||S().damaged?.[r.project]))return D.PROJECTS[r.project].name+' first';/* project names are already verbs ("Rekindle the village forge"); "Restore Rekindle…" doubled them (27 Nov 2026 audit) */
  if(r.facility&&!known(r.facility)&&!(r.facility==='workshop_jig'&&(S().house.furn.toolrack||0)>0))return 'Make '+D.ITEMS[r.facility].name+' in Carpentry';
  if(r.study&&!Q.techDone(r.study))return 'Study '+D.TECH[r.study].name+' in Scholarship';
  if(r.lead==='plans'&&Q.mastCount('thieve','merchant')<25&&!Q.surveyKnown('mossbarrow'))return '25 merchant pickpockets OR the Mossbarrow survey';
@@ -24602,7 +24682,7 @@ const homeGlance = () => {
  /* a checklist step (boss_checklist.js): its first open item is the main action, then Skip; the list sits in the card */
  const todo = next.checklist && next.checklist.items.find(i => !i.done && i.action);
  const button = next.checklist ? `${todo ? `<button class="btn primary" data-do="${todo.action.do}" data-a="${esc(todo.action.a)}">${esc(todo.key === 'armour' || todo.key === 'ability' ? todo.label : todo.action.text)}</button>` : ''}<button class="btn" data-do="bossprepskip" data-a="${esc(next.a || '')}">Skip checks</button>`
-   : `<button class="btn primary" data-do="${next.action}" data-a="${esc(next.a || '')}" data-b="${esc(next.b || '')}">${esc(next.title)}</button>`;
+   : `<button class="btn primary" data-do="${next.action}" data-a="${esc(next.a || '')}" data-b="${esc(next.b || '')}">${next.action === 'qstart' ? 'Accept quest' /* every acceptance says Accept quest (27 Nov 2026 audit) */ : esc(next.title)}</button>`;
  const count = S().inbox?.length || 0;
  const local = (town.id !== 'willowbrook' || S().q.goblin_menace?.s === 'done') && Q.closestRestoration();
  const flag = count ? `<button class="btn" data-do="go" data-a="activity">${count} ${count === 1 ? 'decision' : 'decisions'} waiting</button>` :
@@ -24724,7 +24804,8 @@ const commissionLocks=sk=>!Q.skillUnlocked(sk)?`<div class="skill-commission-loc
 const shop=UI.V.shop;
 UI.V.shop=()=>{
  const sk=UI.skillCommissionSelected;
- if(UI.shopTab==='recovery')return `<section class="panel shop-upgrade-header"><h2>Shop · Buy back</h2>${UI.shopTabs('recovery')}</section><section class="panel recovery-shelf"><p>Recover rare equipment you previously found and no longer own. Each replacement costs four times its base value.</p><div class="illustrated-choices">${Q.recoveryOffers().map(id=>`<article class="illustrated-card">${Q.itemIco(D.ITEMS[id])}<b>${esc(D.ITEMS[id].name)}</b><button class="btn" data-do="recoverloot" data-a="${id}" ${S().coins<D.ITEMS[id].val*4?'disabled':''}>Recover · ${D.ITEMS[id].val*4} coins</button></article>`).join('')||'<p>No missing rare equipment to recover. Find a piece first; equipped and stored items are already safe.</p>'}</div></section>`;
+ /* Buy back uses the same header as every shelf, so the category row and shelf actions keep their places (27 Nov 2026 audit) */
+ if(UI.shopTab==='recovery')return `${UI.shopHeader?UI.shopHeader():`<section class="panel shop-upgrade-header"><h2>Shop</h2>${UI.shopTabs('recovery')}</section>`}<section class="panel recovery-shelf"><p>Recover rare equipment you previously found and no longer own. Each replacement costs four times its base value.</p><div class="illustrated-choices">${Q.recoveryOffers().map(id=>`<article class="illustrated-card">${Q.itemIco(D.ITEMS[id])}<b>${esc(D.ITEMS[id].name)}</b><button class="btn" data-do="recoverloot" data-a="${id}" ${S().coins<D.ITEMS[id].val*4?'disabled':''}>Recover · ${D.ITEMS[id].val*4} coins</button></article>`).join('')||'<p>No missing rare equipment to recover. Find a piece first; equipped and stored items are already safe.</p>'}</div></section>`;
  if(sk&&UI.shopCategory==='tools'&&UI.shopTab==='buy'){
   const owned=S().skillUpgrades?.[sk]||0,selected=UI.skillCommissionRank||Math.min(3,owned+1),st=Q.skillCommission(sk,selected),label=D.SKILL_COMMISSIONS[sk].name,raw=shop(),t=document.createElement('template');t.innerHTML=raw;
   /* the shared "Available only" switch hides ranks whose level (or skill) you haven't reached; acquired ranks stay */
@@ -24998,18 +25079,23 @@ U.afterImpact=(fn,delay=0)=>{
 };
 U.updateEncounter=()=>{
  if(U.view!=='combat'||!document.querySelector('.encounter-arena'))return;
- clearTimeout(encounterTimer);const wait=Math.max(0,(U.impactUntil||0)-performance.now());
+ clearTimeout(encounterTimer);const wait=Math.max(0,Math.max(U.impactUntil||0,U.deathHold||0)-performance.now());
  if(wait){encounterTimer=setTimeout(U.updateEncounter,wait+40);return;}
  if(U.impactFlights?.size){Promise.allSettled([...U.impactFlights].map(a=>a.finished)).then(U.updateEncounter);return;}
  const temp=document.createElement('template');temp.innerHTML=U.V.combat();
  const lastSide=r=>{const a=r.querySelectorAll('.encounter-arena>.side');return a[a.length-1]||null;},old=lastSide(document),fresh=lastSide(temp.content);
- if(old&&fresh&&old.querySelector('#av-foe')?.dataset.a!==fresh.querySelector('#av-foe')?.dataset.a)old.replaceWith(fresh);
+ if(old&&fresh&&old.querySelector('#av-foe')?.dataset.a!==fresh.querySelector('#av-foe')?.dataset.a){old.replaceWith(fresh);if(!calm())fresh.querySelector('#av-foe')?.animate([{opacity:0},{opacity:1}],{duration:320,easing:'ease-out'});}
  const mid=document.querySelector('.encounter-arena>.mid'),nextMid=temp.content.querySelector('.encounter-arena>.mid');if(mid&&nextMid&&!!mid.querySelector('[data-prog]')!==!!nextMid.querySelector('[data-prog]'))mid.innerHTML=nextMid.innerHTML;
  const prog=mid?.querySelector('[data-prog]');if(prog&&Q.act?.kind==='fight')prog.dataset.prog='fight:'+Q.act.id;
  const targets=document.querySelector('.combat-targets .hunt-areas'),nextTargets=temp.content.querySelector('.combat-targets .hunt-areas');if(targets&&nextTargets&&targets.innerHTML!==nextTargets.innerHTML)targets.innerHTML=nextTargets.innerHTML;
  const heroLevel=document.querySelector('.encounter-arena .lvchip.you');if(heroLevel)heroLevel.textContent='Combat '+Q.combatLvl();
  U.updateCombatHeader?.();U.collectProg();U.upd();
 };
+/* the next creature waits until the killing blow has visibly landed and the defeated one has faded (27 Nov 2026 audit:
+   on a busy frame the swing started after the redraw, so the blow and the "slain" flash landed on the new creature).
+   The hold starts when the kill is announced (at most 2 s), then shortens to the death fade once the impact shows;
+   fight timing is unchanged (the next creature is tracked first). */
+Q.on('slain',()=>{if(Q.sim.on||Q.forecasting||calm())return;U.deathHold=performance.now()+2000;U.afterImpact(()=>{U.deathHold=performance.now()+480;},Q.battleTiming?.impact||390);});
 Q.on('splat',(side,text,kind,delay=0)=>{if(side==='foe'&&/^\d/.test(String(text))&&!kind.includes('miss')&&!Q.sim.on&&!Q.forecasting&&!calm())U.impactUntil=performance.now()+Math.max(0,delay-180)+(Q.battleTiming?.impact||390);});
 for(const key of ['fhp','fhptxt']){const bind=U.B[key];U.B[key]=(e,...a)=>{if(performance.now()<(U.impactUntil||0)||U.impactFlights?.size)return;bind(e,...a);};}
 const render=U.render;
@@ -25694,6 +25780,10 @@ setTimeout(wrapUpdate, 0);
 DQ.on('act', () => { if (UI.view === 'combat') setTimeout(() => { try { shape(); } catch (e) {} }, 0); });
 DQ.on('encounter', () => { if (UI.view === 'combat') setTimeout(() => { try { shape(); } catch (e) {} }, 0); });
 })();
+/* starting a fight from a pop-up (the Boss card's Challenge, a field guide's Fight it) closes the pop-up first, so the
+   fight itself is what you see (27 Nov 2026 audit: the boss, its special and the victory all played behind it) */
+(() => { const UI = DQ.ui, act0 = UI.DO.act; if (!act0 || act0._closesModal) return;
+  UI.DO.act = (k, ...r) => { if (k === 'fight' && document.querySelector('.modal')) DQ.closeModal(); return act0(k, ...r); }; UI.DO.act._closesModal = true; })();
 
 </script>
 <script>
@@ -26824,8 +26914,28 @@ const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performan
       if (key !== L.key) { L.key = key; L.x.clearRect(0, 0, L.cv.width, L.cv.height); for (const w of L.walkers) draw(L.x, w); } }
     if (layers.size) this.raf = requestAnimationFrame(n => this.run(n)); } };
 
+/* Home's town scene at a whole-number scale (27 Nov 2026 audit: object-fit:cover showed it at 2.36x, 1.78x and 0.56x;
+   the art rule allows a fitted scale only on the Village page). The picture takes the smallest whole scale that covers
+   the card's width (2x on desktop, 1x on phones), sits on the card's bottom edge and is cropped by it; any height left
+   above is filled with the scene's own sky colour, so nothing is shrunk or stretched. The walkers' canvas follows. */
+const sky = new Map();
+const skyOf = img => { const k = img.currentSrc || img.src; if (sky.has(k)) return sky.get(k); let c = '';
+  try { const cv = document.createElement('canvas'); cv.width = 1; cv.height = 1; const x = cv.getContext('2d'); x.drawImage(img, Math.floor(img.naturalWidth / 2), 1, 1, 1, 0, 0, 1, 1); const d = x.getImageData(0, 0, 1, 1).data; c = `rgb(${d[0]},${d[1]},${d[2]})`; } catch (e) { /* a tainted image keeps the panel colour */ }
+  sky.set(k, c); return c; };
+const fitHome = () => { const img = document.querySelector('.home-scene img.scene'); if (!img || !img.naturalWidth) return; const box = img.parentElement;
+  img.removeAttribute('style'); box.style.height = ''; box.style.removeProperty('background');
+  const bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) return;
+  const W = img.naturalWidth, H = img.naturalHeight, k = Math.max(1, Math.ceil(bw / W)), w = W * k, h = H * k;
+  box.style.height = bh + 'px'; const c = skyOf(img); if (c) box.style.setProperty('background', c, 'important');
+  Object.assign(img.style, { position: 'absolute', maxWidth: 'none', width: w + 'px', height: h + 'px', left: Math.round((bw - w) / 2) + 'px', top: (h <= bh ? bh - h : Math.round((bh - h) * .6)) + 'px', objectFit: 'fill' });
+  img.dataset.scale = k; for (const L of layers) if (L.img === img) fit(L); };
+Q.fitHomeScene = fitHome;
+let fitRaf = 0; addEventListener('resize', () => { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(fitHome); });
+
 const render0 = UI.render;
-UI.render = (...a) => { const r = render0(...a); try { Q.townWalkersScan(); } catch (e) { /* the scene stays as painted */ } return r; };
+UI.render = (...a) => { const r = render0(...a);
+  try { const img = document.querySelector('.home-scene img.scene'); if (img) { if (img.complete) fitHome(); else img.addEventListener('load', fitHome, { once: true }); } } catch (e) { /* the scene keeps its CSS fit */ }
+  try { Q.townWalkersScan(); } catch (e) { /* the scene stays as painted */ } return r; };
 })();
 
 </script>
@@ -27109,8 +27219,12 @@ function fireflies(cv) {
   const cx = cv.getContext('2d'); let w, h; const fit = () => { w = cv.width = innerWidth; h = cv.height = innerHeight; }; fit(); addEventListener('resize', fit);
   const fl = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), r: .6 + Math.random() * 1.8, p: Math.random() * 6, s: .02 + Math.random() * .05 }));
   let lastFrame=performance.now();
+  /* reduced motion: one still frame of fireflies, no drifting (27 Nov 2026 audit: the loop ignored the setting) */
+  const still = () => (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) || (DQ.S && DQ.S.settings && DQ.S.settings.reduceFx);
+  let drawnStill = false;
   const loop = t => {
     if (!cv.isConnected) return;
+    if (still()) { if (drawnStill) { requestAnimationFrame(loop); return; } drawnStill = true; t = 0; } else drawnStill = false;
     const frames=Math.max(0,Math.min(3,(t-lastFrame)/(1000/60)));lastFrame=t; cx.clearRect(0, 0, w, h);
     for (const f of fl) { f.x += Math.sin(t / 2400 + f.p) * .0004 * frames; f.y -= f.s * .0006 * frames; if (f.y < -.02) { f.y = 1.02; f.x = Math.random(); } const a = .35 + .65 * Math.abs(Math.sin(t / 900 + f.p)); cx.fillStyle = `rgba(${tint},${a * .85})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r, 0, 6.3); cx.fill(); cx.fillStyle = `rgba(${tint},${a * .12})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r * 6, 0, 6.3); cx.fill(); }
     requestAnimationFrame(loop);

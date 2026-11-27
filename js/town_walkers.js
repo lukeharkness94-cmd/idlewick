@@ -54,6 +54,26 @@ const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performan
       if (key !== L.key) { L.key = key; L.x.clearRect(0, 0, L.cv.width, L.cv.height); for (const w of L.walkers) draw(L.x, w); } }
     if (layers.size) this.raf = requestAnimationFrame(n => this.run(n)); } };
 
+/* Home's town scene at a whole-number scale (27 Nov 2026 audit: object-fit:cover showed it at 2.36x, 1.78x and 0.56x;
+   the art rule allows a fitted scale only on the Village page). The picture takes the smallest whole scale that covers
+   the card's width (2x on desktop, 1x on phones), sits on the card's bottom edge and is cropped by it; any height left
+   above is filled with the scene's own sky colour, so nothing is shrunk or stretched. The walkers' canvas follows. */
+const sky = new Map();
+const skyOf = img => { const k = img.currentSrc || img.src; if (sky.has(k)) return sky.get(k); let c = '';
+  try { const cv = document.createElement('canvas'); cv.width = 1; cv.height = 1; const x = cv.getContext('2d'); x.drawImage(img, Math.floor(img.naturalWidth / 2), 1, 1, 1, 0, 0, 1, 1); const d = x.getImageData(0, 0, 1, 1).data; c = `rgb(${d[0]},${d[1]},${d[2]})`; } catch (e) { /* a tainted image keeps the panel colour */ }
+  sky.set(k, c); return c; };
+const fitHome = () => { const img = document.querySelector('.home-scene img.scene'); if (!img || !img.naturalWidth) return; const box = img.parentElement;
+  img.removeAttribute('style'); box.style.height = ''; box.style.removeProperty('background');
+  const bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) return;
+  const W = img.naturalWidth, H = img.naturalHeight, k = Math.max(1, Math.ceil(bw / W)), w = W * k, h = H * k;
+  box.style.height = bh + 'px'; const c = skyOf(img); if (c) box.style.setProperty('background', c, 'important');
+  Object.assign(img.style, { position: 'absolute', maxWidth: 'none', width: w + 'px', height: h + 'px', left: Math.round((bw - w) / 2) + 'px', top: (h <= bh ? bh - h : Math.round((bh - h) * .6)) + 'px', objectFit: 'fill' });
+  img.dataset.scale = k; for (const L of layers) if (L.img === img) fit(L); };
+Q.fitHomeScene = fitHome;
+let fitRaf = 0; addEventListener('resize', () => { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(fitHome); });
+
 const render0 = UI.render;
-UI.render = (...a) => { const r = render0(...a); try { Q.townWalkersScan(); } catch (e) { /* the scene stays as painted */ } return r; };
+UI.render = (...a) => { const r = render0(...a);
+  try { const img = document.querySelector('.home-scene img.scene'); if (img) { if (img.complete) fitHome(); else img.addEventListener('load', fitHome, { once: true }); } } catch (e) { /* the scene keeps its CSS fit */ }
+  try { Q.townWalkersScan(); } catch (e) { /* the scene stays as painted */ } return r; };
 })();

@@ -14,7 +14,7 @@ const URL=process.env.IDLEWICK_URL||'http://127.0.0.1:8765/';
   /* 1. Normal progression: first task through first useful upgrade */
   {const {ctx,page,errors}=await fresh();
    /* Part B compact Home (.home-glance): the goal card's heading names the chapter and its primary button names the action */
-   assert.match(await page.locator('.home-next h2').innerText(),/First Steps/);assert.match(await page.locator('.home-next .btn.primary').innerText(),/Meet Elder Wren/);
+   assert.match(await page.locator('.home-next h2').innerText(),/First Steps/);/* 27 Nov 2026: every quest acceptance says Accept quest (AGENTS.md words rule), Home included */assert.match(await page.locator('.home-next .btn.primary').innerText(),/Accept quest/);
    await page.locator('.home-next .btn.primary').click();await page.waitForTimeout(300);assert.equal(await page.evaluate(()=>DQ.S.q.first_steps?.s),'active','Meet Elder Wren accepts First Steps');
    await page.evaluate(()=>{DQ.go('overview');});assert.match(await page.locator('.home-glance').innerText(),/0\s*\/\s*5/);
    await page.evaluate(()=>{DQ.startAct('fish','shrimp',{quiet:true});DQ.simulate(5*60000);DQ.startAct('wood','normal',{quiet:true});DQ.simulate(4*60000);DQ.ui.render(true);});

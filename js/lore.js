@@ -3,17 +3,18 @@
 const DQ = window.DQ, D = DQ.data;
 
 /* ---------- Weapons: plain names for starter gear, grander ones as the metal improves ---------- */
+/* plain names in sentence case like the armour ("Bronze full helm"), 27 Nov 2026 audit */
 const T = ['bronze', 'iron', 'steel', 'mithril', 'adamant', 'rune', 'astral'];
 const WEAPON_NAMES = {
-  sword: ['Bronze Shortsword', "Soldier's Blade", "Knight's Longsword", 'Skyforged Saber', 'Emerald Reaver', 'Glacier Fang', 'Starsunder'],
-  dagger: ['Bronze Knife', 'Alley Knife', 'Quickfang', 'Whisperblade', "Viper's Kiss", 'Frostbite', 'Nightglint'],
-  hammer: ['Bronze Mallet', "Smith's Maul", 'Siegebreaker', 'Thunderhead', 'Earthshaker', 'Avalanche', 'Worldbreaker'],
+  sword: ['Bronze shortsword', "Soldier's Blade", "Knight's Longsword", 'Skyforged Saber', 'Emerald Reaver', 'Glacier Fang', 'Starsunder'],
+  dagger: ['Bronze knife', 'Alley Knife', 'Quickfang', 'Whisperblade', "Viper's Kiss", 'Frostbite', 'Nightglint'],
+  hammer: ['Bronze mallet', "Smith's Maul", 'Siegebreaker', 'Thunderhead', 'Earthshaker', 'Avalanche', 'Worldbreaker'],
 };
 const W = {};
 T.forEach((t, i) => Object.entries(WEAPON_NAMES).forEach(([k, names]) => { W[`${t}_${k}`] = names[i]; }));
 Object.assign(W, {
-  bow_normal: 'Wooden Shortbow', bow_oak: "Hunter's Bow", bow_willow: 'Whisperwood Bow', bow_maple: 'Autumn Recurve', bow_yew: 'Nightyew Longbow', bow_magic: 'Spellstring', bow_elder: 'Elderthorn Greatbow',
-  staff_normal: 'Wooden Staff', staff_oak: "Acolyte's Staff", staff_willow: 'Willowshade Staff', staff_maple: 'Emberwood Staff', staff_yew: 'Yewbound Staff', staff_magic: 'Aetherwood Staff', staff_elder: 'Elderlight',
+  bow_normal: 'Wooden shortbow', bow_oak: "Hunter's Bow", bow_willow: 'Whisperwood Bow', bow_maple: 'Autumn Recurve', bow_yew: 'Nightyew Longbow', bow_magic: 'Spellstring', bow_elder: 'Elderthorn Greatbow',
+  staff_normal: 'Wooden staff', staff_oak: "Acolyte's Staff", staff_willow: 'Willowshade Staff', staff_maple: 'Emberwood Staff', staff_yew: 'Yewbound Staff', staff_magic: 'Aetherwood Staff', staff_elder: 'Elderlight',
   barnacle_cutlass: 'Saltbitten Cutlass', witch_staff: "Morwenna's Hexstaff", emberfang_bow: 'Emberfang, the Wyrm Bow',
 });
 D.WEAPON_NAMES = W;

@@ -12,7 +12,7 @@ Q.recipeGate=r=>{
  /* a survey works from anywhere once its town is unlocked (owner, 26 Nov 2026) */
  if(r.town&&!Q.townUnlocked(r.town))return 'Reach '+D.TOWN[r.town].name+' first';
  if(r.chart&&!known(r.chart))return 'Complete the '+D.ITEMS[r.chart].name+' first';
- if(r.project&&(!S().projects[r.project]||S().damaged?.[r.project]))return 'Restore '+D.PROJECTS[r.project].name+' to use this commission';
+ if(r.project&&(!S().projects[r.project]||S().damaged?.[r.project]))return D.PROJECTS[r.project].name+' first';/* project names are already verbs ("Rekindle the village forge"); "Restore Rekindle…" doubled them (27 Nov 2026 audit) */
  if(r.facility&&!known(r.facility)&&!(r.facility==='workshop_jig'&&(S().house.furn.toolrack||0)>0))return 'Make '+D.ITEMS[r.facility].name+' in Carpentry';
  if(r.study&&!Q.techDone(r.study))return 'Study '+D.TECH[r.study].name+' in Scholarship';
  if(r.lead==='plans'&&Q.mastCount('thieve','merchant')<25&&!Q.surveyKnown('mossbarrow'))return '25 merchant pickpockets OR the Mossbarrow survey';

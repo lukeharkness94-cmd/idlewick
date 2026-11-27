@@ -328,8 +328,10 @@ html.calm .events .ev-result{animation:none}
 .event-fullscreen{padding:20px;background:#07101aea}.event-fullscreen>.m-card.wide{width:min(1200px,100%);max-width:none;height:calc(100dvh - 40px);display:flex;flex-direction:column}.event-fullscreen .m-body{flex:1;min-height:0;display:flex}.encounter-moment{display:flex;flex-direction:column;flex:1;min-width:0}.event-panorama{background-image:linear-gradient(transparent,#101a2470),var(--event-scene);background-size:cover;background-position:center 65%;image-rendering:pixelated;min-height:120px;flex:1;max-height:45vh;border-radius:8px}.encounter-moment .events{flex:none;padding-top:12px}.encounter-moment .event,.encounter-moment .ev-result{margin:0}.encounter-moment .ev-t{font-size:24px}.encounter-moment .ev-b>p{font-size:20px;max-width:75ch}.encounter-moment .ev-opts{display:flex;flex-wrap:wrap;gap:12px}.encounter-moment .ev-opt{flex:1;min-width:180px;min-height:64px}.event-fullscreen .m-act{margin-top:12px}
 @media(min-width:861px){
  .workspace-focus>.activity-stage{display:flex;flex-direction:column;min-height:0;max-height:100%;position:static}
- .workspace-focus>.activity-stage>.activity-scene{height:clamp(110px,22vh,220px);min-height:100px;flex:1 1 160px}
- .workspace-focus>.activity-stage>.activity-caption{flex:0 0 auto;min-height:min-content;min-width:0;padding:12px}
+ .workspace-focus>.activity-stage>.activity-scene{height:clamp(110px,22vh,220px);min-height:100px;flex:1 8 160px}
+ /* on short windows the scene gives up its height first; whatever still doesn't fit scrolls inside the details instead
+    of being cut off mid-line (27 Nov 2026 audit: a locked survey's reason and Smithing's stats were hidden at 1280x720) */
+ .workspace-focus>.activity-stage>.activity-caption{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;min-width:0;padding:12px}
  .activity-caption .task-summary{margin-top:8px}.activity-caption .recipe-ingredients{display:flex;flex-wrap:wrap;gap:6px 12px}
  .activity-caption .activity-actions{margin:8px 0}
  .magic-runes .magic-body>.activity-workspace{display:grid;grid-template-columns:minmax(300px,.85fr) minmax(0,1.5fr);gap:16px}
@@ -495,7 +497,9 @@ html.calm .illustrated-card.just-unlocked{box-shadow:0 0 0 3px var(--brass)}
 .cw-head>small{color:var(--mute);font-size:14px}
 .cw-quest{margin-left:auto;display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--brass);border-radius:10px;background:color-mix(in srgb,var(--brass) 10%,var(--panel));cursor:pointer;color:var(--ink);font:inherit}
 .cw-quest small{display:block;font-size:13px;color:var(--brass);text-transform:uppercase;letter-spacing:.06em}.cw-quest b{font-size:15px}
-.cw-areas{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;min-height:0;flex:1}
+.cw-areas{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;min-height:0;flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+/* the places are the stage's list of choices: when a second row of creatures doesn't fit (1280x720), the list scrolls
+   rather than cutting off their Track buttons (27 Nov 2026 audit) */
 .cw-area{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);min-height:0}
 .cw-area-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .cw-area-h b{display:block;font-size:17px}.cw-area-h small{font-size:14px;font-weight:600}
@@ -573,7 +577,14 @@ html.short .cw-foe{gap:5px;padding:7px!important}html.short .cw-foe-h img{width:
 @media (min-width:861px){
 #view .combat-x.cw-reorg .combat-targets{display:flex;flex-direction:column;gap:8px;min-height:0;overflow:hidden}
 #view .combat-x.cw-reorg .combat-targets>.step-h{flex:none}
-#view .combat-x.cw-reorg .combat-targets>.combat-equipped{flex:1 1 0;min-height:96px;overflow:hidden}
+/* the doll never gives up its own height: its slots are controls (27 Nov 2026 audit: at 1280x720 Legs, Ammo and the
+   Weapon slot were cut off); the two training buttons share a row and the future-slot line moves into the heading's
+   tooltip on short windows, which frees the room */
+#view .combat-x.cw-reorg .combat-targets>.combat-equipped{flex:1 0 auto;min-height:min-content;overflow:hidden}
+html.lw-1600 #view .combat-x.cw-reorg .combat-targets .cx-styles{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html.lw-1600 #view .combat-x.cw-reorg .combat-targets .cx-styles .ss-btn{grid-template-columns:minmax(0,1fr)!important;padding:6px 8px!important}
+html.lw-1600 #view .combat-x.cw-reorg .combat-targets .cx-styles .ss-btn>.ic{display:none}
+html.short #view .combat-x.cw-reorg .combat-targets .ab-future-slot{display:none}
 #view .combat-x.cw-reorg .combat-targets>.hud-train,#view .combat-x.cw-reorg .combat-targets>.combat-abils{flex:none;margin:0;padding:10px}
 #view .combat-x.cw-reorg .combat-targets .hud-train .kit-head{flex-wrap:wrap;row-gap:4px}
 #view .combat-x.cw-reorg .combat-targets .style-strip{display:flex;flex-direction:column;gap:6px}
@@ -798,6 +809,12 @@ html:has(.home-glance) #hud .h-stats,html:has(.home-glance) #hud .h-task,html:ha
 .bundle-indicator .ico{animation:bundle-beacon 1.6s ease-in-out 3}
 @keyframes bundle-beacon{50%{opacity:.48}}
 @media(prefers-reduced-motion:reduce){.bundle-indicator .ico{animation:none}}
+/* on a fixed-size shop card the restoration that wants this item is a corner badge with its name in the tooltip: as a
+   text line it pushed "25 held" out of the 170px card (27 Nov 2026 audit) */
+#view .illustrated-card:has(>.bundle-indicator){position:relative}
+#view .illustrated-card>.bundle-indicator{position:absolute;left:8px;top:8px;display:grid;place-items:center;width:24px;height:24px;border-radius:4px;background:color-mix(in srgb,var(--brass) 18%,var(--panel));line-height:1;margin:0}
+#view .illustrated-card>.bundle-indicator .ic{width:16px!important;height:16px!important;margin:0}
+#view .illustrated-card>.bundle-indicator .bi-t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .daily-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
 .daily-list section{display:grid;gap:12px;align-content:start;min-width:0}
 .daily-list progress{width:100%;accent-color:var(--brass)}
@@ -898,7 +915,9 @@ button.linkish{display:inline-flex;align-items:center}
 /* Overflow sweep fixes (26 Nov 2026, scripts/audit-overflow.cjs): nothing spills out of its tile or button */
 .ss-weapon span{min-width:0}
 .ss-weapon b{white-space:normal;overflow-wrap:anywhere}
-.slot .bundle-indicator{position:absolute;left:3px;bottom:2px;line-height:1}
+.slot .bundle-indicator{position:absolute;left:3px;bottom:3px;line-height:1;display:grid;place-items:center;width:20px;height:20px;border-radius:4px;background:var(--panel)}
+/* the "a restoration needs this" badge is a corner mark, never the slot's 48px picture size (27 Nov 2026 audit: it covered half the pack) */
+#packgrid .slot .bundle-indicator .ic,.slots .slot .bundle-indicator .ic,.slot .bundle-indicator .ic{width:16px!important;height:16px!important;margin:0}
 .slot .bundle-indicator .bi-t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 #view .skrow small.sk-next{white-space:normal;overflow:visible;text-overflow:clip;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 #view .combat-x .hud-train .ss-weapon b{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.15}
@@ -984,3 +1003,25 @@ html.calm .petted,html.calm .petted img{animation:none}
 /* Gathering cards (js/card_scale.js): a 96 px art box; the sprite stands on its ground line at its own whole-number scale */
 #view .illustrated-choices .illustrated-card.card-scaled>.choice-art{height:96px!important;min-height:96px!important;place-items:end center;padding-bottom:2px}
 #view .illustrated-card.card-scaled>.choice-art img{image-rendering:pixelated;object-fit:fill}
+/* phone bottom bar: labels and counts at the 13px floor (27 Nov 2026 audit measured 12px labels and 11px counts) */
+@media(max-width:860px){.hub>span{font-size:13px!important;letter-spacing:-.01em}.hub .hubdot.num{font-size:13px!important;line-height:16px}}
+/* why the last task stopped: two lines at most in the rail, the whole sentence in its tooltip (27 Nov 2026 audit: a
+   long stop reason pushed rail rows under their 34px floor and Sailing off the window) */
+.now.idle .now-why{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.modal .bc-btn~.progw{display:none}/* the fight-progress strip belongs to the page card, not the pop-up copy (27 Nov 2026 audit) */
+/* phones: the foe at the hero's 4x (32px art -> 128px), not 6x in a 143px box (27 Nov 2026 audit) */
+@media(max-width:860px){#view .encounter-arena #av-foe img.pxa{width:128px!important;height:128px!important}}
+/* ---------- 27 Nov 2026 visual audit: small fixes ---------- */
+/* quest pictures not yet earned: a light ghost on the dark theme (black at 16% vanished on dark panels) */
+:root[data-theme="dark"] .obj-pic .qp-cell img{filter:brightness(0) invert(1) opacity(.22)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .obj-pic .qp-cell img{filter:brightness(0) invert(1) opacity(.22)}}
+.obj-pic .qp-cell.got img{filter:none!important}
+/* story dialogue: the clickable line keeps its text off its outline */
+.story-conversation .story-line{padding:10px 14px}
+/* requirement rows: text off the outline */
+.unlock-step{padding-inline:10px}
+/* hover lifts move with translate, never transform (motion rule) */
+.slot:not(.blank):hover{transform:none;translate:0 -2px}.slot:not(.blank):active{transform:none;scale:.96}
+.pen:hover{transform:none;translate:0 -2px}
+/* phones: the hero portrait in the top bar shows the whole 48px face, not its top-left corner */
+@media(max-width:860px){#hud .portrait.px-portrait{width:48px!important;height:48px!important}}

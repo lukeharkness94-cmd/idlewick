@@ -40,18 +40,23 @@ U.afterImpact=(fn,delay=0)=>{
 };
 U.updateEncounter=()=>{
  if(U.view!=='combat'||!document.querySelector('.encounter-arena'))return;
- clearTimeout(encounterTimer);const wait=Math.max(0,(U.impactUntil||0)-performance.now());
+ clearTimeout(encounterTimer);const wait=Math.max(0,Math.max(U.impactUntil||0,U.deathHold||0)-performance.now());
  if(wait){encounterTimer=setTimeout(U.updateEncounter,wait+40);return;}
  if(U.impactFlights?.size){Promise.allSettled([...U.impactFlights].map(a=>a.finished)).then(U.updateEncounter);return;}
  const temp=document.createElement('template');temp.innerHTML=U.V.combat();
  const lastSide=r=>{const a=r.querySelectorAll('.encounter-arena>.side');return a[a.length-1]||null;},old=lastSide(document),fresh=lastSide(temp.content);
- if(old&&fresh&&old.querySelector('#av-foe')?.dataset.a!==fresh.querySelector('#av-foe')?.dataset.a)old.replaceWith(fresh);
+ if(old&&fresh&&old.querySelector('#av-foe')?.dataset.a!==fresh.querySelector('#av-foe')?.dataset.a){old.replaceWith(fresh);if(!calm())fresh.querySelector('#av-foe')?.animate([{opacity:0},{opacity:1}],{duration:320,easing:'ease-out'});}
  const mid=document.querySelector('.encounter-arena>.mid'),nextMid=temp.content.querySelector('.encounter-arena>.mid');if(mid&&nextMid&&!!mid.querySelector('[data-prog]')!==!!nextMid.querySelector('[data-prog]'))mid.innerHTML=nextMid.innerHTML;
  const prog=mid?.querySelector('[data-prog]');if(prog&&Q.act?.kind==='fight')prog.dataset.prog='fight:'+Q.act.id;
  const targets=document.querySelector('.combat-targets .hunt-areas'),nextTargets=temp.content.querySelector('.combat-targets .hunt-areas');if(targets&&nextTargets&&targets.innerHTML!==nextTargets.innerHTML)targets.innerHTML=nextTargets.innerHTML;
  const heroLevel=document.querySelector('.encounter-arena .lvchip.you');if(heroLevel)heroLevel.textContent='Combat '+Q.combatLvl();
  U.updateCombatHeader?.();U.collectProg();U.upd();
 };
+/* the next creature waits until the killing blow has visibly landed and the defeated one has faded (27 Nov 2026 audit:
+   on a busy frame the swing started after the redraw, so the blow and the "slain" flash landed on the new creature).
+   The hold starts when the kill is announced (at most 2 s), then shortens to the death fade once the impact shows;
+   fight timing is unchanged (the next creature is tracked first). */
+Q.on('slain',()=>{if(Q.sim.on||Q.forecasting||calm())return;U.deathHold=performance.now()+2000;U.afterImpact(()=>{U.deathHold=performance.now()+480;},Q.battleTiming?.impact||390);});
 Q.on('splat',(side,text,kind,delay=0)=>{if(side==='foe'&&/^\d/.test(String(text))&&!kind.includes('miss')&&!Q.sim.on&&!Q.forecasting&&!calm())U.impactUntil=performance.now()+Math.max(0,delay-180)+(Q.battleTiming?.impact||390);});
 for(const key of ['fhp','fhptxt']){const bind=U.B[key];U.B[key]=(e,...a)=>{if(performance.now()<(U.impactUntil||0)||U.impactFlights?.size)return;bind(e,...a);};}
 const render=U.render;

@@ -248,7 +248,7 @@ DQ.prepAdvice = (monId, fc) => {
 
 /* a defeat names the most useful change for next time, from the same advice as the boss card */
 const notifyPrep0 = DQ.notify;
-DQ.notify = o => { if (o && o.kind === 'death' && DQ.lastFoe && !DQ.forecasting) { const m = D.MON[DQ.lastFoe], tip = m && DQ.prepAdvice(m.id).find(x => x.key !== 'rest'); if (tip) o = Object.assign({}, o, { text: `${m.name} won this time. Most useful change: ${tip.title.charAt(0).toLowerCase() + tip.title.slice(1)}.` }); } return notifyPrep0(o); };
+DQ.notify = o => { if (o && o.kind === 'death' && DQ.lastFoe && !DQ.forecasting) { const m = D.MON[DQ.lastFoe], advice = m ? DQ.prepAdvice(m.id).filter(x => x.key !== 'rest') : [], tip = advice.find(x => x.key === 'food') || advice.find(x => !/^remove /i.test(x.title || '')) || advice[0]; /* food first; dropping a heal is never the headline tip (27 Nov 2026 audit) */ if (tip) o = Object.assign({}, o, { text: `${m.name} won this time. Most useful change: ${tip.title.charAt(0).toLowerCase() + tip.title.slice(1)}.` }); } return notifyPrep0(o); };
 
 /* ---------- Away events: things that happened while you were gone, each with a choice ---------- */
 const tIdx = () => D.TOWN[S().town].idx;

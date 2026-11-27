@@ -71,7 +71,10 @@ function onLevel(sk, from, to) {
   const unlockedDetails = details.slice();
   if (!details.length) {
     const next = Object.keys(D.UNL[sk] || {}).map(Number).filter(level => level > to).sort((a,b) => a-b)[0];
-    details.push(`Experience bonus is now +${Math.round(((DQ.xpBonusBase ? DQ.xpBonusBase(sk) : DQ.xpMult(sk)) - 1) * 100)}%.`);
+    /* the same figure as the skill's "+N% XP" chip: the opening's slower pace is not a penalty to report (27 Nov 2026
+       audit: a fresh hero read "Experience bonus is now +-66%") */
+    const bon = Math.round(((DQ.xpBonusBase ? DQ.xpBonusBase(sk) : DQ.xpMult(sk)) / (DQ.earlyPace ? DQ.earlyPace(sk) : 1) - 1) * 100);
+    if (bon > 0) details.push(`Experience bonus is now +${bon}%.`);
     if (next) { const short = DQ.ui && DQ.ui.unlockShort ? DQ.ui.unlockShort({ what: D.UNL[sk][next].join(', ') }) : ''; if (short) details.push(`Next at level ${next}: ${short}.`); }
   }
   if (DQ.sim.on) DQ.sim.levels.push([sk, to]);
@@ -554,7 +557,8 @@ function combatRound() {
     let first = null;
     DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, xpDealt * per); f.heroXp = (f.heroXp || 0) + x; if (!i) first = [sk, x]; });
     f.heroXp = (f.heroXp || 0) + DQ.addXp('hitpoints', xpDealt * 1.33);
-    if (first) DQ.floatAt(document.getElementById('av-foe'), `${ico(first[0])}+${fmt(first[1])} XP`, D.SK[first[0]].col);
+    /* the XP shows when the blow visibly lands, not while the arrow or spell is still in flight (27 Nov 2026 audit) */
+    if (first) { const fl = () => DQ.floatAt(document.getElementById('av-foe'), `${ico(first[0])}+${fmt(first[1])} XP`, D.SK[first[0]].col); if (DQ.ui && DQ.ui.afterImpact && !DQ.sim.on && !DQ.forecasting) DQ.ui.afterImpact(fl, DQ.battleTiming?.impact || 390); else fl(); }
   }
   if (f.hp <= 0) return kill(m);
   if (DQ.beastAttack) { f.hp -= DQ.beastAttack(f, m); if (f.hp <= 0) return kill(m); }
@@ -602,7 +606,9 @@ function monsterAttack(f, m, ps, sty) {
   S().hp -= taken; DQ.splat('you', special ? taken + '!' : taken, taken ? 'hit' : 'miss', 900);
   if (S().hp <= 0 && A('unbreakable') && !f.unbroken) { f.unbroken = 1; S().hp = 1; DQ.splat('you', 'Unbreakable!', 'miss', 1000); }
   if (S().hp <= 0 && U.laststand && !f.last) { f.last = 1; S().hp = 1; fxHit('laststand'); DQ.splat('you', 'Last stand!', 'miss', 1000); }
-  if (taken) setTimeout(() => DQ.sfx('hurt'), 900);
+  /* never from a forecast or simulation: the delayed call used to fire after the forecast flag was cleared, so the
+     hero "got hurt" out loud while untouched (27 Nov 2026 audit) */
+  if (taken && !DQ.sim.on && !DQ.forecasting) setTimeout(() => DQ.sfx('hurt'), 900);
   if (special && !DQ.sim.on) { DQ.log(`${m.name} unleashes ${sp.name}!`, 'bad'); DQ.emit('bossSpecial', m); }
   if (!DQ.sim.on && (m.boss || m.mini) && (m.boss || m.mini).special) DQ.emit('bossTell', m, (f.ma + 1) % (m.boss || m.mini).special.every === 0);
   if (S().hp <= 0) { die(); return 'dead'; }

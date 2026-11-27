@@ -54,7 +54,7 @@ UI.render = fresh => {
 DQ.on('ui', () => {
   const st = S(); if (!DQ.started || !st || !st.seenTabs || st.seenTabs.plan || !DQ.planUnlocked()) return;
   st.seenTabs.plan = 1;
-  DQ.notify({ kind: 'unlock', key: 'plan', icon: 'clock', col: '#8fc7ff', title: 'Task planning unlocked', text: 'Choose a pace, set stop rules and queue the next task. Tap the count on the Now card (top left), or the arrow on any card.', action: { label: 'Open plan', fn: () => UI.openPlan() }, sound: 'unlock', ttl: 14000 });
+  DQ.notify({ kind: 'unlock', key: 'plan', icon: 'clock', col: '#8fc7ff', title: 'Task planning unlocked', text: 'Choose a pace, set stop rules and queue the next task. Open it from the count on the Now card (top left), or the arrow on any card.', action: { label: 'Open plan', fn: () => UI.openPlan() }, sound: 'unlock', ttl: 14000 });
 });
 
 
@@ -165,7 +165,7 @@ DQ.on('equip', () => {});
 UI.skillHero = (sk, extra = '') => {
   const s = D.SK[sk], l = DQ.lvl(sk);
   const perks = D.GATHER_SKILLS.includes(sk) ? `<div class="perks"><span class="k">Perks</span>${D.PERKS.map(p => `<span class="perk ${l >= p.lvl ? 'on' : ''}" data-tip="text:${p.name} at ${s.name} ${p.lvl}: ${p.speed ? Math.round(p.speed * 100) + '% speed' : Math.round(p.dbl * 100) + '% double'}">${p.lvl}</span>`).join('')}</div>` : '';
-  return `<section class="panel skillhero compact" style="--c:${s.col};--sc:${s.col}"><div class="big sm">${ico(sk)}</div>
+  return `<section class="panel skillhero compact" style="--c:${s.col};--sc:${s.col}"><div class="big sm">${(DQ.artImage && DQ.artImage('skill', sk, 32, '', '')) || ico(sk)}</div>
     <div class="sk-main"><div class="sk-top"><h2>${s.name}</h2><b class="mono sk-lv" data-b="lvl:${sk}"></b><span class="chipx" data-tip="skill:${sk}"><span data-b="bonus:${sk}"></span></span></div>
       <span class="bar big"><i data-b="xpbar:${sk}"></i></span><div class="sh-line mono"><span data-b="toNext:${sk}"></span><span data-b="eta:${sk}"></span></div></div>
     <div class="sk-side">${perks}</div>${extra}</section>`;
@@ -194,7 +194,7 @@ UI.toolsPanel = () => {
     const t = DQ.toolTier(sk), own = t ? D.ITEMS[`tool_${k}_${t}`] : null, next = D.ITEMS[`tool_${k}_${D.TOOL_ORDER.find(n=>n>t)}`] || null, open = DQ.skillUnlocked(sk), pct = +(D.TOOL_SPEED[t]*100).toFixed(1);
     return `<div class="toolrow ${open ? '' : 'locked'}" style="--c:${D.SK[sk].col}"><span class="ti">${ico(ic)}</span><div class="tb"><b>${own ? own.name : `No ${label.toLowerCase()}`}</b>
       <small>${D.SK[sk].name}${open ? ` ${DQ.lvl(sk)}` : ' (locked)'} · ${t ? `${pct}% faster` : 'normal speed'}</small><span class="pips" aria-label="Upgrade ${D.TOOL_ORDER.indexOf(t)+1} of ${D.TOOL_ORDER.length}">${D.TOOL_ORDER.map(i => `<i class="${i <= t ? 'on' : ''}"></i>`).join('')}</span></div>
-      ${next ? `<button class="btn sm" data-do="go" data-a="shop" data-tip="text:${esc(next.name)}: ${fmt(next.buy)} coins. Opens the shop.">Upgrade ${DQ.fmtK ? DQ.fmtK(next.buy) : fmt(next.buy)}</button>` : '<span class="max">Best</span>'}</div>`;
+      ${next ? `<button class="btn sm" data-do="go" data-a="shop" data-tip="text:${esc(next.name)}: ${fmt(DQ.buyPrice ? DQ.buyPrice(next.id) : next.buy)} coins. Opens the shop.">Upgrade ${(p => DQ.fmtK ? DQ.fmtK(p) : fmt(p))(DQ.buyPrice ? DQ.buyPrice(next.id) : next.buy)}</button>` : '<span class="max">Best</span>'}</div>`;
   }).join('');
   return `<section data-reference="true" class="panel toolsp" id="inventory-tools"><h3>Gathering tools</h3><div class="toolrows">${rows}</div></section>`;
 };

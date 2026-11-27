@@ -199,6 +199,8 @@ let openingReveals = 0, revealHero;
 DQ.unlockRevealsOn = () => { const s = DQ.S.settings, v = s.unlockReveals === false && !s.unlockRevealsChosen ? undefined : s.unlockReveals; return v === true || (v == null && (!navigator.webdriver || localStorage.getItem('idlewick.reveals') === '1')); };
 DQ.allowAutomaticReveal = () => {
   if (modalEl || document.querySelector('#intro,.quest-reveal') || document.hidden) return false;
+  /* not over a fight you are watching (27 Nov 2026 audit: "Task planning unlocked" covered a boss); the bell keeps it */
+  if (DQ.act && DQ.act.kind === 'fight' && DQ.ui && DQ.ui.view === 'combat') return false;
   if (revealHero !== DQ.S) { revealHero = DQ.S; openingReveals = 0; }
   if ((DQ.S.playtime || 0) >= 5 * 60000) return true;
   if (openingReveals >= 3) return false;

@@ -87,6 +87,9 @@ Q.poseBattle = (avatar, style, phase, animate) => { const root = avatar && avata
 
 /* ---------- icons: every .pxi class gets its pixel icon; ids without one keep the code-drawn line glyph ---------- */
 const installIcons = () => {
+  /* every skill has pixel icon art; register the ones the old line-glyph list lacked (research, melee, hunting,
+     exploration, herbalism, enchanting) so ico(skill) draws them instead of the placeholder dot (27 Nov 2026 audit) */
+  for (const sk of (Q.data && Q.data.SKILLS) || []) if (Q.ICONS && !(sk.id in Q.ICONS) && A.iconUrl(sk.id)) Q.ICONS[sk.id] = Q.ICONS.bit;
   const rules = Object.keys(Q.ICONS || {}).map(id => { const u = A.iconUrl(id); return u ? `.pxi-${id}{background:transparent url(${u}) center/contain no-repeat!important;-webkit-mask:none!important;mask:none!important;image-rendering:pixelated!important}` : ''; }).join('');
   let st = document.getElementById('pixel-icons'); if (!st) { st = document.createElement('style'); st.id = 'pixel-icons'; document.head.appendChild(st); } st.textContent = rules;
 };

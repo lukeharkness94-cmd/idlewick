@@ -54,7 +54,7 @@ const homeGlance = () => {
  /* a checklist step (boss_checklist.js): its first open item is the main action, then Skip; the list sits in the card */
  const todo = next.checklist && next.checklist.items.find(i => !i.done && i.action);
  const button = next.checklist ? `${todo ? `<button class="btn primary" data-do="${todo.action.do}" data-a="${esc(todo.action.a)}">${esc(todo.key === 'armour' || todo.key === 'ability' ? todo.label : todo.action.text)}</button>` : ''}<button class="btn" data-do="bossprepskip" data-a="${esc(next.a || '')}">Skip checks</button>`
-   : `<button class="btn primary" data-do="${next.action}" data-a="${esc(next.a || '')}" data-b="${esc(next.b || '')}">${esc(next.title)}</button>`;
+   : `<button class="btn primary" data-do="${next.action}" data-a="${esc(next.a || '')}" data-b="${esc(next.b || '')}">${next.action === 'qstart' ? 'Accept quest' /* every acceptance says Accept quest (27 Nov 2026 audit) */ : esc(next.title)}</button>`;
  const count = S().inbox?.length || 0;
  const local = (town.id !== 'willowbrook' || S().q.goblin_menace?.s === 'done') && Q.closestRestoration();
  const flag = count ? `<button class="btn" data-do="go" data-a="activity">${count} ${count === 1 ? 'decision' : 'decisions'} waiting</button>` :
