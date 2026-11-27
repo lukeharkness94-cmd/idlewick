@@ -123,8 +123,12 @@ function hero(o = {}) {
   /* body: tunic with a belt */
   s.poly([[8, 14 + bob], [15, 14 + bob], [16, 23], [7, 23]], tunic); s.rect(7, 20, 10, 1, belt); s.fix(11, 20, '#e6b84a');
   /* arms (the right arm swings for work) */
-  const swing = o.pose === 'work' ? [[1, 0], [2, -2], [0, 1]][f % 3] : [0, 0];
-  s.rect(6, 15 + bob, 2, 6, tunic); s.rect(6, 21 + bob, 2, 1, sk);
+  /* idle-life frames (o.expr, js/personality.js): blink, yawn, stretch (both arms lifted two pixels), pack (looking down
+     at the belt pouch) and wipe (the free hand at the brow). No expr draws the standing hero exactly as before. */
+  const ex = o.expr || '', liftL = ex === 'stretch' ? -2 : 0, wipe = ex === 'wipe';
+  const swing0 = o.pose === 'work' ? [[1, 0], [2, -2], [0, 1]][f % 3] : [0, 0], swing = [swing0[0], swing0[1] + liftL];
+  let sleeve = tunic;
+  if (!wipe) { s.rect(6, 15 + bob + liftL, 2, 6, tunic); s.rect(6, 21 + bob + liftL, 2, 1, sk); }
   s.rect(16 + swing[0], 15 + bob + swing[1], 2, 6, tunic); s.rect(16 + swing[0], 21 + bob + swing[1], 2, 1, sk);
   /* head */
   s.ell(11.5, 8.5 + bob, 4.5, 4.6, sk); s.rect(10, 13 + bob, 4, 1, sk);
@@ -133,6 +137,8 @@ function hero(o = {}) {
   s.ell(11.5, 5, 5.3, 2.8, hr); s.rect(6, 5, 2, 4, hr); s.rect(16, 5, 2, 3, hr);                                       /* crown, side locks */
   [[8, 7], [9, 7], [10, 6], [12, 7], [13, 7], [14, 6], [15, 7]].forEach(([x, y]) => s.dot(x, y, hr));                 /* a swept, uneven fringe */
   (FACES[o.face] || FACES.bright)(s, sk, hr);
+  if (ex) { for (const x of [9, 14]) { s.dot(x, 8, sk); s.dot(x, 9, sk); if (ex === 'pack') { s.fix(x, 9, INK); s.fix(x, 10, INK); } else s.fix(x, 9, sk.out); } /* shut, or looking down */
+    if (ex === 'yawn' || ex === 'stretch') { s.fix(11, 11, '#5a2a2a'); s.fix(12, 11, '#5a2a2a'); s.fix(11, 12, '#3a1a24'); s.fix(12, 12, '#3a1a24'); } }  /* a wide yawn */
   /* equipment fitted to this body. Each slot takes {type, col}; plain strings name a metal (the showcase uses those). */
   const spec = v => !v ? null : typeof v === 'string' ? { type: null, col: (R[v] || R.bronze).base } : v;
   const metal = c => ramp(c, { gl: .72 }), soft = c => ramp(c);
@@ -143,7 +149,7 @@ function hero(o = {}) {
     else { s.rect(9, 21, 2, 7, c); s.rect(13, 21, 2, 7, c); if (t === 'plate') { s.fix(9, 24, c.gl); s.fix(13, 24, c.gl); s.rect(9, 25, 2, 1, ramp(mix(legs.col, '#3a2448', .3))); s.rect(13, 25, 2, 1, ramp(mix(legs.col, '#3a2448', .3))); } else { s.fix(10, 22, '#e6c86a'); } } }
   const body = spec(o.body);
   if (body) { const t = body.type || 'plate', c = t === 'plate' ? metal(body.col) : soft(body.col);
-    if (t === 'robe') { s.poly([[7, 14], [16, 14], [17, 23], [6, 23]], c); s.rect(6, 15, 2, 6, c); s.rect(16, 15, 2, 6, c); s.line(11, 15, 11, 22, null, R.gold.base); s.line(12, 15, 12, 22, null, R.gold.hi); }
+    if (t === 'robe') { s.poly([[7, 14], [16, 14], [17, 23], [6, 23]], c); sleeve = c; if (!wipe) s.rect(6, 15 + liftL, 2, 6, c); s.rect(16, 15 + liftL, 2, 6, c); s.line(11, 15, 11, 22, null, R.gold.base); s.line(12, 15, 12, 22, null, R.gold.hi); }
     else if (t === 'vest') { s.poly([[8, 14], [15, 14], [16, 22], [7, 22]], c); for (let y = 16; y <= 20; y += 2) { s.fix(10, y, '#e8dcc0'); s.fix(13, y, '#e8dcc0'); } s.line(11, 15, 11, 21, null, c.lo); s.line(12, 15, 12, 21, null, c.lo); }
     else { s.poly([[7, 14], [16, 14], [16, 21], [7, 21]], c); s.rect(5, 14, 3, 3, c); s.rect(16, 14, 3, 3, c); s.line(11, 15, 11, 20, null, c.lo); s.line(12, 15, 12, 20, null, c.hi); s.fix(9, 16, c.gl); }
     s.rect(7, 20, 10, 1, belt); s.fix(11, 20, '#e6b84a'); }
@@ -161,7 +167,7 @@ function hero(o = {}) {
       s.line(11, 1, 11, 6, null, m.lo); s.line(12, 1, 12, 6, null, m.hi); s.fix(8, 3, m.gl); s.fix(9, 3, m.hi);
       if (t === 'horned') { const h = ramp('#efe2c4'); s.poly([[6, 4], [3, -1], [5, 0], [7, 2]], h); s.poly([[17, 4], [20, -1], [18, 0], [16, 2]], h); } } }
   const shield = spec(o.shield);
-  if (shield) { const m = metal(shield.col); s.poly([[2, 15], [8, 15], [8, 20], [5, 24], [2, 20]], m); s.poly([[3, 16], [7, 16], [7, 19], [5, 22], [3, 19]], ramp(mix(shield.col, '#c8483c', .45))); s.fix(3, 16, m.gl); }
+  if (shield) { const m = metal(shield.col), L = liftL; s.poly([[2, 15 + L], [8, 15 + L], [8, 20 + L], [5, 24 + L], [2, 20 + L]], m); s.poly([[3, 16 + L], [7, 16 + L], [7, 19 + L], [5, 22 + L], [3, 19 + L]], ramp(mix(shield.col, '#c8483c', .45))); s.fix(3, 16 + L, m.gl); }
   const wpn = typeof o.weapon === 'string' ? { type: o.weapon, col: R[o.blade || (o.weapon === 'axe' ? 'iron' : 'steel')].base } : o.weapon;
   if (wpn) { const hx = 17 + swing[0], hy = 21 + swing[1], t = wpn.type, m = metal(wpn.col);
     if (t === 'sword' || t === 'cutlass') { for (let i = 2; i <= 11; i++) { const dx = t === 'cutlass' ? Math.round(Math.sin(i / 4) * 1.5) : 0; s.dot(hx + 1 + dx, hy - i, m); s.dot(hx + 2 + dx, hy - i, m); } s.fix(hx + 1, hy - 12, m.gl); s.line(hx + 1, hy - 3, hx + 1, hy - 10, null, m.gl); s.rect(hx - 1, hy - 2, 5, 1, R.gold); s.rect(hx + 1, hy - 1, 2, 2, R.leather); }
@@ -171,6 +177,9 @@ function hero(o = {}) {
     else if (t === 'bow') { const w = ramp(wpn.col); for (let y = -6; y <= 6; y++) { s.dot(19 + Math.round(1.6 - (y * y) / 22), 15 + y, w); s.dot(20 + Math.round(1.6 - (y * y) / 22), 15 + y, w); } s.line(19, 9, 19, 21, null, '#efe4c8'); }
     else if (t === 'staff') { const w = ramp(mix(wpn.col, '#6a4a2a', .3)); s.line(hx + 1, hy + 4, hx + 1, hy - 12, w); s.line(hx + 2, hy + 4, hx + 2, hy - 12, w); s.ell(hx + 1.5, hy - 13, 1.6, 1.6, ramp(wpn.orb || '#8fc0ff', { gl: .85 })); }
   }
+  /* the free (left) hand: at the brow, with a bead of sweat flicked off, or holding the belt pouch open */
+  if (wipe) { s.rect(5, 12, 2, 3, sleeve); s.rect(6, 10, 2, 2, sleeve); s.rect(7, 7, 3, 2, sk); s.fix(18, 8, '#cfe8f2'); }
+  if (ex === 'pack') { s.rect(6, 21, 3, 3, R.leather); s.fix(7, 21, R.leather.lo); s.fix(8, 22, '#e6b84a'); s.rect(6, 21, 2, 1, sk); }
   return s;
 }
 

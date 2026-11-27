@@ -70,6 +70,9 @@ const heroOpts = (look, extra = {}) => {
 const heroUrl = (look, extra) => A.heroUrl(heroOpts(look, extra));
 Q.heroFigureUrl = look => heroUrl(look);
 Q.heroWorkFigureUrl = look => heroUrl(look, { shield: null, weapon: null });
+/* the same figure with an idle-life expression (blink, yawn, stretch, pack, wipe; js/personality.js); no frame is the
+   plain figure, so the frame and the figure share one cached drawing */
+Q.heroFrameUrl = (look, frame, work) => heroUrl(look, Object.assign(work ? { shield: null, weapon: null } : {}, frame ? { expr: frame } : {}));
 Q.heroCanvas = (look, scale = 1) => { const c = document.createElement('canvas'); c.width = 48 * scale; c.height = 64 * scale; const x = c.getContext('2d'); x.imageSmoothingEnabled = false; const im = new Image(); im.src = heroUrl(look); x.drawImage(im, 0, 0, c.width, c.height); return c; };
 Q.heroBustUrl = look => { const k = 'bust:' + JSON.stringify(heroOpts(look)); return A.url(k, () => { const full = A.hero(heroOpts(look)), s = A.Spr(16, 16); for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const p = full.px[y * 24 + x + 4]; if (p) s.px[y * 16 + x] = p; } return s; }); };
 Q.heroUrl = Q.heroBustUrl;
