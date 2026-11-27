@@ -11,14 +11,13 @@ function fireflies(cv) {
   /* reduced motion: one still frame of fireflies, no drifting (27 Nov 2026 audit: the loop ignored the setting) */
   const still = () => (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) || (DQ.S && DQ.S.settings && DQ.S.settings.reduceFx);
   let drawnStill = false;
-  const loop = t => {
-    if (!cv.isConnected) return;
-    if (still()) { if (drawnStill) { requestAnimationFrame(loop); return; } drawnStill = true; t = 0; } else drawnStill = false;
+  const loop = (dt, t) => { /* on the shared animation clock (util.js); returning false ends it */
+    if (!cv.isConnected) return false;
+    if (still()) { if (drawnStill) return; drawnStill = true; t = 0; } else drawnStill = false;
     const frames=Math.max(0,Math.min(3,(t-lastFrame)/(1000/60)));lastFrame=t; cx.clearRect(0, 0, w, h);
     for (const f of fl) { f.x += Math.sin(t / 2400 + f.p) * .0004 * frames; f.y -= f.s * .0006 * frames; if (f.y < -.02) { f.y = 1.02; f.x = Math.random(); } const a = .35 + .65 * Math.abs(Math.sin(t / 900 + f.p)); cx.fillStyle = `rgba(${tint},${a * .85})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r, 0, 6.3); cx.fill(); cx.fillStyle = `rgba(${tint},${a * .12})`; cx.beginPath(); cx.arc(f.x * w, f.y * h, f.r * 6, 0, 6.3); cx.fill(); }
-    requestAnimationFrame(loop);
   };
-  requestAnimationFrame(loop);
+  DQ.frame.add(loop);
 }
 
 /* The title (20 Nov 2026 redo): it follows the player's theme like the rest of the game. Behind a parchment card,

@@ -2053,20 +2053,22 @@ body[data-tod="dawn"] .tod-tint{background:linear-gradient(#ffb08a30,#ffd8a018 6
 body[data-tod="dusk"] .tod-tint{background:linear-gradient(#ff8a5a38,#7a4a8a30)}
 body[data-tod="night"] .tod-tint{background:linear-gradient(#0a1440a0,#1a2450b0)}
 /* weather */
-.weather{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+.weather{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2;container-type:size}
+/* 27 Nov 2026: the drops travel by transform alone (cqh/cqw are the weather box's own height and width), so a
+   rainy scene no longer lays out every particle on every frame; the paths are the same as the old top/left ones */
 .weather i{position:absolute;left:var(--x);top:-10%;display:block;animation:wx-fall var(--d) linear var(--t) infinite}
 .w-rain i{width:1px;height:10px;background:#cfe6ff99;animation-duration:calc(var(--d) * .25)}
 .w-snow i{width:3px;height:3px;background:#fff;box-shadow:0 0 0 1px #ffffff40}
-.w-pollen i{width:2px;height:2px;background:#fff6b0cc;animation-name:wx-drift}
-.w-leaves i{width:4px;height:3px;background:#c8803a;animation-name:wx-drift}
+.w-pollen i{width:2px;height:2px;background:#fff6b0cc;top:-5%;animation-name:wx-drift}
+.w-leaves i{width:4px;height:3px;background:#c8803a;top:-5%;animation-name:wx-drift}
 .w-embers i{width:2px;height:2px;background:#ffb04a;top:auto;bottom:-5%;animation-name:wx-rise}
 .w-motes i{width:2px;height:2px;background:#c0a0ff;top:auto;bottom:-5%;animation-name:wx-rise}
 .w-wind i{width:18px;height:1px;background:#ffffff70;left:-20%;top:var(--x);animation-name:wx-wind}
 .w-mist i{width:40%;height:22%;background:radial-gradient(#d0e0d840,transparent 70%);top:55%;animation-name:wx-mist;animation-duration:calc(var(--d) * 4)}
-@keyframes wx-fall{to{transform:translate(-12px,130%) ;top:110%}}
-@keyframes wx-drift{0%{top:-5%;transform:translateX(0)}50%{transform:translateX(16px)}100%{top:105%;transform:translateX(-8px)}}
-@keyframes wx-rise{0%{bottom:-5%;opacity:0}20%{opacity:1}100%{bottom:105%;opacity:0;transform:translateX(10px)}}
-@keyframes wx-wind{to{left:120%}}
+@keyframes wx-fall{to{transform:translate(-12px,calc(120cqh + 130%))}}
+@keyframes wx-drift{0%{transform:translate(0,0)}50%{transform:translate(16px,55cqh)}100%{transform:translate(-8px,110cqh)}}
+@keyframes wx-rise{0%{opacity:0;transform:translate(0,0)}20%{opacity:1}100%{opacity:0;transform:translate(10px,-110cqh)}}
+@keyframes wx-wind{to{transform:translateX(140cqw)}}
 @keyframes wx-mist{0%,100%{transform:translateX(-10%)}50%{transform:translateX(40%)}}
 /* villagers, your weapon and your companion in the work scene (3x like the hero; companion 2x) */
 .scene-folk{position:absolute;bottom:12px;z-index:1;animation:folk-idle 3.2s ease-in-out infinite}
@@ -3874,6 +3876,21 @@ button.sk-goal:hover b,.sh-next-btn:hover b{color:var(--brass);text-decoration:u
 @keyframes finIn{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
 #view.fin-enter [style*="--fin-i"]{animation:finIn .34s var(--ease-out) both;animation-delay:calc(var(--fin-i) * 45ms)}
 
+/* page turns (js/finish.js): only the main view moves, ~200 ms, transform and opacity on the browser's snapshots;
+   the view's box snaps to the new page (no size morph), so nothing stretches or shifts */
+html.page-turning #view{view-transition-name:idw-page}
+::view-transition-group(idw-page){animation:none}
+::view-transition-old(idw-page){animation:idwPageOut 170ms cubic-bezier(.4,0,.9,.6) both}
+::view-transition-new(idw-page){animation:idwPageIn 210ms cubic-bezier(.2,.7,.3,1) both}
+html[data-page-turn="back"]::view-transition-old(idw-page){animation-name:idwPageOutBack}
+html[data-page-turn="back"]::view-transition-new(idw-page){animation-name:idwPageInBack}
+@keyframes idwPageOut{to{opacity:0;translate:-14px 0}}
+@keyframes idwPageIn{from{opacity:0;translate:18px 0}}
+@keyframes idwPageOutBack{to{opacity:0;translate:14px 0}}
+@keyframes idwPageInBack{from{opacity:0;translate:-18px 0}}
+html.calm::view-transition-old(idw-page),html.calm::view-transition-new(idw-page){animation:none}
+@media(prefers-reduced-motion:reduce){::view-transition-old(idw-page),::view-transition-new(idw-page){animation:none}}
+
 /* the sliding ink under the top menu and the page tabs */
 #topnav,#subnav .subnav{position:relative}
 .fin-ink{position:absolute;left:0;top:0;height:3px;border-radius:3px;pointer-events:none;z-index:2;opacity:0;
@@ -3904,12 +3921,15 @@ button.sk-goal:hover b,.sh-next-btn:hover b{color:var(--brass);text-decoration:u
 .illustrated-card:hover:not(.locked) .choice-art img{translate:0 -2px}
 .illustrated-card.locked:hover{translate:0 -1px}
 .illustrated-card:active:not(.locked){translate:0 -1px;transition-duration:.06s}
-@keyframes finGlow{0%,100%{box-shadow:0 0 0 1px var(--brass),0 0 10px -4px var(--glow)}50%{box-shadow:0 0 0 1px var(--brass-hi),0 0 22px -4px var(--glow)}}
-.illustrated-card.selected{animation:finGlow 3.4s ease-in-out infinite}
+/* (27 Nov 2026: the chosen card's breathing glow is gone; the shape layer's !important shadow already hid it, so it
+   only cost a style pass every frame. The chosen card shows by its brass fill.) */
 
 /* the task you are doing: a slow light runs along its progress bar */
-@keyframes finGlint{from{background-position:-40% 0,0 0}to{background-position:140% 0,0 0}}
-.bar.prog>i{background-color:var(--c,var(--brass));background-image:linear-gradient(90deg,transparent,#ffffff55,transparent),linear-gradient(180deg,#ffffff22,transparent 60%);background-size:30% 100%,100% 100%;background-repeat:no-repeat;animation:finGlint 1.8s linear infinite}
+/* the light is its own layer sliding by transform (27 Nov 2026: it was a background-position loop, a repaint a frame);
+   same path: a 30%-wide gleam from -28% to 98% of the bar */
+@keyframes finGlint{from{translate:-93.33% 0}to{translate:326.67% 0}}
+.bar.prog>i{position:relative;background-color:var(--c,var(--brass));background-image:linear-gradient(180deg,#ffffff22,transparent 60%);background-repeat:no-repeat;overflow:hidden}
+.bar.prog>i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:30%;pointer-events:none;background:linear-gradient(90deg,transparent,#ffffff55,transparent);animation:finGlint 1.8s linear infinite}
 
 
 /* pop-ups and tooltips arrive instead of appearing */
@@ -3922,13 +3942,13 @@ button.sk-goal:hover b,.sh-next-btn:hover b{color:var(--brass);text-decoration:u
 /* the skill rail answers the pointer; the skill you are training breathes */
 .dk{transition:background .2s,translate .18s var(--ease-out)}
 .dk:hover{translate:2px 0}
-@keyframes finBreath{0%,100%{box-shadow:inset 3px 0 0 var(--c,var(--brass))}50%{box-shadow:inset 3px 0 0 var(--c,var(--brass)),inset 0 0 18px -8px var(--c,var(--brass))}}
-.dk.working{animation:finBreath 2.8s ease-in-out infinite}
+/* (27 Nov 2026: the training skill's breathing shadow is gone; the shape layer's !important outline already hid it, so it
+   only cost a style pass every frame) */
 
-html.calm #view.fin-enter [style*="--fin-i"],html.calm .illustrated-card.selected,html.calm .bar.prog>i,html.calm .modal .m-card,html.calm .dk{animation:none!important}
+html.calm #view.fin-enter [style*="--fin-i"],html.calm .illustrated-card.selected,html.calm .bar.prog>i,html.calm .bar.prog>i::after,html.calm .modal .m-card,html.calm .dk{animation:none!important}
 html.calm .fin-ink{transition:none}
 @media (prefers-reduced-motion:reduce){
-  #view.fin-enter [style*="--fin-i"],.illustrated-card.selected,.bar.prog>i,.modal .m-card,.dk{animation:none!important}
+  #view.fin-enter [style*="--fin-i"],.illustrated-card.selected,.bar.prog>i,.bar.prog>i::after,.modal .m-card,.dk{animation:none!important}
   .fin-ink,.illustrated-card,.illustrated-card .choice-art img,.btn.primary::after,.tnav .ic,.dk{transition:none!important}
   .illustrated-card:hover,.btn:hover,.dk:hover,.tnav:hover .ic,.tnav.on .ic,.illustrated-card:hover .choice-art img{translate:none!important}
 }

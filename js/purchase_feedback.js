@@ -17,8 +17,9 @@ function celebrate(id, gained, from) {
   const chip = document.querySelector('.packchip'), pick = () => document.querySelector('#view .shop-detail-actions .btn.primary, #view [data-do="buy"].primary, #view [data-do="buyupgrade"], #view [data-do="localbuy"]');
   /* the shop redraws itself after a purchase, so the "Bought" label follows whichever Buy button is on screen */
   const until = performance.now() + 1100, text = `✓ Bought${gained > 1 ? ' ×' + gained : ''}`, keep = new WeakMap();
-  const hold = t => { const b = pick(); if (b) { if (t < until) { if (!b.classList.contains('just-bought')) { keep.set(b, b.innerHTML); b.classList.add('just-bought'); b.innerHTML = text; } requestAnimationFrame(hold); } else if (b.classList.contains('just-bought')) { b.classList.remove('just-bought'); if (keep.has(b)) b.innerHTML = keep.get(b); else UI.render(false); } } else if (t < until) requestAnimationFrame(hold); };
-  requestAnimationFrame(hold);
+  /* on the shared animation clock (util.js); returning false ends it */
+  const hold = (dt, t) => { const b = pick(); if (b) { if (t < until) { if (!b.classList.contains('just-bought')) { keep.set(b, b.innerHTML); b.classList.add('just-bought'); b.innerHTML = text; } return; } if (b.classList.contains('just-bought')) { b.classList.remove('just-bought'); if (keep.has(b)) b.innerHTML = keep.get(b); else UI.render(false); } return false; } if (t >= until) return false; };
+  DQ.frame.add(hold);
   if (DQ.sfx) DQ.sfx('buy');
   if (chip) {
     const plus = document.createElement('b'); plus.className = 'pack-plus'; plus.textContent = '+' + Math.max(1, gained); chip.appendChild(plus);

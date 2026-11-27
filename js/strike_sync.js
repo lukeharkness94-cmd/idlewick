@@ -15,9 +15,13 @@ const soundOf = act => {
   return null;
 };
 let stageEl = null, beatSet = 0, lastStrike = -1, lastAct = null;
+/* the working stage inside #view (what '#view .activity-stage.working' finds), from a live list the browser keeps
+   current, so a frame never searches the whole page (27 Nov 2026: that search was the biggest per-frame cost in a fight) */
+let viewEl = null, stages = null;
+const findStage = () => { const v = document.getElementById('view'); if (v !== viewEl) { viewEl = v; stages = v ? v.getElementsByClassName('activity-stage') : null; }
+  if (stages) for (const s of stages) if (s.classList.contains('working')) return s; return null; };
 const loop = () => {
-  requestAnimationFrame(loop);
-  const act = DQ.act, name = soundOf(act), stage = document.querySelector('#view .activity-stage.working');
+  const act = DQ.act, name = soundOf(act), stage = name && findStage();
   if (!name || !stage || document.hidden || !act.dur) { DQ.strikeLive = null; stageEl = null; return; }
   const dur = act.dur, swings = Math.max(1, Math.round(dur / 1200)), beat = dur / swings;
   const elapsed = Math.max(0, (Date.now() - act.t0) % dur);
@@ -32,5 +36,5 @@ const loop = () => {
   const strike = Math.floor(elapsed / beat - IMPACT);
   if (strike !== lastStrike) { if (strike >= 0) DQ.sfxStrike && DQ.sfxStrike(name); lastStrike = strike; } /* -1 is the wind-up before the first swing lands */
 };
-requestAnimationFrame(loop);
+DQ.frame.add(loop); /* the shared animation clock (util.js) */
 })();

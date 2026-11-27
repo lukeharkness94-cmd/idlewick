@@ -88,15 +88,15 @@ UI.travelAnim = to => {
   const a = D.TOWN[from].idx, b = D.TOWN[to].idx, step = a < b ? 1 : -1, path = []; for (let i = a; i !== b; i += step) path.push(step > 0 ? [i, false] : [i - 1, true]);
   const pin = $('#hero-pin'); if (!pin || DQ.S.settings.reduceFx) return DQ.travel(to);
   UI.traveling = true; DQ.sfx('travel'); let k = 0, t0 = performance.now(); const per = 650;
-  const go = () => {
+  const go = () => { /* on the shared animation clock (util.js); returning false ends it */
     const [si, rev] = path[k], p = $('#seg' + si);
-    if (!p || !pin.isConnected) { UI.traveling = false; DQ.travel(to); return; }
+    if (!p || !pin.isConnected) { UI.traveling = false; DQ.travel(to); return false; }
     const len = p.getTotalLength(), f = clamp((performance.now() - t0) / per, 0, 1), e = f * f * (3 - 2 * f), pt = p.getPointAtLength((rev ? 1 - e : e) * len);
     pin.setAttribute('transform', `translate(${pt.x} ${pt.y - 40 - Math.sin(f * Math.PI) * 10})`);
     if (f >= 1) { k++; t0 = performance.now(); }
-    if (k < path.length) requestAnimationFrame(go); else { UI.traveling = false; DQ.travel(to); }
+    if (k >= path.length) { UI.traveling = false; DQ.travel(to); return false; }
   };
-  requestAnimationFrame(go);
+  DQ.frame.add(go);
 };
 
 /* ---------- Shop ---------- */
@@ -533,7 +533,7 @@ UI.init = () => {
     const impact=Math.max(0,(delay||0)-180)+(DQ.battleTiming?.impact||390),show=()=>{if(!box.isConnected||document.hidden)return;const el=document.createElement('div');el.className='splat '+kind;el.textContent=text;box.appendChild(el);setTimeout(()=>el.remove(),1400);};if(side==='foe')UI.afterImpact(show,impact);else setTimeout(show,impact);
   });
   DQ.on('slain', () => { const foe=$('#av-foe');UI.afterImpact(()=>{if(foe?.isConnected)DQ.flash(foe,'slain');},DQ.battleTiming?.impact||390); });
-  THEME(); UI.renderHud(); UI.renderRail(); UI.render(true); requestAnimationFrame(UI.frame);
+  THEME(); UI.renderHud(); UI.renderRail(); UI.render(true); DQ.frame.add(UI.frame);
 };
 DQ.on('itemfound',()=>{if(['cooking','smithing','crafting','carpentry','brewery','enchanting','research','projects','magic','bestiary'].includes(UI.view))UI.refresh();});
 })();

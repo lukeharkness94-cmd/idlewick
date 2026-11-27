@@ -95,8 +95,7 @@ const progOf = key => { const a = DQ.act; if (!a) return 0; if (key !== '@' && k
   return tr ? clamp((tr - DQ.fight.tracking + f) / tr, 0, 1) : f; };
 UI.frame = () => {
   for (const e of progEls) { const p = progOf(e.dataset.prog); if (e.dataset.ring) e.style.strokeDashoffset = 289 * (1 - p); else e.style.transform = `scaleX(${p})`; }
-  requestAnimationFrame(UI.frame);
-};
+}; /* runs on the shared clock (DQ.frame, util.js) from UI.init */
 
 /* ---------- Portrait ---------- */
 UI.portrait = (px = 48, cls = '') => {

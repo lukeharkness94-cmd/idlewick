@@ -73,9 +73,9 @@ UI.B.qbuild = (cv, id) => { const q = D.QM[id]; if (!q) return; const pr = UI.qu
     if (was < 0 || n <= was || still()) { anim.delete(cv); return paint(cv, P, n); }
     /* new blocks fall a few pixels into place, staggered, timed by elapsed time */
     const t0 = performance.now(), fresh = Array.from({ length: n - was }, (_, i) => was + i); anim.set(cv, 1);
-    const step = t => { const drop = {}; let busy = false; fresh.forEach((i, k) => { const u = Math.min(1, Math.max(0, (t - t0 - k * 70) / 260)); if (u < 1) busy = true; drop[i] = Math.round((1 - u * u) * 6); });
-      paint(cv, P, n, drop); if (busy && cv.isConnected) requestAnimationFrame(step); else anim.delete(cv); };
-    requestAnimationFrame(step); }); };
+    const step = (dt, t) => { const drop = {}; /* on the shared animation clock (util.js) */ let busy = false; fresh.forEach((i, k) => { const u = Math.min(1, Math.max(0, (t - t0 - k * 70) / 260)); if (u < 1) busy = true; drop[i] = Math.round((1 - u * u) * 6); });
+      paint(cv, P, n, drop); if (!(busy && cv.isConnected)) { anim.delete(cv); return false; } };
+    Q.frame.add(step); }); };
 
 /* ---------- put them on the quest card ---------- */
 const decorate = () => { const card = document.querySelector('#view .quest-journal[id^="q-"]'); if (!card || card.dataset.pics) return; const q = D.QM[card.id.slice(2)]; if (!q) return;

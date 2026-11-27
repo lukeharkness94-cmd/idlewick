@@ -148,13 +148,13 @@ Q.townLifeScan = () => document.querySelectorAll('.home-scene img.scene[data-tow
 Q.townLifeLive = () => [...layers].filter(L => L.img.isConnected).map(L => ({ town: L.town, phase: L.tint.dataset.phase, tint: L.tint.style.backgroundColor, weather: L.weather, windows: (L.meta.windows || []).length, chimneys: (L.meta.chimneys || []).length,
   animals: L.animals.map(a => ({ kind: a.kind, x: Math.round(a.kind === 'gull' ? a.cx + Math.cos(a.a) * a.r * 1.6 : a.x) })), drops: L.drops.length }));
 
-const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performance.now(); this.raf = requestAnimationFrame(t => this.run(t)); } },
-  run(t) { this.raf = 0; const dt = Math.min(.1, Math.max(0, (t - this.last) / 1000)); this.last = t; /* a hidden tab never catches up */
+const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performance.now(); this.raf = Q.frame.add((dt, t) => this.run(t)); } }, /* the shared animation clock (util.js) */
+  run(t) { const dt = Math.min(.1, Math.max(0, (t - this.last) / 1000)); this.last = t; /* a hidden tab never catches up */
     const calm = still();
     for (const L of layers) { if (!L.img.isConnected) { L.ro && L.ro.disconnect(); layers.delete(L); continue; }
       /* still: nothing moves; the light is brought up to the hour twice a minute */
       if (!calm) { paint(L, dt); L.calmAt = 0; } else if (!L.calmAt || t - L.calmAt > 30000) { paint(L, 0); L.calmAt = t; } }
-    if (layers.size) this.raf = requestAnimationFrame(n => this.run(n)); } };
+    if (!layers.size) { this.raf = 0; return false; } } };
 
 /* ---------- Settings → Display → Town life ---------- */
 Q.townLifeSettings = () => { const s = S().settings, clock = s.townTime !== 'day', wet = s.townWeather !== false;

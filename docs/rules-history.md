@@ -276,3 +276,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   parchment-style fantasy game ... moving town scenes, animated animals and characters ... cosy, logical and like a warm
   dashboard", then chose "1 and 2" (materials and polish; living towns with day and night). Added the materials line
   to the Hearthside Journal rule and the living-towns line to the towns rule.
+- 27 Nov 2026 (owner): "smoother and higher FPS animations, more logical flow". Added to the motion rule: continuous
+  script animation runs on the one clock `DQ.frame` (no per-module rAF loops, nothing while hidden, no catch-up), no
+  whole-page searches per frame, and page changes turn the main view with a short View Transition.

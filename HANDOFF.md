@@ -1077,3 +1077,32 @@ fight; and one hunting ground with tier tabs, no towns ("even if this means redu
 - Not changed: js/world_events.js (another agent's file) still picks a town's highest-level creature for some events,
   which can be an animal now off the ground; tests/combat-hunting-qa.cjs already failed on `claude/part-b-c` before
   this work (its fresh-hero opening) and was not repaired here.
+
+## One animation clock, a cheaper snapper and page turns (Claude, 27 Nov 2026)
+
+Branch `claude/smooth-motion`. Owner: "smoother and higher FPS animations, more logical flow". Numbers and method in
+docs/motion-performance.md.
+
+- **One clock** (`DQ.frame`, end of js/util.js): one requestAnimationFrame loop; subscribers get `(dt, now)` (dt in
+  seconds, capped at 0.1), return false to stop, stop while the tab is hidden and get dt 0 on return (no catch-up).
+  On it now: progress bars (`UI.frame`), the strike beat (strike_sync.js), town life and walkers (only their loop line
+  changed), particles (fx.js), title fireflies (boot.js), coin roll-up (finish.js), quest-reveal counts
+  (quest_claim.js), blueprint blocks (quest_pictures.js), the Bought label (purchase_feedback.js), the map journey
+  (ui_pages.js). One-shot "next frame" calls stay plain rAF.
+- **Snapper** (pixel_runtime.js): a MutationObserver hands only sprites in added subtrees or with a changed src/class
+  to a ResizeObserver, which reports them after the browser's own layout in the same frame (no forced layout, snapped
+  before paint). Sprites with no size yet (hidden panels) stay observed and snap when shown; late-loading pictures are
+  observed again on load; a resize re-observes everything. `DQ.snapStats()` counts batches and sprites measured;
+  `DQ.snapPixels(root)` still measures a whole subtree at once.
+- **Strike beat** no longer runs `document.querySelector('#view .activity-stage.working')` every frame (it was the
+  largest per-frame cost in a fight); it reads a live `getElementsByClassName` list and only when the task has a beat.
+- **Paint-free loops**: weather drops move by transform (cqh/cqw of the `.weather` box, same paths) instead of
+  top/left/bottom; the progress-bar light is a translated pseudo-element instead of a background-position loop; the
+  selected card's and training rail row's breathing shadows were removed (the shape layer's !important shadow already
+  hid both, so they only cost a style pass a frame).
+- **Page turns** (finish.js + "page turns" in css/style.css): top menu, page tabs, rail and route chips
+  (`go`, `hub`, `route`, `routeback`, `openquest`, `openproject`, `nowactivity`) start a View Transition of `#view`
+  only (old page out 170 ms, new in 210 ms, direction from the menu order); the click is replayed inside the
+  transition so state and DOM still change together. Off without the API, under calm/reduced motion, and in automated
+  browsers unless `localStorage['idlewick.transitions'] = '1'`.
+- **Tests**: `tests/motion-clock.cjs` (new). `scripts/measure-motion.cjs` records the numbers.
