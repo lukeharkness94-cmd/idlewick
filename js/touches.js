@@ -43,10 +43,8 @@ UI.render = fresh => {
   if (arena && !arena.querySelector('.weather')) arena.insertAdjacentHTML('afterbegin', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town));
   /* 7. a fresh unique glows in the pack until you have looked at it */
   if (S().freshUnique && UI.view === 'character') { const id = S().freshUnique; setTimeout(() => { if (S().freshUnique === id && UI.view === 'character') S().freshUnique = null; }, 4000); }
-  /* 11. a cosy home at night */
-  if (UI.view === 'overview' && DQ.timeOfDay() === 'night' && !document.querySelector('.night-home')) {
-    const view = document.getElementById('view'); if (view) view.insertAdjacentHTML('afterbegin', nightHtml());
-  }
+  /* 11. a cosy home at night: now the hearth and the living town show the hour themselves (js/hearth.js,
+     js/town_life.js, 27 Nov 2026), so the old night card no longer stacks above Home */
 };
 const pack0 = UI.packGrid;
 if (pack0) UI.packGrid = () => { const h = pack0(), id = S().freshUnique; return id ? h.replace(`data-a="${id}" data-b="pack"`, `data-a="${id}" data-b="pack" data-fresh="1"`) : h; };

@@ -107,8 +107,12 @@ dated line to the history file.
   1080 when above 1; `html.lw-wide` over 2300 page px), times Settings → Interface size, never below 85%; laptops adapt
   with `html.lw-1600` / `html.lw-1300` / `html.short` instead of smaller text. Use `--vh`/`--vh100`/`--vw100`, never raw
   vh/vw, and `DQ.toPage()` for screen-to-page coordinates. Phones (≤ 860px) stay responsive at 100%.
-- **Shell**: the top bar holds the page menu (Home, Quests, World, Village, Hero, Guide, Shop; `js/shell.js`) with dots
-  for "something to do here". The 180px left rail holds the Now card (current task, Stop/Retreat, "then …" for the
+- **Shell** (five places, owner 27 Nov; docs/navigation-review.md): the top bar holds the page menu, Home, Skills,
+  Quests, Town (projects, shop, house, workers, map) and Journal (field guide, collection, achievements, museum, skill
+  levels, mastery, story); `js/shell.js` `HUBS`/`TOP`, with old ids (world, village, shop, guide) redirected. Hero is the
+  portrait: backpack and equipment, tools, bank, settings. Exploration sits with the skills. A menu shows a dot only for
+  something to do now (a quest to hand in, a site to finish, a crop to pick, a decision waiting), never a number. Phones
+  use the same five in the bottom bar and a header of portrait, coins and bell. The 180px left rail holds the Now card (current task, Stop/Retreat, "then …" for the
   queue), a Combat group (overall level, then Melee, Ranged, Magic, Defence, Health) and every other skill. Rail rows
   share the window height (`UI.fitDock`, 34–64 page px) and show icon, name, level or lock and one bar; rail order is
   stable (fresh-hero activities first). Never shrink text or icons to fit. Phones keep the bottom bar.

@@ -279,3 +279,5 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 27 Nov 2026 (owner): "let's now do 3, 4, 5 and 6" (personality, smoother motion, a homely flow, room sound). Home
   now opens in the hearth, Welcome Back starts with a diary entry, and seasons follow the real month. The owner also
   asked where every menu should sit: proposal in docs/navigation-review.md, not yet decided.
+- 27 Nov 2026 (owner): "go with the five-place navigation proposal". Replaces the seven-menu top bar (Home, Quests,
+  World, Village, Hero, Guide, Shop) and the eight-tab phone bar with number badges.

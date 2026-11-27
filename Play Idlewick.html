@@ -5882,6 +5882,14 @@ html.calm .hearth>.hearth-dim{transition:none}
 /* Welcome back opens with a few handwritten lines from the hero's diary (js/welcome.js diary()) */
 .wb-diary{margin:2px 2px 4px;padding:10px 14px;font:italic 500 17px/1.45 var(--f-body);color:color-mix(in srgb,var(--ink) 88%,var(--brass));background:color-mix(in srgb,var(--brass) 7%,transparent);border-radius:var(--r-info,4px)}
 .wb-diary span{font-weight:700;font-style:normal;font-family:var(--f-display);letter-spacing:.02em}
+
+/* five places (27 Nov 2026): the map pin's job is Town → Map now; on phones the header card is the portrait, coins
+   and the bell, and the backpack, settings and mute are in the Hero page the portrait opens (Settings is its tab) */
+#hud .iconb[data-a="map"]{display:none!important}
+@media (max-width:860px){#hud :is(.packchip,.iconb[data-a="settings"],.iconb[data-do="mute"]){display:none!important}}
+/* the phone bar's dot: something to do now, never a number */
+#rail .hub{position:relative}
+#rail .hub .hubdot.todo{display:block;position:absolute;top:5px;right:9px;width:10px;height:10px;min-width:0;padding:0;border-radius:50%;background:#e2572c;font-size:0;line-height:0}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
@@ -18941,22 +18949,25 @@ const DQ = window.DQ, D = DQ.data, UI = DQ.ui, { $, $$, ico, fmt, fmtK, esc, cla
 const S = () => DQ.S;
 
 /* ---------- Hubs ---------- */
+/* Five places (owner, 27 Nov 2026: "go with the five-place navigation proposal", docs/navigation-review.md): Home,
+   Skills (every skill and Combat), Quests, Town (projects, the shop, your house and workers, the map) and Journal (the
+   field guide and everything you have done). Hero is the portrait in the corner: backpack, tools, bank and settings.
+   Old menu ids (world, village, guide, shop) still work: UI.DO.hub maps them to their new place. */
 const HUBS = [
-  { id: 'home', name: 'Home', ic: 'home', pages: ['overview', 'activity', 'journal'] },
-  { id: 'quests', name: 'Quests', ic: 'quest', pages: ['quests', 'people'] },
-  { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'brewery', 'enchanting', 'research', 'carpentry', 'sailing', 'beastmastery'] },
+  { id: 'home', name: 'Home', ic: 'home', pages: ['overview', 'activity'] },
+  { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'brewery', 'enchanting', 'research', 'carpentry', 'sailing', 'beastmastery', 'exploration'] },
   { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'tower', 'melee', 'ranged', 'magic'] },
-  { id: 'world', name: 'World', ic: 'map', pages: ['map', 'exploration'] },
-  { id: 'village', name: 'Village', ic: 'house', pages: ['projects', 'house', 'hirelings'] },
-  { id: 'hero', name: 'Hero', ic: 'bag', pages: ['character', 'tools', 'bank', 'skillsummary', 'mastery'] },
-  /* Guide (Dec 2026): the field guide now covers everything you work with, so it sits beside Hero with the collection log
-     and achievements: the three places that show what you are close to earning */
-  { id: 'guide', name: 'Guide', ic: 'book', pages: ['bestiary', 'museum', 'collection', 'achievements'] },
-  { id: 'shop', name: 'Shop', ic: 'shop', pages: ['shop'] },
+  { id: 'quests', name: 'Quests', ic: 'quest', pages: ['quests', 'people'] },
+  { id: 'town', name: 'Town', ic: 'house', pages: ['projects', 'shop', 'house', 'hirelings', 'map'] },
+  { id: 'journal', name: 'Journal', ic: 'book', pages: ['bestiary', 'collection', 'achievements', 'museum', 'skillsummary', 'mastery', 'journal'] },
+  { id: 'hero', name: 'Hero', ic: 'bag', pages: ['character', 'tools', 'bank', 'settings'] },
 ];
-/* The page menu along the top bar (desktop). Combat and every skill live down the left; phones keep the bottom bar. */
-const TOP = ['home', 'quests', 'world', 'village', 'hero', 'guide', 'shop'];
-const UTILITIES = { id: 'settings', name: 'Settings', pages: ['settings', 'balance'] };
+/* the page menu along the top (desktop) and the bottom bar (phones): the same five */
+const TOP = ['home', 'skills', 'quests', 'town', 'journal'];
+const ALIAS = { world: ['town', 'map'], village: ['town', 'projects'], shop: ['town', 'shop'], guide: ['journal', 'bestiary'] };
+/* a menu entry is "on" for its own pages and, for Skills, Combat's */
+const topOf = id => id === 'combat' ? 'skills' : id;
+const UTILITIES = { id: 'settings', name: 'Settings', pages: ['balance'] };
 const TAB = { arts:['Combat arts','book'], melee:['Melee','attack'], ranged:['Ranged','ranged'], museum:['Museum','museum'], tower:['Trial tower','shield'], collection:['Collection','star'], carpentry:['Carpentry','carpentry'], sailing:['Sailing','sailing'], beastmastery:['Beastmastery','beastmastery'], hunting:['Hunting','paw'], exploration:['Exploration','map'], enchanting:['Enchanting','rune'], brewery: ['Herbalism', 'bottle'], overview: ['Home', 'home'], skillsummary: ['Skill levels', 'star'], tools: ['Tools', 'mining'], activity: ['Activity', 'clock'], journal: ['Journal', 'book'], projects: ['Town projects', 'house'], combat: ['Fight', 'attack'], bestiary: ['Field guide', 'book'], map: ['Map', 'map'], quests: ['Quests', 'quest'], people: ['People', 'users'], shop: ['Shop', 'shop'], character: ['Inventory & equipment', 'bag'], bank: ['Bank', 'bank'], house: ['House', 'house'], hirelings: ['Workers', 'users'], achievements: ['Achievements', 'trophy'], mastery: ['Mastery', 'trophy'], research: ['Scholarship', 'book'], settings: ['Settings', 'gear'] };
 UI.hubOf = p => HUBS.find(h => h.pages.includes(p)) || (UTILITIES.pages.includes(p) ? UTILITIES : HUBS[0]);
 const lastIn = {};
@@ -18978,11 +18989,11 @@ DQ.on && DQ.on('levelup', sk => {
   if (row) { row.classList.remove('lvl-pop'); void row.offsetWidth; row.style.setProperty('--pop-delay', '0ms'); row.classList.add('lvl-pop'); }
   if (UI.levelPop.combat === now) { const e = document.querySelector('#combatnav .combat-entry'); if (e) { e.classList.remove('lvl-pop'); void e.offsetWidth; e.style.setProperty('--pop-delay', '0ms'); e.classList.add('lvl-pop'); } }
 });
-const topNav = () => { const cur = UI.hubOf(UI.view).id; return `<nav class="topnav" id="topnav" aria-label="Pages">${TOP.map(id => { const h = HUBS.find(x => x.id === id), on = id === cur; return `<button class="tnav ${on ? 'on' : ''}" data-do="hub" data-a="${id}" aria-label="${h.name}" ${on ? 'aria-current="page"' : ''}>${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${id}"></i></button>`; }).join('')}</nav>`; };
+const topNav = () => { const cur = topOf(UI.hubOf(UI.view).id); return `<nav class="topnav" id="topnav" aria-label="Pages">${TOP.map(id => { const h = HUBS.find(x => x.id === id), on = id === cur; return `<button class="tnav ${on ? 'on' : ''}" data-do="hub" data-a="${id}" aria-label="${h.name}" ${on ? 'aria-current="page"' : ''}>${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${id}"></i></button>`; }).join('')}</nav>`; };
 UI.renderRail = () => {
   if (lastCombat == null && DQ.S) lastCombat = DQ.combatLvl();
   const cur = UI.hubOf(UI.view).id;
-  $('#rail').innerHTML = `<div class="brand">${ico('candle')}<b>Idlewick</b></div>` + HUBS.filter(h=>h.id!=='combat').map(h => `<button class="hub ${h.id === cur ? 'on' : ''}" data-do="hub" data-a="${h.id}" aria-label="${h.name}">${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${h.id}"></i></button>`).join('');
+  $('#rail').innerHTML = `<div class="brand">${ico('candle')}<b>Idlewick</b></div>` + TOP.map(id=>HUBS.find(h=>h.id===id)).map(h => `<button class="hub ${h.id === topOf(cur) ? 'on' : ''}" data-do="hub" data-a="${h.id}" aria-label="${h.name}">${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${h.id}"></i></button>`).join('');
   const cpop=UI.levelPop.combat,cpopping=cpop&&Date.now()-cpop<1600;
   $('#combatnav').innerHTML=`<button class="hub combat-entry ${cur==='combat'?'on':''} ${cpopping?'lvl-pop':''}" ${cpopping?`style="--c:var(--brass);--pop-delay:-${Date.now()-cpop}ms"`:''} data-do="hub" data-a="combat" aria-label="Combat">${ico('attack')}<span>Combat</span><b class="combat-menu-level mono" data-b="combat">${DQ.combatLvl()}</b><i class="hubdot" data-b="hubdot:combat"></i><span class="combat-menu-bar bar"><i data-b="combatbar" style="width:${DQ.combatProgress().pct.toFixed(1)}%"></i></span></button>`;
   UI.upd();
@@ -18992,13 +19003,17 @@ UI.B.notice = (e, page) => {
   e.hidden = !n; UI.set(e, n > 9 ? '9+' : n);
   e.setAttribute('aria-label', n + ' available actions');
 };
+/* a dot only for something you can do now: a quest to hand in, a site to finish, a crop to pick, a decision waiting;
+   not new quests on offer or things the shop could sell you (owner, 27 Nov 2026: the phone bar was "very busy") */
+DQ.nowCount = pages => pages.flatMap(p => DQ.actionTargets ? DQ.actionTargets(p) : []).filter(t => t.kind !== 'quest-new' && t.page !== 'shop').length + (pages.includes('activity') ? (S().inbox || []).length : 0);
 UI.B.hubdot = (e, h) => {
   let n = 0, live = false;
-  if (h === 'skills' || h === 'combat') { const ap = DQ.act && DQ.actPage(); live = !!ap && HUBS.find(x => x.id === h).pages.includes(ap); }
-  n = DQ.noticeCount ? DQ.noticeCount(HUBS.find(hub => hub.id === h)?.pages || []) : 0;
+  const pages = h === 'skills' ? HUBS.filter(x => x.id === 'skills' || x.id === 'combat').flatMap(x => x.pages) : (HUBS.find(hub => hub.id === h)?.pages || []);
+  if (h === 'skills' || h === 'combat') { const ap = DQ.act && DQ.actPage(); live = !!ap && pages.includes(ap); }
+  n = DQ.nowCount(pages);
   /* top menu (20 Nov): a clear dot says "something to do here"; the count lives in the label, not in tiny text */
   if (e.closest('.tnav')) { e.className = 'hubdot' + (n ? ' todo' : live ? ' live' : ''); UI.set(e, ''); const b = e.closest('.tnav'), base = b.dataset.label || (b.dataset.label = b.getAttribute('aria-label')); b.setAttribute('aria-label', n ? `${base}, ${n} to do` : base); return; }
-  e.className = 'hubdot' + (n ? ' num' : live ? ' live' : ''); UI.set(e, n || '');
+  e.className = 'hubdot' + (n ? ' todo' : live ? ' live' : ''); UI.set(e, ''); const b = e.closest('.hub'); if (b) { const base = b.dataset.label || (b.dataset.label = b.getAttribute('aria-label')); b.setAttribute('aria-label', n ? `${base}, ${n} to do` : base); }
 };
 const subnav = () => {
   const h = UI.hubOf(UI.view), el = $('#subnav'); if (!el) return;
@@ -19021,12 +19036,12 @@ UI.openMenuAction = target => {
   DQ.go(target.page);return true;
 };
 const menuTarget=pages=>pages.flatMap(page=>DQ.actionTargets?.(page)||[])[0];
-UI.DO.hub = a => { const h=HUBS.find(x=>x.id===a);if(!h)return;const target=menuTarget(h.pages);if(!UI.openMenuAction(target))DQ.go(hubDefault(h)); };
+UI.DO.hub = a => { if (ALIAS[a]) return DQ.go(ALIAS[a][1]); const h=HUBS.find(x=>x.id===a);if(!h)return;const target=menuTarget(h.pages);if(!UI.openMenuAction(target))DQ.go(hubDefault(h)); };
 const go0=UI.DO.go;UI.DO.go=(page,b,el)=>{if(el?.matches('.dk,.stab')&&UI.openMenuAction(menuTarget([page])))return;return go0(page,b,el);};
 const prevRender = UI.render;
 UI.render = fresh => {
   prevRender(fresh); lastIn[UI.hubOf(UI.view).id] = UI.view; subnav(); UI.renderDock(); UI.renderPins(); UI.packWarn(true); UI.upd();
-  const cur = UI.hubOf(UI.view).id; $$('.hub').forEach(b => b.classList.toggle('on', b.dataset.a === cur));
+  const cur = topOf(UI.hubOf(UI.view).id); $$('.hub').forEach(b => b.classList.toggle('on', b.dataset.a === cur || (b.dataset.a === 'combat' && UI.hubOf(UI.view).id === 'combat')));
   $$('#topnav .tnav').forEach(b => { const on = b.dataset.a === cur; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   UI.markNow();
 };
@@ -22297,10 +22312,8 @@ UI.render = fresh => {
   if (arena && !arena.querySelector('.weather')) arena.insertAdjacentHTML('afterbegin', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town));
   /* 7. a fresh unique glows in the pack until you have looked at it */
   if (S().freshUnique && UI.view === 'character') { const id = S().freshUnique; setTimeout(() => { if (S().freshUnique === id && UI.view === 'character') S().freshUnique = null; }, 4000); }
-  /* 11. a cosy home at night */
-  if (UI.view === 'overview' && DQ.timeOfDay() === 'night' && !document.querySelector('.night-home')) {
-    const view = document.getElementById('view'); if (view) view.insertAdjacentHTML('afterbegin', nightHtml());
-  }
+  /* 11. a cosy home at night: now the hearth and the living town show the hour themselves (js/hearth.js,
+     js/town_life.js, 27 Nov 2026), so the old night card no longer stacks above Home */
 };
 const pack0 = UI.packGrid;
 if (pack0) UI.packGrid = () => { const h = pack0(), id = S().freshUnique; return id ? h.replace(`data-a="${id}" data-b="pack"`, `data-a="${id}" data-b="pack" data-fresh="1"`) : h; };
@@ -24782,7 +24795,7 @@ UI.V.settings=()=>{
  if(filters)for(const b of filters.querySelectorAll('[data-do="sndcat"] b'))b.textContent=(b.textContent==='Rewards'?'Reward':b.textContent)+' sounds';
  const audioCards=[card('Volume',volume),card('Music & effects',layers+taskHtml),card('Sound filters',(filters?.outerHTML||'')+'')];
  const lessons=get('Help & learning');const lessonText=lessons?.querySelector('p');if(lessonText)lessonText.textContent='Quick guides explain each skill when you first open it. Revisit them whenever you need.';
- const story=`<button class="tog ${Q.S.settings.storyScenes!==false?'on':''}" data-do="storysetting"><span class="sw"></span><span><b>Automatic story scenes</b><small>Major events offer skippable scenes. Replay them in Home → Journal.</small></span></button>`;
+ const story=`<button class="tog ${Q.S.settings.storyScenes!==false?'on':''}" data-do="storysetting"><span class="sw"></span><span><b>Automatic story scenes</b><small>Major events offer skippable scenes. Replay them in Journal → Journal.</small></span></button>`;
  const gameCards=[card('Combat & offline progress',body(game)),card('Your hero',name),card('Story & learning',story+body(lessons)),card('Play time',body(get('Time')))];
  const danger=take(save,'[data-do="newgame"]'),backupList=save?.querySelector('.bklist')?.parentElement;
  const backupHtml=backupList?.outerHTML||'<p class="dim">No automatic backups yet. Your recent backups on this device will appear here.</p>';backupList?.remove();

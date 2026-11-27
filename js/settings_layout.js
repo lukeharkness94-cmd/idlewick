@@ -29,7 +29,7 @@ UI.V.settings=()=>{
  if(filters)for(const b of filters.querySelectorAll('[data-do="sndcat"] b'))b.textContent=(b.textContent==='Rewards'?'Reward':b.textContent)+' sounds';
  const audioCards=[card('Volume',volume),card('Music & effects',layers+taskHtml),card('Sound filters',(filters?.outerHTML||'')+'')];
  const lessons=get('Help & learning');const lessonText=lessons?.querySelector('p');if(lessonText)lessonText.textContent='Quick guides explain each skill when you first open it. Revisit them whenever you need.';
- const story=`<button class="tog ${Q.S.settings.storyScenes!==false?'on':''}" data-do="storysetting"><span class="sw"></span><span><b>Automatic story scenes</b><small>Major events offer skippable scenes. Replay them in Home → Journal.</small></span></button>`;
+ const story=`<button class="tog ${Q.S.settings.storyScenes!==false?'on':''}" data-do="storysetting"><span class="sw"></span><span><b>Automatic story scenes</b><small>Major events offer skippable scenes. Replay them in Journal → Journal.</small></span></button>`;
  const gameCards=[card('Combat & offline progress',body(game)),card('Your hero',name),card('Story & learning',story+body(lessons)),card('Play time',body(get('Time')))];
  const danger=take(save,'[data-do="newgame"]'),backupList=save?.querySelector('.bklist')?.parentElement;
  const backupHtml=backupList?.outerHTML||'<p class="dim">No automatic backups yet. Your recent backups on this device will appear here.</p>';backupList?.remove();

@@ -5,22 +5,25 @@ const DQ = window.DQ, D = DQ.data, UI = DQ.ui, { $, $$, ico, fmt, fmtK, esc, cla
 const S = () => DQ.S;
 
 /* ---------- Hubs ---------- */
+/* Five places (owner, 27 Nov 2026: "go with the five-place navigation proposal", docs/navigation-review.md): Home,
+   Skills (every skill and Combat), Quests, Town (projects, the shop, your house and workers, the map) and Journal (the
+   field guide and everything you have done). Hero is the portrait in the corner: backpack, tools, bank and settings.
+   Old menu ids (world, village, guide, shop) still work: UI.DO.hub maps them to their new place. */
 const HUBS = [
-  { id: 'home', name: 'Home', ic: 'home', pages: ['overview', 'activity', 'journal'] },
-  { id: 'quests', name: 'Quests', ic: 'quest', pages: ['quests', 'people'] },
-  { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'brewery', 'enchanting', 'research', 'carpentry', 'sailing', 'beastmastery'] },
+  { id: 'home', name: 'Home', ic: 'home', pages: ['overview', 'activity'] },
+  { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'brewery', 'enchanting', 'research', 'carpentry', 'sailing', 'beastmastery', 'exploration'] },
   { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'tower', 'melee', 'ranged', 'magic'] },
-  { id: 'world', name: 'World', ic: 'map', pages: ['map', 'exploration'] },
-  { id: 'village', name: 'Village', ic: 'house', pages: ['projects', 'house', 'hirelings'] },
-  { id: 'hero', name: 'Hero', ic: 'bag', pages: ['character', 'tools', 'bank', 'skillsummary', 'mastery'] },
-  /* Guide (Dec 2026): the field guide now covers everything you work with, so it sits beside Hero with the collection log
-     and achievements: the three places that show what you are close to earning */
-  { id: 'guide', name: 'Guide', ic: 'book', pages: ['bestiary', 'museum', 'collection', 'achievements'] },
-  { id: 'shop', name: 'Shop', ic: 'shop', pages: ['shop'] },
+  { id: 'quests', name: 'Quests', ic: 'quest', pages: ['quests', 'people'] },
+  { id: 'town', name: 'Town', ic: 'house', pages: ['projects', 'shop', 'house', 'hirelings', 'map'] },
+  { id: 'journal', name: 'Journal', ic: 'book', pages: ['bestiary', 'collection', 'achievements', 'museum', 'skillsummary', 'mastery', 'journal'] },
+  { id: 'hero', name: 'Hero', ic: 'bag', pages: ['character', 'tools', 'bank', 'settings'] },
 ];
-/* The page menu along the top bar (desktop). Combat and every skill live down the left; phones keep the bottom bar. */
-const TOP = ['home', 'quests', 'world', 'village', 'hero', 'guide', 'shop'];
-const UTILITIES = { id: 'settings', name: 'Settings', pages: ['settings', 'balance'] };
+/* the page menu along the top (desktop) and the bottom bar (phones): the same five */
+const TOP = ['home', 'skills', 'quests', 'town', 'journal'];
+const ALIAS = { world: ['town', 'map'], village: ['town', 'projects'], shop: ['town', 'shop'], guide: ['journal', 'bestiary'] };
+/* a menu entry is "on" for its own pages and, for Skills, Combat's */
+const topOf = id => id === 'combat' ? 'skills' : id;
+const UTILITIES = { id: 'settings', name: 'Settings', pages: ['balance'] };
 const TAB = { arts:['Combat arts','book'], melee:['Melee','attack'], ranged:['Ranged','ranged'], museum:['Museum','museum'], tower:['Trial tower','shield'], collection:['Collection','star'], carpentry:['Carpentry','carpentry'], sailing:['Sailing','sailing'], beastmastery:['Beastmastery','beastmastery'], hunting:['Hunting','paw'], exploration:['Exploration','map'], enchanting:['Enchanting','rune'], brewery: ['Herbalism', 'bottle'], overview: ['Home', 'home'], skillsummary: ['Skill levels', 'star'], tools: ['Tools', 'mining'], activity: ['Activity', 'clock'], journal: ['Journal', 'book'], projects: ['Town projects', 'house'], combat: ['Fight', 'attack'], bestiary: ['Field guide', 'book'], map: ['Map', 'map'], quests: ['Quests', 'quest'], people: ['People', 'users'], shop: ['Shop', 'shop'], character: ['Inventory & equipment', 'bag'], bank: ['Bank', 'bank'], house: ['House', 'house'], hirelings: ['Workers', 'users'], achievements: ['Achievements', 'trophy'], mastery: ['Mastery', 'trophy'], research: ['Scholarship', 'book'], settings: ['Settings', 'gear'] };
 UI.hubOf = p => HUBS.find(h => h.pages.includes(p)) || (UTILITIES.pages.includes(p) ? UTILITIES : HUBS[0]);
 const lastIn = {};
@@ -42,11 +45,11 @@ DQ.on && DQ.on('levelup', sk => {
   if (row) { row.classList.remove('lvl-pop'); void row.offsetWidth; row.style.setProperty('--pop-delay', '0ms'); row.classList.add('lvl-pop'); }
   if (UI.levelPop.combat === now) { const e = document.querySelector('#combatnav .combat-entry'); if (e) { e.classList.remove('lvl-pop'); void e.offsetWidth; e.style.setProperty('--pop-delay', '0ms'); e.classList.add('lvl-pop'); } }
 });
-const topNav = () => { const cur = UI.hubOf(UI.view).id; return `<nav class="topnav" id="topnav" aria-label="Pages">${TOP.map(id => { const h = HUBS.find(x => x.id === id), on = id === cur; return `<button class="tnav ${on ? 'on' : ''}" data-do="hub" data-a="${id}" aria-label="${h.name}" ${on ? 'aria-current="page"' : ''}>${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${id}"></i></button>`; }).join('')}</nav>`; };
+const topNav = () => { const cur = topOf(UI.hubOf(UI.view).id); return `<nav class="topnav" id="topnav" aria-label="Pages">${TOP.map(id => { const h = HUBS.find(x => x.id === id), on = id === cur; return `<button class="tnav ${on ? 'on' : ''}" data-do="hub" data-a="${id}" aria-label="${h.name}" ${on ? 'aria-current="page"' : ''}>${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${id}"></i></button>`; }).join('')}</nav>`; };
 UI.renderRail = () => {
   if (lastCombat == null && DQ.S) lastCombat = DQ.combatLvl();
   const cur = UI.hubOf(UI.view).id;
-  $('#rail').innerHTML = `<div class="brand">${ico('candle')}<b>Idlewick</b></div>` + HUBS.filter(h=>h.id!=='combat').map(h => `<button class="hub ${h.id === cur ? 'on' : ''}" data-do="hub" data-a="${h.id}" aria-label="${h.name}">${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${h.id}"></i></button>`).join('');
+  $('#rail').innerHTML = `<div class="brand">${ico('candle')}<b>Idlewick</b></div>` + TOP.map(id=>HUBS.find(h=>h.id===id)).map(h => `<button class="hub ${h.id === topOf(cur) ? 'on' : ''}" data-do="hub" data-a="${h.id}" aria-label="${h.name}">${ico(h.ic)}<span>${h.name}</span><i class="hubdot" data-b="hubdot:${h.id}"></i></button>`).join('');
   const cpop=UI.levelPop.combat,cpopping=cpop&&Date.now()-cpop<1600;
   $('#combatnav').innerHTML=`<button class="hub combat-entry ${cur==='combat'?'on':''} ${cpopping?'lvl-pop':''}" ${cpopping?`style="--c:var(--brass);--pop-delay:-${Date.now()-cpop}ms"`:''} data-do="hub" data-a="combat" aria-label="Combat">${ico('attack')}<span>Combat</span><b class="combat-menu-level mono" data-b="combat">${DQ.combatLvl()}</b><i class="hubdot" data-b="hubdot:combat"></i><span class="combat-menu-bar bar"><i data-b="combatbar" style="width:${DQ.combatProgress().pct.toFixed(1)}%"></i></span></button>`;
   UI.upd();
@@ -56,13 +59,17 @@ UI.B.notice = (e, page) => {
   e.hidden = !n; UI.set(e, n > 9 ? '9+' : n);
   e.setAttribute('aria-label', n + ' available actions');
 };
+/* a dot only for something you can do now: a quest to hand in, a site to finish, a crop to pick, a decision waiting;
+   not new quests on offer or things the shop could sell you (owner, 27 Nov 2026: the phone bar was "very busy") */
+DQ.nowCount = pages => pages.flatMap(p => DQ.actionTargets ? DQ.actionTargets(p) : []).filter(t => t.kind !== 'quest-new' && t.page !== 'shop').length + (pages.includes('activity') ? (S().inbox || []).length : 0);
 UI.B.hubdot = (e, h) => {
   let n = 0, live = false;
-  if (h === 'skills' || h === 'combat') { const ap = DQ.act && DQ.actPage(); live = !!ap && HUBS.find(x => x.id === h).pages.includes(ap); }
-  n = DQ.noticeCount ? DQ.noticeCount(HUBS.find(hub => hub.id === h)?.pages || []) : 0;
+  const pages = h === 'skills' ? HUBS.filter(x => x.id === 'skills' || x.id === 'combat').flatMap(x => x.pages) : (HUBS.find(hub => hub.id === h)?.pages || []);
+  if (h === 'skills' || h === 'combat') { const ap = DQ.act && DQ.actPage(); live = !!ap && pages.includes(ap); }
+  n = DQ.nowCount(pages);
   /* top menu (20 Nov): a clear dot says "something to do here"; the count lives in the label, not in tiny text */
   if (e.closest('.tnav')) { e.className = 'hubdot' + (n ? ' todo' : live ? ' live' : ''); UI.set(e, ''); const b = e.closest('.tnav'), base = b.dataset.label || (b.dataset.label = b.getAttribute('aria-label')); b.setAttribute('aria-label', n ? `${base}, ${n} to do` : base); return; }
-  e.className = 'hubdot' + (n ? ' num' : live ? ' live' : ''); UI.set(e, n || '');
+  e.className = 'hubdot' + (n ? ' todo' : live ? ' live' : ''); UI.set(e, ''); const b = e.closest('.hub'); if (b) { const base = b.dataset.label || (b.dataset.label = b.getAttribute('aria-label')); b.setAttribute('aria-label', n ? `${base}, ${n} to do` : base); }
 };
 const subnav = () => {
   const h = UI.hubOf(UI.view), el = $('#subnav'); if (!el) return;
@@ -85,12 +92,12 @@ UI.openMenuAction = target => {
   DQ.go(target.page);return true;
 };
 const menuTarget=pages=>pages.flatMap(page=>DQ.actionTargets?.(page)||[])[0];
-UI.DO.hub = a => { const h=HUBS.find(x=>x.id===a);if(!h)return;const target=menuTarget(h.pages);if(!UI.openMenuAction(target))DQ.go(hubDefault(h)); };
+UI.DO.hub = a => { if (ALIAS[a]) return DQ.go(ALIAS[a][1]); const h=HUBS.find(x=>x.id===a);if(!h)return;const target=menuTarget(h.pages);if(!UI.openMenuAction(target))DQ.go(hubDefault(h)); };
 const go0=UI.DO.go;UI.DO.go=(page,b,el)=>{if(el?.matches('.dk,.stab')&&UI.openMenuAction(menuTarget([page])))return;return go0(page,b,el);};
 const prevRender = UI.render;
 UI.render = fresh => {
   prevRender(fresh); lastIn[UI.hubOf(UI.view).id] = UI.view; subnav(); UI.renderDock(); UI.renderPins(); UI.packWarn(true); UI.upd();
-  const cur = UI.hubOf(UI.view).id; $$('.hub').forEach(b => b.classList.toggle('on', b.dataset.a === cur));
+  const cur = topOf(UI.hubOf(UI.view).id); $$('.hub').forEach(b => b.classList.toggle('on', b.dataset.a === cur || (b.dataset.a === 'combat' && UI.hubOf(UI.view).id === 'combat')));
   $$('#topnav .tnav').forEach(b => { const on = b.dataset.a === cur; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   UI.markNow();
 };

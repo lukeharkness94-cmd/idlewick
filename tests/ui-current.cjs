@@ -47,7 +47,7 @@ const fs=require('node:fs');
    DQ.fxDirty();DQ.ui.renderHud();DQ.ui.renderRail();
    document.querySelectorAll('.note').forEach(el=>el.remove());
   });
-  const hubs={overview:'home',activity:'home',shop:'shop',map:'world',projects:'village',achievements:'guide',bestiary:'guide',skillsummary:'hero',mastery:'hero',brewery:'skills',bank:'hero',house:'village',hirelings:'village',people:'quests',research:'skills',settings:'settings',fishing:'skills',woodcutting:'skills',character:'hero',quests:'quests',combat:'combat',mining:'skills',thieving:'skills',cooking:'skills',smithing:'skills',crafting:'skills',magic:'combat',farming:'skills',hunting:'skills',enchanting:'skills',exploration:'world'};
+  const hubs={overview:'home',activity:'home',shop:'town',map:'town',projects:'town',achievements:'journal',bestiary:'journal',skillsummary:'journal',mastery:'journal',brewery:'skills',bank:'hero',house:'town',hirelings:'town',people:'quests',research:'skills',settings:'hero',fishing:'skills',woodcutting:'skills',character:'hero',quests:'quests',combat:'combat',mining:'skills',thieving:'skills',cooking:'skills',smithing:'skills',crafting:'skills',magic:'combat',farming:'skills',hunting:'skills',enchanting:'skills',exploration:'skills'};
   for(const width of [390,1440,1920,2560,3440])for(const theme of ['dark','light']){
    await page.setViewportSize({width,height:1000});
    await page.evaluate(theme=>{DQ.S.settings.theme=theme;DQ.applyTheme();},theme);
@@ -72,7 +72,9 @@ const fs=require('node:fs');
      assert.equal(await page.locator('.combat-live .lootp').count(),0);if(width===1440&&theme==='dark'){await page.evaluate(()=>{for(let i=0;i<3;i++)DQ.closeModal();});const head=page.locator('.cw-mon .cw-mon-art').nth(1),hid=await head.getAttribute('data-a');await head.click();assert.match(await page.locator('.modal').innerText(),/Field guide/);await page.evaluate(()=>DQ.closeModal());await page.locator('.ready-line [data-do="guide"], [data-do="guide"]').first().click();assert.match(await page.locator('.modal').innerText(),/Field guide/);await page.evaluate(()=>DQ.closeModal());}
     }
    }
-   assert.ok(await page.locator('#hud [aria-label="Settings"]').isVisible());
+   /* five places (owner, 27 Nov 2026): Settings is the gear in the desktop header, and on phones a tab of Hero (the portrait) */
+   if(width>860)assert.ok(await page.locator('#hud [aria-label="Settings"]').isVisible());
+   else{await page.evaluate(()=>DQ.go('character'));assert.ok(await page.locator('#subnav [data-a="settings"]').isVisible(),'Settings tab on the Hero page');}
   }
   // A newly unlocked skill wears "New" in the rail until its page is opened; work scenes show the tool, never the weapon.
   {const r=await page.evaluate(()=>{const S=DQ.S,D=DQ.data;delete (S.newSkills||{}).herbalism;S.stats.harvest=20;S.unlocked.herbalism=true;DQ.notify({kind:'unlock',key:'unlock:herbalism',title:'Herbalism unlocked',text:'',icon:'herbalism'});DQ.ui.renderDock();

@@ -3,7 +3,7 @@
 Owner: "have a look again at where every skill, menu and system currently sits and suggest where it might better sit.
 There's a lot of menus at the top and it makes the phone menu system look very busy."
 
-This is a proposal; nothing here is built yet.
+Chosen by the owner on 27 Nov 2026 ("go with the five-place navigation proposal") and built in `js/shell.js`.
 
 ## What there is today
 

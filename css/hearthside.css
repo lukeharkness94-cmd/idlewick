@@ -1109,3 +1109,11 @@ html.calm .hearth>.hearth-dim{transition:none}
 /* Welcome back opens with a few handwritten lines from the hero's diary (js/welcome.js diary()) */
 .wb-diary{margin:2px 2px 4px;padding:10px 14px;font:italic 500 17px/1.45 var(--f-body);color:color-mix(in srgb,var(--ink) 88%,var(--brass));background:color-mix(in srgb,var(--brass) 7%,transparent);border-radius:var(--r-info,4px)}
 .wb-diary span{font-weight:700;font-style:normal;font-family:var(--f-display);letter-spacing:.02em}
+
+/* five places (27 Nov 2026): the map pin's job is Town → Map now; on phones the header card is the portrait, coins
+   and the bell, and the backpack, settings and mute are in the Hero page the portrait opens (Settings is its tab) */
+#hud .iconb[data-a="map"]{display:none!important}
+@media (max-width:860px){#hud :is(.packchip,.iconb[data-a="settings"],.iconb[data-do="mute"]){display:none!important}}
+/* the phone bar's dot: something to do now, never a number */
+#rail .hub{position:relative}
+#rail .hub .hubdot.todo{display:block;position:absolute;top:5px;right:9px;width:10px;height:10px;min-width:0;padding:0;border-radius:50%;background:#e2572c;font-size:0;line-height:0}
