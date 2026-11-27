@@ -45,7 +45,9 @@ dated line to the history file.
   before touching persistence or packaging. Never claim Steam Cloud is active or native builds are validated without
   the real App ID and platform tests.
 - Ask the owner only at real decision points (a design choice, a consequential balance change); give options with a
-  recommendation. Otherwise act, then report.
+  recommendation. Otherwise act, then report. Obvious fixes you notice along the way (a generic icon where the real
+  sprite belongs, a mislabelled button, a clipped label) are made in the same change, not offered as follow-ups
+  (owner, 27 Nov).
 
 ## 2. Look and art
 

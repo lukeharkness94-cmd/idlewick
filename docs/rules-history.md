@@ -261,3 +261,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 27 Nov 2026 (owner): "yes, bring all the 33 retired names as rare drops with unique art - make them all feel genuinely
   unique and cool - take inspiration from other fantasy armour where possible". 29 named weapons added as rare drops
   (30 retired fantasy names; Viper's kiss already existed; the three plain bronze names stay retired).
+- 27 Nov 2026 (owner): "for things like this where you notice obvious changes need making, make them yourself." Obvious
+  fixes noticed while working are made, not offered.
+

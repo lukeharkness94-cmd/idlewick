@@ -1031,3 +1031,6 @@ html.calm .petted,html.calm .petted img{animation:none}
 /* the queued task wraps rather than being cut off ("Now · then Fishing s…"), in normal case */
 .now .now-k:has(.now-next){white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
 .now .now-next{text-transform:none;letter-spacing:0}
+/* the held weapon's own sprite on the Fighting style card and the fighter panel: 16px art at 2x */
+.ss-wart{display:grid;place-items:center;width:32px;height:32px;flex:none;line-height:0}
+.ss-wart img{width:32px!important;height:32px!important;max-width:none!important;image-rendering:pixelated}
