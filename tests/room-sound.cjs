@@ -72,7 +72,7 @@ const { chromium } = require('playwright'), assert = require('node:assert/strict
     let d = await diff(() => DQ.go('quests')); assert.deepEqual(d, { page: 1 }, 'a page turn rustles once');
     await p.waitForTimeout(400);
     const before = await played();
-    const nav = p.locator('#topnav [data-do="hub"][data-a="world"]').first(); await nav.click(); await p.waitForTimeout(60); let after = await played();
+    const nav = p.locator('#topnav [data-do="hub"][data-a="town"]').first(); await nav.click(); await p.waitForTimeout(60); let after = await played();
     assert.equal((after.page || 0) - (before.page || 0), 1, 'a real click on the menu rustles once');
     await p.waitForTimeout(400);
     d = await diff(() => { for (let i = 0; i < 6; i++) DQ.sfx('page'); }); assert.deepEqual(d, { page: 1 }, 'six turns at once rustle once');
