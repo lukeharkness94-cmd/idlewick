@@ -19,7 +19,9 @@ dated line to the history file.
 - **Tests before merging: the whole suite, not only your area.** `node scripts/run-tests.cjs` rebuilds the game, starts
   its own preview server on a free port, runs every file in `tests/` several at a time (half the CPU cores, 2 to 4;
   `--jobs N` to change) and prints a summary;
-  `node scripts/run-tests.cjs ui- shop` runs only matching files. Two runs on one machine no longer collide. Browser
+  `node scripts/run-tests.cjs ui- shop` runs only matching files. Two runs on one machine no longer collide.
+  Failures are rerun once by themselves; a test that only passes alone is reported as **flaky**: say so when you
+  report results, and fix its timing when you next touch that area rather than ignoring it. Browser
   tests read `IDLEWICK_URL` and `SHOT_DIR`, use Playwright's bundled Chromium unless `CHROMIUM_PATH` is set, and never
   hard-code a machine's browser path, port or folder. A failing test written for an older rule is updated to the
   current rule in the same change, with the reason in the commit.

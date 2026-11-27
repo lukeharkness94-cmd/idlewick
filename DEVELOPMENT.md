@@ -16,7 +16,7 @@ Run the whole suite (rebuilds the game, starts its own preview on a free port, r
 
     node scripts/run-tests.cjs
 
-Only some files: `node scripts/run-tests.cjs ui- shop`. More or fewer at once: `--jobs N`.
+Only some files: `node scripts/run-tests.cjs ui- shop`. More or fewer at once: `--jobs N`. Failures are rerun once by themselves; any that pass alone are listed as flaky. The summary is also saved as `summary.txt` in the run's log folder.
 
 For each focused change, inspect its normal interaction at desktop and phone widths, check the other theme, and rerun relevant regressions. Keep release summaries short and state any unverified behavior.
 

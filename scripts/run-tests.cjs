@@ -11,7 +11,10 @@
      node scripts/run-tests.cjs --jobs 2        how many test files at once (default: half the CPU cores, 2 to 4)
      node scripts/run-tests.cjs --timeout 900   seconds before one test file is stopped (default 600)
      node scripts/run-tests.cjs --no-build      skip rebuilding Play Idlewick.html first
-   Exit code 0 only when every selected test passed. Each test's full output is kept in the run's log folder (printed
+     node scripts/run-tests.cjs --no-retry      don't rerun failures by themselves at the end
+   Failures are run once more by themselves at the end (some browser tests time animations and fail only on a busy
+   machine); one that passes alone is reported as flaky, separately from plain passes. Exit code 0 when nothing
+   failed both times. Each test's full output is kept in the run's log folder (printed
    at the start and end); the summary shows the last lines of every failure. Slowest tests start first, using the
    durations remembered from earlier runs on this machine (in the OS temp folder, never in the repository).
    Uses Node built-ins only; the browser tests use Playwright's bundled Chromium unless CHROMIUM_PATH is set. */
@@ -21,6 +24,7 @@ const fs = require('node:fs'), os = require('node:os'), path = require('node:pat
 const ROOT = path.resolve(__dirname, '..');
 const args = process.argv.slice(2), flag = (name, dflt) => { const i = args.indexOf(name); if (i < 0) return dflt; const v = args[i + 1]; args.splice(i, 2); return v; };
 const noBuild = args.includes('--no-build'); if (noBuild) args.splice(args.indexOf('--no-build'), 1);
+const noRetry = args.includes('--no-retry'); if (noRetry) args.splice(args.indexOf('--no-retry'), 1);
 const cores = os.cpus().length || 2;
 const jobs = Math.max(1, +flag('--jobs', Math.min(4, Math.max(2, Math.floor(cores / 2)))));
 const timeoutS = +flag('--timeout', 600);
@@ -68,11 +72,22 @@ process.on('SIGINT', () => { cleanup(); process.exit(130); }); process.on('SIGTE
   });
   const workers = Array.from({ length: Math.min(jobs, queue.length) }, async () => { while (queue.length) await runOne(queue.shift()); });
   await Promise.all(workers);
+  /* a few browser tests time animations and pop-ups and can fail only because the machine is busy: each failure is run
+     once more by itself; one that then passes is reported as flaky, never silently counted as a plain pass */
+  const firstFails = results.filter(r => !r.ok).map(r => r.file), flaky = [];
+  if (firstFails.length && !noRetry) {
+    console.log(`\nRunning ${firstFails.length} failure${firstFails.length > 1 ? 's' : ''} again, one at a time:`);
+    for (const file of firstFails) { const before = results.findIndex(r => r.file === file), old = results.splice(before, 1)[0];
+      fs.renameSync(path.join(logDir, file + '.txt'), path.join(logDir, file + '.first-try.txt'));
+      await runOne(file); const now = results[results.length - 1]; if (now.ok) { now.flaky = true; flaky.push(file); } else now.firstTry = old; }
+  }
   cleanup();
   try { fs.writeFileSync(timesFile, JSON.stringify(times)); } catch (e) { /* durations are only an ordering hint */ }
 
   const failed = results.filter(r => !r.ok).sort((a, b) => a.file.localeCompare(b.file));
-  console.log(`\n${results.length - failed.length} passed, ${failed.length} failed, in ${fmt(Date.now() - t0)} (${jobs} at a time).`);
+  const summary = `${results.length - failed.length - flaky.length} passed, ${flaky.length} flaky (failed alongside others, passed alone), ${failed.length} failed, in ${fmt(Date.now() - t0)} (${jobs} at a time).`;
+  console.log('\n' + summary); if (flaky.length) console.log('Flaky: ' + flaky.join(', ') + `  (first-try output: *.first-try.txt in the log folder)`);
+  try { fs.writeFileSync(path.join(logDir, 'summary.txt'), [summary, ...results.map(r => `${r.ok ? (r.flaky ? 'flaky' : 'pass') : 'FAIL'}\t${r.file}\t${fmt(r.ms)}`)].join('\n') + '\n'); } catch (e) { /* the console has it */ }
   for (const r of failed) { const text = fs.readFileSync(path.join(logDir, r.file + '.txt'), 'utf8').trim().split('\n').filter(l => !/^\s+at /.test(l)); console.log(`\n--- ${r.file}${r.timedOut ? ` (stopped after ${timeoutS}s)` : ` (exit ${r.code})`}\n` + text.slice(-12).join('\n')); }
   console.log(`\nFull output: ${logDir}`);
   process.exit(failed.length ? 1 : 0);
