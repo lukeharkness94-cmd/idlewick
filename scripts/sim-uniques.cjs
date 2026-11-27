@@ -15,13 +15,13 @@ const ctx = vm.createContext({ console, Math: math, Date, JSON, performance: { n
   document: { querySelector: () => null, querySelectorAll: () => [], getElementById: () => null, createElement: el, body: el(), addEventListener() {} } });
 ctx.window = ctx;
 const load = n => vm.runInContext(fs.readFileSync(path.join(root, n + '.js'), 'utf8'), ctx, { filename: n });
-['util', 'data', 'creatures_expanded', 'skill_expansion_data', 'data2', 'data3', 'economy', 'state', 'audio'].forEach(load);
+['util', 'data', 'creatures_expanded', 'creature_roster', 'hunt_tiers_data', 'skill_expansion_data', 'data2', 'data3', 'economy', 'state', 'audio'].forEach(load);
 const q = ctx.DQ; q.notify = q.pulse = q.floatAt = q.flash = q.burstAt = q.burstEl = q.toast = q.go = q.splat = () => {};
 ['engine', 'systems', 'plan', 'meta'].forEach(load);
 q.ui = { V: {}, DO: {}, B: {}, homeSections: [], render() {}, tabState: () => null }; q.tips = { item: () => '' }; q.goals = () => [];
 ['research', 'journey'].forEach(load);
 /* the same gameplay systems the shipped page composes on top: field guide, enchantments, adventures, companion tricks */
-for (const n of ['lore', 'hunting', 'bestiary', 'skill_expansion', 'adventures', 'companions']) { try { load(n); } catch (e) { console.error('sim-bosses: could not load ' + n + ': ' + e.message); process.exit(1); } }
+for (const n of ['lore', 'hunting', 'minibosses', 'towers', 'bestiary', 'skill_expansion', 'adventures', 'companions', 'rare_weapons']) { try { load(n); } catch (e) { console.error('sim-bosses: could not load ' + n + ': ' + e.message); process.exit(1); } }
 const D = q.data;
 /* For every unique item: a hero at the level of the region where it drops (the boss requirement there), wearing the
    region's best ordinary gear, abilities and 15 food. Compare that baseline with the same hero swapping the unique into
@@ -56,7 +56,8 @@ console.log('unique                 slot     region       vs toughest regular (s
 for (const id of uniques) {
   const it = D.ITEMS[id], town = dropTown(id) || trophyTown(id); if (!town) { console.log(id, 'no source town'); continue; }
   const style = it.style || (it.slot === 'weapon' ? 'melee' : 'melee');
-  const mon = D.MONLIST.filter(m => m.town === town && !m.boss).sort((a, b) => b.cl - a.cl)[0];
+  /* the region's toughest ordinary creature: not a boss, mini-boss, tower floor, event foe or hunting-ground animal */
+  const mon = D.MONLIST.filter(m => m.town === town && !m.boss && !m.mini && !m.tower && !m.event && !m.hl && !m.huntKind && !/^tw_/.test(m.id)).sort((a, b) => b.cl - a.cl)[0];
   const a = setup(town, style, null, id); if (a.err) { console.log(id, a.err); continue; } const ra = fight(mon.id), ba = fight(a.boss.id);
   const b = setup(town, style, id); if (b.err) { console.log(id, 'cannot equip: ' + b.err); continue; } const rb = fight(mon.id), bb = fight(b.boss.id);
   const d = (x, y) => x == null || y == null ? '' : (y < x ? `${Math.round((1 - y / x) * 100)}% faster` : y > x ? `${Math.round((y / x - 1) * 100)}% slower` : 'same');

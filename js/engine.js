@@ -314,7 +314,7 @@ DQ.startAct = (kind, id, o = {}) => {
 };
 DQ.combatInterval = () => {
   const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword;
-  return Math.round(W.speed*(1-Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003))*(DQ.uniqueFx&&DQ.uniqueFx().swift?.9:1));
+  return Math.round(W.speed*(1-Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003))*(DQ.uniqueFx&&DQ.uniqueFx().swift?.9:1)*(DQ.rareFx&&DQ.rareFx()&&DQ.rareFx().fx==='quick'?1-DQ.rareFx().spd:1));
 };
 DQ.combatSpeedText = () => { const W=D.WTYPES[D.weaponType()]||D.WTYPES.sword,ms=DQ.combatInterval(),lv=Math.round(Math.min(.24,Math.max(0,DQ.combatLvl()-1)*.003)*100),gale=DQ.uniqueFx&&DQ.uniqueFx().swift; return `${W.name}: ${(ms/1000).toFixed(2)}s per attack · ${lv}% faster from Combat level${gale?' · 10% faster from Gale':''}`; };
 DQ.actDur = a => {
@@ -499,7 +499,7 @@ DQ.TRACK_MS = 4000;
 DQ.trackRounds = () => Math.max(1, Math.round(DQ.TRACK_MS / Math.max(600, DQ.combatInterval())));
 function combatRound() {
   if (DQ.fight && DQ.fight.tracking > 0) { DQ.fight.tracking--; return; }
-  const f = DQ.fight, m = D.MON[f.id], ps = DQ.pstats(), A = DQ.ability, U = DQ.uniqueFx(); DQ.lastFoe = f.id; f.round++; f.pa = (f.pa || 0) + 1;
+  const f = DQ.fight, m = D.MON[f.id], ps = DQ.pstats(), A = DQ.ability, U = DQ.uniqueFx(), RX = DQ.rareFx(), rx = k => RX && RX.fx === k; DQ.lastFoe = f.id; f.round++; f.pa = (f.pa || 0) + 1;
   const sty = ps.style, W = D.WTYPES[D.weaponType()], mhp = m.hp;
   if (sty === 'ranged') {
     if (S().ammo.n <= 0 && S().ammo.id && DQ.have(S().ammo.id)) { const n = Math.min(DQ.have(S().ammo.id), 500); DQ.take(S().ammo.id, n); S().ammo.n += n; }
@@ -507,7 +507,7 @@ function combatRound() {
     if (!(ps.tech && ps.tech.free && chance(ps.tech.free))) S().ammo.n--; if (S().ammo.n <= 0 && !DQ.have(S().ammo.id)) { S().ammo = { id: null, n: 0 }; delete S().equip.ammo; }
   } else if (sty === 'magic') {
     const sp = pickSpell(); if (!sp) return DQ.stopAct(false, 'Out of Arcane runes. Buy more from the shop.');
-    ps.spell = sp; ps.max = Math.round((sp.max + Math.floor(DQ.lvl('magic') * ((D.STYLE_TUNE && D.STYLE_TUNE.level) || 1) / 10) + Math.floor(DQ.bonus().mag / 12)) * (1 + DQ.fx().dmg + (ps.tech ? ps.tech.dmg : 0)) * DQ.buffMult('weak')); if (!(ps.tech && ps.tech.free && chance(ps.tech.free))) DQ.take('rune', sp.runes);
+    ps.spell = sp; ps.max = Math.round((sp.max + Math.floor(DQ.lvl('magic') * ((D.STYLE_TUNE && D.STYLE_TUNE.level) || 1) / 10) + Math.floor(DQ.bonus().mag / 12)) * (1 + DQ.fx().dmg + (ps.tech ? ps.tech.dmg : 0)) * DQ.buffMult('weak') * (rx('runesave') ? 1 + RX.dmg : 1)); if (!(ps.tech && ps.tech.free && chance(ps.tech.free)) && !(rx('runesave') && chance(RX.p) && (fxHit(RX.key), true))) DQ.take('rune', sp.runes);
   }
   const dtype = sty === 'magic' ? D.SPELL_EL[ps.spell.id] : (ps.dtype || W.dtype); f.lastEl = dtype; /* a combat art can change the damage type (combat_arts.js) */
   /* Hollow King changes form */
@@ -530,13 +530,38 @@ function combatRound() {
     /* unique gear (data.js unique.key) */
     if (U.marked && f.pa <= 3) { sure = true; max *= 1.5; fxHit('marked'); }
     if (U.fury) { max *= 1.1 + .3 * (1 - clamp(S().hp / DQ.maxHp(), 0, 1)); fxHit('fury'); } /* always +10%, up to +40% as health falls */
-    const mDef = (m.def + 8) * (64 + m.def);
+    /* named weapons (js/rare_weapons.js): each applies its own signature with its own numbers */
+    let everyNow = false;
+    if (RX) {
+      if (rx('opener') && f.pa <= RX.n) { sure = true; max *= RX.m; fxHit(RX.key); }
+      if (rx('every') && f.pa % RX.n === 0) { everyNow = true; if (RX.sure) sure = true; max *= RX.m; if (RX.pierce && mult < 1) max /= mult; fxHit(RX.key); }
+      if (rx('reap') && f.hp < mhp * RX.below) { max *= RX.m; fxHit(RX.key); }
+      if (rx('momentum') && f.streak) { max *= 1 + Math.min(RX.cap, RX.step * f.streak); fxHit(RX.key); }
+      if (rx('snowball') && f.landed) { max *= 1 + Math.min(RX.cap, RX.step * f.landed); fxHit(RX.key); }
+      if (rx('quick')) max *= 1 - RX.dmg;
+      if (rx('stunplus') && f.stunBonus) { max *= 1 + RX.bonus; f.stunBonus = 0; }
+    }
+    const defCut = Math.min(.6, (rx('breach') ? RX.d : 0) + (rx('sunder') ? f.sunder || 0 : 0)), effDef = m.def * (1 - defCut); if (defCut && rx('breach')) fxHit(RX.key);
+    const mDef = (effDef + 8) * (64 + effDef);
     if (sure || Math.random() < hitChance(acc, mDef)) dealt = rnd(1, Math.max(1, Math.round(max)));
     if (dealt && A('deadeye')) dealt = Math.max(dealt, Math.ceil(max / 2));
     f.streak = dealt ? (f.streak || 0) + 1 : 0;
     if (dealt && ((A('cleave') && f.pa % 5 === 0) || (A('volley') && f.pa % 4 === 0))) { dealt += rnd(1, Math.max(1, Math.round(max))); tag += ' twin'; DQ.splat('foe', A('cleave') ? 'Cleave' : 'Volley', 'hit', 180); }
     if (dealt && A('echo') && chance(.2)) { dealt += Math.max(1, Math.round(dealt * .5)); DQ.splat('foe', 'Echo', 'hit', 180); }
     if (dealt && A('pin')) f.pinned = 2;
+    if (dealt && RX) {
+      if (rx('floor')) { const lo = Math.ceil(max * RX.f); if (dealt < lo) { dealt = lo; fxHit(RX.key); } }
+      if (rx('crit') && chance(RX.p)) { dealt = Math.max(1, Math.round(dealt * RX.m)); tag += ' power'; fxHit(RX.key); DQ.splat('foe', RX.name, 'hit', 150); }
+      if (rx('double') && chance(RX.p)) { dealt += rnd(1, Math.max(1, Math.round(max * RX.m))); tag += ' twin'; fxHit(RX.key); DQ.splat('foe', RX.name, 'hit', 180); }
+      if (rx('volley') && f.pa % RX.every === 0) { for (let i = 0; i < RX.n; i++) dealt += rnd(1, Math.max(1, Math.round(max * RX.m))); tag += ' twin'; fxHit(RX.key); DQ.splat('foe', RX.name, 'hit', 180); }
+      if (rx('spellshot') && chance(RX.p)) { const best = (D.SPELLS || []).filter(x => DQ.lvl('magic') >= x.lvl).pop() || (D.SPELLS || [])[0], el = best && D.SPELL_EL[best.id], wr2 = DQ.weakOf(m, f); let e = rnd(1, Math.max(1, Math.round(ps.max * RX.f))); if (el && wr2.weak.includes(el)) e = Math.round(e * 1.5); else if (el && wr2.resist.includes(el)) e = Math.max(1, Math.round(e * .5)); dealt += e; fxHit(RX.key); DQ.splat('foe', RX.name, 'hit', 200); }
+      if (rx('chill') && chance(RX.p)) { f.chill = RX.n; fxHit(RX.key); }
+      if (rx('stunplus') && chance(RX.p)) { f.stun = 1; f.stunBonus = 1; fxHit(RX.key); }
+      if (everyNow && RX.stun) f.stun = 1;
+      if (rx('sunder')) { f.sunder = Math.min(RX.cap, (f.sunder || 0) + RX.step); fxHit(RX.key); }
+      if (rx('dot')) f.dot = Math.min(RX.max, (f.dot || 0) + 1);
+    }
+    if (dealt) f.landed = (f.landed || 0) + 1;
     if (dealt && U.twin && chance(.2)) { dealt += rnd(1, Math.max(1, Math.round(max))); tag += ' twin'; fxHit('twin'); DQ.splat('foe', 'Twin cut', 'hit', 180); }
     if (dealt && U.arc && sty === 'magic' && chance(.2)) { dealt += Math.max(1, Math.round(dealt * .5)); fxHit('arc'); DQ.splat('foe', 'Arc', 'hit', 180); }
     if (dealt && U.stun && chance(.12)) { f.stun = 1; fxHit('stun'); }
@@ -546,9 +571,12 @@ function combatRound() {
     if (DQ.beastHeroHit) dealt = DQ.beastHeroHit(dealt, m, f);
   }
   /* XP counts the damage the creature could actually take: overkill on weak creatures teaches nothing extra */
-  const xpDealt = Math.min(dealt, Math.max(0, f.hp));
+  const xpDealt = Math.min(dealt, Math.max(0, f.hp)) * (rx('scholar') ? RX.m : 1); if (xpDealt && rx('scholar')) fxHit(RX.key);
   f.hp -= dealt; DQ.splat('foe', dealt, dealt ? 'hit ' + tag : 'miss', 0);
   if (dealt && (U.lifesteal || U.sovereign)) { const before = S().hp; S().hp = Math.min(DQ.maxHp(), S().hp + Math.max(1, Math.round(dealt * (U.lifesteal ? .2 : .08)))); const h = Math.round(S().hp - before); if (h > 0) { fxHit(U.lifesteal ? 'lifesteal' : 'sovereign'); DQ.splat('you', '+' + h, 'heal', 300); } }
+  if (dealt && rx('drain') && f.hp + dealt < mhp * RX.below) { const before = S().hp; S().hp = Math.min(DQ.maxHp(), S().hp + Math.max(1, Math.round(dealt * RX.p))); const h = Math.round(S().hp - before); if (h > 0) { fxHit(RX.key); DQ.splat('you', '+' + h, 'heal', 300); } }
+  if (dealt && rx('dawn') && f.pa % RX.n === 0) { const before = S().hp; S().hp = Math.min(DQ.maxHp(), S().hp + dealt); const h = Math.round(S().hp - before); if (h > 0) { fxHit(RX.key); DQ.splat('you', '+' + h, 'heal', 300); } }
+  if (rx('blaze') && sty === 'magic' && dealt) { const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(2, Math.round(ps.max * RX.f))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 300); fxHit(RX.key); }
   if (U.ember && sty === 'ranged') { const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(2, Math.round(ps.max * .25))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 300); fxHit('ember'); }
   if (DQ.trick && DQ.trick('charge') && f.round === 1) { fxHit('charge'); const c = Math.max(1, Math.round(ps.max * W.dmg * .5)); f.hp -= c; DQ.splat('foe', c, 'hit power', 250); }
   if (DQ.trick && DQ.trick('ember') && f.pa % 6 === 0) { fxHit('trickember'); const wr = DQ.weakOf(m, f); let e = rnd(1, Math.max(1, Math.round(ps.max * .5))); if (wr.weak.includes('fire')) e = Math.round(e * 1.5); else if (wr.resist.includes('fire')) e = Math.max(1, Math.round(e * .5)); f.hp -= e; DQ.splat('foe', e, 'hit weak', 320); }
@@ -564,11 +592,13 @@ function combatRound() {
   if (DQ.beastAttack) { f.hp -= DQ.beastAttack(f, m); if (f.hp <= 0) return kill(m); }
   /* the monster attacks on its own clock: faster weapons get more swings in between */
   f.mt = (f.mt || 0) + (DQ.act ? DQ.act.dur * D.PACE[DQ.act.pace || 'steady'].speed : 2000);
-  const clock = (m.attackMs || 2000) * (U.slow ? 1.15 : 1); if (U.slow) fxHit('slow');
+  const clock = (m.attackMs || 2000) * (U.slow ? 1.15 : 1) * (f.chill > 0 && rx('chill') ? 1 + RX.slow : 1); if (U.slow) fxHit('slow');
   while (f.mt >= clock && DQ.fight) { f.mt -= clock; if (monsterAttack(f, m, ps, sty) === 'dead') return; }
 }
 function monsterAttack(f, m, ps, sty) {
-  const A = DQ.ability, U = DQ.uniqueFx(); f.ma = (f.ma || 0) + 1;
+  const A = DQ.ability, U = DQ.uniqueFx(), RX = DQ.rareFx(), rx = k => RX && RX.fx === k; f.ma = (f.ma || 0) + 1;
+  if (f.chill > 0) f.chill--;
+  if (f.dot && rx('dot')) { const pd = f.dot * Math.max(1, Math.round(ps.max * RX.per)); f.hp -= pd; DQ.splat('foe', pd, 'hit poison', 300); fxHit(RX.key); if (f.hp <= 0) { kill(m); return 'dead'; } }
   if (f.poison) { const pd = f.poison * Math.max(1, Math.round(ps.max * .12)); f.hp -= pd; DQ.splat('foe', pd, 'hit poison', 300); fxHit('poisontick'); if (f.hp <= 0) { kill(m); return 'dead'; } }
   if (f.stun) { f.stun = 0; DQ.splat('foe', 'Stunned', 'miss', 600); return; }
   if (U.roar && !f.roared) { f.roared = 1; fxHit('roar'); DQ.splat('you', 'Roar!', 'miss', 600); return; }
@@ -576,6 +606,7 @@ function monsterAttack(f, m, ps, sty) {
   if (special && A('bash') && f.ma - (f.lastBash || -99) >= 8) { f.lastBash = f.ma; if (!DQ.forecasting) beastNote('answered', m.id); DQ.splat('you', 'Bash!', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your shield bash interrupts ${sp.name}!`, 'good'); return; }
   if (special && A('ward') && f.ma - (f.lastWard || -99) >= 6) { f.lastWard = f.ma; if (!DQ.forecasting) beastNote('answered', m.id); DQ.splat('you', 'Ward', 'miss', 600); if (!DQ.sim.on) DQ.log(`Your ward absorbs ${sp.name}.`, 'good'); return; }
   if (DQ.trick && DQ.trick('heckle') && !f.heckled && f.ma >= 2) { f.heckled = 1; fxHit('heckle'); DQ.splat('you', 'Oi!', 'miss', 600); if (!DQ.sim.on) DQ.trickNote('heckled it into missing!', document.getElementById('av-foe')); return; }
+  if (!special && rx('parry') && chance(RX.p)) { fxHit(RX.key); DQ.splat('you', RX.name, 'miss', 600); return; }
   let acc = hitChance((m.att + 8) * (64 + m.att), ps.defRoll); if (f.pinned > 0) { acc *= .75; f.pinned--; }
   let taken = 0;
   if (special || Math.random() < acc) {
@@ -597,6 +628,9 @@ function monsterAttack(f, m, ps, sty) {
       if (m.id === 'morwenna') f.hex = 4;
     } else { if (A('kite')) taken *= .7; if (A('fortress')) taken *= .85; if (U.hide) { taken *= .85; fxHit('hide'); } }
     if (f.curse) { taken *= 1 - .05 * f.curse; fxHit('cursed'); }
+    if (rx('guard') && (f.guarded || 0) < RX.n) { f.guarded = (f.guarded || 0) + 1; taken *= 1 - RX.red; fxHit(RX.key); }
+    if (rx('rally') && S().hp < DQ.maxHp() * RX.below) { taken *= 1 - RX.red; fxHit(RX.key); }
+    if (rx('dot') && RX.weaken && f.dot) taken *= 1 - RX.weaken * f.dot;
     taken *= DQ.buffMult('guard');
     taken = Math.max(1, Math.round(taken * (1 - ps.red) * ({ careful: .85, steady: 1, push: 1.25 }[(DQ.act && DQ.act.pace) || 'steady'])));
   }
@@ -629,7 +663,10 @@ function kill(m) {
   if (DQ.beastVictory) DQ.beastVictory(f, m);
   if (!DQ.sim.on && !DQ.forecasting) DQ.emit('foedefeated', m);
   if (f && !DQ.forecasting) { const wr = DQ.weakOf(m, f); if (f.lastEl && wr.weak.includes(f.lastEl)) beastNote('weakWins', m.id); } S().stats.kill++; if (DQ.act) DQ.act.count++;
-  const c = Math.round(rnd(m.coins[0], m.coins[1]) * DQ.coinMult()); DQ.addCoins(c);
+  const RX = DQ.rareFx(), rx = k => RX && RX.fx === k;
+  const c = Math.round(rnd(m.coins[0], m.coins[1]) * DQ.coinMult() * (rx('steal') ? 1 + RX.coin : 1)); DQ.addCoins(c); if (rx('steal') && c) fxHit(RX.key);
+  if (rx('steal') && D.ITEMS.coin_pouch && chance(RX.pouch)) DQ.give('coin_pouch', 1);
+  if (rx('feast')) { const before = S().hp; S().hp = Math.min(DQ.maxHp(), S().hp + Math.round(DQ.maxHp() * RX.heal)); if (S().hp > before) { fxHit(RX.key); DQ.splat('you', '+' + Math.round(S().hp - before), 'heal', 300); } }
   const loot = c ? [`${fmt(c)} coins`] : [], got = [], drops = [];
   const first = m.boss && !(S().towns[m.town] && S().towns[m.town].boss), firstMini = m.mini && !(S().minis && S().minis[m.id]);
   if (DQ.uniqueFx().fortune) fxHit('fortune');

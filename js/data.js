@@ -498,7 +498,7 @@ Object.entries({
   chief_helm: U('roar', 'Battle roar', 'First enemy attack each fight misses'),
   tusk_charm: U('hide', 'Thick hide', 'Normal attacks: −15% damage taken'),
   barnacle_cutlass: U('riposte', 'Riposte', 'When hit: 20% chance to counter for up to max hit'),
-  frostmaw_pendant: U('slow', 'Frostbite', 'Enemies attack 15% slower'),
+  frostmaw_pendant: U('slow', 'Rime', 'Enemies attack 15% slower'), /* 'Frostbite' is now a named dagger (js/rare_weapons.js) */
   witch_staff: U('curse', 'Bog hex', 'Spell hits: enemy −5% damage per stack (max 15%)'),
   emberfang_bow: U('ember', 'Ember arrows', 'Each shot: + fire damage up to 25% of max hit'),
   storm_feather: U('swift', 'Gale', '+10% attack speed'),

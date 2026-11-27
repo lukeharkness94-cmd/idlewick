@@ -163,7 +163,7 @@ const house0 = UI.V.house;
 if (house0) UI.V.house = () => house0() + (S().house.owned ? UI.trophyWallHtml() : '');
 /* where a unique comes from (shown with the item, in tooltips, the comparison and the field guide) */
 DQ.uniqueSource = id => {
-  const m = D.MONLIST.find(x => !x.boss && (x.drops || []).some(d => d[0] === id)), b = D.MONLIST.find(x => x.boss && x.boss.first === id);
+  const b = D.MONLIST.find(x => x.boss && x.boss.first === id), m = D.MONLIST.find(x => (x.drops || []).some(d => d[0] === id) && x !== b); /* bosses can drop a rare weapon too (Starsunder from the Hollow King) */
   if (b) return { boss: b, text: `Always dropped by ${b.name} the first time you defeat it.` };
   if (!m) return null; const p = m.drops.find(d => d[0] === id)[2], need = Math.ceil(2.5 / p), have = (S().upity || {})[id] || 0, met = (S().beast.kills[m.id] || 0) > 0, found = (S().uniqFound || {})[id];
   return { mon: m, need, have, met, found, text: met ? `Dropped by ${m.name} in ${D.TOWN[m.town].name}, rarely.${found ? '' : ` Your first copy is guaranteed within ${need} defeats (${Math.min(have, need)} so far).`}` : `Found somewhere in ${D.TOWN[m.town].name}.` };
