@@ -5951,6 +5951,25 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 #view .combat-x.cw-idle .encounter-arena{background-image:none!important;background-color:var(--panel)!important}
 /* phones: Go inside / Step outside sit top right so the wider pixel town name at the bottom never runs under them */
 @media (max-width:860px){.home-scene>.home-viewswap{top:10px!important;bottom:auto!important;right:10px}}
+
+/* Fight stage at one pixel scale (owner, 28 Nov 2026: the hero, creatures and bosses must look like the pixel mockup).
+   Every fighter is shown at the same whole-number multiple of the size it was drawn: hero 24 x 32, creatures 32 x 32,
+   bosses, mini-bosses and tower bosses 64 x 64, so a boss towers over the hero and a rat stays rat-sized. Each stands
+   on a hard-edged ground shadow. Replaces the older rules that forced every sprite to 128 px tall. */
+@media (min-width:861px){
+  #view .combat-d .encounter-arena{--k:5}
+  html.lw-1600 #view .combat-d .encounter-arena{--k:4}
+  html.short #view .combat-d .encounter-arena{--k:3}
+  #view .combat-d .encounter-arena .avatar{position:relative;height:auto!important;min-height:calc(32px * var(--k));display:flex!important;align-items:flex-end!important;justify-content:center!important;overflow:visible!important}
+  #view .combat-d .encounter-arena .side{align-self:end}
+  #view .combat-d .encounter-arena .avatar .battle-rig,#view .combat-d .encounter-arena .avatar .rig-torso,#view .combat-d .encounter-arena .avatar .foe-torso,#view .combat-d .encounter-arena .avatar .foe-face{width:auto!important;height:auto!important;display:block;line-height:0;position:relative;z-index:1}
+  #view .combat-d .encounter-arena .avatar .hero-rig img{width:calc(24px * var(--k))!important;height:calc(32px * var(--k))!important;max-width:none!important}
+  #view .combat-d .encounter-arena .avatar .foe-rig img{width:calc(32px * var(--k))!important;height:calc(32px * var(--k))!important;max-width:none!important}
+  #view .combat-d .encounter-arena .avatar .foe-rig img.px-big{width:calc(64px * var(--k))!important;height:calc(64px * var(--k))!important}
+  #view .combat-d .encounter-arena .avatar::before{content:'';position:absolute;left:50%;bottom:calc(-1px * var(--k));width:calc(18px * var(--k));height:calc(4px * var(--k));translate:-50% 0;background:radial-gradient(closest-side,rgba(6,5,8,.62) 97%,transparent 100%);z-index:0;pointer-events:none}
+  html.short #view .combat-d .encounter-arena.cx-stage{padding-top:12px!important}
+  #view .combat-d .encounter-arena .avatar:has(img.px-big)::before{width:calc(40px * var(--k));height:calc(6px * var(--k))}
+}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
@@ -24016,7 +24035,8 @@ Q.battleHero = () => `<span class="battle-rig hero-rig px-hero encounter-hero" r
 Q.creatureFacing=id=>D.MON[id]?.artFacing||'right';
 /* the stage's foe box is 192 px, 128 px on laptops, 96 px on short windows (css/style.css): the 64 x 64 boss drawing
    fits the first two at 3x and 2x; on short windows the 32 x 32 one is shown at 3x */
-const foeBox = () => typeof document !== 'undefined' && document.documentElement.classList.contains('short') ? 96 : 192;
+/* the stage always asks for the large drawing so bosses keep their 64 x 64 art; CSS sets the on-screen scale */
+const foeBox = () => 192;
 Q.battleFoe = (m,known=true) => `<span class="battle-rig foe-rig px-foe" role="img" aria-label="${esc(known?m.name:'Unknown creature')} ready for battle" data-creature="${m.id}"><span class="foe-torso">${Q.creatureFacing(m.id)==='left' ? Q.artImage('creature', m.id, foeBox(), known?'':'sil', known?m.name:'Unknown creature') : `<span class="foe-face">${Q.artImage('creature', m.id, foeBox(), known?'':'sil', known?m.name:'Unknown creature')}</span>`}</span></span>`;
 const pose0 = Q.poseBattle;
 Q.poseBattle = (avatar, style, phase, animate) => { const root = avatar && avatar.querySelector('.px-hero'); if (!root) return pose0 ? pose0(avatar, style, phase, animate) : false; if (Q.S.settings.reduceFx) return true;

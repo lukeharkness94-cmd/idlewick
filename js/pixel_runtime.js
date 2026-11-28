@@ -95,7 +95,8 @@ Q.battleHero = () => `<span class="battle-rig hero-rig px-hero encounter-hero" r
 Q.creatureFacing=id=>D.MON[id]?.artFacing||'right';
 /* the stage's foe box is 192 px, 128 px on laptops, 96 px on short windows (css/style.css): the 64 x 64 boss drawing
    fits the first two at 3x and 2x; on short windows the 32 x 32 one is shown at 3x */
-const foeBox = () => typeof document !== 'undefined' && document.documentElement.classList.contains('short') ? 96 : 192;
+/* the stage always asks for the large drawing so bosses keep their 64 x 64 art; CSS sets the on-screen scale */
+const foeBox = () => 192;
 Q.battleFoe = (m,known=true) => `<span class="battle-rig foe-rig px-foe" role="img" aria-label="${esc(known?m.name:'Unknown creature')} ready for battle" data-creature="${m.id}"><span class="foe-torso">${Q.creatureFacing(m.id)==='left' ? Q.artImage('creature', m.id, foeBox(), known?'':'sil', known?m.name:'Unknown creature') : `<span class="foe-face">${Q.artImage('creature', m.id, foeBox(), known?'':'sil', known?m.name:'Unknown creature')}</span>`}</span></span>`;
 const pose0 = Q.poseBattle;
 Q.poseBattle = (avatar, style, phase, animate) => { const root = avatar && avatar.querySelector('.px-hero'); if (!root) return pose0 ? pose0(avatar, style, phase, animate) : false; if (Q.S.settings.reduceFx) return true;

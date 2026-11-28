@@ -1265,3 +1265,22 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 #view .combat-x.cw-idle .encounter-arena{background-image:none!important;background-color:var(--panel)!important}
 /* phones: Go inside / Step outside sit top right so the wider pixel town name at the bottom never runs under them */
 @media (max-width:860px){.home-scene>.home-viewswap{top:10px!important;bottom:auto!important;right:10px}}
+
+/* Fight stage at one pixel scale (owner, 28 Nov 2026: the hero, creatures and bosses must look like the pixel mockup).
+   Every fighter is shown at the same whole-number multiple of the size it was drawn: hero 24 x 32, creatures 32 x 32,
+   bosses, mini-bosses and tower bosses 64 x 64, so a boss towers over the hero and a rat stays rat-sized. Each stands
+   on a hard-edged ground shadow. Replaces the older rules that forced every sprite to 128 px tall. */
+@media (min-width:861px){
+  #view .combat-d .encounter-arena{--k:5}
+  html.lw-1600 #view .combat-d .encounter-arena{--k:4}
+  html.short #view .combat-d .encounter-arena{--k:3}
+  #view .combat-d .encounter-arena .avatar{position:relative;height:auto!important;min-height:calc(32px * var(--k));display:flex!important;align-items:flex-end!important;justify-content:center!important;overflow:visible!important}
+  #view .combat-d .encounter-arena .side{align-self:end}
+  #view .combat-d .encounter-arena .avatar .battle-rig,#view .combat-d .encounter-arena .avatar .rig-torso,#view .combat-d .encounter-arena .avatar .foe-torso,#view .combat-d .encounter-arena .avatar .foe-face{width:auto!important;height:auto!important;display:block;line-height:0;position:relative;z-index:1}
+  #view .combat-d .encounter-arena .avatar .hero-rig img{width:calc(24px * var(--k))!important;height:calc(32px * var(--k))!important;max-width:none!important}
+  #view .combat-d .encounter-arena .avatar .foe-rig img{width:calc(32px * var(--k))!important;height:calc(32px * var(--k))!important;max-width:none!important}
+  #view .combat-d .encounter-arena .avatar .foe-rig img.px-big{width:calc(64px * var(--k))!important;height:calc(64px * var(--k))!important}
+  #view .combat-d .encounter-arena .avatar::before{content:'';position:absolute;left:50%;bottom:calc(-1px * var(--k));width:calc(18px * var(--k));height:calc(4px * var(--k));translate:-50% 0;background:radial-gradient(closest-side,rgba(6,5,8,.62) 97%,transparent 100%);z-index:0;pointer-events:none}
+  html.short #view .combat-d .encounter-arena.cx-stage{padding-top:12px!important}
+  #view .combat-d .encounter-arena .avatar:has(img.px-big)::before{width:calc(40px * var(--k));height:calc(6px * var(--k))}
+}
