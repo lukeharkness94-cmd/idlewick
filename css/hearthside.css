@@ -1242,3 +1242,4 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 #skilldock .dk .dk-top .notice-badge:not([hidden]),#dock .dk .dk-top .notice-badge:not([hidden]){position:absolute!important;left:34px!important;top:7px!important;margin:0!important}
 .bundle-indicator .bi-t{font-size:13px!important}
 :root.type-hearthside:not(.type-classic) .combat-abils :is(button,.btn){font-size:13px!important}
+:root.type-hearthside:not(.type-classic) #topnav .tnav{letter-spacing:.01em!important}
