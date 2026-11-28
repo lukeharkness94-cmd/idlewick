@@ -102,7 +102,7 @@ dated line to the history file.
   "go with the capital pixelated font on more places too"): buttons, menus, tabs, the rail, card and quest names,
   numbers, tags and badges (`--f-ui`, `--f-mono`; 14px buttons and names, 13px small labels); sentences are Tiny5 on
   desktop (owner, 28 Nov: "B or E"; Terminal in Settings uses VT323, scaled 128% in fonts.css) and Alegreya Sans on
-  phones. The rail is 220px on desktop so Silkscreen names show whole. A quest ready
+  phones. The rail is 212px on desktop so Silkscreen names show whole. A quest ready
   to hand in carries a wax seal. Use the `--f-display/--f-body/--f-ui/--f-mono` variables, never a hard-coded family.
   Type: 16.5px body, 16px buttons, 14px meta; nothing visible under 13px in the design.
 - **Pixel frames** (owner, 28 Nov, chosen from the owner's reference GUI over the 26-27 Nov "no lines" rule): panels are dark
@@ -161,7 +161,7 @@ dated line to the history file.
   levels, mastery, story); `js/shell.js` `HUBS`/`TOP`, with old ids (world, village, shop, guide) redirected. Hero is the
   portrait: backpack and equipment, tools, bank, settings. Exploration sits with the skills. A menu shows a dot only for
   something to do now (a quest to hand in, a site to finish, a crop to pick, a decision waiting), never a number. Phones
-  use the same five in the bottom bar and a header of portrait, coins and bell. The 220px left rail holds the Now card (current task, Stop/Retreat, "then …" for the
+  use the same five in the bottom bar and a header of portrait, coins and bell. The 212px left rail holds the Now card (current task, Stop/Retreat, "then …" for the
   queue), a Combat group (overall level, then Melee, Ranged, Magic, Defence, Health) and every other skill. Rail rows
   share the window height (`UI.fitDock`, 34–64 page px) and show icon, name, level or lock and one bar; rail order is
   stable (fresh-hero activities first). Never shrink text or icons to fit. Phones keep the bottom bar.

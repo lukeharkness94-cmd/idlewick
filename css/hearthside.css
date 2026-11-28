@@ -1216,18 +1216,18 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 /* locked pictures: a pale silhouette that still reads on dark wood */
 :root[data-theme="dark"] :is(.blackout img,.blackout .ic,.blackout .gico,.blackout canvas,.activity-stage .blackout img){filter:brightness(0) invert(.9) opacity(.3)!important}
 /* pixel lettering is wider: the rail grows so every skill name shows whole ("never shrink text to fit") */
-@media(min-width:861px){#app{grid-template-columns:220px minmax(0,1fr)}}
+@media(min-width:861px){#app{grid-template-columns:212px minmax(0,1fr)}#view .visual-shop{gap:8px}}
 /* the capital pixel face on everything that is a label (owner, 28 Nov 2026: "go with the capital pixelated font on more
    places too"): buttons, menus, tabs, the rail, card and quest names, numbers, tags and badges; sentences stay in
    Tiny5 or VT323 (desktop) or Alegreya Sans (phones) so long text still reads */
 :root.type-hearthside:not(.type-classic){--f-ui:'Silkscreen','Tiny5',monospace;--f-mono:'Silkscreen','Tiny5',monospace}
-:root.type-hearthside:not(.type-classic) :is(.illustrated-card>b,.qrow b,.h-name>b,#nowcard b,.tag,.chipx,.state,.notice-badge,.lvchip,.k,.phead>small,.phead small:not(.dim),.est-count,.rw,.req-chip,.need-tile b,.eq small,.cw-area h3,.area-card b,.dk-h,.estate-fields h3,.estate-pasture h3,.activity-caption small,.mast-line,.stat,.gt b){
+:root.type-hearthside:not(.type-classic) :is(.illustrated-card>b,.qrow b,.h-name>b,#nowcard b,.tag,.chipx,.state,.notice-badge,.lvchip,.k,.phead>small,.phead small:not(.dim),.est-count,.rw,.req-chip,.need-tile b,.eq small,.cw-area h3,.area-card b,.dk-h,.estate-fields h3,.estate-pasture h3,.activity-caption small,.mast-line,.stat){
   font-family:var(--f-ui)!important;font-weight:400;letter-spacing:.03em}
 :root.type-hearthside:not(.type-classic) :is(.btn,button,.tnav,.tab,.stab,.dk-n,.nav){font-weight:400!important;letter-spacing:.03em}
 /* Silkscreen sizes: its capitals stand taller and wider than a book face at the same size */
 :root.type-hearthside:not(.type-classic) :is(.btn,button,.tnav,.tab,.stab,.nav,.choice-button){font-size:14px}
 :root.type-hearthside:not(.type-classic) #skilldock .dk .dk-n,:root.type-hearthside:not(.type-classic) #dock .dk .dk-n{font-family:var(--f-ui)!important;font-size:13px!important;letter-spacing:0!important;font-weight:400!important}
-:root.type-hearthside:not(.type-classic) :is(.illustrated-card>b,.qrow b,.area-card b,.need-tile b,.gt b){font-size:14px}
+:root.type-hearthside:not(.type-classic) :is(.illustrated-card>b,.qrow b,.area-card b,.need-tile b){font-size:14px}
 :root.type-hearthside:not(.type-classic) :is(.tag,.chipx,.state,.lvchip,.k,.phead>small,.phead small:not(.dim),.est-count,.rw,.req-chip,.eq small,.dk-h,.activity-caption small,.mast-line,.stat){font-size:13px}
 /* phones: a row of four or more tabs in Silkscreen sits two by two so every label shows whole */
 @media(max-width:860px){:root.type-hearthside:not(.type-classic) #view .tabs:has(>:nth-child(4)){grid-template-columns:repeat(2,minmax(0,1fr))!important}}
