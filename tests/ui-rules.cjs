@@ -1,5 +1,5 @@
 /* node tests/ui-rules.cjs: the player's standing UI rules, checked on every page in an early and a mid-game save,
-   both themes, desktop and phone. Needs the preview server (IDLEWICK_URL, default http://127.0.0.1:8765/index.html).
+   the dark theme, desktop and phone. Needs the preview server (IDLEWICK_URL, default http://127.0.0.1:8765/index.html).
    R1  locked content is never named: unreached fish, trees, rocks, marks, recipes, crops, livestock, voyages and
        unmet creatures stay ??? / "Something new" / "Unknown creature", on the page and in tooltips
    R2  locked choice cards show a blacked-out picture and ???
@@ -44,12 +44,11 @@ const SETUP = {
 
 (async () => {
   const b = await chromium.launch();
-  for (const [vw, vh] of [[1440, 900], [390, 844]]) for (const save of ['early', 'mid']) for (const theme of ['dark', 'light']) {
-    if (vw < 800 && theme === 'light') continue;
+  for (const [vw, vh] of [[1440, 900], [390, 844]]) for (const save of ['early', 'mid']) for (const theme of ['dark']) {
     const p = await b.newPage({ viewport: { width: vw, height: vh } }); const errs = [];
     p.on('pageerror', e => errs.push(e.message));
     if(process.env.INTEGRATION_CANDIDATE)await p.addInitScript(()=>window.__IDLEWICK_INTEGRATION_TEST__=true);await p.goto(URL); await p.locator('#t-new').click(); await p.locator('#crname').fill('Rulecheck'); await p.locator('#cr-go').click(); await p.waitForTimeout(700);
-    await p.evaluate(`(${SETUP[save].toString()})()`); await p.evaluate(t => DQ.setTheme(t), theme);
+    await p.evaluate(`(${SETUP[save].toString()})()`); await p.evaluate(t => DQ.applyTheme(), theme);
     for (const pg of PAGES) {
       const tag = `${save}/${theme}/${vw}/${pg}`;
       const ok = await p.evaluate(v => { try { DQ.go(v); return true; } catch (e) { return String(e); } }, pg);

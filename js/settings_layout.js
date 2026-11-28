@@ -12,13 +12,11 @@ UI.V.settings=()=>{
  const take=(p,selector)=>{const n=p?.querySelector(selector);if(!n)return '';const h=n.outerHTML;n.remove();return h;};
  const body=p=>{if(!p)return '';p.querySelector(':scope>.phead')?.remove();return p.innerHTML;};
  const iface=get('Interface'),audio=get('Audio'),game=get('Gameplay'),save=get('Save data'),about=get('About');
- const themeBlock=iface?.querySelector('.seg [data-do="theme"]')?.closest('.seg')?.parentElement;
- const themeHtml=themeBlock?.outerHTML||'';themeBlock?.remove();
  const name=take(iface,'.nameedit'),dev=take(about,'[data-do="devtog"]');
  const size=body(get('Interface size'));
  const backdrop=body(get('Backdrop'));
  const notation = `<div class="settings-field"><h3>Number notation</h3><div class="btnrow wrap">${[['default','Default'],['suffix','Suffix · 1.2k'],['scientific','Scientific · 1.2e3']].map(([id, label]) => `<button class="btn" data-do="numbernotation" data-a="${id}" aria-pressed="${(Q.S.settings.numberNotation || 'default') === id}">${label}</button>`).join('')}</div></div>`;
- const display=[card('Appearance',themeHtml+`<div class="settings-field"><h3>Interface size</h3>${size}<small class="dim">Size preference applies on desktop.</small></div><div class="settings-field"><h3>Backdrop</h3>${backdrop}</div>`),card('Lettering',body(get('Lettering'))+notation,'lettering-set'),card('Notifications & accessibility',body(iface))];
+ const display=[card('Appearance',`<div class="settings-field"><h3>Interface size</h3>${size}<small class="dim">Size preference applies on desktop.</small></div><div class="settings-field"><h3>Backdrop</h3>${backdrop}</div>`),card('Lettering',body(get('Lettering'))+notation,'lettering-set'),card('Notifications & accessibility',body(iface))];
  if(Q.townLifeSettings)display.splice(1,0,card('Town life',Q.townLifeSettings()));
  const volume=take(audio,'[data-do="set"][data-a="muted"]')+['masterVol','vol','musicVol','ambVol'].map(k=>take(audio,`label:has([data-in="${k}"])`)).join('');
  const musicLabel=audio?.querySelector('[data-do="set"][data-a="music"] b');if(musicLabel)musicLabel.textContent='Music';
@@ -35,7 +33,7 @@ UI.V.settings=()=>{
  const backupHtml=backupList?.outerHTML||UI.emptyState('chest', 'The chest is empty and suspiciously tidy.', 'No automatic backups yet. Your recent backups on this device will appear here.', 'sm');backupList?.remove();
  const autosave=save?.querySelector('.phead small')?.textContent||'';
  const saveCards=[card('Backup & transfer',`<p class="sm dim">${esc(autosave)}</p>`+body(save)+'<div class="btnrow wrap"><button class="btn" data-do="copystring">Copy save string</button><button class="btn" data-do="pastestring">Import save string</button></div>'),card('Automatic backups',backupHtml),card('Start over','<p>Make a backup before starting a new hero.</p>'+danger,'settings-danger')];
- const shortcuts=get('Shortcuts');shortcuts?.querySelector('.keys')?.insertAdjacentHTML('beforeend','<dt><kbd>L</kbd></dt><dd>Switch light/dark theme</dd><dt><kbd>Enter</kbd> or <kbd>Esc</kbd></dt><dd>Continue from Welcome Back</dd><dt><kbd>V</kbd> / <kbd>G</kbd></dt><dd>Village / Guide</dd>');
+ const shortcuts=get('Shortcuts');shortcuts?.querySelector('.keys')?.insertAdjacentHTML('beforeend','<dt><kbd>Enter</kbd> or <kbd>Esc</kbd></dt><dd>Continue from Welcome Back</dd><dt><kbd>V</kbd> / <kbd>G</kbd></dt><dd>Village / Guide</dd>');
  const tools=card('Testing & artwork',body(get('Playtest'))+body(get('Art showcase'))+dev);
  const helpCards=[card('Keyboard shortcuts',body(shortcuts)),card('About Idlewick',body(about)),tools];
  for(const[name,p]of panels)if(!used.has(name))helpCards.push(card(esc(name),body(p)));

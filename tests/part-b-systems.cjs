@@ -124,8 +124,8 @@ const { chromium } = require('playwright');
       const rgb = hex => hex.trim().match(/[a-f\d]{2}/gi).map(v => parseInt(v, 16) / 255);
       const luminance = hex => rgb(hex).map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
         .reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
-      const ratios = ['light', 'dark'].map(theme => {
-        DQ.setTheme(theme);
+      const ratios = ['dark'].map(theme => {
+        DQ.applyTheme();
         const css = getComputedStyle(document.documentElement);
         const pair = [luminance(css.getPropertyValue('--ink')), luminance(css.getPropertyValue('--panel'))].sort((a, b) => b - a);
         return (pair[0] + 0.05) / (pair[1] + 0.05);

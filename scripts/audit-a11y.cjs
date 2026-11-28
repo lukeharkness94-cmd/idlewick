@@ -9,11 +9,11 @@ const PAGES = ['overview', 'activity', 'quests', 'map', 'projects', 'character',
 const SIZES = [['phone', 390, 844, 1], ['short', 1280, 720, 1], ['phone-200', 195, 422, 2], ['short-200', 640, 360, 2]];
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined }); const out = []; const errors = [];
-  for (const theme of ['light', 'dark']) for (const [name, w, h, dpr] of SIZES) {
+  for (const theme of ['dark']) for (const [name, w, h, dpr] of SIZES) {
     const p = await b.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: dpr }); p.on('pageerror', e => errors.push(e.message));
     await p.goto(process.env.IDLEWICK_URL || 'http://127.0.0.1:8765/'); await p.locator('#t-new').click(); await p.locator('#cr-go').click();
     await p.waitForFunction(() => DQ.started && document.querySelector('#title').hidden);
-    await p.evaluate(t => { for (let i = 0; i < 12; i++) DQ.closeModal(); DQ.S.settings.theme = t; DQ.emit('settings'); document.documentElement.dataset.theme = t; }, theme);
+    await p.evaluate(t => { for (let i = 0; i < 12; i++) DQ.closeModal(); DQ.emit('settings'); document.documentElement.dataset.theme = t; }, theme);
     for (const page of PAGES) {
       await p.evaluate(v => { for (let i = 0; i < 4; i++) DQ.closeModal(); DQ.go(v); DQ.ui.render(true); }, page); await p.waitForTimeout(200);
       const r = await p.evaluate(() => {

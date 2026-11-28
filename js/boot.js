@@ -4,7 +4,7 @@ const DQ = window.DQ, D = DQ.data, { $, $$, ico, esc } = DQ;
 DQ.started = false;
 
 function fireflies(cv) {
-  const tint = document.documentElement.dataset.theme === 'dark' ? '243,213,138' : '255,236,190';
+  const tint = '243,213,138';
   const cx = cv.getContext('2d'); let w, h; const fit = () => { w = cv.width = innerWidth; h = cv.height = innerHeight; }; fit(); addEventListener('resize', fit);
   const fl = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), r: .6 + Math.random() * 1.8, p: Math.random() * 6, s: .02 + Math.random() * .05 }));
   let lastFrame=performance.now();

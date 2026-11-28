@@ -1,6 +1,5 @@
 /* Hearthside Journal: one material language and clear action hierarchy across the existing game. */
 :root{--ground:#18251f;--panel:#23352b;--panel2:#2c4034;--line:#425a4a;--line2:#61745f;--ink:#f1ebdf;--mute:#c0cbbb;--brass:#d7b16a;--brass-hi:#f4d69e;--brass-lo:#946638;--good:#8ac8a3;--bad:#f29286;--warn:#e8c27d;--hs-action-ink:#211b12;--hs-paper-shadow:rgba(0,0,0,.13);--backdrop-wash:rgba(24,37,31,.94)}
-:root[data-theme="light"]{--ground:#e9e2d4;--panel:#fbf7ee;--panel2:#f1eadb;--line:#d8cdb9;--line2:#baac92;--ink:#2e3028;--mute:#606355;--brass:#91652c;--brass-hi:#785121;--brass-lo:#bb945a;--good:#386747;--bad:#a33f35;--warn:#865d20;--hs-action-ink:#fff9ef;--hs-paper-shadow:rgba(73,51,24,.07);--backdrop-wash:rgba(233,226,212,.94)}
 :root.type-hearthside{--f-display:'Cinzel','Alegreya SC',Georgia,serif;--f-body:'Alegreya Sans',system-ui,sans-serif;--f-ui:'Alegreya Sans',system-ui,sans-serif;--f-mono:'Alegreya Sans',system-ui,sans-serif}
 .type-sample-hearthside b{font-family:'Cinzel',serif}.type-sample-hearthside span{font-family:'Alegreya Sans',sans-serif}
 :root.type-hearthside body{font-size:18px;font-weight:400}
@@ -9,14 +8,14 @@
 :root.type-hearthside .mono{font-variant-numeric:lining-nums tabular-nums;font-weight:500}
 :root.type-hearthside :is(b,strong){font-weight:700}
 body{background-color:var(--ground)}
-.panel,:root[data-theme="light"] .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 2px 4px var(--hs-paper-shadow)}
-.hud,:root[data-theme="light"] .hud{background:var(--panel);border-color:var(--line);box-shadow:none}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 2px 4px var(--hs-paper-shadow)}
+.hud{background:var(--panel);border-color:var(--line);box-shadow:none}
 #pagebar{gap:10px}
 :root.type-hearthside :is(.btn,.tab,.stab,.tnav,.choice-button){font-size:16px;letter-spacing:0}
-.btn,:root[data-theme="light"] .btn{background:linear-gradient(180deg,var(--panel),var(--panel2));border-color:var(--line2);color:var(--ink);border-radius:6px;box-shadow:0 2px 0 color-mix(in srgb,var(--line2) 50%,transparent);text-shadow:none}
-.btn.primary,:root[data-theme="light"] .btn.primary{background:linear-gradient(180deg,var(--brass),color-mix(in srgb,var(--brass) 88%,#392612));border-color:var(--brass);color:var(--hs-action-ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 2px 0 color-mix(in srgb,var(--brass-hi) 60%,var(--ground));text-shadow:none}
-.btn.on,:root[data-theme="light"] .btn.on,.tab.on,.stab.on{background:var(--panel2);color:var(--ink);border-color:var(--brass);box-shadow:inset 3px 0 var(--brass)}
-.btn.danger,:root[data-theme="light"] .btn.danger{background:var(--panel);border-color:color-mix(in srgb,var(--bad) 60%,var(--line));color:var(--bad)}
+.btn{background:linear-gradient(180deg,var(--panel),var(--panel2));border-color:var(--line2);color:var(--ink);border-radius:6px;box-shadow:0 2px 0 color-mix(in srgb,var(--line2) 50%,transparent);text-shadow:none}
+.btn.primary{background:linear-gradient(180deg,var(--brass),color-mix(in srgb,var(--brass) 88%,#392612));border-color:var(--brass);color:var(--hs-action-ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 2px 0 color-mix(in srgb,var(--brass-hi) 60%,var(--ground));text-shadow:none}
+.btn.on,.tab.on,.stab.on{background:var(--panel2);color:var(--ink);border-color:var(--brass);box-shadow:inset 3px 0 var(--brass)}
+.btn.danger{background:var(--panel);border-color:color-mix(in srgb,var(--bad) 60%,var(--line));color:var(--bad)}
 :is(.btn,.choice-button):disabled{filter:none;opacity:.68}
 #topnav .tnav{background:transparent;color:var(--mute);box-shadow:none;border-color:transparent;border-radius:6px}
 #topnav .tnav.on{background:var(--panel2);color:var(--ink);border-color:var(--line);box-shadow:inset 0 -2px var(--brass)}
@@ -33,7 +32,7 @@ body{background-color:var(--ground)}
 .notice-badge{background:var(--brass);color:var(--hs-action-ink);box-shadow:none}
 .bar{background:color-mix(in srgb,var(--mute) 16%,var(--panel));box-shadow:none}
 .illustrated-card,.card,.slot,.eq{border-radius:7px;box-shadow:none}
-.illustrated-card,:root[data-theme="light"] .illustrated-card{background:var(--panel2);border-color:var(--line)}
+.illustrated-card{background:var(--panel2);border-color:var(--line)}
 .illustrated-card.selected{border-color:var(--brass);box-shadow:inset 0 -3px var(--brass)}
 .illustrated-card:not(.locked):hover{border-color:var(--line2)}
 :root.type-hearthside .activity-caption h2{font-size:26px;font-weight:500}
@@ -47,8 +46,8 @@ body{background-color:var(--ground)}
 .journal-kicker,.journal-objective-head{color:var(--mute)}
 .quest-actions{border-top:1px solid var(--line);padding-top:12px}
 .qrec{background:var(--panel2);border-color:var(--line);font-family:var(--f-ui)}
-.qrec.ok,:root[data-theme="light"] .qrec.ok{color:var(--good)}
-.qrec.short,:root[data-theme="light"] .qrec.short{color:var(--warn)}
+.qrec.ok{color:var(--good)}
+.qrec.short{color:var(--warn)}
 .need-tile{background:var(--panel2);border-color:var(--line)}
 .need-tile.enough{border-color:color-mix(in srgb,var(--good) 40%,var(--line))}
 .shop-upgrade-header{box-shadow:none}
@@ -57,9 +56,9 @@ body{background-color:var(--ground)}
 #view .combat-x :is(.hud-train,.combat-food,.combat-abils){background:var(--panel);border-color:var(--line)}
 #view .combat-x .combat-equipped{background:var(--panel);border-color:var(--line)}
 .combat-equipped .paper-doll .eq.empty{background:transparent;border-style:dashed}
-#tip,.m-card,:root[data-theme="light"] .m-card{background:var(--panel);color:var(--ink);border-color:var(--line2);border-radius:10px}
-.m-card,:root[data-theme="light"] .m-card{box-shadow:0 16px 50px rgba(0,0,0,.23)}
-.note,:root[data-theme="light"] .note{background:var(--panel);color:var(--ink);border-color:var(--line2);box-shadow:0 6px 24px var(--hs-paper-shadow)}
+#tip,.m-card{background:var(--panel);color:var(--ink);border-color:var(--line2);border-radius:10px}
+.m-card{box-shadow:0 16px 50px rgba(0,0,0,.23)}
+.note{background:var(--panel);color:var(--ink);border-color:var(--line2);box-shadow:0 6px 24px var(--hs-paper-shadow)}
 .settings-navigation .btn{box-shadow:none}
 .settings-card h2{font-size:20px}
 .letter-opts{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
@@ -651,11 +650,11 @@ html.rail-tight #combatnav .cg-tile .bar{width:80%}
 
 /* Night on the fight stage (owner, 23 Nov): the time-of-day tint colours the landscape only. The fighters, their
    names, health and hit numbers sit above it at full strength, and night is a gentle wash, not a blackout. */
-.encounter-arena > .tod-tint, .encounter-arena > .weather { z-index: 0; }
-.encounter-arena > .side, .encounter-arena > .mid { position: relative; z-index: 1; }
+.encounter-arena > .tod-tint,.encounter-arena > .weather{ z-index: 0; }
+.encounter-arena > .side,.encounter-arena > .mid{ position: relative; z-index: 1; }
 body[data-tod="night"] .encounter-arena > .tod-tint { background: linear-gradient(#0a144048, #1a245058); }
 body[data-tod="dusk"] .encounter-arena > .tod-tint { background: linear-gradient(#ff8a5a22, #7a4a8a20); }
-.encounter-arena .side .nm, .encounter-arena .side small.mono { text-shadow: 0 1px 0 color-mix(in srgb, var(--panel) 80%, transparent); }
+.encounter-arena .side .nm,.encounter-arena .side small.mono{ text-shadow: 0 1px 0 color-mix(in srgb, var(--panel) 80%, transparent); }
 
 /* Your foe card, rebuilt (owner, 23 Nov: "text on two lines and symbols hovering over each other"). One column:
    portrait (opens the field entry) with name, level and place on single lines and the health bar under them; then how
@@ -1027,7 +1026,7 @@ html.calm .petted,html.calm .petted img{animation:none}
 /* ---------- 27 Nov 2026 visual audit: small fixes ---------- */
 /* quest pictures not yet earned: a light ghost on the dark theme (black at 16% vanished on dark panels) */
 :root[data-theme="dark"] .obj-pic .qp-cell img{filter:brightness(0) invert(1) opacity(.22)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .obj-pic .qp-cell img{filter:brightness(0) invert(1) opacity(.22)}}
+:root[data-theme="dark"] .obj-pic .qp-cell img{filter:brightness(0) invert(1) opacity(.22)}
 .obj-pic .qp-cell.got img{filter:none!important}
 /* story dialogue: the clickable line keeps its text off its outline */
 .story-conversation .story-line{padding:10px 14px}
@@ -1058,26 +1057,18 @@ html.calm .petted,html.calm .petted img{animation:none}
   --paper-lift:0 2px 4px rgba(0,0,0,.18),0 14px 30px -20px rgba(0,0,0,.55);
   --press:0 1px 0 rgba(0,0,0,.45);
 }
-:root[data-theme="light"]{
-  --paper-edge:inset 0 0 40px -12px rgba(150,104,40,.30);
-  --paper-lift:0 1px 2px rgba(90,62,24,.10),0 14px 30px -20px rgba(90,62,24,.42);
-  --press:0 1px 0 rgba(255,255,255,.75);
-}
 /* paper (light): the panel's own colour under a mottle and a grain */
-:root[data-theme="light"] .panel:not(.panel .panel,.home-scene){background-color:var(--panel);background-image:var(--paper-mottle),var(--paper-grain);background-blend-mode:multiply,multiply;box-shadow:var(--paper-edge),var(--paper-lift)}
 /* leather (dark): the same grain, deeper, and a candle's warmth from the top left */
-:root:not([data-theme="light"]) .panel:not(.panel .panel,.home-scene){background-color:var(--panel);background-image:radial-gradient(ellipse at 12% 0%,rgba(255,196,120,.07),transparent 60%),var(--paper-grain);background-blend-mode:normal,soft-light;box-shadow:var(--paper-edge),var(--paper-lift)}
+:root[data-theme="dark"] .panel:not(.panel .panel,.home-scene){background-color:var(--panel);background-image:radial-gradient(ellipse at 12% 0%,rgba(255,196,120,.07),transparent 60%),var(--paper-grain);background-blend-mode:normal,soft-light;box-shadow:var(--paper-edge),var(--paper-lift)}
 /* pop-ups are a sheet laid on the page */
-:root[data-theme="light"] .modal>.m-card{background-image:var(--paper-mottle),var(--paper-grain);background-blend-mode:multiply,multiply}
 .modal>.m-card>h2{text-shadow:var(--press)}
 /* the rail and top bar are the same paper */
-:root[data-theme="light"] :is(#hud,.sidebar){background-image:var(--paper-grain);background-blend-mode:multiply}
 /* headings pressed into the paper */
 :is(.phead h2,.panel>h1,.panel h1,.settings-navigation h1){text-shadow:var(--press)}
 /* a quest ready to hand in carries a red wax seal */
 .qrow .state.ready{color:#8a2a22!important;background:color-mix(in srgb,#b8483a 12%,transparent)!important;display:inline-flex;align-items:center;gap:6px}
 .qrow .state.ready::before{content:"";flex:none;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 38% 34%,#e07a6a 0 18%,#b8483a 40%,#7a221c 100%);box-shadow:0 1px 1px rgba(60,10,8,.45)}
-:root:not([data-theme="light"]) .qrow .state.ready{color:#f2a598!important}
+:root[data-theme="dark"] .qrow .state.ready{color:#f2a598!important}
 
 /* the town picture's frame: its sky colour stops at the padding, so no pale rim shows round the scene */
 .home-scene{background-clip:padding-box!important;background-image:none!important}

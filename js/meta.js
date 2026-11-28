@@ -67,13 +67,9 @@ DQ.on('ui', () => { if (!DQ.started || ++acc % 20) return; sample(); });
 
 
 
-/* ---------- Theme: dark (default), light, or follow the device ---------- */
-const mq = typeof matchMedia === 'function' ? matchMedia('(prefers-color-scheme: light)') : null;
-DQ.resolveTheme = () => { const t = (S().settings && S().settings.theme) || 'dark'; return t === 'auto' ? (mq && mq.matches ? 'light' : 'dark') : t === 'light' ? 'light' : 'dark'; };
-DQ.applyTheme = () => { document.documentElement.dataset.theme = DQ.resolveTheme(); DQ.emit('theme'); };
-DQ.setTheme = t => { S().settings.theme = t; DQ.applyTheme(); DQ.save(); };
-DQ.toggleTheme = () => DQ.setTheme(DQ.resolveTheme() === 'light' ? 'dark' : 'light');
-if (mq && mq.addEventListener) mq.addEventListener('change', () => { if ((S().settings || {}).theme === 'auto') DQ.applyTheme(); });
+/* ---------- Theme ---------- */
+/* One theme: dark (owner, 28 Nov 2026: "I only want the dark theme"). Old saves' theme choice is dropped. */
+DQ.applyTheme = () => { document.documentElement.dataset.theme = 'dark'; if (S() && S().settings) delete S().settings.theme; DQ.emit('theme'); };
 
 /* ---------- Which active quests does this task advance? ---------- */
 const KIND_EV = { fish: 'catch', wood: 'chop', mine: 'mine', thieve: 'thieve' };

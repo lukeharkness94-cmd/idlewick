@@ -11,9 +11,9 @@ const fs=require('node:fs');
   await page.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/');
   await page.locator('#t-new').click();
   await page.locator('#crname').fill('Luke');
-  for(const width of [390,738,1440])for(const theme of ['dark','light']){
+  for(const width of [390,738,1440])for(const theme of ['dark']){
    await page.setViewportSize({width,height:800});
-   await page.evaluate(theme=>{DQ.S.settings.theme=theme;DQ.applyTheme();},theme);
+   await page.evaluate(theme=>{DQ.applyTheme();},theme);
    const entrance=await page.evaluate(()=>{
     const style=selector=>getComputedStyle(document.querySelector(selector));
     return {name:style('#crname').color,nameBg:style('#crname').backgroundColor,back:style('#cr-back').color,backBg:style('#cr-back').backgroundColor,begin:style('#tmenu .tbtn.primary').color,primary:getComputedStyle(document.documentElement).getPropertyValue('--brass').trim(),form:style('#crname').fontFamily,logo:style('.logo h1').fontFamily,overflow:document.documentElement.scrollWidth>innerWidth};
@@ -48,9 +48,9 @@ const fs=require('node:fs');
    document.querySelectorAll('.note').forEach(el=>el.remove());
   });
   const hubs={overview:'home',activity:'home',shop:'town',map:'town',projects:'town',achievements:'journal',bestiary:'journal',skillsummary:'journal',mastery:'journal',brewery:'skills',bank:'hero',house:'town',hirelings:'town',people:'quests',research:'skills',settings:'hero',fishing:'skills',woodcutting:'skills',character:'hero',quests:'quests',combat:'combat',mining:'skills',thieving:'skills',cooking:'skills',smithing:'skills',crafting:'skills',magic:'combat',farming:'skills',hunting:'skills',enchanting:'skills',exploration:'skills'};
-  for(const width of [390,1440,1920,2560,3440])for(const theme of ['dark','light']){
+  for(const width of [390,1440,1920,2560,3440])for(const theme of ['dark']){
    await page.setViewportSize({width,height:1000});
-   await page.evaluate(theme=>{DQ.S.settings.theme=theme;DQ.applyTheme();},theme);
+   await page.evaluate(theme=>{DQ.applyTheme();},theme);
    await page.evaluate(()=>DQ.go('fishing'));
    if(width>860)assert.equal(await page.locator('#subnav .stab').count(),0);
    await page.evaluate(()=>DQ.go('brewery'));

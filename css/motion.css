@@ -95,7 +95,7 @@ html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,ht
 .work-atmosphere i:nth-child(2) { left:39px; animation-delay:-.13s; }
 .work-atmosphere i:nth-child(3) { left:10px; animation-delay:-.24s; }
 .work-atmosphere i:nth-child(4) { left:46px; animation-delay:-.36s; }
-.mine .work-atmosphere i,.skill-smithing .work-atmosphere i { background:#efcf88; }
+.mine .work-atmosphere i,.skill-smithing .work-atmosphere i{ background:#efcf88; }
 .wood .work-atmosphere i:nth-child(even) { background:#b1b775; width:5px; height:3px; }
 .fish .work-atmosphere { left:44%; bottom:14px; height:45px; }
 .fish .work-atmosphere i { width:28px; height:8px; border:2px solid #b7dbd0; background:transparent; animation:water-ripple 2.8s ease-in-out infinite; }
@@ -103,7 +103,7 @@ html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,ht
 .fish .work-atmosphere i:nth-child(n+3) { display:none; }
 .skill-cooking .work-atmosphere { bottom:90px; }
 .skill-cooking .work-atmosphere i { width:5px; height:13px; background:#e8e3c8; animation:steam-rise 2s ease-in-out infinite; }
-.skill-crafting .work-atmosphere i,.alch .work-atmosphere i { background:#dac0ec; animation:magic-motes 2.4s ease-in-out infinite; }
+.skill-crafting .work-atmosphere i,.alch .work-atmosphere i{ background:#dac0ec; animation:magic-motes 2.4s ease-in-out infinite; }
 .thieve .work-atmosphere { display:none; }
 /* the hero's body only moves in whole steps of position, never rotates: a few degrees of rotation smeared its pixels
    (27 Nov 2026 audit); the tool still swings */
@@ -132,15 +132,15 @@ html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,ht
 .combat-projectile .ic { width:36px; height:36px; }
 .combat-projectile.magic { width:17px; height:17px; background:var(--spell-color,#c3ace7); border:3px solid #eee5d0; box-shadow:-5px 0 0 color-mix(in srgb,var(--spell-color,#c3ace7) 55%,transparent),-10px 0 0 color-mix(in srgb,var(--spell-color,#c3ace7) 25%,transparent); }
 .work-result { width:40px; height:40px; }
-.work-result img,.work-result .ic { width:40px; height:40px; image-rendering:pixelated; }
-.scene-paused .activity-scene *,.scene-paused .encounter-arena * { animation-play-state:paused!important; }
+.work-result img,.work-result .ic{ width:40px; height:40px; image-rendering:pixelated; }
+.scene-paused .activity-scene *,.scene-paused .encounter-arena *{ animation-play-state:paused!important; }
 @media(max-width:600px) { .scene-worker{left:5%} .activity-stage.working .action-tool{left:calc(5% + 44px)} }
 @media(prefers-reduced-motion:reduce) {
- .scene-worker,.scene-worker img,.action-tool,.work-atmosphere i,.activity-stage.working .fish .scene-target,.encounter-arena #av-foe img.bob,.encounter-arena #av-you > img { animation:none!important; }
- .work-atmosphere,.scene-effect { display:none!important; }
+ .scene-worker,.scene-worker img,.action-tool,.work-atmosphere i,.activity-stage.working .fish .scene-target,.encounter-arena #av-foe img.bob,.encounter-arena #av-you > img{ animation:none!important; }
+ .work-atmosphere,.scene-effect{ display:none!important; }
 }
-.calm .scene-worker,.calm .scene-worker img,.calm .action-tool,.calm .activity-stage.working .fish .scene-target,.calm .encounter-arena #av-foe img.bob,.calm .encounter-arena #av-you > img { animation:none!important; }
-.calm .work-atmosphere,.calm .scene-effect { display:none!important; }
+.calm .scene-worker,.calm .scene-worker img,.calm .action-tool,.calm .activity-stage.working .fish .scene-target,.calm .encounter-arena #av-foe img.bob,.calm .encounter-arena #av-you > img{ animation:none!important; }
+.calm .work-atmosphere,.calm .scene-effect{ display:none!important; }
 
 /* Actual joint poses; only the small active fighters need animation layers. */
 .battle-rig { position:relative; display:block; flex:none; overflow:visible; isolation:isolate; }
@@ -162,17 +162,17 @@ html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,ht
 .rig-bow-string path { fill:none; stroke:#e6dac0; stroke-width:.65; }
 .rig-nocked-arrow { position:absolute; width:calc(25 * var(--rig-unit)); height:var(--rig-unit); background:#c8a46e; left:calc(-9 * var(--rig-unit)); top:calc(21 * var(--rig-unit)); opacity:0; }
 .rig-nocked-arrow::after { content:""; position:absolute; right:calc(-2 * var(--rig-unit)); top:calc(-1 * var(--rig-unit)); width:calc(3 * var(--rig-unit)); height:calc(3 * var(--rig-unit)); background:#c7d2cd; clip-path:polygon(0 0,100% 50%,0 100%); }
-.hero-rig:not([data-action]),.foe-rig:not([data-action]) { animation:fighter-breath 3s ease-in-out infinite; }
+.hero-rig:not([data-action]),.foe-rig:not([data-action]){ animation:fighter-breath 3s ease-in-out infinite; }
 @keyframes fighter-breath { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1.5px)} }
 .rig-magic[data-action="magic"] .rig-hand-anchor::before { content:""; position:absolute; left:calc(-4 * var(--rig-unit)); top:calc(-4 * var(--rig-unit)); width:calc(9 * var(--rig-unit)); height:calc(9 * var(--rig-unit)); background:#c9b4ea; box-shadow:0 0 10px #c9b4ea99; animation:spell-gather 720ms ease-out both; }
 @keyframes spell-gather { 0%{opacity:0;transform:scale(.1)} 28%{opacity:.9;transform:scale(1)} 55%,100%{opacity:0;transform:scale(.3)} }
 [data-prog]:not([data-ring]) { transform-origin:left; transition:none!important; }
 @media(max-width:700px) { .hero-rig{--rig-unit:2px} .foe-rig{--rig-unit:3px} }
 @media(prefers-reduced-motion:reduce) {
- .battle-rig,.battle-bone,.rig-hand-anchor::before { animation:none!important; }
+ .battle-rig,.battle-bone,.rig-hand-anchor::before{ animation:none!important; }
  .rig-hand-anchor::before { display:none!important; }
 }
-.calm .battle-rig,.calm .battle-bone,.calm .rig-hand-anchor::before { animation:none!important; }
+.calm .battle-rig,.calm .battle-bone,.calm .rig-hand-anchor::before{ animation:none!important; }
 .calm .rig-hand-anchor::before { display:none!important; }
 
 /* Personality (js/personality.js, owner 27 Nov 2026: "characters and animals with personality"). The hero and the
@@ -181,15 +181,15 @@ html.calm .btn,html.calm .tab,html.calm .stab,html.calm .hub,html.calm .iconb,ht
    reduced motion. Blinks, yawns, stretches, brow wipes and ear flicks are drawn frames swapped by the script. */
 .fig-stage .fig-img { animation:lw-breathe 3.6s ease-in-out infinite; }
 .scene-worker img { animation:lw-breathe 3s ease-in-out infinite; }
-.fig-pet img:not(.lw-z),.scene-pet img,.battle-companion img:not(.lw-z) { animation:lw-breathe 2.7s ease-in-out infinite; }
+.fig-pet img:not(.lw-z),.scene-pet img,.battle-companion img:not(.lw-z){ animation:lw-breathe 2.7s ease-in-out infinite; }
 .lw-asleep img:not(.lw-z) { animation-duration:4.8s; }
 @keyframes lw-breathe { 0%,100% { translate:0 0; } 50% { translate:0 -1px; } }
 .lw-zzz { position:absolute; left:50%; bottom:70%; width:28px; height:30px; pointer-events:none; z-index:3; }
 .lw-zzz .lw-z { position:absolute; left:0; bottom:0; opacity:0; animation:lw-zzz 3.6s linear infinite; animation-delay:calc(var(--z) * -1.2s); }
 @keyframes lw-zzz { 0% { opacity:0; transform:translate(0,0); } 15% { opacity:1; } 70% { opacity:.8; } 100% { opacity:0; transform:translate(-10px,-24px); } }
-html.calm .fig-stage .fig-img,html.calm .fig-pet img,html.calm .scene-pet img,html.calm .battle-companion img,html.calm .lw-zzz .lw-z { animation:none!important; }
+html.calm .fig-stage .fig-img,html.calm .fig-pet img,html.calm .scene-pet img,html.calm .battle-companion img,html.calm .lw-zzz .lw-z{ animation:none!important; }
 html.calm .lw-zzz { display:none; }
 @media (prefers-reduced-motion:reduce) {
- .fig-stage .fig-img,.fig-pet img,.scene-pet img,.battle-companion img,.lw-zzz .lw-z { animation:none!important; }
+ .fig-stage .fig-img,.fig-pet img,.scene-pet img,.battle-companion img,.lw-zzz .lw-z{ animation:none!important; }
  .lw-zzz { display:none; }
 }

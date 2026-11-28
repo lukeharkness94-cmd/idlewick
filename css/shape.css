@@ -21,12 +21,6 @@
   --act-glow:color-mix(in srgb,var(--brass) 80%,transparent);
   --nav-on:color-mix(in srgb,var(--brass) 46%,var(--panel));--nav-on-hi:color-mix(in srgb,var(--brass) 30%,var(--panel));
   --act-lift:0 1px 2px rgba(0,0,0,.35),0 4px 10px -6px rgba(0,0,0,.65);--act-lift-hi:0 2px 4px rgba(0,0,0,.4),0 9px 18px -8px rgba(0,0,0,.7)}
-:root[data-theme="light"]{--act-line:#b09d7c;--act-line-hi:#8c7650;--act-on:var(--brass);--act-strong:#6f4a1c;
-  --info-fill:color-mix(in srgb,var(--mute) 11%,transparent);--pip-off:color-mix(in srgb,var(--mute) 26%,var(--panel));
-  --act-fill:color-mix(in srgb,#a07a40 9%,var(--panel));--act-fill-on:color-mix(in srgb,var(--brass) 20%,var(--panel));
-  --act-glow:color-mix(in srgb,var(--brass) 70%,transparent);
-  --nav-on:color-mix(in srgb,var(--brass) 42%,var(--panel));--nav-on-hi:color-mix(in srgb,var(--brass) 24%,var(--panel));
-  --act-lift:0 1px 2px rgba(80,55,20,.16),0 4px 10px -6px rgba(80,55,20,.42);--act-lift-hi:0 2px 4px rgba(80,55,20,.18),0 9px 18px -8px rgba(80,55,20,.5)}
 
 @layer shape {
   /* ---------- not clickable: panels are soft fills, 12px, no border ---------- */
@@ -202,7 +196,7 @@
   .encounter-arena #av-foe.foe-guide:hover{filter:brightness(1.08)}
 
   /* dark theme: a locked silhouette is a pale shape, not a black one with a drawn edge */
-  :root:not([data-theme="light"]) :is(.sil,img.sil){filter:brightness(0) invert(.86) opacity(.3)!important}
+  :root[data-theme="dark"] :is(.sil,img.sil){filter:brightness(0) invert(.86) opacity(.3)!important}
 
   /* things whose outline was all they had now sit on a soft tint */
   :is(.wb-activity,.wb-totals>b,.gl-dot,.tw-floor:not(.done) .tw-n,.tw-dot:not(.part,.on),.boss-checklist li:not(.done) .bc-mark,.need-tile:not(button),.tw-prize){background-color:var(--info-fill)!important}
@@ -219,7 +213,6 @@
    (scale .93 in motion.css and style.css) is retired so the press is one consistent sink. translate only; under Reduce
    effects and reduced motion the shadow still softens but nothing moves. */
 :root{--act-press:0 0 1px rgba(0,0,0,.32),0 1px 2px -1px rgba(0,0,0,.5);--press-spring:cubic-bezier(.34,1.9,.6,1)}
-:root[data-theme="light"]{--act-press:0 0 1px rgba(80,55,20,.16),0 1px 2px -1px rgba(80,55,20,.32)}
 @layer shape {
   :is(.btn,.tab,.stab,.chip,.n-act,.iconb,.packchip,.hub,.seg button,.dg-row,.pinchip,.slot,.abil,.card,.tile,.goal,.beast,.plot,.skrow,.nav,.spell,button.eq,.tbtn,.illustrated-card):active{transform:none!important}
   :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,#hud :is(.iconb,.packchip,.h-hero),button,[data-do],[role=button],[role=tab],[role=switch],.btn):not(:disabled,.site-spot,.tc-room,.hearth-spot,img).lw-press.lw-press{

@@ -295,15 +295,11 @@ Object.assign(UI.DO, {
     const t = $('#reptext'); if (t) t.focus();
   }
 });
-const THEMES = [['dark', 'Dark'], ['light', 'Light'], ['auto', 'Match device']];
-UI.themeControl = () => `<div><div class="k" style="margin-bottom:6px">Theme</div><div class="seg">${THEMES.map(([k, n]) => `<button class="${(S().settings.theme || 'dark') === k ? 'on' : ''}" data-do="theme" data-a="${k}">${n}</button>`).join('')}</div><p class="sm dim" style="margin:6px 0 0">Press L to switch between dark and light at any time.</p></div>`;
-Object.assign(UI.DO, { theme: a => { if (a === 'toggle') DQ.toggleTheme(); else DQ.setTheme(a); DQ.sfx('tab'); UI.renderHud(); UI.render(false); } });
 DQ.on('theme', () => { if (DQ.started) UI.renderHud(); });
-addEventListener('keydown', e => { if (e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || !DQ.started) return; if (e.key.toLowerCase() === 'l') UI.DO.theme('toggle'); });
 const origBank = UI.V.bank;
 UI.V.bank = () => origBank().replace('<div class="slots big" id="bankgrid">', '<div class="selbar" id="selbar"></div><div class="slots big" id="bankgrid">');
 const origSettings = UI.V.settings;
-UI.V.settings = () => origSettings().replace(/<\/div>\s*$/, UI.timePanel() + UI.playtestPanel() + '</div>').replace('<label class="nameedit">', UI.themeControl() + '<label class="nameedit">');
+UI.V.settings = () => origSettings().replace(/<\/div>\s*$/, UI.timePanel() + UI.playtestPanel() + '</div>');
 /* Settings have one category at a time instead of a wall of controls. */
 UI.after.settings = () => {
   const view = $('#view'), panels = [...view.querySelectorAll('section.panel')].filter(panel => panel.querySelector('h2'));

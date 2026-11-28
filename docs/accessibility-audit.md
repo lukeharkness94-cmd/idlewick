@@ -48,4 +48,4 @@ The phone-at-200% case is narrower than the 320 CSS px that WCAG 1.4.10 asks con
   - `span.choice-state`;
   - `small.warn`.
 
-  The light theme's muted text is `#606355` on `#fbf7ee`, about 5.9:1.
+  (The light theme was removed on 28 Nov 2026; the game is dark only.)

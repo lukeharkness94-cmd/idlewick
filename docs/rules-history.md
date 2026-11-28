@@ -315,3 +315,7 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 28 Nov 2026 (owner): "Ok, worth looking at farming work scenes. Though only do it if it doesn't look awful". Replaces
   "Farming has no work scene" (it runs on timers): the Farming page shows the farm with the hero hoeing between the real
   crops while anything grows; the strip of farm scenery above the fields is gone on desktop. Phones unchanged.
+- 28 Nov 2026 (owner): "I've just decided we're going to get rid of the light theme. I only want the dark theme. Remove
+  all code and references to there being a light theme." Replaces "light parchment by default, dark theme available"
+  and the Theme setting (Dark / Light / Match device) with its L shortcut; css/light.css and every light-only rule are
+  gone and tests check the dark theme only.

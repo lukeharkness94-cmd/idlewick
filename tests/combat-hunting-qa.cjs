@@ -236,10 +236,9 @@ const path = require('node:path');
     assert.equal(await page.evaluate(() => DQ.act), null);
 
     console.log('PASS exact Now destinations, #arts, supplies and Explore instead');
-    for (const theme of ['light', 'dark']) for (const [width,height] of [[320,780],[390,844],[1280,720]]) {
+    for (const theme of ['dark']) for (const [width,height] of [[320,780],[390,844],[1280,720]]) {
       await page.setViewportSize({ width, height });
       await page.evaluate(theme => {
-        DQ.S.settings.theme = theme;
         DQ.applyTheme();
         DQ.S.equip.weapon = 'bow_normal';
         DQ.S.ammo = { id: null, n: 0 };

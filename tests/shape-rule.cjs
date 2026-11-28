@@ -1,7 +1,7 @@
 /* node tests/shape-rule.cjs: the shape rule (owner, 26 Nov 2026), no lines around anything you can't click and only
    navigation outlined (owner, 27 Nov 2026: "I despise seeing physical lines around things"; "Unless it's a menu item to
    navigate, we can just either make it float on over or have a slight backdrop so its obvious it's clickable").
-   Checked on every page, in a fight and in the common pop-ups, in both themes at 1440 x 900. Needs the preview server.
+   Checked on every page, in a fight and in the common pop-ups, in the dark theme at 1440 x 900. Needs the preview server.
    S1  anything you can click (button, [data-do], [role=button], [role=tab], [role=switch], a[href], text fields) wider
        than 20px is an 8px rounded rectangle (all four corners) with no outline that floats: a shadow, or a fill that
        differs from what it sits on (a disabled control may sit flat). Menus too (owner, 27 Nov 2026)
@@ -41,7 +41,7 @@ const MODALS = {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
   const errs = [];
   try {
-    for (const theme of ['light', 'dark']) {
+    for (const theme of ['dark']) {
       const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
       p.on('pageerror', e => errs.push(e.message));
       await p.goto(URL);
@@ -53,7 +53,7 @@ const MODALS = {
         for (const s of D.SKILLS) { S.unlocked[s.id] = true; S.xp[s.id] = D.XPF[30]; }
         for (const t of ['willowbrook', 'mossbarrow']) S.towns[t] = Object.assign(S.towns[t] || {}, { visited: true, boss: true });
         Object.assign(S.inv, { log_normal: 40, ore_copper: 20, bar_bronze: 6, trout: 10, bread: 10 });
-        S.coins = 30000; DQ.setTheme(t);
+        S.coins = 30000; DQ.applyTheme();
       }, theme);
       const check = async label => {
         await p.evaluate(() => document.querySelectorAll('#notes > *').forEach(e => e.remove()));
@@ -131,7 +131,7 @@ const MODALS = {
     const show = process.env.VERBOSE ? problems : problems.slice(0, 60);
     console.log(show.join('\n')); if (show.length < problems.length) console.log(`... ${problems.length - show.length} more (VERBOSE=1)`);
   }
-  console.log(`shape-rule: pages, a fight and pop-ups x 2 themes; S1 clickable shape problems ${n('S1')}, S2 lines round non-clickables ${n('S2')}, S3 lines inside controls ${n('S3')}, errors ${errs.length}`);
+  console.log(`shape-rule: pages, a fight and pop-ups (dark theme); S1 clickable shape problems ${n('S1')}, S2 lines round non-clickables ${n('S2')}, S3 lines inside controls ${n('S3')}, errors ${errs.length}`);
   if (problems.length) process.exit(1);
   console.log('shape-rule: ok');
 })().catch(e => { console.error(e); process.exit(1); });

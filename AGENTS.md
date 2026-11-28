@@ -31,7 +31,7 @@ dated line to the history file.
   `RESTORE=1 MIN=300 KITS=<kit> node scripts/review-opening.cjs`. Simulations and browser checks are evidence, not human
   playtests (docs/playtest-plan.md); say which you ran and what they can't tell you.
 - **Visual changes are delivered with screenshots** of the rebuilt game that you have looked at yourself, naming any
-  test fixture (granted levels, coins, items). Check desktop and phone widths and both themes.
+  test fixture (granted levels, coins, items). Check desktop and phone widths.
 - **Integration gate** (owner, 16 Nov): before replacing or rebuilding a system, audit its connections (saves and earned
   progress, unlock reachability, ingredient and source routes, quests, inventory/bank conservation, shop transactions,
   companions, offline work, UI journeys), validate in isolated test saves, keep working behaviour while candidates are
@@ -94,10 +94,12 @@ dated line to the history file.
   (`SPEC.hoe`, driven through `DQ.farmWork` by the strike clock when no activity stage is in view); nothing growing,
   no hero. Not shown on phones (`tests/farm-scene.cjs`). The page backdrop (`js/backdrop.js`) is Starlit hills or Twilight forest; combat shows
   the area's own scene (two per region, keyed like `saltmere:1`); a new area needs a recipe there.
-- **Hearthside Journal** (owner, 18 Nov) is the whole game's look: light parchment and Hearthside lettering by default
-  (local Cinzel + Alegreya Sans), dark theme available; `css/hearthside.css` is the shared presentation layer (extend it,
-  don't add per-page skins). Modern but old-world (owner, 27 Nov): panels are paper (a fine grain and soft mottle drawn
-  with an SVG noise filter, aged edges), the dark theme is candlelit leather, headings are letterpressed, a quest ready
+- **One theme: dark** (owner, 28 Nov: "I only want the dark theme"). There is no light theme, theme setting, picker or
+  shortcut; `DQ.applyTheme` always sets `data-theme="dark"` and drops an old save's choice. Don't add theme variants.
+- **Hearthside Journal** (owner, 18 Nov) is the whole game's look with Hearthside lettering by default (local Cinzel +
+  Alegreya Sans); `css/hearthside.css` is the shared presentation layer (extend it, don't add per-page skins). Modern
+  but old-world (owner, 27 Nov): panels are candlelit leather (a fine grain drawn with an SVG noise filter, aged
+  edges), headings are letterpressed, a quest ready
   to hand in carries a wax seal; soft shadows, smooth easing and clean spacing keep it modern. Lettering presets (Storybook, Adventurer, Pixel, Original) stay in Settings; use the
   `--f-display/--f-body/--f-ui/--f-mono` variables, never a hard-coded family. Silkscreen only for big numbers and short
   headlines. Type: 16.5px body, 16px buttons, 14px meta; nothing visible under 13px in the design.

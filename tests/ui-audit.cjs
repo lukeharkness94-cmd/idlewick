@@ -10,8 +10,8 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
  let count=0;
  for(const progressed of [false,true]){
  if(progressed)await p.evaluate(()=>{for(const sk of DQ.data.SKILLS){DQ.S.xp[sk.id]=300000;DQ.S.unlocked[sk.id]=true;}DQ.S.coins=100000;DQ.fxDirty();});
- for(const [width,height]of [[390,844],[1440,720],[1920,1080],[2560,1440],[3440,1440]])for(const theme of ['dark','light']){
- await p.setViewportSize({width,height});await p.evaluate(t=>{DQ.S.settings.theme=t;DQ.applyTheme();},theme);
+ for(const [width,height]of [[390,844],[1440,720],[1920,1080],[2560,1440],[3440,1440]])for(const theme of ['dark']){
+ await p.setViewportSize({width,height});await p.evaluate(t=>{DQ.applyTheme();},theme);
  for(const page of pages){
  await p.evaluate(id=>DQ.go(id),page);
  const state=await p.evaluate(()=>({error:document.querySelector('#view').textContent.includes('Something went wrong'),overflow:document.documentElement.scrollWidth>innerWidth,duplicate:[...document.querySelectorAll('#subnav [data-do="go"]')].some(e=>(DQ.data.SK[e.dataset.a]&&e.dataset.a!=='exploration')||e.dataset.a==='brewery'),sidebar:[...document.querySelectorAll('.dk')].map(e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,text:e.querySelector('.dk-n').getBoundingClientRect().bottom,inner:e.querySelector('.dk-info').getBoundingClientRect().bottom};}),dockBottom:document.querySelector('.sidebar').getBoundingClientRect().bottom,dockScroll:getComputedStyle(document.querySelector('.sidebar')).overflowY,rail:innerHeight,topnav:document.querySelectorAll('#topnav .tnav').length,topfit:(()=>{const n=document.querySelector('#topnav');return n?n.scrollWidth<=n.clientWidth+1:false})()}));
@@ -22,7 +22,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
  }
  }
  }
- await p.setViewportSize({width:1440,height:900});await p.evaluate(()=>{DQ.S.settings.theme='dark';DQ.applyTheme();DQ.go('fishing');});await p.waitForTimeout(900);await p.screenshot({path:'/tmp/idlewick-audit-skills.png'});
+ await p.setViewportSize({width:1440,height:900});await p.evaluate(()=>{DQ.applyTheme();DQ.go('fishing');});await p.waitForTimeout(900);await p.screenshot({path:'/tmp/idlewick-audit-skills.png'});
  await p.evaluate(()=>{DQ.ui.beastTab='monsters';DQ.go('bestiary');});await p.waitForTimeout(900);await p.screenshot({path:'/tmp/idlewick-audit-guide.png'});
  await p.evaluate(()=>DQ.go('combat'));await p.waitForTimeout(900);await p.screenshot({path:'/tmp/idlewick-audit-combat.png'});
  // Real unlock path and help on demand.
