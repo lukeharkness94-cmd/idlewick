@@ -6042,6 +6042,27 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 :root.type-hearthside:not(.type-classic) #view .ss-cl>span,:root.type-hearthside:not(.type-classic) #view .ss-hp>span{font-size:13px!important;letter-spacing:0!important;min-width:0}
 :root.type-hearthside:not(.type-classic) #view .combat-equipped-slot small{font:400 13px/1.1 var(--f-body)!important;text-transform:none!important;letter-spacing:0!important}
 :root.type-hearthside:not(.type-classic) #view :is(.ss-cl,.ss-hp){gap:4px!important;padding-left:4px!important;padding-right:4px!important;min-width:0}
+
+/* text that has to fit (owner, 28 Nov 2026: "places in the UI where the text isn't working properly"; found with
+   scripts/audit-overflow.cjs): the capital pixel face needs room, so these narrow controls get it or take the sentence
+   face. Skill-upgrade family tabs pack by width; ranch pen buttons, seed chips, paper-doll slot labels, training
+   captions and the hiring button fit their text. */
+:root.type-hearthside:not(.type-classic) #view .tool-families{grid-template-columns:repeat(auto-fill,minmax(196px,1fr))!important}
+:root.type-hearthside:not(.type-classic) #view .tool-families .btn{font-size:13px!important;letter-spacing:.02em!important;justify-content:flex-start!important;min-width:0}
+:root.type-hearthside:not(.type-classic) #view :is(.pen-collect,.pen-sell){font:400 15px/1.1 var(--f-body)!important;text-transform:none!important;letter-spacing:0!important;white-space:nowrap!important;min-width:max-content!important}
+:root.type-hearthside:not(.type-classic) #view .seed-choice{width:auto!important;max-width:none!important;flex:0 0 auto!important}
+:root.type-hearthside:not(.type-classic) #view .seed-choice small{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}
+:root.type-hearthside:not(.type-classic) #view button.eq small{font:400 13px/1.1 var(--f-body)!important;text-transform:none!important;letter-spacing:0!important}
+:root.type-hearthside:not(.type-classic) #view .ss-btn small{font:400 13px/1.15 var(--f-body)!important;text-transform:none!important;letter-spacing:0!important}
+:root.type-hearthside:not(.type-classic) #view .cand .btn{white-space:nowrap!important;min-width:max-content!important;flex:0 0 auto}
+:root.type-hearthside:not(.type-classic) #view .shop-categories .notice-badge{position:static!important;margin-left:6px}
+/* pen buttons share one row under the animal (the sprite column was too narrow for "Collect 5") */
+#view .pen .pen-acts{grid-column:1/-1;display:flex;gap:6px;min-width:0}
+#view .pen .pen-acts .btn{flex:1 1 0;min-width:0!important;justify-content:center}
+:root.type-hearthside:not(.type-classic) #view .seed-choices{grid-template-columns:repeat(auto-fill,minmax(186px,1fr))!important}
+:root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .ss-btn{padding-left:3px!important;padding-right:3px!important;gap:3px!important}
+:root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .combat-x .ss-btn :is(svg,img,.ic){width:20px!important;height:20px!important}
+@layer shape { :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .combat-x .ss-btn{padding-left:4px!important;padding-right:4px!important} }
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
@@ -6431,6 +6452,8 @@ DQ.fmtK = n => {
   if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
   if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 1 : 2) + 'M';
   if (n >= 1e5) return Math.floor(n / 1e3) + 'K';
+  /* five-figure counts fit an item tile too (owner, 28 Nov 2026: "15,265" spilled over the picture) */
+  if (n >= 1e4) return (Math.floor(n / 100) / 10).toFixed(1).replace(/\.0$/, '') + 'K';
   return n.toLocaleString('en-US');
 };
 DQ.formatCoins = n => ['suffix', 'scientific'].includes(DQ.S?.settings?.numberNotation) ? DQ.fmtK(n) : DQ.fmt(n);
@@ -20306,7 +20329,7 @@ UI.V.farming = () => {
     const A = D.ANIMAL[an.id], pr = D.ITEMS[A.prod];
     return `<div class="pen" data-i="${i}" data-b="pen:${i}" style="--c:${A.col}"><button class="pspr" data-do="petanimal" data-a="${i}" data-tip="text:Pet ${esc(an.name)}: +25% speed for 3 min">${DQ.animalSprite(A, 64, 'bob')}</button>
       <div class="pen-t"><b>${esc(an.name)}</b><small>${A.name} · makes ${pr.name.toLowerCase()} every ${left(DQ.animalPeriod(an))}</small><span class="bar pbar"><i></i></span><small><span class="pst mono"></span> ${pr.name.toLowerCase()} ready <span class="tag hungrytag">Hungry</span><span class="tag happytag">Happy</span></small></div>
-      <button class="btn sm pen-collect" data-do="collect" data-a="${i}">Collect <span class="mono" data-b="pencount:${i}">${an.stored}</span></button><button class="btn sm pen-sell" data-do="sellanimal" data-a="${i}" data-tip="text:Sell to free this pen · ${fmt(DQ.animalSellPrice(i))} coins">Sell</button></div>`;
+      <div class="pen-acts"><button class="btn sm pen-collect" data-do="collect" data-a="${i}">Collect <span class="mono" data-b="pencount:${i}">${an.stored}</span></button><button class="btn sm pen-sell" data-do="sellanimal" data-a="${i}" data-tip="text:Sell to free this pen · ${fmt(DQ.animalSellPrice(i))} coins">Sell</button></div></div>`;
   }).join('');
   const nextPen = D.PEN_PRICES[F.pensBought], mossOpen = DQ.townUnlocked('mossbarrow');
   const market = D.ANIMALS.map(a => { const lock = DQ.lvl('farming') < a.lvl; return `<div class="srow ${lock || S().coins < a.price ? 'cant' : ''}" id="buy-${a.id}"><span class="mini">${DQ.animalSprite(a, 40)}</span><div class="sr-t"><b>${a.name}</b><small>Makes ${D.ITEMS[a.prod].name.toLowerCase()} (${fmt(D.ITEMS[a.prod].val)} coins) · <span class="${lock ? 'bad' : 'ok'}">Farming ${a.lvl}</span></small></div><span class="price mono">${ico('coin')}${fmt(a.price)}</span><button class="btn sm ${lock ? '' : 'primary'}" data-do="buyanimal" data-a="${a.id}" ${lock ? 'disabled' : ''}>Buy</button></div>`; }).join('');
@@ -36743,7 +36766,7 @@ setTimeout(tick, 500);
    3. XP flows to its skill: the "+XP" from work (and the fight's XP, after the blow lands) drifts into that skill's row
       in the rail (the Skills tab of the phone bar) and the row's bar fills as it arrives.
    4. A quill pointer: a pixel quill drawn in code (js/pixel_feel.js), a pointing hand over controls; desktop pointers
-      only; Settings > Display > "Quill pointer" turns it off.
+      only; Settings > Display > "Pixel pointer" turns it off. The quill is retired: the pointing hand is used everywhere.
    15. Hold to confirm big spends: a buy or sale worth 10,000 coins or more, or 1,000+ that is a quarter of your coins,
       needs a press and hold (0.6 s) that fills the button from left to right. Letting go early cancels; Enter or Space
       held does the same; a quick click explains. Small amounts stay one click.
@@ -36924,7 +36947,9 @@ UI.applyCursor = () => {
   const root = document.documentElement, on = cursorWanted(); cursorOn = on;
   if (on) {
     adoptSheets();
-    const q = cursorValue('quill', 'auto'), h = cursorValue('hand', 'pointer');
+    /* the pointing hand everywhere (owner, 28 Nov 2026: "Not keen on the quill though, make it always the pointing
+       hand"); the page keeps the browser's arrow as its fallback, controls the browser's hand */
+    const q = cursorValue('hand', 'auto'), h = cursorValue('hand', 'pointer');
     if (q && h) { root.style.setProperty('--cur-quill', q); root.style.setProperty('--cur-hand', h); root.classList.add('lw-cursor'); return; }
   }
   root.classList.remove('lw-cursor'); root.style.removeProperty('--cur-quill'); root.style.removeProperty('--cur-hand');
@@ -36934,7 +36959,7 @@ const settings0 = UI.V.settings;
 UI.V.settings = (...a) => {
   const h = settings0(...a); if (UI.tab.settingsPanel !== 'display') return h;
   const on = S().settings.quillCursor !== false;
-  const tog = `<button class="tog ${on ? 'on' : ''}" data-do="quillcursor" aria-pressed="${on}"><span class="sw"></span><span><b>Quill pointer</b><small>${finePointer() ? 'A pixel quill for the mouse pointer, and a pointing hand over anything you can click' : 'For a mouse or trackpad; touch screens keep their own'}</small></span></button>`;
+  const tog = `<button class="tog ${on ? 'on' : ''}" data-do="quillcursor" aria-pressed="${on}"><span class="sw"></span><span><b>Pixel pointer</b><small>${finePointer() ? 'A pixel pointing hand for the mouse pointer' : 'For a mouse or trackpad; touch screens keep their own'}</small></span></button>`;
   /* into the Notifications & accessibility card, beside Reduce effects */
   const i = h.indexOf('<h2>Notifications &amp; accessibility</h2>') >= 0 ? h.indexOf('<h2>Notifications &amp; accessibility</h2>') : h.indexOf('<h2>Notifications & accessibility</h2>');
   if (i < 0) return h;

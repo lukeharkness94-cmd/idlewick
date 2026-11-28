@@ -72,11 +72,11 @@ const fresh = async (b, opts = {}) => {
     assert.deepEqual(calmFly, { f: 0, x: 0, flowed: false }, 'Reduce effects: no flights and the XP float stays where it was');
     await p.evaluate(() => DQ.stopAct(true));
 
-    /* ---------- 4. the quill pointer ---------- */
+    /* ---------- 4. the pixel pointer: the pointing hand everywhere (owner, 28 Nov 2026) ---------- */
     await p.evaluate(() => { DQ.paused = true; DQ.go('overview'); DQ.ui.render(true); });
     const cur = await p.evaluate(() => ({ on: document.documentElement.classList.contains('lw-cursor'), body: getComputedStyle(document.body).cursor, btn: getComputedStyle(document.querySelector('#topnav .tnav')).cursor }));
-    assert.ok(cur.on, 'a mouse gets the quill pointer');
-    assert.match(cur.body, /^(image-set|url)\(.*auto$/, 'the quill, falling back to the normal pointer');
+    assert.ok(cur.on, 'a mouse gets the pixel pointer');
+    assert.match(cur.body, /^(image-set|url)\(.*auto$/, 'the pointing hand on the page, falling back to the normal pointer');
     assert.match(cur.btn, /^(image-set|url)\(.* pointer$/, 'the hand over controls, falling back to the normal hand');
     await p.evaluate(() => { DQ.go('settings'); DQ.ui.render(true); });
     assert.equal(await p.locator('[data-do="quillcursor"]').count(), 1, 'Settings > Display has the switch');

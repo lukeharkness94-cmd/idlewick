@@ -1356,3 +1356,24 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 :root.type-hearthside:not(.type-classic) #view .ss-cl>span,:root.type-hearthside:not(.type-classic) #view .ss-hp>span{font-size:13px!important;letter-spacing:0!important;min-width:0}
 :root.type-hearthside:not(.type-classic) #view .combat-equipped-slot small{font:400 13px/1.1 var(--f-body)!important;text-transform:none!important;letter-spacing:0!important}
 :root.type-hearthside:not(.type-classic) #view :is(.ss-cl,.ss-hp){gap:4px!important;padding-left:4px!important;padding-right:4px!important;min-width:0}
+
+/* text that has to fit (owner, 28 Nov 2026: "places in the UI where the text isn't working properly"; found with
+   scripts/audit-overflow.cjs): the capital pixel face needs room, so these narrow controls get it or take the sentence
+   face. Skill-upgrade family tabs pack by width; ranch pen buttons, seed chips, paper-doll slot labels, training
+   captions and the hiring button fit their text. */
+:root.type-hearthside:not(.type-classic) #view .tool-families{grid-template-columns:repeat(auto-fill,minmax(196px,1fr))!important}
+:root.type-hearthside:not(.type-classic) #view .tool-families .btn{font-size:13px!important;letter-spacing:.02em!important;justify-content:flex-start!important;min-width:0}
+:root.type-hearthside:not(.type-classic) #view :is(.pen-collect,.pen-sell){font:400 15px/1.1 var(--f-body)!important;text-transform:none!important;letter-spacing:0!important;white-space:nowrap!important;min-width:max-content!important}
+:root.type-hearthside:not(.type-classic) #view .seed-choice{width:auto!important;max-width:none!important;flex:0 0 auto!important}
+:root.type-hearthside:not(.type-classic) #view .seed-choice small{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}
+:root.type-hearthside:not(.type-classic) #view button.eq small{font:400 13px/1.1 var(--f-body)!important;text-transform:none!important;letter-spacing:0!important}
+:root.type-hearthside:not(.type-classic) #view .ss-btn small{font:400 13px/1.15 var(--f-body)!important;text-transform:none!important;letter-spacing:0!important}
+:root.type-hearthside:not(.type-classic) #view .cand .btn{white-space:nowrap!important;min-width:max-content!important;flex:0 0 auto}
+:root.type-hearthside:not(.type-classic) #view .shop-categories .notice-badge{position:static!important;margin-left:6px}
+/* pen buttons share one row under the animal (the sprite column was too narrow for "Collect 5") */
+#view .pen .pen-acts{grid-column:1/-1;display:flex;gap:6px;min-width:0}
+#view .pen .pen-acts .btn{flex:1 1 0;min-width:0!important;justify-content:center}
+:root.type-hearthside:not(.type-classic) #view .seed-choices{grid-template-columns:repeat(auto-fill,minmax(186px,1fr))!important}
+:root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .ss-btn{padding-left:3px!important;padding-right:3px!important;gap:3px!important}
+:root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .combat-x .ss-btn :is(svg,img,.ic){width:20px!important;height:20px!important}
+@layer shape { :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .combat-x .ss-btn{padding-left:4px!important;padding-right:4px!important} }

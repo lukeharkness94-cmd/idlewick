@@ -57,9 +57,9 @@ dated line to the history file.
   the original icons), `js/pixel_icons.js` (the 16 × 16 interface icons, 32 × 32 skill emblems and boss trophies; loaded
   before pixel_runtime.js), `js/pixel_nodes.js` (trees, ore boulders, fishing-spot fish, crops, furniture, workers,
   object thieving marks), `js/town_scene.js` (top-down towns, restoration sites, townsfolk), `js/combat_scenes.js` (the
-  sixteen fight backgrounds), `js/pixel_feel.js` (empty-page pictures, the quill pointer), `js/pixel_bosses.js` (the
-  64 × 64 bosses and tower bosses), `js/pixel_minibosses.js` (the mini-bosses' 64 × 64 drawings), `js/pixel_hand_1.js` (ordinary creatures designed one by one at 32 × 32 with the bosses' painter, front and side; its
-  kit `A.HAND` serves the later batches), `js/pixel_runtime.js`
+  sixteen fight backgrounds), `js/pixel_feel.js` (empty-page pictures, the pointer), `js/pixel_bosses.js` (the
+  64 × 64 bosses and tower bosses), `js/pixel_minibosses.js` (the mini-bosses' 64 × 64 drawings), `js/pixel_hand_1.js` (ordinary creatures designed one by one
+  at 32 × 32 with the bosses' painter, front and side; its kit `A.HAND` serves the later batches), `js/pixel_runtime.js`
   (routes every art hook; loaded last). Chunky and outlined (owner, 28 Nov;
   docs/pixel-art-style.md): top-left light, five-step ramps with cool shadows and warm lights, sphere-lit round forms,
   each silhouette outlined in its material's darkest colour; the hero and humanoid creatures are chibis with big heads
@@ -208,8 +208,8 @@ dated line to the history file.
 - **Empty pages** (owner, 27 Nov) show `UI.emptyState(picture, line, plain line)`: a small pixel picture from
   `DQ.emptyArt` and a dry one-liner in the game's voice ("Even the spiders moved out."), with the plain sentence saying
   what fills it. A new empty list or page uses it.
-- **Pointer**: a pixel quill (a pointing hand over controls) drawn in code for mice and trackpads, never touch;
-  Settings → Display → Quill pointer (`settings.quillCursor`) turns it off. Pointer rules read `--cur-hand`/`--cur-quill`.
+- **Pointer**: a pixel pointing hand everywhere (owner, 28 Nov: no quill), drawn in code for mice and trackpads, never
+  touch; Settings → Display → Pixel pointer (`settings.quillCursor`) turns it off. Pointer rules read `--cur-hand`/`--cur-quill`.
 - **Tooltips are passive**: never clickable; source/use icons inside them have no handlers or tab stops; Escape
   dismisses and touch-hold works. Requirements are plain named counts (`held / required`) with a real button for the
   source route (needs.js, item_navigation.js).
