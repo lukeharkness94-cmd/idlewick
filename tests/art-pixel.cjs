@@ -11,7 +11,7 @@ ctx.window = ctx;ctx.__IDLEWICK_INTEGRATION_TEST__=true;
 const load = n => vm.runInContext(fs.readFileSync(path.join(root, 'js', n + '.js'), 'utf8'), ctx, { filename: n });
 ['util', 'data', 'creatures_expanded', 'creature_roster', 'hunt_tiers_data', 'skill_expansion_data', 'data2', 'data3', 'economy', 'skills_new_data', 'beastmastery_data', 'hunting_loop_data', 'crosslinks_data', 'state', 'rare_weapons'].forEach(load); /* the 29 named weapons must look different too (27 Nov 2026) */
 const Q = ctx.DQ; Q.ui = { V: {}, DO: {}, B: {}, homeSections: [] };
-['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'skills_new_art', 'beastmastery_art'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
+['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'skills_new_art', 'beastmastery_art', 'pixel_icons'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
 const A = Q.pixelArt, D = Q.data;
 let checks = 0; const check = (name, fn) => { fn(); checks++; console.log('PASS', name); };
 const colours = spr => spr.render();
@@ -66,6 +66,21 @@ check('no image files or painted-art scripts remain', () => {
   assert.ok(!fs.existsSync(path.join(root, 'assets/painted')) && !fs.existsSync(path.join(root, 'assets/art-completion')));
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8'); assert.ok(!/art_painted|painted_runtime|art_completion/.test(html)); assert.ok(/pixel_runtime\.js/.test(html));
   for (const f of fs.readdirSync(path.join(root, 'js'))) { const src = fs.readFileSync(path.join(root, 'js', f), 'utf8'); assert.ok(!/assets\/(painted|art-completion)/.test(src), f + ' references a removed image'); }
+});
+check('interface icons, skill emblems and trophies are the chunky outlined drawings, each its own', () => {
+  /* 28 Nov 2026: js/pixel_icons.js redraws the 16 x 16 icons, the 32 x 32 emblems and the trophy plaques. Every one keeps
+     a pixel of margin so its outline shows, and no two skills (or the five places along the top) share a picture. */
+  const shape = s => s.px.map(Boolean), edge = s => { const m = shape(s); for (let i = 0; i < s.w; i++) if (m[i] || m[(s.h - 1) * s.w + i] || m[i * s.w] || m[i * s.w + s.w - 1]) return true; return false; };
+  const tight = [];
+  for (const id of Object.keys(A.ICONS2)) { const s = A.iconSprite(id); assert.equal(s.w, 16); if (edge(s)) tight.push('icon:' + id); assert.ok(s.render().filter(Boolean).length >= 20, id + ' icon is a real drawing'); }
+  for (const id of Object.keys(A.EMBLEM2)) { const s = A.emblemSprite(id); assert.equal(s.w, 32); if (edge(s)) tight.push('emblem:' + id); }
+  assert.deepEqual(tight, [], 'every icon and emblem leaves a pixel for its outline');
+  const key = s => s.render().join(','), skills = D.SKILLS.map(s => s.id);
+  assert.equal(new Set(skills.map(id => key(A.iconSprite(id)))).size, skills.length, 'every skill icon is different');
+  assert.equal(new Set(skills.map(id => key(A.emblemSprite(id)))).size, skills.length, 'every skill emblem is different');
+  assert.equal(new Set(['home', 'skills', 'quest', 'house', 'book'].map(id => key(A.iconSprite(id)))).size, 5, 'the five places along the top each have their own icon');
+  assert.ok('skills' in Q.ICONS, 'the Skills place has its icon id');
+  for (const m of D.MONLIST.filter(x => x.boss)) assert.notEqual(key(A.trophySprite(m.id, false)), key(A.trophySprite(m.id, true)), m.id + ' gilded trophy differs');
 });
 check('new beasts and evolved forms have distinct structural silhouettes', () => {
  const keys=[];for(const id of Object.keys(D.BEAST_SPECIES)){const a=A.creatureSprite(id),b=A.creatureSprite('evolved:'+id);assert.ok(a&&b);assert.notEqual(a.render().map(Boolean).join(''),b.render().map(Boolean).join(''),id+' evolved shape');keys.push(a.render().join(','),b.render().join(','));}assert.equal(new Set(keys).size,8);

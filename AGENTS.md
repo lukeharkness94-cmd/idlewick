@@ -52,7 +52,8 @@ dated line to the history file.
 ## 2. Look and art
 
 - **Original pixel art drawn in code, nothing else.** `js/pixelart.js` (system, palette, hero), `js/pixel_items.js`,
-  `js/pixel_creatures.js`, `js/pixel_world.js` (trees, rocks, furniture, icons), `js/town_scene.js` (top-down towns,
+  `js/pixel_creatures.js`, `js/pixel_world.js` (trees, rocks, furniture), `js/pixel_icons.js` (the 16 × 16 interface
+  icons, 32 × 32 skill emblems and boss trophies; loaded before pixel_runtime.js), `js/town_scene.js` (top-down towns,
   restoration sites, townsfolk), `js/pixel_feel.js` (empty-page pictures, the quill pointer), `js/pixel_bosses.js` (the
   64 × 64 bosses), `js/pixel_runtime.js` (routes every art hook; loaded last). Chunky and outlined (owner, 28 Nov;
   docs/pixel-art-style.md): top-left light, five-step ramps with cool shadows and warm lights, sphere-lit round forms,
