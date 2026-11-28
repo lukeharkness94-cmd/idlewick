@@ -52,3 +52,12 @@ html.calm .activity-scene.rigged .scene-worker,html.calm .activity-scene.rigged 
 .activity-scene .scene-target > span{display:flex;align-items:flex-end}
 /* the hunter keeps their distance for the strike: the old hero's step-in is the rig's thrust now */
 .activity-scene.hunt.rigged[data-step="2"] .scene-worker{translate:none}
+
+/* Work scenes that live (js/work_scenes.js, 28 Nov 2026): three 240 x 100 layers in the district's own pixels, laid
+   exactly over the backdrop (720 x 300 css, centred on the scene's bottom edge). The marks and the small life sit
+   first in the scene, behind the station, the companion and the hero; the hour's wash and the weather (or the view
+   through an indoor window) over them, under the hunting step tag and the strike effects. Nothing takes a click. */
+.activity-scene .work-layer{position:absolute;left:calc(50% - 360px);bottom:0;width:720px;height:300px;max-width:none;image-rendering:pixelated;pointer-events:none;margin:0}
+.activity-scene .work-marks,.activity-scene .work-life{z-index:1}
+.activity-scene .work-tint{position:absolute;inset:0;z-index:3;pointer-events:none;mix-blend-mode:multiply;background-color:#fff}
+.activity-scene .work-sky{z-index:3}

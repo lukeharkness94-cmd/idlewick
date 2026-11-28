@@ -308,3 +308,7 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   press (1px sink and spring back, replacing the shrink-on-press scale), gathered items fly to the backpack, XP drifts
   into its rail row, the quill pointer (Settings switch), pictures and one-liners on empty pages, and hold-to-confirm for
   big spends (10,000+ coins, or 1,000+ that is a quarter of your coins).
+- 28 Nov 2026 (owner, approved polish items 5-7): work leaves a mark that builds up through a session (strikes, and
+  piles grown only by real yields, capped, cleared when the activity changes), small life in each workplace, and the
+  town's weather and hour in outdoor work scenes (indoors only through a window). Replaces the fixed per-region weather
+  and the body-clock tint that js/touches.js put on every work scene.
