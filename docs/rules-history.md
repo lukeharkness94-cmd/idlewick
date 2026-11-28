@@ -349,3 +349,5 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   sprite redrawn at twice the detail. Tower bosses keep the 2x redraw.
 - 28 Nov 2026 (owner: "left-to-right should be the unlocks as you unlock"): field guide pages list entries in unlock
   order; the four entries nearest their next entry no longer jump to the front.
+- 28 Nov 2026 (owner: "Not keen on the quill though, make it always the pointing hand"): the pixel pointer is the
+  pointing hand everywhere; the quill is retired. Replaces "a pixel quill (a pointing hand over controls)".

@@ -35686,7 +35686,7 @@ setTimeout(tick, 500);
    3. XP flows to its skill: the "+XP" from work (and the fight's XP, after the blow lands) drifts into that skill's row
       in the rail (the Skills tab of the phone bar) and the row's bar fills as it arrives.
    4. A quill pointer: a pixel quill drawn in code (js/pixel_feel.js), a pointing hand over controls; desktop pointers
-      only; Settings > Display > "Quill pointer" turns it off.
+      only; Settings > Display > "Pixel pointer" turns it off. The quill is retired: the pointing hand is used everywhere.
    15. Hold to confirm big spends: a buy or sale worth 10,000 coins or more, or 1,000+ that is a quarter of your coins,
       needs a press and hold (0.6 s) that fills the button from left to right. Letting go early cancels; Enter or Space
       held does the same; a quick click explains. Small amounts stay one click.
@@ -35867,7 +35867,9 @@ UI.applyCursor = () => {
   const root = document.documentElement, on = cursorWanted(); cursorOn = on;
   if (on) {
     adoptSheets();
-    const q = cursorValue('quill', 'auto'), h = cursorValue('hand', 'pointer');
+    /* the pointing hand everywhere (owner, 28 Nov 2026: "Not keen on the quill though, make it always the pointing
+       hand"); the page keeps the browser's arrow as its fallback, controls the browser's hand */
+    const q = cursorValue('hand', 'auto'), h = cursorValue('hand', 'pointer');
     if (q && h) { root.style.setProperty('--cur-quill', q); root.style.setProperty('--cur-hand', h); root.classList.add('lw-cursor'); return; }
   }
   root.classList.remove('lw-cursor'); root.style.removeProperty('--cur-quill'); root.style.removeProperty('--cur-hand');
@@ -35877,7 +35879,7 @@ const settings0 = UI.V.settings;
 UI.V.settings = (...a) => {
   const h = settings0(...a); if (UI.tab.settingsPanel !== 'display') return h;
   const on = S().settings.quillCursor !== false;
-  const tog = `<button class="tog ${on ? 'on' : ''}" data-do="quillcursor" aria-pressed="${on}"><span class="sw"></span><span><b>Quill pointer</b><small>${finePointer() ? 'A pixel quill for the mouse pointer, and a pointing hand over anything you can click' : 'For a mouse or trackpad; touch screens keep their own'}</small></span></button>`;
+  const tog = `<button class="tog ${on ? 'on' : ''}" data-do="quillcursor" aria-pressed="${on}"><span class="sw"></span><span><b>Pixel pointer</b><small>${finePointer() ? 'A pixel pointing hand for the mouse pointer' : 'For a mouse or trackpad; touch screens keep their own'}</small></span></button>`;
   /* into the Notifications & accessibility card, beside Reduce effects */
   const i = h.indexOf('<h2>Notifications &amp; accessibility</h2>') >= 0 ? h.indexOf('<h2>Notifications &amp; accessibility</h2>') : h.indexOf('<h2>Notifications & accessibility</h2>');
   if (i < 0) return h;
