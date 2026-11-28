@@ -323,3 +323,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   phones" and "Towns top-down, work side-on". Replaces the 26-27 Nov shape rule (8px floating controls, no lines round
   anything, 12px soft panels) with pixel frames (framed wood panels, bevelled controls, 3px corners), the Hearthside
   book faces as default lettering with pixel lettering, and the 180px rail with 206px.
+- 28 Nov 2026 (owner): "Can we go with the capital pixelated font on more places too please? I enjoyed that design
+  aesthetic of the suggestions I sent over". Silkscreen moves from headings only to every label (buttons, menus, tabs,
+  the rail, card and quest names, numbers, tags, badges); the rail widens from 206px to 220px so names show whole.
