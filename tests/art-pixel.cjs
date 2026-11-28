@@ -12,6 +12,7 @@ const load = n => vm.runInContext(fs.readFileSync(path.join(root, 'js', n + '.js
 ['util', 'data', 'creatures_expanded', 'creature_roster', 'hunt_tiers_data', 'skill_expansion_data', 'data2', 'data3', 'economy', 'skills_new_data', 'beastmastery_data', 'hunting_loop_data', 'crosslinks_data', 'state', 'rare_weapons'].forEach(load); /* the 29 named weapons must look different too (27 Nov 2026) */
 const Q = ctx.DQ; Q.ui = { V: {}, DO: {}, B: {}, homeSections: [] };
 ['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'skills_new_art', 'beastmastery_art', 'pixel_items_armour'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
+['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'skills_new_art', 'beastmastery_art', 'pixel_items_weapons'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
 const A = Q.pixelArt, D = Q.data;
 let checks = 0; const check = (name, fn) => { fn(); checks++; console.log('PASS', name); };
 const colours = spr => spr.render();
@@ -49,6 +50,16 @@ check('fish and trees differ in silhouette, not just colour', () => {
   const mask = s => s.render().map(Boolean).join('');
   const fish = D.NODES.fish.map(n => mask(A.fishLarge(n.id))), trees = D.NODES.wood.map(n => mask(A.treeSprite(n.id)));
   assert.equal(new Set(fish).size, fish.length, 'every fish has its own outline'); assert.equal(new Set(trees).size, trees.length, 'every tree has its own outline');
+});
+check('every weapon and bundle of arrows is drawn in the chunky style, and each tier of a family has its own shape', () => {
+  /* 28 Nov 2026: js/pixel_items_weapons.js redraws them; tiers differ by guard, pommel, head or limb, not only colour */
+  const W = A.weaponArt; assert.ok(W, 'js/pixel_items_weapons.js is loaded');
+  const ids = Object.values(D.ITEMS).filter(it => it.slot === 'weapon' || it.slot === 'ammo').map(it => it.id);
+  assert.deepEqual(ids.filter(id => !W[id]), [], 'every weapon and ammo id has its drawing in js/pixel_items_weapons.js');
+  const mask = id => A.itemSprite(id).render().map(Boolean).join(''), tiers = D.TIERS.map(t => t.id), woods = ['normal', 'oak', 'willow', 'maple', 'yew', 'magic', 'elder'];
+  for (const fam of [tiers.map(t => t + '_sword'), tiers.map(t => t + '_dagger'), tiers.map(t => t + '_hammer'), tiers.map(t => 'arrow_' + t), woods.map(w => 'bow_' + w), woods.map(w => 'staff_' + w)])
+    assert.equal(new Set(fam.map(mask)).size, fam.length, fam[0] + ' and its family: every tier has its own silhouette');
+  for (const id of (D.RARE_WEAPONS || [])) assert.ok(!ids.filter(o => o !== id).some(o => mask(o) === mask(id)), id + ' has a silhouette of its own');
 });
 check('outlines are coloured shades of their material, never flat black', () => {
   for (const id of ['bronze_sword', 'gem_ruby', 'log_oak', 'raw_pike']) for (const c of colours(A.itemSprite(id)).filter(Boolean)) assert.notEqual(c, '#000000');

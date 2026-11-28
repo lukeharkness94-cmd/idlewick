@@ -93,6 +93,11 @@ shield, ring, amulet) is drawn in `js/pixel_items_armour.js`: plate is bright an
 knee cops and domes, leather is matte with stitching and brass buckles, robes are soft cloth with trim, and each alloy,
 hide or dye adds its own detail as the tier rises (rivets, comb and nasal, gold trim, a gem, a plume or crest, wings). The 29 named weapons
 (`js/rare_weapons.js`) each keep their own hand-drawn identity.
+Fish icons are drawn plumper than their spot pictures so they read at 1×. Weapons and arrows (`js/pixel_items_weapons.js`)
+have two- and three-pixel blades and hafts with a lit upper edge and a shaded lower edge; swords and daggers lie on the
+diagonal, warhammers stand upright, shortbows stand like a D. Each metal tier adds its own guard, pommel, grip or head
+detail, so tiers differ in shape as well as colour. The 29 named weapons (`js/rare_weapons.js`) each keep their own
+hand-drawn identity.
 
 ## Animation
 
