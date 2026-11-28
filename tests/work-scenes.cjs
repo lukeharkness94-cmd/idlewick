@@ -87,7 +87,10 @@ const { chromium } = require('playwright');
       if (mode === 'calm') await p.evaluate(() => { DQ.S.settings.reduceFx = true; DQ.applyTheme && DQ.applyTheme(); DQ.ui.render(true); });
       else { await p.evaluate(() => { DQ.S.settings.reduceFx = false; DQ.ui.render(true); }); await p.emulateMedia({ reducedMotion: 'reduce' }); }
       assert.ok(await start('wood', 'normal', 'woodcutting')); await until(() => DQ.workScenes.live().spec === 'wood' && DQ.workScenes.live().mounted);
-      await p.evaluate(() => { DQ.townWeatherOverride = 'rain'; DQ.townTimeOverride = 23.5; DQ.workScenes.fake(6); }); await p.waitForTimeout(1200);
+      await p.evaluate(() => { DQ.townWeatherOverride = 'rain'; DQ.townTimeOverride = 23.5; DQ.workScenes.fake(6); });
+      /* the scene reads the hour and weather twice a second: on a busy machine wait until it shows the night, then let
+         one calm redraw pass before comparing (28 Nov 2026: flaked under load) */
+      await until(() => DQ.workScenes.live().phase === 'night' && DQ.workScenes.live().still); await p.waitForTimeout(1200);
       const st = await p.evaluate(() => new Promise(res => { const sc = document.querySelector('#view .activity-scene'), life = sc.querySelector('canvas.work-life'), sky = sc.querySelector('canvas.work-sky'), a = life.toDataURL() + sky.toDataURL();
         setTimeout(() => res({ live: DQ.workScenes.live(), same: life.toDataURL() + sky.toDataURL() === a }), 900); }));
       l = st.live; assert.ok(l.still && l.drops === 0 && l.lifeInk === 0, `${mode}: no creature, drop or ripple ` + JSON.stringify(l));
