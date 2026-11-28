@@ -5919,7 +5919,10 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 @media(max-width:860px){:root.type-hearthside:not(.type-classic) #view .tabs:has(>:nth-child(4)){grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 :root.type-hearthside:not(.type-classic) .gt b{font-family:var(--f-body)!important;font-size:15px!important;letter-spacing:0!important}
 /* phones: a long Silkscreen label wraps inside its button rather than pushing past the screen */
-@media(max-width:860px){:root.type-hearthside:not(.type-classic) #view :is(.btn,button){max-width:100%;white-space:normal;overflow-wrap:anywhere}}
+@media(max-width:860px){:root.type-hearthside:not(.type-classic) #view :is(.btn,button){max-width:100%;white-space:normal;overflow-wrap:normal;word-break:normal}
+ /* the farm's four section tabs fit one row without their small pictures; the two field actions sit side by side */
+ :root.type-hearthside:not(.type-classic) .estate-mobile-tabs .btn>:is(img,.ic,svg){display:none!important}
+ :root.type-hearthside:not(.type-classic) .estate-mobile-tabs .btn,:root.type-hearthside:not(.type-classic) .estate-actions .btn{font-size:13px!important;letter-spacing:0!important}}
 /* the fighting-style tiles: Silkscreen at its label size, whole words only */
 :root.type-hearthside:not(.type-classic) :is(.cx-styles .ss-btn,.cx-stats>button,.cx-stats>[data-do],.cx-stats>div){font-size:13px!important}
 :root.type-hearthside:not(.type-classic) :is(.cx-styles .ss-btn,.cx-stats>*) *{overflow-wrap:normal!important;word-break:normal!important}
@@ -5931,6 +5934,11 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 :root.type-hearthside:not(.type-classic) #topnav .tnav{letter-spacing:.01em!important}
 :root.type-hearthside:not(.type-classic) .cx-head :is(.cx-tools .btn,>.btn){font-size:13px!important;letter-spacing:.01em!important;padding-inline:8px!important}
 .cx-head .cx-chips{flex-wrap:wrap!important;row-gap:4px;align-content:center}
+/* the companion flag sits at the foot of the pen picture so it never covers the bond badge */
+:root.type-hearthside:not(.type-classic) .pen-flag{top:auto!important;bottom:8px;font-size:13px!important}
+/* short windows: the Capture card keeps its button, the sentence under its title goes (the button says the same) */
+@media(min-width:861px){html.short .ranch-side .panel:last-child>p{display:none}}
+@media(min-width:861px){html.short .ranch-side{gap:8px!important}html.short .ranch-side>.panel{padding-block:9px!important}}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
