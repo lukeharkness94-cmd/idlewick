@@ -56,7 +56,8 @@ UI.renderRail = () => {
 };
 UI.B.notice = (e, page) => {
   const n = DQ.noticeCount ? DQ.noticeCount(page) : 0;
-  e.hidden = !n; UI.set(e, n > 9 ? '9+' : n);
+  /* rail rows show a dot, never a number (AGENTS.md); the count stays in the label */
+  e.hidden = !n; UI.set(e, e.closest('#skilldock,#dock') ? '' : n > 9 ? '9+' : n);
   e.setAttribute('aria-label', n + ' available actions');
 };
 /* a dot only for something you can do now: a quest to hand in, a site to finish, a crop to pick, a decision waiting;

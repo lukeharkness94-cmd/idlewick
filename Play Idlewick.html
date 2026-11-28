@@ -6148,7 +6148,7 @@ html.calm .activity-scene.rigged .scene-worker,html.calm .activity-scene.rigged 
   :is(.tag,.chipx,.perk,.thief-perk,.ench-gain,.rw,.sl,.hunt-steps>span,span.rl-i):not(button,[data-do]){background-color:var(--info-fill)!important}
   .notice-badge{border-radius:var(--r-info)!important}
   /* rail rows: a dot, never a number (the count stays in its label); a number clipped "Scholarship" to "Scholars…" */
-  :is(#skilldock,#dock) .dk .notice-badge:not([hidden]){width:8px!important;min-width:8px!important;height:8px!important;padding:0!important;border-radius:50%!important;font-size:0!important;color:transparent!important;align-self:center}
+  :is(#skilldock,#dock) .dk .notice-badge:not([hidden]){width:8px!important;min-width:8px!important;height:8px!important;padding:0!important;border-radius:50%!important;align-self:center}
 
   /* ---------- round things you don't click: pips and dots, no outline ---------- */
   .pips i{border-color:transparent!important;background-color:var(--pip-off)!important}
@@ -19771,7 +19771,8 @@ UI.renderRail = () => {
 };
 UI.B.notice = (e, page) => {
   const n = DQ.noticeCount ? DQ.noticeCount(page) : 0;
-  e.hidden = !n; UI.set(e, n > 9 ? '9+' : n);
+  /* rail rows show a dot, never a number (AGENTS.md); the count stays in the label */
+  e.hidden = !n; UI.set(e, e.closest('#skilldock,#dock') ? '' : n > 9 ? '9+' : n);
   e.setAttribute('aria-label', n + ' available actions');
 };
 /* a dot only for something you can do now: a quest to hand in, a site to finish, a crop to pick, a decision waiting;
