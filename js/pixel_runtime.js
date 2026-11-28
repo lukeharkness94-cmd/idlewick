@@ -88,6 +88,9 @@ Q.heroFigureUrl = look => heroUrl(look);
 const sideUrl = (look, extra = {}) => { const o = heroOpts(look, { shield: null, weapon: null }), p = extra.posture && extra.posture !== 'stand' ? extra.posture : null;
   const k = { face: o.face, skin: o.skin, hair: o.hair, tunic: o.tunic, helm: o.helm, body: o.body, legs: o.legs, cape: o.cape }; if (p) k.posture = p; if (extra.expr) k.expr = extra.expr; return A.heroSideUrl(k); };
 Q.heroWorkFigureUrl = (look, posture) => sideUrl(look, { posture });
+/* walking home in profile (the opening, js/intro.js): frame 0 to 3 of the stride, the weapon slung across the back */
+Q.heroWalkUrl = (look, frame = 0) => { const o = heroOpts(look);
+  return A.heroSideUrl({ face: o.face, skin: o.skin, hair: o.hair, tunic: o.tunic, helm: o.helm, body: o.body, legs: o.legs, cape: o.cape, walk: ((frame % 4) + 4) % 4, sling: o.weapon || null }); };
 /* the colours the work rig dresses the arms in: sleeves of the body armour (or the tunic) and the skin */
 Q.heroRigLook = look => { const o = heroOpts(look); return { skin: o.skin, sleeve: o.body ? o.body.col : o.tunic, sleeveType: o.body ? o.body.type : 'cloth' }; };
 /* the same figure with an idle-life expression (blink, yawn, stretch, pack, wipe; js/personality.js); no frame is the

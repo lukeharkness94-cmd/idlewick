@@ -5,7 +5,7 @@ const defs=D.STORY_SCENES,seen=id=>!!S().seen['story:'+id],quiet=()=>Q.forecasti
 let active=null,pending=null;
 /* Main-story quests are explicit; discoveries, projects and regional arrivals are quiet entries. */
 for(const q of D.QUESTS)if(q.id==='first_steps'||q.id==='goblin_menace'||q.obj.some(o=>o.ev==='boss'))q.main=true;
-Q.storyCinematic=s=>!!(s&&(s.quest&&D.QM[s.quest]?.main||s.type==='quest'&&D.QM[s.source]?.main||s.boss&&D.QUESTS.some(q=>q.main&&q.obj.some(o=>o.ev==='boss'&&o.key===s.boss))));
+Q.storyCinematic=s=>!!(s&&(s.cinematic||s.quest&&D.QM[s.quest]?.main||s.type==='quest'&&D.QM[s.source]?.main||s.boss&&D.QUESTS.some(q=>q.main&&q.obj.some(o=>o.ev==='boss'&&o.key===s.boss))));
 
 const text=v=>typeof v==='function'?v():v;
 Q.availableStories=()=>Object.values(defs).filter(s=>s.eligible());
@@ -26,13 +26,15 @@ Q.chooseStory=(id,pick)=>{
  if(!Q.save()){Q.S=before;Q.fxDirty();return false;}return true;
 };
 const close0=Q.closeModal;
-Q.closeModal=()=>{if(active){S().seen['story:'+active.id]=1;active=null;Q.save();}return close0();};
-const finish=()=>{if(!active)return;const id=active.id;S().seen['story:'+id]=1;Q.journal('story',`Remembered “${defs[id].title}”.`,'book');active=null;Q.save();Q.closeModal();};
+/* a scene opened with onDone (the opening, js/intro.js) hears when it closes, however it closes */
+const ended=a=>{if(!a)return;clearTimeout(a.timer);if(a.onDone)setTimeout(a.onDone,0);};
+Q.closeModal=()=>{if(active){const a=active;S().seen['story:'+a.id]=1;active=null;Q.save();const r=close0();ended(a);return r;}return close0();};
+const finish=()=>{if(!active)return;const a=active,id=a.id;S().seen['story:'+id]=1;Q.journal('story',`Remembered “${defs[id].title}”.`,'book');active=null;Q.save();Q.closeModal();ended(a);};
 function draw(){
  if(!active)return;const s=defs[active.id],frames=s.frames(),decision=active.index>=frames.length,chosen=choiceOf(s),c=s.choices?.find(c=>c.id===chosen),f=frames[Math.min(active.index,frames.length-1)];
  const speaker=decision&&c?(s.type==='quest'?D.QM[s.source].giver:f.speaker):f.speaker;
  const legacyDecision=s.type==='quest'&&Q.questState(D.QM[s.source])==='done'&&!chosen;
- const body=decision?(legacyDecision?'This chapter was completed before its decision was recorded. Your earned progress and rewards are preserved.':c?text(c.response||c.text):'What will you do?'):text(f.text);
+ const body=decision?(legacyDecision?'This chapter was completed before its decision was recorded. Your earned progress and rewards are preserved.':c?text(c.response||c.text):(s.ask||'What will you do?')):text(f.text);
  const choices=decision&&!chosen&&!legacyDecision?(s.choices||[]).map(c=>`<button class="story-choice btn" data-do="storychoose" data-a="${s.id}" data-b="${c.id}" ${missing(c)?'disabled':''}><b>${esc(c.label)}</b><small>${esc(missing(c)||text(c.effect)||'This choice will be remembered.')}</small></button>`).join(''):'';
  const step=Math.min(active.index+1,frames.length+(s.choices?1:0)),total=frames.length+(s.choices?1:0);
  const root=active.modal.querySelector('.m-body');
@@ -45,18 +47,24 @@ function draw(){
  line.textContent=body;line.setAttribute('aria-label',body+(waiting?' Choose a response below.':' Click for the next line.'));
  root.querySelector('.story-response').innerHTML=decision&&c?`<small class="story-remembered">Your decision: ${esc(c.label)}${c.effect?' · '+esc(text(c.effect)):''}</small>`:'';
  root.querySelector('.story-options').innerHTML=(active.error?`<p class="story-error" role="alert">${esc(active.error)}</p>`:'')+(choices?`<div class="story-choices" role="group" aria-label="Your decision">${choices}</div>`:'');
- root.querySelector('.story-controls').innerHTML=`<button class="btn sm" data-do="storyskip">${waiting?'Decide later':'Skip scene'}</button><small>${step} / ${total} · ${waiting?'Choose a response':'Click the dialogue or press Space'} · your task keeps running</small>${choices?'':`<button class="btn primary" data-do="storynext">${decision||(!s.choices&&active.index===frames.length-1)?'Return to game':'Continue'}</button>`}`;
+ root.querySelector('.story-controls').innerHTML=`<button class="btn sm" data-do="storyskip">${waiting?'Decide later':'Skip scene'}</button><small>${step} / ${total} · ${waiting?'Choose a response':'Click the dialogue or press Space'} · your task keeps running</small>${choices?'':`<button class="btn primary" data-do="storynext">${decision||(!s.choices&&active.index===frames.length-1)?(s.doneLabel||'Return to game'):'Continue'}</button>`}`;
  const reduced=S().settings.reduceFx||matchMedia('(prefers-reduced-motion: reduce)').matches;
  line.getAnimations().forEach(a=>a.cancel());person.getAnimations().forEach(a=>a.cancel());
  if(!reduced){line.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});if(!waiting)person.animate([{transform:'translateY(0)'},{transform:'translateY(-2px)',offset:.25},{transform:'translateY(0)',offset:.5},{transform:'translateY(-1px)',offset:.75},{transform:'translateY(0)'}],{duration:850,easing:'ease-in-out'});}
  line.focus({preventScroll:true});
+ /* a scene that moves on by itself (the opening): each line waits its reading time; a decision waits longer, then
+    the scene closes undecided (Decide later), so nothing is ever chosen for the player */
+ clearTimeout(active.timer);
+ if(active.auto){const a=active,ms=waiting?a.auto.decide:Math.max(2600,Math.min(7000,800+body.split(/\s+/).length*a.auto.word));a.timer=setTimeout(()=>{if(active!==a)return;if(waiting||decision)return finish();UI.DO.storynext();},ms);}
 }
-Q.openStory=id=>{
+Q.storyActive=()=>active?{id:active.id,index:active.index}:null;
+Q.openStory=(id,opts={})=>{
  const s=defs[id];if(typeof s?.eligible!=='function'||!s.eligible()||quiet()||!Q.started)return false;
  if(!Q.storyCinematic(s)){if(s.project){UI.restoredSite=s.project;UI.DO.openproject(s.project);}else if(s.type==='discovery')discovery0(s.source);else if(s.type==='quest')UI.openQuestChoice(s.source);else{UI.storyEntry=id;Q.go('journal');}return true;}
  if(s.type==='quest'&&Q.questState(D.QM[s.source])==='ready'&&UI.view!=='quests'){UI.questTab='active';UI.tab.questSelected=s.source;Q.go('quests');}
  Q.closeModal();if(pending===id)pending=null;const m=Q.modal({title:s.title,wide:true,body:'',actions:[]});m.classList.add('story-modal');m.dataset.story=id;
- active={id,index:0,modal:m};draw();return true;
+ if(opts.cls)m.classList.add(opts.cls);
+ active={id,index:0,modal:m,onDone:opts.onDone||null,auto:opts.auto||null};draw();return true;
 };
 Object.assign(UI.DO,{
  storyopen:id=>Q.openStory(id),storynext:()=>{if(!active)return;const s=defs[active.id];if(active.index>=s.frames().length-1&&!s.choices||active.index>=s.frames().length)return finish();active.index++;draw();},

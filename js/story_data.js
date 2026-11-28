@@ -60,6 +60,19 @@ for(const [id,p]of Object.entries(D.PROJECTS)){
  if(existing){const frames=existing.frames;existing.frames=()=>[...frames(),{speaker:'Narrator',shot:'wide',text:p.reward}];continue;}
  add('restore_'+id,{title:p.name,town:p.town,project:id,eligible:()=>!!S().projects[id],frames:()=>[{speaker:'Narrator',shot:'wide',text:p.story},...(voice?[{speaker,shot:'wide',text:voice[1]}]:[]),{speaker:'Narrator',shot:'wide',text:p.reward}]});
 }
+/* The opening's last scene (js/intro.js, owner 28 Nov 2026): Wren meets the hero at the broken well. One reply, flavour
+   only, kept in S.choices.story_opening; the plain goal comes just before it. It moves on by itself inside the opening;
+   after the opening it can be replayed from Story so far, and an unanswered reply can be given there. */
+add('opening_home',{title:'Home again',town:'willowbrook',cinematic:true,choiceKey:'story_opening',ask:'What do you say?',doneLabel:'Continue',eligible:()=>!!((Q.introLive&&Q.introLive())||(Q.introSeen&&Q.introSeen())),frames:()=>[
+ {speaker:'Elder Wren',shot:'well',text:'There you are, pet. And in boots. I knew you’d read the whole letter.'},
+ {speaker:'Elder Wren',shot:'well',text:'That’s the well. Goblins broke the winch, and the bucket went wherever buckets go. Half the green packed up after the bell went.'},
+ {speaker:'Elder Wren',shot:'well',text:'Here’s how it works, as far as I can tell. Get a town back on its feet, see off whatever is blocking its road, and the next town opens up.'},
+ {speaker:'Elder Wren',shot:'well',text:'Somewhere at the end of that road is whoever has the bells.'}
+],choices:[
+ {id:'kettle',label:'Kettle on, then',effect:'The polite answer.',response:'It’s been on since Tuesday, pet. I wasn’t sure which Tuesday you meant. Come in and get warm.'},
+ {id:'word',label:'I’d like a word with them',effect:'The honest answer.',response:'So would I. You’ll have to queue behind Mabel. Start with the well; the road will keep.'},
+ {id:'boots',label:'I brought boots',effect:'The practical answer.',response:'Good. Mind the third stair, then the goblins. In that order.'}
+]});
 /* Existing authored adventures become voiced storyboards; their objectives, gates and rewards stay authoritative. */
 for(const q of D.QUESTS.filter(q=>q.adventure))add('quest_'+q.id,{title:q.name,town:q.town,quest:q.id,eligible:()=>accepted(q.id),frames:()=>[{speaker:q.giver,shot:'wide',text:q.blurb},{speaker:q.giver,shot:'gate',text:q.choices?'When you’ve finished, we’ll need to decide what to do next. I’ll explain the options before you choose.':'The tasks are written in your quest journal, so you can check what’s left whenever you need to. Come back when you’ve finished, and we’ll take it from there.'}]});
 })();

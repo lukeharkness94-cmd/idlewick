@@ -63,7 +63,7 @@ const ART = {
 };
 
 /* ---------- one town's life ---------- */
-const build = (town, meta) => { const rnd = seeded(hash(town + ':life')), share = restoredShare(town), st = meta.style || {}, W = meta.W, H = meta.H;
+const build = (town, meta, share0) => { const rnd = seeded(hash(town + ':life')), share = share0 != null ? share0 : restoredShare(town), st = meta.style || {}, W = meta.W, H = meta.H;
   const L = { town, meta, animals: [], puffs: [], drops: [], stars: [], flies: [], glints: [], birds: null, birdWait: 6 + rnd() * 20, t: 0 };
   const skyMax = st.snow ? 40 : 62;
   for (let i = 0; i < 70; i++) L.stars.push({ x: Math.floor(rnd() * W), y: Math.floor(rnd() * skyMax), p: rnd() * 6.28, big: rnd() < .12 });
@@ -90,7 +90,7 @@ const build = (town, meta) => { const rnd = seeded(hash(town + ':life')), share 
   return L; };
 
 /* ---------- moving everything on (dt in seconds) ---------- */
-const step = (L, dt) => { L.t += dt; const W = L.meta.W, H = L.meta.H, wx = Q.townWeather(L.town);
+const step = (L, dt) => { L.t += dt; const W = L.meta.W, H = L.meta.H, wx = L.weatherFn ? L.weatherFn() : Q.townWeather(L.town);
   for (const a of L.animals) {
     if (a.kind === 'gull') { a.a += a.sp * dt; continue; }
     if (a.mode === 'idle') { a.wait -= dt; a.f = a.kind === 'chicken' ? (Math.sin(L.t * 7 + a.x) > .4 ? 1 : 0) : a.kind === 'cat' ? (Math.sin(L.t * 1.3 + a.x) > .6 ? 1 : 0) : (Math.sin(L.t * 2 + a.x) > .7 ? 1 : 0);
@@ -159,10 +159,23 @@ const attach = img => { if (img.dataset.life || img.classList.contains('scene-ol
     const L = Object.assign(build(town, meta), { img, under, tint, glow, over, ux: under.getContext('2d'), ox: over.getContext('2d'), home: !!img.closest('.home-scene') });
     if (window.ResizeObserver) { L.ro = new ResizeObserver(() => fit(L)); L.ro.observe(img); if (L.home) L.ro.observe(img.parentElement); } fit(L); layers.add(L); paint(L, 0); requestAnimationFrame(() => tint.classList.add('eased')); tick.start(); };
   if (img.complete) go(); else img.addEventListener('load', go, { once: true }); };
-const paint = (L, dt) => { const moving = !still(); if (moving && dt) step(L, dt); const light = Q.townLight(Q.townHour()), [r, g, b] = tintOf(light); L.lightDark = light.dark;
+const paint = (L, dt) => { const moving = !still(); if (moving && dt) step(L, dt); const light = Q.townLight(L.hourFn ? ((L.hourFn() % 24) + 24) % 24 : Q.townHour()), [r, g, b] = tintOf(light); L.lightDark = light.dark;
   L.tint.style.backgroundColor = `rgb(${r},${g},${b})`; L.tint.dataset.phase = light.phase;
   /* the low sun warms the sky (an overlay, so a blue sky turns gold and rose rather than brown) */
   const sw = light.warm * (1 - light.dark * .5); L.glow.style.background = sw > .02 ? `linear-gradient(to bottom, rgba(255,128,72,${(sw * .85).toFixed(3)}) 0%, rgba(255,176,96,${(sw * .55).toFixed(3)}) 34%, rgba(255,190,120,${(sw * .25).toFixed(3)}) 60%, rgba(255,190,120,0) 85%)` : 'none'; drawUnder(L, L.ux, moving); drawOver(L, L.ox, light, moving); };
+/* the opening (js/intro.js) lays the same life over its own town pictures, with its own clock and weather (o.hour and
+   o.weather are functions; o.share is how restored the town looks) and its own scene record (o.meta), since it shows
+   Willowbrook as it was before the bells went. remove() takes it away; repaint() brings a still frame up to the hour
+   (under calm nothing moves, so the opening repaints each still itself). */
+Q.townLifeMount = (img, o = {}) => { const meta = o.meta || (A.sceneMeta && A.sceneMeta[o.town]); if (!meta) return null;
+  const town = o.town || meta.town, mk = (tag, cls) => { const e = document.createElement(tag); e.className = cls; e.setAttribute('aria-hidden', 'true'); if (tag === 'canvas') { e.width = meta.W; e.height = meta.H; } return e; };
+  const under = mk('canvas', 'town-life town-life-under'), tint = mk('div', 'town-tint'), glow = mk('div', 'town-glow'), over = mk('canvas', 'town-life town-life-over');
+  img.dataset.life = '1'; img.after(under, tint, glow, over);
+  const L = Object.assign(build(town, meta, o.share), { img, under, tint, glow, over, ux: under.getContext('2d'), ox: over.getContext('2d'), home: false, own: true, hourFn: o.hour || null, weatherFn: o.weather || null });
+  if (window.ResizeObserver) { L.ro = new ResizeObserver(() => fit(L)); L.ro.observe(img); } fit(L); layers.add(L); paint(L, 0); tick.start();
+  return { L, repaint: () => paint(L, 0), remove: () => { L.ro && L.ro.disconnect(); [under, tint, glow, over].forEach(e => e.remove()); layers.delete(L); } }; };
+/* the colour the hour's light multiplies over a scene (the opening's road uses it, under the hero) */
+Q.townTint = h => tintOf(Q.townLight(((h % 24) + 24) % 24));
 Q.townLifeScan = () => document.querySelectorAll('.home-scene img.scene[data-town], .village-scene>img.scene[data-town]').forEach(attach);
 /* for tests: what each layer is showing right now */
 Q.townLifeLive = () => [...layers].filter(L => L.img.isConnected).map(L => ({ town: L.town, phase: L.tint.dataset.phase, tint: L.tint.style.backgroundColor, weather: L.weather, windows: (L.meta.windows || []).length, chimneys: (L.meta.chimneys || []).length,

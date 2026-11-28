@@ -350,8 +350,16 @@ dated line to the history file.
   32 × 32 portrait and notes revealed by finishing their quests (`js/folk.js`); any new giver needs both.
 - **Story** (`js/story_data.js`, `js/story.js`): cutscenes only for main quests and boss victories, in the one
   conversation screen (portrait left, dialogue right, click/Space/Enter, Skip, choices, journal replay); work continues
-  behind them; no replays on load. Decisions in `S.choices`, history in `S.seen`. The opening (`js/intro.js`) plays once
-  for a new hero (automated browsers skip unless `localStorage['idlewick.intro'] = '1'`).
+  behind them; no replays on load. Decisions in `S.choices`, history in `S.seen`. **The opening** (owner, 28 Nov;
+  `js/intro.js`, art in `js/opening_art.js`) is a living scene, never a slideshow, built from the game's own systems:
+  Willowbrook at noon with its walkers and town life and the bell rung in its belfry; night, the bell taken, the rope at
+  dawn; the town emptying; the hero breathing in their lodging until Wren's letter slides under the door (seal, parchment,
+  their name); the walk home side-on in a walk cycle past the signpost (hold to walk faster); Wren at the broken well in
+  the conversation screen (scene `opening_home`, the plain goal, one flavour reply kept in `S.choices.story_opening`);
+  the title and Begin. It plays once for a new hero, moves on by itself (under two minutes), a click/Space/Enter hurries
+  it, Skip shows after the first input, Escape skips; it grants nothing and records `S.seen.intro`; under calm and
+  reduced motion each beat is one still frame. Replay from the Journal; automated browsers skip it unless
+  `localStorage['idlewick.intro'] = '1'` (`tests/intro.cjs`).
 - **Restoration** shows what changed (ruined and restored art, the benefit, a villager's thanks). Standing is derived
   (10 per finished non-relic project), never a currency; local supplies need standing and the restored, undamaged
   building. Restoration migration version 1 rules in docs/connected-systems.md.

@@ -7,6 +7,7 @@ const PENT = [0, 2, 4, 7, 9];
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 const S = () => DQ.S.settings;
 const HUSH_OPEN = 20000; /* the hush filter's resting cutoff: wide open, inaudible */
+let musDim = 1; /* the opening thins the music while the town empties (DQ.musicDim) */
 
 function init() {
   if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
@@ -29,7 +30,7 @@ function applyVolumes() {
   if (!ctx) return; const s = S(), t = ctx.currentTime;
   master.gain.setTargetAtTime(s.muted ? 0 : (s.masterVol ?? 1), t, .05);
   sfxG.gain.setTargetAtTime(s.sfx ? s.vol * .8 : 0, t, .05);
-  musG.gain.setTargetAtTime(s.music ? s.musicVol * .45 : 0, t, .3);
+  musG.gain.setTargetAtTime(s.music ? s.musicVol * .45 * musDim : 0, t, .3);
   /* ambience sits under everything, and dips during fights so combat reads clearly */
   if (ambG) ambG.gain.setTargetAtTime(s.ambience === false ? 0 : (s.ambVol ?? .45) * .6 * (DQ.act && DQ.act.kind === 'fight' ? .25 : 1), t, .8);
 }
@@ -709,6 +710,22 @@ DQ.bellTick = () => { let h = null; try { h = bellClock(); } catch (e) {} if (h 
 let ambMeter = null; DQ.ambienceLevel = () => { if (!ctx) return null; if (!ambMeter) { ambMeter = ctx.createAnalyser(); ambMeter.fftSize = 2048; ambG.connect(ambMeter); } const d = new Float32Array(ambMeter.fftSize); ambMeter.getFloatTimeDomainData(d); let pk = 0; for (const x of d) pk = Math.max(pk, Math.abs(x)); return { peak: pk, bus: ambG.gain.value }; };
 DQ.bellState = () => ({ last: bellLast, rung: bellRung.slice(), log: bellLog.slice(), ok: bellOk() });
 const ambWatch = () => { if (!ambLoop) ambLoop = setInterval(() => { if (ctx && !document.hidden) DQ.ambienceRefresh(); DQ.bellTick(); }, 2000); };
+
+/* ---------- The opening's sounds (owner, 28 Nov 2026: the opening redone as a living scene, js/intro.js) ----------
+   The noon bell is the story's own sound, so it plays on the effects bus (Effects volume and Mute, never hushed) with
+   the effects reverb: the same cast bell as the hour bells (BELL above), a few strokes, about twice as present as an
+   hour bell heard from the Home page. The knock at the lodging door is the same wooden knock as Gloomfen's. Both are
+   quiet in a simulation or forecast, while hidden, before the first click and with effects off. */
+const storyOk = () => { const s = S(); return !!(ctx && ctx.state === 'running' && s.sfx && !s.muted && !quiet() && !(typeof document !== 'undefined' && document.hidden)); };
+DQ.storyBell = (kind = 'church', strokes = 3, k = 2.4) => { if (!storyOk() || !BELL[kind]) return null; const plan = Object.assign(DQ.bellPlan('willowbrook', 12), { kind, strokes });
+  const lp = bandOf('lowpass', 5200, .5), g = gainOf(k), wet = gainOf(.45); lp.connect(g); g.connect(sfxG); g.connect(wet); wet.connect(sverb);
+  try { BELL[kind](lp, ctx.currentTime + .03, plan); } catch (e) { return null; } played['story:' + kind] = (played['story:' + kind] || 0) + 1; return plan; };
+DQ.storyKnock = () => { if (!storyOk()) return null; const g = gainOf(1.6); g.connect(sfxG); try { BELL.knock(g, ctx.currentTime + .02, { strokes: 2 }); } catch (e) { return null; } played['story:knock'] = (played['story:knock'] || 0) + 1; return true; };
+/* a wax seal cracking (a dry snap, the seal's dull give, then the paper unfolding) and a soft footstep on a dirt road */
+SFX.seal = () => { noise(.05, { type: 'highpass', f: 2600, v: .08 }); noise(.09, { type: 'bandpass', f: 900, q: 2, v: .06, at: .03 }); tone(jit(190), .08, { type: 'triangle', v: .045, at: .02, to: 120 }); paper(.4, { f: 2600, to: 1700, v: .035, at: .14 }); };
+SFX.step = () => noise(.07, { type: 'lowpass', f: jit(380, .18), v: .028 });
+/* the music thins while the town empties: a gentle dip of the music bus only (k 0 to 1), on top of the volume */
+DQ.musicDim = k => { musDim = Math.max(0, Math.min(1, +k || 0)); if (!ctx) return; const s = S(); musG.gain.setTargetAtTime(s.music ? s.musicVol * .45 * musDim : 0, ctx.currentTime, 1.2); };
 
 DQ.musicMode = id => { modeId = id === 'title' ? 'title' : 'game'; if (ctx) musicTick(); };
 DQ.musicStart = () => { init(); applyVolumes(); if (S().music) musicStep(); DQ.ambienceRefresh(); ambWatch(); };

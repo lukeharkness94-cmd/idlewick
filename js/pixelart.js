@@ -276,13 +276,29 @@ function heroSide(o = {}) {
   const pose = WORK_POSTURE[o.posture] ? o.posture : 'stand', dy = WORK_POSTURE[pose].dy, ex = o.expr || '';
   const s = Spr(24, 32), spec = v => !v ? null : typeof v === 'string' ? { type: null, col: (R[v] || R.bronze).base } : v;
   const metal = c => ramp(c, { gl: .72 }), soft = c => ramp(c);
-  const hu = ex === 'stretch' ? -1 : 0, Y = y => y + dy + hu; /* the head and chest; stretch lifts the chin a pixel */
+  /* walking (the opening's road home, js/intro.js): four frames, contact, passing, contact, passing; the head and chest
+     ride a pixel higher as a leg passes under them */
+  const wk = o.walk != null ? ((o.walk % 4) + 4) % 4 : -1;
+  const hu = ex === 'stretch' || wk === 1 || wk === 3 ? -1 : 0, Y = y => y + dy + hu; /* the head and chest; stretch lifts the chin a pixel */
+  /* what the walker carries slung across the back: the weapon they set out with */
+  if (wk >= 0 && o.sling) { const t = o.sling.type, col = o.sling.col || '#9a9aa4';
+    if (t === 'bow') { const w = ramp(mix(col, '#6a4a2a', .35)); s.line(9, Y(9), 6, Y(13), w); s.line(6, Y(13), 5, 21, w); s.line(5, 21, 6, 25, w); s.line(6, 25, 9, 27, w); s.line(9, Y(9), 9, 27, null, '#e8dcc0'); }
+    else if (t === 'staff') { const w = ramp(mix(col, '#6a4a2a', .3)); s.line(11, Y(4), 5, 27, w); s.ell(11.5, Y(3), 1.6, 1.6, ramp(o.sling.orb || '#8fc0ff', { gl: .85 })); }
+    else { const m = metal(col); s.line(10, Y(10), 5, 24, m); s.line(9, Y(9), 12, Y(11), null, '#c8a050'); s.line(11, Y(8), 10, Y(9), null, '#5a3e26'); } }
   /* cape first, hanging behind the back */
   if (o.cape) s.poly([[8, 14 + dy], [11, 14 + dy], [9, 30], [4, 29]], soft(o.cape));
   /* legs: a working stance, feet a stride apart (back foot left, front foot right, toes forward) */
   const legsC = spec(o.legs), legT = legsC ? (legsC.type || 'plate') : null, lr = legsC ? (legT === 'plate' ? metal(legsC.col) : soft(legsC.col)) : pants;
   const foot = (x, y) => { s.rect(x, y, 4, 2, boots); s.tone(x + 3, y, boots, 3); };
-  if (pose === 'stand') { s.line(10, 22, 8, 29, lr); s.line(11, 22, 9, 29, lr); s.line(13, 22, 14, 29, lr); s.line(14, 22, 15, 29, lr); foot(7, 30); foot(14, 30); }
+  if (wk >= 0) { /* the far leg a shade darker, drawn first; the near leg over it */
+    const far = legT === 'plate' ? metal(mix(lr.base, '#1a1838', .3)) : ramp(mix(lr.base, '#1a1838', .3)), farBoot = ramp(mix(boots.base, '#1a1838', .3));
+    const legAt = (r, b, kind) => { if (kind === 'fwd') { s.line(13, 22, 16, 29, r); s.line(14, 22, 17, 29, r); s.rect(15, 30, 4, 2, b); s.tone(18, 30, b, 3); }
+      else if (kind === 'back') { s.line(10, 22, 7, 29, r); s.line(11, 22, 8, 29, r); s.rect(5, 30, 4, 2, b); s.tone(5, 30, b, 1); }
+      else if (kind === 'under') { s.line(11, 22, 11, 29, r); s.line(12, 22, 12, 29, r); s.rect(11, 30, 4, 2, b); s.tone(14, 30, b, 3); }
+      else { s.line(10, 22, 10, 25, r); s.line(11, 22, 11, 25, r); s.line(10, 25, 8, 28, r); s.line(11, 26, 9, 28, r); s.rect(6, 28, 3, 2, b); } };
+    const [farK, nearK] = [['back', 'fwd'], ['lift', 'under'], ['fwd', 'back'], ['under', 'lift']][wk];
+    legAt(far, farBoot, farK); legAt(lr, boots, nearK); }
+  else if (pose === 'stand') { s.line(10, 22, 8, 29, lr); s.line(11, 22, 9, 29, lr); s.line(13, 22, 14, 29, lr); s.line(14, 22, 15, 29, lr); foot(7, 30); foot(14, 30); }
   else if (pose === 'crouch') { s.line(10, 25, 6, 27, lr); s.line(10, 26, 6, 28, lr); s.line(6, 28, 7, 29, lr); s.line(13, 25, 16, 26, lr); s.line(13, 26, 16, 27, lr); s.line(16, 27, 15, 29, lr); s.line(17, 27, 16, 29, lr); foot(5, 30); foot(15, 30); }
   else if (pose === 'kneel') { s.rect(9, 28, 5, 2, lr); s.rect(7, 30, 7, 2, lr); s.rect(4, 30, 3, 2, boots); s.line(13, 28, 17, 27, lr); s.line(13, 29, 17, 28, lr); s.rect(16, 28, 2, 3, lr); foot(16, 30); }
   else { /* sit: thighs level on a stool, shins down to the floor */
@@ -297,6 +313,9 @@ function heroSide(o = {}) {
   else if (bt === 'vest') { for (let y = Y(16); y <= 20 + dy; y += 2) s.fix(14, y, '#e8dcc0'); }
   else if (bt === 'robe') s.line(13, Y(15), 13, 22 + dy, null, R.gold.base);
   s.rect(8, 20 + dy, 8, 1, belt); s.fix(14, 20 + dy, '#f2c84a');
+  /* walking: the near arm swings against the near leg (back as it steps forward), hanging as the legs pass */
+  if (wk >= 0) { const sw = [-1, 0, 1, 0][wk], hx = 12 + sw * 3, hy = 21 - Math.abs(sw);
+    s.line(11, Y(15), hx - (sw < 0 ? -1 : 0), hy - 1, br); s.line(12, Y(15), hx + (sw > 0 ? 0 : 1), hy - 1, br); s.rect(hx, hy, 2, 2, sk); }
   /* head in profile: face to the right, the ear mid-head, a nose and a mouth */
   s.ell(11.5, Y(8.3), 5.2, 5.1, sk); s.rect(10, Y(13), 3, 1, sk); s.dot(17, Y(10), sk);
   s.fix(10, Y(8), sk.lo); s.fix(10, Y(9), sk.lo); s.fix(9, Y(9), sk.lo);                                                /* ear */

@@ -354,3 +354,9 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 28 Nov 2026 (owner: "could we put this same amount of effort into the thoughts of every creature, monster, beast and
   character in the game?"): ordinary creatures are redesigned by hand at 32 x 32 with the bosses' painter, both views, a
   batch at a time; batch 1 is every Willowbrook and Mossbarrow creature (js/pixel_hand_1.js), replacing their builder views.
+- 28 Nov 2026 (owner: "does this whole redo bring in the opening scene too? Also, this needs a complete redo if not - it's
+  not particularly immersive - use the new interactive characters, motions etc to make the opening scene far more
+  immersive"): the opening is rebuilt as a living, playable scene from the game's own town scenes, walkers, town life,
+  hearth, letters, conversation screen, idle life, walk cycle and synthesised bells (js/intro.js, js/opening_art.js),
+  with one flavour reply in S.choices.story_opening. Replaces "The opening (`js/intro.js`) plays once for a new hero",
+  which was a slideshow of still town pictures with captions.

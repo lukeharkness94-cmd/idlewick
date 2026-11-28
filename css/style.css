@@ -3983,103 +3983,118 @@ html.calm .logo p,html.calm .tmenu,html.calm .tbtn.primary{animation:none}
 #view.enter>*{animation:none}
 html.calm #view.enter>*{animation:none}
 
-/* ===================== The opening (js/intro.js) ===================== */
-#intro{position:fixed;inset:0;z-index:400;background:#05080b;color:#efe6d2;overflow:hidden;cursor:pointer;animation:inFade .9s ease both;user-select:none}
-#intro.out{animation:inOut .7s ease forwards}
-@keyframes inFade{from{opacity:0}}@keyframes inOut{to{opacity:0}}
-.in-stage,.in-shot{position:absolute;inset:0}
-.in-shot{opacity:0;transition:opacity 1.1s ease}
-.in-shot.on{opacity:1}.in-shot.off{opacity:0}
-.in-scene{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}
-.in-scene img{flex:none;max-width:none;image-rendering:pixelated}
-.in-scene.pan img{animation:inPan 16s ease-in-out both}
-@keyframes inPan{from{translate:var(--pan) 0}to{translate:calc(var(--pan) * -1) 0}}
-.in-scene.stack{opacity:0;animation:inStack 9s ease both}
-.in-scene.stack.s0{animation-delay:0s}.in-scene.stack.s1{animation-delay:4s}
-@keyframes inStack{0%{opacity:0}12%{opacity:1}55%{opacity:1}70%{opacity:0}100%{opacity:0}}
-.in-scene.stack.s1{animation-name:inStackLast}
-@keyframes inStackLast{0%{opacity:0}15%{opacity:1}100%{opacity:1}}
-.in-scene.dark img{animation:inPan 16s ease-in-out both,inDim 6s ease forwards}
-@keyframes inDim{to{filter:grayscale(.75) brightness(.45) contrast(1.05)}}
-.in-scene.dawn img{filter:sepia(.25) saturate(1.15) brightness(1.05)}
-/* everything behind the words sits under a soft vignette so the caption always reads */
-.in-shot::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse farthest-corner at 50% 40%,transparent 55%,#05080b88 100%),linear-gradient(180deg,transparent 58%,#05080be6 100%)}
-.shot-letter::after,.shot-road::after,.shot-title::after{display:none}
-.in-bellwrap{position:absolute;left:50%;top:18%;translate:-50% 0;z-index:2}
-.in-bell{width:128px;height:128px;filter:drop-shadow(0 0 24px #f3d58a88);animation:inSwing 3.2s ease-in-out infinite;transform-origin:50% 8%}
-@keyframes inSwing{0%,100%{rotate:-7deg}50%{rotate:7deg}}
-.in-walk{position:absolute;left:50%;bottom:22%;translate:-50% 0;z-index:2}
-.in-hero{width:192px;height:256px;filter:drop-shadow(0 10px 12px #000a);animation:inBob 1.1s ease-in-out infinite}
-@keyframes inBob{0%,100%{translate:0 0}50%{translate:0 -4px}}
-/* the caption */
-.in-cap{position:absolute;left:50%;bottom:9%;translate:-50% 0;width:min(1100px,calc(100% - 64px));display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;z-index:3;pointer-events:none}
-.in-cap p{margin:0;font:400 31px/1.45 var(--f-body);color:#f4ead6;text-shadow:0 2px 0 #000,0 0 24px #000;opacity:0;translate:0 10px;transition:opacity .9s ease,translate .9s var(--ease-out,ease)}
-.in-cap p.on{opacity:1;translate:0 0}
-.in-cap p:not(:last-child){opacity:.45}
-/* Wren's letter */
-.shot-letter{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 45%,#1a2026,#05080b 75%)}
-.in-paper{width:min(780px,calc(100% - 48px));padding:52px 64px;background:linear-gradient(180deg,#efe2c2,#e2cfa5);color:#3a2b18;border-radius:3px;box-shadow:0 30px 60px -20px #000,inset 0 0 60px #b8946044;rotate:-1.2deg}
-.in-letter p{margin:0 0 16px;font:italic 400 27px/1.5 var(--f-body);opacity:0;animation:inInk 1.4s ease forwards}
-.in-letter p.date{font-size:18px;font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:#7a6440;margin-bottom:22px}
-.in-letter p.dear{font-style:normal;font-weight:600}
-.in-letter p.sign{text-align:right;font-weight:600;margin:20px 0 0}
-@keyframes inInk{from{opacity:0;filter:blur(2px)}to{opacity:1;filter:none}}
-/* the road */
-.shot-road{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 50%,#121a20,#05080b 70%)}
-.in-road ol{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:0;width:min(1100px,calc(var(--vw100,100vw) - 80px))}
-.in-road li{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:14px;opacity:0;animation:inStep .7s ease forwards;animation-delay:calc(var(--i) * .45s + .4s)}
-.in-road li::before{content:'';position:absolute;top:9px;right:50%;width:100%;height:2px;background:linear-gradient(90deg,#d8a64a55,#d8a64a);z-index:-1}
-.in-road li:first-child::before{display:none}
-.in-road li i{width:20px;height:20px;border-radius:50%;background:#2a3238;border:2px solid #d8a64a99}
-.in-road li.here i{background:#d8a64a;box-shadow:0 0 18px #f3d58a}
-.in-road li span{font:600 20px var(--f-body);color:#f3d58a;min-height:72px;display:grid;place-items:start center}
-.in-road li.end .in-bell{width:64px;height:64px;animation:inSwing 2.6s ease-in-out infinite}
-@keyframes inStep{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
-/* the title */
-.shot-title{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 60%,#1b2a2f,#05080b 70%)}
-.in-title{display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}
-.in-title .logo h1{font-size:76px}
-.in-title p{margin:0;font:400 22px var(--f-body);color:#cfc3a8}
-.in-title .tbtn{min-width:260px;animation:finRise .6s var(--ease-out,ease) .4s both,finInvite 2.6s ease-in-out 1.6s infinite}
-/* skip: only after the first click */
-.in-skip{position:absolute;top:22px;right:26px;z-index:5;background:#0008;border:1px solid #f3d58a55;color:#f3d58a;font:600 16px var(--f-ui);padding:8px 16px;border-radius:999px;cursor:pointer;opacity:0;translate:0 -6px;transition:opacity .4s,translate .4s,border-color .2s}
-.in-skip.on{opacity:1;translate:0 0}.in-skip:hover{border-color:#f3d58a}
+/* ===================== The opening (js/intro.js) =====================
+   Owner, 28 Nov 2026: redone as a living scene. Every picture is placed by script at a whole-number multiple of its
+   drawn size and cropped by the screen; these rules only stack the layers, give the words their dark backing and
+   fade beats in and out (opacity and transforms only; nothing moves under calm or reduced motion). */
+#intro{position:fixed;inset:0;z-index:400;background:#05070a;color:#efe6d2;overflow:hidden;user-select:none;cursor:var(--cur-quill,default);animation:inFade .9s ease both}
+#intro.out{opacity:0;transition:opacity .7s ease}
+@keyframes inFade{from{opacity:0}}
+#intro canvas,#intro .op-scene,#intro .op-walker{image-rendering:pixelated;max-width:none;display:block}
+.op-stage,.op-shot{position:absolute;inset:0;overflow:hidden}
+.op-shot{opacity:0;transition:opacity .65s ease}
+.op-shot.on{opacity:1}.op-shot.off{opacity:0;transition-duration:.5s}
+.op-world{position:absolute;left:0;top:0;will-change:transform}
+.op-scene{position:absolute;left:0;top:0}
+.op-props{position:absolute;left:0;top:0;z-index:1;pointer-events:none}
+.op-night{position:absolute;left:0;top:0;z-index:2;mix-blend-mode:multiply;pointer-events:none}
+#intro .town-tint{transition:none}
+/* the narrator: large, on a framed dark backing so it never sits bare over a busy picture */
+.op-say{position:absolute;left:50%;bottom:28px;translate:-50% 0;width:min(1180px,calc(100% - 48px));z-index:6;display:grid;pointer-events:none}
+.op-say[data-pos="top"]{bottom:auto;top:28px}
+.op-say p{grid-area:1/1;margin:0;padding:16px 28px;border-radius:4px;background:rgba(10,8,12,.86);box-shadow:0 0 0 3px #07060a,inset 0 2px 0 #6a4a2a,inset 2px 0 0 #5a3e24,inset 0 -2px 0 #1a120c,inset -2px 0 0 #1a120c;font:400 30px/1.4 var(--f-body);color:#f4ead6;text-align:center;opacity:0;translate:0 8px;transition:opacity .45s ease,translate .45s ease}
+.op-say p.on{opacity:1;translate:0 0}.op-say p.gone{opacity:0;translate:0 -4px}
+/* a townsperson speaking: a speech bubble with a stepped pixel tail, following them */
+.op-bubble{position:absolute;left:0;top:0;z-index:5;width:max-content;max-width:min(320px,calc(100vw - 40px));margin-top:-12px;padding:8px 12px;border-radius:3px;background:#f6ecd2;color:#2a1a10;font:400 19px/1.3 var(--f-body);box-shadow:0 0 0 2px #1a1008,0 4px 0 2px rgba(0,0,0,.35);opacity:0;transition:opacity .3s ease;pointer-events:none}
+.op-bubble::before,.op-bubble::after{content:'';position:absolute;left:50%;background:#f6ecd2}
+.op-bubble::before{bottom:-5px;width:10px;height:5px;margin-left:-5px;box-shadow:2px 0 0 #1a1008,-2px 0 0 #1a1008}
+.op-bubble::after{bottom:-9px;width:4px;height:4px;margin-left:-2px;box-shadow:2px 0 0 #1a1008,-2px 0 0 #1a1008,0 2px 0 #1a1008}
+.op-bubble.on{opacity:1}
+/* the bell close up, in a framed window of its own */
+.op-inset{position:absolute;left:4%;top:7%;z-index:4;padding:6px;border-radius:4px;background:#1a120c;box-shadow:0 0 0 3px #07060a,inset 0 2px 0 #8a6236,inset 2px 0 0 #7a5630,inset 0 -2px 0 #120c08,0 10px 24px rgba(0,0,0,.5);opacity:0;translate:0 -8px;transition:opacity .5s ease,translate .5s ease;pointer-events:none}
+.op-inset.on{opacity:1;translate:0 0}
+.op-skip{position:absolute;top:18px;right:20px;z-index:8;opacity:0;transition:opacity .35s ease}
+.op-skip.on{opacity:1}
+/* the lodging: the hearth room with the hero standing in it, and the letter under the door */
+.op-room .fig-stage{position:absolute;left:0;top:0;width:0;height:0;padding:0;min-width:0;display:block}
+.op-room .fig-stage::after{display:none}
+.op-room .fig-img{position:absolute;z-index:2;max-width:none;filter:none;image-rendering:pixelated!important}
+.op-lights{position:absolute;left:0;top:0;z-index:1;pointer-events:none}
+.op-env{position:absolute;left:0;top:0;z-index:3}
+.op-open{position:absolute;z-index:7;translate:-50% 0;display:inline-flex;align-items:center;gap:8px;opacity:0;transition:opacity .4s ease}
+.op-open.on{opacity:1}
+/* the letter: the envelope rises, the seal cracks in two, the parchment comes out */
+.op-letterbox{position:absolute;inset:0;z-index:5;display:grid;place-items:center;background:rgba(5,6,10,.6);opacity:0;transition:opacity .4s ease}
+.op-letterbox.on{opacity:1}.op-letterbox.off{opacity:0}
+.op-bigenv{position:absolute;left:50%;top:50%;translate:-50% -50%;transition:translate .6s ease,opacity .5s ease}
+.op-letterbox:not(.on) .op-bigenv{translate:-50% -20%}
+.op-letterbox.cracked .op-bigenv{opacity:0;translate:-50% -35%;transition-delay:.45s}
+.op-seal{position:absolute;z-index:3;transition:translate .7s cubic-bezier(.2,.6,.4,1),opacity .7s ease}
+.op-letterbox.cracked .op-seal-l{translate:-48px 70px;opacity:0}
+.op-letterbox.cracked .op-seal-r{translate:52px 84px;opacity:0}
+#intro .op-letter{position:relative;z-index:2;width:min(880px,calc(100% - 32px));max-height:calc(100% - 48px);overflow:auto;padding:26px 34px 28px;font-size:25px;line-height:1.5;opacity:0;translate:0 48px;transition:opacity .6s ease,translate .7s ease}
+#intro .op-letter .letter-head b{font-size:22px}#intro .op-letter .letter-head small{font-size:16px}#intro .op-letter .letter-sign{font-size:22px}
+#intro .op-letter.on{opacity:1;translate:0 0}
+.op-letter .op-l{opacity:0;transition:opacity .9s ease}
+.op-letter .op-l.on{opacity:1}
+.op-letter .letter-date{font:400 15px/1.2 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:#7a6440}
+.op-letter .letter-dear{font-weight:700}
+.op-letter .letter-ps{font-size:19px;color:#6a5434}
+/* the road home: layers that scroll at their own pace, the hour's light over the scenery, the hero on top */
+.op-layer,.op-roadtint,.op-fx{position:absolute;left:0;top:0;pointer-events:none}
+.op-layer{will-change:transform}
+.op-roadtint{z-index:1;mix-blend-mode:multiply}
+.op-sign{position:absolute;left:0;z-index:1;will-change:transform}
+.op-signname{position:absolute;bottom:100%;left:50%;translate:-50% -6px;white-space:nowrap;padding:4px 10px;border-radius:3px;background:rgba(10,8,6,.84);box-shadow:0 0 0 2px #07060a;font:400 20px/1.1 var(--f-ui);color:#f3d58a}
+.op-shadow{position:absolute;z-index:2;background:rgba(6,8,12,.42);border-radius:50%}
+.op-walker{position:absolute;z-index:3}
+.op-fx{z-index:4}
+.op-hint{position:absolute;right:22px;bottom:22px;z-index:6;padding:6px 12px;border-radius:3px;background:rgba(10,8,12,.8);font:400 14px var(--f-ui);color:#d8ccb0;opacity:0;transition:opacity .5s ease}
+.op-hint.on{opacity:.9}
+/* home: the conversation sits low, so the town and the two of them stay in view above it */
+.modal.op-talk{z-index:450;place-items:end center;padding:0 12px 20px;background:linear-gradient(180deg,transparent 35%,rgba(5,9,11,.72));backdrop-filter:none}
+.op-talk .m-card{width:min(1100px,calc(100% - 24px));padding:14px 18px}
+.op-talk .m-card>h2{font-size:20px;margin:0 0 8px}
+.op-talk .story-conversation{grid-template-columns:168px minmax(0,1fr);gap:16px;min-height:0}
+.op-talk .story-conversation .story-speaker{gap:10px;padding:10px}
+.op-talk .story-talker,.op-talk .story-talker :is(img,.portrait){width:128px!important;height:128px!important}
+.op-talk .story-conversation .story-dialogue{padding:14px}
+.op-talk .story-conversation .story-line{min-height:84px;font-size:23px}
+/* the title, over the town pulled back */
+.op-title{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center;background:radial-gradient(ellipse at 50% 50%,rgba(5,6,10,.25),rgba(5,6,10,.82) 78%);opacity:0;transition:opacity 1.2s ease}
+.op-title.on{opacity:1}
+.op-titlecard{display:flex;flex-direction:column;align-items:center;gap:16px;max-width:960px;padding:26px 36px 30px;border-radius:4px;background:rgba(10,8,12,.88);box-shadow:0 0 0 3px #07060a,inset 0 2px 0 #6a4a2a,inset 2px 0 0 #5a3e24,inset 0 -2px 0 #1a120c,inset -2px 0 0 #1a120c,0 18px 40px rgba(0,0,0,.55)}
+.op-title .logo{display:flex;align-items:center;gap:14px;animation:none}
+.op-title .logo .ic{width:64px;height:64px}
+.op-title .logo h1{font-size:76px;margin:0}
+.op-tag{margin:0;font:400 22px/1.4 var(--f-body);color:#d8ccb0}
+.op-goal{max-width:880px}
+.op-goal p{margin:6px 0;font:400 24px/1.45 var(--f-body);color:#f4ead6}
+.op-title .tbtn{min-width:260px;font-size:21px;margin-top:6px}
 .in-replay{display:flex;justify-content:flex-end;margin:0 0 10px}
-@media (max-width:860px){.in-cap p{font-size:20px}.in-paper{padding:26px 24px}.in-letter p{font-size:17px}.in-title .logo h1{font-size:52px}.in-road li span{font-size:15px}.in-road li i{width:14px;height:14px}.in-road li::before{top:6px}.in-hero{width:144px;height:192px}}
-html.calm #intro *,html.calm #intro{animation:none!important;transition:none!important}
-html.calm .in-shot.on,html.calm .in-cap p,html.calm .in-letter p,html.calm .in-road li{opacity:1;translate:0 0}
-html.calm .in-scene.stack.s0{display:none}html.calm .in-scene.stack.s1{opacity:1}
-html.calm .in-skip.on{opacity:1}
-@media (prefers-reduced-motion:reduce){#intro *,#intro{animation:none!important;transition:none!important}.in-shot.on,.in-cap p,.in-letter p,.in-road li{opacity:1;translate:0 0}.in-scene.stack.s0{display:none}.in-scene.stack.s1{opacity:1}.in-skip.on{opacity:1}}
-.in-letter p.ps{font-size:21px;color:#6a5434;margin-top:10px}
-/* The opening, revised: the whole town is shown (never cropped) at a whole-number scale above its own caption band,
-   its edges fading into the dark; shots dip to black instead of overlapping. */
-.in-shot{display:flex;align-items:center;justify-content:center;padding-bottom:var(--capband,180px);transition:opacity .5s ease}
-.in-shot.on{transition-delay:.45s}
-.in-shot.off{transition-delay:0s}
-.in-shot::after{display:none}
-.in-frame{position:relative;flex:none;overflow:hidden;
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent);-webkit-mask-composite:source-in;
-  mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent);mask-composite:intersect}
-.in-frame .in-town{display:block;max-width:none;image-rendering:pixelated}
-.in-frame.dark .in-town{animation:inDim 6s ease forwards}
-.in-frame.dawn .in-town{filter:sepia(.2) saturate(1.1) brightness(1.04)}
-.in-frame .in-bellwrap{position:absolute;left:50%;top:9%;translate:-50% 0;z-index:2}
-.in-frame .in-bell{width:auto;height:auto}
-.in-frame .in-walk{position:absolute;left:50%;bottom:15%;translate:-50% 0;z-index:2}
-.in-frame .in-hero{width:auto;height:auto}
-.in-cap{top:auto;bottom:0;height:var(--capband,180px);justify-content:center;padding:0 0 4%}
-@media (max-width:860px){.in-cap{width:calc(100% - 32px)}.in-frame{-webkit-mask-image:linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent);mask-image:linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent)}}
-.in-shot{padding-bottom:0}
-.in-shot:has(.in-frame.below){padding-bottom:var(--capband,180px)}
-.in-shot:has(.in-frame.over){align-items:flex-end}
-.in-frame .in-town{position:absolute}
-.in-frame.pan .in-town{animation:inPan 22s ease-in-out infinite alternate}
-.in-frame.dark.pan .in-town{animation:inPan 22s ease-in-out infinite alternate,inDim 6s ease forwards}
-.in-frame.over{-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent),linear-gradient(180deg,#000 70%,#0006 100%);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent),linear-gradient(180deg,#000 70%,#0006 100%)}
-.in-frame.over~*,.shot-town .in-frame.over{}
-#intro .in-cap{text-shadow:0 2px 0 #000,0 0 18px #000,0 0 36px #000}
-@media (max-width:860px){.in-frame.pan{-webkit-mask-image:linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent);mask-image:linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent)}}
+@media (max-width:860px){
+ .op-say{bottom:14px;width:calc(100% - 24px)}
+ .op-say p{padding:12px 14px;font-size:18px;line-height:1.4}
+ .op-bubble{font-size:15px;max-width:240px}
+ .op-inset{left:12px;top:12px;padding:4px}
+ #intro .op-letter{font-size:17px;padding:14px 16px 16px}
+ #intro .op-letter .letter-head b{font-size:17px}#intro .op-letter .letter-head small{font-size:13px}#intro .op-letter .letter-sign{font-size:17px}
+ .op-letter .letter-ps{font-size:15px}
+ .op-talk .story-conversation{grid-template-columns:104px minmax(0,1fr);gap:10px}
+ .op-talk .story-talker,.op-talk .story-talker :is(img,.portrait){width:96px!important;height:96px!important}
+ .op-talk .story-conversation .story-line{font-size:18px;min-height:120px}
+ .op-titlecard{padding:16px 16px 20px;gap:12px}
+ .op-title .logo .ic{width:48px;height:48px}
+ .op-signname{font-size:13px;padding:3px 7px}
+ .op-hint{right:auto;left:12px;bottom:auto;top:16px;font-size:13px}
+ .op-title .logo h1{font-size:52px}
+ .op-tag{font-size:17px}
+ .op-goal{padding:10px 14px}.op-goal p{font-size:17px}
+ .modal.op-talk{padding:0 6px 10px}
+}
+/* still: Reduce effects, html.calm and the device's reduced motion */
+#intro.op-still,#intro.op-still *,html.calm #intro,html.calm #intro *{animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){#intro,#intro *{animation:none!important;transition:none!important}}
 
 /* Connected supplies and finite jobs: existing brass, cards and text sizes. */
 .local-project-payoff{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}.local-project-payoff small{flex-basis:100%;font-size:14px}.local-picture{height:64px;display:flex;align-items:center}.local-picture img{width:64px;height:64px;image-rendering:pixelated}.worker-job-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}.worker-job-controls input{width:100px;min-height:36px;font:inherit}.worker-job-status,.worker-request{padding:8px;border-left:3px solid var(--brass);margin:8px 0}.worker-request{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.worker-request small{flex-basis:100%}.worker-ingredients{display:flex;flex-wrap:wrap;gap:5px}.worker-guide-rate{display:block}.tower-preparation{padding:10px 12px;border-left:3px solid var(--brass);background:var(--panel);margin-bottom:10px}.tower-preparation p{margin:5px 0 0}.guide-discovery{padding:8px;border-left:3px solid var(--brass);font-size:14px}.shop-task>small{display:block;margin-top:8px}
