@@ -22,6 +22,15 @@ The equipped copy is stored separately from inventory. Equipping consumes exactl
 
 Shop prices use `UI.money(amount)`: a small visible coin and formatted amount, with an accessible currency label. Do not restore "8 coins each" prose on cards. Buy/sell totals show quantity and the coin amount; rare offers and inventory selling use the same visual treatment. Locked/owned rare cards retain their visible prices.
 
+## Farm work scene (28 Nov 2026, Claude Code)
+- Owner: "worth looking at farming work scenes. Though only do it if it doesn't look awful." `js/farm_scene.js` puts
+  the farm district (towns.js `districtFor` 'farm') at the top of the Farming page's right-hand column, with the first
+  six plots' crops at their real stage and, while anything grows, the hero hoeing (`js/work_rig.js` `SPEC.hoe`, a 1.2 m
+  hoe). `js/strike_sync.js` asks `DQ.farmWork()` when no activity stage is in view, so the rig, the hoe's sound on its
+  frame, the brow wipe, clods, a robin and the town's weather (js/work_scenes.js) all come for free. Desktop only; the
+  old scenery strip above the fields is hidden on desktop. Also fixed: at short desktop heights (1280 x 720) each
+  plot's 48 px crop picture spilled over its name; it now shows at 2x in the 32 px box. Test: `tests/farm-scene.cjs`.
+
 ## One-screen overhaul, stage 1: shell (Nov 2026, Claude Code)
 - Approved concept canvas: top bar holds the hero, the page menu (Home, Quests, World, Village, Hero, Shop) and coins/bell/settings/mute. Village is a new hub (Town projects, House, Workers); World is now Map and Exploration.
 - Left column (208px): Now card (current task, progress, count opens the plan, Stop/Retreat; gold outline when you are on its page), Combat, then all 14 skills at 44px rows. Fits 1440 × 900 without scrolling; shorter windows scroll the column.

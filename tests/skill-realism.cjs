@@ -22,9 +22,9 @@ const { chromium } = require('playwright');
       for (const s of D.SKILLS) S.unlocked[s.id] = true; for (const id of Object.keys(D.ITEMS)) if (!D.ITEMS[id].slot) S.inv[id] = 50; for (let i = 0; i < 12; i++) DQ.closeModal(); });
 
     /* (1) sizes: [tool, min px, max px] from real tools (felling axe 70-95 cm, pick 80-100 cm, smith's hammer 35-45 cm
-       with its head, tongs 40-55 cm, handsaw 65-90 cm, float rod 2-3 m, boar spear 1.7-2.1 m, arming sword 80-100 cm) */
+       with its head, tongs 40-55 cm, handsaw 65-90 cm, float rod 2-3 m, boar spear 1.7-2.1 m, arming sword 80-100 cm, field hoe 1-1.5 m) */
     const sizes = await p.evaluate(() => Object.fromEntries(DQ.workRig.TOOLS.map(t => [t, DQ.workRig.toolLength(t)])));
-    const RANGE = { axe: [14, 18], pick: [15, 19], hammer: [7, 9], tongs: [8, 11], saw: [13, 17], rod: [38, 57], spear: [32, 40], sword: [15, 19], dagger: [7, 10], warhammer: [10, 14], cutlass: [14, 18], staff: [26, 32], spoon: [11, 14], mallet: [5, 8], chisel: [3, 6], pestle: [4, 7] };
+    const RANGE = { hoe: [19, 28], axe: [14, 18], pick: [15, 19], hammer: [7, 9], tongs: [8, 11], saw: [13, 17], rod: [38, 57], spear: [32, 40], sword: [15, 19], dagger: [7, 10], warhammer: [10, 14], cutlass: [14, 18], staff: [26, 32], spoon: [11, 14], mallet: [5, 8], chisel: [3, 6], pestle: [4, 7] };
     for (const [t, [lo, hi]] of Object.entries(RANGE)) assert.ok(sizes[t] >= lo && sizes[t] <= hi, `${t} is ${sizes[t]} px (${Math.round(sizes[t] * 5.3)} cm), wanted ${lo}-${hi}`);
     const heights = await p.evaluate(() => { const R = DQ.workRig, top = n => { const c = R.stationCanvas(n, {}).canvas, x = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; for (let y = 0; y < c.height; y++) for (let i = 0; i < c.width; i++) if (x[(y * c.width + i) * 4 + 3]) return c.height - y; return 0; };
       return { anvil: top('anvil'), trestle: top('trestle'), mortarTable: (() => { const c = R.stationCanvas('mortar', {}).canvas, x = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; for (let y = 0; y < c.height; y++) if (x[(y * c.width + 4) * 4 + 3] || x[(y * c.width + 38) * 4 + 3]) return c.height - y; return 0; })() }; });

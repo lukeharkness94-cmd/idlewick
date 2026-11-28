@@ -61,3 +61,11 @@ html.calm .activity-scene.rigged .scene-worker,html.calm .activity-scene.rigged 
 .activity-scene .work-marks,.activity-scene .work-life{z-index:1}
 .activity-scene .work-tint{position:absolute;inset:0;z-index:3;pointer-events:none;mix-blend-mode:multiply;background-color:#fff}
 .activity-scene .work-sky{z-index:3}
+/* the farm's work scene (js/farm_scene.js): heads the Farming page's right-hand column; the crops stand on the ground
+   line at 3x, the hero hoes the furrow in front of them */
+.farm-work{padding:0;overflow:hidden;margin:0 0 12px}
+.farm-work>.activity-scene{height:210px}
+.farm-work .farm-crops{position:absolute;inset:0;z-index:1;pointer-events:none}
+.farm-work .farm-crop{position:absolute;bottom:12px;width:48px!important;height:48px!important;max-width:none;image-rendering:pixelated}
+@media(min-width:861px){.farm-estate .estate-land .estate-scenery{display:none}}
+@media(max-width:860px){.farm-work{display:none}}

@@ -26,7 +26,9 @@ DQ.workCycle = (act, spec, now = Date.now()) => {
 const TASK_SOUND = { wood: 'wood', mine: 'mine', fish: 'fish', thieve: 'thieve', alch: 'cast' };
 let lastStage = null;
 const loop = () => {
-  const act = DQ.act, rig = R(), stage = act && findStage();
+  let act = DQ.act, stage = act && findStage(); const rig = R();
+  /* no working stage in view: the farm's hoeing, while something grows and the Farming page is open (js/farm_scene.js) */
+  if (!stage && DQ.farmWork) { const fw = DQ.farmWork(); if (fw) { act = fw.act; stage = fw.stage; } }
   const spec = rig && act && act.dur && rig.specFor(act);
   if (!spec || !stage || document.hidden) { DQ.strikeLive = null; if (rig) rig.live = null; lastStage = null; return; }
   let r = stage._rig;

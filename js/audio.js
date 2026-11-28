@@ -89,6 +89,8 @@ const SFX = {
   chisel: () => { tone(jit(2600), .07, { type: 'triangle', v: .05 }); noise(.03, { f: 3800, v: .06 }); },
   scratch: () => paper(.12, { f: 4200, to: 3400, q: 3, v: .05, grain: 1.5 }),
   grind: () => paper(.22, { f: 900, to: 700, q: 1, v: .08, grain: 6 }),
+  /* the hoe biting into soil: a soft, dull crunch, no ring (farm work scene, 28 Nov 2026) */
+  hoe: () => { noise(.07, { type: 'lowpass', f: 420, v: .1 }); tone(jit(90), .06, { type: 'triangle', v: .05, to: 70 }); },
   stake: () => { noise(.05, { type: 'lowpass', f: 600, v: .16 }); tone(jit(110), .08, { type: 'triangle', v: .1, to: 80 }); },
   swish: () => noise(.14, { f: 1600, to: 500, q: 1.2, v: .06 }),
   cast: () => { const r = pick([57, 60, 62, 64]); [0, 2, 4, 5].forEach((d, i) => tone(note(r, d), .35, { v: .06, at: i * .06 })); },

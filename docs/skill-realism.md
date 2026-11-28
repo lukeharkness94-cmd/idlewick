@@ -56,6 +56,7 @@ smithing anvil was a 16 px icon shown at 4x beside the 3x hero.
 | Thing | Real size | Drawn | Test range |
 | --- | --- | --- | --- |
 | Felling axe (haft and head) | 70–95 cm haft, 3–3.5 lb head | 16 px (85 cm) | 14–18 |
+| Field hoe (haft and blade) | 1–1.5 m haft, 15 cm blade | 22 px (1.2 m) | 19–28 |
 | Miner's pick | 80–100 cm | 17 px | 15–19 |
 | Smith's cross-peen hammer | 35–40 cm handle | 8 px | 7–9 |
 | Tongs | 40–55 cm | 9 px | 8–11 |
@@ -293,3 +294,19 @@ edge, that every work sound (axe, pick, anvil, both saw strokes, plop and splash
 calm and reduced motion hold the ready pose with nothing moving. Screenshots were taken at 1440 x 900 and 390 x 844 in
 both themes. None of this is a playtest: whether a 1.1 s chop reads as heavy, or the cast reads at a glance on a
 phone, needs a person watching.
+
+## Farming (added 28 Nov 2026)
+
+**How it is done.** Weeding a growing crop by hand is hoe work: a chop hoe is lifted so the blade rides at about waist
+height in front, dropped so it bites the soil a stride ahead of the toes, then drawn back through the earth toward
+the feet, cutting weeds and loosening the crust; the left hand stays high on the haft, the right lower, the back bent
+a little. A robin often follows a gardener for the worms in the turned soil.
+
+**Before.** Farming had no work scene: plots grow on their own timers, so there is no running activity to draw.
+
+**Now.** `js/farm_scene.js` heads the Farming page's right-hand column with the farm district (barn, fence, a
+scarecrow, the tilled plot), the first six plots' own crops standing in the furrow at their growth stage, and, while
+anything grows, the hero hoeing (`SPEC.hoe`: lift, bite on the frame the hoe's soft crunch plays, draw back). Clods
+gather along the furrow, a robin hops in for the worms, and the town's weather, hour and season reach it like any
+outdoor workplace. With nothing growing the hero is not in the field. Phones do not show it (their farm page is fitted
+to the screen). `tests/farm-scene.cjs`.

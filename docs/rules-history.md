@@ -312,3 +312,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   piles grown only by real yields, capped, cleared when the activity changes), small life in each workplace, and the
   town's weather and hour in outdoor work scenes (indoors only through a window). Replaces the fixed per-region weather
   and the body-clock tint that js/touches.js put on every work scene.
+- 28 Nov 2026 (owner): "Ok, worth looking at farming work scenes. Though only do it if it doesn't look awful". Replaces
+  "Farming has no work scene" (it runs on timers): the Farming page shows the farm with the hero hoeing between the real
+  crops while anything grows; the strip of farm scenery above the fields is gone on desktop. Phones unchanged.

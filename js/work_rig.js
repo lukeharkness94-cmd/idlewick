@@ -85,6 +85,8 @@ const TOOL = {
   pestle(g, B, a) { g.line(B, at(B, a, 4), WOODL); g.shape(B, a, [[4, -1], [5.5, -1], [5.5, 1], [4, 1]], WOODL); return at(B, a, 5.6); },
   graver(g, B, a, m) { g.dot(B, WOOD); g.line(at(B, a, 1), at(B, a, 3), m); return at(B, a, 3.2); },
   quill(g, B, a) { g.line(B, at(B, a, 4), ramp('#efe8d8')); g.fix(at(B, a, 4.2), '#2a1c1f'); return at(B, a, 4.2); },
+  /* a draw hoe: about 1.2 m of ash haft (23 px) and a 15 cm iron blade set back toward the user (owner, 28 Nov 2026) */
+  hoe(g, B, a, m) { g.haft(B, a, 21); g.shape(B, a, [[19.6, -.4], [21.4, -.4], [21.4, 3.4], [19.6, 3.4]], m); g.fix(at(B, a, 20.4, 0), m.gl); return at(B, a, 21, 3.4); },
   stake(g, B, a) { g.line(B, at(B, a, 6), WOODL); g.fix(at(B, a, 6), WOOD.lo); return at(B, a, 0); },
   staff(g, B, a, m) { g.haft(B, a, 28, ramp('#7a5a3a')); g.ell(at(B, a, 29), 1.4, 1.4, ramp(m.base, { gl: .85 })); return at(B, a, 29); },
   spear(g, B, a, m) { g.haft(B, a, 32); g.shape(B, a, [[31, -1], [33, -1.4], [36, 0], [33, 1.4]], m); return at(B, a, 36); },
@@ -217,6 +219,12 @@ SPEC.capture = { lean: 'none', mode: 'action', beats: [], wipe: null, contact: '
 SPEC.stake = { lean: 'none', beatMs: 1200, beats: [{ at: .4, sfx: 'stake', fx: 'dust' }], wipe: [.55, .86], contact: 'free', stand: 40, rest: .9, posture: 'kneel',
   keys: [K(0, { hx: 16, hy: 23, a: -40, d: 0 }), K(.28, { hx: 14, hy: 19, a: -100, d: 0 }, 'out'), K(.4, { hx: 18, hy: 24, a: -5, d: 1 }, 'in'), K(.5, { hx: 17, hy: 23, a: -30, d: 1 }, 'out'), K(1, { hx: 16, hy: 23, a: -40, d: 0 }, 'io')],
   draw(p, g, c) { const s0 = [22, 25 + Math.round(p.d)]; TOOL.stake(g.front, s0, 90); if (!c.wipe) arm(g.front, 'near', [22, 27], c.look, 6); const B = [p.hx, p.hy]; TOOL.mallet(g.back, B, p.a); arm(g.back, 'far', B, c.look, 6); return s0; } };
+/* Farming: hoeing between the rows while the crops grow. A chop hoe is lifted in front so the blade rides at about waist height, dropped
+   so the blade bites the soil a stride ahead of the toes, then drawn back through the earth toward the feet to cut the
+   weeds and loosen the crust; the left hand stays high on the haft, the right lower, and the back bends a little. */
+SPEC.hoe = { lean: 'chop', beatMs: 1600, beats: [{ at: .4, sfx: 'hoe', fx: 'dust' }], wipe: [.84, .98], contact: 'free', stand: 62, rest: .8,
+  keys: [K(0, { hx: 12, hy: 12, a: 64, g2: 6 }), K(.26, { hx: 15, hy: 14, a: 12, g2: 6 }, 'io'), K(.31, { hx: 15, hy: 13, a: 6, g2: 6 }, 'out'), K(.4, { hx: 16, hy: 16, a: 40, g2: 5 }, 'in'), K(.48, { hx: 16, hy: 16, a: 40, g2: 5 }, 'hold'), K(.62, { hx: 14, hy: 14, a: 52, g2: 5 }, 'lin'), K(.78, { hx: 12, hy: 12, a: 64, g2: 6 }, 'lin'), K(1, { hx: 12, hy: 12, a: 64, g2: 6 }, 'hold')],
+  draw(p, g, c) { const B = [p.hx, p.hy], tip = TOOL.hoe(g.front, at(B, p.a, -1), p.a, c.metal); if (!c.wipe) arm(g.front, 'near', B, c.look, 0); arm(g.back, 'far', at(B, p.a, p.g2), c.look, 0); return tip; } };
 /* Sailing: on the quay, hauling the halyard hand over hand to raise the sail before casting off. */
 SPEC.haul = { lean: 'pull', beatMs: 1400, beats: [], wipe: null, contact: 'free', stand: 30, rest: 0,
   keys: [K(0, { ny: 12, fy: 19 }), K(.5, { ny: 19, fy: 12 }, 'io'), K(1, { ny: 12, fy: 19 }, 'io')],
@@ -247,6 +255,7 @@ const specKey = act => {
   if (!act) return null; const k = act.kind;
   if (k === 'wood' || k === 'mine' || k === 'fish' || k === 'thieve' || k === 'hunt' || k === 'capture' || k === 'alch') return k;
   if (k === 'train') return 'stake';
+  if (k === 'farm') return 'hoe';
   if (k === 'sail') return 'haul';
   if (k === 'drill') return String(act.id).startsWith('ranged') ? 'butts' : 'pell';
   if (k === 'recipe') { const r = D.RECIPES[act.id]; if (!r) return null;

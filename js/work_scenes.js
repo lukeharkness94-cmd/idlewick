@@ -45,7 +45,8 @@ const pen = x => ({ x,
 const keyOf = a => (a ? a.kind + ':' + a.id : null);
 let ses = null;
 const fresh = a => ({ key: keyOf(a), kind: a.kind, id: a.id, s: 0, n: 0, burnt: 0, bits: [], items: [], rev: 0 });
-const session = () => { const a = Q.act, k = keyOf(a); if (k && (!ses || ses.key !== k)) ses = fresh(a); return ses; };
+/* the live rig's own work (the farm's hoeing has no running activity: js/farm_scene.js), else the running activity */
+const session = () => { const r = Q.workRig && Q.workRig.live, a = r && r.act ? r.act : Q.act, k = keyOf(a); if (k && (!ses || ses.key !== k)) ses = fresh(a); return ses; };
 const CAP_BITS = 40;
 const addBit = (b, cap = CAP_BITS) => { ses.bits.push(b); if (ses.bits.length > cap) ses.bits.splice(0, ses.bits.length - cap); };
 /* what the activity yields (its colour goes on the pile) */
@@ -139,6 +140,10 @@ const MARK = {
     draw(g, A, items) { for (const b of ses.bits) g.p(b.c, b.x, b.y);
       /* a tally cut into the post for each one caught alive */
       const x = 70; g.p('#7a5a3a', x - 1, 74, 8, 16); g.p('#9a7a4e', x - 1, 74, 8, 1); items.forEach((it, i) => { const grp = Math.floor(i / 5), k = i % 5, y = 77 + grp * 5; if (k < 4) g.p('#3a2414', x + k + (grp ? 0 : 0), y, 1, 3); else g.p('#3a2414', x, y + 1, 5, 1); }); } },
+  /* the hoe turns up clods along the furrow it works (no pile: the harvest goes to the pack, not the field) */
+  hoe: { cap: 0,
+    strike(A) { for (let i = 0; i < 2; i++) addBit({ x: A.C[0] + rand(-4, 3), y: A.B - rand(0, 1), c: pick(['#94683e', '#4a3020', '#6e4a2e']) }, 30); },
+    draw(g) { for (const b of ses.bits) g.p(b.c, b.x, b.y); } },
   stake: { cap: 6,
     strike(A) { addBit({ x: A.C[0] + rand(-4, 4), y: A.B - rand(0, 1), c: pick(['#8a7a5a', '#6a5a40']) }, 12); },
     draw(g, A, items) { for (const b of ses.bits) g.p(b.c, b.x, b.y);
@@ -160,13 +165,13 @@ const cool = (it, now) => { if (still() || !it.t) return it.col; const k = clamp
 /* ---------- the place: indoor or out, and where its lantern hangs ---------- */
 const placeOf = sc => { const kind = sc.dataset.kind, key = (sc.className.match(/skill-([\w-]+)/) || [])[1] || '';
   const dk = kind === 'hunt' || kind === 'capture' ? 'train' : kind;
-  const out = ['wood', 'mine', 'fish', 'sail', 'thieve', 'train'].includes(dk);
+  const out = ['wood', 'mine', 'fish', 'sail', 'thieve', 'train', 'farm'].includes(dk);
   const magic = kind === 'alch' || key === 'magic' || key === 'enchanting';
   /* the workshop facade's windows (towns.js facade at x -4, top 20): glass 9 x 9 */
   const windows = out ? [] : [[18, 32], magic ? [92, 28] : [206, 32]];
   /* a lantern on a fence post, the mine's own lamp, the mooring post, the quay bollard, a wall bracket, a stake by the trap line: [x, y, the top of what holds it, already painted] */
-  const LAMP = { wood: [163, 63, 66], mine: [151, 66, 0, true], fish: [151, 77, 80], sail: [115, 75, 78], thieve: [104, 60, 0], train: [160, 84, 96] };
-  const SKY = { wood: 50, mine: 34, fish: 52, sail: 50, thieve: 22, train: 48 };
+  const LAMP = { wood: [163, 63, 66], mine: [151, 66, 0, true], fish: [151, 77, 80], sail: [115, 75, 78], thieve: [104, 60, 0], train: [160, 84, 96], farm: [48, 60, 0] };
+  const SKY = { wood: 50, mine: 34, fish: 52, sail: 50, thieve: 22, train: 48, farm: 50 };
   return { kind, dk, key, out, magic, windows, lamp: LAMP[dk], sky: SKY[dk] || 0 }; };
 
 /* ---------- small life: one or two creatures or effects per workplace ---------- */
@@ -182,6 +187,16 @@ LIFE.squirrel = () => ({ x: -10, y: 68, dir: 1, mode: 'away', wait: rand(4, 10),
     g.p(c, x, y - 2, 3, 2); g.p(lt, x, y - 2, 3, 1); g.p(c, d > 0 ? x + 3 : x - 2, y - 3, 2, 2); g.p('#1a1010', d > 0 ? x + 4 : x - 2, y - 3, 1, 1); g.p(c, d > 0 ? x + 3 : x - 1, y - 4, 1, 1);
     const tx = d > 0 ? x - 2 : x + 3; if (this.mode === 'sit') { g.p(c, tx, y - 5 + this.f, 2, 4 - this.f); g.p(lt, tx, y - 5 + this.f, 1, 1); } else { g.p(c, tx, y - 3, 2, 2); g.p(c, d > 0 ? tx - 1 : tx + 2, y - 4, 1, 1); }
     if (this.mode !== 'sit') { g.p(c, x + this.f, y, 1, 1); g.p(c, x + 2 - this.f, y, 1, 1); } } });
+/* a robin follows the hoe for the worms in the turned soil: it hops in, pecks, watches and hops off (as they do) */
+LIFE.robin = () => ({ x: -10, dir: 1, mode: 'away', wait: rand(5, 12), f: 0, t: 0,
+  step(dt, L) { this.t += dt; if (this.mode === 'away') { if ((this.wait -= dt) <= 0) { this.dir = Math.random() < .5 ? 1 : -1; this.x = this.dir > 0 ? 58 : 236; this.goal = rand(96, 150); this.mode = 'hop'; } return; }
+    if (this.mode === 'hop' || this.mode === 'off') { this.hopT = (this.hopT || 0) + dt; this.x += this.dir * 18 * dt; this.f = Math.floor(this.hopT * 6) % 2;
+      if (this.mode === 'hop' && (this.dir > 0 ? this.x >= this.goal : this.x <= this.goal)) { this.mode = 'peck'; this.wait = rand(2.5, 5); }
+      if (this.mode === 'off' && (this.x < 56 || this.x > 238)) { this.mode = 'away'; this.wait = rand(14, 30); } return; }
+    this.f = Math.sin(this.t * 7) > .55 ? 2 : 0; if ((this.wait -= dt) <= 0) { this.mode = 'off'; this.dir = Math.random() < .5 ? 1 : -1; } },
+  draw(g, L) { if (this.mode === 'away') return; const x = Math.round(this.x), y = (L.A ? L.A.B : 95) - (this.f === 1 ? 1 : 0), d = this.dir, br = '#7a5a3a', rd = '#d8603a';
+    g.p(br, x - 1, y - 3, 4, 2); g.p(rd, d > 0 ? x + 1 : x - 1, y - 2, 2, 1); g.p(br, d > 0 ? x + 2 : x - 2, y - 4 + (this.f === 2 ? 2 : 0), 2, 2); g.p('#1a1010', d > 0 ? x + 3 : x - 2, y - 4 + (this.f === 2 ? 2 : 0), 1, 1);
+    g.p(br, d > 0 ? x - 2 : x + 3, y - 3, 1, 1); g.p('#3a2a1e', x, y - 1); g.p('#3a2a1e', x + 1, y - 1); } });
 /* birds cross the sky now and then */
 LIFE.birds = (y0 = 52) => ({ x: -20, dir: 1, wait: rand(8, 20), on: false,
   step(dt) { if (!this.on) { if ((this.wait -= dt) <= 0) { this.on = true; this.dir = Math.random() < .5 ? 1 : -1; this.x = this.dir > 0 ? 40 : 200; this.y = y0 + rand(-4, 4); this.n = 2 + Math.floor(rand(0, 2)); } return; }
@@ -297,6 +312,7 @@ const lifeFor = (spec, P) => { const id = spec.id;
   if (id === 'fish') return [LIFE.fishjump(), LIFE.dragonfly()];
   if (id === 'haul') return [LIFE.gulls(), LIFE.fishjump([140, 58, 220, 74])];
   if (id === 'thieve') return [LIFE.pigeon(), LIFE.birds(30)];
+  if (id === 'hoe') return [LIFE.robin(), LIFE.birds(40)];
   if (id === 'hunt' || id === 'capture' || id === 'stake') return [LIFE.rabbit(), LIFE.butterfly([70, 66, 190, 88], true), LIFE.fireflies()];
   if (id === 'forge') return [LIFE.ashdoor(166, 75), LIFE.embers(158, 186, 61, 24)];
   if (id === 'smelt') return [LIFE.embers(118, 122, 69, 18), LIFE.steam(120, 66, () => 1, '190,186,190', 20)];

@@ -88,7 +88,11 @@ dated line to the history file.
   workplaces show the town's weather, hour and season as town_life.js does (the Town life weather switch obeyed),
   indoor ones only through their windows. Nothing here is saved or runs in a forecast or simulation; under calm and
   reduced motion nothing moves and no weather shows. A new workplace needs its marks and life there
-  (`tests/work-scenes.cjs`). The page backdrop (`js/backdrop.js`) is Starlit hills or Twilight forest; combat shows
+  (`tests/work-scenes.cjs`). **The farm** (owner, 28 Nov; `js/farm_scene.js`) has no running activity, so the Farming
+  page's right-hand column carries its own scene: the farm district (`districtFor` 'farm'), the first six plots' crops
+  at their real growth stage on the ground line, and, while anything grows, the hero hoeing between the rows
+  (`SPEC.hoe`, driven through `DQ.farmWork` by the strike clock when no activity stage is in view); nothing growing,
+  no hero. Not shown on phones (`tests/farm-scene.cjs`). The page backdrop (`js/backdrop.js`) is Starlit hills or Twilight forest; combat shows
   the area's own scene (two per region, keyed like `saltmere:1`); a new area needs a recipe there.
 - **Hearthside Journal** (owner, 18 Nov) is the whole game's look: light parchment and Hearthside lettering by default
   (local Cinzel + Alegreya Sans), dark theme available; `css/hearthside.css` is the shared presentation layer (extend it,

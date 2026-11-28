@@ -334,6 +334,29 @@ function districtFor(town, kind, key, o = {}) {
     put(A.treeSprite(TREE_OF[town] || 'normal'), 196, 82 - 48);
     trapBig(P, 26, 92); trapBig(P, 172, 90); trapBig(P, 206, 97);
     const fc = mix(st.walls[0], '#5a3a26', .6); for (let q = 0; q < 56; q += 10) f(fc, q, 72, 2, 10); f(fc, 0, 75, 56, 1); f(fc, 0, 79, 56, 1);
+  } else if (kind === 'farm') {
+    /* the farm (owner, 28 Nov 2026): the barn behind the hero, the field fence, a scarecrow, and the tilled plot the hero
+       hoes; the crops themselves stand on it from the live save (js/farm_scene.js), so they grow while you watch */
+    skyBand(P, T, st, rnd, 62); P.ridge(T.hills[0], 52, 4, town.length); backTown(P, T, st, rnd, 64, 60); P.ridge(T.hills[1], 66, 2, town.length + 2);
+    grassy(P, T, st, rnd, 78);
+    const fc = mix(st.walls[0], '#5a3a26', .6); for (let q = 50; q < DW; q += 18) { f(fc, q, 68, 2, 12); f(mix(fc, '#ffffff', .2), q, 68, 1, 12); } f(fc, 50, 71, DW - 50, 2); f(fc, 50, 75, DW - 50, 1);
+    /* the barn: about 5 m to the eaves at the hero's 5.3 cm a pixel would not fit, so it stands well back (smaller) */
+    const barn = '#9a4a36', barnDk = mix(barn, '#000000', .3), barnLt = mix(barn, '#ffffff', .18);
+    f(barn, 6, 50, 40, 32); for (let q = 8; q < 46; q += 4) f(barnDk, q, 50, 1, 32); f(barnLt, 6, 50, 40, 1);
+    for (let j = 0; j < 14; j++) f(j % 3 ? '#6a4a3a' : '#7a5a46', 4 + j, 50 - j, 44 - j * 2, 1); f('#5a3a2e', 4, 50, 44, 1);
+    f('#3a2420', 18, 62, 16, 20); f('#e8dcc0', 18, 62, 16, 1); for (let j = 0; j < 16; j++) { f('#e8dcc0', 18 + j, 62 + Math.round(j * 20 / 16), 1, 1); f('#e8dcc0', 33 - j, 62 + Math.round(j * 20 / 16), 1, 1); }
+    f('#e8dcc0', 22, 40, 8, 6); f('#3a2420', 23, 41, 6, 4); f('#c8a050', 24, 42, 4, 2);
+    /* hay at the barn door, a water butt by it */
+    ell('#d8b860', 52, 82, 7, 4); ell('#f0d890', 51, 80, 5, 2); f(DPAL.woodDk, 40, 74, 7, 9); f(DPAL.wood, 40, 74, 7, 1); f('#3a4a5a', 41, 75, 5, 1); f(DPAL.iron, 40, 77, 7, 1); f(DPAL.iron, 40, 81, 7, 1);
+    /* the tilled plot: ridges and furrows running away from you, darker as they go under */
+    const soil = '#6e4a2e', soilDk = '#4a3020', soilLt = '#94683e';
+    f(soil, 60, 84, DW - 60, DH - 84); f(soilLt, 60, 84, DW - 60, 1);
+    for (let y = 86; y < DH; y += 3) { f(soilDk, 62, y, DW - 62, 1); f(soilLt, 62, y + 1, DW - 62, 1); }
+    for (let i = 0; i < 40; i++) f(i % 2 ? soilLt : soilDk, 62 + Math.floor(rnd() * (DW - 64)), 85 + Math.floor(rnd() * 14), 1, 1);
+    f(mix(T.ground, soil, .5), 58, 84, 3, DH - 84);
+    /* the scarecrow at the far side of the plot: a cross of poles, an old coat, a straw hat (about 1.6 m, 30 px) */
+    const sx = 198; f(DPAL.woodDk, sx, 56, 2, 30); f(DPAL.woodDk, sx - 8, 63, 18, 2); f('#5a6a8a', sx - 5, 62, 12, 11); f('#4a5a78', sx - 5, 72, 12, 2); f('#d8b860', sx - 8, 64, 2, 3); f('#d8b860', sx + 8, 64, 2, 3);
+    ell('#e8d0a0', sx + 1, 57, 3, 3); f('#d8b860', sx - 4, 53, 10, 2); f('#c8a040', sx - 2, 50, 6, 3); f('#3a2a1e', sx, 57, 1, 1); f('#3a2a1e', sx + 2, 57, 1, 1);
   } else {
     /* workshops: cooking, smithing, crafting, carpentry, magic and the rest */
     f(T.sky[1], 0, 0, DW, 14);
