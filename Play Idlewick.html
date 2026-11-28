@@ -4716,14 +4716,14 @@ html.calm .lw-zzz { display:none; }
 </style>
 <style>/* Hearthside Journal: one material language and clear action hierarchy across the existing game. */
 :root{--ground:#18251f;--panel:#23352b;--panel2:#2c4034;--line:#425a4a;--line2:#61745f;--ink:#f1ebdf;--mute:#c0cbbb;--brass:#d7b16a;--brass-hi:#f4d69e;--brass-lo:#946638;--good:#8ac8a3;--bad:#f29286;--warn:#e8c27d;--hs-action-ink:#211b12;--hs-paper-shadow:rgba(0,0,0,.13);--backdrop-wash:rgba(24,37,31,.94)}
-:root.type-hearthside{--f-display:'Silkscreen','Tiny5',monospace;--f-body:'Tiny5','Alegreya Sans',system-ui,sans-serif;--f-ui:'Silkscreen','Tiny5',monospace;--f-mono:'Silkscreen','Tiny5',monospace}
+:root.type-hearthside{--f-display:'Silkscreen','Tiny5',monospace;--f-body:'Alegreya Sans',system-ui,sans-serif;--f-ui:'Silkscreen','Tiny5',monospace;--f-mono:'Silkscreen','Tiny5',monospace}
 /* Terminal: the same pixel layout with VT323 for sentences (owner, 28 Nov 2026: "B or E") */
 :root.type-terminal{--f-body:'VT323','Alegreya Sans',system-ui,sans-serif}
-/* phones: pixel lettering for labels only; sentences in a book face (owner, 28 Nov 2026) */
+/* reading text everywhere is Alegreya Sans (owner, 28 Nov 2026: "the pixel font is a little hard to read"); labels stay pixel */
 @media (max-width:860px){:root.type-hearthside:not(.type-classic){--f-body:'Alegreya Sans',system-ui,sans-serif}}
 :root.type-classic{--f-display:'Cinzel','Alegreya SC',Georgia,serif;--f-body:'Alegreya Sans',system-ui,sans-serif;--f-ui:'Alegreya Sans',system-ui,sans-serif;--f-mono:'Alegreya Sans',system-ui,sans-serif}
-.type-sample-hearthside b,.type-sample-terminal b{font-family:'Silkscreen',monospace}.type-sample-hearthside span{font-family:'Tiny5',sans-serif}.type-sample-terminal span{font-family:'VT323',monospace}.type-sample-classic b{font-family:'Cinzel',serif}.type-sample-classic span{font-family:'Alegreya Sans',sans-serif}
-:root.type-hearthside body{font-size:18px;font-weight:400}
+.type-sample-hearthside b,.type-sample-terminal b{font-family:'Silkscreen',monospace}.type-sample-hearthside span{font-family:'Alegreya Sans',sans-serif}.type-sample-terminal span{font-family:'VT323',monospace}.type-sample-classic b{font-family:'Cinzel',serif}.type-sample-classic span{font-family:'Alegreya Sans',sans-serif}
+:root.type-hearthside body{font-size:18.5px;font-weight:400}
 :root.type-hearthside :is(button,input,textarea){font-weight:500;font-variant-numeric:lining-nums tabular-nums}
 :root.type-hearthside :is(h1,h2,h3){font-weight:500;letter-spacing:.015em}
 :root.type-hearthside .mono{font-variant-numeric:lining-nums tabular-nums;font-weight:500}
@@ -5940,8 +5940,8 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 /* pixel lettering is wider: the rail grows so every skill name shows whole ("never shrink text to fit") */
 @media(min-width:861px){#app{grid-template-columns:212px minmax(0,1fr)}#view .visual-shop{gap:8px}}
 /* the capital pixel face on everything that is a label (owner, 28 Nov 2026: "go with the capital pixelated font on more
-   places too"): buttons, menus, tabs, the rail, card and quest names, numbers, tags and badges; sentences stay in
-   Tiny5 or VT323 (desktop) or Alegreya Sans (phones) so long text still reads */
+   places too"): buttons, menus, tabs, the rail, card and quest names, numbers, tags and badges; sentences are
+   Alegreya Sans (VT323 under Terminal) so they read easily */
 :root.type-hearthside:not(.type-classic){--f-ui:'Silkscreen','Tiny5',monospace;--f-mono:'Silkscreen','Tiny5',monospace}
 :root.type-hearthside:not(.type-classic) :is(.illustrated-card>b,.qrow b,.h-name>b,#nowcard b,.tag,.chipx,.state,.notice-badge,.lvchip,.k,.phead>small,.phead small:not(.dim),.est-count,.rw,.req-chip,.need-tile b,.eq small,.cw-area h3,.area-card b,.dk-h,.estate-fields h3,.estate-pasture h3,.activity-caption small,.mast-line,.stat){
   font-family:var(--f-ui)!important;font-weight:400;letter-spacing:.03em}
@@ -29945,13 +29945,13 @@ if (settings0) UI.V.settings = () => settings0() + `<section class="panel"><div 
 
 </script>
 <script>
-/* Lettering: Hearthside, the default, is pixel lettering (owner, 28 Nov 2026: Silkscreen headings, Pixelify Sans for
-   everything else on desktop; on phones sentences keep Alegreya Sans and only labels are pixel). Classic keeps the old
+/* Lettering: Hearthside, the default, is pixel lettering (owner, 28 Nov 2026: Silkscreen labels and headings; the
+   sentences you read are Alegreya Sans on every screen, owner 28 Nov 2026: "the pixel font is a little hard to read"). Classic keeps the old
    Cinzel + Alegreya Sans; Storybook, Adventurer and Original remain. The old separate Pixel choice is the default now.
    All fonts are local and embedded by the standalone packager. */
 (() => {
 const DQ = window.DQ, UI = DQ.ui, root = document.documentElement;
-const OPTS = [['hearthside', 'Pixel', 'Silkscreen + Tiny5'], ['terminal', 'Terminal', 'Silkscreen + VT323'], ['classic', 'Classic', 'Cinzel + Alegreya Sans'], ['storybook', 'Storybook', 'Cinzel + Alegreya'], ['adventurer', 'Adventurer', 'MedievalSharp + Alegreya'], ['original', 'Original', 'Alegreya Sans']];
+const OPTS = [['hearthside', 'Pixel', 'Silkscreen + Alegreya Sans'], ['terminal', 'Terminal', 'Silkscreen + VT323'], ['classic', 'Classic', 'Cinzel + Alegreya Sans'], ['storybook', 'Storybook', 'Cinzel + Alegreya'], ['adventurer', 'Adventurer', 'MedievalSharp + Alegreya'], ['original', 'Original', 'Alegreya Sans']];
 const apply = () => { const st = DQ.S && DQ.S.settings; if (st && st.lettering === 'pixel') st.lettering = 'hearthside'; const v = (st && st.lettering) || 'hearthside';
   /* Classic is the Hearthside layout in its old book faces */
   OPTS.forEach(([k]) => root.classList.toggle('type-' + k, k === v || (k === 'hearthside' && (v === 'classic' || v === 'terminal')))); root.classList.remove('type-pixel'); };

@@ -1254,8 +1254,8 @@ or VT323.
   wood with pins; a panel inside a panel is a sunk well; the main action is a green bevel; bars are troughs with brass
   end caps; the page you are on is a brass button. css/shape.css carries the selected and bevel rules;
   tests/shape-rule.cjs checks bevels instead of the old "no lines" rule.
-- **Lettering** (js/lettering.js): Pixel (default) = Silkscreen labels and headings + Tiny5 sentences; Terminal =
-  Silkscreen + VT323; Classic = Cinzel + Alegreya Sans; the older presets remain. Phones keep Alegreya Sans for sentences.
+- **Lettering** (js/lettering.js): Pixel (default) = Silkscreen labels and headings + Alegreya Sans for every sentence (28 Nov: Tiny5 was hard to read); Terminal =
+  Silkscreen + VT323; Classic = Cinzel + Alegreya Sans; the older presets remain.
   Fonts are local woff2 (OFL). Silkscreen is wider, so the rail is 212px, catalogue gaps 8px, and a set of phone rules
   wrap tabs and button rows rather than shrink anything.
 - **Sprites and towns** (helper branches merged): js/pixel_bosses.js redraws the bosses at 64 × 64; the engine restyles

@@ -387,3 +387,7 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   hearth, letters, conversation screen, idle life, walk cycle and synthesised bells (js/intro.js, js/opening_art.js),
   with one flavour reply in S.choices.story_opening. Replaces "The opening (`js/intro.js`) plays once for a new hero",
   which was a slideshow of still town pictures with captions.
+- 28 Nov 2026 (owner: "can we make the text a little more legible where it needs to be read? The pixel font is a little
+  hard to read"; chose "Alegreya Sans for reading" over long-text-only and a bigger Tiny5): every sentence you read is
+  Alegreya Sans on desktop as on phones; labels, buttons, names and numbers stay Silkscreen. Replaces "Tiny5 sentences on
+  desktop". Pixelify Sans was tried and ruled out (its pixel forms turn "five" into "Ave" and 5 into S).
