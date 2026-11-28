@@ -195,7 +195,7 @@ const lights = (x, t, dark, moving) => { x.clearRect(0, 0, RW, RH); x.save(); x.
 /* ---------- the Home card ---------- */
 const st = { key: '', url: '', busy: false, raf: 0, last: 0, t: 0 };
 const lightNow = () => { const town = S().town, h = Q.townHour ? Q.townHour() : 13, L = Q.townLight ? Q.townLight(h) : { dark: 0, warm: 0 };
-  const night = [46, 58, 120], sun = [255, 168, 104], tint = [255, 255, 255].map((v, i) => Math.round(v + (sun[i] - v) * L.warm * .62)).map((v, i) => Math.round(v + (night[i] - v) * L.dark * .8 * (1 - L.warm * .45)));
+  const night = [46, 58, 120], sun = [255, 168, 104], tint = [255, 255, 255].map((v, i) => Math.round(v + (sun[i] - v) * L.warm * .62)).map((v, i) => Math.round(v + (night[i] - v) * L.dark * .45 * (1 - L.warm * .45)));
   return { town, dark: L.dark, warm: L.warm, tint, weather: Q.townWeather ? Q.townWeather(town) : 'clear', quarter: Math.floor(h * 4) }; };
 const goalNote = () => { const g = Q.homeGoalNow; return g ? `<b>${esc(g.name)}</b><span>${esc(g.label)} ${g.have} / ${g.need}</span>` : '<b>Your next step</b><span>See Quests</span>'; };
 /* the keepsakes and the letters have their own hotspots, placed like the furniture's (st.extra holds this render's) */

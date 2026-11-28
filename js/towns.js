@@ -1,40 +1,12 @@
-/* Idlewick towns (Nov 2026): every town is a wide, lived-in place drawn at 640 x 360, with everything in it to one
-   scale: townsfolk about 10 px tall, homes two to three times that, the restoration sites (32 x 32 pieces) the size
-   of a building, your boats moored at Saltmere and your traps at the meadow's edge sized against them. Rows of homes
-   with lit windows and chimney smoke, streets with townsfolk, each region's own landmark and trade, and the
-   restoration sites among the homes. Each site shows its project as a ruin, then building up in stages as materials
-   are delivered, then restored; the more of a town is restored, the more of its homes are lived in again.
-   Each skill also gets a close-up of the part of town where it happens (districtFor, 240 x 100), drawn at the same
-   pixel scale as the hero and the tree, rock or fish they work on, so the town, the hero and the object agree.
+/* Idlewick districts (Nov 2026): each skill gets a close-up of the part of town where it happens (districtFor,
+   240 x 100), seen side-on and drawn at the same pixel scale as the hero and the tree, rock or fish they work on, so
+   the town, the hero and the object agree. The towns themselves are drawn top-down in js/town_scene.js (28 Nov 2026);
+   this file keeps each town's district look (STYLE), the shared scene painter and the side-on ship.
    Drawn in code in the house style; whole-pixel art. */
 (() => {
 const DQ = window.DQ, D = DQ.data, A = DQ.pixelArt; if (!A || !A.piece) return;
 const { mix } = A, W = 640, H = 360;
-/* what the living-town layer (js/town_life.js) needs to know about the picture: lit windows, chimneys, lanterns, the
-   landmark, homes and water, recorded while sceneFor paints (it never changes what is painted) */
-let META = null;
 const seeded = s => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967296; }; };
-
-/* ---------- a restoration piece at its construction stage ---------- */
-const stagePiece = (kind, stage) => {
-  if (stage >= 4) return A.piece(kind, true);
-  if (stage <= 0) return A.piece(kind, false);
-  const F = A.piece(kind, true), s = A.Spr(32, 32); let x0 = 32, x1 = -1, y0 = 32, y1 = -1;
-  for (let y = 0; y < 32; y++) for (let x = 0; x < 32; x++) if (F.px[y * 32 + x]) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
-  if (x1 < 0) return F;
-  const reveal = [0, .18, .5, .82][stage], top = Math.round(y1 + 1 - (y1 - y0 + 1) * reveal);
-  for (let y = top; y <= y1; y++) for (let x = x0; x <= x1; x++) { const p = F.px[y * 32 + x]; if (p) s.px[y * 32 + x] = p; }
-  /* foundations along the ground line */
-  s.rect(Math.max(0, x0 - 1), y1, Math.min(32, x1 - x0 + 3), 1, A.R.stone);
-  /* scaffolding: two posts a little above the work, planks every few rows, a ladder on stages 2 and 3 */
-  const wood = A.R.woodLight, postTop = Math.max(0, top - 4), L = Math.max(0, x0), Rt = Math.min(31, x1);
-  for (const x of [L, Rt]) for (let y = postTop; y <= y1; y++) s.dot(x, y, wood);
-  for (let y = y1 - 3; y >= postTop; y -= 5) for (let x = L; x <= Rt; x++) if (!s.px[y * 32 + x] || (x === L || x === Rt) || y < top) s.dot(x, y, A.R.wood);
-  if (stage >= 2) for (let y = postTop + 1; y <= y1; y++) { s.dot(L + 2, y, wood); if (y % 2 === 0) s.dot(L + 3, y, A.R.wood); s.dot(L + 4, y, wood); }
-  /* materials waiting by the site: timber and stone */
-  const px = Math.min(28, x1 + 1) - 3; s.rect(px, 29, 4, 1, A.R.wood); s.rect(px + 1, 28, 3, 1, A.R.woodLight); s.ell(Math.max(2, x0 - 1), 29, 1.6, 1.2, A.R.stone);
-  return s;
-};
 
 /* ---------- small drawing helpers on a scene canvas ---------- */
 const make = (w = W, h = H) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
@@ -49,47 +21,6 @@ const painter = (x, w = W, h = H) => {
 const pick = (arr, rnd) => arr[Math.floor(rnd() * arr.length) % arr.length];
 const FLOWERS = ['#f0d060', '#e0607a', '#f4f0f4', '#a07ae0'];
 
-/* a home (town scale): 22 to 36 px wide; framed windows, shutters and flower boxes, a door with a step, tiled roof,
-   chimney smoke when lived in; boarded windows and doors when not. Top-left light. */
-const home = (P, X, base, w, h, st, lived, rnd) => {
-  const { f } = P, wall = pick(st.walls, rnd), roof = pick(st.roofs, rnd), top = base - h;
-  const lt = mix(wall, '#ffffff', .25), dk = mix(wall, '#000000', .2), line = mix(wall, '#3a2414', .6), frame = mix(wall, '#2a1a10', .5);
-  if (st.stilts) for (const px of [X + 2, X + w - 4]) { f(mix(st.ground, '#000000', .5), px, base, 2, 9); f(mix(st.ground, '#000000', .35), px, base + 3, w - 4, 1); }
-  f(wall, X, top, w, h); f(lt, X, top, 1, h); f(dk, X + Math.ceil(w * .68), top, Math.floor(w * .32), h);
-  f(mix(wall, '#5a5048', .55), X, base - 2, w, 2);
-  if (st.timber && rnd() < .6) { f(line, X, top, w, 1); f(line, X, top + Math.floor(h / 2), w, 1); for (let q = X; q < X + w - 2; q += Math.max(7, Math.floor(w / 3))) f(line, q, top, 1, h - 2); f(line, X + w - 1, top, 1, h - 2); }
-  const rh = Math.max(7, Math.round(w / 2.3));
-  for (let j = 0; j < rh; j++) { const inset = Math.round((rh - 1 - j) * (w / 2 + 2) / rh), a = X - 2 + inset, b = X + w + 2 - inset; if (b <= a) continue; const mid = Math.round((a + b) / 2), band = j % 3 === 2 ? .12 : 0;
-    f(mix(roof, '#ffffff', .14 - band), a, top - rh + j, mid - a, 1); f(mix(roof, '#000000', .2 + band), mid, top - rh + j, b - mid, 1); }
-  f(mix(roof, '#000000', .45), X - 2, top - 1, w + 4, 1);
-  if (st.snow) { const m = X + Math.floor(w / 2); f('#f4f8fc', m - 4, top - rh, 8, 2); f('#f4f8fc', X - 2, top - 2, w + 4, 1); }
-  /* missing tiles on an empty house */
-  if (!lived) { f(mix(roof, '#000000', .55), X + Math.floor(w * .55), top - Math.floor(rh * .6), 3, 2); }
-  const glow = st.glow || '#f6d880', win = (wx, wy) => {
-    f(frame, wx - 1, wy - 1, 6, 6); f(lived ? glow : '#2a2830', wx, wy, 4, 4); if (lived && META) META.windows.push([wx, wy, glow]);
-    if (lived) { f(mix(glow, '#ffffff', .45), wx, wy, 2, 1); f(frame, wx + 2, wy, 1, 4); f(frame, wx, wy + 2, 4, 1); if (rnd() < .5) { f(pick(['#4a6a9a', '#9a4a3a', '#4a7a4a'], rnd), wx - 2, wy, 1, 4); f(pick(['#4a6a9a', '#9a4a3a', '#4a7a4a'], rnd), wx + 5, wy, 1, 4); } if (rnd() < .45) { f('#7a5236', wx - 1, wy + 5, 6, 1); f(pick(FLOWERS, rnd), wx, wy + 4, 1, 1); f(pick(FLOWERS, rnd), wx + 3, wy + 4, 1, 1); } }
-    else { f('#7a5a3a', wx - 1, wy + 1, 6, 1); f('#7a5a3a', wx - 1, wy + 3, 6, 1); }
-    f(lt, wx - 1, wy + 5, 6, 1); };
-  const dw = 5, dh = Math.min(9, h - 4), dx = w >= 26 ? X + Math.floor(w / 2) - 2 : X + w - 9;
-  if (w >= 26) { win(X + 4, top + 4); win(X + w - 9, top + 4); } else win(X + 3, top + 4);
-  f(frame, dx - 1, base - dh - 1, dw + 2, dh + 1); f(lived ? mix(roof, '#3a2416', .45) : '#2e2828', dx, base - dh, dw, dh);
-  if (lived) f('#e6c060', dx + 3, base - Math.ceil(dh / 2), 1, 1); else { f('#6a4a30', dx - 1, base - dh + 2, dw + 2, 1); f('#6a4a30', dx - 1, base - 3, dw + 2, 1); }
-  f(mix(wall, '#8a8478', .5), dx - 1, base, dw + 2, 1);
-  if (rnd() < .75) { const cx = X + (rnd() < .5 ? 3 : w - 7), cy = top - Math.round(rh * .75); f(mix(st.walls[0], '#3a2e28', .55), cx, cy, 4, top - cy - 1); f(mix(st.walls[0], '#1e1a18', .6), cx - 1, cy - 1, 6, 2);
-    if (lived && META) META.chimneys.push([cx + 2, cy - 1]);
-    if (lived) for (let k = 0; k < 4; k++) P.ell(`rgba(232,232,236,${.75 - k * .16})`, cx + 2 + k * 2, cy - 4 - k * 5, 2 + k * .6, 1.6 + k * .4); }
-};
-/* trees at town scale: 14 to 28 px */
-const tree = (P, X, base, size, leaf, rnd) => { const { f, ell } = P; f(mix(leaf, '#3a2414', .7), X - 1, base - size * .55, 3, size * .55); ell(mix(leaf, '#000000', .22), X + 1, base - size * .62, size * .5, size * .38); ell(leaf, X, base - size * .7, size * .42, size * .32); ell(mix(leaf, '#ffffff', .22), X - size * .12, base - size * .8, size * .2, size * .14); if (rnd() < .3) f(mix(leaf, '#000000', .3), X - 4, base, 9, 1); };
-const pine = (P, X, base, size, leaf) => { const { f } = P; f('#4a3424', X, base - 4, 2, 4); for (let j = 0; j < size; j++) { const w = Math.round((j + 2) * .42); f(j % 4 === 0 ? mix(leaf, '#ffffff', .18) : j % 4 === 3 ? mix(leaf, '#000000', .18) : leaf, X + 1 - w, base - 4 - size + j, w * 2, 1); } };
-/* a townsperson (5 x 10): hair, face, clothes, legs; some carry a basket */
-const folk = (P, X, Y, rnd) => { const { f } = P, cloth = pick(['#3f7fbf', '#b8483a', '#7a9a5a', '#c89a3a', '#7a5a9a', '#6a6a74', '#c87a8a'], rnd), hair = pick(['#3a2414', '#7a4a24', '#d8b060', '#2a2a2a', '#a8a8a8'], rnd);
-  f('#e0b088', X + 1, Y - 10, 3, 3); f(hair, X + 1, Y - 10, 3, 1); f(cloth, X, Y - 7, 5, 4); f(mix(cloth, '#000000', .25), X + 3, Y - 7, 2, 4); f(mix(cloth, '#ffffff', .2), X, Y - 7, 1, 3);
-  f('#3a3030', X + 1, Y - 3, 1, 3); f('#3a3030', X + 3, Y - 3, 1, 3); if (rnd() < .25) { f('#a07a4a', X + 5, Y - 5, 3, 2); f('#c8483a', X + 5, Y - 6, 1, 1); } };
-const chicken = (P, X, Y) => { P.f('#f4f0e8', X, Y - 2, 3, 2); P.f('#e04030', X + 2, Y - 3, 1, 1); P.f('#e0a030', X + 3, Y - 2, 1, 1); };
-const dog = (P, X, Y, col) => { const { f } = P; f(col, X, Y - 4, 6, 2); f(col, X + 5, Y - 6, 2, 3); f(mix(col, '#000000', .3), X + 6, Y - 6, 1, 1); f(col, X, Y - 2, 1, 2); f(col, X + 5, Y - 2, 1, 2); f(col, X - 1, Y - 5, 1, 1); };
-/* a trap at town scale (8 x 6): wooden box, the door propped on a stick, a bit of bait */
-const trapSmall = (P, X, Y) => { const { f } = P; f('#8a6a42', X, Y - 5, 8, 5); f('#a8845a', X, Y - 5, 8, 1); f('#5a3e26', X + 7, Y - 5, 1, 5); f('#6a4a2e', X + 2, Y - 3, 1, 3); f('#6a4a2e', X + 5, Y - 3, 1, 3); f('#c8a070', X + 8, Y - 8, 1, 6); f('#a8845a', X + 8, Y - 9, 3, 1); f('#e0405a', X + 9, Y - 1, 1, 1); };
 /* a boat seen from the side, sized by tier against the town (skiff 22 px long, galleon 62) */
 const ship = (P, X, wl, tier, col, k = 1) => { const { f } = P, L = [0, 22, 34, 42, 52, 62][tier] * k, hh = [0, 5, 7, 8, 9, 10][tier] * k, hull = col, dk = mix(col, '#2a1a10', .45), lt = mix(col, '#ffffff', .22);
   for (let j = 0; j < hh; j++) { const inset = Math.round(j * j / hh * 1.6 * k + (j > hh - 3 ? k : 0)); f(j === 0 ? lt : j === 1 ? dk : hull, X + inset, wl - hh + j, L - inset * 2 + (j < 2 ? 2 * k : 0), 1); }
@@ -118,117 +49,6 @@ const STYLE = {
   skyreach: { walls: ['#f4f4f0', '#e8e4dc', '#f0ece4'], roofs: ['#c8483c', '#b83a30', '#d86a4a'], leaf: '#6aaa6a', landmark: ['monastery', 470, 150], trees: 6, clouds: true, pines: true },
   hollow: { walls: ['#4a4058', '#3a3448', '#5a4e66'], roofs: ['#2a2238', '#342a44', '#221c30'], leaf: '#4a3a5a', landmark: ['castle', 470, 150], trees: 7, stars: true, glow: '#c8a8ff', ruined: .35 }
 };
-
-/* where each restoration site stands in a town scene (32 x 32 each, in scene pixels): among the homes, alternating
-   between the middle street and the front; the Projects page puts a clickable spot over each one */
-const siteLayout = town => { const sites = Object.keys(D.PROJECTS || {}).filter(k => D.PROJECTS[k].town === town), n = sites.length, gap = (W - 40) / Math.max(1, n);
-  return sites.map((id, i) => ({ id, i, X: Math.round(20 + gap * (i + .5) - 16), Y: i % 2 ? 254 : 198 })).sort((a, b) => a.Y - b.Y); };
-A.siteLayout = siteLayout; /* where each site stands, for the townsfolk who gather round a finished one (js/town_walkers.js) */
-/* extras: what you have built or laid elsewhere that belongs in the town (boats, traps, the cottage's crops) */
-function sceneFor(town, stages = {}, extras = {}) {
-  const T = A.TOWN[town] || A.TOWN.willowbrook, st = Object.assign({ ground: T.ground }, STYLE[town] || STYLE.willowbrook), rnd = seeded(town);
-  const c = make(), x = c.getContext('2d'), P = painter(x), { f, ell, ridge, put } = P;
-  META = { town, W, H, windows: [], chimneys: [], lamps: [], homes: [], ponds: [], style: st };
-  /* sky */
-  f(T.sky[0], 0, 0, W, 30); f(T.sky[1], 0, 30, W, 28); f(T.sky[2], 0, 58, W, 50);
-  if (st.stars) for (let i = 0; i < 90; i++) f(i % 5 ? '#c8c0ff' : '#ffffff', Math.floor(rnd() * W), Math.floor(rnd() * 80), 1, 1);
-  else for (const [cx, cy, w] of [[60, 16, 52], [300, 10, 68], [500, 22, 44], [600, 8, 30]]) { const cl = mix(T.sky[0], '#ffffff', .78); f(cl, cx, cy, w, 5); f(cl, cx + 8, cy - 4, w - 16, 4); f(mix(T.sky[0], '#ffffff', .55), cx + 4, cy + 5, w - 8, 1); }
-  if (st.volcano) put(A.landmark('volcano'), 400, 0, 3);
-  /* far and near hills, with distant homes on the ridge */
-  ridge(T.hills[0], st.snow ? 60 : 76, st.snow ? 18 : 8, town.length);
-  if (st.snow) for (let i = 0; i < W; i++) { const y = Math.round(60 + Math.sin(i / 74 + town.length) * 18 + Math.sin(i / 26 + town.length * 2) * 6.3); f('#ffffff', i, y, 1, 3); }
-  const farBase = st.snow ? 60 : 76, farAmp = st.snow ? 18 : 8, farY = i => farBase + Math.sin(i / 74 + town.length) * farAmp + Math.sin(i / 26 + town.length * 2) * farAmp * .35;
-  for (let i = 0; i < 12; i++) { const hx = 10 + i * 53 + Math.floor(rnd() * 20), hy = Math.round(Math.max(farY(hx), farY(hx + 10)) + 5 + rnd() * 4); f(mix(st.walls[0], T.hills[0], .45), hx, hy, 10, 7); f(mix(st.roofs[0], T.hills[0], .45), hx - 1, hy - 3, 12, 3); if (!st.ruined || i % 2) f(st.glow || '#f6d880', hx + 3, hy + 2, 2, 2); }
-  ridge(T.hills[1], 102, 6, town.length + 3);
-  /* ground and water */
-  f(T.ground, 0, 110, W, H - 110);
-  for (let i = 0; i < 900; i++) f(mix(T.ground, i % 2 ? '#ffffff' : '#000000', .1), Math.floor(rnd() * W), 110 + Math.floor(rnd() * 250), 2, 1);
-  if (st.snow) for (let i = 0; i < 260; i++) f('#f4f8fc', Math.floor(rnd() * W), 110 + Math.floor(rnd() * 250), 2, 1);
-  if (st.sea) { f('#4f8fc0', 0, 80, W, 44); f('#5f9fcc', 0, 90, W, 5); for (let i = 0; i < 50; i++) f('#e8f6ff', Math.floor(rnd() * W), 84 + Math.floor(rnd() * 36), 6, 1); f('#f0e2b0', 0, 122, W, 10); f('#d8c890', 0, 131, W, 2);
-    for (const [bx, by, t] of [[70, 104, 2], [220, 96, 3], [360, 110, 1]]) ship(P, bx, by, t, '#7a5236'); }
-  if (st.clouds) for (const [cx, cy, w] of [[0, 120, 120], [180, 128, 140], [400, 118, 180]]) { f('#f6fbfc', cx, cy, w, 9); f('#f6fbfc', cx + 12, cy - 5, w - 24, 5); }
-  if (st.fields) for (let r = 0; r < 6; r++) { f(r % 2 ? '#c8b058' : '#8aa850', 0, 112 + r * 4, 240, 3); f(r % 2 ? '#d8c068' : '#9ab860', 440, 112 + r * 4, 200, 3); }
-  if (st.swamp) META.ponds = [[120, 196, 50], [520, 168, 56], [330, 272, 40]];
-  if (st.swamp) for (const [px, py, rx] of [[120, 196, 50], [520, 168, 56], [330, 272, 40]]) { ell('#3a4a3a', px, py, rx, 7); ell('#4a5a4a', px - 8, py - 2, rx * .5, 2.5); for (let k = 0; k < 4; k++) f('#5a8a4a', px - rx * .6 + k * rx * .4, py - 1, 3, 1); }
-  if (st.lava) { f('#e8583a', 0, 128, W, 4); f('#ffb04a', 0, 128, W, 1); for (let i = 0; i < 20; i++) f('#ff8a3a', Math.floor(rnd() * W), 130 + Math.floor(rnd() * 3), 5, 1); }
-  /* streets: two long roads and the lanes between them */
-  const road = T.path || mix(T.ground, '#d8c8a0', .45), roadDk = mix(road, '#000000', .14), roadLt = mix(road, '#ffffff', .16);
-  for (const ry of [154, 236]) { f(road, 0, ry, W, 9); f(roadDk, 0, ry + 8, W, 1); f(roadLt, 0, ry, W, 1); for (let i = 0; i < 70; i++) f(roadDk, Math.floor(rnd() * W), ry + 2 + Math.floor(rnd() * 5), 2, 1); }
-  for (let i = 0; i < 6; i++) { const lx = 36 + i * 112; f(road, lx, 132, 5, 22); f(road, lx + 40, 163, 5, 73); f(road, lx + 70, 245, 5, 76); }
-  /* a small square with a fountain or a well-worn green in the middle of the town */
-  ell(mix(road, '#ffffff', .06), 320, 200, 34, 9);
-  /* landmark (a landmark is a big building: drawn at twice its sprite size so it stands two to three homes tall) */
-  const lm = st.landmark, LMK = 2;
-  if (lm) { const s = A.landmark(lm[0]); if (lm[0] === 'lighthouse') { ell('#7a746a', lm[1] + 48, lm[2] - 2, 26, 6); ell('#9a9488', lm[1] + 44, lm[2] - 4, 18, 3); } put(s, lm[1], lm[2] - s.h * LMK, LMK); META.landmark = { kind: lm[0], x: lm[1], y: lm[2] - s.h * LMK, w: s.w * LMK, h: s.h * LMK }; }
-  const cottage = town === 'willowbrook' ? [296, 156] : null;
-  if (cottage) { const s = A.sprites.cottage(); put(s, cottage[0], cottage[1] - s.h); if (extras.farm) for (let r = 0; r < 4; r++) { f('#6a4a2e', 350, 140 + r * 4, 34, 3); for (let q = 0; q < 8; q++) f(r % 2 ? '#7ab04a' : '#5f9a45', 352 + q * 4, 140 + r * 4, 2, 2); } }
-  /* homes in rows among the restoration sites; the more of the town is restored, the more of them are lived in */
-  const ids = Object.keys(D.PROJECTS || {}).filter(k => D.PROJECTS[k].town === town && !D.PROJECTS[k].relic), restored = ids.filter(k => (stages[k] || 0) >= 4).length;
-  const lived = Math.min(1, .5 + .5 * restored / Math.max(1, ids.length)) - (st.ruined || 0) * (1 - restored / Math.max(1, ids.length));
-  const sites = siteLayout(town);
-  const hit = (a0, a1, b0, b1, c0, c1, d0, d1) => a0 < c1 && a1 > c0 && b0 < d1 && b1 > d0;
-  const blocked = (hx, w, base, h = 34) => (lm && hit(hx, hx + w, base - h, base, lm[1] - 4, lm[1] + 100, lm[2] - 96, lm[2]))
-    || (cottage && hit(hx, hx + w, base - h, base, cottage[0] - 6, cottage[0] + 92, cottage[1] - 42, cottage[1] + 2))
-    || sites.some(s => hit(hx, hx + w, base - h, base, s.X - 6, s.X + 38, s.Y - 4, s.Y + 34))
-    || hit(hx, hx + w, base - h, base, 288, 352, 178, 214);
-  const homes = [];
-  for (const [base, step] of [[150, 40], [192, 46], [230, 44], [284, 48], [318, 54]]) for (let i = 0; i * step < W; i++) {
-    const w = 22 + Math.floor(rnd() * 14), hgt = 14 + Math.floor(rnd() * 6), hx = Math.round(6 + i * step + rnd() * (step - w - 6)), hb = base + Math.floor(rnd() * 2);
-    if (hx + w > W - 4 || blocked(hx - 2, w + 4, hb)) continue; homes.push([hx, hb, w, hgt]); }
-  /* gardens and fences in front of some homes */
-  homes.forEach(([hx, hb, hw], k) => { if (k % 3 === 0) { f(mix(T.ground, '#3a2a1a', .35), hx, hb + 1, hw, 3); for (let q = 1; q < hw; q += 3) f(k % 2 ? st.leaf : pick(FLOWERS, rnd), hx + q, hb + 1, 2, 1); } else if (k % 3 === 1) { const fc = mix(st.walls[0], '#5a3a26', .6); for (let q = -3; q < hw + 3; q += 3) f(fc, hx + q, hb + 1, 1, 3); f(fc, hx - 3, hb + 2, hw + 6, 1); } });
-  homes.sort((a, b) => a[1] - b[1]).forEach(([hx, hb, hw, hh]) => { const on = rnd() < lived; META.homes.push([hx, hb, hw, hh, on]); home(P, hx, hb, hw, hh, st, on, rnd); });
-  /* trees between the homes and along the edges */
-  for (let i = 0; i < st.trees + 16; i++) { const tx = Math.floor(rnd() * W), tb = 132 + Math.floor(rnd() * 190); if (blocked(tx - 8, 16, tb, 26)) continue; if (st.pines) pine(P, tx, tb, 16 + Math.floor(rnd() * 12), st.leaf); else tree(P, tx, tb, 16 + Math.floor(rnd() * 10), st.leaf, rnd); }
-  /* the town's trade: market stalls, carts, lanterns, banners */
-  const clear = (sx, w, base) => !blocked(sx, w, base, 26);
-  if (st.stalls) for (const sx of [292, 330]) { f('#7a5236', sx, 214, 26, 8); f('#5a3a26', sx, 221, 26, 1); f('#5a3a26', sx + 1, 202, 2, 12); f('#5a3a26', sx + 23, 202, 2, 12); for (let k = 0; k < 4; k++) f(k % 2 ? '#f4ecd8' : '#b8483a', sx - 1 + k * 7, 198, 7, 6); for (let k = 0; k < 5; k++) f(pick(['#e0405a', '#f0d060', '#7ab04a', '#c87a3a'], rnd), sx + 3 + k * 4, 212, 3, 2); }
-  else { ell(mix(st.walls[0], '#5a5048', .5), 320, 200, 10, 3); f(mix(st.walls[0], '#5a5048', .4), 316, 190, 8, 9); f('#6aa8d8', 317, 191, 6, 2); f(mix(st.walls[0], '#5a5048', .3), 319, 184, 2, 6); f('#9cd0f0', 318, 182, 4, 2); }
-  if (st.swamp || town === 'hollow') for (const lx of [50, 190, 270, 470, 610]) if (clear(lx - 4, 10, 246)) { f('#5a4a3a', lx, 220, 2, 26); f('#3a2e24', lx - 2, 218, 6, 2); f(st.glow, lx - 2, 212, 6, 6); f(mix(st.glow, '#ffffff', .5), lx - 1, 213, 2, 2); META.lamps.push([lx + 1, 215, st.glow]); }
-  if (town === 'emberfall') for (const bx of [170, 300, 440, 580]) if (clear(bx, 14, 236)) { f('#3a2420', bx, 190, 2, 46); f('#c8483c', bx + 2, 192, 10, 16); f('#8a2a24', bx + 9, 192, 3, 16); f('#ffb04a', bx + 5, 197, 4, 4); }
-  if (town === 'ironpeak') for (const cx of [172, 226, 400]) if (clear(cx, 22, 248)) { f('#6a6a74', cx, 237, 20, 9); f('#8a8a94', cx, 237, 20, 1); f('#3a3a40', cx + 2, 246, 4, 4); f('#3a3a40', cx + 14, 246, 4, 4); f('#8a7a5a', cx + 3, 234, 6, 3); f('#b87a4a', cx + 10, 233, 6, 4); }
-  if (town === 'skyreach') for (let k = 0; k < 44; k++) f(['#c8483c', '#f0d060', '#3f7fbf', '#7ab04a'][k % 4], 10 + k * 14, 116 + Math.round(Math.sin(k / 2.2) * 3), 6, 5);
-  if (st.carts) for (const [cx, cy] of [[140, 250], [500, 248]]) if (clear(cx, 24, cy)) { f('#7a5236', cx, cy - 8, 20, 7); f('#5a3a26', cx, cy - 2, 20, 1); f('#3a3030', cx + 2, cy - 1, 4, 4); f('#3a3030', cx + 14, cy - 1, 4, 4); f('#d8b860', cx + 1, cy - 12, 18, 4); f('#c8a050', cx + 3, cy - 14, 13, 2); f('#5a3a26', cx + 20, cy - 6, 6, 1); }
-  /* townsfolk on the streets, and a few animals */
-  const people = 14 + Math.round(20 * lived);
-  for (let i = 0; i < people; i++) folk(P, 8 + Math.floor(rnd() * (W - 16)), [162, 244, 200][i % 3] + (i % 3 === 2 ? Math.floor(rnd() * 6) : 0), rnd);
-  if (!st.ruined) { for (let i = 0; i < 6; i++) chicken(P, 20 + Math.floor(rnd() * (W - 40)), 290 + Math.floor(rnd() * 24)); dog(P, 30 + Math.floor(rnd() * 560), 164, '#8a6a42'); }
-  /* restoration sites: a dug plot each, the piece at its stage; hidden relic sites are just grass */
-  sites.forEach(({ id, X, Y }) => {
-    const pj = D.PROJECTS[id], sg = stages[id] || 0; if (pj.relic && sg < 4) return;
-    ell(mix(T.ground, '#3a2a1a', sg >= 4 ? .12 : .3), X + 16, Y + 31, 17, 3);
-    ell('rgba(30,40,24,.28)', X + 16, Y + 31, 12, 2);
-    put(stagePiece(pj.art || id, sg), X, Y);
-    if (sg >= 4) {
-      /* Completed sites are used, rather than simply painted intact. Keep regional ground/architecture. */
-      const local = seeded(town+':'+id+':inhabited');
-      folk(P, X - 5, Y + 33, local); folk(P, X + 28, Y + 36, local);
-      const workshop = /forge|smith|workshop|mill/.test(id);
-      if (workshop) {
-        f('#795438', X + 28, Y + 25, 10, 3); f('#4b3932', X + 29, Y + 28, 2, 6); f('#4b3932', X + 35, Y + 28, 2, 6);
-        f('#acbac0', X + 30, Y + 23, 5, 2); f('#e9d39b', X + 31, Y + 22, 2, 1);
-      } else if (/well|garden|kitchen|inn/.test(id)) {
-        f('#946d43', X - 6, Y + 30, 6, 4); f('#d9bd73', X - 7, Y + 29, 8, 1);
-        f('#6c9156', X + 30, Y + 29, 3, 4); f('#d8a4a0', X + 30, Y + 28, 2, 2);
-      } else {
-        f('#927047', X + 28, Y + 30, 6, 5); f('#d8bd86', X + 28, Y + 31, 6, 1);
-      }
-    }
-    if (sg > 0 && sg < 4) { folk(P, X - 4, Y + 32, rnd); f('#a8845a', X - 1, Y + 24, 1, 6); }
-  });
-  /* the front: a quay with your boats at Saltmere, otherwise the meadow's edge (where your traps are laid) */
-  if (st.sea) { f('#8a8478', 0, 322, W, 6); f('#b8b0a0', 0, 322, W, 1); for (let q = 0; q < W; q += 12) f('#6a6458', q, 323, 1, 5); f('#3f7fb8', 0, 328, W, H - 328); for (let i = 0; i < 70; i++) f('#9cd0f0', Math.floor(rnd() * W), 332 + Math.floor(rnd() * 28), 5, 1);
-    let bx = 18; for (const t of (extras.boats || [])) { const b = (D.BOATS || []).find(r => r[2] === t); ship(P, bx, 344, t, b ? b[6] : '#a07a4f'); f('#5a4a3a', bx - 4, 326, 2, 18); bx += [0, 22, 34, 42, 52, 62][t] + 18; }
-    if (!(extras.boats || []).length) ship(P, 40, 344, 1, '#8a6a42'); }
-  else { for (let i = 0; i < 40; i++) { const gx = Math.floor(rnd() * W), gy = 326 + Math.floor(rnd() * 30); f(mix(T.ground, '#1e2a14', .35), gx, gy, 1, 3); f(mix(T.ground, '#1e2a14', .35), gx + 2, gy - 1, 1, 4); }
-    for (let i = 0; i < 26; i++) f(pick(FLOWERS, rnd), Math.floor(rnd() * W), 330 + Math.floor(rnd() * 26), 2, 2);
-    const fc = mix(st.walls[0], '#5a3a26', .6); for (const [a, b] of [[0, 90], [560, 640]]) { for (let q = a; q < b; q += 8) f(fc, q, 330, 2, 9); f(fc, a, 332, b - a, 1); f(fc, a, 336, b - a, 1); } }
-  if (extras.traps) for (const [tx, ty] of st.sea ? [[574, 327], [600, 327], [622, 327]] : [[200, 346], [330, 352], [456, 344]]) { if (st.sea) f('#8a8478', tx - 2, ty - 1, 12, 1); trapSmall(P, tx, ty); }
-  /* foreground: big trees framing the edges (nearer, so larger) */
-  if (!st.sea) for (const [tx, sz] of [[8, 46], [W - 10, 40]]) { if (st.pines) pine(P, tx, H + 2, sz, mix(st.leaf, '#000000', .1)); else tree(P, tx, H + 4, sz, mix(st.leaf, '#000000', .1), rnd); }
-  META.lived = lived; META.ruined = !!st.ruined; (A.sceneMeta = A.sceneMeta || {})[town] = META; c.meta = META; META = null;
-  return c;
-}
 
 /* ================= Districts: the part of town where each skill happens (240 x 100) =================
    Shown behind the activity at the same whole-pixel scale (3x) as the hero (24 x 32) and the tree, rock, fish or
@@ -397,5 +217,5 @@ function districtFor(town, kind, key, o = {}) {
   }
   return c;
 }
-Object.assign(A, { sceneFor, stagePiece, siteLayout, SCENE_W: W, SCENE_H: H, TOWN_STYLE: STYLE, townPainter: painter, townHome: home, townShip: ship, townSeeded: seeded, townMake: make, districtFor, DISTRICT_W: DW, DISTRICT_H: DH });
+Object.assign(A, { TOWN_STYLE: STYLE, townPainter: painter, townShip: ship, townSeeded: seeded, townMake: make, districtFor, DISTRICT_W: DW, DISTRICT_H: DH });
 })();

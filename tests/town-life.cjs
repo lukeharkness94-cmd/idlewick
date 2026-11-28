@@ -27,7 +27,7 @@ const { chromium } = require('playwright');
       const lit = cv.getContext('2d').getImageData(wx, wy, 1, 1).data[3]; return { phase: t.dataset.phase, tint: t.style.backgroundColor, glow: document.querySelector('.home-scene .town-glow').style.background, lit }; }); };
     const day = await at(13), night = await at(23.5), dusk = await at(19);
     assert.equal(day.phase, 'day'); assert.match(day.tint, /rgb\(255, 255, 255\)/, 'no tint by day'); assert.equal(day.lit, 0, 'windows are not lit by day');
-    assert.equal(night.phase, 'night'); const [r, g, bl] = night.tint.match(/\d+/g).map(Number); assert.ok(bl > r && r < 140, 'a dark blue tint at night: ' + night.tint); assert.ok(night.lit > 150, 'windows glow at night: ' + night.lit);
+    assert.equal(night.phase, 'night'); const [r, g, bl] = night.tint.match(/\d+/g).map(Number); assert.ok(bl > r && r < 175, 'a blue tint at night (gentler since the towns are painted at dusk): ' + night.tint); assert.ok(night.lit > 150, 'windows glow at night: ' + night.lit);
     assert.equal(dusk.phase, 'dusk'); assert.match(dusk.glow, /gradient/, 'a warm sky at dusk');
     /* 3 */
     await p.evaluate(() => { DQ.townTimeOverride = 13; DQ.townWeatherOverride = 'rain'; });
