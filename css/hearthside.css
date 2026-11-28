@@ -1253,3 +1253,8 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 /* short windows: the Capture card keeps its button, the sentence under its title goes (the button says the same) */
 @media(min-width:861px){html.short .ranch-side .panel:last-child>p{display:none}}
 @media(min-width:861px){html.short .ranch-side{gap:8px!important}html.short .ranch-side>.panel{padding-block:9px!important}}
+/* phones: the fitted farm and Scholarship pages keep their controls above the bottom bar in Silkscreen */
+@media(max-width:860px){
+ :root.type-hearthside:not(.type-classic) .farm-estate .estate-scenery{display:none!important}
+ :root.type-hearthside:not(.type-classic) .pen .pen-collect{font-family:var(--f-body)!important;letter-spacing:0!important}
+ :root.type-hearthside:not(.type-classic) .tech-ranks .btn{font-size:13px!important;letter-spacing:0!important;padding-inline:7px!important}}
