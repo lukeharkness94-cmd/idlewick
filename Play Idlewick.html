@@ -10370,7 +10370,8 @@ function hero(o = {}) {
   const spec = v => !v ? null : typeof v === 'string' ? { type: null, col: (R[v] || R.bronze).base } : v;
   const metal = c => ramp(c, { gl: .72 }), soft = c => ramp(c);
   /* a cape hangs behind everything */
-  if (o.cape) { const c = soft(o.cape); s.poly([[6, 15], [18, 15], [20, 29], [4, 29]], c); s.line(8, 18, 6, 28, null, c.lo); s.line(16, 18, 18, 28, null, c.lo); }
+  /* seen from the front the skill cape shows as a mantle over the shoulders (drawn after the body, below); a cape
+     hanging behind a front-facing chibi read as blue trousers (owner, 28 Nov 2026) */
   /* legs and boots */
   const legs = spec(o.legs), lt = legs ? (legs.type || 'plate') : null, lr = legs ? (lt === 'plate' ? metal(legs.col) : soft(legs.col)) : pants;
   s.rect(8, 23, 3, 5, lr); s.rect(13, 23, 3, 5, lr);
@@ -10387,6 +10388,7 @@ function hero(o = {}) {
   else if (bt === 'plate') { s.ell(7, 16, 2.4, 1.8, br); s.ell(16, 16, 2.4, 1.8, br); s.line(11, 16, 11, 20, null, br.lo); s.line(12, 16, 12, 20, null, br.hi); s.tone(9, 17, br, 4); s.tone(9, 18, br, 3); }
   else { s.fix(11, 15, tunic.lo); s.fix(12, 15, tunic.lo); s.fix(11, 16, tunic.out); }       /* the tunic's neck opening */
   if (bt !== 'robe') { s.rect(7, 21, 10, 1, belt); s.fix(11, 21, '#f2c84a'); s.fix(12, 21, '#c8962a'); }
+  if (o.cape) { const c = soft(o.cape); s.rect(6, 15, 12, 2, c); s.line(6, 16, 17, 16, null, c.lo); s.fix(6, 15, c.lo); s.fix(17, 15, c.lo); s.fix(11, 16, '#f2c84a'); s.fix(12, 16, '#c8962a'); }
   /* arms: sleeves and chunky fists; the right one holds the weapon */
   let sleeve = body && bt !== 'vest' ? br : tunic;
   if (!wipe) { s.rect(5, 16 + lift, 2, 5, sleeve); s.rect(5, 21 + lift, 2, 2, sk); s.tone(5, 16 + lift, sleeve, 3); }
