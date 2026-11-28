@@ -13,6 +13,8 @@ DQ.fmtK = n => {
   if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
   if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 1 : 2) + 'M';
   if (n >= 1e5) return Math.floor(n / 1e3) + 'K';
+  /* five-figure counts fit an item tile too (owner, 28 Nov 2026: "15,265" spilled over the picture) */
+  if (n >= 1e4) return (Math.floor(n / 100) / 10).toFixed(1).replace(/\.0$/, '') + 'K';
   return n.toLocaleString('en-US');
 };
 DQ.formatCoins = n => ['suffix', 'scientific'].includes(DQ.S?.settings?.numberNotation) ? DQ.fmtK(n) : DQ.fmt(n);

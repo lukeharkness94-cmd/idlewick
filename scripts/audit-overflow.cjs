@@ -16,6 +16,9 @@ const SIZES = [[1440, 900], [1280, 720], [390, 844]];
       for (const t of ['willowbrook', 'mossbarrow', 'saltmere']) S.towns[t] = { visited: true, boss: t !== 'saltmere' };
       for (const id of ['arrow_bronze', 'arrow_iron', 'bronze_sword', 'iron_sword', 'bow_oak', 'staff_oak', 'bronze_helm', 'iron_body', 'iron_legs', 'iron_shield', 'bread', 'raw_shrimp', 'log_normal', 'log_oak', 'ore_copper', 'bar_bronze', 'rune', 'seed_potato', 'cowhide', 'string'])
         if (D.ITEMS[id]) Q.give(id, id.startsWith('arrow') || id === 'rune' ? 250 : 12);
+      /* a five-figure stack, livestock in pens and seed stacks (owner, 28 Nov 2026: tile counts, Collect and seed chips) */
+      Q.give('feather', 15265); if (S.farm) { S.farm.pensBought = 2; S.farm.animals = [{ id: 'hen', name: 'Henrietta', stored: 5, fed: Date.now(), t: Date.now() }]; }
+      for (const c of D.CROPS.slice(0, 3)) Q.give('seed_' + c.id, 3153);
       S.coins = 25000; Q.fxDirty && Q.fxDirty(); Q.ui.renderDock && Q.ui.renderDock(); for (let i = 0; i < 12; i++) Q.closeModal();
       return Object.keys(Q.ui.V); });
     for (const page of pages) {
