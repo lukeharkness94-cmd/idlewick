@@ -1020,6 +1020,12 @@ html.calm .petted,html.calm .petted img{animation:none}
 /* Gathering cards (js/card_scale.js): a 96 px art box; the sprite stands on its ground line at its own whole-number scale */
 #view .illustrated-choices .illustrated-card.card-scaled>.choice-art{height:96px!important;min-height:96px!important;place-items:end center;padding-bottom:2px}
 #view .illustrated-card.card-scaled>.choice-art img{image-rendering:pixelated;object-fit:fill}
+/* the spot you are working: its level line gives way to "Working" and the progress bar runs along the card's foot, so
+   the name keeps its full height in the 180px card (28 Nov 2026: the name was squeezed to 10px and clipped) */
+#view .illustrated-choices .illustrated-card.card-scaled{position:relative}
+#view .illustrated-choices .illustrated-card.card-scaled>b{flex-shrink:0}
+#view .illustrated-choices .illustrated-card.card-scaled.active>small{display:none!important}
+#view .illustrated-choices .illustrated-card.card-scaled.active>.bar.prog{position:absolute;left:12px;right:12px;bottom:6px;margin:0}
 /* phone bottom bar: labels and counts at the 13px floor (27 Nov 2026 audit measured 12px labels and 11px counts) */
 @media(max-width:860px){.hub>span{font-size:13px!important;letter-spacing:-.01em}.hub .hubdot.num{font-size:13px!important;line-height:16px}}
 /* why the last task stopped: two lines at most in the rail, the whole sentence in its tooltip (27 Nov 2026 audit: a

@@ -21,7 +21,9 @@ light, a small-headed hero); `docs/rules-history.md` has the history.
 | Bosses, mini-bosses, tower bosses (large) | 64 × 64 | 3× on the combat stage (2× on laptops); the 32 × 32 sprite elsewhere |
 | Quest-giver portraits | 32 × 32 | 2× and 4× |
 | Fish | 32 × 16 | 3× |
-| Trees | 32 × 48 | 3× |
+| Trees | 32 × 48 | 2× on cards (shrubs and flax 1×), 3× in the woodcutting scene |
+| Ore boulders, object thieving marks | 32 × 32 | 2× on cards, 3× in the work scene |
+| Crops on plots, house furniture | 16 × 16 | the plot and the furniture card |
 
 Sprites are only ever scaled by whole numbers, with `image-rendering: pixelated` (the `pxa` class). `pixel_runtime.js`
 snaps each sprite to the nearest whole multiple of its native size after every page change. `Q.artImage('creature', id,
@@ -111,6 +113,16 @@ hand-drawn identity.
 (the rail and skill rows) and the boss trophy plaques. Each keeps one empty pixel round its edge so the outline shows,
 strokes are two pixels wide (lit on the top-left side), and no two skills or top-menu places share a picture
 (`node tests/art-pixel.cjs`). Item-type icons (fish, ore, helm...) reuse the item sprite.
+
+## Gathering pictures
+
+Trees, ore boulders, fishing-spot fish, crops, furniture, workers and the stalls, cauldron, hoard and vault marks are
+drawn in `js/pixel_nodes.js` (28 Nov 2026), which wraps the older drawings in `pixel_world.js` and `pixel_items.js`.
+Tree crowns are overlapping sphere-lit clumps (a darker back layer, lit front clumps, a few two-pixel leaf tufts),
+trunks are tapered with bark grain, and the bottom third keeps the trunk clear on its left so the axe meets bark. Each
+ore sits in a sphere-lit boulder with a flat base on the ground line; crystals are faceted (lit left face, shaded
+right face, a glint at the tip). Fish are built per column from a body profile, belly in its own ramp, with their own
+tails, fins and marks. Sizes on cards follow `js/card_scale.js`.
 
 ## Animation
 
