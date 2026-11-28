@@ -148,6 +148,17 @@ dated line to the history file.
   work scene to the backpack chip (the Hero portrait on phones), which gulps, at most one flight per 0.6 s with bursts
   merged; work and fight XP drifts into its skill's rail row (the phone bar's Skills tab) after `UI.afterImpact`, and the
   row's bar fills when it lands. None of it in simulations, forecasts, under a pop-up, calm or reduced motion.
+  **Polish pass** (owner, 28 Nov; docs/polish-pass.md is the standing reference for its eight stages): cosmetic only,
+  never a menu or style change; particles only inside game pictures (work scenes, fight stage, hearth, town scenes,
+  item art), never on interface chrome. **Weighted moments** (stage 1; js/weight_rules.js, js/weight.js,
+  `tests/polish-weight.cjs`): weight scales with significance. Each stage keeps one timings table in seconds that the
+  picture and the sound both read (`DQ.WEIGHT.T`), and its decisions (tier, sound, queue or not) are pure functions with
+  Node tests. Ordinary levels chime by tier; milestones (10/25/50/75/90/99, skills and Hero) get a click-through title
+  and a deeper chord, one moment for the biggest of several, queued behind a pop-up or a fight on the stage; finds glint,
+  light the scene and (rarest) title by `D.RARITY` band; sales drop more coins with a deeper clunk; crits and killing
+  blows stagger further and hit-stop the stage sprites under 80 ms. Hooked after the game changes; a click or key
+  finishes any effect; nothing in simulations, forecasts, time away or a hidden window; calm shows end states still;
+  own randomness only, never Math.random or the save; new sounds peak below -1 dBFS (`DQ.sfxPeak`).
 - **Music and sound are synthesised** (`js/audio.js`, no audio files): one theme per region plus title, combat and boss
   (`D.MUSIC`), played lo-fi (`D.MUSIC_LOFI`); ambience per town with ruined/mending/restored tiers (`D.AMBIENCE`). A new
   region needs a theme row and ambience. Work sounds land on each visible strike (`js/strike_sync.js`). Quest and boss
@@ -408,5 +419,5 @@ The runner covers everything; these are the ones to read when you touch an area.
 `card-packing-ui`, `catalogue-cards-ui`, `menu-density-ui`, `scripts/audit-overflow.cjs`. Art: `art-pixel`. Systems:
 `connected-systems`, `crosslinks`, `quest-progression`, `beastmastery`, `beast-capture`, `hunt-stalk`, `creature-roster`,
 `world-life`, `world-events-hindsight`, `story`, `combat-arts`, `base-gear`, `unique-levels`, `choice-order`,
-`offline-ceiling`, `live-notes`, `music`, `motion-clock`, `hearth-life`, `ui-feel`, `polish-sound`, `skill-realism`. HANDOFF.md has the
+`offline-ceiling`, `live-notes`, `music`, `motion-clock`, `hearth-life`, `ui-feel`, `polish-sound`, `polish-weight`, `skill-realism`. HANDOFF.md has the
 full list.

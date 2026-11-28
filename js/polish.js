@@ -14,6 +14,10 @@ const SAVE_KEY = 'dashboard-quest-save-v2', BK_KEY = 'dashboard-quest-backups';
 const CAT = { tab: 'ui', page: 'ui', quill: 'ui', click: 'ui', error: 'ui', equip: 'ui', mat_metal: 'ui', mat_leather: 'ui', mat_cloth: 'ui', mat_wood: 'ui', mat_paper: 'ui', mat_gem: 'ui', mat_food: 'ui', mat_potion: 'ui', buy: 'ui', sell: 'ui', coin: 'ui', start: 'ui', stop: 'ui', travel: 'ui',
   hit: 'combat', miss: 'combat', hurt: 'combat', eat: 'combat', boss: 'combat', death: 'combat',
   level: 'rewards', perk: 'rewards', ach: 'rewards', quest: 'rewards', unlock: 'rewards', gem: 'rewards', notify: 'rewards' };
+/* the weighted moments (js/weight.js): level chimes, milestone chords and finds are rewards, sales the interface, heavy
+   blows combat */
+for (let i = 0; i < 7; i++) { CAT['lvchime' + i] = 'rewards'; CAT['milestone' + i] = 'rewards'; CAT['find' + i] = 'rewards'; CAT['sale' + i] = 'ui'; }
+CAT.crit = 'combat'; CAT.killblow = 'combat';
 const BUZZ = { level: [18, 40, 18], perk: [14, 30, 14], ach: [18, 40, 18], quest: [18, 40, 18], unlock: [12, 30, 12], gem: [14], boss: [40], death: [90] };
 const sfx0 = DQ.sfx;
 DQ.sfx = name => {

@@ -46,7 +46,7 @@ function tone(f, dur, o = {}) {
 function noise(dur, o = {}) {
   if (!ctx) return; const t = ctx.currentTime + (o.at || 0);
   const n = Math.floor(ctx.sampleRate * dur), buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
-  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+  const R = o.rand || Math.random; for (let i = 0; i < n; i++) d[i] = R() * 2 - 1;
   const src = ctx.createBufferSource(); src.buffer = buf;
   const f = ctx.createBiquadFilter(); f.type = o.type || 'bandpass'; f.frequency.setValueAtTime(o.f || 1000, t); if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t + dur); f.Q.value = o.q || 1;
   const g = ctx.createGain(); g.gain.setValueAtTime(o.v || .15, t); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
@@ -149,7 +149,53 @@ const SFX = {
      520 to 980 Hz and back down 900 to 450 Hz) with one small bubble rising 640 to 1150 Hz */
   mat_potion: () => { const f = jit(2900, .03); tone(f, .14, { v: .022, a: .002, wet: true }); tone(f * 2.32, .08, { v: .007, a: .002 }); noise(.12, { f: 520, to: 980, q: 3, v: .05, at: .05 }); noise(.12, { f: 900, to: 450, q: 3, v: .04, at: .15 }); tone(jit(640), .04, { v: .012, at: .1, to: 1150 }); },
   discover: () => { tone(1047,.12,{type:'triangle',v:.075});tone(1568,.24,{type:'triangle',v:.065,at:.08});tone(2093,.38,{v:.045,at:.17}); },
+  /* Weighted moments (polish stage 1, 28 Nov 2026; js/weight_rules.js names them, js/weight.js times them). Their own
+     little generator for jitter and noise: the game's rolls (Math.random) are never drawn from by these. */
+  ...weighted(),
 };
+/* the weighted sounds: ordinary level chimes pitched by how many milestones are behind you, a deeper chord for each
+   milestone (99 the grandest), find chimes that grow longer by rarity band, sale clunks that deepen with the sum, and
+   heavier blows for crits and killing blows. Peaks stay below -1 dBFS at full volume (tests/polish-weight.cjs). */
+function weighted() {
+  let seed = 0x2545f491;
+  const wr = () => { seed ^= seed << 13; seed >>>= 0; seed ^= seed >>> 17; seed ^= seed << 5; seed >>>= 0; return seed / 4294967296; };
+  const wj = (f, r = .03) => f * (1 + (wr() * 2 - 1) * r);
+  const wn = (dur, o) => noise(dur, { ...o, rand: wr });
+  const W = DQ.WEIGHT || { T: { sale: { clunk: .5, stagger: .06 } } }, T = W.T;
+  const out = {};
+  /* an ordinary level: two soft bells a fifth apart; each milestone behind you lifts them a step (C, D, E, F, G, A) */
+  [0, 2, 4, 5, 7, 9].forEach((st, band) => { out['lvchime' + band] = () => { const r = 76 + st; bell(mtof(r), 0, .03); bell(mtof(r + 7), .085, .022); }; });
+  /* a milestone: a soft swelling chord that sits under the title, its root lower for each bigger mark, then a bell on
+     top as the title settles. 99 adds a low octave, a ninth and a falling cascade of bells */
+  [[60, [0, 4, 7, 12]], [57, [0, 4, 7, 12]], [55, [0, 4, 7, 12, 16]], [53, [0, 4, 7, 11, 14]], [50, [0, 4, 7, 12, 16]], [48, [-12, 0, 7, 12, 14, 16, 19]]].forEach(([root, chord], i) => {
+    const rank = i + 1, grand = rank === 6;
+    out['milestone' + rank] = () => {
+      const hold = (T.title && T.title.hold ? T.title.hold[i] : 1.5) + (T.title ? T.title.in : .25);
+      chord.forEach((d, j) => tone(mtof(root + d), hold + .6, { type: 'triangle', v: (grand ? .034 : .04) * (d < 0 ? 1.3 : 1), at: j * (grand ? .07 : .05), a: .18, wet: true }));
+      tone(mtof(root - 12), hold, { v: grand ? .05 : .035, a: .12 });
+      bell(mtof(root + 24), .22, .04); if (rank >= 4) bell(mtof(root + 31), .4, .028);
+      if (grand) [36, 31, 28, 24].forEach((d, j) => bell(mtof(root + d), .7 + j * .16, .026));
+    };
+  });
+  /* a find: a rising shimmer; uncommon three notes, rare five with a bell, epic seven with two bells and a longer tail */
+  [[3, .4, .05], [5, .65, .048], [7, .9, .044]].forEach(([n, len, v], i) => {
+    out['find' + (i + 1)] = () => { const steps = [0, 4, 7, 11, 12, 16, 19]; for (let j = 0; j < n; j++) tone(mtof(79 + steps[j]), len, { type: 'triangle', v, at: j * .055, wet: true });
+      if (i >= 1) bell(mtof(98), n * .055, .035); if (i >= 2) bell(mtof(103), n * .055 + .2, .028); };
+  });
+  /* a sale: coins land in the purse as the first coin arrives (T.sale.clunk); bigger sums add a dull purse thump that
+     deepens, and one clink per coin that drops, in step with the picture (T.sale.stagger) */
+  [[0, 1, 0], [1, 3, 150], [2, 5, 120], [3, 8, 90]].forEach(([band, coins, thump]) => {
+    out['sale' + band] = () => { const at = T.sale.clunk, st = T.sale.stagger;
+      if (thump) { wn(.11 + band * .03, { type: 'lowpass', f: 420 - band * 60, v: .12 + band * .03, at }); tone(wj(thump), .16 + band * .05, { type: 'triangle', v: .1 + band * .03, to: thump * .7, at }); }
+      for (let i = 0; i < coins; i++) { const f = wj(2350 - band * 120, .05) * (1 + (i % 3) * .06); tone(f, .08, { v: (band ? .028 : .05) - Math.min(.012, i * .0015), a: .002, at: at + i * st }); tone(f * 2.76, .04, { v: band ? .008 : .014, a: .002, at: at + i * st }); }
+    };
+  });
+  /* a crit lands harder: a low thud dropping to 55 Hz with a sharp crack on top; a killing blow deeper still, with a short
+     dull tail as the creature drops */
+  out.crit = () => { wn(.12, { type: 'lowpass', f: 700, v: .26 }); tone(wj(110), .2, { type: 'triangle', v: .22, to: 55 }); wn(.05, { f: 2600, q: 1.5, v: .12 }); };
+  out.killblow = () => { wn(.16, { type: 'lowpass', f: 520, v: .28 }); tone(wj(82), .32, { type: 'triangle', v: .26, to: 40 }); wn(.05, { f: 2200, q: 1.5, v: .11 }); wn(.3, { type: 'lowpass', f: 260, to: 120, v: .1, at: .12 }); };
+  return out;
+}
 /* Sounds that fire once per finished task are thinned out and varied so they never become a metronome */
 const TASK = new Set(['fish', 'wood', 'mine', 'thieve', 'sizzle', 'anvil', 'stitch', 'cast', 'bow', 'hit', 'miss']);
 /* soft interface sounds wait longer before they repeat, so rapid clicks never machine-gun (and a purchase that two
@@ -168,7 +214,7 @@ DQ.sfx = name => {
   } else if (now - (last[name] || 0) < (GAP[name] || 60)) return;
   const IMPORTANT = new Set(['level', 'quest', 'boss', 'death', 'restore', 'region', 'adventure', 'discover', 'unlock', 'ach', 'collection', 'unique']);
   recent.push(now); while (recent.length && now - recent[0] > 400) recent.shift();
-  if (recent.length > 5 && !IMPORTANT.has(name)) return;
+  if (recent.length > 5 && !IMPORTANT.has(name) && !/^(milestone|find|lvchime|sale)\d$/.test(name)) return;
   last[name] = now; played[name] = (played[name] || 0) + 1; try { SFX[name] && SFX[name](); } catch (e) {}
 };
 /* Strike sounds (20 Nov 2026): js/strike_sync.js plays the work sound as each swing lands on screen. While it does,
@@ -179,6 +225,23 @@ DQ.sfxStrike = name => {
   const now = performance.now(); if (now - (last['strike:' + name] || 0) < 140) return;
   last['strike:' + name] = now; try { SFX[name] && SFX[name](); } catch (e) {}
 };
+/* Measure one effect offline (tests, docs/polish-pass.md): the sound is rendered into an OfflineAudioContext through
+   the same gain staging as the effects bus at the given volumes (default: everything at full), with its reverb, and the
+   peak and RMS of what reaches the output are returned. Nothing is heard; the live context is put back at once. */
+DQ.sfxPeak = async (name, { vol = 1, master: mv = 1, seconds = 3.5 } = {}) => {
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext; if (!OAC || !SFX[name]) return null;
+  const off = new OAC(2, Math.ceil(44100 * seconds), 44100), keep = [ctx, master, sfxG, sverb];
+  const m = off.createGain(); m.gain.value = mv; m.connect(off.destination);
+  const g = off.createGain(); g.gain.value = vol * .8; g.connect(m);
+  const len = off.sampleRate * 2.6, buf = off.createBuffer(2, len, off.sampleRate); let s = 7;
+  for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) { s = (s * 16807) % 2147483647; d[i] = ((s / 2147483647) * 2 - 1) * Math.pow(1 - i / len, 2.4); } }
+  const cv = off.createConvolver(); cv.buffer = buf; const cg = off.createGain(); cg.gain.value = .32; cv.connect(cg); cg.connect(g);
+  try { ctx = off; master = m; sfxG = g; sverb = cv; SFX[name](); } finally { [ctx, master, sfxG, sverb] = keep; }
+  const out = await off.startRendering(); let pk = 0, sq = 0, n = 0;
+  for (let c = 0; c < out.numberOfChannels; c++) { const d = out.getChannelData(c); for (let i = 0; i < d.length; i++) { const x = Math.abs(d[i]); if (x > pk) pk = x; sq += x * x; n++; } }
+  return { peak: pk, dbfs: pk > 0 ? 20 * Math.log10(pk) : -Infinity, rms: Math.sqrt(sq / n) };
+};
+DQ.sfxNames = () => Object.keys(SFX);
 DQ.audioInit = init;
 DQ.audioApply = applyVolumes;
 DQ.setMuted = m => { DQ.S.settings.muted = m; applyVolumes(); DQ.roomRefresh && DQ.roomRefresh(); DQ.emit('settings'); };

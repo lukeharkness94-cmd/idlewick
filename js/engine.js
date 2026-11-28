@@ -96,7 +96,7 @@ function onAdv(from, to) {
     ['hirelings', D.HIRE.adv, 'Workers', 'users']
   ]) if (level > from && level <= to) { gains.push(title); DQ.notify({ kind: 'unlock', key: 'feature:' + page, page, icon, title: `${title} unlocked`, text: `You can now explore ${title.toLowerCase()} in World.`, action: { label: `Open ${title}`, fn: () => DQ.go(page) }, sound: 'unlock', ttl: 12000 }); }
   if (!DQ.sim.on) {
-    DQ.log(`Hero level ${to} reached.`, 'quest');
+    DQ.log(`Hero level ${to} reached.`, 'quest'); DQ.emit('herolevel', from, to); /* live play only: js/weight.js answers it */
   }
   DQ.notify({ kind: 'adv', key: 'adv', icon: 'star', col: '#d8a64a', title: `Hero level ${to}!`, text: (gains.length ? `Unlocked: ${gains.join(', ')}. ` : '') + `All experience now earns +${((to - 1) * .25).toFixed(1).replace(".0", "")}% bonus.`, sound: 'level', ttl: 14000, burst: true, from, to, gains: gains.slice() });
   DQ.achDirty = true; checkQuests(); DQ.emit('lvl');

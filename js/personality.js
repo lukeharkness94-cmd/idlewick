@@ -185,9 +185,11 @@ Q.on('splat', (side, text, kind = '', delay = 0) => {
     }, start - wind);
   } else if (side === 'foe' && !kind.includes('miss')) {
     /* a stagger when the blow visibly lands: pushed back and the knees give a little, more for a big hit */
-    const n = parseInt(text, 10) || 0, big = String(text).includes('!') || (m && n >= m.hp * .2), k = big ? 1.6 : 1;
+    /* crits and killing blows stagger it further and a little longer (polish stage 1: js/weight_rules.js hitTier) */
+    const n = parseInt(text, 10) || 0, w = Q.weight && Q.weight.hitOf(side, text, kind), big = String(text).includes('!') || (m && n >= m.hp * .2);
+    const k = w ? Math.max(w.stagger, big ? 1.6 : 1) : big ? 1.6 : 1, dur = w ? Math.round(w.staggerS * 1000) : big ? 460 : 360;
     const go = () => { const rig = foeRig(); if (!rig) return; const u = parseFloat(getComputedStyle(rig).getPropertyValue('--rig-unit')) || 4;
-      animate(rig, [{ translate: '0 0' }, { translate: `${Math.round(u * k)}px ${Math.round(u * .5 * k)}px`, offset: .22 }, { translate: `${-Math.round(u * .25 * k)}px 0`, offset: .6 }, { translate: '0 0' }], { duration: big ? 460 : 360, easing: 'cubic-bezier(.22,.7,.3,1)', id: 'lw-stagger' }); };
+      animate(rig, [{ translate: '0 0' }, { translate: `${Math.round(u * k)}px ${Math.round(u * .5 * k)}px`, offset: .22 }, { translate: `${-Math.round(u * .25 * k)}px 0`, offset: .6 }, { translate: '0 0' }], { duration: dur, easing: 'cubic-bezier(.22,.7,.3,1)', id: 'lw-stagger' }); };
     UI.afterImpact ? UI.afterImpact(go, start + T.impact) : setTimeout(go, start + T.impact);
   }
 });

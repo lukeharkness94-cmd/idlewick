@@ -212,7 +212,8 @@ DQ.on('loot', (m, drops, c) => {
   const from = $('#av-foe'); if (!from || S().settings.reduceFx || document.hidden) return;
   const a = from.getBoundingClientRect(), b = box.getBoundingClientRect(), fx = $('#fx');
   drops.slice(0, 4).forEach((d, i) => {
-    const it = D.ITEMS[d.id], el = document.createElement('div'); el.className = 'flyloot'; el.style.setProperty('--c', d.rar[2]); el.innerHTML = DQ.itemIco(it);
+    /* uncommon and rarer drops glint as they fly (polish stage 1, js/weight.js) */
+    const it = D.ITEMS[d.id], g = !d.coins && DQ.weight && DQ.weight.dropTier(d), el = document.createElement('div'); el.className = 'flyloot' + (g && g.glint ? ` glint glint-${g.band}` : ''); el.style.setProperty('--c', d.rar[2]); if (g && g.glint) el.style.setProperty('--glint-c', g.col); el.innerHTML = DQ.itemIco(it);
     el.style.left = DQ.toPage(a.left + a.width / 2) + 'px'; el.style.top = DQ.toPage(a.top + a.height / 2) + 'px'; fx.appendChild(el);
     const dx = DQ.toPage(b.left + 30 - (a.left + a.width / 2)), dy = DQ.toPage(b.top + 20 - (a.top + a.height / 2)), up = -60 - Math.random() * 40, sx = (Math.random() - .5) * 80;
     el.animate([{ transform: 'translate(-50%,-50%) scale(.4)', opacity: 0 }, { transform: `translate(calc(-50% + ${sx}px),calc(-50% + ${up}px)) scale(1.3)`, opacity: 1, offset: .35 }, { transform: `translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(.7)`, opacity: .9 }], { duration: 900, delay: i * 120, easing: 'cubic-bezier(.3,.7,.4,1)', fill: 'both' }).onfinish = () => el.remove();

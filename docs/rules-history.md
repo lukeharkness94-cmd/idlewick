@@ -381,3 +381,8 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   in either"): no companion is an ordinary animal; the four bond species and the skill and boss pets that were animals
   are re-themed as creatures of fable, ids and bonuses kept. Replaces Hearthwolf, Bramble boar, Duskwatch owl, Honeyclaw
   and the farm dog, chick, goldfish, squirrel, mole, alley cat, owl, piglet, boarlet and hermit crab companions.
+- 28 Nov 2026 (owner, on the polish pass, docs/polish-pass.md: "none of this should change the new menu or style, simply
+  the immersive feeling players get"): build all eight stages in order, each merged and published on its own by the
+  owner; everything cosmetic (reads the game, never changes it); particles only inside game pictures (work scenes, the
+  fight stage, the hearth, town scenes, item art), never on interface chrome. Stage 1, weighted moments, added the rule
+  in AGENTS.md section 2 (Motion).

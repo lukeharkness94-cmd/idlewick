@@ -78,13 +78,15 @@ const gulp = target => {
   target.classList.remove(cls); void target.offsetWidth; target.classList.add(cls);
   setTimeout(() => target.classList.remove(cls), 460);
 };
-const launch = (id, n, ev) => {
+const launch = (id, n, ev, tier) => {
   waiting = null; clearTimeout(waitTimer);
   if (quiet() || covered()) return;
   const from = sceneSource(ev), to = packTarget(), src = spriteOf(id); if (!from || !to || !src) return;
   lastFlight = performance.now(); feel.flights++;
   const a = from.getBoundingClientRect(), b = to.getBoundingClientRect(), size = 32;
-  const fly = document.createElement('span'); fly.className = 'gain-fly'; fly.setAttribute('aria-hidden', 'true');
+  /* a find of uncommon rarity or rarer glints as it flies (polish stage 1, js/weight.js); its timing is the stage's table */
+  const fly = document.createElement('span'); fly.className = 'gain-fly' + (tier && tier.glint ? ` glint glint-${tier.band}` : ''); fly.setAttribute('aria-hidden', 'true');
+  if (tier && tier.glint) fly.style.setProperty('--glint-c', tier.col);
   fly.innerHTML = `<img class="pxa" src="${src}" width="${size}" height="${size}" alt="">${n > 1 ? `<b>×${DQ.fmt ? DQ.fmt(n) : n}</b>` : ''}`;
   const x0 = page(a.left + a.width / 2 - size / 2), y0 = page(a.top + a.height / 2 - size / 2), x1 = page(b.left + b.width / 2 - size / 2), y1 = page(b.top + b.height / 2 - size / 2);
   Object.assign(fly.style, { left: x0 + 'px', top: y0 + 'px' });
@@ -95,23 +97,27 @@ const launch = (id, n, ev) => {
     { translate: '0 -14px', scale: '1', opacity: 1, offset: .14 },
     { translate: `${dx * .45}px ${dy * .45 + lift}px`, scale: '1', opacity: 1, offset: .55 },
     { translate: `${dx}px ${dy}px`, scale: '.5', opacity: .9 }
-  ], { duration: 760, easing: 'cubic-bezier(.45,.05,.35,1)' });
+  ], { duration: Math.round(((DQ.WEIGHT && DQ.WEIGHT.T.find.flight) || .76) * 1000), easing: 'cubic-bezier(.45,.05,.35,1)' });
   let landed = false; const land = () => { if (landed) return; landed = true; fly.remove(); if (!quiet()) gulp(packTarget()); };
   anim.onfinish = land; anim.oncancel = () => { landed = true; fly.remove(); };
+  if (tier && tier.glint && DQ.weight) DQ.weight.track(anim);
 };
-const fly = (id, n, ev) => {
+const fly = (id, n, ev, tier) => {
   if (quiet()) return;
   const now = performance.now();
-  if (now - lastFlight >= GAP && !waiting) return launch(id, n, ev);
-  /* a burst: the next flight carries everything gathered meanwhile */
-  if (waiting && waiting.id === id) waiting.n += n; else waiting = { id, n: (waiting && waiting.id === id ? waiting.n : 0) + n, ev };
-  clearTimeout(waitTimer); waitTimer = setTimeout(() => { const w = waiting; if (w) launch(w.id, w.n, w.ev); }, Math.max(0, lastFlight + GAP - now));
+  if (now - lastFlight >= GAP && !waiting) return launch(id, n, ev, tier);
+  /* a burst: the next flight carries everything gathered meanwhile (a find keeps its place at the front) */
+  if (waiting && waiting.tier && !tier) return;
+  if (waiting && waiting.id === id) waiting.n += n; else waiting = { id, n: (waiting && waiting.id === id ? waiting.n : 0) + n, ev, tier };
+  clearTimeout(waitTimer); waitTimer = setTimeout(() => { const w = waiting; if (w) launch(w.id, w.n, w.ev, w.tier); }, Math.max(0, lastFlight + GAP - now));
 };
 DQ.on('workcycle', ev => {
   const g = got; got = null; if (!g || !g.size || quiet()) return;
   /* the action's own output leads; otherwise the largest gain */
   const node = D.NODE && D.NODE[ev.kind + ':' + ev.id], recipe = ev.kind === 'recipe' && D.RECIPES[ev.id], main = node && node.item || recipe && Object.keys(recipe.out)[0];
-  const id = main && g.has(main) ? main : [...g].sort((a, b) => b[1] - a[1])[0][0];
+  let id = main && g.has(main) ? main : [...g].sort((a, b) => b[1] - a[1])[0][0];
+  /* a rare find made in this action flies instead, glinting by its rarity band (js/weight.js decided it already) */
+  const find = DQ.weight && DQ.weight.lastWorkFind(ev); if (find && g.has(find.id)) { id = find.id; return fly(id, g.get(id), ev, find.tier); }
   fly(id, g.get(id), ev);
 });
 DQ.flyToPack = (id, n = 1) => fly(id, n, null); /* for tests and future callers */

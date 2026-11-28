@@ -22,6 +22,16 @@ The equipped copy is stored separately from inventory. Equipping consumes exactl
 
 Shop prices use `UI.money(amount)`: a small visible coin and formatted amount, with an accessible currency label. Do not restore "8 coins each" prose on cards. Buy/sell totals show quantity and the coin amount; rare offers and inventory selling use the same visual treatment. Locked/owned rare cards retain their visible prices.
 
+## Polish pass, stage 1: weighted moments (28 Nov 2026, Claude Code)
+- Owner: eight cosmetic polish stages from docs/polish-pass.md, in order, each merged on its own; nothing changes a
+  menu, a style or the game. Stage 1 makes bigger moments feel bigger: `js/weight_rules.js` (loaded before audio.js:
+  `DQ.WEIGHT`, the timings table `T` in seconds and the pure decisions), `js/weight.js` (loaded before ui_feel.js:
+  title moments, find light and glint, coin drop, hit-stop; `DQ.weight` stats/log for tests), the weighted sounds in
+  audio.js `weighted()` (`lvchime0-5`, `milestone1-6`, `find1-3`, `sale0-3`, `crit`, `killblow`; categories in
+  polish.js) and `DQ.sfxPeak` (offline peak meter). The engine now emits `herolevel` (live play only); ui_feel's
+  flight takes a find tier; personality's stagger reads `DQ.weight.hitOf`; ui_extra's loot flight glints by band.
+  Test: `tests/polish-weight.cjs`.
+
 ## Hunting, Beastmastery and building costs (28 Nov 2026, Claude Code)
 - Owner: no animal in both skills; Hunting is real game you get resources from, hunted with a lure from Cooking whose
   favourite you find by trying; Beastmastery captures mythical beasts with crafted traps, nets and halters plus bait;
