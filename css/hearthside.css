@@ -1374,6 +1374,7 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 #view .pen .pen-acts{grid-column:1/-1;display:flex;gap:6px;min-width:0}
 #view .pen .pen-acts .btn{flex:1 1 0;min-width:0!important;justify-content:center}
 :root.type-hearthside:not(.type-classic) #view .seed-choices{grid-template-columns:repeat(auto-fill,minmax(186px,1fr))!important}
+@media(max-width:860px){:root.type-hearthside:not(.type-classic) #view .estate-supplies .seed-choices{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .ss-btn{padding-left:3px!important;padding-right:3px!important;gap:3px!important}
 :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .combat-x .ss-btn :is(svg,img,.ic){width:20px!important;height:20px!important}
 @layer shape { :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .combat-x .ss-btn{padding-left:4px!important;padding-right:4px!important} }

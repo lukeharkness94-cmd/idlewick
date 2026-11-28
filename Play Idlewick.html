@@ -6060,6 +6060,7 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 #view .pen .pen-acts{grid-column:1/-1;display:flex;gap:6px;min-width:0}
 #view .pen .pen-acts .btn{flex:1 1 0;min-width:0!important;justify-content:center}
 :root.type-hearthside:not(.type-classic) #view .seed-choices{grid-template-columns:repeat(auto-fill,minmax(186px,1fr))!important}
+@media(max-width:860px){:root.type-hearthside:not(.type-classic) #view .estate-supplies .seed-choices{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .ss-btn{padding-left:3px!important;padding-right:3px!important;gap:3px!important}
 :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .combat-x .ss-btn :is(svg,img,.ic){width:20px!important;height:20px!important}
 @layer shape { :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .combat-x .ss-btn{padding-left:4px!important;padding-right:4px!important} }
@@ -29044,28 +29045,34 @@ const wolfFront = (o = {}) => { const s = pane(), m = wolfMats(s, o), ey = o.eye
   o.extra && o.extra(s, m, 'front');
   return s; };
 const wolfSide = (o = {}) => { const s = pane(), m = wolfMats(s, o), ey = o.eye || '#f2b030';
+  /* standing alert, side-on: a level back, long legs, the head carried at shoulder height and the tall ears of the
+     front view (seven pixels, the far one just showing behind) */
+  s.poly([[21.5, 9], [21.8, 2.5], [24, 7]], m.furD);
   /* far legs in shadow */
-  tube(s, [[12, 21], [13, 25], [11.5, 28.6]], 1.4, 1.1, m.furD); tube(s, [[20.5, 21], [21, 28.6]], 1.4, 1.1, m.furD);
-  /* the body: rump, a lean waist, a deep chest; hackles up along the saddle */
-  s.ell(9.5, 18.5, 4.8, 4.6, m.fur); s.ell(15, 18.5, 6, 3.6, m.fur); s.ell(20.5, 18, 4.6, 5, m.fur); relight(s, m.fur, 15, 18.5, 11, 6);
-  s.ell(20.5, 21.6, 3.2, 1.8, m.pale, { flat: 3 }); s.ell(15, 21.8, 4, 1, m.pale, { flat: 2 });
-  s.ell(13.5, 14.6, 6.6, 1.6, m.saddle);
-  for (const [x, y] of [[8, 14.5], [11, 13], [14, 12.5], [17, 12.5], [20, 13]]) s.poly([[x - 1.8, y + 2], [x - .6, y - 1.6], [x + 1.6, y + 2]], m.saddle);
-  /* the brush, held low */
-  tube(s, [[6.5, 16.5], [3.8, 18.8], [2.5, 22.5], [2.8, 26]], 2.4, 1.1, m.tail); grain(s, m.tail, (x, y, l) => (y > 24 && l > 0 ? 1 : null)); contact(s, m.tail, m.fur);
-  /* near legs: a bent hind leg (the thigh over the flank), a straight foreleg */
-  s.ell(9.5, 20, 3.2, 3.6, m.leg); tube(s, [[8.5, 22], [7.5, 24.5], [9.5, 26.5], [9, 28.6]], 1.7, 1.2, m.leg); s.ell(10, 29, 2, .9, m.furD);
-  tube(s, [[22.5, 19.5], [23.5, 25], [23.5, 28.6]], 1.8, 1.3, m.leg); s.ell(24.5, 29, 2, .9, m.furD); relight(s, m.leg, 9, 18, 16, 10); contact(s, m.leg, [m.fur, m.pale]);
-  /* the head, low and forward, ears up */
-  s.poly([[23.5, 15.5], [24, 10], [27, 14.5]], m.head);
-  s.ell(25.5, 16.5, 3.8, 3.4, m.head); s.poly([[26, 14.5], [31, 16.5], [31, 18.5], [27, 19.5]], m.head); relight(s, m.head, 25, 14, 6, 5);
-  s.poly([[26, 19], [30.5, 18.5], [29, 20.6], [26, 20.6]], m.pale); s.ell(22.8, 18, 1.6, 2.6, m.pale, { flat: 3 }); contact(s, [m.head, m.pale], m.fur);
+  tube(s, [[11, 19], [10.5, 23.5], [12, 26.5], [11.5, 28.6]], 1.5, 1.1, m.furD); tube(s, [[19.5, 19], [19.8, 28.6]], 1.5, 1.1, m.furD);
+  /* the brush, hanging low behind */
+  tube(s, [[6.5, 14], [4.2, 15.4], [2.8, 18.4], [2.4, 22.6]], 2.6, 1, m.tail); grain(s, m.tail, (x, y, l) => (y > 20 ? 0 : y > 18 && l > 0 ? 1 : null));
+  /* the body: rump, a lean waist, a deep chest */
+  s.ell(8.5, 16.5, 3.8, 3.6, m.fur); s.ell(14, 16.6, 7.5, 3.1, m.fur); s.ell(20, 16.8, 4, 4, m.fur);
+  /* the neck rising to the head */
+  s.poly([[18.5, 13.5], [22.5, 8.5], [26, 10.5], [24, 18]], m.fur); relight(s, m.fur, 14, 14, 11, 6); contact(s, m.tail, m.fur);
+  s.ell(13.5, 13.9, 6.5, 1.1, m.saddle); s.poly([[17, 13.6], [19.5, 11.2], [21.5, 10.8], [20, 13.4]], m.saddle);
+  s.ell(20.5, 19.2, 2.8, 1.6, m.pale, { flat: 3 }); s.ell(14.5, 19.5, 4.2, .9, m.pale, { flat: 2 });
+  s.ell(23.2, 15.6, 1.2, 2.4, m.pale, { flat: 3 });
+  /* near legs: the hind leg with its hock, a straight foreleg, white socks */
+  s.ell(9, 18, 3, 3.4, m.leg); tube(s, [[8.5, 20], [7.6, 23.5], [9.5, 26.2], [9.2, 28.6]], 1.7, 1.2, m.leg);
+  tube(s, [[21.5, 19], [22, 24.5], [22, 28.6]], 1.8, 1.3, m.leg); relight(s, m.leg, 9, 16, 16, 10); contact(s, m.leg, [m.fur, m.pale]);
+  s.rect(8, 28, 3, 2, m.pale); s.rect(21, 28, 3, 2, m.pale);
+  /* the head: a wedge narrowing to the nose, pale cheek ruff, the near ear tall and pricked */
+  s.ell(24.6, 10.2, 3.6, 3.2, m.head); s.poly([[25.5, 8.6], [31, 10.2], [31, 12.2], [26, 13]], m.head); relight(s, m.head, 24, 8, 6, 4);
+  s.poly([[26, 12.4], [30.5, 12.2], [29, 13.8], [26, 13.8]], m.pale); s.poly([[22.2, 10.5], [25.5, 11.5], [25, 14], [22.4, 13.6]], m.pale);
+  s.poly([[22.5, 8.6], [23.4, 1.6], [26, 7.6]], m.head); contact(s, [m.head, m.pale], m.fur);
   s.outline();
-  dots(s, [[24, 12], [24, 13], [25, 14]], m.saddle, 1);
-  s.fix(31, 16, WOLF_NOSE); s.fix(30, 16, '#3a3038');
-  dots(s, [[27, 18], [28, 18], [29, 18], [30, 18]], m.saddle, 0); s.fix(28, 19, WOLF_TOOTH); s.fix(30, 19, WOLF_TOOTH); s.fix(27, 17, '#a85a5e');
-  dots(s, [[25, 14], [26, 14], [27, 14]], m.saddle, 0);
-  eye(s, 26, 15, { kind: 'glow', col: ey });
+  dots(s, [[23, 3], [23, 4], [23, 5], [24, 6]], m.saddle, 1);
+  s.fix(31, 10, WOLF_NOSE); s.fix(30, 10, '#3a3038');
+  dots(s, [[27, 12], [28, 12], [29, 12], [30, 12]], m.saddle, 0); s.fix(28, 13, WOLF_TOOTH); s.fix(30, 13, WOLF_TOOTH); s.fix(26, 12, '#a85a5e');
+  dots(s, [[25, 8], [26, 8], [27, 8]], m.saddle, 0);
+  eye(s, 26, 9, { kind: 'glow', col: ey });
   o.extra && o.extra(s, m, 'side');
   return s; };
 own('wolf', () => wolfFront(), () => wolfSide());
@@ -29098,27 +29105,31 @@ const direFront = () => { const s = pane(), m = direMats(s);
   for (const [x, y] of [[12, 8], [12, 9], [12, 10], [13, 11], [12, 13], [11, 14]]) s.fix(x, y, SCAR);
   return s; };
 const direSide = () => { const s = pane(), m = direMats(s);
-  /* the tail straight out behind, bristling */
-  tube(s, [[6, 15], [3, 16], [1, 18.5]], 2.2, 1.2, m.fur);
-  tube(s, [[10, 20], [11.5, 25], [10, 28.6]], 1.8, 1.4, m.legF); tube(s, [[21, 21], [21.5, 28.6]], 1.8, 1.4, m.legF);
-  /* a body that rises to the hump of its shoulders */
-  s.ell(9, 17.5, 5, 4.6, m.fur); s.ell(14, 17.5, 6, 4.4, m.fur); s.ell(20, 16, 6.4, 6.4, m.fur); relight(s, m.fur, 14, 13, 12, 8);
+  /* the far ear, then the tail straight out behind, bristling */
+  s.poly([[21.5, 10], [22, 4], [24, 8]], m.legF);
+  tube(s, [[6, 14.5], [3, 15.5], [1, 18]], 2.2, 1.2, m.fur);
+  tube(s, [[10.5, 20], [11.5, 24.5], [10.5, 28.6]], 1.9, 1.5, m.legF); tube(s, [[20.5, 20], [21, 28.6]], 1.9, 1.5, m.legF);
+  /* a big body: the back level, the shoulders deep and heavy */
+  s.ell(9, 16.5, 5, 4.4, m.fur); s.ell(14.5, 16.6, 6.5, 4.2, m.fur); s.ell(20.5, 16, 5.6, 5.6, m.fur);
+  s.poly([[19, 12], [23, 8.6], [27, 12], [24.5, 20]], m.fur); relight(s, m.fur, 14, 12, 12, 8);
   swap(s, m.fur, m.grizzle, (x, y) => (x * 7 + y * 3) % 9 === 0 && y < 21);
-  for (const [x, y, h] of [[7, 13.5, 2], [10, 13, 2.6], [13, 12.5, 3], [16, 11, 3.6], [19, 9.6, 4], [22, 10, 3.4]]) s.poly([[x - 2, y + 2], [x - 1, y - h], [x + 1.8, y + 2]], m.hackle);
+  /* black hackles standing up along the neck and back */
+  for (const [x, y, h] of [[9, 12.6, 1.4], [12, 12.2, 1.8], [15, 11.8, 2.2], [18, 11, 2.6], [21, 9.6, 2.6]]) s.poly([[x - 1.8, y + 2], [x - .8, y - h], [x + 1.6, y + 2]], m.hackle);
   /* the near legs, thick */
-  s.ell(8.5, 19.5, 3.4, 3.8, m.leg); tube(s, [[8.5, 21], [7.5, 24.5], [9.5, 26.5], [9, 28.6]], 2, 1.4, m.leg);
-  tube(s, [[22, 19], [23.5, 25], [23.5, 28.6]], 2.3, 1.6, m.leg); relight(s, m.leg, 12, 17, 16, 10); contact(s, m.leg, m.fur);
-  s.ell(10, 29, 2.2, .9, m.legF); s.ell(24.5, 29, 2.4, .9, m.legF);
-  /* the head, low and huge, the jaws open */
-  s.poly([[23, 14], [23.5, 8.5], [26, 12.5]], m.head); s.set(23, 10, null);
-  s.ell(26, 15.5, 4.2, 3.8, m.head); s.poly([[27, 13.4], [31.4, 15.6], [31.4, 17.4], [27, 17.4]], m.head); relight(s, m.head, 25, 13, 6, 5); contact(s, m.head, m.fur, 0);
-  s.poly([[25, 18.4], [31, 18.6], [29.5, 21.8], [25, 21.4]], m.muzzle); s.edges(m.muzzle);
-  s.poly([[27, 17.4], [31, 17.4], [31, 18.4], [27, 18.6]], m.mouth);
+  s.ell(8.5, 18.5, 3.4, 3.8, m.leg); tube(s, [[8.5, 20.5], [7.5, 24], [9.5, 26.4], [9, 28.6]], 2, 1.4, m.leg);
+  tube(s, [[22, 19], [23, 24.5], [23, 28.6]], 2.3, 1.6, m.leg); relight(s, m.leg, 12, 16, 16, 10); contact(s, m.leg, m.fur);
+  s.ell(10, 29, 2.2, .9, m.legF); s.ell(24, 29, 2.4, .9, m.legF);
+  /* the head, big and level with the back, jaws open; the near ear tall with its torn notch */
+  s.ell(25.6, 12, 3.8, 3.4, m.head); s.poly([[27, 10.2], [31.4, 11.8], [31.4, 13.6], [27, 14]], m.head); relight(s, m.head, 25, 10, 6, 5);
+  s.poly([[22.6, 10.4], [23.6, 3.4], [26.6, 9]], m.head); s.set(24, 6, null); s.set(24, 5, null);
+  contact(s, m.head, m.fur, 0);
+  s.poly([[25.5, 15], [31, 15], [29.5, 18], [25.5, 17.6]], m.muzzle); s.edges(m.muzzle);
+  s.poly([[27, 14], [31, 13.6], [31, 15], [27, 15]], m.mouth);
   s.outline();
-  s.fix(31, 15, '#16100e'); s.fix(30, 15, '#3a3034');
-  for (const x of [27, 29, 31]) s.fix(x, 17, FANG); for (const x of [28, 30]) s.fix(x, 19, FANG); s.fix(26, 17, '#3a1a20');
-  dots(s, [[25, 12], [26, 12], [27, 13]], m.head, 0); s.fix(26, 14, '#ffd090'); s.fix(27, 14, DIRE_EYE);
-  for (const [x, y] of [[26, 11], [27, 12], [28, 13], [28, 15]]) s.fix(x, y, SCAR);
+  s.fix(31, 12, '#16100e'); s.fix(30, 12, '#3a3034');
+  for (const x of [27, 29, 31]) s.fix(x, 14, FANG); for (const x of [28, 30]) s.fix(x, 15, FANG); s.fix(26, 14, '#3a1a20');
+  dots(s, [[25, 9], [26, 9], [27, 10]], m.head, 0); s.fix(26, 11, '#ffd090'); s.fix(27, 11, DIRE_EYE);
+  for (const [x, y] of [[26, 8], [27, 9], [28, 10], [28, 12]]) s.fix(x, y, SCAR);
   return s; };
 own('dire_wolf', direFront, direSide);
 
