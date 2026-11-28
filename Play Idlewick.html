@@ -4683,7 +4683,10 @@ html.calm .lw-zzz { display:none; }
 </style>
 <style>/* Hearthside Journal: one material language and clear action hierarchy across the existing game. */
 :root{--ground:#18251f;--panel:#23352b;--panel2:#2c4034;--line:#425a4a;--line2:#61745f;--ink:#f1ebdf;--mute:#c0cbbb;--brass:#d7b16a;--brass-hi:#f4d69e;--brass-lo:#946638;--good:#8ac8a3;--bad:#f29286;--warn:#e8c27d;--hs-action-ink:#211b12;--hs-paper-shadow:rgba(0,0,0,.13);--backdrop-wash:rgba(24,37,31,.94)}
-:root.type-hearthside{--f-display:'Cinzel','Alegreya SC',Georgia,serif;--f-body:'Alegreya Sans',system-ui,sans-serif;--f-ui:'Alegreya Sans',system-ui,sans-serif;--f-mono:'Alegreya Sans',system-ui,sans-serif}
+:root.type-hearthside{--f-display:'Silkscreen','Pixelify Sans',monospace;--f-body:'Pixelify Sans','Alegreya Sans',system-ui,sans-serif;--f-ui:'Pixelify Sans','Alegreya Sans',system-ui,sans-serif;--f-mono:'Pixelify Sans','Alegreya Sans',monospace}
+/* phones: pixel lettering for labels only; sentences in a book face (owner, 28 Nov 2026) */
+@media (max-width:860px){:root.type-hearthside:not(.type-classic){--f-body:'Alegreya Sans',system-ui,sans-serif}}
+:root.type-classic{--f-display:'Cinzel','Alegreya SC',Georgia,serif;--f-body:'Alegreya Sans',system-ui,sans-serif;--f-ui:'Alegreya Sans',system-ui,sans-serif;--f-mono:'Alegreya Sans',system-ui,sans-serif}
 .type-sample-hearthside b{font-family:'Cinzel',serif}.type-sample-hearthside span{font-family:'Alegreya Sans',sans-serif}
 :root.type-hearthside body{font-size:18px;font-weight:400}
 :root.type-hearthside :is(button,input,textarea){font-weight:500;font-variant-numeric:lining-nums tabular-nums}
@@ -5850,6 +5853,51 @@ html.calm :is(.packchip.pack-gulp,.h-hero.pack-bounce){animation:none}
 :where(html.lw-cursor) :where(button,[data-do],a[href],[role=button],[role=tab],[role=switch],summary,label[for]){cursor:var(--cur-hand)}
 :where(html.lw-cursor) :where(button:disabled){cursor:var(--cur-quill)}
 :where(html.lw-cursor) :where(input:not([type=range],[type=checkbox],[type=radio],[type=button],[type=submit]),textarea,[contenteditable=true]){cursor:text}
+
+/* ===================== Pixel frames (owner, 28 Nov 2026) =====================
+   "I want the entire interface ... to take [this pixel art direction] ... a darker theme than now." The owner chose
+   bevelled frames: every panel is dark wood in a frame (a near-black rim, a lit top-left bevel, a shaded lower edge,
+   brass pins in its corners, a fine plank grain); every control is a raised bevel in its own colour (the rim is part
+   of its shading, not a separate outline); a panel inside a panel is a sunk well. Corners are square-ish (3-4 px).
+   The shape layer (css/shape.css) reads these tokens, so every control takes the bevel without listing them. */
+:root[data-theme="dark"]{
+  --ground:#0b0c10;--panel:#2b2019;--panel2:#33261e;--line:#4a3a2e;--line2:#6a5440;--ink:#efe3c4;--mute:#b8a888;
+  --brass:#d9a441;--brass-hi:#f6d47a;--brass-lo:#8a6224;--good:#7ac46a;--bad:#e8705e;--warn:#e8c060;--hs-action-ink:#1c1206;
+  --backdrop-wash:rgba(9,10,14,.9);
+  --px-rim:#0e0907;--px-hi:#5e4736;--px-hi2:#46352a;--px-lo:#1a120e;--px-well:#18110d;--px-well-hi:#33271e;
+  --paper-grain:repeating-linear-gradient(180deg,transparent 0 17px,rgba(0,0,0,.2) 17px 18px,transparent 18px 19px,rgba(255,220,170,.025) 19px 20px);
+  --paper-mottle:none;
+  --paper-edge:inset 0 2px 0 var(--px-hi),inset 2px 0 0 var(--px-hi2),inset 0 -2px 0 var(--px-lo),inset -2px 0 0 var(--px-lo);
+  --paper-lift:0 0 0 2px var(--px-rim),0 5px 0 2px rgba(0,0,0,.32);
+  --px-pin:radial-gradient(circle at 3px 3px,#ffe08a 0 .9px,#c8902e 1px 1.8px,#5a3c14 1.9px 2.6px,transparent 2.7px);
+  --r-act:3px;--r-panel:4px;--r-info:2px;
+  --act-fill:#47372b;--act-fill-on:#6a4c1e;
+  --act-lift:0 0 0 2px var(--px-rim),inset 0 2px 0 #6e5844,inset 0 -3px 0 #281d16,0 4px 0 2px rgba(0,0,0,.3);
+  --act-lift-hi:0 0 0 2px var(--px-rim),inset 0 2px 0 #8a6e52,inset 0 -3px 0 #281d16,0 5px 0 2px rgba(0,0,0,.3);
+  --act-glow:rgba(246,212,122,.0);
+  --nav-on:#b0822e;--nav-on-hi:#d6a84c;--nav-ink:#1c1206;
+  --sel-bevel:0 0 0 2px #2a1a06,inset 0 2px 0 #c89a40,inset 0 -3px 0 #3a2810,0 4px 0 2px rgba(0,0,0,.3);
+  --info-fill:rgba(0,0,0,.28);--pip-off:#3a2c22}
+html[data-theme="dark"] body{background-color:var(--ground)}
+/* panels: framed wood with brass pins */
+:root[data-theme="dark"] .panel:not(.panel .panel,.home-scene,.farm-work),:root[data-theme="dark"] :is(.sidebar,#hud){
+  background-color:var(--panel);background-image:var(--px-pin),var(--px-pin),var(--px-pin),var(--px-pin),var(--paper-grain);
+  background-size:6px 6px,6px 6px,6px 6px,6px 6px,auto;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,repeat;
+  background-position:3px 3px,calc(100% - 3px) 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),0 0;background-blend-mode:normal;
+  box-shadow:var(--paper-edge),var(--paper-lift)}
+/* a panel inside a panel, and the quiet boxes inside one: sunk wells */
+:root[data-theme="dark"] .panel .panel:not(button,[data-do]){background-color:var(--px-well);background-image:none;box-shadow:inset 2px 2px 0 #0a0706,inset -2px -2px 0 var(--px-well-hi)}
+/* the main action: a green bevel (the gold one was the loudest thing on every page); danger is red */
+:root[data-theme="dark"] :is(.btn,button).primary:not(:disabled){background:#3f8a4f;color:#f2ecd0;text-shadow:0 1px 0 #10200e;
+  box-shadow:0 0 0 2px #0b1a0e,inset 0 2px 0 #6ab878,inset 0 -3px 0 #24552f,0 4px 0 2px rgba(0,0,0,.3)!important}
+:root[data-theme="dark"] :is(.btn,button).primary:not(:disabled):hover{background:#479a59}
+/* bars: a dark trough with brass end caps; the fill keeps a lit top edge */
+:root[data-theme="dark"] .bar{border-radius:1px;background:#0a0707;box-shadow:0 0 0 1px #000,inset 0 1px 0 rgba(255,255,255,.04);border-left:2px solid #c8902e;border-right:2px solid #c8902e}
+:root[data-theme="dark"] .bar>i{border-radius:0;background-image:linear-gradient(180deg,rgba(255,255,255,.28) 0 1px,transparent 1px 60%,rgba(0,0,0,.18))}
+/* locked pictures: a pale silhouette that still reads on dark wood */
+:root[data-theme="dark"] :is(.blackout img,.blackout .ic,.blackout .gico,.blackout canvas,.activity-stage .blackout img){filter:brightness(0) invert(.9) opacity(.3)!important}
+/* pixel lettering is wider: the rail grows so every skill name shows whole ("never shrink text to fit") */
+@media(min-width:861px){#app{grid-template-columns:206px minmax(0,1fr)}}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
@@ -6030,7 +6078,7 @@ html.calm .activity-scene.rigged .scene-worker,html.calm .activity-scene.rigged 
   :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(:disabled,.locked):hover{box-shadow:var(--act-lift-hi)!important;translate:0 -1px}
   html.calm :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):hover{translate:none}
   :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):is(.on,.selected,.active,.current,.here,[aria-selected=true],[aria-pressed=true],[aria-current=page]){
-    background:linear-gradient(180deg,var(--nav-on-hi),var(--nav-on))!important;color:var(--ink)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),var(--act-lift),0 0 18px -6px var(--act-glow)!important}
+    background:var(--nav-on)!important;color:var(--nav-ink,var(--ink))!important;box-shadow:0 0 0 2px #2a1a06,inset 0 2px 0 #f6d47a,inset 0 -3px 0 #6a4614,0 4px 0 2px rgba(0,0,0,.3)!important}
 
   /* ---------- every other control floats: no outline, a raised fill and a soft shadow ----------
      (owner, 27 Nov 2026: "we can just either make it float on over or have a slight backdrop so its obvious it's
@@ -6128,9 +6176,11 @@ html.calm .activity-scene.rigged .scene-worker,html.calm .activity-scene.rigged 
   .fancy::before,.fancy::after{border-color:transparent!important}
 
   /* rings drawn with box-shadow: the line goes, any soft glow stays */
-  :is(.nav.on,.hub.on,.swatch,.swatch.on,.goal-choice.on,.region-row.on,.ss-btn.on,.bd-opt.on,.mini-card.on,.letter-opt.on,
-      .beast-choice.on,.gt.on,.mu-t.sel,.beast.quest-study,.now.here,.cw-dt,.cw-dt.mine,.art-card .art-dot,#topnav .tnav .hubdot){
+  :is(.swatch,.swatch.on,.beast.quest-study,.now.here,.cw-dt,.cw-dt.mine,.art-card .art-dot,#topnav .tnav .hubdot){
     box-shadow:none!important}
+  /* a selected control keeps its pixel bevel, in brass (owner, 28 Nov 2026: bevelled frames) */
+  :is(.nav.on,.hub.on,.goal-choice.on,.region-row.on,.ss-btn.on,.bd-opt.on,.mini-card.on,.letter-opt.on,.beast-choice.on,.gt.on,.mu-t.sel){
+    box-shadow:var(--sel-bevel)!important}
   .pen.sel{outline:0!important}
   .avatar.boss{box-shadow:0 0 28px -4px var(--c)!important}
   .plot.ripe{box-shadow:0 0 22px -6px var(--c)!important}
@@ -6162,7 +6212,7 @@ html.calm .activity-scene.rigged .scene-worker,html.calm .activity-scene.rigged 
   .encounter-arena #av-foe.foe-guide:hover{filter:brightness(1.08)}
 
   /* dark theme: a locked silhouette is a pale shape, not a black one with a drawn edge */
-  :root[data-theme="dark"] :is(.sil,img.sil){filter:brightness(0) invert(.86) opacity(.3)!important}
+  :root[data-theme="dark"] :is(.sil,img.sil){filter:brightness(0) invert(.9) opacity(.34)!important}
 
   /* things whose outline was all they had now sit on a soft tint */
   :is(.wb-activity,.wb-totals>b,.gl-dot,.tw-floor:not(.done) .tw-n,.tw-dot:not(.part,.on),.boss-checklist li:not(.done) .bc-mark,.need-tile:not(button),.tw-prize){background-color:var(--info-fill)!important}
@@ -23504,13 +23554,16 @@ if (settings0) UI.V.settings = () => settings0() + `<section class="panel"><div 
 
 </script>
 <script>
-/* Lettering: Hearthside defaults to bundled Cinzel headings and Alegreya Sans reading/UI text.
-   Storybook, Adventurer, Pixel and Original remain available, and explicit saved choices are preserved.
+/* Lettering: Hearthside, the default, is pixel lettering (owner, 28 Nov 2026: Silkscreen headings, Pixelify Sans for
+   everything else on desktop; on phones sentences keep Alegreya Sans and only labels are pixel). Classic keeps the old
+   Cinzel + Alegreya Sans; Storybook, Adventurer and Original remain. The old separate Pixel choice is the default now.
    All fonts are local and embedded by the standalone packager. */
 (() => {
 const DQ = window.DQ, UI = DQ.ui, root = document.documentElement;
-const OPTS = [['hearthside', 'Hearthside', 'Cinzel + Alegreya Sans'], ['storybook', 'Storybook', 'Cinzel + Alegreya'], ['adventurer', 'Adventurer', 'MedievalSharp + Alegreya'], ['pixel', 'Pixel', 'Silkscreen + Pixelify'], ['original', 'Original', 'Alegreya Sans']];
-const apply = () => { const v = (DQ.S && DQ.S.settings && DQ.S.settings.lettering) || 'hearthside'; OPTS.forEach(([k]) => root.classList.toggle('type-' + k, k === v)); };
+const OPTS = [['hearthside', 'Pixel', 'Silkscreen + Pixelify'], ['classic', 'Classic', 'Cinzel + Alegreya Sans'], ['storybook', 'Storybook', 'Cinzel + Alegreya'], ['adventurer', 'Adventurer', 'MedievalSharp + Alegreya'], ['original', 'Original', 'Alegreya Sans']];
+const apply = () => { const st = DQ.S && DQ.S.settings; if (st && st.lettering === 'pixel') st.lettering = 'hearthside'; const v = (st && st.lettering) || 'hearthside';
+  /* Classic is the Hearthside layout in its old book faces */
+  OPTS.forEach(([k]) => root.classList.toggle('type-' + k, k === v || (k === 'hearthside' && v === 'classic'))); root.classList.remove('type-pixel'); };
 DQ.applyLettering = apply; apply();
 UI.DO.lettering = v => { if (!OPTS.some(o => o[0] === v)) return; DQ.S.settings.lettering = v; apply(); DQ.save && DQ.save(); UI.render(false); };
 const settings0 = UI.V.settings;

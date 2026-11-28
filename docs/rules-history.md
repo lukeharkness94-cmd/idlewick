@@ -319,3 +319,7 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   all code and references to there being a light theme." Replaces "light parchment by default, dark theme available"
   and the Theme setting (Dark / Light / Match device) with its L shortcut; css/light.css and every light-only rule are
   gone and tests check the dark theme only.
+- 28 Nov 2026 (owner): sent pixel-art references and chose "Bevelled frames", "Pixel everywhere on desktop, labels only on
+  phones" and "Towns top-down, work side-on". Replaces the 26-27 Nov shape rule (8px floating controls, no lines round
+  anything, 12px soft panels) with pixel frames (framed wood panels, bevelled controls, 3px corners), the Hearthside
+  book faces as default lettering with pixel lettering, and the 180px rail with 206px.

@@ -96,23 +96,23 @@ dated line to the history file.
   the area's own scene (two per region, keyed like `saltmere:1`); a new area needs a recipe there.
 - **One theme: dark** (owner, 28 Nov: "I only want the dark theme"). There is no light theme, theme setting, picker or
   shortcut; `DQ.applyTheme` always sets `data-theme="dark"` and drops an old save's choice. Don't add theme variants.
-- **Hearthside Journal** (owner, 18 Nov) is the whole game's look with Hearthside lettering by default (local Cinzel +
-  Alegreya Sans); `css/hearthside.css` is the shared presentation layer (extend it, don't add per-page skins). Modern
-  but old-world (owner, 27 Nov): panels are candlelit leather (a fine grain drawn with an SVG noise filter, aged
-  edges), headings are letterpressed, a quest ready
-  to hand in carries a wax seal; soft shadows, smooth easing and clean spacing keep it modern. Lettering presets (Storybook, Adventurer, Pixel, Original) stay in Settings; use the
-  `--f-display/--f-body/--f-ui/--f-mono` variables, never a hard-coded family. Silkscreen only for big numbers and short
-  headlines. Type: 16.5px body, 16px buttons, 14px meta; nothing visible under 13px in the design.
-- **Shape rule** (owner, 26–27 Nov): anything you can click is an 8px rounded rectangle (`--r-act`) with no outline,
-  menus included ("I HATE lines like this around menus or buttons"). Menu items (top menu and HUD buttons, page tabs,
-  tab rows, the skill rail) float, and the page you're on is a warm brass button (`--nav-on`) with a soft glow. Every
-  other control (buttons, choice cards, item tiles, slots, quest rows, portraits) floats too: a raised fill (`--act-fill`) and soft shadow (`--act-lift`) that
-  lifts on hover; selected, ready, warning and danger change the fill (brass, green…), disabled sits flat. Anything you
-  can't click draws no line round itself (no border, ring, outline or frame), and nothing inside a control does either:
-  panels are 12px soft fills, labels/chips/badges/counts flat 4px tinted fills. Circles only for round things you don't
-  click (pips, dots). `css/shape.css` (linked last, one `@layer shape`) applies it by role. Pixel-scene hotspots (Village
-  sites and their colour-only signs, tower rooms, the SVG map, the creature on the combat stage) glow or tint instead,
-  and drawn scene art keeps its pixel-art outlines. `tests/shape-rule.cjs` checks every page, a fight and the pop-ups.
+- **Hearthside Journal** (owner, 18 Nov) is the whole game's look, now dark and pixel-framed; `css/hearthside.css` is the shared presentation layer (extend it, don't add per-page skins).
+  Lettering (owner, 28 Nov): the default is pixel lettering, Silkscreen headings and Pixelify Sans for everything else
+  on desktop; on phones only labels are pixel and sentences keep Alegreya Sans; Classic (Cinzel + Alegreya Sans),
+  Storybook, Adventurer and Original stay in Settings. The rail is 206px on desktop so pixel names show whole. A quest ready
+  to hand in carries a wax seal. Use the `--f-display/--f-body/--f-ui/--f-mono` variables, never a hard-coded family.
+  Type: 16.5px body, 16px buttons, 14px meta; nothing visible under 13px in the design.
+- **Pixel frames** (owner, 28 Nov, chosen from his reference GUI over the 26-27 Nov "no lines" rule): panels are dark
+  wood in a frame (a near-black rim, a lit top-left bevel, a shaded lower edge, brass pins in the corners, a fine plank
+  grain; `--paper-edge`, `--paper-lift`, `--px-pin` in css/hearthside.css's Pixel frames section); a panel inside a
+  panel is a sunk well. Every control is a raised bevel in its own colour, drawn with box-shadow (`--act-lift`, no
+  border or CSS outline), with the pixel corner `--r-act` (3px); the page you're on and selected choices are brass
+  bevels (`--nav-on`, `--sel-bevel`, dark lettering on brass), the main action is a green bevel, danger red; disabled
+  sits flat. Labels, chips, badges and counts stay flat tinted fills (`--r-info`). Bars are troughs with brass end caps.
+  Circles only for round things you don't click (pips, dots). `css/shape.css` (linked last, one `@layer shape`)
+  applies it by role from those tokens. Pixel-scene hotspots (Village sites and their colour-only signs, tower rooms,
+  the SVG map, the creature on the combat stage) glow or tint instead, and drawn scene art keeps its pixel-art
+  outlines. `tests/shape-rule.cjs` checks every page, a fight and the pop-ups.
   Controls press (owner, 27 Nov): held by pointer, Enter or Space they sink 1px with a softer shadow and spring back on
   release (`.lw-press`/`.lw-release`, js/ui_feel.js); a drag or scroll lets go; no shrink-on-press.
 - **Motion** (`js/finish.js`, Finish layer in css/style.css): browser timelines at native refresh, elapsed-time motion,
@@ -158,7 +158,7 @@ dated line to the history file.
   levels, mastery, story); `js/shell.js` `HUBS`/`TOP`, with old ids (world, village, shop, guide) redirected. Hero is the
   portrait: backpack and equipment, tools, bank, settings. Exploration sits with the skills. A menu shows a dot only for
   something to do now (a quest to hand in, a site to finish, a crop to pick, a decision waiting), never a number. Phones
-  use the same five in the bottom bar and a header of portrait, coins and bell. The 180px left rail holds the Now card (current task, Stop/Retreat, "then …" for the
+  use the same five in the bottom bar and a header of portrait, coins and bell. The 206px left rail holds the Now card (current task, Stop/Retreat, "then …" for the
   queue), a Combat group (overall level, then Melee, Ranged, Magic, Defence, Health) and every other skill. Rail rows
   share the window height (`UI.fitDock`, 34–64 page px) and show icon, name, level or lock and one bar; rail order is
   stable (fresh-hero activities first). Never shrink text or icons to fit. Phones keep the bottom bar.
