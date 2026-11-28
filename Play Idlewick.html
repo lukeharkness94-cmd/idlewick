@@ -5917,7 +5917,7 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 :root.type-hearthside:not(.type-classic) :is(.tag,.chipx,.state,.lvchip,.k,.phead>small,.phead small:not(.dim),.est-count,.rw,.req-chip,.eq small,.dk-h,.activity-caption small,.mast-line,.stat){font-size:13px}
 /* phones: a row of four or more tabs in Silkscreen sits two by two so every label shows whole */
 @media(max-width:860px){:root.type-hearthside:not(.type-classic) #view .tabs:has(>:nth-child(4)){grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-:root.type-hearthside:not(.type-classic) .gt b{font-size:13px!important;letter-spacing:0!important}
+:root.type-hearthside:not(.type-classic) .gt b{font-family:var(--f-body)!important;font-size:15px!important;letter-spacing:0!important}
 /* phones: a long Silkscreen label wraps inside its button rather than pushing past the screen */
 @media(max-width:860px){:root.type-hearthside:not(.type-classic) #view :is(.btn,button){max-width:100%;white-space:normal;overflow-wrap:anywhere}}
 /* the fighting-style tiles: Silkscreen at its label size, whole words only */
@@ -5925,7 +5925,9 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 :root.type-hearthside:not(.type-classic) :is(.cx-styles .ss-btn,.cx-stats>*) *{overflow-wrap:normal!important;word-break:normal!important}
 /* the rail's notice dot sits on the corner of the skill's picture, so the name keeps its whole width */
 #skilldock .dk,#dock .dk{position:relative}
-#skilldock .dk .dk-top .notice-badge:not([hidden]),#dock .dk .dk-top .notice-badge:not([hidden]){position:absolute!important;left:34px!important;top:7px!important;margin:0!important;box-shadow:0 0 0 2px var(--px-rim)}
+#skilldock .dk .dk-top .notice-badge:not([hidden]),#dock .dk .dk-top .notice-badge:not([hidden]){position:absolute!important;left:34px!important;top:7px!important;margin:0!important}
+.bundle-indicator .bi-t{font-size:13px!important}
+:root.type-hearthside:not(.type-classic) .combat-abils :is(button,.btn){font-size:13px!important}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
