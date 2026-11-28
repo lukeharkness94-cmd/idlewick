@@ -77,6 +77,11 @@ combat stage is 96 px, keeps the 32 × 32 sprite at 3×.
   64 × 64 drawings in the same file, each the same character as its 32 × 32 sprite. Mini-bosses keep their own designs
   redrawn at twice the detail (`A.atScale(2, make)`: ellipses and polygons are rasterised afresh, so curves are smoother and the outline is
   one fine pixel).
+  a weapon, a crown or helm, glowing eyes. The twelve regional mini-bosses (`js/pixel_minibosses.js`, same painter) have
+  their own 64 × 64 drawings too, each the character, palette and silhouette of its 32 × 32 sprite designed afresh at
+  the large size: feet on the bottom rows, animals facing right, one readable face. Tower bosses keep their own designs
+  redrawn at twice the detail (`A.atScale(2, make)`: ellipses and polygons are rasterised afresh, so curves are smoother
+  and the outline is one fine pixel).
 - Locked creatures stay blacked out (the `sil` class) and unnamed, at either size.
 
 ## Items
@@ -97,4 +102,6 @@ Fish icons are drawn plumper than their spot pictures so they read at 1×. The 2
 Every id the game can request resolves to a finished design (`DQ.pixelArt.coverage()` is empty; `node
 tests/art-pixel.cjs` enforces it): about 480 items, 284 creatures (8 bosses and 8 tower bosses with 64 × 64 drawings,
 mini-bosses with 2× drawings), 21 companions plus their evolved forms, the townsfolk and thieving marks, the farm animals,
+tests/art-pixel.cjs` enforces it): about 480 items, 284 creatures (8 bosses and 12 mini-bosses with 64 × 64 drawings, tower
+bosses with 2× drawings), 21 companions plus their evolved forms, the townsfolk and thieving marks, the farm animals,
 the quest givers' portraits, trees, rocks, fish, crops and icons.

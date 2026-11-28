@@ -467,6 +467,8 @@ const BIG = { oldtusk, grubnash, frostmaw, barnacle, morwenna, pyrrhax, zephyrio
 /* mini-bosses and tower bosses: their own designs at twice the detail */
 const fine = id => { const D = Q.data, m = D && D.MON[id]; if (!m || !(m.mini || (m.tower && /^tw_/.test(id) && !m.tower.floor) || (m.tower && A.CREATURE_SPECS[id] && A.CREATURE_SPECS[id] !== A.CREATURE_SPECS[m.base]))) return null; const f = A.CREATURE_SPECS[id]; return f ? A.atScale(2, f) : null; };
 A.BIG = BIG;
+/* the painter and its ramp, for the mini-bosses' own 64 x 64 drawings (js/pixel_minibosses.js) */
+A.BossPainter = P; A.bossRamp = ramp; A.bossMix = mix;
 A.bigSprite = id => BIG[id] ? BIG[id]() : fine(id);
 A.hasBig = id => !!BIG[id] || !!(Q.data && Q.data.MON[id] && (Q.data.MON[id].mini || (Q.data.MON[id].tower && A.CREATURE_SPECS[id] && A.CREATURE_SPECS[id] !== A.CREATURE_SPECS[Q.data.MON[id].base])));
 A.creatureBigUrl = id => A.hasBig(id) ? A.url('creaturebig:' + id, () => A.bigSprite(id)) : null;

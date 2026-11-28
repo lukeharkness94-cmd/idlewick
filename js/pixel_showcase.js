@@ -1,6 +1,6 @@
 /* Idlewick: the pixel-art showcase, the living reference for docs/pixel-art-style.md. Every family of sprite at the
    size players see it: the chibi hero in three looks and in gear, the side-on working figure, creatures from every
-   family, the bosses at 64 x 64, items by category and the named weapons. Open it from Settings (Art showcase). */
+   family, the bosses and mini-bosses at 64 x 64, items by category and the named weapons. Open it from Settings (Art showcase). */
 (() => {
 const DQ = window.DQ, UI = DQ.ui, A = DQ.pixelArt; if (!A) return;
 const fig = (u, w, h, k, label) => u ? `<figure class="pxs-fig"><img class="pxa" src="${u}" width="${w * k}" height="${h * k}" alt="${label}"><figcaption>${label}<small>${w}×${h} at ${k}×</small></figcaption></figure>` : '';
@@ -18,8 +18,8 @@ UI.V.showcase = () => {
     <figure class="pxs-fig"><span class="pxs-fight"><img class="pxa hero" src="${A.heroUrl({ face: 'bearded', skin: 2, hair: 0, tunic: '#4a9a6a', weapon: 'sword', helm: 'iron' })}" width="96" height="128" alt=""><img class="pxa foe" src="${A.sprite('goblin')}" width="96" height="96" alt=""></span><figcaption>Combat: lunge and hit<small>whole-sprite motion with a hit flash</small></figcaption></figure>`;
   const families = ['goblin', 'skeleton', 'zombie', 'wraith', 'pirate', 'raider', 'troll', 'wolf', 'boar', 'icewolf', 'bat', 'crab', 'drake', 'hawk', 'golem', 'horror', 'cinderloom', 'furnacemite', 'snowcoil', 'kelplantern', 'tattercap', 'rootbound', 'chicken', 'cow']
     .filter(id => A.hasCreature(id)).map(id => fig(A.creatureUrl(id), 32, 32, 3, (D().MON[id] || {}).name || id)).join('');
-  const bosses = Object.keys(A.BIG || {}).map(id => fig(A.creatureBigUrl(id), 64, 64, 2, (D().MON[id] || {}).name || id)).join('');
-  const minis = (D().MONLIST || []).filter(m => m.mini).slice(0, 4).map(m => fig(A.creatureBigUrl(m.id), 64, 64, 2, m.name)).join('');
+  const bosses = Object.keys(A.BIG || {}).filter(id => !(D().MON[id] || {}).mini).map(id => fig(A.creatureBigUrl(id), 64, 64, 2, (D().MON[id] || {}).name || id)).join('');
+  const minis = (D().MONLIST || []).filter(m => m.mini && !m.tower).map(m => fig(A.creatureBigUrl(m.id), 64, 64, 2, m.name)).join('');
   const items = ['bronze_sword', 'iron_body', 'iron_helm', 'bow_oak', 'ore_copper', 'bar_iron', 'log_oak', 'gem_ruby', 'raw_pike', 'pike', 'baked_potato', 'tool_pick_1', 'ring_ruby', 'amulet_sapphire', 'robe_mystic_body']
     .filter(id => D().ITEMS[id]).map(id => fig(A.itemUrl(id), 16, 16, 3, D().ITEMS[id].name)).join('');
   const named = Object.keys(D().ITEMS).filter(id => D().ITEMS[id].unique).slice(0, 8).map(id => fig(A.itemUrl(id), 16, 16, 3, D().ITEMS[id].name)).join('');
@@ -29,7 +29,8 @@ UI.V.showcase = () => {
     ${group('The hero at work (side-on, the work rig draws the arms and tool)', side)}
     ${group('Animation', anim)}
     ${group('Creatures: one of each family', families)}
-    ${group('Bosses (64 × 64)', bosses + minis)}
+    ${group('Bosses (64 × 64)', bosses)}
+    ${group('Mini-bosses (64 × 64)', minis)}
     ${group('Items (inventory size)', items + named)}
     ${group('Trees and fish', ['oak', 'pine'].map(n => fig(A.sprite(n), 32, 48, 3, n)).join('') + ['pike', 'carp'].map(n => fig(A.sprite(n), 32, 16, 3, n)).join(''))}
     ${group('Skill icons', [['iconFishing', 'Fishing'], ['iconWoodcutting', 'Woodcutting'], ['iconMining', 'Mining']].map(([n, l]) => fig(A.sprite(n), 16, 16, 3, l) + fig(A.sprite(n), 16, 16, 2, l + ' (menu)')).join(''))}`;

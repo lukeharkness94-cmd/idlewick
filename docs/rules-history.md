@@ -344,3 +344,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 28 Nov 2026 (owner: "It doesn't look like the hero or the creatures, monsters and bosses have gone through our new
   pixel redesign"): the fight stage shows every fighter at one pixel scale with ground shadows; it had forced every
   sprite to 128 px, so bosses stood no taller than a rat.
+- 28 Nov 2026 (owner: the mini-bosses don't look like the new pixel redesign): the twelve regional mini-bosses get their
+  own hand-designed 64 x 64 drawings (js/pixel_minibosses.js) at Old Tusk's finish; before, the stage showed their 32 x 32
+  sprite redrawn at twice the detail. Tower bosses keep the 2x redraw.
