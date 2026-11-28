@@ -51,12 +51,15 @@ dated line to the history file.
 
 ## 2. Look and art
 
-- **Original pixel art drawn in code, nothing else.** `js/pixelart.js` (system, palette, hero), `js/pixel_items.js`,
-  `js/pixel_creatures.js`, `js/pixel_world.js` (trees, rocks, furniture), `js/pixel_icons.js` (the 16 × 16 interface
-  icons, 32 × 32 skill emblems and boss trophies; loaded before pixel_runtime.js), `js/town_scene.js` (top-down towns,
-  `js/pixel_creatures.js`, `js/pixel_world.js` (icons, restoration pieces), `js/pixel_nodes.js` (trees, ore boulders, fishing-spot fish, crops, furniture, workers, object thieving marks), `js/town_scene.js` (top-down towns,
-  restoration sites, townsfolk), `js/pixel_feel.js` (empty-page pictures, the quill pointer), `js/pixel_bosses.js` (the
-  64 × 64 bosses), `js/pixel_minibosses.js` (the mini-bosses' 64 × 64 drawings), `js/pixel_runtime.js` (routes every art hook; loaded last). Chunky and outlined (owner, 28 Nov;
+- **Original pixel art drawn in code, nothing else.** `js/pixelart.js` (system, palette, hero, `A.dusk`), `js/pixel_items.js`
+  with its redrawn sets `js/pixel_items_weapons.js`, `_armour.js`, `_materials.js` and `_food.js` (each wraps
+  `A.itemSprite`; the later file wins an overlap), `js/pixel_creatures.js`, `js/pixel_world.js` (restoration pieces and
+  the original icons), `js/pixel_icons.js` (the 16 × 16 interface icons, 32 × 32 skill emblems and boss trophies; loaded
+  before pixel_runtime.js), `js/pixel_nodes.js` (trees, ore boulders, fishing-spot fish, crops, furniture, workers,
+  object thieving marks), `js/town_scene.js` (top-down towns, restoration sites, townsfolk), `js/combat_scenes.js` (the
+  sixteen fight backgrounds), `js/pixel_feel.js` (empty-page pictures, the quill pointer), `js/pixel_bosses.js` (the
+  64 × 64 bosses and tower bosses), `js/pixel_minibosses.js` (the mini-bosses' 64 × 64 drawings), `js/pixel_runtime.js`
+  (routes every art hook; loaded last). Chunky and outlined (owner, 28 Nov;
   docs/pixel-art-style.md): top-left light, five-step ramps with cool shadows and warm lights, sphere-lit round forms,
   each silhouette outlined in its material's darkest colour; the hero and humanoid creatures are chibis with big heads
   and two-pixel eyes; bosses have 64 × 64 drawings for the combat stage. No image files, AI-generated, traced or
