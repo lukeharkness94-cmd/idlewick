@@ -13,6 +13,7 @@ const load = n => vm.runInContext(fs.readFileSync(path.join(root, 'js', n + '.js
 const Q = ctx.DQ; Q.ui = { V: {}, DO: {}, B: {}, homeSections: [] };
 ['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'skills_new_art', 'beastmastery_art', 'pixel_items_armour'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
 ['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'skills_new_art', 'beastmastery_art', 'pixel_items_weapons'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
+['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'skills_new_art', 'beastmastery_art', 'pixel_items_materials'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
 const A = Q.pixelArt, D = Q.data;
 let checks = 0; const check = (name, fn) => { fn(); checks++; console.log('PASS', name); };
 const colours = spr => spr.render();
@@ -80,5 +81,14 @@ check('no image files or painted-art scripts remain', () => {
 });
 check('new beasts and evolved forms have distinct structural silhouettes', () => {
  const keys=[];for(const id of Object.keys(D.BEAST_SPECIES)){const a=A.creatureSprite(id),b=A.creatureSprite('evolved:'+id);assert.ok(a&&b);assert.notEqual(a.render().map(Boolean).join(''),b.render().map(Boolean).join(''),id+' evolved shape');keys.push(a.render().join(','),b.render().join(','));}assert.equal(new Set(keys).size,8);
+});
+check('tools, materials, kit, relics, boats and draughts use the chunky set, and no tool tier is a recolour of another', () => {
+  const scope = Object.entries(D.ITEMS).filter(([id, it]) => ['tool', 'resource', 'gem', 'craft', 'relic', 'container', 'boat', 'potion', 'supply'].includes(it.type) || (it.type === 'junk' && id !== 'burnt'));
+  assert.ok(scope.length > 150); for (const [id] of scope) assert.ok(A.materialItem(id), id + ' is drawn by pixel_items_materials.js');
+  /* a recolour keeps the same pattern of colours: relabel each sprite's colours by first appearance and compare */
+  const pattern = id => { const seen = new Map(); return colours(A.itemSprite(id)).map(c => c ? (seen.has(c) ? seen.get(c) : (seen.set(c, seen.size), seen.size - 1)) : '.').join(','); };
+  for (const fam of ['rod', 'axe', 'pick', 'gloves', 'hoe']) { const ids = D.TOOL_ORDER.map(t => `tool_${fam}_${t}`); assert.equal(ids.filter(id => D.ITEMS[id]).length, 10, fam);
+    { const P = ids.map(pattern); P.forEach((p, i) => { const j = P.indexOf(p); if (j !== i) console.log('same pattern', ids[i], ids[j]); }); } assert.equal(new Set(ids.map(pattern)).size, 10, fam + ': every tier has its own detail, not only its own metal'); }
+  for (const pre of ['log_', 'ore_', 'bar_']) { const ids = Object.keys(D.ITEMS).filter(id => id.startsWith(pre)); assert.equal(new Set(ids.map(pattern)).size, ids.length, pre + ' items differ beyond colour'); }
 });
 console.log(checks + ' pixel-art checks passed');

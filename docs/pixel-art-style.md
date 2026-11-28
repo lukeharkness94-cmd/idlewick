@@ -92,6 +92,12 @@ Fish icons are drawn plumper than their spot pictures so they read at 1×. Worn 
 shield, ring, amulet) is drawn in `js/pixel_items_armour.js`: plate is bright and hard-edged with sphere-lit pauldrons,
 knee cops and domes, leather is matte with stitching and brass buckles, robes are soft cloth with trim, and each alloy,
 hide or dye adds its own detail as the tier rises (rivets, comb and nasal, gold trim, a gem, a plume or crest, wings). The 29 named weapons
+Fish icons are drawn plumper than their spot pictures so they read at 1×. Tools, materials, crafted kit, relics,
+containers, boats and draughts are drawn in `js/pixel_items_materials.js` (loaded just before `pixel_runtime.js`):
+two-pixel hafts, sphere-lit ore lumps, gems with a facet and a glint, ingots in three-quarter view. The ten tool tiers
+(copper to runic) keep one silhouette per family and add their own detail (verdigris, a rivet, a socket collar, an
+engraved line, a leather grip, a pommel cap, a set stone, a heavier head, knapped glass, glowing runes), so no tier is
+a recolour of another (`tests/art-pixel.cjs`). The 29 named weapons
 (`js/rare_weapons.js`) each keep their own hand-drawn identity.
 Fish icons are drawn plumper than their spot pictures so they read at 1×. Weapons and arrows (`js/pixel_items_weapons.js`)
 have two- and three-pixel blades and hafts with a lit upper edge and a shaded lower edge; swords and daggers lie on the
