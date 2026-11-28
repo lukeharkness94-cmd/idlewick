@@ -49,6 +49,8 @@
     border-color:transparent!important;border-radius:var(--r-info)!important}
   :is(.tag,.chipx,.perk,.thief-perk,.ench-gain,.rw,.sl,.hunt-steps>span,span.rl-i):not(button,[data-do]){background-color:var(--info-fill)!important}
   .notice-badge{border-radius:var(--r-info)!important}
+  /* rail rows: a dot, never a number (the count stays in its label); a number clipped "Scholarship" to "Scholars…" */
+  :is(#skilldock,#dock) .dk .notice-badge:not([hidden]){width:8px!important;min-width:8px!important;height:8px!important;padding:0!important;border-radius:50%!important;font-size:0!important;color:transparent!important;align-self:center}
 
   /* ---------- round things you don't click: pips and dots, no outline ---------- */
   .pips i{border-color:transparent!important;background-color:var(--pip-off)!important}
