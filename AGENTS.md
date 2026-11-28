@@ -53,9 +53,12 @@ dated line to the history file.
 
 - **Original pixel art drawn in code, nothing else.** `js/pixelart.js` (system, palette, hero), `js/pixel_items.js`,
   `js/pixel_creatures.js`, `js/pixel_world.js` (trees, rocks, scenes, restoration, furniture, icons), `js/pixel_feel.js`
-  (empty-page pictures, the quill pointer), `js/pixel_runtime.js` (routes every art hook; loaded last). Follow docs/pixel-art-style.md: top-left light, five-step hue-shifted ramps,
-  selective coloured outlines. No image files, AI-generated, traced or recoloured art, or sprite packs. Settings → Art
-  showcase is the living reference.
+  (empty-page pictures, the quill pointer), `js/pixel_bosses.js` (the 64 × 64 bosses), `js/pixel_runtime.js` (routes
+  every art hook; loaded last). Chunky and outlined (owner, 28 Nov; docs/pixel-art-style.md): top-left light, five-step
+  ramps with cool shadows and warm lights, sphere-lit round forms, each silhouette outlined in its material's darkest
+  colour; the hero and humanoid creatures are chibis with big heads and two-pixel eyes; bosses have 64 × 64 drawings for
+  the combat stage. No image files, AI-generated, traced or recoloured art, or sprite packs (reference images guide style
+  only). Settings → Art showcase is the living reference.
 - **Chunky pixels at whole-number scales.** `SMOOTH = false` (pixelart.js) and `HIRES_ON = false` (hires.js) stay off.
   Show every sprite and scene at a whole-number multiple of the size it was drawn; crop rather than shrink or stretch.
   The one exception is the Village page's town scene, which fits its panel (about 1.5–1.9×) so every building stays

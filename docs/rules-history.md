@@ -315,3 +315,8 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 28 Nov 2026 (owner): "Ok, worth looking at farming work scenes. Though only do it if it doesn't look awful". Replaces
   "Farming has no work scene" (it runs on timers): the Farming page shows the farm with the hero hoeing between the real
   crops while anything grows; the strip of farm scenery above the fields is gone on desktop. Phones unchanged.
+- 28 Nov 2026 (owner): chose the chunky, outlined pixel direction from reference images (style only, nothing copied)
+  for every creature, the hero and every item. Replaces the earlier softer style (violet-leaning shadows, flat edge light
+  only, a 24 x 32 hero with a small head): materials are five-step ramps with cool shadows (#1a1838) and warm lights
+  (#fff2c8), round forms are sphere-lit, outlines take each material's darkest colour, the hero and humanoid creatures
+  are chibis with big heads and two-pixel eyes, and the bosses have 64 x 64 drawings (docs/pixel-art-style.md).
