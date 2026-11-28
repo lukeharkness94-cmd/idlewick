@@ -237,7 +237,7 @@ function hero(o = {}) {
   /* the weapon in the right fist */
   const wpn = typeof o.weapon === 'string' ? { type: o.weapon, col: R[o.blade || (o.weapon === 'axe' ? 'iron' : 'steel')].base } : o.weapon;
   if (wpn) { const hx = 17 + swing[0], hy = 21 + swing[1], t = wpn.type, m = metal(wpn.col);
-    if (t === 'sword' || t === 'cutlass') { for (let i = 2; i <= 12; i++) { const dx = t === 'cutlass' ? Math.round(Math.sin(i / 4) * 1.5) : 0; s.tone(hx + 2 + dx, hy - i, m, 3); s.tone(hx + 3 + dx, hy - i, m, 1); } s.tone(hx + 2, hy - 13, m, 4); s.rect(hx, hy - 1, 5, 1, R.gold); s.rect(hx + 2, hy, 1, 3, R.leather); }
+    if (t === 'sword' || t === 'cutlass') { for (let i = 2; i <= 12; i++) { const dx = t === 'cutlass' ? Math.round(Math.sin(i / 4) * 1.5) : 0; s.tone(hx + 3 + dx, hy - i, m, 4); s.tone(hx + 4 + dx, hy - i, m, 2); } s.tone(hx + 3, hy - 13, m, 4); s.rect(hx + 1, hy - 1, 5, 1, R.gold); s.rect(hx + 3, hy, 1, 2, R.leather); } /* the blade stands a pixel off the arm, so its outline shows */
     else if (t === 'dagger') { for (let i = 2; i <= 6; i++) { s.tone(hx + 2, hy - i, m, 3); s.tone(hx + 3, hy - i, m, 1); } s.tone(hx + 2, hy - 7, m, 4); s.rect(hx + 1, hy - 1, 4, 1, R.gold); }
     else if (t === 'hammer') { s.line(hx + 2, hy + 2, hx + 2, hy - 9, R.wood); s.rect(hx, hy - 13, 6, 4, m); s.tone(hx, hy - 13, m, 4); }
     else if (t === 'axe') { s.line(hx + 1, hy + 1, hx + 4, hy - 8, R.wood); s.poly([[hx + 3, hy - 10], [hx + 7, hy - 10], [hx + 7, hy - 5], [hx + 4, hy - 6]], m); }

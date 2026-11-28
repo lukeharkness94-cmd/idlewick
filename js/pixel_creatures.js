@@ -481,6 +481,12 @@ const guard = () => knight({ metal: '#9aa3ad', tabard: '#3f5f94', plume: '#c8483
 
 /* ---------- reassign the families that repeated ---------- */
 Object.assign(SPECS, {
+  /* Old Tusk at card size matches his 64 x 64 drawing (pixel_bosses.js): a boar king on two legs, crowned, with a club */
+  oldtusk: () => { const hide = rp('#8a6a52'), s = brute({ skin: '#8a6a52', cloth: '#6a7a3a', club: true }), sn = rp('#d89a8e'), tk = rp('#f4ecd8'), g = ramp('#e8b440', { gl: .8 }), d = rp('#5c4034');
+    s.ell(16, 10, 5.6, 4.8, hide); s.ell(16, 13, 3.2, 2.2, sn); s.fix(15, 13, d.base); s.fix(17, 13, d.base);
+    s.poly([[11.5, 14], [10.5, 9.5], [13, 12.5]], tk); s.poly([[20.5, 14], [21.5, 9.5], [19, 12.5]], tk); s.poly([[11, 7], [8, 2], [13, 6]], d); s.poly([[21, 7], [24, 2], [19, 6]], d);
+    s.rect(12, 4, 9, 2, g); for (const x of [12, 15, 18]) s.poly([[x, 4], [x + 1, 1], [x + 2, 4]], g); s.fix(16, 5, '#ff5a2a');
+    eye(s, 14, 10, '#ff6a2a', false); eye(s, 18, 10, '#ff6a2a', false); for (let x = 9; x < 24; x += 2) s.fix(x, 9 + (x % 4 ? 0 : 1), '#3e2a22'); return s; },
   rat: () => rodent({ col: '#8a7e70' }),
   troll: () => brute({ skin: '#8a9a78', cloth: '#5a4a3a', moss: true, club: true }),
   frostmaw: () => brute({ skin: '#bfe0f0', cloth: '#5a6a8a', ice: true, glow: '#7ae8ff', club: true }),
