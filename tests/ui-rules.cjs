@@ -13,7 +13,7 @@ const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 const URL = process.env.IDLEWICK_URL || 'http://127.0.0.1:8765/index.html';
 const PAGES = (process.env.PAGES || 'overview,activity,journal,quests,people,map,exploration,projects,house,hirelings,character,tools,bank,skillsummary,mastery,bestiary,museum,collection,achievements,shop,settings,combat,tower,fishing,woodcutting,mining,thieving,farming,cooking,smithing,crafting,magic,research,hunting,brewery,enchanting,carpentry,sailing,beastmastery').split(',');
-const FACES = /cinzel|alegreya|medievalsharp|silkscreen|pixelify|system-ui|monospace|sans-serif|serif/i;
+const FACES = /cinzel|alegreya|medievalsharp|silkscreen|pixelify|tiny5|vt323|system-ui|monospace|sans-serif|serif/i;
 const problems = [];
 const bad = (rule, where, what) => problems.push(`${rule} ${where}: ${what}`);
 
@@ -103,7 +103,7 @@ const SETUP = {
         let n; while ((n = walker.nextNode())) {
           const t = n.textContent.trim(); if (!t) continue; const el = n.parentElement; if (!el || !vis(el) || el.closest('.modal,#notes,.tt,[aria-hidden=true],svg')) continue;
           const cs = getComputedStyle(el), fam = cs.fontFamily.split(',')[0].replace(/["']/g, '').trim();
-          if (!/cinzel|alegreya|medievalsharp|silkscreen|pixelify|system-ui|monospace|sans-serif|serif/i.test(fam) && !seen.has('f' + fam)) { seen.add('f' + fam); r.push(['R4', `font "${fam}" on "${t.slice(0, 30)}" (${el.className})`]); }
+          if (!/cinzel|alegreya|medievalsharp|silkscreen|pixelify|tiny5|vt323|system-ui|monospace|sans-serif|serif/i.test(fam) && !seen.has('f' + fam)) { seen.add('f' + fam); r.push(['R4', `font "${fam}" on "${t.slice(0, 30)}" (${el.className})`]); }
           const px = parseFloat(cs.fontSize);
           if (desktop && px < 12.95 && !seen.has('s' + el.className)) { seen.add('s' + el.className); r.push(['R5', `${px}px "${t.slice(0, 30)}" (${el.tagName.toLowerCase()}.${el.className})`]); }
         }
