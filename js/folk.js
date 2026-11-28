@@ -153,7 +153,7 @@
 
   /* ---------- People page ---------- */
   UI.V.people = () => {
-    const ppl = DQ.folkMet(); if (!ppl.length) return `<section class="panel"><h2>People</h2><p class="dim">Accept a quest and the person who gave it will appear here.</p></section>`;
+    const ppl = DQ.folkMet(); if (!ppl.length) return `<section class="panel"><h2>People</h2>${UI.emptyState('bench', 'An empty bench. Everyone is busy, or hiding.', 'Accept a quest and the person who gave it will appear here.')}</section>`;
     const sel = ppl.find(f => f.id === UI.tab.folk) || ppl[0]; UI.tab.folk = sel.id;
     const list = ppl.map(f => `<button class="folk-card ${f === sel ? 'on' : ''}" data-do="folk" data-a="${f.id}" aria-pressed="${f === sel}"><img class="px folk-face" src="${DQ.folkUrl(f)}" width="64" height="64" alt=""><b>${esc(f.n)}</b><small>${esc(D.TOWN[f.town].name)}</small></button>`).join('');
     const done = qs(sel).filter(q => DQ.questState(q) === 'done');

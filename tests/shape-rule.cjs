@@ -91,7 +91,9 @@ const MODALS = {
           for (const e of document.querySelectorAll('body *:not(script):not(style)')) {
             if (clicks.has(e) || !vis(e) || AF.some(s => e.closest(s))) continue;
             const cs = getComputedStyle(e);
-            if (cs.cursor === 'pointer' && !e.closest(CLICK) && !(e.parentElement && getComputedStyle(e.parentElement).cursor === 'pointer')) continue; /* a script-driven control */
+            /* the pointing hand of the quill pointer (js/ui_feel.js, 27 Nov 2026) reads as an image cursor ending in "pointer" */
+            const hand = c => c === 'pointer' || / pointer$/.test(c);
+            if (hand(cs.cursor) && !e.closest(CLICK) && !(e.parentElement && hand(getComputedStyle(e.parentElement).cursor))) continue; /* a script-driven control */
             const host = e.closest(CLICK), list = host ? r.inner : r.flat, rect = e.getBoundingClientRect();
             const self = lined(cs, rect.width, rect.height); if (self) list.push(sig(e) + ' [' + self + '] < ' + where(e));
             for (const ps of ['::before', '::after']) { const pc = getComputedStyle(e, ps); if (pc.content === 'none' || pc.display === 'none' || pc.visibility === 'hidden' || +pc.opacity < 0.05) continue; const w = parseFloat(pc.width) || rect.width, h = parseFloat(pc.height) || rect.height; if (w < 3 || h < 3) continue; const l = lined(pc, w, h); if (l) list.push(sig(e) + ps + ' [' + l + '] < ' + where(e)); }

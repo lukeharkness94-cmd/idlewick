@@ -32,7 +32,7 @@ UI.V.settings=()=>{
  const story=`<button class="tog ${Q.S.settings.storyScenes!==false?'on':''}" data-do="storysetting"><span class="sw"></span><span><b>Automatic story scenes</b><small>Major events offer skippable scenes. Replay them in Journal → Story.</small></span></button>`;
  const gameCards=[card('Combat & offline progress',body(game)),card('Your hero',name),card('Story & learning',story+body(lessons)),card('Play time',body(get('Time')))];
  const danger=take(save,'[data-do="newgame"]'),backupList=save?.querySelector('.bklist')?.parentElement;
- const backupHtml=backupList?.outerHTML||'<p class="dim">No automatic backups yet. Your recent backups on this device will appear here.</p>';backupList?.remove();
+ const backupHtml=backupList?.outerHTML||UI.emptyState('chest', 'The chest is empty and suspiciously tidy.', 'No automatic backups yet. Your recent backups on this device will appear here.', 'sm');backupList?.remove();
  const autosave=save?.querySelector('.phead small')?.textContent||'';
  const saveCards=[card('Backup & transfer',`<p class="sm dim">${esc(autosave)}</p>`+body(save)+'<div class="btnrow wrap"><button class="btn" data-do="copystring">Copy save string</button><button class="btn" data-do="pastestring">Import save string</button></div>'),card('Automatic backups',backupHtml),card('Start over','<p>Make a backup before starting a new hero.</p>'+danger,'settings-danger')];
  const shortcuts=get('Shortcuts');shortcuts?.querySelector('.keys')?.insertAdjacentHTML('beforeend','<dt><kbd>L</kbd></dt><dd>Switch light/dark theme</dd><dt><kbd>Enter</kbd> or <kbd>Esc</kbd></dt><dd>Continue from Welcome Back</dd><dt><kbd>V</kbd> / <kbd>G</kbd></dt><dd>Village / Guide</dd>');

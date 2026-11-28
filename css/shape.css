@@ -209,3 +209,30 @@
   .hunt-recent i.fail{background-color:color-mix(in srgb,var(--bad,#b04a3a) 55%,transparent)!important}
   .tog .sw{border-color:transparent!important}
 }
+
+/* ===================== Buttons that press (owner, 27 Nov 2026: polish) =====================
+   js/ui_feel.js puts .lw-press on a control while the pointer (or Enter/Space) holds it, and swaps it for .lw-release
+   when it lets go; a drag or a scroll lets go at once, so a list never sinks under a swiping finger. Held, the control
+   sinks one pixel and its shadow softens; released, it springs back with a little overshoot. The older shrink-on-press
+   (scale .93 in motion.css and style.css) is retired so the press is one consistent sink. translate only; under Reduce
+   effects and reduced motion the shadow still softens but nothing moves. */
+:root{--act-press:0 0 1px rgba(0,0,0,.32),0 1px 2px -1px rgba(0,0,0,.5);--press-spring:cubic-bezier(.34,1.9,.6,1)}
+:root[data-theme="light"]{--act-press:0 0 1px rgba(80,55,20,.16),0 1px 2px -1px rgba(80,55,20,.32)}
+@layer shape {
+  :is(.btn,.tab,.stab,.chip,.n-act,.iconb,.packchip,.hub,.seg button,.dg-row,.pinchip,.slot,.abil,.card,.tile,.goal,.beast,.plot,.skrow,.nav,.spell,button.eq,.tbtn,.illustrated-card):active{transform:none!important}
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,#hud :is(.iconb,.packchip,.h-hero),button,[data-do],[role=button],[role=tab],[role=switch],.btn):not(:disabled,.site-spot,.tc-room,.hearth-spot,img).lw-press.lw-press{
+    translate:0 1px!important;box-shadow:var(--act-press)!important;
+    transition:translate 70ms ease-out,box-shadow 70ms ease-out,background-color .15s,color .15s!important}
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,#hud :is(.iconb,.packchip,.h-hero),button,[data-do],[role=button],[role=tab],[role=switch],.btn):not(:disabled,.site-spot,.tc-room,.hearth-spot,img).lw-release.lw-release{
+    transition:translate .32s var(--press-spring),box-shadow .26s ease-out,background-color .15s,color .15s!important}
+  html.calm :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,#hud :is(.iconb,.packchip,.h-hero),button,[data-do],[role=button],[role=tab],[role=switch],.btn):not(:disabled,.site-spot,.tc-room,.hearth-spot,img):is(.lw-press,.lw-release):is(.lw-press,.lw-release){translate:none!important;transition:none!important}
+  @media (prefers-reduced-motion:reduce){:is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,#hud :is(.iconb,.packchip,.h-hero),button,[data-do],[role=button],[role=tab],[role=switch],.btn):not(:disabled,.site-spot,.tc-room,.hearth-spot,img):is(.lw-press,.lw-release):is(.lw-press,.lw-release){translate:none!important;transition:none!important}}
+
+  /* hold to confirm (js/ui_feel.js): the button's own background fills from the left while you hold; a fill, never a
+     ring or a line. The fill is information (how long is left), so it shows under Reduce effects too. */
+  .hold-confirm{position:relative!important;isolation:isolate;overflow:hidden}
+  .hold-confirm::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;border:0!important;
+    background:color-mix(in srgb,var(--brass) 52%,transparent);transform-origin:0 50%;scale:0 1;transition:scale .18s ease-out}
+  .hold-confirm.holding::before{scale:1 1;transition:scale .6s linear}
+  .hold-confirm.hold-done::before{scale:1 1;background:color-mix(in srgb,var(--good,#4a8a4a) 45%,transparent);transition:none}
+}

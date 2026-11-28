@@ -111,7 +111,7 @@
     const foods = (DQ.foods ? DQ.foods() : []).filter(id => DQ.have(id) > 0), heal = foodHeal(), at = S().settings.eatAt || 50;
     const tiles = foods.map(id => { const it = D.ITEMS[id]; return `<button class="food-tile" data-do="eat" data-a="${id}" data-tip="item:${id}">${DQ.itemIco(it)}<span><b>${esc(it.name)} <span class="mono" data-b="count:${id}"></span></b><small>+${it.heal} HP each</small></span></button>`; }).join('');
     return `<section class="panel combat-food"><div class="kit-head"><span class="k">Food <b class="mono">${heal}</b> <small>health</small></span><button class="tog ${S().settings.autoEat ? 'on' : ''}" data-do="autoeat"><span class="sw"></span>Auto-eat</button></div>
-      <div class="food-tiles">${tiles || '<p class="food-none">None carried. Cook fish or buy bread.</p>'}</div>
+      <div class="food-tiles">${tiles || `<div class="food-none">${UI.emptyState('plate', 'A clean plate and a long day ahead.', 'None carried. Cook fish or buy bread.', 'row')}</div>`}</div>
       <div class="eat-step" role="group" aria-label="Eat below this health"><span>Eat below</span><button type="button" class="btn sm" data-do="eatstep" data-a="-10" aria-label="Eat at lower health">−</button><output class="mono">${at}%</output><button type="button" class="btn sm" data-do="eatstep" data-a="10" aria-label="Eat at higher health">+</button></div></section>`;
   };
   UI.DO.abilswap = id => { const on = S().abilities || []; if (on.length >= DQ.abilSlots()) DQ.toggleAbility(on[on.length - 1]); if (DQ.toggleAbility(id)) DQ.sfx && DQ.sfx('equip'); UI.render(false); };

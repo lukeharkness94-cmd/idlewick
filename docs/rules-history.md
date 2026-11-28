@@ -294,3 +294,7 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 27 Nov 2026 (owner): "the number of traps I'm using when hunting isn't changing", then chose "Wear out". Replaces
   "that tier's trap kept in the pack": a hunt's trap breaks 1 hunt in 60 to 1 in 120 (about one every 7-10 minutes of hunting; the "1 in 8" first
   offered would have broken ~75 traps an hour, as hunts take 5-9 s).
+- 27 Nov 2026 (owner): "I love the subtle things that make games feel more polished ... Let's do all 15." Added: controls
+  press (1px sink and spring back, replacing the shrink-on-press scale), gathered items fly to the backpack, XP drifts
+  into its rail row, the quill pointer (Settings switch), pictures and one-liners on empty pages, and hold-to-confirm for
+  big spends (10,000+ coins, or 1,000+ that is a quarter of your coins).

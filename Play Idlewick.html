@@ -5931,6 +5931,47 @@ html.calm .hearth>.hearth-dim{transition:none}
 /* the phone bar's dot: something to do now, never a number */
 #rail .hub{position:relative}
 #rail .hub .hubdot.todo{display:block;position:absolute;top:5px;right:9px;width:10px;height:10px;min-width:0;padding:0;border-radius:50%;background:#e2572c;font-size:0;line-height:0}
+
+/* ===================== Feel (owner, 27 Nov 2026: polish; js/ui_feel.js) ===================== */
+/* gathered items fly to the backpack, which gulps them (the chip is a control, so it may scale; the phone's Hero
+   portrait is pixel art, so it bobs by translate instead) */
+.gain-fly{position:fixed;z-index:9000;pointer-events:none;display:flex;align-items:center;gap:2px;filter:drop-shadow(0 3px 5px #0006)}
+.gain-fly img{image-rendering:pixelated;display:block}
+.gain-fly b{font:700 14px var(--f-body);color:#fff;background:rgba(22,17,12,.82);border-radius:4px;padding:0 5px;margin-left:-6px;align-self:flex-end}
+@keyframes packGulp{0%{scale:1}35%{scale:1.14}70%{scale:.96}100%{scale:1}}
+@keyframes packBounce{0%{translate:0 0}35%{translate:0 -3px}70%{translate:0 1px}100%{translate:0 0}}
+.packchip.pack-gulp{animation:packGulp .42s cubic-bezier(.3,1.4,.5,1)}
+.h-hero.pack-bounce{animation:packBounce .42s cubic-bezier(.3,1.4,.5,1)}
+/* XP drifts into its skill's row; the row brightens as it arrives (an overlay fading in and out, no ring) */
+#fx .fl.xp-flow{animation:none;transform:none;white-space:nowrap}
+@keyframes xpArrive{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+.xp-arrive{position:relative}
+.xp-arrive::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;background:color-mix(in srgb,var(--c,var(--brass)) 26%,transparent);animation:xpArrive .6s ease-out both}
+html.calm :is(.gain-fly,.xp-flow),html.calm .xp-arrive::before{display:none}
+html.calm :is(.packchip.pack-gulp,.h-hero.pack-bounce){animation:none}
+@media (prefers-reduced-motion:reduce){:is(.gain-fly,.xp-flow),.xp-arrive::before{display:none}:is(.packchip.pack-gulp,.h-hero.pack-bounce){animation:none}}
+/* empty pages: a small pixel picture and a dry line, centred; nothing drawn round them */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:18px 12px;color:var(--mute);min-width:0}
+.empty-state .empty-art{display:block;flex:none}
+.empty-state .es-words{display:flex;flex-direction:column;gap:3px;align-items:center;max-width:46ch}
+.empty-state .es-line,.journal-empty .es-line{font:italic 500 16.5px/1.35 var(--f-body);color:var(--ink);margin:0}
+.empty-state .es-sub{font:14px/1.35 var(--f-body);color:var(--mute)}
+.empty-state.sm{padding:10px 8px;gap:6px}
+.empty-state.row{flex-direction:row;text-align:left;padding:6px 4px;gap:10px;justify-content:flex-start}
+.empty-state.row .es-words{align-items:flex-start}
+.journal-empty .empty-art{display:block;margin:0 auto 6px}
+.food-tiles>.food-none{grid-column:1/-1;width:100%}
+.log .log-empty{display:block;list-style:none}
+.log .log-empty .empty-state{padding:8px 4px}
+/* for screen readers only (the hold-to-confirm hint) */
+.lw-sr{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+/* the quill pointer (Settings > Display): the game's own pointer rules read --cur-hand / --cur-quill (js/ui_feel.js
+   rewrites their "pointer" and "default"); these zero-specificity rules cover controls that never set one */
+:root{--cur-quill:auto;--cur-hand:pointer}
+:where(html.lw-cursor),:where(html.lw-cursor) body{cursor:var(--cur-quill)}
+:where(html.lw-cursor) :where(button,[data-do],a[href],[role=button],[role=tab],[role=switch],summary,label[for]){cursor:var(--cur-hand)}
+:where(html.lw-cursor) :where(button:disabled){cursor:var(--cur-quill)}
+:where(html.lw-cursor) :where(input:not([type=range],[type=checkbox],[type=radio],[type=button],[type=submit]),textarea,[contenteditable=true]){cursor:text}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
@@ -6183,6 +6224,33 @@ html.calm .activity-scene.capture .scene-target{animation:none!important}
   .tw-prize.got{background-color:color-mix(in srgb,var(--brass) 14%,transparent)!important}
   .hunt-recent i.fail{background-color:color-mix(in srgb,var(--bad,#b04a3a) 55%,transparent)!important}
   .tog .sw{border-color:transparent!important}
+}
+
+/* ===================== Buttons that press (owner, 27 Nov 2026: polish) =====================
+   js/ui_feel.js puts .lw-press on a control while the pointer (or Enter/Space) holds it, and swaps it for .lw-release
+   when it lets go; a drag or a scroll lets go at once, so a list never sinks under a swiping finger. Held, the control
+   sinks one pixel and its shadow softens; released, it springs back with a little overshoot. The older shrink-on-press
+   (scale .93 in motion.css and style.css) is retired so the press is one consistent sink. translate only; under Reduce
+   effects and reduced motion the shadow still softens but nothing moves. */
+:root{--act-press:0 0 1px rgba(0,0,0,.32),0 1px 2px -1px rgba(0,0,0,.5);--press-spring:cubic-bezier(.34,1.9,.6,1)}
+:root[data-theme="light"]{--act-press:0 0 1px rgba(80,55,20,.16),0 1px 2px -1px rgba(80,55,20,.32)}
+@layer shape {
+  :is(.btn,.tab,.stab,.chip,.n-act,.iconb,.packchip,.hub,.seg button,.dg-row,.pinchip,.slot,.abil,.card,.tile,.goal,.beast,.plot,.skrow,.nav,.spell,button.eq,.tbtn,.illustrated-card):active{transform:none!important}
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,#hud :is(.iconb,.packchip,.h-hero),button,[data-do],[role=button],[role=tab],[role=switch],.btn):not(:disabled,.site-spot,.tc-room,.hearth-spot,img).lw-press.lw-press{
+    translate:0 1px!important;box-shadow:var(--act-press)!important;
+    transition:translate 70ms ease-out,box-shadow 70ms ease-out,background-color .15s,color .15s!important}
+  :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,#hud :is(.iconb,.packchip,.h-hero),button,[data-do],[role=button],[role=tab],[role=switch],.btn):not(:disabled,.site-spot,.tc-room,.hearth-spot,img).lw-release.lw-release{
+    transition:translate .32s var(--press-spring),box-shadow .26s ease-out,background-color .15s,color .15s!important}
+  html.calm :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,#hud :is(.iconb,.packchip,.h-hero),button,[data-do],[role=button],[role=tab],[role=switch],.btn):not(:disabled,.site-spot,.tc-room,.hearth-spot,img):is(.lw-press,.lw-release):is(.lw-press,.lw-release){translate:none!important;transition:none!important}
+  @media (prefers-reduced-motion:reduce){:is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,#hud :is(.iconb,.packchip,.h-hero),button,[data-do],[role=button],[role=tab],[role=switch],.btn):not(:disabled,.site-spot,.tc-room,.hearth-spot,img):is(.lw-press,.lw-release):is(.lw-press,.lw-release){translate:none!important;transition:none!important}}
+
+  /* hold to confirm (js/ui_feel.js): the button's own background fills from the left while you hold; a fill, never a
+     ring or a line. The fill is information (how long is left), so it shows under Reduce effects too. */
+  .hold-confirm{position:relative!important;isolation:isolate;overflow:hidden}
+  .hold-confirm::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;border:0!important;
+    background:color-mix(in srgb,var(--brass) 52%,transparent);transform-origin:0 50%;scale:0 1;transition:scale .18s ease-out}
+  .hold-confirm.holding::before{scale:1 1;transition:scale .6s linear}
+  .hold-confirm.hold-done::before{scale:1 1;background:color-mix(in srgb,var(--good,#4a8a4a) 45%,transparent);transition:none}
 }
 </style>
 
@@ -12233,6 +12301,95 @@ Object.assign(A, { workerSprite, treeSprite, rockSprite, piece, sceneFor, landma
 
 </script>
 <script>
+/* Idlewick pixel art: the small pictures for empty pages and the quill pointer (27 Nov 2026, owner: "I love the subtle
+   things that make games feel more polished"). House style (docs/pixel-art-style.md): top-left light from the shared
+   ramps, selective outlines, whole-number scales only.
+   - DQ.emptyArt(kind, box): a 24 x 24 picture for an empty state (UI.emptyState in ui_core.js), shown at the largest
+     whole multiple that fits the box (3x on desktop, 2x where space is short).
+   - DQ.cursorArt(kind, scale): the quill (default pointer) and the pointing hand (over controls), 16 x 16 drawn here and
+     scaled by whole numbers to a PNG data URL for a CSS cursor (js/ui_feel.js sets them). */
+(() => {
+const DQ = window.DQ, A = DQ.pixelArt; if (!A) return;
+const { Spr, ramp, R, SKIN } = A;
+const INK = '#2a1c1f', THREAD = '#b9b09c', GLASS = ramp('#a9cfe0', { gl: .8 }), PEWTER = ramp('#9ba2a8', { gl: .72 });
+
+const ART = {
+  /* the bank: a beam corner with an abandoned web and one loose thread (the spider has moved out) */
+  cobweb() { const s = Spr(24, 24); s.rect(0, 0, 24, 3, R.beam).rect(0, 0, 3, 24, R.beam);
+    for (const [x, y] of [[20, 3], [16, 9], [9, 16], [3, 20], [12, 13]]) s.line(3, 3, x, y, null, THREAD);
+    for (const r of [5, 9, 13]) for (let i = 0; i <= 12; i++) { const t = i / 12 * Math.PI / 2; s.fix(Math.round(3 + Math.cos(t) * r), Math.round(3 + Math.sin(t) * r), THREAD); }
+    s.line(16, 9, 16, 19, null, THREAD); s.fix(16, 20, '#8f8676'); return s; },
+  /* an open crate with nothing in it but shadow */
+  crate() { const s = Spr(24, 24); s.poly([[3, 9], [21, 9], [19, 5], [5, 5]], R.woodLight); s.poly([[5, 9], [19, 9], [17.5, 6.5], [6.5, 6.5]], R.barkDark);
+    s.rect(3, 9, 18, 12, R.wood); s.rect(3, 9, 2, 12, R.beam).rect(19, 9, 2, 12, R.beam);
+    for (const y of [13, 17]) s.line(5, y, 18, y, null, R.wood.lo); s.fix(4, 11, '#e6b84a'); s.fix(20, 11, '#e6b84a'); return s; },
+  /* a looking glass over nothing in particular */
+  lens() { const s = Spr(24, 24); s.line(14, 14, 20, 20, R.wood); s.line(15, 14, 21, 20, R.wood); s.line(14, 15, 20, 21, R.wood);
+    s.ell(9, 9, 7, 7, R.iron); s.ell(9, 9, 5, 5, GLASS); s.fix(7, 6, '#ffffff'); s.fix(6, 7, '#ffffff'); return s; },
+  /* a quiet inn table: one mug, nobody drinking from it */
+  table() { const s = Spr(24, 24); s.rect(2, 12, 20, 3, R.wood); s.rect(4, 15, 2, 7, R.beam).rect(18, 15, 2, 7, R.beam);
+    s.rect(13, 6, 5, 6, PEWTER); s.rect(18, 7, 2, 1, PEWTER).rect(19, 8, 1, 2, PEWTER).rect(18, 10, 2, 1, PEWTER); s.line(13, 6, 17, 6, null, PEWTER.gl);
+    s.rect(6, 9, 2, 3, R.plaster); s.fix(6, 8, '#f0c060'); s.fix(7, 8, '#e08a30'); return s; },
+  /* a blank scroll, rolled at both ends */
+  scroll() { const s = Spr(24, 24); s.rect(6, 4, 12, 16, R.plaster); s.rect(4, 2, 16, 3, R.straw).rect(4, 19, 16, 3, R.straw);
+    s.fix(4, 3, R.strawDark.lo); s.fix(19, 3, R.strawDark.lo); s.fix(4, 20, R.strawDark.lo); s.fix(19, 20, R.strawDark.lo); return s; },
+  /* an empty shelf on brackets, dusted and waiting */
+  shelf() { const s = Spr(24, 24); s.rect(1, 12, 22, 2, R.wood); s.poly([[4, 14], [7, 14], [4, 18]], R.beam); s.poly([[17, 14], [20, 14], [20, 18]], R.beam);
+    s.rect(15, 10, 3, 2, ramp('#c8bfae')); s.fix(16, 9, '#d8d0c0'); return s; },
+  /* an inkpot and a quill, nothing yet written */
+  inkpot() { const s = Spr(24, 24); s.ell(9, 17, 6, 4, ramp('#3c4a7a')); s.rect(7, 11, 5, 3, ramp('#3c4a7a')); s.rect(6, 10, 7, 1, R.ink);
+    for (let i = 0; i <= 10; i++) { const x = 11 + i, y = 12 - i; s.fix(x, y, '#c8a060'); if (i > 3) { s.dot(x + 1, y, R.feather); s.dot(x, y - 1, R.feather); if (i > 5 && i < 10) s.dot(x + 1, y - 1, R.feather); } }
+    s.fix(8, 18, '#6a7ab0'); return s; },
+  /* an empty bench, everyone busy elsewhere */
+  bench() { const s = Spr(24, 24); s.rect(2, 13, 20, 2, R.wood); s.rect(3, 8, 18, 2, R.woodLight);
+    s.rect(4, 10, 2, 3, R.beam).rect(18, 10, 2, 3, R.beam); s.rect(4, 15, 2, 6, R.beam).rect(18, 15, 2, 6, R.beam); return s; },
+  /* a clean plate and two crumbs */
+  plate() { const s = Spr(24, 24); s.ell(12, 14, 10, 5, R.plaster); s.ell(12, 14, 6, 3, ramp('#e2d6bb'));
+    s.fix(9, 14, '#b88a4a'); s.fix(15, 13, '#b88a4a'); return s; },
+  /* an hourglass with all its sand at the bottom */
+  hourglass() { const s = Spr(24, 24); s.rect(5, 2, 14, 2, R.wood).rect(5, 20, 14, 2, R.wood); s.rect(6, 4, 1, 16, R.beam).rect(17, 4, 1, 16, R.beam);
+    s.poly([[8, 4], [16, 4], [12.5, 11.5], [11.5, 11.5]], GLASS); s.poly([[11.5, 12.5], [12.5, 12.5], [16, 20], [8, 20]], GLASS);
+    s.poly([[9.5, 20], [14.5, 20], [13, 16], [11, 16]], R.straw); return s; },
+  /* a closed chest with iron bands */
+  chest() { const s = Spr(24, 24); s.rect(3, 9, 18, 11, R.wood); s.ell(12, 9, 9, 3, R.woodLight); s.rect(3, 9, 18, 1, R.beam);
+    s.rect(6, 7, 2, 13, R.iron).rect(16, 7, 2, 13, R.iron); s.rect(11, 10, 2, 3, R.gold); return s; },
+  /* a map that is mostly blank, which is the fun part */
+  map() { const s = Spr(24, 24); s.poly([[2, 5], [8, 3], [15, 5], [22, 3], [22, 19], [15, 21], [8, 19], [2, 21]], R.path);
+    s.line(8, 3, 8, 19, null, R.path.lo); s.line(15, 5, 15, 21, null, R.path.lo);
+    for (const [x, y] of [[4, 17], [6, 15], [8, 14], [10, 13]]) s.fix(x, y, '#9a4a3a'); s.fix(11, 11, '#c8483c'); s.fix(12, 11, '#c8483c'); s.fix(11, 12, '#c8483c'); s.fix(12, 12, '#c8483c'); return s; }
+};
+DQ.EMPTY_ART = Object.keys(ART);
+DQ.emptyArt = (kind, box = 72, alt = '') => { if (!ART[kind]) return ''; return A.img(A.url('empty:' + kind, ART[kind]), 24, 24, box, 'empty-art', alt); };
+
+/* ---------- the pointer ---------- */
+const CUR = {
+  /* a quill, nib at the top left (the hotspot) and the feather trailing down to the right */
+  quill() { const s = Spr(16, 16), shaft = '#c8a060';
+    s.poly([[5.5, 3], [10, 5], [14.5, 10], [15, 15], [10, 14.5], [5, 10], [3, 5.5]], R.feather);
+    s.dot(2, 2, R.iron); s.dot(3, 3, R.iron); s.dot(2, 3, R.iron); s.dot(3, 2, R.iron); s.dot(4, 4, R.iron); s.fix(1, 1, INK);
+    for (let i = 5; i <= 14; i++) s.fix(i, i, shaft);
+    s.fix(9, 6, R.feather.lo); s.fix(6, 9, R.feather.lo); s.fix(12, 9, R.feather.lo); s.fix(9, 12, R.feather.lo);
+    return s; },
+  /* a pointing hand with a brown cuff, fingertip at the top (the hotspot) */
+  hand() { const s = Spr(16, 16), sk = SKIN[0];
+    s.grid(['', '......ss', '......ss', '......ss', '......ss', '......ssss', '......sssssss', '..ss..sssssssss', '..sss.sssssssss', '...ssssssssssss', '...ssssssssssss',
+      '....ssssssssss', '.....ssssssss', '.....cccccccc', '.....cccccccc'], { s: sk, c: R.leather });
+    for (const x of [8, 10, 12]) s.fix(x, 6, sk.lo); return s; }
+};
+/* hotspots in sprite pixels: the quill's nib and the hand's fingertip */
+DQ.CURSOR_HOT = { quill: [1, 1], hand: [6, 1] };
+const curCache = new Map();
+DQ.cursorArt = (kind, scale = 2) => {
+  const key = kind + ':' + scale; if (curCache.has(key)) return curCache.get(key);
+  if (!CUR[kind] || typeof document === 'undefined' || !document.createElement) return null;
+  const src = A.toCanvas(CUR[kind]()), c = document.createElement('canvas'); c.width = src.width * scale; c.height = src.height * scale;
+  const x = c.getContext('2d'); if (!x) return null; x.imageSmoothingEnabled = false; x.drawImage(src, 0, 0, c.width, c.height);
+  const u = c.toDataURL(); curCache.set(key, u); return u;
+};
+})();
+
+</script>
+<script>
 /* Idlewick towns (Nov 2026): every town is a wide, lived-in place drawn at 640 x 360, with everything in it to one
    scale: townsfolk about 10 px tall, homes two to three times that, the restoration sites (32 x 32 pieces) the size
    of a building, your boats moored at Saltmere and your traps at the meadow's edge sized against them. Rows of homes
@@ -14030,7 +14187,7 @@ const trunc = (t, n) => { t = String(t || '').replace(/<[^>]+>/g, ''); return t.
 const ago = t => { const s = Math.round((Date.now() - t) / 1000); return s < 60 ? 'just now' : s < 3600 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`; };
 DQ.openBell = () => {
   DQ.flushItemDigest(); DQ.unreadNotes = 0; const L = DQ.noteLog.filter(e => DQ.notificationTier(e.o) === 'quiet');
-  const body = L.length ? `<div class="bell-list">${L.map((e, i) => { const o = e.o, a = inferActions(o)[0]; return `<div class="bell-row ${e.silent ? 'quiet' : ''}" style="--c:${o.col || '#d8a64a'}"><span class="n-ic">${DQ.data.ITEMS[o.icon] ? DQ.itemIco(DQ.data.ITEMS[o.icon]) : DQ.data.SK[o.icon] && DQ.artImage ? DQ.artImage('skill', o.icon, 32, '', '') : ico(o.icon || 'star')}</span><div class="bell-t"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(o.kind === 'loot' ? o.text : trunc(o.text, 190))}</span>` : ''}<small>${ago(e.t)}</small></div>${a ? `<button class="btn sm" data-i="${i}">${esc(a.label)}</button>` : ''}</div>`; }).join('')}</div>` : '<p class="dim" style="margin:0">Nothing yet. Routine progress and finds will be listed here.</p>';
+  const body = L.length ? `<div class="bell-list">${L.map((e, i) => { const o = e.o, a = inferActions(o)[0]; return `<div class="bell-row ${e.silent ? 'quiet' : ''}" style="--c:${o.col || '#d8a64a'}"><span class="n-ic">${DQ.data.ITEMS[o.icon] ? DQ.itemIco(DQ.data.ITEMS[o.icon]) : DQ.data.SK[o.icon] && DQ.artImage ? DQ.artImage('skill', o.icon, 32, '', '') : ico(o.icon || 'star')}</span><div class="bell-t"><b>${esc(o.title)}</b>${o.text ? `<span>${esc(o.kind === 'loot' ? o.text : trunc(o.text, 190))}</span>` : ''}<small>${ago(e.t)}</small></div>${a ? `<button class="btn sm" data-i="${i}">${esc(a.label)}</button>` : ''}</div>`; }).join('')}</div>` : (DQ.ui && DQ.ui.emptyState ? DQ.ui.emptyState('inkpot', 'Quiet so far. Suspiciously quiet.', 'Routine progress and finds will be listed here.', 'sm') : '<p class="dim" style="margin:0">Nothing yet. Routine progress and finds will be listed here.</p>');
   DQ.modal({ title: 'Recent activity', wide: true, body, actions: [{ label: 'Close', primary: true }] });
   $$('.bell-row .btn').forEach(b => b.onclick = () => { const e = L[+b.dataset.i], a = e && inferActions(e.o)[0]; DQ.closeModal(); a && a.fn && a.fn(); });
 };
@@ -14521,7 +14678,8 @@ DQ.stopAct = (silent, why, done) => { /* done: a batch finished as planned, show
 
 const extraCoins = () => D.ECONOMY.gatherCoinScale * (D.ECONOMY.gatherTownScale[townIdx()] || 1);
 function floatItem(id, n) { const it = D.ITEMS[id]; DQ.floatAt(document.querySelector('.card.active .own') || document.querySelector('.card.active') || document.querySelector('.nowp'), `${DQ.ico(it.ic)}+${n} ${it.name.toLowerCase()}`, it.col); }
-function floatXp(sk, x) { DQ.floatAt(document.querySelector('.card.active') || document.querySelector('.arena') || document.querySelector('.nowp'), `${DQ.ico(sk)}+${fmt(x)} XP`, D.SK[sk].col); }
+/* the XP drifts into that skill's row in the rail when it can (js/ui_feel.js); otherwise it rises where it was earned */
+function floatXp(sk, x) { if (DQ.flowXp && DQ.flowXp(sk, x)) return; DQ.floatAt(document.querySelector('.card.active') || document.querySelector('.arena') || document.querySelector('.nowp'), `${DQ.ico(sk)}+${fmt(x)} XP`, D.SK[sk].col); }
 
 function gatherDone(kind, n) {
   const sk = n.skill;
@@ -14769,7 +14927,7 @@ function combatRound() {
     DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, xpDealt * per); f.heroXp = (f.heroXp || 0) + x; if (!i) first = [sk, x]; });
     f.heroXp = (f.heroXp || 0) + DQ.addXp('hitpoints', xpDealt * 1.33);
     /* the XP shows when the blow visibly lands, not while the arrow or spell is still in flight (27 Nov 2026 audit) */
-    if (first) { const fl = () => DQ.floatAt(document.getElementById('av-foe'), `${ico(first[0])}+${fmt(first[1])} XP`, D.SK[first[0]].col); if (DQ.ui && DQ.ui.afterImpact && !DQ.sim.on && !DQ.forecasting) DQ.ui.afterImpact(fl, DQ.battleTiming?.impact || 390); else fl(); }
+    if (first) { const fl = () => { const foe = document.getElementById('av-foe'); if (!(DQ.flowXp && DQ.flowXp(first[0], first[1], foe))) DQ.floatAt(foe, `${ico(first[0])}+${fmt(first[1])} XP`, D.SK[first[0]].col); }; if (DQ.ui && DQ.ui.afterImpact && !DQ.sim.on && !DQ.forecasting) DQ.ui.afterImpact(fl, DQ.battleTiming?.impact || 390); else fl(); }
   }
   if (f.hp <= 0) return kill(m);
   if (DQ.beastAttack) { f.hp -= DQ.beastAttack(f, m); if (f.hp <= 0) return kill(m); }
@@ -16263,7 +16421,11 @@ UI.activityIcon = page => {
  return `<span class="route-art" aria-hidden="true">${art}</span>`;
 };
 UI.objectiveIcon = (q,o) => UI.activityIcon(o.guildPage||({carve:'carpentry',sail:'sailing',train:'beastmastery',study:'research',brew:'brewery',guildfight:'combat',guildheal:'combat'})[o.ev]||DQ.objPage(q,o));
-UI.money = amount => `<span class="money" role="img" aria-label="${fmt(amount)} coins"><span class="money-icon" aria-hidden="true">${ico('coin')}</span><span aria-hidden="true">${fmt(amount)}</span></span>`;
+UI.money = amount => `<span class="money" data-coins="${Math.round(+amount || 0)}" role="img" aria-label="${fmt(amount)} coins"><span class="money-icon" aria-hidden="true">${ico('coin')}</span><span aria-hidden="true">${fmt(amount)}</span></span>`;
+/* An empty page or list (27 Nov 2026, owner: polish): a small pixel picture drawn in code (js/pixel_feel.js), a dry
+   one-liner in the game's voice and, when it helps, the plain line saying what fills it. Not clickable: no outline.
+   size 'sm' uses the 2x picture where space is short; 'row' puts that picture beside the words in a tight panel. */
+UI.emptyState = (pic, line, sub = '', size = '') => `<div class="empty-state ${size === 'sm' || size === 'row' ? size : ''}" style="grid-column:1/-1">${DQ.emptyArt ? DQ.emptyArt(pic, size ? 48 : 72) : ''}<span class="es-words"><span class="es-line">${line}</span>${sub ? `<small class="es-sub">${sub}</small>` : ''}</span></div>`;
 /* Render existing choice definitions as visible buttons, never native dropdowns.
    The select is parsed in an inert template only; it never enters the page. */
 /* Every button choice carries the same pixel icon the menus use, so options read at a glance. */
@@ -16452,7 +16614,7 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
     const requirementLabel=shortReason(requirementText);
     return `<button data-task-id="${c.id}" class="illustrated-card ${working?'active':''} ${choice.id===c.id?'selected':''} ${c.locked?'locked':''} ${c.missing?'missing':''}" data-do="taskselect" data-a="${kind}" data-b="${c.id}" data-page="${key}" aria-pressed="${choice.id===c.id}" ${c.locked?`aria-disabled="true" data-tip="text:${esc(c.reason||'Not unlocked yet')}"`:''}>
       <span class="choice-art">${art(c,96)}</span>${c.secret?'<span class="recipe-origin" title="Learned from a discovered recipe">'+ico('book')+' Found recipe</span>':''}${!c.locked && DQ.mastBadge ? DQ.mastBadge(kind, c.id) : ''}${!c.locked && DQ.gearMark ? (g => g && D.ITEMS[g] && D.ITEMS[g].slot ? DQ.gearMark(g) : '')(c.yieldId || (c.artKind === 'item' ? c.artId || c.id : null)) : ''}<b>${c.locked&&!c.revealed?'???':esc(c.name)}</b><small>${c.locked?`${ico('lock')}<span>${esc(requirementLabel)}</span>`:c.caption||esc(c.reason||'')}</small>${c.locked?'':`<span class="choice-state">${working?'● Working':c.stateText?c.stateText:c.locked?'Locked':c.away?'Travel required':''}</span>`}${working?`<span class="bar prog"><i data-prog="${kind}:${c.id}"></i></span>`:''}</button>`;
-  }).join('') || '<p class="dim">No recipes match. Try another category.</p>'}</div></section>`;
+  }).join('') || UI.emptyState('lens', 'Not a recipe in sight.', 'No recipes match. Try another category.')}</div></section>`;
   if(kind==='fight')return `<section class="panel encounter-controls"><div class="phead"><h2>${esc(choice.name)}</h2><small>Combat <b data-b="combat"></b></small></div>${action}<div class="task-summary">${choice.info||''}</div></section>${cards}`;
   const stage = `<section class="panel activity-stage ${running?'working':''}" style="--c:${D.SK[key]?.col||'var(--brass)'};--work-beat:${Math.max(900,Math.min(1700,(DQ.act?.dur||3600)/3))}ms"><div class="activity-scene ${kind} skill-${key}" data-kind="${kind}" data-task="${choice.id}" style="--landscape:url('${DQ.districtUrl ? DQ.districtUrl(S().town, kind, key, choice) : DQ.sceneUrl ? DQ.sceneUrl(S().town) : ''}')"><span class="scene-target">${art(choice, choice.artKind==='item' ? 48 : kind==='wood' ? 144 : kind==='train' ? 64 : 96)}</span>${choice.yieldId&&kind!=='fish'?`<span class="scene-yield"><small>Produces</small>${DQ.itemIco(D.ITEMS[choice.yieldId])}</span>`:''}${running?`<span class="scene-worker" aria-hidden="true"><img class="px" src="${DQ.heroWorkFigureUrl?DQ.heroWorkFigureUrl(S().look):DQ.heroFigureUrl(S().look)}" width="72" height="96" alt=""></span><span class="action-tool" aria-hidden="true">${(t => t ? DQ.itemIco(D.ITEMS[t]) : ico({wood:'woodcutting',mine:'mining',fish:'rod',thieve:'glove',recipe:{cooking:'cooking',smithing:'hammer',crafting:'crafting'}[key],alch:'staff'}[kind]||key))((k => { const n = k && DQ.toolTier(key); return n && D.ITEMS[`tool_${k}_${n}`] ? `tool_${k}_${n}` : null; })(DQ.toolKey && DQ.toolKey(key)))}</span><span class="work-atmosphere" aria-hidden="true"><i></i><i></i><i></i><i></i></span>`:''}</div>
     <div class="activity-caption"><div class="phead"><div><small>${esc(title)} · Level <b data-b="lvl:${key}"></b></small><h2>${esc(running ? DQ.actLabel() : choice.name)}</h2></div><span class="activity-state ${running?'ok':'dim'}">${running?'▶ Running':choice.blocked?'Preview':'Ready'}</span></div>${running?'<span class="bar prog activity-progress" role="img" aria-label="Current action progress"><i data-prog="@"></i></span>':''}${action}${!choice.blackout && DQ.mastLine ? DQ.mastLine(kind, choice.id) : ''}<div class="task-summary">${choice.info||''}${choice.blocked&&!running&&!choice.blackout?`<p class="bad">${esc(choice.reason)}</p>`:''}</div></div></section>`;
@@ -16563,7 +16725,7 @@ UI.V.magic = () => {
 /* ---------- Combat page ---------- */
 UI.foodChips = () => {
   const foods = DQ.foods();
-  return foods.length ? foods.map(id => { const it = D.ITEMS[id]; return `<button class="chip" style="--c:${it.col}" data-do="eat" data-a="${id}" data-tip="item:${id}">${ico(it.ic)}${it.name} <b class="mono" data-b="count:${id}"></b><small class="mono">+${it.heal}</small></button>`; }).join('') : `<p class="dim sm">No food. Cook fish, or buy bread from the shop.</p>`;
+  return foods.length ? foods.map(id => { const it = D.ITEMS[id]; return `<button class="chip" style="--c:${it.col}" data-do="eat" data-a="${id}" data-tip="item:${id}">${ico(it.ic)}${it.name} <b class="mono" data-b="count:${id}"></b><small class="mono">+${it.heal}</small></button>`; }).join('') : UI.emptyState('plate', 'A clean plate and a long day ahead.', 'No food. Cook fish, or buy bread from the shop.', 'row');
 };
 /* One selected encounter for the whole combat page: the creature you are fighting, else the one you last chose,
    else the first ordinary creature here. The arena preview, the preparation brief and the start control all use it. */
@@ -16640,7 +16802,7 @@ UI.tile = (sk, i = 0) => {
 
 UI.renderLog = () => {
   const el = $('#loglist'); if (!el) return;
-  el.innerHTML = S().log.slice(0, 14).map(l => { const d = new Date(l.t); return `<li class="${esc(l.k || '')}"><time>${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}</time><span>${esc(l.m)}</span></li>`; }).join('') || `<li><time></time><span class="dim">Your adventures will be written here.</span></li>`;
+  el.innerHTML = S().log.slice(0, 14).map(l => { const d = new Date(l.t); return `<li class="${esc(l.k || '')}"><time>${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}</time><span>${esc(l.m)}</span></li>`; }).join('') || `<li class="log-empty">${UI.emptyState('inkpot', 'Nothing has happened yet. The quill is sharpened and bored.', 'Your adventures will be written here.', 'sm')}</li>`;
 };
 UI.chart = () => {
   /* the chart is drawn at its container's own width so its labels keep their size (a fixed 600-wide viewBox blew
@@ -16808,12 +16970,13 @@ UI.shopPreview = id => {
 UI.inlineBuy = id => {
   const reason = DQ.shopBuyLock(id), max = DQ.buyMax(id), price = DQ.buyPrice(id);
   if (reason) return `<button class="btn" disabled>${ico('lock')}${esc(reason)}</button>`;
-  /* short labels so three buttons fit a card without wrapping (review 26 Nov); the full wording is in each button's
+  /* short labels so three buttons fit a card without wrapping (review 26 Nov; 27 Nov: Max ×15,000 clipped, so five-figure
+     counts read 15k); the full wording is in each button's
      accessible name and tooltip. Gear is bought one at a time, so it gets a single Buy button. */
   const it = D.ITEMS[id], why = 'Not enough coins or supplies';
   const purchase = (n, label, full) => { const ok = n > 0 && n <= max; return `<button class="btn" data-do="buy" data-a="${id}" data-b="${n}" ${ok ? '' : 'disabled'} aria-label="${esc(full)}${ok ? '' : ': ' + why}" data-tip="text:${esc(ok ? full : why)}"><b>${label}</b><small>${ok ? UI.money(n * price) : '—'}</small></button>`; };
   if (it && it.slot && it.type !== 'ammo') return `<div class="inline-buy one" aria-label="Buy ${esc(it.name)}">${purchase(1, 'Buy', 'Buy 1')}</div>`;
-  return `<div class="inline-buy" aria-label="Buy ${esc(D.ITEMS[id].name)}">${purchase(1, '×1', 'Buy 1')}${purchase(10, '×10', 'Buy 10')}${purchase(max, `Max ×${fmt(max)}`, `Buy max (${fmt(max)})`)}</div>`;
+  return `<div class="inline-buy" aria-label="Buy ${esc(D.ITEMS[id].name)}">${purchase(1, '×1', 'Buy 1')}${purchase(10, '×10', 'Buy 10')}${purchase(max, `Max ×${max >= 10000 ? String(Math.floor(max / 100) / 10).replace(/\.0$/, '') + 'k' : fmt(max)}`, `Buy max (${fmt(max)})`)}</div>`;
 };
 UI.V.shop = () => {
   const tab = UI.shopTab, buying = tab === 'buy', qty = UI.shopQty;
@@ -16830,7 +16993,7 @@ UI.V.shop = () => {
     ${it ? `<div class="shop-workspace"><div class="shop-purchase">${UI.shopPreview(id)}${UI.bundleLinks?.(id)||''}${buying&&DQ.shopMaterialCost?UI.needTiles(Object.fromEntries(Object.entries(DQ.shopMaterialCost(id)).map(([k,n])=>[k,n*count]))):''}${buying ? UI.inlineBuy(id) : `<div class="shop-controls"><label for="shop-quantity">Quantity${UI.choiceButtons(`<select id="shop-quantity" data-in="shop-quantity" ${tool ? 'disabled' : ''}>${[1,10,100].map(n=>`<option value="${n}" ${count === n ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}</label></div>
       <div class="btnrow wrap shop-action"><button class="btn primary" data-do="${buying ? 'buy' : 'sell'}" data-a="${id}" ${buying ? '' : `data-b="${count}"`} >${tool && owned && buying ? 'Already owned' : (buying ? 'Buy' : 'Sell')+' ×'+(buying?count:Math.min(count,owned))} ${tool && owned && buying ? '' : UI.money(cost)}</button>${!buying ? `<button class="btn" data-do="sell" data-a="${id}" data-b="all">Sell all ${UI.money(DQ.sellPrice(id) * owned)}</button>` : ''}</div>`}
       ${buying && S().coins < cost ? `<p class="bad">Need ${UI.money(cost - S().coins)} more.</p>` : ''}
-      </div><div class="shop-comparison">${UI.compareHtml ? UI.compareHtml(id) : ''}</div></div>` : '<p>Nothing to sell. Gather resources or visit your bank.</p>'}
+      </div><div class="shop-comparison">${UI.compareHtml ? UI.compareHtml(id) : ''}</div></div>` : UI.emptyState('crate', 'The trader looks into your empty sack, then at you.', 'Nothing to sell. Gather resources or visit your bank.')}
     ${later}</section></div>`;
 };
 
@@ -16873,7 +17036,7 @@ UI.V.quests = () => {
   }).join(''):'';
   const done=D.QUESTS.filter(groups.done).length;
   const sections=[['Main story',list.filter(q=>q.main)],['Side stories',list.filter(q=>!q.main)]].filter(([,qs])=>qs.length).map(([label,qs])=>`<h3 class="journal-section">${label} <small>${qs.length}</small></h3>${qs.map(rowOf).join('')}`).join('');
-  return `<section class="panel shophead journal-header"><div><span class="k">Quest journal</span><h2>Your stories</h2><small>${done} ${done === 1 ? 'story' : 'stories'} completed</small></div><nav class="tabs" aria-label="Quest status">${Object.entries(names).map(([k,n])=>`<button class="tab ${tab===k?'on':''}" data-do="qtab" data-a="${k}" aria-pressed="${tab===k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</nav></section>${list.length?`<div class="qlayout quest-journal-layout"><nav class="qlist" aria-label="${names[tab]} quests">${sections}</nav><div class="qdetail">${cards}</div></div>`:`<section class="panel journal-empty"><h2>${{active:'No stories underway',available:'No new requests here',upcoming:'No upcoming requests',done:'Your story is just beginning'}[tab]}</h2><p>${{active:'Choose an available story and someone to help.',available:'Check Upcoming to see what opens the next story.',upcoming:'Explore the realm and meet its people.',done:'Completed stories and their acknowledgements will stay here.'}[tab]}</p><button class="btn" data-do="qtab" data-a="${tab==='available'?'upcoming':'available'}">${tab==='available'?'See upcoming stories':'Browse available stories'}</button></section>`}`;
+  return `<section class="panel shophead journal-header"><div><span class="k">Quest journal</span><h2>Your stories</h2><small>${done} ${done === 1 ? 'story' : 'stories'} completed</small></div><nav class="tabs" aria-label="Quest status">${Object.entries(names).map(([k,n])=>`<button class="tab ${tab===k?'on':''}" data-do="qtab" data-a="${k}" aria-pressed="${tab===k}">${n} <b class="mono">${D.QUESTS.filter(groups[k]).length}</b></button>`).join('')}</nav></section>${list.length?`<div class="qlayout quest-journal-layout"><nav class="qlist" aria-label="${names[tab]} quests">${sections}</nav><div class="qdetail">${cards}</div></div>`:`<section class="panel journal-empty">${DQ.emptyArt ? DQ.emptyArt('scroll', 72) : ''}<h2>${{current:'Nothing on your plate',active:'No stories underway',available:'No new requests here',upcoming:'No upcoming requests',done:'Your story is just beginning'}[tab]}</h2><p class="es-line">${{current:'Nobody needs anything. Enjoy it while it lasts.',active:'Nobody needs anything. Enjoy it while it lasts.',available:'Nobody needs anything. Enjoy it while it lasts.',upcoming:'Nobody has mentioned anything. Yet.',done:'Nothing finished yet. Everyone starts here, usually holding a fishing rod.'}[tab]}</p><p>${{current:'New requests turn up as you level up and visit new places.',active:'Choose an available story and someone to help.',available:'Check Upcoming to see what opens the next story.',upcoming:'Explore the realm and meet its people.',done:'Completed stories and their acknowledgements will stay here.'}[tab]}</p><button class="btn" data-do="qtab" data-a="${tab==='upcoming'?'current':'upcoming'}">${tab==='upcoming'?'Back to current stories':'See upcoming stories'}</button></section>`}`;
 };
 
 /* ---------- Character ---------- */
@@ -16895,7 +17058,7 @@ UI.packVisible = () => UI.packSorted().filter(id => inCat(id, UI.packFilter) && 
 UI.inventoryPicker = () => '';
 UI.packGrid = () => {
   const ids = UI.packVisible();
-  if (!ids.length) return `<p class="dim" style="grid-column:1/-1;margin:6px 0">${UI.packSorted().length ? 'No matches.' : 'Your backpack is empty.'}</p>`;
+  if (!ids.length) return UI.packSorted().length ? UI.emptyState('lens', 'You checked the side pocket too. Nothing.', 'No matches.', 'sm') : UI.emptyState('crate', 'Just crumbs, and a button you don’t remember losing.', 'Your backpack is empty.', 'sm');
   return ids.map(id => { const spare = D.ITEMS[id].slot !== 'ammo' && S().equip[D.ITEMS[id].slot] === id; return `<button class="slot ${UI.sel === id && UI.selFrom === 'pack' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="pack" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().inv[id]} ${spare ? 'spare copies' : 'in backpack'}">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().inv[id])}</span>${spare ? '<span class="spare-tag">Spare</span>' : ''}${DQ.gearMark ? DQ.gearMark(id) : ''}${UI.bundleLabel?.(id)||''}</button>`; }).join('');
 };
 UI.detail = (id, from) => {
@@ -16925,7 +17088,7 @@ UI.V.character = () => {
 
 /* ---------- Bank ---------- */
 const bankIds = () => Object.keys(S().bank).filter(id => !DQ.isTool(id) && inCat(id, UI.bankFilter) && D.ITEMS[id].name.toLowerCase().includes(UI.bankQ.toLowerCase())).sort(byCat);
-UI.bankGrid = () => { const ids = bankIds(); return ids.length ? ids.map(id => `<button class="slot ${UI.sel === id && UI.selFrom === 'bank' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="bank" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().bank[id]} in bank">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().bank[id])}</span>${DQ.gearMark ? DQ.gearMark(id) : ''}${UI.bundleLabel?.(id)||''}</button>`).join('') : `<p class="dim" style="grid-column:1/-1">${Object.keys(S().bank).length ? 'Nothing matches that filter.' : 'Your bank is empty. Overflow and deposits end up here.'}</p>`; };
+UI.bankGrid = () => { const ids = bankIds(); return ids.length ? ids.map(id => `<button class="slot ${UI.sel === id && UI.selFrom === 'bank' ? 'sel' : ''}" style="--c:${D.ITEMS[id].col}" data-do="sel" data-a="${id}" data-b="bank" data-tip="item:${id}" aria-label="${esc(D.ITEMS[id].name)}, ${S().bank[id]} in bank">${DQ.itemIco(D.ITEMS[id])}<span class="n mono">${fmtK(S().bank[id])}</span>${DQ.gearMark ? DQ.gearMark(id) : ''}${UI.bundleLabel?.(id)||''}</button>`).join('') : (Object.keys(S().bank).length ? UI.emptyState('lens', 'Rummaged twice. Still nothing.', 'Nothing matches that filter.') : UI.emptyState('cobweb', 'Even the spiders moved out.', 'Your bank is empty. Overflow and deposits end up here.')); };
 UI.V.bank = () => `<section class="panel shophead"><div><h2>Bank</h2><small class="dim">${Object.keys(S().bank).filter(id => !DQ.isTool(id)).length} item types · Used automatically by tasks</small></div><button class="btn" data-do="depositall">${ico('bank')}Deposit backpack</button></section>
   <div class="chargrid"><section class="panel"><div class="phead bank-filters"><div class="tabs">${UI.catTabs(S().bank, UI.bankFilter, 'bankfilter')}</div><input id="bankq" class="search" data-in="bankq" placeholder="Search" value="${esc(UI.bankQ)}" aria-label="Search bank"></div>${UI.inventoryPicker('bank')}<div class="slots big" id="bankgrid">${UI.bankGrid()}</div></section>
   <section class="panel" id="detailbox">${UI.detail(UI.sel, UI.selFrom)}</section></div>`;
@@ -16936,7 +17099,7 @@ UI.V.achievements = () => {
   const list = D.ACH.filter(a => f === 'all' || (f === 'done' ? S().ach[a.id] : !S().ach[a.id])).sort((a, b) => (!!S().ach[b.id] - !!S().ach[a.id]) || (Math.min(1, b.val() / b.goal) - Math.min(1, a.val() / a.goal)));
   const cut = f === 'todo' && !UI.achAll && list.length > 12, shown = cut ? list.slice(0, 12) : list;
   return `<section class="panel shophead"><div><span class="k">Achievements</span><h2>${done} of ${D.ACH.length} earned</h2></div><div class="tabs">${[['all', 'All'], ['todo', 'In progress'], ['done', 'Earned']].map(([k, n]) => `<button class="tab ${f === k ? 'on' : ''}" data-do="achfilter" data-a="${k}">${n}</button>`).join('')}</div></section>
-    <div class="achgrid">${shown.map(a => { const v = Math.min(a.goal, a.val() || 0), ok = !!S().ach[a.id]; return `<div class="ach ${ok ? 'ok' : ''}"><span class="ai">${ico(ok ? a.ic : a.ic)}</span><div><b>${a.name}</b><small>${a.desc}</small><span class="bar"><i style="width:${v / a.goal * 100}%"></i></span><small class="mono">${ok ? 'Earned' : `${fmtK(v)} / ${fmtK(a.goal)}`} · ${ico('coin')}${fmt(a.coins)}</small></div></div>`; }).join('')}</div>${cut ? `<div class="btnrow" style="justify-content:center;margin-top:12px"><button class="btn" data-do="achall">Show all ${list.length} in progress</button></div>` : ''}`;
+    <div class="achgrid">${shown.map(a => { const v = Math.min(a.goal, a.val() || 0), ok = !!S().ach[a.id]; return `<div class="ach ${ok ? 'ok' : ''}"><span class="ai">${ico(ok ? a.ic : a.ic)}</span><div><b>${a.name}</b><small>${a.desc}</small><span class="bar"><i style="width:${v / a.goal * 100}%"></i></span><small class="mono">${ok ? 'Earned' : `${fmtK(v)} / ${fmtK(a.goal)}`} · ${ico('coin')}${fmt(a.coins)}</small></div></div>`; }).join('') || (f === 'done' ? UI.emptyState('shelf', 'A shelf, dusted and waiting.', 'Achievements you earn will sit here.') : UI.emptyState('shelf', 'Nothing left to chase. The shelf is starting to sag.', 'Every achievement is earned.'))}</div>${cut ? `<div class="btnrow" style="justify-content:center;margin-top:12px"><button class="btn" data-do="achall">Show all ${list.length} in progress</button></div>` : ''}`;
 };
 
 /* ---------- Settings ---------- */
@@ -18213,7 +18376,7 @@ UI.V.hirelings = () => {
   const hiring = UI.tab.workersView === 'hire' || !ws.length;
   return `<section class="panel shophead"><div><span class="k">Workers</span><h2>${ws.length} of ${slots} bed${slots > 1 ? 's' : ''} filled</h2><small class="dim">Items go to your bank · wages paid per minute</small></div></section>
     <div class="tabs worker-mobile-tabs"><button class="tab ${hiring ? '' : 'on'}" data-do="tab" data-a="workersView" data-b="team">Your team</button><button class="tab ${hiring ? 'on' : ''}" data-do="tab" data-a="workersView" data-b="hire">Hire</button></div>
-    <div class="worker-panels"><div class="worker-team ${hiring ? 'mobile-hide' : ''}">${mine ? `<label class="panel page-picker" for="worker-choice">Worker${UI.choiceButtons(`<select id="worker-choice" data-in="worker-choice">${ws.map(w=>`<option value="${w.id}" ${w === selectedWorker ? 'selected' : ''}>${esc(w.name)} · ${D.SK[w.skill].name}</option>`).join('')}</select>`)}</label>${mine}` : '<section class="panel">Your team is empty. Hire a worker to get started.</section>'}</div>
+    <div class="worker-panels"><div class="worker-team ${hiring ? 'mobile-hide' : ''}">${mine ? `<label class="panel page-picker" for="worker-choice">Worker${UI.choiceButtons(`<select id="worker-choice" data-in="worker-choice">${ws.map(w=>`<option value="${w.id}" ${w === selectedWorker ? 'selected' : ''}>${esc(w.name)} · ${D.SK[w.skill].name}</option>`).join('')}</select>`)}</label>${mine}` : `<section class="panel">${UI.emptyState('table', 'Two stools, one mug, no takers.', 'Your team is empty. Hire a worker to get started.')}</section>`}</div>
     <section class="panel worker-board ${hiring ? '' : 'mobile-hide'}"><div class="phead"><h2>Hiring board</h2><span class="btnrow"><small class="mono" data-b="hirewait"></small><button class="btn sm" data-do="refreshboard">${free ? 'Refresh (free)' : 'Refresh · 100'}</button></span></div><label class="page-picker" for="hire-choice">Candidate${UI.choiceButtons(`<select id="hire-choice" data-in="hire-choice">${S().hire.cands.map((c,i)=>`<option value="${i}" ${i === selectedCandidate ? 'selected' : ''}>${esc(c.name)} · ${D.SK[c.skill].name}</option>`).join('')}</select>`)}</label><div class="cands">${cands}</div></section></div>`;
 };
 
@@ -18411,7 +18574,7 @@ UI.planHtml = () => {
       ${UI.levelStopHtml(a)}
       ${prog ? `<div class="sm">Progress: <b class="mono">${fmt(prog[0])} / ${fmt(prog[1])} ${prog[2]}</b></div>` : ''}
       ${sup ? `<div class="sm ${sup.n ? '' : 'bad'}">${ico('bag')} Supplies: ${sup.label}${sup.ms ? ` (about ${DQ.fmtTime(sup.ms)})` : ''}</div>` : ''}${awayPreview(a, sup)}</div>`
-    : `<p class="dim">Nothing is running. Queue a task with the <b>+</b> button on any card, or just click a card to start it.</p>`;
+    : UI.emptyState('hourglass', 'Nothing is running. The sand has all settled.', 'Queue a task with the <b>+</b> button on any card, or just click a card to start it.', 'sm');
   const rows = Q.map((t, i) => `<div class="qitem"><span class="qn mono">${i + 1}</span><div class="qbody"><b>${DQ.actLabel(t)}</b>
       <div class="qctl">${UI.choiceButtons(`<select data-in="qrule" data-i="${i}" aria-label="Stop rule">${D.STOP_RULES.filter(r => r[0] !== 'none').map(([k, n]) => `<option value="${k}" ${t.rule === k ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}
       ${UI.choiceButtons(`<select data-in="qpace" data-i="${i}" aria-label="Pace">${Object.entries(D.PACE).map(([k, p]) => `<option value="${k}" ${t.pace === k ? 'selected' : ''}>${p.name}</option>`).join('')}</select>`)}</div></div>
@@ -19446,7 +19609,7 @@ UI.DO.skiponboarding = () => {
   DQ.save();
   UI.render(false);
 };
-UI.V.activity = () => `${UI.inboxPanel()}<section class="panel"><div class="phead"><h2>Activity</h2><small class="mono" id="xph"></small></div><div id="chart"></div><ul class="log" id="loglist"></ul></section>`;
+UI.V.activity = () => `${UI.inboxPanel() || `<section class="panel inbox-empty">${UI.emptyState('table', 'No decisions waiting. The village is coping, somehow.', 'World events you leave for later wait here.', 'row')}</section>`}<section class="panel"><div class="phead"><h2>Activity</h2><small class="mono" id="xph"></small></div><div id="chart"></div><ul class="log" id="loglist"></ul></section>`;
 let gAcc = 0;
 /* Up next refreshes quietly: if the same goals are showing, only the numbers and bars are updated in place, so nothing flickers or re-animates */
 const syncGoal = (a, b) => {
@@ -21862,7 +22025,7 @@ UI.discoveriesPanel = () => {
   const found = Object.keys(D.DISCOVERIES).filter(DQ.discovered), left = total() - found.length;
   const advs = Object.entries(ADVENTURES).map(([k, a]) => { const qs = D.QUESTS.filter(q => q.adventure === k), done = qs.filter(q => DQ.questState(q) === 'done').length; return { k, a, qs, done, started: qs.some(q => S().q[q.id]) || DQ.discovered(qs[0].secret) }; }).filter(x => x.started);
   return `<section class="panel discoveries"><div class="phead"><div><span class="k">Secrets of the realm</span><h2>Discoveries</h2></div><small>${found.length} of ${total()} found</small></div>
-    ${found.length ? `<div class="disc-list">${found.map(id => { const d = D.DISCOVERIES[id]; return `<button class="disc-card" data-do="discovery" data-a="${id}"><span class="disc-ic">${DQ.ico('star')}</span><span><b>${esc(d.name)}</b><small>${esc(D.TOWN[d.place].name)}${disc()[id].away ? ' · found while you were away' : ''}</small></span></button>`; }).join('')}</div>` : '<p class="dim">Nothing yet. Rare finds turn up while you gather and fight around the realm.</p>'}
+    ${found.length ? `<div class="disc-list">${found.map(id => { const d = D.DISCOVERIES[id]; return `<button class="disc-card" data-do="discovery" data-a="${id}"><span class="disc-ic">${DQ.ico('star')}</span><span><b>${esc(d.name)}</b><small>${esc(D.TOWN[d.place].name)}${disc()[id].away ? ' · found while you were away' : ''}</small></span></button>`; }).join('')}</div>` : UI.emptyState('map', 'The map is mostly blank bits. That’s the fun part.', 'Rare finds turn up while you gather and fight around the realm.')}
     ${left ? `<p class="hint">${left} more ${left === 1 ? 'secret waits' : 'secrets wait'} somewhere out there.</p>` : '<p class="ok">Every secret found.</p>'}
     ${advs.length ? `<h3>Adventures</h3><div class="adv-list">${advs.map(x => `<div class="adv-row"><b>${esc(x.a.name)}</b><span class="bar"><i style="width:${Math.round(x.done / x.a.stages * 100)}%"></i></span><small>${x.done} / ${x.a.stages} chapters</small></div>`).join('')}</div>` : ''}</section>`;
 };
@@ -22334,7 +22497,7 @@ UI.V.journal = () => {
   const art = e => e.kind === 'skill' && D.SK[e.icon] ? DQ.artImage('skill', e.icon, 32, 'jr-art', '') : D.ITEMS[e.icon] ? DQ.itemIco(D.ITEMS[e.icon]) : ico(e.icon || 'star');
   return `<section class="panel journal"><div class="phead"><div><span class="k">${esc(S().name)}’s</span><h2>Adventure journal</h2></div><span class="btnrow"><small>${fmt(J.length)} entr${J.length === 1 ? 'y' : 'ies'}</small><button class="btn sm" data-do="copystory">Copy my story</button></span></div>
     ${groups.length ? groups.map(g => `<div class="jr-day"><div class="jr-date">Day ${g.d}</div><ol class="jr-list">${g.e.map(e => `<li class="jr-${e.kind}"><span class="jr-ic">${art(e)}</span><span><p>${esc(e.text)}</p><small>${esc(D.TOWN[e.town] ? D.TOWN[e.town].name : '')}${e.away ? ' · while away' : ''} · ${new Date(e.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small></span></li>`).join('')}</ol></div>`).join('')
-      : '<p class="dim">Nothing written yet. Your first quest, your first boss and every discovery will be recorded here.</p>'}
+      : UI.emptyState('inkpot', 'A clean page. The ink is getting impatient.', 'Your first quest, your first boss and every discovery will be written here.')}
     ${J.length > shown.length ? `<button class="btn sm" data-do="journalmore">Show older entries</button>` : ''}</section>`;
 };
 UI.DO.journalmore = () => { UI.journalShown += 60; UI.render(false); };
@@ -22735,7 +22898,7 @@ DQ.notify = o => { if (o && o.kind === 'death' && DQ.journal && mem('death')) DQ
     const foods = (DQ.foods ? DQ.foods() : []).filter(id => DQ.have(id) > 0), heal = foodHeal(), at = S().settings.eatAt || 50;
     const tiles = foods.map(id => { const it = D.ITEMS[id]; return `<button class="food-tile" data-do="eat" data-a="${id}" data-tip="item:${id}">${DQ.itemIco(it)}<span><b>${esc(it.name)} <span class="mono" data-b="count:${id}"></span></b><small>+${it.heal} HP each</small></span></button>`; }).join('');
     return `<section class="panel combat-food"><div class="kit-head"><span class="k">Food <b class="mono">${heal}</b> <small>health</small></span><button class="tog ${S().settings.autoEat ? 'on' : ''}" data-do="autoeat"><span class="sw"></span>Auto-eat</button></div>
-      <div class="food-tiles">${tiles || '<p class="food-none">None carried. Cook fish or buy bread.</p>'}</div>
+      <div class="food-tiles">${tiles || `<div class="food-none">${UI.emptyState('plate', 'A clean plate and a long day ahead.', 'None carried. Cook fish or buy bread.', 'row')}</div>`}</div>
       <div class="eat-step" role="group" aria-label="Eat below this health"><span>Eat below</span><button type="button" class="btn sm" data-do="eatstep" data-a="-10" aria-label="Eat at lower health">−</button><output class="mono">${at}%</output><button type="button" class="btn sm" data-do="eatstep" data-a="10" aria-label="Eat at higher health">+</button></div></section>`;
   };
   UI.DO.abilswap = id => { const on = S().abilities || []; if (on.length >= DQ.abilSlots()) DQ.toggleAbility(on[on.length - 1]); if (DQ.toggleAbility(id)) DQ.sfx && DQ.sfx('equip'); UI.render(false); };
@@ -23269,7 +23432,7 @@ const render0 = UI.render; UI.render = (...a) => { apply(); return render0(...a)
 
   /* ---------- People page ---------- */
   UI.V.people = () => {
-    const ppl = DQ.folkMet(); if (!ppl.length) return `<section class="panel"><h2>People</h2><p class="dim">Accept a quest and the person who gave it will appear here.</p></section>`;
+    const ppl = DQ.folkMet(); if (!ppl.length) return `<section class="panel"><h2>People</h2>${UI.emptyState('bench', 'An empty bench. Everyone is busy, or hiding.', 'Accept a quest and the person who gave it will appear here.')}</section>`;
     const sel = ppl.find(f => f.id === UI.tab.folk) || ppl[0]; UI.tab.folk = sel.id;
     const list = ppl.map(f => `<button class="folk-card ${f === sel ? 'on' : ''}" data-do="folk" data-a="${f.id}" aria-pressed="${f === sel}"><img class="px folk-face" src="${DQ.folkUrl(f)}" width="64" height="64" alt=""><b>${esc(f.n)}</b><small>${esc(D.TOWN[f.town].name)}</small></button>`).join('');
     const done = qs(sel).filter(q => DQ.questState(q) === 'done');
@@ -25072,7 +25235,7 @@ UI.V.settings=()=>{
  const story=`<button class="tog ${Q.S.settings.storyScenes!==false?'on':''}" data-do="storysetting"><span class="sw"></span><span><b>Automatic story scenes</b><small>Major events offer skippable scenes. Replay them in Journal → Story.</small></span></button>`;
  const gameCards=[card('Combat & offline progress',body(game)),card('Your hero',name),card('Story & learning',story+body(lessons)),card('Play time',body(get('Time')))];
  const danger=take(save,'[data-do="newgame"]'),backupList=save?.querySelector('.bklist')?.parentElement;
- const backupHtml=backupList?.outerHTML||'<p class="dim">No automatic backups yet. Your recent backups on this device will appear here.</p>';backupList?.remove();
+ const backupHtml=backupList?.outerHTML||UI.emptyState('chest', 'The chest is empty and suspiciously tidy.', 'No automatic backups yet. Your recent backups on this device will appear here.', 'sm');backupList?.remove();
  const autosave=save?.querySelector('.phead small')?.textContent||'';
  const saveCards=[card('Backup & transfer',`<p class="sm dim">${esc(autosave)}</p>`+body(save)+'<div class="btnrow wrap"><button class="btn" data-do="copystring">Copy save string</button><button class="btn" data-do="pastestring">Import save string</button></div>'),card('Automatic backups',backupHtml),card('Start over','<p>Make a backup before starting a new hero.</p>'+danger,'settings-danger')];
  const shortcuts=get('Shortcuts');shortcuts?.querySelector('.keys')?.insertAdjacentHTML('beforeend','<dt><kbd>L</kbd></dt><dd>Switch light/dark theme</dd><dt><kbd>Enter</kbd> or <kbd>Esc</kbd></dt><dd>Continue from Welcome Back</dd><dt><kbd>V</kbd> / <kbd>G</kbd></dt><dd>Village / Guide</dd>');
@@ -28919,6 +29082,288 @@ P.retime = () => { P.epoch++; tick(); }; /* after changing BLINK or FLICK: every
 document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
 const render0 = UI.render; UI.render = (...a) => { const r = render0(...a); if (!timer || calm()) setTimeout(tick, 0); return r; };
 setTimeout(tick, 500);
+})();
+
+</script>
+<script>
+/* Idlewick: the small things that make the game feel made with care (owner, 27 Nov 2026: "I love the subtle things
+   that make games feel more polished ... Let's do all 15"). Presentation only: nothing here changes a rule, a price, a
+   reward or a save other than the one Settings switch it adds (settings.quillCursor).
+   1. Buttons that press: a control sinks a pixel and its shadow softens while held, then springs back. A drag or a
+      scroll lets go of it at once. Enter and Space press too. (css/shape.css, "press")
+   2. Gathered items fly to the backpack: work that yields items (logs, ore, fish, crafted output, hunting catches)
+      sends a small copy of the item from the work scene to the backpack chip (the Hero portrait on phones), which gulps.
+      At most one flight every 0.6 s; a burst merges into the next flight. Never in simulations or forecasts.
+   3. XP flows to its skill: the "+XP" from work (and the fight's XP, after the blow lands) drifts into that skill's row
+      in the rail (the Skills tab of the phone bar) and the row's bar fills as it arrives.
+   4. A quill pointer: a pixel quill drawn in code (js/pixel_feel.js), a pointing hand over controls; desktop pointers
+      only; Settings > Display > "Quill pointer" turns it off.
+   15. Hold to confirm big spends: a buy or sale worth 10,000 coins or more, or 1,000+ that is a quarter of your coins,
+      needs a press and hold (0.6 s) that fills the button from left to right. Letting go early cancels; Enter or Space
+      held does the same; a quick click explains. Small amounts stay one click.
+   (Item 14, the pictures on empty pages, is UI.emptyState in ui_core.js with art in js/pixel_feel.js.)
+   Motion is transform and opacity on the browser's own timeline, and none of it runs under Reduce effects
+   (html.calm) or the device's reduced-motion setting. tests/ui-feel.cjs. */
+(() => {
+const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S;
+const calm = () => document.documentElement.classList.contains('calm') || !!(S() && S().settings && S().settings.reduceFx) || matchMedia('(prefers-reduced-motion: reduce)').matches;
+const quiet = () => calm() || DQ.sim.on || DQ.forecasting || document.hidden;
+/* nothing flies across a pop-up: the backpack and the rail sit behind it */
+const covered = () => !!document.querySelector('.modal, .story-stage, .encounter-moment');
+const page = v => DQ.toPage ? DQ.toPage(v) : v;
+const shown = el => !!el && el.isConnected && el.getClientRects().length > 0 && (() => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth; })();
+const feel = DQ.feel = { flights: 0, flows: 0, holds: 0 }; /* counts for tests */
+
+/* ================= 1. Buttons that press ================= */
+const PRESSABLE = 'button,[data-do],[role=button],[role=tab],[role=switch],a.btn,.btn';
+const NOT_PRESSED = '.site-spot,.tc-room,.hearth-spot,#av-foe,input,select,textarea,svg,img';
+let pressed = null, pressAt = null;
+const pressOf = t => { const el = t && t.closest && t.closest(PRESSABLE); return el && !el.disabled && el.getAttribute('aria-disabled') !== 'true' && !el.matches(NOT_PRESSED) ? el : null; };
+const letGo = () => {
+  const el = pressed; pressed = null; pressAt = null; if (!el) return;
+  el.classList.remove('lw-press'); el.classList.add('lw-release');
+  setTimeout(() => el.classList.remove('lw-release'), 340);
+};
+document.addEventListener('pointerdown', e => {
+  if (e.button !== 0 || !e.isPrimary) return; letGo();
+  const el = pressOf(e.target); if (!el) return;
+  pressed = el; pressAt = [e.clientX, e.clientY]; el.classList.add('lw-press');
+}, { capture: true, passive: true });
+document.addEventListener('pointermove', e => { if (pressed && pressAt && Math.hypot(e.clientX - pressAt[0], e.clientY - pressAt[1]) > 6) letGo(); }, { capture: true, passive: true });
+for (const ev of ['pointerup', 'pointercancel', 'dragstart', 'blur']) addEventListener(ev, letGo, { capture: true, passive: true });
+document.addEventListener('scroll', letGo, { capture: true, passive: true });
+document.addEventListener('keydown', e => {
+  if ((e.key !== 'Enter' && e.key !== ' ') || e.repeat) return;
+  const el = pressOf(document.activeElement); if (!el || el === document.body) return;
+  letGo(); pressed = el; el.classList.add('lw-press');
+}, true);
+document.addEventListener('keyup', e => { if (e.key === 'Enter' || e.key === ' ') letGo(); }, true);
+
+/* ================= 2. Gathered items fly to the backpack ================= */
+const GAP = 600;
+let got = null, lastFlight = -1e9, waiting = null, waitTimer = 0;
+const recording = () => !DQ.sim.on && !DQ.forecasting && DQ.act && DQ.act.kind !== 'fight';
+const grant0 = DQ.grant;
+DQ.grant = (id, n = 1) => {
+  const r = grant0(id, n);
+  if (recording() && D.ITEMS[id] && n > 0) {
+    /* gains made while one action completes: emitted as 'workcycle' in the same task, so a microtask closes the batch */
+    if (!got) { got = new Map(); queueMicrotask(() => { got = null; }); }
+    got.set(id, (got.get(id) || 0) + n);
+  }
+  return r;
+};
+const packTarget = () => [document.querySelector('#hud .packchip'), document.querySelector('#hud .h-hero')].find(shown) || null;
+const sceneSource = ev => {
+  const scene = document.querySelector('#view .activity-scene');
+  if (scene && (!ev || scene.dataset.kind === ev.kind)) { const t = scene.querySelector('.scene-target'); if (shown(t)) return t; }
+  const card = document.querySelector('#view .illustrated-card.active, #view .card.active'); return shown(card) ? card : null;
+};
+const spriteOf = id => { const A = DQ.pixelArt, u = A && A.itemUrl && A.itemUrl(id); if (u) return u;
+  const t = document.createElement('template'); t.innerHTML = DQ.itemIco ? DQ.itemIco(D.ITEMS[id]) : ''; const img = t.content.querySelector('img'); return img ? img.getAttribute('src') : null; };
+const gulp = target => {
+  if (!target) return; const cls = target.matches('.packchip') ? 'pack-gulp' : 'pack-bounce';
+  target.classList.remove(cls); void target.offsetWidth; target.classList.add(cls);
+  setTimeout(() => target.classList.remove(cls), 460);
+};
+const launch = (id, n, ev) => {
+  waiting = null; clearTimeout(waitTimer);
+  if (quiet() || covered()) return;
+  const from = sceneSource(ev), to = packTarget(), src = spriteOf(id); if (!from || !to || !src) return;
+  lastFlight = performance.now(); feel.flights++;
+  const a = from.getBoundingClientRect(), b = to.getBoundingClientRect(), size = 32;
+  const fly = document.createElement('span'); fly.className = 'gain-fly'; fly.setAttribute('aria-hidden', 'true');
+  fly.innerHTML = `<img class="pxa" src="${src}" width="${size}" height="${size}" alt="">${n > 1 ? `<b>×${DQ.fmt ? DQ.fmt(n) : n}</b>` : ''}`;
+  const x0 = page(a.left + a.width / 2 - size / 2), y0 = page(a.top + a.height / 2 - size / 2), x1 = page(b.left + b.width / 2 - size / 2), y1 = page(b.top + b.height / 2 - size / 2);
+  Object.assign(fly.style, { left: x0 + 'px', top: y0 + 'px' });
+  document.body.appendChild(fly);
+  const dx = x1 - x0, dy = y1 - y0, lift = Math.min(-50, dy * .35 - 50);
+  const anim = fly.animate([
+    { translate: '0 0', scale: '.6', opacity: 0 },
+    { translate: '0 -14px', scale: '1', opacity: 1, offset: .14 },
+    { translate: `${dx * .45}px ${dy * .45 + lift}px`, scale: '1', opacity: 1, offset: .55 },
+    { translate: `${dx}px ${dy}px`, scale: '.5', opacity: .9 }
+  ], { duration: 760, easing: 'cubic-bezier(.45,.05,.35,1)' });
+  let landed = false; const land = () => { if (landed) return; landed = true; fly.remove(); if (!quiet()) gulp(packTarget()); };
+  anim.onfinish = land; anim.oncancel = () => { landed = true; fly.remove(); };
+};
+const fly = (id, n, ev) => {
+  if (quiet()) return;
+  const now = performance.now();
+  if (now - lastFlight >= GAP && !waiting) return launch(id, n, ev);
+  /* a burst: the next flight carries everything gathered meanwhile */
+  if (waiting && waiting.id === id) waiting.n += n; else waiting = { id, n: (waiting && waiting.id === id ? waiting.n : 0) + n, ev };
+  clearTimeout(waitTimer); waitTimer = setTimeout(() => { const w = waiting; if (w) launch(w.id, w.n, w.ev); }, Math.max(0, lastFlight + GAP - now));
+};
+DQ.on('workcycle', ev => {
+  const g = got; got = null; if (!g || !g.size || quiet()) return;
+  /* the action's own output leads; otherwise the largest gain */
+  const node = D.NODE && D.NODE[ev.kind + ':' + ev.id], recipe = ev.kind === 'recipe' && D.RECIPES[ev.id], main = node && node.item || recipe && Object.keys(recipe.out)[0];
+  const id = main && g.has(main) ? main : [...g].sort((a, b) => b[1] - a[1])[0][0];
+  fly(id, g.get(id), ev);
+});
+DQ.flyToPack = (id, n = 1) => fly(id, n, null); /* for tests and future callers */
+
+/* ================= 3. XP flows to its skill ================= */
+const held = new Map();
+const railRow = sk => {
+  const s = D.SK[sk]; if (!s) return null;
+  const rows = [document.querySelector(`#combatnav .cg-tile[data-tip="rail:${sk}"]`), document.querySelector(`#skilldock .dk[data-tip="rail:${sk}"]`), document.querySelector(`#skilldock .dk[data-a="${s.page}"]`)];
+  if (sk === 'hitpoints' || sk === 'defence') rows.push(document.querySelector('#combatnav .combat-entry'));
+  rows.push(document.querySelector('#rail .hub[data-a="skills"]')); /* phones: the bottom bar's Skills tab */
+  return rows.find(shown) || null;
+};
+const xpbar0 = UI.B.xpbar;
+UI.B.xpbar = (e, sk, ...rest) => { if ((held.get(sk) || 0) > 0 && e.closest('#skilldock,#combatnav')) return; return xpbar0(e, sk, ...rest); };
+const release = sk => {
+  const n = (held.get(sk) || 1) - 1; if (n > 0) held.set(sk, n); else held.delete(sk);
+  if (!held.get(sk)) document.querySelectorAll(`#skilldock [data-b="xpbar:${sk}"],#combatnav [data-b="xpbar:${sk}"]`).forEach(e => xpbar0(e, sk));
+};
+const arrive = row => { if (!row) return; row.classList.remove('xp-arrive'); void row.offsetWidth; row.classList.add('xp-arrive'); setTimeout(() => row.classList.remove('xp-arrive'), 620); };
+DQ.flowXp = (sk, amount, fromEl) => {
+  if (quiet() || covered() || !(amount > 0)) return false;
+  sk = DQ.skId ? DQ.skId(sk) : sk; const s = D.SK[sk]; if (!s) return false;
+  const from = fromEl && shown(fromEl) ? fromEl : sceneSource(null), to = railRow(sk);
+  if (!from || !to) return false;
+  const fx = document.getElementById('fx'); if (!fx) return false;
+  held.set(sk, (held.get(sk) || 0) + 1); feel.flows++;
+  let done = false; const finish = () => { if (done) return; done = true; release(sk); };
+  const go = () => {
+    if (!from.isConnected && !shown(to)) return finish();
+    const a = from.getBoundingClientRect(), dest = railRow(sk) || to, b = dest.getBoundingClientRect();
+    const f = document.createElement('div'); f.className = 'fl xp-flow'; f.style.setProperty('--c', s.col);
+    f.innerHTML = `${DQ.ico(sk)}+${DQ.fmt(amount)} XP`; f.setAttribute('aria-hidden', 'true');
+    const fighter = fromEl && (fromEl.id === 'av-foe' || fromEl.closest?.('.side'));
+    const x0 = page(a.left + a.width / 2), y0 = page(fighter ? a.top - 30 : a.top + Math.min(a.height / 2, 36));
+    Object.assign(f.style, { left: x0 + 'px', top: y0 + 'px' }); fx.appendChild(f);
+    const x1 = page(b.left + b.width / 2), y1 = page(b.top + b.height / 2), dx = x1 - x0, dy = y1 - y0;
+    const anim = f.animate([
+      { translate: '-50% 0', scale: '.7', opacity: 0 },
+      { translate: '-50% -16px', scale: '1.08', opacity: 1, offset: .16 },
+      { translate: '-50% -18px', scale: '1', opacity: 1, offset: .34 },
+      { translate: `calc(-50% + ${dx * .9}px) ${dy * .9}px`, scale: '.7', opacity: .95, offset: .86 },
+      { translate: `calc(-50% + ${dx}px) ${dy}px`, scale: '.55', opacity: 0 }
+    ], { duration: 1150, easing: 'ease-in-out' });
+    const end = ok => { f.remove(); finish(); if (ok && !quiet()) arrive(railRow(sk)); };
+    anim.onfinish = () => end(true); anim.oncancel = () => end(false);
+    setTimeout(() => { if (f.isConnected) end(true); }, 2400); /* a backstop: the bar is never held for long */
+  };
+  UI.afterImpact ? UI.afterImpact(go, 0) : go();
+  setTimeout(finish, 4000);
+  return true;
+};
+
+/* ================= 4. The quill pointer ================= */
+const finePointer = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
+const cursorWanted = () => !!(S() && S().settings && S().settings.quillCursor !== false) && finePointer();
+let cursorSheetDone = false;
+/* rule-level pointers in the game's own sheets read the hand variable, so every clickable thing shows the same hand */
+const adoptSheets = () => {
+  if (cursorSheetDone) return; cursorSheetDone = true;
+  const walk = rules => { for (const r of rules) {
+    if (r.style && r.style.cursor === 'pointer') r.style.setProperty('cursor', 'var(--cur-hand, pointer)', r.style.getPropertyPriority('cursor'));
+    else if (r.style && r.style.cursor === 'default') r.style.setProperty('cursor', 'var(--cur-quill, default)', r.style.getPropertyPriority('cursor'));
+    if (r.cssRules) walk(r.cssRules);
+  } };
+  for (const sheet of document.styleSheets) { try { walk(sheet.cssRules); } catch (e) { /* a sheet from another origin (web fonts) */ } }
+};
+const cursorValue = (kind, fallback) => {
+  const one = DQ.cursorArt && DQ.cursorArt(kind, 2), two = DQ.cursorArt && DQ.cursorArt(kind, 4), [hx, hy] = (DQ.CURSOR_HOT || {})[kind] || [0, 0];
+  if (!one) return null;
+  const set = `image-set(url("${one}") 1x, url("${two}") 2x) ${hx * 2} ${hy * 2}, ${fallback}`;
+  return CSS.supports('cursor', set) ? set : `url("${one}") ${hx * 2} ${hy * 2}, ${fallback}`;
+};
+let cursorOn = null;
+UI.applyCursor = () => {
+  const root = document.documentElement, on = cursorWanted(); cursorOn = on;
+  if (on) {
+    adoptSheets();
+    const q = cursorValue('quill', 'auto'), h = cursorValue('hand', 'pointer');
+    if (q && h) { root.style.setProperty('--cur-quill', q); root.style.setProperty('--cur-hand', h); root.classList.add('lw-cursor'); return; }
+  }
+  root.classList.remove('lw-cursor'); root.style.removeProperty('--cur-quill'); root.style.removeProperty('--cur-hand');
+};
+UI.DO.quillcursor = () => { const st = S().settings; st.quillCursor = st.quillCursor === false; UI.applyCursor(); DQ.save && DQ.save(); UI.render(false); };
+const settings0 = UI.V.settings;
+UI.V.settings = (...a) => {
+  const h = settings0(...a); if (UI.tab.settingsPanel !== 'display') return h;
+  const on = S().settings.quillCursor !== false;
+  const tog = `<button class="tog ${on ? 'on' : ''}" data-do="quillcursor" aria-pressed="${on}"><span class="sw"></span><span><b>Quill pointer</b><small>${finePointer() ? 'A pixel quill for the mouse pointer, and a pointing hand over anything you can click' : 'For a mouse or trackpad; touch screens keep their own'}</small></span></button>`;
+  /* into the Notifications & accessibility card, beside Reduce effects */
+  const i = h.indexOf('<h2>Notifications &amp; accessibility</h2>') >= 0 ? h.indexOf('<h2>Notifications &amp; accessibility</h2>') : h.indexOf('<h2>Notifications & accessibility</h2>');
+  if (i < 0) return h;
+  const j = h.indexOf('<div class="stack">', i); if (j < 0) return h;
+  const k = j + '<div class="stack">'.length; return h.slice(0, k) + tog + h.slice(k);
+};
+matchMedia('(hover: hover) and (pointer: fine)').addEventListener?.('change', () => UI.applyCursor());
+
+/* ================= 15. Hold to confirm big spends ================= */
+const HOLD_MS = 600, SPENDS = new Set(['buy', 'sell', 'buyupgrade', 'localbuy', 'rarebuy', 'buycommission']);
+const SPEND_SEL = [...SPENDS].map(k => `button[data-do="${k}"]`).join(',');
+DQ.HOLD_MS = HOLD_MS;
+/* a spend is big at 10,000 coins, or at 1,000 when that is a quarter of what you hold */
+DQ.bigSpend = coins => coins >= 10000 || (coins >= 1000 && coins >= .25 * (S().coins || 0));
+const valueOf = el => { let v = 0; el.querySelectorAll('.money[data-coins]').forEach(m => { v = Math.max(v, +m.dataset.coins || 0); }); return v; };
+const HINT = 'Big spend: press and hold to confirm. Letting go early cancels.';
+const hint = () => { if (document.getElementById('lw-hold-hint')) return; const h = document.createElement('span'); h.id = 'lw-hold-hint'; h.className = 'lw-sr'; h.textContent = HINT; document.body.appendChild(h); };
+const mark = () => {
+  const list = document.querySelectorAll(SPEND_SEL); let any = false;
+  for (const el of list) {
+    const big = !el.disabled && DQ.bigSpend(valueOf(el));
+    if (big === (el.dataset.hold === '1')) { any ||= big; continue; }
+    if (big) { el.dataset.hold = '1'; el.classList.add('hold-confirm'); const d = (el.getAttribute('aria-describedby') || '').split(' ').filter(Boolean); if (!d.includes('lw-hold-hint')) el.setAttribute('aria-describedby', [...d, 'lw-hold-hint'].join(' ')); const t = el.dataset.tip; if (t && t.startsWith('text:') && !t.includes('hold to confirm')) el.dataset.tip = t + ' · hold to confirm'; any = true; }
+    else { delete el.dataset.hold; el.classList.remove('hold-confirm', 'holding'); const d = (el.getAttribute('aria-describedby') || '').split(' ').filter(x => x && x !== 'lw-hold-hint'); if (d.length) el.setAttribute('aria-describedby', d.join(' ')); else el.removeAttribute('aria-describedby'); if (el.dataset.tip) el.dataset.tip = el.dataset.tip.replace(' · hold to confirm', ''); }
+  }
+  if (any) hint();
+};
+UI.markHolds = mark;
+let hold = null, confirming = false, swallowUntil = 0, lastHint = 0;
+const startHold = (el, via) => {
+  cancelHold(); feel.holds++;
+  el.classList.remove('holding'); void el.offsetWidth; el.classList.add('holding');
+  hold = { el, via, done: false, timer: setTimeout(() => completeHold(), HOLD_MS) };
+};
+const cancelHold = () => { if (!hold) return; clearTimeout(hold.timer); if (!hold.done) hold.el.classList.remove('holding'); hold = null; };
+const completeHold = () => {
+  const h = hold; if (!h || h.done) return; h.done = true;
+  const el = h.el; el.classList.remove('holding'); el.classList.add('hold-done'); setTimeout(() => el.classList.remove('hold-done'), 400);
+  if (!el.isConnected || el.disabled) return;
+  confirming = true; swallowUntil = Infinity;
+  try { el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window })); } finally { confirming = false; }
+};
+const tellHold = () => { const now = performance.now(); if (now - lastHint > 1200) { lastHint = now; DQ.toast && DQ.toast('Big spend: press and hold to confirm'); } };
+document.addEventListener('pointerdown', e => {
+  const el = e.button === 0 && e.target.closest && e.target.closest('[data-hold="1"]');
+  if (!el || el.disabled) return; startHold(el, 'pointer');
+}, true);
+const endPointer = () => { if (!hold || hold.via !== 'pointer') return; const done = hold.done; cancelHold(); swallowUntil = performance.now() + 80; if (!done) tellHold(); };
+document.addEventListener('pointerup', endPointer, true);
+document.addEventListener('pointercancel', () => { if (hold && hold.via === 'pointer') { cancelHold(); swallowUntil = performance.now() + 80; } }, true);
+document.addEventListener('pointerout', e => { if (hold && hold.via === 'pointer' && !hold.done && hold.el.contains(e.target) && !hold.el.contains(e.relatedTarget)) cancelHold(); }, true);
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const el = document.activeElement && document.activeElement.closest && document.activeElement.closest('[data-hold="1"]'); if (!el) return;
+  e.preventDefault(); if (!e.repeat && !hold) startHold(el, 'key');
+}, true);
+document.addEventListener('keyup', e => {
+  if ((e.key !== 'Enter' && e.key !== ' ') || !hold || hold.via !== 'key') return;
+  e.preventDefault(); const done = hold.done; cancelHold(); if (!done) tellHold();
+}, true);
+/* the button's own click only counts when the hold finished; anything else explains instead of spending */
+document.addEventListener('click', e => {
+  if (confirming) return;
+  if (performance.now() < swallowUntil) { swallowUntil = 0; const t = e.target.closest && e.target.closest('[data-do]'); if (t) { e.preventDefault(); e.stopImmediatePropagation(); } return; }
+  const el = e.target.closest && e.target.closest('[data-hold="1"]'); if (!el) return;
+  e.preventDefault(); e.stopImmediatePropagation(); if (!hold) tellHold();
+}, true);
+
+/* keep the marks (and the pointer) current as pages draw and coins change */
+const render0 = UI.render;
+UI.render = (...a) => { const r = render0(...a); try { mark(); if (cursorOn !== cursorWanted()) UI.applyCursor(); } catch (e) { console.error(e); } return r; };
+const modal0 = DQ.modal;
+if (modal0) DQ.modal = (...a) => { const r = modal0(...a); try { mark(); } catch (e) { console.error(e); } return r; };
+DQ.on('ui', () => { try { mark(); } catch (e) { /* a page mid-redraw */ } });
+DQ.on('shop', () => setTimeout(mark, 0));
 })();
 
 </script>

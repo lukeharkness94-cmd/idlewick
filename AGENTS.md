@@ -52,8 +52,8 @@ dated line to the history file.
 ## 2. Look and art
 
 - **Original pixel art drawn in code, nothing else.** `js/pixelart.js` (system, palette, hero), `js/pixel_items.js`,
-  `js/pixel_creatures.js`, `js/pixel_world.js` (trees, rocks, scenes, restoration, furniture, icons), `js/pixel_runtime.js`
-  (routes every art hook; loaded last). Follow docs/pixel-art-style.md: top-left light, five-step hue-shifted ramps,
+  `js/pixel_creatures.js`, `js/pixel_world.js` (trees, rocks, scenes, restoration, furniture, icons), `js/pixel_feel.js`
+  (empty-page pictures, the quill pointer), `js/pixel_runtime.js` (routes every art hook; loaded last). Follow docs/pixel-art-style.md: top-left light, five-step hue-shifted ramps,
   selective coloured outlines. No image files, AI-generated, traced or recoloured art, or sprite packs. Settings → Art
   showcase is the living reference.
 - **Chunky pixels at whole-number scales.** `SMOOTH = false` (pixelart.js) and `HIRES_ON = false` (hires.js) stay off.
@@ -93,6 +93,8 @@ dated line to the history file.
   click (pips, dots). `css/shape.css` (linked last, one `@layer shape`) applies it by role. Pixel-scene hotspots (Village
   sites and their colour-only signs, tower rooms, the SVG map, the creature on the combat stage) glow or tint instead,
   and drawn scene art keeps its pixel-art outlines. `tests/shape-rule.cjs` checks every page, a fight and the pop-ups.
+  Controls press (owner, 27 Nov): held by pointer, Enter or Space they sink 1px with a softer shadow and spring back on
+  release (`.lw-press`/`.lw-release`, js/ui_feel.js); a drag or scroll lets go; no shrink-on-press.
 - **Motion** (`js/finish.js`, Finish layer in css/style.css): browser timelines at native refresh, elapsed-time motion,
   no stepped easing or 60 Hz loops; hover lifts use `translate`, not `transform`; everything transform/opacity only and
   off under `html.calm` and `prefers-reduced-motion`. Continuous script animation subscribes to the one clock
@@ -103,6 +105,10 @@ dated line to the history file.
   27 Nov): the hero breathes, blinks, fidgets when idle and wipes their brow between strikes (never over one); the
   companion breathes, flicks, hops on wins and sleeps when nothing runs; creatures wind up before each blow and stagger
   when hit. Expressions are drawn frames on the same sprite; impacts and hit numbers keep `UI.afterImpact`.
+  Feedback that travels (owner, 27 Nov; js/ui_feel.js, `tests/ui-feel.cjs`): items a work action yields fly from the
+  work scene to the backpack chip (the Hero portrait on phones), which gulps, at most one flight per 0.6 s with bursts
+  merged; work and fight XP drifts into its skill's rail row (the phone bar's Skills tab) after `UI.afterImpact`, and the
+  row's bar fills when it lands. None of it in simulations, forecasts, under a pop-up, calm or reduced motion.
 - **Music and sound are synthesised** (`js/audio.js`, no audio files): one theme per region plus title, combat and boss
   (`D.MUSIC`), played lo-fi (`D.MUSIC_LOFI`); ambience per town with ruined/mending/restored tiers (`D.AMBIENCE`). A new
   region needs a theme row and ambience. Work sounds land on each visible strike (`js/strike_sync.js`). Quest and boss
@@ -147,7 +153,16 @@ dated line to the history file.
   the detail/purchase footer keep their positions as contents change. Every tool tier and workshop rank stays on the
   shelf; the "Available only" switch is per shelf family (`UI.availOnly`, saved in `settings.availOnly`), on by default
   until the hero owns something from that family, and when on shows only what the hero can afford and make now, with a
-  line counting what is hidden. Purchases fly to the backpack; double clicks are guarded (`js/usability.js`).
+  line counting what is hidden. Purchases fly to the backpack; double clicks are guarded (`js/usability.js`). Big spends
+  hold to confirm (owner, 27 Nov): a buy or sale worth 10,000+ coins, or 1,000+ that is a quarter of your coins
+  (`DQ.bigSpend`), needs a 0.6 s press-and-hold (pointer, Enter or Space) that fills the button from the left; letting go
+  early cancels, a click explains, screen readers get `#lw-hold-hint`; smaller amounts stay one click. Prices inside
+  buttons use `UI.money` (its `data-coins` is what the check reads).
+- **Empty pages** (owner, 27 Nov) show `UI.emptyState(picture, line, plain line)`: a small pixel picture from
+  `DQ.emptyArt` and a dry one-liner in the game's voice ("Even the spiders moved out."), with the plain sentence saying
+  what fills it. A new empty list or page uses it.
+- **Pointer**: a pixel quill (a pointing hand over controls) drawn in code for mice and trackpads, never touch;
+  Settings → Display → Quill pointer (`settings.quillCursor`) turns it off. Pointer rules read `--cur-hand`/`--cur-quill`.
 - **Tooltips are passive**: never clickable; source/use icons inside them have no handlers or tab stops; Escape
   dismisses and touch-hold works. Requirements are plain named counts (`held / required`) with a real button for the
   source route (needs.js, item_navigation.js).
@@ -321,4 +336,4 @@ The runner covers everything; these are the ones to read when you touch an area.
 `card-packing-ui`, `catalogue-cards-ui`, `menu-density-ui`, `scripts/audit-overflow.cjs`. Art: `art-pixel`. Systems:
 `connected-systems`, `crosslinks`, `quest-progression`, `beastmastery`, `beast-capture`, `hunt-stalk`, `creature-roster`,
 `world-life`, `world-events-hindsight`, `story`, `combat-arts`, `base-gear`, `unique-levels`, `choice-order`,
-`offline-ceiling`, `live-notes`, `music`, `motion-clock`. HANDOFF.md has the full list.
+`offline-ceiling`, `live-notes`, `music`, `motion-clock`, `ui-feel`. HANDOFF.md has the full list.

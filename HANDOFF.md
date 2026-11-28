@@ -1132,3 +1132,30 @@ docs/motion-performance.md.
   transition so state and DOM still change together. Off without the API, under calm/reduced motion, and in automated
   browsers unless `localStorage['idlewick.transitions'] = '1'`.
 - **Tests**: `tests/motion-clock.cjs` (new). `scripts/measure-motion.cjs` records the numbers.
+
+## Feel: presses, flights, XP flow, quill pointer, empty pages, hold to confirm (Claude, 27 Nov 2026)
+
+Branch `claude/ui-feel`. Owner: "I love the subtle things that make games feel more polished ... Let's do all 15" (items
+1-4, 14 and 15 here; the rest on other branches). Presentation only, in `js/ui_feel.js` unless noted.
+
+- **Press**: `.lw-press` while a pointer, Enter or Space holds a control (1px sink, `--act-press` shadow), `.lw-release`
+  springs back (`--press-spring`); a 6px drag, a scroll or pointercancel lets go. The old `:active` scale is neutralised
+  in the shape layer (css/shape.css, "Buttons that press").
+- **Flights**: `DQ.grant` is wrapped to collect what one work action yields (closed by a microtask; the action's
+  `workcycle` event reads it); the main output flies from `.scene-target` to `.packchip` (phones `.h-hero`), 0.6 s gap,
+  bursts merge into the next flight (`DQ.flyToPack`). `DQ.feel` counts flights, flows and holds for tests.
+- **XP flow**: engine.js `floatXp` and the fight's XP float call `DQ.flowXp(sk, amount, from)`; when it returns false
+  (calm, sim, forecast, a pop-up, no visible rail row) the old float shows. `UI.B.xpbar` holds the rail bars of a skill
+  while its XP is in the air.
+- **Quill pointer**: `DQ.cursorArt` (js/pixel_feel.js) draws the quill and hand; `UI.applyCursor` sets `--cur-quill` /
+  `--cur-hand` on the root (image-set 1x/2x, hotspots from `DQ.CURSOR_HOT`) and rewrites the game's own
+  `cursor:pointer/default` rules to read them; fine pointers only; `settings.quillCursor`.
+- **Empty pages**: `UI.emptyState` (ui_core.js) with 12 pictures in js/pixel_feel.js (`DQ.EMPTY_ART`): bank, backpack,
+  filters, shop sell list, quest tabs (the Current tab's empty text read "undefined" before), achievements, workers,
+  Activity's decisions, journal, discoveries, activity log, people, queue, recipes, backups, the bell, combat food.
+- **Hold to confirm**: buttons whose action is buy/sell/buyupgrade/localbuy/rarebuy/buycommission and whose
+  `UI.money` price passes `DQ.bigSpend` get `data-hold`, `.hold-confirm` and `aria-describedby="lw-hold-hint"`; a
+  capture click listener blocks their plain clicks; a completed hold dispatches the click. The Max label shortens
+  five-figure counts (Max ×15k) so it no longer clips.
+- **Tests**: `tests/ui-feel.cjs` (new); `tests/shape-rule.cjs` treats the hand cursor as `pointer`.
+
