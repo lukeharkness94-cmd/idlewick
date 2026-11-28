@@ -102,7 +102,7 @@ dated line to the history file.
   Storybook, Adventurer and Original stay in Settings. The rail is 206px on desktop so pixel names show whole. A quest ready
   to hand in carries a wax seal. Use the `--f-display/--f-body/--f-ui/--f-mono` variables, never a hard-coded family.
   Type: 16.5px body, 16px buttons, 14px meta; nothing visible under 13px in the design.
-- **Pixel frames** (owner, 28 Nov, chosen from his reference GUI over the 26-27 Nov "no lines" rule): panels are dark
+- **Pixel frames** (owner, 28 Nov, chosen from the owner's reference GUI over the 26-27 Nov "no lines" rule): panels are dark
   wood in a frame (a near-black rim, a lit top-left bevel, a shaded lower edge, brass pins in the corners, a fine plank
   grain; `--paper-edge`, `--paper-lift`, `--px-pin` in css/hearthside.css's Pixel frames section); a panel inside a
   panel is a sunk well. Every control is a raised bevel in its own colour, drawn with box-shadow (`--act-lift`, no
