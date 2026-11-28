@@ -42,7 +42,7 @@ const shelf = () => { const f = foodsHeld(), cur = chosenFood();
 const sheet = id => { const p = D.PET[id], o = S().pets.owned[id], lv = Q.petLevel(id), st = stateOf(id), t = st.t, job = Q.beastJob && Q.beastJob(id), active = S().pets.active === id, food = chosenFood();
   const next = D.BOND_XP[lv] || D.BOND_XP[MAX - 1], base = D.BOND_XP[lv - 1], pct = lv >= MAX ? 100 : Math.min(100, 100 * (o.bondXp - base) / (next - base));
   const foodName = food ? D.ITEMS[food].name.toLowerCase() : 'cooked food';
-  return `<section class="panel ranch-sheet"><div class="rs-head"><span class="rs-art">${Q.petSprite(p, 96)}</span><div><span class="k">${active ? 'Companion' : 'In its pen'}${job ? ' · ' + esc(job.role) : ''} · Bond ${lv}/${MAX}</span><h2>${esc(o.evolved && Q.beastSpec(id) ? Q.beastSpec(id).evolution : p.name)}</h2></div></div>
+  return `<section class="panel ranch-sheet"><div class="rs-head"><span class="rs-art"${p.lore ? ` data-tip="text:${esc(p.lore)}"` : ''}>${Q.petSprite(p, 96)}</span><div><span class="k">${active ? 'Companion' : 'In its pen'}${job ? ' · ' + esc(job.role) : ''} · Bond ${lv}/${MAX}</span><h2>${esc(o.evolved && Q.beastSpec(id) ? Q.beastSpec(id).evolution : p.name)}</h2></div></div>
     ${UI.beastJourney ? UI.beastJourney(id) : ''}
     <p class="rs-passive">${esc(Q.beastPassiveText(id))}</p>
     <div class="bar" role="progressbar" aria-label="Bond progress" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
@@ -55,6 +55,8 @@ const shedTeaser = () => { const j = S().pets.expedition;
   if (UI.captureView) return `<section class="panel ranch-shedcard"><span class="k">Capture</span><p>${j && D.PET[j.species] ? `<b>An old trap is out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'Catch a mythical beast and keep it.'}</p><button class="btn" data-do="beastmode" data-a="capture">Capture a beast</button><button class="linkish ranch-eggs-link" data-do="eggways">Where do eggs come from?</button></section>`;
   return `<section class="panel ranch-shedcard"><span class="k">Trapper</span><p>${j ? `<b>Trap out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'No trap is out. Send one and it brings back an egg.'}</p><button class="btn" data-do="beastmode" data-a="shed">Open the shed</button><button class="linkish ranch-eggs-link" data-do="eggways">Where do eggs come from?</button></section>`; };
 const ranch = () => {
+  /* a beast that arrived without its bond record (a hatch outside the usual path) gets one before it is drawn, never NaN */
+  if (Q.migrateBeasts && Object.values(S().pets.owned).some(o => !Number.isFinite(o.bondXp))) Q.migrateBeasts(S());
   const list = owned(), k = K(), per = PER(), pages = Math.max(1, Math.ceil(list.length / per)); UI.beastPenPage = Math.min(UI.beastPenPage, pages - 1);
   const sel = list.find(p => p.id === UI.beastSelected) || list.find(p => p.id === S().pets.active) || list[0];
   const slice = list.slice(UI.beastPenPage * per, UI.beastPenPage * per + per);

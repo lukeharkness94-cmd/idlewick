@@ -22,7 +22,7 @@ building costs are at the end of this file.
 - **Lures** (Cooking → Lures, ten a batch): one is laid on every hunt, caught or not. No lure, no hunt ("Needs a
   lure"), except an active quest's animal, which is hunted without one at the ignored-lure odds (quests are never
   blocked). The lure row under the selected animal shows a button per lure with how many you hold and what you know
-  (♥ likes, ✗ ignores, ? untried); picking one lays it until you pick it again; with none picked the game lays the
+  (its name and count, then ♥ likes, ✗ ignores or ? untried); picking one lays it until you pick it again; with none picked the game lays the
   liked lure you have found, else one you have not tried on that animal, else any. A lure is named on the row once its
   recipe's ingredients are found or you have held one; the rest are counted ("2 more to find in Cooking").
 - **The verdict**: each animal secretly likes one lure (`m.lure`). The first hunt with a lure on an animal says

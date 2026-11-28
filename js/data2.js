@@ -5,18 +5,18 @@ const DQ = window.DQ, D = DQ.data;
 /* ---------- Pets: found while playing, one can follow you at a time ---------- */
 const pet = (id, name, kind, spr, col, src, bonus, text) => ({ id, name, kind, spr, col, src, bonus, text });
 D.PETS = [
-  pet('biscuit', 'Biscuit', 'Farm dog', 'quad', '#c89a5a', { type: 'shop', price: 5000, town: 'mossbarrow' }, { xpAll: .02 }, '+2% XP to every skill'),
-  pet('toast', 'Toast', 'Chick', 'bird', '#ffd84a', { type: 'harvest', chance: 1 / 120 }, { xp: { farming: .06 } }, '+6% Farming XP'),
-  pet('bubbles', 'Bubbles', 'Goldfish', 'fish', '#ff9a3a', { type: 'skill', skill: 'fishing', chance: 1 / 900 }, { xp: { fishing: .06 } }, '+6% Fishing XP'),
-  pet('acorn', 'Acorn', 'Squirrel', 'rodent', '#c8703a', { type: 'skill', skill: 'woodcutting', chance: 1 / 900 }, { xp: { woodcutting: .06 } }, '+6% Woodcutting XP'),
-  pet('nugget', 'Nugget', 'Mole', 'rodent', '#6a5a50', { type: 'skill', skill: 'mining', chance: 1 / 900 }, { xp: { mining: .06 } }, '+6% Mining XP'),
-  pet('whiskers', 'Whiskers', 'Alley cat', 'quad', '#9a9aa8', { type: 'skill', skill: 'thieving', chance: 1 / 800 }, { coin: .06 }, '+6% coins from every source'),
+  pet('biscuit', 'Biscuit', 'Hearth brownie', 'humanoid', '#c89a5a', { type: 'shop', price: 5000, town: 'mossbarrow' }, { xpAll: .02 }, '+2% XP to every skill'),
+  pet('toast', 'Toast', 'Harvest sprite', 'ghost', '#ffd84a', { type: 'harvest', chance: 1 / 120 }, { xp: { farming: .06 } }, '+6% Farming XP'),
+  pet('bubbles', 'Bubbles', 'Brook nixie', 'ghost', '#ff9a3a', { type: 'skill', skill: 'fishing', chance: 1 / 900 }, { xp: { fishing: .06 } }, '+6% Fishing XP'),
+  pet('acorn', 'Acorn', 'Oak dryad', 'humanoid', '#c8703a', { type: 'skill', skill: 'woodcutting', chance: 1 / 900 }, { xp: { woodcutting: .06 } }, '+6% Woodcutting XP'),
+  pet('nugget', 'Nugget', 'Pebble golem', 'humanoid', '#6a5a50', { type: 'skill', skill: 'mining', chance: 1 / 900 }, { xp: { mining: .06 } }, '+6% Mining XP'),
+  pet('whiskers', 'Smudge', 'Pocket shade', 'ghost', '#9a9aa8', { type: 'skill', skill: 'thieving', chance: 1 / 800 }, { coin: .06 }, '+6% coins from every source'),
   pet('cinder', 'Cinder', 'Fire sprite', 'ghost', '#ff8a3a', { type: 'skill', skill: 'smithing', chance: 1 / 700 }, { xp: { smithing: .06 } }, '+6% Smithing XP'),
-  pet('quill', 'Quill', 'Owl', 'bird', '#c8b090', { type: 'skill', skill: 'crafting', chance: 1 / 700 }, { xp: { crafting: .06, magic: .06 } }, '+6% Crafting and Magic XP'),
-  pet('pudding', 'Pudding', 'Piglet', 'quad', '#f0a8b0', { type: 'skill', skill: 'cooking', chance: 1 / 900 }, { heal: .1 }, 'Food heals 10% more'),
+  pet('quill', 'Quill', 'Inkling', 'ghost', '#c8b090', { type: 'skill', skill: 'crafting', chance: 1 / 700 }, { xp: { crafting: .06, magic: .06 } }, '+6% Crafting and Magic XP'),
+  pet('pudding', 'Pudding', 'Custard slime', 'humanoid', '#f0a8b0', { type: 'skill', skill: 'cooking', chance: 1 / 900 }, { heal: .1 }, 'Food heals 10% more'),
   pet('gobbo', 'Gobbo', 'Goblin whelp', 'humanoid', '#8fbf6a', { type: 'boss', mon: 'grubnash', chance: 1 / 15 }, { dmg: .03 }, '+3% damage'),
-  pet('tusky', 'Tusky', 'Boarlet', 'quad', '#b07a4a', { type: 'boss', mon: 'oldtusk', chance: 1 / 15 }, { dr: .03 }, '3% less damage taken'),
-  pet('bill', 'Barnacle Bill', 'Hermit crab', 'crab', '#6fc7d8', { type: 'boss', mon: 'barnacle', chance: 1 / 20 }, { coin: .08 }, '+8% coins from every source'),
+  pet('tusky', 'Bristle', 'Bramble imp', 'humanoid', '#b07a4a', { type: 'boss', mon: 'oldtusk', chance: 1 / 15 }, { dr: .03 }, '3% less damage taken'),
+  pet('bill', 'Barnacle Bill', 'Sea sprite', 'ghost', '#6fc7d8', { type: 'boss', mon: 'barnacle', chance: 1 / 20 }, { coin: .08 }, '+8% coins from every source'),
   pet('frostling', 'Frostling', 'Ice troll pup', 'brute', '#bfe6ff', { type: 'boss', mon: 'frostmaw', chance: 1 / 20 }, { dmg: .05 }, '+5% damage'),
   pet('bogwisp', 'Bogwisp', 'Marsh light', 'ghost', '#b79cff', { type: 'boss', mon: 'morwenna', chance: 1 / 20 }, { xpAll: .05 }, '+5% XP to every skill'),
   pet('wyrmling', 'Wyrmling', 'Baby wyrm', 'dragon', '#ff6a3a', { type: 'boss', mon: 'pyrrhax', chance: 1 / 25 }, { dmg: .07, dr: .03 }, '+7% damage, 3% less damage taken'),
@@ -24,6 +24,29 @@ D.PETS = [
   pet('hollowling', 'Hollowling', 'Crowned shade', 'ghost', '#b08aff', { type: 'boss', mon: 'hollowking', chance: 1 / 25 }, { xpAll: .08, coin: .08 }, '+8% XP and coins'),
 ];
 D.PET = Object.fromEntries(D.PETS.map(p => [p.id, p]));
+/* companions are mythical only (owner, 28 Nov 2026: "Beastmastery should be mythical creatures" and "There should be
+   NO animals the same in either"): the pets that were ordinary animals became small folk of fable, ids and bonuses
+   unchanged. One line of lore each, shown on the ranch. */
+const LORE = {
+  biscuit: 'A hearth brownie who tidies the woodpile at night and brings back whatever you dropped, plus one more for luck. Paid in biscuits.',
+  toast: 'A harvest sprite that wakes before the cockerel and warms the furrows. Gets crumbs everywhere.',
+  bubbles: 'A brook nixie no bigger than a teacup. Knows where every fish in the pool is hiding and tells you, eventually.',
+  acorn: 'A dryad who grew out of a fallen acorn and has opinions about which trees you cut. Keeps the birds’ nests safe.',
+  nugget: 'A pebble golem that hums when it is near a seam. Mostly it hums at gravel.',
+  whiskers: 'A pocket shade that lives in your coat and steps into other people’s. Smudge by name, smudge by nature.',
+  quill: 'An inkling: a blot of ink that got up off the page. Reads over your shoulder and corrects your spelling.',
+  pudding: 'A custard slime who tastes every pot and has never once let a dish burn. Wobbles when pleased.',
+  gobbo: 'A goblin whelp who followed you home from the Thicket and will not say why.',
+  tusky: 'A bramble imp that grew on the Boar King’s back and rode him into every charge. Now it rides you.',
+  bill: 'A sea sprite in a captain’s hat three sizes too big, salvaged from Barnacle’s wreck. Finds coins in the sand.',
+  frostling: 'A troll pup from Frostmaw’s cave. Cold to the touch and warm to everyone else.',
+  bogwisp: 'A marsh light that decided to follow you instead of the other way round.',
+  wyrmling: 'A baby wyrm that thinks it is a lap dog. It is not. It is on fire.',
+  stormchick: 'A roc hatchling already the size of a goose and still growing.',
+  hollowling: 'A shade in a paper crown who copies whatever you do, but quieter.',
+  cinder: 'A fire sprite from the forge that sleeps in the coals and sneezes sparks.'
+};
+for (const [id, l] of Object.entries(LORE)) if (D.PET[id]) D.PET[id].lore = l;
 D.PET_LEVELS = [0, 10, 30, 70, 150];   // minutes together to reach each bond level
 
 /* ---------- House ---------- */

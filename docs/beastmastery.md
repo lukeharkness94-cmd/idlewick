@@ -118,9 +118,7 @@ ordinary animals: "Get rid."
   prism kite are still their regions' signature beasts, so Fieldwork's wooden traps can still leave their eggs.
 - **Ordinary animals**: the hunting animals have no companions any more (their `wild_` entries are removed), and a
   companion caught from an ordinary animal is let go on load with a note in the log; an egg of one is dropped too.
-  Nothing else about the hero changes. The four bond species (Hearthwolf, Bramble boar, Duskwatch owl, Honeyclaw)
-  stay as lucky-find eggs; whether a boar and a bear among the ranch's pets clash with the hunting ground's wild boar
-  and bears is a question for the owner.
+  Nothing else about the hero changes. The four bond species stay as lucky-find eggs, re-themed as mythical (below).
 
 | Beast | Beastmastery | Tier | Kind | Capture tool | Bait | As companion |
 |---|---|---|---|---|---|---|
@@ -178,6 +176,34 @@ Bait (one per try):
 | Honey bait | 38 | 6 | 1 honey, 1 wheat, 1 tallow |
 | Smoked bait | 58 | 6 | 2 raw venison, 1 maple logs, 1 goldleaf herb |
 | Moonlit bait | 78 | 6 | 2 raw beef, 1 moonmelon, 5 arcane rune |
+
+### Companions are mythical only (28 Nov 2026, coordinator follow-up)
+
+Every companion that was an ordinary animal is now a small creature of fable; ids, bonuses, tricks, passives and
+evolutions are unchanged, so saves keep them. Each has one line of lore (the tooltip on its portrait on the ranch sheet) and is drawn with
+the creature builders so it has a front and a side view (js/pixel_hunt.js; the bond species in js/beastmastery_art.js,
+whose evolved forms add a crest, wings or crown).
+
+| id | Was | Now |
+|---|---|---|
+| bond_wolf | Hearthwolf (wolf) | Hearthfire chimera (chimera) |
+| bond_boar | Bramble boar (boar) | Bramblekin (briar fae) |
+| bond_owl | Duskwatch owl (owl) | Duskwatch sylph (sylph) |
+| bond_bear | Honeyclaw (bear) | Honeycomb golem (amber golem) |
+| biscuit | Biscuit, farm dog | Biscuit, hearth brownie |
+| toast | Toast, chick | Toast, harvest sprite |
+| bubbles | Bubbles, goldfish | Bubbles, brook nixie |
+| acorn | Acorn, squirrel | Acorn, oak dryad |
+| nugget | Nugget, mole | Nugget, pebble golem |
+| whiskers | Whiskers, alley cat (trick Light paws) | Smudge, pocket shade (trick Light fingers) |
+| quill | Quill, owl | Quill, inkling |
+| pudding | Pudding, piglet | Pudding, custard slime |
+| tusky | Tusky, boarlet (Old Tusk's pet) | Bristle, bramble imp that rode the Boar King |
+| bill | Barnacle Bill, hermit crab | Barnacle Bill, sea sprite in Barnacle's salvaged hat |
+
+The hidden, never-earnable companions of combat creatures that are ordinary animals (giant rat, grey wolf, cave bat,
+ice wolf, dire wolf, the two spiders, giant leech, lava hound) are removed; an old save that held one lets it go on load
+with the others. The farm's livestock (hen, cow, sheep, pig, goat, bees) are farm animals, not companions, and stay.
 
 Verification: `tests/beast-capture.cjs` (the gate, odds and bounds, keep once, let go, failures spend bait, the tier
 kit and stopping, ordinary-animal companions let go on load, forecasts, offline parity, save and reload, the old

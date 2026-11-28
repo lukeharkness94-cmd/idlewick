@@ -1378,3 +1378,26 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .ss-btn{padding-left:3px!important;padding-right:3px!important;gap:3px!important}
 :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .combat-x .ss-btn :is(svg,img,.ic){width:20px!important;height:20px!important}
 @layer shape { :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .combat-x .ss-btn{padding-left:4px!important;padding-right:4px!important} }
+
+/* ---------- build costs (js/build_costs.js, owner 28 Nov 2026): each build button stays on one line, with its
+   material chips beside it, or wrapped under it when the row is short ---------- */
+#view .estate-zones h3{flex-wrap:wrap;row-gap:4px}
+#view .estate-expand{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex:none;width:auto;min-width:max-content}
+#view .estate-expand>*{display:inline-flex;align-items:center;white-space:nowrap;margin:0}
+#view .build-needs{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;min-width:0}
+#view .build-room{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px;min-width:0}
+#view .build-room .btn,#view .housebuy .quick .btn{white-space:nowrap}
+#view .housebuy .build-needs{display:flex;margin:8px 0}
+#view .housebuy .build-needs .k{margin-right:4px}
+
+/* ---------- hunting lures (js/hunt_stalk.js): a wrapping row of named buttons, each with its count and what the
+   selected animal thinks of it (♥ likes, ✗ ignores, ? not tried yet) ---------- */
+#view .hunt-lures{display:flex;flex-direction:column;gap:4px;margin:6px 0}
+#view .hunt-lure-row{display:flex;flex-wrap:wrap;gap:4px}
+#view .hunt-lure{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:3px 7px;min-height:32px;font-family:var(--f-ui);font-size:13px}
+#view .hunt-lure .item-art,#view .hunt-lure img{width:24px;height:24px}
+#view .hunt-lure>i{font-style:normal;min-width:1ch;text-align:center}
+#view .hunt-lure.lk-yes>i{color:#9be07a}
+#view .hunt-lure.lk-no>i{color:#d9a066}
+#view .hunt-lure.lk-unk>i{opacity:.7}
+#view .hunt-lure.miss{opacity:.62}

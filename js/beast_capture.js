@@ -97,7 +97,10 @@ const name0 = Q.mastName; if (name0) Q.mastName = (kind, id) => kind === 'captur
 /* ---------- the companions of the beasts, and none from ordinary animals ---------- */
 /* beastmastery_data.js made a companion for each beast (wild_<id>); the hunting ground's animals had one too from
    hunting.js's every-creature rule, and the animals that left the game took theirs with them: those go */
-const animalPet = p => p && String(p.id).startsWith('wild_') && !p.myth && (!p.mon || !D.MON[p.mon] || (D.MON[p.mon].hl > 0));
+/* companions are mythical only (owner, 28 Nov 2026): the hidden companions of combat creatures that are ordinary
+   animals (rats, wolves, bats, spiders, a leech, a hound) go too; none could be earned since 21 Nov */
+const REAL = new Set(['rat', 'wolf', 'bat', 'icewolf', 'dire_wolf', 'thicket_spider', 'mossback_spider', 'giant_leech', 'hound']);
+const animalPet = p => p && String(p.id).startsWith('wild_') && !p.myth && (!p.mon || !D.MON[p.mon] || (D.MON[p.mon].hl > 0) || REAL.has(p.mon));
 for (let i = D.PETS.length - 1; i >= 0; i--) if (animalPet(D.PETS[i])) { delete D.PET[D.PETS[i].id]; D.PETS.splice(i, 1); }
 /* an old save keeps every companion that still exists; one caught from an ordinary animal is let go, its egg too */
 const prep0 = Q.prepareBeastSave;

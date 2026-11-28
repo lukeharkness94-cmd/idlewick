@@ -546,7 +546,8 @@ A.creatureView = draw;
 /* the mythical beasts of Beastmastery (hunt_tiers_data.js D.MYTHS, 28 Nov 2026) are not creatures you fight, but they are
    seen in menus (front) and on the capture stage (side) the same way */
 A.registerViews = () => {
-  for (const m of [...Object.values(D.MON || {}), ...(D.MYTHS || []).map(x => ({ id: x.id, myth: true }))]) { if (!m.myth && !A.viewScope(m)) continue; const id = m.id; if (!A.hasCreature(id) && !OWN[id]) continue;
+  /* and the named companions (skill, boss and bond pets, all of fable since 28 Nov 2026) */
+  for (const m of [...Object.values(D.MON || {}), ...(D.MYTHS || []).map(x => ({ id: x.id, myth: true })), ...(D.PETS || []).filter(p => !String(p.id).startsWith('wild_') && A.PET_SPECS && A.PET_SPECS[p.id]).map(p => ({ id: p.id, myth: true }))]) { if (!m.myth && !A.viewScope(m)) continue; const id = m.id; if (!A.hasCreature(id) && !OWN[id]) continue;
     for (const v of ['front', 'side']) { if (!A.VIEWS[v][id]) A.VIEWS[v][id] = () => draw(id, v);
       if (isFloor(id) && !A.BIG_VIEWS[v][id]) A.BIG_VIEWS[v][id] = () => A.atScale(2, () => draw(id, v)); } }
 };

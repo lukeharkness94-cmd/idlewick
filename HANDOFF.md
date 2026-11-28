@@ -40,8 +40,9 @@ Shop prices use `UI.money(amount)`: a small visible coin and formatted amount, w
   beast companions), `js/pixel_views.js` (registers both views for `D.MYTHS`).
 - Quests retargeted: crab_cull → greylag geese, mb_bellhares → brown hares, ip_chimes → mountain goats, gf_lanterns →
   beavers, ef_glass → cape buffalo, sr_feathers and af_star → great bustards, sr_golems → argali.
-- Open for the owner: the four lucky-egg bond species include a boar and a bear (Bramble boar, Honeyclaw) while the
-  hunting ground has a wild boar and three bears; companions from skills and bosses (a piglet, a boarlet, an owl) stay.
+- Companions are mythical only: the bond species and the skill and boss pets that were animals are re-themed (table in
+  docs/beastmastery.md), ids and bonuses kept. Build buttons stay on one line with their material chips beside or under
+  them; hunting lure buttons show each lure's name, count and the selected animal's verdict.
 
 ## Towns from above (28 Nov 2026, Claude Code, the pixel rebuild)
 - Owner chose top-down (three-quarter) towns, darker, in the outlined pixel style of the approved example; work and

@@ -29,6 +29,21 @@ for (const [id, [builder, opts]] of Object.entries({ ...(D.HUNT_ART || {}), ...(
   SPECS[id] = () => mark(b({ ...opts }), id, opts, builder);
 }
 Object.assign(A.CREATURE_SPECS, SPECS);
+/* the companions that used to be ordinary animals are small folk of fable since 28 Nov 2026 (data2.js): drawn with
+   the builders so pixel_views.js can give each a front and a side view */
+const PB = A.BUILD;
+Object.assign(A.PET_SPECS || {}, {
+  biscuit: () => PB.humanoid({ skin: '#b08a5a', cloth: '#7a8a4a', hat: 'hood', hatCol: '#8a5a3a', mouth: 'grin', ears: 'goblin' }),
+  toast: () => PB.wisp({ col: '#f0c850' }),
+  bubbles: () => PB.orb({ col: '#6ad0f0' }),
+  acorn: () => PB.treant({ col: '#9a6a3a', leaf: '#8ab84a', glow: '#fff070' }),
+  nugget: () => PB.stonepile({ glow: '#f0d060' }),
+  whiskers: () => PB.shadow({ col: '#4a4a6a', eyes: '#f0e070' }),
+  quill: () => PB.veil({ col: '#3a4a8a' }),
+  pudding: () => PB.blob({ col: '#f0c890' }),
+  tusky: () => PB.mushroom({ col: '#7a5a3a' }),
+  bill: () => PB.floater({ cloth: '#3a7a8a', skin: '#9ad8d0', hood: '#2a3a5a' })
+});
 /* a mythical beast's companion (wild_<id>) is drawn as the beast */
 if (A.PET_SPECS) for (const m of D.MYTHS || []) if (!A.PET_SPECS['wild_' + m.id]) A.PET_SPECS['wild_' + m.id] = () => A.creatureSprite(m.id);
 /* ---------- the kit ---------- */

@@ -377,3 +377,7 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 28 Nov 2026 (owner: "building anything in the game should require resources as well as money (pens, chicken coops
   etc)"; answer: "materials matched to tier, coins roughly halved"): plots, pens, the cottage and its rooms cost logs,
   planks and bars plus about half the old coins (js/build_costs.js). Replaces coin-only plot, pen, house and room prices.
+- 28 Nov 2026 (coordinator, applying the owner's "Beastmastery should be mythical creatures" and "NO animals the same
+  in either"): no companion is an ordinary animal; the four bond species and the skill and boss pets that were animals
+  are re-themed as creatures of fable, ids and bonuses kept. Replaces Hearthwolf, Bramble boar, Duskwatch owl, Honeyclaw
+  and the farm dog, chick, goldfish, squirrel, mole, alley cat, owl, piglet, boarlet and hermit crab companions.

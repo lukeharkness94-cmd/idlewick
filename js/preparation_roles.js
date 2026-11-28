@@ -21,7 +21,7 @@ for(const [town,p]of Object.entries(profiles)){
 /* More distinctive support roles trade some direct support damage for an existing signature behaviour. */
 D.BEAST_ROLES={
  bond_wolf:{role:'Striker',key:null,support:1,text:'Critical hits and the strongest direct support. A useful everyday companion.'},
- bond_boar:{role:'Disruptor',key:'heckle',support:.7,text:'Enemy skips its second attack each fight. Keeps its coin bonus; less direct support than the wolf.'},
+ bond_boar:{role:'Disruptor',key:'heckle',support:.7,text:'Enemy skips its second attack each fight. Keeps its coin bonus; less direct support than the chimera.'},
  bond_owl:{role:'Research partner',key:'night',support:.7,text:'Research runs 10% faster while assigned. Keeps its XP bonus and offers modest combat support.'},
  bond_bear:{role:'Special guard',key:'cold',support:.65,text:'Special attacks deal 20% less damage. Keeps its boss-damage bonus; lower direct support.'}
 };

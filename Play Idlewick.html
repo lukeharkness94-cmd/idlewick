@@ -6064,6 +6064,29 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .ss-btn{padding-left:3px!important;padding-right:3px!important;gap:3px!important}
 :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .combat-x .ss-btn :is(svg,img,.ic){width:20px!important;height:20px!important}
 @layer shape { :root.type-hearthside:not(.type-classic):is(.lw-1600,.short) #view .combat-x .ss-btn{padding-left:4px!important;padding-right:4px!important} }
+
+/* ---------- build costs (js/build_costs.js, owner 28 Nov 2026): each build button stays on one line, with its
+   material chips beside it, or wrapped under it when the row is short ---------- */
+#view .estate-zones h3{flex-wrap:wrap;row-gap:4px}
+#view .estate-expand{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex:none;width:auto;min-width:max-content}
+#view .estate-expand>*{display:inline-flex;align-items:center;white-space:nowrap;margin:0}
+#view .build-needs{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;min-width:0}
+#view .build-room{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px;min-width:0}
+#view .build-room .btn,#view .housebuy .quick .btn{white-space:nowrap}
+#view .housebuy .build-needs{display:flex;margin:8px 0}
+#view .housebuy .build-needs .k{margin-right:4px}
+
+/* ---------- hunting lures (js/hunt_stalk.js): a wrapping row of named buttons, each with its count and what the
+   selected animal thinks of it (♥ likes, ✗ ignores, ? not tried yet) ---------- */
+#view .hunt-lures{display:flex;flex-direction:column;gap:4px;margin:6px 0}
+#view .hunt-lure-row{display:flex;flex-wrap:wrap;gap:4px}
+#view .hunt-lure{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:3px 7px;min-height:32px;font-family:var(--f-ui);font-size:13px}
+#view .hunt-lure .item-art,#view .hunt-lure img{width:24px;height:24px}
+#view .hunt-lure>i{font-style:normal;min-width:1ch;text-align:center}
+#view .hunt-lure.lk-yes>i{color:#9be07a}
+#view .hunt-lure.lk-no>i{color:#d9a066}
+#view .hunt-lure.lk-unk>i{opacity:.7}
+#view .hunt-lure.miss{opacity:.62}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
@@ -7953,18 +7976,18 @@ const DQ = window.DQ, D = DQ.data;
 /* ---------- Pets: found while playing, one can follow you at a time ---------- */
 const pet = (id, name, kind, spr, col, src, bonus, text) => ({ id, name, kind, spr, col, src, bonus, text });
 D.PETS = [
-  pet('biscuit', 'Biscuit', 'Farm dog', 'quad', '#c89a5a', { type: 'shop', price: 5000, town: 'mossbarrow' }, { xpAll: .02 }, '+2% XP to every skill'),
-  pet('toast', 'Toast', 'Chick', 'bird', '#ffd84a', { type: 'harvest', chance: 1 / 120 }, { xp: { farming: .06 } }, '+6% Farming XP'),
-  pet('bubbles', 'Bubbles', 'Goldfish', 'fish', '#ff9a3a', { type: 'skill', skill: 'fishing', chance: 1 / 900 }, { xp: { fishing: .06 } }, '+6% Fishing XP'),
-  pet('acorn', 'Acorn', 'Squirrel', 'rodent', '#c8703a', { type: 'skill', skill: 'woodcutting', chance: 1 / 900 }, { xp: { woodcutting: .06 } }, '+6% Woodcutting XP'),
-  pet('nugget', 'Nugget', 'Mole', 'rodent', '#6a5a50', { type: 'skill', skill: 'mining', chance: 1 / 900 }, { xp: { mining: .06 } }, '+6% Mining XP'),
-  pet('whiskers', 'Whiskers', 'Alley cat', 'quad', '#9a9aa8', { type: 'skill', skill: 'thieving', chance: 1 / 800 }, { coin: .06 }, '+6% coins from every source'),
+  pet('biscuit', 'Biscuit', 'Hearth brownie', 'humanoid', '#c89a5a', { type: 'shop', price: 5000, town: 'mossbarrow' }, { xpAll: .02 }, '+2% XP to every skill'),
+  pet('toast', 'Toast', 'Harvest sprite', 'ghost', '#ffd84a', { type: 'harvest', chance: 1 / 120 }, { xp: { farming: .06 } }, '+6% Farming XP'),
+  pet('bubbles', 'Bubbles', 'Brook nixie', 'ghost', '#ff9a3a', { type: 'skill', skill: 'fishing', chance: 1 / 900 }, { xp: { fishing: .06 } }, '+6% Fishing XP'),
+  pet('acorn', 'Acorn', 'Oak dryad', 'humanoid', '#c8703a', { type: 'skill', skill: 'woodcutting', chance: 1 / 900 }, { xp: { woodcutting: .06 } }, '+6% Woodcutting XP'),
+  pet('nugget', 'Nugget', 'Pebble golem', 'humanoid', '#6a5a50', { type: 'skill', skill: 'mining', chance: 1 / 900 }, { xp: { mining: .06 } }, '+6% Mining XP'),
+  pet('whiskers', 'Smudge', 'Pocket shade', 'ghost', '#9a9aa8', { type: 'skill', skill: 'thieving', chance: 1 / 800 }, { coin: .06 }, '+6% coins from every source'),
   pet('cinder', 'Cinder', 'Fire sprite', 'ghost', '#ff8a3a', { type: 'skill', skill: 'smithing', chance: 1 / 700 }, { xp: { smithing: .06 } }, '+6% Smithing XP'),
-  pet('quill', 'Quill', 'Owl', 'bird', '#c8b090', { type: 'skill', skill: 'crafting', chance: 1 / 700 }, { xp: { crafting: .06, magic: .06 } }, '+6% Crafting and Magic XP'),
-  pet('pudding', 'Pudding', 'Piglet', 'quad', '#f0a8b0', { type: 'skill', skill: 'cooking', chance: 1 / 900 }, { heal: .1 }, 'Food heals 10% more'),
+  pet('quill', 'Quill', 'Inkling', 'ghost', '#c8b090', { type: 'skill', skill: 'crafting', chance: 1 / 700 }, { xp: { crafting: .06, magic: .06 } }, '+6% Crafting and Magic XP'),
+  pet('pudding', 'Pudding', 'Custard slime', 'humanoid', '#f0a8b0', { type: 'skill', skill: 'cooking', chance: 1 / 900 }, { heal: .1 }, 'Food heals 10% more'),
   pet('gobbo', 'Gobbo', 'Goblin whelp', 'humanoid', '#8fbf6a', { type: 'boss', mon: 'grubnash', chance: 1 / 15 }, { dmg: .03 }, '+3% damage'),
-  pet('tusky', 'Tusky', 'Boarlet', 'quad', '#b07a4a', { type: 'boss', mon: 'oldtusk', chance: 1 / 15 }, { dr: .03 }, '3% less damage taken'),
-  pet('bill', 'Barnacle Bill', 'Hermit crab', 'crab', '#6fc7d8', { type: 'boss', mon: 'barnacle', chance: 1 / 20 }, { coin: .08 }, '+8% coins from every source'),
+  pet('tusky', 'Bristle', 'Bramble imp', 'humanoid', '#b07a4a', { type: 'boss', mon: 'oldtusk', chance: 1 / 15 }, { dr: .03 }, '3% less damage taken'),
+  pet('bill', 'Barnacle Bill', 'Sea sprite', 'ghost', '#6fc7d8', { type: 'boss', mon: 'barnacle', chance: 1 / 20 }, { coin: .08 }, '+8% coins from every source'),
   pet('frostling', 'Frostling', 'Ice troll pup', 'brute', '#bfe6ff', { type: 'boss', mon: 'frostmaw', chance: 1 / 20 }, { dmg: .05 }, '+5% damage'),
   pet('bogwisp', 'Bogwisp', 'Marsh light', 'ghost', '#b79cff', { type: 'boss', mon: 'morwenna', chance: 1 / 20 }, { xpAll: .05 }, '+5% XP to every skill'),
   pet('wyrmling', 'Wyrmling', 'Baby wyrm', 'dragon', '#ff6a3a', { type: 'boss', mon: 'pyrrhax', chance: 1 / 25 }, { dmg: .07, dr: .03 }, '+7% damage, 3% less damage taken'),
@@ -7972,6 +7995,29 @@ D.PETS = [
   pet('hollowling', 'Hollowling', 'Crowned shade', 'ghost', '#b08aff', { type: 'boss', mon: 'hollowking', chance: 1 / 25 }, { xpAll: .08, coin: .08 }, '+8% XP and coins'),
 ];
 D.PET = Object.fromEntries(D.PETS.map(p => [p.id, p]));
+/* companions are mythical only (owner, 28 Nov 2026: "Beastmastery should be mythical creatures" and "There should be
+   NO animals the same in either"): the pets that were ordinary animals became small folk of fable, ids and bonuses
+   unchanged. One line of lore each, shown on the ranch. */
+const LORE = {
+  biscuit: 'A hearth brownie who tidies the woodpile at night and brings back whatever you dropped, plus one more for luck. Paid in biscuits.',
+  toast: 'A harvest sprite that wakes before the cockerel and warms the furrows. Gets crumbs everywhere.',
+  bubbles: 'A brook nixie no bigger than a teacup. Knows where every fish in the pool is hiding and tells you, eventually.',
+  acorn: 'A dryad who grew out of a fallen acorn and has opinions about which trees you cut. Keeps the birds’ nests safe.',
+  nugget: 'A pebble golem that hums when it is near a seam. Mostly it hums at gravel.',
+  whiskers: 'A pocket shade that lives in your coat and steps into other people’s. Smudge by name, smudge by nature.',
+  quill: 'An inkling: a blot of ink that got up off the page. Reads over your shoulder and corrects your spelling.',
+  pudding: 'A custard slime who tastes every pot and has never once let a dish burn. Wobbles when pleased.',
+  gobbo: 'A goblin whelp who followed you home from the Thicket and will not say why.',
+  tusky: 'A bramble imp that grew on the Boar King’s back and rode him into every charge. Now it rides you.',
+  bill: 'A sea sprite in a captain’s hat three sizes too big, salvaged from Barnacle’s wreck. Finds coins in the sand.',
+  frostling: 'A troll pup from Frostmaw’s cave. Cold to the touch and warm to everyone else.',
+  bogwisp: 'A marsh light that decided to follow you instead of the other way round.',
+  wyrmling: 'A baby wyrm that thinks it is a lap dog. It is not. It is on fire.',
+  stormchick: 'A roc hatchling already the size of a goose and still growing.',
+  hollowling: 'A shade in a paper crown who copies whatever you do, but quieter.',
+  cinder: 'A fire sprite from the forge that sleeps in the coals and sneezes sparks.'
+};
+for (const [id, l] of Object.entries(LORE)) if (D.PET[id]) D.PET[id].lore = l;
 D.PET_LEVELS = [0, 10, 30, 70, 150];   // minutes together to reach each bond level
 
 /* ---------- House ---------- */
@@ -8394,13 +8440,20 @@ D.BOND_XP = [0, 25, 100, 300, 750, 1400, 2400, 3800, 5600, 8000];
 D.BOND_MILESTONES = [2, 4, 6, 8, 10];
 D.BOND_PASSIVE_STEP = .006; // Five upgrades total +3 percentage points.
 D.BEAST_SPECIES = {
-  bond_wolf: { name: 'Hearthwolf', kind: 'Wolf', hero: 15, town: 'willowbrook', rarity: 'common', passive: 'crit', critDamage: 1.5, evolvedCritDamage: 2, base: .05, damage: .85, evolution: 'Moonmane', col: '#96acba' },
-  bond_boar: { name: 'Bramble boar', kind: 'Boar', hero: 18, town: 'mossbarrow', rarity: 'common', passive: 'coin', base: .08, damage: 1, evolution: 'Briarback', col: '#a47b55' },
-  bond_owl: { name: 'Duskwatch owl', kind: 'Owl', hero: 22, town: 'willowbrook', rarity: 'rare', passive: 'xpAll', base: .10, damage: .7, evolution: 'Starwarden', col: '#b0a0c8' },
-  bond_bear: { name: 'Honeyclaw', kind: 'Bear', hero: 26, town: 'mossbarrow', rarity: 'rare', passive: 'boss', base: .05, damage: 1.15, evolution: 'Sunkeeper', col: '#bb8950' }
+  bond_wolf: { name: 'Hearthfire chimera', kind: 'Chimera', hero: 15, town: 'willowbrook', rarity: 'common', passive: 'crit', critDamage: 1.5, evolvedCritDamage: 2, base: .05, damage: .85, evolution: 'Moonmane', col: '#96acba' },
+  bond_boar: { name: 'Bramblekin', kind: 'Briar fae', hero: 18, town: 'mossbarrow', rarity: 'common', passive: 'coin', base: .08, damage: 1, evolution: 'Briarback', col: '#a47b55' },
+  bond_owl: { name: 'Duskwatch sylph', kind: 'Sylph', hero: 22, town: 'willowbrook', rarity: 'rare', passive: 'xpAll', base: .10, damage: .7, evolution: 'Starwarden', col: '#b0a0c8' },
+  bond_bear: { name: 'Honeycomb golem', kind: 'Amber golem', hero: 26, town: 'mossbarrow', rarity: 'rare', passive: 'boss', base: .05, damage: 1.15, evolution: 'Sunkeeper', col: '#bb8950' }
+};
+/* mythical since 28 Nov 2026 (owner: companions are mythical, no animal in both skills); ids, passives and evolutions kept */
+const BOND_LORE = {
+  bond_wolf: 'A chimera cub with a lion’s mane of embers, a goat’s horns and a tail that answers back. Lies across the hearth and bites at the right moment.',
+  bond_boar: 'A briar fae the size of a gate-post, all thorn and bark, that walks the hedgerows and trips up anyone you dislike.',
+  bond_owl: 'A sylph of the dusk wind that reads over your shoulder and turns the pages for you.',
+  bond_bear: 'A golem of honeycomb and amber that hums like a hive and stands between you and the worst a boss can do.'
 };
 for (const [id, s] of Object.entries(D.BEAST_SPECIES)) {
-  const p = { id, name: s.name, kind: s.kind, col: s.col, collectible: true, bonus: {}, text: 'A bond shaped by your adventures.', src: { type: 'beasttrap', hero: s.hero, town: s.town } };
+  const p = { id, name: s.name, kind: s.kind, col: s.col, collectible: true, bonus: {}, text: 'A bond shaped by your adventures.', lore: BOND_LORE[id], src: { type: 'beasttrap', hero: s.hero, town: s.town } };
   D.PETS.push(p); D.PET[id] = p;
 }
 /* the mythical beasts (hunt_tiers_data.js D.MYTHS, owner 28 Nov 2026) are the companions Beastmastery Capture keeps:
@@ -8409,7 +8462,7 @@ for (const [id, s] of Object.entries(D.BEAST_SPECIES)) {
 const MYTH_BONUS = [['dmg', v => `+${v}% damage`], ['dr', v => `${v}% less damage taken`], ['coin', v => `+${v}% coins from every source`], ['xpAll', v => `+${v}% XP to every skill`], ['speed', v => `Every task is ${v}% faster`]];
 for (const m of D.MYTHS || []) { const id = 'wild_' + m.id; if (D.PET[id]) continue;
   const [k, say] = MYTH_BONUS[m.index % MYTH_BONUS.length], v = [2, 3, 4, 5, 6][m.tier];
-  const p = { id, name: m.name, kind: 'Mythical beast', spr: 'quad', mon: m.id, myth: m.id, town: m.town, col: m.col, collectible: true, signature: ['thimblefox', 'tideglass', 'candletoad', 'prismkite'].includes(m.id), src: { type: 'capture', myth: m.id }, bonus: { [k]: v / 100 }, text: say(v) };
+  const p = { id, name: m.name, kind: 'Mythical beast', spr: 'quad', mon: m.id, myth: m.id, town: m.town, col: m.col, lore: m.note, collectible: true, signature: ['thimblefox', 'tideglass', 'candletoad', 'prismkite'].includes(m.id), src: { type: 'capture', myth: m.id }, bonus: { [k]: v / 100 }, text: say(v) };
   D.PETS.push(p); D.PET[id] = p; }
 D.BEAST_TRAPS = {
   basic: { name: 'Basic trap', cost: 40, hours: 1, common: .4, rare: .1, consolation: 5 },
@@ -12307,6 +12360,21 @@ for (const [id, [builder, opts]] of Object.entries({ ...(D.HUNT_ART || {}), ...(
   SPECS[id] = () => mark(b({ ...opts }), id, opts, builder);
 }
 Object.assign(A.CREATURE_SPECS, SPECS);
+/* the companions that used to be ordinary animals are small folk of fable since 28 Nov 2026 (data2.js): drawn with
+   the builders so pixel_views.js can give each a front and a side view */
+const PB = A.BUILD;
+Object.assign(A.PET_SPECS || {}, {
+  biscuit: () => PB.humanoid({ skin: '#b08a5a', cloth: '#7a8a4a', hat: 'hood', hatCol: '#8a5a3a', mouth: 'grin', ears: 'goblin' }),
+  toast: () => PB.wisp({ col: '#f0c850' }),
+  bubbles: () => PB.orb({ col: '#6ad0f0' }),
+  acorn: () => PB.treant({ col: '#9a6a3a', leaf: '#8ab84a', glow: '#fff070' }),
+  nugget: () => PB.stonepile({ glow: '#f0d060' }),
+  whiskers: () => PB.shadow({ col: '#4a4a6a', eyes: '#f0e070' }),
+  quill: () => PB.veil({ col: '#3a4a8a' }),
+  pudding: () => PB.blob({ col: '#f0c890' }),
+  tusky: () => PB.mushroom({ col: '#7a5a3a' }),
+  bill: () => PB.floater({ cloth: '#3a7a8a', skin: '#9ad8d0', hood: '#2a3a5a' })
+});
 /* a mythical beast's companion (wild_<id>) is drawn as the beast */
 if (A.PET_SPECS) for (const m of D.MYTHS || []) if (!A.PET_SPECS['wild_' + m.id]) A.PET_SPECS['wild_' + m.id] = () => A.creatureSprite(m.id);
 /* ---------- the kit ---------- */
@@ -14477,29 +14545,17 @@ if (A.ICON) Object.assign(A.ICON, ICO);
 (() => {
 const Q=window.DQ,A=Q.pixelArt,D=Q.data;if(!A)return;
 const {Spr,ramp,R}=A,eye=(s,x,y)=>{s.fix(x,y,'#291d2b');s.fix(x,y-1,'#fff3cf');};
-const draw=(kind,evolved=false)=>{
- const s=Spr(32,32),fur=ramp({wolf:'#98aab6',boar:'#986b4b',owl:'#9583ad',bear:'#b7844d'}[kind]),dark=ramp('#574257'),cream=ramp('#e8d4a4'),gold=R.gold;
- if(kind==='owl'){
-  if(evolved){s.poly([[12,18],[1,11],[3,23],[12,25]],fur);s.poly([[20,18],[30,10],[28,24],[20,26]],fur);}
-  s.ell(16,20,8,10,fur);s.ell(16,12,9,8,fur);s.poly([[8,8],[6,2],[13,6]],fur);s.poly([[19,6],[26,2],[24,10]],fur);
-  s.ell(12,12,4,5,cream);s.ell(20,12,4,5,cream);eye(s,12,12);eye(s,20,12);s.poly([[15,15],[18,15],[16,18]],gold);
-  for(let y=20;y<28;y+=3){s.fix(13,y,dark.base);s.fix(18,y+1,dark.base);}s.rect(10,29,5,2,gold);s.rect(18,29,5,2,gold);
-  if(evolved){s.poly([[11,5],[16,0],[21,5],[16,7]],gold);s.fix(16,3,'#e8f4ff');}
- }else{
-  const bear=kind==='bear',boar=kind==='boar';
-  s.ell(17,bear?20:21,bear?10:11,bear?9:7,fur);
-  for(const x of bear?[8,22]:[9,22])s.rect(x,24,bear?5:3,7,dark);
-  if(kind==='wolf'){s.poly([[24,20],[31,13],[30,24],[25,27]],fur);s.poly([[10,11],[6,2],[4,14]],fur);s.poly([[16,11],[15,3],[20,13]],fur);}
-  if(boar){s.poly([[23,17],[29,12],[30,18],[26,21]],dark);for(let x=11;x<25;x+=3)s.poly([[x,16],[x-1,evolved?7:12],[x+3,16]],dark);}
-  if(bear){s.ell(9,8,4,4,fur);s.ell(21,8,4,4,fur);s.ell(9,8,2,2,dark);s.ell(21,8,2,2,dark);}
-  s.ell(13,15,bear?9:8,bear?8:7,fur);s.ell(boar?6:8,19,boar?5:4,3,cream);s.fix(boar?3:5,18,dark.out);eye(s,10,13);eye(s,17,13);
-  if(boar){s.poly([[5,23],[1,evolved?13:17],[3,23]],cream);s.poly([[11,24],[13,evolved?15:19],[14,24]],cream);}
-  if(evolved&&kind==='wolf'){s.poly([[18,13],[25,9],[23,16],[28,18],[23,22],[26,26],[18,25]],cream);s.ell(14,23,3,3,gold);}
-  if(evolved&&bear){s.poly([[5,21],[1,15],[8,18]],cream);s.poly([[23,18],[30,14],[28,23]],cream);s.ell(17,24,5,3,gold);s.fix(17,23,'#fff3cf');}
- }
- return s;
+/* The four bond species are mythical since 28 Nov 2026 (owner: companions are mythical, no animal in both skills): a
+   chimera cub, a briar fae, a dusk sylph and an amber golem, drawn with pixel_creatures.js's builders so each has a
+   front and a side view; the evolved form adds its own crest, wings or crown so its silhouette changes too. */
+const B=A.BUILD||{},gold=()=>R.gold;
+const BOND={
+ bond_wolf:ev=>{const s=B.quad({fur:ev?'#e8a050':'#c8603a',dark:'#7a2a1e',mane:true,horns:true,hornCol:'#efe2c4',tail:'thin',ears:'pointy',glow:'#ffd060',big:ev,plates:'#8a3a2a',cloud:ev});if(ev){s.poly([[9,6],[13,0],[15,6]],gold());s.poly([[17,5],[21,0],[22,6]],gold());}return s;},
+ bond_boar:ev=>{const s=B.treant({col:ev?'#5a4a2a':'#4a3a22',leaf:ev?'#a8d060':'#6a9a3a',glow:'#ff8ab0'});if(ev){s.poly([[2,12],[0,2],[7,9]],gold());s.poly([[30,12],[31,2],[25,9]],gold());}return s;},
+ bond_owl:ev=>{const s=B.spectral({col:ev?'#c8b8f0':'#8a7ab8',eyes:'#fff6c0'});if(ev){s.poly([[8,14],[0,6],[3,20]],gold());s.poly([[24,14],[31,6],[29,20]],gold());s.poly([[12,4],[16,0],[20,4]],gold());}return s;},
+ bond_bear:ev=>{const s=B.golem({col:ev?'#f0b840':'#d8a040'});if(ev){s.poly([[11,3],[13,0],[16,2],[19,0],[21,3]],gold());s.ell(16,15,2,2,ramp('#fff3cf'));}return s;}
 };
-for(const [id,k]of [['bond_wolf','wolf'],['bond_boar','boar'],['bond_owl','owl'],['bond_bear','bear']]){A.PET_SPECS[id]=()=>draw(k);A.PET_SPECS['evolved:'+id]=()=>draw(k,true);}
+for(const [id,f]of Object.entries(BOND)){A.PET_SPECS[id]=()=>f(false);A.PET_SPECS['evolved:'+id]=()=>f(true);}
 /* Legacy companions retain their anatomy and acquire a visible bonded mantle, crest or flight feathers. */
 Q.registerBondArt=()=>{for(const p of D.PETS){if(D.BEAST_SPECIES[p.id]||A.PET_SPECS['evolved:'+p.id])continue;const id=p.id,base=()=>A.creatureSprite(A.hasCreature(id)?id:p.mon);A.PET_SPECS['evolved:'+id]=()=>{const s=base();if(!s)return null;const g=R.gold;const bird=/owl|bird|moth|kite|chick/i.test(p.kind+' '+p.name);if(bird){s.poly([[3,17],[0,9],[7,15]],g);s.poly([[25,15],[31,8],[29,20]],g);}else{s.poly([[9,24],[6,16],[12,20],[16,18],[22,21],[25,16],[23,25]],g);}s.fix(16,20,'#fff3cf');return s;};}};Q.registerBondArt();
 const item0=A.itemSprite;
@@ -24677,7 +24733,7 @@ D.TRICKS = {
   bubbles: { key: 'school', name: 'School spotter', text: '1 in 12 catches: double' },
   acorn: { key: 'nuts', name: 'Nut stash', text: "2× bird's nests" },
   nugget: { key: 'seam', name: 'Seam sense', text: '2× mining gems' },
-  whiskers: { key: 'paws', name: 'Light paws', text: 'first failed pickpocket each minute: no damage' },
+  whiskers: { key: 'paws', name: 'Light fingers', text: 'first failed pickpocket each minute: no damage' },
   cinder: { key: 'bellows', name: 'Bellows', text: '1 in 10 smelts: +1 bar' },
   quill: { key: 'night', name: 'Night study', text: '+10% research speed' },
   pudding: { key: 'taster', name: 'Taster', text: 'first dish never burns · −25% burn chance' },
@@ -28215,7 +28271,8 @@ A.creatureView = draw;
 /* the mythical beasts of Beastmastery (hunt_tiers_data.js D.MYTHS, 28 Nov 2026) are not creatures you fight, but they are
    seen in menus (front) and on the capture stage (side) the same way */
 A.registerViews = () => {
-  for (const m of [...Object.values(D.MON || {}), ...(D.MYTHS || []).map(x => ({ id: x.id, myth: true }))]) { if (!m.myth && !A.viewScope(m)) continue; const id = m.id; if (!A.hasCreature(id) && !OWN[id]) continue;
+  /* and the named companions (skill, boss and bond pets, all of fable since 28 Nov 2026) */
+  for (const m of [...Object.values(D.MON || {}), ...(D.MYTHS || []).map(x => ({ id: x.id, myth: true })), ...(D.PETS || []).filter(p => !String(p.id).startsWith('wild_') && A.PET_SPECS && A.PET_SPECS[p.id]).map(p => ({ id: p.id, myth: true }))]) { if (!m.myth && !A.viewScope(m)) continue; const id = m.id; if (!A.hasCreature(id) && !OWN[id]) continue;
     for (const v of ['front', 'side']) { if (!A.VIEWS[v][id]) A.VIEWS[v][id] = () => draw(id, v);
       if (isFloor(id) && !A.BIG_VIEWS[v][id]) A.BIG_VIEWS[v][id] = () => A.atScale(2, () => draw(id, v)); } }
 };
@@ -31117,7 +31174,7 @@ const shelf = () => { const f = foodsHeld(), cur = chosenFood();
 const sheet = id => { const p = D.PET[id], o = S().pets.owned[id], lv = Q.petLevel(id), st = stateOf(id), t = st.t, job = Q.beastJob && Q.beastJob(id), active = S().pets.active === id, food = chosenFood();
   const next = D.BOND_XP[lv] || D.BOND_XP[MAX - 1], base = D.BOND_XP[lv - 1], pct = lv >= MAX ? 100 : Math.min(100, 100 * (o.bondXp - base) / (next - base));
   const foodName = food ? D.ITEMS[food].name.toLowerCase() : 'cooked food';
-  return `<section class="panel ranch-sheet"><div class="rs-head"><span class="rs-art">${Q.petSprite(p, 96)}</span><div><span class="k">${active ? 'Companion' : 'In its pen'}${job ? ' · ' + esc(job.role) : ''} · Bond ${lv}/${MAX}</span><h2>${esc(o.evolved && Q.beastSpec(id) ? Q.beastSpec(id).evolution : p.name)}</h2></div></div>
+  return `<section class="panel ranch-sheet"><div class="rs-head"><span class="rs-art"${p.lore ? ` data-tip="text:${esc(p.lore)}"` : ''}>${Q.petSprite(p, 96)}</span><div><span class="k">${active ? 'Companion' : 'In its pen'}${job ? ' · ' + esc(job.role) : ''} · Bond ${lv}/${MAX}</span><h2>${esc(o.evolved && Q.beastSpec(id) ? Q.beastSpec(id).evolution : p.name)}</h2></div></div>
     ${UI.beastJourney ? UI.beastJourney(id) : ''}
     <p class="rs-passive">${esc(Q.beastPassiveText(id))}</p>
     <div class="bar" role="progressbar" aria-label="Bond progress" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
@@ -31130,6 +31187,8 @@ const shedTeaser = () => { const j = S().pets.expedition;
   if (UI.captureView) return `<section class="panel ranch-shedcard"><span class="k">Capture</span><p>${j && D.PET[j.species] ? `<b>An old trap is out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'Catch a mythical beast and keep it.'}</p><button class="btn" data-do="beastmode" data-a="capture">Capture a beast</button><button class="linkish ranch-eggs-link" data-do="eggways">Where do eggs come from?</button></section>`;
   return `<section class="panel ranch-shedcard"><span class="k">Trapper</span><p>${j ? `<b>Trap out:</b> ${esc(D.PET[j.species].name)} · <span data-beast-due="${j.due}">${Q.fmtTime(Math.max(0, j.due - Date.now()))}</span> left` : 'No trap is out. Send one and it brings back an egg.'}</p><button class="btn" data-do="beastmode" data-a="shed">Open the shed</button><button class="linkish ranch-eggs-link" data-do="eggways">Where do eggs come from?</button></section>`; };
 const ranch = () => {
+  /* a beast that arrived without its bond record (a hatch outside the usual path) gets one before it is drawn, never NaN */
+  if (Q.migrateBeasts && Object.values(S().pets.owned).some(o => !Number.isFinite(o.bondXp))) Q.migrateBeasts(S());
   const list = owned(), k = K(), per = PER(), pages = Math.max(1, Math.ceil(list.length / per)); UI.beastPenPage = Math.min(UI.beastPenPage, pages - 1);
   const sel = list.find(p => p.id === UI.beastSelected) || list.find(p => p.id === S().pets.active) || list[0];
   const slice = list.slice(UI.beastPenPage * per, UI.beastPenPage * per + per);
@@ -31731,7 +31790,7 @@ for(const [town,p]of Object.entries(profiles)){
 /* More distinctive support roles trade some direct support damage for an existing signature behaviour. */
 D.BEAST_ROLES={
  bond_wolf:{role:'Striker',key:null,support:1,text:'Critical hits and the strongest direct support. A useful everyday companion.'},
- bond_boar:{role:'Disruptor',key:'heckle',support:.7,text:'Enemy skips its second attack each fight. Keeps its coin bonus; less direct support than the wolf.'},
+ bond_boar:{role:'Disruptor',key:'heckle',support:.7,text:'Enemy skips its second attack each fight. Keeps its coin bonus; less direct support than the chimera.'},
  bond_owl:{role:'Research partner',key:'night',support:.7,text:'Research runs 10% faster while assigned. Keeps its XP bonus and offers modest combat support.'},
  bond_bear:{role:'Special guard',key:'cold',support:.65,text:'Special attacks deal 20% less damage. Keeps its boss-damage bonus; lower direct support.'}
 };
@@ -32096,7 +32155,7 @@ D.MASTERY_GUILDS={
  enchanting:g('The Remembered Spark','The Last Herald','hollow','The Name Within the Light','Bring me an enchanted item and runes for the inscription. I want to see what you’ve already learned before we try a stronger enchantment. I sometimes begin with the lesson we haven’t had yet. Forgive me; we’ll take this one in order.',[task('guildproof','enchant',1,'Present equipment enchanted to at least +1','enchanting'),work('deliver','rune',10,'Bring 10 runes for the inscription')],'A Name Worth Keeping',[task('guildproof','enchant',4,'Present equipment enchanted to at least +4','enchanting'),work('deliver','gem_sapphire',1,'Bring a sapphire for the final inscription')]),
  carpentry:g('The Lasting Joint','Boatwright Sorrel','gloomfen','The Joint Beneath the Journey','Saw ordinary timber and oak into planks for me. I want to see that the cuts are sound before we move on to boats. I had a speech about that, but… perhaps it’s better if I show you at the bench.',[work('carve','plank_normal',6,'Saw 6 ordinary planks'),work('carve','plank_oak',6,'Saw 6 oak planks')],'Something That Can Leave Harbour',[work('carve','plank_elder',4,'Saw 4 elder planks'),task('guildproof','boat',1,'Present a boat you own','carpentry')]),
  sailing:g('The Safe Return','Harbourmaster Ilsa','saltmere','The Harbour Beyond the Map','A voyage is not finished when you arrive somewhere impressive. It is finished when your crew comes home.',[work('sail','gull_rock',1,'Return from Gull Rock'),work('sail','kelp_isle',1,'Return from Kelp Isle')],'The Far Side of Home',[work('sail','storm_spire',1,'Return from Storm Spire'),work('sail','worlds_edge',1,'Return from World’s Edge')]),
- beastmastery:g('The Gentle Hand','Elder Wren','willowbrook','The Trust That Walks Beside You','Let me see how you’re looking after your Hearthwolf, pet. Spend some time training together. If you’ve already developed a full bond, that tells me what I need to know. We can talk about caring for different beasts after that.',[work('train','bond_wolf',2,'Train the Hearthwolf twice (or present a completed bond)')],'Two Different Kinds of Trust',[work('train','bond_owl',2,'Train the owl twice (or present a completed bond)'),work('train','bond_boar',2,'Train the boar twice (or present a completed bond)')])
+ beastmastery:g('The Gentle Hand','Elder Wren','willowbrook','The Trust That Walks Beside You','Let me see how you’re looking after that chimera of yours, pet. Spend some time training together. If you’ve already developed a full bond, that tells me what I need to know. We can talk about caring for different beasts after that.',[work('train','bond_wolf',2,'Train the Hearthwolf twice (or present a completed bond)')],'Two Different Kinds of Trust',[work('train','bond_owl',2,'Train the owl twice (or present a completed bond)'),work('train','bond_boar',2,'Train the boar twice (or present a completed bond)')])
 };
 const id=(sk,tier)=>'guild_'+sk+'_'+tier;
 for(const[sk,G]of Object.entries(D.MASTERY_GUILDS)){
@@ -35149,7 +35208,7 @@ const lureOpen = l => Q.itemDiscovered(l) || (D.RECIPES['cook_' + l] && (!Q.reci
 /* the lure row: one button per lure with how many you hold and what it does to this animal */
 const lureRow = id => { const m = animal(id), lay = Q.huntLure(id), sel = H().lureSel[id], o = Q.huntOdds(id), shown = LURES().filter(lureOpen), hidden = LURES().length - shown.length;
   const btn = l => { const it = D.ITEMS[l], n = Q.have(l), k = Q.lureKnown(id, l), mark = k === true ? '♥' : k === false ? '✗' : '?', say = k === true ? `likes it · ${Math.round(o.liked * 100)}%` : k === false ? `ignores it · ${Math.round(o.other * 100)}%` : 'not tried on it yet';
-    return `<button type="button" class="hunt-lure ${l === lay ? 'on' : ''} ${n ? 'ok' : 'miss'} lk-${k === true ? 'yes' : k === false ? 'no' : 'unk'}" data-do="huntlure" data-a="${id}|${l}" aria-pressed="${l === sel}" data-tip="text:${esc(it.name)} · ${n} held · ${say}${l === sel ? ' · chosen (press again to let the game choose)' : ''}" aria-label="${esc(it.name)}: ${n} held, ${say}">${Q.itemIco(it)}<b class="mono" data-b="count:${l}">${n}</b><i aria-hidden="true">${mark}</i></button>`; };
+    return `<button type="button" class="btn sm hunt-lure ${l === lay ? 'on' : ''} ${n ? 'ok' : 'miss'} lk-${k === true ? 'yes' : k === false ? 'no' : 'unk'}" data-do="huntlure" data-a="${id}|${l}" aria-pressed="${l === sel}" data-tip="text:${esc(it.name)} · ${n} held · ${say}${l === sel ? ' · chosen (press again to let the game choose)' : ''}" aria-label="${esc(it.name)}: ${n} held, ${say}">${Q.itemIco(it)}<span class="hl-name">${esc(it.name)}</span><b class="mono" data-b="count:${l}">${n}</b><i aria-hidden="true">${mark}</i></button>`; };
   const make = !lay ? `<button type="button" class="btn sm" data-do="huntkit" data-a="${(sel && D.ITEMS[sel] ? sel : shown[0]) || 'grain_mash'}">${UI.activityIcon ? UI.activityIcon('cooking') : ''}Cook lures</button>` : '';
   return `<div class="hunt-lures"><span class="k">Lure</span><div class="hunt-lure-row">${shown.map(btn).join('')}</div>${make}<small class="dim">One lure per hunt. ${lay ? `Laying ${esc(D.ITEMS[lay].name.toLowerCase())}${sel ? '' : ' (chosen for you)'}.` : 'You hold no lure for this hunt.'}${hidden ? ` ${hidden} more to find in Cooking.` : ''}</small></div>`; };
 const oddsLine = id => { const lay = Q.huntLure(id), k = lay ? Q.lureKnown(id, lay) : false, o = Q.huntOdds(id);
@@ -35334,7 +35393,10 @@ const name0 = Q.mastName; if (name0) Q.mastName = (kind, id) => kind === 'captur
 /* ---------- the companions of the beasts, and none from ordinary animals ---------- */
 /* beastmastery_data.js made a companion for each beast (wild_<id>); the hunting ground's animals had one too from
    hunting.js's every-creature rule, and the animals that left the game took theirs with them: those go */
-const animalPet = p => p && String(p.id).startsWith('wild_') && !p.myth && (!p.mon || !D.MON[p.mon] || (D.MON[p.mon].hl > 0));
+/* companions are mythical only (owner, 28 Nov 2026): the hidden companions of combat creatures that are ordinary
+   animals (rats, wolves, bats, spiders, a leech, a hound) go too; none could be earned since 21 Nov */
+const REAL = new Set(['rat', 'wolf', 'bat', 'icewolf', 'dire_wolf', 'thicket_spider', 'mossback_spider', 'giant_leech', 'hound']);
+const animalPet = p => p && String(p.id).startsWith('wild_') && !p.myth && (!p.mon || !D.MON[p.mon] || (D.MON[p.mon].hl > 0) || REAL.has(p.mon));
 for (let i = D.PETS.length - 1; i >= 0; i--) if (animalPet(D.PETS[i])) { delete D.PET[D.PETS[i].id]; D.PETS.splice(i, 1); }
 /* an old save keeps every companion that still exists; one caught from an ordinary animal is let go, its egg too */
 const prep0 = Q.prepareBeastSave;

@@ -344,7 +344,8 @@ dated line to the history file.
   40%, set the trap 30%, coax 30%; odds 55% + 2.5% per Beastmastery level above the beast (35–90%), so lower beasts get
   easier; one bait per try, the tool used only on a keep; a success is a `wild_<id>` beast straight to a pen
   (`DQ.awardPet(id, { hatched: true })`); one you own is let go for the XP. Never in forecasts. Companions caught from
-  ordinary animals are let go on load (owner, 28 Nov: "Get rid"). No bond XP from captures: deliberate paid training
+  ordinary animals are let go on load (owner, 28 Nov: "Get rid"). Every companion is mythical: the bond, skill and boss
+  pets that were ordinary animals are creatures of fable with the same ids and bonuses (docs/beastmastery.md). No bond XP from captures: deliberate paid training
   (cooldown, no repeating training) stays the only repeating bond growth; ten bond levels as in docs/beastmastery.md.
 - **Eggs** are lucky finds: 1 in 2,000 skilling actions and 1 in 500 victories or catches (`D.EGG_DROP`), hatching at the
   ranch after 10/30/60 minutes; all older egg sources stay and hatch only companions that exist. Expeditions are
