@@ -23,7 +23,39 @@ const LIGHT = [-.55, -.7];
 const sphere = (nx, ny) => { const d = nx * nx + ny * ny, nz = Math.sqrt(Math.max(0, 1 - d)), dot = -(nx * LIGHT[0] + ny * LIGHT[1]) * .8 + nz * .45; return dot > .8 ? 4 : dot > .42 ? 3 : dot > .02 ? 2 : 1; };
 
 /* ---------- a sprite canvas with regions, automatic lighting and selective outlines ---------- */
-function Spr(w, h) {
+/* drawn at k times the detail: inside atScale(k, fn) every Spr(w, h) is a (w*k) x (h*k) canvas that takes the same
+   drawing calls in the original coordinates. Ellipses and polygons are rasterised afresh at the finer grid (smoother
+   curves, sphere light, a one-pixel outline); dots and fixed pixels become k x k blocks. Used for the larger versions of
+   mini-bosses and tower bosses on the combat stage (pixel_bosses.js). */
+let SCALE = 1;
+function Spr(w, h) { return SCALE > 1 ? fineSpr(w, h, SCALE) : rawSpr(w, h); }
+function fineSpr(w, h, k) {
+  const b = rawSpr(w * k, h * k), blk = (x, y, f) => { x = (x | 0) * k; y = (y | 0) * k; for (let j = 0; j < k; j++) for (let i = 0; i < k; i++) f(x + i, y + j); };
+  const s = {
+    w, h, big: b, fine: k, px: b.px,
+    at: (x, y) => b.at((x | 0) * k, (y | 0) * k),
+    dot(x, y, r) { blk(x, y, (X, Y) => b.dot(X, Y, r)); },
+    fix(x, y, c) { blk(x, y, (X, Y) => b.fix(X, Y, c)); },
+    tone(x, y, r, lv) { blk(x, y, (X, Y) => b.tone(X, Y, r, lv)); },
+    erase(x, y) { blk(x, y, (X, Y) => b.erase(X, Y)); },
+    rect(x, y, rw, rh, r) { for (let j = 0; j < rh; j++) for (let i = 0; i < rw; i++) s.dot(x + i, y + j, r); return s; },
+    ell(cx, cy, rx, ry, r, o) { const lit = !(o && o.flat) && Math.min(rx, ry) >= 1.5, Cx = Math.floor(cx) + .5, Cy = Math.floor(cy) + .5, RX = rx + .4, RY = ry + .4;
+      for (let Y = Math.floor((Cy - RY) * k); Y <= Math.ceil((Cy + RY) * k); Y++) for (let X = Math.floor((Cx - RX) * k); X <= Math.ceil((Cx + RX) * k); X++) {
+        const nx = ((X + .5) / k - Cx) / RX, ny = ((Y + .5) / k - Cy) / RY; if (nx * nx + ny * ny > 1) continue; lit ? b.tone(X, Y, r, sphere(nx, ny)) : b.dot(X, Y, r); }
+      return s; },
+    line(x0, y0, x1, y1, r, fixC) { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1) * k; for (let i = 0; i <= n; i++) { const X = Math.round((x0 + (x1 - x0) * i / n) * k), Y = Math.round((y0 + (y1 - y0) * i / n) * k);
+      for (let j = 0; j < k; j++) for (let q = 0; q < k; q++) fixC ? b.fix(X + q, Y + j, fixC) : b.dot(X + q, Y + j, r); } return s; },
+    poly(pts, r) { b.poly(pts.map(([x, y]) => [x * k, y * k]), r); return s; },
+    grid(rows, map, ox = 0, oy = 0) { rows.forEach((row, j) => [...row].forEach((ch, i) => { const v = map[ch]; if (!v) return; typeof v === 'string' ? s.fix(ox + i, oy + j, v) : s.dot(ox + i, oy + j, v); })); return s; },
+    mirrorX() { b.mirrorX(); return s; },
+    stamp(o, ox, oy) { if (o.big) b.stamp(o.big, ox * k, oy * k); else for (let y = 0; y < o.h; y++) for (let x = 0; x < o.w; x++) { const p = o.px[y * o.w + x]; if (p) blk(ox + x, oy + y, (X, Y) => { if (X >= 0 && Y >= 0 && X < b.w && Y < b.h) b.px[Y * b.w + X] = p; }); } return s; },
+    render: o => b.render(o)
+  };
+  return s;
+}
+/* run a sprite maker with every canvas drawn at k times the detail; returns the fine canvas */
+const atScale = (k, make) => { const was = SCALE; SCALE = k; try { const s = make(); return s ? (s.big || s) : null; } finally { SCALE = was; } };
+function rawSpr(w, h) {
   const px = new Array(w * h).fill(null); /* {r: ramp, fix: colour|null, lv: light step from a sphere|undefined} */
   const at = (x, y) => (x >= 0 && y >= 0 && x < w && y < h) ? px[y * w + x] : null;
   const s = {
@@ -460,7 +492,7 @@ function iconMining() { const s = Spr(16, 16); s.line(4, 14, 11, 5, R.wood); s.l
 const SPRITES = { chicken, goblin, wolf, oak, pine, pike, carp, sword, bow, platebody, ore, log, gem, potato, cottage, iconFishing, iconWoodcutting, iconMining };
 DQ.pixelArt = {
   ramp, mix, Spr, R, SKIN, HAIR, hero, heroSide, WORK_POSTURE, url, img, toCanvas, hires, scale2x, logicalOf, sprites: SPRITES, composeScene,
-  EYES, sphere, INK, COOL, WARM, lum,
+  EYES, sphere, INK, COOL, WARM, lum, atScale,
   sprite: (name, ...args) => url(name + ':' + args.join(','), () => SPRITES[name](...args)),
   heroUrl: (o) => url('hero:' + JSON.stringify(o), () => hero(o)),
   heroSideUrl: (o) => url('heroside:' + JSON.stringify(o), () => heroSide(o)),
