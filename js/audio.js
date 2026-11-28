@@ -1,11 +1,12 @@
 /* Idlewick: synthesised sound effects and ambient music (no audio files). */
 (() => {
 const DQ = window.DQ, { rnd, pick } = DQ;
-let ctx = null, master, sfxG, musG, ambG, verb, sverb, started = false;
+let ctx = null, master, sfxG, musG, ambG, verb, sverb, started = false, hushG = null, hushF = null, verbBuf = null;
 const last = {}, recent = [];
 const PENT = [0, 2, 4, 7, 9];
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 const S = () => DQ.S.settings;
+const HUSH_OPEN = 20000; /* the hush filter's resting cutoff: wide open, inaudible */
 
 function init() {
   if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
@@ -13,13 +14,16 @@ function init() {
   ctx = new AC();
   master = ctx.createGain(); sfxG = ctx.createGain(); musG = ctx.createGain();
   ambG = ctx.createGain(); ambG.gain.value = 0;
-  sfxG.connect(master); musG.connect(master); ambG.connect(master); master.connect(ctx.destination);
+  /* music and ambience pass through the hush (a gain and a gentle low-pass) so a pop-up can quieten the world under it;
+     interface sounds go straight to master, so clicks inside a pop-up stay clear */
+  hushG = ctx.createGain(); hushF = ctx.createBiquadFilter(); hushF.type = 'lowpass'; hushF.Q.value = .5; hushF.frequency.value = HUSH_OPEN;
+  sfxG.connect(master); musG.connect(hushG); ambG.connect(hushG); hushG.connect(hushF); hushF.connect(master); master.connect(ctx.destination);
   verb = ctx.createConvolver();
   const len = ctx.sampleRate * 2.6, buf = ctx.createBuffer(2, len, ctx.sampleRate);
   for (let c = 0; c < 2; c++) { const d = buf.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.4); }
-  verb.buffer = buf; const vg = ctx.createGain(); vg.gain.value = .7; verb.connect(vg); vg.connect(musG);
+  verb.buffer = buf; verbBuf = buf; const vg = ctx.createGain(); vg.gain.value = .7; verb.connect(vg); vg.connect(musG);
   sverb = ctx.createConvolver(); sverb.buffer = buf; const sg = ctx.createGain(); sg.gain.value = .32; sverb.connect(sg); sg.connect(sfxG);
-  applyVolumes();
+  applyVolumes(); hushApply(true);
 }
 function applyVolumes() {
   if (!ctx) return; const s = S(), t = ctx.currentTime;
@@ -36,7 +40,8 @@ function tone(f, dur, o = {}) {
   if (o.to) osc.frequency.exponentialRampToValueAtTime(Math.max(20, o.to), t + dur);
   const v = (o.v || .2), a = o.a || .005;
   g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + a); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
-  osc.connect(g); g.connect(o.dest || sfxG); if (o.wet && sverb) g.connect(sverb); osc.start(t); osc.stop(t + dur + .05);
+  let src = osc; if (o.filt) { const b = ctx.createBiquadFilter(); b.type = o.filt[0]; b.frequency.value = o.filt[1]; b.Q.value = o.filt[2] || 1; osc.connect(b); src = b; }
+  src.connect(g); g.connect(o.dest || sfxG); if (o.wet && sverb) g.connect(sverb); osc.start(t); osc.stop(t + dur + .05);
 }
 function noise(dur, o = {}) {
   if (!ctx) return; const t = ctx.currentTime + (o.at || 0);
@@ -117,13 +122,37 @@ const SFX = {
   region: () => { [55, 62, 67].forEach((m, i) => tone(mtof(m), 1.8, { type: 'triangle', v: .055, at: i * .18, a: .35, wet: true })); bell(mtof(79), .7, .05); },
   adventure: () => { [60, 64, 67, 72, 76, 79].forEach((m, i) => tone(mtof(m), .9, { type: 'triangle', v: .07, at: i * .1, wet: true })); bell(mtof(84), .7, .07); bell(mtof(91), .85, .04); },
   collection: () => { [79, 83, 86].forEach((m, i) => bell(mtof(m), i * .09, .05)); },
+  /* Item materials (owner, 27 Nov 2026, "a sound for each material"): equipping, unequipping and moving an item between
+     the pack, the bank and the equipment slots sounds like what it is made of (DQ.itemMaterial). All short (under
+     a quarter of a second), on the effects bus and the Interface filter, about as loud as the old equip thump. */
+  /* metal: a bright clink (three inharmonic sine partials around 2.3 kHz, 1 : 2.76 : 5.4, fast decay), a second
+     lighter touch 35 ms later, and a short scrape (noise through a narrow band swept 5.2 kHz down to 2.6 kHz) */
+  mat_metal: () => { const f = jit(2350, .05); [[1, .03, .16], [2.76, .014, .1], [5.4, .006, .06]].forEach(([m, v, d]) => tone(f * m, d, { v, a: .002 })); tone(jit(3300, .04), .08, { v: .011, at: .035, a: .002 }); noise(.07, { f: 5200, to: 2600, q: 2.5, v: .026, at: .01 }); },
+  /* leather: a soft thump (low-passed noise at 320 Hz with a 95 Hz sine dropping to 70) and a small creak (a sawtooth
+     bending 150 to 190 Hz through a narrow 900 Hz band) */
+  mat_leather: () => { noise(.09, { type: 'lowpass', f: 320, v: .15 }); tone(jit(95), .1, { v: .06, to: 70 }); tone(jit(150), .15, { type: 'sawtooth', v: .03, at: .03, to: 190, filt: ['bandpass', 900, 3] }); },
+  /* cloth: a soft rustle, coarse-grained paper noise (9 ms grains) band-passed low and sweeping 1.5 kHz down to 800 Hz,
+     with a fainter brush above it */
+  mat_cloth: () => { paper(.17, { f: 1500, to: 800, q: .6, v: .045, grain: 9 }); paper(.12, { f: 2600, to: 1800, q: .8, v: .016, at: .05, grain: 6 }); },
+  /* wood: a dull knock, a triangle at 210 Hz falling to 150, a 520 Hz body tone and a narrow 900 Hz click */
+  mat_wood: () => { tone(jit(210), .09, { type: 'triangle', v: .1, to: 150 }); tone(jit(520), .05, { v: .03, to: 430 }); noise(.035, { f: 900, q: 4, v: .07 }); },
+  /* paper and books: a page slipping, fine-grained paper noise sliding 3.6 kHz down to 2.4 kHz with a soft low swish */
+  mat_paper: () => { paper(.13, { f: 3600, to: 2400, q: .7, v: .04, grain: 3 }); paper(.08, { f: 1300, q: .9, v: .016, at: .03 }); },
+  /* gems and jewellery: a tiny glassy tick-tick, a 4.4 kHz sine with its 2.76 overtone, then a quieter answer a minor
+     third up 50 ms later */
+  mat_gem: () => { const f = jit(4400, .04); tone(f, .07, { v: .02, a: .001 }); tone(f * 2.76, .04, { v: .007, a: .001 }); tone(f * 1.19, .06, { v: .011, at: .05, a: .001 }); },
+  /* food: a soft pat, low-passed noise at 520 Hz and a 130 Hz sine settling to 95 */
+  mat_food: () => { noise(.05, { type: 'lowpass', f: 520, v: .11 }); tone(jit(130), .06, { v: .05, to: 95 }); },
+  /* potions: a glass touch (a 2.9 kHz sine with a 2.32 overtone, a little reverb) and a slosh (two noise bands sweeping
+     520 to 980 Hz and back down 900 to 450 Hz) with one small bubble rising 640 to 1150 Hz */
+  mat_potion: () => { const f = jit(2900, .03); tone(f, .14, { v: .022, a: .002, wet: true }); tone(f * 2.32, .08, { v: .007, a: .002 }); noise(.12, { f: 520, to: 980, q: 3, v: .05, at: .05 }); noise(.12, { f: 900, to: 450, q: 3, v: .04, at: .15 }); tone(jit(640), .04, { v: .012, at: .1, to: 1150 }); },
   discover: () => { tone(1047,.12,{type:'triangle',v:.075});tone(1568,.24,{type:'triangle',v:.065,at:.08});tone(2093,.38,{v:.045,at:.17}); },
 };
 /* Sounds that fire once per finished task are thinned out and varied so they never become a metronome */
 const TASK = new Set(['fish', 'wood', 'mine', 'thieve', 'sizzle', 'anvil', 'stitch', 'cast', 'bow', 'hit', 'miss']);
 /* soft interface sounds wait longer before they repeat, so rapid clicks never machine-gun (and a purchase that two
    systems both announce still sounds once) */
-const GAP = { page: 350, quill: 400, buy: 250 };
+const GAP = { page: 350, quill: 400, buy: 250, mat_metal: 90, mat_leather: 90, mat_cloth: 90, mat_wood: 90, mat_paper: 90, mat_gem: 90, mat_food: 90, mat_potion: 90 };
 const played = {};
 const quiet = () => !!(DQ.sim.on || DQ.forecasting);
 DQ.sfx = name => {
@@ -512,7 +541,172 @@ DQ.roomRefresh = () => {
 };
 /* read-only: each room layer's wanted level, its gain right now, and whether it is fading out (tests, long sessions) */
 DQ.roomState = () => { const out = {}; for (const [k, L] of Object.entries(room)) out[k] = { target: L.target, gain: L.g.gain.value, dying: !!L.dying, timers: L.timers.size, tier: L.tier || null, events: L.events || 0, errors: L.errors || 0 }; return { on: roomOn(), inputs: DQ.S ? roomInputs() : null, layers: out }; };
-const ambWatch = () => { if (!ambLoop) ambLoop = setInterval(() => { if (ctx && !document.hidden) DQ.ambienceRefresh(); }, 2000); };
+/* ---------- Pop-ups hush the world (owner, 27 Nov 2026, subtle polish) ----------
+   While a pop-up is open (DQ.modal: pop-ups, the story conversation, a full-screen world event) the music and the
+   ambience (village details, room layers, town bells) glide down by D.HUSH.db through a gentle low-pass (12 dB per
+   octave, Q .5 so nothing rings) over `down` seconds, and come back over `up` when the last pop-up closes. Effects stay
+   clear. The hush is one state, read from the page (is any `.modal` open?), so a pop-up that replaces another, or two
+   at once, never deepens it; Mute and the volumes sit on other nodes and are untouched. */
+D.HUSH = { db: -9, cutoff: 1800, down: .25, up: .6 };
+let hushOn = false;
+function hushApply(instant) {
+  if (!ctx || !hushG) return; const H = D.HUSH, t = ctx.currentTime, dur = instant ? 0 : hushOn ? H.down : H.up;
+  const want = [[hushG.gain, hushOn ? Math.pow(10, H.db / 20) : 1], [hushF.frequency, hushOn ? H.cutoff : HUSH_OPEN]];
+  for (const [p, v] of want) { p.cancelScheduledValues(t); if (!dur) { p.setValueAtTime(v, t); continue; } p.setValueAtTime(Math.max(1e-4, p.value), t); p.exponentialRampToValueAtTime(v, t + dur); }
+}
+const hushCheck = () => { const on = !!(typeof document !== 'undefined' && document.querySelector && document.querySelector('body > .modal')); if (on === hushOn) return; hushOn = on; hushApply(false); };
+if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined' && document.body) new MutationObserver(hushCheck).observe(document.body, { childList: true });
+/* read-only: whether the world is hushed, and the hush's gain and cutoff right now */
+DQ.hushState = () => ({ on: hushOn, gain: hushG ? hushG.gain.value : null, cutoff: hushF ? hushF.frequency.value : null, master: master ? master.gain.value : null, db: D.HUSH.db });
+
+/* ---------- Item materials ----------
+   What an item is made of, from its own data: type, slot, weapon style, the wood flag, its icon and the words in its
+   id and name (alloys, woods, hides). One of metal, leather, cloth, wood, paper, gem, food, potion. */
+const MAT_WORDS = {
+  potion: /\b(draught|potion|tonic|elixir|tea|brew|milk|flask|vial|ale|mead)\b/,
+  food: /\b(bait|lure|ration|feast|supper|bread|stonebread|cheese|honey|truffle|egg|pie|stew)\b/,
+  paper: /\b(map|book|tome|scroll|chart|letter|notes?|journal|page|recipe|manual|deed|ledger)\b/,
+  cloth: /\b(robe|hood|cloth|wool|woollen|cloak|cape|mantle|silk|linen|flax|thread|weave|thornweave|woven|starwoven|sash|tunic|scarf|knot|cord|rope|net|feather|feed|sack|hat)\b/,
+  leather: /\b(leather|hide|cowhide|pelt|coif|chaps|vest|scale|bogscale|drakehide|frostpelt|coat|jerkin|boots|gloves?|pouch|string)\b/,
+  gem: /\b(gems?|sapphire|emerald|ruby|diamond|quartz|amber|jet|jade|moonstone|bloodstone|obsidian|skyglass|nullite|crystal|pearl|opal|glass|lens|shard|star|core|rune|charm|pendant)\b/,
+  wood: /\b(logs?|planks?|bow|longbow|shortbow|recurve|greatbow|staff|wand|wood|wooden|trap|boat|skiff|cog|sloop|caravel|galleon|bone|tusk|oak|willow|maple|yew|birch|elder|hazel|ash|palm|cedar|pine|mangrove|cinderbark|windpine|wraithbark|gloomwood|wicker|chest|arrows?)\b/,
+  metal: /\b(bronze|iron|steel|mithril|adamant|runite|astral|gold|silver|copper|tin|metal|bars?|ores?|bell|lantern|cage|crown|helm|greathelm|blade|sword|sabre|saber|dagger|knife|hammer|maul|axe|pick|pickaxe|hoe|rod|torc|censer|chain)\b/,
+};
+DQ.itemMaterial = id => {
+  const it = D.ITEMS && D.ITEMS[id]; if (!it) return null;
+  const n = (String(it.name || '') + ' ' + String(id).replace(/[_.-]/g, ' ')).toLowerCase().replace(/[’']s\b/g, ''), has = k => MAT_WORDS[k].test(n), ic = it.ic, type = it.type;
+  if (ic === 'bottle' || it.drink || has('potion')) return 'potion';
+  if (['food', 'raw', 'crop', 'seed'].includes(type) || (type === 'produce' && !has('cloth')) || it.heal || it.dish || ['bread', 'food', 'fish', 'egg'].includes(ic) || has('food')) return 'food';
+  if (type === 'potion') return 'potion';
+  if (['scroll', 'book', 'map'].includes(ic) || has('paper')) return 'paper';
+  const slot = it.slot;
+  if (slot === 'ring' || slot === 'amulet') return /\b(torc|censer|chain|bell)\b/.test(n) ? 'metal' : /\b(knot|feather|cord|woven)\b/.test(n) ? 'cloth' : 'gem';
+  if (slot === 'ammo') return 'wood';
+  if (slot === 'weapon') return it.style === 'ranged' || it.style === 'magic' || ['bow', 'staff'].includes(it.wtype) || ['bow', 'staff'].includes(ic) ? (/\b(crystal|glass)\b/.test(n) ? 'gem' : 'wood') : 'metal';
+  if (slot === 'shield') return it.wood || has('wood') ? 'wood' : has('leather') ? 'leather' : 'metal';
+  if (slot) return /^robe_/.test(id) || has('cloth') ? 'cloth' : has('leather') ? 'leather' : 'metal';
+  if (type === 'tool') return has('leather') ? 'leather' : 'metal';
+  if (has('cloth')) return 'cloth';
+  if (has('leather') || ic === 'hide') return 'leather';
+  if (type === 'gem' || ic === 'gem' || ic === 'rune' || has('gem')) return 'gem';
+  if (type === 'boat' || ['log', 'plank', 'bone'].includes(ic) || has('wood')) return 'wood';
+  if (type === 'tool' || ['ore', 'bar', 'bell'].includes(ic) || has('metal')) return 'metal';
+  return 'cloth';
+};
+/* one sound per gesture: moves made together (Bank everything, a saved preparation swapping five slots) are gathered
+   for 35 ms and sound once, as the material most of them share */
+let matQ = [], matT = 0;
+const matStats = { queued: 0, flushed: 0, last: null };
+function matFlush() { matT = 0; const q = matQ; matQ = []; if (!q.length) return; const n = {}; for (const m of q) n[m] = (n[m] || 0) + 1;
+  const best = Object.keys(n).sort((a, b) => n[b] - n[a] || q.indexOf(a) - q.indexOf(b))[0]; matStats.flushed++; matStats.last = best; DQ.sfx('mat_' + best); }
+DQ.itemSound = id => { if (quiet()) return null; const m = DQ.itemMaterial(id); if (!m) return null; matQ.push(m); matStats.queued++; if (!matT) matT = setTimeout(matFlush, 35); return m; };
+DQ.itemSoundStats = () => Object.assign({ pending: matQ.length }, matStats);
+/* the moves themselves: equip, unequip, pack to bank and back (js/state.js), whoever calls them */
+{ const eq0 = DQ.equipItem, un0 = DQ.unequip, dep0 = DQ.deposit, wd0 = DQ.withdraw;
+  if (eq0) DQ.equipItem = (id, ...r) => { const res = eq0(id, ...r); if (res && res.ok) DQ.itemSound(id); return res; };
+  if (un0) DQ.unequip = (slot, ...r) => { const st = DQ.S, id = st && (slot === 'ammo' ? st.ammo && st.ammo.id : st.equip && st.equip[slot]); const res = un0(slot, ...r); if (res && id) DQ.itemSound(id); return res; };
+  if (dep0) DQ.deposit = (id, n, ...r) => { const st = DQ.S, b = (st && st.bank[id]) || 0, res = dep0(id, n, ...r); if (((st && st.bank[id]) || 0) > b) DQ.itemSound(id); return res; };
+  if (wd0) DQ.withdraw = (id, n, ...r) => { const res = wd0(id, n, ...r); if (res > 0) DQ.itemSound(id); return res; }; }
+
+/* ---------- Town bells on the hour (owner, 27 Nov 2026) ----------
+   By the player's own clock (DQ.townHour, js/town_life.js), each town marks the hour in its own way, on the Home and
+   Town pages (where the room sound is), on the ambience bus through a soft low-pass and a little reverb. They follow
+   Master and Ambience volume, Mute, the Nature ambience switch and the Room sounds filter. "Always daytime" has no
+   clock, so no bells; nothing rings in a simulation or forecast, while the tab is hidden or before the first click.
+   Each hour rings once at most: only in its first two minutes (a tab that comes back at 3:20 stays quiet) and never a
+   second time for the same hour. Peaks are about .03 to .06 on the ambience bus: the restored village's own bell
+   (AMB_EVENT.bell) peaks near .064 and the hearth bed sits at .045, so a bell is no louder than the town already is.
+   count: 'hour' strikes the hour (1 to 12, 12 at midnight and noon); a number is a fixed pattern. lp: the low-pass
+   cutoff in Hz (distance); wet: the reverb send. */
+D.TOWN_BELLS = {
+  window: 2 / 60, hubs: ['home', 'town'],
+  towns: {
+    willowbrook: { kind: 'church', count: 'hour', lp: 3600, wet: .35 },
+    mossbarrow: { kind: 'farm', count: 6, lp: 5000, wet: .22 },
+    saltmere: { kind: 'harbour', count: 'hour', horn: true, lp: 4200, wet: .35 },
+    ironpeak: { kind: 'gong', count: 1, lp: 2400, wet: .45 },
+    gloomfen: { kind: 'knock', count: 3, lp: 2200, wet: .45 },
+    emberfall: { kind: 'clang', count: 1, lp: 5500, wet: .3 },
+    skyreach: { kind: 'chimes', count: 5, lp: 8000, wet: .5 },
+    hollow: { kind: 'cracked', count: 2, lp: 1100, wet: .6 },
+  },
+};
+DQ.bellPlan = (town, hour) => { const T = D.TOWN_BELLS.towns, id = T[town] ? town : 'willowbrook', B = T[id], h = ((Math.floor(hour) % 24) + 24) % 24;
+  return { town: id, kind: B.kind, hour: h, strokes: Math.min(12, B.count === 'hour' ? (h % 12) || 12 : B.count), horn: !!B.horn, lp: B.lp, wet: B.wet }; };
+let aVerb = null;
+const ambVerb = () => { if (!aVerb) { aVerb = ctx.createConvolver(); aVerb.buffer = verbBuf; aVerb.connect(ambG); } return aVerb; };
+const cents = () => (Math.random() * 2 - 1) * 6; /* each partial a few cents off true, as a cast bell is */
+/* one decaying partial: up in a, then an exponential fall over d */
+const partial = (dest, t, f, v, a, d, det = 0, type = 'sine') => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); o.detune.value = det;
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + a); g.gain.exponentialRampToValueAtTime(.0002, t + a + d); o.connect(g); g.connect(dest); o.start(t); o.stop(t + a + d + .05); return o; };
+/* a short filtered noise burst (a clapper, a mallet, a knuckle on wood) */
+const burst = (dest, t, type, f, len, v, q = 1) => { const s = ctx.createBufferSource(); s.buffer = noiseOf('white'); const b = bandOf(type, f, q), g = ctx.createGain(); blip(g, t, .001, len, v); s.connect(b); b.connect(g); g.connect(dest); s.start(t, Math.random() * 2.5, len + .05); };
+/* [ratio, gain, decay seconds] per partial */
+const CHURCH = [[.5, .55, 5.5], [.5 * 1.0035, .25, 5.5], [1, .5, 4], [1.19, .42, 3.2], [1.5, .2, 2.2], [2, .6, 2.6], [2.5, .16, 1.3], [2.67, .12, 1.1], [4, .08, .8]];
+const BELL = {
+  /* Willowbrook: a village church bell counting the hour, a stroke every 2.4 s. E4 strike (329.6 Hz) with the minor-
+     third bell spectrum (hum .5, prime, tierce 1.19, quint 1.5, nominal 2, 2.5, 2.67, 4), a doubled hum 0.35% apart
+     that beats slowly, every partial a few cents off true, decays from 5.5 s (hum) to 0.8 s, and a clapper tap */
+  church: (o, t, p) => { const f = jit(329.6, .01); for (let i = 0; i < p.strokes; i++) { const at = t + i * 2.4, V = .018 * (.9 + Math.random() * .1);
+    CHURCH.forEach(([m, g, d]) => partial(o, at, f * m, V * g, .004, d, cents())); burst(o, at, 'bandpass', 2400, .025, V * 1.2, 1.5); } },
+  /* Mossbarrow: a small yard bell shaken six times (every 0.2 s, alternating strong and light), 880 Hz with partials
+     2.4, 3.9 and 5.3, about a second of ring each */
+  farm: (o, t, p) => { const f = jit(880, .02); for (let i = 0; i < p.strokes; i++) { const at = t + i * .2, V = .025 * (i % 2 ? .75 : 1);
+    [[1, .6, 1.1], [2.4, .25, .6], [3.9, .14, .35], [5.3, .08, .2]].forEach(([m, g, d]) => partial(o, at, f * m, V * g, .003, d, cents())); burst(o, at, 'highpass', 3500, .01, V * .8); } },
+  /* Saltmere: one low foghorn blast (two sawtooths at 87 Hz, 7 cents apart, and a square an octave below, sliding up
+     from 6% flat as the horn takes air, through a low-pass opening 240 to 420 Hz; 0.5 s swell, 2.3 s hold, 1.2 s fade)
+     then the harbour bell (1240 Hz, partials 2, 2.76, 4.07) striking the hour in ship's-bell pairs */
+  harbour: (o, t, p) => { let t0 = t;
+    if (p.horn) { const lp = bandOf('lowpass', 240, .9), g = gainOf(0); lp.frequency.setValueAtTime(240, t); lp.frequency.linearRampToValueAtTime(420, t + .7); lp.frequency.setTargetAtTime(340, t + 2.2, .5); lp.connect(g); g.connect(o);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.022, t + .5); g.gain.setValueAtTime(.022, t + 2.3); g.gain.linearRampToValueAtTime(0, t + 3.5);
+      [[87, 0, 'sawtooth', 1], [87, 7, 'sawtooth', 1], [43.5, 0, 'square', .35]].forEach(([f, c, type, k]) => { const x = ctx.createOscillator(), xg = gainOf(k); x.type = type; x.frequency.setValueAtTime(f * .94, t); x.frequency.exponentialRampToValueAtTime(f, t + .45); x.detune.value = c; x.connect(xg); xg.connect(lp); x.start(t); x.stop(t + 3.7); });
+      t0 = t + 3.9; }
+    const f = jit(1240, .01); for (let i = 0; i < p.strokes; i++) { const at = t0 + Math.floor(i / 2) * 1.15 + (i % 2) * .32, V = .02;
+      [[1, .6, 1.6], [2, .3, 1], [2.76, .2, .7], [4.07, .1, .4]].forEach(([m, g, d]) => partial(o, at, f * m, V * g, .003, d, cents())); burst(o, at, 'highpass', 4000, .012, V); } },
+  /* Ironpeak: one deep mine gong, 73.4 Hz with partials 1.52, 2.03, 2.71, 3.39, 4.11 and 5.4 that bloom in after the
+     strike (attacks 0.25 to 1.1 s, higher ones later) and hum for up to 7 s, the fundamental sagging 1.5%; a soft
+     mallet thump (noise low-passed at 180 Hz) */
+  gong: (o, t) => { const f = jit(73.4, .01), V = .03;
+    [[1, .6, 7, .005], [1.52, .35, 5.5, .25], [2.03, .3, 4.5, .4], [2.71, .22, 3.5, .6], [3.39, .15, 2.8, .8], [4.11, .1, 2.2, 1], [5.4, .06, 1.6, 1.1]].forEach(([m, g, d, a], i) => {
+      const x = partial(o, t, f * m, V * g, a, d, cents()); if (!i) x.frequency.exponentialRampToValueAtTime(f * .985, t + 2.5); }); burst(o, t, 'lowpass', 180, .09, .05); },
+  /* Gloomfen: a hollow wooden knock, knock ... knock (at 0, 0.5 and 1.45 s): a 330 Hz block tone (0.16 s), a 205 Hz
+     cavity under it (0.26 s, the hollow), a faint 760 Hz edge and a narrow 1.4 kHz knuckle click */
+  knock: (o, t, p) => { [0, .5, 1.45].slice(0, p.strokes).forEach((dt, i) => { const at = t + dt, V = i === 2 ? .05 : .042;
+    partial(o, at, jit(330, .02), V, .002, .16); partial(o, at, jit(205, .02), V * .6, .003, .26); partial(o, at, jit(760, .03), V * .25, .001, .05); burst(o, at, 'bandpass', 1400, .02, V * .9, 6); }); },
+  /* Emberfall: one bronze clang, 196 Hz with bright inharmonic partials (2.32, 3.1, 4.25, 5.6, 6.63, 8.9; 3 s down to
+     0.5 s) and a hard strike (noise high-passed at 3 kHz) */
+  clang: (o, t) => { const f = jit(196, .01), V = .028;
+    [[1, .4, 3], [2.32, .35, 2.4], [3.1, .25, 1.8], [4.25, .3, 1.4], [5.6, .15, 1], [6.63, .12, .8], [8.9, .08, .5]].forEach(([m, g, d]) => partial(o, t, f * m, V * g, .002, d, cents())); burst(o, t, 'highpass', 3000, .03, .05); },
+  /* Skyreach: high monastery chimes, a five-note run down F6 E6 C6 A5 F5 (Skyreach's Lydian key), one every 0.34 s,
+     each a small bar chime (partials 2.76, 5.4) ringing about 3 s */
+  chimes: (o, t, p) => { [89, 88, 84, 81, 77].slice(0, p.strokes).forEach((m, i) => { const at = t + i * .34, f = mtof(m) * (1 + (Math.random() - .5) * .004), V = .03;
+    [[1, .6, 3.2], [2.76, .2, 1.4], [5.4, .08, .7]].forEach(([k, g, d]) => partial(o, at, f * k, V * g, .002, d, cents())); }); },
+  /* the Hollow: a distant cracked bell, two slow strokes (the second fainter, 3.4 s on). D3 (146.8 Hz): a hum and prime
+     that ring clean, and mistuned upper partials (1.23, 1.46, 2.07, 2.6) cut short and buzzing through a 31 Hz flutter,
+     where the crack rattles; a breath of noise at 900 Hz; heard far off (low-pass 1.1 kHz, a lot of reverb) */
+  cracked: (o, t, p) => { const f = jit(146.8, .01); for (let i = 0; i < p.strokes; i++) { const at = t + i * 3.4, V = .028 * (i ? .6 : 1);
+    [[.5 * .97, .5, 4.5], [1, .45, 3.2]].forEach(([m, g, d]) => partial(o, at, f * m, V * g, .004, d, cents()));
+    const buzz = gainOf(.5), lfo = ctx.createOscillator(), lg = gainOf(.5); lfo.type = 'square'; lfo.frequency.value = 31; lfo.connect(lg); lg.connect(buzz.gain); buzz.connect(o); lfo.start(at); lfo.stop(at + 2);
+    [[1.23, .4, 1.1], [1.46, .2, .9], [2.07, .5, 1.2], [2.6, .15, .6]].forEach(([m, g, d]) => partial(buzz, at, f * m, V * g, .004, d, cents() * 4)); burst(o, at, 'bandpass', 900, .35, V * .8, 3); } },
+};
+let bellLast = null; const bellRung = [], bellLog = [];
+/* the clock the bells follow: none under "Always daytime" (or a test browser left at daytime) */
+const bellClock = () => { const s = DQ.S && DQ.S.settings; if (!s || s.townTime === 'day' || !DQ.townHour) return null;
+  if (DQ.townTimeOverride == null && s.townTime == null && typeof navigator !== 'undefined' && navigator.webdriver) return null; return DQ.townHour(); };
+const bellPage = () => { const UI = DQ.ui || {}; return !!(UI.view && UI.hubOf && D.TOWN_BELLS.hubs.includes(UI.hubOf(UI.view).id)); };
+const bellOk = () => !!(ctx && ctx.state === 'running' && !(typeof document !== 'undefined' && document.hidden) && !quiet() && roomOn() && bellPage());
+function bellRing(plan) { const lp = bandOf('lowpass', plan.lp, .5), wet = gainOf(plan.wet); lp.connect(ambG); lp.connect(wet); wet.connect(ambVerb());
+  try { BELL[plan.kind](lp, ctx.currentTime + .05, plan); } catch (e) { plan.error = String(e); } played['bell:' + plan.town] = (played['bell:' + plan.town] || 0) + 1; }
+/* checked every two seconds with the ambience (and by tests): rings when the clock has just crossed an hour */
+DQ.bellTick = () => { let h = null; try { h = bellClock(); } catch (e) {} if (h == null || !isFinite(h)) { bellLast = null; return null; }
+  const hour = ((Math.floor(h) % 24) + 24) % 24, prev = bellLast; bellLast = hour; if (prev === null || prev === hour || h - Math.floor(h) > D.TOWN_BELLS.window) return null;
+  const key = (DQ.townTimeOverride != null ? 'set' : new Date().toDateString()) + ':' + hour; if (bellRung.includes(key) || !bellOk()) return null;
+  bellRung.push(key); if (bellRung.length > 48) bellRung.shift();
+  const plan = DQ.bellPlan((DQ.S && DQ.S.town) || 'willowbrook', hour); bellRing(plan); bellLog.push(plan); if (bellLog.length > 8) bellLog.shift(); return plan; };
+/* a level meter on the ambience bus, made on first use (tests check a bell is heard and never loud) */
+let ambMeter = null; DQ.ambienceLevel = () => { if (!ctx) return null; if (!ambMeter) { ambMeter = ctx.createAnalyser(); ambMeter.fftSize = 2048; ambG.connect(ambMeter); } const d = new Float32Array(ambMeter.fftSize); ambMeter.getFloatTimeDomainData(d); let pk = 0; for (const x of d) pk = Math.max(pk, Math.abs(x)); return { peak: pk, bus: ambG.gain.value }; };
+DQ.bellState = () => ({ last: bellLast, rung: bellRung.slice(), log: bellLog.slice(), ok: bellOk() });
+const ambWatch = () => { if (!ambLoop) ambLoop = setInterval(() => { if (ctx && !document.hidden) DQ.ambienceRefresh(); DQ.bellTick(); }, 2000); };
 
 DQ.musicMode = id => { modeId = id === 'title' ? 'title' : 'game'; if (ctx) musicTick(); };
 DQ.musicStart = () => { init(); applyVolumes(); if (S().music) musicStep(); DQ.ambienceRefresh(); ambWatch(); };

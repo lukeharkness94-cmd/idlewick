@@ -115,8 +115,16 @@ dated line to the history file.
   under the Home pages, a market murmur that rises with the restoration tier, crickets and an owl at night, birds by
   day, rain and snow wind with the town weather, on the ambience bus and the Room sounds filter; layers re-level and
   crossfade, never stack. Soft interface sounds: a paper turn for pages and tabs, a quill for Accept quest, one coin
-  chime per purchase, debounced and in the Interface filter. Nothing plays in a simulation or forecast
-  (`tests/room-sound.cjs`).
+  chime per purchase, debounced and in the Interface filter. Town bells (owner, 27 Nov; `D.TOWN_BELLS`, `DQ.bellTick`):
+  on the hour by the player's clock, on Home and Town pages, each town its own (Willowbrook's church bell counts the
+  hour, Saltmere a foghorn and harbour bell, Ironpeak a gong, Gloomfen a wooden knock, Emberfall a bronze clang, Skyreach
+  chimes, the Hollow a cracked bell, Mossbarrow a farm bell), once per hour, only in its first two minutes, none under
+  Always daytime; on the ambience bus and the Room filter. Pop-ups (`DQ.modal`, so the story screen and world events
+  too) hush music and ambience by `D.HUSH` (-9 dB and a low-pass, 250 ms down, 600 ms back; one state, never deeper
+  when pop-ups replace or stack). Equipping, unequipping and bank moves sound by the item's material
+  (`DQ.itemMaterial`: metal, leather, cloth, wood, paper, gem, food, potion), one sound per gesture, Interface filter.
+  Nothing plays in a simulation or forecast, while hidden or before the first click (`tests/room-sound.cjs`,
+  `tests/polish-sound.cjs`).
 
 ## 3. Screen layout
 

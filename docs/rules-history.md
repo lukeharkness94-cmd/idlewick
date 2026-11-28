@@ -297,3 +297,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 27 Nov 2026 (owner): "work on some of the realism. The sizes of things in comparison to each other, the animations,
   where the character holds things when using them in skills." Replaces the front-facing working hero with a floating
   tool icon at 12% of the scene: the side-on work rig, real tool sizes, the tool meeting the target, sounds per frame.
+- 27 Nov 2026 (owner, subtle polish: "Let's do all 15"): sound items 11 to 13. Town bells on the hour by the player's
+  clock, pop-ups hush music and ambience, and gear and item moves sound by material. Replaces the single equip thump
+  for equip/unequip and the tab blip for bank moves.
