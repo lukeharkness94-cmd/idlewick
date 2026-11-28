@@ -217,7 +217,9 @@ dated line to the history file.
   takes `DQ.TRACK_MS` (4 s) with no attacks and the VS bar shows tracking progress. Below: **This fight** (the foe card:
   level, health, speed, max hit, "You deal <type>", weaknesses ticked, drops found; or challenges and the next boss out
   of a fight) beside **Food** ("+N HP each", auto-eat). Level tags are flat labels. Phones stack Where to fight, Your
-  fighter, then This fight and Food. Same-page refreshes keep the arena and training DOM (`UI.updateEncounter`) and
+  fighter, then This fight and Food. The stage shows every fighter at one whole-number scale of its drawn size (hero 24 × 32, creatures 32 × 32,
+  bosses 64 × 64 so they tower; 5× at 1920, 4× laptops, 3× short windows and phones, phone bosses 2×) on a hard-edged
+  ground shadow (css/hearthside.css, end). Same-page refreshes keep the arena and training DOM (`UI.updateEncounter`) and
   never shake the page; hit numbers wait for the visible impact (`UI.afterImpact`).
 - **Home**: the live journey, selected goal, real giver and objective progress (`js/hearthside.js`), one clear main
   action, the hearth (`js/hearth.js`, owner 27 Nov: the hero's room by the fire at a whole-number scale; today's goal

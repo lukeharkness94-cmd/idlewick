@@ -341,3 +341,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 28 Nov 2026 (pixel rebuild, "focus on this having a darker theme than now"): work districts, skill backdrops and
   combat area scenes are deepened by one shared dusk grade; the bright daytime districts were the last thing at the old
   brightness.
+- 28 Nov 2026 (owner: "It doesn't look like the hero or the creatures, monsters and bosses have gone through our new
+  pixel redesign"): the fight stage shows every fighter at one pixel scale with ground shadows; it had forced every
+  sprite to 128 px, so bosses stood no taller than a rat.

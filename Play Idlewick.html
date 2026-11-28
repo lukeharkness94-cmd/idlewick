@@ -5970,6 +5970,17 @@ html[data-theme="dark"] body{background-color:var(--ground)}
   html.short #view .combat-d .encounter-arena.cx-stage{padding-top:12px!important}
   #view .combat-d .encounter-arena .avatar:has(img.px-big)::before{width:calc(40px * var(--k));height:calc(6px * var(--k))}
 }
+/* phones: the same one-scale stage at 3x (bosses at 2x so two fighters fit 390 px side by side, still a head taller) */
+@media (max-width:860px){
+  #view .combat-d .encounter-arena{--k:3}
+  #view .combat-d .encounter-arena .avatar{position:relative;height:auto!important;min-height:calc(32px * var(--k));display:flex!important;align-items:flex-end!important;justify-content:center!important;overflow:visible!important}
+  #view .combat-d .encounter-arena .avatar .battle-rig,#view .combat-d .encounter-arena .avatar .rig-torso,#view .combat-d .encounter-arena .avatar .foe-torso,#view .combat-d .encounter-arena .avatar .foe-face{width:auto!important;height:auto!important;display:block;line-height:0;position:relative;z-index:1}
+  #view .combat-d .encounter-arena .avatar .hero-rig img{width:calc(24px * var(--k))!important;height:calc(32px * var(--k))!important;max-width:none!important}
+  #view .combat-d .encounter-arena .avatar .foe-rig img{width:calc(32px * var(--k))!important;height:calc(32px * var(--k))!important;max-width:none!important}
+  #view .combat-d .encounter-arena .avatar .foe-rig img.px-big{width:128px!important;height:128px!important}
+  #view .combat-d .encounter-arena .avatar::before{content:'';position:absolute;left:50%;bottom:-3px;width:54px;height:12px;translate:-50% 0;background:radial-gradient(closest-side,rgba(6,5,8,.62) 97%,transparent 100%);z-index:0;pointer-events:none}
+  #view .combat-d .encounter-arena .avatar:has(img.px-big)::before{width:80px;height:12px}
+}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
