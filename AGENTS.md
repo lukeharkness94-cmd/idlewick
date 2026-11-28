@@ -54,7 +54,7 @@ dated line to the history file.
 - **Original pixel art drawn in code, nothing else.** `js/pixelart.js` (system, palette, hero), `js/pixel_items.js`,
   `js/pixel_creatures.js`, `js/pixel_world.js` (trees, rocks, furniture, icons), `js/town_scene.js` (top-down towns,
   restoration sites, townsfolk), `js/pixel_feel.js` (empty-page pictures, the quill pointer), `js/pixel_bosses.js` (the
-  64 × 64 bosses), `js/pixel_runtime.js` (routes every art hook; loaded last). Chunky and outlined (owner, 28 Nov;
+  64 × 64 bosses), `js/pixel_minibosses.js` (the mini-bosses' 64 × 64 drawings), `js/pixel_runtime.js` (routes every art hook; loaded last). Chunky and outlined (owner, 28 Nov;
   docs/pixel-art-style.md): top-left light, five-step ramps with cool shadows and warm lights, sphere-lit round forms,
   each silhouette outlined in its material's darkest colour; the hero and humanoid creatures are chibis with big heads
   and two-pixel eyes; bosses have 64 × 64 drawings for the combat stage. No image files, AI-generated, traced or
