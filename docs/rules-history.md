@@ -347,3 +347,5 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 28 Nov 2026 (owner: the mini-bosses don't look like the new pixel redesign): the twelve regional mini-bosses get their
   own hand-designed 64 x 64 drawings (js/pixel_minibosses.js) at Old Tusk's finish; before, the stage showed their 32 x 32
   sprite redrawn at twice the detail. Tower bosses keep the 2x redraw.
+- 28 Nov 2026 (owner: "left-to-right should be the unlocks as you unlock"): field guide pages list entries in unlock
+  order; the four entries nearest their next entry no longer jump to the front.

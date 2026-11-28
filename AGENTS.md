@@ -305,7 +305,8 @@ dated line to the history file.
   burnt food. `NO_PERKS=1` boss sims must match the default.
 - **Field guide** (`js/guide_materials.js`, `js/mastery.js`): creatures have six entries; every fish, tree, ore, pocket,
   recipe, crop, animal, brew, voyage and training has five (25/100/300/750/1,500: 2% faster each, 5% and 10% double at 3
-  and 5), counted in `S.mast`. A thin brass bar on the thing itself; under the action button a labelled line ("Field
+  and 5), counted in `S.mast`. Every guide page lists its entries left to right in unlock order (owner, 28 Nov;
+  `tests/guide-order.cjs`); one near its next entry is marked where it stands, never moved to the front. A thin brass bar on the thing itself; under the action button a labelled line ("Field
   guide 1/5", "Catch 54 more · 4% faster"). Any new repeatable activity needs a topic and a truthful perk.
 - **Farming**: crops grow 4× longer than their base and give 6× XP (yields unchanged); farm plots say Plant <seed> /
   Growing · time / Harvest; farmhands earn 1/4 Guide progress per harvest or collection and no personal XP.

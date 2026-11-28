@@ -55,10 +55,12 @@ UI.V.bestiary = () => { if (UI.beastTab === 'pets') return page0();
   const sel = items.find(e => e.key === UI.guideSel[topic.id]) || items.find(e => e.quest) || near[0] || items.find(e => !e.locked) || items[0];
   const fill = t => { const it = t.items(); return [it.reduce((n, e) => n + e.filled, 0), it.reduce((n, e) => n + e.total, 0)]; };
   let group = ''; const index = T.map(t => { const [a, b] = fill(t), head = t.group !== group ? `<span class="gi-group">${group = t.group}</span>` : ''; return `${head}<button class="gi ${t.id === topic.id ? 'on' : ''}" data-do="guidetopic" data-a="${t.id}" aria-pressed="${t.id === topic.id}">${ico(t.ic)}<b>${esc(t.name)}</b><em class="mono">${a}/${b}</em><span class="bar"><i style="width:${b ? a / b * 100 : 0}%"></i></span></button>`; }).join('');
-  const [a, b] = fill(topic), rest = items.filter(e => !near.includes(e));
+  /* left to right in the order you unlock them (owner, 28 Nov 2026); the ones nearest their next entry keep their
+     "Near next entry" line where they stand instead of jumping to the front */
+  const [a, b] = fill(topic);
   return `<div class="guide-book"><nav class="panel guide-index" aria-label="Field guide topics"><span class="k">Field guide</span>${index}<button class="btn sm gi-eggs" data-do="go" data-a="collection">Beast eggs</button></nav>
     <section class="panel guide-album"><div class="phead"><div><span class="k">${esc(topic.group)}</span><h2>${esc(topic.name)}</h2></div><small class="mono">${a} of ${b} entries</small></div>
-      <p class="guide-index-hint">${items.length} ${topic.group === 'Creatures' ? 'creatures' : 'entries'} · Select one to view its research</p><div class="guide-entry-list">${[...near,...rest].map(e => tile(e, e === sel, near.includes(e))).join('')}</div></section>
+      <p class="guide-index-hint">${items.length} ${topic.group === 'Creatures' ? 'creatures' : 'entries'} · Select one to view its research</p><div class="guide-entry-list">${items.map(e => tile(e, e === sel, near.includes(e))).join('')}</div></section>
     ${sel ? pageOf(sel) : ''}</div>`; };
 UI.DO.guidetopic = a => { UI.guideTopic = a; UI.beastTab = null; UI.render(false); };
 UI.DO.guidepick = a => { UI.guideSel[UI.guideTopic] = a; UI.render(false); };
