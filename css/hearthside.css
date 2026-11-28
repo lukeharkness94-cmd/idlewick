@@ -1258,3 +1258,5 @@ html[data-theme="dark"] body{background-color:var(--ground)}
  :root.type-hearthside:not(.type-classic) .farm-estate .estate-scenery{display:none!important}
  :root.type-hearthside:not(.type-classic) .pen .pen-collect{font-family:var(--f-body)!important;letter-spacing:0!important}
  :root.type-hearthside:not(.type-classic) .tech-ranks .btn{font-size:13px!important;letter-spacing:0!important;padding-inline:7px!important}}
+@media(max-width:860px){:root.type-hearthside:not(.type-classic) :is(.beast-tabs,.capture-bar) .btn{font-size:13px!important;letter-spacing:0!important;padding-inline:7px!important}}
+@media(max-width:860px){:root.type-hearthside:not(.type-classic) #view .beast-tabs{display:grid!important;grid-template-columns:1fr 1fr;gap:6px}:root.type-hearthside:not(.type-classic) #view .beast-tabs .btn{max-width:none}}
