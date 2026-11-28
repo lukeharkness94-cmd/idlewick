@@ -1455,3 +1455,5 @@ html.calm :is(.lw-coin,.lw-find-light,.gain-fly.glint::after,.gain-fly.glint::be
 html.calm .h-coin.lw-take{animation:none}
 @media (prefers-reduced-motion:reduce){:is(.lw-coin,.lw-find-light),.lw-moment.grand::after{display:none}.h-coin.lw-take{animation:none}}
 @media (max-width:860px){.lw-moment{gap:10px;padding:8px 16px 8px 8px}.lw-moment b{font-size:18px}.lw-moment.grand b{font-size:20px}}
+html.calm :is(.lw-moment,.lw-moment *){animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){:is(.lw-moment,.lw-moment *){animation:none!important;transition:none!important}}

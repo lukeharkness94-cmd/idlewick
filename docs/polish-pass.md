@@ -101,5 +101,5 @@ rules each stage adds; docs/rules-history.md has the decision.
   (the timings table in seconds and the decisions as pure functions), `js/weight.js` (drawing and wiring), the weighted
   sounds in `js/audio.js` (`weighted()`), `tests/polish-weight.cjs`. Milestone levels (10, 25, 50, 75, 90, 99) get a
   short title moment and a deeper chord, ordinary levels a chime pitched by tier; finds glint, light the scene and
-  (rarest) title by their `D.RARITY` band; sales drop more coins with a deeper clunk as the sum grows; crits and
+  (rarest, the first find of each item only) title by their `D.RARITY` band; sales drop more coins with a deeper clunk as the sum grows; crits and
   killing blows stagger further, sound heavier and hit-stop the stage sprites for under 80 ms.

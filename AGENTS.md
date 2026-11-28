@@ -155,7 +155,7 @@ dated line to the history file.
   picture and the sound both read (`DQ.WEIGHT.T`), and its decisions (tier, sound, queue or not) are pure functions with
   Node tests. Ordinary levels chime by tier; milestones (10/25/50/75/90/99, skills and Hero) get a click-through title
   and a deeper chord, one moment for the biggest of several, queued behind a pop-up or a fight on the stage; finds glint,
-  light the scene and (rarest) title by `D.RARITY` band; sales drop more coins with a deeper clunk; crits and killing
+  light the scene and (rarest, first find of that item only, from `S.seen.items`) title by `D.RARITY` band; sales drop more coins with a deeper clunk; crits and killing
   blows stagger further and hit-stop the stage sprites under 80 ms. Hooked after the game changes; a click or key
   finishes any effect; nothing in simulations, forecasts, time away or a hidden window; calm shows end states still;
   own randomness only, never Math.random or the save; new sounds peak below -1 dBFS (`DQ.sfxPeak`).

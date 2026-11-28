@@ -7,7 +7,8 @@
      lets every click through, and waits behind a pop-up or a fight on the combat stage. Several level-ups at once are one
      moment, for the biggest.
    - Finds (D.RARITY bands of their own chance): common keeps today's flight; uncommon and up glint on the flying item and
-     chime longer; rare and up light the work scene or the fight stage where they were found; the rarest get a title.
+     chime longer; rare and up light the work scene or the fight stage where they were found; the rarest get a title
+     the first time the hero ever finds that item (the save's acquisition history, S.seen.items).
    - Sales: one answer per gesture (Sell all junk included), coins dropping into the purse and a clunk that deepens with
      the sum, in a few bands; the purse keeps its number roll (js/finish.js).
    - Blows: crits and killing blows stagger the creature further (js/personality.js reads hitOf), land with a heavier
@@ -139,8 +140,14 @@ DQ.on('herolevel', (from, to) => levelUp('hero', null, to));
 /* ---------- finds ---------- */
 const recording = () => !(DQ.sim && DQ.sim.on) && !DQ.forecasting && DQ.act && DQ.act.kind !== 'fight';
 let got = null, huntOut = null, lastFind = null, gemTask = null;
+/* the first time the hero ever finds an item, read from the save's own acquisition history (S.seen.items, which
+   DQ.grant keeps) just before the grant records it; only a first epic find gets the title. Nothing new is saved. */
+const firstEver = id => { const seen = (S() && S().seen && S().seen.items) || {}; return !seen[id] && DQ.have(id) === 0; };
+let firsts = null;
 const grant0 = DQ.grant;
-DQ.grant = (id, n = 1) => { const r = grant0(id, n);
+DQ.grant = (id, n = 1) => {
+  if (!(DQ.sim && DQ.sim.on) && !DQ.forecasting && D.ITEMS[id] && n > 0 && firstEver(id)) { if (!firsts) { firsts = new Set(); queueMicrotask(() => { firsts = null; }); } firsts.add(id); }
+  const r = grant0(id, n);
   if (recording() && D.ITEMS[id] && n > 0) { if (!got) { got = new Map(); queueMicrotask(() => { got = null; }); } got.set(id, (got.get(id) || 0) + n); }
   return r; };
 DQ.on('huntcatch', (m, out) => { huntOut = out || null; queueMicrotask(() => { huntOut = null; }); });
@@ -176,7 +183,7 @@ const answerFind = (f, where) => {
     if (where === 'fight') { const ar = document.querySelector('.encounter-arena'), foe = document.getElementById('av-foe'); if (shown(ar) && shown(foe)) light(ar, foe, f.tier.col, 4); }
     else { const sc = sceneEl(); if (sc) light(sc, sc.querySelector('.scene-target') || sc, f.tier.col, 3); }
   }
-  if (f.tier.title) title({ type: 'find', id: f.id, band: f.tier.band, label: f.tier.label, col: f.tier.col, rank: 0, chord: null, times: W.titleTimes(0) });
+  if (f.tier.title && f.first) title({ type: 'find', id: f.id, band: f.tier.band, label: f.tier.label, col: f.tier.col, rank: 0, chord: null, times: W.titleTimes(0) });
 };
 DQ.on('workcycle', ev => {
   const g = got, out = huntOut; got = null; lastFind = null; if (!g || !g.size || !ev) return;
@@ -189,12 +196,12 @@ DQ.on('workcycle', ev => {
   }).filter(f => f.chance != null || f.unique);
   const best = W.biggestFind(list); if (!best || best.tier.band < 1) return;
   lastFind = { ev, id: best.id, tier: best.tier };
-  answerFind(best, 'work');
+  answerFind({ ...best, first: !!(firsts && firsts.has(best.id)) }, 'work');
 });
 DQ.on('loot', (m, drops) => {
   if (!drops || !drops.length) return;
   const best = W.biggestFind(drops.filter(d => !d.coins && d.rar).map(d => ({ id: d.id, chance: d.rar[3], unique: !!(D.ITEMS[d.id] || {}).unique })));
-  if (best && best.tier.band >= 1) answerFind(best, 'fight');
+  if (best && best.tier.band >= 1) answerFind({ ...best, first: !!(firsts && firsts.has(best.id)) }, 'fight');
 });
 
 /* ---------- sales ---------- */
@@ -272,7 +279,7 @@ Object.assign(DQ.weight, {
   flush,
   /* tests and the Art showcase: run a moment directly, through the same gates */
   levelUp: (who, id, level) => levelUp(who, id, level),
-  find: (id, chance, where = 'work') => { const t = W.findTier(chance, { unique: !!(D.ITEMS[id] || {}).unique }); if (t && t.band >= 1) answerFind({ id, chance, tier: t }, where); },
+  find: (id, chance, where = 'work', first = firstEver(id)) => { const t = W.findTier(chance, { unique: !!(D.ITEMS[id] || {}).unique }); if (t && t.band >= 1) answerFind({ id, chance, tier: t, first }, where); },
   sale: coins => { if (gate(false) === 'drop') return; if (!sale) { sale = { coins: 0, n: 0 }; queueMicrotask(flushSale); } sale.coins += coins; sale.n++; },
   hit: (tier, delay = 180) => { const w = W.hitTier(tier); if (w) answerHit(w, delay); return w; },
   stop: hitStop

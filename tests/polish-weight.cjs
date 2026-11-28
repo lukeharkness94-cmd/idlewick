@@ -5,7 +5,7 @@
          sale bands, blow tiers, the gate, the queue) and that the table is in seconds and within the rules.
    Browser, fixture a new hero (granted XP, items and coins as stated):
    1  each moment answers and finishes: an ordinary level chimes; a milestone shows its title and leaves on its own;
-      several level-ups at once are one moment for the biggest; a find glints, lights the scene and (rarest) titles;
+      several level-ups at once are one moment for the biggest; a find glints, lights the scene and (rarest, first find of that item only) titles;
       a sale drops coins into the purse with a clunk by band; a crit and a killing blow hit-stop the stage sprites
    2  the save (JSON) is the same before and after every effect, and no effect draws from Math.random (the game's rolls)
    3  nothing waits: a second sale mid-effect sells at once and finishes the coins; a click mid-title changes page at once
@@ -152,6 +152,22 @@ const WEIGHTED = [AUDIO.findIndex(l => l.startsWith('function weighted()')) + 1,
     assert.equal(await p.evaluate(() => window.__snap()), await p.evaluate(() => window.__a), 'a find: the save is unchanged while it plays');
     w = await W(); assert.equal(w.stats.sounds.find3 - (s0.sounds.find3 || 0), 1, 'with the longest chime');
     assert.equal(await p.evaluate(() => document.querySelectorAll('.lw-find-light,.gain-fly,.lw-moment').length), 0, 'everything has finished');
+    /* the title is for the first find of an item only (the save's acquisition history, S.seen.items); a second diamond
+       keeps the glint, the light and the long chime, with no title, and nothing new is saved for it */
+    assert.equal(await p.evaluate(() => DQ.S.seen.items.gem_diamond), 1, 'the first diamond is in the acquisition history');
+    s0 = (await W()).stats;
+    const again = await p.evaluate(() => new Promise(res => { const seen = new Set(); const mo = new MutationObserver(r => r.forEach(x => x.addedNodes.forEach(n => n.nodeType === 1 && seen.add(n.className)))); mo.observe(document.body, { childList: true, subtree: true });
+      const id = DQ.act.id, keys = JSON.stringify(Object.keys(DQ.S).sort()); DQ.grant(DQ.data.NODE['wood:' + id].item, 1); DQ.grant('gem_diamond', 1); DQ.emit('workcycle', { kind: 'wood', id, quantity: 1 });
+      setTimeout(() => { mo.disconnect(); res({ seen: [...seen], sameKeys: JSON.stringify(Object.keys(DQ.S).sort()) === keys }); }, 1500); }));
+    assert.ok(again.seen.some(c => /gain-fly glint glint-3/.test(c)), 'a later diamond still glints: ' + again.seen.join(' | '));
+    assert.ok(again.seen.includes('lw-find-light'), 'and lights the scene');
+    assert.ok(!again.seen.some(c => /lw-moment/.test(c)), 'but has no title');
+    assert.ok(again.sameKeys, 'no new saved state');
+    w = await W(); assert.equal(w.stats.sounds.find3 - s0.sounds.find3, 1, 'and keeps the seven-note chime'); assert.equal(w.stats.titles, s0.titles);
+    /* the same rule for a creature's drop and for a never-seen epic item */
+    s0 = w.stats; await p.evaluate(() => { DQ.weight.find('gem_diamond', .0004); }); w = await W(); assert.equal(w.stats.titles, s0.titles, 'a known item: no title');
+    await p.evaluate(() => { DQ.weight.find('gem_ruby', .0004); }); w = await W(); assert.equal(w.stats.titles - s0.titles, 1, 'a never-found item: the title');
+    await p.evaluate(() => DQ.weight.hurry()); await settle(1600);
     /* an uncommon find: a glint and a chime, no light */
     s0 = w.stats; await p.evaluate(() => DQ.weight.find('gem_sapphire', .03)); w = await W();
     assert.equal(w.stats.lights, s0.lights, 'uncommon: no light'); assert.equal(w.stats.sounds.find1, 1);
@@ -172,8 +188,10 @@ const WEIGHTED = [AUDIO.findIndex(l => l.startsWith('function weighted()')) + 1,
     /* a big sale (hold to confirm), then a second sale mid-effect */
     await p.evaluate(() => { DQ.ui.sel = 'gem_diamond'; DQ.ui.render(true); });
     const big = p.locator('#view button[data-do="sell"][data-b="keep1"]:visible').first(), bb = await big.boundingBox();
-    await p.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2); await p.mouse.down(); await p.waitForTimeout(720); await p.mouse.up();
-    await p.waitForTimeout(80);
+    const nSales = await p.evaluate(() => DQ.weight.log.filter(x => x.type === 'sale').length);
+    await p.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2); await p.mouse.down();
+    /* held until the hold confirms (0.6 s; longer on a busy machine), then let go */
+    await p.waitForFunction(n => DQ.weight.log.filter(x => x.type === 'sale').length > n, nSales, { timeout: 5000 }); await p.mouse.up();
     w = await W(); const last = await p.evaluate(() => DQ.weight.log.filter(x => x.type === 'sale').pop());
     assert.equal(last.band, 3, 'a big sale is the top band: ' + JSON.stringify(last)); assert.equal(last.drop, 8, 'eight coins');
     assert.ok(await p.evaluate(() => document.querySelectorAll('.lw-coin').length) >= 1, 'coins in the air');
@@ -239,7 +257,7 @@ const WEIGHTED = [AUDIO.findIndex(l => l.startsWith('function weighted()')) + 1,
     await p.evaluate(() => { DQ.S.settings.reduceFx = true; document.documentElement.classList.add('calm'); DQ.go('woodcutting'); DQ.ui.render(true); });
     s0 = (await W()).stats;
     await p.evaluate(() => DQ.weight.levelUp('skill', 'cooking', 50)); await p.waitForTimeout(300);
-    const still = await p.evaluate(() => { const el = document.querySelector('.lw-moment'); return el && { anims: el.getAnimations({ subtree: true }).length, op: getComputedStyle(el).opacity, text: el.textContent.trim(), still: DQ.weight.showing().still }; });
+    const still = await p.evaluate(() => { const el = document.querySelector('.lw-moment'); return el && { anims: el.getAnimations({ subtree: true }).length, names: el.getAnimations({ subtree: true }).map(a => (a.animationName || a.transitionProperty || a.id || 'waapi') + '@' + (a.effect && a.effect.target && a.effect.target.className)), op: getComputedStyle(el).opacity, text: el.textContent.trim(), still: DQ.weight.showing().still }; });
     assert.ok(still && still.anims === 0 && still.op === '1' && still.still, 'the title stands complete and still: ' + JSON.stringify(still)); assert.match(still.text, /Cooking 50/);
     await p.evaluate(() => DQ.weight.hurry());
     await p.evaluate(() => { DQ.weight.sale(50000); DQ.weight.find('gem_diamond', .0004); DQ.weight.hit({ dealt: 9, kind: 'hit power', foeMax: 10 }); }); await p.waitForTimeout(50);
