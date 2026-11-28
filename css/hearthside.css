@@ -1193,6 +1193,7 @@ html.calm :is(.packchip.pack-gulp,.h-hero.pack-bounce){animation:none}
   --act-lift-hi:0 0 0 2px var(--px-rim),inset 0 2px 0 #8a6e52,inset 0 -3px 0 #281d16,0 5px 0 2px rgba(0,0,0,.3);
   --act-glow:rgba(246,212,122,.0);
   --nav-on:#b0822e;--nav-on-hi:#d6a84c;--nav-ink:#1c1206;
+  --sel-bevel:0 0 0 2px #2a1a06,inset 0 2px 0 #c89a40,inset 0 -3px 0 #3a2810,0 4px 0 2px rgba(0,0,0,.3);
   --info-fill:rgba(0,0,0,.28);--pip-off:#3a2c22}
 html[data-theme="dark"] body{background-color:var(--ground)}
 /* panels: framed wood with brass pins */
@@ -1211,3 +1212,6 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 :root[data-theme="dark"] .bar{border-radius:1px;background:#0a0707;box-shadow:0 0 0 1px #000,inset 0 1px 0 rgba(255,255,255,.04);border-left:2px solid #c8902e;border-right:2px solid #c8902e}
 :root[data-theme="dark"] .bar>i{border-radius:0;background-image:linear-gradient(180deg,rgba(255,255,255,.28) 0 1px,transparent 1px 60%,rgba(0,0,0,.18))}
 /* locked pictures: a pale silhouette that still reads on dark wood */
+:root[data-theme="dark"] :is(.blackout img,.blackout .ic,.blackout .gico,.blackout canvas,.activity-stage .blackout img){filter:brightness(0) invert(.9) opacity(.3)!important}
+/* pixel lettering is wider: the rail grows so every skill name shows whole ("never shrink text to fit") */
+@media(min-width:861px){#app{grid-template-columns:206px minmax(0,1fr)}}

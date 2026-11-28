@@ -1,14 +1,13 @@
-/* node tests/shape-rule.cjs: the shape rule (owner, 26 Nov 2026), no lines around anything you can't click and only
-   navigation outlined (owner, 27 Nov 2026: "I despise seeing physical lines around things"; "Unless it's a menu item to
-   navigate, we can just either make it float on over or have a slight backdrop so its obvious it's clickable").
-   Checked on every page, in a fight and in the common pop-ups, in the dark theme at 1440 x 900. Needs the preview server.
+/* node tests/shape-rule.cjs: the pixel frame rule (owner, 28 Nov 2026: bevelled pixel frames, from the reference GUI;
+   replaces the 26-27 Nov "no lines, 8px floating controls" rule). Checked on every page, in a fight and in the common
+   pop-ups, in the dark theme at 1440 x 900. Needs the preview server.
    S1  anything you can click (button, [data-do], [role=button], [role=tab], [role=switch], a[href], text fields) wider
-       than 20px is an 8px rounded rectangle (all four corners) with no outline that floats: a shadow, or a fill that
-       differs from what it sits on (a disabled control may sit flat). Menus too (owner, 27 Nov 2026)
-   S2  anything you can't click draws no line around itself: no border on three or more sides (a one-sided divider or
-       accent stripe is not an outline), no border at all on a round thing, no outline and no box-shadow ring; the same
-       for its ::before and ::after
-   S3  inside a control, the control's outline is the only line: no ring round a dot, frame round a portrait or dashed
+       than 20px has the pixel corner (--r-act, 3px, all four corners), no CSS outline and no border lines, and carries
+       its bevel: a box-shadow with a lit or shaded inset edge (a disabled control may sit flat)
+   S2  only panels are framed (.panel, the rail, the top bar: a rim and bevel drawn with box-shadow); anything else you
+       can't click (labels, chips, badges, counts, tags) draws no line round itself: no border on three or more sides,
+       no outline, no box-shadow ring; the same for ::before and ::after
+   S3  inside a control, the control's frame is the only line: no ring round a dot, frame round a portrait or dashed
        label inside it
    ALLOW lists the few genuine exceptions; keep it short and say why.
    VERBOSE=1 prints every offender; PAGES=a,b limits the pages. */
@@ -22,10 +21,13 @@ const URL = process.env.IDLEWICK_URL || 'http://127.0.0.1:8765/';
      effects, whose dark edges are the pixel-art outline, not a frame
    Text fields count as clickable: they take the same 8px outlined shape. */
 const ALLOW_CLICK = ['.site-spot', '.tc-room', '.hearth-spot', 'svg', '.encounter-arena #av-foe'];
-const ALLOW_FLAT = ['svg', '.tc-room', '.pen-bowl', '.pen-flag', '.pen-sign', '.work-atmosphere', '.tower-cutaway', '.combat-projectile', '#title'];
+/* - .bar: progress bars are drawn pixel GUI pieces (a trough with brass end caps, owner's reference GUI, 28 Nov 2026) */
+const ALLOW_FLAT = ['.bar', 'svg', '.tc-room', '.pen-bowl', '.pen-flag', '.pen-sign', '.work-atmosphere', '.tower-cutaway', '.combat-projectile', '#title'];
 /* the menus you navigate with keep their outline (css/shape.css lists the same) */
 const NAV = '#topnav .tnav,#pagebar button,#pagebar [data-do],#combatnav button,#combatnav [data-do],#skilldock .dk,#dock .dk,.cg-tile,#hud .iconb,#hud .packchip,#hud .h-hero,[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]';
 const problems = [];
+/* panels carry the pixel frame (a rim and bevel in box-shadow) */
+const FRAMED = '.panel,.sidebar,#hud';
 
 const MODALS = {
   unlock: () => { localStorage.setItem('idlewick.reveals', '1'); const n = DQ.S.settings.notify; DQ.S.settings.notify = true; DQ.S.playtime = 10 * 60000; DQ.go('overview'); DQ.ui.render(true); DQ.notify({ kind: 'unlock', key: 'unlock:sailing', title: 'Sailing unlocked', text: 'Boats await.' }); DQ.S.settings.notify = n; localStorage.removeItem('idlewick.reveals'); },
@@ -57,7 +59,8 @@ const MODALS = {
       }, theme);
       const check = async label => {
         await p.evaluate(() => document.querySelectorAll('#notes > *').forEach(e => e.remove()));
-        const out = await p.evaluate(({ AC, AF, NAV }) => {
+        const out = await p.evaluate(({ AC, AF, NAV, FRAMED }) => {
+          const R_ACT = getComputedStyle(document.documentElement).getPropertyValue('--r-act').trim() || '3px';
           const CLICK = 'button,[data-do],[role=button],[role=tab],[role=switch],a[href],input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=hidden]),textarea';
           const sig = e => e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + [...e.classList].slice(0, 3).map(c => '.' + c).join('');
           const where = e => { const a = e.parentElement && e.parentElement.closest('[id],[class]'); return a ? sig(a) : ''; };
@@ -78,13 +81,13 @@ const MODALS = {
             if (outer) { const o = outer.getBoundingClientRect(); if (Math.abs(o.width - box.width) < 6 && Math.abs(o.height - box.height) < 6) continue; }
             const cs = getComputedStyle(e);
             const rad = ['TopLeft', 'TopRight', 'BottomRight', 'BottomLeft'].map(k => cs[`border${k}Radius`]);
-            const okR = rad.every(v => v === '8px');
+            const okR = rad.every(v => v === R_ACT);
             let okB, why;
             { /* navigation floats too (owner, 27 Nov 2026: "get rid of all the borders around the menu items") */
-              const lined = sides(cs) > 0 || ring(cs) || outline(cs);
-              const bg = c => { for (let a = c; a; a = a.parentElement) { const s = getComputedStyle(a); if (alpha(s.backgroundColor) > 0.05) return s.backgroundColor; } return ''; };
-              const floats = cs.boxShadow !== 'none' || (alpha(cs.backgroundColor) > 0.05 && cs.backgroundColor !== bg(e.parentElement)) || cs.backgroundImage !== 'none' || e.disabled;
-              okB = !lined && floats; why = lined ? ' outlined' : ' does not float (no shadow or fill)';
+              /* the pixel bevel (owner, 28 Nov 2026): a lit or shaded inset edge in the control's own box-shadow */
+              const lined = sides(cs) > 0 || outline(cs);
+              const bevel = /inset/.test(cs.boxShadow) || e.disabled || e.matches('input,textarea');
+              okB = !lined && bevel; why = lined ? ' border or outline lines' : ' no bevel';
             }
             if (!okR || !okB) r.click.push(sig(e) + ' < ' + where(e) + (okR ? '' : ' radius=' + [...new Set(rad)].join('/')) + (okB ? '' : why));
           }
@@ -95,11 +98,12 @@ const MODALS = {
             const hand = c => c === 'pointer' || / pointer$/.test(c);
             if (hand(cs.cursor) && !e.closest(CLICK) && !(e.parentElement && hand(getComputedStyle(e.parentElement).cursor))) continue; /* a script-driven control */
             const host = e.closest(CLICK), list = host ? r.inner : r.flat, rect = e.getBoundingClientRect();
-            const self = lined(cs, rect.width, rect.height); if (self) list.push(sig(e) + ' [' + self + '] < ' + where(e));
+            let self = lined(cs, rect.width, rect.height); if (!host && e.matches(FRAMED)) self = self.split('+').filter(x => x !== 'ring').join('+');
+            if (self) list.push(sig(e) + ' [' + self + '] < ' + where(e));
             for (const ps of ['::before', '::after']) { const pc = getComputedStyle(e, ps); if (pc.content === 'none' || pc.display === 'none' || pc.visibility === 'hidden' || +pc.opacity < 0.05) continue; const w = parseFloat(pc.width) || rect.width, h = parseFloat(pc.height) || rect.height; if (w < 3 || h < 3) continue; const l = lined(pc, w, h); if (l) list.push(sig(e) + ps + ' [' + l + '] < ' + where(e)); }
           }
           return r;
-        }, { AC: ALLOW_CLICK, AF: ALLOW_FLAT, NAV });
+        }, { AC: ALLOW_CLICK, AF: ALLOW_FLAT, NAV, FRAMED });
         const tally = a => { const m = new Map(); a.forEach(x => m.set(x, (m.get(x) || 0) + 1)); return [...m].map(([k, n]) => n > 1 ? `${k} x${n}` : k); };
         for (const x of tally(out.click)) problems.push(`S1 ${theme}/${label}: ${x}`);
         for (const x of tally(out.flat)) problems.push(`S2 ${theme}/${label}: ${x}`);

@@ -162,9 +162,11 @@
   .fancy::before,.fancy::after{border-color:transparent!important}
 
   /* rings drawn with box-shadow: the line goes, any soft glow stays */
-  :is(.nav.on,.hub.on,.swatch,.swatch.on,.goal-choice.on,.region-row.on,.ss-btn.on,.bd-opt.on,.mini-card.on,.letter-opt.on,
-      .beast-choice.on,.gt.on,.mu-t.sel,.beast.quest-study,.now.here,.cw-dt,.cw-dt.mine,.art-card .art-dot,#topnav .tnav .hubdot){
+  :is(.swatch,.swatch.on,.beast.quest-study,.now.here,.cw-dt,.cw-dt.mine,.art-card .art-dot,#topnav .tnav .hubdot){
     box-shadow:none!important}
+  /* a selected control keeps its pixel bevel, in brass (owner, 28 Nov 2026: bevelled frames) */
+  :is(.nav.on,.hub.on,.goal-choice.on,.region-row.on,.ss-btn.on,.bd-opt.on,.mini-card.on,.letter-opt.on,.beast-choice.on,.gt.on,.mu-t.sel){
+    box-shadow:var(--sel-bevel)!important}
   .pen.sel{outline:0!important}
   .avatar.boss{box-shadow:0 0 28px -4px var(--c)!important}
   .plot.ripe{box-shadow:0 0 22px -6px var(--c)!important}
