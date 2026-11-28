@@ -1336,3 +1336,10 @@ html[data-theme="dark"] body{background-color:var(--ground)}
   #view .combat-d .encounter-arena .splat.weak{color:#ffb03a}
   #view .combat-d .encounter-arena .splat.power{color:#ff8a2a;font-size:calc(9px * var(--k) + 6px)!important}
 }
+/* field guide index: topic names in the sentence face so "Willowbrook", "Woodcutting" and "Hunting ground" show whole
+   in the narrow column (the capital pixel face clipped them) */
+#view .guide-index .gi b{font:400 16px/1.2 var(--f-body)!important;text-transform:none!important;letter-spacing:0!important}
+#view .guide-index .gi{grid-template-columns:24px minmax(0,1fr)!important;grid-template-rows:auto auto;row-gap:0!important}
+#view .guide-index .gi>:is(svg,img,.ic){grid-row:1/3;align-self:center}
+#view .guide-index .gi em{grid-column:2;grid-row:2;line-height:1.1}
+@media (min-width:861px){#view .guide-book{grid-template-columns:248px minmax(0,1fr) 390px}}
