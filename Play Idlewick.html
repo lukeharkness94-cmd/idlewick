@@ -4070,103 +4070,133 @@ html.calm .logo p,html.calm .tmenu,html.calm .tbtn.primary{animation:none}
 #view.enter>*{animation:none}
 html.calm #view.enter>*{animation:none}
 
-/* ===================== The opening (js/intro.js) ===================== */
-#intro{position:fixed;inset:0;z-index:400;background:#05080b;color:#efe6d2;overflow:hidden;cursor:pointer;animation:inFade .9s ease both;user-select:none}
-#intro.out{animation:inOut .7s ease forwards}
-@keyframes inFade{from{opacity:0}}@keyframes inOut{to{opacity:0}}
-.in-stage,.in-shot{position:absolute;inset:0}
-.in-shot{opacity:0;transition:opacity 1.1s ease}
-.in-shot.on{opacity:1}.in-shot.off{opacity:0}
-.in-scene{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}
-.in-scene img{flex:none;max-width:none;image-rendering:pixelated}
-.in-scene.pan img{animation:inPan 16s ease-in-out both}
-@keyframes inPan{from{translate:var(--pan) 0}to{translate:calc(var(--pan) * -1) 0}}
-.in-scene.stack{opacity:0;animation:inStack 9s ease both}
-.in-scene.stack.s0{animation-delay:0s}.in-scene.stack.s1{animation-delay:4s}
-@keyframes inStack{0%{opacity:0}12%{opacity:1}55%{opacity:1}70%{opacity:0}100%{opacity:0}}
-.in-scene.stack.s1{animation-name:inStackLast}
-@keyframes inStackLast{0%{opacity:0}15%{opacity:1}100%{opacity:1}}
-.in-scene.dark img{animation:inPan 16s ease-in-out both,inDim 6s ease forwards}
-@keyframes inDim{to{filter:grayscale(.75) brightness(.45) contrast(1.05)}}
-.in-scene.dawn img{filter:sepia(.25) saturate(1.15) brightness(1.05)}
-/* everything behind the words sits under a soft vignette so the caption always reads */
-.in-shot::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse farthest-corner at 50% 40%,transparent 55%,#05080b88 100%),linear-gradient(180deg,transparent 58%,#05080be6 100%)}
-.shot-letter::after,.shot-road::after,.shot-title::after{display:none}
-.in-bellwrap{position:absolute;left:50%;top:18%;translate:-50% 0;z-index:2}
-.in-bell{width:128px;height:128px;filter:drop-shadow(0 0 24px #f3d58a88);animation:inSwing 3.2s ease-in-out infinite;transform-origin:50% 8%}
-@keyframes inSwing{0%,100%{rotate:-7deg}50%{rotate:7deg}}
-.in-walk{position:absolute;left:50%;bottom:22%;translate:-50% 0;z-index:2}
-.in-hero{width:192px;height:256px;filter:drop-shadow(0 10px 12px #000a);animation:inBob 1.1s ease-in-out infinite}
-@keyframes inBob{0%,100%{translate:0 0}50%{translate:0 -4px}}
-/* the caption */
-.in-cap{position:absolute;left:50%;bottom:9%;translate:-50% 0;width:min(1100px,calc(100% - 64px));display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;z-index:3;pointer-events:none}
-.in-cap p{margin:0;font:400 31px/1.45 var(--f-body);color:#f4ead6;text-shadow:0 2px 0 #000,0 0 24px #000;opacity:0;translate:0 10px;transition:opacity .9s ease,translate .9s var(--ease-out,ease)}
-.in-cap p.on{opacity:1;translate:0 0}
-.in-cap p:not(:last-child){opacity:.45}
-/* Wren's letter */
-.shot-letter{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 45%,#1a2026,#05080b 75%)}
-.in-paper{width:min(780px,calc(100% - 48px));padding:52px 64px;background:linear-gradient(180deg,#efe2c2,#e2cfa5);color:#3a2b18;border-radius:3px;box-shadow:0 30px 60px -20px #000,inset 0 0 60px #b8946044;rotate:-1.2deg}
-.in-letter p{margin:0 0 16px;font:italic 400 27px/1.5 var(--f-body);opacity:0;animation:inInk 1.4s ease forwards}
-.in-letter p.date{font-size:18px;font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:#7a6440;margin-bottom:22px}
-.in-letter p.dear{font-style:normal;font-weight:600}
-.in-letter p.sign{text-align:right;font-weight:600;margin:20px 0 0}
-@keyframes inInk{from{opacity:0;filter:blur(2px)}to{opacity:1;filter:none}}
-/* the road */
-.shot-road{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 50%,#121a20,#05080b 70%)}
-.in-road ol{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:0;width:min(1100px,calc(var(--vw100,100vw) - 80px))}
-.in-road li{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:14px;opacity:0;animation:inStep .7s ease forwards;animation-delay:calc(var(--i) * .45s + .4s)}
-.in-road li::before{content:'';position:absolute;top:9px;right:50%;width:100%;height:2px;background:linear-gradient(90deg,#d8a64a55,#d8a64a);z-index:-1}
-.in-road li:first-child::before{display:none}
-.in-road li i{width:20px;height:20px;border-radius:50%;background:#2a3238;border:2px solid #d8a64a99}
-.in-road li.here i{background:#d8a64a;box-shadow:0 0 18px #f3d58a}
-.in-road li span{font:600 20px var(--f-body);color:#f3d58a;min-height:72px;display:grid;place-items:start center}
-.in-road li.end .in-bell{width:64px;height:64px;animation:inSwing 2.6s ease-in-out infinite}
-@keyframes inStep{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
-/* the title */
-.shot-title{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 60%,#1b2a2f,#05080b 70%)}
-.in-title{display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}
-.in-title .logo h1{font-size:76px}
-.in-title p{margin:0;font:400 22px var(--f-body);color:#cfc3a8}
-.in-title .tbtn{min-width:260px;animation:finRise .6s var(--ease-out,ease) .4s both,finInvite 2.6s ease-in-out 1.6s infinite}
-/* skip: only after the first click */
-.in-skip{position:absolute;top:22px;right:26px;z-index:5;background:#0008;border:1px solid #f3d58a55;color:#f3d58a;font:600 16px var(--f-ui);padding:8px 16px;border-radius:999px;cursor:pointer;opacity:0;translate:0 -6px;transition:opacity .4s,translate .4s,border-color .2s}
-.in-skip.on{opacity:1;translate:0 0}.in-skip:hover{border-color:#f3d58a}
+/* ===================== The opening (js/intro.js) =====================
+   Owner, 28 Nov 2026: redone as a living scene. Every picture is placed by script at a whole-number multiple of its
+   drawn size and cropped by the screen; these rules only stack the layers, give the words their dark backing and
+   fade beats in and out (opacity and transforms only; nothing moves under calm or reduced motion). */
+#intro{position:fixed;inset:0;z-index:400;background:#05070a;color:#efe6d2;overflow:hidden;user-select:none;cursor:var(--cur-quill,default);animation:inFade .9s ease both}
+#intro.out{opacity:0;transition:opacity .7s ease}
+html.op-playing #app{visibility:hidden}
+@keyframes inFade{from{opacity:0}}
+#intro canvas,#intro .op-scene,#intro .op-walker{image-rendering:pixelated;max-width:none;display:block}
+.op-stage,.op-shot{position:absolute;inset:0;overflow:hidden}
+.op-shot{opacity:0;transition:opacity .65s ease}
+.op-shot.on{opacity:1}.op-shot.off{opacity:0;transition-duration:.5s}
+.op-world{position:absolute;left:0;top:0;will-change:transform}
+.op-scene{position:absolute;left:0;top:0}
+/* the town's living layers stay at 1x, out of sight; the one canvas on screen is composed from them each frame */
+.op-stack{display:none}
+.op-stack .op-scene{width:640px;height:360px}
+.op-frame{position:absolute;left:0;top:0;transition:opacity .22s ease}
+.op-frame.cut{opacity:0}
+#intro .town-tint{transition:none}
+/* the narrator: large, on a framed dark backing so it never sits bare over a busy picture */
+.op-say{position:absolute;left:50%;bottom:28px;translate:-50% 0;width:min(1180px,calc(100% - 48px));z-index:6;display:grid;pointer-events:none}
+.op-say[data-pos="top"]{bottom:auto;top:28px}
+.op-say p{grid-area:1/1;margin:0;padding:16px 28px;border-radius:4px;background:rgba(10,8,12,.86);box-shadow:0 0 0 3px #07060a,inset 0 2px 0 #6a4a2a,inset 2px 0 0 #5a3e24,inset 0 -2px 0 #1a120c,inset -2px 0 0 #1a120c;font:400 30px/1.4 var(--f-body);color:#f4ead6;text-align:center;opacity:0;translate:0 8px;transition:opacity .45s ease,translate .45s ease}
+.op-say p.on{opacity:1;translate:0 0}.op-say p.gone{opacity:0;translate:0 -4px}
+/* a townsperson speaking: a speech bubble with a stepped pixel tail, following them */
+.op-bubble{position:absolute;left:0;top:0;z-index:5;width:max-content;max-width:min(320px,calc(var(--vw100,100vw) - 40px));margin-top:-12px;padding:8px 12px;border-radius:3px;background:#f6ecd2;color:#2a1a10;font:400 19px/1.3 var(--f-body);box-shadow:0 0 0 2px #1a1008,0 4px 0 2px rgba(0,0,0,.35);opacity:0;transition:opacity .3s ease;pointer-events:none}
+.op-bubble::before,.op-bubble::after{content:'';position:absolute;left:50%;background:#f6ecd2}
+.op-bubble::before{bottom:-5px;width:10px;height:5px;margin-left:-5px;box-shadow:2px 0 0 #1a1008,-2px 0 0 #1a1008}
+.op-bubble::after{bottom:-9px;width:4px;height:4px;margin-left:-2px;box-shadow:2px 0 0 #1a1008,-2px 0 0 #1a1008,0 2px 0 #1a1008}
+.op-bubble.on{opacity:1}
+/* the bell close up, in a framed window of its own */
+.op-inset{position:absolute;left:4%;top:7%;z-index:4;padding:6px;border-radius:4px;background:#1a120c;box-shadow:0 0 0 3px #07060a,inset 0 2px 0 #8a6236,inset 2px 0 0 #7a5630,inset 0 -2px 0 #120c08,0 10px 24px rgba(0,0,0,.5);opacity:0;translate:0 -8px;transition:opacity .5s ease,translate .5s ease;pointer-events:none}
+.op-inset.on{opacity:1;translate:0 0}
+.op-skip{position:absolute;top:18px;right:20px;z-index:8;opacity:0;transition:opacity .35s ease}
+.op-skip.on{opacity:1}
+/* the lodging: the hearth room with the hero standing in it, and the letter under the door */
+.op-room .fig-stage{position:absolute;left:0;top:0;width:0;height:0;padding:0;min-width:0;display:block}
+.op-room .fig-stage::after{display:none}
+.op-room .fig-img{position:absolute;z-index:2;max-width:none;filter:none;image-rendering:pixelated!important}
+.op-lights{position:absolute;left:0;top:0;z-index:1;pointer-events:none}
+.op-env{position:absolute;left:0;top:0;z-index:3}
+.op-open{position:absolute;z-index:7;translate:-50% 0;display:inline-flex;align-items:center;gap:8px;opacity:0;transition:opacity .4s ease}
+.op-open.on{opacity:1}
+/* the letter: the envelope rises, the seal cracks in two, the parchment comes out */
+.op-letterbox{position:absolute;inset:0;z-index:5;display:grid;place-items:center;background:rgba(5,6,10,.6);opacity:0;transition:opacity .4s ease}
+.op-letterbox.on{opacity:1}.op-letterbox.off{opacity:0}
+.op-bigenv{position:absolute;left:50%;top:50%;translate:-50% -50%;transition:translate .6s ease,opacity .5s ease}
+.op-letterbox:not(.on) .op-bigenv{translate:-50% -20%}
+.op-letterbox.cracked .op-bigenv{opacity:0;translate:-50% -35%;transition-delay:.45s}
+.op-seal{position:absolute;z-index:3;transition:translate .7s cubic-bezier(.2,.6,.4,1),opacity .7s ease}
+.op-letterbox.cracked .op-seal-l{translate:-48px 70px;opacity:0}
+.op-letterbox.cracked .op-seal-r{translate:52px 84px;opacity:0}
+#intro .op-letter{position:relative;z-index:2;width:min(880px,calc(100% - 32px));max-height:calc(100% - 48px);overflow:auto;padding:26px 34px 28px;font-size:25px;line-height:1.5;opacity:0;translate:0 48px;transition:opacity .6s ease,translate .7s ease}
+#intro .op-letter .letter-head b{font-size:22px}#intro .op-letter .letter-head small{font-size:16px}#intro .op-letter .letter-sign{font-size:22px}
+#intro .op-letter.on{opacity:1;translate:0 0}
+.op-letter .op-l{opacity:0;transition:opacity .9s ease}
+.op-letter .op-l.on{opacity:1}
+.op-letter .letter-date{font:400 15px/1.2 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:#7a6440}
+.op-letter .letter-dear{font-weight:700}
+.op-letter .letter-ps{font-size:19px;color:#6a5434}
+/* the road home: layers that scroll at their own pace, the hour's light over the scenery, the hero on top */
+.op-layer,.op-roadtint,.op-fx{position:absolute;left:0;top:0;pointer-events:none}
+.op-layer{will-change:transform}
+.op-roadtint{z-index:1;mix-blend-mode:multiply}
+.op-sign{position:absolute;left:0;z-index:1;will-change:transform}
+.op-signname{position:absolute;bottom:100%;left:50%;translate:-50% -6px;white-space:nowrap;padding:4px 10px;border-radius:3px;background:rgba(10,8,6,.84);box-shadow:0 0 0 2px #07060a;font:400 20px/1.1 var(--f-ui);color:#f3d58a}
+.op-shadow{position:absolute;z-index:2;background:rgba(6,8,12,.42);border-radius:50%}
+.op-walker{position:absolute;z-index:3}
+.op-fx{z-index:4}
+.op-hint{position:absolute;right:22px;bottom:22px;z-index:6;padding:6px 12px;border-radius:3px;background:rgba(10,8,12,.8);font:400 14px var(--f-ui);color:#d8ccb0;opacity:0;transition:opacity .5s ease}
+.op-hint.on{opacity:.9}
+/* home: the conversation sits low, so the town and the two of them stay in view above it */
+.modal.op-talk{z-index:450;place-items:end center;padding:0 12px 20px;background:linear-gradient(180deg,transparent 35%,rgba(5,9,11,.72));backdrop-filter:none}
+.op-talk .m-card{width:min(1100px,calc(100% - 24px));padding:14px 18px}
+.op-talk .m-card>h2{font-size:20px;margin:0 0 8px}
+.op-talk .story-conversation{grid-template-columns:168px minmax(0,1fr);gap:16px;min-height:0}
+.op-talk .story-conversation .story-speaker{gap:10px;padding:10px}
+.op-talk .story-talker,.op-talk .story-talker :is(img,.portrait){width:128px!important;height:128px!important}
+.op-talk .story-conversation .story-dialogue{padding:14px}
+.op-talk .story-conversation .story-line{min-height:84px;font-size:23px}
+/* the reply sits in one row, so the panel stays low and the well stays in view above it */
+.op-talk .story-conversation .story-choices{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.op-talk .story-choice.btn{padding:9px 10px}
+/* the title, over the town pulled back */
+.op-title{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center;background:radial-gradient(ellipse at 50% 50%,rgba(5,6,10,.25),rgba(5,6,10,.82) 78%);opacity:0;transition:opacity 1.2s ease}
+.op-title.on{opacity:1}
+.op-titlecard{display:flex;flex-direction:column;align-items:center;gap:16px;max-width:960px;padding:26px 36px 30px;border-radius:4px;background:rgba(10,8,12,.88);box-shadow:0 0 0 3px #07060a,inset 0 2px 0 #6a4a2a,inset 2px 0 0 #5a3e24,inset 0 -2px 0 #1a120c,inset -2px 0 0 #1a120c,0 18px 40px rgba(0,0,0,.55)}
+.op-title .logo{display:flex;align-items:center;gap:14px;animation:none}
+.op-title .logo .ic{width:64px;height:64px}
+.op-title .logo h1{font-size:76px;margin:0}
+.op-tag{margin:0;font:400 22px/1.4 var(--f-body);color:#d8ccb0}
+.op-goal{max-width:880px}
+.op-goal p{margin:6px 0;font:400 24px/1.45 var(--f-body);color:#f4ead6}
+.op-title .tbtn{min-width:260px;font-size:21px;margin-top:6px}
 .in-replay{display:flex;justify-content:flex-end;margin:0 0 10px}
-@media (max-width:860px){.in-cap p{font-size:20px}.in-paper{padding:26px 24px}.in-letter p{font-size:17px}.in-title .logo h1{font-size:52px}.in-road li span{font-size:15px}.in-road li i{width:14px;height:14px}.in-road li::before{top:6px}.in-hero{width:144px;height:192px}}
-html.calm #intro *,html.calm #intro{animation:none!important;transition:none!important}
-html.calm .in-shot.on,html.calm .in-cap p,html.calm .in-letter p,html.calm .in-road li{opacity:1;translate:0 0}
-html.calm .in-scene.stack.s0{display:none}html.calm .in-scene.stack.s1{opacity:1}
-html.calm .in-skip.on{opacity:1}
-@media (prefers-reduced-motion:reduce){#intro *,#intro{animation:none!important;transition:none!important}.in-shot.on,.in-cap p,.in-letter p,.in-road li{opacity:1;translate:0 0}.in-scene.stack.s0{display:none}.in-scene.stack.s1{opacity:1}.in-skip.on{opacity:1}}
-.in-letter p.ps{font-size:21px;color:#6a5434;margin-top:10px}
-/* The opening, revised: the whole town is shown (never cropped) at a whole-number scale above its own caption band,
-   its edges fading into the dark; shots dip to black instead of overlapping. */
-.in-shot{display:flex;align-items:center;justify-content:center;padding-bottom:var(--capband,180px);transition:opacity .5s ease}
-.in-shot.on{transition-delay:.45s}
-.in-shot.off{transition-delay:0s}
-.in-shot::after{display:none}
-.in-frame{position:relative;flex:none;overflow:hidden;
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent);-webkit-mask-composite:source-in;
-  mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent);mask-composite:intersect}
-.in-frame .in-town{display:block;max-width:none;image-rendering:pixelated}
-.in-frame.dark .in-town{animation:inDim 6s ease forwards}
-.in-frame.dawn .in-town{filter:sepia(.2) saturate(1.1) brightness(1.04)}
-.in-frame .in-bellwrap{position:absolute;left:50%;top:9%;translate:-50% 0;z-index:2}
-.in-frame .in-bell{width:auto;height:auto}
-.in-frame .in-walk{position:absolute;left:50%;bottom:15%;translate:-50% 0;z-index:2}
-.in-frame .in-hero{width:auto;height:auto}
-.in-cap{top:auto;bottom:0;height:var(--capband,180px);justify-content:center;padding:0 0 4%}
-@media (max-width:860px){.in-cap{width:calc(100% - 32px)}.in-frame{-webkit-mask-image:linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent);mask-image:linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent)}}
-.in-shot{padding-bottom:0}
-.in-shot:has(.in-frame.below){padding-bottom:var(--capband,180px)}
-.in-shot:has(.in-frame.over){align-items:flex-end}
-.in-frame .in-town{position:absolute}
-.in-frame.pan .in-town{animation:inPan 22s ease-in-out infinite alternate}
-.in-frame.dark.pan .in-town{animation:inPan 22s ease-in-out infinite alternate,inDim 6s ease forwards}
-.in-frame.over{-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent),linear-gradient(180deg,#000 70%,#0006 100%);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent),linear-gradient(180deg,#000 70%,#0006 100%)}
-.in-frame.over~*,.shot-town .in-frame.over{}
-#intro .in-cap{text-shadow:0 2px 0 #000,0 0 18px #000,0 0 36px #000}
-@media (max-width:860px){.in-frame.pan{-webkit-mask-image:linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent);mask-image:linear-gradient(180deg,transparent,#000 9%,#000 88%,transparent)}}
+@media (max-width:860px){
+ .op-say{bottom:14px;width:calc(100% - 24px)}
+ .op-say p{padding:12px 14px;font-size:18px;line-height:1.4}
+ .op-bubble{font-size:15px;max-width:240px}
+ .op-inset{left:12px;top:12px;padding:4px}
+ #intro .op-letter{font-size:17px;padding:14px 16px 16px}
+ #intro .op-letter .letter-head b{font-size:17px}#intro .op-letter .letter-head small{font-size:13px}#intro .op-letter .letter-sign{font-size:17px}
+ .op-letter .letter-ps{font-size:15px}
+ /* one column: Wren's face and name on a row, the words and the replies full width, so the panel stays low and the
+    well and the two of them stay in view above it (.modal.op-talk outranks the conversation screen's phone rules) */
+ .modal.op-talk .m-card{padding:8px 10px}.modal.op-talk .m-card>h2{display:none}
+ .modal.op-talk .story-conversation{grid-template-columns:minmax(0,1fr);gap:6px;min-height:0}
+ .modal.op-talk .story-talker,.modal.op-talk .story-talker :is(img,.portrait){width:64px!important;height:64px!important}
+ .modal.op-talk .story-conversation .story-speaker{flex-direction:row;justify-content:flex-start;align-items:center;padding:2px 6px;gap:10px}
+ .modal.op-talk .story-conversation .story-dialogue{padding:8px}
+ .modal.op-talk .story-conversation .story-line{font-size:17px;min-height:0}
+ .modal.op-talk .story-conversation .story-choices{grid-template-columns:1fr;gap:4px}
+ .modal.op-talk .story-choice.btn{padding:6px 8px;min-height:0}.modal.op-talk .story-choice small{display:none}
+ .modal.op-talk .story-controls small{display:none}
+ .op-titlecard{padding:16px 16px 20px;gap:12px}
+ .op-title .logo .ic{width:48px;height:48px}
+ .op-signname{font-size:13px;padding:3px 7px}
+ .op-hint{right:auto;left:12px;bottom:auto;top:16px;font-size:13px}
+ .op-title .logo h1{font-size:52px}
+ .op-tag{font-size:17px}
+ .op-goal{padding:10px 14px}.op-goal p{font-size:17px}
+ .modal.op-talk{padding:0 6px 10px}
+}
+/* still: Reduce effects, html.calm and the device's reduced motion */
+#intro.op-still,#intro.op-still *,html.calm #intro,html.calm #intro *{animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){#intro,#intro *{animation:none!important;transition:none!important}}
 
 /* Connected supplies and finite jobs: existing brass, cards and text sizes. */
 .local-project-payoff{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}.local-project-payoff small{flex-basis:100%;font-size:14px}.local-picture{height:64px;display:flex;align-items:center}.local-picture img{width:64px;height:64px;image-rendering:pixelated}.worker-job-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}.worker-job-controls input{width:100px;min-height:36px;font:inherit}.worker-job-status,.worker-request{padding:8px;border-left:3px solid var(--brass);margin:8px 0}.worker-request{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.worker-request small{flex-basis:100%}.worker-ingredients{display:flex;flex-wrap:wrap;gap:5px}.worker-guide-rate{display:block}.tower-preparation{padding:10px 12px;border-left:3px solid var(--brass);background:var(--panel);margin-bottom:10px}.tower-preparation p{margin:5px 0 0}.guide-discovery{padding:8px;border-left:3px solid var(--brass);font-size:14px}.shop-task>small{display:block;margin-top:8px}
@@ -6404,7 +6434,7 @@ html.calm .activity-scene.rigged .scene-worker,html.calm .activity-scene.rigged 
     .filter-toggle.on,.first-animal,.flyloot,.folk-card,.folk-head .folk-face.big,.food-tile,.furn,.gbtn,.gl-dot,
     .gladder li,.goal,.goal-choice,.gsprite,.gt,.gt.unk,.guild-row,.guild-seal,.h-lv,.h-stop,.h-task,.hfurn,
     .hfurn .pips i,.homestats div,.hq,.hroom,.hunt-kit-item,.hunt-recent i.fail,.hunt-steps > span,.hunt-track-steps li,
-    .iconb,.in-road li i,.in-skip,.ingredient,.intel,.item-uses,.itm,.kit-abil,.kit-abil.empty,.kit-abil.on.idle,.kit-add,
+    .iconb,.ingredient,.intel,.item-uses,.itm,.kit-abil,.kit-abil.empty,.kit-abil.on.idle,.kit-add,
     .lad,.letter-opt,.lo-card,.lvchip,.lvlban,.m-card,.mini-card,.mq-box,.msk,.mtitle,.mu-t,.mu-t.on,.need-tile,.note,
     .now,.now-stop,.nt-n,.pack-plus,.packbar,.packchip,.painted-portrait,.pen,.pen.buypen,.perk,.petc,.pinbtn,.pinchip,
     .pips i,.pk,.plot,.plot-act,.plot-act.none,.plot.buyplot,.proj-done-tag,.proj-line,.qadd,.qitem,.qr-face,.qrec,
@@ -10600,13 +10630,29 @@ function heroSide(o = {}) {
   const pose = WORK_POSTURE[o.posture] ? o.posture : 'stand', dy = WORK_POSTURE[pose].dy, ex = o.expr || '';
   const s = Spr(24, 32), spec = v => !v ? null : typeof v === 'string' ? { type: null, col: (R[v] || R.bronze).base } : v;
   const metal = c => ramp(c, { gl: .72 }), soft = c => ramp(c);
-  const hu = ex === 'stretch' ? -1 : 0, Y = y => y + dy + hu; /* the head and chest; stretch lifts the chin a pixel */
+  /* walking (the opening's road home, js/intro.js): four frames, contact, passing, contact, passing; the head and chest
+     ride a pixel higher as a leg passes under them */
+  const wk = o.walk != null ? ((o.walk % 4) + 4) % 4 : -1;
+  const hu = ex === 'stretch' || wk === 1 || wk === 3 ? -1 : 0, Y = y => y + dy + hu; /* the head and chest; stretch lifts the chin a pixel */
+  /* what the walker carries slung across the back: the weapon they set out with */
+  if (wk >= 0 && o.sling) { const t = o.sling.type, col = o.sling.col || '#9a9aa4';
+    if (t === 'bow') { const w = ramp(mix(col, '#6a4a2a', .35)); s.line(9, Y(9), 6, Y(13), w); s.line(6, Y(13), 5, 21, w); s.line(5, 21, 6, 25, w); s.line(6, 25, 9, 27, w); s.line(9, Y(9), 9, 27, null, '#e8dcc0'); }
+    else if (t === 'staff') { const w = ramp(mix(col, '#6a4a2a', .3)); s.line(11, Y(4), 5, 27, w); s.ell(11.5, Y(3), 1.6, 1.6, ramp(o.sling.orb || '#8fc0ff', { gl: .85 })); }
+    else { const m = metal(col); s.line(10, Y(10), 5, 24, m); s.line(9, Y(9), 12, Y(11), null, '#c8a050'); s.line(11, Y(8), 10, Y(9), null, '#5a3e26'); } }
   /* cape first, hanging behind the back */
   if (o.cape) s.poly([[8, 14 + dy], [11, 14 + dy], [9, 30], [4, 29]], soft(o.cape));
   /* legs: a working stance, feet a stride apart (back foot left, front foot right, toes forward) */
   const legsC = spec(o.legs), legT = legsC ? (legsC.type || 'plate') : null, lr = legsC ? (legT === 'plate' ? metal(legsC.col) : soft(legsC.col)) : pants;
   const foot = (x, y) => { s.rect(x, y, 4, 2, boots); s.tone(x + 3, y, boots, 3); };
-  if (pose === 'stand') { s.line(10, 22, 8, 29, lr); s.line(11, 22, 9, 29, lr); s.line(13, 22, 14, 29, lr); s.line(14, 22, 15, 29, lr); foot(7, 30); foot(14, 30); }
+  if (wk >= 0) { /* the far leg a shade darker, drawn first; the near leg over it */
+    const far = legT === 'plate' ? metal(mix(lr.base, '#1a1838', .3)) : ramp(mix(lr.base, '#1a1838', .3)), farBoot = ramp(mix(boots.base, '#1a1838', .3));
+    const legAt = (r, b, kind) => { if (kind === 'fwd') { s.line(13, 22, 16, 29, r); s.line(14, 22, 17, 29, r); s.rect(15, 30, 4, 2, b); s.tone(18, 30, b, 3); }
+      else if (kind === 'back') { s.line(10, 22, 7, 29, r); s.line(11, 22, 8, 29, r); s.rect(5, 30, 4, 2, b); s.tone(5, 30, b, 1); }
+      else if (kind === 'under') { s.line(11, 22, 11, 29, r); s.line(12, 22, 12, 29, r); s.rect(11, 30, 4, 2, b); s.tone(14, 30, b, 3); }
+      else { s.line(10, 22, 10, 25, r); s.line(11, 22, 11, 25, r); s.line(10, 25, 8, 28, r); s.line(11, 26, 9, 28, r); s.rect(6, 28, 3, 2, b); } };
+    const [farK, nearK] = [['back', 'fwd'], ['lift', 'under'], ['fwd', 'back'], ['under', 'lift']][wk];
+    legAt(far, farBoot, farK); legAt(lr, boots, nearK); }
+  else if (pose === 'stand') { s.line(10, 22, 8, 29, lr); s.line(11, 22, 9, 29, lr); s.line(13, 22, 14, 29, lr); s.line(14, 22, 15, 29, lr); foot(7, 30); foot(14, 30); }
   else if (pose === 'crouch') { s.line(10, 25, 6, 27, lr); s.line(10, 26, 6, 28, lr); s.line(6, 28, 7, 29, lr); s.line(13, 25, 16, 26, lr); s.line(13, 26, 16, 27, lr); s.line(16, 27, 15, 29, lr); s.line(17, 27, 16, 29, lr); foot(5, 30); foot(15, 30); }
   else if (pose === 'kneel') { s.rect(9, 28, 5, 2, lr); s.rect(7, 30, 7, 2, lr); s.rect(4, 30, 3, 2, boots); s.line(13, 28, 17, 27, lr); s.line(13, 29, 17, 28, lr); s.rect(16, 28, 2, 3, lr); foot(16, 30); }
   else { /* sit: thighs level on a stool, shins down to the floor */
@@ -10621,6 +10667,9 @@ function heroSide(o = {}) {
   else if (bt === 'vest') { for (let y = Y(16); y <= 20 + dy; y += 2) s.fix(14, y, '#e8dcc0'); }
   else if (bt === 'robe') s.line(13, Y(15), 13, 22 + dy, null, R.gold.base);
   s.rect(8, 20 + dy, 8, 1, belt); s.fix(14, 20 + dy, '#f2c84a');
+  /* walking: the near arm swings against the near leg (back as it steps forward), hanging as the legs pass */
+  if (wk >= 0) { const sw = [-1, 0, 1, 0][wk], hx = 12 + sw * 3, hy = 21 - Math.abs(sw);
+    s.line(11, Y(15), hx - (sw < 0 ? -1 : 0), hy - 1, br); s.line(12, Y(15), hx + (sw > 0 ? 0 : 1), hy - 1, br); s.rect(hx, hy, 2, 2, sk); }
   /* head in profile: face to the right, the ear mid-head, a nose and a mouth */
   s.ell(11.5, Y(8.3), 5.2, 5.1, sk); s.rect(10, Y(13), 3, 1, sk); s.dot(17, Y(10), sk);
   s.fix(10, Y(8), sk.lo); s.fix(10, Y(9), sk.lo); s.fix(9, Y(9), sk.lo);                                                /* ear */
@@ -14478,7 +14527,7 @@ function sceneFor(town, stages = {}, extras = {}) {
       if (sq === 'brazier') { f('#ff8a2a', sqc[0] - 5, sqc[1] - 25, 10, 6); f('#fff0a0', sqc[0] - 2, sqc[1] - 24, 4, 3); META.lamps.push([sqc[0], sqc[1] - 23, '#ff9a3a']); } else if (sq === 'shrine') { f('#d8a840', sqc[0] - 3, sqc[1] - 26, 6, 6); f('#fff0b0', sqc[0] - 1, sqc[1] - 25, 2, 2); META.lamps.push([sqc[0], sqc[1] - 23, '#ffd890']); } else { f('#141018', sqc[0] - 4, sqc[1] - 26, 6, 7); f(col, sqc[0] - 3, sqc[1] - 25, 4, 5); } });
     else put(sqc[1] + 8, () => { shadow(sqc[0], sqc[1] + 6, 16, 4); f('#2a2a34', sqc[0] - 14, sqc[1] - 6, 28, 12); f('#7a7a86', sqc[0] - 13, sqc[1] - 5, 26, 10); f('#244a6a', sqc[0] - 11, sqc[1] - 4, 22, 6); f('#4a8ab0', sqc[0] - 9, sqc[1] - 3, 10, 1); f('#2a2a34', sqc[0] - 2, sqc[1] - 16, 4, 12); f('#9a9aa4', sqc[0] - 1, sqc[1] - 15, 2, 10); f('#9ad0f0', sqc[0] - 3, sqc[1] - 18, 6, 2); }); }
   /* ---- 8 restoration sites: a worked plot each, the site at its stage; hidden relic sites are just grass ---- */
-  for (const { id, X, Y } of sites) { const pj = D.PROJECTS[id], sg = stages[id] || 0;
+  for (const { id, X, Y } of sites) { if (extras.skip && extras.skip.includes(id)) continue; /* a site its caller draws itself (the opening's belfry, js/intro.js) */ const pj = D.PROJECTS[id], sg = stages[id] || 0;
     /* a relic's plot waits as a little garden with a bench until the relic is brought home (nothing names it) */
     if (pj.relic && sg < 4) { put(Y + 30, () => { shadow(X + 16, Y + 28, 14, 3, .25); f('#2a1c14', X + 3, Y + 21, 26, 9); f('#4a3220', X + 4, Y + 22, 24, 7); for (let q = 0; q < 6; q++) { f('#2e4a2a', X + 5 + q * 4, Y + 22, 3, 3); f(pick(['#c86a8a', '#d8c060', '#e8e0f0', '#8aa8e8'], () => hash2(q, X)), X + 6 + q * 4, Y + 22, 1, 1); }
       f('#1a1008', X + 6, Y + 12, 20, 6); f('#6e4a2c', X + 7, Y + 12, 18, 3); f('#8a6040', X + 7, Y + 12, 18, 1); f('#3e2818', X + 8, Y + 15, 2, 3); f('#3e2818', X + 22, Y + 15, 2, 3); }); continue; }
@@ -15468,6 +15517,7 @@ const PENT = [0, 2, 4, 7, 9];
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 const S = () => DQ.S.settings;
 const HUSH_OPEN = 20000; /* the hush filter's resting cutoff: wide open, inaudible */
+let musDim = 1; /* the opening thins the music while the town empties (DQ.musicDim) */
 
 function init() {
   if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
@@ -15490,7 +15540,7 @@ function applyVolumes() {
   if (!ctx) return; const s = S(), t = ctx.currentTime;
   master.gain.setTargetAtTime(s.muted ? 0 : (s.masterVol ?? 1), t, .05);
   sfxG.gain.setTargetAtTime(s.sfx ? s.vol * .8 : 0, t, .05);
-  musG.gain.setTargetAtTime(s.music ? s.musicVol * .45 : 0, t, .3);
+  musG.gain.setTargetAtTime(s.music ? s.musicVol * .45 * musDim : 0, t, .3);
   /* ambience sits under everything, and dips during fights so combat reads clearly */
   if (ambG) ambG.gain.setTargetAtTime(s.ambience === false ? 0 : (s.ambVol ?? .45) * .6 * (DQ.act && DQ.act.kind === 'fight' ? .25 : 1), t, .8);
 }
@@ -16233,6 +16283,22 @@ DQ.bellTick = () => { let h = null; try { h = bellClock(); } catch (e) {} if (h 
 let ambMeter = null; DQ.ambienceLevel = () => { if (!ctx) return null; if (!ambMeter) { ambMeter = ctx.createAnalyser(); ambMeter.fftSize = 2048; ambG.connect(ambMeter); } const d = new Float32Array(ambMeter.fftSize); ambMeter.getFloatTimeDomainData(d); let pk = 0; for (const x of d) pk = Math.max(pk, Math.abs(x)); return { peak: pk, bus: ambG.gain.value }; };
 DQ.bellState = () => ({ last: bellLast, rung: bellRung.slice(), log: bellLog.slice(), ok: bellOk() });
 const ambWatch = () => { if (!ambLoop) ambLoop = setInterval(() => { if (ctx && !document.hidden) DQ.ambienceRefresh(); DQ.bellTick(); }, 2000); };
+
+/* ---------- The opening's sounds (owner, 28 Nov 2026: the opening redone as a living scene, js/intro.js) ----------
+   The noon bell is the story's own sound, so it plays on the effects bus (Effects volume and Mute, never hushed) with
+   the effects reverb: the same cast bell as the hour bells (BELL above), a few strokes, about twice as present as an
+   hour bell heard from the Home page. The knock at the lodging door is the same wooden knock as Gloomfen's. Both are
+   quiet in a simulation or forecast, while hidden, before the first click and with effects off. */
+const storyOk = () => { const s = S(); return !!(ctx && ctx.state === 'running' && s.sfx && !s.muted && !quiet() && !(typeof document !== 'undefined' && document.hidden)); };
+DQ.storyBell = (kind = 'church', strokes = 3, k = 2.4) => { if (!storyOk() || !BELL[kind]) return null; const plan = Object.assign(DQ.bellPlan('willowbrook', 12), { kind, strokes });
+  const lp = bandOf('lowpass', 5200, .5), g = gainOf(k), wet = gainOf(.45); lp.connect(g); g.connect(sfxG); g.connect(wet); wet.connect(sverb);
+  try { BELL[kind](lp, ctx.currentTime + .03, plan); } catch (e) { return null; } played['story:' + kind] = (played['story:' + kind] || 0) + 1; return plan; };
+DQ.storyKnock = () => { if (!storyOk()) return null; const g = gainOf(1.6); g.connect(sfxG); try { BELL.knock(g, ctx.currentTime + .02, { strokes: 2 }); } catch (e) { return null; } played['story:knock'] = (played['story:knock'] || 0) + 1; return true; };
+/* a wax seal cracking (a dry snap, the seal's dull give, then the paper unfolding) and a soft footstep on a dirt road */
+SFX.seal = () => { noise(.05, { type: 'highpass', f: 2600, v: .08 }); noise(.09, { type: 'bandpass', f: 900, q: 2, v: .06, at: .03 }); tone(jit(190), .08, { type: 'triangle', v: .045, at: .02, to: 120 }); paper(.4, { f: 2600, to: 1700, v: .035, at: .14 }); };
+SFX.step = () => noise(.07, { type: 'lowpass', f: jit(380, .18), v: .028 });
+/* the music thins while the town empties: a gentle dip of the music bus only (k 0 to 1), on top of the volume */
+DQ.musicDim = k => { musDim = Math.max(0, Math.min(1, +k || 0)); if (!ctx) return; const s = S(); musG.gain.setTargetAtTime(s.music ? s.musicVol * .45 * musDim : 0, ctx.currentTime, 1.2); };
 
 DQ.musicMode = id => { modeId = id === 'title' ? 'title' : 'game'; if (ctx) musicTick(); };
 DQ.musicStart = () => { init(); applyVolumes(); if (S().music) musicStep(); DQ.ambienceRefresh(); ambWatch(); };
@@ -29672,6 +29738,9 @@ Q.heroFigureUrl = look => heroUrl(look);
 const sideUrl = (look, extra = {}) => { const o = heroOpts(look, { shield: null, weapon: null }), p = extra.posture && extra.posture !== 'stand' ? extra.posture : null;
   const k = { face: o.face, skin: o.skin, hair: o.hair, tunic: o.tunic, helm: o.helm, body: o.body, legs: o.legs, cape: o.cape }; if (p) k.posture = p; if (extra.expr) k.expr = extra.expr; return A.heroSideUrl(k); };
 Q.heroWorkFigureUrl = (look, posture) => sideUrl(look, { posture });
+/* walking home in profile (the opening, js/intro.js): frame 0 to 3 of the stride, the weapon slung across the back */
+Q.heroWalkUrl = (look, frame = 0) => { const o = heroOpts(look);
+  return A.heroSideUrl({ face: o.face, skin: o.skin, hair: o.hair, tunic: o.tunic, helm: o.helm, body: o.body, legs: o.legs, cape: o.cape, walk: ((frame % 4) + 4) % 4, sling: o.weapon || null }); };
 /* the colours the work rig dresses the arms in: sleeves of the body armour (or the tunic) and the skin */
 Q.heroRigLook = look => { const o = heroOpts(look); return { skin: o.skin, sleeve: o.body ? o.body.col : o.tunic, sleeveType: o.body ? o.body.type : 'cloth' }; };
 /* the same figure with an idle-life expression (blink, yawn, stretch, pack, wipe; js/personality.js); no frame is the
@@ -30854,6 +30923,19 @@ for(const [id,p]of Object.entries(D.PROJECTS)){
  if(existing){const frames=existing.frames;existing.frames=()=>[...frames(),{speaker:'Narrator',shot:'wide',text:p.reward}];continue;}
  add('restore_'+id,{title:p.name,town:p.town,project:id,eligible:()=>!!S().projects[id],frames:()=>[{speaker:'Narrator',shot:'wide',text:p.story},...(voice?[{speaker,shot:'wide',text:voice[1]}]:[]),{speaker:'Narrator',shot:'wide',text:p.reward}]});
 }
+/* The opening's last scene (js/intro.js, owner 28 Nov 2026): Wren meets the hero at the broken well. One reply, flavour
+   only, kept in S.choices.story_opening; the plain goal comes just before it. It moves on by itself inside the opening;
+   after the opening it can be replayed from Story so far, and an unanswered reply can be given there. */
+add('opening_home',{title:'Home again',town:'willowbrook',cinematic:true,choiceKey:'story_opening',ask:'What do you say?',doneLabel:'Continue',eligible:()=>!!((Q.introLive&&Q.introLive())||(Q.introSeen&&Q.introSeen())),frames:()=>[
+ {speaker:'Elder Wren',shot:'well',text:'There you are, pet. And in boots. I knew you’d read the whole letter.'},
+ {speaker:'Elder Wren',shot:'well',text:'That’s the well. Goblins broke the winch, and the bucket went wherever buckets go. Half the green packed up after the bell went.'},
+ {speaker:'Elder Wren',shot:'well',text:'Here’s how it works, as far as I can tell. Get a town back on its feet, see off whatever is blocking its road, and the next town opens up.'},
+ {speaker:'Elder Wren',shot:'well',text:'Somewhere at the end of that road is whoever has the bells.'}
+],choices:[
+ {id:'kettle',label:'Kettle on, then',effect:'The polite answer.',response:'It’s been on since Tuesday, pet. I wasn’t sure which Tuesday you meant. Come in and get warm.'},
+ {id:'word',label:'I’d like a word with them',effect:'The honest answer.',response:'So would I. You’ll have to queue behind Mabel. Start with the well; the road will keep.'},
+ {id:'boots',label:'I brought boots',effect:'The practical answer.',response:'Good. Mind the third stair, then the goblins. In that order.'}
+]});
 /* Existing authored adventures become voiced storyboards; their objectives, gates and rewards stay authoritative. */
 for(const q of D.QUESTS.filter(q=>q.adventure))add('quest_'+q.id,{title:q.name,town:q.town,quest:q.id,eligible:()=>accepted(q.id),frames:()=>[{speaker:q.giver,shot:'wide',text:q.blurb},{speaker:q.giver,shot:'gate',text:q.choices?'When you’ve finished, we’ll need to decide what to do next. I’ll explain the options before you choose.':'The tasks are written in your quest journal, so you can check what’s left whenever you need to. Come back when you’ve finished, and we’ll take it from there.'}]});
 })();
@@ -30867,7 +30949,7 @@ const defs=D.STORY_SCENES,seen=id=>!!S().seen['story:'+id],quiet=()=>Q.forecasti
 let active=null,pending=null;
 /* Main-story quests are explicit; discoveries, projects and regional arrivals are quiet entries. */
 for(const q of D.QUESTS)if(q.id==='first_steps'||q.id==='goblin_menace'||q.obj.some(o=>o.ev==='boss'))q.main=true;
-Q.storyCinematic=s=>!!(s&&(s.quest&&D.QM[s.quest]?.main||s.type==='quest'&&D.QM[s.source]?.main||s.boss&&D.QUESTS.some(q=>q.main&&q.obj.some(o=>o.ev==='boss'&&o.key===s.boss))));
+Q.storyCinematic=s=>!!(s&&(s.cinematic||s.quest&&D.QM[s.quest]?.main||s.type==='quest'&&D.QM[s.source]?.main||s.boss&&D.QUESTS.some(q=>q.main&&q.obj.some(o=>o.ev==='boss'&&o.key===s.boss))));
 
 const text=v=>typeof v==='function'?v():v;
 Q.availableStories=()=>Object.values(defs).filter(s=>s.eligible());
@@ -30888,13 +30970,15 @@ Q.chooseStory=(id,pick)=>{
  if(!Q.save()){Q.S=before;Q.fxDirty();return false;}return true;
 };
 const close0=Q.closeModal;
-Q.closeModal=()=>{if(active){S().seen['story:'+active.id]=1;active=null;Q.save();}return close0();};
-const finish=()=>{if(!active)return;const id=active.id;S().seen['story:'+id]=1;Q.journal('story',`Remembered “${defs[id].title}”.`,'book');active=null;Q.save();Q.closeModal();};
+/* a scene opened with onDone (the opening, js/intro.js) hears when it closes, however it closes */
+const ended=a=>{if(!a)return;clearTimeout(a.timer);if(a.onDone)setTimeout(a.onDone,0);};
+Q.closeModal=()=>{if(active){const a=active;S().seen['story:'+a.id]=1;active=null;Q.save();const r=close0();ended(a);return r;}return close0();};
+const finish=()=>{if(!active)return;const a=active,id=a.id;S().seen['story:'+id]=1;Q.journal('story',`Remembered “${defs[id].title}”.`,'book');active=null;Q.save();Q.closeModal();ended(a);};
 function draw(){
  if(!active)return;const s=defs[active.id],frames=s.frames(),decision=active.index>=frames.length,chosen=choiceOf(s),c=s.choices?.find(c=>c.id===chosen),f=frames[Math.min(active.index,frames.length-1)];
  const speaker=decision&&c?(s.type==='quest'?D.QM[s.source].giver:f.speaker):f.speaker;
  const legacyDecision=s.type==='quest'&&Q.questState(D.QM[s.source])==='done'&&!chosen;
- const body=decision?(legacyDecision?'This chapter was completed before its decision was recorded. Your earned progress and rewards are preserved.':c?text(c.response||c.text):'What will you do?'):text(f.text);
+ const body=decision?(legacyDecision?'This chapter was completed before its decision was recorded. Your earned progress and rewards are preserved.':c?text(c.response||c.text):(s.ask||'What will you do?')):text(f.text);
  const choices=decision&&!chosen&&!legacyDecision?(s.choices||[]).map(c=>`<button class="story-choice btn" data-do="storychoose" data-a="${s.id}" data-b="${c.id}" ${missing(c)?'disabled':''}><b>${esc(c.label)}</b><small>${esc(missing(c)||text(c.effect)||'This choice will be remembered.')}</small></button>`).join(''):'';
  const step=Math.min(active.index+1,frames.length+(s.choices?1:0)),total=frames.length+(s.choices?1:0);
  const root=active.modal.querySelector('.m-body');
@@ -30907,18 +30991,24 @@ function draw(){
  line.textContent=body;line.setAttribute('aria-label',body+(waiting?' Choose a response below.':' Click for the next line.'));
  root.querySelector('.story-response').innerHTML=decision&&c?`<small class="story-remembered">Your decision: ${esc(c.label)}${c.effect?' · '+esc(text(c.effect)):''}</small>`:'';
  root.querySelector('.story-options').innerHTML=(active.error?`<p class="story-error" role="alert">${esc(active.error)}</p>`:'')+(choices?`<div class="story-choices" role="group" aria-label="Your decision">${choices}</div>`:'');
- root.querySelector('.story-controls').innerHTML=`<button class="btn sm" data-do="storyskip">${waiting?'Decide later':'Skip scene'}</button><small>${step} / ${total} · ${waiting?'Choose a response':'Click the dialogue or press Space'} · your task keeps running</small>${choices?'':`<button class="btn primary" data-do="storynext">${decision||(!s.choices&&active.index===frames.length-1)?'Return to game':'Continue'}</button>`}`;
+ root.querySelector('.story-controls').innerHTML=`<button class="btn sm" data-do="storyskip">${waiting?'Decide later':'Skip scene'}</button><small>${step} / ${total} · ${waiting?'Choose a response':'Click the dialogue or press Space'} · your task keeps running</small>${choices?'':`<button class="btn primary" data-do="storynext">${decision||(!s.choices&&active.index===frames.length-1)?(s.doneLabel||'Return to game'):'Continue'}</button>`}`;
  const reduced=S().settings.reduceFx||matchMedia('(prefers-reduced-motion: reduce)').matches;
  line.getAnimations().forEach(a=>a.cancel());person.getAnimations().forEach(a=>a.cancel());
  if(!reduced){line.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});if(!waiting)person.animate([{transform:'translateY(0)'},{transform:'translateY(-2px)',offset:.25},{transform:'translateY(0)',offset:.5},{transform:'translateY(-1px)',offset:.75},{transform:'translateY(0)'}],{duration:850,easing:'ease-in-out'});}
  line.focus({preventScroll:true});
+ /* a scene that moves on by itself (the opening): each line waits its reading time; a decision waits longer, then
+    the scene closes undecided (Decide later), so nothing is ever chosen for the player */
+ clearTimeout(active.timer);
+ if(active.auto){const a=active,ms=waiting?a.auto.decide:Math.max(2600,Math.min(7000,800+body.split(/\s+/).length*a.auto.word));a.timer=setTimeout(()=>{if(active!==a)return;if(waiting||decision)return finish();UI.DO.storynext();},ms);}
 }
-Q.openStory=id=>{
+Q.storyActive=()=>active?{id:active.id,index:active.index}:null;
+Q.openStory=(id,opts={})=>{
  const s=defs[id];if(typeof s?.eligible!=='function'||!s.eligible()||quiet()||!Q.started)return false;
  if(!Q.storyCinematic(s)){if(s.project){UI.restoredSite=s.project;UI.DO.openproject(s.project);}else if(s.type==='discovery')discovery0(s.source);else if(s.type==='quest')UI.openQuestChoice(s.source);else{UI.storyEntry=id;Q.go('journal');}return true;}
  if(s.type==='quest'&&Q.questState(D.QM[s.source])==='ready'&&UI.view!=='quests'){UI.questTab='active';UI.tab.questSelected=s.source;Q.go('quests');}
  Q.closeModal();if(pending===id)pending=null;const m=Q.modal({title:s.title,wide:true,body:'',actions:[]});m.classList.add('story-modal');m.dataset.story=id;
- active={id,index:0,modal:m};draw();return true;
+ if(opts.cls)m.classList.add(opts.cls);
+ active={id,index:0,modal:m,onDone:opts.onDone||null,auto:opts.auto||null};draw();return true;
 };
 Object.assign(UI.DO,{
  storyopen:id=>Q.openStory(id),storynext:()=>{if(!active)return;const s=defs[active.id];if(active.index>=s.frames().length-1&&!s.choices||active.index>=s.frames().length)return finish();active.index++;draw();},
@@ -33571,132 +33661,569 @@ UI.pageTurning = () => !!turning;
 
 </script>
 <script>
-/* Idlewick: the opening (Nov 2026). A full-screen story for a new hero, played once after the character is made:
-   why the towns are quiet (the noon bells went missing), who you are (someone Wren wrote to), and what you do
-   (mend one town, and the road to the next opens). Built from the game's own pixel art at whole-number scales.
-   It moves on by itself; a click or key hurries it along, and only after that first click does Skip appear.
-   Reduced motion keeps the words and drops the pans. Replay from Home > Journal. Recorded in S.seen.intro. */
+/* Idlewick: the opening's own pictures (owner, 28 Nov 2026: "use the new interactive characters, motions etc to make the
+   opening scene far more immersive"; played by js/intro.js). Original pixel art drawn in code with the town painter's
+   material engine (js/town_scene.js A.townPx: five-step ramps, top-left light, an outline in each material's darkest
+   colour) and the district painter's palette (js/towns.js, js/pixel_world.js A.TOWN):
+   - the noon bell in its belfry, close up and side-on (64 x 64), swinging through five drawn angles, and the same
+     belfry with only the rope left, swaying;
+   - the belfry seen from above at town scale (32 x 32), built from the town's own bell-frame site piece, with the bell
+     nudged a pixel either way as it swings, or the rope alone;
+   - the road home seen side-on (320 x 180, the district's pixel scale, so the 24 x 32 hero walks it at 1.7 m): sky,
+     far hills, the hedgerow and trees, and the road and its verge, each layer seamless so it can scroll for parallax;
+     the season's touch on the verge; a signpost for Willowbrook;
+   - Wren's envelope with its red wax seal (small on the lodging floor, large when opened) and the two halves of the
+     seal as it breaks.
+   Every scenery layer passes through the one dusk grade (A.dusk); the hero, the bell and the envelope do not. */
+(() => {
+const Q = window.DQ, A = Q.pixelArt; if (!A) return;
+const cache = new Map(), memo = (k, make) => { if (!cache.has(k)) cache.set(k, make()); return cache.get(k); };
+const TP = () => A.townPx, mixc = (a, b, k) => (A.mix ? A.mix(a, b, k) : a);
+const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const rot = (pts, a, px, py) => { const c = Math.cos(a), s = Math.sin(a); return pts.map(([x, y]) => [px + (x - px) * c - (y - py) * s, py + (x - px) * s + (y - py) * c]); };
+
+/* ---------- the belfry, close up (64 x 64), with its own patch of sky ---------- */
+const SKY = { noon: ['#5a8ac8', '#6e9ad0', '#86acd8', '#9cbedc'], dusk: ['#2a2a54', '#4a3a64', '#8a5a6a', '#c8806a'], dawn: ['#3a4a7a', '#7a6a8a', '#c89a8a', '#e8c09a'], night: ['#0a0e1e', '#10162a', '#161e34', '#1c2640'] };
+const ANGLES = [-26, -13, 0, 13, 26];
+A.openingBelfry = (state = 'bell', i = 2, sky = 'noon') => memo(`belfry:${state}:${i}:${sky}`, () => {
+  const { Spr, fixed } = TP(), s = new Spr(64, 64);
+  const stone = s.mat('#7e7a86'), stoneDk = s.mat('#5a5664'), wood = s.mat('#7a5232'), roof = s.mat('#a8463a'), bronze = s.mat('#c89640', { warm: '#fff0b8' }), iron = s.mat('#4a4a54'), rope = s.mat('#c8b48a');
+  /* the roof, the two piers and the sill */
+  s.poly([[2, 18], [32, 1], [62, 18], [58, 21], [6, 21]], roof); s.edges(roof); for (let x = 8; x < 58; x += 5) s.line(x, 19, x + 3, 14 - Math.abs(32 - x) * .25, roof, 1);
+  /* dressed stone in courses: each block a shade of its own, the mortar dark, the joints staggered, a lichen spot or two */
+  const moss = s.mat('#5e7a46'), rnd = A.townSeeded ? A.townSeeded('belfry-stone') : Math.random;
+  const blocks = (x0, y0, w, h) => { for (let y = y0, row = 0; y < y0 + h; y += 4, row++) { let x = x0 - (row % 2 ? 3 : 0);
+    while (x < x0 + w) { const bw = 5 + Math.floor(rnd() * 3), lv = [1.6, 2, 2, 2.4, 3][Math.floor(rnd() * 5)];
+      for (let j = 0; j < 4; j++) for (let i = 0; i < bw; i++) { const X = x + i, Y = y + j; if (X < x0 || X >= x0 + w || Y >= y0 + h) continue; const mortar = j === 3 || i === bw - 1;
+        s.set(X, Y, mortar ? stoneDk : stone, mortar ? 1 : (j === 0 || i === 0) ? Math.min(4, lv + 1) : lv); }
+      if (rnd() < .12) s.dot(x + 1, y + 2, moss, 2); x += bw; } } };
+  blocks(4, 20, 10, 44); blocks(50, 20, 10, 44);
+  blocks(4, 58, 56, 6); s.line(4, 58, 59, 58, stone, 3);
+  /* the arch over the opening, its voussoirs picked out */
+  for (let x = 14; x < 50; x++) { const d = (x - 31.5) / 18, y = Math.round(21 + 8 * (1 - Math.sqrt(Math.max(0, 1 - d * d)))); for (let yy = 21; yy <= y; yy++) s.set(x, yy, (x - 14) % 6 === 5 ? stoneDk : stone, yy === y ? 1 : (x - 14) % 6 === 0 ? 3 : 2); }
+  /* the headstock beam the bell hangs from */
+  s.rect(12, 22, 40, 3, wood); s.dot(31, 25, iron, 2); s.dot(32, 25, iron, 2);
+  const a = (ANGLES[i] || 0) * Math.PI / 180, P = [32, 25];
+  const twisted = (x0, y0, x1, y1) => { for (let y = Math.round(y0); y <= y1; y++) { const t = (y - y0) / Math.max(1, y1 - y0), x = Math.round(x0 + (x1 - x0) * t); s.set(x, y, rope, y % 3 === 0 ? 1 : 3); s.set(x + 1, y, rope, y % 3 === 1 ? 1 : 2); } };
+  if (state === 'bell') {
+    /* the bell: crown, shoulder, waist and the flared lip, lit on its left; it turns on the beam */
+    const body = [[28, 26], [36, 26], [38, 29], [39, 36], [41, 43], [46, 49], [46, 51], [18, 51], [18, 49], [23, 43], [25, 36], [26, 29]];
+    s.poly(rot(body, a, ...P), bronze);
+    /* cast bronze is round: light it across its own width (lit on the left, a bright streak, shadow on the right),
+       measured in the bell's own frame so the light stays put on the metal as it swings */
+    const half = ly => ly < 29 ? 4 + (ly - 26) * .7 : ly < 36 ? 6 + (ly - 29) * .15 : ly < 43 ? 7 + (ly - 36) * .3 : 9 + (ly - 43) * .8;
+    for (let y = 0; y < 64; y++) for (let x = 0; x < 64; x++) { if (s.get(x, y) !== bronze) continue; const [lx, ly] = rot([[x + .5, y + .5]], -a, ...P)[0], u = (lx - 32) / Math.max(2, half(ly));
+      s.set(x, y, bronze, u < -.7 ? 3 : u < -.42 ? 4 : u < -.1 ? 3 : u < .5 ? 2 : u < .85 ? 1 : 0); }
+    const [l0, l1] = rot([[19, 49], [45, 49]], a, ...P); s.line(l0[0], l0[1], l1[0], l1[1], bronze, 1); /* the band at the lip */
+    /* the clapper lags the swing a little */
+    const [cx, cy] = rot([[32, 50]], a * .55, ...P)[0]; s.ell(cx, cy + 1, 2.2, 2.2, iron);
+    /* the bell rope: from the wheel at the lip straight down past the sill to the ringing floor, its twist showing */
+    const [r0] = rot([[34, 51]], a * .3, ...P); twisted(r0[0], r0[1], 33 + Math.round(a * 6), 63);
+  } else {
+    /* only the rope, from the empty beam down to the floor, swaying a bit guiltily */
+    const sway = [-4, -2, 0, 2, 4][i] || 0; twisted(32, 25, 32 + sway, 63);
+  }
+  s.outline();
+  const c = canvas(64, 64), x = c.getContext('2d'), bands = SKY[sky] || SKY.noon;
+  bands.forEach((col, k) => { x.fillStyle = col; x.fillRect(0, k * 16, 64, 16); });
+  if (sky === 'night' || sky === 'dusk') { x.fillStyle = '#f4ecd0'; for (const [sx, sy] of [[18, 30], [44, 34], [26, 44], [40, 28], [21, 52]]) x.fillRect(sx, sy, 1, 1); }
+  x.drawImage(s.canvas(), 0, 0); return c; });
+A.OPENING_BELL_ANGLES = ANGLES;
+/* a pigeon on the belfry roof (11 x 8, facing left): sitting, then wings up and down as it flaps off at the first stroke */
+A.openingPigeon = (frame = 'sit') => memo('pigeon:' + frame, () => { const { Spr } = TP(), s = new Spr(11, 9), body = s.mat('#8a8c9a'), wing = s.mat('#5e6070'), neck = s.mat('#5a8a7a', { warm: '#c8a0e0' }), beak = s.mat('#d8c8b0'), foot = s.mat('#d8707a');
+  s.ell(6, 5.5, 3.6, 2.4, body); s.ell(2.6, 3.4, 1.7, 1.6, body); s.dot(2, 4, neck, 3); s.dot(3, 5, neck, 2); s.dot(0, 3, beak, 3); s.dot(2, 2, s.mat('#e86a2a'), 4);
+  s.rect(9, 5, 2, 1, wing, { flat: 1 });
+  if (frame === 'up') { s.poly([[5, 4], [8, 0], [10, 0], [8, 4]], wing); s.poly([[4, 4], [4, 1], [6, 1], [6, 4]], wing, { flat: 1 }); }
+  else if (frame === 'down') { s.poly([[5, 6], [8, 8], [10, 8], [8, 5]], wing); }
+  else { s.ell(6.5, 5, 2.4, 1.4, wing); s.dot(5, 8, foot, 2); s.dot(7, 8, foot, 2); }
+  s.outline(); return s.canvas(); });
+
+/* ---------- the belfry from above, at town scale (32 x 32): the town's own bell-frame site, the bell nudged or gone ---------- */
+A.openingBelfryTop = (state = 'bell', nudge = 0) => memo(`belfrytop:${state}:${nudge}`, () => {
+  const c = canvas(32, 32), x = c.getContext('2d'), piece = A.stagePiece ? A.stagePiece('bell', 4) : null; if (!piece) return c;
+  const src = piece.canvas(), bell = canvas(14, 13); bell.getContext('2d').drawImage(src, 9, 9, 14, 13, 0, 0, 14, 13);
+  x.drawImage(src, 0, 0); x.clearRect(9, 9, 14, 13);
+  if (state === 'bell') x.drawImage(bell, 9 + nudge, 9);
+  else { const f = (col, a, b, w, h) => { x.fillStyle = col; x.fillRect(a, b, w, h); }; for (let y = 9; y < 20; y++) { const dx = Math.round(nudge * (y - 9) / 11); f('#2a1c10', 15 + dx, y, 3, 1); f('#c8b48a', 16 + dx, y, 1, 1); } f('#e0d0a8', 16 + nudge, 20, 1, 1); }
+  return c; });
+
+/* ---------- the road home, side-on (320 x 180), four seamless layers for parallax ---------- */
+const RW = 320, RH = 180, GROUND = 160; /* the hero's feet */
+A.OPENING_ROAD = { w: RW, h: RH, ground: GROUND };
+const wrapDraw = (x, img, X, Y) => { for (const o of [-RW, 0, RW]) x.drawImage(img, Math.round(X + o), Math.round(Y)); };
+const ridgeY = (i, base, amp, seed, cycles = [2, 5]) => { const t = i / RW * Math.PI * 2; return Math.round(base + Math.sin(t * cycles[0] + seed) * amp + Math.sin(t * cycles[1] + seed * 2) * amp * .35); };
+const ridge = (x, col, base, amp, seed, cycles = [2, 5]) => { x.fillStyle = col; for (let i = 0; i < RW; i++) { const y = ridgeY(i, base, amp, seed, cycles); x.fillRect(i, y, 1, RH - y); } };
+A.openingRoad = (town = 'willowbrook', season = 'autumn') => memo(`road:${town}:${season}`, () => {
+  const T = (A.TOWN && A.TOWN[town]) || { sky: ['#a8d8ec', '#b8e0ee', '#cbe8ef'], hills: ['#8cbf74', '#79b04f'], ground: '#6aa244', path: '#cdb07a' };
+  const st = (A.TOWN_STYLE && A.TOWN_STYLE[town]) || { leaf: '#5f9a45', walls: ['#e8dcc0'], roofs: ['#c8a050'] }, rnd = A.townSeeded ? A.townSeeded('road:' + town) : Math.random;
+  const L = { sky: canvas(RW, RH), far: canvas(RW, RH), mid: canvas(RW, RH), near: canvas(RW, RH) };
+  const g = k => L[k].getContext('2d'), f = (x, col, a, b, w, h) => { x.fillStyle = col; x.fillRect(Math.round(a), Math.round(b), Math.round(w), Math.round(h)); };
+  /* sky: bands from high to the horizon, and a few flat-bottomed clouds */
+  { const x = g('sky'), cols = [mixc(T.sky[0], '#1a2a5a', .35), mixc(T.sky[0], '#1a2a5a', .15), T.sky[0], T.sky[1], T.sky[2], mixc(T.sky[2], '#fff2c8', .25)];
+    cols.forEach((c, k) => f(x, c, 0, k * 20, RW, 20)); f(x, cols[5], 0, 120, RW, RH - 120);
+    /* a dithered seam between bands, so the sky steps rather than stripes */
+    for (let k = 1; k < 6; k++) for (let i = 0; i < RW; i++) { if ((i + k) % 2 === 0) f(x, cols[k - 1], i, k * 20, 1, 1); if ((i + k) % 2 === 1) f(x, cols[k], i, k * 20 - 1, 1, 1); if (i % 4 === k % 4) f(x, cols[k - 1], i, k * 20 + 1, 1, 1); }
+    for (const [cx, cy, w] of [[30, 24, 40], [140, 14, 56], [236, 30, 34], [290, 50, 26]]) { const cl = mixc(T.sky[0], '#ffffff', .78), sh = mixc(T.sky[0], '#ffffff', .5);
+      for (const o of [-RW, 0, RW]) { f(x, cl, cx + o, cy, w, 4); f(x, cl, cx + o + 6, cy - 3, w - 14, 3); f(x, cl, cx + o + 14, cy - 5, w - 26, 2); f(x, sh, cx + o + 2, cy + 4, w - 4, 1); } } }
+  /* far: two lines of hills, the nearer a little greener, with a dark hedge line along the nearer crest */
+  { const x = g('far'); ridge(x, mixc(T.hills[0], T.sky[2], .45), 92, 8, 1.3); ridge(x, mixc(T.hills[1], T.sky[2], .2), 108, 6, 4.1, [3, 7]);
+    for (let i = 0; i < RW; i += 1) if ((i * 13) % 17 < 9) f(x, mixc(T.hills[1], '#1a2a18', .35), i, ridgeY(i, 108, 6, 4.1, [3, 7]), 1, 1); }
+  /* mid: a hedgerow along the field behind the road, its trees, and a few fence posts */
+  { const x = g('mid'), leaf = st.leaf || '#5f9a45', hedge = mixc(leaf, '#1a2a18', .3), hedgeLt = mixc(leaf, '#fff2c8', .12);
+    for (let i = 0; i < RW; i += 7) { const r = 5 + Math.round(Math.abs(Math.sin(i * .31)) * 3); for (const o of [-RW, 0, RW]) { x.fillStyle = hedge; x.beginPath(); x.ellipse(i + o, 142, r, r * .8, 0, 0, 7); x.fill(); x.fillStyle = hedgeLt; x.fillRect(i + o - 2, 142 - r * .8 + 1, 3, 1); } }
+    f(x, hedge, 0, 142, RW, 8);
+    const tree = id => { try { const sp = A.treeSprite && A.treeSprite(id); return sp ? A.toCanvas(sp) : null; } catch (e) { return null; } };
+    for (const [tx, id] of [[14, 'normal'], [118, 'oak'], [204, 'normal'], [262, 'willow']]) { const c = tree(id) || tree('normal'); if (c) wrapDraw(x, c, tx, 148 - c.height); }
+    for (let q = 6; q < RW; q += 26) { f(x, '#3e2a1a', q, 136, 2, 14); f(x, '#6a4a2c', q, 136, 1, 14); }
+    f(x, '#3e2a1a', 0, 139, RW, 1); f(x, '#3e2a1a', 0, 144, RW, 1);
+    if (season === 'spring') for (let i = 0; i < 60; i++) f(x, ['#f4c4d0', '#ffffff', '#f8dce4'][i % 3], rnd() * RW, 134 + rnd() * 12, 1, 1);
+    if (season === 'winter') for (let i = 0; i < RW; i += 2) f(x, '#e8eef6', i, 134 + Math.round(Math.abs(Math.sin(i * .31)) * -3), 2, 1); }
+  /* near: the verge, the road with its ruts and stones, and grass in front */
+  { const x = g('near'), grass = T.ground, grassDk = mixc(grass, '#1a2a18', .35), road = mixc(T.ground, T.path || '#cdb07a', .7), roadDk = mixc(road, '#3a2a1a', .3), roadLt = mixc(road, '#fff2c8', .25);
+    f(x, grass, 0, 148, RW, RH - 148); f(x, mixc(grass, '#fff2c8', .2), 0, 148, RW, 1);
+    f(x, road, 0, 153, RW, 15); f(x, roadDk, 0, 153, RW, 1); f(x, roadDk, 0, 167, RW, 1);
+    for (let i = 0; i < RW; i += 1) { if ((i * 7) % 11 < 6) f(x, roadDk, i, 157, 1, 1); if ((i * 5) % 13 < 7) f(x, roadDk, i, 163, 1, 1); }
+    for (let i = 0; i < 46; i++) { const sx = Math.floor(rnd() * RW), sy = 154 + Math.floor(rnd() * 12), w = 1 + Math.floor(rnd() * 3); for (const o of [-RW, 0, RW]) { f(x, roadDk, sx + o, sy + 1, w, 1); f(x, roadLt, sx + o, sy, w, 1); } }
+    for (let i = 0; i < 90; i++) { const gx = Math.floor(rnd() * RW), gy = 168 + Math.floor(rnd() * 12), h = 2 + Math.floor(rnd() * 3); for (const o of [-RW, 0, RW]) { f(x, grassDk, gx + o, gy - h, 1, h); f(x, mixc(grass, '#fff2c8', .15), gx + o + 1, gy - h + 1, 1, h - 1); } }
+    for (let i = 0; i < 40; i++) { const gx = Math.floor(rnd() * RW), gy = 148 + Math.floor(rnd() * 5); for (const o of [-RW, 0, RW]) f(x, grassDk, gx + o, gy, 1, 2); }
+    const fl = season === 'autumn' ? ['#d8782a', '#c8482a', '#e8b040'] : season === 'winter' ? ['#f4f8fc', '#e8eef6', '#ffffff'] : season === 'summer' ? ['#f0d060', '#e0607a', '#f4f0f4'] : ['#f4c4d0', '#a07ae0', '#f0d060'];
+    for (let i = 0; i < (season === 'autumn' ? 70 : 34); i++) { const gx = Math.floor(rnd() * RW), gy = (season === 'autumn' && i % 2) ? 154 + Math.floor(rnd() * 13) : 169 + Math.floor(rnd() * 10); for (const o of [-RW, 0, RW]) f(x, fl[i % 3], gx + o, gy, season === 'autumn' ? 2 : 1, 1); } }
+  for (const k of ['sky', 'far', 'mid', 'near']) if (A.dusk) A.dusk(L[k]);
+  return L; });
+
+/* the signpost (32 x 44): a post, one board pointing on to Willowbrook and one pointing back; the place name is lettered
+   over the long board by the page, in the game's own pixel face */
+A.openingSignpost = () => memo('signpost', () => { const { Spr } = TP(), s = new Spr(36, 46), wood = s.mat('#8a6040'), dk = s.mat('#5a3e26'), paint = s.mat('#d8c8a0');
+  s.rect(16, 6, 4, 40, wood); s.line(16, 6, 16, 45, dk, 1);
+  s.poly([[1, 8], [29, 8], [35, 13], [29, 18], [1, 18]], wood); s.edges(wood); s.line(2, 9, 28, 9, paint, 3);
+  s.poly([[6, 24], [26, 24], [26, 30], [6, 30], [2, 27]], wood); s.edges(wood);
+  s.ell(18, 45, 5, 1.2, dk, { flat: 1 }); s.outline(); const c = s.canvas(); if (A.dusk) A.dusk(c); return c; });
+A.OPENING_SIGN_BOARD = [1, 8, 29, 11]; /* the long board's box, for the lettering */
+
+/* ---------- Wren's envelope ---------- */
+A.openingEnvelope = (size = 'small', open = false) => memo(`env:${size}:${open}`, () => { const { Spr } = TP(), big = size === 'big', W = big ? 48 : 18, H = big ? 32 : 12, s = new Spr(W, H + (open && big ? 14 : 0)), oy = open && big ? 14 : 0;
+  const paper = s.mat('#e8dcc0', { warm: '#fff8e8' }), fold = s.mat('#c8b890'), wax = s.mat('#b8302a', { warm: '#ff9a7a' });
+  s.rect(0, oy, W, H, paper); s.edges(paper);
+  const mid = Math.floor(W / 2), dip = big ? 16 : 6;
+  for (let i = 0; i < mid; i++) { const y = oy + Math.round(i * dip / mid); s.dot(i, y, fold, 1); s.dot(W - 1 - i, y, fold, 1); }
+  for (let i = 0; i < mid; i++) { const y = oy + H - 1 - Math.round(i * (H * .45) / mid); s.dot(i, y, fold, 2); s.dot(W - 1 - i, y, fold, 2); }
+  if (open && big) { s.poly([[0, oy], [mid, 0], [W - 1, oy]], paper); s.line(0, oy, mid, 0, fold, 1); s.line(mid, 0, W - 1, oy, fold, 1); }
+  else { const r = big ? 5 : 2; s.ell(mid - .5, oy + dip - (big ? 1 : 0), r, r, wax); if (big) { s.dot(mid - 2, oy + dip - 3, wax, 4); s.line(mid - 2, oy + dip - 1, mid + 1, oy + dip - 1, wax, 1); s.dot(mid, oy + dip + 1, wax, 1); } }
+  s.outline(); return s.canvas(); });
+/* the seal's two halves as it cracks (each 6 x 11) */
+A.openingSealHalf = side => memo('seal:' + side, () => { const { Spr } = TP(), s = new Spr(7, 12), wax = s.mat('#b8302a', { warm: '#ff9a7a' });
+  for (let y = 1; y < 11; y++) { const half = Math.round(Math.sqrt(Math.max(0, 25 - (y - 5.5) * (y - 5.5)))), crack = (y % 3 === 0 ? 1 : 0); if (side === 'l') for (let x = 6 - half; x <= 5 - crack; x++) s.set(x, y, wax, x < 3 ? 3 : 2); else for (let x = 1 + crack; x <= half; x++) s.set(x, y, wax, x > 4 ? 1 : 2); }
+  s.outline(); return s.canvas(); });
+})();
+
+</script>
+<script>
+/* Idlewick: the opening (owner, 28 Nov 2026: "this needs a complete redo ... it's not particularly immersive - use the
+   new interactive characters, motions etc to make the opening scene far more immersive").
+   A short living scene, played once after the character is made, built from the game's own living systems:
+   1 noon    Willowbrook from above as it was (js/town_scene.js), its townsfolk walking the streets
+             (js/town_walkers.js), smoke, animals and the noon light (js/town_life.js); the bell swings in its belfry,
+             drawn close up (js/opening_art.js) and rung with the town's own cast-bell voice (js/audio.js); everyone
+             stops and turns towards it.
+   2 night   night falls (lamps and windows come up), a shadowy shape takes the bell, and at dawn only the rope swings;
+             the music thins.
+   3 empty   days pass in quick light, rain on the second; people leave one by one with their bundles and the good
+             pans, one of them says so, and the town falls into its present, ruined look.
+   4 lodging far down the road the hero (the player's look and starter weapon, breathing and blinking: js/personality.js)
+             is in their room (js/hearth.js); a knock, and a letter slides under the door.
+   5 letter  the wax seal breaks and Wren's letter opens on parchment (js/hearth_letters.js's paper, Wren's portrait,
+             the hero's name).
+   6 road    the walk home, side-on: parallax hills, hedgerow and road in the season, the hero in a real walk cycle
+             (js/pixelart.js), past the signpost for Willowbrook; holding a key or the pointer walks faster.
+   7 home    the hero walks in to the broken well where Wren is waiting, and they talk in the conversation screen
+             (js/story.js, scene opening_home in js/story_data.js), ending on the plain goal and one reply (S.choices).
+   8 title   the view pulls back over the town; Idlewick; Begin.
+   Everything moves on by itself (about two minutes if you only watch); a click, Space or Enter hurries the beat; Skip
+   appears after the first input and Escape skips at any time. Begin and Skip both end in the game with S.seen.intro
+   recorded, and nothing else changed: the opening grants nothing. Under Reduce effects, html.calm and reduced motion
+   nothing moves: each beat is one still frame with its words, and it can still be skipped. Motion runs on the one
+   clock (DQ.frame) with transforms and opacity; every picture is shown at a whole-number multiple of its drawn size,
+   cropped by the screen. Replay from Home > Journal. tests/intro.cjs. */
 (() => {
 const DQ = window.DQ, D = DQ.data, UI = DQ.ui, S = () => DQ.S, esc = DQ.esc;
-const calm = () => document.documentElement.classList.contains('calm') || (S() && S().settings && S().settings.reduceFx) || matchMedia('(prefers-reduced-motion: reduce)').matches;
+const A = () => DQ.pixelArt || {};
+const root = document.documentElement, TOWN = 'willowbrook';
+const calm = () => root.classList.contains('calm') || !!(S() && S().settings && S().settings.reduceFx) || matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), smooth = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const canvasEl = (w, h, cls) => { const c = el('canvas', cls); c.width = w; c.height = h; c.setAttribute('aria-hidden', 'true'); return c; };
+const size = (e, w, h) => { e.style.width = w + 'px'; e.style.height = h + 'px'; };
+const move = (e, x, y) => { e.style.transform = `translate3d(${Math.round(x)}px,${Math.round(y)}px,0)`; };
 
-/* the script: one entry per shot; each line is shown in turn */
-const SCRIPT = name => [
-  { shot: 'town', town: 'willowbrook', bell: true, lines: [
-    'Every town on the old road had a bell.',
-    'It rang once, at noon. The market opened, the kettles went on, and somebody always wandered over to the well to complain about the weather.'] },
-  { shot: 'town', town: 'mossbarrow', lines: [
-    'Nobody thought much about the bells. You don’t, with things that work. Ask anyone over fifty about their knees.'] },
-  { shot: 'dark', town: 'saltmere', lines: [
-    'Then the bells started to go missing. A town would have its bell at supper, and by breakfast there would just be a rope, swinging a bit guiltily.',
-    'Nobody saw who took them. Several people saw nothing, very carefully.'] },
-  { shot: 'dark', town: 'willowbrook', lines: [
-    'People used to meet at the market when the noon bell rang. After it vanished, fewer traders came. Before long, whole market days were passing with nobody on the road.',
-    'Fields went wild. Goblins moved into the east farms and called it a kingdom. Smugglers took the harbour and called it business.',
-    'People did what people do. They packed up and left. A few left notes. Most just took the good pans.'] },
-  { shot: 'letter', letter: [
-    'Willowbrook, early spring',
-    `Dear ${name},`,
-    'The well is broken and someone has taken the bucket. Who steals a bucket? Goblins, apparently.',
-    'Half the houses on the green are empty, and Mabel is feeding the rest of us out of sheer stubbornness.',
-    'I can’t pay much. There is a bed, a rod, an axe, and more work than one person ought to take on. I am told that is what friends are for.',
-    'You grew up here. Come home. Bring boots.',
-    '— Wren',
-    'P.S. Orrin says hello. He doesn’t, but he would if he were nicer.'] },
-  { shot: 'hero', town: 'willowbrook', lines: [
-    'You are not a knight. Nobody chose you. There was no prophecy, just a letter and a very long walk.',
-    'You can learn to fish, cut timber, cook a decent meal and hold your ground when it matters. It turns out that is enough to start.'] },
-  { shot: 'road', lines: [
-    'Help a town get back on its feet, then defeat the creature blocking its road. That will open the way to the next town.',
-    'Somewhere at the end of that road is whoever has the bells. You would like a word.'] },
-  { shot: 'title' }
+/* ---------- the words: spoken or shown, a line at a time ---------- */
+const WORDS = {
+  bells: 'Every town on the old road had a bell.',
+  noon: 'It rang once, at noon. The market opened, the kettles went on, and somebody always went to the well to complain about the weather.',
+  noonSay: 'Noon already? I’ve done nothing.',
+  work: 'Nobody thought much about the bells. You don’t, with things that work.',
+  missing: 'Then the bells started to go missing.',
+  rope: 'By breakfast there was just a rope, swinging a bit guiltily. Several people saw nothing, very carefully.',
+  traders: 'Without the noon bell, fewer traders came. Then whole market days went by with nobody on the road.',
+  pans: 'I’m off to my sister’s. I’m taking the good pans.',
+  left: 'People did what people do. They packed up and left.',
+  far: 'Far down the road, someone who grew up in Willowbrook was having a perfectly ordinary week.',
+  knock: 'Knock, knock.',
+  knight: 'You are not a knight. Nobody chose you. There was no prophecy, just a letter and a very long walk.',
+  enough: 'You can fish, cut timber, cook a decent meal and hold your ground when it matters. It turns out that is enough to start.',
+  home: 'Willowbrook. Home, more or less.',
+  goal: 'Help a town get back on its feet, then beat the creature blocking its road. That opens the way to the next town.',
+  word: 'Somewhere at the end of that road is whoever has the bells. You would like a word.'
+};
+const LETTER = name => [
+  ['date', 'Willowbrook, early spring'],
+  ['dear', `Dear ${name},`],
+  ['', 'The well is broken and someone has taken the bucket. Who steals a bucket? Goblins, apparently.'],
+  ['', 'Half the houses on the green are empty, and Mabel is feeding the rest of us out of sheer stubbornness.'],
+  ['', 'I can’t pay much. There is a bed, a rod, an axe, and more work than one person ought to take on. I am told that is what friends are for.'],
+  ['', 'You grew up here. Come home. Bring boots.'],
+  ['sign', 'Wren'],
+  ['ps', 'P.S. Orrin says hello. He doesn’t, but he would if he were nicer.']
 ];
 
-/* the stage's own size in its CSS pixels (the page may be zoomed); the captions keep the bottom band */
-let stageBox = { w: 1920, h: 1080 };
-const capBand = h => Math.max(150, Math.round(h * .24));
-/* a town scene at the largest whole-number scale whose full width fits the screen; when it is taller than the space,
-   only sky is trimmed from the top. The caption sits below when there is room, otherwise over the faded foot.
-   On a phone (wider than the screen even at 1x) the picture pans slowly, exactly edge to edge. */
-const sceneK = () => { const { w, h } = stageBox; let k = Math.max(1, Math.floor((w - 16) / 640)); while (k > 1 && 360 * k * .8 > h) k--; return k; };
-const sceneHtml = (town, cls = '', inner = '') => {
-  const url = DQ.sceneUrl ? DQ.sceneUrl(town) : DQ.backdropUrl && DQ.backdropUrl(town + ':0'); if (!url) return '';
-  const { w, h } = stageBox, k = sceneK(), iw = 640 * k, ih = 360 * k, below = ih + capBand(h) <= h;
-  const fw = Math.min(iw, w), fh = Math.min(ih, below ? h - capBand(h) : h), pan = Math.max(0, Math.round((iw - fw) / 2));
-  return `<div class="in-frame ${cls} ${pan ? 'pan' : ''} ${below ? 'below' : 'over'}" style="--k:${k};--pan:${pan}px;width:${fw}px;height:${fh}px"><img class="pxa in-town" src="${url}" width="${iw}" height="${ih}" style="left:${Math.round((fw - iw) / 2)}px;top:${fh - ih}px" alt="" draggable="false">${inner}</div>`;
-};
-/* the bell (drawn 16 x 16) and the hero (drawn 24 x 32) at whole-number scales tied to the town's */
-const bellHtml = (m = 4) => { const u = DQ.gearIconUrl && DQ.gearIconUrl('millers_bell'); return u ? `<img class="pxa in-bell" src="${u}" width="${16 * m}" height="${16 * m}" style="width:${16 * m}px;height:${16 * m}px" alt="" draggable="false">` : ''; };
-const heroHtml = m => { const u = DQ.heroFigureUrl && DQ.heroFigureUrl(S().look); return u ? `<img class="pxa in-hero" src="${u}" width="${24 * m}" height="${32 * m}" style="width:${24 * m}px;height:${32 * m}px" alt="" draggable="false">` : ''; };
-const roadHtml = () => {
-  const n = D.TOWNS.length, first = D.TOWNS[0];
-  const dots = D.TOWNS.map((t, i) => `<li style="--i:${i}" class="${i === 0 ? 'here' : i === n - 1 ? 'end' : ''}"><i></i><span>${i === 0 ? esc(first.name) : i === n - 1 ? bellHtml() : ''}</span></li>`).join('');
-  return `<div class="in-road"><ol>${dots}</ol></div>`;
-};
-const shotHtml = f => {
-  const k = sceneK();
-  if (f.shot === 'town') return sceneHtml(f.town, '', f.bell ? `<div class="in-bellwrap">${bellHtml(2 * k + 2)}</div>` : '');
-  if (f.shot === 'dark') return sceneHtml(f.town, 'dark');
-  if (f.shot === 'hero') return sceneHtml(f.town, 'dawn', `<div class="in-walk">${heroHtml(2 * k + 2)}</div>`);
-  if (f.shot === 'road') return roadHtml();
-  if (f.shot === 'letter') return `<div class="in-paper"><div class="in-letter">${f.letter.map((l, i) => `<p class="${i === 0 ? 'date' : i === 1 ? 'dear' : /^— /.test(l) ? 'sign' : /^P\.S\./.test(l) ? 'ps' : ''}" style="--i:${i}">${esc(l)}</p>`).join('')}</div></div>`;
-  if (f.shot === 'title') return `<div class="in-title"><div class="logo">${DQ.ico('candle')}<h1>Idlewick</h1></div><p>Your work carries on while you’re away.</p><button class="tbtn primary" data-in="begin"><span>Begin</span></button></div>`;
-  return '';
-};
+/* ---------- Willowbrook as it was, and as it is (the belfry is drawn by the opening itself) ---------- */
+const scenes = {};
+const projectIds = () => Object.keys(D.PROJECTS || {}).filter(k => D.PROJECTS[k].town === TOWN);
+const sceneOf = (stages, extras) => { const a = A(); if (!a.sceneFor) return null; const keep = a.sceneMeta && a.sceneMeta[TOWN];
+  const c = a.sceneFor(TOWN, stages, extras), meta = c.meta; if (keep && a.sceneMeta) a.sceneMeta[TOWN] = keep; /* the Home and Village scenes keep their own record */
+  return { url: c.toDataURL(), meta }; };
+const nowScene = () => { const st = Object.fromEntries(projectIds().map(k => [k, DQ.projectStage ? DQ.projectStage(k) : 0])), key = JSON.stringify(st);
+  if (!scenes.now || scenes.nowKey !== key) { scenes.now = sceneOf(st, { skip: ['bell'], farm: !!((S().unlocked || {}).farming) }); scenes.nowKey = key; } return scenes.now; };
+const pastScene = () => { nowScene(); return scenes.past || (scenes.past = sceneOf(Object.fromEntries(projectIds().map(k => [k, D.PROJECTS[k].relic ? 0 : 4])), { skip: ['bell'] })); };
+const ruinScene = () => { nowScene(); return scenes.ruin || (scenes.ruin = sceneOf(Object.fromEntries(projectIds().map(k => [k, 0])), { skip: ['bell'] })); };
+const bellSite = () => { const s = (A().siteLayout ? A().siteLayout(TOWN) : []).find(x => x.id === 'bell'); return s ? { X: s.X, Y: s.Y } : { X: 570, Y: 196 }; };
+const heroChibi = () => { const L = S().look || {}; return { skin: L.skin || '#e8b98e', hair: L.hair || '#3a2414', hs: 'short', cloth: L.tunic || '#3f7fbf' }; };
+const folk = n => DQ.folkOf ? DQ.folkOf(n) : null;
 
+let R = null; /* the opening while it plays */
+DQ.introLive = () => !!R;
 DQ.introSeen = () => !!(S() && S().seen && S().seen.intro);
+
+/* ---------- shots: a layer each, dipped in and out ---------- */
+const addShot = cls => { const s = el('div', 'op-shot ' + cls); R.stage.appendChild(s); if (R.still) s.classList.add('on'); else requestAnimationFrame(() => s.classList.add('on')); return s; };
+const dropShot = s => { if (!s) return; s.classList.remove('on'); s.classList.add('off'); setTimeout(() => s.remove(), R && !R.still ? 700 : 0); };
+
+/* the narrator: one line at a time, large, on its own dark backing */
+const say = (text, pos = 'bottom') => { const box = R.sayEl; box.dataset.pos = R.box.phone ? 'bottom' : pos; const old = box.querySelector('p.on'); if (old) { old.classList.remove('on'); old.classList.add('gone'); setTimeout(() => old.remove(), R.still ? 0 : 400); }
+  box.classList.toggle('empty', !text); if (!text) return; const p = el('p', R.still ? 'on' : ''); p.textContent = text; box.appendChild(p); if (!R.still) requestAnimationFrame(() => p.classList.add('on')); R.said.push(text); };
+/* a speech bubble over a townsperson (or a fixed point), following them as they walk */
+const bubble = (text, at, secs = 3.4) => { const b = el('div', 'op-bubble'); b.textContent = text; b.setAttribute('role', 'note'); R.el.appendChild(b); const B = { b, at, until: R.clock + secs, half: b.offsetWidth / 2 }; R.bubbles.push(B); placeBubble(B); R.said.push(text);
+  if (!R.still) requestAnimationFrame(() => b.classList.add('on')); else b.classList.add('on'); return B; };
+/* kept on screen: a speaker near the edge has their bubble pulled in (measured once, when it is made) */
+const placeBubble = B => { const p = B.at(); if (p) move(B.b, clamp(p[0], B.half + 10, R.box.w - B.half - 10), p[1]); B.b.style.transform += ' translate(-50%,-100%)'; };
+const bubblesTick = () => { for (const B of R.bubbles.slice()) { if (R.clock > B.until || !B.b.isConnected) { B.b.classList.remove('on'); setTimeout(() => B.b.remove(), 300); R.bubbles.splice(R.bubbles.indexOf(B), 1); continue; } placeBubble(B); } };
+
+/* ---------- the town from above: scene, belfry, townsfolk and town life, under a camera ----------
+   One canvas on screen, at the scene's own 640 x 360 pixels, scaled to a whole number. Behind it, out of sight at 1x,
+   the town's picture and the living layers that town_walkers.js and town_life.js keep up to date. The static scene is
+   lit once into a cached layer and relit only when the light changes; each frame copies that cache, then draws only
+   what moves (smoke and animals, the belfry and its rings, the townsfolk) under the same light, then the lit windows.
+   So the screen composites one picture instead of eight full-size blended layers (owner, 28 Nov 2026: frame rate). */
+function townShot(o) {
+  const shot = addShot('op-town'), stack = el('div', 'op-stack'), world = el('div', 'op-world'), img = new Image(), frame = canvasEl(640, 360, 'op-frame');
+  /* the working layers stay in memory (willReadFrequently keeps them off the GPU), so copying between them is a plain copy */
+  const off = () => { const c = document.createElement('canvas'); c.width = 640; c.height = 360; c.getContext('2d', { willReadFrequently: true }); return c; }, props = off(), lit = off(), mid = off();
+  img.className = 'op-scene'; img.alt = ''; img.draggable = false; stack.setAttribute('aria-hidden', 'true'); stack.appendChild(img); world.appendChild(frame); shot.append(stack, world);
+  const T = { shot, world, img, frame, fx: frame.getContext('2d'), props, px: props.getContext('2d'), k: 1, tx: 0, ty: 0, mode: o.view || 'wide', cam: { x: o.focus[0], y: o.focus[1] }, want: { x: o.focus[0], y: o.focus[1] }, ay: o.anchorY || .5,
+    belfry: o.belfry || 'rope', nudge: 0, ripples: [], cast: o.cast || [], meta: o.meta, drawn: '', lightKey: '', tintC: [255, 255, 255] };
+  const site = bellSite();
+  T.people = () => (T.walk ? T.walk.L.walkers : T.cast);
+  /* the wide shot covers the screen at the smallest whole scale; the close shot is twice that; far is one step out */
+  T.kFor = mode => { const { w, h, phone } = R.box, base = phone ? clamp(Math.floor((h * .86) / 360), 2, 3) : Math.max(1, Math.ceil(Math.max(w / 640, h / 360) - .02));
+    return mode === 'close' ? Math.min(8, base * 2) : mode === 'far' ? Math.max(1, base - 1) : base; };
+  T.layout = () => { T.k = T.kFor(T.mode); for (const e of [world, frame]) size(e, 640 * T.k, 360 * T.k); T.at = ''; T.place(); };
+  T.place = () => { const { w, h, phone } = R.box, k = T.k, W = 640 * k, H = 360 * k;
+    T.tx = Math.round(W <= w ? (w - W) / 2 : clamp(w / 2 - T.cam.x * k, w - W, 0));
+    T.ty = Math.round(H <= h ? (phone ? Math.max(0, (h - H) * .22) : (h - H) / 2) : clamp(h * T.ay - T.cam.y * k, h - H, 0));
+    const at = T.tx + ',' + T.ty + ',' + k; if (at !== T.at) { T.at = at; move(world, T.tx, T.ty); } /* written only when the camera has moved a whole pixel */ };
+  /* a cut to another framing: a quick dip, then the new scale and camera */
+  T.view = (mode, focus, anchorY, onCut) => { const go = () => { if (onCut) onCut(); T.mode = mode; if (focus) { T.cam = { x: focus[0], y: focus[1] }; T.want = { x: focus[0], y: focus[1] }; } if (anchorY) T.ay = anchorY; T.layout(); frame.classList.remove('cut'); };
+    if (R.still) return go(); frame.classList.add('cut'); setTimeout(() => { if (shot.isConnected) go(); }, 240); };
+  T.screen = (x, y) => [T.tx + x * T.k, T.ty + y * T.k];
+  /* the light: the hour's tint (DQ.townTint), the opening's deeper night and the low sun's glow, as town_life.js lays them */
+  T.relight = () => { if (!img.naturalWidth) return false; const h = ((R.hour % 24) + 24) % 24, L = DQ.townLight ? DQ.townLight(h) : { dark: 0, warm: 0 }, tint = DQ.townTint ? DQ.townTint(h) : [255, 255, 255];
+    const c = tint.map((v, i) => Math.round(v * (255 + ([70, 82, 128][i] - 255) * L.dark * .5) / 255)), sw = L.warm * (1 - L.dark * .5), key = c.join(',') + '|' + Math.round(sw * 40) + '|' + img.src.length;
+    if (key === T.lightKey) return false; T.lightKey = key; T.tintC = c;
+    const dim = 1 - (c[0] + c[1] + c[2]) / 765, deep = c.map(v => Math.round(v * .18)); T.shadeC = `rgba(${deep.join(',')},${dim.toFixed(3)})`;
+    const x = lit.getContext('2d'); x.globalCompositeOperation = 'source-over'; x.drawImage(img, 0, 0, 640, 360); x.globalCompositeOperation = 'multiply'; x.fillStyle = `rgb(${c.join(',')})`; x.fillRect(0, 0, 640, 360);
+    if (sw > .02) { const g = x.createLinearGradient(0, 0, 0, 360); g.addColorStop(0, `rgba(255,128,72,${(sw * .85).toFixed(3)})`); g.addColorStop(.34, `rgba(255,176,96,${(sw * .55).toFixed(3)})`); g.addColorStop(.6, `rgba(255,190,120,${(sw * .25).toFixed(3)})`); g.addColorStop(.85, 'rgba(255,190,120,0)'); x.globalCompositeOperation = 'overlay'; x.fillStyle = g; x.fillRect(0, 0, 640, 360); }
+    x.globalCompositeOperation = 'source-over'; return true; };
+  T.compose = () => { if (!img.naturalWidth) return; T.relight(); const f = T.fx, m = mid.getContext('2d'), life = T.life && T.life.L;
+    /* by day the light is plain white: what moves goes straight onto the frame */
+    if (T.tintC.every(v => v >= 254)) { f.drawImage(lit, 0, 0); if (life) f.drawImage(life.under, 0, 0); f.drawImage(props, 0, 0); if (T.walk) f.drawImage(T.walk.L.cv, 0, 0); if (life) f.drawImage(life.over, 0, 0); return; }
+    /* after dark: what moves is gathered on one layer and shaded where it stands (source-atop: only its own pixels), by
+       the same amount the light takes off the scene, toward the night's blue */
+    m.globalCompositeOperation = 'source-over'; m.clearRect(0, 0, 640, 360); if (life) m.drawImage(life.under, 0, 0); m.drawImage(props, 0, 0); if (T.walk) m.drawImage(T.walk.L.cv, 0, 0);
+    m.globalCompositeOperation = 'source-atop'; m.fillStyle = T.shadeC; m.fillRect(0, 0, 640, 360); m.globalCompositeOperation = 'source-over';
+    f.drawImage(lit, 0, 0); f.drawImage(mid, 0, 0); if (life) f.drawImage(life.over, 0, 0); };
+  T.repaint = () => { if (T.life) T.life.repaint(); T.drawProps(true); T.compose(); }; /* a still frame brought up to the hour */
+  /* the belfry at its site, the bell nudged a pixel as it swings (or the rope alone), and rings of sound as it strikes */
+  T.drawProps = force => { const key = T.belfry + T.nudge + ':' + T.ripples.map(r => Math.round(r.age * 20)).join(','); if (!force && key === T.drawn) return; T.drawn = key;
+    const x = T.px; x.clearRect(0, 0, 640, 360); if (T.belfry) { x.fillStyle = 'rgba(6,8,14,.3)'; for (let j = -3; j <= 3; j++) { const ww = Math.round(15 * Math.sqrt(1 - (j * j) / 12.5)); x.fillRect(site.X + 16 - ww, site.Y + 30 + j, ww * 2, 1); }
+      const art = A().openingBelfryTop && A().openingBelfryTop(T.belfry, T.nudge); if (art) x.drawImage(art, site.X, site.Y); }
+    /* still (Reduce effects, reduced motion): nobody walks, so the cast stands where they are, drawn once */
+    if (R.still && A().townFolk) for (const w of [...T.cast].sort((a, b) => a.y - b.y)) if (!w.hidden && !w.thief && !w.leave) A().townFolk(x, w.goal != null && w.hold ? w.goal : w.x, w.y, w.look, w.pose || 0, w.face || 0);
+    for (const r of T.ripples) { const rad = 8 + r.age * 70, a = Math.max(0, .55 * (1 - r.age / 1.8)); x.fillStyle = `rgba(255,236,170,${a.toFixed(3)})`; for (let i = 0; i < 96; i++) { const t = i / 96 * Math.PI * 2; x.fillRect(Math.round(site.X + 16 + Math.cos(t) * rad), Math.round(site.Y + 12 + Math.sin(t) * rad * .6), 1, 1); } } };
+  T.ring = () => { if (!R.still) T.ripples.push({ age: 0 }); };
+  T.update = dt => { const k = 1 - Math.exp(-dt * 1.6); T.cam.x += (T.want.x - T.cam.x) * k; T.cam.y += (T.want.y - T.cam.y) * k; T.place();
+    for (const r of T.ripples) r.age += dt; T.ripples = T.ripples.filter(r => r.age < 1.8); T.drawProps(); T.compose(); };
+  const mountLife = share => DQ.townLifeMount ? DQ.townLifeMount(img, { meta: T.meta, town: TOWN, hour: () => R.hour, weather: () => R.weather, share }) : null;
+  T.swap = (scene, done) => { const go = () => { img.removeEventListener('load', go); if (T.life) T.life.remove(); T.meta = scene.meta; T.life = mountLife(o.shareAfter); T.lightKey = ''; T.compose(); done && done(); };
+    img.addEventListener('load', go); img.src = scene.url; };
+  T.remove = () => { if (T.walk) T.walk.remove(); if (T.life) T.life.remove(); T.walk = T.life = null; R.shots.delete(T); dropShot(shot); };
+  img.addEventListener('load', () => { if (!R || !shot.isConnected || T.mounted) return; T.mounted = true;
+    T.walk = DQ.townWalkersMount && !R.still ? DQ.townWalkersMount(img, { walkers: T.cast }) : null; T.life = mountLife(o.share); T.repaint(); }, { once: true });
+  img.src = o.url; R.shots.add(T); T.layout(); return T;
+}
+const site0 = () => bellSite();
+const turnToBell = T => { const s = site0(), bx = s.X + 16; for (const w of T.people()) { if (w.thief || w.hidden) continue; w.goal = null; w.rest = 4.5 + Math.random() * 1.5; w.face = w.x < bx ? 1 : -1; } };
+const leave = (w, carry, pace = 16) => { if (!w) return; w.carry = carry || null; w.leave = true; w.script = true; w.rest = 0; w.goal = null; w.dir = w.x < 320 ? -1 : 1; w.pace = pace; };
+const castOf = (n, seed) => { const list = DQ.townWalkersMake ? DQ.townWalkersMake(seed || TOWN, 640, n) : []; for (const w of list) w.look = { skin: w.skin, hair: w.hair, hs: w.hs, cloth: w.cloth, basket: w.basket }; return list; };
+
+/* ---------- the bell, close up, in a framed window of its own ---------- */
+const inset = (state, i = 2, sky = 'noon') => { let box = R.inset; if (!box) { box = R.inset = el('div', 'op-inset'); box.setAttribute('aria-hidden', 'true'); box.appendChild(canvasEl(64, 64, 'op-bellcv')); R.el.appendChild(box); }
+  const k = R.box.phone ? 3 : clamp(Math.floor(R.box.h / 260), 3, 5), c = box.firstChild; if (+box.dataset.k !== k) { box.dataset.k = k; size(c, 64 * k, 64 * k); } if (!box.classList.contains('on')) box.classList.add('on');
+  /* the pigeon on the roof (R.pigeon: where it is, sitting or which wingbeat) is drawn over the belfry */
+  const pg = R.pigeon, key = state + i + sky + '|' + (pg ? `${Math.round(pg.x)},${Math.round(pg.y)},${pg.frame}` : '-');
+  if (box.dataset.key !== key) { box.dataset.key = key; const x = c.getContext('2d'); x.clearRect(0, 0, 64, 64); const art = A().openingBelfry && A().openingBelfry(state, i, sky); if (art) x.drawImage(art, 0, 0);
+    const pa = pg && A().openingPigeon && A().openingPigeon(pg.frame); if (pa) x.drawImage(pa, Math.round(pg.x), Math.round(pg.y)); } };
+const PERCH = { x: 46, y: 4 }; /* on the roof's right slope, facing the ridge */
+const perch = () => { R.pigeon = { x: PERCH.x, y: PERCH.y, frame: 'sit', flying: false }; };
+const pigeonTick = dt => { const pg = R.pigeon; if (!pg || !pg.flying) return; pg.x -= 26 * dt; pg.y -= 22 * dt; pg.frame = Math.floor(R.clock * 11) % 2 ? 'up' : 'down'; if (pg.y < -10 || pg.x < -12) R.pigeon = null; };
+const insetOff = () => { if (R.inset) R.inset.classList.remove('on'); };
+const swingIndex = deg => clamp(Math.round(deg / 13) + 2, 0, 4);
+
+/* ---------- the lodging: the hearth room, borrowed, with the hero standing in it ---------- */
+function roomShot() {
+  const H0 = DQ.HEARTH_ROOM || { w: 320, h: 280, oy: 40, hero: { x: 140, y: 172 } }, shot = addShot('op-room'), world = el('div', 'op-world'), img = new Image(), lights = canvasEl(H0.w, H0.h, 'op-lights');
+  img.className = 'op-scene'; img.alt = ''; img.draggable = false;
+  const fig = el('span', 'fig-stage op-hero'), hero = el('img', 'fig-img'); hero.alt = ''; hero.draggable = false; hero.src = DQ.heroFigureUrl ? DQ.heroFigureUrl(S().look) : ''; fig.appendChild(hero);
+  const env = canvasEl(18, 12, 'op-env'), ea = A().openingEnvelope && A().openingEnvelope('small'); if (ea) env.getContext('2d').drawImage(ea, 0, 0);
+  world.append(img, lights, fig, env); shot.appendChild(world);
+  const P = { shot, world, img, lights, lx: lights.getContext('2d'), fig, hero, env, k: 1, tx: 0, ty: 0, t: 0, envAt: null, H0 };
+  P.layout = () => { const { w, h, phone } = R.box, k = P.k = phone ? clamp(Math.floor(h * .8 / H0.h), 1, 3) : Math.max(1, Math.floor(Math.min(w / H0.w, h / 240))), W = H0.w * k, H = H0.h * k;
+    for (const e of [world, img, lights]) size(e, W, H);
+    for (const [p, v] of Object.entries({ left: H0.hero.x * k + 'px', top: (H0.oy + H0.hero.y - 32) * k + 'px', width: 24 * k + 'px', height: 32 * k + 'px' })) hero.style.setProperty(p, v, 'important');
+    size(env, 18 * k, 12 * k);
+    /* phones see the door side of the room with the hero in it, so the letter's arrival is in view */
+    P.tx = Math.round(W <= w ? (w - W) / 2 : clamp(w / 2 - (phone ? 98 : H0.hero.x + 12) * k, w - W, 0)); P.ty = Math.round(H <= h ? (phone ? (h - H) * .3 : (h - H) / 2) : clamp(h / 2 - (H0.oy + 150) * k, h - H, 0)); move(world, P.tx, P.ty); P.placeEnv(); };
+  /* the envelope: under the door at the left, onto the boards by the wall, short of the rug and well above the bottom */
+  const ENV = { from: -20, to: 12, y: H0.oy + 182 };
+  P.placeEnv = () => { const k = P.k, a = P.envAt; if (a == null) { env.style.opacity = '0'; return; } env.style.opacity = '1'; move(env, (ENV.from + (ENV.to - ENV.from) * smooth(a)) * k, ENV.y * k); };
+  P.envScreen = () => [P.tx + (ENV.to + 9) * P.k, P.ty + ENV.y * P.k];
+  P.update = dt => { P.t += dt; if (DQ.hearthLightsDraw) DQ.hearthLightsDraw(P.lx, P.t, .1, !R.still); };
+  P.remove = () => { R.shots.delete(P); dropShot(shot); };
+  (DQ.hearthRoomUrl ? DQ.hearthRoomUrl('saltmere', 8.4) : Promise.resolve('')).then(u => { if (u) img.src = u; if (DQ.hearthLightsDraw) DQ.hearthLightsDraw(P.lx, 0, .1, false); });
+  R.shots.add(P); P.layout(); return P;
+}
+
+/* ---------- the road home, side-on, in layers ---------- */
+function roadShot() {
+  const RD = A().OPENING_ROAD || { w: 320, h: 180, ground: 160 }, season = DQ.season ? DQ.season() : 'autumn', L = A().openingRoad ? A().openingRoad(TOWN, season) : null;
+  const shot = addShot('op-road'), layers = {};
+  /* each layer is two copies of its seamless strip side by side; sliding it left by up to one copy always covers the
+     screen, since the strip at its whole-number scale is at least as wide as the screen */
+  for (const [name, f] of [['sky', .03], ['far', .14], ['mid', .5], ['near', 1]]) { const c = canvasEl(RD.w * 2, RD.h, 'op-layer op-' + name); if (L) for (let i = 0; i < 2; i++) c.getContext('2d').drawImage(L[name], i * RD.w, 0); shot.appendChild(c); layers[name] = { c, f }; }
+  const tint = el('div', 'op-roadtint'), fx = canvasEl(RD.w, RD.h, 'op-fx'), shadow = el('i', 'op-shadow'), hero = el('img', 'op-walker'), sign = el('div', 'op-sign'), sc = canvasEl(36, 46, 'op-signcv'), name = el('b', 'op-signname', 'Willowbrook');
+  hero.alt = ''; hero.draggable = false; const sp = A().openingSignpost && A().openingSignpost(); if (sp) sc.getContext('2d').drawImage(sp, 0, 0); sign.append(name, sc);
+  const hint = el('small', 'op-hint', R.box.phone ? 'Hold the screen to walk faster' : 'Hold Space or the mouse button to walk faster');
+  shot.append(sign, tint, shadow, hero, fx, hint); /* the light of the hour falls on the scenery and the signpost, not on the hero */
+  const frames = [0, 1, 2, 3].map(i => DQ.heroWalkUrl ? DQ.heroWalkUrl(S().look, i) : (DQ.heroFigureUrl ? DQ.heroFigureUrl(S().look) : ''));
+  frames.forEach(u => { const im = new Image(); im.src = u; });
+  const Rd = { shot, layers, tint, fx, fxx: fx.getContext('2d'), hero, shadow, sign, name, hint, frames, k: 1, baseX: 0, ty: 0, dist: 0, frame: -1, end: 420, signX: 0, hx: 0, season, leaves: [], tintKey: '' };
+  for (let i = 0; i < 26; i++) Rd.leaves.push({ x: Math.random() * RD.w, y: Math.random() * RD.h, s: 8 + Math.random() * 10, p: Math.random() * 6.28 });
+  Rd.layout = () => { const { w, h, phone } = R.box, k = Rd.k = phone ? Math.max(clamp(Math.floor(h * .66 / RD.h), 1, 4), Math.ceil(w / RD.w)) :Math.max(1, Math.ceil(Math.max(w / RD.w, h / RD.h) - .02)), W = RD.w * k, H = RD.h * k;
+    Rd.baseX = Math.round((w - W) / 2); Rd.ty = Math.round(phone ? Math.max(0, (h - H) * .3) : h - H);
+    for (const { c } of Object.values(layers)) { size(c, W * 2, H); c.style.left = Rd.baseX + 'px'; c.style.top = Rd.ty + 'px'; }
+    for (const e of [tint, fx]) { size(e, W, H); e.style.left = Rd.baseX + 'px'; e.style.top = Rd.ty + 'px'; }
+    size(hero, 24 * k, 32 * k); const hxs = Math.round(w * (phone ? .42 : .4) - 12 * k); hero.style.left = hxs + 'px'; hero.style.top = (Rd.ty + (RD.ground - 32) * k) + 'px';
+    size(shadow, 16 * k, 3 * k); shadow.style.left = (hxs + 4 * k) + 'px'; shadow.style.top = (Rd.ty + (RD.ground - 2) * k) + 'px';
+    size(sc, 36 * k, 46 * k); sign.style.top = (Rd.ty + (151 - 46) * k) + 'px';
+    Rd.hx = (hxs + 12 * k - Rd.baseX) / k; if (!Rd.signX) Rd.signX = Rd.hx + 300; Rd.place(); };
+  Rd.place = () => { const k = Rd.k, W = RD.w * k;
+    for (const { c, f } of Object.values(layers)) { const off = ((Rd.dist * f * k) % W + W) % W; c.style.transform = `translate3d(${-Math.round(off)}px,0,0)`; }
+    move(sign, Rd.baseX + (Rd.signX - Rd.dist - 18) * k, 0);
+    const f = Math.floor(Rd.dist / 7) % 4; if (f !== Rd.frame) { if (!R.still && (f === 0 || f === 2) && Rd.frame >= 0) DQ.sfx && DQ.sfx('step'); Rd.frame = f; hero.src = frames[f]; }
+    const hr = 9 + 8 * clamp(Rd.dist / Rd.end, 0, 1), tc = DQ.townTint ? DQ.townTint(hr) : [255, 255, 255], key = tc.join(','); if (key !== Rd.tintKey) { Rd.tintKey = key; tint.style.backgroundColor = `rgb(${key})`; } };
+  Rd.update = dt => { const sp = 28 * (R.holding || R.hurried ? 3 : 1); Rd.dist += sp * dt; Rd.place();
+    const x = Rd.fxx, s = Rd.season; x.clearRect(0, 0, RD.w, RD.h); if (s === 'summer') return;
+    const col = s === 'autumn' ? ['#d8782a', '#c8482a', '#e8b040'] : s === 'winter' ? ['#f4f8fc', '#ffffff', '#e8eef6'] : ['#f4c4d0', '#ffffff', '#f8dce4'];
+    Rd.leaves.forEach((l, i) => { l.y += l.s * dt * (s === 'winter' ? .8 : 1); l.x += (Math.sin(R.clock * 1.2 + l.p) * 8 - sp * .6) * dt; if (l.y > RD.h) { l.y = -2; l.x = Math.random() * RD.w; } if (l.x < -4) l.x += RD.w + 8;
+      x.fillStyle = col[i % 3]; x.fillRect(Math.round(l.x), Math.round(l.y), s === 'winter' ? 1 : 2, 1); }); };
+  Rd.remove = () => { R.shots.delete(Rd); dropShot(shot); };
+  R.shots.add(Rd); Rd.layout(); return Rd;
+}
+
+/* ---------- the beats ----------
+   The wide shot (the whole town at the smallest whole scale that covers the screen) establishes each place; the close
+   shot (twice that) frames the belfry, the square and the well, so the townsfolk, the hooded thief and Wren read as
+   people. Every change of framing is a cut through a quick dip, never a zoom. */
+const BELL_SPOT = () => { const s = site0(); return [s.X + 16, s.Y + 26]; };
+/* a few townsfolk about the belfry when the bell goes, on the two streets either side of it */
+const NEAR_BELL = [[506, 162], [546, 163], [626, 162], [528, 244], [612, 245]];
+const BEATS = [
+  { id: 'noon', len: 12.5, enter() { R.hour = 12; R.weather = 'clear'; DQ.musicMode && DQ.musicMode('game'); DQ.musicDim && DQ.musicDim(1); perch();
+      const sc = pastScene(); if (!sc) return; R.town = townShot({ url: sc.url, meta: sc.meta, share: 1, belfry: 'bell', cast: castOf(9), focus: [400, 214], view: 'wide' }); },
+    cues: [[.6, () => say(WORDS.bells), 1],
+      [3, () => { const T = R.town; if (T) T.view('close', BELL_SPOT(), null, () => T.people().slice(0, NEAR_BELL.length).forEach((w, i) => { [w.x, w.y] = NEAR_BELL[i]; w.goal = null; w.rest = 0; w.dir = i % 2 ? -1 : 1; if (R.still) w.face = w.x < BELL_SPOT()[0] ? 1 : -1; })); }],
+      [3.4, () => { R.ringAt = R.bt; inset('bell', 4); if (DQ.storyBell) DQ.storyBell('church', 3); if (R.town) { turnToBell(R.town); R.town.ring(); if (R.still) R.town.repaint(); } }, 1],
+      [4.2, () => say(WORDS.noon), 1], [5.8, () => R.town && R.town.ring()], [8.2, () => R.town && R.town.ring()],
+      [9.4, () => { const T = R.town; if (!T) return; const [bx] = BELL_SPOT(), w = T.people().filter(p => !p.hidden && Math.abs(p.x - bx) < 70).sort((a, b) => Math.abs(a.x - bx) - Math.abs(b.x - bx))[0]; if (w) bubble(WORDS.noonSay, () => T.screen(w.x + 2.5, w.y - 15), 2.8); }]],
+    update(dt) { if (R.ringAt == null) return; const e = R.bt - R.ringAt, amp = 26 * clamp(1 - (e - 4.8) / 2.6, 0, 1), deg = amp * Math.cos(Math.PI * e / 2.4);
+      if (R.pigeon && !R.pigeon.flying && e > .3) R.pigeon.flying = true; /* the first stroke sends the pigeon off */
+      pigeonTick(dt); inset('bell', swingIndex(deg)); if (R.town) R.town.nudge = Math.round(deg / 18); } },
+  { id: 'night', len: 14, enter() { DQ.musicMode && DQ.musicMode('title'); DQ.musicDim && DQ.musicDim(.6); insetOff(); R.ringAt = null; R.pigeon = null; if (R.town) { R.town.nudge = 0; R.town.view('wide', [400, 214]); } if (R.still) { R.hour = 22; R.town && R.town.repaint(); } },
+    cues: [[.4, () => say(WORDS.work), 1], [.6, () => { if (R.town) { for (const w of R.town.people()) leave(w, null, 24); R.town.drawProps(true); if (R.still) R.town.repaint(); } }],
+      [4.4, () => { say(WORDS.missing); const T = R.town; if (!T) return; T.view('close', BELL_SPOT()); if (!T.walk) return; const s = site0(); R.thief = { x: 650, y: 244, dir: -1, pace: 36, walked: 0, rest: 0, script: true, thief: true, goal: s.X + 12, hold: 1e9, face: 0,
+        /* a hooded, cloaked shape in plum and soot, dark but with a lit edge, and two yellow eyes in the hood */
+        look: { skin: '#5a4a62', hair: '#1c1624', hs: 'short', cloth: '#4a3a5e', hat: ['hood', '#3a2e4c'], glow: '#ffe060' } }; T.walk.L.walkers.push(R.thief); }, 1],
+      [6.8, () => { const T = R.town; if (!T) return; T.belfry = 'rope'; T.drawProps(true); if (R.still) T.repaint(); const th = R.thief; if (th) { th.x = th.goal != null ? th.goal : th.x; th.goal = null; th.carry = 'bell'; th.rest = 0; th.leave = true; th.dir = 1; th.pace = 26; } }],
+      [8.8, () => { R.dawnAt = R.bt; }], [10.4, () => { perch(); inset('rope', 2, 'dawn'); say(WORDS.rope); if (R.still) { R.hour = 6.5; R.town && R.town.repaint(); } }, 1]],
+    update() { R.hour = R.dawnAt != null ? 22 + 8.5 * smooth((R.bt - R.dawnAt) / 2.2) : 12 + 10 * smooth(R.bt / 4);
+      if (R.inset && R.inset.classList.contains('on')) inset('rope', clamp(Math.round(2 + 2 * Math.sin(R.clock * 2.1)), 0, 4), 'dawn'); } },
+  { id: 'empty', len: 11.5, enter() { DQ.musicDim && DQ.musicDim(.45); R.dawnAt = null; R.hour = R.still ? 9 : 6.5; if (R.town) R.town.view('wide', [400, 214]); if (R.still && R.town) R.town.repaint();
+      if (R.town && R.town.walk) { const cast = castOf(6, TOWN + ':after'); R.town.walk.L.walkers = cast; } },
+    cues: [[.4, () => { insetOff(); say(WORDS.traders); }, 1], [1.4, () => leave(R.town && R.town.people()[0], 'bundle')],
+      [2.8, () => { const T = R.town; if (!T) return; const w = T.people()[1]; if (!w) return; leave(w, 'pan', 12); T.want = { x: w.x, y: w.y - 20 }; bubble(WORDS.pans, () => T.screen(w.x + 2.5, w.y - 16), 3.4); }],
+      [5, () => leave(R.town && R.town.people()[2], 'bundle')], [5.9, () => { const sc = ruinScene(); if (sc && R.town) R.town.swap(sc, () => { if (R.still) { R.hour = 15; R.town.repaint(); } }); }],
+      [6.8, () => say(WORDS.left), 1], [7.6, () => leave(R.town && R.town.people()[3], 'pan')], [8.8, () => leave(R.town && R.town.people()[4], 'bundle')]],
+    update() { R.hour = 6.5 + R.bt / 3.4 * 24; R.weather = R.bt > 3.4 && R.bt < 6.6 ? 'rain' : 'clear'; } },
+  { id: 'lodging', len: 9.5, enter() { DQ.musicDim && DQ.musicDim(.75); R.weather = 'clear'; if (R.town) { R.town.remove(); R.town = null; } insetOff(); say(null); R.room = roomShot(); },
+    cues: [[.5, () => say(WORDS.far, 'top'), 1], [1.6, () => { const P = DQ.personality; if (P && !R.still) { const now = performance.now(); P.force = 'yawn'; P.idleSince = Math.min(P.idleSince, now - P.IDLE_MS - 1); P.nextFidget = 0; P.tick && P.tick(); } }],
+      [3.6, () => { DQ.storyKnock && DQ.storyKnock(); const P = R.room; bubble(WORDS.knock, () => [P.tx + 14 * P.k, P.ty + (P.H0.oy + 150) * P.k], 2); }, 1],
+      [4.6, () => { R.envFrom = R.bt; if (R.still && R.room) { R.room.envAt = 1; R.room.placeEnv(); } }],
+      [6.2, () => { R.room.envAt = 1; R.room.placeEnv(); openPrompt(); }, 1]],
+    update(dt) { if (R.room) { R.room.update(dt); if (R.envFrom != null && R.room.envAt !== 1) { R.room.envAt = clamp((R.bt - R.envFrom) / 1.3, 0, 1); R.room.placeEnv(); } } },
+    leave() { R.envFrom = null; if (R.prompt) { R.prompt.remove(); R.prompt = null; } } },
+  { id: 'letter', len: 16, enter() { say(null); if (R.room) { R.room.envAt = null; R.room.placeEnv(); } openLetter(); },
+    cues: [[.8, () => crackSeal()], [1.3, () => { if (R.paper) R.paper.classList.add('on'); DQ.sfx && DQ.sfx('page'); }], ...LETTER('').map((_, i) => [1.9 + i * 1.15, () => showLine(i), i === 0])],
+    hurry() { const hidden = R.paper && R.paper.querySelector('.op-l:not(.on)'); if (hidden) { R.bt = Math.max(R.bt, 1.9 + (LETTER('').length - 1) * 1.15 + .01); return true; } R.next(); return true; },
+    update(dt) { if (R.room) R.room.update(dt); },
+    leave() { if (R.letterBox) { const b = R.letterBox; b.classList.add('off'); setTimeout(() => b.remove(), R.still ? 0 : 500); R.letterBox = R.paper = null; } if (R.room) { R.room.remove(); R.room = null; } } },
+  { id: 'road', len: null, enter() { DQ.musicMode && DQ.musicMode('game'); DQ.musicDim && DQ.musicDim(.9); R.hurried = false; R.road = roadShot(); if (R.still) { R.road.dist = R.road.signX - R.road.hx - 34; R.road.place(); } },
+    cues: [[.8, () => say(WORDS.knight, 'top'), 1], [1.6, () => R.road && R.road.hint.classList.add('on')], [7.4, () => say(WORDS.enough, 'top'), 1], [12.5, () => R.road && R.road.hint.classList.remove('on')], [13, () => { if (R.still) R.next(); }]],
+    hurry() { R.hurried = true; return true; },
+    update(dt) { const Rd = R.road; if (!Rd) return; Rd.update(dt); if (Rd.dist >= Rd.end) R.next(); },
+    leave() { if (R.road) { R.road.remove(); R.road = null; } R.holding = R.hurried = false; } },
+  { id: 'home', len: null, enter() { DQ.musicDim && DQ.musicDim(1); R.hour = 18.3; R.weather = 'clear'; R.met = null; R.talked = false;
+      const sc = nowScene(), wren = folk('Elder Wren'), cast = castOf(3, TOWN + ':now');
+      R.hero = { x: 150, y: 244, dir: 1, pace: 40, walked: 0, rest: 0, script: true, goal: 322, hold: 1e9, face: 1, look: heroChibi(), arrive: () => meet() };
+      R.wren = { x: 346, y: 244, dir: -1, pace: 0, walked: 0, rest: 1e9, face: -1, script: true, look: (DQ.townGiverLook && DQ.townGiverLook(wren)) || { skin: '#e8b98e', hair: '#c8c4bc', hs: 'long', cloth: '#5a7a4a' } };
+      if (R.still) R.hero.x = 322;
+      /* the well and the two of them sit in the upper part of the screen, above the conversation panel */
+      R.town = townShot({ url: sc.url, meta: sc.meta, belfry: 'rope', view: 'wide', anchorY: R.box.phone ? .27 : .36, cast: cast.concat([R.wren, R.hero]), focus: [320, 244] }); say(WORDS.home); if (R.still) setTimeout(() => meet(), 1200); },
+    cues: [[1.4, () => { const T = R.town; if (T) T.view('close', [R.still ? 334 : clamp(R.hero.x + 60, 0, 640), 240]); }], [9, () => { if (R.met == null && R.hero) { R.hero.x = 322; R.hero.goal = null; R.hero.rest = 1e9; meet(); } }]],
+    hurry() { if (R.met == null && R.hero) { R.hero.x = 322; R.hero.goal = null; R.hero.rest = 1e9; R.hero.face = 1; meet(); } return true; },
+    update(dt) { const T = R.town; if (!T) return; if (R.hero && T.mode === 'close') T.want = { x: R.met != null ? 334 : clamp(R.hero.x + 60, 0, 640), y: 240 }; T.update(dt); /* the camera walks in with the hero, then settles on the two of them */
+      if (R.wren && R.hero && R.met == null) R.wren.pose = R.hero.x > 240 && Math.floor(R.clock * 2.5) % 2 ? 'cheer' : null; },
+    leave() { if (R.wren) R.wren.pose = null; } },
+  { id: 'title', len: null, enter() { R.wait = true; say(null); const old = R.town, sc = nowScene(); R.town = townShot({ url: sc.url, meta: sc.meta, belfry: 'rope', view: 'far', cast: old ? old.people() : [], focus: [320, 230] }); R.town.want = { x: 320, y: 150 }; if (old) old.remove(); showTitle(); },
+    cues: [], hurry() { return true; }, update(dt) { if (R.town) R.town.update(dt * .35); } }
+];
+BEATS.forEach(b => { b.cues = b.cues || []; });
+
+/* the lodging's letter: a button by the envelope, and the letter itself */
+const openPrompt = () => { if (R.prompt || !R.room) return; const b = el('button', 'btn primary op-open'), [x, y] = R.room.envScreen();
+  b.type = 'button'; b.dataset.op = 'open'; b.innerHTML = `${DQ.ico ? DQ.ico('quest') : ''}<span>Open Wren’s letter</span>`; R.el.appendChild(b);
+  /* beside the envelope on the boards, between the bookshelf and the hearth, clear of the rug and the cat; on a phone,
+     where the room is drawn smaller, just above it against the bookshelf */
+  const k = R.room.k, bw = b.offsetWidth, bh = b.offsetHeight;
+  if (R.box.phone) { b.style.left = Math.round(clamp(x, bw / 2 + 10, R.box.w - bw / 2 - 10)) + 'px'; b.style.top = Math.round(clamp(y - bh - 10, 10, R.box.h - bh - 10)) + 'px'; }
+  else { b.style.translate = '0 0'; b.style.left = Math.round(Math.min(x + 9 * k + 12, R.box.w - bw - 10)) + 'px'; b.style.top = Math.round(y + 6 * k - bh / 2) + 'px'; }
+  R.prompt = b; if (R.still) b.classList.add('on'); else requestAnimationFrame(() => b.classList.add('on')); };
+const openLetter = () => { const name = (S().name || 'friend').trim() || 'friend', w = folk('Elder Wren'), box = el('div', 'op-letterbox'), kB = R.box.phone ? 4 : clamp(Math.floor(R.box.h / 180), 4, 6);
+  const env = canvasEl(48, 46, 'op-bigenv'), draw = open => { const x = env.getContext('2d'); x.clearRect(0, 0, 48, 46); const a = A().openingEnvelope && A().openingEnvelope('big', open); if (a) x.drawImage(a, 0, open ? 0 : 14); };
+  draw(false); size(env, 48 * kB, 46 * kB); R.drawEnv = draw;
+  const halves = ['l', 'r'].map(s => { const c = canvasEl(7, 12, 'op-seal op-seal-' + s), a = A().openingSealHalf && A().openingSealHalf(s); if (a) c.getContext('2d').drawImage(a, 0, 0); size(c, 7 * kB, 12 * kB); c.style.left = `calc(50% + ${(s === 'l' ? 17 : 24) * kB - 24 * kB}px)`; c.style.top = `calc(50% + ${(14 + 9) * kB - 23 * kB}px)`; return c; });
+  const paper = el('div', 'letter-paper op-letter', `<div class="letter-head">${DQ.folkPortrait ? DQ.folkPortrait('Elder Wren', 64, 'letter-face') : ''}<span><b>${esc(w ? w.n : 'Elder Wren')}</b><small>${esc(w ? w.role : 'Village elder')} · ${esc(D.TOWN[TOWN] ? D.TOWN[TOWN].name : 'Willowbrook')}</small></span></div>`
+    + LETTER(name).map(([cls, t], i) => `<p class="op-l ${cls ? 'letter-' + cls : ''}" data-i="${i}">${esc(t)}</p>`).join(''));
+  paper.setAttribute('role', 'document'); paper.setAttribute('aria-label', 'Wren’s letter');
+  box.append(env, ...halves, paper); R.el.appendChild(box); R.letterBox = box; R.paper = paper; R.envCv = env;
+  if (R.still) { box.classList.add('cracked', 'on'); draw(true); paper.classList.add('on'); paper.querySelectorAll('.op-l').forEach(p => p.classList.add('on')); }
+  else requestAnimationFrame(() => box.classList.add('on')); };
+const crackSeal = () => { if (!R.letterBox || R.still) return; DQ.sfx && DQ.sfx('seal'); R.letterBox.classList.add('cracked'); setTimeout(() => R.drawEnv && R.drawEnv(true), 140); };
+const showLine = i => { const p = R.paper && R.paper.querySelector(`.op-l[data-i="${i}"]`); if (p) p.classList.add('on'); };
+
+/* home: they meet at the well, and talk */
+const meet = () => { if (!R || R.met != null) return; R.met = R.clock; if (R.hero) { R.hero.face = 1; R.hero.rest = 1e9; } if (R.wren) { R.wren.pose = null; R.wren.face = -1; } };
+const talk = () => { if (R.talked) return; R.talked = true; R.wait = true; say(null);
+  const ok = DQ.openStory && DQ.openStory('opening_home', { cls: 'op-talk', onDone: () => { if (R && !R.ended && R.beat && R.beat.id === 'home') R.next(); }, auto: { word: 220, decide: 9000 } });
+  if (!ok) { R.wait = false; R.next(); } };
+
+/* the title moment */
+const showTitle = () => { const t = el('div', 'op-title', `<div class="op-titlecard"><div class="logo">${DQ.ico ? DQ.ico('candle') : ''}<h1>Idlewick</h1></div><p class="op-tag">Mend the towns, find the missing bells, put the kettle on.</p>
+  <div class="op-goal"><p>${esc(WORDS.goal)}</p><p>${esc(WORDS.word)}</p></div><button class="tbtn primary" type="button" data-op="begin"><span>Begin</span></button></div>`);
+  const ic = t.querySelector('.logo .ic'), icn = R.box.phone ? 48 : 64; if (ic) for (const p of ['width', 'height']) ic.style.setProperty(p, icn + 'px', 'important'); /* the candle at a whole multiple of its 16 px drawing */
+  R.el.appendChild(t); R.titleEl = t; R.said.push(WORDS.goal, WORDS.word); if (R.still) t.classList.add('on'); else requestAnimationFrame(() => t.classList.add('on'));
+  setTimeout(() => { const b = t.querySelector('[data-op="begin"]'); if (b && R && !R.ended) b.focus({ preventScroll: true }); }, R.still ? 0 : 900); };
+
+/* ---------- playing it ---------- */
+const measure = () => { if (!R) return; R.box = { w: R.el.clientWidth || 1280, h: R.el.clientHeight || 720, phone: innerWidth <= 860 }; };
 DQ.playIntro = (opts = {}) => {
   if (document.getElementById('intro')) return;
-  const name = (S().name || 'friend').trim() || 'friend', script = SCRIPT(name), quick = calm();
-  const el = document.createElement('div'); el.id = 'intro'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'The story so far');
-  el.innerHTML = `<div class="in-stage"></div><div class="in-cap" aria-live="polite"></div><button class="in-skip" data-in="skip" hidden>Skip intro ›</button>`;
-  document.body.appendChild(el);
-  const stage = el.querySelector('.in-stage'), cap = el.querySelector('.in-cap'), skip = el.querySelector('.in-skip');
-  const measure = () => { stageBox = { w: el.clientWidth || 1280, h: el.clientHeight || 720 }; el.style.setProperty('--capband', capBand(stageBox.h) + 'px'); };
-  DQ._introBox = () => stageBox;
+  const box = el('div'); box.id = 'intro'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', 'The story so far');
+  box.innerHTML = `<div class="op-stage"></div><div class="op-say empty" aria-live="polite"></div><button class="btn sm op-skip" type="button" data-op="skip" hidden>Skip ›</button>`;
+  document.body.appendChild(box);
+  /* the game under the opening is not painted while it plays (its Home scene would otherwise be drawn, unseen, every frame) */
+  setTimeout(() => { if (document.getElementById('intro') === box && !box.classList.contains('out')) root.classList.add('op-playing'); }, 950);
+  R = { el: box, stage: box.querySelector('.op-stage'), sayEl: box.querySelector('.op-say'), skip: box.querySelector('.op-skip'), still: calm(), bi: -1, bt: 0, clock: 0, wait: false, beat: null, fired: new Set(), shots: new Set(), bubbles: [], said: [], reached: [], hour: 12, weather: 'clear', touched: false, holding: false, hurried: false, ended: false, opts };
+  if (R.still) box.classList.add('op-still');
   measure();
-  let fi = -1, li = 0, timer = 0, touched = false, ended = false;
-  const readTime = t => Math.max(2400, Math.min(6500, 900 + t.split(/\s+/).length * 270));
-  const showShot = () => {
-    measure(); const f = script[fi], olds = [...stage.querySelectorAll('.in-shot')];
-    const shot = document.createElement('div'); shot.className = `in-shot shot-${f.shot}`; shot.innerHTML = shotHtml(f); stage.appendChild(shot);
-    requestAnimationFrame(() => shot.classList.add('on'));
-    olds.forEach(old => { old.classList.remove('on'); old.classList.add('off'); setTimeout(() => old.remove(), 1200); });
-    if (f.bell && DQ.sfx) DQ.sfx('bell');
-    cap.innerHTML = ''; li = 0;
-  };
-  const showLine = () => {
-    const f = script[fi]; clearTimeout(timer);
-    if (f.shot === 'title') { cap.innerHTML = ''; const b = el.querySelector('[data-in="begin"]'); if (b) setTimeout(() => b.focus({ preventScroll: true }), 50); skip.hidden = true; return; }
-    if (f.shot === 'letter') { const total = f.letter.reduce((a, l) => a + readTime(l) * .55, 0); el.querySelectorAll('.in-letter p').forEach((p, i) => p.style.animationDelay = `${i * (quick ? 0 : 1.1)}s`); timer = setTimeout(next, quick ? 9000 : total + 1500); li = f.letter.length; return; }
-    const t = f.lines[li]; const p = document.createElement('p'); p.textContent = t; cap.appendChild(p); requestAnimationFrame(() => p.classList.add('on'));
-    while (cap.children.length > 2) cap.firstElementChild.remove();
-    timer = setTimeout(advance, readTime(t));
-  };
-  const next = () => { if (fi >= script.length - 1) return; fi++; showShot(); setTimeout(showLine, fi === 0 ? 900 : 650); };
-  const advance = () => { const f = script[fi]; if (!f || f.shot === 'title') return; if (f.lines && li < f.lines.length - 1) { li++; showLine(); } else next(); };
-  const finish = () => {
-    if (ended) return; ended = true; clearTimeout(timer);
+  /* the beats in order; a beat with no length waits for its own end (the road's last step, the conversation, Begin) */
+  R.next = () => { if (R.ended) return; const prev = R.beat; if (prev && prev.leave) prev.leave(); R.bi++; R.bt = 0; R.wait = false; R.fired = new Set(); const b = BEATS[R.bi]; R.beat = b || null; if (!b) return finish(); R.reached.push(b.id); b.enter(); };
+  const step = dt => { if (!R || R.ended) return false; R.clock += dt; const b = R.beat; if (!b) return;
+    if (!R.wait) R.bt += dt;
+    for (let i = 0; i < b.cues.length; i++) { if (R.fired.has(i) || R.bt < b.cues[i][0]) continue; R.fired.add(i); try { b.cues[i][1](); } catch (e) { console.error('opening', e); } if (R.beat !== b || R.ended) return; }
+    if (!R.still) { try { if (b.update) b.update(dt); else for (const s of R.shots) if (s.update) s.update(dt); if (b.id !== 'home' && b.id !== 'title' && R.town && b.update) R.town.update(dt); } catch (e) { console.error('opening', e); } }
+    bubblesTick();
+    if (b.id === 'home' && R.met != null && !R.talked && R.clock - R.met > .7) talk(); /* still or moving: they talk once they have met */
+    if (R.beat === b && !R.wait && b.len != null && R.bt >= b.len) R.next(); };
+  R.frameFn = dt => step(dt);
+  /* a click, Space or Enter hurries the beat: on to its next line, or to the next beat */
+  R.hurry = () => { const b = R.beat; if (!b || R.ended) return; if (b.hurry && b.hurry()) return;
+    const ahead = b.cues.map((c, i) => [c[0], i, c[2]]).filter(([t, i, mark]) => mark && !R.fired.has(i) && t > R.bt).sort((a, z) => a[0] - z[0])[0];
+    if (ahead && (b.len == null || ahead[0] < b.len)) R.bt = ahead[0]; else if (!R.wait) R.next(); };
+  const touch = () => { if (R.touched) return; R.touched = true; R.skip.hidden = false; requestAnimationFrame(() => R.skip.classList.add('on')); if (DQ.audioInit) DQ.audioInit(); };
+  const finish = () => { if (!R || R.ended) return; const r = R; r.ended = true;
+    if (DQ.storyActive && DQ.storyActive() && DQ.storyActive().id === 'opening_home') DQ.closeModal();
     S().seen = S().seen || {}; S().seen.intro = 1; if (DQ.save) DQ.save();
-    el.classList.add('out'); setTimeout(() => { el.remove(); if (opts.onDone) opts.onDone(); }, quick ? 0 : 700);
-    document.removeEventListener('keydown', onKey, true);
-  };
-  const touch = () => { if (!touched) { touched = true; skip.hidden = false; requestAnimationFrame(() => skip.classList.add('on')); } };
-  el.addEventListener('click', e => {
-    const b = e.target.closest('[data-in]');
-    if (b && b.dataset.in === 'skip') return finish();
-    if (b && b.dataset.in === 'begin') { DQ.sfx && DQ.sfx('click'); return finish(); }
-    touch(); advance();
-  });
-  const onKey = e => {
-    if (!document.getElementById('intro')) return;
-    e.stopPropagation();
-    if (e.key === 'Escape') { if (touched) finish(); else touch(); e.preventDefault(); return; }
-    if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowRight') { e.preventDefault(); if (script[fi] && script[fi].shot === 'title') return finish(); touch(); advance(); }
-  };
-  document.addEventListener('keydown', onKey, true);
-  next();
+    DQ.musicMode && DQ.musicMode('game'); DQ.musicDim && DQ.musicDim(1);
+    document.removeEventListener('keydown', onKey, true); document.removeEventListener('keyup', onKeyUp, true); removeEventListener('resize', onResize);
+    for (const s of [...r.shots]) s.remove && s.remove(); r.bubbles.forEach(B => B.b.remove());
+    root.classList.remove('op-playing'); box.classList.add('out'); setTimeout(() => { box.remove(); if (R === r) R = null; if (opts.onDone) opts.onDone(); }, r.still ? 0 : 700); };
+  R.finish = finish;
+  box.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; touch(); if (R.beat && R.beat.id === 'road') { R.holding = true; R.pressAt = performance.now(); } });
+  const lift = () => { if (!R) return; if (R.holding && R.beat && R.beat.id === 'road' && performance.now() - (R.pressAt || 0) < 260) R.hurried = true; R.holding = false; };
+  box.addEventListener('pointerup', lift); box.addEventListener('pointercancel', () => { if (R) R.holding = false; });
+  box.addEventListener('click', e => { const b = e.target.closest('[data-op]');
+    if (b && b.dataset.op === 'skip') return finish();
+    if (b && b.dataset.op === 'begin') { DQ.sfx && DQ.sfx('click'); return finish(); }
+    if (b && b.dataset.op === 'open') { touch(); if (R.beat && R.beat.id === 'lodging') R.next(); return; }
+    touch(); if (R.beat && R.beat.id !== 'road' && R.beat.id !== 'title') R.hurry(); });
+  const onKey = e => { if (!R || R.ended || !document.getElementById('intro')) return;
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); return finish(); }
+    if (DQ.storyActive && DQ.storyActive()) return; /* the conversation screen owns its keys */
+    const go = e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowRight'; if (!go) return;
+    if (e.target && e.target.closest && e.target.closest('#intro button')) { touch(); return; } /* a focused button presses itself */
+    e.preventDefault(); e.stopPropagation(); touch();
+    if (R.beat && R.beat.id === 'title') return finish();
+    if (R.beat && R.beat.id === 'road') { if (!e.repeat) R.pressAt = performance.now(); R.holding = true; return; }
+    if (!e.repeat) R.hurry(); };
+  const onKeyUp = e => { if (!R || !(e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowRight')) return; lift(); };
+  const onResize = () => { measure(); for (const s of R.shots) s.layout && s.layout(); if (R.inset && R.inset.classList.contains('on')) { const key = R.inset.dataset.key; delete R.inset.dataset.key; const m = /^(bell|rope)(\d)(\w+)$/.exec(key || ''); if (m) inset(m[1], +m[2], m[3]); } };
+  document.addEventListener('keydown', onKey, true); document.addEventListener('keyup', onKeyUp, true); addEventListener('resize', onResize);
+  /* draw the pictures it needs ahead of time, a few at once, so no beat waits on a painter */
+  setTimeout(() => { try { pastScene(); ruinScene(); if (A().openingRoad) A().openingRoad(TOWN, DQ.season ? DQ.season() : 'autumn'); } catch (e) { console.error('opening', e); } }, 0);
+  R.next(); DQ.frame.add(R.frameFn);
 };
+/* for tests and the screenshots: where the opening is, what it has said, and a way to jump ahead */
+DQ.introState = () => R ? { beat: R.beat && R.beat.id, reached: R.reached.slice(), bt: Math.round(R.bt * 100) / 100, wait: R.wait, still: R.still, touched: R.touched, skip: !R.skip.hidden, said: R.said.slice(), hour: R.hour, weather: R.weather, dist: R.road ? Math.round(R.road.dist) : null, talk: !!(DQ.storyActive && DQ.storyActive()) } : null;
+DQ.introJump = (id, at = 0) => { if (!R) return false; let n = 0; while (R && !R.ended && R.beat && R.beat.id !== id && n++ < 12) R.next(); if (R && R.beat && R.beat.id === id) { R.bt = at; return true; } return false; };
+DQ.INTRO_BEATS = BEATS.map(b => b.id);
 
 /* a new hero sees it once; automated browsers skip it unless a test asks (localStorage idlewick.intro = 1) */
 DQ.introWanted = () => {
@@ -36230,7 +36757,7 @@ Q.townWalkerCount = town => 3 + Math.round(6 * restoredShare(town));
 
 /* one walker: a figure, a road, a direction, a pace (scene px per second) and the odd pause to chat */
 const SKINS = ['#f2c9a0', '#e8b98e', '#c98e5e', '#9a6640', '#6e4428'], STYLES = ['short', 'short', 'long', 'bun', 'bald'];
-const makeWalkers = (town, W) => { const rnd = seeded(hash(town)), n = Q.townWalkerCount(town);
+const makeWalkers = (town, W, count) => { const rnd = seeded(hash(town)), n = count != null ? count : Q.townWalkerCount(town);
   return Array.from({ length: n }, (_, i) => ({ x: 8 + rnd() * (W - 24), y: ROADS[i % 2] + (rnd() < .5 ? 0 : 1), dir: rnd() < .5 ? -1 : 1, pace: 5 + rnd() * 5,
     rest: 0, cloth: CLOTH[Math.floor(rnd() * CLOTH.length)], hair: HAIR[Math.floor(rnd() * HAIR.length)], basket: rnd() < .25, walked: 0,
     skin: SKINS[Math.floor(rnd() * SKINS.length)], hs: STYLES[Math.floor(rnd() * STYLES.length)] })); };
@@ -36240,7 +36767,12 @@ const giversOf = town => (Q.folkMet ? Q.folkMet() : []).filter(f => f.town === t
 const makeGivers = (town, W) => { const rnd = seeded(hash(town + ':givers'));
   return giversOf(town).map((f, i) => ({ giver: f, x: 20 + rnd() * (W - 40), y: ROADS[i % 2] + (rnd() < .5 ? 0 : 1), dir: rnd() < .5 ? -1 : 1, pace: 3 + rnd() * 3, rest: 1 + rnd() * 4, walked: 0, cloth: f.look.clothes || '#6a6a74' })); };
 /* the chibi townsfolk (js/town_scene.js); the older flat figure below stays as a fallback */
-const chibi = (x, w, look, frame) => { if (!A || !A.townFolk) return false; A.townFolk(x, w.x, w.y, look, frame, w.rest > 0 ? 0 : w.dir); return true; };
+const chibi = (x, w, look, frame) => { if (!A || !A.townFolk) return false; if (w.hidden) return true; A.townFolk(x, w.x, w.y, look, w.pose || frame, w.rest > 0 ? (w.face || 0) : w.dir); if (w.carry) carry(x, w); return true; };
+/* what someone leaving town carries (the opening, js/intro.js): a bundle on a stick, the good frying pan, a stolen bell */
+const carry = (x, w) => { const f = (c, a, b, ww, hh) => { x.fillStyle = c; x.fillRect(Math.round(a), Math.round(b), ww, hh); }, X = Math.round(w.x), Y = w.y, d = w.rest > 0 ? (w.face || 1) : w.dir, back = d < 0 ? X + 6 : X - 2;
+  if (w.carry === 'bundle') { f('#141018', back - (d < 0 ? 0 : 3), Y - 16, 5, 5); f('#c8483a', back - (d < 0 ? -1 : 2), Y - 15, 3, 3); f('#e86a5a', back - (d < 0 ? -1 : 2), Y - 15, 1, 1); for (let i = 0; i < 6; i++) f('#5a3e26', back + (d < 0 ? -i * .6 : i * .6), Y - 12 + i, 1, 1); }
+  else if (w.carry === 'pan') { const hx = d < 0 ? X - 4 : X + 7; f('#141018', hx - 1, Y - 9, 6, 4); f('#3a3a44', hx, Y - 8, 4, 2); f('#6a6a78', hx, Y - 8, 1, 1); f('#5a3e26', hx + (d < 0 ? 4 : -2), Y - 7, 2, 1); }
+  else if (w.carry === 'bell') { const bx = X + 1; f('#2a1a08', bx - 1, Y - 20, 7, 6); f('#d8a640', bx, Y - 19, 5, 4); f('#f8e08a', bx, Y - 19, 2, 1); f('#8a5a20', bx + 2, Y - 15, 1, 1); } };
 const giverLook = w => { const L = w.giver.look, [hc, hs] = L.hair || ['#3a2414', 'short']; return { skin: SKIN[L.skin] || SKIN.light, hair: hc, hs: hs === 'bald' || hs === 'tonsure' ? hs : ['long', 'braids', 'wild'].includes(hs) ? 'long' : hs === 'bun' ? 'bun' : 'short', cloth: w.cloth, apron: L.apron || null, shawl: L.shawl || null, hat: L.hat || null, beard: L.beard && L.beard[1] !== 'stubble' ? L.beard[0] : null, glow: L.glow || null }; };
 const drawGiver = (x, w) => { if (chibi(x, w, w.look || (w.look = giverLook(w)), w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2)) return; const X = Math.round(w.x), Y = w.y, L = w.giver.look, f = (c, a, b, ww, hh) => { x.fillStyle = c; x.fillRect(a, b, ww, hh); }, flip = w.dir < 0, fx = (a, ww) => flip ? X + 5 - a - ww : X + a;
   const step = w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2, skin = SKIN[L.skin] || SKIN.light, [hc, hs] = L.hair || ['#3a2414', 'short'], [k, c] = L.hat || [], dk = c ? mix(c, '#000000', .3) : '';
@@ -36303,21 +36835,39 @@ const attach = img => { if (img.dataset.walkers || img.classList.contains('scene
     img.after(cv); const L = { img, cv, x: cv.getContext('2d'), walkers: makeWalkers(img.dataset.town, W), givers: [], W, key: '' };
     if (window.ResizeObserver) { L.ro = new ResizeObserver(() => { fit(L); placeTags(L); }); L.ro.observe(img); } fit(L); syncGivers(L); layers.add(L); tick.start(); };
   if (img.complete) go(); else img.addEventListener('load', go, { once: true }); };
-Q.townWalkersScan = () => { if (still()) return; document.querySelectorAll('.home-scene img.scene[data-town], .village-scene>img.scene[data-town]').forEach(attach); for (const L of layers) if (L.cv.isConnected) syncGivers(L); };
+Q.townWalkersScan = () => { if (still()) return; document.querySelectorAll('.home-scene img.scene[data-town], .village-scene>img.scene[data-town]').forEach(attach); for (const L of layers) if (L.cv.isConnected && !L.own) syncGivers(L); };
 Q.townWalkersLive = () => [...layers].filter(L => L.cv.isConnected).map(L => ({ town: L.img.dataset.town, walkers: L.walkers.map(w => ({ x: Math.round(w.x), y: w.y })),
   givers: L.givers.map(w => ({ id: w.giver.id, x: Math.round(w.x), y: w.y })), tags: (L.tags || []).filter(b => b.isConnected).length, cheer: L.cheer || null }));
 
+/* the opening (js/intro.js) walks its own cast over its own picture of the town: the same figures and the same clock,
+   told where to go (goal, face, hold, leave, carry, pose, hidden). Never on the Home or Village scenes. */
+Q.townWalkersMount = (img, o = {}) => { if (still() || !img || !img.isConnected) return null; const W = o.W || img.naturalWidth || (A && A.SCENE_W) || 640, H = o.H || img.naturalHeight || (A && A.SCENE_H) || 360;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H; cv.className = 'town-walkers'; cv.setAttribute('aria-hidden', 'true'); img.dataset.walkers = '1'; img.after(cv);
+  const L = { img, cv, x: cv.getContext('2d'), walkers: o.walkers || makeWalkers(o.town || 'willowbrook', W, o.count), givers: [], W, key: '', own: true, giverKey: 'own' };
+  if (window.ResizeObserver) { L.ro = new ResizeObserver(() => fit(L)); L.ro.observe(img); } fit(L); layers.add(L); tick.start();
+  return { L, remove: () => { L.ro && L.ro.disconnect(); cv.remove(); layers.delete(L); } }; };
+Q.townWalkersMake = (town, W, count) => makeWalkers(town, W, count);
+/* a quest giver's chibi look, from their portrait (the opening's Wren) */
+Q.townGiverLook = f => f ? giverLook({ giver: f, cloth: (f.look && f.look.clothes) || '#6a6a74' }) : null;
 const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performance.now(); this.raf = Q.frame.add((dt, t) => this.run(t)); } }, /* the shared animation clock (util.js) */
   run(t) { const dt = Math.min(.1, Math.max(0, (t - this.last) / 1000)); this.last = t; /* a hidden tab never catches up */
     for (const L of layers) { if (!L.cv.isConnected) { L.ro && L.ro.disconnect(); for (const b of L.tags || []) b.remove(); layers.delete(L); continue; }
       if (still()) { L.cv.remove(); for (const b of L.tags || []) b.remove(); continue; }
-      for (const w of L.walkers.concat(L.givers)) { if (w.rest > 0) { w.rest -= dt; continue; }
+      for (const w of L.walkers.concat(L.givers)) {
+        /* told where to go (the opening): walk there, then stand facing w.face until told otherwise */
+        if (w.goal != null) { const gap = w.goal - w.x; if (Math.abs(gap) < .5) { w.x = w.goal; w.goal = null; w.rest = w.hold != null ? w.hold : 1e9; if (w.arrive) { const fn = w.arrive; w.arrive = null; fn(w); } }
+          else { w.rest = 0; w.dir = gap < 0 ? -1 : 1; const d = Math.min(Math.abs(gap), w.pace * dt); w.x += w.dir * d; w.walked += d; } continue; }
+        if (w.rest > 0) { w.rest -= dt; continue; }
         const d = w.pace * dt; w.x += w.dir * d; w.walked += d;
+        /* leaving town: off the edge of the picture and gone */
+        if (w.leave) { if (w.x < -14 || w.x > L.W + 14) w.gone = true; continue; }
         if (w.x < 4) { w.x = 4; w.dir = 1; } else if (w.x > L.W - 10) { w.x = L.W - 10; w.dir = -1; }
+        if (w.script) continue;
         /* givers stop to chat more often, and for longer */
         if (Math.random() < dt * (w.giver ? .1 : .06)) { w.rest = (w.giver ? 2 : 1) + Math.random() * (w.giver ? 5 : 3); if (Math.random() < .4) w.dir = -w.dir; } }
+      if (L.walkers.some(w => w.gone)) L.walkers = L.walkers.filter(w => !w.gone);
       const ch = cheerOf(L.img.dataset.town, t); L.cheer = ch ? { id: ch.id, t: Math.round(ch.el) } : null;
-      const key = L.walkers.concat(L.givers).map(w => Math.round(w.x) + ':' + (w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2) + w.dir).join(',') + (ch ? '|' + Math.floor(ch.el * 30) : '');
+      const key = L.walkers.concat(L.givers).map(w => w.hidden ? 'h' : Math.round(w.x) + ':' + (w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2) + w.dir + (w.rest > 0 ? 'f' + (w.face || 0) : '') + (w.pose || '') + (w.carry || '')).join(',') + (ch ? '|' + Math.floor(ch.el * 30) : '');
       if (key !== L.key) { L.key = key; L.x.clearRect(0, 0, L.cv.width, L.cv.height); for (const w of L.walkers) draw(L.x, w); for (const w of L.givers) drawGiver(L.x, w); if (ch) drawCheer(L.x, ch); placeTags(L); } }
     if (!layers.size) { this.raf = 0; return false; } } };
 
@@ -36414,7 +36964,7 @@ const ART = {
 };
 
 /* ---------- one town's life ---------- */
-const build = (town, meta) => { const rnd = seeded(hash(town + ':life')), share = restoredShare(town), st = meta.style || {}, W = meta.W, H = meta.H;
+const build = (town, meta, share0) => { const rnd = seeded(hash(town + ':life')), share = share0 != null ? share0 : restoredShare(town), st = meta.style || {}, W = meta.W, H = meta.H;
   const L = { town, meta, animals: [], puffs: [], drops: [], stars: [], flies: [], glints: [], birds: null, birdWait: 6 + rnd() * 20, t: 0 };
   const skyMax = st.snow ? 40 : 62;
   for (let i = 0; i < 70; i++) L.stars.push({ x: Math.floor(rnd() * W), y: Math.floor(rnd() * skyMax), p: rnd() * 6.28, big: rnd() < .12 });
@@ -36441,7 +36991,7 @@ const build = (town, meta) => { const rnd = seeded(hash(town + ':life')), share 
   return L; };
 
 /* ---------- moving everything on (dt in seconds) ---------- */
-const step = (L, dt) => { L.t += dt; const W = L.meta.W, H = L.meta.H, wx = Q.townWeather(L.town);
+const step = (L, dt) => { L.t += dt; const W = L.meta.W, H = L.meta.H, wx = L.weatherFn ? L.weatherFn() : Q.townWeather(L.town);
   for (const a of L.animals) {
     if (a.kind === 'gull') { a.a += a.sp * dt; continue; }
     if (a.mode === 'idle') { a.wait -= dt; a.f = a.kind === 'chicken' ? (Math.sin(L.t * 7 + a.x) > .4 ? 1 : 0) : a.kind === 'cat' ? (Math.sin(L.t * 1.3 + a.x) > .6 ? 1 : 0) : (Math.sin(L.t * 2 + a.x) > .7 ? 1 : 0);
@@ -36510,10 +37060,23 @@ const attach = img => { if (img.dataset.life || img.classList.contains('scene-ol
     const L = Object.assign(build(town, meta), { img, under, tint, glow, over, ux: under.getContext('2d'), ox: over.getContext('2d'), home: !!img.closest('.home-scene') });
     if (window.ResizeObserver) { L.ro = new ResizeObserver(() => fit(L)); L.ro.observe(img); if (L.home) L.ro.observe(img.parentElement); } fit(L); layers.add(L); paint(L, 0); requestAnimationFrame(() => tint.classList.add('eased')); tick.start(); };
   if (img.complete) go(); else img.addEventListener('load', go, { once: true }); };
-const paint = (L, dt) => { const moving = !still(); if (moving && dt) step(L, dt); const light = Q.townLight(Q.townHour()), [r, g, b] = tintOf(light); L.lightDark = light.dark;
+const paint = (L, dt) => { const moving = !still(); if (moving && dt) step(L, dt); const light = Q.townLight(L.hourFn ? ((L.hourFn() % 24) + 24) % 24 : Q.townHour()), [r, g, b] = tintOf(light); L.lightDark = light.dark;
   L.tint.style.backgroundColor = `rgb(${r},${g},${b})`; L.tint.dataset.phase = light.phase;
   /* the low sun warms the sky (an overlay, so a blue sky turns gold and rose rather than brown) */
   const sw = light.warm * (1 - light.dark * .5); L.glow.style.background = sw > .02 ? `linear-gradient(to bottom, rgba(255,128,72,${(sw * .85).toFixed(3)}) 0%, rgba(255,176,96,${(sw * .55).toFixed(3)}) 34%, rgba(255,190,120,${(sw * .25).toFixed(3)}) 60%, rgba(255,190,120,0) 85%)` : 'none'; drawUnder(L, L.ux, moving); drawOver(L, L.ox, light, moving); };
+/* the opening (js/intro.js) lays the same life over its own town pictures, with its own clock and weather (o.hour and
+   o.weather are functions; o.share is how restored the town looks) and its own scene record (o.meta), since it shows
+   Willowbrook as it was before the bells went. remove() takes it away; repaint() brings a still frame up to the hour
+   (under calm nothing moves, so the opening repaints each still itself). */
+Q.townLifeMount = (img, o = {}) => { const meta = o.meta || (A.sceneMeta && A.sceneMeta[o.town]); if (!meta) return null;
+  const town = o.town || meta.town, mk = (tag, cls) => { const e = document.createElement(tag); e.className = cls; e.setAttribute('aria-hidden', 'true'); if (tag === 'canvas') { e.width = meta.W; e.height = meta.H; } return e; };
+  const under = mk('canvas', 'town-life town-life-under'), tint = mk('div', 'town-tint'), glow = mk('div', 'town-glow'), over = mk('canvas', 'town-life town-life-over');
+  img.dataset.life = '1'; img.after(under, tint, glow, over);
+  const L = Object.assign(build(town, meta, o.share), { img, under, tint, glow, over, ux: under.getContext('2d'), ox: over.getContext('2d'), home: false, own: true, hourFn: o.hour || null, weatherFn: o.weather || null });
+  if (window.ResizeObserver) { L.ro = new ResizeObserver(() => fit(L)); L.ro.observe(img); } fit(L); layers.add(L); paint(L, 0); tick.start();
+  return { L, repaint: () => paint(L, 0), remove: () => { L.ro && L.ro.disconnect(); [under, tint, glow, over].forEach(e => e.remove()); layers.delete(L); } }; };
+/* the colour the hour's light multiplies over a scene (the opening's road uses it, under the hero) */
+Q.townTint = h => tintOf(Q.townLight(((h % 24) + 24) % 24));
 Q.townLifeScan = () => document.querySelectorAll('.home-scene img.scene[data-town], .village-scene>img.scene[data-town]').forEach(attach);
 /* for tests: what each layer is showing right now */
 Q.townLifeLive = () => [...layers].filter(L => L.img.isConnected).map(L => ({ town: L.town, phase: L.tint.dataset.phase, tint: L.tint.style.backgroundColor, weather: L.weather, windows: (L.meta.windows || []).length, chimneys: (L.meta.chimneys || []).length,
@@ -36656,7 +37219,7 @@ const drawKeep = async (x, P, list) => { const { f, ell } = P, wood = '#6a4630',
 
 /* ---------- the room itself (redrawn when the quarter hour, weather, season or companion changes) ---------- */
 const load = src => new Promise(r => { if (!src) return r(null); const im = new Image(); im.onload = () => r(im); im.onerror = () => r(null); im.src = src; });
-const room = async (town, light, weather, season, petId, keep = [], letters = 0) => {
+const room = async (town, light, weather, season, petId, keep = [], letters = 0, o = {}) => {
   const c = document.createElement('canvas'); c.width = RW; c.height = RH; const x = c.getContext('2d'), P = A.townPainter(x, RW, RH), { f, ell } = P;
   /* the darker house palette (28 Nov 2026): warm lights, cool shadows, and an outline round every piece of furniture */
   const plaster = '#6e5a44', beam = '#3a2618', beamLt = '#5a3e28', stone = '#5a5660', stoneDk = '#3a3640', stoneLt = '#7a7682', wood = '#6a4630', woodDk = '#3e2818', woodLt = '#8a6040', INK = '#120a08';
@@ -36695,7 +37258,7 @@ const room = async (town, light, weather, season, petId, keep = [], letters = 0)
   /* on the mantel: a candle, a jar, a little clock; the season's own touch */
   box(60, 88, 4, 10, '#e0d8c4'); f('#e8b048', 61, 85, 2, 3); box(120, 90, 8, 8, '#4a6a88'); f('#8ab0d0', 121, 90, 2, 4); box(96, 88, 10, 10, '#b08a40'); f('#e8e0cc', 98, 90, 6, 6); f(INK, 100, 92, 1, 3); f(INK, 101, 93, 2, 1);
   if (season === 'winter') { for (let q = 48; q < 152; q += 4) { f('#1e4a2a', q, 96, 4, 3); f('#2f6a3a', q, 96, 3, 2); if (q % 12 === 0) f('#c8382e', q + 1, 97, 2, 2); } }
-  if (season === 'autumn') { ell(INK, 36, 170, 8, 6); ell('#c06a26', 36, 170, 7, 5); ell('#e8923a', 34, 168, 3, 2); f('#4a6a34', 36, 164, 1, 2); ell(INK, 156, 171, 6, 5); ell('#b08a36', 156, 171, 5, 4); f('#4a6a34', 156, 166, 1, 2); }
+  if (season === 'autumn') { ell(INK, 36, 170, 8, 6); ell('#c06a26', 36, 170, 7, 5); ell('#e8923a', 34, 168, 3, 2); f('#4a6a34', 36, 164, 1, 2); } /* one pumpkin by the hearth; the gourd that sat at the hero's feet is gone */
   if (season === 'spring' || season === 'summer') { box(280, 136, 6, 8, '#4a6a88'); for (const [dx, col] of [[-2, '#e0607a'], [3, '#f0d060'], [7, '#f4f0f4'], [1, season === 'summer' ? '#f0a030' : '#a07ae0']]) { f('#4a7a3a', 282 + dx / 2, 130, 1, 6); f(INK, 279 + dx, 126, 5, 5); f(col, 280 + dx, 127, 3, 3); } }
   /* map on the wall, rolled at the edges */
   const M = SPOTS.map; box(M.x + 2, M.y + 2, M.w - 4, M.h - 4, '#c8b48a'); box(M.x, M.y, 3, M.h, '#a08860'); box(M.x + M.w - 3, M.y, 3, M.h, '#a08860');
@@ -36715,7 +37278,7 @@ const room = async (town, light, weather, season, petId, keep = [], letters = 0)
   /* rug in front of the fire */
   ell(INK, 100, 214, 63, 15); ell('#5a2420', 100, 214, 62, 14); ell('#8a3430', 100, 214, 56, 11); ell('#b8843a', 100, 214, 44, 7); ell('#8a3430', 100, 214, 38, 5); for (let q = 44; q < 158; q += 6) f('#d8b060', q, 214 + Math.round(Math.sin(q) * 1), 2, 1);
   /* the hero by the fire, the companion (or the house cat) asleep on the rug */
-  const hero = await load(Q.heroFigureUrl && Q.heroFigureUrl(S().look)); if (hero) x.drawImage(hero, HERO.x, HERO.y - 32, 24, 32);
+  const hero = o.noHero ? null : await load(Q.heroFigureUrl && Q.heroFigureUrl(S().look)); if (hero) x.drawImage(hero, HERO.x, HERO.y - 32, 24, 32);
   const pet = await load(petId ? petArt(petId) : null);
   if (pet) x.drawImage(pet, PET.x, PET.y - 32 + 6, 32, 32);
   else { const cat = '#6a6470'; ell(INK, PET.x + 14, PET.y - 4, 10, 5); f(INK, PET.x + 3, PET.y - 12, 8, 7); ell(cat, PET.x + 14, PET.y - 4, 9, 4); f(cat, PET.x + 4, PET.y - 9, 6, 5); f(cat, PET.x + 4, PET.y - 11, 2, 2); f(cat, PET.x + 8, PET.y - 11, 2, 2); f(lit(cat), PET.x + 9, PET.y - 7, 6, 1); f(mix(cat, '#000000', .3), PET.x + 18, PET.y - 3, 8, 2); }
@@ -36741,6 +37304,13 @@ const lights = (x, t, dark, moving) => { x.clearRect(0, 0, RW, RH); x.save(); x.
   /* the lantern's warm pool on the rafters */
   glow(250.5, 40 - OY, 26, 18, .1 + .14 * dark);
   x.restore(); };
+
+/* the opening (js/intro.js) borrows the room for the hero's lodgings far down the road: drawn without the hero (who
+   stands in it as a living figure), its window onto another town, and the fire's own living light on the same clock */
+Q.HEARTH_ROOM = { w: RW, h: RH, oy: OY, hero: HERO, fire: FIRE, pet: PET, window: SPOTS.window };
+Q.hearthRoomUrl = (town, hour = 9, weather = 'clear') => { const L = Q.townLight ? Q.townLight(hour) : { dark: 0, warm: 0 }, tint = Q.townTint ? Q.townTint(hour) : [255, 255, 255];
+  return room(town, { dark: L.dark, warm: L.warm, tint }, weather, Q.season(), null, [], 0, { noHero: true }); };
+Q.hearthLightsDraw = lights;
 
 /* ---------- the Home card ---------- */
 const st = { key: '', url: '', busy: false, raf: 0, last: 0, t: 0 };

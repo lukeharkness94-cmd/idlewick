@@ -2,6 +2,15 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
 (async()=>{const browser=await chromium.launch({...(fs.existsSync('/usr/bin/chromium')?{executablePath:process.env.CHROMIUM_PATH||undefined}:{}),args:['--no-sandbox']});try{
 const p=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];p.on('pageerror',e=>errors.push(e.message));
 await p.goto(process.env.IDLEWICK_URL||'http://127.0.0.1:8765/Play%20Idlewick.html');await p.locator('#t-new').click();await p.locator('#cr-go').click();await p.waitForTimeout(700);
+/* The opening (owner, 28 Nov 2026: a living scene, js/intro.js) stays out of automated runs; played and skipped, it leaves
+   the new hero exactly where the opening routes below start from: same pack, purse, gear, skills and quests. */
+assert.equal(await p.locator('#intro').count(),0,'automation does not play the opening');
+const snapshot=()=>p.evaluate(()=>JSON.stringify([DQ.S.coins,DQ.S.inv,DQ.S.bank,DQ.S.equip,DQ.S.ammo,DQ.S.xp,DQ.S.q,DQ.S.projects,DQ.S.town]));
+const fresh=await snapshot();await p.evaluate(()=>DQ.playIntro());await p.waitForTimeout(1500);
+assert.equal(await p.evaluate(()=>DQ.introState()&&DQ.introState().beat),'noon','the opening starts in Willowbrook at noon');
+await p.mouse.click(700,300);await p.waitForTimeout(400);await p.locator('.op-skip').click();await p.waitForTimeout(900);
+assert.equal(await p.locator('#intro').count(),0,'Skip ends the opening');assert.equal(await p.evaluate(()=>DQ.S.seen.intro),1,'the opening is recorded as seen');
+assert.equal(await snapshot(),fresh,'the opening grants and changes nothing the routes depend on');
 const checks=await p.evaluate(()=>{
 const Q=DQ,D=Q.data,U=Q.ui;Q.paused=true;Q.S.settings.notify=false;Q.S.settings.storyScenes=false;Q.S.tut.hidden=true;for(const id of Object.keys(Q.skillLessons))Q.S.tut.done['lesson:'+id]=true;for(let i=0;i<20;i++)Q.closeModal();
 const out=[];const check=(yes,label)=>{if(!yes)throw Error(label);out.push(label);};

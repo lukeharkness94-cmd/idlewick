@@ -114,7 +114,7 @@ const drawKeep = async (x, P, list) => { const { f, ell } = P, wood = '#6a4630',
 
 /* ---------- the room itself (redrawn when the quarter hour, weather, season or companion changes) ---------- */
 const load = src => new Promise(r => { if (!src) return r(null); const im = new Image(); im.onload = () => r(im); im.onerror = () => r(null); im.src = src; });
-const room = async (town, light, weather, season, petId, keep = [], letters = 0) => {
+const room = async (town, light, weather, season, petId, keep = [], letters = 0, o = {}) => {
   const c = document.createElement('canvas'); c.width = RW; c.height = RH; const x = c.getContext('2d'), P = A.townPainter(x, RW, RH), { f, ell } = P;
   /* the darker house palette (28 Nov 2026): warm lights, cool shadows, and an outline round every piece of furniture */
   const plaster = '#6e5a44', beam = '#3a2618', beamLt = '#5a3e28', stone = '#5a5660', stoneDk = '#3a3640', stoneLt = '#7a7682', wood = '#6a4630', woodDk = '#3e2818', woodLt = '#8a6040', INK = '#120a08';
@@ -153,7 +153,7 @@ const room = async (town, light, weather, season, petId, keep = [], letters = 0)
   /* on the mantel: a candle, a jar, a little clock; the season's own touch */
   box(60, 88, 4, 10, '#e0d8c4'); f('#e8b048', 61, 85, 2, 3); box(120, 90, 8, 8, '#4a6a88'); f('#8ab0d0', 121, 90, 2, 4); box(96, 88, 10, 10, '#b08a40'); f('#e8e0cc', 98, 90, 6, 6); f(INK, 100, 92, 1, 3); f(INK, 101, 93, 2, 1);
   if (season === 'winter') { for (let q = 48; q < 152; q += 4) { f('#1e4a2a', q, 96, 4, 3); f('#2f6a3a', q, 96, 3, 2); if (q % 12 === 0) f('#c8382e', q + 1, 97, 2, 2); } }
-  if (season === 'autumn') { ell(INK, 36, 170, 8, 6); ell('#c06a26', 36, 170, 7, 5); ell('#e8923a', 34, 168, 3, 2); f('#4a6a34', 36, 164, 1, 2); ell(INK, 156, 171, 6, 5); ell('#b08a36', 156, 171, 5, 4); f('#4a6a34', 156, 166, 1, 2); }
+  if (season === 'autumn') { ell(INK, 36, 170, 8, 6); ell('#c06a26', 36, 170, 7, 5); ell('#e8923a', 34, 168, 3, 2); f('#4a6a34', 36, 164, 1, 2); } /* one pumpkin by the hearth; the gourd that sat at the hero's feet is gone */
   if (season === 'spring' || season === 'summer') { box(280, 136, 6, 8, '#4a6a88'); for (const [dx, col] of [[-2, '#e0607a'], [3, '#f0d060'], [7, '#f4f0f4'], [1, season === 'summer' ? '#f0a030' : '#a07ae0']]) { f('#4a7a3a', 282 + dx / 2, 130, 1, 6); f(INK, 279 + dx, 126, 5, 5); f(col, 280 + dx, 127, 3, 3); } }
   /* map on the wall, rolled at the edges */
   const M = SPOTS.map; box(M.x + 2, M.y + 2, M.w - 4, M.h - 4, '#c8b48a'); box(M.x, M.y, 3, M.h, '#a08860'); box(M.x + M.w - 3, M.y, 3, M.h, '#a08860');
@@ -173,7 +173,7 @@ const room = async (town, light, weather, season, petId, keep = [], letters = 0)
   /* rug in front of the fire */
   ell(INK, 100, 214, 63, 15); ell('#5a2420', 100, 214, 62, 14); ell('#8a3430', 100, 214, 56, 11); ell('#b8843a', 100, 214, 44, 7); ell('#8a3430', 100, 214, 38, 5); for (let q = 44; q < 158; q += 6) f('#d8b060', q, 214 + Math.round(Math.sin(q) * 1), 2, 1);
   /* the hero by the fire, the companion (or the house cat) asleep on the rug */
-  const hero = await load(Q.heroFigureUrl && Q.heroFigureUrl(S().look)); if (hero) x.drawImage(hero, HERO.x, HERO.y - 32, 24, 32);
+  const hero = o.noHero ? null : await load(Q.heroFigureUrl && Q.heroFigureUrl(S().look)); if (hero) x.drawImage(hero, HERO.x, HERO.y - 32, 24, 32);
   const pet = await load(petId ? petArt(petId) : null);
   if (pet) x.drawImage(pet, PET.x, PET.y - 32 + 6, 32, 32);
   else { const cat = '#6a6470'; ell(INK, PET.x + 14, PET.y - 4, 10, 5); f(INK, PET.x + 3, PET.y - 12, 8, 7); ell(cat, PET.x + 14, PET.y - 4, 9, 4); f(cat, PET.x + 4, PET.y - 9, 6, 5); f(cat, PET.x + 4, PET.y - 11, 2, 2); f(cat, PET.x + 8, PET.y - 11, 2, 2); f(lit(cat), PET.x + 9, PET.y - 7, 6, 1); f(mix(cat, '#000000', .3), PET.x + 18, PET.y - 3, 8, 2); }
@@ -199,6 +199,13 @@ const lights = (x, t, dark, moving) => { x.clearRect(0, 0, RW, RH); x.save(); x.
   /* the lantern's warm pool on the rafters */
   glow(250.5, 40 - OY, 26, 18, .1 + .14 * dark);
   x.restore(); };
+
+/* the opening (js/intro.js) borrows the room for the hero's lodgings far down the road: drawn without the hero (who
+   stands in it as a living figure), its window onto another town, and the fire's own living light on the same clock */
+Q.HEARTH_ROOM = { w: RW, h: RH, oy: OY, hero: HERO, fire: FIRE, pet: PET, window: SPOTS.window };
+Q.hearthRoomUrl = (town, hour = 9, weather = 'clear') => { const L = Q.townLight ? Q.townLight(hour) : { dark: 0, warm: 0 }, tint = Q.townTint ? Q.townTint(hour) : [255, 255, 255];
+  return room(town, { dark: L.dark, warm: L.warm, tint }, weather, Q.season(), null, [], 0, { noHero: true }); };
+Q.hearthLightsDraw = lights;
 
 /* ---------- the Home card ---------- */
 const st = { key: '', url: '', busy: false, raf: 0, last: 0, t: 0 };

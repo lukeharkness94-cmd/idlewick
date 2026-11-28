@@ -25,7 +25,7 @@ Q.townWalkerCount = town => 3 + Math.round(6 * restoredShare(town));
 
 /* one walker: a figure, a road, a direction, a pace (scene px per second) and the odd pause to chat */
 const SKINS = ['#f2c9a0', '#e8b98e', '#c98e5e', '#9a6640', '#6e4428'], STYLES = ['short', 'short', 'long', 'bun', 'bald'];
-const makeWalkers = (town, W) => { const rnd = seeded(hash(town)), n = Q.townWalkerCount(town);
+const makeWalkers = (town, W, count) => { const rnd = seeded(hash(town)), n = count != null ? count : Q.townWalkerCount(town);
   return Array.from({ length: n }, (_, i) => ({ x: 8 + rnd() * (W - 24), y: ROADS[i % 2] + (rnd() < .5 ? 0 : 1), dir: rnd() < .5 ? -1 : 1, pace: 5 + rnd() * 5,
     rest: 0, cloth: CLOTH[Math.floor(rnd() * CLOTH.length)], hair: HAIR[Math.floor(rnd() * HAIR.length)], basket: rnd() < .25, walked: 0,
     skin: SKINS[Math.floor(rnd() * SKINS.length)], hs: STYLES[Math.floor(rnd() * STYLES.length)] })); };
@@ -35,7 +35,12 @@ const giversOf = town => (Q.folkMet ? Q.folkMet() : []).filter(f => f.town === t
 const makeGivers = (town, W) => { const rnd = seeded(hash(town + ':givers'));
   return giversOf(town).map((f, i) => ({ giver: f, x: 20 + rnd() * (W - 40), y: ROADS[i % 2] + (rnd() < .5 ? 0 : 1), dir: rnd() < .5 ? -1 : 1, pace: 3 + rnd() * 3, rest: 1 + rnd() * 4, walked: 0, cloth: f.look.clothes || '#6a6a74' })); };
 /* the chibi townsfolk (js/town_scene.js); the older flat figure below stays as a fallback */
-const chibi = (x, w, look, frame) => { if (!A || !A.townFolk) return false; A.townFolk(x, w.x, w.y, look, frame, w.rest > 0 ? 0 : w.dir); return true; };
+const chibi = (x, w, look, frame) => { if (!A || !A.townFolk) return false; if (w.hidden) return true; A.townFolk(x, w.x, w.y, look, w.pose || frame, w.rest > 0 ? (w.face || 0) : w.dir); if (w.carry) carry(x, w); return true; };
+/* what someone leaving town carries (the opening, js/intro.js): a bundle on a stick, the good frying pan, a stolen bell */
+const carry = (x, w) => { const f = (c, a, b, ww, hh) => { x.fillStyle = c; x.fillRect(Math.round(a), Math.round(b), ww, hh); }, X = Math.round(w.x), Y = w.y, d = w.rest > 0 ? (w.face || 1) : w.dir, back = d < 0 ? X + 6 : X - 2;
+  if (w.carry === 'bundle') { f('#141018', back - (d < 0 ? 0 : 3), Y - 16, 5, 5); f('#c8483a', back - (d < 0 ? -1 : 2), Y - 15, 3, 3); f('#e86a5a', back - (d < 0 ? -1 : 2), Y - 15, 1, 1); for (let i = 0; i < 6; i++) f('#5a3e26', back + (d < 0 ? -i * .6 : i * .6), Y - 12 + i, 1, 1); }
+  else if (w.carry === 'pan') { const hx = d < 0 ? X - 4 : X + 7; f('#141018', hx - 1, Y - 9, 6, 4); f('#3a3a44', hx, Y - 8, 4, 2); f('#6a6a78', hx, Y - 8, 1, 1); f('#5a3e26', hx + (d < 0 ? 4 : -2), Y - 7, 2, 1); }
+  else if (w.carry === 'bell') { const bx = X + 1; f('#2a1a08', bx - 1, Y - 20, 7, 6); f('#d8a640', bx, Y - 19, 5, 4); f('#f8e08a', bx, Y - 19, 2, 1); f('#8a5a20', bx + 2, Y - 15, 1, 1); } };
 const giverLook = w => { const L = w.giver.look, [hc, hs] = L.hair || ['#3a2414', 'short']; return { skin: SKIN[L.skin] || SKIN.light, hair: hc, hs: hs === 'bald' || hs === 'tonsure' ? hs : ['long', 'braids', 'wild'].includes(hs) ? 'long' : hs === 'bun' ? 'bun' : 'short', cloth: w.cloth, apron: L.apron || null, shawl: L.shawl || null, hat: L.hat || null, beard: L.beard && L.beard[1] !== 'stubble' ? L.beard[0] : null, glow: L.glow || null }; };
 const drawGiver = (x, w) => { if (chibi(x, w, w.look || (w.look = giverLook(w)), w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2)) return; const X = Math.round(w.x), Y = w.y, L = w.giver.look, f = (c, a, b, ww, hh) => { x.fillStyle = c; x.fillRect(a, b, ww, hh); }, flip = w.dir < 0, fx = (a, ww) => flip ? X + 5 - a - ww : X + a;
   const step = w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2, skin = SKIN[L.skin] || SKIN.light, [hc, hs] = L.hair || ['#3a2414', 'short'], [k, c] = L.hat || [], dk = c ? mix(c, '#000000', .3) : '';
@@ -98,21 +103,39 @@ const attach = img => { if (img.dataset.walkers || img.classList.contains('scene
     img.after(cv); const L = { img, cv, x: cv.getContext('2d'), walkers: makeWalkers(img.dataset.town, W), givers: [], W, key: '' };
     if (window.ResizeObserver) { L.ro = new ResizeObserver(() => { fit(L); placeTags(L); }); L.ro.observe(img); } fit(L); syncGivers(L); layers.add(L); tick.start(); };
   if (img.complete) go(); else img.addEventListener('load', go, { once: true }); };
-Q.townWalkersScan = () => { if (still()) return; document.querySelectorAll('.home-scene img.scene[data-town], .village-scene>img.scene[data-town]').forEach(attach); for (const L of layers) if (L.cv.isConnected) syncGivers(L); };
+Q.townWalkersScan = () => { if (still()) return; document.querySelectorAll('.home-scene img.scene[data-town], .village-scene>img.scene[data-town]').forEach(attach); for (const L of layers) if (L.cv.isConnected && !L.own) syncGivers(L); };
 Q.townWalkersLive = () => [...layers].filter(L => L.cv.isConnected).map(L => ({ town: L.img.dataset.town, walkers: L.walkers.map(w => ({ x: Math.round(w.x), y: w.y })),
   givers: L.givers.map(w => ({ id: w.giver.id, x: Math.round(w.x), y: w.y })), tags: (L.tags || []).filter(b => b.isConnected).length, cheer: L.cheer || null }));
 
+/* the opening (js/intro.js) walks its own cast over its own picture of the town: the same figures and the same clock,
+   told where to go (goal, face, hold, leave, carry, pose, hidden). Never on the Home or Village scenes. */
+Q.townWalkersMount = (img, o = {}) => { if (still() || !img || !img.isConnected) return null; const W = o.W || img.naturalWidth || (A && A.SCENE_W) || 640, H = o.H || img.naturalHeight || (A && A.SCENE_H) || 360;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H; cv.className = 'town-walkers'; cv.setAttribute('aria-hidden', 'true'); img.dataset.walkers = '1'; img.after(cv);
+  const L = { img, cv, x: cv.getContext('2d'), walkers: o.walkers || makeWalkers(o.town || 'willowbrook', W, o.count), givers: [], W, key: '', own: true, giverKey: 'own' };
+  if (window.ResizeObserver) { L.ro = new ResizeObserver(() => fit(L)); L.ro.observe(img); } fit(L); layers.add(L); tick.start();
+  return { L, remove: () => { L.ro && L.ro.disconnect(); cv.remove(); layers.delete(L); } }; };
+Q.townWalkersMake = (town, W, count) => makeWalkers(town, W, count);
+/* a quest giver's chibi look, from their portrait (the opening's Wren) */
+Q.townGiverLook = f => f ? giverLook({ giver: f, cloth: (f.look && f.look.clothes) || '#6a6a74' }) : null;
 const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performance.now(); this.raf = Q.frame.add((dt, t) => this.run(t)); } }, /* the shared animation clock (util.js) */
   run(t) { const dt = Math.min(.1, Math.max(0, (t - this.last) / 1000)); this.last = t; /* a hidden tab never catches up */
     for (const L of layers) { if (!L.cv.isConnected) { L.ro && L.ro.disconnect(); for (const b of L.tags || []) b.remove(); layers.delete(L); continue; }
       if (still()) { L.cv.remove(); for (const b of L.tags || []) b.remove(); continue; }
-      for (const w of L.walkers.concat(L.givers)) { if (w.rest > 0) { w.rest -= dt; continue; }
+      for (const w of L.walkers.concat(L.givers)) {
+        /* told where to go (the opening): walk there, then stand facing w.face until told otherwise */
+        if (w.goal != null) { const gap = w.goal - w.x; if (Math.abs(gap) < .5) { w.x = w.goal; w.goal = null; w.rest = w.hold != null ? w.hold : 1e9; if (w.arrive) { const fn = w.arrive; w.arrive = null; fn(w); } }
+          else { w.rest = 0; w.dir = gap < 0 ? -1 : 1; const d = Math.min(Math.abs(gap), w.pace * dt); w.x += w.dir * d; w.walked += d; } continue; }
+        if (w.rest > 0) { w.rest -= dt; continue; }
         const d = w.pace * dt; w.x += w.dir * d; w.walked += d;
+        /* leaving town: off the edge of the picture and gone */
+        if (w.leave) { if (w.x < -14 || w.x > L.W + 14) w.gone = true; continue; }
         if (w.x < 4) { w.x = 4; w.dir = 1; } else if (w.x > L.W - 10) { w.x = L.W - 10; w.dir = -1; }
+        if (w.script) continue;
         /* givers stop to chat more often, and for longer */
         if (Math.random() < dt * (w.giver ? .1 : .06)) { w.rest = (w.giver ? 2 : 1) + Math.random() * (w.giver ? 5 : 3); if (Math.random() < .4) w.dir = -w.dir; } }
+      if (L.walkers.some(w => w.gone)) L.walkers = L.walkers.filter(w => !w.gone);
       const ch = cheerOf(L.img.dataset.town, t); L.cheer = ch ? { id: ch.id, t: Math.round(ch.el) } : null;
-      const key = L.walkers.concat(L.givers).map(w => Math.round(w.x) + ':' + (w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2) + w.dir).join(',') + (ch ? '|' + Math.floor(ch.el * 30) : '');
+      const key = L.walkers.concat(L.givers).map(w => w.hidden ? 'h' : Math.round(w.x) + ':' + (w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2) + w.dir + (w.rest > 0 ? 'f' + (w.face || 0) : '') + (w.pose || '') + (w.carry || '')).join(',') + (ch ? '|' + Math.floor(ch.el * 30) : '');
       if (key !== L.key) { L.key = key; L.x.clearRect(0, 0, L.cv.width, L.cv.height); for (const w of L.walkers) draw(L.x, w); for (const w of L.givers) drawGiver(L.x, w); if (ch) drawCheer(L.x, ch); placeTags(L); } }
     if (!layers.size) { this.raf = 0; return false; } } };
 

@@ -1279,3 +1279,69 @@ Limits: mini-bosses and tower bosses are 2× scale-ups of their earlier sprites,
 engine rather than one by one; Pyrrhax and the Hollow King are the weakest boss drawings; the town-life night tint test
 threshold was loosened for the darker towns. Browser checks and the full suite are evidence, not playtests.
 
+## The opening, redone as a living scene (Claude, 28 Nov 2026)
+
+Branch `claude/opening-redo`. Owner: "does this whole redo bring in the opening scene too? Also, this needs a complete
+redo if not - it's not particularly immersive - use the new interactive characters, motions etc to make the opening
+scene far more immersive". The old opening (still town pictures with a slow pan and captions) is replaced.
+
+- **Beats** (`js/intro.js`, `BEATS`; times if you only watch): noon 12.5 s (Willowbrook from above as it was, nine
+  walkers, the bell close up in a framed window, three strokes of the church bell, everyone stops and turns to it, rings
+  of sound from the belfry, a villager's bubble); night 14 s (dusk to night, the walkers go home, a hooded shape takes
+  the bell, dawn, the rope); empty 11.5 s (three quick days, rain on the second, five people leave with bundles and pans,
+  one says so; the town turns to its ruined look in the dark); lodging 9.5 s (the hearth room with the hero standing in
+  it, a knock, the letter under the door, "Open Wren's letter"); letter 16 s (seal cracks, parchment, Wren's portrait,
+  the hero's name, a line at a time); road about 15 s (side-on parallax, walk cycle, footsteps, the signpost; hold to
+  walk three times faster); home (the hero walks in to the broken well, Wren waves, then the conversation screen moves
+  on by itself, about 30 s with the reply); title (the view pulls back to a whole-number smaller scale; Begin). About two
+  minutes in all; a click/Space/Enter hurries to the beat's next line or the next beat.
+- **Systems reused, not copied**: `A.sceneFor` draws Willowbrook restored (the past) and as it is, with a new
+  `extras.skip` so the opening draws the belfry at the bell site itself; `DQ.townWalkersMount` (town_walkers.js) walks
+  the opening's cast with new walker fields (goal, face, hold, leave, carry bundle/pan/bell, pose, hidden);
+  `DQ.townLifeMount` (town_life.js) lays smoke, animals, weather and the hour's light with the opening's own clock;
+  `DQ.hearthRoomUrl` / `DQ.hearthLightsDraw` (hearth.js) lend the room and its fire; `.fig-stage .fig-img` gives the
+  hero personality.js's breathing, blinks and a forced yawn; `.letter-paper` and `DQ.folkPortrait` from the letters;
+  `DQ.openStory(id, { onDone, auto, cls })` (story.js) opens the real conversation screen and can move on by itself (an
+  unanswered reply closes as Decide later, never chosen for the player); `DQ.heroWalkUrl` (pixel_runtime.js) and a
+  four-frame `walk` stride with the weapon slung on the back in `heroSide` (pixelart.js); `DQ.townTint`, `DQ.season`;
+  `DQ.storyBell` / `DQ.storyKnock` play the town-bell voices (BELL.church, BELL.knock) on the effects bus;
+  `DQ.musicDim` thins the music while the town empties, with the title theme for the night beats.
+- **New art** (`js/opening_art.js`): the belfry close up (64 x 64, five swing angles, the bronze lit in its own frame,
+  the rope-only state), the belfry from above built from the town's own bell-frame site piece, the road's four seamless
+  layers (320 x 180, dusk-graded, season on the verge), the signpost, Wren's envelope small and large and the seal halves.
+- **Rules kept**: whole-number scales throughout (scenes cover the screen and are cropped; the test measures every
+  canvas and picture); motion on `DQ.frame` plus transforms/opacity; nothing moves under calm/reduced motion (still
+  frames, the cast drawn standing); sound only after the creation click (the AudioContext is running by then); the
+  conversation hushes through `D.HUSH` as every pop-up does; the opening grants nothing (the test compares coins, pack,
+  bank, gear, XP, quests and projects before and after); `DQ.playIntro`, `DQ.introWanted`, `DQ.introSeen`, the Journal
+  replay and `S.seen.intro` unchanged. Test hooks: `DQ.introState()`, `DQ.introJump(id)`.
+- **Tests**: `tests/intro.cjs` rewritten for the new opening (every beat in order, Skip after the first input, the reply
+  in `S.choices`, the walk cycle and hold-to-hurry, hush, whole-number scales, nothing granted, still frames under reduced
+  motion, Escape on replay); `tests/opening-routes-ui.cjs` checks a played and skipped opening leaves the hero where the
+  routes start.
+- **Review fixes (same day)**:
+  - *Frame rate*: the town is one canvas on screen at 640 x 360, scaled to a whole number. The scene is lit once into a
+    cached layer (the hour's tint, the opening's deeper night, the low sun's glow) and relit only when the light changes;
+    each frame copies the cache and draws only what moves (town life's smoke, animals and weather, the belfry and its
+    rings, the walkers, shaded where they stand after dark), then the lit windows. town_walkers and town_life still run
+    their own layers, at 1x and out of sight (`.op-stack`, display none). The game under the opening is not painted while
+    it plays (`html.op-playing #app`). Headless Chromium, ms per frame over 5 s, before and after, same machine and
+    load: 1920 x 1080 noon 69.5 -> 17.5, night 81.2 -> 17.2; 1280 x 720 noon 27.2 -> 16.8, night 30.8 -> 16.7;
+    390 x 844 noon 16.7 -> 16.7, night 16.8 -> 16.7 (scratch script perf3.cjs, not in the repo). A bare canvas page
+    redrawn every frame measures 16.7 there.
+  - *Framing*: the wide shot (smallest whole scale that covers the screen) establishes; the close shot (twice that: 6x
+    at 1920, 4x on phones) frames the belfry for the bell and the theft and the square for the meeting with Wren.
+    Changes of framing are cuts through a 0.22 s dip, never zooms. Five townsfolk stand about the belfry when it rings;
+    the thief is plum and soot with yellow eyes.
+  - *Conversation*: the camera puts the well and the two of them in the upper third, and the panel stays low (replies in
+    one row on desktop; one column with a small face row on phones), so Wren and the hero stay in view while it is
+    open, in the talk and in the reply (checked at 1920 x 1080, 1280 x 720, 390 x 844 and 375 x 667). They meet at
+    x 322 / 346, clear of the lamp post.
+  - *Lodging*: the letter stops on the boards by the wall, under the bookshelf and above the bottom edge; the button
+    sits beside it (above it on phones), off the rug and the cat; phones frame the door side of the room. The autumn gourd
+    by the hearth is gone from the room (Home too), where it sat at the hero's feet.
+  - *Belfry close-up*: dressed stone in courses with staggered joints and lichen, a twisted rope down to the floor, and a
+    pigeon on the roof that flaps off at the first stroke (`A.openingPigeon`) and is back by dawn.
+- **Limits**: the frame numbers are headless Chromium (software rendering), not real hardware. The townsfolk are still
+  the town's 12 px chibis (72 px tall at 6x). Browser checks are evidence, not playtests.
+

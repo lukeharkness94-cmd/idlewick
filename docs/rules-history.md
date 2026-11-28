@@ -381,6 +381,12 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   in either"): no companion is an ordinary animal; the four bond species and the skill and boss pets that were animals
   are re-themed as creatures of fable, ids and bonuses kept. Replaces Hearthwolf, Bramble boar, Duskwatch owl, Honeyclaw
   and the farm dog, chick, goldfish, squirrel, mole, alley cat, owl, piglet, boarlet and hermit crab companions.
+- 28 Nov 2026 (owner: "does this whole redo bring in the opening scene too? Also, this needs a complete redo if not - it's
+  not particularly immersive - use the new interactive characters, motions etc to make the opening scene far more
+  immersive"): the opening is rebuilt as a living, playable scene from the game's own town scenes, walkers, town life,
+  hearth, letters, conversation screen, idle life, walk cycle and synthesised bells (js/intro.js, js/opening_art.js),
+  with one flavour reply in S.choices.story_opening. Replaces "The opening (`js/intro.js`) plays once for a new hero",
+  which was a slideshow of still town pictures with captions.
 - 28 Nov 2026 (owner, on the polish pass, docs/polish-pass.md: "none of this should change the new menu or style, simply
   the immersive feeling players get"): build all eight stages in order, each merged and published on its own by the
   owner; everything cosmetic (reads the game, never changes it); particles only inside game pictures (work scenes, the
