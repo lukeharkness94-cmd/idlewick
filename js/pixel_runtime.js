@@ -11,14 +11,24 @@ Q.itemIco = it => { const u = it && A.itemUrl(it.id); return u ? img(u, 16, 16, 
 Q.gearIconUrl = id => A.itemUrl(id);
 Q.gearIco = (id, cls = '') => { const u = A.itemUrl(id); return u ? img(u, 16, 16, 48, 'gico ' + cls, (D.ITEMS[id] || {}).name || '') : ''; };
 /* the shared entry point for larger art: items, creatures, gathering spots, trees, rocks, skills, plants */
-Q.artImage = (kind, id, size = 96, cls = '', alt = '') => {
+/* Creature views (owner, 28 Nov 2026: "each boss, creature, monster etc needs a side view and a front view - front
+   view for when we're viewing them in menus and guides and such and a side view for when they're fighting, being
+   caught, being hunted"). A creature's front and side drawings register in A.VIEWS.front / A.VIEWS.side (32 x 32) and
+   A.BIG_VIEWS.front / A.BIG_VIEWS.side (64 x 64). Pictures default to the front view; the fight stage and the
+   activity scene's target (hunting, capture) ask for 'side'. A creature with no drawing for a view falls back to its
+   one existing drawing. Side views face right; the stage mirrors foes to face the hero. */
+A.VIEWS = A.VIEWS || { front: {}, side: {} }; A.BIG_VIEWS = A.BIG_VIEWS || { front: {}, side: {} };
+A.creatureViewUrl = (id, view) => { const f = view && A.VIEWS[view] && A.VIEWS[view][id]; return f ? A.url('creature:' + view + ':' + id, f) : null; };
+A.creatureBigViewUrl = (id, view) => { const f = view && A.BIG_VIEWS[view] && A.BIG_VIEWS[view][id]; return f ? A.url('creaturebig:' + view + ':' + id, f) : null; };
+A.hasCreatureView = (id, view) => !!(A.VIEWS[view] && A.VIEWS[view][id]) || !!(A.BIG_VIEWS[view] && A.BIG_VIEWS[view][id]);
+Q.artImage = (kind, id, size = 96, cls = '', alt = '', view = 'front') => {
   const item = D.ITEMS[id];
   if (kind === 'item') return item ? img(A.itemUrl(id), 16, 16, size, cls, alt || item.name) : '';
   if (kind === 'creature' || kind === 'thieve') { const k = String(id).replace(/^wild_/, '');
     /* bosses, mini-bosses and tower bosses have a 64 x 64 drawing for boxes that show it at 2x or more (the combat
        stage, big field-guide pictures); everywhere else the 32 x 32 one (pixel_bosses.js) */
-    const big = size >= 128 && A.creatureBigUrl ? A.creatureBigUrl(k) : null; if (big) return img(big, 64, 64, size, cls + ' px-big', alt || k);
-    const u = A.hasCreature(k) ? A.creatureUrl(k) : null; return u ? img(u, 32, 32, size, cls, alt || k) : ''; }
+    const big = size >= 128 ? (A.creatureBigViewUrl(k, view) || (A.creatureBigUrl ? A.creatureBigUrl(k) : null)) : null; if (big) return img(big, 64, 64, size, cls + ' px-big', alt || k);
+    const u = A.creatureViewUrl(k, view) || (A.hasCreature(k) ? A.creatureUrl(k) : null); return u ? img(u, 32, 32, size, cls, alt || k) : ''; }
   if (kind === 'island') { const u = A.islandUrl && A.islandUrl(id); return u ? img(u, 32, 32, size, cls, alt || id) : ''; }
   if (kind === 'fish') { const s = A.url('fishnode:' + id, () => A.fishLarge(id)); return s ? img(s, 32, 16, size, cls, alt || id) : ''; }
   if (kind === 'wood' || kind === 'tree') return img(A.treeUrl(id), 32, 48, size * 1.1, cls, alt || id);
@@ -97,7 +107,7 @@ Q.creatureFacing=id=>D.MON[id]?.artFacing||'right';
    fits the first two at 3x and 2x; on short windows the 32 x 32 one is shown at 3x */
 /* the stage always asks for the large drawing so bosses keep their 64 x 64 art; CSS sets the on-screen scale */
 const foeBox = () => 192;
-Q.battleFoe = (m,known=true) => `<span class="battle-rig foe-rig px-foe" role="img" aria-label="${esc(known?m.name:'Unknown creature')} ready for battle" data-creature="${m.id}"><span class="foe-torso">${Q.creatureFacing(m.id)==='left' ? Q.artImage('creature', m.id, foeBox(), known?'':'sil', known?m.name:'Unknown creature') : `<span class="foe-face">${Q.artImage('creature', m.id, foeBox(), known?'':'sil', known?m.name:'Unknown creature')}</span>`}</span></span>`;
+Q.battleFoe = (m,known=true) => `<span class="battle-rig foe-rig px-foe" role="img" aria-label="${esc(known?m.name:'Unknown creature')} ready for battle" data-creature="${m.id}"><span class="foe-torso">${Q.creatureFacing(m.id)==='left' ? Q.artImage('creature', m.id, foeBox(), known?'':'sil', known?m.name:'Unknown creature', 'side') : `<span class="foe-face">${Q.artImage('creature', m.id, foeBox(), known?'':'sil', known?m.name:'Unknown creature', 'side')}</span>`}</span></span>`;
 const pose0 = Q.poseBattle;
 Q.poseBattle = (avatar, style, phase, animate) => { const root = avatar && avatar.querySelector('.px-hero'); if (!root) return pose0 ? pose0(avatar, style, phase, animate) : false; if (Q.S.settings.reduceFx) return true;
   const attack = phase === 'attack', dir = attack ? 1 : -1; animate(root, [{ transform: 'translateX(0)' }, { transform: `translateX(${-dir * 4}px)`, offset: .25 }, { transform: `translateX(${dir * 14}px)`, offset: .5 }, { transform: 'translateX(0)' }], { duration: attack ? (Q.battleTiming ? Q.battleTiming.duration : 420) : 340, easing: 'ease-in-out' }); return true; };
