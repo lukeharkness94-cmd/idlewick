@@ -1263,3 +1263,5 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 @media(max-width:860px){:root.type-hearthside:not(.type-classic) #view .btnrow{flex-wrap:wrap!important}}
 /* idle combat: the Where to fight window covers the stage; no scenery shows round its edge as a stray border */
 #view .combat-x.cw-idle .encounter-arena{background-image:none!important;background-color:var(--panel)!important}
+/* phones: Go inside / Step outside sit top right so the wider pixel town name at the bottom never runs under them */
+@media (max-width:860px){.home-scene>.home-viewswap{top:10px!important;bottom:auto!important;right:10px}}
