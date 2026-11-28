@@ -112,13 +112,16 @@ const BEATS = ['noon', 'night', 'empty', 'lodging', 'letter', 'road', 'home', 't
   { const { ctx, p, errs } = await make(true, { reduce: true, viewport: { width: 390, height: 844 } });
     await p.waitForSelector('#intro'); await p.waitForTimeout(1200);
     const s0 = await state(p); assert.equal(s0.still, true, 'reduced motion plays the still version');
-    const snap = () => p.evaluate(() => { const world = document.querySelector('#intro .op-world'), props = document.querySelector('#intro .op-props');
-      return { world: world && world.style.transform, props: props && props.toDataURL().length, walkers: document.querySelectorAll('#intro canvas.town-walkers').length, anims: document.getAnimations().filter(a => a.effect && a.effect.target && a.effect.target.closest && a.effect.target.closest('#intro') && a.playState === 'running').length }; });
-    const a = await snap(); await p.waitForTimeout(1500); const c = await snap();
-    assert.equal(a.walkers, 0, 'no townsfolk walking'); assert.equal(c.anims, 0, 'no animations running');
-    assert.deepEqual(a, c, 'nothing moves in the still frame');
+    const snap = () => p.evaluate(() => { const world = document.querySelector('#intro .op-world'), frame = document.querySelector('#intro .op-frame');
+      return { world: world && world.style.transform, frame: frame && frame.toDataURL(), walkers: document.querySelectorAll('#intro canvas.town-walkers').length, anims: document.getAnimations().filter(a => a.effect && a.effect.target && a.effect.target.closest && a.effect.target.closest('#intro') && a.playState === 'running').length }; });
     assert.ok((await state(p)).said.length >= 1, 'the words still show');
     await checkScales(p, 'still noon (phone)');
+    /* within one framing (a cut to the close shot is a new still, like a new caption), nothing moves: the emptying town
+       after its ruined picture is in, and the lodging after the letter has arrived */
+    for (const [id, at] of [['empty', 7], ['lodging', 6.5]]) { await p.evaluate(([id, at]) => DQ.introJump(id, at), [id, at]); await p.waitForTimeout(600);
+      const a = await snap(); await p.waitForTimeout(1500); const c = await snap();
+      assert.equal(a.walkers, 0, 'no townsfolk walking'); assert.equal(c.anims, 0, 'no animations running');
+      assert.deepEqual(a, c, 'nothing moves in the still frame: ' + id); }
     for (const id of ['lodging', 'road', 'home']) { await p.evaluate(id => DQ.introJump(id), id); await p.waitForTimeout(500); await checkScales(p, 'still ' + id + ' (phone)'); }
     await p.mouse.click(200, 200); await p.waitForTimeout(300);
     if (await p.locator('.modal.op-talk').count()) await p.keyboard.press('Escape'); else await p.locator('.op-skip').click();

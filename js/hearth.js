@@ -153,7 +153,7 @@ const room = async (town, light, weather, season, petId, keep = [], letters = 0,
   /* on the mantel: a candle, a jar, a little clock; the season's own touch */
   box(60, 88, 4, 10, '#e0d8c4'); f('#e8b048', 61, 85, 2, 3); box(120, 90, 8, 8, '#4a6a88'); f('#8ab0d0', 121, 90, 2, 4); box(96, 88, 10, 10, '#b08a40'); f('#e8e0cc', 98, 90, 6, 6); f(INK, 100, 92, 1, 3); f(INK, 101, 93, 2, 1);
   if (season === 'winter') { for (let q = 48; q < 152; q += 4) { f('#1e4a2a', q, 96, 4, 3); f('#2f6a3a', q, 96, 3, 2); if (q % 12 === 0) f('#c8382e', q + 1, 97, 2, 2); } }
-  if (season === 'autumn') { ell(INK, 36, 170, 8, 6); ell('#c06a26', 36, 170, 7, 5); ell('#e8923a', 34, 168, 3, 2); f('#4a6a34', 36, 164, 1, 2); ell(INK, 156, 171, 6, 5); ell('#b08a36', 156, 171, 5, 4); f('#4a6a34', 156, 166, 1, 2); }
+  if (season === 'autumn') { ell(INK, 36, 170, 8, 6); ell('#c06a26', 36, 170, 7, 5); ell('#e8923a', 34, 168, 3, 2); f('#4a6a34', 36, 164, 1, 2); } /* one pumpkin by the hearth; the gourd that sat at the hero's feet is gone */
   if (season === 'spring' || season === 'summer') { box(280, 136, 6, 8, '#4a6a88'); for (const [dx, col] of [[-2, '#e0607a'], [3, '#f0d060'], [7, '#f4f0f4'], [1, season === 'summer' ? '#f0a030' : '#a07ae0']]) { f('#4a7a3a', 282 + dx / 2, 130, 1, 6); f(INK, 279 + dx, 126, 5, 5); f(col, 280 + dx, 127, 3, 3); } }
   /* map on the wall, rolled at the edges */
   const M = SPOTS.map; box(M.x + 2, M.y + 2, M.w - 4, M.h - 4, '#c8b48a'); box(M.x, M.y, 3, M.h, '#a08860'); box(M.x + M.w - 3, M.y, 3, M.h, '#a08860');

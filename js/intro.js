@@ -97,42 +97,66 @@ const bubble = (text, at, secs = 3.4) => { const b = el('div', 'op-bubble'); b.t
 const placeBubble = B => { const p = B.at(); if (p) move(B.b, clamp(p[0], B.half + 10, R.box.w - B.half - 10), p[1]); B.b.style.transform += ' translate(-50%,-100%)'; };
 const bubblesTick = () => { for (const B of R.bubbles.slice()) { if (R.clock > B.until || !B.b.isConnected) { B.b.classList.remove('on'); setTimeout(() => B.b.remove(), 300); R.bubbles.splice(R.bubbles.indexOf(B), 1); continue; } placeBubble(B); } };
 
-/* ---------- the town from above: scene, belfry, townsfolk and town life, under a camera ---------- */
+/* ---------- the town from above: scene, belfry, townsfolk and town life, under a camera ----------
+   One canvas on screen, at the scene's own 640 x 360 pixels, scaled to a whole number. Behind it, out of sight at 1x,
+   the town's picture and the living layers that town_walkers.js and town_life.js keep up to date. The static scene is
+   lit once into a cached layer and relit only when the light changes; each frame copies that cache, then draws only
+   what moves (smoke and animals, the belfry and its rings, the townsfolk) under the same light, then the lit windows.
+   So the screen composites one picture instead of eight full-size blended layers (owner, 28 Nov 2026: frame rate). */
 function townShot(o) {
-  const shot = addShot('op-town'), world = el('div', 'op-world'), img = new Image(), props = canvasEl(640, 360, 'op-props');
-  img.className = 'op-scene'; img.alt = ''; img.draggable = false; world.appendChild(img); shot.appendChild(world);
-  const T = { shot, world, img, props, px: props.getContext('2d'), k: 1, tx: 0, ty: 0, cam: { x: o.focus[0], y: o.focus[1] }, want: { x: o.focus[0], y: o.focus[1] }, belfry: o.belfry || 'rope', nudge: 0, ripples: [], cast: o.cast || [], meta: o.meta, drawn: '' };
+  const shot = addShot('op-town'), stack = el('div', 'op-stack'), world = el('div', 'op-world'), img = new Image(), frame = canvasEl(640, 360, 'op-frame');
+  /* the working layers stay in memory (willReadFrequently keeps them off the GPU), so copying between them is a plain copy */
+  const off = () => { const c = document.createElement('canvas'); c.width = 640; c.height = 360; c.getContext('2d', { willReadFrequently: true }); return c; }, props = off(), lit = off(), mid = off();
+  img.className = 'op-scene'; img.alt = ''; img.draggable = false; stack.setAttribute('aria-hidden', 'true'); stack.appendChild(img); world.appendChild(frame); shot.append(stack, world);
+  const T = { shot, world, img, frame, fx: frame.getContext('2d'), props, px: props.getContext('2d'), k: 1, tx: 0, ty: 0, mode: o.view || 'wide', cam: { x: o.focus[0], y: o.focus[1] }, want: { x: o.focus[0], y: o.focus[1] }, ay: o.anchorY || .5,
+    belfry: o.belfry || 'rope', nudge: 0, ripples: [], cast: o.cast || [], meta: o.meta, drawn: '', lightKey: '', tintC: [255, 255, 255] };
   const site = bellSite();
   T.people = () => (T.walk ? T.walk.L.walkers : T.cast);
-  /* night deepens a little more than on the Home page, so the theft happens in the dark (multiplied, like the hour's tint) */
-  const night = el('div', 'op-night'); night.setAttribute('aria-hidden', 'true'); world.appendChild(night);
-  T.layout = () => { const { w, h, phone } = R.box; let k = phone ? clamp(Math.floor((h * .86) / 360), 1, 3) : Math.max(1, Math.ceil(Math.max(w / 640, h / 360) - .02)); if (o.wide) k = Math.max(1, k - 1); if (o.close) k = Math.min(phone ? 3 : 6, k + 1);
-    T.k = k; for (const e of [world, img, props, night]) size(e, 640 * k, 360 * k); T.place(); T.shade(); };
-  T.place = () => { const { w, h, phone } = R.box, k = T.k, W = 640 * k, H = 360 * k, ay = o.anchorY || .5;
+  /* the wide shot covers the screen at the smallest whole scale; the close shot is twice that; far is one step out */
+  T.kFor = mode => { const { w, h, phone } = R.box, base = phone ? clamp(Math.floor((h * .86) / 360), 2, 3) : Math.max(1, Math.ceil(Math.max(w / 640, h / 360) - .02));
+    return mode === 'close' ? Math.min(8, base * 2) : mode === 'far' ? Math.max(1, base - 1) : base; };
+  T.layout = () => { T.k = T.kFor(T.mode); for (const e of [world, frame]) size(e, 640 * T.k, 360 * T.k); T.at = ''; T.place(); };
+  T.place = () => { const { w, h, phone } = R.box, k = T.k, W = 640 * k, H = 360 * k;
     T.tx = Math.round(W <= w ? (w - W) / 2 : clamp(w / 2 - T.cam.x * k, w - W, 0));
-    T.ty = Math.round(H <= h ? (phone ? Math.max(0, (h - H) * .22) : (h - H) / 2) : clamp(h * ay - T.cam.y * k, h - H, 0));
+    T.ty = Math.round(H <= h ? (phone ? Math.max(0, (h - H) * .22) : (h - H) / 2) : clamp(h * T.ay - T.cam.y * k, h - H, 0));
     const at = T.tx + ',' + T.ty + ',' + k; if (at !== T.at) { T.at = at; move(world, T.tx, T.ty); } /* written only when the camera has moved a whole pixel */ };
-  T.shade = () => { const d = DQ.townLight ? DQ.townLight(((R.hour % 24) + 24) % 24).dark : 0, key = Math.round(d * 40); if (key === T.shadeKey) return; T.shadeKey = key;
-    night.style.display = d > .02 ? '' : 'none'; /* no extra blended layer by day */
-    night.style.backgroundColor = `rgb(${[255, 255, 255].map((v, i) => Math.round(v + ([70, 82, 128][i] - v) * d * .5)).join(',')})`; };
-  T.relight = () => { if (T.life) T.life.repaint(); T.shade(); T.drawProps(true); };
+  /* a cut to another framing: a quick dip, then the new scale and camera */
+  T.view = (mode, focus, anchorY, onCut) => { const go = () => { if (onCut) onCut(); T.mode = mode; if (focus) { T.cam = { x: focus[0], y: focus[1] }; T.want = { x: focus[0], y: focus[1] }; } if (anchorY) T.ay = anchorY; T.layout(); frame.classList.remove('cut'); };
+    if (R.still) return go(); frame.classList.add('cut'); setTimeout(() => { if (shot.isConnected) go(); }, 240); };
   T.screen = (x, y) => [T.tx + x * T.k, T.ty + y * T.k];
+  /* the light: the hour's tint (DQ.townTint), the opening's deeper night and the low sun's glow, as town_life.js lays them */
+  T.relight = () => { if (!img.naturalWidth) return false; const h = ((R.hour % 24) + 24) % 24, L = DQ.townLight ? DQ.townLight(h) : { dark: 0, warm: 0 }, tint = DQ.townTint ? DQ.townTint(h) : [255, 255, 255];
+    const c = tint.map((v, i) => Math.round(v * (255 + ([70, 82, 128][i] - 255) * L.dark * .5) / 255)), sw = L.warm * (1 - L.dark * .5), key = c.join(',') + '|' + Math.round(sw * 40) + '|' + img.src.length;
+    if (key === T.lightKey) return false; T.lightKey = key; T.tintC = c;
+    const dim = 1 - (c[0] + c[1] + c[2]) / 765, deep = c.map(v => Math.round(v * .18)); T.shadeC = `rgba(${deep.join(',')},${dim.toFixed(3)})`;
+    const x = lit.getContext('2d'); x.globalCompositeOperation = 'source-over'; x.drawImage(img, 0, 0, 640, 360); x.globalCompositeOperation = 'multiply'; x.fillStyle = `rgb(${c.join(',')})`; x.fillRect(0, 0, 640, 360);
+    if (sw > .02) { const g = x.createLinearGradient(0, 0, 0, 360); g.addColorStop(0, `rgba(255,128,72,${(sw * .85).toFixed(3)})`); g.addColorStop(.34, `rgba(255,176,96,${(sw * .55).toFixed(3)})`); g.addColorStop(.6, `rgba(255,190,120,${(sw * .25).toFixed(3)})`); g.addColorStop(.85, 'rgba(255,190,120,0)'); x.globalCompositeOperation = 'overlay'; x.fillStyle = g; x.fillRect(0, 0, 640, 360); }
+    x.globalCompositeOperation = 'source-over'; return true; };
+  T.compose = () => { if (!img.naturalWidth) return; T.relight(); const f = T.fx, m = mid.getContext('2d'), life = T.life && T.life.L;
+    /* by day the light is plain white: what moves goes straight onto the frame */
+    if (T.tintC.every(v => v >= 254)) { f.drawImage(lit, 0, 0); if (life) f.drawImage(life.under, 0, 0); f.drawImage(props, 0, 0); if (T.walk) f.drawImage(T.walk.L.cv, 0, 0); if (life) f.drawImage(life.over, 0, 0); return; }
+    /* after dark: what moves is gathered on one layer and shaded where it stands (source-atop: only its own pixels), by
+       the same amount the light takes off the scene, toward the night's blue */
+    m.globalCompositeOperation = 'source-over'; m.clearRect(0, 0, 640, 360); if (life) m.drawImage(life.under, 0, 0); m.drawImage(props, 0, 0); if (T.walk) m.drawImage(T.walk.L.cv, 0, 0);
+    m.globalCompositeOperation = 'source-atop'; m.fillStyle = T.shadeC; m.fillRect(0, 0, 640, 360); m.globalCompositeOperation = 'source-over';
+    f.drawImage(lit, 0, 0); f.drawImage(mid, 0, 0); if (life) f.drawImage(life.over, 0, 0); };
+  T.repaint = () => { if (T.life) T.life.repaint(); T.drawProps(true); T.compose(); }; /* a still frame brought up to the hour */
   /* the belfry at its site, the bell nudged a pixel as it swings (or the rope alone), and rings of sound as it strikes */
   T.drawProps = force => { const key = T.belfry + T.nudge + ':' + T.ripples.map(r => Math.round(r.age * 20)).join(','); if (!force && key === T.drawn) return; T.drawn = key;
-    const x = T.px; x.clearRect(0, 0, 640, 360); if (!T.belfry) return; x.fillStyle = 'rgba(6,8,14,.3)'; for (let j = -3; j <= 3; j++) { const ww = Math.round(15 * Math.sqrt(1 - (j * j) / 12.5)); x.fillRect(site.X + 16 - ww, site.Y + 30 + j, ww * 2, 1); }
-    const art = A().openingBelfryTop && A().openingBelfryTop(T.belfry, T.nudge); if (art) x.drawImage(art, site.X, site.Y);
+    const x = T.px; x.clearRect(0, 0, 640, 360); if (T.belfry) { x.fillStyle = 'rgba(6,8,14,.3)'; for (let j = -3; j <= 3; j++) { const ww = Math.round(15 * Math.sqrt(1 - (j * j) / 12.5)); x.fillRect(site.X + 16 - ww, site.Y + 30 + j, ww * 2, 1); }
+      const art = A().openingBelfryTop && A().openingBelfryTop(T.belfry, T.nudge); if (art) x.drawImage(art, site.X, site.Y); }
     /* still (Reduce effects, reduced motion): nobody walks, so the cast stands where they are, drawn once */
-    if (R.still && A().townFolk) for (const w of [...T.cast].sort((a, b) => a.y - b.y)) if (!w.hidden && !w.thief && !w.leave) A().townFolk(x, w.goal != null && w.hold ? w.goal : w.x, w.y, w.look, 0, w.face || 0);
+    if (R.still && A().townFolk) for (const w of [...T.cast].sort((a, b) => a.y - b.y)) if (!w.hidden && !w.thief && !w.leave) A().townFolk(x, w.goal != null && w.hold ? w.goal : w.x, w.y, w.look, w.pose || 0, w.face || 0);
     for (const r of T.ripples) { const rad = 8 + r.age * 70, a = Math.max(0, .55 * (1 - r.age / 1.8)); x.fillStyle = `rgba(255,236,170,${a.toFixed(3)})`; for (let i = 0; i < 96; i++) { const t = i / 96 * Math.PI * 2; x.fillRect(Math.round(site.X + 16 + Math.cos(t) * rad), Math.round(site.Y + 12 + Math.sin(t) * rad * .6), 1, 1); } } };
   T.ring = () => { if (!R.still) T.ripples.push({ age: 0 }); };
-  T.update = dt => { const k = 1 - Math.exp(-dt * 1.6); T.cam.x += (T.want.x - T.cam.x) * k; T.cam.y += (T.want.y - T.cam.y) * k; T.place(); T.shade();
-    for (const r of T.ripples) r.age += dt; T.ripples = T.ripples.filter(r => r.age < 1.8); T.drawProps(); };
-  T.swap = (scene, done) => { const go = () => { img.removeEventListener('load', go); if (T.life) T.life.remove(); T.meta = scene.meta; T.life = DQ.townLifeMount ? DQ.townLifeMount(img, { meta: scene.meta, town: TOWN, hour: () => R.hour, weather: () => R.weather, share: o.shareAfter }) : null; done && done(); };
+  T.update = dt => { const k = 1 - Math.exp(-dt * 1.6); T.cam.x += (T.want.x - T.cam.x) * k; T.cam.y += (T.want.y - T.cam.y) * k; T.place();
+    for (const r of T.ripples) r.age += dt; T.ripples = T.ripples.filter(r => r.age < 1.8); T.drawProps(); T.compose(); };
+  const mountLife = share => DQ.townLifeMount ? DQ.townLifeMount(img, { meta: T.meta, town: TOWN, hour: () => R.hour, weather: () => R.weather, share }) : null;
+  T.swap = (scene, done) => { const go = () => { img.removeEventListener('load', go); if (T.life) T.life.remove(); T.meta = scene.meta; T.life = mountLife(o.shareAfter); T.lightKey = ''; T.compose(); done && done(); };
     img.addEventListener('load', go); img.src = scene.url; };
   T.remove = () => { if (T.walk) T.walk.remove(); if (T.life) T.life.remove(); T.walk = T.life = null; R.shots.delete(T); dropShot(shot); };
   img.addEventListener('load', () => { if (!R || !shot.isConnected || T.mounted) return; T.mounted = true;
-    T.walk = DQ.townWalkersMount && !R.still ? DQ.townWalkersMount(img, { walkers: T.cast }) : null; img.after(props);
-    T.life = DQ.townLifeMount ? DQ.townLifeMount(img, { meta: T.meta, town: TOWN, hour: () => R.hour, weather: () => R.weather, share: o.share }) : null; T.drawProps(true); }, { once: true });
+    T.walk = DQ.townWalkersMount && !R.still ? DQ.townWalkersMount(img, { walkers: T.cast }) : null; T.life = mountLife(o.share); T.repaint(); }, { once: true });
   img.src = o.url; R.shots.add(T); T.layout(); return T;
 }
 const site0 = () => bellSite();
@@ -143,7 +167,13 @@ const castOf = (n, seed) => { const list = DQ.townWalkersMake ? DQ.townWalkersMa
 /* ---------- the bell, close up, in a framed window of its own ---------- */
 const inset = (state, i = 2, sky = 'noon') => { let box = R.inset; if (!box) { box = R.inset = el('div', 'op-inset'); box.setAttribute('aria-hidden', 'true'); box.appendChild(canvasEl(64, 64, 'op-bellcv')); R.el.appendChild(box); }
   const k = R.box.phone ? 3 : clamp(Math.floor(R.box.h / 260), 3, 5), c = box.firstChild; if (+box.dataset.k !== k) { box.dataset.k = k; size(c, 64 * k, 64 * k); } if (!box.classList.contains('on')) box.classList.add('on');
-  const key = state + i + sky; if (box.dataset.key !== key) { box.dataset.key = key; const x = c.getContext('2d'); x.clearRect(0, 0, 64, 64); const art = A().openingBelfry && A().openingBelfry(state, i, sky); if (art) x.drawImage(art, 0, 0); } };
+  /* the pigeon on the roof (R.pigeon: where it is, sitting or which wingbeat) is drawn over the belfry */
+  const pg = R.pigeon, key = state + i + sky + '|' + (pg ? `${Math.round(pg.x)},${Math.round(pg.y)},${pg.frame}` : '-');
+  if (box.dataset.key !== key) { box.dataset.key = key; const x = c.getContext('2d'); x.clearRect(0, 0, 64, 64); const art = A().openingBelfry && A().openingBelfry(state, i, sky); if (art) x.drawImage(art, 0, 0);
+    const pa = pg && A().openingPigeon && A().openingPigeon(pg.frame); if (pa) x.drawImage(pa, Math.round(pg.x), Math.round(pg.y)); } };
+const PERCH = { x: 46, y: 4 }; /* on the roof's right slope, facing the ridge */
+const perch = () => { R.pigeon = { x: PERCH.x, y: PERCH.y, frame: 'sit', flying: false }; };
+const pigeonTick = dt => { const pg = R.pigeon; if (!pg || !pg.flying) return; pg.x -= 26 * dt; pg.y -= 22 * dt; pg.frame = Math.floor(R.clock * 11) % 2 ? 'up' : 'down'; if (pg.y < -10 || pg.x < -12) R.pigeon = null; };
 const insetOff = () => { if (R.inset) R.inset.classList.remove('on'); };
 const swingIndex = deg => clamp(Math.round(deg / 13) + 2, 0, 4);
 
@@ -159,10 +189,12 @@ function roomShot() {
     for (const e of [world, img, lights]) size(e, W, H);
     for (const [p, v] of Object.entries({ left: H0.hero.x * k + 'px', top: (H0.oy + H0.hero.y - 32) * k + 'px', width: 24 * k + 'px', height: 32 * k + 'px' })) hero.style.setProperty(p, v, 'important');
     size(env, 18 * k, 12 * k);
-    P.tx = Math.round(W <= w ? (w - W) / 2 : clamp(w / 2 - (H0.hero.x + 12) * k, w - W, 0)); P.ty = Math.round(H <= h ? (phone ? (h - H) * .3 : (h - H) / 2) : clamp(h / 2 - (H0.oy + 150) * k, h - H, 0)); move(world, P.tx, P.ty); P.placeEnv(); };
-  /* the envelope: under the door at the left, across the boards to the rug */
-  P.placeEnv = () => { const k = P.k, a = P.envAt; if (a == null) { env.style.opacity = '0'; return; } env.style.opacity = '1'; move(env, (-22 + 70 * smooth(a)) * k, (H0.oy + 226) * k); };
-  P.envScreen = () => [P.tx + (-22 + 70 + 9) * P.k, P.ty + (H0.oy + 226) * P.k];
+    /* phones see the door side of the room with the hero in it, so the letter's arrival is in view */
+    P.tx = Math.round(W <= w ? (w - W) / 2 : clamp(w / 2 - (phone ? 98 : H0.hero.x + 12) * k, w - W, 0)); P.ty = Math.round(H <= h ? (phone ? (h - H) * .3 : (h - H) / 2) : clamp(h / 2 - (H0.oy + 150) * k, h - H, 0)); move(world, P.tx, P.ty); P.placeEnv(); };
+  /* the envelope: under the door at the left, onto the boards by the wall, short of the rug and well above the bottom */
+  const ENV = { from: -20, to: 12, y: H0.oy + 182 };
+  P.placeEnv = () => { const k = P.k, a = P.envAt; if (a == null) { env.style.opacity = '0'; return; } env.style.opacity = '1'; move(env, (ENV.from + (ENV.to - ENV.from) * smooth(a)) * k, ENV.y * k); };
+  P.envScreen = () => [P.tx + (ENV.to + 9) * P.k, P.ty + ENV.y * P.k];
   P.update = dt => { P.t += dt; if (DQ.hearthLightsDraw) DQ.hearthLightsDraw(P.lx, P.t, .1, !R.still); };
   P.remove = () => { R.shots.delete(P); dropShot(shot); };
   (DQ.hearthRoomUrl ? DQ.hearthRoomUrl('saltmere', 8.4) : Promise.resolve('')).then(u => { if (u) img.src = u; if (DQ.hearthLightsDraw) DQ.hearthLightsDraw(P.lx, 0, .1, false); });
@@ -206,28 +238,38 @@ function roadShot() {
   R.shots.add(Rd); Rd.layout(); return Rd;
 }
 
-/* ---------- the beats ---------- */
+/* ---------- the beats ----------
+   The wide shot (the whole town at the smallest whole scale that covers the screen) establishes each place; the close
+   shot (twice that) frames the belfry, the square and the well, so the townsfolk, the hooded thief and Wren read as
+   people. Every change of framing is a cut through a quick dip, never a zoom. */
+const BELL_SPOT = () => { const s = site0(); return [s.X + 16, s.Y + 26]; };
+/* a few townsfolk about the belfry when the bell goes, on the two streets either side of it */
+const NEAR_BELL = [[506, 162], [546, 163], [626, 162], [528, 244], [612, 245]];
 const BEATS = [
-  { id: 'noon', len: 12.5, enter() { R.hour = 12; R.weather = 'clear'; DQ.musicMode && DQ.musicMode('game'); DQ.musicDim && DQ.musicDim(1);
-      const sc = pastScene(); if (!sc) return; const s = site0(); R.town = townShot({ url: sc.url, meta: sc.meta, share: 1, belfry: 'bell', cast: castOf(9), focus: [400, 214] }); R.town.want = { x: s.X + 16, y: s.Y + 30 }; },
-    cues: [[.6, () => say(WORDS.bells), 1], [3.4, () => { R.ringAt = R.bt; inset('bell', 4); if (DQ.storyBell) DQ.storyBell('church', 3); if (R.town) { turnToBell(R.town); R.town.ring(); } }, 1],
+  { id: 'noon', len: 12.5, enter() { R.hour = 12; R.weather = 'clear'; DQ.musicMode && DQ.musicMode('game'); DQ.musicDim && DQ.musicDim(1); perch();
+      const sc = pastScene(); if (!sc) return; R.town = townShot({ url: sc.url, meta: sc.meta, share: 1, belfry: 'bell', cast: castOf(9), focus: [400, 214], view: 'wide' }); },
+    cues: [[.6, () => say(WORDS.bells), 1],
+      [3, () => { const T = R.town; if (T) T.view('close', BELL_SPOT(), null, () => T.people().slice(0, NEAR_BELL.length).forEach((w, i) => { [w.x, w.y] = NEAR_BELL[i]; w.goal = null; w.rest = 0; w.dir = i % 2 ? -1 : 1; if (R.still) w.face = w.x < BELL_SPOT()[0] ? 1 : -1; })); }],
+      [3.4, () => { R.ringAt = R.bt; inset('bell', 4); if (DQ.storyBell) DQ.storyBell('church', 3); if (R.town) { turnToBell(R.town); R.town.ring(); if (R.still) R.town.repaint(); } }, 1],
       [4.2, () => say(WORDS.noon), 1], [5.8, () => R.town && R.town.ring()], [8.2, () => R.town && R.town.ring()],
-      [9.4, () => { const T = R.town; if (!T) return; const w = T.people().filter(p => !p.hidden).sort((a, b) => Math.abs(a.x - T.cam.x + 40) - Math.abs(b.x - T.cam.x + 40))[0]; if (w) bubble(WORDS.noonSay, () => T.screen(w.x + 2.5, w.y - 15), 2.8); }]],
-    update(dt) { if (R.ringAt == null) return; const e = R.bt - R.ringAt, amp = 26 * clamp(1 - (e - 4.8) / 2.6, 0, 1), deg = amp * Math.cos(Math.PI * e / 2.4); inset('bell', swingIndex(deg));
-      if (R.town) R.town.nudge = Math.round(deg / 18); } },
-  { id: 'night', len: 14, enter() { DQ.musicMode && DQ.musicMode('title'); DQ.musicDim && DQ.musicDim(.6); insetOff(); R.ringAt = null; if (R.town) R.town.nudge = 0; if (R.still) { R.hour = 22; R.town && R.town.relight(); } },
-    cues: [[.4, () => say(WORDS.work), 1], [.6, () => { if (R.town) { for (const w of R.town.people()) leave(w, null, 24); R.town.drawProps(true); } }],
-      [4.4, () => { say(WORDS.missing); const T = R.town; if (!T || !T.walk) return; const s = site0(); R.thief = { x: 660, y: 244, dir: -1, pace: 30, walked: 0, rest: 0, script: true, thief: true, goal: s.X + 14, hold: 1e9, face: 0,
-        look: { skin: '#2a2230', hair: '#100c14', hs: 'short', cloth: '#120e16', hat: ['hood', '#1a1622'], glow: '#f0d060' } }; T.walk.L.walkers.push(R.thief); }, 1],
-      [6.8, () => { const T = R.town; if (!T) return; T.belfry = 'rope'; T.drawProps(true); const th = R.thief; if (th) { th.x = th.goal != null ? th.goal : th.x; th.goal = null; th.carry = 'bell'; th.rest = 0; th.leave = true; th.dir = 1; th.pace = 30; } }],
-      [8.8, () => { R.dawnAt = R.bt; }], [10.4, () => { inset('rope', 2, 'dawn'); say(WORDS.rope); if (R.still) { R.hour = 6.5; R.town && R.town.relight(); } }, 1]],
+      [9.4, () => { const T = R.town; if (!T) return; const [bx] = BELL_SPOT(), w = T.people().filter(p => !p.hidden && Math.abs(p.x - bx) < 70).sort((a, b) => Math.abs(a.x - bx) - Math.abs(b.x - bx))[0]; if (w) bubble(WORDS.noonSay, () => T.screen(w.x + 2.5, w.y - 15), 2.8); }]],
+    update(dt) { if (R.ringAt == null) return; const e = R.bt - R.ringAt, amp = 26 * clamp(1 - (e - 4.8) / 2.6, 0, 1), deg = amp * Math.cos(Math.PI * e / 2.4);
+      if (R.pigeon && !R.pigeon.flying && e > .3) R.pigeon.flying = true; /* the first stroke sends the pigeon off */
+      pigeonTick(dt); inset('bell', swingIndex(deg)); if (R.town) R.town.nudge = Math.round(deg / 18); } },
+  { id: 'night', len: 14, enter() { DQ.musicMode && DQ.musicMode('title'); DQ.musicDim && DQ.musicDim(.6); insetOff(); R.ringAt = null; R.pigeon = null; if (R.town) { R.town.nudge = 0; R.town.view('wide', [400, 214]); } if (R.still) { R.hour = 22; R.town && R.town.repaint(); } },
+    cues: [[.4, () => say(WORDS.work), 1], [.6, () => { if (R.town) { for (const w of R.town.people()) leave(w, null, 24); R.town.drawProps(true); if (R.still) R.town.repaint(); } }],
+      [4.4, () => { say(WORDS.missing); const T = R.town; if (!T) return; T.view('close', BELL_SPOT()); if (!T.walk) return; const s = site0(); R.thief = { x: 650, y: 244, dir: -1, pace: 36, walked: 0, rest: 0, script: true, thief: true, goal: s.X + 12, hold: 1e9, face: 0,
+        /* a hooded, cloaked shape in plum and soot, dark but with a lit edge, and two yellow eyes in the hood */
+        look: { skin: '#5a4a62', hair: '#1c1624', hs: 'short', cloth: '#4a3a5e', hat: ['hood', '#3a2e4c'], glow: '#ffe060' } }; T.walk.L.walkers.push(R.thief); }, 1],
+      [6.8, () => { const T = R.town; if (!T) return; T.belfry = 'rope'; T.drawProps(true); if (R.still) T.repaint(); const th = R.thief; if (th) { th.x = th.goal != null ? th.goal : th.x; th.goal = null; th.carry = 'bell'; th.rest = 0; th.leave = true; th.dir = 1; th.pace = 26; } }],
+      [8.8, () => { R.dawnAt = R.bt; }], [10.4, () => { perch(); inset('rope', 2, 'dawn'); say(WORDS.rope); if (R.still) { R.hour = 6.5; R.town && R.town.repaint(); } }, 1]],
     update() { R.hour = R.dawnAt != null ? 22 + 8.5 * smooth((R.bt - R.dawnAt) / 2.2) : 12 + 10 * smooth(R.bt / 4);
       if (R.inset && R.inset.classList.contains('on')) inset('rope', clamp(Math.round(2 + 2 * Math.sin(R.clock * 2.1)), 0, 4), 'dawn'); } },
-  { id: 'empty', len: 11.5, enter() { DQ.musicDim && DQ.musicDim(.45); R.dawnAt = null; R.hour = R.still ? 9 : 6.5; if (R.still && R.town) R.town.relight();
+  { id: 'empty', len: 11.5, enter() { DQ.musicDim && DQ.musicDim(.45); R.dawnAt = null; R.hour = R.still ? 9 : 6.5; if (R.town) R.town.view('wide', [400, 214]); if (R.still && R.town) R.town.repaint();
       if (R.town && R.town.walk) { const cast = castOf(6, TOWN + ':after'); R.town.walk.L.walkers = cast; } },
     cues: [[.4, () => { insetOff(); say(WORDS.traders); }, 1], [1.4, () => leave(R.town && R.town.people()[0], 'bundle')],
       [2.8, () => { const T = R.town; if (!T) return; const w = T.people()[1]; if (!w) return; leave(w, 'pan', 12); T.want = { x: w.x, y: w.y - 20 }; bubble(WORDS.pans, () => T.screen(w.x + 2.5, w.y - 16), 3.4); }],
-      [5, () => leave(R.town && R.town.people()[2], 'bundle')], [5.9, () => { const sc = ruinScene(); if (sc && R.town) R.town.swap(sc, () => { if (R.still) R.hour = 15; R.town.relight(); }); }],
+      [5, () => leave(R.town && R.town.people()[2], 'bundle')], [5.9, () => { const sc = ruinScene(); if (sc && R.town) R.town.swap(sc, () => { if (R.still) { R.hour = 15; R.town.repaint(); } }); }],
       [6.8, () => say(WORDS.left), 1], [7.6, () => leave(R.town && R.town.people()[3], 'pan')], [8.8, () => leave(R.town && R.town.people()[4], 'bundle')]],
     update() { R.hour = 6.5 + R.bt / 3.4 * 24; R.weather = R.bt > 3.4 && R.bt < 6.6 ? 'rain' : 'clear'; } },
   { id: 'lodging', len: 9.5, enter() { DQ.musicDim && DQ.musicDim(.75); R.weather = 'clear'; if (R.town) { R.town.remove(); R.town = null; } insetOff(); say(null); R.room = roomShot(); },
@@ -249,22 +291,29 @@ const BEATS = [
     leave() { if (R.road) { R.road.remove(); R.road = null; } R.holding = R.hurried = false; } },
   { id: 'home', len: null, enter() { DQ.musicDim && DQ.musicDim(1); R.hour = 18.3; R.weather = 'clear'; R.met = null; R.talked = false;
       const sc = nowScene(), wren = folk('Elder Wren'), cast = castOf(3, TOWN + ':now');
-      R.hero = { x: -10, y: 244, dir: 1, pace: 42, walked: 0, rest: 0, script: true, goal: 306, hold: 1e9, face: 1, look: heroChibi(), arrive: () => meet() };
-      R.wren = { x: 334, y: 244, dir: -1, pace: 0, walked: 0, rest: 1e9, face: -1, script: true, look: (DQ.townGiverLook && DQ.townGiverLook(wren)) || { skin: '#e8b98e', hair: '#c8c4bc', hs: 'long', cloth: '#5a7a4a' } };
-      R.town = townShot({ url: sc.url, meta: sc.meta, belfry: 'rope', close: true, anchorY: .36, cast: cast.concat([R.wren, R.hero]), focus: [R.still ? 320 : 120, 244] }); say(WORDS.home); if (R.still) setTimeout(() => meet(), 1200); },
-    cues: [[9, () => { if (R.met == null && R.hero) { R.hero.x = 306; R.hero.goal = null; R.hero.rest = 1e9; meet(); } }]],
-    hurry() { if (R.met == null && R.hero) { R.hero.x = 306; R.hero.goal = null; R.hero.rest = 1e9; R.hero.face = 1; meet(); } return true; },
-    update(dt) { const T = R.town; if (!T) return; if (R.hero) T.want = { x: R.met != null ? 320 : clamp(R.hero.x + 70, 0, 320), y: 244 }; T.update(dt); /* the camera walks in with the hero, then settles on the two of them */
-      if (R.wren && R.hero && R.met == null) R.wren.pose = R.hero.x > 200 && Math.floor(R.clock * 2.5) % 2 ? 'cheer' : null; },
+      R.hero = { x: 150, y: 244, dir: 1, pace: 40, walked: 0, rest: 0, script: true, goal: 322, hold: 1e9, face: 1, look: heroChibi(), arrive: () => meet() };
+      R.wren = { x: 346, y: 244, dir: -1, pace: 0, walked: 0, rest: 1e9, face: -1, script: true, look: (DQ.townGiverLook && DQ.townGiverLook(wren)) || { skin: '#e8b98e', hair: '#c8c4bc', hs: 'long', cloth: '#5a7a4a' } };
+      if (R.still) R.hero.x = 322;
+      /* the well and the two of them sit in the upper part of the screen, above the conversation panel */
+      R.town = townShot({ url: sc.url, meta: sc.meta, belfry: 'rope', view: 'wide', anchorY: R.box.phone ? .27 : .36, cast: cast.concat([R.wren, R.hero]), focus: [320, 244] }); say(WORDS.home); if (R.still) setTimeout(() => meet(), 1200); },
+    cues: [[1.4, () => { const T = R.town; if (T) T.view('close', [R.still ? 334 : clamp(R.hero.x + 60, 0, 640), 240]); }], [9, () => { if (R.met == null && R.hero) { R.hero.x = 322; R.hero.goal = null; R.hero.rest = 1e9; meet(); } }]],
+    hurry() { if (R.met == null && R.hero) { R.hero.x = 322; R.hero.goal = null; R.hero.rest = 1e9; R.hero.face = 1; meet(); } return true; },
+    update(dt) { const T = R.town; if (!T) return; if (R.hero && T.mode === 'close') T.want = { x: R.met != null ? 334 : clamp(R.hero.x + 60, 0, 640), y: 240 }; T.update(dt); /* the camera walks in with the hero, then settles on the two of them */
+      if (R.wren && R.hero && R.met == null) R.wren.pose = R.hero.x > 240 && Math.floor(R.clock * 2.5) % 2 ? 'cheer' : null; },
     leave() { if (R.wren) R.wren.pose = null; } },
-  { id: 'title', len: null, enter() { R.wait = true; say(null); const old = R.town, sc = nowScene(); R.town = townShot({ url: sc.url, meta: sc.meta, belfry: 'rope', wide: true, cast: old ? old.people() : [], focus: [320, 230] }); R.town.want = { x: 320, y: 150 }; if (old) old.remove(); showTitle(); },
+  { id: 'title', len: null, enter() { R.wait = true; say(null); const old = R.town, sc = nowScene(); R.town = townShot({ url: sc.url, meta: sc.meta, belfry: 'rope', view: 'far', cast: old ? old.people() : [], focus: [320, 230] }); R.town.want = { x: 320, y: 150 }; if (old) old.remove(); showTitle(); },
     cues: [], hurry() { return true; }, update(dt) { if (R.town) R.town.update(dt * .35); } }
 ];
 BEATS.forEach(b => { b.cues = b.cues || []; });
 
 /* the lodging's letter: a button by the envelope, and the letter itself */
 const openPrompt = () => { if (R.prompt || !R.room) return; const b = el('button', 'btn primary op-open'), [x, y] = R.room.envScreen();
-  b.type = 'button'; b.dataset.op = 'open'; b.innerHTML = `${DQ.ico ? DQ.ico('quest') : ''}<span>Open Wren’s letter</span>`; R.el.appendChild(b); b.style.left = Math.round(clamp(x, 170, R.box.w - 170)) + 'px'; b.style.top = Math.round(clamp(y - 72, 60, R.box.h - 80)) + 'px';
+  b.type = 'button'; b.dataset.op = 'open'; b.innerHTML = `${DQ.ico ? DQ.ico('quest') : ''}<span>Open Wren’s letter</span>`; R.el.appendChild(b);
+  /* beside the envelope on the boards, between the bookshelf and the hearth, clear of the rug and the cat; on a phone,
+     where the room is drawn smaller, just above it against the bookshelf */
+  const k = R.room.k, bw = b.offsetWidth, bh = b.offsetHeight;
+  if (R.box.phone) { b.style.left = Math.round(clamp(x, bw / 2 + 10, R.box.w - bw / 2 - 10)) + 'px'; b.style.top = Math.round(clamp(y - bh - 10, 10, R.box.h - bh - 10)) + 'px'; }
+  else { b.style.translate = '0 0'; b.style.left = Math.round(Math.min(x + 9 * k + 12, R.box.w - bw - 10)) + 'px'; b.style.top = Math.round(y + 6 * k - bh / 2) + 'px'; }
   R.prompt = b; if (R.still) b.classList.add('on'); else requestAnimationFrame(() => b.classList.add('on')); };
 const openLetter = () => { const name = (S().name || 'friend').trim() || 'friend', w = folk('Elder Wren'), box = el('div', 'op-letterbox'), kB = R.box.phone ? 4 : clamp(Math.floor(R.box.h / 180), 4, 6);
   const env = canvasEl(48, 46, 'op-bigenv'), draw = open => { const x = env.getContext('2d'); x.clearRect(0, 0, 48, 46); const a = A().openingEnvelope && A().openingEnvelope('big', open); if (a) x.drawImage(a, 0, open ? 0 : 14); };
@@ -299,6 +348,8 @@ DQ.playIntro = (opts = {}) => {
   const box = el('div'); box.id = 'intro'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', 'The story so far');
   box.innerHTML = `<div class="op-stage"></div><div class="op-say empty" aria-live="polite"></div><button class="btn sm op-skip" type="button" data-op="skip" hidden>Skip ›</button>`;
   document.body.appendChild(box);
+  /* the game under the opening is not painted while it plays (its Home scene would otherwise be drawn, unseen, every frame) */
+  setTimeout(() => { if (document.getElementById('intro') === box && !box.classList.contains('out')) root.classList.add('op-playing'); }, 950);
   R = { el: box, stage: box.querySelector('.op-stage'), sayEl: box.querySelector('.op-say'), skip: box.querySelector('.op-skip'), still: calm(), bi: -1, bt: 0, clock: 0, wait: false, beat: null, fired: new Set(), shots: new Set(), bubbles: [], said: [], reached: [], hour: 12, weather: 'clear', touched: false, holding: false, hurried: false, ended: false, opts };
   if (R.still) box.classList.add('op-still');
   measure();
@@ -323,7 +374,7 @@ DQ.playIntro = (opts = {}) => {
     DQ.musicMode && DQ.musicMode('game'); DQ.musicDim && DQ.musicDim(1);
     document.removeEventListener('keydown', onKey, true); document.removeEventListener('keyup', onKeyUp, true); removeEventListener('resize', onResize);
     for (const s of [...r.shots]) s.remove && s.remove(); r.bubbles.forEach(B => B.b.remove());
-    box.classList.add('out'); setTimeout(() => { box.remove(); if (R === r) R = null; if (opts.onDone) opts.onDone(); }, r.still ? 0 : 700); };
+    root.classList.remove('op-playing'); box.classList.add('out'); setTimeout(() => { box.remove(); if (R === r) R = null; if (opts.onDone) opts.onDone(); }, r.still ? 0 : 700); };
   R.finish = finish;
   box.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; touch(); if (R.beat && R.beat.id === 'road') { R.holding = true; R.pressAt = performance.now(); } });
   const lift = () => { if (!R) return; if (R.holding && R.beat && R.beat.id === 'road' && performance.now() - (R.pressAt || 0) < 260) R.hurried = true; R.holding = false; };

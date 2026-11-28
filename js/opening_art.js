@@ -27,13 +27,21 @@ A.openingBelfry = (state = 'bell', i = 2, sky = 'noon') => memo(`belfry:${state}
   const stone = s.mat('#7e7a86'), stoneDk = s.mat('#5a5664'), wood = s.mat('#7a5232'), roof = s.mat('#a8463a'), bronze = s.mat('#c89640', { warm: '#fff0b8' }), iron = s.mat('#4a4a54'), rope = s.mat('#c8b48a');
   /* the roof, the two piers and the sill */
   s.poly([[2, 18], [32, 1], [62, 18], [58, 21], [6, 21]], roof); s.edges(roof); for (let x = 8; x < 58; x += 5) s.line(x, 19, x + 3, 14 - Math.abs(32 - x) * .25, roof, 1);
-  for (const x0 of [4, 50]) { s.rect(x0, 20, 10, 44, stone); for (let y = 24; y < 64; y += 6) s.line(x0, y, x0 + 9, y, stoneDk, 1); for (let y = 21; y < 64; y += 12) s.dot(x0 + 5, y + 3, stoneDk, 1); }
-  s.rect(4, 58, 56, 6, stone, { flat: 2 }); s.line(4, 58, 59, 58, stone, 3);
-  /* the arch over the opening */
-  for (let x = 14; x < 50; x++) { const d = (x - 31.5) / 18, y = Math.round(21 + 8 * (1 - Math.sqrt(Math.max(0, 1 - d * d)))); for (let yy = 21; yy <= y; yy++) s.set(x, yy, stone, yy === y ? 1 : 2); }
+  /* dressed stone in courses: each block a shade of its own, the mortar dark, the joints staggered, a lichen spot or two */
+  const moss = s.mat('#5e7a46'), rnd = A.townSeeded ? A.townSeeded('belfry-stone') : Math.random;
+  const blocks = (x0, y0, w, h) => { for (let y = y0, row = 0; y < y0 + h; y += 4, row++) { let x = x0 - (row % 2 ? 3 : 0);
+    while (x < x0 + w) { const bw = 5 + Math.floor(rnd() * 3), lv = [1.6, 2, 2, 2.4, 3][Math.floor(rnd() * 5)];
+      for (let j = 0; j < 4; j++) for (let i = 0; i < bw; i++) { const X = x + i, Y = y + j; if (X < x0 || X >= x0 + w || Y >= y0 + h) continue; const mortar = j === 3 || i === bw - 1;
+        s.set(X, Y, mortar ? stoneDk : stone, mortar ? 1 : (j === 0 || i === 0) ? Math.min(4, lv + 1) : lv); }
+      if (rnd() < .12) s.dot(x + 1, y + 2, moss, 2); x += bw; } } };
+  blocks(4, 20, 10, 44); blocks(50, 20, 10, 44);
+  blocks(4, 58, 56, 6); s.line(4, 58, 59, 58, stone, 3);
+  /* the arch over the opening, its voussoirs picked out */
+  for (let x = 14; x < 50; x++) { const d = (x - 31.5) / 18, y = Math.round(21 + 8 * (1 - Math.sqrt(Math.max(0, 1 - d * d)))); for (let yy = 21; yy <= y; yy++) s.set(x, yy, (x - 14) % 6 === 5 ? stoneDk : stone, yy === y ? 1 : (x - 14) % 6 === 0 ? 3 : 2); }
   /* the headstock beam the bell hangs from */
   s.rect(12, 22, 40, 3, wood); s.dot(31, 25, iron, 2); s.dot(32, 25, iron, 2);
   const a = (ANGLES[i] || 0) * Math.PI / 180, P = [32, 25];
+  const twisted = (x0, y0, x1, y1) => { for (let y = Math.round(y0); y <= y1; y++) { const t = (y - y0) / Math.max(1, y1 - y0), x = Math.round(x0 + (x1 - x0) * t); s.set(x, y, rope, y % 3 === 0 ? 1 : 3); s.set(x + 1, y, rope, y % 3 === 1 ? 1 : 2); } };
   if (state === 'bell') {
     /* the bell: crown, shoulder, waist and the flared lip, lit on its left; it turns on the beam */
     const body = [[28, 26], [36, 26], [38, 29], [39, 36], [41, 43], [46, 49], [46, 51], [18, 51], [18, 49], [23, 43], [25, 36], [26, 29]];
@@ -46,12 +54,11 @@ A.openingBelfry = (state = 'bell', i = 2, sky = 'noon') => memo(`belfry:${state}
     const [l0, l1] = rot([[19, 49], [45, 49]], a, ...P); s.line(l0[0], l0[1], l1[0], l1[1], bronze, 1); /* the band at the lip */
     /* the clapper lags the swing a little */
     const [cx, cy] = rot([[32, 50]], a * .55, ...P)[0]; s.ell(cx, cy + 1, 2.2, 2.2, iron);
-    const [r0, r1] = rot([[34, 51], [34, 58]], a * .3, ...P); s.line(r0[0], r0[1], r1[0], 63, rope, 2);
+    /* the bell rope: from the wheel at the lip straight down past the sill to the ringing floor, its twist showing */
+    const [r0] = rot([[34, 51]], a * .3, ...P); twisted(r0[0], r0[1], 33 + Math.round(a * 6), 63);
   } else {
-    /* only the rope, cut short, swaying a bit guiltily */
-    const sway = [-4, -2, 0, 2, 4][i] || 0, end = [32 + sway, 50];
-    s.line(32, 25, end[0], end[1], rope, 3); s.line(33, 25, end[0] + 1, end[1], rope, 2);
-    s.dot(end[0] - 1, end[1] + 1, rope, 2); s.dot(end[0] + 1, end[1] + 2, rope, 1); s.dot(end[0] + 2, end[1] + 1, rope, 3);
+    /* only the rope, from the empty beam down to the floor, swaying a bit guiltily */
+    const sway = [-4, -2, 0, 2, 4][i] || 0; twisted(32, 25, 32 + sway, 63);
   }
   s.outline();
   const c = canvas(64, 64), x = c.getContext('2d'), bands = SKY[sky] || SKY.noon;
@@ -59,6 +66,14 @@ A.openingBelfry = (state = 'bell', i = 2, sky = 'noon') => memo(`belfry:${state}
   if (sky === 'night' || sky === 'dusk') { x.fillStyle = '#f4ecd0'; for (const [sx, sy] of [[18, 30], [44, 34], [26, 44], [40, 28], [21, 52]]) x.fillRect(sx, sy, 1, 1); }
   x.drawImage(s.canvas(), 0, 0); return c; });
 A.OPENING_BELL_ANGLES = ANGLES;
+/* a pigeon on the belfry roof (11 x 8, facing left): sitting, then wings up and down as it flaps off at the first stroke */
+A.openingPigeon = (frame = 'sit') => memo('pigeon:' + frame, () => { const { Spr } = TP(), s = new Spr(11, 9), body = s.mat('#8a8c9a'), wing = s.mat('#5e6070'), neck = s.mat('#5a8a7a', { warm: '#c8a0e0' }), beak = s.mat('#d8c8b0'), foot = s.mat('#d8707a');
+  s.ell(6, 5.5, 3.6, 2.4, body); s.ell(2.6, 3.4, 1.7, 1.6, body); s.dot(2, 4, neck, 3); s.dot(3, 5, neck, 2); s.dot(0, 3, beak, 3); s.dot(2, 2, s.mat('#e86a2a'), 4);
+  s.rect(9, 5, 2, 1, wing, { flat: 1 });
+  if (frame === 'up') { s.poly([[5, 4], [8, 0], [10, 0], [8, 4]], wing); s.poly([[4, 4], [4, 1], [6, 1], [6, 4]], wing, { flat: 1 }); }
+  else if (frame === 'down') { s.poly([[5, 6], [8, 8], [10, 8], [8, 5]], wing); }
+  else { s.ell(6.5, 5, 2.4, 1.4, wing); s.dot(5, 8, foot, 2); s.dot(7, 8, foot, 2); }
+  s.outline(); return s.canvas(); });
 
 /* ---------- the belfry from above, at town scale (32 x 32): the town's own bell-frame site, the bell nudged or gone ---------- */
 A.openingBelfryTop = (state = 'bell', nudge = 0) => memo(`belfrytop:${state}:${nudge}`, () => {

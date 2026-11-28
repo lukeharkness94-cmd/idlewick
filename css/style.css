@@ -3989,6 +3989,7 @@ html.calm #view.enter>*{animation:none}
    fade beats in and out (opacity and transforms only; nothing moves under calm or reduced motion). */
 #intro{position:fixed;inset:0;z-index:400;background:#05070a;color:#efe6d2;overflow:hidden;user-select:none;cursor:var(--cur-quill,default);animation:inFade .9s ease both}
 #intro.out{opacity:0;transition:opacity .7s ease}
+html.op-playing #app{visibility:hidden}
 @keyframes inFade{from{opacity:0}}
 #intro canvas,#intro .op-scene,#intro .op-walker{image-rendering:pixelated;max-width:none;display:block}
 .op-stage,.op-shot{position:absolute;inset:0;overflow:hidden}
@@ -3996,8 +3997,11 @@ html.calm #view.enter>*{animation:none}
 .op-shot.on{opacity:1}.op-shot.off{opacity:0;transition-duration:.5s}
 .op-world{position:absolute;left:0;top:0;will-change:transform}
 .op-scene{position:absolute;left:0;top:0}
-.op-props{position:absolute;left:0;top:0;z-index:1;pointer-events:none}
-.op-night{position:absolute;left:0;top:0;z-index:2;mix-blend-mode:multiply;pointer-events:none}
+/* the town's living layers stay at 1x, out of sight; the one canvas on screen is composed from them each frame */
+.op-stack{display:none}
+.op-stack .op-scene{width:640px;height:360px}
+.op-frame{position:absolute;left:0;top:0;transition:opacity .22s ease}
+.op-frame.cut{opacity:0}
 #intro .town-tint{transition:none}
 /* the narrator: large, on a framed dark backing so it never sits bare over a busy picture */
 .op-say{position:absolute;left:50%;bottom:28px;translate:-50% 0;width:min(1180px,calc(100% - 48px));z-index:6;display:grid;pointer-events:none}
@@ -4060,6 +4064,9 @@ html.calm #view.enter>*{animation:none}
 .op-talk .story-talker,.op-talk .story-talker :is(img,.portrait){width:128px!important;height:128px!important}
 .op-talk .story-conversation .story-dialogue{padding:14px}
 .op-talk .story-conversation .story-line{min-height:84px;font-size:23px}
+/* the reply sits in one row, so the panel stays low and the well stays in view above it */
+.op-talk .story-conversation .story-choices{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.op-talk .story-choice.btn{padding:9px 10px}
 /* the title, over the town pulled back */
 .op-title{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center;background:radial-gradient(ellipse at 50% 50%,rgba(5,6,10,.25),rgba(5,6,10,.82) 78%);opacity:0;transition:opacity 1.2s ease}
 .op-title.on{opacity:1}
@@ -4080,9 +4087,17 @@ html.calm #view.enter>*{animation:none}
  #intro .op-letter{font-size:17px;padding:14px 16px 16px}
  #intro .op-letter .letter-head b{font-size:17px}#intro .op-letter .letter-head small{font-size:13px}#intro .op-letter .letter-sign{font-size:17px}
  .op-letter .letter-ps{font-size:15px}
- .op-talk .story-conversation{grid-template-columns:104px minmax(0,1fr);gap:10px}
- .op-talk .story-talker,.op-talk .story-talker :is(img,.portrait){width:96px!important;height:96px!important}
- .op-talk .story-conversation .story-line{font-size:18px;min-height:120px}
+ /* one column: Wren's face and name on a row, the words and the replies full width, so the panel stays low and the
+    well and the two of them stay in view above it (.modal.op-talk outranks the conversation screen's phone rules) */
+ .modal.op-talk .m-card{padding:8px 10px}.modal.op-talk .m-card>h2{display:none}
+ .modal.op-talk .story-conversation{grid-template-columns:minmax(0,1fr);gap:6px;min-height:0}
+ .modal.op-talk .story-talker,.modal.op-talk .story-talker :is(img,.portrait){width:64px!important;height:64px!important}
+ .modal.op-talk .story-conversation .story-speaker{flex-direction:row;justify-content:flex-start;align-items:center;padding:2px 6px;gap:10px}
+ .modal.op-talk .story-conversation .story-dialogue{padding:8px}
+ .modal.op-talk .story-conversation .story-line{font-size:17px;min-height:0}
+ .modal.op-talk .story-conversation .story-choices{grid-template-columns:1fr;gap:4px}
+ .modal.op-talk .story-choice.btn{padding:6px 8px;min-height:0}.modal.op-talk .story-choice small{display:none}
+ .modal.op-talk .story-controls small{display:none}
  .op-titlecard{padding:16px 16px 20px;gap:12px}
  .op-title .logo .ic{width:48px;height:48px}
  .op-signname{font-size:13px;padding:3px 7px}

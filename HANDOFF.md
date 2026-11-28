@@ -1287,8 +1287,29 @@ scene far more immersive". The old opening (still town pictures with a slow pan 
   in `S.choices`, the walk cycle and hold-to-hurry, hush, whole-number scales, nothing granted, still frames under reduced
   motion, Escape on replay); `tests/opening-routes-ui.cjs` checks a played and skipped opening leaves the hero where the
   routes start.
-- **Limits**: headless Chromium without a GPU draws the full-screen town at about 15-20 frames a second (the stack of
-  town-life layers at 3-4x); real hardware was not measured. The townsfolk are 12 px chibis even at 3-4x, so the turn
-  towards the bell reads more from the bubble and the ripples than from the figures. Wren and the hero at the well are
-  the town's chibis, not the 72 x 96 hero. Browser checks are evidence, not playtests.
+- **Review fixes (same day)**:
+  - *Frame rate*: the town is one canvas on screen at 640 x 360, scaled to a whole number. The scene is lit once into a
+    cached layer (the hour's tint, the opening's deeper night, the low sun's glow) and relit only when the light changes;
+    each frame copies the cache and draws only what moves (town life's smoke, animals and weather, the belfry and its
+    rings, the walkers, shaded where they stand after dark), then the lit windows. town_walkers and town_life still run
+    their own layers, at 1x and out of sight (`.op-stack`, display none). The game under the opening is not painted while
+    it plays (`html.op-playing #app`). Headless Chromium, ms per frame over 5 s, before and after, same machine and
+    load: 1920 x 1080 noon 69.5 -> 17.5, night 81.2 -> 17.2; 1280 x 720 noon 27.2 -> 16.8, night 30.8 -> 16.7;
+    390 x 844 noon 16.7 -> 16.7, night 16.8 -> 16.7 (scratch script perf3.cjs, not in the repo). A bare canvas page
+    redrawn every frame measures 16.7 there.
+  - *Framing*: the wide shot (smallest whole scale that covers the screen) establishes; the close shot (twice that: 6x
+    at 1920, 4x on phones) frames the belfry for the bell and the theft and the square for the meeting with Wren.
+    Changes of framing are cuts through a 0.22 s dip, never zooms. Five townsfolk stand about the belfry when it rings;
+    the thief is plum and soot with yellow eyes.
+  - *Conversation*: the camera puts the well and the two of them in the upper third, and the panel stays low (replies in
+    one row on desktop; one column with a small face row on phones), so Wren and the hero stay in view while it is
+    open, in the talk and in the reply (checked at 1920 x 1080, 1280 x 720, 390 x 844 and 375 x 667). They meet at
+    x 322 / 346, clear of the lamp post.
+  - *Lodging*: the letter stops on the boards by the wall, under the bookshelf and above the bottom edge; the button
+    sits beside it (above it on phones), off the rug and the cat; phones frame the door side of the room. The autumn gourd
+    by the hearth is gone from the room (Home too), where it sat at the hero's feet.
+  - *Belfry close-up*: dressed stone in courses with staggered joints and lichen, a twisted rope down to the floor, and a
+    pigeon on the roof that flaps off at the first stroke (`A.openingPigeon`) and is back by dawn.
+- **Limits**: the frame numbers are headless Chromium (software rendering), not real hardware. The townsfolk are still
+  the town's 12 px chibis (72 px tall at 6x). Browser checks are evidence, not playtests.
 
