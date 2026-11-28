@@ -11,7 +11,7 @@ ctx.window = ctx;ctx.__IDLEWICK_INTEGRATION_TEST__=true;
 const load = n => vm.runInContext(fs.readFileSync(path.join(root, 'js', n + '.js'), 'utf8'), ctx, { filename: n });
 ['util', 'data', 'creatures_expanded', 'creature_roster', 'hunt_tiers_data', 'skill_expansion_data', 'data2', 'data3', 'economy', 'skills_new_data', 'beastmastery_data', 'hunting_loop_data', 'crosslinks_data', 'state', 'rare_weapons'].forEach(load); /* the 29 named weapons must look different too (27 Nov 2026) */
 const Q = ctx.DQ; Q.ui = { V: {}, DO: {}, B: {}, homeSections: [] };
-['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'skills_new_art', 'beastmastery_art'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
+['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'skills_new_art', 'beastmastery_art', 'pixel_items_food'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
 const A = Q.pixelArt, D = Q.data;
 let checks = 0; const check = (name, fn) => { fn(); checks++; console.log('PASS', name); };
 const colours = spr => spr.render();
