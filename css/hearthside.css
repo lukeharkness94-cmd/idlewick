@@ -1295,3 +1295,38 @@ html[data-theme="dark"] body{background-color:var(--ground)}
   #view .combat-d .encounter-arena .avatar::before{content:'';position:absolute;left:50%;bottom:-3px;width:54px;height:12px;translate:-50% 0;background:radial-gradient(closest-side,rgba(6,5,8,.62) 97%,transparent 100%);z-index:0;pointer-events:none}
   #view .combat-d .encounter-arena .avatar:has(img.px-big)::before{width:80px;height:12px}
 }
+
+/* Fight stage HUD (owner, 28 Nov 2026: match the pixel mockup): each fighter's name, level and health sit in a framed
+   wooden bar in its top corner (hero left, foe right), the fighters stand on the scene's ground line below, and hit
+   numbers are big outlined pixel numbers over the head instead of coloured circles. Desktop only; phones keep the
+   stacked labels under each fighter. The elements stay where updateEncounter expects them; only their place changes. */
+@media (min-width:861px){
+  #view .combat-d:not(.cw-idle) .encounter-arena.cx-stage{padding-top:86px!important}
+  html.short #view .combat-d:not(.cw-idle) .encounter-arena.cx-stage{padding-top:60px!important}
+  #view .combat-d .encounter-arena>.side{position:relative;align-self:stretch!important;display:flex!important;flex-direction:column;justify-content:flex-end;align-items:center;justify-self:stretch!important;flex:1 1 0!important;width:auto!important;min-width:0;--hud-w:min(480px,100%)}
+  #view .combat-d .encounter-arena>.side::after{content:'';position:absolute;top:-76px;left:0;width:var(--hud-w);height:64px;border-radius:var(--r-panel,4px);background:linear-gradient(180deg,#3a2c22,#2b2019);box-shadow:0 0 0 2px #0e0a08,inset 0 2px 0 #5e4736,inset 2px 0 0 #4a3829,inset 0 -2px 0 #1a120e,0 4px 10px rgba(0,0,0,.45);z-index:2;pointer-events:none}
+  #view .combat-d .encounter-arena>.side:last-child::after{left:auto;right:0}
+  #view .combat-d .encounter-arena>.side>.nm{position:absolute;top:-66px;left:14px;right:auto;z-index:3;margin:0;padding:0!important;background:none!important;font:400 15px/20px 'Silkscreen',var(--f-ui)!important;letter-spacing:.02em;max-width:calc(var(--hud-w) - 190px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+  #view .combat-d .encounter-arena>.side>.nm .lvchip{font:400 14px 'Silkscreen',var(--f-mono)!important;background:none!important;padding:0 0 0 6px!important;color:var(--brass)}
+  #view .combat-d .encounter-arena>.side>.hpb{position:absolute;top:-38px;left:14px;width:calc(var(--hud-w) - 28px)!important;height:14px!important;z-index:3;margin:0!important}
+  #view .combat-d .encounter-arena>.side>small.mono{position:absolute;top:-66px;left:auto;right:calc(100% - var(--hud-w) + 14px);z-index:3;padding:0!important;background:none!important;font:400 14px/20px 'Silkscreen',var(--f-mono)!important;color:var(--mute)}
+  #view .combat-d .encounter-arena>.side:last-child>.nm,#view .combat-d .encounter-arena>.side:last-child>.hpb{left:calc(100% - var(--hud-w) + 14px)}
+  #view .combat-d .encounter-arena>.side:last-child>small.mono{right:14px}
+  html.short #view .combat-d .encounter-arena>.side::after{top:-54px;height:46px}
+  html.short #view .combat-d .encounter-arena>.side>.nm,html.short #view .combat-d .encounter-arena>.side>small.mono{top:-48px;font-size:13px!important;line-height:16px}
+  html.short #view .combat-d .encounter-arena>.side>.hpb{top:-26px;height:10px!important}
+  #view .combat-d .encounter-arena>.side>.hpb{max-width:none!important}
+  #view .combat-d .encounter-arena>.side>.hpb i{background:linear-gradient(180deg,#ff8a6a 0 2px,#d8403a 2px calc(100% - 3px),#8a1e1a calc(100% - 3px))!important}
+  #view .combat-d .encounter-arena>.cw-trackmsg{top:96px!important}
+  html.short #view .combat-d .encounter-arena>.cw-trackmsg{top:66px!important}
+  /* hit numbers over the head, whatever the fighter's height */
+  #view .combat-d .encounter-arena>.side>.splats{top:auto!important;bottom:calc(32px * var(--k) + 8px);height:70px}
+  #view .combat-d .encounter-arena>.side:has(img.px-big)>.splats{bottom:calc(64px * var(--k) - 24px)}
+  #view .combat-d .encounter-arena .splat{width:auto!important;height:auto!important;margin-left:0!important;translate:-50% 0;border-radius:0!important;background:none!important;display:block;white-space:nowrap;font:400 calc(7px * var(--k) + 6px)/1 'Silkscreen',var(--f-mono)!important;color:#ffd84a;text-shadow:2px 0 0 #1a0806,-2px 0 0 #1a0806,0 2px 0 #1a0806,0 -2px 0 #1a0806,2px 2px 0 #1a0806,-2px 2px 0 #1a0806,2px -2px 0 #1a0806,-2px -2px 0 #1a0806,0 5px 0 rgba(0,0,0,.45)}
+  #view .combat-d .encounter-arena #sp-you .splat.hit{color:#ff5a46}
+  #view .combat-d .encounter-arena .splat.miss,#view .combat-d .encounter-arena .splat.resist{color:#a8bcd8;font-size:calc(5px * var(--k) + 6px)!important}
+  #view .combat-d .encounter-arena .splat.heal{color:#7cf08c}
+  #view .combat-d .encounter-arena .splat.poison{color:#b8e04a}
+  #view .combat-d .encounter-arena .splat.weak{color:#ffb03a}
+  #view .combat-d .encounter-arena .splat.power{color:#ff8a2a;font-size:calc(9px * var(--k) + 6px)!important}
+}
