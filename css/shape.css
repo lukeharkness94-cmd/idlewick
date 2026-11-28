@@ -64,7 +64,7 @@
   :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):not(:disabled,.locked):hover{box-shadow:var(--act-lift-hi)!important;translate:0 -1px}
   html.calm :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):hover{translate:none}
   :is(#topnav .tnav,#pagebar :is(button,[data-do]),#combatnav :is(button,[data-do]),#skilldock .dk,#dock .dk,.cg-tile,#hud :is(.iconb,.packchip,.h-hero),[role=tab],.tab,.stab,[data-do=hub],[data-do=shopcategory],[data-do=shoptab],[data-do=settingsgroup],[data-do=estatesection],[data-do=toolfamily]):is(.on,.selected,.active,.current,.here,[aria-selected=true],[aria-pressed=true],[aria-current=page]){
-    background:linear-gradient(180deg,var(--nav-on-hi),var(--nav-on))!important;color:var(--ink)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),var(--act-lift),0 0 18px -6px var(--act-glow)!important}
+    background:var(--nav-on)!important;color:var(--nav-ink,var(--ink))!important;box-shadow:0 0 0 2px #2a1a06,inset 0 2px 0 #f6d47a,inset 0 -3px 0 #6a4614,0 4px 0 2px rgba(0,0,0,.3)!important}
 
   /* ---------- every other control floats: no outline, a raised fill and a soft shadow ----------
      (owner, 27 Nov 2026: "we can just either make it float on over or have a slight backdrop so its obvious it's
@@ -196,7 +196,7 @@
   .encounter-arena #av-foe.foe-guide:hover{filter:brightness(1.08)}
 
   /* dark theme: a locked silhouette is a pale shape, not a black one with a drawn edge */
-  :root[data-theme="dark"] :is(.sil,img.sil){filter:brightness(0) invert(.86) opacity(.3)!important}
+  :root[data-theme="dark"] :is(.sil,img.sil){filter:brightness(0) invert(.9) opacity(.34)!important}
 
   /* things whose outline was all they had now sit on a soft tint */
   :is(.wb-activity,.wb-totals>b,.gl-dot,.tw-floor:not(.done) .tw-n,.tw-dot:not(.part,.on),.boss-checklist li:not(.done) .bc-mark,.need-tile:not(button),.tw-prize){background-color:var(--info-fill)!important}

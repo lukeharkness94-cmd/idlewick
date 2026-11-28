@@ -1,6 +1,9 @@
 /* Hearthside Journal: one material language and clear action hierarchy across the existing game. */
 :root{--ground:#18251f;--panel:#23352b;--panel2:#2c4034;--line:#425a4a;--line2:#61745f;--ink:#f1ebdf;--mute:#c0cbbb;--brass:#d7b16a;--brass-hi:#f4d69e;--brass-lo:#946638;--good:#8ac8a3;--bad:#f29286;--warn:#e8c27d;--hs-action-ink:#211b12;--hs-paper-shadow:rgba(0,0,0,.13);--backdrop-wash:rgba(24,37,31,.94)}
-:root.type-hearthside{--f-display:'Cinzel','Alegreya SC',Georgia,serif;--f-body:'Alegreya Sans',system-ui,sans-serif;--f-ui:'Alegreya Sans',system-ui,sans-serif;--f-mono:'Alegreya Sans',system-ui,sans-serif}
+:root.type-hearthside{--f-display:'Silkscreen','Pixelify Sans',monospace;--f-body:'Pixelify Sans','Alegreya Sans',system-ui,sans-serif;--f-ui:'Pixelify Sans','Alegreya Sans',system-ui,sans-serif;--f-mono:'Pixelify Sans','Alegreya Sans',monospace}
+/* phones: pixel lettering for labels only; sentences in a book face (owner, 28 Nov 2026) */
+@media (max-width:860px){:root.type-hearthside:not(.type-classic){--f-body:'Alegreya Sans',system-ui,sans-serif}}
+:root.type-classic{--f-display:'Cinzel','Alegreya SC',Georgia,serif;--f-body:'Alegreya Sans',system-ui,sans-serif;--f-ui:'Alegreya Sans',system-ui,sans-serif;--f-mono:'Alegreya Sans',system-ui,sans-serif}
 .type-sample-hearthside b{font-family:'Cinzel',serif}.type-sample-hearthside span{font-family:'Alegreya Sans',sans-serif}
 :root.type-hearthside body{font-size:18px;font-weight:400}
 :root.type-hearthside :is(button,input,textarea){font-weight:500;font-variant-numeric:lining-nums tabular-nums}
@@ -1167,3 +1170,44 @@ html.calm :is(.packchip.pack-gulp,.h-hero.pack-bounce){animation:none}
 :where(html.lw-cursor) :where(button,[data-do],a[href],[role=button],[role=tab],[role=switch],summary,label[for]){cursor:var(--cur-hand)}
 :where(html.lw-cursor) :where(button:disabled){cursor:var(--cur-quill)}
 :where(html.lw-cursor) :where(input:not([type=range],[type=checkbox],[type=radio],[type=button],[type=submit]),textarea,[contenteditable=true]){cursor:text}
+
+/* ===================== Pixel frames (owner, 28 Nov 2026) =====================
+   "I want the entire interface ... to take [this pixel art direction] ... a darker theme than now." The owner chose
+   bevelled frames: every panel is dark wood in a frame (a near-black rim, a lit top-left bevel, a shaded lower edge,
+   brass pins in its corners, a fine plank grain); every control is a raised bevel in its own colour (the rim is part
+   of its shading, not a separate outline); a panel inside a panel is a sunk well. Corners are square-ish (3-4 px).
+   The shape layer (css/shape.css) reads these tokens, so every control takes the bevel without listing them. */
+:root[data-theme="dark"]{
+  --ground:#0b0c10;--panel:#2b2019;--panel2:#33261e;--line:#4a3a2e;--line2:#6a5440;--ink:#efe3c4;--mute:#b8a888;
+  --brass:#d9a441;--brass-hi:#f6d47a;--brass-lo:#8a6224;--good:#7ac46a;--bad:#e8705e;--warn:#e8c060;--hs-action-ink:#1c1206;
+  --backdrop-wash:rgba(9,10,14,.9);
+  --px-rim:#0e0907;--px-hi:#5e4736;--px-hi2:#46352a;--px-lo:#1a120e;--px-well:#18110d;--px-well-hi:#33271e;
+  --paper-grain:repeating-linear-gradient(180deg,transparent 0 17px,rgba(0,0,0,.2) 17px 18px,transparent 18px 19px,rgba(255,220,170,.025) 19px 20px);
+  --paper-mottle:none;
+  --paper-edge:inset 0 2px 0 var(--px-hi),inset 2px 0 0 var(--px-hi2),inset 0 -2px 0 var(--px-lo),inset -2px 0 0 var(--px-lo);
+  --paper-lift:0 0 0 2px var(--px-rim),0 5px 0 2px rgba(0,0,0,.32);
+  --px-pin:radial-gradient(circle at 3px 3px,#ffe08a 0 .9px,#c8902e 1px 1.8px,#5a3c14 1.9px 2.6px,transparent 2.7px);
+  --r-act:3px;--r-panel:4px;--r-info:2px;
+  --act-fill:#47372b;--act-fill-on:#6a4c1e;
+  --act-lift:0 0 0 2px var(--px-rim),inset 0 2px 0 #6e5844,inset 0 -3px 0 #281d16,0 4px 0 2px rgba(0,0,0,.3);
+  --act-lift-hi:0 0 0 2px var(--px-rim),inset 0 2px 0 #8a6e52,inset 0 -3px 0 #281d16,0 5px 0 2px rgba(0,0,0,.3);
+  --act-glow:rgba(246,212,122,.0);
+  --nav-on:#b0822e;--nav-on-hi:#d6a84c;--nav-ink:#1c1206;
+  --info-fill:rgba(0,0,0,.28);--pip-off:#3a2c22}
+html[data-theme="dark"] body{background-color:var(--ground)}
+/* panels: framed wood with brass pins */
+:root[data-theme="dark"] .panel:not(.panel .panel,.home-scene,.farm-work),:root[data-theme="dark"] :is(.sidebar,#hud){
+  background-color:var(--panel);background-image:var(--px-pin),var(--px-pin),var(--px-pin),var(--px-pin),var(--paper-grain);
+  background-size:6px 6px,6px 6px,6px 6px,6px 6px,auto;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,repeat;
+  background-position:3px 3px,calc(100% - 3px) 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),0 0;background-blend-mode:normal;
+  box-shadow:var(--paper-edge),var(--paper-lift)}
+/* a panel inside a panel, and the quiet boxes inside one: sunk wells */
+:root[data-theme="dark"] .panel .panel:not(button,[data-do]){background-color:var(--px-well);background-image:none;box-shadow:inset 2px 2px 0 #0a0706,inset -2px -2px 0 var(--px-well-hi)}
+/* the main action: a green bevel (the gold one was the loudest thing on every page); danger is red */
+:root[data-theme="dark"] :is(.btn,button).primary:not(:disabled){background:#3f8a4f;color:#f2ecd0;text-shadow:0 1px 0 #10200e;
+  box-shadow:0 0 0 2px #0b1a0e,inset 0 2px 0 #6ab878,inset 0 -3px 0 #24552f,0 4px 0 2px rgba(0,0,0,.3)!important}
+:root[data-theme="dark"] :is(.btn,button).primary:not(:disabled):hover{background:#479a59}
+/* bars: a dark trough with brass end caps; the fill keeps a lit top edge */
+:root[data-theme="dark"] .bar{border-radius:1px;background:#0a0707;box-shadow:0 0 0 1px #000,inset 0 1px 0 rgba(255,255,255,.04);border-left:2px solid #c8902e;border-right:2px solid #c8902e}
+:root[data-theme="dark"] .bar>i{border-radius:0;background-image:linear-gradient(180deg,rgba(255,255,255,.28) 0 1px,transparent 1px 60%,rgba(0,0,0,.18))}
+/* locked pictures: a pale silhouette that still reads on dark wood */
