@@ -266,7 +266,8 @@ DQ.recipeGroup = r => {
   if(r.skill==='smithing'){ if(r.id.startsWith('smelt_')||it.ic==='bar')return {g:'Smelting'}; if(r.tab==='Tools')return {g:'Tools'}; return {g:METAL[m]||D.TIERS[it.tier]?.name||'Other',s:it.slot==='weapon'?'Weapons':'Armour'}; }
   if(r.skill==='crafting'){ if(r.tab==='Tools')return {g:'Tools'}; if(it.charm)return {g:'Charms'}; if(r.tab==='Jewellery')return {g:'Jewellery'}; if(r.tab==='Arrows')return {g:'Arrows'};
     if(it.slot&&HIDE[m]&&it.slot!=='weapon')return {g:'Armour',s:HIDE[m]}; if(r.tab==='Bows')return {g:'Wood',s:'Bows'}; if(r.tab==='Staves')return {g:'Wood',s:'Staves'}; if(r.tab==='Shields'||it.wood)return {g:'Wood',s:'Shields'}; return {g:'Basics'}; }
-  if(r.skill==='cooking'){ if(it.dish)return {g:'Fish suppers'}; if(r.tab==='Farmhouse')return {g:'Farmhouse'}; const b=r.lvl<=25?'Level 1–25':r.lvl<=50?'Level 26–50':r.lvl<=75?'Level 51–75':'Level 76–99'; return {g:'Fish',s:b}; }
+  /* the hunting ground's meat, its lures and Beastmastery's capture bait have their own categories (28 Nov 2026) */
+  if(r.skill==='cooking'){ if(it.dish)return {g:'Fish suppers'}; if(r.tab==='Farmhouse')return {g:'Farmhouse'}; if(it.lure)return {g:'Lures'}; if(it.bait)return {g:'Bait'}; if((D.ITEMS[Object.keys(r.in)[0]]||{}).hunt)return {g:'Game'}; const b=r.lvl<=25?'Level 1–25':r.lvl<=50?'Level 26–50':r.lvl<=75?'Level 51–75':'Level 76–99'; return {g:'Fish',s:b}; }
   return {g:r.tab||'All'};
 };
 UI.V.recipes = sk => {
@@ -274,7 +275,7 @@ UI.V.recipes = sk => {
      make (armour by hide, wood by bows / staves / shields). Each chip says how many are ready, or the level it opens at. */
   /* every list in level order, so new additions never trail at the end */
   const openRecipe=r=>DQ.recipeLvlOk(r)&&DQ.recipeDiscovered(r)?1:0; /* unlocked before locked, then by level (owner, 26 Nov) */
-  const list=D.RLIST[sk].filter(r=>!DQ.recipeShown||DQ.recipeShown(r)).sort((a,b)=>(openRecipe(b)-openRecipe(a))||a.lvl-b.lvl||a.name.localeCompare(b.name)),grp=r=>DQ.recipeGroup(r),order=['Fish','Fish suppers','Farmhouse','Smelting','Bronze','Iron','Steel','Mithril','Adamant','Rune','Astral','Basics','Armour','Wood','Arrows','Jewellery','Charms','Tools','Discovered recipes'],groups=[...new Set(list.map(r=>grp(r).g))].sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
+  const list=D.RLIST[sk].filter(r=>!DQ.recipeShown||DQ.recipeShown(r)).sort((a,b)=>(openRecipe(b)-openRecipe(a))||a.lvl-b.lvl||a.name.localeCompare(b.name)),grp=r=>DQ.recipeGroup(r),order=['Fish','Fish suppers','Game','Farmhouse','Lures','Bait','Smelting','Bronze','Iron','Steel','Mithril','Adamant','Rune','Astral','Basics','Armour','Wood','Arrows','Jewellery','Charms','Tools','Discovered recipes'],groups=[...new Set(list.map(r=>grp(r).g))].sort((a,b)=>(order.indexOf(a)+1||99)-(order.indexOf(b)+1||99));
   const g=UI.tab[sk]=groups.includes(UI.tab[sk])?UI.tab[sk]:(groups.find(x=>list.some(r=>grp(r).g===x&&DQ.recipeLvlOk(r)&&DQ.recipeDiscovered(r)&&DQ.canMake(r)))||groups[0]);
   const subs=[...new Set(list.filter(r=>grp(r).g===g).map(r=>grp(r).s).filter(Boolean))],sub=UI.tab[sk+'sub']=subs.includes(UI.tab[sk+'sub'])?UI.tab[sk+'sub']:subs[0],only=UI.tab[sk+'ready'];
   const inG=(r,x,y)=>grp(r).g===x&&(!y||grp(r).s===y),chip=(x,y,on,act,b)=>{const rs=list.filter(r=>inG(r,x,y)),ready=rs.filter(r=>DQ.recipeLvlOk(r)&&DQ.recipeDiscovered(r)&&DQ.canMake(r)).length,min=Math.min(...rs.map(r=>r.lvl)),locked=(DQ.lvl(sk)<min&&!rs.some(r=>DQ.recipeLvlOk(r)))||rs.every(r=>!DQ.recipeDiscovered(r)&&!(r.secret&&DQ.recipeKnown(r.secret)));

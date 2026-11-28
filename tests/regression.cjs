@@ -447,7 +447,7 @@ test('early levels are slower for non-combat skills and full speed from level 20
  assert.equal(q.earlyPace('attack'),1);assert.equal(q.earlyPace('hitpoints'),1);
 });
 test('every town keeps a quest within reach from its first quest to its boss, and every objective points at something real',()=>{
- const {q,load}=harness();load('creatures_expanded');try{load('routes');load('adventures');}catch(e){}const D=q.data;
+ const {q,load}=harness();load('creatures_expanded');/* the hunting ground's animals (28 Nov 2026) are quest targets too */load('creature_roster');load('hunt_tiers_data');try{load('routes');load('adventures');}catch(e){}const D=q.data;
  const outs=new Set(Object.values(D.RLIST).flat().flatMap(r=>[...Object.keys(r.out||{}),r.evKey].filter(Boolean)));
  const node={catch:'fish',chop:'wood',mine:'mine',thieve:'thieve'};
  for(const x of D.QUESTS)for(const o of x.obj){if(o.key==='*')continue;const ok=o.ev==='kill'||o.ev==='boss'||o.ev==='guide'?!!D.MON[o.key]:node[o.ev]?D.NODES[node[o.ev]].some(n=>n.id===o.key):['cook','smith','smelt','craft'].includes(o.ev)?outs.has(o.key):o.ev==='harvest'?D.CROPS.some(c=>c.id===o.key):o.ev==='visit'?!!D.TOWN[o.key]:['deliver','collect'].includes(o.ev)?!!D.ITEMS[o.key]:true;assert.ok(ok,`${x.id}: ${o.ev} ${o.key} does not exist`);

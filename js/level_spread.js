@@ -21,8 +21,9 @@ const moveUnl = (skill, from, to, name) => { const U = D.UNL && D.UNL[skill]; if
 const QUEST_EV = ['craft', 'smith', 'cook', 'smelt', 'carve', 'brew'], questKeys = new Set();
 for (const q of D.QUESTS || []) for (const o of q.obj || []) if (QUEST_EV.includes(o.ev) && o.key && o.key !== '*') questKeys.add(o.key);
 const asked = x => x.out ? (questKeys.has(x.id) || Object.keys(x.out).some(k => questKeys.has(k))) : false;
-/* the opening's own route wins a tie outright: Hettie teaches flax string at Crafting 1, the Hunting gate's wooden trap is Crafting 2 */
-const OPENING = new Set(['craft_flax_string', 'craft_trap']);
+/* the opening's own route wins a tie outright: Hettie teaches flax string at Crafting 1, Beastmastery's gate wooden trap is
+   Crafting 2, and the Hunting gate's lure, grain mash, is Cooking 1 (28 Nov 2026) */
+const OPENING = new Set(['craft_flax_string', 'craft_trap', 'cook_grain_mash']);
 const rank = x => OPENING.has(x.id) ? 0 : asked(x) ? 1 : 2;
 /* each item takes the lowest free level at or above its own: the opening's recipes first, then quest ones, then the
    rest in definition order (dagger before sword) */

@@ -40,7 +40,7 @@ DQ.bedPlan = () => {
   const H = S().house || {}, room = D.ROOMS.find(r => r.id === 'quarters'), cot = room && room.furn.find(f => f.id === 'cot'), tier = (H.furn && H.furn.cot) || 0;
   const slots = DQ.workerSlots(), used = S().workers.length;
   if (!H.owned) return { slots, used, title: 'Buy your cottage', text: 'Worker beds go in your house. Buy the cottage first.', action: 'house' };
-  if (!(H.rooms && H.rooms.quarters)) return { slots, used, title: `Build the Servants’ quarters · ${fmt(room.price)} coins`, text: 'A room in your house for the people who work for you. Then add bunk beds.', action: 'quarters', ready: S().coins >= room.price };
+  if (!(H.rooms && H.rooms.quarters)) return { slots, used, title: `Build the Servants’ quarters · ${fmt(room.price)} coins`, text: 'A room in your house for the people who work for you. Then add bunk beds.', action: 'quarters', ready: DQ.buildReason ? !DQ.buildReason(DQ.buildCost('room', 'quarters')) : S().coins >= room.price };
   if (tier < 3) { const cost = cot.costs[tier], adds = cot.fx.workers[tier] - (tier ? cot.fx.workers[tier - 1] : 0);
     return { slots, used, title: `${tier ? 'Upgrade' : 'Place'} the bunk beds · +${adds} bed${adds > 1 ? 's' : ''}`, text: Object.entries(cost).map(([k, n]) => k === 'coins' ? `${fmt(n)} coins` : `${n} ${D.ITEMS[k].name.toLowerCase()}`).join(' · '), action: 'quarters', ready: DQ.canAfford(cost) }; }
   return { slots, used, title: 'Every bed is built', text: 'Your quarters are full of bunks. Workers you hire now replace others.', action: null };

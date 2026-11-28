@@ -134,7 +134,8 @@ D.SK.cooking.unlock = 0; // A recipe still requires its ingredient to have been 
 set('mining', { chop: 10, 'tool:mining': 1 });
 set('farming', { hero: 5, chop: 15, 'use:seed_potato': 5 });
 set('research', { hero: 12, beasts: 8 });
-set('hunting', { chop: 20, 'own:wooden_trap': 3, combat: 8 });
+/* Hunting lays a lure instead of a trap (owner, 28 Nov 2026): three grain mash (Cooking 1, from bread) to learn it */
+set('hunting', { chop: 20, 'own:grain_mash': 3, combat: 8 });
 set('herbalism', { harvest: 20, 'skill:farming': 10 });
 set('exploration', { catch: 25, chop: 25, 'visit:mossbarrow': 1 });
 /* starter routes that no longer ask for the skill they unlock */

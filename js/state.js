@@ -136,6 +136,12 @@ function candidateState(o) {
     if (result[key] !== undefined && !Array.isArray(result[key])) throw new Error('Invalid save list');
   }
   migrateQuarryIds(result);
+  /* 28 Nov 2026: the hunting ground became 40 real animals and Beastmastery captures mythical beasts. A hunt or fight of an
+     animal that left the game, or a capture of an ordinary animal, stops with a note rather than making the save fail */
+  const goneTask = a => record(a) && ((['hunt', 'fight'].includes(a.kind) && !D.MON[a.id]) || (a.kind === 'capture' && D.MYTH && !D.MYTH[a.id]));
+  if (goneTask(result.act)) { result.log.unshift({ t: Date.now(), m: 'The animal you were hunting is no longer on the hunting ground, so that task has stopped. Pick another from Hunting.', k: 'warn' }); result.act = null; }
+  if (Array.isArray(result.queue)) result.queue = result.queue.filter(a => !goneTask(a));
+  if (goneTask(result.lastAct)) result.lastAct = null;
   const validAction = a => {
     if (!record(a)) return false;
     const known = a.kind === 'recipe' ? D.RECIPES[a.id] : a.kind === 'fight' ? D.MON[a.id] : a.kind === 'alch' ? D.ITEMS[a.id] : a.kind === 'sail' ? D.VOYAGE?.[a.id] : a.kind === 'train' ? (D.PET[a.id] || (String(a.id).startsWith('lure:') && D.TOWN[String(a.id).slice(5)])) : DQ.KIND_EXT?.[a.kind]?.valid?.(a.id) || D.NODE[a.kind + ':' + a.id];

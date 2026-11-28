@@ -543,8 +543,10 @@ const isFloor = id => /^tw_[a-z]+_\d$/.test(id);
 A.viewScope = m => !!m && !handDrawn(m.id) && (!m.mini || isFloor(m.id));
 const draw = (id, v) => { const own = OWN[id] && OWN[id][v]; if (own) return own(); return A.drawView(v, () => A.creatureSprite(id)); };
 A.creatureView = draw;
+/* the mythical beasts of Beastmastery (hunt_tiers_data.js D.MYTHS, 28 Nov 2026) are not creatures you fight, but they are
+   seen in menus (front) and on the capture stage (side) the same way */
 A.registerViews = () => {
-  for (const m of Object.values(D.MON || {})) { if (!A.viewScope(m)) continue; const id = m.id; if (!A.hasCreature(id) && !OWN[id]) continue;
+  for (const m of [...Object.values(D.MON || {}), ...(D.MYTHS || []).map(x => ({ id: x.id, myth: true }))]) { if (!m.myth && !A.viewScope(m)) continue; const id = m.id; if (!A.hasCreature(id) && !OWN[id]) continue;
     for (const v of ['front', 'side']) { if (!A.VIEWS[v][id]) A.VIEWS[v][id] = () => draw(id, v);
       if (isFloor(id) && !A.BIG_VIEWS[v][id]) A.BIG_VIEWS[v][id] = () => A.atScale(2, () => draw(id, v)); } }
 };

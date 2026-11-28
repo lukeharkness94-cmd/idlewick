@@ -23,6 +23,8 @@ function boot() {
   ['engine', 'systems', 'plan', 'meta', 'mastery'].forEach(load);
   q.ui = { V: {}, DO: {}, B: {}, homeSections: [], render() {}, tabState: () => null }; q.tips = { item: () => '' }; q.goals = () => [];
   ['research', 'journey', 'local_standing', ...(process.env.NO_PERKS ? [] : ['skill_perks'])].forEach(load);
+  /* builds cost materials as well as coins since 28 Nov 2026 (build_costs.js): the table below lists their coin part */
+  load('build_costs');
   /* the game loads this last, after every ladder is defined: each gathering spot and recipe on its own level */
   if (!process.env.NO_SPREAD) load('level_spread');
   q.S = q.newState(); q.fxDirty(); return q;
@@ -53,8 +55,8 @@ console.log(`Idlewick economy simulation · ${hours}h active play · reward cuts
 console.log('hour  hero  town         coins     coins/hr');
 for (const r of rows) console.log(String(r.h).padEnd(6) + String(r.hero).padEnd(6) + r.town.padEnd(13) + String(r.coins).padEnd(10) + r.perHour);
 const goals = [
-  ['Tier 2 tool', price('tool_axe_2')], ['Tier 3 tool', price('tool_axe_3')], ['Tier 4 tool', price('tool_axe_4')], ['Cottage', D.HOUSE.price],
-  ['Kitchen', (D.ROOMS.find(r => r.id === 'kitchen') || {}).price], ['Workshop', (D.ROOMS.find(r => r.id === 'workshop') || {}).price],
+  ['Tier 2 tool', price('tool_axe_2')], ['Tier 3 tool', price('tool_axe_3')], ['Tier 4 tool', price('tool_axe_4')], ['Cottage (+ 40 logs, 5 bronze bars)', D.HOUSE.price],
+  ['Kitchen (+ 20 oak logs, 10 bronze bars)', (D.ROOMS.find(r => r.id === 'kitchen') || {}).price], ['Workshop (+ 20 oak planks, 15 iron bars)', (D.ROOMS.find(r => r.id === 'workshop') || {}).price],
   ...Object.entries(D.PROJECTS).filter(([, p]) => p.cost.coins >= 1000).map(([id, p]) => ['Project: ' + p.name, p.cost.coins]),
   ['Scholarship tier III project (typical)', Math.round((D.TECHS.filter(t => t.tier === 3 && t.cost.coins).map(t => t.cost.coins).sort((a, b) => a - b)[2]) || 0)]
 ].filter(g => g[1]);

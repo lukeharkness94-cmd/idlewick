@@ -14,6 +14,14 @@ for (const [id, s] of Object.entries(D.BEAST_SPECIES)) {
   const p = { id, name: s.name, kind: s.kind, col: s.col, collectible: true, bonus: {}, text: 'A bond shaped by your adventures.', src: { type: 'beasttrap', hero: s.hero, town: s.town } };
   D.PETS.push(p); D.PET[id] = p;
 }
+/* the mythical beasts (hunt_tiers_data.js D.MYTHS, owner 28 Nov 2026) are the companions Beastmastery Capture keeps:
+   wild_<id>, a bonus that grows with the beast's tier. Four were the old regional signature beasts, whose egg fieldwork's
+   wooden traps can still leave (skills_new.js DQ.signatureOf, beast_capture.js). */
+const MYTH_BONUS = [['dmg', v => `+${v}% damage`], ['dr', v => `${v}% less damage taken`], ['coin', v => `+${v}% coins from every source`], ['xpAll', v => `+${v}% XP to every skill`], ['speed', v => `Every task is ${v}% faster`]];
+for (const m of D.MYTHS || []) { const id = 'wild_' + m.id; if (D.PET[id]) continue;
+  const [k, say] = MYTH_BONUS[m.index % MYTH_BONUS.length], v = [2, 3, 4, 5, 6][m.tier];
+  const p = { id, name: m.name, kind: 'Mythical beast', spr: 'quad', mon: m.id, myth: m.id, town: m.town, col: m.col, collectible: true, signature: ['thimblefox', 'tideglass', 'candletoad', 'prismkite'].includes(m.id), src: { type: 'capture', myth: m.id }, bonus: { [k]: v / 100 }, text: say(v) };
+  D.PETS.push(p); D.PET[id] = p; }
 D.BEAST_TRAPS = {
   basic: { name: 'Basic trap', cost: 40, hours: 1, common: .4, rare: .1, consolation: 5 },
   iron: { name: 'Iron trap', cost: 120, hours: 2, common: .6, rare: .3, consolation: 10 },
