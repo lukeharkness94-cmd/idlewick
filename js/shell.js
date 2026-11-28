@@ -11,7 +11,7 @@ const S = () => DQ.S;
    Old menu ids (world, village, guide, shop) still work: UI.DO.hub maps them to their new place. */
 const HUBS = [
   { id: 'home', name: 'Home', ic: 'home', pages: ['overview', 'activity'] },
-  { id: 'skills', name: 'Skills', ic: 'star', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'brewery', 'enchanting', 'research', 'carpentry', 'sailing', 'beastmastery', 'exploration'] },
+  { id: 'skills', name: 'Skills', ic: 'skills', pages: ['fishing', 'woodcutting', 'mining', 'thieving', 'farming', 'hunting', 'cooking', 'smithing', 'crafting', 'brewery', 'enchanting', 'research', 'carpentry', 'sailing', 'beastmastery', 'exploration'] },
   { id: 'combat', name: 'Combat', ic: 'attack', pages: ['combat', 'tower', 'melee', 'ranged', 'magic'] },
   { id: 'quests', name: 'Quests', ic: 'quest', pages: ['quests', 'people'] },
   { id: 'town', name: 'Town', ic: 'house', pages: ['projects', 'shop', 'house', 'hirelings', 'map'] },

@@ -105,6 +105,13 @@ diagonal, warhammers stand upright, shortbows stand like a D. Each metal tier ad
 detail, so tiers differ in shape as well as colour. The 29 named weapons (`js/rare_weapons.js`) each keep their own
 hand-drawn identity.
 
+## Icons, emblems and trophies
+
+`js/pixel_icons.js` draws the 16 × 16 interface icons (menus, HUD, coins, stats, routes), the 32 × 32 skill emblems
+(the rail and skill rows) and the boss trophy plaques. Each keeps one empty pixel round its edge so the outline shows,
+strokes are two pixels wide (lit on the top-left side), and no two skills or top-menu places share a picture
+(`node tests/art-pixel.cjs`). Item-type icons (fish, ore, helm...) reuse the item sprite.
+
 ## Animation
 
 - Sprite frames swap on a stepped timeline: pixel art never tweens between frames.
