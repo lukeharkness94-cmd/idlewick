@@ -14,7 +14,11 @@ Q.gearIco = (id, cls = '') => { const u = A.itemUrl(id); return u ? img(u, 16, 1
 Q.artImage = (kind, id, size = 96, cls = '', alt = '') => {
   const item = D.ITEMS[id];
   if (kind === 'item') return item ? img(A.itemUrl(id), 16, 16, size, cls, alt || item.name) : '';
-  if (kind === 'creature' || kind === 'thieve') { const k = String(id).replace(/^wild_/, ''), u = A.hasCreature(k) ? A.creatureUrl(k) : null; return u ? img(u, 32, 32, size, cls, alt || k) : ''; }
+  if (kind === 'creature' || kind === 'thieve') { const k = String(id).replace(/^wild_/, '');
+    /* bosses, mini-bosses and tower bosses have a 64 x 64 drawing for boxes that show it at 2x or more (the combat
+       stage, big field-guide pictures); everywhere else the 32 x 32 one (pixel_bosses.js) */
+    const big = size >= 128 && A.creatureBigUrl ? A.creatureBigUrl(k) : null; if (big) return img(big, 64, 64, size, cls + ' px-big', alt || k);
+    const u = A.hasCreature(k) ? A.creatureUrl(k) : null; return u ? img(u, 32, 32, size, cls, alt || k) : ''; }
   if (kind === 'island') { const u = A.islandUrl && A.islandUrl(id); return u ? img(u, 32, 32, size, cls, alt || id) : ''; }
   if (kind === 'fish') { const s = A.url('fishnode:' + id, () => A.fishLarge(id)); return s ? img(s, 32, 16, size, cls, alt || id) : ''; }
   if (kind === 'wood' || kind === 'tree') return img(A.treeUrl(id), 32, 48, size * 1.1, cls, alt || id);
@@ -89,7 +93,10 @@ Q.battleHero = () => `<span class="battle-rig hero-rig px-hero encounter-hero" r
    explicit artFacing metadata supports any future left-facing drawing. */
 // Current code-drawn creatures, including the revised chicken, face right.
 Q.creatureFacing=id=>D.MON[id]?.artFacing||'right';
-Q.battleFoe = (m,known=true) => `<span class="battle-rig foe-rig px-foe" role="img" aria-label="${esc(known?m.name:'Unknown creature')} ready for battle" data-creature="${m.id}"><span class="foe-torso">${Q.creatureFacing(m.id)==='left' ? Q.artImage('creature', m.id, 192, known?'':'sil', known?m.name:'Unknown creature') : `<span class="foe-face">${Q.artImage('creature', m.id, 192, known?'':'sil', known?m.name:'Unknown creature')}</span>`}</span></span>`;
+/* the stage's foe box is 192 px, 128 px on laptops, 96 px on short windows (css/style.css): the 64 x 64 boss drawing
+   fits the first two at 3x and 2x; on short windows the 32 x 32 one is shown at 3x */
+const foeBox = () => typeof document !== 'undefined' && document.documentElement.classList.contains('short') ? 96 : 192;
+Q.battleFoe = (m,known=true) => `<span class="battle-rig foe-rig px-foe" role="img" aria-label="${esc(known?m.name:'Unknown creature')} ready for battle" data-creature="${m.id}"><span class="foe-torso">${Q.creatureFacing(m.id)==='left' ? Q.artImage('creature', m.id, foeBox(), known?'':'sil', known?m.name:'Unknown creature') : `<span class="foe-face">${Q.artImage('creature', m.id, foeBox(), known?'':'sil', known?m.name:'Unknown creature')}</span>`}</span></span>`;
 const pose0 = Q.poseBattle;
 Q.poseBattle = (avatar, style, phase, animate) => { const root = avatar && avatar.querySelector('.px-hero'); if (!root) return pose0 ? pose0(avatar, style, phase, animate) : false; if (Q.S.settings.reduceFx) return true;
   const attack = phase === 'attack', dir = attack ? 1 : -1; animate(root, [{ transform: 'translateX(0)' }, { transform: `translateX(${-dir * 4}px)`, offset: .25 }, { transform: `translateX(${dir * 14}px)`, offset: .5 }, { transform: 'translateX(0)' }], { duration: attack ? (Q.battleTiming ? Q.battleTiming.duration : 420) : 340, easing: 'ease-in-out' }); return true; };

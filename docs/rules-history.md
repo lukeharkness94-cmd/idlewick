@@ -328,3 +328,8 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   the rail, card and quest names, numbers, tags, badges); the rail widens from 206px to 212px so names show whole.
 - 28 Nov 2026 (owner): "I'm not keen on pixelfy for the rest of the font - what other options do we have?", then chose
   "B or E" from ten samples. Replaces Pixelify Sans for sentences with Tiny5 (default) and VT323 (the Terminal lettering).
+- 28 Nov 2026 (owner): chose the chunky, outlined pixel direction from reference images (style only, nothing copied)
+  for every creature, the hero and every item. Replaces the earlier softer style (violet-leaning shadows, flat edge light
+  only, a 24 x 32 hero with a small head): materials are five-step ramps with cool shadows (#1a1838) and warm lights
+  (#fff2c8), round forms are sphere-lit, outlines take each material's darkest colour, the hero and humanoid creatures
+  are chibis with big heads and two-pixel eyes, and the bosses have 64 x 64 drawings (docs/pixel-art-style.md).

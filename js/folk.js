@@ -66,7 +66,13 @@
   D.FOLK = F; DQ.folkOf = giver => BY[giver] || null;
 
   /* ---------- portrait painter (32 × 32, top-left light, outlined) ---------- */
-  const shade = (hex, k) => { const n = parseInt(hex.slice(1), 16), c = [n >> 16, n >> 8 & 255, n & 255].map(v => Math.max(0, Math.min(255, Math.round(k < 0 ? v * (1 + k) : v + (255 - v) * k)))); return '#' + c.map(v => v.toString(16).padStart(2, '0')).join(''); };
+  /* hue-shifted like every sprite (docs/pixel-art-style.md, 28 Nov 2026): shadows lean cool, lights lean warm */
+  const shade = (hex, k) => { const n = parseInt(hex.slice(1), 16), to = k < 0 ? [26, 24, 56] : [255, 242, 200], t = Math.min(1, Math.abs(k) * (k < 0 ? 1.1 : 1)), c = [n >> 16, n >> 8 & 255, n & 255].map((v, i) => Math.max(0, Math.min(255, Math.round(v + (to[i] - v) * t)))); return '#' + c.map(v => v.toString(16).padStart(2, '0')).join(''); };
+  /* the selective outline: every empty pixel touching the portrait takes a deep, cool shade of what it touches */
+  const outline = g => { const d = g.getImageData(0, 0, 32, 32), p = d.data, src = new Uint8ClampedArray(p), at = (x, y) => x >= 0 && y >= 0 && x < 32 && y < 32 && src[(y * 32 + x) * 4 + 3] > 0 ? (y * 32 + x) * 4 : -1;
+    for (let y = 0; y < 32; y++) for (let x = 0; x < 32; x++) { const i = (y * 32 + x) * 4; if (src[i + 3]) continue; const n = [at(x, y + 1), at(x + 1, y), at(x, y - 1), at(x - 1, y)].find(v => v >= 0); if (n == null) continue;
+      p[i] = Math.round(src[n] * .26 + 16 * .74); p[i + 1] = Math.round(src[n + 1] * .26 + 12 * .74); p[i + 2] = Math.round(src[n + 2] * .26 + 34 * .74); p[i + 3] = 255; }
+    g.putImageData(d, 0, 0); };
   const paint = f => {
     const L = f.look, c = document.createElement('canvas'); c.width = c.height = 32; const g = c.getContext('2d');
     const P = (x, y, col, w = 1, h = 1) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
@@ -130,7 +136,7 @@
       if (k === 'plume') { for (let y = 4; y < 12; y++) for (let x = 7; x < 25; x++) if (inFace(x, y + 3)) P(x, y, y < 6 ? h3 : x > 19 ? h2 : hc2); P(7, 11, h2, 18, 1); for (let i = 0; i < 6; i++) P(15 + i, 4 - Math.floor(i / 2), '#d83a2a', 2, 2); }
     }
     if (L.earring) P(23, 18, '#e8c040');
-    const A = DQ.pixelArt; return (A && A.hires ? A.hires(c) : c).toDataURL();
+    outline(g); const A = DQ.pixelArt; return (A && A.hires ? A.hires(c) : c).toDataURL();
   };
   const cache = {};
   DQ.folkUrl = f => cache[f.id] || (cache[f.id] = paint(f));

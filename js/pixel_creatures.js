@@ -6,48 +6,61 @@ const DQ = window.DQ, D = DQ.data, A = DQ.pixelArt; if (!A) return;
 const { Spr, ramp, mix, R } = A;
 const rp = c => ramp(c || '#999999');
 const EYE = '#2a1c1f';
-const eye = (s, x, y, c = EYE, shine = true) => { s.fix(x, y, c); if (shine && c === EYE) s.fix(x, y - 1, '#ffffff'); };
+/* eyes are two pixels tall: a dark eye under a catch-light, or a glowing eye with a bright core (28 Nov 2026) */
+const eye = (s, x, y, c = EYE, shine = true) => { s.fix(x, y, c); if (c === EYE) s.fix(x, y - 1, shine ? '#ffffff' : EYE); else s.fix(x, y - 1, mix(c, '#ffffff', .6)); };
 
-/* ---------- humanoids ---------- */
+/* ---------- humanoids: chibi proportions (owner, 28 Nov 2026), a big head with readable eyes, a short body ----------
+   Head centre (16, 9.5), eyes on columns 13 and 19 (rows 9-10), torso rows 15-24, hands on rows 22-23, boots on rows
+   28-29. Hats are fitted to the head's own box, so a pirate, a scarecrow and a skeleton stay different figures. */
+const dome = (s, cx, cy, rx, ry, maxRow, r) => { for (let y = Math.floor(cy - ry); y <= maxRow; y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) { const nx = (x + .5 - cx) / rx, ny = (y + .5 - cy) / ry; if (nx * nx + ny * ny <= 1) s.tone(x, y, r, A.sphere(nx, ny)); } };
 function humanoid(o) {
-  const s = Spr(32, 32), k = o.big ? 1 : 0, skin = rp(o.skin || '#e0b088'), cloth = rp(o.cloth || '#7a6a5a'), cloth2 = rp(o.cloth2 || mix(o.cloth || '#7a6a5a', '#3a2448', .35));
-  const top = 6 - k * 2, legY = 24;
-  if (o.skeleton) { const b = rp('#dcdcd0'); s.ell(16, top + 5, 4.4, 4.6, b); s.rect(15, top + 10, 2, 9, b); for (let y = top + 11; y < top + 18; y += 2) s.line(12, y, 20, y, b); s.line(13, legY - 4, 11, 30, b); s.line(19, legY - 4, 21, 30, b); s.line(12, top + 11, 8, top + 19, b); s.line(20, top + 11, 24, top + 19, b); s.rect(13, top + 4, 2, 2, rp('#2a1c1f')); s.rect(17, top + 4, 2, 2, rp('#2a1c1f')); s.line(14, top + 8, 18, top + 8, null, b.lo); if (o.weapon) weapon(s, o.weapon, 24, top + 19); return s; }
+  const s = Spr(32, 32), k = o.big ? 1 : 0, skin = rp(o.skin || '#e0b088'), cloth = rp(o.cloth || '#7a6a5a'), cloth2 = rp(o.cloth2 || mix(o.cloth || '#7a6a5a', '#1a1838', .35));
+  const hc = 9.5, hrx = 6.4 + k * .6, hry = 5.8, T = 4, B = 14, L = 16 - Math.round(hrx), Rr = 16 + Math.round(hrx), ey = 10, ec = o.glow || EYE;
+  if (o.skeleton) { const b = rp('#e4ddca'), dk = rp('#2a1c2a');
+    s.line(12, 15, 12, 21, b); s.line(20, 15, 20, 21, b); for (let y = 16; y <= 21; y += 2) s.line(12, y, 20, y, b); s.rect(15, 14, 2, 9, b);   /* ribs and spine */
+    s.rect(12, 22, 8, 2, b); s.line(13, 24, 12, 29, b); s.line(19, 24, 20, 29, b); s.rect(10, 29, 4, 1, b); s.rect(19, 29, 4, 1, b);           /* pelvis, legs */
+    s.line(11, 16, 8, 23, b); s.line(21, 16, 23, 23, b);                                                                                     /* arms */
+    s.ell(16, 8.5, 5.6, 5.2, b); s.rect(13, 12, 6, 2, b); for (const x of [14, 16, 18]) s.fix(x, 13, dk.base);                             /* skull and jaw */
+    s.rect(12, 7, 3, 3, dk); s.rect(17, 7, 3, 3, dk); s.fix(13, 8, o.glow || '#7fd6ff'); s.fix(18, 8, o.glow || '#7fd6ff'); s.fix(15, 11, dk.base); s.fix(16, 11, dk.base);
+    if (o.weapon) weapon(s, o.weapon, 22, 24, o.weaponCol); return s; }
   /* legs, body, arms */
-  s.rect(12, legY, 3, 6, cloth2); s.rect(17, legY, 3, 6, cloth2); s.rect(11, 29, 4, 2, rp(o.boots || '#4a3226')); s.rect(17, 29, 4, 2, rp(o.boots || '#4a3226'));
-  if (o.straw) { const st = R.straw; s.line(13, legY, 12, 30, st); s.line(19, legY, 20, 30, st); }
-  s.poly([[11 - k, top + 11], [21 + k, top + 11], [22 + k, legY + 1], [10 - k, legY + 1]], cloth);
-  if (o.robe) s.poly([[10, legY - 2], [22, legY - 2], [24, 30], [8, 30]], cloth);
-  if (o.armour) { const m = ramp(o.armour, { gl: .72 }); s.poly([[10 - k, top + 11], [22 + k, top + 11], [22 + k, legY], [10 - k, legY]], m); s.rect(8 - k, top + 11, 3, 3, m); s.rect(21 + k, top + 11, 3, 3, m); s.line(16, top + 12, 16, legY - 1, null, m.lo); s.fix(12, top + 13, m.gl); }
-  s.rect(8 - k, top + 12, 3, 8, o.armour ? ramp(o.armour) : cloth); s.rect(21 + k, top + 12, 3, 8, o.armour ? ramp(o.armour) : cloth);
-  const hand = o.zombie ? [[8, top + 13], [21, top + 13]] : [[8 - k, top + 20], [21 + k, top + 20]];
-  if (o.zombie) { s.rect(4, top + 13, 7, 2, skin); s.rect(21, top + 13, 7, 2, skin); } else hand.forEach(([x, y]) => s.rect(x, y, 3, 2, skin));
-  s.rect(10 - k, legY - 2, 12 + 2 * k, 1, rp(o.belt || '#3e2a20'));
+  s.rect(12, 24, 3, 4, cloth2); s.rect(17, 24, 3, 4, cloth2); s.rect(11, 28, 4, 2, rp(o.boots || '#4a3226')); s.rect(17, 28, 4, 2, rp(o.boots || '#4a3226'));
+  if (o.straw) { const st = R.straw; s.line(13, 24, 12, 30, st); s.line(19, 24, 20, 30, st); }
+  s.poly([[11 - k, 15], [21 + k, 15], [22 + k, 25], [10 - k, 25]], cloth);
+  if (o.robe) s.poly([[10, 21], [22, 21], [24, 30], [8, 30]], cloth);
+  if (o.armour) { const m = ramp(o.armour, { gl: .72 }); s.poly([[10 - k, 15], [22 + k, 15], [22 + k, 24], [10 - k, 24]], m); s.ell(9.5 - k, 16, 2.6, 2, m); s.ell(22.5 + k, 16, 2.6, 2, m); s.line(16, 16, 16, 23, null, m.lo); s.tone(12, 17, m, 4); }
+  const sleeve = o.armour ? ramp(o.armour) : cloth;
+  if (o.zombie) { s.rect(4, 17, 7, 3, sleeve); s.rect(22, 17, 7, 3, sleeve); s.rect(2, 17, 3, 3, skin); s.rect(28, 17, 3, 3, skin); }
+  else { s.rect(8 - k, 16, 3, 6, sleeve); s.rect(21 + k, 16, 3, 6, sleeve); s.rect(8 - k, 22, 3, 2, skin); s.rect(21 + k, 22, 3, 2, skin); }
+  s.rect(10 - k, 22, 12 + 2 * k, 1, rp(o.belt || '#3e2a20')); s.fix(16, 22, '#e6b84a');
   /* head */
-  s.ell(16, top + 5, 4.6 + k * .6, 4.8 + k * .4, skin);
-  if (o.ears === 'goblin') { s.poly([[11, top + 4], [5, top + 1], [11, top + 7]], skin); s.poly([[21, top + 4], [27, top + 1], [21, top + 7]], skin); }
-  if (o.horns) { const h = rp('#efe2c4'); s.poly([[12, top + 1], [10, top - 3], [13, top]], h); s.poly([[20, top + 1], [22, top - 3], [19, top]], h); }
-  const ey = top + 5, ec = o.glow || EYE; eye(s, 14, ey, ec, !o.glow); eye(s, 18, ey, ec, !o.glow);
-  if (o.mouth === 'grin') { s.line(14, ey + 3, 18, ey + 3, null, skin.out); s.fix(15, ey + 4, '#f4ecd8'); s.fix(17, ey + 4, '#f4ecd8'); } else s.line(15, ey + 3, 17, ey + 3, null, skin.out);
-  if (o.beard) { const b = rp(o.beard); for (let y = ey + 2; y <= ey + 6; y++) s.line(13 + (y - ey - 2) * .4, y, 19 - (y - ey - 2) * .4, y, b); s.line(15, ey + 3, 17, ey + 3, null, '#5a2a2a'); }
-  if (o.mask) s.rect(12, ey + 2, 9, 3, rp(o.mask));
-  if (o.hair) { const h = rp(o.hair); s.ell(16, top + 2, 4.8, 2.2, h); s.rect(11, top + 2, 2, 4, h); s.rect(20, top + 2, 2, 3, h); }
+  if (o.ears === 'goblin') { s.poly([[L + 1, hc - 1.5], [L - 7, hc - 5], [L + 1, hc + 2]], skin); s.poly([[Rr, hc - 1.5], [Rr + 8, hc - 5], [Rr, hc + 2]], skin); }
+  s.ell(16, hc, hrx, hry, skin);
+  if (o.horns) { const h = rp('#efe2c4'); s.poly([[12, T + 2], [9, T - 4], [14, T + 1]], h); s.poly([[20, T + 2], [23, T - 4], [18, T + 1]], h); }
+  const face = () => { eye(s, 13, ey, ec, !o.glow); eye(s, 19, ey, ec, !o.glow);
+    if (o.mouth === 'grin') { s.line(13, 13, 19, 13, null, skin.out); s.fix(14, 14, '#f4ecd8'); s.fix(18, 14, '#f4ecd8'); } else { s.line(15, 13, 17, 13, null, skin.out); }
+    if (!o.glow && !o.zombie) { s.fix(11, 12, mix(skin.base, '#e0606a', .35)); s.fix(21, 12, mix(skin.base, '#e0606a', .35)); } };
+  face();
+  if (o.beard) { const b = rp(o.beard); for (let y = 12; y <= 17; y++) { const w = 6 - Math.max(0, y - 14) * 1.4; s.line(16 - w, y, 16 + w, y, b); } s.line(15, 13, 17, 13, null, '#5a2a2a'); }
+  if (o.mask) s.rect(L + 1, 11, Rr - L - 1, 3, rp(o.mask));
+  if (o.hair) { const h = rp(o.hair); s.ell(16, T + 1.5, hrx + .4, 2.6, h); s.rect(L - 1, T + 1, 2, 6, h); s.rect(Rr, T + 1, 2, 5, h); }
   /* hats and helmets */
-  const H = o.hat, hc = rp(o.hatCol || '#4a3a5a');
-  if (H === 'hood') { s.poly([[16, top - 3], [23, top + 3], [22, top + 10], [10, top + 10], [9, top + 3]], hc); for (let y = top + 3; y <= top + 9; y++) for (let x = 13; x <= 19; x++) if (((x - 16) ** 2) / 11 + ((y - top - 6) ** 2) / 12 < 1) s.dot(x, y, skin); eye(s, 14, ey, ec, !o.glow); eye(s, 18, ey, ec, !o.glow); if (o.mask) s.rect(13, ey + 2, 7, 2, rp(o.mask)); }
-  if (H === 'tricorn') { s.poly([[8, top + 1], [24, top + 1], [20, top - 4], [12, top - 4]], hc); s.line(9, top + 1, 23, top + 1, null, R.gold.base); }
-  if (H === 'witch') { s.poly([[16, top - 9], [22, top + 1], [10, top + 1]], hc); s.rect(7, top + 1, 18, 2, hc); s.fix(17, top - 4, '#e6c86a'); }
-  if (H === 'bandana') { s.rect(11, top, 10, 3, hc); s.poly([[21, top + 1], [25, top + 4], [22, top + 3]], hc); [[13, top + 1], [17, top + 1]].forEach(([x, y]) => s.fix(x, y, '#f4ecd8')); }
-  if (H === 'cap') { s.ell(16, top + 1, 6, 2.6, hc); s.rect(10, top + 2, 12, 1, hc); [[13, top], [18, top - 1]].forEach(([x, y]) => s.fix(x, y, '#f4ecd8')); }
-  if (H === 'straw') { const st = R.straw; s.rect(7, top + 1, 18, 2, st); s.ell(16, top - 1, 5, 3, st); s.line(10, top + 3, 9, top + 6, null, st.lo); s.line(22, top + 3, 23, top + 6, null, st.lo); }
-  if (H === 'helm' || H === 'horned') { const m = ramp(o.hatCol || '#9aa3ad', { gl: .72 }); s.ell(16, top + 2, 5.4, 4, m); s.rect(10, top + 3, 12, 2, m); s.line(16, top - 2, 16, top + 3, null, m.lo); if (H === 'horned') { const h = rp('#efe2c4'); s.poly([[11, top + 1], [7, top - 4], [10, top - 2]], h); s.poly([[21, top + 1], [25, top - 4], [22, top - 2]], h); } }
-  if (H === 'crown') { const g = ramp(o.hatCol || '#e6b84a', { gl: .8 }); s.poly([[10, top + 1], [10, top - 3], [13, top - 1], [16, top - 5], [19, top - 1], [22, top - 3], [22, top + 1]], g); s.fix(16, top - 1, '#ff7ad0'); }
-  if (H === 'antler') { const a = rp('#a88a5a'); s.line(12, top + 1, 8, top - 5, a); s.line(10, top - 2, 7, top - 2, a); s.line(20, top + 1, 24, top - 5, a); s.line(22, top - 2, 25, top - 2, a); }
-  if (H === 'halo') { const h = ramp('#fff0a0', { gl: .9 }); for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8; s.fix(16 + Math.cos(a) * 6, top - 3 + Math.sin(a) * 1.6, h.base); } }
-  if (o.straw) [[10, top + 12], [22, top + 12], [16, legY + 1]].forEach(([x, y]) => { s.fix(x, y, R.straw.hi); s.fix(x + 1, y + 1, R.straw.base); });
-  if (o.barnacles) [[12, top + 14], [19, top + 17], [14, legY - 4]].forEach(([x, y]) => { s.fix(x, y, '#e8e4d8'); s.fix(x + 1, y, '#b8b4a8'); });
-  if (o.strings) for (const x of [9, 16, 23]) s.line(x, 0, x, top + 4, null, '#d8d4c8');
-  if (o.weapon) weapon(s, o.weapon, 23 + k, top + 20, o.weaponCol);
+  const H = o.hat, hc2 = rp(o.hatCol || '#4a3a5a');
+  if (H === 'hood') { s.poly([[16, T - 5], [Rr + 3, T + 2], [Rr + 2, B + 2], [L - 2, B + 2], [L - 3, T + 2]], hc2); s.ell(16, hc + 1.5, 4.8, 4.4, skin); face(); if (o.mask) s.rect(L + 2, 12, Rr - L - 3, 2, rp(o.mask)); }
+  if (H === 'tricorn') { s.poly([[L - 4, T + 2], [Rr + 4, T + 2], [Rr, T - 4], [L, T - 4]], hc2); s.line(L - 3, T + 2, Rr + 3, T + 2, null, R.gold.base); s.fix(16, T - 1, R.gold.hi); }
+  if (H === 'witch') { s.poly([[16, T - 10], [Rr - 1, T + 1], [L + 1, T + 1]], hc2); s.rect(L - 3, T + 1, Rr - L + 7, 2, hc2); s.fix(17, T - 4, '#e6c86a'); s.fix(17, T - 3, '#e6c86a'); }
+  if (H === 'bandana') { s.rect(L, T - 1, Rr - L + 1, 4, hc2); s.poly([[Rr, T], [Rr + 5, T + 4], [Rr + 1, T + 3]], hc2); [[L + 3, T], [16, T + 1], [Rr - 3, T]].forEach(([x, y]) => s.fix(x, y, '#f4ecd8')); }
+  if (H === 'cap') { s.ell(16, T + .5, hrx + .4, 3.2, hc2); s.rect(L - 1, T + 2, Rr - L + 3, 1, hc2); [[13, T - 1], [19, T - 2]].forEach(([x, y]) => s.fix(x, y, '#f4ecd8')); }
+  if (H === 'straw') { const st = R.straw; s.rect(L - 4, T + 1, Rr - L + 9, 2, st); s.ell(16, T - 1, 5.4, 3, st); s.line(L - 1, T + 3, L - 2, T + 6, null, st.lo); s.line(Rr + 1, T + 3, Rr + 2, T + 6, null, st.lo); s.rect(L + 1, T, Rr - L - 1, 1, rp('#a8483a')); }
+  if (H === 'helm' || H === 'horned') { const m = ramp(o.hatCol || '#9aa3ad', { gl: .72 }); dome(s, 16, T + 5, hrx + 1.2, 7.4, T + 4, m); s.rect(L - 1, T + 4, Rr - L + 3, 1, m); s.rect(L - 1, T + 5, 2, 5, m); s.rect(Rr, T + 5, 2, 5, m); s.line(16, T - 2, 16, T + 3, null, m.lo);
+    if (H === 'horned') { const h = rp('#efe2c4'); s.poly([[L + 1, T + 1], [L - 4, T - 5], [L - 1, T - 3]], h); s.poly([[Rr - 1, T + 1], [Rr + 4, T - 5], [Rr + 1, T - 3]], h); } }
+  if (H === 'crown') { const g = ramp(o.hatCol || '#e6b84a', { gl: .8 }); s.poly([[L + 1, T + 2], [L + 1, T - 3], [L + 3, T - 1], [16, T - 5], [Rr - 3, T - 1], [Rr - 1, T - 3], [Rr - 1, T + 2]], g); s.fix(16, T - 1, '#ff7ad0'); s.fix(L + 2, T, '#7ad0ff'); }
+  if (H === 'antler') { const a = rp('#a88a5a'); s.line(12, T + 1, 7, T - 4, a); s.line(9, T - 2, 6, T - 2, a); s.line(20, T + 1, 25, T - 4, a); s.line(23, T - 2, 26, T - 2, a); }
+  if (H === 'halo') { const h = ramp('#fff0a0', { gl: .9 }); for (let i = 0; i < 18; i++) { const a = i * Math.PI / 9; s.fix(16 + Math.cos(a) * 7, T - 2 + Math.sin(a) * 1.6, h.base); } }
+  if (o.straw) [[10, 17], [22, 17], [16, 25]].forEach(([x, y]) => { s.fix(x, y, R.straw.hi); s.fix(x + 1, y + 1, R.straw.base); });
+  if (o.barnacles) [[12, 18], [19, 20], [14, 23]].forEach(([x, y]) => { s.fix(x, y, '#e8e4d8'); s.fix(x + 1, y, '#b8b4a8'); });
+  if (o.strings) for (const x of [9, 16, 23]) s.line(x, 0, x, x === 16 ? T - 1 : 15, null, '#d8d4c8');
+  if (o.weapon) weapon(s, o.weapon, 22 + k, 24, o.weaponCol);
   return s;
 }
 function weapon(s, w, x, y, col) {
@@ -69,13 +82,13 @@ function quad(o) {
   else if (o.tail === 'curly') { s.fix(5, by - 3, f.out); s.fix(4, by - 4, f.out); s.fix(4, by - 5, f.out); }
   else if (o.tail === 'thin') s.line(6, by - 2, 2, by + 3, d);
   else if (o.tail === 'fluff') s.ell(5, by - 2, 2.4, 2.4, rp('#f4f0e8'));
-  s.ell(14, by, 8.5 + k, 4.8 + k * .6, f);
-  const legs = o.short ? 4 : 7;
-  [[7, legTop, 1], [10, legTop, -1], [17, legTop, 1], [20, legTop, 0]].forEach(([x, y, kk], i) => { const r = i % 2 ? d : f; s.rect(x, y, 2 + (o.stout ? 1 : 0), Math.ceil(legs / 2), r); s.rect(x + (o.stout ? 0 : kk), y + Math.ceil(legs / 2), 2 + (o.stout ? 1 : 0), Math.floor(legs / 2), r); s.rect(x + (o.stout ? 0 : kk), y + legs, 3, 1, rp(o.hoof || mix(o.fur, '#3a2448', .55))); });
+  s.ell(14, by, 9.5 + k, 5.6 + k * .6, f);                                    /* a chunkier body (28 Nov 2026) */
+  const legs = o.short ? 4 : 7, lw = o.stout ? 4 : 3;
+  [[7, legTop, 1], [10, legTop, -1], [17, legTop, 1], [20, legTop, 0]].forEach(([x, y, kk], i) => { const r = i % 2 ? d : f; s.rect(x, y, lw, Math.ceil(legs / 2), r); s.rect(x + (o.stout ? 0 : kk), y + Math.ceil(legs / 2), lw - (o.stout ? 0 : 1), Math.floor(legs / 2), r); s.rect(x + (o.stout ? 0 : kk), y + legs, lw, 1, rp(o.hoof || mix(o.fur, '#3a2448', .55))); });
   s.ell(14, by + 2.4, 6.4, 1.8, belly);
   /* head */
   const hx = 23 + k, hy = by - 5;
-  s.ell(hx, hy, 4 + k * .5, 3.8, f);
+  s.ell(hx, hy, 4.8 + k * .5, 4.4, f);
   if (o.snout) { s.ell(hx + 4, hy + 2, 2.6, 2.2, rp(o.snoutCol || mix(o.fur, '#f0a0a0', .4))); s.fix(hx + 5, hy + 2, f.out); s.fix(hx + 3, hy + 2, f.out); }
   else s.poly([[hx + 2, hy - 1], [hx + 8, hy + 1], [hx + 7, hy + 4], [hx + 2, hy + 4]], f);
   if (o.ears === 'pointy') { s.poly([[hx - 3, hy - 2], [hx - 2, hy - 7], [hx, hy - 3]], d); s.poly([[hx, hy - 3], [hx + 2, hy - 7], [hx + 3, hy - 2]], d); }
@@ -163,7 +176,12 @@ function dragon(o) {
 }
 
 /* ---------- smaller families ---------- */
-function bat(o) { const s = Spr(32, 32), b = rp(o.col), w = rp(mix(o.col, '#3a2448', .3)); s.poly([[14, 14], [2, 9], [5, 14], [3, 18], [8, 16], [11, 19], [15, 17]], w); s.poly([[18, 14], [30, 9], [27, 14], [29, 18], [24, 16], [21, 19], [17, 17]], w); s.ell(16, 16, 3.6, 4.4, b); s.poly([[13, 12], [13, 8], [15, 11]], b); s.poly([[19, 12], [19, 8], [17, 11]], b); eye(s, 15, 14, '#ff6a6a', false); eye(s, 17, 14, '#ff6a6a', false); s.fix(15, 18, '#f4ecd8'); s.fix(17, 18, '#f4ecd8'); return s; }
+/* bats: a round furry body, big ears and wide scalloped wings (28 Nov 2026: chunkier, bigger eyes) */
+function bat(o) { const s = Spr(32, 32), b = rp(o.col), w = rp(mix(o.col, '#1a1838', .3)), m = rp(mix(o.col, '#e0a0b0', .25));
+  s.poly([[14, 13], [1, 7], [3, 13], [1, 19], [6, 16], [8, 20], [11, 17], [15, 20]], w); s.poly([[18, 13], [31, 7], [29, 13], [31, 19], [26, 16], [24, 20], [21, 17], [17, 20]], w);
+  for (const [x0, y0, x1, y1] of [[13, 14, 4, 9], [13, 15, 6, 16], [19, 14, 28, 9], [19, 15, 26, 16]]) s.line(x0, y0, x1, y1, null, w.lo);
+  s.ell(16, 16, 5, 5.6, b); s.ell(16, 18.5, 3, 2.4, m); s.poly([[12, 13], [11, 6], [15, 11]], b); s.poly([[20, 13], [21, 6], [17, 11]], b); s.fix(12, 9, m.base); s.fix(20, 9, m.base);
+  eye(s, 14, 15, '#ff6a6a', false); eye(s, 18, 15, '#ff6a6a', false); s.fix(15, 19, '#f4ecd8'); s.fix(17, 19, '#f4ecd8'); s.line(14, 22, 13, 24, null, w.out); s.line(18, 22, 19, 24, null, w.out); return s; }
 function rodent(o) { const s = Spr(32, 32), f = rp(o.col), b = rp(mix(o.col, '#ffffff', .35)); if (o.tail === 'bushy') { s.poly([[10, 22], [4, 12], [8, 8], [12, 18]], f); } else s.line(9, 24, 2, 26, rp('#d8a0a0')); s.ell(15, 22, 6.4, 4.6, f); s.ell(15, 24, 3.6, 2, b); s.ell(21, 18, 3.6, 3.2, f); s.ell(19, 15, 1.6, 1.6, f); s.ell(23, 15, 1.6, 1.6, f); s.fix(19, 15, mix(o.col, '#f0a0a0', .5)); s.fix(25, 19, '#e07a7a'); eye(s, 22, 17); s.rect(11, 26, 2, 2, f); s.rect(17, 26, 2, 2, f); if (o.acorn) { s.ell(25, 24, 1.8, 2, rp('#a87a3a')); s.rect(24, 22, 3, 1, rp('#6a4a2a')); } return s; }
 function golem(o) { const s = Spr(32, 32), g = rp(o.col), d = rp(mix(o.col, '#3a2448', .35)); s.rect(10, 9, 12, 13, g); s.rect(12, 3, 8, 7, g); s.rect(5, 10, 5, 9, d); s.rect(22, 10, 5, 9, d); s.rect(4, 19, 6, 4, g); s.rect(22, 19, 6, 4, g); s.rect(11, 22, 4, 8, d); s.rect(17, 22, 4, 8, d); s.line(12, 14, 19, 17, null, g.lo); s.fix(14, 6, o.eyes || '#7ae8ff'); s.fix(17, 6, o.eyes || '#7ae8ff'); [[13, 11], [18, 19]].forEach(([x, y]) => s.fix(x, y, g.hi)); if (o.moss) [[12, 3], [19, 9], [6, 10]].forEach(([x, y]) => s.fix(x, y, '#6a9a4a')); return s; }
 function blob(o) { const s = Spr(32, 32), b = rp(o.col); for (const [x, dir] of [[9, -1], [14, -1], [19, 1], [23, 1]]) for (let i = 0; i < 7; i++) s.dot(x + Math.round(Math.sin(i / 1.5) * dir * 1.5), 21 + i, b); s.ell(16, 15, 9, 8, b); [[12, 12, 2], [19, 11, 2.4], [16, 17, 1.6]].forEach(([x, y, r]) => { s.ell(x, y, r, r, rp('#f4ecd8')); s.fix(x, y, EYE); }); if (o.bloom) for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; s.ell(16 + Math.cos(a) * 8, 7 + Math.sin(a) * 2.4, 1.6, 1.6, rp(o.bloom)); } return s; }
@@ -411,7 +429,7 @@ function jelly(o) { const s = Spr(32, 32), b = ramp(o.col, { gl: .75 });
   return s; }
 /* beasts with their own build */
 function deer(o) { const s = Spr(32, 32), f = rp(o.fur), d = rp(mix(o.fur, '#3a2448', .35));
-  s.ell(14, 16, 8, 4, f); for (const x of [8, 11, 17, 20]) { s.rect(x, 19, 2, 6, x % 2 ? d : f); s.rect(x, 25, 2, 5, d); }
+  s.ell(14, 16, 8.6, 5, f); for (const x of [8, 11, 17, 20]) { s.rect(x, 19, 3, 6, x % 2 ? d : f); s.rect(x, 25, 2, 5, d); }
   s.poly([[19, 14], [22, 6], [25, 7], [23, 15]], f); s.ell(25, 6, 3, 2.4, f); s.poly([[26, 6], [30, 7], [29, 9], [26, 8]], f); s.fix(29, 7, '#2a1c1f'); eye(s, 25, 5);
   const a = rp(o.antler || '#cde8d8'); s.line(24, 4, 21, -1, a); s.line(22, 1, 19, 1, a); s.line(26, 4, 28, -1, a); s.line(27, 1, 30, 1, a); s.poly([[6, 15], [4, 12], [7, 13]], rp('#f4f0e8'));
   if (o.glassy) [[10, 14], [15, 13], [19, 15]].forEach(([x, y]) => s.fix(x, y, '#ffffff')); if (o.bell) s.ell(22, 12, 1.6, 1.6, R.gold);
@@ -463,6 +481,12 @@ const guard = () => knight({ metal: '#9aa3ad', tabard: '#3f5f94', plume: '#c8483
 
 /* ---------- reassign the families that repeated ---------- */
 Object.assign(SPECS, {
+  /* Old Tusk at card size matches his 64 x 64 drawing (pixel_bosses.js): a boar king on two legs, crowned, with a club */
+  oldtusk: () => { const hide = rp('#8a6a52'), s = brute({ skin: '#8a6a52', cloth: '#6a7a3a', club: true }), sn = rp('#d89a8e'), tk = rp('#f4ecd8'), g = ramp('#e8b440', { gl: .8 }), d = rp('#5c4034');
+    s.ell(16, 10, 5.6, 4.8, hide); s.ell(16, 13, 3.2, 2.2, sn); s.fix(15, 13, d.base); s.fix(17, 13, d.base);
+    s.poly([[11.5, 14], [10.5, 9.5], [13, 12.5]], tk); s.poly([[20.5, 14], [21.5, 9.5], [19, 12.5]], tk); s.poly([[11, 7], [8, 2], [13, 6]], d); s.poly([[21, 7], [24, 2], [19, 6]], d);
+    s.rect(12, 4, 9, 2, g); for (const x of [12, 15, 18]) s.poly([[x, 4], [x + 1, 1], [x + 2, 4]], g); s.fix(16, 5, '#ff5a2a');
+    eye(s, 14, 10, '#ff6a2a', false); eye(s, 18, 10, '#ff6a2a', false); for (let x = 9; x < 24; x += 2) s.fix(x, 9 + (x % 4 ? 0 : 1), '#3e2a22'); return s; },
   rat: () => rodent({ col: '#8a7e70' }),
   troll: () => brute({ skin: '#8a9a78', cloth: '#5a4a3a', moss: true, club: true }),
   frostmaw: () => brute({ skin: '#bfe0f0', cloth: '#5a6a8a', ice: true, glow: '#7ae8ff', club: true }),
