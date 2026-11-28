@@ -58,7 +58,8 @@ dated line to the history file.
   before pixel_runtime.js), `js/pixel_nodes.js` (trees, ore boulders, fishing-spot fish, crops, furniture, workers,
   object thieving marks), `js/town_scene.js` (top-down towns, restoration sites, townsfolk), `js/combat_scenes.js` (the
   sixteen fight backgrounds), `js/pixel_feel.js` (empty-page pictures, the quill pointer), `js/pixel_bosses.js` (the
-  64 × 64 bosses and tower bosses), `js/pixel_minibosses.js` (the mini-bosses' 64 × 64 drawings), `js/pixel_runtime.js`
+  64 × 64 bosses and tower bosses), `js/pixel_minibosses.js` (the mini-bosses' 64 × 64 drawings), `js/pixel_hand_1.js` (ordinary creatures designed one by one at 32 × 32 with the bosses' painter, front and side; its
+  kit `A.HAND` serves the later batches), `js/pixel_runtime.js`
   (routes every art hook; loaded last). Chunky and outlined (owner, 28 Nov;
   docs/pixel-art-style.md): top-left light, five-step ramps with cool shadows and warm lights, sphere-lit round forms,
   each silhouette outlined in its material's darkest colour; the hero and humanoid creatures are chibis with big heads

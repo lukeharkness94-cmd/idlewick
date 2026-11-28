@@ -84,6 +84,15 @@ combat stage is 96 px, keeps the 32 × 32 sprite at 3×.
   the large size: feet on the bottom rows, animals facing right, one readable face. Tower bosses keep their own designs
   redrawn at twice the detail (`A.atScale(2, make)`: ellipses and polygons are rasterised afresh, so curves are smoother
   and the outline is one fine pixel).
+- **Hand-designed creatures** (owner, 28 Nov 2026: the same thought as the bosses for every creature): ordinary creatures
+  are being redrawn one at a time, a region per batch, in `js/pixel_hand_<n>.js` (loaded after `pixel_views.js`), with
+  the bosses' painter at 32 × 32 in both views. Each is designed from its name, notes, drops and level: its own
+  silhouette and body language, a material per part (fur, chitin, cloth, bark, burlap, mud), a face with an expression,
+  and one signature detail present in both views (the Giant rat's cheese, the Mudling's swallowed boot, the Goblin
+  brute's field gate, the Poacher's wolf-head hood, the Dire wolf's scarred blind eye). The kit `A.HAND` does the
+  lighting: `relight` lights a body built of several shapes as one volume, `contact` sinks the pixels behind a near
+  limb or head so same-coloured parts separate, `swap` paints stripes and patches, `grid` places faces by hand.
+  Batch 1 is Willowbrook and Mossbarrow (`node tests/art-pixel.cjs` checks they are hand-drawn and stand on row 29).
 - Locked creatures stay blacked out (the `sil` class) and unnamed, at either size.
 - **Front and side views** (owner, 28 Nov 2026): every creature has a front view for menus, guides and cards and a side
   view, facing right, for the fight stage and the hunting and capture scenes (the stage mirrors it to face the hero).

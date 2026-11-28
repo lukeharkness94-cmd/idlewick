@@ -11,7 +11,7 @@ ctx.window = ctx;ctx.__IDLEWICK_INTEGRATION_TEST__=true;
 const load = n => vm.runInContext(fs.readFileSync(path.join(root, 'js', n + '.js'), 'utf8'), ctx, { filename: n });
 ['util', 'data', 'creatures_expanded', 'creature_roster', 'hunt_tiers_data', 'skill_expansion_data', 'data2', 'data3', 'economy', 'skills_new_data', 'beastmastery_data', 'hunting_loop_data', 'crosslinks_data', 'state', 'rare_weapons'].forEach(load); /* the 29 named weapons must look different too (27 Nov 2026) */
 const Q = ctx.DQ; Q.ui = { V: {}, DO: {}, B: {}, homeSections: [] };
-['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'pixel_icons', 'skills_new_art', 'beastmastery_art', 'pixel_items_armour', 'pixel_items_weapons', 'pixel_items_materials', 'pixel_items_food', 'pixel_nodes', 'pixel_bosses', 'pixel_minibosses', 'pixel_views'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
+['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'pixel_icons', 'skills_new_art', 'beastmastery_art', 'pixel_items_armour', 'pixel_items_weapons', 'pixel_items_materials', 'pixel_items_food', 'pixel_nodes', 'pixel_bosses', 'pixel_minibosses', 'pixel_views', 'pixel_hand_1'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
 const A = Q.pixelArt, D = Q.data;
 let checks = 0; const check = (name, fn) => { fn(); checks++; console.log('PASS', name); };
 const colours = spr => spr.render();
@@ -113,6 +113,17 @@ check('every ordinary creature has a front view and a side view, and the two are
   /* no view leaves the old drawing's extras floating: the side view of a humanoid holds its weapon forward (right half) */
   const right = s => { const r = s.render(); let n = 0; for (let y = 0; y < 32; y++) for (let x = 27; x < 32; x++) if (r[y * 32 + x]) n++; return n; };
   assert.ok(right(A.VIEWS.side.pirate()) > right(A.VIEWS.front.pirate()), 'the pirate turns to face right with the cutlass out front');
+});
+check('the Willowbrook and Mossbarrow creatures are hand-designed in both views, standing on the ground line', () => {
+  /* owner, 28 Nov 2026: every creature gets the bosses' level of thought. js/pixel_hand_1.js draws these by hand with the
+     bosses' painter; they replace the builder views, and each stands with its feet on row 29 like the rest of the stage
+     (a flier may hover). The Mudling and Goblin raider are added by villains.js, which this test does not load. */
+  const ids = [...new Set(D.MONLIST.filter(m => ['willowbrook', 'mossbarrow'].includes(m.town) && !m.boss && !m.mini && !m.tower && !m.hl).map(m => m.id).concat(['mudling', 'goblin_raider']))], bad = [];
+  assert.ok(A.HAND && ids.length >= 21, 'batch: ' + ids.length);
+  for (const id of ids) for (const v of ['front', 'side']) { const f = A.VIEWS[v][id]; if (!f || !f.hand) { bad.push(id + ' ' + v + ' not hand-drawn'); continue; }
+    const s = f(), r = s.render(); let low = -1; for (let i = 0; i < r.length; i++) if (r[i] && !(s.fixed && s.fixed.has(i))) low = Math.max(low, Math.floor(i / 32));
+    if (!f.flies && (low < 29 || low > 30)) bad.push(`${id} ${v} lowest row ${low}`); }
+  assert.deepEqual(bad, []);
 });
 check('new beasts and evolved forms have distinct structural silhouettes', () => {
  const keys=[];for(const id of Object.keys(D.BEAST_SPECIES)){const a=A.creatureSprite(id),b=A.creatureSprite('evolved:'+id);assert.ok(a&&b);assert.notEqual(a.render().map(Boolean).join(''),b.render().map(Boolean).join(''),id+' evolved shape');keys.push(a.render().join(','),b.render().join(','));}assert.equal(new Set(keys).size,8);

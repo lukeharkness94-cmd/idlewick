@@ -349,3 +349,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   sprite redrawn at twice the detail. Tower bosses keep the 2x redraw.
 - 28 Nov 2026 (owner: "left-to-right should be the unlocks as you unlock"): field guide pages list entries in unlock
   order; the four entries nearest their next entry no longer jump to the front.
+- 28 Nov 2026 (owner: "could we put this same amount of effort into the thoughts of every creature, monster, beast and
+  character in the game?"): ordinary creatures are redesigned by hand at 32 x 32 with the bosses' painter, both views, a
+  batch at a time; batch 1 is every Willowbrook and Mossbarrow creature (js/pixel_hand_1.js), replacing their builder views.
