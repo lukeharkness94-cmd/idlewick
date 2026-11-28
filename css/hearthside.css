@@ -1097,7 +1097,11 @@ html.calm .petted,html.calm .petted img{animation:none}
 .hearth-note:hover{translate:0 -1px}
 .home-scene>.home-viewswap{left:auto;right:12px;bottom:auto;top:12px;z-index:6}
 html.calm .hearth>.hearth-dim{transition:none}
-@media (max-width:860px){.hearth-note{font-size:13px;padding:5px 7px}.hearth-note b{font-size:13.5px}.home-scene>.home-viewswap{top:auto;bottom:12px;right:12px}}
+@media (max-width:860px){.hearth-note{font-size:13px;padding:5px 7px}.hearth-note b{font-size:13.5px}.home-scene>.home-viewswap{top:auto;bottom:10px;right:12px}
+ /* phones: the room keeps its floor (baskets, rug); the two buttons sit in a strip of paper below it */
+ .home-scene.is-hearth{background-color:var(--panel)!important;min-height:340px}
+ .home-scene.is-hearth>.hearth{bottom:62px;background:#3a2a1e;border-radius:12px 12px 0 0}
+ .home-scene.is-hearth>.btn{bottom:10px}}
 /* the room fills up (js/hearth.js keepsakes, js/hearth_letters.js): "+N" on a full row is a flat label, not a frame */
 .hearth-spot .hearth-more{position:absolute;right:-4px;bottom:-4px;padding:1px 5px;border-radius:var(--r-info,4px);font:700 13px/1.2 var(--f-ui);color:#3a2a18;background:#f4dc8a;pointer-events:none}
 .hearth-spot.hearth-letter:not(:hover):not(:focus-visible){box-shadow:0 0 14px 1px rgba(255,214,140,.28)!important}

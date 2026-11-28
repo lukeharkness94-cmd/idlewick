@@ -3301,9 +3301,9 @@ button.rl-i:hover{border-color:var(--brass-hi)}
 #combatnav .combat-entry .hubdot.live{left:0;right:auto;top:6px;bottom:6px;width:3px;height:auto;border-radius:2px;animation:none;box-shadow:none}
 .routed-locked{flex:none!important;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.routed-locked h3{margin:0}.routed-locked p{margin:0}.routed-locked img{max-width:48px;max-height:48px}
 @media(max-width:860px){
- html.compact-skill-navigation .sidebar{display:contents!important}html.compact-skill-navigation .sidebar>*:not(#rail){display:none!important}html.compact-skill-navigation #hud{display:grid!important;grid-template-columns:40px minmax(90px,1fr) auto!important;gap:6px!important;padding:8px!important;margin-bottom:8px;min-height:0}
- html.compact-skill-navigation #hud .h-hero{grid-column:1;grid-row:1;width:40px;height:40px}html.compact-skill-navigation #hud .h-name{grid-column:2;grid-row:1;width:auto;min-width:0}html.compact-skill-navigation #hud .h-name>small{display:none}html.compact-skill-navigation #hud .h-hp{margin-top:4px}html.compact-skill-navigation #hud .h-hp small{font-size:13px}
- html.compact-skill-navigation #hud .h-stats{grid-column:3;grid-row:1;display:block}html.compact-skill-navigation #hud .h-btns{grid-column:1 / -1;grid-row:2;justify-content:flex-end}html.compact-skill-navigation #hud .h-task{grid-column:1 / -1;grid-row:3;min-height:38px;padding:5px}html.compact-skill-navigation #hud .h-task.idle{display:none}html.compact-skill-navigation #hud .h-btns .iconb{width:32px;height:32px}html.compact-skill-navigation #hud .hud-pet{display:none}
+ html.compact-hud .sidebar{display:contents!important}html.compact-hud .sidebar>*:not(#rail){display:none!important}html.compact-hud #hud{display:grid!important;grid-template-columns:40px minmax(90px,1fr) auto!important;gap:6px!important;padding:8px!important;margin-bottom:8px;min-height:0}
+ html.compact-hud #hud .h-hero{grid-column:1;grid-row:1;width:40px;height:40px}html.compact-hud #hud .h-name{grid-column:2;grid-row:1;width:auto;min-width:0}html.compact-hud #hud .h-name>small{display:none}html.compact-hud #hud .h-hp{margin-top:4px}html.compact-hud #hud .h-hp small{font-size:13px}
+ html.compact-hud #hud .h-stats{grid-column:3;grid-row:1;display:block}html.compact-hud #hud .h-btns{grid-column:1 / -1;grid-row:2;justify-content:flex-end}html.compact-hud #hud .h-task{grid-column:1 / -1;grid-row:3;min-height:38px;padding:5px}html.compact-hud #hud .h-task.idle{display:none}html.compact-hud #hud .h-btns .iconb{width:32px;height:32px}html.compact-hud #hud .hud-pet{display:none}
  html.compact-skill-navigation #pagebar{margin:0 0 5px;min-height:32px}html.compact-skill-navigation #routebar{display:flex;align-items:center;gap:5px}
  html.compact-skill-navigation #app:has(.beast-workspace){height:calc(var(--vh100,100vh) - 85px);min-height:0}html.compact-skill-navigation #app:has(.beast-workspace)>main{min-height:0;display:flex;flex-direction:column}html.compact-skill-navigation #view:has(.beast-workspace){flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}.beast-workspace{height:auto;min-height:0;flex:1}.beast-tabs{margin:4px 0 8px}.beast-tabs .btn:last-child{max-width:none}.beast-focus{flex-wrap:nowrap;flex:1}.beast-focus>div:last-child{min-width:0}.beast-focus h2{font-size:21px;margin:4px 0}.beast-focus .sm{font-size:14px}.beast-focus .beast-milestones{gap:4px}.beast-focus .tag{padding:2px 5px}.beast-focus .beast-portrait{flex-basis:48px}.beast-focus .beast-portrait img{max-width:48px;max-height:48px}#view:has(.beast-workspace) .page-help{display:none}
  .estate-land{flex:1!important;height:100%}.estate-layout{flex:1;min-height:0}.estate-zones{flex:1;min-height:0}.estate-fields>.plots{height:100%;min-height:0}.estate-fields>.plots .plot{height:auto;min-height:60px!important}.estate-supplies{flex:1}.estate-controls{flex:none}.estate-scenery{min-height:45px;height:45px}.estate-fields .plot .pspr{height:28px}.estate-fields .plot .pspr img{max-height:28px;max-width:28px}
@@ -5911,7 +5911,11 @@ html.calm .petted,html.calm .petted img{animation:none}
 .hearth-note:hover{translate:0 -1px}
 .home-scene>.home-viewswap{left:auto;right:12px;bottom:auto;top:12px;z-index:6}
 html.calm .hearth>.hearth-dim{transition:none}
-@media (max-width:860px){.hearth-note{font-size:13px;padding:5px 7px}.hearth-note b{font-size:13.5px}.home-scene>.home-viewswap{top:auto;bottom:12px;right:12px}}
+@media (max-width:860px){.hearth-note{font-size:13px;padding:5px 7px}.hearth-note b{font-size:13.5px}.home-scene>.home-viewswap{top:auto;bottom:10px;right:12px}
+ /* phones: the room keeps its floor (baskets, rug); the two buttons sit in a strip of paper below it */
+ .home-scene.is-hearth{background-color:var(--panel)!important;min-height:340px}
+ .home-scene.is-hearth>.hearth{bottom:62px;background:#3a2a1e;border-radius:12px 12px 0 0}
+ .home-scene.is-hearth>.btn{bottom:10px}}
 /* the room fills up (js/hearth.js keepsakes, js/hearth_letters.js): "+N" on a full row is a flat label, not a frame */
 .hearth-spot .hearth-more{position:absolute;right:-4px;bottom:-4px;padding:1px 5px;border-radius:var(--r-info,4px);font:700 13px/1.2 var(--f-ui);color:#3a2a18;background:#f4dc8a;pointer-events:none}
 .hearth-spot.hearth-letter:not(:hover):not(:focus-visible){box-shadow:0 0 14px 1px rgba(255,214,140,.28)!important}
@@ -24194,7 +24198,7 @@ UI.DO.researchphonemode=a=>{UI.researchPhoneMode=a;UI.render(false);};UI.DO.rese
 UI.DO.researchrank=(key,id)=>{UI.researchRanks[key]=id;UI.render(false);};
 /* Existing item requirement chips become direct routes, not dead text. */
 const render0=UI.render;
-UI.render=fresh=>{render0(fresh);document.documentElement.classList.toggle('compact-skill-navigation',innerWidth<=860&&UI.hubOf(UI.view).id==='skills');const view=document.getElementById('view');if(!view)return;
+UI.render=fresh=>{render0(fresh);document.documentElement.classList.toggle('compact-skill-navigation',innerWidth<=860&&UI.hubOf(UI.view).id==='skills');document.documentElement.classList.toggle('compact-hud',innerWidth<=860);const view=document.getElementById('view');if(!view)return;
  if(innerWidth<=860&&UI.hubOf(UI.view).id==='skills'){const bar=document.getElementById('routebar')||view;const btn=document.createElement('button');btn.className='btn sm mobile-skill-switch';btn.dataset.do='skillpicker';btn.textContent='Choose skill';bar.appendChild(btn);const combat=document.createElement('button');combat.className='btn sm mobile-combat-switch';combat.dataset.do='go';combat.dataset.a='combat';combat.textContent='Combat';bar.appendChild(combat);}
  const yieldBox=view.querySelector('.scene-yield');if(yieldBox){yieldBox.closest('.activity-stage')?.appendChild(yieldBox);yieldBox.classList.add('yield-tray');}
  if(UI.view==='combat'&&Q.beastActive()){const arena=view.querySelector('.encounter-arena');if(arena&&!arena.querySelector('.battle-companion')){const el=document.createElement('span'),id=Q.beastActive();el.className='battle-companion';el.innerHTML=Q.petSprite(D.PET[id],128)+`<small>${esc(D.PET[id].name)} · Bond ${Q.petLevel(id)}</small>`;arena.appendChild(el);}
@@ -29562,7 +29566,7 @@ UI.hearth = () => { const keep = Q.hearthKeep(); st.extra = { letter: LETTER }; 
   ${Object.entries(SPOTS).filter(([k]) => k !== 'board' && (k !== 'pet' || (S().pets && S().pets.active))).map(([k, s]) => `<button class="hearth-spot" data-spot="${k}" data-do="${s.act[0]}" data-a="${s.act[1]}" aria-label="${esc(s.label)}" data-tip="text:${esc(s.label)}"></button>`).join('')}
   ${keep.map(keepSpot).join('')}${letterSpot()}</div>`; };
 const place = () => { const box = document.querySelector('.home-scene'), H = box && box.querySelector('.hearth'); if (!H) return;
-  const img = H.querySelector('.hearth-room'), bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) return;
+  const img = H.querySelector('.hearth-room'), bw = H.clientWidth, bh = H.clientHeight; /* the room's own box: on phones the buttons get a strip below it */ if (!bw || !bh) return;
   const k = Math.max(1, Math.floor(Math.max(bw / RW, bh / RH))), w = RW * k, h = RH * k, left = Math.round((bw - w) / 2), top = bh - h;
   /* with priority: the page's sprite snapper and scene rules size pictures with !important */
   for (const el of [img, H.querySelector('.hearth-lights'), H.querySelector('.hearth-dim')]) for (const [k2, v] of Object.entries({ left: left + 'px', top: top + 'px', width: w + 'px', height: h + 'px' })) el.style.setProperty(k2, v, 'important');

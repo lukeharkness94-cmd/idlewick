@@ -209,7 +209,7 @@ UI.hearth = () => { const keep = Q.hearthKeep(); st.extra = { letter: LETTER }; 
   ${Object.entries(SPOTS).filter(([k]) => k !== 'board' && (k !== 'pet' || (S().pets && S().pets.active))).map(([k, s]) => `<button class="hearth-spot" data-spot="${k}" data-do="${s.act[0]}" data-a="${s.act[1]}" aria-label="${esc(s.label)}" data-tip="text:${esc(s.label)}"></button>`).join('')}
   ${keep.map(keepSpot).join('')}${letterSpot()}</div>`; };
 const place = () => { const box = document.querySelector('.home-scene'), H = box && box.querySelector('.hearth'); if (!H) return;
-  const img = H.querySelector('.hearth-room'), bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) return;
+  const img = H.querySelector('.hearth-room'), bw = H.clientWidth, bh = H.clientHeight; /* the room's own box: on phones the buttons get a strip below it */ if (!bw || !bh) return;
   const k = Math.max(1, Math.floor(Math.max(bw / RW, bh / RH))), w = RW * k, h = RH * k, left = Math.round((bw - w) / 2), top = bh - h;
   /* with priority: the page's sprite snapper and scene rules size pictures with !important */
   for (const el of [img, H.querySelector('.hearth-lights'), H.querySelector('.hearth-dim')]) for (const [k2, v] of Object.entries({ left: left + 'px', top: top + 'px', width: w + 'px', height: h + 'px' })) el.style.setProperty(k2, v, 'important');

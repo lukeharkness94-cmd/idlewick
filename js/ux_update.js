@@ -55,7 +55,7 @@ UI.DO.researchphonemode=a=>{UI.researchPhoneMode=a;UI.render(false);};UI.DO.rese
 UI.DO.researchrank=(key,id)=>{UI.researchRanks[key]=id;UI.render(false);};
 /* Existing item requirement chips become direct routes, not dead text. */
 const render0=UI.render;
-UI.render=fresh=>{render0(fresh);document.documentElement.classList.toggle('compact-skill-navigation',innerWidth<=860&&UI.hubOf(UI.view).id==='skills');const view=document.getElementById('view');if(!view)return;
+UI.render=fresh=>{render0(fresh);document.documentElement.classList.toggle('compact-skill-navigation',innerWidth<=860&&UI.hubOf(UI.view).id==='skills');document.documentElement.classList.toggle('compact-hud',innerWidth<=860);const view=document.getElementById('view');if(!view)return;
  if(innerWidth<=860&&UI.hubOf(UI.view).id==='skills'){const bar=document.getElementById('routebar')||view;const btn=document.createElement('button');btn.className='btn sm mobile-skill-switch';btn.dataset.do='skillpicker';btn.textContent='Choose skill';bar.appendChild(btn);const combat=document.createElement('button');combat.className='btn sm mobile-combat-switch';combat.dataset.do='go';combat.dataset.a='combat';combat.textContent='Combat';bar.appendChild(combat);}
  const yieldBox=view.querySelector('.scene-yield');if(yieldBox){yieldBox.closest('.activity-stage')?.appendChild(yieldBox);yieldBox.classList.add('yield-tray');}
  if(UI.view==='combat'&&Q.beastActive()){const arena=view.querySelector('.encounter-arena');if(arena&&!arena.querySelector('.battle-companion')){const el=document.createElement('span'),id=Q.beastActive();el.className='battle-companion';el.innerHTML=Q.petSprite(D.PET[id],128)+`<small>${esc(D.PET[id].name)} · Bond ${Q.petLevel(id)}</small>`;arena.appendChild(el);}
