@@ -85,6 +85,14 @@ combat stage is 96 px, keeps the 32 × 32 sprite at 3×.
   redrawn at twice the detail (`A.atScale(2, make)`: ellipses and polygons are rasterised afresh, so curves are smoother
   and the outline is one fine pixel).
 - Locked creatures stay blacked out (the `sil` class) and unnamed, at either size.
+- **Front and side views** (owner, 28 Nov 2026): every creature has a front view for menus, guides and cards and a side
+  view, facing right, for the fight stage and the hunting and capture scenes (the stage mirrors it to face the hero).
+  Each builder draws one view natively (`A.NATIVE_VIEW`: animals, lizards and serpents side-on; people, birds, crabs,
+  spiders and spirits front-on) and `js/pixel_views.js` draws the other (`A.ALT_VIEWS`): front views show the face with
+  both eyes and symmetric legs, wings or horns; side views have one eye, the snout or nose forward, the far limbs in
+  shadow and the weapon held out to the right. A creature's own extras read `A.view()` so a sling, a sack or a mark sits
+  in the right place in both. Bosses, mini-bosses and tower bosses keep their own 64 × 64 drawings; tower floor
+  creatures get both views at twice the detail. `node tests/art-pixel.cjs` checks every creature has two different views.
 
 ## Items
 

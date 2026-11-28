@@ -148,6 +148,9 @@ const A = DQ.pixelArt;
 if (A && A.CREATURE_SPECS && A.blob && A.humanoid) {
   const rp = c => A.ramp(c);
   A.CREATURE_SPECS.mudling = () => { const s = A.blob({ col: '#7a5a3a' }); for (const [x, y] of [[11, 7], [16, 5], [21, 7]]) s.ell(x, y, 1.6, 1.6, rp('#9a9488')); s.line(23, 18, 29, 12, rp('#8fa860')); s.fix(29, 11, '#c8d890'); return s; };
-  A.CREATURE_SPECS.goblin_raider = () => { const s = A.humanoid({ skin: '#7fae5c', cloth: '#7a5a36', ears: 'goblin', mouth: 'grin', hat: 'hood', hatCol: '#4e3f2e', weapon: 'dagger', belt: '#5a3a22' }); s.ell(7, 19, 4, 5, rp('#9c7a4c')); s.ell(7, 16, 2, 1, rp('#b8955f')); s.line(9, 14, 12, 12, rp('#6e5235')); s.line(19, 2, 22, 0, rp('#eee5cf')); s.fix(21, 1, '#ffffff'); return s; };
+  A.CREATURE_SPECS.goblin_raider = () => { const s = A.humanoid({ skin: '#7fae5c', cloth: '#7a5a36', ears: 'goblin', mouth: 'grin', hat: 'hood', hatCol: '#4e3f2e', weapon: 'dagger', belt: '#5a3a22' });
+    /* the loot sack rides on the back and the feather on the hood: placed for the view being drawn (28 Nov 2026) */
+    if (A.view && A.view() === 'side') { s.ell(7, 19, 3, 4.4, rp('#9c7a4c')); s.ell(7, 16, 1.6, 1, rp('#b8955f')); s.line(10, 15, 15, 16, rp('#6e5235')); s.line(12, 1, 8, 0, rp('#eee5cf')); s.fix(10, 0, '#ffffff'); return s; }
+    s.ell(7, 19, 4, 5, rp('#9c7a4c')); s.ell(7, 16, 2, 1, rp('#b8955f')); s.line(9, 14, 12, 12, rp('#6e5235')); s.line(19, 2, 22, 0, rp('#eee5cf')); s.fix(21, 1, '#ffffff'); return s; };
 }
 })();

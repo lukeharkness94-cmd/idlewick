@@ -7,19 +7,25 @@ const rp = c => A.ramp(c);
 const mix = (a, b, t) => { const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), x = p(a), y = p(b); return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join(''); };
 /* a mark per animal, from its id: a collar, a blaze, a tail tip or a few flecks, in a colour from its own recipe */
 const hash = s => { let h = 7; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
-const mark = (s, id, o) => {
+/* 28 Nov 2026 (front and side views): the mark sits where it belongs in whichever view is drawn (flank flecks, a blaze
+   on the face, a patch at the rump or shoulder, flecks along the back), each point moved onto the animal's own body
+   (the nearest drawn pixel), so no mark floats in the air beside it */
+const SPOTS = {
+  side: [[[11, 17], [14, 18], [17, 17]], [[24, 10], [25, 11]], [[5, 16], [6, 17], [5, 18]], [[13, 14], [16, 15], [19, 14]]],
+  front: [[[13, 20], [16, 21], [19, 20]], [[15, 8], [15, 9]], [[9, 16], [10, 17], [9, 18]], [[12, 16], [16, 17], [20, 16]]]
+};
+const NATIVE = { bird: 'front' };
+const onBody = (s, x, y) => { let best = null, bd = 1e9; for (let j = -4; j <= 4; j++) for (let i = -4; i <= 4; i++) { const p = s.at(x + i, y + j); if (!p || p.fix) continue; const d = i * i + j * j; if (d < bd) { bd = d; best = [x + i, y + j]; } } return best; };
+const mark = (s, id, o, builder) => {
   const h = hash(id), col = o.glow || o.crest || o.fin || o.antler || o.hornCol || mix(o.fur || o.plum || o.col || '#888888', '#ffffff', .45);
-  const k = h % 4, dx = (h >> 3) % 3;
-  if (k === 0) for (let i = 0; i < 3; i++) s.fix(11 + i * 3 + dx, 16 + (i % 2), col);
-  else if (k === 1) { s.fix(24 + dx, 10, col); s.fix(25 + dx, 11, col); }
-  else if (k === 2) { s.fix(5 + dx, 15, col); s.fix(6 + dx, 16, col); s.fix(5 + dx, 17, col); }
-  else for (const [x, y] of [[13, 14], [16, 15], [19, 14]]) s.fix(x + dx, y, col);
+  const k = h % 4, dx = (h >> 3) % 3, view = (A.view && A.view()) || NATIVE[builder] || 'side';
+  for (const [x, y] of SPOTS[view][k]) { const p = onBody(s, x + dx, y); if (p) s.fix(p[0], p[1], col); }
   return s;
 };
 const SPECS = {};
 for (const [id, [builder, opts]] of Object.entries(D.HUNT_ART || {})) {
   const b = A.BUILD[builder]; if (!b) continue;
-  SPECS[id] = () => mark(b({ ...opts }), id, opts);
+  SPECS[id] = () => mark(b({ ...opts }), id, opts, builder);
 }
 Object.assign(A.CREATURE_SPECS, SPECS);
 /* ---------- the kit ---------- */

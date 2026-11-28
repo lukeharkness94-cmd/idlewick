@@ -221,7 +221,8 @@ const SPECS = {
   bogsnapper: Q({ fur: '#5f8a4a', shell: '#4a6a3a' }),
   wraith: G({ col: '#9b87e0', hood: '#4a3a6a' }),
   morwenna: H({ skin: '#c8d8a8', cloth: '#5a3a7a', robe: true, hat: 'witch', hatCol: '#3a2a4a', hair: '#2a2a2a', weapon: 'staff', weaponCol: '#b79cff' }),
-  imp: () => { const s = humanoid({ skin: '#ff8a4a', cloth: '#a03a2a', horns: true, mouth: 'grin', glow: '#fff070' }); s.poly([[9, 14], [3, 9], [5, 16]], rp('#a03a2a')); s.poly([[23, 14], [29, 9], [27, 16]], rp('#a03a2a')); return s; },
+  imp: () => { if (VIEW === 'side') { const s = Spr(32, 32), w = rp('#a03a2a'); s.poly([[13, 15], [8, 7], [10, 15]], rp('#701e18')); s.poly([[12, 16], [3, 9], [6, 18]], w); s.stamp(humanoid({ skin: '#ff8a4a', cloth: '#a03a2a', horns: true, mouth: 'grin', glow: '#fff070' }), 0, 0); return s; }
+    const s = humanoid({ skin: '#ff8a4a', cloth: '#a03a2a', horns: true, mouth: 'grin', glow: '#fff070' }); s.poly([[9, 14], [3, 9], [5, 16]], rp('#a03a2a')); s.poly([[23, 14], [29, 9], [27, 16]], rp('#a03a2a')); return s; },
   hound: Q({ fur: '#5a3a34', dark: '#3a2424', ears: 'pointy', tail: 'thin', cracks: '#ff8a3a', glow: '#ffb04a' }),
   drake: Dr({ col: '#58c27e', belly: '#e8e0a0' }),
   emberlord: H({ skin: '#5a3a34', armour: '#7a5a4a', hat: 'helm', hatCol: '#8a5a4a', glow: '#ff8a3a', weapon: 'sword', weaponCol: '#ff8a4a' }),
@@ -533,10 +534,35 @@ Object.assign(PET_SPECS, {
   frostling: () => stout({ skin: '#cfe6f2', cloth: '#7a9ab8', beard: '#e8f6ff', helm: '#e8f6ff' }), whiskers: () => fox({ fur: '#8a8a94' }), toast: B({ plum: '#f0d878', wing: '#e0b850', beak: '#e88838', small: true, crest: '#e86a3a' })
 });
 Object.assign(FOLK, { witch: () => cauldron(), armoury: () => guard(), merchant: () => fishstall(), dwarf: () => stout({ skin: '#e0a880', cloth: '#6a5a8a', beard: '#c06a3a', helm: '#e0b040', axe: true }) });
+/* ---------- front and side views (owner, 28 Nov 2026: "front view for when we're viewing them in menus and guides and
+   such and a side view for when they're fighting, being caught, being hunted") ----------
+   Each builder draws one view natively: four-legged animals, lizards, serpents and the hunched ones side-on (facing
+   right); humanoids, birds, crabs, spiders, spirits and the rest front-on. js/pixel_views.js adds the other view to
+   A.ALT_VIEWS[builder]. A.drawView(view, make) runs a sprite maker with every builder drawing that view, so a creature's
+   own extras (pixel_roster.js, pixel_hunt.js) read A.view() to place themselves; o.view picks one for a single call. */
+let VIEW = null;
+const NATIVE = { humanoid: 'front', quad: 'side', bird: 'front', clawed: 'front', spectral: 'front', dragon: 'side', bat: 'front', rodent: 'side', golem: 'front', blob: 'front',
+  brute: 'front', stout: 'front', lanky: 'front', hunch: 'side', floater: 'front', knight: 'front', beetle: 'front', spider: 'front', scorpion: 'side', isopod: 'side', newt: 'side',
+  stonepile: 'front', mushroom: 'front', treant: 'front', plankgolem: 'front', wisp: 'front', serpent: 'side', veil: 'front', orb: 'front', shadow: 'front', jelly: 'front',
+  deer: 'side', armoured: 'side', toad: 'front', hedgehog: 'side', hare: 'side', fox: 'side', moth: 'front', kite: 'front' };
+const ALT = {};
+const viewed = (name, f) => { const g = o => { const v = (o && o.view) || VIEW; return v && v !== NATIVE[name] && ALT[name] ? ALT[name](o || {}) : f(o); }; g.native = f; return g; };
+humanoid = viewed('humanoid', humanoid); quad = viewed('quad', quad); bird = viewed('bird', bird); clawed = viewed('clawed', clawed); spectral = viewed('spectral', spectral);
+dragon = viewed('dragon', dragon); bat = viewed('bat', bat); rodent = viewed('rodent', rodent); golem = viewed('golem', golem); blob = viewed('blob', blob); brute = viewed('brute', brute);
+stout = viewed('stout', stout); lanky = viewed('lanky', lanky); hunch = viewed('hunch', hunch); floater = viewed('floater', floater); knight = viewed('knight', knight);
+beetle = viewed('beetle', beetle); spider = viewed('spider', spider); scorpion = viewed('scorpion', scorpion); isopod = viewed('isopod', isopod); newt = viewed('newt', newt);
+stonepile = viewed('stonepile', stonepile); mushroom = viewed('mushroom', mushroom); treant = viewed('treant', treant); plankgolem = viewed('plankgolem', plankgolem);
+wisp = viewed('wisp', wisp); serpent = viewed('serpent', serpent); veil = viewed('veil', veil); orb = viewed('orb', orb); shadow = viewed('shadow', shadow); jelly = viewed('jelly', jelly);
+deer = viewed('deer', deer); armoured = viewed('armoured', armoured); toad = viewed('toad', toad); hedgehog = viewed('hedgehog', hedgehog); hare = viewed('hare', hare); fox = viewed('fox', fox);
+moth = viewed('moth', moth); kite = viewed('kite', kite);
+const drawView = (view, make) => { const was = VIEW; VIEW = view; try { return make(); } finally { VIEW = was; } };
 const creatureSprite = id => { const f = SPECS[id] || PET_SPECS[id] || FOLK[id] || ANIMAL[id]; return f ? f() : null; };
-Object.assign(A, { humanoid, blob, creatureSprite,
+Object.assign(A, { humanoid, blob, creatureSprite, drawView, view: () => VIEW, ALT_VIEWS: ALT, NATIVE_VIEW: NATIVE,
+  /* the shared pieces, for js/pixel_views.js */
+  CKIT: { rp, eye, weapon, dome, EYE },
+  BUILD_NATIVE: { humanoid: humanoid.native, quad: quad.native, bird: bird.native, deer: deer.native, fox: fox.native, hare: hare.native },
   /* the builders, for creature_roster's sprites (pixel_roster.js) */
-  BUILD: { humanoid, quad, bird, clawed, spectral, dragon, bat, rodent, golem, blob, brute, stout, lanky, hunch, floater, knight, beetle, spider, scorpion, isopod, newt, mushroom, treant, wisp, serpent, veil, orb, shadow, jelly, deer, armoured, toad, hedgehog, hare, fox, moth, kite }, CREATURE_SPECS: SPECS, PET_SPECS, FOLK, ANIMAL,
+  BUILD: { humanoid, quad, bird, clawed, spectral, dragon, bat, rodent, golem, blob, brute, stout, lanky, hunch, floater, knight, beetle, spider, scorpion, isopod, newt, mushroom, treant, wisp, serpent, veil, orb, shadow, jelly, deer, armoured, toad, hedgehog, hare, fox, moth, kite, stonepile, plankgolem }, CREATURE_SPECS: SPECS, PET_SPECS, FOLK, ANIMAL,
   creatureUrl: id => A.url('creature:' + id, () => creatureSprite(id)),
   hasCreature: id => !!(SPECS[id] || PET_SPECS[id] || FOLK[id] || ANIMAL[id]) });
 })();

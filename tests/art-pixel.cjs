@@ -11,7 +11,7 @@ ctx.window = ctx;ctx.__IDLEWICK_INTEGRATION_TEST__=true;
 const load = n => vm.runInContext(fs.readFileSync(path.join(root, 'js', n + '.js'), 'utf8'), ctx, { filename: n });
 ['util', 'data', 'creatures_expanded', 'creature_roster', 'hunt_tiers_data', 'skill_expansion_data', 'data2', 'data3', 'economy', 'skills_new_data', 'beastmastery_data', 'hunting_loop_data', 'crosslinks_data', 'state', 'rare_weapons'].forEach(load); /* the 29 named weapons must look different too (27 Nov 2026) */
 const Q = ctx.DQ; Q.ui = { V: {}, DO: {}, B: {}, homeSections: [] };
-['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'pixel_icons', 'skills_new_art', 'beastmastery_art', 'pixel_items_armour', 'pixel_items_weapons', 'pixel_items_materials', 'pixel_items_food', 'pixel_nodes'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
+['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'pixel_icons', 'skills_new_art', 'beastmastery_art', 'pixel_items_armour', 'pixel_items_weapons', 'pixel_items_materials', 'pixel_items_food', 'pixel_nodes', 'pixel_bosses', 'pixel_minibosses', 'pixel_views'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
 const A = Q.pixelArt, D = Q.data;
 let checks = 0; const check = (name, fn) => { fn(); checks++; console.log('PASS', name); };
 const colours = spr => spr.render();
@@ -91,6 +91,28 @@ check('interface icons, skill emblems and trophies are the chunky outlined drawi
   assert.equal(new Set(['home', 'skills', 'quest', 'house', 'book'].map(id => key(A.iconSprite(id)))).size, 5, 'the five places along the top each have their own icon');
   assert.ok('skills' in Q.ICONS, 'the Skills place has its icon id');
   for (const m of D.MONLIST.filter(x => x.boss)) assert.notEqual(key(A.trophySprite(m.id, false)), key(A.trophySprite(m.id, true)), m.id + ' gilded trophy differs');
+});
+check('every ordinary creature has a front view and a side view, and the two are different drawings', () => {
+  /* owner, 28 Nov 2026: a front view for menus and guides, a side view (facing right) for fights, hunts and captures.
+     js/pixel_views.js draws the missing view for every builder; the 28 with their own 64 x 64 art are drawn elsewhere. */
+  const mask = s => s.render().map(Boolean).join(''), scope = D.MONLIST.filter(A.viewScope), bad = [];
+  assert.ok(scope.length >= 270, 'creatures in scope: ' + scope.length);
+  assert.ok(!scope.some(m => A.BIG[m.id] || (m.mini && !/^tw_[a-z]+_\d$/.test(m.id))), 'bosses, mini-bosses and tower bosses keep their own drawings');
+  for (const m of scope) { const f = A.VIEWS.front[m.id], sd = A.VIEWS.side[m.id];
+    if (!f || !sd) { bad.push(m.id + ' missing a view'); continue; }
+    const a = f(), b = sd(); if (!a || !b || a.w !== 32 || a.h !== 32 || b.w !== 32 || b.h !== 32) { bad.push(m.id + ' size'); continue; }
+    if (mask(a) === mask(b)) bad.push(m.id + ' front and side share a silhouette');
+    if (a.render().filter(Boolean).length < 60 || b.render().filter(Boolean).length < 60) bad.push(m.id + ' empty view');
+    assert.deepEqual(a.render(), f().render(), m.id + ' front view is deterministic'); }
+  assert.deepEqual(bad, []);
+  /* creatures that share no drawing on purpose (tower floors reuse their base creature) never share a view */
+  for (const v of ['front', 'side']) { const seen = new Map();
+    for (const m of scope.filter(m => !/^tw_/.test(m.id))) { const k = A.VIEWS[v][m.id]().render().join(','); assert.ok(!seen.has(k), `${m.id} ${v} view is identical to ${seen.get(k)}`); seen.set(k, m.id); } }
+  /* tower floor creatures keep a 64 x 64 drawing in both views */
+  for (const m of scope.filter(m => /^tw_[a-z]+_\d$/.test(m.id))) for (const v of ['front', 'side']) { const s = A.BIG_VIEWS[v][m.id] && A.BIG_VIEWS[v][m.id](); assert.ok(s && s.w === 64, m.id + ' ' + v + ' large view'); }
+  /* no view leaves the old drawing's extras floating: the side view of a humanoid holds its weapon forward (right half) */
+  const right = s => { const r = s.render(); let n = 0; for (let y = 0; y < 32; y++) for (let x = 27; x < 32; x++) if (r[y * 32 + x]) n++; return n; };
+  assert.ok(right(A.VIEWS.side.pirate()) > right(A.VIEWS.front.pirate()), 'the pirate turns to face right with the cutlass out front');
 });
 check('new beasts and evolved forms have distinct structural silhouettes', () => {
  const keys=[];for(const id of Object.keys(D.BEAST_SPECIES)){const a=A.creatureSprite(id),b=A.creatureSprite('evolved:'+id);assert.ok(a&&b);assert.notEqual(a.render().map(Boolean).join(''),b.render().map(Boolean).join(''),id+' evolved shape');keys.push(a.render().join(','),b.render().join(','));}assert.equal(new Set(keys).size,8);
