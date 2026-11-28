@@ -1217,3 +1217,32 @@ Branch `claude/ui-feel`. Owner: "I love the subtle things that make games feel m
   five-figure counts (Max ×15k) so it no longer clips.
 - **Tests**: `tests/ui-feel.cjs` (new); `tests/shape-rule.cjs` treats the hand cursor as `pointer`.
 
+## Pixel rebuild: dark only, pixel frames, pixel lettering, darker scenery (Claude, 28 Nov 2026)
+
+Owner asked for the dark theme only, then a rebuild from their reference pixel GUIs ("focus on this having a darker
+theme than now"). They chose bevelled frames, pixel lettering everywhere on desktop with labels only on phones, and towns
+seen from above with work and combat side-on; later, capital pixel lettering in more places and, for sentences, Tiny5
+or VT323.
+
+- **Dark only**: css/light.css and every light rule are gone; `DQ.applyTheme()` always sets `data-theme="dark"` and
+  drops any saved `settings.theme`. The theme control and the L shortcut are removed.
+- **Skin**: the "Pixel frames (owner, 28 Nov 2026)" section at the end of css/hearthside.css holds the tokens (ground
+  #0b0c10, wood panels #2b2019, brass #d9a441, bevel shadows, corner pins, 3px controls / 4px panels). Panels are framed
+  wood with pins; a panel inside a panel is a sunk well; the main action is a green bevel; bars are troughs with brass
+  end caps; the page you are on is a brass button. css/shape.css carries the selected and bevel rules;
+  tests/shape-rule.cjs checks bevels instead of the old "no lines" rule.
+- **Lettering** (js/lettering.js): Pixel (default) = Silkscreen labels and headings + Tiny5 sentences; Terminal =
+  Silkscreen + VT323; Classic = Cinzel + Alegreya Sans; the older presets remain. Phones keep Alegreya Sans for sentences.
+  Fonts are local woff2 (OFL). Silkscreen is wider, so the rail is 212px, catalogue gaps 8px, and a set of phone rules
+  wrap tabs and button rows rather than shrink anything.
+- **Sprites and towns** (helper branches merged): js/pixel_bosses.js redraws the bosses at 64 × 64; the engine restyles
+  creatures, items and folk portraits in the chibi outlined style; js/town_scene.js draws the towns top-down at dusk;
+  towns.js keeps only the side-on districts.
+- **Darker scenery**: `A.dusk` (pixelart.js) grades districts, skill backdrops and combat area scenes (gamma 1.45, 80%
+  value, 10% night ink). Heroes, targets and creatures are not graded so they stay the brightest thing on the stage. The
+  idle Where to fight window covers the stage on an opaque fill (no scenery edge round it).
+
+Limits: mini-bosses and tower bosses are 2× scale-ups of their earlier sprites, not redrawn; items were restyled by the
+engine rather than one by one; Pyrrhax and the Hollow King are the weakest boss drawings; the town-life night tint test
+threshold was loosened for the darker towns. Browser checks and the full suite are evidence, not playtests.
+

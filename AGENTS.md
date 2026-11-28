@@ -86,7 +86,8 @@ dated line to the history file.
   life (follow my clock / always daytime, weather). Under Reduce effects nothing moves; the hour's light stays.
 - **Activity backdrops**: each activity shows a close-up district (`districtFor`, 240 × 100) at 3× with the 3× hero
   (72 × 96) and target on one ground line; the 17 skill workplaces are in skill_backdrops.js. Any new activity kind or
-  recipe skill needs a district. **Skill realism** (owner, 27 Nov; `js/work_rig.js`, docs/skill-realism.md): at work
+  recipe skill needs a district. Districts and backdrops pass through the one dusk grade (`A.dusk`, pixelart.js) so
+  the scenery sits under the dark frames; heroes, targets and creatures are never graded. **Skill realism** (owner, 27 Nov; `js/work_rig.js`, docs/skill-realism.md): at work
   the hero stands side-on facing the job and the rig draws their arms and the tool in the right hand(s) (right-handed:
   dominant hand behind the body), tools at real size for a 1.7 m hero (1 px ≈ 5.3 cm), working heights at the
   figure's joints (anvil at the knuckles, trestle and table at the belt), placed so the tool meets the target's edge;

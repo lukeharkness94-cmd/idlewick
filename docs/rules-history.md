@@ -338,3 +338,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   "Towns to one scale" (side-on 640 × 360 towns with a sky, hills and two roads): towns are top-down at dusk in the
   outlined style (js/town_scene.js), townsfolk ~12px chibis, landmarks two to three homes tall; the hearth room keeps
   its layout in the darker palette.
+- 28 Nov 2026 (pixel rebuild, "focus on this having a darker theme than now"): work districts, skill backdrops and
+  combat area scenes are deepened by one shared dusk grade; the bright daytime districts were the last thing at the old
+  brightness.
