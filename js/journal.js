@@ -70,7 +70,7 @@ UI.V.journal = () => {
   const art = e => e.kind === 'skill' && D.SK[e.icon] ? DQ.artImage('skill', e.icon, 32, 'jr-art', '') : D.ITEMS[e.icon] ? DQ.itemIco(D.ITEMS[e.icon]) : ico(e.icon || 'star');
   return `<section class="panel journal"><div class="phead"><div><span class="k">${esc(S().name)}’s</span><h2>Adventure journal</h2></div><span class="btnrow"><small>${fmt(J.length)} entr${J.length === 1 ? 'y' : 'ies'}</small><button class="btn sm" data-do="copystory">Copy my story</button></span></div>
     ${groups.length ? groups.map(g => `<div class="jr-day"><div class="jr-date">Day ${g.d}</div><ol class="jr-list">${g.e.map(e => `<li class="jr-${e.kind}"><span class="jr-ic">${art(e)}</span><span><p>${esc(e.text)}</p><small>${esc(D.TOWN[e.town] ? D.TOWN[e.town].name : '')}${e.away ? ' · while away' : ''} · ${new Date(e.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small></span></li>`).join('')}</ol></div>`).join('')
-      : '<p class="dim">Nothing written yet. Your first quest, your first boss and every discovery will be recorded here.</p>'}
+      : UI.emptyState('inkpot', 'A clean page. The ink is getting impatient.', 'Your first quest, your first boss and every discovery will be written here.')}
     ${J.length > shown.length ? `<button class="btn sm" data-do="journalmore">Show older entries</button>` : ''}</section>`;
 };
 UI.DO.journalmore = () => { UI.journalShown += 60; UI.render(false); };

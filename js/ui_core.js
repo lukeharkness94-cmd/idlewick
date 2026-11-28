@@ -13,7 +13,11 @@ UI.activityIcon = page => {
  return `<span class="route-art" aria-hidden="true">${art}</span>`;
 };
 UI.objectiveIcon = (q,o) => UI.activityIcon(o.guildPage||({carve:'carpentry',sail:'sailing',train:'beastmastery',study:'research',brew:'brewery',guildfight:'combat',guildheal:'combat'})[o.ev]||DQ.objPage(q,o));
-UI.money = amount => `<span class="money" role="img" aria-label="${fmt(amount)} coins"><span class="money-icon" aria-hidden="true">${ico('coin')}</span><span aria-hidden="true">${fmt(amount)}</span></span>`;
+UI.money = amount => `<span class="money" data-coins="${Math.round(+amount || 0)}" role="img" aria-label="${fmt(amount)} coins"><span class="money-icon" aria-hidden="true">${ico('coin')}</span><span aria-hidden="true">${fmt(amount)}</span></span>`;
+/* An empty page or list (27 Nov 2026, owner: polish): a small pixel picture drawn in code (js/pixel_feel.js), a dry
+   one-liner in the game's voice and, when it helps, the plain line saying what fills it. Not clickable: no outline.
+   size 'sm' uses the 2x picture where space is short; 'row' puts that picture beside the words in a tight panel. */
+UI.emptyState = (pic, line, sub = '', size = '') => `<div class="empty-state ${size === 'sm' || size === 'row' ? size : ''}" style="grid-column:1/-1">${DQ.emptyArt ? DQ.emptyArt(pic, size ? 48 : 72) : ''}<span class="es-words"><span class="es-line">${line}</span>${sub ? `<small class="es-sub">${sub}</small>` : ''}</span></div>`;
 /* Render existing choice definitions as visible buttons, never native dropdowns.
    The select is parsed in an inert template only; it never enters the page. */
 /* Every button choice carries the same pixel icon the menus use, so options read at a glance. */
@@ -202,7 +206,7 @@ UI.taskPanel = (key, title, kind, choices, verb) => {
     const requirementLabel=shortReason(requirementText);
     return `<button data-task-id="${c.id}" class="illustrated-card ${working?'active':''} ${choice.id===c.id?'selected':''} ${c.locked?'locked':''} ${c.missing?'missing':''}" data-do="taskselect" data-a="${kind}" data-b="${c.id}" data-page="${key}" aria-pressed="${choice.id===c.id}" ${c.locked?`aria-disabled="true" data-tip="text:${esc(c.reason||'Not unlocked yet')}"`:''}>
       <span class="choice-art">${art(c,96)}</span>${c.secret?'<span class="recipe-origin" title="Learned from a discovered recipe">'+ico('book')+' Found recipe</span>':''}${!c.locked && DQ.mastBadge ? DQ.mastBadge(kind, c.id) : ''}${!c.locked && DQ.gearMark ? (g => g && D.ITEMS[g] && D.ITEMS[g].slot ? DQ.gearMark(g) : '')(c.yieldId || (c.artKind === 'item' ? c.artId || c.id : null)) : ''}<b>${c.locked&&!c.revealed?'???':esc(c.name)}</b><small>${c.locked?`${ico('lock')}<span>${esc(requirementLabel)}</span>`:c.caption||esc(c.reason||'')}</small>${c.locked?'':`<span class="choice-state">${working?'● Working':c.stateText?c.stateText:c.locked?'Locked':c.away?'Travel required':''}</span>`}${working?`<span class="bar prog"><i data-prog="${kind}:${c.id}"></i></span>`:''}</button>`;
-  }).join('') || '<p class="dim">No recipes match. Try another category.</p>'}</div></section>`;
+  }).join('') || UI.emptyState('lens', 'Not a recipe in sight.', 'No recipes match. Try another category.')}</div></section>`;
   if(kind==='fight')return `<section class="panel encounter-controls"><div class="phead"><h2>${esc(choice.name)}</h2><small>Combat <b data-b="combat"></b></small></div>${action}<div class="task-summary">${choice.info||''}</div></section>${cards}`;
   const stage = `<section class="panel activity-stage ${running?'working':''}" style="--c:${D.SK[key]?.col||'var(--brass)'};--work-beat:${Math.max(900,Math.min(1700,(DQ.act?.dur||3600)/3))}ms"><div class="activity-scene ${kind} skill-${key}" data-kind="${kind}" data-task="${choice.id}" style="--landscape:url('${DQ.districtUrl ? DQ.districtUrl(S().town, kind, key, choice) : DQ.sceneUrl ? DQ.sceneUrl(S().town) : ''}')"><span class="scene-target">${art(choice, choice.artKind==='item' ? 48 : kind==='wood' ? 144 : kind==='train' ? 64 : 96)}</span>${choice.yieldId&&kind!=='fish'?`<span class="scene-yield"><small>Produces</small>${DQ.itemIco(D.ITEMS[choice.yieldId])}</span>`:''}${running?`<span class="scene-worker" aria-hidden="true"><img class="px" src="${DQ.heroWorkFigureUrl?DQ.heroWorkFigureUrl(S().look):DQ.heroFigureUrl(S().look)}" width="72" height="96" alt=""></span><span class="action-tool" aria-hidden="true">${(t => t ? DQ.itemIco(D.ITEMS[t]) : ico({wood:'woodcutting',mine:'mining',fish:'rod',thieve:'glove',recipe:{cooking:'cooking',smithing:'hammer',crafting:'crafting'}[key],alch:'staff'}[kind]||key))((k => { const n = k && DQ.toolTier(key); return n && D.ITEMS[`tool_${k}_${n}`] ? `tool_${k}_${n}` : null; })(DQ.toolKey && DQ.toolKey(key)))}</span><span class="work-atmosphere" aria-hidden="true"><i></i><i></i><i></i><i></i></span>`:''}</div>
     <div class="activity-caption"><div class="phead"><div><small>${esc(title)} · Level <b data-b="lvl:${key}"></b></small><h2>${esc(running ? DQ.actLabel() : choice.name)}</h2></div><span class="activity-state ${running?'ok':'dim'}">${running?'▶ Running':choice.blocked?'Preview':'Ready'}</span></div>${running?'<span class="bar prog activity-progress" role="img" aria-label="Current action progress"><i data-prog="@"></i></span>':''}${action}${!choice.blackout && DQ.mastLine ? DQ.mastLine(kind, choice.id) : ''}<div class="task-summary">${choice.info||''}${choice.blocked&&!running&&!choice.blackout?`<p class="bad">${esc(choice.reason)}</p>`:''}</div></div></section>`;
@@ -313,7 +317,7 @@ UI.V.magic = () => {
 /* ---------- Combat page ---------- */
 UI.foodChips = () => {
   const foods = DQ.foods();
-  return foods.length ? foods.map(id => { const it = D.ITEMS[id]; return `<button class="chip" style="--c:${it.col}" data-do="eat" data-a="${id}" data-tip="item:${id}">${ico(it.ic)}${it.name} <b class="mono" data-b="count:${id}"></b><small class="mono">+${it.heal}</small></button>`; }).join('') : `<p class="dim sm">No food. Cook fish, or buy bread from the shop.</p>`;
+  return foods.length ? foods.map(id => { const it = D.ITEMS[id]; return `<button class="chip" style="--c:${it.col}" data-do="eat" data-a="${id}" data-tip="item:${id}">${ico(it.ic)}${it.name} <b class="mono" data-b="count:${id}"></b><small class="mono">+${it.heal}</small></button>`; }).join('') : UI.emptyState('plate', 'A clean plate and a long day ahead.', 'No food. Cook fish, or buy bread from the shop.', 'row');
 };
 /* One selected encounter for the whole combat page: the creature you are fighting, else the one you last chose,
    else the first ordinary creature here. The arena preview, the preparation brief and the start control all use it. */
@@ -390,7 +394,7 @@ UI.tile = (sk, i = 0) => {
 
 UI.renderLog = () => {
   const el = $('#loglist'); if (!el) return;
-  el.innerHTML = S().log.slice(0, 14).map(l => { const d = new Date(l.t); return `<li class="${esc(l.k || '')}"><time>${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}</time><span>${esc(l.m)}</span></li>`; }).join('') || `<li><time></time><span class="dim">Your adventures will be written here.</span></li>`;
+  el.innerHTML = S().log.slice(0, 14).map(l => { const d = new Date(l.t); return `<li class="${esc(l.k || '')}"><time>${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}</time><span>${esc(l.m)}</span></li>`; }).join('') || `<li class="log-empty">${UI.emptyState('inkpot', 'Nothing has happened yet. The quill is sharpened and bored.', 'Your adventures will be written here.', 'sm')}</li>`;
 };
 UI.chart = () => {
   /* the chart is drawn at its container's own width so its labels keep their size (a fixed 600-wide viewBox blew

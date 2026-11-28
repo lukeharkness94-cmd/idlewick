@@ -304,3 +304,7 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   up from the save (boss trophies, named-weapon rack, museum shelf, a basket per beast) and quest givers leave letters
   on its desk (none in the first 20 minutes, at most one per 45-90 minutes of play, three waiting, kept in the Journal);
   met givers walk their town, and a finished restoration draws a cheering crowd for about a minute.
+- 27 Nov 2026 (owner): "I love the subtle things that make games feel more polished ... Let's do all 15." Added: controls
+  press (1px sink and spring back, replacing the shrink-on-press scale), gathered items fly to the backpack, XP drifts
+  into its rail row, the quill pointer (Settings switch), pictures and one-liners on empty pages, and hold-to-confirm for
+  big spends (10,000+ coins, or 1,000+ that is a quarter of your coins).

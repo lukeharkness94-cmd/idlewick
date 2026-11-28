@@ -338,7 +338,8 @@ DQ.stopAct = (silent, why, done) => { /* done: a batch finished as planned, show
 
 const extraCoins = () => D.ECONOMY.gatherCoinScale * (D.ECONOMY.gatherTownScale[townIdx()] || 1);
 function floatItem(id, n) { const it = D.ITEMS[id]; DQ.floatAt(document.querySelector('.card.active .own') || document.querySelector('.card.active') || document.querySelector('.nowp'), `${DQ.ico(it.ic)}+${n} ${it.name.toLowerCase()}`, it.col); }
-function floatXp(sk, x) { DQ.floatAt(document.querySelector('.card.active') || document.querySelector('.arena') || document.querySelector('.nowp'), `${DQ.ico(sk)}+${fmt(x)} XP`, D.SK[sk].col); }
+/* the XP drifts into that skill's row in the rail when it can (js/ui_feel.js); otherwise it rises where it was earned */
+function floatXp(sk, x) { if (DQ.flowXp && DQ.flowXp(sk, x)) return; DQ.floatAt(document.querySelector('.card.active') || document.querySelector('.arena') || document.querySelector('.nowp'), `${DQ.ico(sk)}+${fmt(x)} XP`, D.SK[sk].col); }
 
 function gatherDone(kind, n) {
   const sk = n.skill;
@@ -586,7 +587,7 @@ function combatRound() {
     DQ.xpSplit(sty).forEach(([sk, per], i) => { const x = DQ.addXp(sk, xpDealt * per); f.heroXp = (f.heroXp || 0) + x; if (!i) first = [sk, x]; });
     f.heroXp = (f.heroXp || 0) + DQ.addXp('hitpoints', xpDealt * 1.33);
     /* the XP shows when the blow visibly lands, not while the arrow or spell is still in flight (27 Nov 2026 audit) */
-    if (first) { const fl = () => DQ.floatAt(document.getElementById('av-foe'), `${ico(first[0])}+${fmt(first[1])} XP`, D.SK[first[0]].col); if (DQ.ui && DQ.ui.afterImpact && !DQ.sim.on && !DQ.forecasting) DQ.ui.afterImpact(fl, DQ.battleTiming?.impact || 390); else fl(); }
+    if (first) { const fl = () => { const foe = document.getElementById('av-foe'); if (!(DQ.flowXp && DQ.flowXp(first[0], first[1], foe))) DQ.floatAt(foe, `${ico(first[0])}+${fmt(first[1])} XP`, D.SK[first[0]].col); }; if (DQ.ui && DQ.ui.afterImpact && !DQ.sim.on && !DQ.forecasting) DQ.ui.afterImpact(fl, DQ.battleTiming?.impact || 390); else fl(); }
   }
   if (f.hp <= 0) return kill(m);
   if (DQ.beastAttack) { f.hp -= DQ.beastAttack(f, m); if (f.hp <= 0) return kill(m); }

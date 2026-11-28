@@ -255,7 +255,7 @@ UI.DO.skiponboarding = () => {
   DQ.save();
   UI.render(false);
 };
-UI.V.activity = () => `${UI.inboxPanel()}<section class="panel"><div class="phead"><h2>Activity</h2><small class="mono" id="xph"></small></div><div id="chart"></div><ul class="log" id="loglist"></ul></section>`;
+UI.V.activity = () => `${UI.inboxPanel() || `<section class="panel inbox-empty">${UI.emptyState('table', 'No decisions waiting. The village is coping, somehow.', 'World events you leave for later wait here.', 'row')}</section>`}<section class="panel"><div class="phead"><h2>Activity</h2><small class="mono" id="xph"></small></div><div id="chart"></div><ul class="log" id="loglist"></ul></section>`;
 let gAcc = 0;
 /* Up next refreshes quietly: if the same goals are showing, only the numbers and bars are updated in place, so nothing flickers or re-animates */
 const syncGoal = (a, b) => {

@@ -36,7 +36,7 @@ UI.planHtml = () => {
       ${UI.levelStopHtml(a)}
       ${prog ? `<div class="sm">Progress: <b class="mono">${fmt(prog[0])} / ${fmt(prog[1])} ${prog[2]}</b></div>` : ''}
       ${sup ? `<div class="sm ${sup.n ? '' : 'bad'}">${ico('bag')} Supplies: ${sup.label}${sup.ms ? ` (about ${DQ.fmtTime(sup.ms)})` : ''}</div>` : ''}${awayPreview(a, sup)}</div>`
-    : `<p class="dim">Nothing is running. Queue a task with the <b>+</b> button on any card, or just click a card to start it.</p>`;
+    : UI.emptyState('hourglass', 'Nothing is running. The sand has all settled.', 'Queue a task with the <b>+</b> button on any card, or just click a card to start it.', 'sm');
   const rows = Q.map((t, i) => `<div class="qitem"><span class="qn mono">${i + 1}</span><div class="qbody"><b>${DQ.actLabel(t)}</b>
       <div class="qctl">${UI.choiceButtons(`<select data-in="qrule" data-i="${i}" aria-label="Stop rule">${D.STOP_RULES.filter(r => r[0] !== 'none').map(([k, n]) => `<option value="${k}" ${t.rule === k ? 'selected' : ''}>${n}</option>`).join('')}</select>`)}
       ${UI.choiceButtons(`<select data-in="qpace" data-i="${i}" aria-label="Pace">${Object.entries(D.PACE).map(([k, p]) => `<option value="${k}" ${t.pace === k ? 'selected' : ''}>${p.name}</option>`).join('')}</select>`)}</div></div>
