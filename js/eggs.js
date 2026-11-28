@@ -75,7 +75,7 @@ if (page0) UI.V.beastmastery = () => { const h = page0(); const eggs = UI.hatche
   return h.includes('class="ranch-side">') ? h.replace('class="ranch-side">', 'class="ranch-side">' + eggs) : h; };
 /* one plain explanation of the three ways, as a pop-up (reference, not an action) and above the two finding pages */
 /* captures replaced the Trapper (owner, 26 Nov 2026, beast_capture.js) */
-const WAYS = [['Lucky finds', 'Rare egg from any skill or fight: 1 in 2,000 actions, 1 in 500 victories. Odds: Guide → Collection.'], ['Capture', 'Catch an animal you have hunted in Beastmastery → Capture. No egg: it goes straight to your pens.'], ['Fieldwork and fights', 'Each region’s wild beast can leave an egg in a wooden trap or after a victory.']];
+const WAYS = [['Lucky finds', 'Rare egg from any skill or fight: 1 in 2,000 actions, 1 in 500 victories. Odds: Guide → Collection.'], ['Capture', 'Catch a mythical beast in Beastmastery → Capture with the trap, net or halter that suits it and its bait. No egg: it goes straight to your pens.'], ['Fieldwork and fights', 'Each region’s wild beast can leave an egg in a wooden trap or after a victory.']];
 UI.DO.eggways = () => Q.modal({ title: 'Where beasts come from', body:`<div class="egg-ways">${WAYS.map(([t, d], i) => `<div class="egg-way"><b>${i + 1}. ${t}</b><p>${d}</p></div>`).join('')}<p class="sm dim">Hatch times: wild 10 min · speckled 30 min · royal 1 hour.</p></div>`, actions: [{ label: 'Open the collection log', fn: () => { UI.colTab = 'eggs'; Q.go('collection'); } }, { label: 'Close', primary: true }] });
 /* the rail count for Beastmastery never counted eggs before; a waiting egg is not an action, so it still does not */
 })();

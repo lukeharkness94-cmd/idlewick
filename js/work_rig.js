@@ -200,7 +200,7 @@ SPEC.survey = { lean: 'sight', beatMs: 3200, beats: [{ at: .6, sfx: 'quill' }], 
 SPEC.alch = { lean: 'sight', mode: 'action', beats: [{ at: .82, sfx: 'cast', fx: 'flash', replaces: 'cast' }], wipe: [.2, .5], contact: 'free', stand: 22, rest: .1,
   keys: [K(0, { nx: 17, ny: 21, sy: 1 }), K(.6, { nx: 18, ny: 19, sy: 0 }, 'io'), K(.82, { nx: 19, ny: 18, sy: -1 }, 'in'), K(1, { nx: 17, ny: 21, sy: 1 }, 'io')],
   draw(p, g, c) { const B = [17, 31 + p.sy]; TOOL.staff(g.back, B, -86, c.orb); arm(g.back, 'far', at(B, -86, 12), c.look, 0); if (!c.wipe) { arm(g.front, 'near', [p.nx, p.ny], c.look, 0); g.front.fix([p.nx + 1, p.ny - 1], '#e6b84a'); } return [p.nx + 1, p.ny - 2]; } };
-/* Hunting: crouched on the trail reading prints; kneel to set the trap; then up with the spear for the strike, which
+/* Hunting: crouched on the trail reading prints; kneel to lay the lure; then up with the spear for the strike, which
    stops short: whether it lands is shown only after the roll. */
 SPEC.hunt = { lean: 'none', mode: 'action', beats: [{ at: .88, sfx: 'swish' }], wipe: null, contact: 'free', stand: 56, rest: .1,
   posture: t => t < .45 ? 'crouch' : t < .75 ? 'kneel' : 'stand',

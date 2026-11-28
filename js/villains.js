@@ -7,7 +7,9 @@
 (() => {
 const DQ = window.DQ, D = DQ.data;
 const like = (base, o) => {
-  const b = D.MON[base]; if (!b || D.MON[o.id]) return;
+  /* the farm animals as they were before the hunting ground changed (28 Nov 2026): the cow has left the game and the
+     chicken now drops raw chicken, so their old stats and drops stay the template */
+  const b = (D.MON_TEMPLATES || {})[base] || D.MON[base]; if (!b || D.MON[o.id]) return;
   const m = { ...b, ...o, drops: [...o.own, ...b.drops.filter(d => !o.drop.includes(d[0]) && !o.own.some(x => x[0] === d[0]))] };
   delete m.own; delete m.drop; delete m.hl; m.hp = Math.round(o.hp * .62); m.max = Math.max(1, Math.round(o.max * .72));
   D.MON[m.id] = m; D.MONLIST.push(m);
@@ -128,9 +130,10 @@ const fieldMats = () => {
   if (!DQ.fieldMaterials || DQ.fieldMaterials._roster) return;
   const fm0 = DQ.fieldMaterials;
   DQ.fieldMaterials = town => {
-    const g = DQ.huntGround(town); if (!g) return fm0(town);
-    const out = [];
-    for (const e of g.monsters) { const m = D.MON[e.id]; if (!m || (m.hl && DQ.huntLevel() < m.hl)) continue; for (const [k] of m.drops || []) { const it = D.ITEMS[k]; if (it && !it.slot && it.type !== 'container' && !it.unique && !out.includes(k)) out.push(k); } }
+    /* each region's own hauls (hunt_tiers_data.js D.FIELD_MATS, 28 Nov 2026): what its old ground animals gave, each
+       from the Hunting level the first of them was found at */
+    const t = D.FIELD_MATS && D.FIELD_MATS[town]; if (!t) return fm0(town);
+    const out = Object.entries(t).filter(([k, l]) => D.ITEMS[k] && DQ.huntLevel() >= l).map(([k]) => k);
     return out.length ? out : fm0(town);
   };
   DQ.fieldMaterials._roster = true;

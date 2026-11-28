@@ -52,8 +52,8 @@ dated line to the history file.
 ## 2. Look and art
 
 - **Original pixel art drawn in code, nothing else.** `js/pixelart.js` (system, palette, hero, `A.dusk`), `js/pixel_items.js`
-  with its redrawn sets `js/pixel_items_weapons.js`, `_armour.js`, `_materials.js` and `_food.js` (each wraps
-  `A.itemSprite`; the later file wins an overlap), `js/pixel_creatures.js`, `js/pixel_world.js` (restoration pieces and
+  with its redrawn sets `js/pixel_items_weapons.js`, `_armour.js`, `_materials.js`, `_food.js` and `_hunt.js` (each
+  wraps `A.itemSprite`; the later file wins an overlap), `js/pixel_creatures.js`, `js/pixel_world.js` (restoration pieces and
   the original icons), `js/pixel_icons.js` (the 16 × 16 interface icons, 32 × 32 skill emblems and boss trophies; loaded
   before pixel_runtime.js), `js/pixel_nodes.js` (trees, ore boulders, fishing-spot fish, crops, furniture, workers,
   object thieving marks), `js/town_scene.js` (top-down towns, restoration sites, townsfolk), `js/combat_scenes.js` (the
@@ -201,7 +201,7 @@ dated line to the history file.
   shelf; the "Available only" switch is per shelf family (`UI.availOnly`, saved in `settings.availOnly`), on by default
   until the hero owns something from that family, and when on shows only what the hero can afford and make now, with a
   line counting what is hidden. Purchases fly to the backpack; double clicks are guarded (`js/usability.js`). Big spends
-  hold to confirm (owner, 27 Nov): a buy or sale worth 10,000+ coins, or 1,000+ that is a quarter of your coins
+  hold to confirm (owner, 27 Nov): a buy, sale or build worth 10,000+ coins, or 1,000+ that is a quarter of your coins
   (`DQ.bigSpend`), needs a 0.6 s press-and-hold (pointer, Enter or Space) that fills the button from the left; letting go
   early cancels, a click explains, screen readers get `#lw-hold-hint`; smaller amounts stay one click. Prices inside
   buttons use `UI.money` (its `data-coins` is what the check reads).
@@ -286,7 +286,7 @@ dated line to the history file.
   Staff through the letter to Wren; never a class lock, never re-granted to loaded saves (`D.STARTER_KITS`).
 - **Unique levels** (`js/level_spread.js`, runs last): no two gathering spots of one kind and no two recipes in one
   category/type share a level (tools climb per family); the opening keeps flax string at Crafting 1, the wooden trap at
-  Crafting 2 and copper at Mining 1 (tin is 2). A quest may push a skill a little further.
+  Crafting 2, grain mash (Hunting's lure gate) at Cooking 1 and copper at Mining 1 (tin is 2). A quest may push a skill a little further.
 - **Towns open content everywhere**: once a town is unlocked, all its gathering spots (thieving and signature ones
   too), surveys and fieldwork work from any town (`DQ.nodeRegional` is always false). Towns matter for restoration,
   combat, shops, local supplies and discoveries.
@@ -319,27 +319,38 @@ dated line to the history file.
   `DQ.give` refuses ids that are not items. Rarity labels (`D.RARITY`) are bands of a drop's own chance; never change a
   chance to fix a label.
 - **Offline**: up to 24 h counted at full speed; the ceiling (`js/offline_ceiling.js`) stops gathering and combat skills
-  at the highest content level in the towns reached (Hunting's cap is the top ground animal; Beastmastery and the rest
-  uncapped pending the owner). Never in forecasts or live play.
+  at the highest content level in the towns reached (Hunting's cap is the top hunting animal, 98; Beastmastery and the
+  rest uncapped pending the owner). Never in forecasts or live play.
 
-### Hunting and Beastmastery (owner, 26 Nov: two separate things)
-- **Hunting** kills animals for their drops. One hunting ground with five tier tabs (`D.HUNT_GROUND`, js/hunt_stalk.js):
-  ten animals per tier, each on its own level two apart, plain animals low and mythic ones high; only the Hunting level
-  and the tier's kit matter, never the town. A hunt tracks (45%), sets the trap (30%) and strikes (25%); the strike lands
-  with `DQ.huntCatch` (45–92%), otherwise it slips away for 30% XP. Kit from Intermediate up: that tier's trap in the
-  pack and one bait per hunt; the trap you set wears out (owner, 27 Nov: 1 hunt in 60 for the wooden trap to 1 in 120
-  for the sturdiest, about one every 7-10 minutes of hunting, `DQ.trapWear`); counts update live. A catch gives drops, quest kills and the wild-companion chance, never
-  combat XP or food. An animal's name stays ??? until your first catch, even at
-  your level and even a chicken (owner, 27 Nov). Animals off the ground keep their ids, kills, guide pages and pets
-  and are listed only once caught (`DQ.animalListed`); an active quest can still send you after one. Fieldwork lays traps for a region's materials.
-- **Beastmastery Capture** (`js/beast_capture.js`): any animal you have hunted can be caught alive and kept. Track 40%,
-  live trap 30%, coax 30%; odds 55% + 2.5% per Beastmastery level above the animal (35–90%); one bait per try, the trap
-  used only on a keep; a success is a `wild_<id>` beast straight to a pen (`DQ.awardPet(id, { hatched: true })`); one you
-  own is let go for the XP. Never in forecasts. No bond XP from captures: deliberate paid training (cooldown, no
-  repeating training) stays the only repeating bond growth; ten bond levels as in docs/beastmastery.md.
+### Hunting and Beastmastery (owner, 26 and 28 Nov: two separate things, no animal in both)
+- **Hunting** takes real game for its drops (docs/hunting.md). One hunting ground with five tier tabs
+  (`D.HUNT_GROUND`, js/hunt_tiers_data.js, js/hunt_stalk.js): 40 real animals, eight per tier, each on its own level,
+  small game and fowl low and great beasts (moose, bison, musk ox, walrus, polar bear) high; only the Hunting level
+  matters, never the town. Each animal has its own drops (meat, feathers, down, pelts, hides, antler, horn, tallow,
+  ivory) with real uses in Cooking, Crafting and the capture kit. None is a mythical beast or a combat creature.
+  A hunt tracks (45%), lays a lure (30%) and strikes (25%). Every hunt lays one lure from Cooking → Lures (eight,
+  ten a batch); no lure, no hunt, except an active quest's animal. Each animal secretly likes one lure (`m.lure`): the
+  first hunt with a lure says plainly, after the roll, whether it likes or ignores it, kept in `S.hunt.lures` and shown
+  on its card, field-guide page and tooltip; the player picks the lure with visible buttons (held counts, ♥/✗/?). The
+  strike lands with `DQ.huntCatch`: 80% + 1% a level above the animal (to 95%) with the liked lure, 25% + 1% a level
+  (to 45%) with any other; the page never reveals a verdict before the hunt; an escape pays 30% XP. A catch gives
+  drops, quest kills and its field-guide entry, never companions, combat XP or food used. Learning Hunting needs three
+  grain mash (Cooking 1). An animal's name stays ??? until your first catch (owner, 27 Nov). Fieldwork lays wooden
+  traps for a region's materials (`D.FIELD_MATS`).
+- **Beastmastery Capture** (`js/beast_capture.js`, docs/beastmastery.md) catches the 30 mythical beasts of `D.MYTHS`
+  (not creatures, not hunting animals), named once you have tried to catch one. It needs Beastmastery at the beast's
+  level, the crafted capture tool that suits its kind (`D.CAPTURE_TOOLS`: wooden or padded live trap, fowling or
+  starwoven net, rope or mithril halter, iron-jaw cage, warded snare or rune trap) and its tier's Cooking bait. Track
+  40%, set the trap 30%, coax 30%; odds 55% + 2.5% per Beastmastery level above the beast (35–90%), so lower beasts get
+  easier; one bait per try, the tool used only on a keep; a success is a `wild_<id>` beast straight to a pen
+  (`DQ.awardPet(id, { hatched: true })`); one you own is let go for the XP. Never in forecasts. Companions caught from
+  ordinary animals are let go on load (owner, 28 Nov: "Get rid"). Every companion is mythical: the bond, skill and boss
+  pets that were ordinary animals are creatures of fable with the same ids and bonuses (docs/beastmastery.md). No bond XP from captures: deliberate paid training
+  (cooldown, no repeating training) stays the only repeating bond growth; ten bond levels as in docs/beastmastery.md.
 - **Eggs** are lucky finds: 1 in 2,000 skilling actions and 1 in 500 victories or catches (`D.EGG_DROP`), hatching at the
-  ranch after 10/30/60 minutes; all older egg sources stay. Expeditions are retired: none can be sent; one already out
-  resolves once. Only the assigned companion gives its bonus. Collection (`js/collection.js`) shows real odds.
+  ranch after 10/30/60 minutes; all older egg sources stay and hatch only companions that exist. Expeditions are
+  retired: none can be sent; one already out resolves once. Only the assigned companion gives its bonus. Collection
+  (`js/collection.js`) shows real odds.
 
 ### Quests, story and the world
 - **Quests**: one Current list (ready first, then active, then new), story index with Main/Side grouping, live counts
@@ -388,7 +399,12 @@ dated line to the history file.
   existing items and `DQ.migrateDiscoveries` grants ones earned by mastery; plots keep a saved next crop. Purchases,
   brewing, claims and choices save atomically and roll back on a failed save; forecasts never change anything.
 - **Hunting stage strips** (js/hunting_stages.js) show only real progress (fight health, the trap cycle, the running
-  hunt or capture); outcomes appear after the roll, never before.
+  hunt or capture); outcomes and lure verdicts appear after the roll, never before.
+- **Building costs materials** (owner, 28 Nov; `js/build_costs.js`, `D.BUILD`): farm plots, pens, the cottage and its
+  rooms take logs, planks and bars matched to tier plus about half their old coins; furniture, workshop ranks, smithy
+  gear, boats and restorations already did. Needs show as named held / required tiles with a source route, a short
+  build refuses with one plain sentence, the spend is atomic with rollback on a failed save, and big builds hold to
+  confirm like big purchases.
 - **Workers** take finite jobs through `DQ.assign` (`js/worker_jobs.js`); wages only for time worked; output never spent
   automatically.
 - **Mastery guilds** (`js/mastery_guilds.js`) extend all skills at 99 through side quests; never reset earned ranks.

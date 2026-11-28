@@ -68,7 +68,7 @@ DQ.goals = () => {
   if (!S().house.owned) { if (adv >= D.HOUSE.adv) add({ id: 'house', cat: 'Home', icon: 'house', col: '#d8a64a', title: 'Buy a house', sub: `${fmt(S().coins)} / ${fmt(D.HOUSE.price)} coins`, pct: clamp(S().coins / D.HOUSE.price, 0, 1), eta: etaCoins(D.HOUSE.price - S().coins), go: 'house', ready: S().coins >= D.HOUSE.price }); }
   else {
     const H = S().house, opts = [];
-    D.ROOMS.forEach(r => { if (!H.rooms[r.id]) opts.push({ name: `Build the ${r.name.toLowerCase()}`, coins: r.price, ok: true }); else r.furn.forEach(f => { const t = H.furn[f.id] || 0; if (t < 3) { const c = f.costs[t]; opts.push({ name: `${t ? 'Upgrade' : 'Place'} ${f.name.toLowerCase()}`, coins: c.coins, ok: DQ.canAfford(c), what: f.label(Object.values(f.fx)[0][t]) }); } }); });
+    D.ROOMS.forEach(r => { if (!H.rooms[r.id]) opts.push({ name: `Build the ${r.name.toLowerCase()}`, coins: r.price, ok: DQ.buildCost ? DQ.canAfford(DQ.buildCost('room', r.id)) : true }); else r.furn.forEach(f => { const t = H.furn[f.id] || 0; if (t < 3) { const c = f.costs[t]; opts.push({ name: `${t ? 'Upgrade' : 'Place'} ${f.name.toLowerCase()}`, coins: c.coins, ok: DQ.canAfford(c), what: f.label(Object.values(f.fx)[0][t]) }); } }); });
     opts.sort((a, b) => a.coins - b.coins); const o = opts[0];
     if (o) add({ id: 'furn', cat: 'Home', icon: 'house', col: '#d8a64a', title: DQ.cap(o.name), sub: `${o.what ? o.what + ' · ' : ''}${fmt(Math.min(S().coins, o.coins))} / ${fmt(o.coins)} coins`, pct: clamp(S().coins / o.coins, 0, 1), eta: etaCoins(o.coins - S().coins), go: 'house', ready: o.ok && S().coins >= o.coins });
   }

@@ -354,6 +354,33 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 28 Nov 2026 (owner: "could we put this same amount of effort into the thoughts of every creature, monster, beast and
   character in the game?"): ordinary creatures are redesigned by hand at 32 x 32 with the bosses' painter, both views, a
   batch at a time; batch 1 is every Willowbrook and Mossbarrow creature (js/pixel_hand_1.js), replacing their builder views.
+- 28 Nov 2026 (owner: "There should be NO animals the same in either. Hunting should be animals you can get resources
+  from (feathers, game, chicken meat, bones etc etc - decide for each of the animals). They should be animals like boar,
+  chickens, moose, oxen, deer etc which you'd hunt in real life"; answer: 40 animals, 5 tiers x 8): the hunting ground
+  is 40 real game animals with their own drops; the mythic animals and the other old ground animals leave it. Replaces
+  "ten animals per tier, each on its own level two apart, plain animals low and mythic ones high" and "Animals off the
+  ground keep their ids, kills, guide pages and pets and are listed only once caught".
+- 28 Nov 2026 (owner: "Hunting shouldn't require a trap, it should require a lure - so on the first attempt when
+  hunting, you lay the lure down (something you make in cooking) and then it tells you if that animal likes that lure
+  or not, once you've found which lure it likes, its chances of you being able to hunt it, increase a lot"): a hunt
+  lays one lure from Cooking; each animal likes one; the first try with a lure reveals it; liked 80-95%, other 25-45%;
+  Hunting is learned with three grain mash. Replaces the tier kit (trap and bait), trap wear (`DQ.trapWear`), the
+  45-92% strike, the wooden-trap Hunting gate and its +5% XP per held trap, and hunting's wild-companion chance.
+- 28 Nov 2026 (owner: "The beastmastery should be mythical creatures you can capture with hard work, high skill etc.
+  ... Beastmastery should use traps with bait in them and require you to have physical traps or leashes or some other
+  thing you can capture - again, something you should have to craft to be able to do. The higher level you are, the
+  easier the lower creatures become."): Capture catches 30 mythical beasts with the crafted tool that suits each and
+  its tier's Cooking bait, at Beastmastery level. Replaces "any animal you have hunted can be caught alive and kept".
+- 28 Nov 2026 (owner, on companions caught from ordinary animals: "Get rid. We're treating this game like it's not
+  launched yet so it doesn't matter."): they are let go on load with a note; a running task on a removed animal stops
+  instead of failing the save.
+- 28 Nov 2026 (owner: "building anything in the game should require resources as well as money (pens, chicken coops
+  etc)"; answer: "materials matched to tier, coins roughly halved"): plots, pens, the cottage and its rooms cost logs,
+  planks and bars plus about half the old coins (js/build_costs.js). Replaces coin-only plot, pen, house and room prices.
+- 28 Nov 2026 (coordinator, applying the owner's "Beastmastery should be mythical creatures" and "NO animals the same
+  in either"): no companion is an ordinary animal; the four bond species and the skill and boss pets that were animals
+  are re-themed as creatures of fable, ids and bonuses kept. Replaces Hearthwolf, Bramble boar, Duskwatch owl, Honeyclaw
+  and the farm dog, chick, goldfish, squirrel, mole, alley cat, owl, piglet, boarlet and hermit crab companions.
 - 28 Nov 2026 (owner: "does this whole redo bring in the opening scene too? Also, this needs a complete redo if not - it's
   not particularly immersive - use the new interactive characters, motions etc to make the opening scene far more
   immersive"): the opening is rebuilt as a living, playable scene from the game's own town scenes, walkers, town life,

@@ -1,12 +1,11 @@
 # Beast bonds and the November 10 UI update
 
-> **26 November 2026: captures replace expeditions.** The owner split the two skills: Hunting goes out to trap and
-> kill animals for their drops; Beastmastery catches animals alive and keeps them. Read "Captures and lucky eggs"
-> at the end first. The expedition rules below are history: nothing can be sent any more, and an expedition already
-> out still resolves once at its saved time. Bonds, training, evolution, companions and hatching are unchanged.
+> **28 November 2026: Beastmastery captures mythical beasts.** Hunting is real game with lures (docs/hunting.md);
+> Beastmastery catches the 30 mythical beasts below with a crafted capture tool and Cooking bait. Read "Mythical
+> beasts" at the end first. "Captures and lucky eggs" (26 Nov) and the expedition rules above it are history where
+> they disagree. Bonds, training, evolution, companions and hatching are unchanged.
 
 Baseline: main at bc6d491b7a37fb8c471011795799e0e448d18a5a (8 November 2026). Changes are local; no publication or push.
-
 ## Decisions and tuning
 
 - Existing companions, IDs, earned levels, signature bonuses and tricks remain. Four additional species offer one distinct passive each: Hearthwolf (5% critical chance), Bramble boar (8% coins), Duskwatch owl (10% XP), Honeyclaw (5% boss damage). Hero thresholds are 15/18/22/26. Their normal and evolved sprites are original code drawings.
@@ -92,3 +91,122 @@ Verification: `tests/beast-capture.cjs` (browser, isolated hero with granted lev
 bounds, keeping once, letting go, failures, kit and stopping, forecasts, offline parity, save and reload, the old
 expedition resolving once, egg hooks and rates, Collection odds and the Capture tab. These are scripted checks, not
 human playtesting: whether captures feel worth it and how often lucky eggs land in real play needs players.
+
+
+## Mythical beasts (28 November 2026)
+
+Owner: "There should be NO animals the same in either ... The beastmastery should be mythical creatures you can
+capture with hard work, high skill etc ... Beastmastery should use traps with bait in them and require you to have
+physical traps or leashes or some other thing you can capture - again, something you should have to craft to be able
+to do. The higher level you are, the easier the lower creatures become." Answers: companions already caught from
+ordinary animals: "Get rid."
+
+- **The beasts** (`js/hunt_tiers_data.js` `D.MYTHS`): 30 mythical creatures in the five tiers by Beastmastery level,
+  none of them a hunting animal or a combat creature. They are not `D.MON` creatures (nothing fights or hunts them);
+  their art is the old creature drawing under the same id where one existed (thimblefox, griffin, firebird...) or a
+  new builder recipe (cockatrice, will-o'-wisp, kelpie, kirin, sphinx cub), with front and side views registered by
+  js/pixel_views.js. A beast stays ??? until you have tried to catch one or own one.
+- **Capture** (`js/beast_capture.js`, `KIND_EXT.capture`, id = beast id): Tracking 40%, Setting the trap 30%, Coaxing
+  30% of the cycle (8 s + 0.09 s per Beastmastery level of the beast). It needs Beastmastery at the beast's level, the
+  crafted tool that suits its kind (`D.CAPTURE_TOOLS`) and its tier's bait (`D.CAPTURE_BAIT`, Cooking → Bait). One
+  bait per try, caught or not; the tool goes home with the beast you keep; a beast you already own is checked over and
+  let go for the XP (tool kept). Running out of either stops the task with the reason.
+- **Odds**: 55% + 2.5% per Beastmastery level above the beast, between 35% and 90%, so the lower beasts get easier as
+  you rise. XP as before (an escape pays 30%).
+- **Companions**: each beast is a `wild_<id>` companion (js/beastmastery_data.js) with one bonus that grows with its
+  tier (2% to 6%: damage, less damage taken, coins, XP or task speed). Thimblefox, tideglass skitter, candletoad and
+  prism kite are still their regions' signature beasts, so Fieldwork's wooden traps can still leave their eggs.
+- **Ordinary animals**: the hunting animals have no companions any more (their `wild_` entries are removed), and a
+  companion caught from an ordinary animal is let go on load with a note in the log; an egg of one is dropped too.
+  Nothing else about the hero changes. The four bond species stay as lucky-find eggs, re-themed as mythical (below).
+
+| Beast | Beastmastery | Tier | Kind | Capture tool | Bait | As companion |
+|---|---|---|---|---|---|---|
+| Thimblefox | 2 | Beginner | Small beasts | Wooden trap | Seed cake | +2% damage |
+| Bellhare | 5 | Beginner | Small beasts | Wooden trap | Seed cake | 2% less damage taken |
+| Candletoad | 8 | Beginner | Small beasts | Wooden trap | Seed cake | +2% coins from every source |
+| Tideglass skitter | 11 | Beginner | Small beasts | Wooden trap | Seed cake | +2% XP to every skill |
+| Hearth hare | 14 | Beginner | Small beasts | Wooden trap | Seed cake | Every task is 2% faster |
+| Cockatrice | 17 | Beginner | Winged beasts | Fowling net | Seed cake | +2% damage |
+| Prism kite | 21 | Intermediate | Winged beasts | Fowling net | Scent bait | 3% less damage taken |
+| Will-o’-wisp | 24 | Intermediate | Spirits | Warded snare | Scent bait | +3% coins from every source |
+| Chimehorn | 27 | Intermediate | Hoofed beasts | Rope halter | Scent bait | +3% XP to every skill |
+| Glassback | 30 | Intermediate | Small beasts | Padded live trap | Scent bait | Every task is 3% faster |
+| Kelpie | 33 | Intermediate | Hoofed beasts | Rope halter | Scent bait | +3% damage |
+| Moon hare | 36 | Intermediate | Small beasts | Padded live trap | Scent bait | 3% less damage taken |
+| Selkie | 39 | Intermediate | Small beasts | Padded live trap | Scent bait | +3% coins from every source |
+| Hippogriff | 42 | Skilled | Winged beasts | Fowling net | Honey bait | +4% XP to every skill |
+| Mirelight stag | 45 | Skilled | Hoofed beasts | Rope halter | Honey bait | Every task is 4% faster |
+| Ember salamander | 48 | Skilled | Spirits | Warded snare | Honey bait | +4% damage |
+| Nimbus grazer | 51 | Skilled | Hoofed beasts | Rope halter | Honey bait | 4% less damage taken |
+| Kirin | 54 | Skilled | Hoofed beasts | Rope halter | Honey bait | +4% coins from every source |
+| Basilisk hatchling | 57 | Skilled | Fierce beasts | Iron-jaw cage | Honey bait | +4% XP to every skill |
+| Firebird | 60 | Expert | Winged beasts | Starwoven net | Smoked bait | Every task is 5% faster |
+| Unicorn | 63 | Expert | Hoofed beasts | Mithril halter | Smoked bait | +5% damage |
+| Griffin | 66 | Expert | Fierce beasts | Iron-jaw cage | Smoked bait | 5% less damage taken |
+| Phoenix chick | 69 | Expert | Spirits | Rune trap | Smoked bait | +5% coins from every source |
+| Sphinx cub | 72 | Expert | Fierce beasts | Iron-jaw cage | Smoked bait | +5% XP to every skill |
+| Thunderbird | 76 | Expert | Winged beasts | Starwoven net | Smoked bait | Every task is 5% faster |
+| Star stag | 81 | Master | Hoofed beasts | Mithril halter | Moonlit bait | +6% damage |
+| Kraken calf | 84 | Master | Fierce beasts | Iron-jaw cage | Moonlit bait | 6% less damage taken |
+| Sun phoenix | 87 | Master | Spirits | Rune trap | Moonlit bait | +6% coins from every source |
+| Celestial unicorn | 91 | Master | Hoofed beasts | Mithril halter | Moonlit bait | +6% XP to every skill |
+| Eclipse roc | 95 | Master | Winged beasts | Starwoven net | Moonlit bait | Every task is 6% faster |
+
+Capture tools:
+
+| Tool | Recipe | Inputs |
+|---|---|---|
+| Wooden trap | Crafting 2 | 2 logs, 1 leather string |
+| Padded live trap | Crafting 20 | 2 oak planks, 3 fur pelt, 2 leather string |
+| Fowling net | Crafting 14 | 4 leather string, 2 down |
+| Starwoven net | Crafting 60 | 2 mithril bar, 2 maple planks, 6 down, 6 leather string |
+| Rope halter | Crafting 26 | 3 leather string, 2 deer hide |
+| Mithril halter | Smithing 60 | 3 mithril bar, 3 deer hide, 2 antler |
+| Iron-jaw cage | Crafting 52 | 3 mithril bar, 2 maple planks, 1 bear pelt, 2 horn, 3 leather string |
+| Warded snare | Crafting 24 | 3 leather string, 10 arcane rune, 1 antler |
+| Rune trap | Crafting 55 | 2 maple planks, 1 mithril bar, 1 sapphire, 10 arcane rune, 2 antler |
+
+Bait (one per try):
+
+| Bait | Cooking | Makes | Inputs |
+|---|---|---|---|
+| Seed cake | 4 | 6 | 1 bread, 2 potato seeds |
+| Scent bait | 18 | 6 | 2 raw rabbit, 1 onion |
+| Honey bait | 38 | 6 | 1 honey, 1 wheat, 1 tallow |
+| Smoked bait | 58 | 6 | 2 raw venison, 1 maple logs, 1 goldleaf herb |
+| Moonlit bait | 78 | 6 | 2 raw beef, 1 moonmelon, 5 arcane rune |
+
+### Companions are mythical only (28 Nov 2026, coordinator follow-up)
+
+Every companion that was an ordinary animal is now a small creature of fable; ids, bonuses, tricks, passives and
+evolutions are unchanged, so saves keep them. Each has one line of lore (the tooltip on its portrait on the ranch sheet) and is drawn with
+the creature builders so it has a front and a side view (js/pixel_hunt.js; the bond species in js/beastmastery_art.js,
+whose evolved forms add a crest, wings or crown).
+
+| id | Was | Now |
+|---|---|---|
+| bond_wolf | Hearthwolf (wolf) | Hearthfire chimera (chimera) |
+| bond_boar | Bramble boar (boar) | Bramblekin (briar fae) |
+| bond_owl | Duskwatch owl (owl) | Duskwatch sylph (sylph) |
+| bond_bear | Honeyclaw (bear) | Honeycomb golem (amber golem) |
+| biscuit | Biscuit, farm dog | Biscuit, hearth brownie |
+| toast | Toast, chick | Toast, harvest sprite |
+| bubbles | Bubbles, goldfish | Bubbles, brook nixie |
+| acorn | Acorn, squirrel | Acorn, oak dryad |
+| nugget | Nugget, mole | Nugget, pebble golem |
+| whiskers | Whiskers, alley cat (trick Light paws) | Smudge, pocket shade (trick Light fingers) |
+| quill | Quill, owl | Quill, inkling |
+| pudding | Pudding, piglet | Pudding, custard slime |
+| tusky | Tusky, boarlet (Old Tusk's pet) | Bristle, bramble imp that rode the Boar King |
+| bill | Barnacle Bill, hermit crab | Barnacle Bill, sea sprite in Barnacle's salvaged hat |
+
+The hidden, never-earnable companions of combat creatures that are ordinary animals (giant rat, grey wolf, cave bat,
+ice wolf, dire wolf, the two spiders, giant leech, lava hound) are removed; an old save that held one lets it go on load
+with the others. The farm's livestock (hen, cow, sheep, pig, goat, bees) are farm animals, not companions, and stay.
+
+Verification: `tests/beast-capture.cjs` (the gate, odds and bounds, keep once, let go, failures spend bait, the tier
+kit and stopping, ordinary-animal companions let go on load, forecasts, offline parity, save and reload, the old
+expedition, eggs, Collection odds, the Capture tab), `tests/hunting-loop-ui.cjs` (the fowling net route) and
+`tests/art-pixel.cjs` (front and side views for all 30, each its own drawing). Scripted checks with granted levels and
+items, not playtests: whether the higher beasts feel like hard work worth doing needs players.

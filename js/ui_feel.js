@@ -212,7 +212,7 @@ UI.V.settings = (...a) => {
 matchMedia('(hover: hover) and (pointer: fine)').addEventListener?.('change', () => UI.applyCursor());
 
 /* ================= 15. Hold to confirm big spends ================= */
-const HOLD_MS = 600, SPENDS = new Set(['buy', 'sell', 'buyupgrade', 'localbuy', 'rarebuy', 'buycommission']);
+const HOLD_MS = 600, SPENDS = new Set(['buy', 'sell', 'buyupgrade', 'localbuy', 'rarebuy', 'buycommission', 'buyplot', 'buypen', 'buyhouse', 'buildroom']);
 const SPEND_SEL = [...SPENDS].map(k => `button[data-do="${k}"]`).join(',');
 DQ.HOLD_MS = HOLD_MS;
 /* a spend is big at 10,000 coins, or at 1,000 when that is a quarter of what you hold */

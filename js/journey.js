@@ -241,8 +241,11 @@ DQ.journeyNext = (id = S().journey || 'boss') => {
   if (id === 'house') {
     if (S().house.owned) return step('Your cottage is ready', 'Build rooms and furnish your home for lasting bonuses.', 'go', 'house');
     if (DQ.advLvl() < D.HOUSE.adv) return task('Reach Hero ' + D.HOUSE.adv, 'Your cottage opens at Hero ' + D.HOUSE.adv + '. Train skills or complete quests for Hero XP.', 'fish', 'shrimp');
+    /* the cottage costs materials as well as coins (build_costs.js, 28 Nov 2026) */
+    const hc = DQ.buildCost ? DQ.buildCost('house') : { coins: D.HOUSE.price }, why = DQ.buildReason ? DQ.buildReason(hc) : (S().coins < D.HOUSE.price ? 'x' : '');
     if (S().coins < D.HOUSE.price) return step('Save for your cottage', fmt(S().coins) + ' / ' + fmt(D.HOUSE.price) + ' coins. Sell spare resources and claim quests.', 'go', 'character');
-    return step('Buy your first home', 'You have the level and coins. Visit the estate to buy your cottage.', 'go', 'house');
+    if (why) return step('Gather materials for your cottage', why, 'go', 'house');
+    return step('Buy your first home', 'You have the level, coins and materials. Visit the estate to buy your cottage.', 'go', 'house');
   }
   const bossQuest = D.QUESTS.find(q => q.obj.some(o => o.ev === 'boss' && o.key === 'grubnash'));
   if (bossQuest && DQ.questState(bossQuest) === 'ready') return step('Claim your victory reward', 'Return to the quest giver for the rewards you earned by defeating Grubnash.', 'qclaim', bossQuest.id);

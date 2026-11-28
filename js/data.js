@@ -342,9 +342,9 @@ JEW.forEach(([g, rl, al, rb, ab], i) => {
 
 mk('cloth', { name: 'Woollen cloth', ic: 'hide', col: '#efe8d8', val: 30, type: 'resource' });
 addR({ id: 'craft_cloth', skill: 'crafting', tab: 'Leather', name: 'Woollen cloth', lvl: 12, xp: 25, t: 2200, in: { wool: 2 }, out: { cloth: 1 }, ev: 'craft' });
-/* Hunting preparation (Nov 2026): leather string from a cowhide, then wooden traps. Held traps are your first hunting gear. */
+/* Leather string from a cowhide, then wooden traps: Fieldwork's first gear and Beastmastery's first capture trap. */
 mk('string', { name: 'Leather string', ic: 'bit', col: '#c8a070', val: 3, type: 'craft', sub: 'Cut from cowhide. Ties traps and strings bows.' });
-mk('wooden_trap', { name: 'Wooden trap', ic: 'bit', col: '#a8784a', val: 9, type: 'craft', trap: true, sub: 'Starting hunting gear: each one held adds 5% Hunting XP (up to three).' });
+mk('wooden_trap', { name: 'Wooden trap', ic: 'bit', col: '#a8784a', val: 9, type: 'craft', trap: true, sub: 'Fieldwork gear and the capture trap for small beasts.' });
 addR({ id: 'craft_string', skill: 'crafting', tab: 'Leather', name: 'Leather string', lvl: 1, xp: 6, t: 1800, in: { cowhide: 1 }, out: { string: 3 }, ev: 'craft' });
 addR({ id: 'craft_trap', skill: 'crafting', tab: 'Leather', name: 'Wooden trap', lvl: 2, xp: 12, t: 2400, in: { log_normal: 2, string: 1 }, out: { wooden_trap: 1 }, ev: 'craft' });
 /* Wooden shields (Nov 2026): a lighter alternative to metal kiteshields. About 60% of the defence of the metal shield at
@@ -566,8 +566,8 @@ D.QUESTS = [
     { xp: { attack: 500, defence: 500 }, coins: 300, items: { bread: 6 } }),
   Q('king_of_the_wood', 'mossbarrow', 'King of the Wood', 'Hunter Wynn', 10, 'boar_hunt', 'Old Tusk has been knocking down fences here for forty winters. I carved my first bow from a branch he snapped. Been waiting a long time to settle that. Read up on him and prepare a bow before you try. You need combat level 18 to face him.',
     [{ ev: 'boss', key: 'oldtusk', n: 1, label: 'Defeat Old Tusk the Boar King' }], { xp: { attack: 1500, strength: 1500, defence: 1000 }, coins: 700 }),
-  Q('crab_cull', 'saltmere', 'Crab Cull', 'Harbourmaster Ilsa', 8, null, 'Rock crabs have been chewing through the jetty posts. Cut eight logs while I round up a repair crew. Once you’ve cleared the crabs away, I can send the crew under the jetty without counting their fingers afterwards.',
-    [{ ev: 'kill', key: 'crab', n: 10, label: 'Defeat 10 rock crabs' }, { ev: 'chop', key: 'normal', n: 8, label: 'Cut 8 logs for the jetty' }],
+  Q('crab_cull', 'saltmere', 'Geese on the Jetty', 'Harbourmaster Ilsa', 8, null, 'A gang of greylag geese has taken the jetty and pulled the tarred rope off the posts to line their nests. Cut eight logs while I round up a repair crew. Once you’ve thinned the geese out, I can send the crew under the jetty without anyone being chased into the harbour.',
+    [{ ev: 'kill', key: 'greylag_goose', n: 10, label: 'Hunt 10 greylag geese' }, { ev: 'chop', key: 'normal', n: 8, label: 'Cut 8 logs for the jetty' }],
     { xp: { defence: 700, hitpoints: 300 }, coins: 250, items: { raw_sardine: 6 } }),
   Q('quick_fingers', 'saltmere', 'Quick Fingers', 'Whisper', 9, 'mq_thieving', 'The people on the docks have been relieving travellers of their purses. I thought you might relieve them of a little of the proceeds. Get some practice in and keep your eyes open. If anybody asks, I’m a perfectly respectable woman who has never met you.',
     [{ ev: 'thieve', key: '*', n: 15, label: 'Steal successfully 15 times' }], { xp: { thieving: 600 }, coins: 300 }),
@@ -656,8 +656,8 @@ D.QUESTS.push(
   TQ('mb_silver', 'mossbarrow', 'The Silver Seam', 'Old Brannoc', 20, 'miners_pick', 'There’s silver in the seam above Mossbarrow. I saw it myself, though my back objected before I could bring much out. Go and mine some, and catch pike for the miners’ supper while you’re about it. I’d appreciate proof of the silver most of all. People have begun making faces when I mention it.',
     [act('mine', 'silver', 15, 'Mine 15 silver ore'), act('catch', 'pike', 15, 'Catch 15 pike for the miners’ supper')], { xp: { mining: 1800, fishing: 1200 }, coins: 650 },
     'Told them. Fifty years I have been telling them.'),
-  TQ('mb_bellhares', 'mossbarrow', 'Under the Bellhare Moon', 'Granny Bramble', 23, 'seeds_of_hope', 'The bellhares are gathering and the rootbound have started to stir. They’ll make a fine mess of the fields if we leave them to it. Deal with them, then bring in the strawberries before they’re trampled. We’ll leave the rest of the wood in peace, dear. It’s busy enough already.',
-    [k('bellhare', 8, 'Calm 8 bellhares'), k('rootbound', 8, 'Put 8 rootbound back to sleep'), act('harvest', 'strawberry', 10, 'Bring in 10 strawberries before the moon')], { xp: { defence: 2000, farming: 1800 }, coins: 900 },
+  TQ('mb_bellhares', 'mossbarrow', 'Under the Hare Moon', 'Granny Bramble', 23, 'seeds_of_hope', 'The brown hares are boxing in the strawberry beds and the rootbound have started to stir. They’ll make a fine mess of the fields if we leave them to it. Deal with them, then bring in the strawberries before they’re trampled. We’ll leave the rest of the wood in peace, dear. It’s busy enough already.',
+    [k('brown_hare', 8, 'Hunt 8 brown hares'), k('rootbound', 8, 'Put 8 rootbound back to sleep'), act('harvest', 'strawberry', 10, 'Bring in 10 strawberries before the moon')], { xp: { defence: 2000, farming: 1800 }, coins: 900 },
     'The strawberries are in, and the fields are quiet again. Thank you, dear. My mother used to keep three dogs for nights like this. I’m glad I had you to help instead.'),
 
   /* Saltmere: past Barnacle, towards Ironpeak */
@@ -669,9 +669,9 @@ D.QUESTS.push(
     'That’s the first new fishing boat we’ve built in ten years. I’m naming her after my mother. She’d have liked to see the slip busy again. Thank you for helping us get here.'),
 
   /* Ironpeak: Hero 34 to 47, the long climb to Frostmaw */
-  TQ('ip_chimes', 'ironpeak', 'Chimes in the Pass', 'Captain Hrod', 34, 'trollbane', 'The night watch reports chimehorns in the high pass, with ice wolves following their calls. We need both driven back before the next convoy. Take your turn out there, and come back to the guardhouse afterwards. Nobody finishes a watch alone on that mountain.',
-    [k('chimehorn', 12, 'Silence 12 chimehorns'), k('icewolf', 10, 'Turn back 10 ice wolves')], { xp: { attack: 7000, defence: 5000 }, coins: 2200 },
-    'The night watch can hear a cart coming now, instead of chimehorns all along the pass. Thank you. We still have Frostmaw to deal with, but this makes the road safer.'),
+  TQ('ip_chimes', 'ironpeak', 'Goats in the Pass', 'Captain Hrod', 34, 'trollbane', 'The night watch reports mountain goats knocking stones on to the high pass, with ice wolves following them down. We need both driven back before the next convoy. Take your turn out there, and come back to the guardhouse afterwards. Nobody finishes a watch alone on that mountain.',
+    [k('mountain_goat', 12, 'Hunt 12 mountain goats'), k('icewolf', 10, 'Turn back 10 ice wolves')], { xp: { attack: 7000, defence: 5000 }, coins: 2200 },
+    'The night watch can hear a cart coming now, instead of rocks bouncing down the pass. Thank you. We still have Frostmaw to deal with, but this makes the road safer.'),
   TQ('ip_gold', 'ironpeak', 'Gold for the Hall', 'Foreman Dagna', 37, 'deep_vein', 'The great hall’s doors used to be gilded. We’ve spent so long patching things up that everyone’s forgotten what they looked like. Mine some gold and smelt the bars. I want us to restore something properly for once, instead of merely keeping it from falling down.',
     [act('mine', 'gold', 25, 'Mine 25 gold ore'), act('smelt', 'bar_gold', 10, 'Smelt 10 gold bars')], { xp: { mining: 9000, smithing: 6000 }, coins: 3000 },
     'There. Now it looks like a hall worth defending.'),
@@ -686,8 +686,8 @@ D.QUESTS.push(
     'The watch has its supplies, and the smaller creatures have been driven back. You can prepare for Frostmaw without worrying about them now. Read what we know about the troll before you go.'),
 
   /* Gloomfen: Hero 60 to 68, towards Morwenna */
-  TQ('gf_lanterns', 'gloomfen', 'Lanterns over the Bog', 'Boatwright Sorrel', 60, 'yew_planks', 'The candletoads keep swallowing the lights, and the murkbells are drawing travellers off the boat path. Could you clear them away and cut yew for fresh lantern posts? I’d like to mark the whole route. It’s easier to be brave about a journey when you can see where it goes.',
-    [k('candletoad', 15, 'Clear 15 candletoads from the lantern posts'), k('murkbell', 10, 'Silence 10 murkbells'), act('chop', 'yew', 30, 'Chop 30 yew logs for new posts')], { xp: { defence: 30000, woodcutting: 25000 }, coins: 6500 },
+  TQ('gf_lanterns', 'gloomfen', 'Lanterns over the Bog', 'Boatwright Sorrel', 60, 'yew_planks', 'The beavers keep felling my lantern posts, and the murkbells are drawing travellers off the boat path. Could you clear them away and cut yew for fresh lantern posts? I’d like to mark the whole route. It’s easier to be brave about a journey when you can see where it goes.',
+    [k('beaver', 15, 'Hunt 15 beavers gnawing the lantern posts'), k('murkbell', 10, 'Silence 10 murkbells'), act('chop', 'yew', 30, 'Chop 30 yew logs for new posts')], { xp: { defence: 30000, woodcutting: 25000 }, coins: 6500 },
     'A light every twenty paces. Nobody drowns on my route again.'),
   TQ('gf_rivets', 'gloomfen', 'Adamant Rivets', 'Boatwright Sorrel', 62, 'gf_lanterns', 'Ordinary nails rust away in this water. I’ve designed a stronger fitting, but I need adamant ore smelted into bars before I can make it. Would you help? I’d rather find out whether it works on the slip than halfway across the marsh.',
     [act('mine', 'adamant', 15, 'Mine 15 adamant ore'), act('smelt', 'bar_adamant', 10, 'Smelt 10 adamant bars')], { xp: { mining: 35000, smithing: 30000 }, coins: 7500 },
@@ -700,8 +700,8 @@ D.QUESTS.push(
     'Now you smell of supper, not fear. The wraiths hate that.'),
 
   /* Emberfall: Hero 77 to 86, towards Pyrrhax */
-  TQ('ef_glass', 'emberfall', 'Ash and Glass', 'Magmasmith Kael', 77, 'forge_of_embers', 'Glassbacks have been feeding on the runite seams. Their shells leave shards in the ore, and one bad batch can ruin a forge. Clear them from the workings and bring out fresh runite. We’ll get a clean ring from the anvils again.',
-    [k('glassback', 12, 'Drive off 12 glassbacks'), act('mine', 'runite', 15, 'Mine 15 runite ore')], { xp: { defence: 90000, mining: 70000 }, coins: 16000 },
+  TQ('ef_glass', 'emberfall', 'Ash and Glass', 'Magmasmith Kael', 77, 'forge_of_embers', 'Cape buffalo have been wallowing in the cooling pools over the runite seams and trampling ash into the ore. One bad batch can ruin a forge. Drive them off the workings and bring out fresh runite. We’ll get a clean ring from the anvils again.',
+    [k('cape_buffalo', 12, 'Hunt 12 cape buffalo'), act('mine', 'runite', 15, 'Mine 15 runite ore')], { xp: { defence: 90000, mining: 70000 }, coins: 16000 },
     'Clean ore at last. Now I can forge you something worthy of the wyrm.'),
   TQ('ef_hounds', 'emberfall', 'Hounds of the Caldera', 'Warden Ignis', 80, 'drakehide_deal', 'The hounds are running in packs along the caldera rim, and cinderlooms have built dens across the paths. We cannot reach Pyrrhax while they hold that ground. Help the wardens clear the rim. Keep an eye on your way back; I want the patrol returning by it.',
     [k('hound', 25, 'Break up 25 hounds'), k('cinderloom', 12, 'Unravel 12 cinderlooms')], { xp: { strength: 120000, hitpoints: 60000 }, coins: 19000 },
@@ -714,14 +714,14 @@ D.QUESTS.push(
     'The furnace crews are gone and we can reach the anvils safely. That gives us room to prepare for Pyrrhax. Take the time you need before you confront him.'),
 
   /* Skyreach: Hero 84 to 95, towards Zephyrion */
-  TQ('sr_feathers', 'skyreach', 'Feathers of the Gale', 'Brother Aldous', 84, 'cloud_harvest', 'Our prayer flags are wearing through. We need hawk feathers for the decorations and elder wood for new poles. Would you gather both? I’ve promised the monks I’ll help hang them afterwards. That was before anyone mentioned how close the last pole is to the edge.',
-    [k('hawk', 25, 'Gather feathers from 25 hawks'), act('chop', 'elder', 25, 'Chop 25 elder logs for flag poles')], { xp: { ranged: 180000, woodcutting: 140000 }, coins: 30000 },
+  TQ('sr_feathers', 'skyreach', 'Feathers of the Gale', 'Brother Aldous', 84, 'cloud_harvest', 'Our prayer flags are wearing through. We need great bustard feathers for the decorations and elder wood for new poles. Would you gather both? I’ve promised the monks I’ll help hang them afterwards. That was before anyone mentioned how close the last pole is to the edge.',
+    [k('great_bustard', 25, 'Gather feathers from 25 great bustards'), act('chop', 'elder', 25, 'Chop 25 elder logs for flag poles')], { xp: { ranged: 180000, woodcutting: 140000 }, coins: 30000 },
     'The flags fly again. Listen. The wind sounds kinder already.'),
   TQ('sr_astral', 'skyreach', 'Star Iron', 'Abbot Seren', 87, null, 'The last storm cracked the monastery bells. Astralite has fallen on the high terraces, and I would like to use it to cast replacements. Mine the ore and smelt the bars for us. It would be good to hear a clear note across these peaks again.',
     [act('mine', 'astralite', 25, 'Mine 25 astralite'), act('smelt', 'bar_astral', 10, 'Smelt 10 astral bars')], { xp: { mining: 200000, smithing: 160000 }, coins: 34000 },
     'Listen to them ring. High and clear, and the whole mountain listening. Star iron remembers where it fell from.'),
-  TQ('sr_golems', 'skyreach', 'Golems of the Stair', 'Abbot Seren', 90, 'sr_astral', 'The golems on the thousand steps no longer recognise the monks. Prismkites are attacking anyone who tries to get past them. Clear the stair so we can reach Zephyrion’s eyrie safely. We used to stop on those steps to admire the view. I would like people to have that choice again.',
-    [k('golem', 20, 'Still 20 golems'), k('prismkite', 12, 'Ground 12 prismkites')], { xp: { defence: 240000, strength: 200000 }, coins: 40000 },
+  TQ('sr_golems', 'skyreach', 'Golems of the Stair', 'Abbot Seren', 90, 'sr_astral', 'The golems on the thousand steps no longer recognise the monks. Argali have taken the upper terraces and butt anyone who tries to get past them. Clear the stair so we can reach Zephyrion’s eyrie safely. We used to stop on those steps to admire the view. I would like people to have that choice again.',
+    [k('golem', 20, 'Still 20 golems'), k('argali', 12, 'Hunt 12 argali on the terraces')], { xp: { defence: 240000, strength: 200000 }, coins: 40000 },
     'The stair is clear. Now we can reach Zephyrion’s eyrie without fighting through the stair guards.'),
   TQ('sr_thunder', 'skyreach', 'Thunder in the Loom', 'Brother Aldous', 92, 'sr_feathers', 'Thunderlooms are gathering storm clouds around the peaks, and wyverns are using the cover to attack the bridges. Drive both away and we’ll have a clearer approach to Zephyrion. I’d offer to hold your coat, but I suspect it would be halfway down the mountain before you got back.',
     [k('thunderloom', 15, 'Unpick 15 thunderlooms'), k('wyvern', 15, 'Bring down 15 wyverns')], { xp: { attack: 280000, hitpoints: 140000 }, coins: 46000 },

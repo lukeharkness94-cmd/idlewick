@@ -10,7 +10,7 @@ D.TRICKS = {
   bubbles: { key: 'school', name: 'School spotter', text: '1 in 12 catches: double' },
   acorn: { key: 'nuts', name: 'Nut stash', text: "2× bird's nests" },
   nugget: { key: 'seam', name: 'Seam sense', text: '2× mining gems' },
-  whiskers: { key: 'paws', name: 'Light paws', text: 'first failed pickpocket each minute: no damage' },
+  whiskers: { key: 'paws', name: 'Light fingers', text: 'first failed pickpocket each minute: no damage' },
   cinder: { key: 'bellows', name: 'Bellows', text: '1 in 10 smelts: +1 bar' },
   quill: { key: 'night', name: 'Night study', text: '+10% research speed' },
   pudding: { key: 'taster', name: 'Taster', text: 'first dish never burns · −25% burn chance' },

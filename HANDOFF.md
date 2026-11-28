@@ -22,6 +22,28 @@ The equipped copy is stored separately from inventory. Equipping consumes exactl
 
 Shop prices use `UI.money(amount)`: a small visible coin and formatted amount, with an accessible currency label. Do not restore "8 coins each" prose on cards. Buy/sell totals show quantity and the coin amount; rare offers and inventory selling use the same visual treatment. Locked/owned rare cards retain their visible prices.
 
+## Hunting, Beastmastery and building costs (28 Nov 2026, Claude Code)
+- Owner: no animal in both skills; Hunting is real game you get resources from, hunted with a lure from Cooking whose
+  favourite you find by trying; Beastmastery captures mythical beasts with crafted traps, nets and halters plus bait;
+  ordinary-animal companions go; every build costs materials. Full rules and tables: docs/hunting.md and the
+  "Mythical beasts" section of docs/beastmastery.md.
+- Data: `js/hunt_tiers_data.js` (rewritten) holds `D.HUNT_TIERS`, the 40 `D.HUNT_ANIMALS` (made into `D.MON` entries
+  with `hl`, `tier`, `ground`, `lure`), the 8 `D.HUNT_LURES`, 10 meats, 8 new materials, `D.MYTHS` (30 beasts, not
+  `D.MON`), `D.CAPTURE_TOOLS`/`D.CAPTURE_BAIT` and `D.FIELD_MATS` (Fieldwork's per-region hauls, frozen from the old
+  grounds). It deletes every other animal from `D.MON` before anything reads the list; `D.MON_TEMPLATES` keeps the old
+  cow and chicken for villains.js's cloned mudling and goblin raider. Myth companions are made in beastmastery_data.js.
+- Logic: `js/hunt_stalk.js` (lures, verdicts in `S.hunt.lures`, picked lure in `S.hunt.lureSel`, odds, lure row),
+  `js/beast_capture.js` (myth capture, tools and bait, ordinary-animal pets removed, let go on load),
+  `js/build_costs.js` (new, `D.BUILD`, atomic builds, overrides `DQ.buyPlot/buyPen/buyHouse/buildRoom`),
+  `js/state.js` (a task on a removed animal stops on load). Cooking has Game, Lures and Bait categories
+  (`DQ.recipeGroup`). Art: `js/pixel_items_hunt.js` (new, 45 items), `js/pixel_hunt.js` (animal and beast recipes,
+  beast companions), `js/pixel_views.js` (registers both views for `D.MYTHS`).
+- Quests retargeted: crab_cull → greylag geese, mb_bellhares → brown hares, ip_chimes → mountain goats, gf_lanterns →
+  beavers, ef_glass → cape buffalo, sr_feathers and af_star → great bustards, sr_golems → argali.
+- Companions are mythical only: the bond species and the skill and boss pets that were animals are re-themed (table in
+  docs/beastmastery.md), ids and bonuses kept. Build buttons stay on one line with their material chips beside or under
+  them; hunting lure buttons show each lure's name, count and the selected animal's verdict.
+
 ## Towns from above (28 Nov 2026, Claude Code, the pixel rebuild)
 - Owner chose top-down (three-quarter) towns, darker, in the outlined pixel style of the approved example; work and
   combat scenes stay side-on. `js/town_scene.js` (loaded after towns.js) now owns `A.sceneFor`, `A.siteLayout` and

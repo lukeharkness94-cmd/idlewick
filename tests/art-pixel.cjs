@@ -11,7 +11,7 @@ ctx.window = ctx;ctx.__IDLEWICK_INTEGRATION_TEST__=true;
 const load = n => vm.runInContext(fs.readFileSync(path.join(root, 'js', n + '.js'), 'utf8'), ctx, { filename: n });
 ['util', 'data', 'creatures_expanded', 'creature_roster', 'hunt_tiers_data', 'skill_expansion_data', 'data2', 'data3', 'economy', 'skills_new_data', 'beastmastery_data', 'hunting_loop_data', 'crosslinks_data', 'state', 'rare_weapons'].forEach(load); /* the 29 named weapons must look different too (27 Nov 2026) */
 const Q = ctx.DQ; Q.ui = { V: {}, DO: {}, B: {}, homeSections: [] };
-['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'pixel_icons', 'skills_new_art', 'beastmastery_art', 'pixel_items_armour', 'pixel_items_weapons', 'pixel_items_materials', 'pixel_items_food', 'pixel_nodes', 'pixel_bosses', 'pixel_minibosses', 'pixel_views', 'pixel_hand_1'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
+['journey', 'adventures', 'pixelart', 'pixel_items', 'pixel_creatures', 'pixel_roster', 'pixel_hunt', 'pixel_world', 'pixel_icons', 'skills_new_art', 'beastmastery_art', 'pixel_items_armour', 'pixel_items_weapons', 'pixel_items_materials', 'pixel_items_food', 'pixel_items_hunt', 'pixel_nodes', 'pixel_bosses', 'pixel_minibosses', 'pixel_views', 'pixel_hand_1'].forEach(n => { try { load(n); } catch (e) { if (n.startsWith('pixel')) throw e; } });
 const A = Q.pixelArt, D = Q.data;
 let checks = 0; const check = (name, fn) => { fn(); checks++; console.log('PASS', name); };
 const colours = spr => spr.render();
@@ -96,7 +96,8 @@ check('every ordinary creature has a front view and a side view, and the two are
   /* owner, 28 Nov 2026: a front view for menus and guides, a side view (facing right) for fights, hunts and captures.
      js/pixel_views.js draws the missing view for every builder; the 28 with their own 64 x 64 art are drawn elsewhere. */
   const mask = s => s.render().map(Boolean).join(''), scope = D.MONLIST.filter(A.viewScope), bad = [];
-  assert.ok(scope.length >= 270, 'creatures in scope: ' + scope.length);
+  /* 28 Nov 2026: the hunting ground is 40 real animals and the 160 old ground animals left the game, so ~115 creatures */
+  assert.ok(scope.length >= 110, 'creatures in scope: ' + scope.length);
   assert.ok(!scope.some(m => A.BIG[m.id] || (m.mini && !/^tw_[a-z]+_\d$/.test(m.id))), 'bosses, mini-bosses and tower bosses keep their own drawings');
   for (const m of scope) { const f = A.VIEWS.front[m.id], sd = A.VIEWS.side[m.id];
     if (!f || !sd) { bad.push(m.id + ' missing a view'); continue; }
@@ -108,6 +109,11 @@ check('every ordinary creature has a front view and a side view, and the two are
   /* creatures that share no drawing on purpose (tower floors reuse their base creature) never share a view */
   for (const v of ['front', 'side']) { const seen = new Map();
     for (const m of scope.filter(m => !/^tw_/.test(m.id))) { const k = A.VIEWS[v][m.id]().render().join(','); assert.ok(!seen.has(k), `${m.id} ${v} view is identical to ${seen.get(k)}`); seen.set(k, m.id); } }
+  /* the 30 mythical beasts of Beastmastery (not creatures you fight) have both views too, each its own drawing */
+  const myths = D.MYTHS || []; assert.equal(myths.length, 30);
+  for (const v of ['front', 'side']) { const seen = new Map();
+    for (const m of [...scope.filter(m => !/^tw_/.test(m.id)), ...myths]) { const f = A.VIEWS[v][m.id]; assert.ok(f, m.id + ' has a ' + v + ' view'); const k = f().render().join(','); assert.ok(!seen.has(k), `${m.id} ${v} view is identical to ${seen.get(k)}`); seen.set(k, m.id); } }
+  for (const m of myths) { const a = A.VIEWS.front[m.id](), b = A.VIEWS.side[m.id](); assert.notEqual(mask(a), mask(b), m.id + ' front and side differ'); assert.ok(a.render().filter(Boolean).length >= 60, m.id + ' front not empty'); }
   /* tower floor creatures keep a 64 x 64 drawing in both views */
   for (const m of scope.filter(m => /^tw_[a-z]+_\d$/.test(m.id))) for (const v of ['front', 'side']) { const s = A.BIG_VIEWS[v][m.id] && A.BIG_VIEWS[v][m.id](); assert.ok(s && s.w === 64, m.id + ' ' + v + ' large view'); }
   /* no view leaves the old drawing's extras floating: the side view of a humanoid holds its weapon forward (right half) */

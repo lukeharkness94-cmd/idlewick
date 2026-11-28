@@ -58,6 +58,9 @@ const path = require('node:path');
       work('wood', 'flax', () => Q.have('flax') >= 12);
       work('recipe', 'craft_flax_string', () => Q.lvl('crafting') >= 2 && Q.have('string') >= 3);
       work('recipe', 'craft_trap', () => Q.have('wooden_trap') >= 3);
+      /* 28 Nov 2026: Hunting's gate is three grain mash (a lure from bread, Cooking 1), not wooden traps */
+      if (!Q.have('bread')) Q.give('bread', 1);
+      work('recipe', 'cook_grain_mash', () => Q.have('grain_mash') >= 3);
       Q.ui.DO.finishstarter();
       work('recipe', 'cook_shrimp', () => Q.S.stats.cook >= 1);
       Q.S.settings.autoEat = false;
@@ -70,16 +73,16 @@ const path = require('node:path');
         }
       }
       Q.stopAct(true);
-      check(Q.combatLvl() >= 8 && Q.skillUnlocked('hunting'), 'Earned Hunting with crafted traps');
-      Q.ui.focusTask('cooking', 'cook_scent_bait');
-      Q.ui.DO.route('raw_game');
-      const src = Q.sourceOf('raw_game');
-      check(src.kind === 'hunt' && !Q.KIND_EXT.hunt.check(src.id), 'Accessible raw game source');
+      check(Q.combatLvl() >= 8 && Q.skillUnlocked('hunting'), 'Earned Hunting with a cooked lure');
+      Q.ui.focusTask('cooking', 'cook_roast_chicken');
+      Q.ui.DO.route('raw_chicken');
+      const src = Q.sourceOf('raw_chicken');
+      check(src.kind === 'hunt' && !Q.KIND_EXT.hunt.check(src.id), 'Accessible raw chicken source');
       check(Q.ui.huntTier === D.MON[src.id].tier && /* one hunting ground since 26 Nov 2026: no town to match */
-        Q.ui.taskChoice.hunting === src.id && !Q.act && Q.ui.returnTo.page === 'cooking', 'Exact raw game route');
+        Q.ui.taskChoice.hunting === src.id && !Q.act && Q.ui.returnTo.page === 'cooking', 'Exact raw chicken route');
     });
 
-    console.log('PASS fresh Cowhide → Crafting → wooden traps → Hunting, and Raw game source');
+    console.log('PASS fresh Cowhide → Crafting → wooden traps, grain mash → Hunting, and Raw chicken source');
 
     // Use a separate context so delayed unlocks from the fresh-hero run cannot interrupt route clicks.
     await page.close();
@@ -126,7 +129,7 @@ const path = require('node:path');
     await page.evaluate(() => {
       const Q = DQ;
       const save = JSON.parse(JSON.stringify(Q.S));
-      save.xp.hunting = Q.data.XPF[Q.data.MON.hill_goat.hl];
+      save.xp.hunting = Q.data.XPF[Q.data.MON.turkey.hl]; /* the hill goat left the game (28 Nov 2026); the id migration is still checked */
       save.inv.reinforced_trap = 1;
       save.inv.scent_bait = 4;
       save.unlocked.beastmastery = true;
@@ -136,7 +139,8 @@ const path = require('node:path');
       save.beast.drops = { 'wild_goat:raw_game': 1 };
       const migrated = Q.validateSave(save);
       const twice = Q.validateSave(JSON.parse(JSON.stringify(migrated)));
-      if (migrated.act.id !== 'hill_goat' || migrated.act.count !== 3 || migrated.queue[0].id !== 'turkey' ||
+      /* the hill goat left the game (28 Nov 2026): its hunt stops on load with a note; the ids still migrate */
+      if (migrated.act !== null || !/no longer on the hunting ground/.test(migrated.log[0].m) || migrated.queue[0].id !== 'turkey' ||
           twice.beast.kills.hill_goat !== 5 || twice.beast.kills.turkey !== 4 ||
           twice.beast.drops['hill_goat:raw_game'] !== 1 || 'wild_goat' in twice.beast.kills) throw Error('Quarry migration');
       // Also save the migrated activity and queue through the real storage path.
@@ -152,10 +156,11 @@ const path = require('node:path');
     await page.evaluate(() => {
       DQ.paused = true; DQ.closeModal(); DQ.S.queue = [];
       DQ.ui.DO.huntground('boar');
-      DQ.startAct('hunt', 'seal', { quiet: true });
+      DQ.S.xp.hunting = DQ.data.XPF[30]; DQ.S.inv.grain_mash = 5;
+      DQ.startAct('hunt', 'roe_deer', { quiet: true });
       DQ.ui.DO.nowactivity();
     });
-    assert.deepEqual(await page.evaluate(() => [DQ.ui.huntTier, DQ.ui.taskChoice.hunting]), [1, 'seal']);
+    assert.deepEqual(await page.evaluate(() => [DQ.ui.huntTier, DQ.ui.taskChoice.hunting]), [1, 'roe_deer']);
     await page.evaluate(() => {
       const Q = DQ;
       Q.stopAct(true);
@@ -257,8 +262,8 @@ const path = require('node:path');
       await page.evaluate(() => {
         DQ.S.xp.hunting = DQ.data.XPF[99];
         DQ.S.towns.ironpeak = { visited: true, boss: false };
-        delete DQ.S.inv.reinforced_trap;
-        delete DQ.S.inv.scent_bait;
+        /* 28 Nov 2026: no lure, no hunt */
+        for (const l of DQ.data.HUNT_LURES) delete DQ.S.inv[l.id];
         DQ.ui.DO.huntground('mountain_goat');
       });
       assert.equal(await page.locator('.task-primary').isDisabled(), true);
@@ -266,6 +271,7 @@ const path = require('node:path');
       assert.equal(await page.locator('.hunt-tiers button').count(), 5);
       await page.evaluate(() => {
         DQ.ui.DO.huntground('chicken');
+        DQ.S.inv.grain_mash = 5;
         DQ.startAct('hunt', 'chicken', { quiet: true });
         DQ.emit('ui');
       });
