@@ -567,7 +567,7 @@ D.QUESTS = [
   Q('king_of_the_wood', 'mossbarrow', 'King of the Wood', 'Hunter Wynn', 10, 'boar_hunt', 'Old Tusk has been knocking down fences here for forty winters. I carved my first bow from a branch he snapped. Been waiting a long time to settle that. Read up on him and prepare a bow before you try. You need combat level 18 to face him.',
     [{ ev: 'boss', key: 'oldtusk', n: 1, label: 'Defeat Old Tusk the Boar King' }], { xp: { attack: 1500, strength: 1500, defence: 1000 }, coins: 700 }),
   Q('crab_cull', 'saltmere', 'Geese on the Jetty', 'Harbourmaster Ilsa', 8, null, 'A gang of greylag geese has taken the jetty and pulled the tarred rope off the posts to line their nests. Cut eight logs while I round up a repair crew. Once you’ve thinned the geese out, I can send the crew under the jetty without anyone being chased into the harbour.',
-    [{ ev: 'kill', key: 'wild_goose', n: 10, label: 'Hunt 10 greylag geese' }, { ev: 'chop', key: 'normal', n: 8, label: 'Cut 8 logs for the jetty' }],
+    [{ ev: 'kill', key: 'greylag_goose', n: 10, label: 'Hunt 10 greylag geese' }, { ev: 'chop', key: 'normal', n: 8, label: 'Cut 8 logs for the jetty' }],
     { xp: { defence: 700, hitpoints: 300 }, coins: 250, items: { raw_sardine: 6 } }),
   Q('quick_fingers', 'saltmere', 'Quick Fingers', 'Whisper', 9, 'mq_thieving', 'The people on the docks have been relieving travellers of their purses. I thought you might relieve them of a little of the proceeds. Get some practice in and keep your eyes open. If anybody asks, I’m a perfectly respectable woman who has never met you.',
     [{ ev: 'thieve', key: '*', n: 15, label: 'Steal successfully 15 times' }], { xp: { thieving: 600 }, coins: 300 }),

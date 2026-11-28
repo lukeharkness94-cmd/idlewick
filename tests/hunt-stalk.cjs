@@ -67,7 +67,7 @@ const { chromium } = require('playwright'), assert = require('node:assert/strict
       const combat = new Set(Object.values(D.AREAS).flat().filter(a => !a.hunt).flatMap(a => a.monsters.map(e => e.id)));
       return { total: g.reduce((n, a) => n + a.monsters.length, 0), ground: G.length, all: D.MONLIST.filter(m => m.hl).length, cells: [0, 1, 2, 3, 4].map(t => G.filter(m => m.tier === t).length).join(','), levels: new Set(G.map(m => m.hl)).size,
         art: G.every(m => A.hasCreature(m.id)), notes: G.every(m => D.LORE[m.id] && D.LORE[m.id].note), bands: G.every(m => { const T = D.HUNT_TIERS[m.tier]; return m.hl >= T.lo && m.hl <= T.hi; }),
-        lures: G.every(m => D.HUNT_LURE[m.lure]), quests: questAnimals.every(id => D.MON[id].ground), noMyth: D.MYTHS.every(x => !D.MON[x.id] && !D.HUNT_GROUND.includes(x.id)), noCombat: G.every(m => !combat.has(m.id)),
+        lures: G.every(m => D.HUNT_LURE[m.lure] && !m.id.startsWith('wild_')), quests: questAnimals.every(id => D.MON[id].ground), noMyth: D.MYTHS.every(x => !D.MON[x.id] && !D.HUNT_GROUND.includes(x.id)), noCombat: G.every(m => !combat.has(m.id)),
         classic: ['chicken', 'rabbit', 'boar', 'red_deer', 'moose', 'aurochs', 'musk_ox', 'walrus', 'polar_bear'].every(id => D.MON[id] && D.MON[id].ground) }; });
     assert.deepEqual(r10, { total: 40, ground: 40, all: 40, cells: '8,8,8,8,8', levels: 40, art: true, notes: true, bands: true, lures: true, quests: true, noMyth: true, noCombat: true, classic: true });
     /* 11. no towns: tier tabs only, the same animals from any town, gated by level; a mythical beast is not hunted */

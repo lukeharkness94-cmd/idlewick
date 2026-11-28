@@ -139,7 +139,8 @@ if (D.SHOPS && Array.isArray(D.SHOPS.saltmere) && !D.SHOPS.saltmere.includes('sa
 
 /* ---------- the 40 animals ----------
    [id, name, Hunting level, home town, favourite lure, drops [[item, [min, max], chance]], note, art (builder,
-   options) for the ones without an older drawing]. Small game and fowl first, the great beasts last. */
+   options) for the ones without an older drawing]. Small game and fowl first, the great beasts last. No id starts with
+   'wild_': that prefix names a companion, and the art and pet lookups strip it (the goose is 'greylag_goose'). */
 const L = D.HUNT_ANIMALS = [
   /* Beginner 1-19 */
   ['chicken', 'Chicken', 1, 'willowbrook', 'grain_mash', [['raw_chicken', [1, 1], .9], ['feather', [2, 5], .85], ['egg', [1, 1], .25]], 'Went feral after the Grubnash raids and now runs the lane like a toll road. Will follow a trail of crumbs anywhere, including into a sack.'],
@@ -148,7 +149,7 @@ const L = D.HUNT_ANIMALS = [
   ['pheasant', 'Pheasant', 8, 'willowbrook', 'root_mash', [['raw_gamebird', [1, 1], .85], ['feather', [3, 6], .9], ['egg', [1, 1], .1]], 'Loud, bright and not as quick off the ground as it thinks. Scratches up roots in the stubble and shouts about it.'],
   ['mallard', 'Mallard', 10, 'gloomfen', 'grain_mash', [['raw_duck', [1, 1], .85], ['feather', [2, 4], .7], ['down', [1, 1], .35], ['egg', [1, 1], .12]], 'An ordinary duck that has been fed bread by every child in the fen and now expects it.'],
   ['brown_hare', 'Brown hare', 12, 'mossbarrow', 'clover_cake', [['raw_rabbit', [1, 2], .85], ['fur_pelt', [1, 1], .6]], 'Boxes other hares in the spring and outruns dogs the rest of the year. Will stop for clover, and only clover.', ['hare', { fur: '#9a6a3a' }]],
-  ['wild_goose', 'Greylag goose', 15, 'saltmere', 'clover_cake', [['raw_goose', [1, 1], .85], ['feather', [3, 6], .8], ['down', [1, 2], .55], ['egg', [1, 1], .15]], 'Grazes the harbour green in a gang of forty and hisses at the harbourmaster. The harbourmaster hisses back.', ['bird', { plum: '#9a9488', wing: '#6a6458', beak: '#e8903a' }]],
+  ['greylag_goose', 'Greylag goose', 15, 'saltmere', 'clover_cake', [['raw_goose', [1, 1], .85], ['feather', [3, 6], .8], ['down', [1, 2], .55], ['egg', [1, 1], .15]], 'Grazes the harbour green in a gang of forty and hisses at the harbourmaster. The harbourmaster hisses back.', ['bird', { plum: '#9a9488', wing: '#6a6458', beak: '#e8903a' }]],
   ['boar', 'Wild boar', 18, 'mossbarrow', 'root_mash', [['raw_boar', [1, 2], .9], ['boar_tusk', [1, 1], .5], ['tallow', [1, 1], .4]], 'Roots up whole fields overnight and charges anything that complains. Dig a little potato into the ground and it forgets to be angry.'],
   /* Intermediate 20-39 */
   ['red_grouse', 'Red grouse', 20, 'ironpeak', 'berry_mash', [['raw_gamebird', [1, 1], .85], ['feather', [2, 5], .85]], 'Explodes out of the heather at your feet with a noise like a dropped tray, then lands ten yards away looking innocent.', ['bird', { plum: '#8a3a2a', wing: '#5a2a1e', beak: '#3a2a24', crest: '#d8402a', small: true }]],

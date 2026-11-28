@@ -6087,6 +6087,25 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 #view .hunt-lure.lk-no>i{color:#d9a066}
 #view .hunt-lure.lk-unk>i{opacity:.7}
 #view .hunt-lure.miss{opacity:.62}
+/* phones: the chips stay small and share the title's row, so the plots and pens below keep their room above the
+   bottom bar */
+@media (max-width:860px){
+  #view .estate-zones h3{gap:4px 6px}
+  /* the phone tab already says Fields or Pens, so while a build is offered its title is read out but not drawn: the
+     material chips take its row and the build button the next, as title and button did before */
+  #view .estate-zones h3:has(.build-needs)>span:first-child{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  #view .estate-zones h3 .build-needs{order:1}
+  #view .estate-zones h3 .estate-expand{order:2}
+  #view .estate-zones h3 .estate-pages{order:3}
+  #view .estate-expand{padding:3px 6px}
+  #view .estate-zones h3 .build-needs{flex-wrap:nowrap;gap:3px}
+  #view .build-needs .need-tile{padding:0 3px;gap:2px;min-height:0}
+  #view .build-needs .need-tile .nt-art img,#view .build-needs .need-tile .nt-art .item-art{width:20px;height:20px}
+  #view .build-needs .route-chip{width:26px;height:26px;min-width:26px;min-height:26px;padding:0}
+  #view .build-needs .route-chip img,#view .build-needs .route-chip .pxi{width:18px;height:18px}
+  #view .estate-zones h3{margin-bottom:4px}
+  #view .estate-expand{min-height:28px}
+}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
@@ -7236,7 +7255,7 @@ D.QUESTS = [
   Q('king_of_the_wood', 'mossbarrow', 'King of the Wood', 'Hunter Wynn', 10, 'boar_hunt', 'Old Tusk has been knocking down fences here for forty winters. I carved my first bow from a branch he snapped. Been waiting a long time to settle that. Read up on him and prepare a bow before you try. You need combat level 18 to face him.',
     [{ ev: 'boss', key: 'oldtusk', n: 1, label: 'Defeat Old Tusk the Boar King' }], { xp: { attack: 1500, strength: 1500, defence: 1000 }, coins: 700 }),
   Q('crab_cull', 'saltmere', 'Geese on the Jetty', 'Harbourmaster Ilsa', 8, null, 'A gang of greylag geese has taken the jetty and pulled the tarred rope off the posts to line their nests. Cut eight logs while I round up a repair crew. Once you’ve thinned the geese out, I can send the crew under the jetty without anyone being chased into the harbour.',
-    [{ ev: 'kill', key: 'wild_goose', n: 10, label: 'Hunt 10 greylag geese' }, { ev: 'chop', key: 'normal', n: 8, label: 'Cut 8 logs for the jetty' }],
+    [{ ev: 'kill', key: 'greylag_goose', n: 10, label: 'Hunt 10 greylag geese' }, { ev: 'chop', key: 'normal', n: 8, label: 'Cut 8 logs for the jetty' }],
     { xp: { defence: 700, hitpoints: 300 }, coins: 250, items: { raw_sardine: 6 } }),
   Q('quick_fingers', 'saltmere', 'Quick Fingers', 'Whisper', 9, 'mq_thieving', 'The people on the docks have been relieving travellers of their purses. I thought you might relieve them of a little of the proceeds. Get some practice in and keep your eyes open. If anybody asks, I’m a perfectly respectable woman who has never met you.',
     [{ ev: 'thieve', key: '*', n: 15, label: 'Steal successfully 15 times' }], { xp: { thieving: 600 }, coins: 300 }),
@@ -7796,7 +7815,8 @@ if (D.SHOPS && Array.isArray(D.SHOPS.saltmere) && !D.SHOPS.saltmere.includes('sa
 
 /* ---------- the 40 animals ----------
    [id, name, Hunting level, home town, favourite lure, drops [[item, [min, max], chance]], note, art (builder,
-   options) for the ones without an older drawing]. Small game and fowl first, the great beasts last. */
+   options) for the ones without an older drawing]. Small game and fowl first, the great beasts last. No id starts with
+   'wild_': that prefix names a companion, and the art and pet lookups strip it (the goose is 'greylag_goose'). */
 const L = D.HUNT_ANIMALS = [
   /* Beginner 1-19 */
   ['chicken', 'Chicken', 1, 'willowbrook', 'grain_mash', [['raw_chicken', [1, 1], .9], ['feather', [2, 5], .85], ['egg', [1, 1], .25]], 'Went feral after the Grubnash raids and now runs the lane like a toll road. Will follow a trail of crumbs anywhere, including into a sack.'],
@@ -7805,7 +7825,7 @@ const L = D.HUNT_ANIMALS = [
   ['pheasant', 'Pheasant', 8, 'willowbrook', 'root_mash', [['raw_gamebird', [1, 1], .85], ['feather', [3, 6], .9], ['egg', [1, 1], .1]], 'Loud, bright and not as quick off the ground as it thinks. Scratches up roots in the stubble and shouts about it.'],
   ['mallard', 'Mallard', 10, 'gloomfen', 'grain_mash', [['raw_duck', [1, 1], .85], ['feather', [2, 4], .7], ['down', [1, 1], .35], ['egg', [1, 1], .12]], 'An ordinary duck that has been fed bread by every child in the fen and now expects it.'],
   ['brown_hare', 'Brown hare', 12, 'mossbarrow', 'clover_cake', [['raw_rabbit', [1, 2], .85], ['fur_pelt', [1, 1], .6]], 'Boxes other hares in the spring and outruns dogs the rest of the year. Will stop for clover, and only clover.', ['hare', { fur: '#9a6a3a' }]],
-  ['wild_goose', 'Greylag goose', 15, 'saltmere', 'clover_cake', [['raw_goose', [1, 1], .85], ['feather', [3, 6], .8], ['down', [1, 2], .55], ['egg', [1, 1], .15]], 'Grazes the harbour green in a gang of forty and hisses at the harbourmaster. The harbourmaster hisses back.', ['bird', { plum: '#9a9488', wing: '#6a6458', beak: '#e8903a' }]],
+  ['greylag_goose', 'Greylag goose', 15, 'saltmere', 'clover_cake', [['raw_goose', [1, 1], .85], ['feather', [3, 6], .8], ['down', [1, 2], .55], ['egg', [1, 1], .15]], 'Grazes the harbour green in a gang of forty and hisses at the harbourmaster. The harbourmaster hisses back.', ['bird', { plum: '#9a9488', wing: '#6a6458', beak: '#e8903a' }]],
   ['boar', 'Wild boar', 18, 'mossbarrow', 'root_mash', [['raw_boar', [1, 2], .9], ['boar_tusk', [1, 1], .5], ['tallow', [1, 1], .4]], 'Roots up whole fields overnight and charges anything that complains. Dig a little potato into the ground and it forgets to be angry.'],
   /* Intermediate 20-39 */
   ['red_grouse', 'Red grouse', 20, 'ironpeak', 'berry_mash', [['raw_gamebird', [1, 1], .85], ['feather', [2, 5], .85]], 'Explodes out of the heather at your feet with a noise like a dropped tray, then lands ten yards away looking innocent.', ['bird', { plum: '#8a3a2a', wing: '#5a2a1e', beak: '#3a2a24', crest: '#d8402a', small: true }]],
