@@ -403,8 +403,15 @@ const paintMarks = (L, now) => { const m = MARK[L.r.spec.id], g = L.gm; g.x.clea
   /* snow caps whatever is piled up (drawn with the settled snow) */ };
 
 /* ---------- the clock ---------- */
+/* an idle work scene (nothing running) still takes the town's hour, so a night page shows no daylight square
+   (28 Nov 2026, the dark-theme audit); indoors only a little, as a lamp-lit room */
+let idleView = null, idleScenes = null, idleAt = 0;
+const idle = now => { if (now - idleAt < 500) return; idleAt = now; const v = document.getElementById('view'); if (v !== idleView) { idleView = v; idleScenes = v ? v.getElementsByClassName('activity-scene') : null; }
+  if (!idleScenes || !Q.townLight || !Q.townHour) return; const light = Q.townLight(Q.townHour());
+  for (const sc of idleScenes) { let t = sc.querySelector(':scope > .work-tint'); if (!t) { t = document.createElement('div'); t.className = 'work-tint'; t.setAttribute('aria-hidden', 'true'); sc.appendChild(t); }
+    const out = placeOf(sc).out, [tr, tg, tb] = tintOf(out ? light : { dark: light.dark * .4, warm: light.warm * .5 }), col = `rgb(${tr},${tg},${tb})`; if (t.style.backgroundColor !== col) t.style.backgroundColor = col; } };
 const loop = (dt, now) => {
-  const r = R().live; if (!r || !r.sc || !r.sc.isConnected) { L = null; return; }
+  const r = R().live; if (!r || !r.sc || !r.sc.isConnected) { L = null; idle(now); return; }
   const s = session(); if (!s) return;
   if (r.spec.id === 'pell' && !s.drill) s.drill = r.ctx && r.ctx.drill;
   if (!L || L.r !== r || r.sc._ws !== L) { mount(r); measure(L, now); }
