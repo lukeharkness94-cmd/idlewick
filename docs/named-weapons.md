@@ -8,9 +8,14 @@ fantasy ones, so they stayed retired. Smithed and sold weapons keep their alloy 
 
 ## Art
 
-Each has its own hand-drawn 16×16 sprite in `js/pixel_items.js`, drawn in the house style and checked by
-`tests/art-pixel.cjs`, which now loads these weapons. The hero holds them by weapon type, so a named dagger or hammer
-is held as a dagger or hammer (`slotSpec` in `js/pixel_runtime.js` reads `wtype`, not the id).
+Each has its own hand-drawn 16×16 sprite, redrawn on 28 Nov 2026 in the chunky outlined style in
+`js/pixel_items_weapons.js` (with every smithed, crafted and fine weapon and every bundle of arrows) and checked by
+`tests/art-pixel.cjs`, which now loads these weapons and checks each one's silhouette is its own. Each keeps the story
+it had: Leechfang's red vein, Glacier Fang's jagged ice, the Thunderhead's coiled horn, Ashka's glowing face, the
+Windcaller's bell, the Lamplight staff's lantern, Starsunder's stars. Swords and daggers lie on the diagonal,
+warhammers stand upright, shortbows stand like a D with the longbows (Wyrdwood, Nightyew, Elderthorn) on the diagonal.
+The hero holds them by weapon type, so a named dagger or hammer is held as a dagger or hammer (`slotSpec` in
+`js/pixel_runtime.js` reads `wtype`, not the id).
 
 ## How they work
 

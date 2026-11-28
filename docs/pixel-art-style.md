@@ -82,8 +82,11 @@ combat stage is 96 px, keeps the 32 × 32 sprite at 3×.
 
 Every item is 16 × 16, readable at 1× and 2×, and different from every other (`node tests/art-pixel.cjs`). Variants
 are new shapes, not recolours; material tiers of the same kind of equipment share a shape and differ by ramp and trim.
-Fish icons are drawn plumper than their spot pictures so they read at 1×. The 29 named weapons
-(`js/rare_weapons.js`) each keep their own hand-drawn identity.
+Fish icons are drawn plumper than their spot pictures so they read at 1×. Weapons and arrows (`js/pixel_items_weapons.js`)
+have two- and three-pixel blades and hafts with a lit upper edge and a shaded lower edge; swords and daggers lie on the
+diagonal, warhammers stand upright, shortbows stand like a D. Each metal tier adds its own guard, pommel, grip or head
+detail, so tiers differ in shape as well as colour. The 29 named weapons (`js/rare_weapons.js`) each keep their own
+hand-drawn identity.
 
 ## Animation
 
