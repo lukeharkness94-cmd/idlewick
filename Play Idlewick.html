@@ -5910,6 +5910,8 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 :root.type-hearthside:not(.type-classic) #skilldock .dk .dk-n,:root.type-hearthside:not(.type-classic) #dock .dk .dk-n{font-family:var(--f-ui)!important;font-size:13px!important;letter-spacing:0!important;font-weight:400!important}
 :root.type-hearthside:not(.type-classic) :is(.illustrated-card>b,.qrow b,.area-card b,.need-tile b,.gt b){font-size:14px}
 :root.type-hearthside:not(.type-classic) :is(.tag,.chipx,.state,.lvchip,.k,.phead>small,.phead small:not(.dim),.est-count,.rw,.req-chip,.eq small,.dk-h,.activity-caption small,.mast-line,.stat){font-size:13px}
+/* phones: a row of four or more tabs in Silkscreen sits two by two so every label shows whole */
+@media(max-width:860px){:root.type-hearthside:not(.type-classic) #view .tabs:has(>:nth-child(4)){grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
