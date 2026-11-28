@@ -36,9 +36,8 @@ const render0 = UI.render;
 UI.render = fresh => {
   render0(fresh);
   const town = S().town, scene = document.querySelector('.activity-scene');
-  if (scene && !scene.querySelector('.weather')) {
-    scene.insertAdjacentHTML('beforeend', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town) + (scene.querySelector('.scene-worker') ? petHtml() : ''));
-  }
+  /* work scenes take the town's own weather and hour from js/work_scenes.js (28 Nov 2026); the companion still keeps you company */
+  if (scene && !scene.dataset.touched) { scene.dataset.touched = '1'; if (scene.querySelector('.scene-worker')) scene.insertAdjacentHTML('beforeend', petHtml()); }
   const arena = document.querySelector('.encounter-arena');
   if (arena && !arena.querySelector('.weather')) arena.insertAdjacentHTML('afterbegin', '<span class="tod-tint" aria-hidden="true"></span>' + weatherHtml(town));
   /* 7. a fresh unique glows in the pack until you have looked at it */

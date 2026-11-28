@@ -53,7 +53,7 @@ const loop = () => {
   if (spec.heat) rig.heat(r, c.elapsed / act.dur);
   /* each sound plays as its own frame appears (the frame is already on screen: show() ran first) */
   DQ.strikeLive = (spec.beats || []).some(b => b.sfx) ? (TASK_SOUND[act.kind] || (spec.beats.find(b => b.replaces) || {}).replaces || spec.beats[0].sfx) : null;
-  for (const b of hits) { r.lastStrike = { sfx: b.sfx, frame, want: rig.frameOf(b.at), at: performance.now() }; if (b.sfx && DQ.sfxStrike) DQ.sfxStrike(b.sfx); if (b.fx) rig.burst(r, b.fx); }
+  for (const b of hits) { r.lastStrike = { sfx: b.sfx, frame, want: rig.frameOf(b.at), at: performance.now() }; if (b.sfx && DQ.sfxStrike) DQ.sfxStrike(b.sfx); if (b.fx) rig.burst(r, b.fx); if (DQ.workScenes) DQ.workScenes.strike(r, b); /* the mark it leaves (js/work_scenes.js) */ }
 };
 DQ.frame.add(loop); /* the shared animation clock (util.js) */
 })();

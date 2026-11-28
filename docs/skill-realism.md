@@ -221,10 +221,69 @@ ax manual's host could not be fetched from the build machine).
   flying to the butt (thock, 0.74).
 
 ### Not changed here
-- **Farming** has no work scene (plots and their crops); **Scholarship** is project cards. Neither shows a working
-  hero, so neither has a rig.
-- The Runes tab's scene on desktop is a short strip (an older layout choice in css/hearthside.css); the rig is correct
-  inside it and shows fully on phones.
+- **Farming** has no work scene (plots and their crops); **Scholarship** is project cards. Neither runs as an activity
+  (`DQ.act`): crops grow on their own timers and research advances on its own, so there is no strike, no yield event
+  and nothing for a working hero to do on screen. Giving them a scene is a design question (what the hero is shown
+  doing while a plot grows), not a small fix, and is left for the owner.
+- The Runes tab's scene was squeezed to a thin strip under a tall caption on desktop (the hero's head cut off). Since
+  28 Nov it is as tall as every other work scene and the caption scrolls inside instead (css/hearthside.css). On
+  windows under 800 px tall it is still hidden in favour of the requirements, as before.
+
+## Work scenes that live (owner, 28 Nov 2026)
+
+Three approved polish items, in `js/work_scenes.js`. Three small canvases lie exactly over the backdrop, in its own
+240 x 100 pixels: the marks and the small life under the hero, the hour's wash and the weather over them.
+
+**Work leaves a mark.** Each visible strike (strike_sync.js, on the frame the tool lands) changes the scene a little;
+each real yield (the engine's `workcycle` with a quantity, never a miss) adds to a capped pile. Starting a different
+activity clears it; the same one carries on.
+
+| Workplace | Each strike | Each yield (cap) |
+| --- | --- | --- |
+| Woodcutting | the notch deepens (to 4 px), chips settle at the foot | a log on the stack beside the tree (10) |
+| Mining | pits in the rock face, grit on the ground | an ore lump on the heap at its foot, in the ore's colour (12) |
+| Fishing | the splash wets the jetty planks | a fish in the wicker basket behind you (8) |
+| Thieving | (the lift is the glint) | a purse or coin stashed by the barrel (8) |
+| Smithing: forge | hammer scale round the anvil | the piece laid on the stone rack, glowing orange, cooling to its metal in 7 s (6) |
+| Smithing: smelting | charcoal and slag at the furnace foot | an ingot on the stack, cooling the same way (9) |
+| Carpentry | the push stroke heaps sawdust under the cut, shavings | a plank on the stack (8) |
+| Cooking | (stirring has no strike; the steam thickens as dishes come) | a bowl on the board; a burnt dish is a black lump (6) |
+| Crafting | thread ends and leather scraps | the finished piece on the pile (6) |
+| Runes | stone chips | a rune stone with its glyph (9) |
+| Enchanting | bright filings | the piece on its cloth, a sparkle (6) |
+| Herbalism | green flecks on the table | a bottle in the rows by the table (10) |
+| Exploration | | a rolled chart tied with red (6) |
+| Alchemy | | coins at your feet (12) |
+| Hunting | footprints along the trail | a bundle of skins and feathers (6) |
+| Beastmastery capture | bait crumbs on each try | a tally cut in the post for each one kept (15) |
+| Fieldwork | dust where the stake goes in | a stake and its twine in the line (6) |
+| Sailing | | a crate on the quay (6) |
+| Melee practice | cuts in the post, straw (or splinters, iron flakes, rune sparks) | |
+| Ranged practice | the arrow stays in the butt (8) | |
+
+**Small life**, occasional and subtle: a squirrel along the fence rail and birds (woodcutting); a drip from the mine's
+lintel and dust in the lamp light (mining); a fish leaping and a dragonfly by day (fishing); gulls and a leaping fish
+(sailing); a pigeon on the cobbles (thieving); a rabbit in the meadow, butterflies by day and fireflies at night
+(hunting, capture, fieldwork); the forge's ash door glowing with embers slipping up (smithing); embers and smoke off the
+furnace (smelting); steam, bubbles at the pot's rim and a cat asleep by the door (cooking); a sparrow pecking sawdust
+and dust in the light (carpentry); a mouse along the skirting (crafting); motes over the magic circle (runes,
+enchanting, alchemy); a candle with a moth after dark and a bee by day (herbalism); a butterfly and birds
+(exploration); a crow on the yard floor (practice).
+
+**Weather and the hour.** Outdoor workplaces (the districts for woodcutting, mining, fishing, sailing, thieving and the
+trap lines) take the current town's `DQ.townWeather` (rain streaks with rings in the puddles, snow that settles in
+flecks over the ground, filling in over a minute and a half, and melts when it stops, sea mist, cloud), its light from `DQ.townLight(DQ.townHour())` (a gentler
+wash than the town scene's, so the work stays readable; stars over the skyline; a lantern on a post, the mine lamp or a
+wall bracket that lights at dusk) and the season (autumn leaves and spring blossom drifting down; winter's snow comes
+with the town's weather).
+Workshops (every other workplace: a building front filling the frame) show the weather and the hour only in their
+window glass: sky blue by day, rose at dusk, dark with a star at night, rain, snow or mist on the panes. Settings →
+Display → Town life → Weather off clears it here too. On a 1440 x 900 screen the workshop windows sit above the crop;
+they show on taller scenes.
+
+**Calm and reduced motion**: no creature, drop or particle shows or moves; the marks (still pictures; the forge's
+pieces already cool) and the hour's wash and lantern stay. Nothing is saved, and a forecast or simulated time away adds
+no strike, yield or pile. `tests/work-scenes.cjs`.
 
 ## What the checks can and cannot tell you
 

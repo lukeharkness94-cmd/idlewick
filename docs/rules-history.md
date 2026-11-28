@@ -297,3 +297,7 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 27 Nov 2026 (owner): "work on some of the realism. The sizes of things in comparison to each other, the animations,
   where the character holds things when using them in skills." Replaces the front-facing working hero with a floating
   tool icon at 12% of the scene: the side-on work rig, real tool sizes, the tool meeting the target, sounds per frame.
+- 28 Nov 2026 (owner, approved polish items 5-7): work leaves a mark that builds up through a session (strikes, and
+  piles grown only by real yields, capped, cleared when the activity changes), small life in each workplace, and the
+  town's weather and hour in outdoor work scenes (indoors only through a window). Replaces the fixed per-region weather
+  and the body-clock tint that js/touches.js put on every work scene.

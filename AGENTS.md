@@ -79,7 +79,13 @@ dated line to the history file.
   dominant hand behind the body), tools at real size for a 1.7 m hero (1 px ≈ 5.3 cm), working heights at the
   figure's joints (anvil at the knuckles, trestle and table at the belt), placed so the tool meets the target's edge;
   the motion follows the real phases and every work sound plays on its own frame (`js/strike_sync.js`). A new
-  activity needs a work spec there (`tests/skill-realism.cjs`). The page backdrop (`js/backdrop.js`) is Starlit hills or Twilight forest; combat shows
+  activity needs a work spec there (`tests/skill-realism.cjs`). **Work scenes live** (owner, 28 Nov; `js/work_scenes.js`):
+  each visible strike leaves a small mark and each real yield grows a capped pile (logs, ore, fish, cooling pieces,
+  bottles...), cleared when the activity changes; one or two small creatures or effects per workplace; outdoor
+  workplaces show the town's weather, hour and season as town_life.js does (the Town life weather switch obeyed),
+  indoor ones only through their windows. Nothing here is saved or runs in a forecast or simulation; under calm and
+  reduced motion nothing moves and no weather shows. A new workplace needs its marks and life there
+  (`tests/work-scenes.cjs`). The page backdrop (`js/backdrop.js`) is Starlit hills or Twilight forest; combat shows
   the area's own scene (two per region, keyed like `saltmere:1`); a new area needs a recipe there.
 - **Hearthside Journal** (owner, 18 Nov) is the whole game's look: light parchment and Hearthside lettering by default
   (local Cinzel + Alegreya Sans), dark theme available; `css/hearthside.css` is the shared presentation layer (extend it,

@@ -350,8 +350,10 @@ html.calm .events .ev-result{animation:none}
 .event-panorama{position:relative;display:grid;place-items:center}.event-subject .ic{width:112px;height:112px;filter:drop-shadow(0 10px 8px #0007)}
 @media(min-width:861px){
  .magic-runes .activity-stage{display:flex;flex-direction:column;padding:0;min-height:0;height:100%;max-height:100%;overflow:hidden}
- .magic-runes .activity-scene{flex:1 1 160px;min-height:0!important;height:auto!important}
- .magic-runes .activity-caption{flex:0 0 auto;min-height:min-content;padding:12px}
+ /* the Runes scene is as tall as every other work scene (28 Nov 2026: it was squeezed to a thin strip under a tall
+    caption, cutting the hero's head off); the caption scrolls inside instead, as on the other activity pages */
+ .magic-runes .activity-scene{flex:0 0 auto;height:clamp(110px,22vh,220px)!important;min-height:100px!important}
+ .magic-runes .activity-caption{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:12px}
 }
 @media(min-width:861px) and (max-height:800px){
  /* The catalogue retains the rune art; this duplicate scene gives way to the actual requirements. */
