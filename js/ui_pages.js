@@ -117,12 +117,12 @@ UI.inlineBuy = id => {
   const reason = DQ.shopBuyLock(id), max = DQ.buyMax(id), price = DQ.buyPrice(id);
   if (reason) return `<button class="btn" disabled>${ico('lock')}${esc(reason)}</button>`;
   /* short labels so three buttons fit a card without wrapping (review 26 Nov; 27 Nov: Max ×15,000 clipped, so five-figure
-     counts read 15k); the full wording is in each button's
+     counts read 15k; 28 Nov: four-figure counts too, 7.5k); the full wording is in each button's
      accessible name and tooltip. Gear is bought one at a time, so it gets a single Buy button. */
   const it = D.ITEMS[id], why = 'Not enough coins or supplies';
   const purchase = (n, label, full) => { const ok = n > 0 && n <= max; return `<button class="btn" data-do="buy" data-a="${id}" data-b="${n}" ${ok ? '' : 'disabled'} aria-label="${esc(full)}${ok ? '' : ': ' + why}" data-tip="text:${esc(ok ? full : why)}"><b>${label}</b><small>${ok ? UI.money(n * price) : '—'}</small></button>`; };
   if (it && it.slot && it.type !== 'ammo') return `<div class="inline-buy one" aria-label="Buy ${esc(it.name)}">${purchase(1, 'Buy', 'Buy 1')}</div>`;
-  return `<div class="inline-buy" aria-label="Buy ${esc(D.ITEMS[id].name)}">${purchase(1, '×1', 'Buy 1')}${purchase(10, '×10', 'Buy 10')}${purchase(max, `Max ×${max >= 10000 ? String(Math.floor(max / 100) / 10).replace(/\.0$/, '') + 'k' : fmt(max)}`, `Buy max (${fmt(max)})`)}</div>`;
+  return `<div class="inline-buy" aria-label="Buy ${esc(D.ITEMS[id].name)}">${purchase(1, '×1', 'Buy 1')}${purchase(10, '×10', 'Buy 10')}${purchase(max, `Max ×${max >= 1000 ? String(Math.floor(max / 100) / 10).replace(/\.0$/, '') + 'k' : fmt(max)}`, `Buy max (${fmt(max)})`)}</div>`;
 };
 UI.V.shop = () => {
   const tab = UI.shopTab, buying = tab === 'buy', qty = UI.shopQty;

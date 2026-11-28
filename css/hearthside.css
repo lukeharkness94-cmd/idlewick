@@ -1343,3 +1343,16 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 #view .guide-index .gi>:is(svg,img,.ic){grid-row:1/3;align-self:center}
 #view .guide-index .gi em{grid-column:2;grid-row:2;line-height:1.1}
 @media (min-width:861px){#view .guide-book{grid-template-columns:248px minmax(0,1fr) 390px}}
+/* clipped labels (owner, 28 Nov 2026: "fix those three"): the capital pixel face is too wide for these narrow controls,
+   so they take the sentence face. Shop quantity buttons, farm plot actions (Plant / Growing · time / Harvest), the
+   Fighting style weapon (full row width, the weapon's whole name), the paper doll's slot labels and the stat tiles. */
+:root.type-hearthside:not(.type-classic) #view .inline-buy .btn b{font:400 15px/1.1 var(--f-body)!important;text-transform:none!important;letter-spacing:0!important;white-space:nowrap}
+:root.type-hearthside:not(.type-classic) #view .plot-act{font:400 15px/1.2 var(--f-body)!important;text-transform:none!important;letter-spacing:0!important;white-space:nowrap}
+:root.type-hearthside:not(.type-classic) #view .ss-weapon{width:100%!important;max-width:none!important;justify-content:flex-start!important;text-align:left}
+:root.type-hearthside:not(.type-classic) #view .ss-weapon b{font:400 16px/1.15 var(--f-body)!important;text-transform:none!important;letter-spacing:0!important;word-break:normal!important;overflow-wrap:normal!important;white-space:normal}
+:root.type-hearthside:not(.type-classic) #view .ss-weapon small{white-space:nowrap}
+:root.type-hearthside:not(.type-classic) #view .combat-equipped-slot small{letter-spacing:0!important}
+:root.type-hearthside:not(.type-classic) #view .combat-x .cx-stats>* b{letter-spacing:0!important}
+:root.type-hearthside:not(.type-classic) #view .ss-cl>span,:root.type-hearthside:not(.type-classic) #view .ss-hp>span{font-size:13px!important;letter-spacing:0!important;min-width:0}
+:root.type-hearthside:not(.type-classic) #view .combat-equipped-slot small{font:400 13px/1.1 var(--f-body)!important;text-transform:none!important;letter-spacing:0!important}
+:root.type-hearthside:not(.type-classic) #view :is(.ss-cl,.ss-hp){gap:4px!important;padding-left:4px!important;padding-right:4px!important;min-width:0}
