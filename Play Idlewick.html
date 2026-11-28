@@ -5947,6 +5947,8 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 @media(max-width:860px){:root.type-hearthside:not(.type-classic) :is(.beast-tabs,.capture-bar) .btn{font-size:13px!important;letter-spacing:0!important;padding-inline:7px!important}}
 @media(max-width:860px){:root.type-hearthside:not(.type-classic) #view .beast-tabs{display:grid!important;grid-template-columns:1fr 1fr;gap:6px}:root.type-hearthside:not(.type-classic) #view .beast-tabs .btn{max-width:none}}
 @media(max-width:860px){:root.type-hearthside:not(.type-classic) #view .btnrow{flex-wrap:wrap!important}}
+/* idle combat: the Where to fight window covers the stage; no scenery shows round its edge as a stray border */
+#view .combat-x.cw-idle .encounter-arena{background-image:none!important;background-color:var(--panel)!important}
 </style>
 <style>/* World events full-screen (owner, 26 Nov 2026; js/world_events.js, js/world_ui.js). The scene itself is the away
    encounter's (.event-fullscreen / .encounter-moment in css/hearthside.css); this only adds the event's picture row,
@@ -10215,6 +10217,14 @@ const scale2x = c => {
   }
   o.getContext('2d').putImageData(od, 0, 0); return o;
 };
+/* dusk grade (owner, 28 Nov 2026: a darker game): scenery behind the work and combat (districts, backdrops) is
+   deepened in place, keeping its hue: a gamma of 1.45 sinks the mid-tones, 80% value, and a 10% pull toward the
+   shared night ink. Heroes, targets and creatures are not graded, so the thing you act on stays the brightest. */
+const DUSK = { gam: 1.45, v: .8, tint: [24, 18, 22], tm: .1 };
+const duskLut = Array.from({ length: 256 }, (_, c) => 255 * Math.pow(c / 255, DUSK.gam) * DUSK.v * (1 - DUSK.tm));
+const dusk = c => { if (!c || !c.getContext) return c; const x = c.getContext('2d'), d = x.getImageData(0, 0, c.width, c.height), q = d.data;
+  for (let i = 0; i < q.length; i += 4) { q[i] = duskLut[q[i]] + DUSK.tint[0] * DUSK.tm; q[i + 1] = duskLut[q[i + 1]] + DUSK.tint[1] * DUSK.tm; q[i + 2] = duskLut[q[i + 2]] + DUSK.tint[2] * DUSK.tm; }
+  x.putImageData(d, 0, 0); return c; };
 const hires = c => { if (!c || Math.max(c.width, c.height) > 64) return c; let o = c; for (let k = 1; k < HIRES; k *= 2) o = scale2x(o); return o; };
 const url = (key, make, o) => { if (cache.has(key)) return cache.get(key); const s = make(); let u = null; if (s) { const c = toCanvas(s, o), up = hires(c); u = up.toDataURL(); if (up !== c) logical.set(u, [c.width, c.height]); } cache.set(key, u); return u; };
 /* an <img> at a whole-number scale; size is the target box, the sprite is scaled by the largest integer that fits */
@@ -10572,7 +10582,7 @@ function iconMining() { const s = Spr(16, 16); s.line(4, 14, 11, 5, R.wood); s.l
 /* ---------- public API ---------- */
 const SPRITES = { chicken, goblin, wolf, oak, pine, pike, carp, sword, bow, platebody, ore, log, gem, potato, cottage, iconFishing, iconWoodcutting, iconMining };
 DQ.pixelArt = {
-  ramp, mix, Spr, R, SKIN, HAIR, hero, heroSide, WORK_POSTURE, url, img, toCanvas, hires, scale2x, logicalOf, sprites: SPRITES, composeScene,
+  ramp, mix, Spr, R, SKIN, HAIR, hero, heroSide, WORK_POSTURE, url, img, toCanvas, hires, scale2x, dusk, logicalOf, sprites: SPRITES, composeScene,
   EYES, sphere, INK, COOL, WARM, lum, atScale,
   sprite: (name, ...args) => url(name + ':' + args.join(','), () => SPRITES[name](...args)),
   heroUrl: (o) => url('hero:' + JSON.stringify(o), () => hero(o)),
@@ -23961,7 +23971,7 @@ const districts = {};
 Q.districtUrl = (town, kind, key, choice) => { if (!A.districtFor) return Q.sceneUrl(town);
   const o = kind === 'sail' ? { island: choice && !choice.locked && !choice.blackout ? choice.id : null, tier: Q.boatTier ? Q.boatTier() : 0 } : {};
   const k = [town, kind, key, o.island || '', o.tier || ''].join('|');
-  if (!districts[k]) { const c = A.districtFor(town, kind, key, o); districts[k] = (A.scale2x ? A.scale2x(c) : c).toDataURL(); } return districts[k]; };
+  if (!districts[k]) { const c = A.dusk ? A.dusk(A.districtFor(town, kind, key, o)) : A.districtFor(town, kind, key, o); districts[k] = (A.scale2x ? A.scale2x(c) : c).toDataURL(); } return districts[k]; };
 /* town scenes are not snapped to whole multiples (they would drop to 1x on most screens): the 640 x 360 drawing is
    doubled with Scale2x and fills its panel */
 UI.scene = (id, cls = '') => `<img class="scene pxscene ${cls}" data-town="${id}" src="${Q.sceneUrl(id)}" alt="" draggable="false">`;
@@ -24206,6 +24216,7 @@ if (settings0) UI.V.settings = () => settings0() + `<section class="panel"><div 
     if (r.rain) { g.globalAlpha = .5; for (let i = 0; i < r.rain; i++) { const x = rnd() * W, y = rnd() * H; px(x, y, 1, 4, '#9aa8c8'); } g.globalAlpha = 1; }
     if (r.dots) { const [n, cols, y0, y1] = r.dots; for (let i = 0; i < n; i++) px(rnd() * W, y0 + rnd() * (y1 - y0), 1, 1, cols[i % cols.length]); }
     if(r.detail)r.detail({px,pine,rnd,W,H});
+    DQ.pixelArt?.dusk?.(c);
     return c.toDataURL();
   };
   const cache = {};

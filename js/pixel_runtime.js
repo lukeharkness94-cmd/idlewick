@@ -52,7 +52,7 @@ const districts = {};
 Q.districtUrl = (town, kind, key, choice) => { if (!A.districtFor) return Q.sceneUrl(town);
   const o = kind === 'sail' ? { island: choice && !choice.locked && !choice.blackout ? choice.id : null, tier: Q.boatTier ? Q.boatTier() : 0 } : {};
   const k = [town, kind, key, o.island || '', o.tier || ''].join('|');
-  if (!districts[k]) { const c = A.districtFor(town, kind, key, o); districts[k] = (A.scale2x ? A.scale2x(c) : c).toDataURL(); } return districts[k]; };
+  if (!districts[k]) { const c = A.dusk ? A.dusk(A.districtFor(town, kind, key, o)) : A.districtFor(town, kind, key, o); districts[k] = (A.scale2x ? A.scale2x(c) : c).toDataURL(); } return districts[k]; };
 /* town scenes are not snapped to whole multiples (they would drop to 1x on most screens): the 640 x 360 drawing is
    doubled with Scale2x and fills its panel */
 UI.scene = (id, cls = '') => `<img class="scene pxscene ${cls}" data-town="${id}" src="${Q.sceneUrl(id)}" alt="" draggable="false">`;

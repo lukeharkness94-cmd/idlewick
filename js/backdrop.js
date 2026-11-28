@@ -69,6 +69,7 @@
     if (r.rain) { g.globalAlpha = .5; for (let i = 0; i < r.rain; i++) { const x = rnd() * W, y = rnd() * H; px(x, y, 1, 4, '#9aa8c8'); } g.globalAlpha = 1; }
     if (r.dots) { const [n, cols, y0, y1] = r.dots; for (let i = 0; i < n; i++) px(rnd() * W, y0 + rnd() * (y1 - y0), 1, 1, cols[i % cols.length]); }
     if(r.detail)r.detail({px,pine,rnd,W,H});
+    DQ.pixelArt?.dusk?.(c);
     return c.toDataURL();
   };
   const cache = {};

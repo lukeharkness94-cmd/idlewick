@@ -134,6 +134,14 @@ const scale2x = c => {
   }
   o.getContext('2d').putImageData(od, 0, 0); return o;
 };
+/* dusk grade (owner, 28 Nov 2026: a darker game): scenery behind the work and combat (districts, backdrops) is
+   deepened in place, keeping its hue: a gamma of 1.45 sinks the mid-tones, 80% value, and a 10% pull toward the
+   shared night ink. Heroes, targets and creatures are not graded, so the thing you act on stays the brightest. */
+const DUSK = { gam: 1.45, v: .8, tint: [24, 18, 22], tm: .1 };
+const duskLut = Array.from({ length: 256 }, (_, c) => 255 * Math.pow(c / 255, DUSK.gam) * DUSK.v * (1 - DUSK.tm));
+const dusk = c => { if (!c || !c.getContext) return c; const x = c.getContext('2d'), d = x.getImageData(0, 0, c.width, c.height), q = d.data;
+  for (let i = 0; i < q.length; i += 4) { q[i] = duskLut[q[i]] + DUSK.tint[0] * DUSK.tm; q[i + 1] = duskLut[q[i + 1]] + DUSK.tint[1] * DUSK.tm; q[i + 2] = duskLut[q[i + 2]] + DUSK.tint[2] * DUSK.tm; }
+  x.putImageData(d, 0, 0); return c; };
 const hires = c => { if (!c || Math.max(c.width, c.height) > 64) return c; let o = c; for (let k = 1; k < HIRES; k *= 2) o = scale2x(o); return o; };
 const url = (key, make, o) => { if (cache.has(key)) return cache.get(key); const s = make(); let u = null; if (s) { const c = toCanvas(s, o), up = hires(c); u = up.toDataURL(); if (up !== c) logical.set(u, [c.width, c.height]); } cache.set(key, u); return u; };
 /* an <img> at a whole-number scale; size is the target box, the sprite is scaled by the largest integer that fits */
@@ -491,7 +499,7 @@ function iconMining() { const s = Spr(16, 16); s.line(4, 14, 11, 5, R.wood); s.l
 /* ---------- public API ---------- */
 const SPRITES = { chicken, goblin, wolf, oak, pine, pike, carp, sword, bow, platebody, ore, log, gem, potato, cottage, iconFishing, iconWoodcutting, iconMining };
 DQ.pixelArt = {
-  ramp, mix, Spr, R, SKIN, HAIR, hero, heroSide, WORK_POSTURE, url, img, toCanvas, hires, scale2x, logicalOf, sprites: SPRITES, composeScene,
+  ramp, mix, Spr, R, SKIN, HAIR, hero, heroSide, WORK_POSTURE, url, img, toCanvas, hires, scale2x, dusk, logicalOf, sprites: SPRITES, composeScene,
   EYES, sphere, INK, COOL, WARM, lum, atScale,
   sprite: (name, ...args) => url(name + ':' + args.join(','), () => SPRITES[name](...args)),
   heroUrl: (o) => url('hero:' + JSON.stringify(o), () => hero(o)),

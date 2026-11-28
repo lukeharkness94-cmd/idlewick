@@ -1261,3 +1261,5 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 @media(max-width:860px){:root.type-hearthside:not(.type-classic) :is(.beast-tabs,.capture-bar) .btn{font-size:13px!important;letter-spacing:0!important;padding-inline:7px!important}}
 @media(max-width:860px){:root.type-hearthside:not(.type-classic) #view .beast-tabs{display:grid!important;grid-template-columns:1fr 1fr;gap:6px}:root.type-hearthside:not(.type-classic) #view .beast-tabs .btn{max-width:none}}
 @media(max-width:860px){:root.type-hearthside:not(.type-classic) #view .btnrow{flex-wrap:wrap!important}}
+/* idle combat: the Where to fight window covers the stage; no scenery shows round its edge as a stray border */
+#view .combat-x.cw-idle .encounter-arena{background-image:none!important;background-color:var(--panel)!important}
