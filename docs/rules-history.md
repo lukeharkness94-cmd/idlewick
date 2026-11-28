@@ -300,3 +300,7 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 27 Nov 2026 (owner, subtle polish: "Let's do all 15"): sound items 11 to 13. Town bells on the hour by the player's
   clock, pop-ups hush music and ambience, and gear and item moves sound by material. Replaces the single equip thump
   for equip/unequip and the tab blip for bank moves.
+- 27 Nov 2026 (owner): "Let's do all 15" (subtle polish, items 8-10). Adds to the Home and towns rules: the hearth fills
+  up from the save (boss trophies, named-weapon rack, museum shelf, a basket per beast) and quest givers leave letters
+  on its desk (none in the first 20 minutes, at most one per 45-90 minutes of play, three waiting, kept in the Journal);
+  met givers walk their town, and a finished restoration draws a cheering crowd for about a minute.

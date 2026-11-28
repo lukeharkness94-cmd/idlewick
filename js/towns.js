@@ -123,6 +123,7 @@ const STYLE = {
    between the middle street and the front; the Projects page puts a clickable spot over each one */
 const siteLayout = town => { const sites = Object.keys(D.PROJECTS || {}).filter(k => D.PROJECTS[k].town === town), n = sites.length, gap = (W - 40) / Math.max(1, n);
   return sites.map((id, i) => ({ id, i, X: Math.round(20 + gap * (i + .5) - 16), Y: i % 2 ? 254 : 198 })).sort((a, b) => a.Y - b.Y); };
+A.siteLayout = siteLayout; /* where each site stands, for the townsfolk who gather round a finished one (js/town_walkers.js) */
 /* extras: what you have built or laid elsewhere that belongs in the town (boats, traps, the cottage's crops) */
 function sceneFor(town, stages = {}, extras = {}) {
   const T = A.TOWN[town] || A.TOWN.willowbrook, st = Object.assign({ ground: T.ground }, STYLE[town] || STYLE.willowbrook), rnd = seeded(town);

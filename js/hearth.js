@@ -6,7 +6,10 @@
    scene (with its walking townsfolk), the companion its pen. The view is remembered in settings.homeView.
    Drawn in code in the house style at 320 x 240 room pixels, shown at a whole-number scale (3x on desktop, 1x on phones)
    and cropped by its card; the fire, the firelight and the candle move with elapsed time at native refresh; under
-   Reduce effects and prefers-reduced-motion they hold still and the room keeps its light. tests/hearth.cjs. */
+   Reduce effects and prefers-reduced-motion they hold still and the room keeps its light. tests/hearth.cjs.
+   The room fills up as you play (owner, 27 Nov 2026): boss trophies over the fire, named weapons on a rack, museum
+   pieces on a shelf, a basket per beast and letters on the desk (js/hearth_letters.js), each with its own hotspot.
+   tests/hearth-life.cjs. */
 (() => {
 const Q = window.DQ, D = Q.data, UI = Q.ui, A = Q.pixelArt, S = () => Q.S, esc = Q.esc, ico = Q.ico;
 if (!A || !A.townPainter) return;
@@ -26,11 +29,88 @@ const SPOTS = {
   desk: { x: 208, y: 146, w: 92, h: 40, label: 'Desk: activity and goals', act: ['go', 'activity'] },
   pet: { x: 92, y: 196, w: 40, h: 26, label: 'Your companion', act: ['go', 'beastmastery'] }
 };
+/* where letters wait: on the desk, right of the inkpot (js/hearth_letters.js) */
+const LETTER = { x: 274, y: 137, w: 22, h: 16 };
 const FIRE = { x: 72, y: 128, w: 56, h: 44 }, HERO = { x: 140, y: 172 }, PET = { x: 96, y: 216 };
+/* a beast's own sprite where it has one, else the creature it came from (the same choice as DQ.petSprite) */
+const petArt = id => { const p = D.PET[id]; if (!p || !A.creatureUrl) return null; const k = String(A.hasCreature && A.hasCreature(p.id) ? p.id : p.mon || p.id).replace(/^wild_/, ''); return A.hasCreature && !A.hasCreature(k) ? null : A.creatureUrl(k); };
+
+/* ---------- the room fills up as you play (owner, 27 Nov 2026) ----------
+   Boss trophies over the fireplace, the named weapons you own on a rack under the rafters, museum pieces on a wall
+   shelf and a basket for every beast you keep (the companion with you still sleeps on the rug). Each has a fixed slot;
+   a row that runs out of room shows "+N" in its last slot. Everything is read from the save; the dates of first boss
+   victories are kept in S.trophies from now on (older victories just say "beaten"). */
+const TROPHY = { grubnash: 'tusk', oldtusk: 'other tusk', barnacle: 'hat', frostmaw: 'tooth', morwenna: 'lantern', pyrrhax: 'scale', zephyrion: 'tail feather', hollowking: 'circlet' };
+const dayOf = t => t ? new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+(Q.killHooks = Q.killHooks || []).push(m => { if (!m.boss || Q.forecasting || (S().towns[m.town] && S().towns[m.town].boss)) return; const T = S().trophies = S().trophies || {}; if (!T[m.id]) T[m.id] = Date.now(); });
+const possess = n => n + (/s$/.test(n) ? '’' : '’s');
+const ownedAnywhere = id => (Q.have ? Q.have(id) : 0) > 0 || ((S().bank || {})[id] || 0) > 0 || Object.values(S().equip || {}).includes(id);
+/* rows: room-pixel slots (inside the translated room, so the rafter strip has negative y) */
+const ROWS = {
+  trophy: { slots: [[56, 18], [79, 18], [102, 18], [125, 18], [56, 44], [79, 44], [102, 44], [125, 44]], w: 20, h: 22 },
+  rack: { slots: [[110, -24], [131, -24], [152, -24], [173, -24]], w: 16, h: 16 },
+  shelf: { slots: [[14, -21], [34, -21], [54, -21], [74, -21]], w: 16, h: 16 },
+  bed: { slots: [[206, 208], [244, 208], [282, 208]], w: 30, h: 28 }
+};
+const CURIO_ART = { hart: ['#f4f4f8', '#c8c8d8'], star: ['#f8e070', '#d8a830'], shrine: ['#a8a49a', '#7a766e'], festival: ['#e0405a', '#4a8ad8'], bard: ['#c8904a', '#8a5a2a'], recipes: ['#b8483a', '#f4ecd8'] };
+Q.hearthKeep = () => { const st = S(), out = [];
+  const put = (row, list) => { const R = ROWS[row], n = R.slots.length, over = list.length > n;
+    list.slice(0, over ? n - 1 : n).forEach((e, i) => out.push(Object.assign({ row, x: R.slots[i][0], y: R.slots[i][1], w: R.w, h: R.h }, e)));
+    if (over) { const rest = list.slice(n - 1), [x, y] = R.slots[n - 1]; out.push({ row, key: row + ':more', more: rest.length, x, y, w: R.w, h: R.h, label: `${rest.length} more: ${rest.map(e => e.name).join(', ')}`, act: rest[0].act }); } };
+  /* trophies: the main bosses, in the order of the road */
+  put('trophy', D.TOWNS.filter(t => st.towns[t.id] && st.towns[t.id].boss && D.MON[t.boss]).map(t => { const m = D.MON[t.boss], nm = (m.boss && m.boss.short) || m.name, at = (st.trophies || {})[m.id];
+    return { key: 'trophy:' + m.id, id: m.id, name: nm, label: `${possess(nm)} ${TROPHY[m.id] || 'trophy'} · beaten${at ? ' ' + dayOf(at) : ''}`, act: ['hearthgo', 'guide:' + m.id] }; }));
+  /* the named weapons you own, wherever they are kept */
+  put('rack', (D.RARE_WEAPONS || []).filter(id => D.ITEMS[id] && ownedAnywhere(id)).map(id => ({ key: 'rack:' + id, id, name: D.ITEMS[id].name, label: `${D.ITEMS[id].name} · ${Object.values(st.equip || {}).includes(id) ? 'in your hand' : (Q.have && Q.have(id)) ? 'in your pack' : 'in the bank'}`, act: ['hearthgo', 'gear:' + id] })));
+  /* museum pieces: a medal for each finished wing, then the relics and curiosities you have found */
+  const mu = st.museum || {}, got = mu.got || {};
+  put('shelf', [].concat((D.WINGS || []).filter(w => (mu.wings || {})[w.id]).map(w => ({ key: 'wing:' + w.id, id: w.id, medal: true, name: w.name, label: `${w.name} complete · ${w.gives}`, act: ['hearthgo', 'museum:'] })),
+    Object.values(D.ITEMS).filter(it => it.type === 'relic' && got['r:' + it.id]).map(it => ({ key: 'relic:' + it.id, id: it.id, name: it.name, label: `${it.name} · in the museum since ${dayOf(got['r:' + it.id])}`, act: ['hearthgo', 'museum:r:' + it.id] })),
+    (D.CURIOS || []).filter(c => got['x:' + c.id]).map(c => ({ key: 'curio:' + c.id, id: c.id, curio: true, name: c.name, label: `${c.name} · ${c.text}`, act: ['hearthgo', 'museum:x:' + c.id] }))));
+  /* a basket for each beast you keep; the companion with you is on the rug */
+  const pets = st.pets || {}; put('bed', Object.keys(pets.owned || {}).filter(id => D.PET[id] && id !== pets.active).map(id => ({ key: 'bed:' + id, id, name: D.PET[id].name, label: `${D.PET[id].name} the ${String(D.PET[id].kind || 'beast').toLowerCase()} · asleep in its basket`, act: ['hearthgo', 'beast:' + id] })));
+  return out; };
+UI.DO.hearthgo = a => { const [k, ...r] = String(a || '').split(':'), id = r.join(':');
+  if (k === 'guide' && UI.openGuide) return UI.openGuide(id);
+  if (k === 'gear') return Q.go('character');
+  if (k === 'museum') { UI.museumSel = id || null; return Q.go('museum'); }
+  if (k === 'beast') { Q.go('beastmastery'); if (UI.DO.beastselect) UI.DO.beastselect(id); } };
+/* drawing the keepsakes into the room (room pixels, whole scale) */
+const head = img => { const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height).data; let x0 = c.width, x1 = -1, y0 = c.height; for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) if (d[(y * c.width + x) * 4 + 3] > 40) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); }
+  return x1 < 0 ? null : { c, sx: Math.max(0, Math.min(c.width - 16, Math.round((x0 + x1) / 2) - 8)), sy: y0 }; };
+const drawKeep = async (x, P, list) => { const { f, ell } = P, wood = '#8a5e3a', woodDk = '#5e3e24', woodLt = '#a87a4e', brass = '#c8a050';
+  /* the rack and the shelf under the rafters, drawn whenever they hold something */
+  if (list.some(e => e.row === 'rack')) { f(woodDk, 106, -6, 86, 4); f(woodLt, 106, -6, 86, 1); for (const [sx] of ROWS.rack.slots) { f('#3a2a1a', sx + 3, -9, 2, 3); f('#3a2a1a', sx + 11, -9, 2, 3); } }
+  if (list.some(e => e.row === 'shelf')) { f(woodDk, 12, -5, 82, 3); f(woodLt, 12, -5, 82, 1); f(woodDk, 16, -2, 2, 5); f(woodDk, 88, -2, 2, 5); }
+  for (const e of list) {
+    if (e.row === 'trophy') { const X = e.x, Y = e.y;
+      /* a shield-shaped plaque: dark rim, lit top-left, a point at the bottom */
+      for (let j = 0; j < 22; j++) { const inset = j < 15 ? (j === 0 ? 2 : j === 1 ? 1 : 0) : Math.round((j - 14) * 1.3); if (inset * 2 >= 20) continue; f(woodDk, X + inset, Y + j, 20 - inset * 2, 1); if (j > 0 && j < 20) f(j < 3 ? woodLt : wood, X + inset + 1, Y + j, Math.max(0, 18 - inset * 2), 1); }
+      f(mix(wood, '#ffffff', .2), X + 2, Y + 2, 1, 10);
+      if (e.more) { f(brass, X + 6, Y + 8, 8, 6); f('#f4dc8a', X + 6, Y + 8, 8, 1); continue; }
+      const im = await load(A.creatureUrl ? A.creatureUrl(e.id) : null), h = im && head(im);
+      if (h) x.drawImage(h.c, h.sx, h.sy, 16, 13, X + 2, Y + 3, 16, 13);
+      f(brass, X + 7, Y + 17, 6, 2); f('#f4dc8a', X + 7, Y + 17, 6, 1); }
+    else if (e.row === 'rack' || (e.row === 'shelf' && !e.medal && !e.curio)) { if (e.more) { f(brass, e.x + 4, e.y + 8, 8, 6); f('#f4dc8a', e.x + 4, e.y + 8, 8, 1); continue; }
+      const im = await load(A.itemUrl ? A.itemUrl(e.id) : null); if (im) x.drawImage(im, 0, 0, 16, 16, e.x, e.y, 16, 16); }
+    else if (e.medal) { const X = e.x + 4, Y = e.y + 2; f('#b8483a', X + 2, Y, 2, 6); f('#3a6ac8', X + 4, Y, 2, 6); ell('#8a6a2a', X + 4, Y + 10, 5, 5); ell(brass, X + 4, Y + 10, 4, 4); f('#f4dc8a', X + 2, Y + 8, 2, 1); f('#8a6a2a', X + 3, Y + 10, 3, 1); }
+    else if (e.curio) { const [a, b] = CURIO_ART[e.id] || ['#d8c8a0', '#8a7a5a'], X = e.x + 3, Y = e.y + 4;
+      if (e.id === 'hart') { f(a, X + 2, Y + 4, 6, 8); f(b, X + 2, Y + 10, 6, 2); f(a, X, Y, 1, 4); f(a, X + 9, Y, 1, 4); f(a, X + 1, Y + 2, 2, 1); f(a, X + 7, Y + 2, 2, 1); f('#3a3030', X + 3, Y + 6, 1, 1); f('#3a3030', X + 6, Y + 6, 1, 1); }
+      else if (e.id === 'star') { f('#4a4a5a', X, Y + 9, 10, 3); f(a, X + 4, Y + 2, 2, 7); f(a, X + 1, Y + 5, 8, 2); f('#fff8d0', X + 4, Y + 4, 1, 1); f(b, X + 5, Y + 7, 1, 2); }
+      else if (e.id === 'shrine') { f(b, X + 1, Y + 2, 8, 10); f(a, X + 2, Y + 3, 6, 9); f(b, X, Y + 1, 10, 2); f('#f0d060', X + 4, Y + 6, 2, 3); }
+      else if (e.id === 'festival') { f(a, X + 3, Y, 4, 4); f(b, X + 1, Y + 4, 3, 8); f(a, X + 6, Y + 4, 3, 8); f(mix(a, '#000000', .25), X + 4, Y + 1, 2, 2); }
+      else if (e.id === 'bard') { ell(a, X + 4, Y + 9, 4, 3); f(b, X + 4, Y, 2, 8); f(b, X + 3, Y, 4, 1); f('#3a2414', X + 4, Y + 9, 2, 1); f('#f4ecd8', X + 5, Y + 1, 1, 7); }
+      else { f(a, X, Y + 3, 10, 9); f(mix(a, '#000000', .3), X, Y + 11, 10, 1); f(b, X + 1, Y + 4, 8, 6); f(a, X + 5, Y + 3, 1, 8); } }
+    else if (e.row === 'bed') { const X = e.x, base = e.y + 26;
+      /* the sleeper first, then the basket's front rim over its feet */
+      if (!e.more) { const im = await load(petArt(e.id)); if (im) x.drawImage(im, 0, 0, 32, 32, X - 1, base - 31, 32, 32); }
+      else { ell('#c8b0d0', X + 15, base - 6, 11, 3); ell('#e0cce8', X + 13, base - 7, 6, 2); }
+      ell('#7a5230', X + 15, base - 3, 15, 4); ell('#a87a4a', X + 15, base - 4, 14, 3); for (let q = X + 3; q < X + 28; q += 3) f('#7a5230', q, base - 6, 1, 4); f('#c89a62', X + 2, base - 7, 26, 1); f('#5e3e24', X + 4, base, 22, 1); } } };
 
 /* ---------- the room itself (redrawn when the quarter hour, weather, season or companion changes) ---------- */
 const load = src => new Promise(r => { if (!src) return r(null); const im = new Image(); im.onload = () => r(im); im.onerror = () => r(null); im.src = src; });
-const room = async (town, light, weather, season, petId) => {
+const room = async (town, light, weather, season, petId, keep = [], letters = 0) => {
   const c = document.createElement('canvas'); c.width = RW; c.height = RH; const x = c.getContext('2d'), P = A.townPainter(x, RW, RH), { f, ell } = P;
   const plaster = '#d8c6a0', beam = '#5a3e26', beamLt = '#7a5636', stone = '#8a8278', stoneDk = '#615a52', wood = '#8a5e3a', woodDk = '#5e3e24', woodLt = '#a87a4e';
   /* the upper wall and the rafters, with a lantern on a chain */
@@ -86,9 +166,12 @@ const room = async (town, light, weather, season, petId) => {
   ell('#8a2e26', 100, 214, 62, 14); ell('#b8483a', 100, 214, 56, 11); ell('#d8a050', 100, 214, 44, 7); ell('#b8483a', 100, 214, 38, 5);
   /* the hero by the fire, the companion (or the house cat) asleep on the rug */
   const hero = await load(Q.heroFigureUrl && Q.heroFigureUrl(S().look)); if (hero) x.drawImage(hero, HERO.x, HERO.y - 32, 24, 32);
-  const petUrl = petId && A.creatureUrl ? A.creatureUrl(String((D.PET[petId] && (D.PET[petId].mon || D.PET[petId].id)) || petId).replace(/^wild_/, '')) : null, pet = await load(petUrl);
+  const pet = await load(petId ? petArt(petId) : null);
   if (pet) x.drawImage(pet, PET.x, PET.y - 32 + 6, 32, 32);
   else { const cat = '#7a7480'; ell(cat, PET.x + 14, PET.y - 4, 9, 4); f(cat, PET.x + 4, PET.y - 9, 6, 5); f(cat, PET.x + 4, PET.y - 11, 2, 2); f(cat, PET.x + 8, PET.y - 11, 2, 2); f(mix(cat, '#000000', .3), PET.x + 18, PET.y - 3, 8, 2); }
+  /* what you have gathered over time, and any letters waiting on the desk (envelopes with a red seal, a little stacked) */
+  await drawKeep(x, P, keep);
+  for (let i = 0; i < Math.min(3, letters); i++) { const ex = LETTER.x + 2 + i * 2, ey = LETTER.y + 5 - i * 2; f('#c8b890', ex, ey, 13, 8); f('#f4ecd8', ex, ey, 12, 7); f('#d8ccb0', ex, ey, 6, 1); f('#d8ccb0', ex + 6, ey, 6, 1); f('#d8ccb0', ex + 1, ey + 1, 1, 1); f('#d8ccb0', ex + 10, ey + 1, 1, 1); f('#d8ccb0', ex + 2, ey + 2, 1, 1); f('#d8ccb0', ex + 9, ey + 2, 1, 1); f('#c8382e', ex + 5, ey + 2, 3, 3); f('#e86050', ex + 5, ey + 2, 1, 1); }
   x.restore(); return c.toDataURL();
 };
 
@@ -115,28 +198,38 @@ const lightNow = () => { const town = S().town, h = Q.townHour ? Q.townHour() : 
   const night = [46, 58, 120], sun = [255, 168, 104], tint = [255, 255, 255].map((v, i) => Math.round(v + (sun[i] - v) * L.warm * .62)).map((v, i) => Math.round(v + (night[i] - v) * L.dark * .8 * (1 - L.warm * .45)));
   return { town, dark: L.dark, warm: L.warm, tint, weather: Q.townWeather ? Q.townWeather(town) : 'clear', quarter: Math.floor(h * 4) }; };
 const goalNote = () => { const g = Q.homeGoalNow; return g ? `<b>${esc(g.name)}</b><span>${esc(g.label)} ${g.have} / ${g.need}</span>` : '<b>Your next step</b><span>See Quests</span>'; };
-UI.hearth = () => `<div class="hearth" data-hearth><img class="hearth-room" alt="Your room by the fire" draggable="false"><canvas class="hearth-lights" width="${RW}" height="${RH}" aria-hidden="true"></canvas><div class="hearth-dim" aria-hidden="true"></div>
+/* the keepsakes and the letters have their own hotspots, placed like the furniture's (st.extra holds this render's) */
+const keepSpot = e => `<button class="hearth-spot hearth-keep" data-spot="${esc(e.key)}" data-row="${e.row}" data-do="${e.act[0]}" data-a="${esc(e.act[1])}" aria-label="${esc(e.label)}" data-tip="text:${esc(e.label)}">${e.more ? `<b class="hearth-more">+${e.more}</b>` : ''}</button>`;
+const letterSpot = () => { const n = Q.lettersWaiting ? Q.lettersWaiting().length : 0; if (!n) return ''; const L = Q.lettersWaiting()[0], f = D.FOLK.find(x => x.id === L.from);
+  const tip = n > 1 ? `${n} letters on your desk · the first is from ${f ? f.n : 'a friend'}` : `A letter from ${f ? f.n : 'a friend'} · open it`;
+  return `<button class="hearth-spot hearth-letter" data-spot="letter" data-do="letteropen" data-a="${esc(L.id)}" aria-label="${esc(tip)}" data-tip="text:${esc(tip)}"></button>`; };
+UI.hearth = () => { const keep = Q.hearthKeep(); st.extra = { letter: LETTER }; for (const e of keep) st.extra[e.key] = e;
+  return `<div class="hearth" data-hearth><img class="hearth-room" alt="Your room by the fire" draggable="false"><canvas class="hearth-lights" width="${RW}" height="${RH}" aria-hidden="true"></canvas><div class="hearth-dim" aria-hidden="true"></div>
   <button class="hearth-note" data-do="go" data-a="quests" data-tip="text:Today's goal · open Quests">${goalNote()}</button>
-  ${Object.entries(SPOTS).filter(([k]) => k !== 'board' && (k !== 'pet' || (S().pets && S().pets.active))).map(([k, s]) => `<button class="hearth-spot" data-spot="${k}" data-do="${s.act[0]}" data-a="${s.act[1]}" aria-label="${esc(s.label)}" data-tip="text:${esc(s.label)}"></button>`).join('')}</div>`;
+  ${Object.entries(SPOTS).filter(([k]) => k !== 'board' && (k !== 'pet' || (S().pets && S().pets.active))).map(([k, s]) => `<button class="hearth-spot" data-spot="${k}" data-do="${s.act[0]}" data-a="${s.act[1]}" aria-label="${esc(s.label)}" data-tip="text:${esc(s.label)}"></button>`).join('')}
+  ${keep.map(keepSpot).join('')}${letterSpot()}</div>`; };
 const place = () => { const box = document.querySelector('.home-scene'), H = box && box.querySelector('.hearth'); if (!H) return;
   const img = H.querySelector('.hearth-room'), bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) return;
   const k = Math.max(1, Math.floor(Math.max(bw / RW, bh / RH))), w = RW * k, h = RH * k, left = Math.round((bw - w) / 2), top = bh - h;
   /* with priority: the page's sprite snapper and scene rules size pictures with !important */
   for (const el of [img, H.querySelector('.hearth-lights'), H.querySelector('.hearth-dim')]) for (const [k2, v] of Object.entries({ left: left + 'px', top: top + 'px', width: w + 'px', height: h + 'px' })) el.style.setProperty(k2, v, 'important');
   H.dataset.scale = k;
-  for (const b of H.querySelectorAll('.hearth-spot')) { const s = SPOTS[b.dataset.spot]; Object.assign(b.style, { left: left + s.x * k + 'px', top: top + (s.y + OY) * k + 'px', width: s.w * k + 'px', height: s.h * k + 'px' }); }
+  /* a small keepsake on a phone gets the 48 px touch target, centred on it rather than hanging off its corner */
+  for (const b of H.querySelectorAll('.hearth-spot')) { const s = SPOTS[b.dataset.spot] || (st.extra || {})[b.dataset.spot]; if (!s) continue; const sw = Math.max(48, s.w * k), sh = Math.max(48, s.h * k);
+    Object.assign(b.style, { left: left + s.x * k - (sw - s.w * k) / 2 + 'px', top: top + (s.y + OY) * k - (sh - s.h * k) / 2 + 'px', width: sw + 'px', height: sh + 'px' }); }
   const n = H.querySelector('.hearth-note'), N = SPOTS.board; Object.assign(n.style, { left: left + (N.x + 2) * k + 'px', top: top + (N.y + OY + 3) * k + 'px', width: Math.max(150, (N.w - 2) * k) + 'px' }); };
-const refresh = async (force) => { const H = document.querySelector('.home-scene .hearth'); if (!H) return; const L = lightNow(), season = Q.season(), pet = S().pets && S().pets.active;
-  const key = [L.town, L.quarter, L.weather, season, pet, JSON.stringify(S().look || {}), S().equip && S().equip.weapon].join('|');
+const refresh = async (force) => { const H = st.H && st.H.isConnected ? st.H : document.querySelector('.home-scene .hearth'); if (!H) return; const L = lightNow(), season = Q.season(), pet = S().pets && S().pets.active;
+  const keep = Q.hearthKeep(), letters = Q.lettersWaiting ? Q.lettersWaiting().length : 0;
+  const key = [L.town, L.quarter, L.weather, season, pet, JSON.stringify(S().look || {}), S().equip && S().equip.weapon, keep.map(e => e.key + (e.more || '')).join(','), letters].join('|');
   const dim = H.querySelector('.hearth-dim'); dim.style.backgroundColor = `rgb(${[255, 255, 255].map((v, i) => Math.round(v + ([150, 112, 84][i] - v) * L.dark * .55)).join(',')})`;
-  if (key !== st.key || force) { if (st.busy) return; st.busy = true; try { st.url = await room(L.town, L, L.weather, season, pet); st.key = key; } finally { st.busy = false; } }
-  const img = H.querySelector('.hearth-room'); if (img.getAttribute('src') !== st.url) img.src = st.url; st.dark = L.dark; };
+  if (key !== st.key || force) { if (st.busy) { st.again = true; return; } st.busy = true; try { st.url = await room(L.town, L, L.weather, season, pet, keep, letters); st.key = key; } finally { st.busy = false; } if (st.again) { st.again = false; return refresh(); } }
+  const img = H.querySelector('.hearth-room'); if (img.isConnected && img.getAttribute('src') !== st.url) img.src = st.url; st.dark = L.dark; };
 /* one subscriber on the shared clock (DQ.frame, js/util.js): elapsed time at native refresh, paused while hidden */
-const tick = (dt, now) => { const H = document.querySelector('.home-scene .hearth'); if (!H) { st.on = false; return false; } const moving = !still(); if (moving) st.t += dt;
-  lights(H.querySelector('.hearth-lights').getContext('2d'), st.t, st.dark || 0, moving);
+const tick = (dt, now) => { const H = st.H && st.H.isConnected ? st.H : (st.H = document.querySelector('.home-scene .hearth')); if (!H) { st.on = false; return false; } const moving = !still(); if (moving) st.t += dt;
+  if (st.cxH !== H) { st.cxH = H; st.cx = H.querySelector('.hearth-lights').getContext('2d'); } lights(st.cx, st.t, st.dark || 0, moving);
   const n = now || performance.now(); if (Math.floor(n / 30000) !== st.minute) { st.minute = Math.floor(n / 30000); refresh(); } };
-const start = () => { place(); refresh(); if (!st.on) { st.on = true; if (Q.frame) Q.frame.add(tick); else { const loop = n => { if (tick(1 / 60, n) !== false) requestAnimationFrame(loop); }; requestAnimationFrame(loop); } } };
-Q.hearthLive = () => { const H = document.querySelector('.home-scene .hearth'); return H ? { scale: +H.dataset.scale, spots: [...H.querySelectorAll('.hearth-spot')].map(b => b.dataset.spot), note: H.querySelector('.hearth-note').innerText, src: !!H.querySelector('.hearth-room').getAttribute('src'), t: st.t } : null; };
+const start = () => { st.H = document.querySelector('.home-scene .hearth'); place(); refresh(); if (!st.on) { st.on = true; if (Q.frame) Q.frame.add(tick); else { const loop = n => { if (tick(1 / 60, n) !== false) requestAnimationFrame(loop); }; requestAnimationFrame(loop); } } };
+Q.hearthLive = () => { const H = document.querySelector('.home-scene .hearth'); return H ? { scale: +H.dataset.scale, spots: [...H.querySelectorAll('.hearth-spot')].map(b => b.dataset.spot), key: st.key, note: H.querySelector('.hearth-note').innerText, src: !!H.querySelector('.hearth-room').getAttribute('src'), t: st.t } : null; };
 
 UI.DO.homeview = v => { if (!['hearth', 'town'].includes(v)) return; S().settings.homeView = v; Q.save && Q.save(); UI.render(true); };
 /* Home's scene card: the hearth or the town, with a way to the other */

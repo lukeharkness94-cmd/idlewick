@@ -5912,6 +5912,25 @@ html.calm .petted,html.calm .petted img{animation:none}
 .home-scene>.home-viewswap{left:auto;right:12px;bottom:auto;top:12px;z-index:6}
 html.calm .hearth>.hearth-dim{transition:none}
 @media (max-width:860px){.hearth-note{font-size:13px;padding:5px 7px}.hearth-note b{font-size:13.5px}.home-scene>.home-viewswap{top:auto;bottom:12px;right:12px}}
+/* the room fills up (js/hearth.js keepsakes, js/hearth_letters.js): "+N" on a full row is a flat label, not a frame */
+.hearth-spot .hearth-more{position:absolute;right:-4px;bottom:-4px;padding:1px 5px;border-radius:var(--r-info,4px);font:700 13px/1.2 var(--f-ui);color:#3a2a18;background:#f4dc8a;pointer-events:none}
+.hearth-spot.hearth-letter:not(:hover):not(:focus-visible){box-shadow:0 0 14px 1px rgba(255,214,140,.28)!important}
+html.calm .hearth-spot.hearth-letter{transition:none}
+/* townsfolk you know, walking the town scene: an invisible hover target that glows (js/town_walkers.js) */
+.hearth-spot.town-giver{z-index:4}
+/* a letter on parchment, the same paper in both themes (ink on cream) */
+.letter-paper{display:grid;gap:10px;padding:16px 20px 18px;border-radius:var(--r-panel,12px);color:#3a2a18;background:#f6ecd2;background-image:var(--paper-grain);background-blend-mode:multiply;font:500 17px/1.5 var(--f-body);box-shadow:inset 0 0 30px rgba(120,80,30,.18)}
+.letter-paper p{margin:0}
+.letter-head{display:flex;align-items:center;gap:12px}.letter-head span{display:grid}.letter-head b{font:700 18px/1.2 var(--f-display);color:#4a2e14}.letter-head small{font-size:14px;color:#6a5236}
+.letter-paper .letter-face{image-rendering:pixelated;border-radius:var(--r-info,4px)}
+.letter-hi{font-style:italic}.letter-bye{font-style:italic;margin-top:4px!important}.letter-sign{font:700 17px/1.2 var(--f-display);color:#4a2e14;text-align:right}
+/* the Journal keeps every letter you have read */
+.letters-panel{margin-bottom:12px}.letters-panel h2{display:flex;align-items:center;gap:8px}
+.letter-list{display:flex;flex-wrap:wrap;gap:10px}
+.letter-row{display:flex;align-items:flex-start;gap:10px;width:300px;max-width:100%;padding:8px 10px;text-align:left}
+.letter-row .letter-face{image-rendering:pixelated;flex:none}
+.letter-row span{display:grid;gap:1px;min-width:0}.letter-row b{font:700 15px/1.2 var(--f-display)}.letter-row small{font-size:13px;color:var(--mute)}
+.letter-row em{font-style:normal;font-size:14px;line-height:1.3;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
 /* Welcome back opens with a few handwritten lines from the hero's diary (js/welcome.js diary()) */
 .wb-diary{margin:2px 2px 4px;padding:10px 14px;font:italic 500 17px/1.45 var(--f-body);color:color-mix(in srgb,var(--ink) 88%,var(--brass));background:color-mix(in srgb,var(--brass) 7%,transparent);border-radius:var(--r-info,4px)}
@@ -12475,6 +12494,7 @@ const STYLE = {
    between the middle street and the front; the Projects page puts a clickable spot over each one */
 const siteLayout = town => { const sites = Object.keys(D.PROJECTS || {}).filter(k => D.PROJECTS[k].town === town), n = sites.length, gap = (W - 40) / Math.max(1, n);
   return sites.map((id, i) => ({ id, i, X: Math.round(20 + gap * (i + .5) - 16), Y: i % 2 ? 254 : 198 })).sort((a, b) => a.Y - b.Y); };
+A.siteLayout = siteLayout; /* where each site stands, for the townsfolk who gather round a finished one (js/town_walkers.js) */
 /* extras: what you have built or laid elsewhere that belongs in the town (boats, traps, the cottage's crops) */
 function sceneFor(town, stages = {}, extras = {}) {
   const T = A.TOWN[town] || A.TOWN.willowbrook, st = Object.assign({ ground: T.ground }, STYLE[town] || STYLE.willowbrook), rnd = seeded(town);
@@ -25479,6 +25499,38 @@ D.FOLK_VOICES={
  dunmore:add('dunmore','Careful, halting around personal matters; precise on safety.','The mine is a place of work and a place of unfinished grief.','Safe lamps and sound shifts','Repairing his father’s lens',['I checked the lamp. Twice. My father used to—never mind. Let us check yours.','It is only a little light. That does not mean it is a little thing.'],'He would have liked that. I mean—I do. Thank you.'),
  warden:add('warden','Slow, formal fragments; loneliness beneath immense perspective.','Has watched ages pass but still notices one person choosing to stay.','Keeping the crater safe','Remembering spring flowers',['There used to be gardens here. I tended them before the ground turned grey. It has been a long time since I’ve seen anything grow.','You may leave when you wish. I say it because nobody said it to me.'],'Someone stayed long enough to help. I had forgotten that could happen.')
 };
+/* Letters on the hearth desk (owner, 27 Nov 2026; js/hearth_letters.js): how each person opens and signs off, and the
+   gossip they might pass on. Tips in between are written from the live save; these lines only carry the voice. */
+const letter=(hi,bye,gossip)=>({hi,bye,gossip});
+D.FOLK_LETTERS={
+ brannoc:letter('A quick word, since you never visit.','Check your props.',['Mabel asked me to taste a new pie. I said it wanted salt. I am no longer asked to taste pies.','Somebody has put a cushion on my stool by the forge. I have not sat on it. I have looked at it a great deal.']),
+ whisper:letter('Don’t look for me. I’m not there.','Count your spoons.',['The mill children have started a gang. They have a password. It is “password”. I’ve let them keep it.','A merchant in Saltmere keeps his purse in his hat. Nobody tell him. Especially not me.']),
+ hettie:letter('Dear,','Mend as you go, dear.',['Orrin brought me his helmet strap to stitch. Third time this month. I think he mostly comes for the tea.','I found one of your buttons in my tin. I am keeping it. That is how the tin works.']),
+ wynn:letter('Wrote this three times.','Quiet feet.',['Saw a fox take a whole loaf off Mabel’s sill. Didn’t stop it. Looked like it had a family.','Carved you a little bird. Then a better one. Kept both. Next time.']),
+ merrow:letter('My dear friend (and I do mean that, not merely as a way of starting),','Yours, slightly damp,',['A page dried overnight and now reads as a recipe for soup. I am told it is quite good soup.','Someone returned a book to the archive that we never owned. I have catalogued it anyway. It is about cheese.']),
+ wren:letter('Hello, pet.','Eat something hot.',['The well bucket came up with a frog in it this morning. He looked so pleased with himself we let him stay a while.','Mabel and Orrin are not speaking over a pie. Neither will tell me which pie. I expect it was a good one.']),
+ orrin:letter('Report follows.','Stand easy.',['Goblin activity: none. Hen activity: considerable. One hen has been placed under watch.','Polished the helmet. Then it rained. Polished it again. Morale: steady.']),
+ mabel:letter('Hello, love!','There’s a plate for you whenever you’re passing.',['Gerald (the pie dish) got through the harvest supper. Two chips, both on the side nobody sees.','Something keeps leaving fish heads on my step. I think it’s the cat. I think they’re presents. I have asked it to stop.']),
+ bramble:letter('Dear,','Love from the farm, and the goats, who did not ask to be included.',['Duchess laid an egg in my boot. I found it by putting the boot on.','The bellhares were out on the hill last night. I left a carrot. By morning it was gone, and so was the carrot I was saving for soup.']),
+ ilsa:letter('Logged and sent:','Fair winds.',['A gull stole a captain’s pipe today. He has filed a complaint. I have filed the complaint.','Three ships in, two ships out, and one still arguing about which way the tide goes.']),
+ piers:letter('Friend of the kitchen,','With garnish,',['I have invented a soup. The harbour has not been told. The harbour is not ready.','A fisherman told me shrimp are “basically just shrimp”. I have not spoken to him since Tuesday.']),
+ tolla:letter('Short one.','Bars first.',['Mended a kettle today. Owner wanted it shiny. I made it work. Shiny is extra.','Someone asked if I could forge them a boat. I said yes, then no, then gave them the name of a boatwright.']),
+ dagna:letter('Lamp, rope, way back. Right:','All accounted for, I hope.',['The canary in shaft four only sings in the afternoons now. We are treating it as a staffing matter.','Counted the miners twice tonight. Same number both times. Lovely.']),
+ brunn:letter('Come in out of the cold, even if only in spirit!','The fire is lit. It always is.',['Told a joke at supper and three hundred dwarves groaned at once. The mountain shook. Best night in years.','A traveller asked if the hearth ever goes out. I laughed so hard I nearly let it.']),
+ grotta:letter('Hello.','That is all.',['The new hammer rings a half-tone flat. I have told it. It is thinking about it.','People ask how I am. I say “warm”. It is the forge. It is also true.']),
+ hrod:letter('From the watch:','The pass holds.',['A snow hare sat on my boot for an hour on the cold watch. I did not move. Neither did the hare. A draw.','Lost at chess to the cook. He used a turnip as a bishop. I am contesting the result.']),
+ sorrel:letter('I meant to say this in person, but…','Perhaps next week, beyond the reeds.',['Took the little skiff past the third post. Then I came back. It still counts.','A frog has moved into the boathouse. He watches me caulk seams. I find it oddly encouraging.']),
+ lysa:letter('A note, by lantern light.','Mind where you put your feet.',['One of the old graves had fresh flowers on it this morning. Not mine. Somebody remembered.','The fog came in so thick I lit the lanterns at noon. The dead did not complain. They rarely do.']),
+ alder:letter('The frogs said you’d want to hear this.','Drink something green.',['Cured a cough with monkfish. Cured a second cough by telling him about the first.','A heron has stood outside my door for three days. Either it wants soup or it knows something.']),
+ kael:letter('From the hot end of the world:','Bare forearms, careful wits.',['Lost an eyebrow to a stubborn bar of runite. The eyebrow will grow back. The bar will not.','The garrison children wanted a glass dragon. I made them a glass newt. Talks continue.']),
+ vess:letter('Item one: hello.','Item last: rest.',['Someone has filed a request for more spare straps. I have never been prouder.','Counted the blankets twice. One extra. I am choosing not to ask.']),
+ aldous:letter('Greetings from somewhere rather high up!','Your friend with excellent calves,',['Baked biscuits for the abbot. She said they had “character”. I am choosing to take that well.','Walked to the lower bridge before breakfast. Met a goat. We both pretended not to have seen each other.']),
+ seren:letter('A few lines, between bells.','Listen for the quiet after.',['A cloud this morning looked exactly like a teapot. Brother Aldous saw a dragon. We are both right, I think.','The novices rang the noon bell at eleven. Nobody minded. Lunch came earlier.']),
+ herald:letter('You will have opened this. Good. Hello.','Until before.',['I said “good morning” to the baker today, and she said it back. I have written it down.','An echo in the east hall laughed today. I believe it was remembering something pleasant.']),
+ ignis:letter('Briefly:','Emberfall stands.',['Mended the banner again, a little stronger at the corners, where the wind pulls.','The hounds ran the walls tonight and answered when I called. We are on speaking terms.']),
+ dunmore:letter('I checked this letter twice before sending it.','Keep your lamp trimmed.',['Lit the lens at the usual hour. A miner I didn’t know stopped and took his cap off. I nodded. I didn’t know what else to do.','Someone put a fresh wick in every lamp on the rack before I got in. I suspect Dagna. She denies it very quickly.']),
+ warden:letter('A letter. I have not written one in some time.','Stay as long as you like.',['A green shoot came up by the crater’s edge. I have built a small wall around it. It is the best wall I have built.','I counted the stars over the Crown. The same as last year. I found that comforting.'])
+};
 const acknowledgements={
  mq_smithing:'There’s the fire back in it. Edda would be pleased, though she’d certainly find something wrong with my bellows. You’ve got the basics now. Keep working at the forge and come back with anything you want me to look over.',
  mq_thieving:'See? You watched the wrong hand again, but you noticed before I got away. That’s progress. Keep practising on easy marks until you’re sure of yourself, and try not to spend the proceeds in front of them.',
@@ -28823,9 +28875,13 @@ Q.advanceTime = (...args) => { if (away()) { let n = 0; while (check() && n++ < 
    the scene's own pixels, so they scale with the picture exactly as it does (whole scene pixels, never smoothed).
    Positions come from elapsed browser time, so a 144 Hz screen walks them no faster than a 60 Hz one; a hidden tab
    does not catch up. More people walk as the town is restored. Nothing here is clickable or saved.
-   Off under html.calm and prefers-reduced-motion (the painted townsfolk stay). */
+   Off under html.calm and prefers-reduced-motion (the painted townsfolk stay).
+   Owner, 27 Nov 2026: the quest givers you have met walk their own town's streets too, drawn at the same scale in their
+   portrait's colours (hair, hat, beard, clothes; js/folk.js), with their name on hover (a click opens People); and when a
+   restoration project is finished the townsfolk gather in front of the site and cheer for about a minute (hops, raised
+   arms, a little confetti and petals). Both are part of this layer, so they are off under calm too. tests/hearth-life.cjs. */
 (() => {
-const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S;
+const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S, A = Q.pixelArt;
 const ROADS = [162, 244];
 const CLOTH = ['#3f7fbf', '#b8483a', '#7a9a5a', '#c89a3a', '#7a5a9a', '#6a6a74', '#c87a8a'], HAIR = ['#3a2414', '#7a4a24', '#d8b060', '#2a2a2a', '#a8a8a8'];
 const mix = (a, b, t) => { const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), x = p(a), y = p(b); return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join(''); };
@@ -28839,6 +28895,46 @@ Q.townWalkerCount = town => 3 + Math.round(6 * restoredShare(town));
 const makeWalkers = (town, W) => { const rnd = seeded(hash(town)), n = Q.townWalkerCount(town);
   return Array.from({ length: n }, (_, i) => ({ x: 8 + rnd() * (W - 24), y: ROADS[i % 2] + (rnd() < .5 ? 0 : 1), dir: rnd() < .5 ? -1 : 1, pace: 5 + rnd() * 5,
     rest: 0, cloth: CLOTH[Math.floor(rnd() * CLOTH.length)], hair: HAIR[Math.floor(rnd() * HAIR.length)], basket: rnd() < .25, walked: 0 })); };
+/* the givers you have met who live in this town, in their portrait colours */
+const SKIN = { fair: '#f2c9a0', light: '#e8b98e', tan: '#c98e5e', brown: '#9a6640', deep: '#6e4428', pale: '#e6dccf', dwarf: '#e0a882' };
+const giversOf = town => (Q.folkMet ? Q.folkMet() : []).filter(f => f.town === town);
+const makeGivers = (town, W) => { const rnd = seeded(hash(town + ':givers'));
+  return giversOf(town).map((f, i) => ({ giver: f, x: 20 + rnd() * (W - 40), y: ROADS[i % 2] + (rnd() < .5 ? 0 : 1), dir: rnd() < .5 ? -1 : 1, pace: 3 + rnd() * 3, rest: 1 + rnd() * 4, walked: 0, cloth: f.look.clothes || '#6a6a74' })); };
+const drawGiver = (x, w) => { const X = Math.round(w.x), Y = w.y, L = w.giver.look, f = (c, a, b, ww, hh) => { x.fillStyle = c; x.fillRect(a, b, ww, hh); }, flip = w.dir < 0, fx = (a, ww) => flip ? X + 5 - a - ww : X + a;
+  const step = w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2, skin = SKIN[L.skin] || SKIN.light, [hc, hs] = L.hair || ['#3a2414', 'short'], [k, c] = L.hat || [], dk = c ? mix(c, '#000000', .3) : '';
+  /* body: clothes with a lit edge, a shawl or apron, the legs */
+  f(w.cloth, X, Y - 7, 5, 4); f(mix(w.cloth, '#000000', .25), fx(3, 2), Y - 7, 2, 4); f(mix(w.cloth, '#ffffff', .2), fx(0, 1), Y - 7, 1, 3);
+  if (L.shawl) f(L.shawl, X, Y - 7, 5, 1); if (L.apron) f(L.apron, fx(1, 3), Y - 6, 3, 3);
+  if (step) { f('#3a3030', fx(0, 1), Y - 3, 1, 3); f('#3a3030', fx(4, 1), Y - 3, 1, 3); } else { f('#3a3030', fx(1, 1), Y - 3, 1, 3); f('#3a3030', fx(3, 1), Y - 3, 1, 3); }
+  /* head, hair, beard */
+  f(skin, fx(1, 3), Y - 10, 3, 3); if (hs !== 'bald' && hs !== 'tonsure') f(hc, fx(1, 3), Y - 10, 3, 1); if (['long', 'braids', 'wild'].includes(hs)) f(hc, fx(0, 1), Y - 10, 1, hs === 'long' ? 4 : 3);
+  if (hs === 'bun') f(hc, fx(2, 1), Y - 11, 1, 1);
+  if (L.beard) { const [bc, bs] = L.beard; if (bs !== 'stubble') f(bc, fx(1, 3), Y - 8, 3, 1); if (['long', 'braided', 'full'].includes(bs)) f(bc, fx(2, 1), Y - 7, 1, bs === 'full' ? 1 : 2); }
+  if (L.glow) f(L.glow, fx(3, 1), Y - 9, 1, 1);
+  /* the hat that makes them who they are */
+  if (k === 'chef') { f('#f8f4ec', fx(1, 3), Y - 13, 3, 3); f('#d8d0c4', fx(3, 1), Y - 12, 1, 2); }
+  else if (k === 'hood' || k === 'cowl') { f(c, fx(1, 3), Y - 11, 3, 1); f(c, fx(0, 1), Y - 10, 1, 3); f(dk, fx(4, 1), Y - 10, 1, 3); }
+  else if (k === 'helmet' || k === 'horned' || k === 'plume') { f(c, fx(1, 3), Y - 11, 3, 2); f(dk, fx(3, 1), Y - 11, 1, 2); if (k === 'horned') { f('#e8e0c8', fx(0, 1), Y - 12, 1, 1); f('#e8e0c8', fx(4, 1), Y - 12, 1, 1); } if (k === 'plume') f('#d83a2a', fx(2, 1), Y - 13, 1, 2); }
+  else if (k === 'minecap') { f(c, fx(1, 3), Y - 11, 3, 2); f('#fff2b0', fx(3, 1), Y - 11, 1, 1); }
+  else if (k === 'tricorn' || k === 'brim') { f(dk, X, Y - 11, 5, 1); f(c, fx(1, 3), Y - 12, 3, 1); }
+  else if (k === 'circlet') f(c, fx(1, 3), Y - 10, 3, 1);
+  else if (k) { f(c, fx(1, 3), Y - 11, 3, 2); if (k === 'cap') f(dk, fx(3, 2), Y - 10, 2, 1); } };
+
+/* a gathering round a finished site: who, where, and how long (Q.townCheer, set when a project is finished) */
+const CHEER_MS = 60000, CONFETTI = ['#e0405a', '#f0d060', '#4a8ad8', '#f4c4d0', '#7ac860', '#ffffff'];
+Q.townCheer = null;
+Q.on && Q.on('project', id => { const p = D.PROJECTS && D.PROJECTS[id]; if (!p || !(S().projects || {})[id] || Q.forecasting || (Q.sim && Q.sim.on)) return; Q.townCheer = { town: p.town, id, at: performance.now() }; });
+const cheerOf = (town, now) => { const c = Q.townCheer; if (!c || c.town !== town) return null; const el = (now - c.at) / 1000; if (el * 1000 > CHEER_MS) { Q.townCheer = null; return null; }
+  const site = A && A.siteLayout ? A.siteLayout(town).find(s => s.id === c.id) : null; return site ? { el: Math.max(0, el), X: site.X, Y: site.Y, id: c.id } : null; };
+const drawCheer = (x, ch) => { const f = (c, a, b, ww, hh) => { x.fillStyle = c; x.fillRect(Math.round(a), Math.round(b), ww, hh); }, rnd = seeded(hash(ch.id)), { X, Y, el } = ch, fade = Math.min(1, (CHEER_MS / 1000 - el) / 6);
+  /* seven townsfolk in two loose rows in front of the site, hopping out of step with their arms up */
+  for (let i = 0; i < 7; i++) { const px = X - 12 + i * 8 + Math.round(rnd() * 2), py = Y + 37 + (i % 2) * 4, ph = rnd() * 6.28, hop = Math.max(0, Math.sin(el * 7 + ph)), cloth = CLOTH[Math.floor(rnd() * CLOTH.length)], hair = HAIR[Math.floor(rnd() * HAIR.length)], Yf = py - Math.round(hop * 2.4);
+    f('#e0b088', px + 1, Yf - 10, 3, 3); f(hair, px + 1, Yf - 10, 3, 1); f(cloth, px, Yf - 7, 5, 4); f(mix(cloth, '#000000', .25), px + 3, Yf - 7, 2, 4); f('#3a3030', px + 1, Yf - 3, 1, 3); f('#3a3030', px + 3, Yf - 3, 1, 3);
+    if (hop > .3) { f('#e0b088', px - 1, Yf - 12, 1, 3); f('#e0b088', px + 5, Yf - 12, 1, 3); } else { f(cloth, px - 1, Yf - 7, 1, 3); f(cloth, px + 5, Yf - 7, 1, 3); } }
+  /* confetti and petals drifting down over the site, thinning out at the end */
+  const n = Math.round(22 * fade); for (let i = 0; i < n; i++) { const per = 2.6 + rnd() * 1.6, off = rnd() * per, u = ((el + off) % per) / per, sx = X + 16 + (rnd() - .5) * 52, c = CONFETTI[Math.floor(rnd() * CONFETTI.length)];
+    f(c, sx + Math.sin(el * 2.2 + i) * 3, Y - 16 + u * 50, i % 3 ? 1 : 2, 1); } };
+
 const draw = (x, w) => { const X = Math.round(w.x), Y = w.y, f = (c, a, b, ww, hh) => { x.fillStyle = c; x.fillRect(a, b, ww, hh); };
   const step = w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2, flip = w.dir < 0;
   const fx = (a, ww) => flip ? X + 5 - a - ww : X + a; /* mirror the figure about its own 5 px width */
@@ -28848,27 +28944,38 @@ const draw = (x, w) => { const X = Math.round(w.x), Y = w.y, f = (c, a, b, ww, h
   if (w.basket) { f('#a07a4a', fx(5, 3), Y - 5, 3, 2); f('#c8483a', fx(5, 1), Y - 6, 1, 1); } };
 
 const layers = new Set();
+/* the givers' hover targets: one invisible button each over its figure (glows on hover; a click opens People) */
+const tags = L => { for (const b of L.tags || []) b.remove(); L.tags = L.givers.map(w => { const b = document.createElement('button'), f = w.giver;
+  b.className = 'hearth-spot town-giver'; b.dataset.do = 'folkfrom'; b.dataset.a = f.n; b.setAttribute('aria-label', `${f.n}, ${f.role}`); b.dataset.tip = `text:${f.n} · ${f.role}`; L.cv.after(b); return b; }); };
+const placeTags = L => { const { img } = L; if (!L.tags || !L.tags.length || !img.isConnected) return; const s = img.offsetWidth / L.W;
+  /* at least a 48 px touch target, centred on the figure with its bottom at the feet */
+  const bw = Math.max(48, 9 * s), bh = Math.max(48, 16 * s);
+  L.tags.forEach((b, i) => { const w = L.givers[i]; b.style.left = img.offsetLeft + (Math.round(w.x) + 2.5) * s - bw / 2 + 'px'; b.style.top = img.offsetTop + (w.y + 2) * s - bh + 'px'; b.style.width = bw + 'px'; b.style.height = bh + 'px'; }); };
+const syncGivers = L => { const key = giversOf(L.img.dataset.town).map(f => f.id).join(','); if (key === L.giverKey) return; L.giverKey = key; L.givers = makeGivers(L.img.dataset.town, L.W); tags(L); placeTags(L); L.key = ''; };
 const fit = L => { const { img, cv } = L; if (!img.isConnected) return; const cs = getComputedStyle(img);
   Object.assign(cv.style, { left: img.offsetLeft + 'px', top: img.offsetTop + 'px', width: img.offsetWidth + 'px', height: img.offsetHeight + 'px', objectFit: cs.objectFit, objectPosition: cs.objectPosition, borderRadius: cs.borderRadius }); };
 const attach = img => { if (img.dataset.walkers || img.classList.contains('scene-old') || !img.dataset.town) return;
   const go = () => { if (!img.isConnected || img.dataset.walkers) return; const W = img.naturalWidth, H = img.naturalHeight; if (!W || !H) return;
     img.dataset.walkers = '1'; const cv = document.createElement('canvas'); cv.width = W; cv.height = H; cv.className = 'town-walkers'; cv.setAttribute('aria-hidden', 'true');
-    img.after(cv); const L = { img, cv, x: cv.getContext('2d'), walkers: makeWalkers(img.dataset.town, W), W, key: '' };
-    if (window.ResizeObserver) { L.ro = new ResizeObserver(() => fit(L)); L.ro.observe(img); } fit(L); layers.add(L); tick.start(); };
+    img.after(cv); const L = { img, cv, x: cv.getContext('2d'), walkers: makeWalkers(img.dataset.town, W), givers: [], W, key: '' };
+    if (window.ResizeObserver) { L.ro = new ResizeObserver(() => { fit(L); placeTags(L); }); L.ro.observe(img); } fit(L); syncGivers(L); layers.add(L); tick.start(); };
   if (img.complete) go(); else img.addEventListener('load', go, { once: true }); };
-Q.townWalkersScan = () => { if (still()) return; document.querySelectorAll('.home-scene img.scene[data-town], .village-scene>img.scene[data-town]').forEach(attach); };
-Q.townWalkersLive = () => [...layers].filter(L => L.cv.isConnected).map(L => ({ town: L.img.dataset.town, walkers: L.walkers.map(w => ({ x: Math.round(w.x), y: w.y })) }));
+Q.townWalkersScan = () => { if (still()) return; document.querySelectorAll('.home-scene img.scene[data-town], .village-scene>img.scene[data-town]').forEach(attach); for (const L of layers) if (L.cv.isConnected) syncGivers(L); };
+Q.townWalkersLive = () => [...layers].filter(L => L.cv.isConnected).map(L => ({ town: L.img.dataset.town, walkers: L.walkers.map(w => ({ x: Math.round(w.x), y: w.y })),
+  givers: L.givers.map(w => ({ id: w.giver.id, x: Math.round(w.x), y: w.y })), tags: (L.tags || []).filter(b => b.isConnected).length, cheer: L.cheer || null }));
 
 const tick = { raf: 0, last: 0, start() { if (!this.raf) { this.last = performance.now(); this.raf = Q.frame.add((dt, t) => this.run(t)); } }, /* the shared animation clock (util.js) */
   run(t) { const dt = Math.min(.1, Math.max(0, (t - this.last) / 1000)); this.last = t; /* a hidden tab never catches up */
-    for (const L of layers) { if (!L.cv.isConnected) { L.ro && L.ro.disconnect(); layers.delete(L); continue; }
-      if (still()) { L.cv.remove(); continue; }
-      for (const w of L.walkers) { if (w.rest > 0) { w.rest -= dt; continue; }
+    for (const L of layers) { if (!L.cv.isConnected) { L.ro && L.ro.disconnect(); for (const b of L.tags || []) b.remove(); layers.delete(L); continue; }
+      if (still()) { L.cv.remove(); for (const b of L.tags || []) b.remove(); continue; }
+      for (const w of L.walkers.concat(L.givers)) { if (w.rest > 0) { w.rest -= dt; continue; }
         const d = w.pace * dt; w.x += w.dir * d; w.walked += d;
         if (w.x < 4) { w.x = 4; w.dir = 1; } else if (w.x > L.W - 10) { w.x = L.W - 10; w.dir = -1; }
-        if (Math.random() < dt * .06) { w.rest = 1 + Math.random() * 3; if (Math.random() < .4) w.dir = -w.dir; } }
-      const key = L.walkers.map(w => Math.round(w.x) + ':' + (w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2) + w.dir).join(',');
-      if (key !== L.key) { L.key = key; L.x.clearRect(0, 0, L.cv.width, L.cv.height); for (const w of L.walkers) draw(L.x, w); } }
+        /* givers stop to chat more often, and for longer */
+        if (Math.random() < dt * (w.giver ? .1 : .06)) { w.rest = (w.giver ? 2 : 1) + Math.random() * (w.giver ? 5 : 3); if (Math.random() < .4) w.dir = -w.dir; } }
+      const ch = cheerOf(L.img.dataset.town, t); L.cheer = ch ? { id: ch.id, t: Math.round(ch.el) } : null;
+      const key = L.walkers.concat(L.givers).map(w => Math.round(w.x) + ':' + (w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2) + w.dir).join(',') + (ch ? '|' + Math.floor(ch.el * 30) : '');
+      if (key !== L.key) { L.key = key; L.x.clearRect(0, 0, L.cv.width, L.cv.height); for (const w of L.walkers) draw(L.x, w); for (const w of L.givers) drawGiver(L.x, w); if (ch) drawCheer(L.x, ch); placeTags(L); } }
     if (!layers.size) { this.raf = 0; return false; } } };
 
 /* Home's town scene at a whole-number scale (27 Nov 2026 audit: object-fit:cover showed it at 2.36x, 1.78x and 0.56x;
@@ -29089,7 +29196,10 @@ UI.render = (...a) => { const r = render0(...a); try { Q.townLifeScan(); } catch
    scene (with its walking townsfolk), the companion its pen. The view is remembered in settings.homeView.
    Drawn in code in the house style at 320 x 240 room pixels, shown at a whole-number scale (3x on desktop, 1x on phones)
    and cropped by its card; the fire, the firelight and the candle move with elapsed time at native refresh; under
-   Reduce effects and prefers-reduced-motion they hold still and the room keeps its light. tests/hearth.cjs. */
+   Reduce effects and prefers-reduced-motion they hold still and the room keeps its light. tests/hearth.cjs.
+   The room fills up as you play (owner, 27 Nov 2026): boss trophies over the fire, named weapons on a rack, museum
+   pieces on a shelf, a basket per beast and letters on the desk (js/hearth_letters.js), each with its own hotspot.
+   tests/hearth-life.cjs. */
 (() => {
 const Q = window.DQ, D = Q.data, UI = Q.ui, A = Q.pixelArt, S = () => Q.S, esc = Q.esc, ico = Q.ico;
 if (!A || !A.townPainter) return;
@@ -29109,11 +29219,88 @@ const SPOTS = {
   desk: { x: 208, y: 146, w: 92, h: 40, label: 'Desk: activity and goals', act: ['go', 'activity'] },
   pet: { x: 92, y: 196, w: 40, h: 26, label: 'Your companion', act: ['go', 'beastmastery'] }
 };
+/* where letters wait: on the desk, right of the inkpot (js/hearth_letters.js) */
+const LETTER = { x: 274, y: 137, w: 22, h: 16 };
 const FIRE = { x: 72, y: 128, w: 56, h: 44 }, HERO = { x: 140, y: 172 }, PET = { x: 96, y: 216 };
+/* a beast's own sprite where it has one, else the creature it came from (the same choice as DQ.petSprite) */
+const petArt = id => { const p = D.PET[id]; if (!p || !A.creatureUrl) return null; const k = String(A.hasCreature && A.hasCreature(p.id) ? p.id : p.mon || p.id).replace(/^wild_/, ''); return A.hasCreature && !A.hasCreature(k) ? null : A.creatureUrl(k); };
+
+/* ---------- the room fills up as you play (owner, 27 Nov 2026) ----------
+   Boss trophies over the fireplace, the named weapons you own on a rack under the rafters, museum pieces on a wall
+   shelf and a basket for every beast you keep (the companion with you still sleeps on the rug). Each has a fixed slot;
+   a row that runs out of room shows "+N" in its last slot. Everything is read from the save; the dates of first boss
+   victories are kept in S.trophies from now on (older victories just say "beaten"). */
+const TROPHY = { grubnash: 'tusk', oldtusk: 'other tusk', barnacle: 'hat', frostmaw: 'tooth', morwenna: 'lantern', pyrrhax: 'scale', zephyrion: 'tail feather', hollowking: 'circlet' };
+const dayOf = t => t ? new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+(Q.killHooks = Q.killHooks || []).push(m => { if (!m.boss || Q.forecasting || (S().towns[m.town] && S().towns[m.town].boss)) return; const T = S().trophies = S().trophies || {}; if (!T[m.id]) T[m.id] = Date.now(); });
+const possess = n => n + (/s$/.test(n) ? '’' : '’s');
+const ownedAnywhere = id => (Q.have ? Q.have(id) : 0) > 0 || ((S().bank || {})[id] || 0) > 0 || Object.values(S().equip || {}).includes(id);
+/* rows: room-pixel slots (inside the translated room, so the rafter strip has negative y) */
+const ROWS = {
+  trophy: { slots: [[56, 18], [79, 18], [102, 18], [125, 18], [56, 44], [79, 44], [102, 44], [125, 44]], w: 20, h: 22 },
+  rack: { slots: [[110, -24], [131, -24], [152, -24], [173, -24]], w: 16, h: 16 },
+  shelf: { slots: [[14, -21], [34, -21], [54, -21], [74, -21]], w: 16, h: 16 },
+  bed: { slots: [[206, 208], [244, 208], [282, 208]], w: 30, h: 28 }
+};
+const CURIO_ART = { hart: ['#f4f4f8', '#c8c8d8'], star: ['#f8e070', '#d8a830'], shrine: ['#a8a49a', '#7a766e'], festival: ['#e0405a', '#4a8ad8'], bard: ['#c8904a', '#8a5a2a'], recipes: ['#b8483a', '#f4ecd8'] };
+Q.hearthKeep = () => { const st = S(), out = [];
+  const put = (row, list) => { const R = ROWS[row], n = R.slots.length, over = list.length > n;
+    list.slice(0, over ? n - 1 : n).forEach((e, i) => out.push(Object.assign({ row, x: R.slots[i][0], y: R.slots[i][1], w: R.w, h: R.h }, e)));
+    if (over) { const rest = list.slice(n - 1), [x, y] = R.slots[n - 1]; out.push({ row, key: row + ':more', more: rest.length, x, y, w: R.w, h: R.h, label: `${rest.length} more: ${rest.map(e => e.name).join(', ')}`, act: rest[0].act }); } };
+  /* trophies: the main bosses, in the order of the road */
+  put('trophy', D.TOWNS.filter(t => st.towns[t.id] && st.towns[t.id].boss && D.MON[t.boss]).map(t => { const m = D.MON[t.boss], nm = (m.boss && m.boss.short) || m.name, at = (st.trophies || {})[m.id];
+    return { key: 'trophy:' + m.id, id: m.id, name: nm, label: `${possess(nm)} ${TROPHY[m.id] || 'trophy'} · beaten${at ? ' ' + dayOf(at) : ''}`, act: ['hearthgo', 'guide:' + m.id] }; }));
+  /* the named weapons you own, wherever they are kept */
+  put('rack', (D.RARE_WEAPONS || []).filter(id => D.ITEMS[id] && ownedAnywhere(id)).map(id => ({ key: 'rack:' + id, id, name: D.ITEMS[id].name, label: `${D.ITEMS[id].name} · ${Object.values(st.equip || {}).includes(id) ? 'in your hand' : (Q.have && Q.have(id)) ? 'in your pack' : 'in the bank'}`, act: ['hearthgo', 'gear:' + id] })));
+  /* museum pieces: a medal for each finished wing, then the relics and curiosities you have found */
+  const mu = st.museum || {}, got = mu.got || {};
+  put('shelf', [].concat((D.WINGS || []).filter(w => (mu.wings || {})[w.id]).map(w => ({ key: 'wing:' + w.id, id: w.id, medal: true, name: w.name, label: `${w.name} complete · ${w.gives}`, act: ['hearthgo', 'museum:'] })),
+    Object.values(D.ITEMS).filter(it => it.type === 'relic' && got['r:' + it.id]).map(it => ({ key: 'relic:' + it.id, id: it.id, name: it.name, label: `${it.name} · in the museum since ${dayOf(got['r:' + it.id])}`, act: ['hearthgo', 'museum:r:' + it.id] })),
+    (D.CURIOS || []).filter(c => got['x:' + c.id]).map(c => ({ key: 'curio:' + c.id, id: c.id, curio: true, name: c.name, label: `${c.name} · ${c.text}`, act: ['hearthgo', 'museum:x:' + c.id] }))));
+  /* a basket for each beast you keep; the companion with you is on the rug */
+  const pets = st.pets || {}; put('bed', Object.keys(pets.owned || {}).filter(id => D.PET[id] && id !== pets.active).map(id => ({ key: 'bed:' + id, id, name: D.PET[id].name, label: `${D.PET[id].name} the ${String(D.PET[id].kind || 'beast').toLowerCase()} · asleep in its basket`, act: ['hearthgo', 'beast:' + id] })));
+  return out; };
+UI.DO.hearthgo = a => { const [k, ...r] = String(a || '').split(':'), id = r.join(':');
+  if (k === 'guide' && UI.openGuide) return UI.openGuide(id);
+  if (k === 'gear') return Q.go('character');
+  if (k === 'museum') { UI.museumSel = id || null; return Q.go('museum'); }
+  if (k === 'beast') { Q.go('beastmastery'); if (UI.DO.beastselect) UI.DO.beastselect(id); } };
+/* drawing the keepsakes into the room (room pixels, whole scale) */
+const head = img => { const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height).data; let x0 = c.width, x1 = -1, y0 = c.height; for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) if (d[(y * c.width + x) * 4 + 3] > 40) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); }
+  return x1 < 0 ? null : { c, sx: Math.max(0, Math.min(c.width - 16, Math.round((x0 + x1) / 2) - 8)), sy: y0 }; };
+const drawKeep = async (x, P, list) => { const { f, ell } = P, wood = '#8a5e3a', woodDk = '#5e3e24', woodLt = '#a87a4e', brass = '#c8a050';
+  /* the rack and the shelf under the rafters, drawn whenever they hold something */
+  if (list.some(e => e.row === 'rack')) { f(woodDk, 106, -6, 86, 4); f(woodLt, 106, -6, 86, 1); for (const [sx] of ROWS.rack.slots) { f('#3a2a1a', sx + 3, -9, 2, 3); f('#3a2a1a', sx + 11, -9, 2, 3); } }
+  if (list.some(e => e.row === 'shelf')) { f(woodDk, 12, -5, 82, 3); f(woodLt, 12, -5, 82, 1); f(woodDk, 16, -2, 2, 5); f(woodDk, 88, -2, 2, 5); }
+  for (const e of list) {
+    if (e.row === 'trophy') { const X = e.x, Y = e.y;
+      /* a shield-shaped plaque: dark rim, lit top-left, a point at the bottom */
+      for (let j = 0; j < 22; j++) { const inset = j < 15 ? (j === 0 ? 2 : j === 1 ? 1 : 0) : Math.round((j - 14) * 1.3); if (inset * 2 >= 20) continue; f(woodDk, X + inset, Y + j, 20 - inset * 2, 1); if (j > 0 && j < 20) f(j < 3 ? woodLt : wood, X + inset + 1, Y + j, Math.max(0, 18 - inset * 2), 1); }
+      f(mix(wood, '#ffffff', .2), X + 2, Y + 2, 1, 10);
+      if (e.more) { f(brass, X + 6, Y + 8, 8, 6); f('#f4dc8a', X + 6, Y + 8, 8, 1); continue; }
+      const im = await load(A.creatureUrl ? A.creatureUrl(e.id) : null), h = im && head(im);
+      if (h) x.drawImage(h.c, h.sx, h.sy, 16, 13, X + 2, Y + 3, 16, 13);
+      f(brass, X + 7, Y + 17, 6, 2); f('#f4dc8a', X + 7, Y + 17, 6, 1); }
+    else if (e.row === 'rack' || (e.row === 'shelf' && !e.medal && !e.curio)) { if (e.more) { f(brass, e.x + 4, e.y + 8, 8, 6); f('#f4dc8a', e.x + 4, e.y + 8, 8, 1); continue; }
+      const im = await load(A.itemUrl ? A.itemUrl(e.id) : null); if (im) x.drawImage(im, 0, 0, 16, 16, e.x, e.y, 16, 16); }
+    else if (e.medal) { const X = e.x + 4, Y = e.y + 2; f('#b8483a', X + 2, Y, 2, 6); f('#3a6ac8', X + 4, Y, 2, 6); ell('#8a6a2a', X + 4, Y + 10, 5, 5); ell(brass, X + 4, Y + 10, 4, 4); f('#f4dc8a', X + 2, Y + 8, 2, 1); f('#8a6a2a', X + 3, Y + 10, 3, 1); }
+    else if (e.curio) { const [a, b] = CURIO_ART[e.id] || ['#d8c8a0', '#8a7a5a'], X = e.x + 3, Y = e.y + 4;
+      if (e.id === 'hart') { f(a, X + 2, Y + 4, 6, 8); f(b, X + 2, Y + 10, 6, 2); f(a, X, Y, 1, 4); f(a, X + 9, Y, 1, 4); f(a, X + 1, Y + 2, 2, 1); f(a, X + 7, Y + 2, 2, 1); f('#3a3030', X + 3, Y + 6, 1, 1); f('#3a3030', X + 6, Y + 6, 1, 1); }
+      else if (e.id === 'star') { f('#4a4a5a', X, Y + 9, 10, 3); f(a, X + 4, Y + 2, 2, 7); f(a, X + 1, Y + 5, 8, 2); f('#fff8d0', X + 4, Y + 4, 1, 1); f(b, X + 5, Y + 7, 1, 2); }
+      else if (e.id === 'shrine') { f(b, X + 1, Y + 2, 8, 10); f(a, X + 2, Y + 3, 6, 9); f(b, X, Y + 1, 10, 2); f('#f0d060', X + 4, Y + 6, 2, 3); }
+      else if (e.id === 'festival') { f(a, X + 3, Y, 4, 4); f(b, X + 1, Y + 4, 3, 8); f(a, X + 6, Y + 4, 3, 8); f(mix(a, '#000000', .25), X + 4, Y + 1, 2, 2); }
+      else if (e.id === 'bard') { ell(a, X + 4, Y + 9, 4, 3); f(b, X + 4, Y, 2, 8); f(b, X + 3, Y, 4, 1); f('#3a2414', X + 4, Y + 9, 2, 1); f('#f4ecd8', X + 5, Y + 1, 1, 7); }
+      else { f(a, X, Y + 3, 10, 9); f(mix(a, '#000000', .3), X, Y + 11, 10, 1); f(b, X + 1, Y + 4, 8, 6); f(a, X + 5, Y + 3, 1, 8); } }
+    else if (e.row === 'bed') { const X = e.x, base = e.y + 26;
+      /* the sleeper first, then the basket's front rim over its feet */
+      if (!e.more) { const im = await load(petArt(e.id)); if (im) x.drawImage(im, 0, 0, 32, 32, X - 1, base - 31, 32, 32); }
+      else { ell('#c8b0d0', X + 15, base - 6, 11, 3); ell('#e0cce8', X + 13, base - 7, 6, 2); }
+      ell('#7a5230', X + 15, base - 3, 15, 4); ell('#a87a4a', X + 15, base - 4, 14, 3); for (let q = X + 3; q < X + 28; q += 3) f('#7a5230', q, base - 6, 1, 4); f('#c89a62', X + 2, base - 7, 26, 1); f('#5e3e24', X + 4, base, 22, 1); } } };
 
 /* ---------- the room itself (redrawn when the quarter hour, weather, season or companion changes) ---------- */
 const load = src => new Promise(r => { if (!src) return r(null); const im = new Image(); im.onload = () => r(im); im.onerror = () => r(null); im.src = src; });
-const room = async (town, light, weather, season, petId) => {
+const room = async (town, light, weather, season, petId, keep = [], letters = 0) => {
   const c = document.createElement('canvas'); c.width = RW; c.height = RH; const x = c.getContext('2d'), P = A.townPainter(x, RW, RH), { f, ell } = P;
   const plaster = '#d8c6a0', beam = '#5a3e26', beamLt = '#7a5636', stone = '#8a8278', stoneDk = '#615a52', wood = '#8a5e3a', woodDk = '#5e3e24', woodLt = '#a87a4e';
   /* the upper wall and the rafters, with a lantern on a chain */
@@ -29169,9 +29356,12 @@ const room = async (town, light, weather, season, petId) => {
   ell('#8a2e26', 100, 214, 62, 14); ell('#b8483a', 100, 214, 56, 11); ell('#d8a050', 100, 214, 44, 7); ell('#b8483a', 100, 214, 38, 5);
   /* the hero by the fire, the companion (or the house cat) asleep on the rug */
   const hero = await load(Q.heroFigureUrl && Q.heroFigureUrl(S().look)); if (hero) x.drawImage(hero, HERO.x, HERO.y - 32, 24, 32);
-  const petUrl = petId && A.creatureUrl ? A.creatureUrl(String((D.PET[petId] && (D.PET[petId].mon || D.PET[petId].id)) || petId).replace(/^wild_/, '')) : null, pet = await load(petUrl);
+  const pet = await load(petId ? petArt(petId) : null);
   if (pet) x.drawImage(pet, PET.x, PET.y - 32 + 6, 32, 32);
   else { const cat = '#7a7480'; ell(cat, PET.x + 14, PET.y - 4, 9, 4); f(cat, PET.x + 4, PET.y - 9, 6, 5); f(cat, PET.x + 4, PET.y - 11, 2, 2); f(cat, PET.x + 8, PET.y - 11, 2, 2); f(mix(cat, '#000000', .3), PET.x + 18, PET.y - 3, 8, 2); }
+  /* what you have gathered over time, and any letters waiting on the desk (envelopes with a red seal, a little stacked) */
+  await drawKeep(x, P, keep);
+  for (let i = 0; i < Math.min(3, letters); i++) { const ex = LETTER.x + 2 + i * 2, ey = LETTER.y + 5 - i * 2; f('#c8b890', ex, ey, 13, 8); f('#f4ecd8', ex, ey, 12, 7); f('#d8ccb0', ex, ey, 6, 1); f('#d8ccb0', ex + 6, ey, 6, 1); f('#d8ccb0', ex + 1, ey + 1, 1, 1); f('#d8ccb0', ex + 10, ey + 1, 1, 1); f('#d8ccb0', ex + 2, ey + 2, 1, 1); f('#d8ccb0', ex + 9, ey + 2, 1, 1); f('#c8382e', ex + 5, ey + 2, 3, 3); f('#e86050', ex + 5, ey + 2, 1, 1); }
   x.restore(); return c.toDataURL();
 };
 
@@ -29198,28 +29388,38 @@ const lightNow = () => { const town = S().town, h = Q.townHour ? Q.townHour() : 
   const night = [46, 58, 120], sun = [255, 168, 104], tint = [255, 255, 255].map((v, i) => Math.round(v + (sun[i] - v) * L.warm * .62)).map((v, i) => Math.round(v + (night[i] - v) * L.dark * .8 * (1 - L.warm * .45)));
   return { town, dark: L.dark, warm: L.warm, tint, weather: Q.townWeather ? Q.townWeather(town) : 'clear', quarter: Math.floor(h * 4) }; };
 const goalNote = () => { const g = Q.homeGoalNow; return g ? `<b>${esc(g.name)}</b><span>${esc(g.label)} ${g.have} / ${g.need}</span>` : '<b>Your next step</b><span>See Quests</span>'; };
-UI.hearth = () => `<div class="hearth" data-hearth><img class="hearth-room" alt="Your room by the fire" draggable="false"><canvas class="hearth-lights" width="${RW}" height="${RH}" aria-hidden="true"></canvas><div class="hearth-dim" aria-hidden="true"></div>
+/* the keepsakes and the letters have their own hotspots, placed like the furniture's (st.extra holds this render's) */
+const keepSpot = e => `<button class="hearth-spot hearth-keep" data-spot="${esc(e.key)}" data-row="${e.row}" data-do="${e.act[0]}" data-a="${esc(e.act[1])}" aria-label="${esc(e.label)}" data-tip="text:${esc(e.label)}">${e.more ? `<b class="hearth-more">+${e.more}</b>` : ''}</button>`;
+const letterSpot = () => { const n = Q.lettersWaiting ? Q.lettersWaiting().length : 0; if (!n) return ''; const L = Q.lettersWaiting()[0], f = D.FOLK.find(x => x.id === L.from);
+  const tip = n > 1 ? `${n} letters on your desk · the first is from ${f ? f.n : 'a friend'}` : `A letter from ${f ? f.n : 'a friend'} · open it`;
+  return `<button class="hearth-spot hearth-letter" data-spot="letter" data-do="letteropen" data-a="${esc(L.id)}" aria-label="${esc(tip)}" data-tip="text:${esc(tip)}"></button>`; };
+UI.hearth = () => { const keep = Q.hearthKeep(); st.extra = { letter: LETTER }; for (const e of keep) st.extra[e.key] = e;
+  return `<div class="hearth" data-hearth><img class="hearth-room" alt="Your room by the fire" draggable="false"><canvas class="hearth-lights" width="${RW}" height="${RH}" aria-hidden="true"></canvas><div class="hearth-dim" aria-hidden="true"></div>
   <button class="hearth-note" data-do="go" data-a="quests" data-tip="text:Today's goal · open Quests">${goalNote()}</button>
-  ${Object.entries(SPOTS).filter(([k]) => k !== 'board' && (k !== 'pet' || (S().pets && S().pets.active))).map(([k, s]) => `<button class="hearth-spot" data-spot="${k}" data-do="${s.act[0]}" data-a="${s.act[1]}" aria-label="${esc(s.label)}" data-tip="text:${esc(s.label)}"></button>`).join('')}</div>`;
+  ${Object.entries(SPOTS).filter(([k]) => k !== 'board' && (k !== 'pet' || (S().pets && S().pets.active))).map(([k, s]) => `<button class="hearth-spot" data-spot="${k}" data-do="${s.act[0]}" data-a="${s.act[1]}" aria-label="${esc(s.label)}" data-tip="text:${esc(s.label)}"></button>`).join('')}
+  ${keep.map(keepSpot).join('')}${letterSpot()}</div>`; };
 const place = () => { const box = document.querySelector('.home-scene'), H = box && box.querySelector('.hearth'); if (!H) return;
   const img = H.querySelector('.hearth-room'), bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) return;
   const k = Math.max(1, Math.floor(Math.max(bw / RW, bh / RH))), w = RW * k, h = RH * k, left = Math.round((bw - w) / 2), top = bh - h;
   /* with priority: the page's sprite snapper and scene rules size pictures with !important */
   for (const el of [img, H.querySelector('.hearth-lights'), H.querySelector('.hearth-dim')]) for (const [k2, v] of Object.entries({ left: left + 'px', top: top + 'px', width: w + 'px', height: h + 'px' })) el.style.setProperty(k2, v, 'important');
   H.dataset.scale = k;
-  for (const b of H.querySelectorAll('.hearth-spot')) { const s = SPOTS[b.dataset.spot]; Object.assign(b.style, { left: left + s.x * k + 'px', top: top + (s.y + OY) * k + 'px', width: s.w * k + 'px', height: s.h * k + 'px' }); }
+  /* a small keepsake on a phone gets the 48 px touch target, centred on it rather than hanging off its corner */
+  for (const b of H.querySelectorAll('.hearth-spot')) { const s = SPOTS[b.dataset.spot] || (st.extra || {})[b.dataset.spot]; if (!s) continue; const sw = Math.max(48, s.w * k), sh = Math.max(48, s.h * k);
+    Object.assign(b.style, { left: left + s.x * k - (sw - s.w * k) / 2 + 'px', top: top + (s.y + OY) * k - (sh - s.h * k) / 2 + 'px', width: sw + 'px', height: sh + 'px' }); }
   const n = H.querySelector('.hearth-note'), N = SPOTS.board; Object.assign(n.style, { left: left + (N.x + 2) * k + 'px', top: top + (N.y + OY + 3) * k + 'px', width: Math.max(150, (N.w - 2) * k) + 'px' }); };
-const refresh = async (force) => { const H = document.querySelector('.home-scene .hearth'); if (!H) return; const L = lightNow(), season = Q.season(), pet = S().pets && S().pets.active;
-  const key = [L.town, L.quarter, L.weather, season, pet, JSON.stringify(S().look || {}), S().equip && S().equip.weapon].join('|');
+const refresh = async (force) => { const H = st.H && st.H.isConnected ? st.H : document.querySelector('.home-scene .hearth'); if (!H) return; const L = lightNow(), season = Q.season(), pet = S().pets && S().pets.active;
+  const keep = Q.hearthKeep(), letters = Q.lettersWaiting ? Q.lettersWaiting().length : 0;
+  const key = [L.town, L.quarter, L.weather, season, pet, JSON.stringify(S().look || {}), S().equip && S().equip.weapon, keep.map(e => e.key + (e.more || '')).join(','), letters].join('|');
   const dim = H.querySelector('.hearth-dim'); dim.style.backgroundColor = `rgb(${[255, 255, 255].map((v, i) => Math.round(v + ([150, 112, 84][i] - v) * L.dark * .55)).join(',')})`;
-  if (key !== st.key || force) { if (st.busy) return; st.busy = true; try { st.url = await room(L.town, L, L.weather, season, pet); st.key = key; } finally { st.busy = false; } }
-  const img = H.querySelector('.hearth-room'); if (img.getAttribute('src') !== st.url) img.src = st.url; st.dark = L.dark; };
+  if (key !== st.key || force) { if (st.busy) { st.again = true; return; } st.busy = true; try { st.url = await room(L.town, L, L.weather, season, pet, keep, letters); st.key = key; } finally { st.busy = false; } if (st.again) { st.again = false; return refresh(); } }
+  const img = H.querySelector('.hearth-room'); if (img.isConnected && img.getAttribute('src') !== st.url) img.src = st.url; st.dark = L.dark; };
 /* one subscriber on the shared clock (DQ.frame, js/util.js): elapsed time at native refresh, paused while hidden */
-const tick = (dt, now) => { const H = document.querySelector('.home-scene .hearth'); if (!H) { st.on = false; return false; } const moving = !still(); if (moving) st.t += dt;
-  lights(H.querySelector('.hearth-lights').getContext('2d'), st.t, st.dark || 0, moving);
+const tick = (dt, now) => { const H = st.H && st.H.isConnected ? st.H : (st.H = document.querySelector('.home-scene .hearth')); if (!H) { st.on = false; return false; } const moving = !still(); if (moving) st.t += dt;
+  if (st.cxH !== H) { st.cxH = H; st.cx = H.querySelector('.hearth-lights').getContext('2d'); } lights(st.cx, st.t, st.dark || 0, moving);
   const n = now || performance.now(); if (Math.floor(n / 30000) !== st.minute) { st.minute = Math.floor(n / 30000); refresh(); } };
-const start = () => { place(); refresh(); if (!st.on) { st.on = true; if (Q.frame) Q.frame.add(tick); else { const loop = n => { if (tick(1 / 60, n) !== false) requestAnimationFrame(loop); }; requestAnimationFrame(loop); } } };
-Q.hearthLive = () => { const H = document.querySelector('.home-scene .hearth'); return H ? { scale: +H.dataset.scale, spots: [...H.querySelectorAll('.hearth-spot')].map(b => b.dataset.spot), note: H.querySelector('.hearth-note').innerText, src: !!H.querySelector('.hearth-room').getAttribute('src'), t: st.t } : null; };
+const start = () => { st.H = document.querySelector('.home-scene .hearth'); place(); refresh(); if (!st.on) { st.on = true; if (Q.frame) Q.frame.add(tick); else { const loop = n => { if (tick(1 / 60, n) !== false) requestAnimationFrame(loop); }; requestAnimationFrame(loop); } } };
+Q.hearthLive = () => { const H = document.querySelector('.home-scene .hearth'); return H ? { scale: +H.dataset.scale, spots: [...H.querySelectorAll('.hearth-spot')].map(b => b.dataset.spot), key: st.key, note: H.querySelector('.hearth-note').innerText, src: !!H.querySelector('.hearth-room').getAttribute('src'), t: st.t } : null; };
 
 UI.DO.homeview = v => { if (!['hearth', 'town'].includes(v)) return; S().settings.homeView = v; Q.save && Q.save(); UI.render(true); };
 /* Home's scene card: the hearth or the town, with a way to the other */
@@ -29231,6 +29431,104 @@ const swap = () => { const box = document.querySelector('#view .home-scene'); if
 const render0 = UI.render;
 UI.render = (...a) => { const r = render0(...a); try { if (UI.view === 'overview') { swap(); if (document.querySelector('#view .hearth')) start(); } } catch (e) { console.error('hearth', e); } return r; };
 let fitRaf = 0; addEventListener('resize', () => { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(place); });
+})();
+
+</script>
+<script>
+/* Idlewick: letters on the desk (owner, 27 Nov 2026: "subtle polish"). Now and then someone you have met through their
+   quests leaves a short letter on the hearth's desk, in their own voice (js/folk_personality.js D.FOLK_LETTERS): a tip
+   that is true for the save at the moment it is written (a skill close to its next perk, a restoration you could hand
+   something to or finish, how far along the goal you are on, whether you are ready for the next boss) or a bit of
+   gossip. Rules: none in the first 20 minutes of play, then one every 45 to 90 minutes of visible play at most, never
+   more than three waiting (the clock holds while three are unread). The hearth draws them as envelopes on the desk; a
+   click opens one on parchment, and read letters are kept in the Journal (Story) under Letters. Saved in S.letters
+   (list, played, next); nothing is ever removed. Never in a simulation or forecast. tests/hearth-life.cjs. */
+(() => {
+const Q = window.DQ, D = Q.data, UI = Q.ui, S = () => Q.S, { esc, ico } = Q;
+const MIN = 60000, FIRST = [20 * MIN, 45 * MIN], GAP = [45 * MIN, 90 * MIN], CAP = 3;
+const span = ([a, b]) => a + Math.random() * (b - a);
+const box = () => { const st = S(); if (!st.letters || typeof st.letters !== 'object' || !Array.isArray(st.letters.list)) st.letters = { list: [], played: 0, next: 0 };
+  const L = st.letters; if (!(L.played >= 0)) L.played = 0; if (!L.next) L.next = L.played + span(FIRST); return L; };
+Q.lettersWaiting = () => (S() ? box().list.filter(l => !l.read) : []);
+Q.lettersRead = () => (S() ? box().list.filter(l => l.read) : []);
+Q.LETTER_RULES = { first: FIRST, gap: GAP, cap: CAP };
+
+/* ---------- what a letter can truthfully say right now ---------- */
+const folk = id => D.FOLK.find(f => f.id === id);
+const metIds = () => (Q.folkMet ? Q.folkMet() : []).map(f => f.id);
+/* who writes about what: the person whose trade it is, if you know them */
+const BY_SKILL = { mining: ['brannoc', 'dagna', 'dunmore'], smithing: ['tolla', 'grotta', 'kael', 'brannoc'], cooking: ['mabel', 'piers', 'brunn'], fishing: ['ilsa', 'piers'], crafting: ['hettie'],
+  thieving: ['whisper'], ranged: ['wynn'], hunting: ['wynn'], farming: ['bramble'], magic: ['merrow'], research: ['merrow', 'seren'], herbalism: ['alder'], woodcutting: ['sorrel', 'wynn'], carpentry: ['sorrel'],
+  sailing: ['ilsa', 'sorrel'], beastmastery: ['bramble', 'wynn'], melee: ['orrin', 'hrod'], defence: ['orrin', 'hrod'], hitpoints: ['mabel'], enchanting: ['merrow'], exploration: ['aldous'] };
+const giverOf = name => { const f = Q.folkOf && Q.folkOf(name); return f ? f.id : null; };
+const lvls = n => n === 1 ? 'one level' : `${n} levels`;
+const tips = () => { const out = [], st = S();
+  /* the goal on the notice board, from its own giver */
+  const g = Q.homeGoalNow, gq = g && D.QM && D.QM[g.id];
+  if (g && gq) { const who = giverOf(gq.giver);
+    if (g.state === 'ready') out.push({ kind: 'goal', top: true, who: [who], page: 'quests', go: 'Open Quests', text: `“${g.name}” is done, as far as I can tell. Come and hand it in when you are passing.` });
+    else if (g.state === 'active' && g.need > 1 && g.have > 0 && g.have < g.need) out.push({ kind: 'goal', who: [who], page: 'quests', go: 'Open Quests', text: `${g.label}: ${g.have} of ${g.need} so far, for “${g.name}”. ${g.need - g.have} to go.` }); }
+  /* a skill one to three levels short of a named perk */
+  for (const s of D.SKILLS || []) { if (!Q.skillUnlocked || !Q.skillUnlocked(s.id) || !UI.nextUnlock || !UI.unlockShort) continue; const nx = UI.nextUnlock(s.id), perks = nx && UI.unlockShort(nx); if (!perks) continue;
+    const gap = nx.lvl - Q.lvl(s.id); if (gap >= 1 && gap <= 3) out.push({ kind: 'perk', who: BY_SKILL[s.id] || [], page: s.page, go: `Open ${s.name}`, text: `Your ${s.name} is ${lvls(gap)} off ${nx.lvl}. At ${nx.lvl} you get ${perks}.` }); }
+  /* a restoration you could finish, or hand something to */
+  for (const [id, p] of Object.entries(D.PROJECTS || {})) { if (p.relic || st.projects[id] || !(Q.townUnlocked && Q.townUnlocked(p.town)) || !Q.projectState) continue; const ps = Q.projectState(id), place = p.name.replace(/^\w+ the /, 'the '), town = D.TOWN[p.town].name, who = [giverOf((D.PROJECT_VOICES || {})[id] && D.PROJECT_VOICES[id][0])].concat(D.FOLK.filter(f => f.town === p.town).map(f => f.id));
+    if (ps === 'ready') out.push({ kind: 'project', top: true, who, page: 'projects', go: 'Open Town projects', text: `Everything ${place} in ${town} needs is in your pack. It only wants finishing.` });
+    else if (ps === 'can' && Q.contributionText) out.push({ kind: 'project', who, page: 'projects', go: 'Open Town projects', text: `You could hand ${Q.contributionText(id)} to ${place} in ${town} today.` }); }
+  /* the next boss: ready, or nearly */
+  const b = Q.regionBoss && Q.regionBoss(); if (b && b.boss && Q.townUnlocked && Q.townUnlocked(b.town)) { const cl = Q.combatLvl(), req = b.boss.req, nm = b.boss.short || b.name, who = ['orrin', 'hrod', 'ignis', 'wynn', 'vess'].concat(D.FOLK.filter(f => f.town === b.town).map(f => f.id));
+    if (cl >= req) out.push({ kind: 'boss', top: true, who, page: 'combat', go: 'Open Fight', text: `${nm} wants combat level ${req}. You are ${cl}. I am only saying.` });
+    else if (req - cl <= 4) out.push({ kind: 'boss', who, page: 'combat', go: 'Open Fight', text: `${lvls(req - cl).replace(/^./, c => c.toUpperCase())} of combat and you could take on ${nm}. ${D.TOWN[b.town].name} would sleep better.` }); }
+  return out; };
+
+/* ---------- writing one ---------- */
+const pick = a => a[Math.floor(Math.random() * a.length)];
+Q.letterWrite = (o = {}) => { if (!S() || Q.forecasting || (Q.sim && Q.sim.on)) return null; const L = box(), met = metIds().filter(id => D.FOLK_LETTERS && D.FOLK_LETTERS[id]); if (!met.length) return null;
+  if (!o.force && Q.lettersWaiting().length >= CAP) return null;
+  const sent = id => L.list.filter(l => l.from === id).length, usedLines = id => L.list.filter(l => l.from === id && l.kind === 'gossip').map(l => l.text);
+  /* tips and gossip take turns (a tip first); a tip goes to whoever knows that trade, if you have met them */
+  const T = tips(), wantTip = o.kind ? o.kind !== 'gossip' : L.list.length % 2 === 0;
+  let from, kind = 'gossip', text = '', page = null, go = null;
+  if (wantTip && T.length) { const lastKind = (L.list.filter(l => l.kind !== 'gossip').slice(-1)[0] || {}).kind;
+    /* something not said lately, from someone whose trade it is, and not the same kind of tip twice running */
+    let pool = o.kind && o.kind !== 'tip' ? T.filter(x => x.kind === o.kind) : T.filter(t => !L.list.slice(-6).some(l => l.text === t.text));
+    if (!pool.length) pool = T; const own = pool.filter(t => (t.who || []).some(id => met.includes(id))); if (own.length) pool = own; const other = pool.filter(t => t.kind !== lastKind); if (other.length) pool = other;
+    const top = pool.filter(t => t.top); const t = pick(top.length ? top : pool); /* something you could do today comes first */
+    from = (t.who || []).find(id => id && met.includes(id)) || met.slice().sort((a, b) => sent(a) - sent(b))[0]; kind = t.kind; text = t.text; page = t.page; go = t.go; }
+  if (!text) { const pool = met.filter(id => D.FOLK_LETTERS[id].gossip.some(g => !usedLines(id).includes(g))); from = (pool.length ? pool : met).slice().sort((a, b) => sent(a) - sent(b))[0];
+    const lines = D.FOLK_LETTERS[from].gossip, unused = lines.filter(g => !usedLines(from).includes(g)); text = pick(unused.length ? unused : lines); }
+  const V = D.FOLK_LETTERS[from], n = L.list.length + 1;
+  const letter = { id: 'L' + n + '-' + Date.now().toString(36), from, kind, hi: V.hi, text, bye: V.bye, at: Date.now(), town: S().town, read: false };
+  if (page) Object.assign(letter, { page, go });
+  L.list.push(letter);
+  if (!o.quiet) { const f = folk(from); Q.notify && Q.notify({ kind: 'info', key: 'letter:' + letter.id, icon: 'quest', col: '#d8a64a', page: 'overview', title: `A letter from ${f.n}`, text: 'It is waiting on your desk at home.', sound: false, ttl: 6000 }); }
+  Q.save && Q.save(); if (UI.view === 'overview' || UI.view === 'journal') UI.render(true); return letter; };
+
+/* the letter clock: visible play only, a hidden tab and time away do not count */
+let last = Date.now();
+Q.letterTick = dt => { if (!S() || (Q.sim && Q.sim.on) || Q.forecasting) return; const L = box(); L.played += Math.max(0, Math.min(dt, 5000));
+  if (L.played < L.next) return;
+  if (Q.lettersWaiting().length >= CAP) { L.next = L.played + 10 * MIN; return; }
+  L.next = L.played + span(GAP); if (!Q.letterWrite()) L.next = L.played + 10 * MIN; };
+Q.on && Q.on('ui', () => { const now = Date.now(), dt = now - last; last = now; if (typeof document !== 'undefined' && document.hidden) return; Q.letterTick(dt); });
+
+/* ---------- reading ---------- */
+const when = t => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+Q.letterHtml = l => { const f = folk(l.from) || { n: 'A friend' };
+  return `<div class="letter-paper"><div class="letter-head">${Q.folkPortrait ? Q.folkPortrait(f.n, 64, 'letter-face') : ''}<span><b>${esc(f.n)}</b><small>${esc(f.role || '')}${D.TOWN[f.town] ? ' · ' + esc(D.TOWN[f.town].name) : ''} · ${esc(when(l.at))}</small></span></div>
+    <p class="letter-hi">${esc(l.hi)}</p><p>${esc(l.text)}</p><p class="letter-bye">${esc(l.bye)}</p><p class="letter-sign">${esc(f.n)}</p></div>`; };
+UI.DO.letteropen = id => { const L = box(), l = L.list.find(x => x.id === id) || Q.lettersWaiting()[0]; if (!l) return; const f = folk(l.from) || { n: 'A friend' };
+  if (!l.read) { l.read = true; l.readAt = Date.now(); Q.save && Q.save(); }
+  const acts = [{ label: Q.lettersWaiting().length ? 'Next letter' : 'Keep it in the Journal', primary: true, fn: () => { const nx = Q.lettersWaiting()[0]; if (nx) { setTimeout(() => UI.DO.letteropen(nx.id), 0); } } }];
+  if (l.page && l.go) acts.unshift({ label: l.go, fn: () => { Q.go(l.page); } });
+  Q.modal({ title: `A letter from ${f.n}`, body: Q.letterHtml(l), actions: acts });
+  if (UI.view === 'overview' || UI.view === 'journal') UI.render(true); };
+
+/* ---------- the Journal keeps every letter you have read ---------- */
+const journal0 = UI.V.journal;
+if (journal0) UI.V.journal = (...a) => { const h = journal0(...a), R = Q.lettersRead().slice().reverse(); if (!R.length) return h;
+  const rows = R.map(l => { const f = folk(l.from) || { n: 'A friend' }; return `<button class="letter-row" data-do="letteropen" data-a="${esc(l.id)}" aria-label="${esc(`Letter from ${f.n}, ${when(l.at)}`)}">${Q.folkPortrait ? Q.folkPortrait(f.n, 32, 'letter-face') : ''}<span><b>${esc(f.n)}</b><small>${esc(when(l.at))}</small><em>${esc(l.text)}</em></span></button>`; }).join('');
+  return `<section class="panel letters-panel"><div class="phead"><h2>${ico('quest')}Letters</h2><small>${R.length} kept</small></div><div class="letter-list">${rows}</div></section>` + h; };
 })();
 
 </script>

@@ -67,7 +67,10 @@ dated line to the history file.
 - **Towns to one scale** (`js/towns.js`): each town scene is 640 × 360 with townsfolk ~10px, homes two to three times
   that, restoration pieces 32px among them and landmarks at 2×. Things you own appear in the scene (boats at Saltmere,
   traps, crops); add them through `extras` and the scene cache key in pixel_runtime.js. Townsfolk walk the two roads on
-  Home and Village (`js/town_walkers.js`; more as the town is restored; off under Reduce effects). Towns live
+  Home and Village (`js/town_walkers.js`; more as the town is restored; off under Reduce effects); the quest givers you
+  have met walk their own town among them (portrait colours at townsfolk scale, name on hover, a click opens People),
+  and finishing a restoration gathers a cheering crowd with confetti in front of its site for about a minute
+  (`A.siteLayout`, owner 27 Nov). Towns live
   (`js/town_life.js`, owner 27 Nov): the player's clock sets dawn, day, dusk and night (windows and lanterns glow after
   dark, stars come out), each town has its weather (rain, snow, sea mist), smoke rises and animals potter (more as the
   town is restored); `sceneFor` records windows, chimneys and lanterns in `A.sceneMeta` for it. Settings → Display →
@@ -180,7 +183,13 @@ dated line to the history file.
   action, the hearth (`js/hearth.js`, owner 27 Nov: the hero's room by the fire at a whole-number scale; today's goal
   pinned to the board; chest, bookshelf, map, desk, companion and window open their pages; "Step outside" shows the town
   scene with walking townsfolk, remembered in `settings.homeView`; automated browsers see the town unless
-  `localStorage['idlewick.hearth'] = '1'`), "Nearly there" once every skill is open, and the Before <boss>
+  `localStorage['idlewick.hearth'] = '1'`). The room fills up from the save (owner 27 Nov, `DQ.hearthKeep`): a trophy
+  over the fire per boss beaten (dated from `S.trophies`), owned named weapons on a rack, finished museum wings, relics
+  and curiosities on a shelf, a basket per beast kept (the companion stays on the rug); fixed slots, a full row ends in
+  "+N", each one a hotspot that opens its page. Letters (`js/hearth_letters.js`, `S.letters`, never erased): a met
+  quest giver leaves one on the desk in their voice (`D.FOLK_LETTERS`), a tip true for the save when written or
+  gossip; none in the first 20 minutes of play, then at most one per 45–90 minutes of visible play, at most three
+  waiting; opened on parchment, kept under Letters in the Journal. "Nearly there" once every skill is open, and the Before <boss>
   checklist when it applies. **Village**: town scene with always-visible, colour-only site signs: Finish (green, site
   glows), Give (blue, the item you can hand in), Needs (pale, missing item greyed, a lock if never found); standing
   appears once in the map header.
@@ -334,4 +343,4 @@ The runner covers everything; these are the ones to read when you touch an area.
 `card-packing-ui`, `catalogue-cards-ui`, `menu-density-ui`, `scripts/audit-overflow.cjs`. Art: `art-pixel`. Systems:
 `connected-systems`, `crosslinks`, `quest-progression`, `beastmastery`, `beast-capture`, `hunt-stalk`, `creature-roster`,
 `world-life`, `world-events-hindsight`, `story`, `combat-arts`, `base-gear`, `unique-levels`, `choice-order`,
-`offline-ceiling`, `live-notes`, `music`, `motion-clock`. HANDOFF.md has the full list.
+`offline-ceiling`, `live-notes`, `music`, `motion-clock`, `hearth-life`. HANDOFF.md has the full list.
