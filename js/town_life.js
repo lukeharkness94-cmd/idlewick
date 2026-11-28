@@ -10,6 +10,9 @@
      scene and the townsfolk walking in it (js/town_walkers.js);
    - over the light: windows and lanterns that glow at dusk and night, stars, fireflies, Emberfall's embers and the
      Hollow's motes.
+   Since 28 Nov 2026 the towns are seen from above and painted at dusk (js/town_scene.js), so the night tint is
+   gentler, there is no sky for stars (the Hollow keeps its motes), and the scene's own record says where the yards,
+   pens, sea, water and lava are and how big each window is.
    Positions come from elapsed browser time at the screen's own refresh rate; a hidden tab does not catch up. More
    animals as the town is restored. Settings → Display → Town life: follow my clock or always daytime; weather on or
    off. Under Reduce effects and prefers-reduced-motion nothing moves: the light for the hour, lit windows and stars
@@ -34,7 +37,7 @@ Q.townLight = h => { const dark = h < 12 ? 1 - smooth(4.8, 7.4, h) : smooth(17.6
   const warm = Math.max(1 - Math.abs(h - 18.9) / 1.9, 1 - Math.abs(h - 6.1) / 1.5, 0);
   return { dark, warm, phase: dark > .8 ? 'night' : warm > .2 ? (h < 12 ? 'dawn' : 'dusk') : dark > .3 ? (h < 12 ? 'dawn' : 'dusk') : 'day' }; };
 const tintOf = ({ dark, warm }) => { const w = [255, 255, 255], sun = [255, 168, 104], night = [46, 58, 120];
-  const a = w.map((v, i) => lerp(v, sun[i], warm * .62)); return a.map((v, i) => Math.round(lerp(v, night[i], dark * .8 * (1 - warm * .45)))); };
+  const a = w.map((v, i) => lerp(v, sun[i], warm * .62)); return a.map((v, i) => Math.round(lerp(v, night[i], dark * .45 * (1 - warm * .45)))); };
 
 /* ---------- weather: a fresh roll every 40 minutes, by town ---------- */
 const WEATHER = { willowbrook: [['rain', .2]], mossbarrow: [['rain', .25]], saltmere: [['mist', .3], ['rain', .15]], ironpeak: [['snow', .65]],
@@ -64,17 +67,21 @@ const build = (town, meta) => { const rnd = seeded(hash(town + ':life')), share 
   const L = { town, meta, animals: [], puffs: [], drops: [], stars: [], flies: [], glints: [], birds: null, birdWait: 6 + rnd() * 20, t: 0 };
   const skyMax = st.snow ? 40 : 62;
   for (let i = 0; i < 70; i++) L.stars.push({ x: Math.floor(rnd() * W), y: Math.floor(rnd() * skyMax), p: rnd() * 6.28, big: rnd() < .12 });
-  const front = st.sea ? null : [292, 316];
-  if (front && !meta.ruined && town !== 'hollow') for (let i = 0, n = 3 + Math.round(3 * share); i < n; i++) L.animals.push({ kind: 'chicken', x: 30 + rnd() * (W - 60), y: front[0] + rnd() * (front[1] - front[0]), x0: 20, x1: W - 20, dir: rnd() < .5 ? -1 : 1, pace: 4, mode: 'idle', wait: rnd() * 3, f: 0 });
+  const top = !!meta.topdown, yards = top ? (meta.yards || []) : (st.sea ? [] : [[20, W - 20, 292, 316]]);
+  if (yards.length && !meta.ruined && town !== 'hollow') for (let i = 0, n = 3 + Math.round(3 * share); i < n; i++) { const [a, b, y0, y1] = yards[i % yards.length]; L.animals.push({ kind: 'chicken', x: a + 10 + rnd() * (b - a - 20), y: y0 + rnd() * (y1 - y0), x0: a, x1: b, dir: rnd() < .5 ? -1 : 1, pace: 4, mode: 'idle', wait: rnd() * 3, f: 0 }); }
   /* sheep in the fenced pens at the meadow's edge, and in Mossbarrow's fields */
-  if (!st.sea && !meta.ruined && /willowbrook|mossbarrow|skyreach/.test(town)) for (const [a, b] of [[6, 82], [566, 632]]) for (let i = 0; i < 1 + Math.round(share); i++) L.animals.push({ kind: 'sheep', x: a + rnd() * (b - a - 8), y: 348 + rnd() * 6, x0: a, x1: b - 8, dir: rnd() < .5 ? -1 : 1, pace: 2, mode: 'idle', wait: rnd() * 5, f: 0 });
-  if (st.fields) for (let i = 0; i < 3 + Math.round(2 * share); i++) { const right = i % 2; L.animals.push({ kind: 'sheep', x: (right ? 450 : 10) + rnd() * 170, y: 116 + rnd() * 16, x0: right ? 444 : 4, x1: right ? 630 : 230, dir: rnd() < .5 ? -1 : 1, pace: 2, mode: 'idle', wait: rnd() * 5, f: 0 }); }
+  const pens = top ? (meta.pens || []).map(([a, b, y]) => [a, b, y]) : (!st.sea && /willowbrook|mossbarrow|skyreach/.test(town) ? [[6, 82, 348], [566, 632, 348]] : []);
+  if (!meta.ruined) for (const [a, b, y] of pens) for (let i = 0; i < 1 + Math.round(share); i++) L.animals.push({ kind: 'sheep', x: a + rnd() * (b - a - 8), y: y + rnd() * 6, x0: a, x1: b - 8, dir: rnd() < .5 ? -1 : 1, pace: 2, mode: 'idle', wait: rnd() * 5, f: 0 });
+  if (top && st.fields) for (let i = 0; i < 3 + Math.round(2 * share); i++) L.animals.push({ kind: 'sheep', x: 20 + rnd() * (W - 60), y: 98 + rnd() * 8, x0: 10, x1: W - 20, dir: rnd() < .5 ? -1 : 1, pace: 2, mode: 'idle', wait: rnd() * 5, f: 0 });
+  if (!top && st.fields) for (let i = 0; i < 3 + Math.round(2 * share); i++) { const right = i % 2; L.animals.push({ kind: 'sheep', x: (right ? 450 : 10) + rnd() * 170, y: 116 + rnd() * 16, x0: right ? 444 : 4, x1: right ? 630 : 230, dir: rnd() < .5 ? -1 : 1, pace: 2, mode: 'idle', wait: rnd() * 5, f: 0 }); }
   /* a cat by the door of a lived-in home */
   const homes = (meta.homes || []).filter(h => h[4]); if (homes.length && town !== 'hollow') { const h = homes[Math.floor(rnd() * homes.length)]; L.animals.push({ kind: 'cat', x: h[0] + h[2] + 2, y: h[1] + 1, x0: h[0] - 6, x1: h[0] + h[2] + 8, dir: -1, pace: 3, mode: 'idle', wait: 4, f: 0, col: ['#e0a060', '#5a5050', '#f4f0e8'][Math.floor(rnd() * 3)], sits: true }); }
   for (const [cx, cy, rx] of meta.ponds || []) L.animals.push({ kind: 'duck', x: cx - rx * .4, y: cy + 1, x0: cx - rx * .7, x1: cx + rx * .6, dir: 1, pace: 3, mode: 'walk', wait: 0, f: 0 });
-  if (st.sea) for (let i = 0; i < 3 + Math.round(2 * share); i++) L.animals.push({ kind: 'gull', cx: 80 + rnd() * 480, cy: 70 + rnd() * 30, r: 14 + rnd() * 20, a: rnd() * 6.28, sp: (.35 + rnd() * .3) * (rnd() < .5 ? -1 : 1) });
-  if (st.sea) { for (let i = 0; i < 26; i++) L.glints.push({ x: rnd() * W, y: 84 + rnd() * 36, p: rnd() * 6.28, w: 3 + Math.floor(rnd() * 4) }); for (let i = 0; i < 22; i++) L.glints.push({ x: rnd() * W, y: 332 + rnd() * 26, p: rnd() * 6.28, w: 3 + Math.floor(rnd() * 4) }); }
-  for (const c of meta.chimneys || []) L.puffs.push(...[0, 1, 2].map(k => ({ cx: c[0], cy: c[1] - 18, age: k * 1.6 + rnd() * 1.6, life: 4.8, drift: .4 + rnd() * .6 })));
+  const gullY = meta.sea ? meta.sea[0] + 8 : 70;
+  if (st.sea) for (let i = 0; i < 3 + Math.round(2 * share); i++) L.animals.push({ kind: 'gull', cx: 80 + rnd() * 480, cy: gullY + rnd() * 24, r: 14 + rnd() * 20, a: rnd() * 6.28, sp: (.35 + rnd() * .3) * (rnd() < .5 ? -1 : 1) });
+  if (top) for (const [wx, wy, ww, wh] of meta.water || []) for (let i = 0, n = Math.round(ww * wh / 900); i < n; i++) L.glints.push({ x: wx + rnd() * ww, y: wy + 2 + rnd() * (wh - 3), p: rnd() * 6.28, w: 3 + Math.floor(rnd() * 4) });
+  else if (st.sea) { for (let i = 0; i < 26; i++) L.glints.push({ x: rnd() * W, y: 84 + rnd() * 36, p: rnd() * 6.28, w: 3 + Math.floor(rnd() * 4) }); for (let i = 0; i < 22; i++) L.glints.push({ x: rnd() * W, y: 332 + rnd() * 26, p: rnd() * 6.28, w: 3 + Math.floor(rnd() * 4) }); }
+  for (const c of meta.chimneys || []) L.puffs.push(...[0, 1, 2].map(k => ({ cx: c[0], cy: c[1] - (top ? 1 : 18), age: k * 1.6 + rnd() * 1.6, life: 4.8, drift: .4 + rnd() * .6 })));
   for (let i = 0; i < 22; i++) L.flies.push({ x: rnd() * W, y: 150 + rnd() * 170, p: rnd() * 6.28, s: .6 + rnd() * .8 });
   /* the season (Q.season, js/hearth.js): leaves in autumn, blossom in spring, butterflies in summer */
   L.fall = Array.from({ length: 34 }, () => ({ x: rnd() * W, y: rnd() * H, p: rnd() * 6.28, s: 8 + rnd() * 8, c: Math.floor(rnd() * 3) }));
@@ -123,18 +130,19 @@ const drawUnder = (L, x, moving) => { const { W, H, style: st = {} } = L.meta; x
 
 const drawOver = (L, x, light, moving) => { const { W, H, style: st = {} } = L.meta, dk = light.dark, t = moving ? L.t : 0; x.clearRect(0, 0, W, H);
   /* stars come out as the sky darkens (the Hollow's are painted in) */
-  if (dk > .45 && !st.stars) for (const s of L.stars) { const a = (dk - .45) / .55 * (.55 + .45 * Math.sin(t * 1.5 + s.p)); px(x, `rgba(255,250,232,${a.toFixed(3)})`, s.x, s.y, s.big ? 2 : 1, 1); }
+  if (dk > .45 && !st.stars && !L.meta.topdown) for (const s of L.stars) { const a = (dk - .45) / .55 * (.55 + .45 * Math.sin(t * 1.5 + s.p)); px(x, `rgba(255,250,232,${a.toFixed(3)})`, s.x, s.y, s.big ? 2 : 1, 1); }
   /* lit windows and lanterns glow above the darkened town; each flickers a little like a candle */
   const glow = clamp((dk - .2) / .6);
   if (glow > 0) { const halo = (X, Y, w, h, col, a, r) => { const [R, G, B] = rgb(col); for (let k = r; k >= 1; k--) px(x, `rgba(${R},${G},${B},${(a * .16 / k).toFixed(3)})`, X - k, Y - k, w + 2 * k, h + 2 * k); px(x, `rgba(${R},${G},${B},${a.toFixed(3)})`, X, Y, w, h); };
-    for (const [wx, wy, col] of L.meta.windows || []) { const f = moving ? .85 + .15 * Math.sin(t * 3.1 + wx * .7 + wy) : 1; halo(wx, wy, 4, 4, col, glow * f, 2); }
+    for (const [wx, wy, col, ww, wh] of L.meta.windows || []) { const f = moving ? .85 + .15 * Math.sin(t * 3.1 + wx * .7 + wy) : 1; halo(wx, wy, ww || 4, wh || 4, col, glow * f, 2); }
     for (const [lx, ly, col] of L.meta.lamps || []) halo(lx - 2, ly - 2, 4, 4, col, glow * (moving ? .85 + .15 * Math.sin(t * 2.3 + lx) : 1), 4);
-    const lm = L.meta.landmark; if (lm && lm.kind === 'lighthouse') { const bx = lm.x + Math.round(lm.w / 2), by = lm.y + 10; halo(bx - 2, by - 2, 4, 4, '#fff2b0', glow, 5);
+    const lm = L.meta.landmark; if (lm && lm.kind === 'lighthouse') { const bx = lm.beam ? lm.beam[0] : lm.x + Math.round(lm.w / 2), by = lm.beam ? lm.beam[1] : lm.y + 10; halo(bx - 2, by - 2, 4, 4, '#fff2b0', glow, 5);
       if (moving) { const sw = Math.sin(t * .8); x.fillStyle = `rgba(255,242,176,${(.10 * glow).toFixed(3)})`; for (let i = 1; i < 26; i++) x.fillRect(Math.round(bx + sw * i * 6), by - 1 - Math.floor(i / 9), 6, 2 + Math.floor(i / 9)); } } }
   if (!moving) return;
   /* fireflies over Gloomfen and the meadows on a summer night; embers over Emberfall; motes in the Hollow */
   if ((/gloomfen|willowbrook|mossbarrow/.test(L.town) && dk > .6) || L.town === 'gloomfen') for (const f of L.flies) { const a = (Math.sin(t * 2.2 * f.s + f.p) + 1) / 2; if (a < .5) continue; px(x, `rgba(214,255,140,${((a - .5) * 1.6 * Math.max(dk, L.town === 'gloomfen' ? .5 : 0)).toFixed(3)})`, f.x + Math.sin(t * .5 * f.s + f.p) * 10, f.y + Math.cos(t * .4 * f.s + f.p) * 6, 1, 1); }
-  if (st.lava) for (const f of L.flies) { const k = ((t * f.s * .18 + f.p) % 1), y = 132 - k * 110 + (f.y - 150) * .1; px(x, `rgba(255,${150 + Math.round(60 * (1 - k))},70,${(.9 * (1 - k)).toFixed(3)})`, f.x + Math.sin(t + f.p) * 4, y, 1, 1); }
+  if (st.lava && (L.meta.lava || []).length) for (const [i, f] of L.flies.entries()) { const [lx, ly] = L.meta.lava[i % L.meta.lava.length], k = ((t * f.s * .18 + f.p) % 1); px(x, `rgba(255,${150 + Math.round(60 * (1 - k))},70,${(.9 * (1 - k)).toFixed(3)})`, lx + (f.x % 60) - 30 + Math.sin(t + f.p) * 4, ly - k * 90, 1, 1); }
+  else if (st.lava) for (const f of L.flies) { const k = ((t * f.s * .18 + f.p) % 1), y = 132 - k * 110 + (f.y - 150) * .1; px(x, `rgba(255,${150 + Math.round(60 * (1 - k))},70,${(.9 * (1 - k)).toFixed(3)})`, f.x + Math.sin(t + f.p) * 4, y, 1, 1); }
   if (st.stars) for (const f of L.flies) { const a = (Math.sin(t * 1.4 * f.s + f.p) + 1) / 2; if (a < .6) continue; px(x, `rgba(200,168,255,${((a - .6) * 2).toFixed(3)})`, f.x + Math.sin(t * .3 + f.p) * 14, f.y - ((t * 4 * f.s) % 60), 1, 1); } };
 
 /* ---------- layers over each scene image ---------- */

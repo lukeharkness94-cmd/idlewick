@@ -52,13 +52,13 @@ dated line to the history file.
 ## 2. Look and art
 
 - **Original pixel art drawn in code, nothing else.** `js/pixelart.js` (system, palette, hero), `js/pixel_items.js`,
-  `js/pixel_creatures.js`, `js/pixel_world.js` (trees, rocks, scenes, restoration, furniture, icons), `js/pixel_feel.js`
-  (empty-page pictures, the quill pointer), `js/pixel_bosses.js` (the 64 × 64 bosses), `js/pixel_runtime.js` (routes
-  every art hook; loaded last). Chunky and outlined (owner, 28 Nov; docs/pixel-art-style.md): top-left light, five-step
-  ramps with cool shadows and warm lights, sphere-lit round forms, each silhouette outlined in its material's darkest
-  colour; the hero and humanoid creatures are chibis with big heads and two-pixel eyes; bosses have 64 × 64 drawings for
-  the combat stage. No image files, AI-generated, traced or recoloured art, or sprite packs (reference images guide style
-  only). Settings → Art showcase is the living reference.
+  `js/pixel_creatures.js`, `js/pixel_world.js` (trees, rocks, furniture, icons), `js/town_scene.js` (top-down towns,
+  restoration sites, townsfolk), `js/pixel_feel.js` (empty-page pictures, the quill pointer), `js/pixel_bosses.js` (the
+  64 × 64 bosses), `js/pixel_runtime.js` (routes every art hook; loaded last). Chunky and outlined (owner, 28 Nov;
+  docs/pixel-art-style.md): top-left light, five-step ramps with cool shadows and warm lights, sphere-lit round forms,
+  each silhouette outlined in its material's darkest colour; the hero and humanoid creatures are chibis with big heads
+  and two-pixel eyes; bosses have 64 × 64 drawings for the combat stage. No image files, AI-generated, traced or
+  recoloured art, or sprite packs (reference images guide style only). Settings → Art showcase is the living reference.
 - **Chunky pixels at whole-number scales.** `SMOOTH = false` (pixelart.js) and `HIRES_ON = false` (hires.js) stay off.
   Show every sprite and scene at a whole-number multiple of the size it was drawn; crop rather than shrink or stretch.
   The one exception is the Village page's town scene, which fits its panel (about 1.5–1.9×) so every building stays
@@ -67,17 +67,23 @@ dated line to the history file.
   metal art on leather gear. `node tests/art-pixel.cjs` enforces it.
 - **Sizes follow real things** on gathering cards (`js/card_scale.js`, 96px art box): trees 2×, shrubs (hazel, elder) 1×,
   flax a low clump; fish 2×/3×/4× by length; ore and thieving marks 2×. Activity backdrops have no bystanders.
-- **Towns to one scale** (`js/towns.js`): each town scene is 640 × 360 with townsfolk ~10px, homes two to three times
-  that, restoration pieces 32px among them and landmarks at 2×. Things you own appear in the scene (boats at Saltmere,
-  traps, crops); add them through `extras` and the scene cache key in pixel_runtime.js. Townsfolk walk the two roads on
-  Home and Village (`js/town_walkers.js`; more as the town is restored; off under Reduce effects); the quest givers you
-  have met walk their own town among them (portrait colours at townsfolk scale, name on hover, a click opens People),
-  and finishing a restoration gathers a cheering crowd with confetti in front of its site for about a minute
-  (`A.siteLayout`, owner 27 Nov). Towns live
-  (`js/town_life.js`, owner 27 Nov): the player's clock sets dawn, day, dusk and night (windows and lanterns glow after
-  dark, stars come out), each town has its weather (rain, snow, sea mist), smoke rises and animals potter (more as the
-  town is restored); `sceneFor` records windows, chimneys and lanterns in `A.sceneMeta` for it. Settings → Display →
-  Town life (follow my clock / always daytime, weather). Under Reduce effects nothing moves; the hour's light stays.
+- **Towns seen from above** (owner, 28 Nov; `js/town_scene.js`): each town scene is 640 × 360 in three-quarter
+  top-down view, painted at dusk (warm lamps and lit windows; town_life still sets the hour) in the outlined material
+  style: two cobbled streets (walkers' feet on rows 162 and 244), two lanes and a square, cottages with each town's
+  roofs and walls, and the town's own character (Willowbrook's fields, Mossbarrow's wheat and windmill, Saltmere's
+  harbour, Ironpeak's cliffs and mine, Gloomfen's fen, Emberfall's volcano and lava, Skyreach's monastery above the
+  clouds, the Hollow's graves and castle). One scale: townsfolk ~12px chibis (`A.townFolk`), homes two to three times
+  that, restoration sites 32px among them (`A.siteLayout`, `A.stagePiece`: ruined, scaffolded, restored), landmarks two
+  to three homes tall. Work and combat scenes stay side-on. Things you own appear in the scene (boats at Saltmere,
+  traps, crops); add them through `extras` and the scene cache key in pixel_runtime.js. Townsfolk walk the two streets
+  on Home and Village (`js/town_walkers.js`; more as the town is restored; off under Reduce effects); the quest givers
+  you have met walk their own town among them (portrait colours and hats on the chibi, name on hover, a click opens
+  People), and finishing a restoration gathers a cheering crowd with confetti in front of its site for about a minute
+  (owner 27 Nov). Towns live (`js/town_life.js`, owner 27 Nov): the player's clock sets dawn, day, dusk and night
+  (windows and lamps glow brighter after dark), each town has its weather (rain, snow, sea mist), smoke rises and
+  animals potter in the yards, pens and ponds (more as the town is restored); `sceneFor` records windows (with their
+  size), chimneys, lamps, homes, yards, pens, ponds, water and lava in `A.sceneMeta` for it. Settings → Display → Town
+  life (follow my clock / always daytime, weather). Under Reduce effects nothing moves; the hour's light stays.
 - **Activity backdrops**: each activity shows a close-up district (`districtFor`, 240 × 100) at 3× with the 3× hero
   (72 × 96) and target on one ground line; the 17 skill workplaces are in skill_backdrops.js. Any new activity kind or
   recipe skill needs a district. **Skill realism** (owner, 27 Nov; `js/work_rig.js`, docs/skill-realism.md): at work

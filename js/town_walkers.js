@@ -1,9 +1,10 @@
 /* Idlewick: townsfolk walking about the town scene (owner, 26 Nov 2026: "could we have people moving around in the
    towns on the home screen and town projects?").
-   The town scene (js/towns.js) is one still picture with its townsfolk painted in. This file lays a transparent canvas
-   of the same pixel size over the Home and Village scenes and walks a few more townsfolk along the two main roads
-   (feet on rows 162 and 244 in every town). They are drawn with the same 5 x 10 figure as the painted townsfolk, at
-   the scene's own pixels, so they scale with the picture exactly as it does (whole scene pixels, never smoothed).
+   The town scene (js/town_scene.js, top-down since 28 Nov 2026) is one still picture with its townsfolk painted in.
+   This file lays a transparent canvas of the same pixel size over the Home and Village scenes and walks a few more
+   townsfolk along the two cobbled streets (feet on rows 162 and 244 in every town). They are drawn with the same small
+   outlined chibi as the painted townsfolk (A.townFolk), side-on as they walk and facing you when they stop, at the
+   scene's own pixels, so they scale with the picture exactly as it does (whole scene pixels, never smoothed).
    Positions come from elapsed browser time, so a 144 Hz screen walks them no faster than a 60 Hz one; a hidden tab
    does not catch up. More people walk as the town is restored. Nothing here is clickable or saved.
    Off under html.calm and prefers-reduced-motion (the painted townsfolk stay).
@@ -23,15 +24,20 @@ const restoredShare = town => { const ids = Object.keys(D.PROJECTS || {}).filter
 Q.townWalkerCount = town => 3 + Math.round(6 * restoredShare(town));
 
 /* one walker: a figure, a road, a direction, a pace (scene px per second) and the odd pause to chat */
+const SKINS = ['#f2c9a0', '#e8b98e', '#c98e5e', '#9a6640', '#6e4428'], STYLES = ['short', 'short', 'long', 'bun', 'bald'];
 const makeWalkers = (town, W) => { const rnd = seeded(hash(town)), n = Q.townWalkerCount(town);
   return Array.from({ length: n }, (_, i) => ({ x: 8 + rnd() * (W - 24), y: ROADS[i % 2] + (rnd() < .5 ? 0 : 1), dir: rnd() < .5 ? -1 : 1, pace: 5 + rnd() * 5,
-    rest: 0, cloth: CLOTH[Math.floor(rnd() * CLOTH.length)], hair: HAIR[Math.floor(rnd() * HAIR.length)], basket: rnd() < .25, walked: 0 })); };
+    rest: 0, cloth: CLOTH[Math.floor(rnd() * CLOTH.length)], hair: HAIR[Math.floor(rnd() * HAIR.length)], basket: rnd() < .25, walked: 0,
+    skin: SKINS[Math.floor(rnd() * SKINS.length)], hs: STYLES[Math.floor(rnd() * STYLES.length)] })); };
 /* the givers you have met who live in this town, in their portrait colours */
 const SKIN = { fair: '#f2c9a0', light: '#e8b98e', tan: '#c98e5e', brown: '#9a6640', deep: '#6e4428', pale: '#e6dccf', dwarf: '#e0a882' };
 const giversOf = town => (Q.folkMet ? Q.folkMet() : []).filter(f => f.town === town);
 const makeGivers = (town, W) => { const rnd = seeded(hash(town + ':givers'));
   return giversOf(town).map((f, i) => ({ giver: f, x: 20 + rnd() * (W - 40), y: ROADS[i % 2] + (rnd() < .5 ? 0 : 1), dir: rnd() < .5 ? -1 : 1, pace: 3 + rnd() * 3, rest: 1 + rnd() * 4, walked: 0, cloth: f.look.clothes || '#6a6a74' })); };
-const drawGiver = (x, w) => { const X = Math.round(w.x), Y = w.y, L = w.giver.look, f = (c, a, b, ww, hh) => { x.fillStyle = c; x.fillRect(a, b, ww, hh); }, flip = w.dir < 0, fx = (a, ww) => flip ? X + 5 - a - ww : X + a;
+/* the chibi townsfolk (js/town_scene.js); the older flat figure below stays as a fallback */
+const chibi = (x, w, look, frame) => { if (!A || !A.townFolk) return false; A.townFolk(x, w.x, w.y, look, frame, w.rest > 0 ? 0 : w.dir); return true; };
+const giverLook = w => { const L = w.giver.look, [hc, hs] = L.hair || ['#3a2414', 'short']; return { skin: SKIN[L.skin] || SKIN.light, hair: hc, hs: hs === 'bald' || hs === 'tonsure' ? hs : ['long', 'braids', 'wild'].includes(hs) ? 'long' : hs === 'bun' ? 'bun' : 'short', cloth: w.cloth, apron: L.apron || null, shawl: L.shawl || null, hat: L.hat || null, beard: L.beard && L.beard[1] !== 'stubble' ? L.beard[0] : null, glow: L.glow || null }; };
+const drawGiver = (x, w) => { if (chibi(x, w, w.look || (w.look = giverLook(w)), w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2)) return; const X = Math.round(w.x), Y = w.y, L = w.giver.look, f = (c, a, b, ww, hh) => { x.fillStyle = c; x.fillRect(a, b, ww, hh); }, flip = w.dir < 0, fx = (a, ww) => flip ? X + 5 - a - ww : X + a;
   const step = w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2, skin = SKIN[L.skin] || SKIN.light, [hc, hs] = L.hair || ['#3a2414', 'short'], [k, c] = L.hat || [], dk = c ? mix(c, '#000000', .3) : '';
   /* body: clothes with a lit edge, a shawl or apron, the legs */
   f(w.cloth, X, Y - 7, 5, 4); f(mix(w.cloth, '#000000', .25), fx(3, 2), Y - 7, 2, 4); f(mix(w.cloth, '#ffffff', .2), fx(0, 1), Y - 7, 1, 3);
@@ -60,13 +66,14 @@ const cheerOf = (town, now) => { const c = Q.townCheer; if (!c || c.town !== tow
 const drawCheer = (x, ch) => { const f = (c, a, b, ww, hh) => { x.fillStyle = c; x.fillRect(Math.round(a), Math.round(b), ww, hh); }, rnd = seeded(hash(ch.id)), { X, Y, el } = ch, fade = Math.min(1, (CHEER_MS / 1000 - el) / 6);
   /* seven townsfolk in two loose rows in front of the site, hopping out of step with their arms up */
   for (let i = 0; i < 7; i++) { const px = X - 12 + i * 8 + Math.round(rnd() * 2), py = Y + 37 + (i % 2) * 4, ph = rnd() * 6.28, hop = Math.max(0, Math.sin(el * 7 + ph)), cloth = CLOTH[Math.floor(rnd() * CLOTH.length)], hair = HAIR[Math.floor(rnd() * HAIR.length)], Yf = py - Math.round(hop * 2.4);
+    if (A && A.townFolk) { A.townFolk(x, px, Yf, { skin: SKINS[i % SKINS.length], hair, hs: STYLES[i % STYLES.length], cloth }, hop > .3 ? 'cheer' : 0, 0); continue; }
     f('#e0b088', px + 1, Yf - 10, 3, 3); f(hair, px + 1, Yf - 10, 3, 1); f(cloth, px, Yf - 7, 5, 4); f(mix(cloth, '#000000', .25), px + 3, Yf - 7, 2, 4); f('#3a3030', px + 1, Yf - 3, 1, 3); f('#3a3030', px + 3, Yf - 3, 1, 3);
     if (hop > .3) { f('#e0b088', px - 1, Yf - 12, 1, 3); f('#e0b088', px + 5, Yf - 12, 1, 3); } else { f(cloth, px - 1, Yf - 7, 1, 3); f(cloth, px + 5, Yf - 7, 1, 3); } }
   /* confetti and petals drifting down over the site, thinning out at the end */
   const n = Math.round(22 * fade); for (let i = 0; i < n; i++) { const per = 2.6 + rnd() * 1.6, off = rnd() * per, u = ((el + off) % per) / per, sx = X + 16 + (rnd() - .5) * 52, c = CONFETTI[Math.floor(rnd() * CONFETTI.length)];
     f(c, sx + Math.sin(el * 2.2 + i) * 3, Y - 16 + u * 50, i % 3 ? 1 : 2, 1); } };
 
-const draw = (x, w) => { const X = Math.round(w.x), Y = w.y, f = (c, a, b, ww, hh) => { x.fillStyle = c; x.fillRect(a, b, ww, hh); };
+const draw = (x, w) => { if (chibi(x, w, w.look || (w.look = { skin: w.skin, hair: w.hair, hs: w.hs, cloth: w.cloth, basket: w.basket }), w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2)) return; const X = Math.round(w.x), Y = w.y, f = (c, a, b, ww, hh) => { x.fillStyle = c; x.fillRect(a, b, ww, hh); };
   const step = w.rest > 0 ? 0 : Math.floor(w.walked / 3) % 2, flip = w.dir < 0;
   const fx = (a, ww) => flip ? X + 5 - a - ww : X + a; /* mirror the figure about its own 5 px width */
   f('#e0b088', fx(1, 3), Y - 10, 3, 3); f(w.hair, fx(1, 3), Y - 10, 3, 1);
@@ -120,7 +127,8 @@ const skyOf = img => { const k = img.currentSrc || img.src; if (sky.has(k)) retu
 const fitHome = () => { const img = document.querySelector('.home-scene img.scene'); if (!img || !img.naturalWidth) return; const box = img.parentElement;
   img.removeAttribute('style'); box.style.height = ''; box.style.removeProperty('background-color');
   const bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) return;
-  const W = img.naturalWidth, H = img.naturalHeight, k = Math.max(1, Math.ceil(bw / W)), w = W * k, h = H * k;
+  /* a top-down town (28 Nov 2026) has no sky to fill with, so it takes the smallest whole scale that covers the card */
+  const meta = A && A.sceneMeta && A.sceneMeta[img.dataset.town], W = img.naturalWidth, H = img.naturalHeight, k = Math.max(1, Math.ceil(bw / W), meta && meta.topdown ? Math.ceil(bh / H) : 1), w = W * k, h = H * k;
   box.style.height = bh + 'px'; const c = skyOf(img); if (c) box.style.setProperty('background-color', c, 'important');
   /* with priority: the page's stylesheets size this picture with !important (height:100%), which squashed it */
   for (const [k2, v] of Object.entries({ position: 'absolute', 'max-width': 'none', 'max-height': 'none', 'aspect-ratio': 'auto', width: w + 'px', height: h + 'px', left: Math.round((bw - w) / 2) + 'px', top: (h <= bh ? bh - h : Math.round((bh - h) * .6)) + 'px', 'object-fit': 'fill' })) img.style.setProperty(k2, v, 'important');

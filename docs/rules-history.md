@@ -333,3 +333,8 @@ Read HANDOFF.md for current product decisions and architecture before changing t
   only, a 24 x 32 hero with a small head): materials are five-step ramps with cool shadows (#1a1838) and warm lights
   (#fff2c8), round forms are sphere-lit, outlines take each material's darkest colour, the hero and humanoid creatures
   are chibis with big heads and two-pixel eyes, and the bosses have 64 x 64 drawings (docs/pixel-art-style.md).
+- 28 Nov 2026 (owner, the pixel rebuild): "I only want the dark theme ... completely rebuild the game using these
+  suggestions"; the owner chose towns seen from above (three-quarter view) and work and combat scenes side-on. Replaces
+  "Towns to one scale" (side-on 640 × 360 towns with a sky, hills and two roads): towns are top-down at dusk in the
+  outlined style (js/town_scene.js), townsfolk ~12px chibis, landmarks two to three homes tall; the hearth room keeps
+  its layout in the darker palette.
