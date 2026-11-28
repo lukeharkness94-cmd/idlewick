@@ -127,7 +127,8 @@ const skyOf = img => { const k = img.currentSrc || img.src; if (sky.has(k)) retu
 const fitHome = () => { const img = document.querySelector('.home-scene img.scene'); if (!img || !img.naturalWidth) return; const box = img.parentElement;
   img.removeAttribute('style'); box.style.height = ''; box.style.removeProperty('background-color');
   const bw = box.clientWidth, bh = box.clientHeight; if (!bw || !bh) return;
-  const W = img.naturalWidth, H = img.naturalHeight, k = Math.max(1, Math.ceil(bw / W)), w = W * k, h = H * k;
+  /* a top-down town (28 Nov 2026) has no sky to fill with, so it takes the smallest whole scale that covers the card */
+  const meta = A && A.sceneMeta && A.sceneMeta[img.dataset.town], W = img.naturalWidth, H = img.naturalHeight, k = Math.max(1, Math.ceil(bw / W), meta && meta.topdown ? Math.ceil(bh / H) : 1), w = W * k, h = H * k;
   box.style.height = bh + 'px'; const c = skyOf(img); if (c) box.style.setProperty('background-color', c, 'important');
   /* with priority: the page's stylesheets size this picture with !important (height:100%), which squashed it */
   for (const [k2, v] of Object.entries({ position: 'absolute', 'max-width': 'none', 'max-height': 'none', 'aspect-ratio': 'auto', width: w + 'px', height: h + 'px', left: Math.round((bw - w) / 2) + 'px', top: (h <= bh ? bh - h : Math.round((bh - h) * .6)) + 'px', 'object-fit': 'fill' })) img.style.setProperty(k2, v, 'important');

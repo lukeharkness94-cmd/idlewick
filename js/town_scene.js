@@ -68,7 +68,7 @@ const TD = {
   gloomfen: { grass: '#2c3a28', cob: '#4a4636', dirt: '#3e3424', fen: true, walls: [['plank', '#6a5a40'], ['plank', '#5a4c36'], ['log', '#5e4a32']], roofs: [['moss', '#4e6a36'], ['thatch', '#6a6438'], ['moss', '#3e5a30']], tree: 'fen', leaf: '#34502e', front: 'fen', back: 'marsh', square: 'pool', stilts: 5, glow: '#b8e888', lamp: '#b8f088' },
   emberfall: { grass: '#2e2424', cob: '#463a3a', dirt: '#3a2c28', ash: true, walls: [['stone', '#6a3e34'], ['brick', '#7a4232'], ['stone', '#5a3a36']], roofs: [['slate', '#2e2228'], ['tile', '#5a2a24'], ['slate', '#3a2a2e']], tree: 'charred', leaf: '#4a3a2a', front: 'lava', back: 'volcano', square: 'brazier', landmark: 'citadel', glow: '#ffa840', lamp: '#ff9a3a' },
   skyreach: { grass: '#3e5452', cob: '#6a6e7c', dirt: '#5a5a62', rocky: true, walls: [['plaster', '#e2e0d8'], ['stone', '#a8a8b0'], ['plaster', '#d8d4cc']], roofs: [['tile', '#b0402e'], ['tile', '#c0563a'], ['slate', '#5a6478']], tree: 'windpine', leaf: '#3e6a5a', front: 'clouds', back: 'peaks', square: 'shrine', landmark: 'monastery', glow: '#ffd070', lamp: '#ffd890' },
-  hollow: { grass: '#28202e', cob: '#3e3848', dirt: '#2e2630', haunted: true, walls: [['stone', '#5a5066'], ['plank', '#4a3e46'], ['stone', '#4a4458']], roofs: [['slate', '#2a2234'], ['shingle', '#3a2e3e'], ['slate', '#342a40']], tree: 'dead', leaf: '#3a2e40', front: 'graves', back: 'deadwood', square: 'statue', landmark: 'castle', glow: '#c8a8ff', lamp: '#b898ff', ruined: .35 }
+  hollow: { grass: '#2e2636', cob: '#3e3848', dirt: '#2e2630', haunted: true, walls: [['stone', '#5a5066'], ['plank', '#4a3e46'], ['stone', '#4a4458']], roofs: [['slate', '#2a2234'], ['shingle', '#3a2e3e'], ['slate', '#342a40']], tree: 'dead', leaf: '#3a2e40', front: 'graves', back: 'deadwood', square: 'statue', landmark: 'castle', glow: '#c8a8ff', lamp: '#b898ff', ruined: .35 }
 };
 
 /* ---------------- buildings in three-quarter view ---------------- */
@@ -407,8 +407,12 @@ function sceneFor(town, stages = {}, extras = {}) {
     for (let q = 0; q < W; q++) { const y = edge(q); f(rock, q, 0, 1, y); f(loC, q, y - 4, 1, 4); f(mix(ground, '#1a1838', .35), q, y, 1, 2); }
     for (let k = 0; k < 7; k++) { const sy = 10 + k * 9; for (let q = 0; q < W; q++) { const y = sy + Math.round(Math.sin(q / 29 + k) * 3); if (y < edge(q) - 6) { if (hash2(q, k) > .25) f(loC, q, y, 1, 1); if (hash2(q, k + 9) > .55) f(hiC, q, y - 1, 1, 1); } } }
     for (let i = 0; i < 26; i++) { const cx = rnd() * W, cy = rnd() * 50; for (let j = 0; j < 9; j++) f(loC, cx + Math.round(Math.sin(j) * 1.5), cy + j, 1, 1); }
-    for (let k = 0; k < 4; k++) for (let q = 0; q < W; q++) { const y = 6 + k * 16 + Math.round(Math.sin(q / 23 + k * 2) * 3); if (hash2(q, k + 30) > .35 && y < edge(q) - 8) { f('#c8d2e4', q, y, 1, 2); if (hash2(q, k + 40) > .6) f('#e8eef8', q, y, 1, 1); } }
-    for (let q = 0; q < W; q++) f('#d0dae8', q, 0, 1, 2 + Math.round(hash2(q, 99) * 3)); }
+    /* snow lying on a few ledges, in short drifts */
+    for (let i = 0; i < 18; i++) { const sx = rnd() * W, sy = 8 + rnd() * 52, len = 10 + rnd() * 26; for (let q = 0; q < len; q++) { const y = sy + Math.round(Math.sin((sx + q) / 9) * 1.5); if (y < edge(sx + q) - 8) { f('#c8d2e4', sx + q, y, 1, q > 2 && q < len - 3 ? 2 : 1); f('#e8eef8', sx + q, y, 1, 1); f(loC, sx + q, y + 2, 1, 1); } } }
+    /* Skyreach: the high peaks beyond, snow-capped */
+    if (back === 'peaks') for (const [px, ph, pw] of [[60, 50, 70], [200, 62, 90], [330, 44, 60], [440, 58, 80], [600, 48, 70]]) { x.fillStyle = mix(rock, '#1a1838', .2); x.beginPath(); x.moveTo(px - pw, 70); x.lineTo(px, 70 - ph); x.lineTo(px + pw, 70); x.fill(); x.fillStyle = hiC; x.beginPath(); x.moveTo(px - pw * .6, 70 - ph * .4); x.lineTo(px, 70 - ph); x.lineTo(px - 2, 70); x.fill();
+      x.fillStyle = '#dfe6f2'; x.beginPath(); x.moveTo(px - pw * .28, 70 - ph * .7); x.lineTo(px, 70 - ph); x.lineTo(px + pw * .28, 70 - ph * .7); x.lineTo(px + pw * .12, 70 - ph * .76); x.lineTo(px, 70 - ph * .68); x.lineTo(px - pw * .12, 70 - ph * .74); x.fill(); }
+    for (let q = 0; q < W; q++) f('#d0dae8', q, 0, 1, 1 + Math.round(hash2(q, 99) * 2)); }
   if (back === 'marsh') { water(0, 0, W, 74, '#22362c', false); for (let i = 0; i < 9; i++) { const ix = i * 74 + rnd() * 30, iy = 18 + rnd() * 40; x.fillStyle = '#2c3a28'; x.beginPath(); x.ellipse(ix, iy, 22, 7, 0, 0, 7); x.fill(); x.fillStyle = '#3a4a30'; x.beginPath(); x.ellipse(ix - 4, iy - 2, 12, 3, 0, 0, 7); x.fill(); }
     for (let i = 0; i < 34; i++) { const rx = rnd() * W, ry = 2 + rnd() * 70; put(ry + 12, () => blit(reedArt(), rx, ry)); } for (let q = 0; q < W; q++) f(mix(ground, '#1a1838', .3), q, 74 + Math.round(Math.sin(q / 19) * 2), 1, 2); }
   /* the volcano behind Emberfall: a dark cone, the glow of its crater and two lava rivers running down */
@@ -465,7 +469,7 @@ function sceneFor(town, stages = {}, extras = {}) {
   for (const [base, x0, x1, maxH] of ROWS) { let hx = x0 + 4 + Math.floor(rnd() * 8);
     while (hx < x1 - 36) { const two = base !== 300 && rnd() < .35, ns = 11 + Math.floor(rnd() * 5), fs = 4 + Math.floor(rnd() * 2); let placed = false;
       /* the widest home that fits here, down to a small cottage */
-      for (const w of [(two ? 44 : 36) + Math.floor(rnd() * 4) * 4, 40, 36]) { const wh = two && w >= 44 ? 22 : 14 + Math.floor(rnd() * 2), tot = fs + ns + wh + 3, rect = [hx - 3, base - tot, w + 6, tot + 1];
+      for (const w of [(two ? 44 : 36) + Math.floor(rnd() * 4) * 4, 40, 36]) { const wh = two && w >= 44 ? 22 : 14 + Math.floor(rnd() * 2), tot = fs + ns + wh + 3 + (T.stilts || 0), rect = [hx - 3, base - tot, w + 6, tot + 1];
         if (hx + w < x1 - 2 && free(rect) && tot <= maxH) { homes.push({ hx, base, w, wh, ns, fs, two: wh === 22 }); blocks.push(rect); hx += w + 5 + Math.floor(rnd() * 8); placed = true; break; } }
       if (!placed) hx += 4; } }
   /* street lamps on both kerbs of both streets (before anything else claims the spot) */
@@ -473,8 +477,8 @@ function sceneFor(town, stages = {}, extras = {}) {
   /* nothing grows on the streets */
   blocks.push([0, STREETS[0][0] - 1, W, STREETS[0][1] + 3], [0, STREETS[1][0] - 1, W, STREETS[1][1] + 3]);
   for (const h of homes) { const on = rnd() < lived, wl = pick(T.walls, rnd), rf = pick(T.roofs, rnd), ruin = !on && T.ruined && rnd() < .5;
-    const b = bld({ w: h.w, wh: h.wh, ns: h.ns, fs: h.fs, roof: rf, wall: wl, hip: rnd() < .4, storeys: h.two ? 2 : 1, dormer: !h.two && h.ns >= 13 && h.w >= 44 && rnd() < .6, lit: on, ruin, board: !on, chimney: rnd() < .8 ? (rnd() < .5 ? 'l' : 'r') : null, snow: !!T.snow, stilts: T.stilts && h.base === 300 ? 0 : 0, flowers: !!T.flowers && on, halfbeam: rnd() < .5, sign: rnd() < .12 && on ? pick(['#b0402e', '#3a6ab0', '#c8a040'], rnd) : null });
-    const X = h.hx - b.wx, Y = h.base - b.base; put(h.base, () => { shadow(h.hx + h.w / 2 + 4, h.base, h.w / 2 + 5, 3.5); blit(b.c, X, Y); });
+    const b = bld({ w: h.w, wh: h.wh, ns: h.ns, fs: h.fs, roof: rf, wall: wl, hip: rnd() < .4, storeys: h.two ? 2 : 1, dormer: !h.two && h.ns >= 13 && h.w >= 44 && rnd() < .6, lit: on, ruin, board: !on, chimney: rnd() < .8 ? (rnd() < .5 ? 'l' : 'r') : null, snow: !!T.snow, stilts: T.stilts || 0, flowers: !!T.flowers && on, halfbeam: rnd() < .5, sign: rnd() < .12 && on ? pick(['#b0402e', '#3a6ab0', '#c8a040'], rnd) : null });
+    const st = T.stilts || 0, X = h.hx - b.wx, Y = h.base - b.base - st; put(h.base, () => { if (st) { x.fillStyle = '#1e3a34'; x.beginPath(); x.ellipse(h.hx + h.w / 2, h.base - 1, h.w / 2 + 5, 4, 0, 0, 7); x.fill(); f('#2e5048', h.hx + 4, h.base - 3, h.w / 3, 1); } shadow(h.hx + h.w / 2 + 4, h.base, h.w / 2 + 5, 3.5); blit(b.c, X, Y); });
     for (const [wx, wy, ww, wh] of b.windows) META.windows.push([X + wx, Y + wy, T.glow, ww, wh]); if (b.chimney) META.chimneys.push([X + b.chimney[0], Y + b.chimney[1]]);
     META.homes.push([h.hx, h.base, h.w, h.wh + h.ns + h.fs, on]); }
   /* ---- 7 the square ---- */
@@ -524,7 +528,7 @@ function sceneFor(town, stages = {}, extras = {}) {
   /* ---- 13 lamp light on the ground: dusk is the default, lamps and windows are already lit ---- */
   for (const [lx, ly, col] of META.lamps) glowPool(lx, ly + 14, 22, col, .045);
   for (const [wx, wy, col, ww] of META.windows) if (wy > 60) glowPool(wx + (ww || 4) / 2, wy + 12, 9, col, .03);
-  if (T.haunted) { x.fillStyle = 'rgba(40,20,70,.16)'; x.fillRect(0, 0, W, H); }
+  if (T.haunted) { x.fillStyle = 'rgba(40,20,70,.08)'; x.fillRect(0, 0, W, H); }
   META.lived = lived; META.ruined = !!T.ruined; META.roads = ROADS; (A.sceneMeta = A.sceneMeta || {})[town] = META; c.meta = META; META = null;
   return c;
 }
