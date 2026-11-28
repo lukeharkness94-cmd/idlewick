@@ -75,6 +75,17 @@ const SFX = {
   sizzle: () => noise(.28, { type: 'highpass', f: 4200, v: .07 }),
   anvil: () => { const b = pick([520, 580, 640]); [1, 1.52, 2.41].forEach((m, i) => tone(b * m, .4 - i * .08, { v: .08 / (i + 1), type: i ? 'sine' : 'triangle' })); noise(.03, { f: 3500, v: .1 }); },
   stitch: () => { tone(jit(1200), .03, { type: 'square', v: .03 }); tone(jit(1500), .03, { type: 'square', v: .03, at: .06 }); },
+  /* work beats for the real motion of each skill (skill realism, 27 Nov 2026; js/strike_sync.js plays them on their frame) */
+  plop: () => { tone(jit(620), .09, { v: .08, to: 240 }); noise(.05, { f: 1800, v: .03, at: .02 }); },                 /* the float lands */
+  splash: () => { noise(.22, { f: 1400, to: 600, q: .8, v: .1 }); tone(jit(300), .1, { type: 'triangle', v: .06, to: 140 }); }, /* the strike as the fish is hooked */
+  saw: () => paper(.3, { f: 2600, to: 1800, q: 1.6, v: .09, grain: 2.5 }),                                              /* the push stroke's rasp */
+  sawback: () => paper(.24, { f: 1700, to: 2300, q: 1.4, v: .035, grain: 3 }),                                         /* the lighter return */
+  bellows: () => noise(.32, { type: 'lowpass', f: 700, to: 260, v: .12 }),
+  chisel: () => { tone(jit(2600), .07, { type: 'triangle', v: .05 }); noise(.03, { f: 3800, v: .06 }); },
+  scratch: () => paper(.12, { f: 4200, to: 3400, q: 3, v: .05, grain: 1.5 }),
+  grind: () => paper(.22, { f: 900, to: 700, q: 1, v: .08, grain: 6 }),
+  stake: () => { noise(.05, { type: 'lowpass', f: 600, v: .16 }); tone(jit(110), .08, { type: 'triangle', v: .1, to: 80 }); },
+  swish: () => noise(.14, { f: 1600, to: 500, q: 1.2, v: .06 }),
   cast: () => { const r = pick([57, 60, 62, 64]); [0, 2, 4, 5].forEach((d, i) => tone(note(r, d), .35, { v: .06, at: i * .06 })); },
   bow: () => { noise(.12, { f: 1500, to: 400, v: .1 }); tone(220, .12, { type: 'triangle', v: .08, to: 110 }); },
   hit: () => { noise(.08, { type: 'lowpass', f: 900, v: .22 }); tone(jit(95), .12, { type: 'triangle', v: .22, to: 60 }); },

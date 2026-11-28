@@ -52,17 +52,11 @@ const sprite = (kind, i) => { const s = A.Spr(16, 16), m = A.ramp(METALS[i][2]),
   return s; };
 const art = (kind, i, size = 64) => A && A.url ? `<img class="pxa" src="${A.url(`smithgear:${kind}:${i}`, () => sprite(kind, i))}" width="${size}" height="${size}" alt="" style="image-rendering:pixelated">` : UI.activityIcon('smithing');
 /* Smithing scene (owner, 26 Nov 2026: "the thing I'm making should be on the anvil and I'm hitting it with the hammer"):
-   the hero holds a hammer (the best one owned, else bronze), an anvil (the best one owned) stands in front of them, and the
-   piece being made rests on it. Same art as the workshop ladders. */
+   the work rig (js/work_rig.js) draws the hero's hammer and the anvil at the hero's own 3x scale (skill realism, 27 Nov
+   2026: the 64 px anvil overlay here stood at 4x beside the 3x hero) in the metal of the best one owned, else bronze
+   for the hammer and plain iron for the anvil; the piece being made rests on its face. */
 Q.smithSceneArt = (kind, size) => art(kind, Math.max(0, owned(kind) - 1), size);
-const render1 = UI.render;
-UI.render = (...a) => { const r = render1(...a);
-  try { const sc = document.querySelector('#view .activity-scene.skill-smithing');
-    if (sc && !sc.querySelector('.smith-anvil')) {
-      sc.insertAdjacentHTML('beforeend', `<span class="smith-anvil" aria-hidden="true">${Q.smithSceneArt('anvil', 64)}</span>`);
-      const tool = sc.querySelector('.action-tool'); if (tool) tool.innerHTML = Q.smithSceneArt('hammer', 32);
-    } } catch (e) { /* the page still works without the scene dressing */ }
-  return r; };
+Q.smithMetalCol = kind => owned(kind) ? METALS[owned(kind) - 1][2] : kind === 'hammer' ? METALS[0][2] : '#6a6e76';
 /* the shelf */
 let pick = null; /* {kind, rank} */
 const card = (kind, r) => { const st = Q.smithGear(kind, r), have = owned(kind), sel = pick && pick.kind === kind && pick.rank === r, g = D.SMITH_GEAR[kind];

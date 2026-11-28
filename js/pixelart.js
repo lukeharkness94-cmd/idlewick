@@ -183,6 +183,74 @@ function hero(o = {}) {
   return s;
 }
 
+/* ================= The hero at work, in profile (24 x 32) =================
+   Skill realism (owner, 27 Nov 2026: "where the character holds things when using them in skills"): at work the hero
+   turns side-on to face the tree, rock, anvil or mark on their right, feet apart, and their arms come from the work rig
+   (js/work_rig.js), which draws them with the tool in the right hand(s) for every frame. This figure has no arms of its
+   own, except the near arm lifted to the brow in the wipe frame (js/personality.js). The feet stand on the bottom row,
+   the scene's ground line. Postures: stand, crouch (tracking), kneel (setting a trap or stake) and sit (on a stool at
+   the stitching bench); WORK_POSTURE gives each one's drop and shoulder for the rig. Same equipment and expressions as
+   the standing hero, drawn for a side view. */
+const WORK_POSTURE = { stand: { dy: 0 }, crouch: { dy: 3 }, kneel: { dy: 6 }, sit: { dy: 6 } };
+function heroSide(o = {}) {
+  const sk = SKIN[o.skin ?? 0], hr = HAIR[o.hair ?? 1], tunic = ramp(o.tunic || '#3f7fbf'), pants = ramp('#6b4b34'), boots = ramp('#4a3226'), belt = ramp('#3e2a20');
+  const pose = WORK_POSTURE[o.posture] ? o.posture : 'stand', dy = WORK_POSTURE[pose].dy, ex = o.expr || '';
+  const s = Spr(24, 32), spec = v => !v ? null : typeof v === 'string' ? { type: null, col: (R[v] || R.bronze).base } : v;
+  const metal = c => ramp(c, { gl: .72 }), soft = c => ramp(c);
+  const hu = ex === 'stretch' ? -1 : 0, Y = y => y + dy + hu; /* the head and chest; stretch lifts the chin a pixel */
+  /* cape first, hanging behind the back */
+  if (o.cape) s.poly([[8, 14 + dy], [11, 14 + dy], [9, 30], [4, 29]], soft(o.cape));
+  /* legs: a working stance, feet a stride apart (back foot left, front foot right, toes forward) */
+  const legsC = spec(o.legs), legT = legsC ? (legsC.type || 'plate') : null, lr = legsC ? (legT === 'plate' ? metal(legsC.col) : soft(legsC.col)) : pants;
+  const foot = (x, y) => { s.rect(x, y, 4, 2, boots); s.fix(x + 3, y, boots.hi); };
+  if (pose === 'stand') { s.line(10, 22, 8, 29, lr); s.line(11, 22, 9, 29, lr); s.line(13, 22, 14, 29, lr); s.line(14, 22, 15, 29, lr); foot(7, 30); foot(14, 30); }
+  else if (pose === 'crouch') { s.line(10, 25, 6, 27, lr); s.line(10, 26, 6, 28, lr); s.line(6, 28, 7, 29, lr); s.line(13, 25, 16, 26, lr); s.line(13, 26, 16, 27, lr); s.line(16, 27, 15, 29, lr); s.line(17, 27, 16, 29, lr); foot(5, 30); foot(15, 30); }
+  else if (pose === 'kneel') { s.rect(9, 28, 5, 2, lr); s.rect(7, 30, 7, 2, lr); s.rect(4, 30, 3, 2, boots); s.line(13, 28, 17, 27, lr); s.line(13, 29, 17, 28, lr); s.rect(16, 28, 2, 3, lr); foot(16, 30); }
+  else { /* sit: thighs level on a stool, shins down to the floor */
+    const st = ramp('#8a6040'); s.rect(6, 29, 8, 1, st); s.rect(7, 30, 1, 2, st); s.rect(12, 30, 1, 2, st);
+    s.rect(10, 27, 7, 2, lr); s.rect(15, 27, 2, 3, lr); foot(15, 30); }
+  if (legT === 'plate') { const kx = pose === 'stand' ? 14 : pose === 'crouch' ? 16 : 16, ky = pose === 'stand' ? 25 : 27; s.fix(kx, ky, lr.gl); }
+  /* body: a tunic seen side-on, chest forward, belt with its buckle at the front */
+  const bodyC = spec(o.body), bt = bodyC ? (bodyC.type || 'plate') : null, br = bodyC ? (bt === 'plate' ? metal(bodyC.col) : soft(bodyC.col)) : tunic;
+  s.poly([[9, Y(14)], [14, Y(14)], [15, 23 + dy], [8, 23 + dy]], br);
+  if (bt === 'robe' || (legT === 'robe')) { const rr = bt === 'robe' ? br : lr; s.poly([[8, 21 + dy], [15, 21 + dy], [17, Math.min(29, 27 + dy)], [7, Math.min(29, 27 + dy)]], rr); s.line(7, Math.min(28, 26 + dy), 17, Math.min(28, 26 + dy), null, R.gold.base); }
+  if (bt === 'plate') { s.rect(10, Y(14), 3, 2, br); s.fix(10, Y(14), br.gl); s.line(14, Y(16), 14, 19 + dy, null, br.hi); }
+  else if (bt === 'vest') { for (let y = Y(16); y <= 20 + dy; y += 2) s.fix(14, y, '#e8dcc0'); }
+  else if (bt === 'robe') s.line(13, Y(15), 13, 22 + dy, null, R.gold.base);
+  s.rect(8, 20 + dy, 8, 1, belt); s.fix(14, 20 + dy, '#e6b84a');
+  /* head in profile: face to the right, the ear mid-head, a nose and a mouth */
+  s.ell(11.5, Y(8.5), 4.5, 4.6, sk); s.rect(10, Y(13), 3, 1, sk); s.dot(16, Y(10), sk);
+  s.fix(10, Y(8), sk.lo); s.fix(10, Y(9), sk.lo);                                                                       /* ear */
+  s.ell(10.5, Y(5), 5, 2.8, hr); s.rect(6, Y(5), 4, 6, hr); s.rect(7, Y(11), 2, 1, hr);                                  /* crown, back of the head */
+  [[13, Y(5)], [14, Y(5)], [15, Y(6)], [12, Y(4)]].forEach(([x, y]) => s.dot(x, y, hr));                              /* fringe over the brow */
+  const eyeX = 14, shut = ex === 'blink' || ex === 'yawn' || ex === 'stretch';
+  if (shut) { s.fix(eyeX, Y(9), sk.out); }
+  else if (ex === 'pack') { s.fix(eyeX, Y(9), '#5a4a4a'); s.fix(eyeX, Y(10), INK); }
+  else { s.fix(eyeX, Y(8), '#5a4a4a'); s.fix(eyeX, Y(9), INK); }
+  const face = o.face || 'bright';
+  if (face === 'bright') s.fix(14, Y(11), mix(sk.base, '#e07a6a', .45));
+  if (face === 'freckled') { s.fix(13, Y(10), sk.lo); s.fix(15, Y(11), sk.lo); s.fix(eyeX, Y(8), shut ? sk.base : sk.base); }
+  if (face === 'bearded') { for (let x = 12; x <= 15; x++) s.dot(x, Y(12), hr); for (let x = 11; x <= 14; x++) s.dot(x, Y(13), hr); s.dot(15, Y(11), hr); }
+  if (ex === 'yawn') { s.fix(15, Y(12), '#5a2a2a'); s.fix(15, Y(13), '#3a1a24'); }
+  else if (ex === 'stretch') { s.fix(14, Y(12), '#5a2a2a'); s.fix(15, Y(12), '#3a1a24'); s.fix(14, Y(6), hr.lo); }
+  else if (face !== 'bearded') s.fix(15, Y(12), sk.out);
+  /* headgear fitted to the side view */
+  const helm = spec(o.helm);
+  if (helm) { const t = helm.type || 'helm';
+    if (t === 'coif' || t === 'hood') { const c = soft(helm.col);
+      for (let y = t === 'hood' ? -1 : 1; y <= 13; y++) for (let x = 5; x <= 17; x++) { const dx = (x - 11) / 6.4, dy2 = (y - 7) / 7; const inFace = x >= 12 && y >= 7 && y <= 12; if (dx * dx + dy2 * dy2 <= 1 && !inFace) s.dot(x, Y(y), c); }
+      if (t === 'hood') { s.dot(6, Y(0), c); s.dot(5, Y(1), c); s.line(10, Y(13), 14, Y(13), null, R.gold.base); }
+      s.fix(9, Y(3), c.gl); }
+    else if (t === 'crown') { const c = metal(helm.col); s.rect(7, Y(2), 9, 2, c); for (const x of [7, 10, 13, 15]) s.rect(x, Y(0), 1, 2, c); s.fix(12, Y(2), '#ff7ad0'); }
+    else { const m = metal(helm.col);
+      for (let y = 1; y <= 7; y++) for (let x = 6; x <= 17; x++) { const dx = (x - 11.5) / 6, dy2 = (y - 6.5) / 5.6; if (dx * dx + dy2 * dy2 <= 1) s.dot(x, Y(y), m); }
+      s.rect(6, Y(7), 5, 5, m); s.rect(15, Y(7), 1, 3, m); s.fix(8, Y(3), m.gl); s.fix(9, Y(3), m.hi);                 /* neck guard behind, nasal in front */
+      if (t === 'horned') { const h = ramp('#efe2c4'); s.poly([[8, Y(3)], [5, Y(-2)], [7, Y(-1)], [10, Y(2)]], h); } } }
+  /* the brow wipe: the near arm up, the forearm across the forehead, a bead of sweat flicked off */
+  if (ex === 'wipe') { const sl = br; s.line(12, Y(16), 15, Y(12), sl); s.line(13, Y(16), 16, Y(12), sl); s.line(15, Y(12), 15, Y(8), sl); s.line(16, Y(12), 16, Y(8), sl); s.rect(13, Y(6), 3, 2, sk); s.fix(19, Y(4), '#cfe8f2'); }
+  return s;
+}
+
 /* ================= Creatures (32 x 32): three anatomies ================= */
 function chicken() {
   const s = Spr(32, 32), b = R.feather;
@@ -349,9 +417,10 @@ function iconMining() { const s = Spr(16, 16); s.line(4, 14, 11, 5, R.wood); s.l
 /* ---------- public API ---------- */
 const SPRITES = { chicken, goblin, wolf, oak, pine, pike, carp, sword, bow, platebody, ore, log, gem, potato, cottage, iconFishing, iconWoodcutting, iconMining };
 DQ.pixelArt = {
-  ramp, mix, Spr, R, SKIN, HAIR, hero, url, img, toCanvas, hires, scale2x, logicalOf, sprites: SPRITES, composeScene,
+  ramp, mix, Spr, R, SKIN, HAIR, hero, heroSide, WORK_POSTURE, url, img, toCanvas, hires, scale2x, logicalOf, sprites: SPRITES, composeScene,
   sprite: (name, ...args) => url(name + ':' + args.join(','), () => SPRITES[name](...args)),
   heroUrl: (o) => url('hero:' + JSON.stringify(o), () => hero(o)),
+  heroSideUrl: (o) => url('heroside:' + JSON.stringify(o), () => heroSide(o)),
   sceneUrl: () => { const k = 'scene:willowbrook'; if (!cache.has(k)) cache.set(k, composeScene().toDataURL()); return cache.get(k); }
 };
 })();

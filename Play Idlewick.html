@@ -5752,13 +5752,6 @@ button.linkish{display:inline-flex;align-items:center}
 #view .plots .plot .ptime{display:none}
 #view .plots .plot .plot-act{margin-top:auto}
 
-/* Smithing scene: anvil on the ground in front of the hero, the piece on the anvil, the hammer in hand */
-.activity-scene.skill-smithing{position:relative}
-.activity-scene.skill-smithing .smith-anvil{position:absolute;left:calc(12% + 66px);bottom:12px;width:64px;height:64px;z-index:1;pointer-events:none}
-.activity-scene.skill-smithing .smith-anvil img{width:64px;height:64px;image-rendering:pixelated}
-.activity-scene.skill-smithing .scene-target{position:absolute;left:calc(12% + 66px);bottom:58px;width:64px;margin:0;z-index:2;animation:none!important;filter:none}
-.activity-scene.skill-smithing .scene-target img{width:48px;height:48px}
-
 /* Townsfolk walking over the Home and Village town scenes (js/town_walkers.js): same box and crop as the picture */
 canvas.town-walkers{position:absolute;pointer-events:none;image-rendering:pixelated;margin:0;display:block;z-index:1}
 /* living towns (js/town_life.js): smoke, weather and animals under the light, the hour's light multiplied over the
@@ -5972,6 +5965,61 @@ html.calm .activity-scene.capture .scene-target{animation:none!important}
 @media (prefers-reduced-motion:reduce){.activity-scene.capture .scene-target{animation:none!important}}
 /* the same proportions as the Hunting ground's workspace (style.css, .skill-hunting) */
 @media(min-width:861px){#view>.activity-workspace:has(.skill-beastmastery){grid-template-columns:minmax(360px,480px) minmax(0,1fr)}#view>.activity-workspace:has(.skill-beastmastery) .activity-caption{padding:12px}#view>.activity-workspace:has(.skill-beastmastery) .task-summary p{margin:6px 0}html.short #view>.activity-workspace:has(.skill-beastmastery) .activity-scene{height:160px}}
+</style>
+<style>/* Idlewick: the work rig (js/work_rig.js; skill realism, owner 27 Nov 2026; docs/skill-realism.md).
+   The hero stands side-on at the job: the far arm behind the body, the side-view body (whose frames js/personality.js
+   swaps for blinks and the brow wipe), the tool and near arm in front, all at the hero's 3x. The station (anvil,
+   trestles, tripod...) is drawn at the same scale on the ground line, with the piece being made on it. Frames step;
+   the body's lean below is continuous (transform only), one loop per swing, timed by js/strike_sync.js. Nothing moves
+   under Reduce effects or the device's reduced-motion setting. */
+.activity-scene.rigged .scene-worker{position:absolute;width:72px;height:96px;transform-origin:50% 100%;animation-name:none;animation-timing-function:linear;animation-iteration-count:infinite;z-index:3}
+.activity-scene.rigged .scene-worker .rig-body{position:absolute;left:0;bottom:0;width:72px;height:96px;animation:lw-breathe 3s ease-in-out infinite}
+.activity-scene.rigged .scene-worker .rig-body img{position:absolute;left:0;bottom:0;width:72px;height:96px;animation:none;z-index:1}
+.activity-scene.rigged .rig-back,.activity-scene.rigged .rig-front{position:absolute;bottom:0;image-rendering:pixelated;pointer-events:none;max-width:none}
+.activity-scene.rigged .rig-back{z-index:0}
+.activity-scene.rigged .rig-front{z-index:2}
+.activity-scene.rigged .work-station{position:absolute;image-rendering:pixelated;pointer-events:none;z-index:1;max-width:none}
+.activity-scene.rigged .scene-target.on-station{position:absolute;margin:0;transform:translateX(-50%);z-index:2;animation:none!important;filter:drop-shadow(0 3px 0 #21362d40)}
+.activity-scene.rigged .scene-target.on-station .activity-item-art{margin:0}
+.activity-scene.rigged .scene-target.rig-hidden{visibility:hidden}
+.activity-scene.rigged .scene-pet{left:max(0px,calc(var(--worker-x,12%) - 58px))}
+.work-fx{position:absolute;width:0;height:0;z-index:4;pointer-events:none}
+.work-fx i{position:absolute;left:-1px;top:-1px;width:3px;height:3px}
+.work-fx i.wide{left:-4px;width:9px}
+/* the forge heat: a glow on the piece that cools through the action (opacity only) */
+.work-heat{position:absolute;inset:10% 5%;background:radial-gradient(closest-side,#ffb048cc,#f0603000);mix-blend-mode:screen;pointer-events:none}
+
+/* the lean of each kind of work: the weight shifts forward and back, the feet never leave the ground line */
+.activity-scene.rigged .scene-worker.lean-chop{animation-name:lean-chop}
+.activity-scene.rigged .scene-worker.lean-hammer{animation-name:lean-hammer}
+.activity-scene.rigged .scene-worker.lean-pump{animation-name:lean-pump}
+.activity-scene.rigged .scene-worker.lean-saw{animation-name:lean-saw}
+.activity-scene.rigged .scene-worker.lean-stir{animation-name:lean-stir}
+.activity-scene.rigged .scene-worker.lean-tap{animation-name:lean-tap}
+.activity-scene.rigged .scene-worker.lean-sight{animation-name:lean-sight}
+.activity-scene.rigged .scene-worker.lean-cast{animation-name:lean-cast}
+.activity-scene.rigged .scene-worker.lean-sidle{animation-name:lean-sidle}
+.activity-scene.rigged .scene-worker.lean-pull{animation-name:lean-pull}
+/* axe, pick, sword: rise into the backswing, drop the weight through the strike, settle */
+@keyframes lean-chop{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}28%{transform:translate(-3px,0);animation-timing-function:ease-in}40%{transform:translate(3px,0);animation-timing-function:ease-out}55%{transform:translate(1px,0)}}
+@keyframes lean-hammer{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}26%{transform:translate(-1px,0);animation-timing-function:ease-in}40%{transform:translate(1px,0);animation-timing-function:ease-out}55%{transform:translate(0,0)}}
+@keyframes lean-pump{0%,100%{transform:translate(0,0);animation-timing-function:ease-in}40%{transform:translate(2px,0);animation-timing-function:ease-in-out}50%{transform:translate(2px,0)}}
+@keyframes lean-saw{0%,12%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}45%,60%{transform:translate(3px,0);animation-timing-function:ease-in-out}}
+@keyframes lean-stir{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}50%{transform:translate(1px,0);animation-timing-function:ease-in-out}}
+@keyframes lean-tap{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}28%{transform:translate(-1px,0);animation-timing-function:ease-in}40%{transform:translate(1px,0);animation-timing-function:ease-out}}
+@keyframes lean-sight{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}15%,45%{transform:translate(2px,0);animation-timing-function:ease-in-out}60%,80%{transform:translate(1px,0);animation-timing-function:ease-in-out}}
+@keyframes lean-cast{0%,100%{transform:translate(0,0);animation-timing-function:ease-out}12%{transform:translate(-3px,0);animation-timing-function:ease-in}22%{transform:translate(3px,0);animation-timing-function:ease-out}34%,76%{transform:translate(0,0);animation-timing-function:ease-in}80%{transform:translate(-2px,0);animation-timing-function:ease-out}}
+@keyframes lean-sidle{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}30%,62%{transform:translate(3px,0);animation-timing-function:ease-in-out}}
+@keyframes lean-pull{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}50%{transform:translate(-2px,0);animation-timing-function:ease-in-out}}
+
+html.calm .activity-scene.rigged .scene-worker,html.calm .activity-scene.rigged .rig-body,html.calm .work-fx i{animation:none!important}
+@media (prefers-reduced-motion:reduce){.activity-scene.rigged .scene-worker,.activity-scene.rigged .rig-body,.work-fx i{animation:none!important}}
+
+/* the target's picture sits on the ground line itself: it was an inline image on its text baseline, standing a few
+   pixels above the hero's feet (skill realism audit, 27 Nov 2026) */
+.activity-scene .scene-target > span{display:flex;align-items:flex-end}
+/* the hunter keeps their distance for the strike: the old hero's step-in is the rig's thrust now */
+.activity-scene.hunt.rigged[data-step="2"] .scene-worker{translate:none}
 </style>
 <style>/* ===================== Shape rule (owner, 26 Nov 2026) =====================
    One shape for everything you can click; a line only round the menus you navigate with.
@@ -10152,6 +10200,74 @@ function hero(o = {}) {
   return s;
 }
 
+/* ================= The hero at work, in profile (24 x 32) =================
+   Skill realism (owner, 27 Nov 2026: "where the character holds things when using them in skills"): at work the hero
+   turns side-on to face the tree, rock, anvil or mark on their right, feet apart, and their arms come from the work rig
+   (js/work_rig.js), which draws them with the tool in the right hand(s) for every frame. This figure has no arms of its
+   own, except the near arm lifted to the brow in the wipe frame (js/personality.js). The feet stand on the bottom row,
+   the scene's ground line. Postures: stand, crouch (tracking), kneel (setting a trap or stake) and sit (on a stool at
+   the stitching bench); WORK_POSTURE gives each one's drop and shoulder for the rig. Same equipment and expressions as
+   the standing hero, drawn for a side view. */
+const WORK_POSTURE = { stand: { dy: 0 }, crouch: { dy: 3 }, kneel: { dy: 6 }, sit: { dy: 6 } };
+function heroSide(o = {}) {
+  const sk = SKIN[o.skin ?? 0], hr = HAIR[o.hair ?? 1], tunic = ramp(o.tunic || '#3f7fbf'), pants = ramp('#6b4b34'), boots = ramp('#4a3226'), belt = ramp('#3e2a20');
+  const pose = WORK_POSTURE[o.posture] ? o.posture : 'stand', dy = WORK_POSTURE[pose].dy, ex = o.expr || '';
+  const s = Spr(24, 32), spec = v => !v ? null : typeof v === 'string' ? { type: null, col: (R[v] || R.bronze).base } : v;
+  const metal = c => ramp(c, { gl: .72 }), soft = c => ramp(c);
+  const hu = ex === 'stretch' ? -1 : 0, Y = y => y + dy + hu; /* the head and chest; stretch lifts the chin a pixel */
+  /* cape first, hanging behind the back */
+  if (o.cape) s.poly([[8, 14 + dy], [11, 14 + dy], [9, 30], [4, 29]], soft(o.cape));
+  /* legs: a working stance, feet a stride apart (back foot left, front foot right, toes forward) */
+  const legsC = spec(o.legs), legT = legsC ? (legsC.type || 'plate') : null, lr = legsC ? (legT === 'plate' ? metal(legsC.col) : soft(legsC.col)) : pants;
+  const foot = (x, y) => { s.rect(x, y, 4, 2, boots); s.fix(x + 3, y, boots.hi); };
+  if (pose === 'stand') { s.line(10, 22, 8, 29, lr); s.line(11, 22, 9, 29, lr); s.line(13, 22, 14, 29, lr); s.line(14, 22, 15, 29, lr); foot(7, 30); foot(14, 30); }
+  else if (pose === 'crouch') { s.line(10, 25, 6, 27, lr); s.line(10, 26, 6, 28, lr); s.line(6, 28, 7, 29, lr); s.line(13, 25, 16, 26, lr); s.line(13, 26, 16, 27, lr); s.line(16, 27, 15, 29, lr); s.line(17, 27, 16, 29, lr); foot(5, 30); foot(15, 30); }
+  else if (pose === 'kneel') { s.rect(9, 28, 5, 2, lr); s.rect(7, 30, 7, 2, lr); s.rect(4, 30, 3, 2, boots); s.line(13, 28, 17, 27, lr); s.line(13, 29, 17, 28, lr); s.rect(16, 28, 2, 3, lr); foot(16, 30); }
+  else { /* sit: thighs level on a stool, shins down to the floor */
+    const st = ramp('#8a6040'); s.rect(6, 29, 8, 1, st); s.rect(7, 30, 1, 2, st); s.rect(12, 30, 1, 2, st);
+    s.rect(10, 27, 7, 2, lr); s.rect(15, 27, 2, 3, lr); foot(15, 30); }
+  if (legT === 'plate') { const kx = pose === 'stand' ? 14 : pose === 'crouch' ? 16 : 16, ky = pose === 'stand' ? 25 : 27; s.fix(kx, ky, lr.gl); }
+  /* body: a tunic seen side-on, chest forward, belt with its buckle at the front */
+  const bodyC = spec(o.body), bt = bodyC ? (bodyC.type || 'plate') : null, br = bodyC ? (bt === 'plate' ? metal(bodyC.col) : soft(bodyC.col)) : tunic;
+  s.poly([[9, Y(14)], [14, Y(14)], [15, 23 + dy], [8, 23 + dy]], br);
+  if (bt === 'robe' || (legT === 'robe')) { const rr = bt === 'robe' ? br : lr; s.poly([[8, 21 + dy], [15, 21 + dy], [17, Math.min(29, 27 + dy)], [7, Math.min(29, 27 + dy)]], rr); s.line(7, Math.min(28, 26 + dy), 17, Math.min(28, 26 + dy), null, R.gold.base); }
+  if (bt === 'plate') { s.rect(10, Y(14), 3, 2, br); s.fix(10, Y(14), br.gl); s.line(14, Y(16), 14, 19 + dy, null, br.hi); }
+  else if (bt === 'vest') { for (let y = Y(16); y <= 20 + dy; y += 2) s.fix(14, y, '#e8dcc0'); }
+  else if (bt === 'robe') s.line(13, Y(15), 13, 22 + dy, null, R.gold.base);
+  s.rect(8, 20 + dy, 8, 1, belt); s.fix(14, 20 + dy, '#e6b84a');
+  /* head in profile: face to the right, the ear mid-head, a nose and a mouth */
+  s.ell(11.5, Y(8.5), 4.5, 4.6, sk); s.rect(10, Y(13), 3, 1, sk); s.dot(16, Y(10), sk);
+  s.fix(10, Y(8), sk.lo); s.fix(10, Y(9), sk.lo);                                                                       /* ear */
+  s.ell(10.5, Y(5), 5, 2.8, hr); s.rect(6, Y(5), 4, 6, hr); s.rect(7, Y(11), 2, 1, hr);                                  /* crown, back of the head */
+  [[13, Y(5)], [14, Y(5)], [15, Y(6)], [12, Y(4)]].forEach(([x, y]) => s.dot(x, y, hr));                              /* fringe over the brow */
+  const eyeX = 14, shut = ex === 'blink' || ex === 'yawn' || ex === 'stretch';
+  if (shut) { s.fix(eyeX, Y(9), sk.out); }
+  else if (ex === 'pack') { s.fix(eyeX, Y(9), '#5a4a4a'); s.fix(eyeX, Y(10), INK); }
+  else { s.fix(eyeX, Y(8), '#5a4a4a'); s.fix(eyeX, Y(9), INK); }
+  const face = o.face || 'bright';
+  if (face === 'bright') s.fix(14, Y(11), mix(sk.base, '#e07a6a', .45));
+  if (face === 'freckled') { s.fix(13, Y(10), sk.lo); s.fix(15, Y(11), sk.lo); s.fix(eyeX, Y(8), shut ? sk.base : sk.base); }
+  if (face === 'bearded') { for (let x = 12; x <= 15; x++) s.dot(x, Y(12), hr); for (let x = 11; x <= 14; x++) s.dot(x, Y(13), hr); s.dot(15, Y(11), hr); }
+  if (ex === 'yawn') { s.fix(15, Y(12), '#5a2a2a'); s.fix(15, Y(13), '#3a1a24'); }
+  else if (ex === 'stretch') { s.fix(14, Y(12), '#5a2a2a'); s.fix(15, Y(12), '#3a1a24'); s.fix(14, Y(6), hr.lo); }
+  else if (face !== 'bearded') s.fix(15, Y(12), sk.out);
+  /* headgear fitted to the side view */
+  const helm = spec(o.helm);
+  if (helm) { const t = helm.type || 'helm';
+    if (t === 'coif' || t === 'hood') { const c = soft(helm.col);
+      for (let y = t === 'hood' ? -1 : 1; y <= 13; y++) for (let x = 5; x <= 17; x++) { const dx = (x - 11) / 6.4, dy2 = (y - 7) / 7; const inFace = x >= 12 && y >= 7 && y <= 12; if (dx * dx + dy2 * dy2 <= 1 && !inFace) s.dot(x, Y(y), c); }
+      if (t === 'hood') { s.dot(6, Y(0), c); s.dot(5, Y(1), c); s.line(10, Y(13), 14, Y(13), null, R.gold.base); }
+      s.fix(9, Y(3), c.gl); }
+    else if (t === 'crown') { const c = metal(helm.col); s.rect(7, Y(2), 9, 2, c); for (const x of [7, 10, 13, 15]) s.rect(x, Y(0), 1, 2, c); s.fix(12, Y(2), '#ff7ad0'); }
+    else { const m = metal(helm.col);
+      for (let y = 1; y <= 7; y++) for (let x = 6; x <= 17; x++) { const dx = (x - 11.5) / 6, dy2 = (y - 6.5) / 5.6; if (dx * dx + dy2 * dy2 <= 1) s.dot(x, Y(y), m); }
+      s.rect(6, Y(7), 5, 5, m); s.rect(15, Y(7), 1, 3, m); s.fix(8, Y(3), m.gl); s.fix(9, Y(3), m.hi);                 /* neck guard behind, nasal in front */
+      if (t === 'horned') { const h = ramp('#efe2c4'); s.poly([[8, Y(3)], [5, Y(-2)], [7, Y(-1)], [10, Y(2)]], h); } } }
+  /* the brow wipe: the near arm up, the forearm across the forehead, a bead of sweat flicked off */
+  if (ex === 'wipe') { const sl = br; s.line(12, Y(16), 15, Y(12), sl); s.line(13, Y(16), 16, Y(12), sl); s.line(15, Y(12), 15, Y(8), sl); s.line(16, Y(12), 16, Y(8), sl); s.rect(13, Y(6), 3, 2, sk); s.fix(19, Y(4), '#cfe8f2'); }
+  return s;
+}
+
 /* ================= Creatures (32 x 32): three anatomies ================= */
 function chicken() {
   const s = Spr(32, 32), b = R.feather;
@@ -10318,9 +10434,10 @@ function iconMining() { const s = Spr(16, 16); s.line(4, 14, 11, 5, R.wood); s.l
 /* ---------- public API ---------- */
 const SPRITES = { chicken, goblin, wolf, oak, pine, pike, carp, sword, bow, platebody, ore, log, gem, potato, cottage, iconFishing, iconWoodcutting, iconMining };
 DQ.pixelArt = {
-  ramp, mix, Spr, R, SKIN, HAIR, hero, url, img, toCanvas, hires, scale2x, logicalOf, sprites: SPRITES, composeScene,
+  ramp, mix, Spr, R, SKIN, HAIR, hero, heroSide, WORK_POSTURE, url, img, toCanvas, hires, scale2x, logicalOf, sprites: SPRITES, composeScene,
   sprite: (name, ...args) => url(name + ':' + args.join(','), () => SPRITES[name](...args)),
   heroUrl: (o) => url('hero:' + JSON.stringify(o), () => hero(o)),
+  heroSideUrl: (o) => url('heroside:' + JSON.stringify(o), () => heroSide(o)),
   sceneUrl: () => { const k = 'scene:willowbrook'; if (!cache.has(k)) cache.set(k, composeScene().toDataURL()); return cache.get(k); }
 };
 })();
@@ -12584,7 +12701,8 @@ function districtFor(town, kind, key, o = {}) {
       const brick = '#8a4a3a'; f(brick, 148, 50, 48, 34); for (let y = 52; y < 84; y += 4) { f(mix(brick, '#000000', .3), 148, y, 48, 1); for (let q = 148 + (y % 8 ? 3 : 0); q < 196; q += 6) f(mix(brick, '#000000', .3), q, y, 1, 4); }
       f('#2a1a14', 154, 54, 36, 8); f(DPAL.fire, 156, 56, 32, 5); f(DPAL.flame, 160, 57, 22, 2); ell('rgba(255,160,80,.25)', 172, 54, 26, 10);
       for (let y = 22; y < 50; y++) { const w = Math.round(14 + (y - 22) * 1.1); f(DPAL.stoneDk, 172 - w, y, w * 2, 1); } f(DPAL.stoneLt, 156, 22, 32, 1);
-      f(DPAL.woodDk, 54, 84, 12, 8); f(DPAL.wood, 54, 84, 12, 1); f(DPAL.iron, 48, 77, 24, 4); f(DPAL.ironLt, 48, 77, 24, 1); for (let j = 0; j < 4; j++) f(DPAL.iron, 44 + j, 78 + j * .3, 4 - j, 1); f(DPAL.iron, 55, 81, 10, 3);
+      /* no anvil painted here: the work rig stands the real one in front of the hero at their own scale (js/work_rig.js) */
+      f(DPAL.woodDk, 30, 80, 10, 12); f(DPAL.wood, 30, 80, 10, 1); f('#3a4a5a', 31, 81, 8, 2);
       f(DPAL.woodDk, 204, 76, 14, 18); f(DPAL.wood, 204, 76, 14, 1); f('#3a4a5a', 205, 77, 12, 2); f(DPAL.iron, 204, 82, 14, 1); f(DPAL.iron, 204, 89, 14, 1);
       f(DPAL.woodDk, 18, 34, 34, 2); for (const tx of [22, 30, 38, 46]) { f(DPAL.iron, tx, 36, 1, 10); f(DPAL.ironLt, tx - 1, 46, 3, 2); }
     } else if (key === 'carpentry') {
@@ -13326,6 +13444,17 @@ const SFX = {
   sizzle: () => noise(.28, { type: 'highpass', f: 4200, v: .07 }),
   anvil: () => { const b = pick([520, 580, 640]); [1, 1.52, 2.41].forEach((m, i) => tone(b * m, .4 - i * .08, { v: .08 / (i + 1), type: i ? 'sine' : 'triangle' })); noise(.03, { f: 3500, v: .1 }); },
   stitch: () => { tone(jit(1200), .03, { type: 'square', v: .03 }); tone(jit(1500), .03, { type: 'square', v: .03, at: .06 }); },
+  /* work beats for the real motion of each skill (skill realism, 27 Nov 2026; js/strike_sync.js plays them on their frame) */
+  plop: () => { tone(jit(620), .09, { v: .08, to: 240 }); noise(.05, { f: 1800, v: .03, at: .02 }); },                 /* the float lands */
+  splash: () => { noise(.22, { f: 1400, to: 600, q: .8, v: .1 }); tone(jit(300), .1, { type: 'triangle', v: .06, to: 140 }); }, /* the strike as the fish is hooked */
+  saw: () => paper(.3, { f: 2600, to: 1800, q: 1.6, v: .09, grain: 2.5 }),                                              /* the push stroke's rasp */
+  sawback: () => paper(.24, { f: 1700, to: 2300, q: 1.4, v: .035, grain: 3 }),                                         /* the lighter return */
+  bellows: () => noise(.32, { type: 'lowpass', f: 700, to: 260, v: .12 }),
+  chisel: () => { tone(jit(2600), .07, { type: 'triangle', v: .05 }); noise(.03, { f: 3800, v: .06 }); },
+  scratch: () => paper(.12, { f: 4200, to: 3400, q: 3, v: .05, grain: 1.5 }),
+  grind: () => paper(.22, { f: 900, to: 700, q: 1, v: .08, grain: 6 }),
+  stake: () => { noise(.05, { type: 'lowpass', f: 600, v: .16 }); tone(jit(110), .08, { type: 'triangle', v: .1, to: 80 }); },
+  swish: () => noise(.14, { f: 1600, to: 500, q: 1.2, v: .06 }),
   cast: () => { const r = pick([57, 60, 62, 64]); [0, 2, 4, 5].forEach((d, i) => tone(note(r, d), .35, { v: .06, at: i * .06 })); },
   bow: () => { noise(.12, { f: 1500, to: 400, v: .1 }); tone(220, .12, { type: 'triangle', v: .08, to: 110 }); },
   hit: () => { noise(.08, { type: 'lowpass', f: 900, v: .22 }); tone(jit(95), .12, { type: 'triangle', v: .22, to: 60 }); },
@@ -22843,10 +22972,16 @@ const heroOpts = (look, extra = {}) => {
 };
 const heroUrl = (look, extra) => A.heroUrl(heroOpts(look, extra));
 Q.heroFigureUrl = look => heroUrl(look);
-Q.heroWorkFigureUrl = look => heroUrl(look, { shield: null, weapon: null });
+/* at work the hero turns side-on to the job, armless: js/work_rig.js draws the arms and the tool (skill realism, 27 Nov
+   2026). posture: stand (default), crouch, kneel or sit */
+const sideUrl = (look, extra = {}) => { const o = heroOpts(look, { shield: null, weapon: null }), p = extra.posture && extra.posture !== 'stand' ? extra.posture : null;
+  const k = { face: o.face, skin: o.skin, hair: o.hair, tunic: o.tunic, helm: o.helm, body: o.body, legs: o.legs, cape: o.cape }; if (p) k.posture = p; if (extra.expr) k.expr = extra.expr; return A.heroSideUrl(k); };
+Q.heroWorkFigureUrl = (look, posture) => sideUrl(look, { posture });
+/* the colours the work rig dresses the arms in: sleeves of the body armour (or the tunic) and the skin */
+Q.heroRigLook = look => { const o = heroOpts(look); return { skin: o.skin, sleeve: o.body ? o.body.col : o.tunic, sleeveType: o.body ? o.body.type : 'cloth' }; };
 /* the same figure with an idle-life expression (blink, yawn, stretch, pack, wipe; js/personality.js); no frame is the
-   plain figure, so the frame and the figure share one cached drawing */
-Q.heroFrameUrl = (look, frame, work) => heroUrl(look, Object.assign(work ? { shield: null, weapon: null } : {}, frame ? { expr: frame } : {}));
+   plain figure, so the frame and the figure share one cached drawing. work: true or a posture name for the side view */
+Q.heroFrameUrl = (look, frame, work) => work ? sideUrl(look, { posture: typeof work === 'string' ? work : null, expr: frame || null }) : heroUrl(look, frame ? { expr: frame } : {});
 Q.heroCanvas = (look, scale = 1) => { const c = document.createElement('canvas'); c.width = 48 * scale; c.height = 64 * scale; const x = c.getContext('2d'); x.imageSmoothingEnabled = false; const im = new Image(); im.src = heroUrl(look); x.drawImage(im, 0, 0, c.width, c.height); return c; };
 Q.heroBustUrl = look => { const k = 'bust:' + JSON.stringify(heroOpts(look)); return A.url(k, () => { const full = A.hero(heroOpts(look)), s = A.Spr(16, 16); for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const p = full.px[y * 24 + x + 4]; if (p) s.px[y * 16 + x] = p; } return s; }); };
 Q.heroUrl = Q.heroBustUrl;
@@ -25979,17 +26114,11 @@ const sprite = (kind, i) => { const s = A.Spr(16, 16), m = A.ramp(METALS[i][2]),
   return s; };
 const art = (kind, i, size = 64) => A && A.url ? `<img class="pxa" src="${A.url(`smithgear:${kind}:${i}`, () => sprite(kind, i))}" width="${size}" height="${size}" alt="" style="image-rendering:pixelated">` : UI.activityIcon('smithing');
 /* Smithing scene (owner, 26 Nov 2026: "the thing I'm making should be on the anvil and I'm hitting it with the hammer"):
-   the hero holds a hammer (the best one owned, else bronze), an anvil (the best one owned) stands in front of them, and the
-   piece being made rests on it. Same art as the workshop ladders. */
+   the work rig (js/work_rig.js) draws the hero's hammer and the anvil at the hero's own 3x scale (skill realism, 27 Nov
+   2026: the 64 px anvil overlay here stood at 4x beside the 3x hero) in the metal of the best one owned, else bronze
+   for the hammer and plain iron for the anvil; the piece being made rests on its face. */
 Q.smithSceneArt = (kind, size) => art(kind, Math.max(0, owned(kind) - 1), size);
-const render1 = UI.render;
-UI.render = (...a) => { const r = render1(...a);
-  try { const sc = document.querySelector('#view .activity-scene.skill-smithing');
-    if (sc && !sc.querySelector('.smith-anvil')) {
-      sc.insertAdjacentHTML('beforeend', `<span class="smith-anvil" aria-hidden="true">${Q.smithSceneArt('anvil', 64)}</span>`);
-      const tool = sc.querySelector('.action-tool'); if (tool) tool.innerHTML = Q.smithSceneArt('hammer', 32);
-    } } catch (e) { /* the page still works without the scene dressing */ }
-  return r; };
+Q.smithMetalCol = kind => owned(kind) ? METALS[owned(kind) - 1][2] : kind === 'hammer' ? METALS[0][2] : '#6a6e76';
 /* the shelf */
 let pick = null; /* {kind, rank} */
 const card = (kind, r) => { const st = Q.smithGear(kind, r), have = owned(kind), sel = pick && pick.kind === kind && pick.rank === r, g = D.SMITH_GEAR[kind];
@@ -26702,43 +26831,507 @@ document.addEventListener('click', e => { const c = e.target.closest && e.target
 
 </script>
 <script>
-/* Idlewick: the sound lands when the swing lands (20 Nov 2026, owner feedback).
-   For work you can see being struck (chopping, mining, smithing, crafting, carpentry) the activity scene swings a
-   whole number of times per action, in step with the action's own clock, and the work sound plays on each swing's
-   impact rather than once when the action finishes. Fishing, cooking and the rest keep their single sound.
-   Presentation only: action timing and rewards are untouched. Elapsed time drives everything, so refresh rate and
-   frame drops change nothing; reduced motion keeps the sounds without the swinging. */
+/* Idlewick: the work rig (skill realism, owner 27 Nov 2026: "work on some of the realism. The sizes of things in
+   comparison to each other, the animations, where the character holds things when using them in skills").
+   Research and the choices behind every pose are in docs/skill-realism.md.
+
+   In a work scene the hero stands side-on (js/pixelart.js heroSide), facing the job on their right, and this file draws
+   their arms and what they hold for every frame of the work: an axe with the knob hand fixed and the other hand sliding
+   down the haft, a pick swung into the rock face at chest height, a rod cast and struck, the smith's hammer in the right
+   hand and tongs in the left over an anvil at knuckle height, a saw pushed and drawn on trestles, and so on. Right
+   handed: the dominant hand is the far arm (drawn behind the body), the near arm is the left.
+
+   Scale: the hero is 24 x 32 px (about 1.7 m, so 1 px is about 5.3 cm). Tools are sized to that (felling axe haft 15 px
+   = 80 cm, pick 16 px, rod 44 px = 2.3 m, smith's hammer handle 7 px = 37 cm, saw blade 12 px = 64 cm...). Work
+   heights follow the figure's own joints, because the figure is drawn with a big head and short legs: the anvil face sits
+   at the hero's hanging knuckles, the trestle and the table at the belt.
+
+   Each skill is a list of key poses over one cycle (a swing for beat work, the whole action for fishing, thieving,
+   hunting and the rest). Frames are drawn in code at the hero's pixel scale, cached, and stepped (FRAMES per cycle);
+   js/strike_sync.js runs the clock, draws the frame for the moment and plays each work sound as its frame appears, so
+   the sound lands on the strike. The body leans continuously (CSS, transform only). Calm and reduced motion show the
+   ready pose and nothing moves. Presentation only: timings, chances and rewards are untouched. */
 (() => {
-const DQ = window.DQ, D = DQ.data, UI = DQ.ui;
-const IMPACT = .4; /* the share of each swing at which the tool meets wood, rock or metal (matches css work keyframes) */
-const soundOf = act => {
-  if (!act) return null;
-  if (act.kind === 'wood') return 'wood';
-  if (act.kind === 'mine') return 'mine';
-  if (act.kind === 'recipe') { const r = D.RECIPES[act.id]; return r && ({ smithing: 'anvil', crafting: 'stitch', carpentry: 'wood' })[r.skill] || null; }
+const Q = window.DQ, D = Q.data, UI = Q.ui, A = Q.pixelArt; if (!A || !A.Spr) return;
+const { Spr, ramp, mix, R: PAL } = A, S = () => Q.S;
+const RW = 112, RH = 72, OX = 40, OY = 40; /* rig canvas, hero px; the body's top-left sits at (OX, OY), feet on its bottom row */
+const SW = 96, SH = 56;                    /* station canvas: stage x -48..47, y -56..-1 (0 is the ground line) */
+const PX = 3;                              /* css px per hero px in a work scene */
+const L1 = 4, L2 = 4.5;                    /* upper arm and forearm */
+const calm = () => document.documentElement.classList.contains('calm') || !!(S() && S().settings && S().settings.reduceFx) || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const rad = d => d * Math.PI / 180, dir = a => [Math.cos(rad(a)), Math.sin(rad(a))];
+const at = (B, a, u, v = 0) => { const [c, s] = dir(a); return [B[0] + c * u - s * v, B[1] + s * u + c * v]; };
+const lerp = (a, b, k) => a + (b - a) * k;
+const EASE = { lin: k => k, in: k => k * k * k, out: k => 1 - (1 - k) ** 3, io: k => k < .5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2, hold: () => 0 };
+const darker = r => ramp(mix(r.base, '#3a2448', .24));
+const WOOD = PAL.wood, WOODL = PAL.woodLight, IRON = ramp('#9aa3ad', { gl: .7 }), STEEL = ramp('#b8c2cc', { gl: .75 }), STRING = ramp('#e8dcc0'), LEATHER = PAL.leather, STONE = PAL.stone;
+
+/* ---------- drawing helpers, in body coordinates (the body sprite's own pixels) ---------- */
+const layer = spr => {
+  const T = ([x, y]) => [Math.round(x + OX), Math.round(y + OY)];
+  const g = {
+    spr,
+    dot(p, r) { const [x, y] = T(p); spr.dot(x, y, r); },
+    fix(p, c) { const [x, y] = T(p); spr.fix(x, y, c); },
+    line(p0, p1, r) { const [a, b] = T(p0), [c, d] = T(p1); spr.line(a, b, c, d, r); },
+    fline(p0, p1, c) { const [a, b] = T(p0), [x, y] = T(p1); spr.line(a, b, x, y, null, c); },
+    thick(p0, p1, r) { const [a, b] = T(p0), [c, d] = T(p1); const n = Math.max(Math.abs(c - a), Math.abs(d - b), 1); for (let i = 0; i <= n; i++) spr.rect(Math.round(a + (c - a) * i / n) - 1, Math.round(b + (d - b) * i / n), 2, 2, r); },
+    rect(p, w, h, r) { const [x, y] = T(p); spr.rect(x, y, w, h, r); },
+    poly(pts, r) { spr.poly(pts.map(([x, y]) => [x + OX, y + OY]), r); },
+    ell(p, rx, ry, r) { spr.ell(p[0] + OX, p[1] + OY, rx, ry, r); },
+    /* a straight haft from B along angle a, L long */
+    haft(B, a, L, r = WOOD) { g.line(B, at(B, a, L), r); },
+    /* a shape in the tool's own frame (u along the haft from B, v to its clockwise side) */
+    shape(B, a, pts, r) { g.poly(pts.map(([u, v]) => at(B, a, u, v)), r); }
+  };
+  return g;
+};
+/* an arm from the shoulder to the hand, the elbow bent down and back */
+const ARM = { near: [11, 16], far: [12, 15] };
+const arm = (g, side, H, look, dy, o = {}) => {
+  const Sh = [ARM[side][0], ARM[side][1] + dy], dx = H[0] - Sh[0], dyy = H[1] - Sh[1]; let d = Math.hypot(dx, dyy) || .01;
+  const reach = L1 + L2 - .05; let Hh = H; if (d > reach) { Hh = [Sh[0] + dx / d * reach, Sh[1] + dyy / d * reach]; d = reach; }
+  const base = Math.atan2(Hh[1] - Sh[1], Hh[0] - Sh[0]), cosA = Math.max(-1, Math.min(1, (L1 * L1 + d * d - L2 * L2) / (2 * L1 * d))), al = Math.acos(cosA);
+  const e1 = [Sh[0] + Math.cos(base + al) * L1, Sh[1] + Math.sin(base + al) * L1], e2 = [Sh[0] + Math.cos(base - al) * L1, Sh[1] + Math.sin(base - al) * L1];
+  const E = o.up ? (e1[1] < e2[1] ? e1 : e2) : (e1[1] > e2[1] ? e1 : e2);
+  const sl = side === 'far' ? look.sleeveFar : look.sleeve, sk = side === 'far' ? look.skinFar : look.skin;
+  const wrist = [lerp(E[0], Hh[0], .62), lerp(E[1], Hh[1], .62)];
+  g.thick(Sh, E, sl); g.thick(E, wrist, sl); g.thick(wrist, Hh, sk);
+  return Hh;
+};
+
+/* ---------- tools ---------- */
+const TOOL = {
+  /* felling axe: 80 cm haft, the bit to the clockwise side, a short poll behind the eye */
+  axe(g, B, a, m) { g.haft(B, a, 15); g.shape(B, a, [[13, -1], [15, -1], [15.6, 1], [16.5, 3.5], [12.5, 3.5], [13.4, 1]], m); g.fix(at(B, a, 14.5, 3), m.gl); return at(B, a, 14.6, 3.6); },
+  /* miner's pick: 85 cm haft, a curved head pointed both ways */
+  pick(g, B, a, m) { g.haft(B, a, 16); g.shape(B, a, [[15, -1], [16.4, -1], [16.2, 1], [17.2, 3.5], [16.2, 4.8], [14.6, 1.4], [14.6, -1.4], [15.6, -4], [14.6, -3.8]], m); return at(B, a, 16.3, 4.8); },
+  /* cross-peen hammer: 37 cm handle, a short head with the face on the clockwise side */
+  hammer(g, B, a, m) { g.haft(B, a, 7); g.shape(B, a, [[5.6, -2], [7.6, -2], [7.6, 2], [5.6, 2]], m); g.fix(at(B, a, 6, -2), m.gl); return at(B, a, 6.6, 2.4); },
+  /* tongs: 45 cm reins and short jaws */
+  tongs(g, B, a, m) { g.fline(B, at(B, a, 6, -.5), m.lo); g.fline(at(B, a, 0, 1), at(B, a, 6, .5), m.base); g.fline(at(B, a, 6, -.5), at(B, a, 8, 0), m.lo); return at(B, a, 8, 0); },
+  mallet(g, B, a) { g.haft(B, a, 5); g.shape(B, a, [[4.5, -1.5], [6.5, -1.5], [6.5, 2.5], [4.5, 2.5]], WOODL); return at(B, a, 5.5, 2.6); },
+  chisel(g, B, a, m) { g.line(B, at(B, a, 2), WOOD); g.line(at(B, a, 2), at(B, a, 4), m); return at(B, a, 4.2); },
+  saw(g, B, a, m) { /* B is the handle; the blade runs 12 px along a, deep at the heel, tapering to the toe */
+    g.shape(B, a, [[-1, -1.5], [2, -1.5], [2, 1.5], [-1, 1.5]], WOOD); g.shape(B, a, [[2, -1], [14, 0], [14, 1], [2, 2]], m); for (let u = 3; u < 14; u += 2) g.fix(at(B, a, u, 1.6), mix(m.base, '#3a2448', .4)); return at(B, a, 14, .5); },
+  spoon(g, B, a) { g.haft(B, a, 11); g.shape(B, a, [[10.5, -1], [12.5, -1], [12.5, 1], [10.5, 1]], WOODL); return at(B, a, 12, 0); },
+  pestle(g, B, a) { g.line(B, at(B, a, 4), WOODL); g.shape(B, a, [[4, -1], [5.5, -1], [5.5, 1], [4, 1]], WOODL); return at(B, a, 5.6); },
+  graver(g, B, a, m) { g.dot(B, WOOD); g.line(at(B, a, 1), at(B, a, 3), m); return at(B, a, 3.2); },
+  quill(g, B, a) { g.line(B, at(B, a, 4), ramp('#efe8d8')); g.fix(at(B, a, 4.2), '#2a1c1f'); return at(B, a, 4.2); },
+  stake(g, B, a) { g.line(B, at(B, a, 6), WOODL); g.fix(at(B, a, 6), WOOD.lo); return at(B, a, 0); },
+  staff(g, B, a, m) { g.haft(B, a, 28, ramp('#7a5a3a')); g.ell(at(B, a, 29), 1.4, 1.4, ramp(m.base, { gl: .85 })); return at(B, a, 29); },
+  spear(g, B, a, m) { g.haft(B, a, 32); g.shape(B, a, [[31, -1], [33, -1.4], [36, 0], [33, 1.4]], m); return at(B, a, 36); },
+  /* a rod: 2.3 m of tapering cane, the butt wrapped in cord */
+  rod(g, B, a) { g.line(B, at(B, a, 44), ramp('#b99a5e')); g.line(B, at(B, a, 3), LEATHER); return at(B, a, 44); },
+  /* swords and the rest of the practice weapons, by type, in the weapon's own metal */
+  sword(g, B, a, m) { g.line(at(B, a, -1.5), at(B, a, .5), LEATHER); g.shape(B, a, [[.5, -2], [1.5, -2], [1.5, 2], [.5, 2]], PAL.gold); g.shape(B, a, [[1.5, -.8], [15, -.8], [16.5, 0], [15, .8], [1.5, .8]], m); g.fline(at(B, a, 3), at(B, a, 14), m.gl); return at(B, a, 16.5); },
+  dagger(g, B, a, m) { g.line(at(B, a, -1), at(B, a, .5), LEATHER); g.shape(B, a, [[.5, -1.5], [1.5, -1.5], [1.5, 1.5], [.5, 1.5]], PAL.gold); g.shape(B, a, [[1.5, -.7], [6.5, -.6], [7.5, 0], [6.5, .6], [1.5, .7]], m); return at(B, a, 7.5); },
+  warhammer(g, B, a, m) { g.haft(B, a, 11); g.shape(B, a, [[9.5, -2], [12.5, -2], [12.5, 2.5], [9.5, 2.5]], m); return at(B, a, 11, 2.6); },
+  cutlass(g, B, a, m) { g.line(at(B, a, -1.5), at(B, a, .5), LEATHER); g.shape(B, a, [[.5, -2], [1.5, -2], [1.5, 2], [.5, 2]], PAL.gold); g.shape(B, a, [[1.5, -.8], [9, -1.4], [14, -.4], [15, 1.2], [9, .6], [1.5, .8]], m); return at(B, a, 15, 1); }
+};
+/* a bow held at its grip G, limbs along angle a (up is -90), drawn by the hand at N (string hand) or braced */
+const bowDraw = (g, G, a, len, wood, N) => {
+  const h = len / 2, t0 = at(G, a, -h, 0), t1 = at(G, a, h, 0), bend = N ? 2.6 : 1.8;
+  const pts = []; for (let i = 0; i <= 12; i++) { const u = -h + len * i / 12, v = -bend * (1 - (u / h) ** 2); pts.push(at(G, a, u, v)); }
+  for (let i = 0; i < 12; i++) g.line(pts[i], pts[i + 1], wood);
+  g.dot(G, LEATHER);
+  const tip0 = at(G, a, -h, -.2), tip1 = at(G, a, h, -.2);
+  if (N) { g.fline(tip0, N, '#efe4c8'); g.fline(N, tip1, '#efe4c8'); } else g.fline(tip0, tip1, '#efe4c8');
+  return { t0, t1 };
+};
+
+/* ---------- the skills ---------- */
+/* key: [t, {pose numbers}, ease into this key]; draw(p, g, ctx) draws one frame and returns its contact point */
+const K = (t, o, e = 'io') => [t, o, e];
+const posture = p => p.posture || 'stand';
+const SPEC = {};
+/* Woodcutting: feet apart, side-on to the tree; the left hand stays at the knob, the right slides from under the head
+   (backswing, over the right shoulder) down to the left as the axe comes through, into the notch at knee to waist
+   height at about 45 degrees; the bit stays in the cut a moment and is worked free. */
+SPEC.wood = { lean: 'chop', beatMs: 1200, beats: [{ at: .4, sfx: 'wood', fx: 'chips' }], wipe: [.52, .86], contact: 'edge', rest: .9,
+  keys: [K(0, { hx: 14, hy: 22, a: -30, g2: 6 }), K(.28, { hx: 9, hy: 9, a: -150, g2: 12 }, 'io'), K(.36, { hx: 12, hy: 11, a: -80, g2: 8 }, 'in'), K(.4, { hx: 15, hy: 21, a: -32, g2: 3 }, 'in'), K(.5, { hx: 15, hy: 21, a: -32, g2: 3 }, 'hold'), K(.62, { hx: 13, hy: 22, a: -24, g2: 4 }, 'out'), K(1, { hx: 14, hy: 22, a: -30, g2: 6 }, 'io')],
+  draw(p, g, c) { const B = [p.hx, p.hy], tip = TOOL.axe(g.front, at(B, p.a, -1), p.a, c.metal); if (!c.wipe) arm(g.front, 'near', B, c.look, 0); arm(g.back, 'far', at(B, p.a, p.g2), c.look, 0); return tip; } };
+/* Mining: the pick swung from over the shoulder down into the rock face in front at chest height, never at the sky;
+   the hands slide together on the way down, and the point is levered out before the next blow. */
+SPEC.mine = { lean: 'chop', beatMs: 1200, beats: [{ at: .4, sfx: 'mine', fx: 'sparks' }], wipe: [.52, .86], contact: 'edge', rest: .9,
+  keys: [K(0, { hx: 14, hy: 21, a: -62, g2: 6 }), K(.28, { hx: 9, hy: 9, a: -165, g2: 11 }, 'io'), K(.36, { hx: 12, hy: 11, a: -100, g2: 8 }, 'in'), K(.4, { hx: 16, hy: 19, a: -52, g2: 3 }, 'in'), K(.5, { hx: 16, hy: 19, a: -52, g2: 3 }, 'hold'), K(.62, { hx: 14, hy: 20, a: -64, g2: 4 }, 'out'), K(1, { hx: 14, hy: 21, a: -62, g2: 6 }, 'io')],
+  draw(p, g, c) { const B = [p.hx, p.hy], tip = TOOL.pick(g.front, at(B, p.a, -1), p.a, c.metal); if (!c.wipe) arm(g.front, 'near', B, c.look, 0); arm(g.back, 'far', at(B, p.a, p.g2), c.look, 0); return tip; } };
+/* Fishing (float and rod, no reel): back-cast over the shoulder, forward cast, the float lands; wait with the rod tip
+   up; the float dips, a quick lift of the rod sets the hook, and the fish is swung in. One cycle per catch. */
+SPEC.fish = { lean: 'cast', mode: 'action', ground: 8, beats: [{ at: .24, sfx: 'plop', fx: 'ripple' }, { at: .8, sfx: 'splash', fx: 'splash' }], wipe: [.34, .62], contact: 'free', stand: 46, rest: .5,
+  keys: [K(0, { hx: 15, hy: 20, a: -30, f: 0, dip: 0 }), K(.12, { hx: 12, hy: 16, a: -105, f: 0, dip: 0 }, 'out'), K(.22, { hx: 17, hy: 20, a: -12, f: 0, dip: 0 }, 'in'), K(.24, { hx: 17, hy: 20, a: -14, f: 1, dip: 0 }, 'out'), K(.34, { hx: 15, hy: 21, a: -20, f: 1, dip: 0 }, 'io'), K(.7, { hx: 15, hy: 21, a: -21, f: 1, dip: 0 }, 'io'), K(.76, { hx: 15, hy: 21, a: -19, f: 1, dip: 2 }, 'in'),
+    K(.8, { hx: 14, hy: 19, a: -38, f: 1, dip: -1 }, 'in'), K(.92, { hx: 13, hy: 18, a: -50, f: 2, dip: 0 }, 'out'), K(1, { hx: 15, hy: 20, a: -30, f: 0, dip: 0 }, 'io')],
+  draw(p, g, c) { const B = [p.hx, p.hy], tip = TOOL.rod(g.front, at(B, p.a, -3), p.a);
+    if (!c.wipe) arm(g.front, 'near', at(B, p.a, -3), c.look, 0); arm(g.back, 'far', B, c.look, 0);
+    const fl = [c.float[0], c.float[1] + p.dip];
+    if (p.f >= 1 && p.f < 2) { g.front.fline(tip, fl, '#f4f0e0'); g.front.fix(fl, '#d84838'); g.front.fix([fl[0], fl[1] + 1], '#f4ecd8'); }
+    else if (p.f >= 2) { const hang = [tip[0] + 1, tip[1] + 9]; g.front.fline(tip, hang, '#e8f0f0'); g.front.poly([[hang[0] - 1, hang[1]], [hang[0] + 1, hang[1]], [hang[0] + 1, hang[1] + 4], [hang[0] - 1, hang[1] + 4]], ramp('#a8c0c8')); }
+    else { g.front.fline(tip, [tip[0] - 2, tip[1] + 6], '#e8f0f0'); }
+    return fl; } };
+/* Thieving: sidle up close at the mark's side, the right hand slips slowly into their purse at the belt, lifts, and
+   tucks the take into your own belt as you ease away. One cycle per attempt; the chink is the lift. */
+SPEC.thieve = { lean: 'sidle', mode: 'action', beats: [{ at: .6, sfx: 'thieve', fx: 'glint', replaces: 'thieve' }], wipe: null, contact: 'edge', rest: .05,
+  keys: [K(0, { hx: 13, hy: 22, ox: 13, oy: 23 }), K(.3, { hx: 16, hy: 21, ox: 13, oy: 23 }, 'io'), K(.55, { hx: 19, hy: 21, ox: 13, oy: 23 }, 'io'), K(.6, { hx: 19, hy: 21, ox: 13, oy: 23 }, 'hold'), K(.68, { hx: 18, hy: 19, ox: 13, oy: 23 }, 'out'), K(.88, { hx: 13, hy: 20, ox: 13, oy: 23 }, 'io'), K(1, { hx: 13, hy: 22, ox: 13, oy: 23 }, 'io')],
+  draw(p, g, c) { const H = arm(g.back, 'far', [p.hx, p.hy], c.look, 0); if (!c.wipe) arm(g.front, 'near', [p.ox, p.oy], c.look, 0); if (p.hy < 20.5 && p.hx > 16) g.back.fix([H[0], H[1] - 1], '#e6b84a'); return [p.hx + 1, p.hy]; } };
+/* Smithing: the anvil at the smith's hanging knuckles; tongs in the left hand hold the hot piece flat on the face, the
+   hammer in the right rises from the elbow and falls square; it bounces up between blows and the piece is turned. The
+   heat fades through the action and comes back with the next one (heat, hammer, reheat). */
+SPEC.forge = { lean: 'hammer', beatMs: 1200, beats: [{ at: .4, sfx: 'anvil', fx: 'sparks' }], wipe: [.55, .86], contact: 'station', station: 'anvil', stand: 26, rest: .9, heat: true,
+  keys: [K(0, { hx: 18, hy: 17, a: -10, tx: 15, ty: 22, ta: 6 }), K(.26, { hx: 15, hy: 11, a: -80, tx: 15, ty: 22, ta: 6 }, 'out'), K(.4, { hx: 18, hy: 18, a: 22, tx: 15, ty: 22, ta: 6 }, 'in'), K(.5, { hx: 18, hy: 16, a: 0, tx: 15, ty: 22, ta: 6 }, 'out'), K(.75, { hx: 18, hy: 17, a: -8, tx: 15, ty: 22, ta: 0 }, 'io'), K(1, { hx: 18, hy: 17, a: -10, tx: 15, ty: 22, ta: 6 }, 'io')],
+  draw(p, g, c) { if (!c.wipe) { const T = [p.tx, p.ty]; TOOL.tongs(g.front, T, p.ta, IRON); arm(g.front, 'near', T, c.look, 0); }
+    const B = [p.hx, p.hy]; const tip = TOOL.hammer(g.back, B, p.a, c.metal); arm(g.back, 'far', B, c.look, 0); return tip; } };
+/* Smelting: a clay furnace blown by a lever bellows; both hands bear down on the lever, the bag breathes out and the
+   flame at the furnace top flares; let it rise and pump again. The bars wait in the mould at its foot. */
+SPEC.smelt = { lean: 'pump', beatMs: 1200, beats: [{ at: .4, sfx: 'bellows', fx: 'flare' }], wipe: [.55, .86], contact: 'station', station: 'furnace', stand: 26, rest: .9,
+  keys: [K(0, { hy: 15 }), K(.4, { hy: 21 }, 'in'), K(.5, { hy: 21 }, 'hold'), K(1, { hy: 15 }, 'io')],
+  draw(p, g, c) { const y = p.hy, H1 = [16, y], H2 = [17, y], m = ramp('#7a5236'), sq = (y - 15) / 6, top = 25 + Math.round(sq * 2);
+    /* the bellows: a leather bag between two boards at the furnace's foot, the pole from its top board up to the hands */
+    g.front.rect([19, 31], 7, 1, WOOD); g.front.poly([[19, top + 1], [25, top + 1], [26, 30], [19, 30]], LEATHER); g.front.rect([19, top], 7, 1, WOOD); g.front.line([25, 29], [27, 29], IRON);
+    g.front.line([22, top], [17, y + 1], m);
+    arm(g.back, 'far', H2, c.look, 0); if (!c.wipe) arm(g.front, 'near', H1, c.look, 0); return [27, 29]; } };
+/* Carpentry: the board across two trestles at belt height, the left hand pins it down beside the line, the right arm
+   saws like a piston from the shoulder, blade at about 45 degrees: the push cuts, the pull returns light. */
+SPEC.saw = { lean: 'saw', beatMs: 1200, beats: [{ at: .12, sfx: 'saw', fx: 'dust' }, { at: .6, sfx: 'sawback' }], wipe: [.5, .58], contact: 'station', station: 'trestle', stand: 20, rest: .5,
+  keys: [K(0, { u: 0 }), K(.12, { u: 0 }, 'hold'), K(.45, { u: 6 }, 'io'), K(.6, { u: 6 }, 'hold'), K(.92, { u: 0 }, 'io'), K(1, { u: 0 }, 'hold')],
+  draw(p, g, c) { const a = 42, B = at([12.5, 15.5], a, p.u); TOOL.saw(g.back, B, a, STEEL); arm(g.back, 'far', B, c.look, 0); if (!c.wipe) arm(g.front, 'near', [18, 21], c.look, 0); return at(B, a, 9); } };
+/* Cooking: a pot hung from an iron tripod over a small fire, stirred with a long wooden spoon so the cook stays out of
+   the smoke; the left hand steadies the lid's cloth. The dish waits on the warming stone. */
+SPEC.cook = { lean: 'stir', beatMs: 1600, beats: [], wipe: [.6, .9], contact: 'station', station: 'tripod', stand: 27, rest: 0,
+  keys: [K(0, { hx: 17, hy: 16, a: 48 }), K(.25, { hx: 19, hy: 16, a: 58 }, 'io'), K(.5, { hx: 18, hy: 17, a: 64 }, 'io'), K(.75, { hx: 16, hy: 17, a: 54 }, 'io'), K(1, { hx: 17, hy: 16, a: 48 }, 'io')],
+  draw(p, g, c) { const B = [p.hx, p.hy]; const tip = TOOL.spoon(g.back, B, p.a); arm(g.back, 'far', B, c.look, 0); if (!c.wipe) arm(g.front, 'near', [14, 22], c.look, 0); return tip; } };
+/* Crafting (leather): seated, the work clamped upright in a stitching clam between the knees; an awl opens the hole,
+   two needles pass through it from both sides and both hands draw the thread out and tight (the saddle stitch). */
+SPEC.stitch = { lean: 'none', beatMs: 1300, beats: [{ at: .45, sfx: 'stitch' }], wipe: [.55, .85], contact: 'station', station: 'clam', stand: 20, rest: .9, posture: 'sit',
+  keys: [K(0, { nx: 17, ny: 17, fx: 18, fy: 17 }), K(.25, { nx: 18, ny: 17, fx: 19, fy: 17 }, 'io'), K(.45, { nx: 13, ny: 15, fx: 23, fy: 16 }, 'out'), K(.55, { nx: 13, ny: 15, fx: 23, fy: 16 }, 'hold'), K(1, { nx: 17, ny: 17, fx: 18, fy: 17 }, 'io')],
+  draw(p, g, c) { const dy = 6, F = [p.fx, p.fy + dy], N = [p.nx, p.ny + dy], hole = [19.5, 22]; arm(g.back, 'far', F, c.look, dy); g.back.fline(hole, F, '#efe4c8');
+    if (!c.wipe) { arm(g.front, 'near', N, c.look, dy); g.front.fline(hole, N, '#efe4c8'); } return hole; } };
+/* Runes: a stone tablet on a block; the chisel held upright in the left hand, a mallet in the right tapping it in a
+   few blows per stroke, as runestones were cut. */
+SPEC.runes = { lean: 'tap', beatMs: 1000, beats: [{ at: .4, sfx: 'chisel', fx: 'chips' }], wipe: [.55, .86], contact: 'station', station: 'tablet', stand: 18, rest: .9,
+  keys: [K(0, { hx: 15, hy: 16, a: -40 }), K(.28, { hx: 14, hy: 13, a: -95 }, 'out'), K(.4, { hx: 17, hy: 15, a: -15 }, 'in'), K(.5, { hx: 16, hy: 15, a: -40 }, 'out'), K(1, { hx: 15, hy: 16, a: -40 }, 'io')],
+  draw(p, g, c) { const top = [22, 19.5]; if (!c.wipe) { TOOL.chisel(g.front, [22, 17], 90, STEEL); arm(g.front, 'near', [22, 18], c.look, 0); }
+    const B = [p.hx, p.hy]; TOOL.mallet(g.back, B, p.a); arm(g.back, 'far', B, c.look, 0); return [22, 22]; } };
+/* Enchanting: an engraver's push: the piece on the block under the left hand, the graver pushed through the line by
+   the heel of the right hand in short strokes. */
+SPEC.engrave = { lean: 'tap', beatMs: 1000, beats: [{ at: .45, sfx: 'scratch', fx: 'glint' }], wipe: [.6, .9], contact: 'station', station: 'tablet', stand: 18, rest: .9,
+  keys: [K(0, { u: 0 }), K(.45, { u: 3 }, 'io'), K(.55, { u: 3 }, 'hold'), K(1, { u: 0 }, 'io')],
+  draw(p, g, c) { const B = [18 + p.u, 19]; TOOL.graver(g.back, B, 10, STEEL); arm(g.back, 'far', B, c.look, 0); if (!c.wipe) arm(g.front, 'near', [24, 20], c.look, 0); return [B[0] + 3, 20]; } };
+/* Herbalism: mortar on the table held by the rim in the left hand; the pestle in the right bruises the leaves with a
+   press, then grinds them round. */
+SPEC.grind = { lean: 'tap', beatMs: 1300, beats: [{ at: .3, sfx: 'grind' }], wipe: [.4, .55], contact: 'station', station: 'mortar', stand: 18, rest: .9,
+  keys: [K(0, { hx: 21, hy: 14, a: 80 }), K(.3, { hx: 21, hy: 16, a: 86 }, 'in'), K(.5, { hx: 22, hy: 15, a: 70 }, 'io'), K(.7, { hx: 20, hy: 15, a: 100 }, 'io'), K(.85, { hx: 21, hy: 15, a: 84 }, 'io'), K(1, { hx: 21, hy: 14, a: 80 }, 'io')],
+  draw(p, g, c) { const B = [p.hx, p.hy]; const tip = TOOL.pestle(g.back, B, p.a); arm(g.back, 'far', B, c.look, 0); if (!c.wipe) arm(g.front, 'near', [18, 19], c.look, 0); return tip; } };
+/* Exploration: a plane table on its tripod; the alidade is sighted along to a landmark, then the ray is ruled and
+   noted on the sheet in pencil. Slow, careful work: one sight and note every few seconds. */
+SPEC.survey = { lean: 'sight', beatMs: 3200, beats: [{ at: .6, sfx: 'quill' }], wipe: [.86, .98], contact: 'station', station: 'planetable', stand: 20, rest: .3,
+  keys: [K(0, { nx: 19, ny: 20, fx: 16, fy: 22, w: 0 }), K(.15, { nx: 21, ny: 19, fx: 16, fy: 22, w: 0 }, 'io'), K(.45, { nx: 21, ny: 19, fx: 16, fy: 22, w: 0 }, 'hold'), K(.55, { nx: 20, ny: 20, fx: 23, fy: 18, w: 0 }, 'io'), K(.6, { nx: 20, ny: 20, fx: 24, fy: 18, w: 1 }, 'lin'), K(.75, { nx: 20, ny: 20, fx: 26, fy: 18, w: 1 }, 'lin'), K(.85, { nx: 20, ny: 20, fx: 25, fy: 19, w: 0 }, 'io'), K(1, { nx: 19, ny: 20, fx: 16, fy: 22, w: 0 }, 'io')],
+  draw(p, g, c) { const F = [p.fx, p.fy]; if (p.w > .5 || p.fx > 20) TOOL.quill(g.back, F, 120); arm(g.back, 'far', F, c.look, 0); if (!c.wipe) arm(g.front, 'near', [p.nx, p.ny], c.look, 0); return [26, 19]; } };
+/* Alchemy: the staff planted in the right hand, the item held out on the left palm; the light gathers and the item
+   turns to coin. */
+SPEC.alch = { lean: 'sight', mode: 'action', beats: [{ at: .82, sfx: 'cast', fx: 'flash', replaces: 'cast' }], wipe: [.2, .5], contact: 'free', stand: 22, rest: .1,
+  keys: [K(0, { nx: 17, ny: 21, sy: 1 }), K(.6, { nx: 18, ny: 19, sy: 0 }, 'io'), K(.82, { nx: 19, ny: 18, sy: -1 }, 'in'), K(1, { nx: 17, ny: 21, sy: 1 }, 'io')],
+  draw(p, g, c) { const B = [17, 31 + p.sy]; TOOL.staff(g.back, B, -86, c.orb); arm(g.back, 'far', at(B, -86, 12), c.look, 0); if (!c.wipe) { arm(g.front, 'near', [p.nx, p.ny], c.look, 0); g.front.fix([p.nx + 1, p.ny - 1], '#e6b84a'); } return [p.nx + 1, p.ny - 2]; } };
+/* Hunting: crouched on the trail reading prints; kneel to set the trap; then up with the spear for the strike, which
+   stops short: whether it lands is shown only after the roll. */
+SPEC.hunt = { lean: 'none', mode: 'action', beats: [{ at: .88, sfx: 'swish' }], wipe: null, contact: 'free', stand: 56, rest: .1,
+  posture: t => t < .45 ? 'crouch' : t < .75 ? 'kneel' : 'stand',
+  keys: [K(0, { nx: 18, ny: 28, fx: 15, fy: 26, s: 0 }), K(.2, { nx: 19, ny: 30, fx: 15, fy: 26, s: 0 }, 'io'), K(.44, { nx: 18, ny: 29, fx: 15, fy: 26, s: 0 }, 'io'), K(.46, { nx: 19, ny: 30, fx: 20, fy: 30, s: 0 }, 'lin'), K(.74, { nx: 19, ny: 30, fx: 21, fy: 30, s: 0 }, 'io'),
+    K(.76, { nx: 15, ny: 21, fx: 12, fy: 21, s: 0 }, 'lin'), K(.84, { nx: 13, ny: 21, fx: 10, fy: 21, s: 0 }, 'out'), K(.88, { nx: 19, ny: 21, fx: 16, fy: 21, s: 1 }, 'in'), K(1, { nx: 16, ny: 21, fx: 13, fy: 21, s: 0 }, 'io')],
+  draw(p, g, c) { const pos = c.posture, dy = A.WORK_POSTURE[pos].dy;
+    if (pos === 'stand') { const a = -4, N = [p.nx, p.ny], F = [p.fx, p.fy + .3]; TOOL.spear(g.front, at(N, a, -14), a, IRON); if (!c.wipe) arm(g.front, 'near', N, c.look, 0); arm(g.back, 'far', F, c.look, 0); return at(N, a, 22); }
+    arm(g.back, 'far', [p.fx, Math.min(31, p.fy)], c.look, dy); if (!c.wipe) arm(g.front, 'near', [p.nx, Math.min(31, p.ny)], c.look, dy); return [p.nx, p.ny]; } };
+/* Beastmastery capture: crouched and quiet on the track, kneel to set the live trap, then coax: bait held out low on
+   the flat of the hand, the other hand still. */
+SPEC.capture = { lean: 'none', mode: 'action', beats: [], wipe: null, contact: 'free', stand: 40, rest: .1,
+  posture: t => t < .4 ? 'crouch' : 'kneel',
+  keys: [K(0, { nx: 18, ny: 28, fx: 15, fy: 26 }), K(.38, { nx: 19, ny: 29, fx: 15, fy: 26 }, 'io'), K(.42, { nx: 19, ny: 30, fx: 20, fy: 30 }, 'lin'), K(.68, { nx: 20, ny: 30, fx: 21, fy: 30 }, 'io'), K(.72, { nx: 20, ny: 26, fx: 14, fy: 27 }, 'io'), K(.86, { nx: 21, ny: 26, fx: 14, fy: 27 }, 'io'), K(1, { nx: 20, ny: 26, fx: 14, fy: 27 }, 'io')],
+  draw(p, g, c) { const dy = A.WORK_POSTURE[c.posture].dy; arm(g.back, 'far', [p.fx, Math.min(31, p.fy)], c.look, dy); if (!c.wipe) { arm(g.front, 'near', [p.nx, Math.min(31, p.ny)], c.look, dy); if (c.t > .7) g.front.fix([p.nx + 1, p.ny - 1], '#c8a040'); } return [p.nx, p.ny]; } };
+/* Fieldwork: kneeling at the set, the stake held in the left hand and driven with a wooden mallet in the right. */
+SPEC.stake = { lean: 'none', beatMs: 1200, beats: [{ at: .4, sfx: 'stake', fx: 'dust' }], wipe: [.55, .86], contact: 'free', stand: 40, rest: .9, posture: 'kneel',
+  keys: [K(0, { hx: 16, hy: 23, a: -40, d: 0 }), K(.28, { hx: 14, hy: 19, a: -100, d: 0 }, 'out'), K(.4, { hx: 18, hy: 24, a: -5, d: 1 }, 'in'), K(.5, { hx: 17, hy: 23, a: -30, d: 1 }, 'out'), K(1, { hx: 16, hy: 23, a: -40, d: 0 }, 'io')],
+  draw(p, g, c) { const s0 = [22, 25 + Math.round(p.d)]; TOOL.stake(g.front, s0, 90); if (!c.wipe) arm(g.front, 'near', [22, 27], c.look, 6); const B = [p.hx, p.hy]; TOOL.mallet(g.back, B, p.a); arm(g.back, 'far', B, c.look, 6); return s0; } };
+/* Sailing: on the quay, hauling the halyard hand over hand to raise the sail before casting off. */
+SPEC.haul = { lean: 'pull', beatMs: 1400, beats: [], wipe: null, contact: 'free', stand: 30, rest: 0,
+  keys: [K(0, { ny: 12, fy: 19 }), K(.5, { ny: 19, fy: 12 }, 'io'), K(1, { ny: 12, fy: 19 }, 'io')],
+  draw(p, g, c) { const N = [16, p.ny], F = [17, p.fy], top = c.mast || [46, -40], hi = N[1] < F[1] ? N : F, lo = hi === N ? F : N;
+    g.front.fline(top, hi, '#c8b080'); g.front.fline(hi, lo, '#c8b080'); g.front.fline(lo, [13, 31], '#c8b080');
+    arm(g.back, 'far', F, c.look, 0); if (!c.wipe) arm(g.front, 'near', N, c.look, 0); return top; } };
+/* Melee practice: at the pell (a post or straw dummy) with sword in the right hand and the shield on the left arm, a
+   cut from over the right shoulder down into the post's flank, then back to guard (Vegetius's drill at the post). */
+SPEC.pell = { lean: 'chop', beatMs: 1200, beats: [{ at: .4, sfx: 'wood', fx: 'chips' }], wipe: [.55, .86], contact: 'edge', station: 'pell', rest: .9,
+  keys: [K(0, { hx: 16, hy: 19, a: -55 }), K(.28, { hx: 12, hy: 10, a: -135 }, 'io'), K(.4, { hx: 18, hy: 17, a: -10 }, 'in'), K(.5, { hx: 18, hy: 18, a: 0 }, 'out'), K(1, { hx: 16, hy: 19, a: -55 }, 'io')],
+  draw(p, g, c) { const B = [p.hx, p.hy], wt = c.weaponType || 'sword', tip = (TOOL[wt] || TOOL.sword)(g.back, B, p.a, c.metal); arm(g.back, 'far', B, c.look, 0);
+    if (!c.wipe) { const N = [15, 19]; arm(g.front, 'near', N, c.look, 0); if (c.shield) { const m = ramp(c.shield, { gl: .7 }); g.front.poly([[13, 13], [17, 13], [17, 21], [15, 24], [13, 21]], m); g.front.fix([13, 13], m.gl); } }
+    return wt === 'warhammer' ? tip : at(B, p.a, wt === 'dagger' ? 6 : 12); } };
+/* Archery practice: side-on to the butt, the bow arm out at the target, the string drawn to the cheek, anchored a
+   breath, loosed; the drawing hand follows back past the ear. */
+SPEC.butts = { lean: 'none', beatMs: 1400, beats: [{ at: .62, sfx: 'bow' }, { at: .74, sfx: 'stake', fx: 'dust' }], wipe: [.8, .95], contact: 'edge', station: 'butt', rest: .05,
+  keys: [K(0, { bx: 16, by: 24, ba: -60, dx: 15, dy: 22, n: 0, f: 0 }), K(.15, { bx: 20, by: 16, ba: -90, dx: 20, dy: 16, n: 1, f: 0 }, 'io'), K(.45, { bx: 20, by: 16, ba: -90, dx: 15, dy: 11, n: 1, f: 0 }, 'io'), K(.62, { bx: 20, by: 16, ba: -90, dx: 14, dy: 11, n: 1, f: 0 }, 'lin'),
+    K(.63, { bx: 20, by: 16, ba: -90, dx: 12, dy: 11, n: 0, f: 0 }, 'lin'), K(.74, { bx: 20, by: 16, ba: -90, dx: 11, dy: 12, n: 0, f: 1 }, 'out'), K(.85, { bx: 19, by: 18, ba: -80, dx: 13, dy: 18, n: 0, f: 1 }, 'io'), K(1, { bx: 16, by: 24, ba: -60, dx: 15, dy: 22, n: 0, f: 1 }, 'io')],
+  draw(p, g, c) { const G = [p.bx, p.by], Nh = [p.dx, p.dy], drawn = p.n > .5; bowDraw(g.front, G, p.ba, c.bowLen, ramp(c.bowCol || '#9b6a3e'), drawn ? [p.dx + 1, p.dy] : null);
+    if (drawn) g.front.line([p.dx + 1, p.dy], at([p.dx + 1, p.dy], 0, 14), ramp('#c8a070'));
+    if (!c.wipe) arm(g.front, 'near', G, c.look, 0); arm(g.back, 'far', Nh, c.look, 0);
+    if (c.t > .62 && c.t < .74) { const k = (c.t - .62) / .12, x0 = p.bx + 2, x1 = c.edgeX != null ? c.edgeX : x0 + 30, x = lerp(x0, x1 - 12, k); g.front.line([x, 16], [x + 12, 16], ramp('#c8a070')); }
+    else if (c.t >= .74 && c.edgeX != null) g.front.line([c.edgeX - 7, 16], [c.edgeX + 1, 16], ramp('#c8a070'));
+    return [p.bx + 14 + (c.t >= .74 ? 0 : 0), 16]; } };
+
+/* which spec runs an activity */
+const specKey = act => {
+  if (!act) return null; const k = act.kind;
+  if (k === 'wood' || k === 'mine' || k === 'fish' || k === 'thieve' || k === 'hunt' || k === 'capture' || k === 'alch') return k;
+  if (k === 'train') return 'stake';
+  if (k === 'sail') return 'haul';
+  if (k === 'drill') return String(act.id).startsWith('ranged') ? 'butts' : 'pell';
+  if (k === 'recipe') { const r = D.RECIPES[act.id]; if (!r) return null;
+    if (r.skill === 'smithing') return /^smelt/.test(r.id) ? 'smelt' : 'forge';
+    return { cooking: 'cook', crafting: 'stitch', carpentry: 'saw', magic: 'runes', enchanting: 'engrave', herbalism: 'grind', exploration: 'survey' }[r.skill] || null; }
   return null;
 };
-let stageEl = null, beatSet = 0, lastStrike = -1, lastAct = null;
+const specFor = act => { const k = specKey(act); return k ? Object.assign({ id: k }, SPEC[k]) : null; };
+
+/* ---------- poses and frames ---------- */
+const FRAMES = 20;
+const poseAt = (spec, t) => { const ks = spec.keys; let i = 0; while (i < ks.length - 2 && ks[i + 1][0] <= t) i++;
+  const [t0, a] = ks[i], [t1, b, e] = ks[i + 1], k = t1 > t0 ? Math.max(0, Math.min(1, (t - t0) / (t1 - t0))) : 1, f = (EASE[e] || EASE.io)(k), o = {};
+  for (const n in b) o[n] = lerp(a[n] ?? b[n], b[n], f); return o; };
+const postureAt = (spec, t) => typeof spec.posture === 'function' ? spec.posture(t) : spec.posture || 'stand';
+/* the frame on screen for cycle time t; impacts land exactly on a frame boundary (each beat's `at` is a multiple of 1/FRAMES) */
+const frameOf = t => Math.min(FRAMES - 1, Math.floor(t * FRAMES + 1e-6));
+const cache = new Map();
+const lookFor = look => { const L = Q.heroRigLook ? Q.heroRigLook(look) : { skin: 0, sleeve: '#3f7fbf', sleeveType: 'cloth' };
+  const sl = ramp(L.sleeve, L.sleeveType === 'plate' ? { gl: .72 } : {}), sk = A.SKIN[L.skin] || A.SKIN[0];
+  return { key: [L.skin, L.sleeve, L.sleeveType].join(','), sleeve: sl, skin: sk, sleeveFar: darker(sl), skinFar: darker(sk) }; };
+/* draws frame i of a spec into two canvases: back (the far arm, behind the body) and front (tools and the near arm) */
+const drawFrame = (spec, ctx, i, wipe) => {
+  const key = [spec.id, ctx.key, i, wipe ? 'w' : ''].join('|'); if (cache.has(key)) return cache.get(key);
+  const t = (i + .5) / FRAMES, tq = i / FRAMES, p = poseAt(spec, tq), pos = postureAt(spec, tq);
+  const g = { front: layer(Spr(RW, RH)), back: layer(Spr(RW, RH)) };
+  const contact = spec.draw(p, g, Object.assign({}, ctx, { wipe, posture: pos, t: tq }));
+  const out = { back: A.toCanvas(g.back.spr), front: A.toCanvas(g.front.spr), posture: pos, contact, t };
+  if (cache.size > 900) cache.delete(cache.keys().next().value); cache.set(key, out); return out;
+};
+/* the contact point of a spec at its first strike, in body coordinates (for placing the hero and for tests) */
+const contactOf = (spec, ctx) => { const b = (spec.beats || [])[0], t = b ? b.at : spec.rest || 0; return spec.draw(poseAt(spec, t), { front: layer(Spr(RW, RH)), back: layer(Spr(RW, RH)) }, Object.assign({}, ctx, { posture: postureAt(spec, t), t })); };
+
+/* ---------- stations: the anvil, trestles, tripod and the rest, drawn at the hero's scale ---------- */
+/* stage coordinates: x from the scene's centre, y up from the ground line (negative is up). The station canvas covers
+   x -48..47 and y -56..-1. Each returns where the piece rests (x, y of its bottom centre) and the item's scale. */
+const ST = (spr) => { const T = (x, y) => [x + SW / 2, y + SH]; return {
+  rect(x, y, w, h, r) { const [a, b] = T(x, y); spr.rect(a, b, w, h, r); }, fix(x, y, c) { const [a, b] = T(x, y); spr.fix(a, b, c); },
+  line(x0, y0, x1, y1, r) { const [a, b] = T(x0, y0), [c, d] = T(x1, y1); spr.line(a, b, c, d, r); }, ell(x, y, rx, ry, r) { const [a, b] = T(x, y); spr.ell(a, b, rx, ry, r); },
+  poly(pts, r) { spr.poly(pts.map(([x, y]) => T(x, y)), r); } }; };
+const STATION = {
+  /* anvil on a stump: the face at the hero's hanging knuckles (8 px up), 12 px (64 cm) long, horn away from the smith */
+  anvil(s, c) { const m = ramp(c.anvil || '#6a6e76', { gl: .7 }), st = ramp('#7a5236'); s.rect(-4, -4, 8, 4, st); s.fix(-3, -4, '#9a7a50'); s.fix(1, -2, st.lo);
+    s.rect(-4, -5, 8, 1, m); s.rect(-2, -7, 4, 2, m); s.rect(-5, -9, 9, 2, m); s.poly([[4, -9], [8, -9], [4, -7]], m); s.rect(-6, -9, 1, 1, m); s.fix(-5, -9, m.gl); s.fix(-4, -9, m.gl); return { x: -2, y: -9, k: c.k }; },
+  /* a clay shaft furnace with the bellows' tuyere at its foot; the mould for the bars on a flat stone beside it */
+  furnace(s) { const clay = ramp('#b07a52'); s.poly([[-7, 0], [7, 0], [3, -24], [-3, -24]], clay); s.rect(-3, -25, 6, 1, ramp('#6a4030'));
+    s.ell(0, -27, 2, 2, ramp('#f8b040')); s.fix(0, -28, '#fff0b0'); s.rect(-2, -5, 4, 4, ramp('#2a1810')); s.rect(-1, -3, 2, 2, ramp('#f08030')); s.fix(0, -3, '#f8d060');
+    for (const [x, y] of [[-4, -8], [2, -12], [-2, -17], [3, -5]]) s.fix(x, y, clay.lo); s.rect(10, -2, 8, 2, STONE); return { x: 14, y: -2, k: 1 }; },
+  /* two trestles at belt height with the board across them */
+  trestle(s) { const w = ramp('#9b7a4e'); for (const x of [-8, 14]) { s.line(x - 3, -1, x, -9, w); s.line(x + 3, -1, x, -9, w); s.rect(x - 3, -10, 7, 1, w); }
+    s.rect(-14, -12, 34, 2, ramp('#d8b878')); s.fix(-14, -12, '#f0d8a0'); for (let i = 0; i < 4; i++) s.fix(-2 + i * 2, -1 - (i % 2), '#e8d0a0'); return { x: 16, y: -12 }; },
+  /* an iron tripod with the pot on its chain over a small fire; a warming stone for the dish */
+  tripod(s) { const ir = ramp('#4a4a52'); s.line(-7, -1, 0, -24, ir); s.line(7, -1, 0, -24, ir); s.line(0, -24, 0, -14, ir);
+    s.ell(0, -9, 4.5, 3.5, ramp('#3a3a42')); s.rect(-5, -12, 10, 1, ramp('#5a5a62')); s.ell(0, -2, 4, 1.5, ramp('#e07030')); s.ell(0, -2, 2, 1, ramp('#f8d060'));
+    for (const x of [-4, -1, 2]) s.rect(x, -1, 3, 1, ramp('#6a4a30')); s.rect(10, -3, 7, 3, STONE); return { x: 13, y: -3, k: 1 }; },
+  /* a stitching clam between the knees: two staves meeting at the jaws, holding the work upright */
+  clam(s) { const w = ramp('#a07a4a'); s.line(-3, -1, -2, -7, w); s.line(-1, -1, -1, -7, w); s.rect(-3, -8, 3, 1, w); return { x: -1.5, y: -8, k: 1 }; },
+  /* a stone tablet (or the piece) on a waist-high block */
+  tablet(s) { s.rect(-6, -9, 12, 9, ramp('#7a6a5a')); s.rect(-7, -11, 14, 2, ramp('#9a948c')); s.fix(-7, -11, '#c8c2b8'); return { x: 3, y: -11, k: 1 }; },
+  /* a table at belt height with a stone mortar on it */
+  mortar(s) { const w = ramp('#8a6040'); s.rect(-9, -12, 22, 2, w); s.rect(-8, -10, 2, 10, w); s.rect(10, -10, 2, 10, w); s.poly([[-4, -16], [2, -16], [1, -12], [-3, -12]], ramp('#9a948c')); s.rect(-4, -16, 6, 1, ramp('#7a746c')); return { x: 7, y: -12, k: 1 }; },
+  /* a plane table on a tripod, the sheet pinned on it and the alidade (a sighting rule) on the sheet */
+  planetable(s) { const w = ramp('#8a6040'); s.line(-4, -1, 0, -11, w); s.line(4, -1, 0, -11, w); s.line(0, -1, 0, -11, w); s.rect(-7, -13, 14, 2, w); s.rect(-6, -14, 12, 1, ramp('#f0e6cc')); s.rect(-4, -15, 8, 1, ramp('#6a5a40')); s.fix(-4, -16, '#6a5a40'); s.fix(3, -16, '#6a5a40'); return { x: 5, y: -14, k: 1 }; },
+  /* the pell: a post as tall as a man; straw dummy, oak post, iron-bound or runed by the drill */
+  pell(s, c) { const v = c.drill || 'straw', post = ramp(v === 'oak' ? '#7a5236' : '#9b7a4e');
+    s.rect(-2, -30, 4, 30, post); s.rect(-4, -1, 8, 1, ramp('#6a4a30'));
+    if (v === 'straw') { s.ell(0, -22, 5, 7, ramp('#d8b860')); s.ell(0, -32, 3.5, 3.5, ramp('#d8b860')); s.line(-4, -20, 4, -20, ramp('#8a6a30')); }
+    if (v === 'iron') for (const y of [-26, -18, -10]) s.rect(-3, y, 6, 1, IRON);
+    if (v === 'runed') for (const y of [-24, -16]) { s.fix(-1, y, '#8fc0ff'); s.fix(0, y + 1, '#c8b0ff'); }
+    return null; },
+  /* a hay-bale butt with its painted face */
+  butt(s) { const h = ramp('#d8b860'); s.rect(-5, -12, 10, 12, h); s.rect(-5, -24, 10, 12, h); s.line(-5, -12, 4, -12, ramp('#a88a40'));
+    s.ell(-1, -16, 3.5, 3.5, ramp('#f0e6cc')); s.ell(-1, -16, 2, 2, ramp('#c8483c')); s.fix(-1, -16, '#f0d060'); return null; }
+};
+const stationCanvas = (name, c) => { const key = 'st|' + name + '|' + JSON.stringify(c); if (cache.has(key)) return cache.get(key); const spr = Spr(SW, SH), info = STATION[name](ST(spr), c) || null; const out = { canvas: A.toCanvas(spr), info }; cache.set(key, out); return out; };
+
+/* how big the thing being made sits on the anvil, bench or table: by what it really is, at a whole-number scale
+   (1x = 16 css px, about 28 cm) */
+const pieceScale = id => { const it = D.ITEMS[id]; if (!it) return 1; const s = it.slot;
+  if (s === 'weapon') return /dagger|knife/.test(id) || it.wtype === 'dagger' ? 1 : 2;
+  if (s === 'body' || s === 'legs' || s === 'shield') return 2;
+  if (/^plank|^tool_|bow|staff|furn/.test(id)) return 2; return 1; };
+
+/* ---------- reading a sprite's edge, so the tool meets the trunk or rock face exactly ---------- */
+const alphaOf = img => { try { const c = document.createElement('canvas'), w = img.naturalWidth, h = img.naturalHeight; if (!w || !h) return null; c.width = w; c.height = h; const x = c.getContext('2d'); x.drawImage(img, 0, 0); return { w, h, d: x.getImageData(0, 0, w, h).data }; } catch (e) { return null; } };
+const edgeAt = (al, row) => { if (!al) return null; for (const r of [row, row - 1, row + 1, row - 2, row + 2]) { if (r < 0 || r >= al.h) continue; for (let x = 0; x < al.w; x++) if (al.d[(r * al.w + x) * 4 + 3] > 40) return x; } return null; };
+const bottomGap = al => { if (!al) return 0; for (let y = al.h - 1; y >= 0; y--) for (let x = 0; x < al.w; x++) if (al.d[(y * al.w + x) * 4 + 3] > 40) return al.h - 1 - y; return 0; };
+
+/* ---------- mounting the rig on a work scene ---------- */
+const GROUND = 4; /* the district's ground line, district px above the scene's bottom (towns.js districtFor) */
+const toolMetal = act => { const sk = act && (act.kind === 'wood' ? 'woodcutting' : act.kind === 'mine' ? 'mining' : null); const k = sk && Q.toolKey && Q.toolKey(sk), n = k && Q.toolTier && Q.toolTier(sk), it = n && D.ITEMS[`tool_${k}_${n}`];
+  return ramp(it && it.col || '#9aa3ad', { gl: .72 }); };
+const ctxFor = (spec, act) => {
+  const look = lookFor(S().look), eq = (S().equip) || {}, w = eq.weapon && D.ITEMS[eq.weapon];
+  const c = { look, key: look.key, metal: toolMetal(act) };
+  if (spec.id === 'forge') { const g = S().smithGear || {}; c.metal = ramp(Q.smithMetalCol ? Q.smithMetalCol('hammer') : '#b98d4e', { gl: .72 }); c.anvil = Q.smithMetalCol ? Q.smithMetalCol('anvil') : null; c.key += '|' + (g.hammer || 0); }
+  if (spec.id === 'pell') { const t = !w ? 'sword' : /dagger/.test(w.id) || w.wtype === 'dagger' ? 'dagger' : /hammer/.test(w.id) || w.wtype === 'hammer' ? 'warhammer' : w.id === 'barnacle_cutlass' ? 'cutlass' : 'sword';
+    c.weaponType = t; c.metal = ramp(w && w.col || '#cdd5dc', { gl: .75 }); c.shield = eq.shield && D.ITEMS[eq.shield] ? D.ITEMS[eq.shield].col : null; c.drill = String(act.id).split(':')[1]; c.key += '|' + t + (w ? w.col : '') + (c.shield || ''); }
+  if (spec.id === 'butts') { c.bowLen = w && /long|yew|magic/.test(w.id) ? 30 : 24; c.bowCol = w && w.col; c.drill = String(act.id).split(':')[1]; c.key += '|' + c.bowLen + (c.bowCol || ''); }
+  if (spec.id === 'alch') { c.orb = ramp(w && w.style === 'magic' && w.id === 'witch_staff' ? '#b79cff' : '#8fc0ff'); }
+  if (spec.id === 'wood' || spec.id === 'mine') c.key += '|' + c.metal.base;
+  return c;
+};
+/* the rig's DOM: two canvases around the body inside .scene-worker, a station canvas, and an effects layer */
+const canvasEl = (cls, w, h, css) => { const c = document.createElement('canvas'); c.width = w; c.height = h; c.className = cls; c.setAttribute('aria-hidden', 'true'); Object.assign(c.style, css); return c; };
+const mount = (stage, act, spec) => {
+  const sc = stage.querySelector('.activity-scene'), worker = sc && sc.querySelector('.scene-worker'), body = worker && worker.querySelector('img'); if (!worker || !body) return null;
+  const ctx = ctxFor(spec, act), rig = { act, spec, ctx, sc, worker, body, frame: -1, wipe: false, posture: null, strikes: {}, t0: act.t0 };
+  sc.classList.add('rigged', 'rig-' + spec.id); sc.querySelectorAll('.action-tool,.work-atmosphere').forEach(e => e.remove());
+  worker.querySelectorAll('.rig-body').forEach(e => e.remove());
+  const wrap = document.createElement('span'); wrap.className = 'rig-body'; worker.insertBefore(wrap, body);
+  rig.back = canvasEl('rig-back', RW, RH, { left: -OX * PX + 'px', width: RW * PX + 'px', height: RH * PX + 'px' }); rig.front = canvasEl('rig-front', RW, RH, { left: -OX * PX + 'px', width: RW * PX + 'px', height: RH * PX + 'px' });
+  wrap.append(rig.back, body, rig.front);
+  worker.className = 'scene-worker lean-' + (spec.lean || 'none');
+  const ground = (spec.ground || GROUND) * PX; worker.style.bottom = ground + 'px';
+  /* the station, centred where the target was, and the piece on it */
+  const tgt = sc.querySelector('.scene-target');
+  sc.querySelectorAll('.work-station,.work-fx').forEach(e => e.remove());
+  if (spec.station) { const st = stationCanvas(spec.station, { anvil: ctx.anvil, drill: ctx.drill });
+    const cv = canvasEl('work-station', SW, SH, { left: `calc(50% - ${SW / 2 * PX}px)`, bottom: ground + 'px', width: SW * PX + 'px', height: SH * PX + 'px' }); cv.getContext('2d').drawImage(st.canvas, 0, 0); sc.appendChild(cv); rig.station = st;
+    if (tgt) { if (!st.info) tgt.classList.add('rig-hidden'); else { tgt.classList.add('on-station'); const img = tgt.querySelector('img'), r = D.RECIPES[sc.dataset.task], k = st.info.k || pieceScale(r ? Object.keys(r.out)[0] : null);
+      tgt.style.left = `calc(50% + ${st.info.x * PX}px)`; tgt.style.bottom = (ground - st.info.y * PX) + 'px';
+      if (img) { img.style.setProperty('width', 16 * k + 'px', 'important'); img.style.setProperty('height', 16 * k + 'px', 'important'); img.dataset.snapped = 1; }
+      if (spec.heat) tgt.insertAdjacentHTML('beforeend', '<span class="work-heat" aria-hidden="true"></span>'); } } }
+  const fx = document.createElement('span'); fx.className = 'work-fx'; fx.setAttribute('aria-hidden', 'true'); sc.appendChild(fx); rig.fx = fx;
+  stage._rig = rig; place(rig); return rig;
+};
+/* where the hero stands: at their stand distance from the station, or so the tool meets the target's edge */
+const place = rig => {
+  const { spec, ctx, sc, worker } = rig, tgt = sc.querySelector('.scene-target'), img = tgt && tgt.querySelector('img');
+  let bx = -(spec.stand || 30), edgeX = null;
+  if (spec.id === 'fish') ctx.float = [-bx - 2, 19]; /* the float sits over the fish, out in the water */
+  if (spec.id === 'haul') ctx.mast = [-bx + 16, -40]; /* the halyard runs up to the boat's masthead (towns.js ship at the quay) */
+  const contact = contactOf(spec, ctx);
+  if (spec.contact === 'edge') {
+    let al = null, k = PX, left = 0;
+    if (spec.station && rig.station) { /* a drawn station (pell, butt): read its own pixels */ const c = rig.station.canvas, x = c.getContext('2d'); al = { w: SW, h: SH, d: x.getImageData(0, 0, SW, SH).data }; k = PX; left = -SW / 2; }
+    else if (img && img.complete && img.naturalWidth) { al = alphaOf(img); k = (img.offsetWidth || img.naturalWidth * PX) / img.naturalWidth; left = -(img.offsetWidth || 0) / 2 / PX;
+      const gap = bottomGap(al); if (gap && tgt) tgt.style.marginBottom = (GROUND * PX - gap * k) + 'px'; /* stand the target's lowest pixel on the ground line */ }
+    else if (img) { img.addEventListener('load', () => { if (rig.sc.isConnected) place(rig); }, { once: true }); }
+    if (al) { const rows = al.h, hy = contact[1] - 32, row = spec.station ? SH + Math.round(hy) : rows - 1 - Math.round(-hy * PX / k);
+      const ex = edgeAt(al, row); if (ex != null) { edgeX = left + ex * k / PX; bx = Math.round(edgeX - contact[0] + 1); } }
+  }
+  rig.bx = bx; rig.ctx.edgeX = edgeX != null ? edgeX - bx : null; /* butts: the arrow flies to the face (body coordinates) */
+  if (spec.id === 'butts') { for (const k of [...cache.keys()]) if (k.startsWith(spec.id + '|')) cache.delete(k); rig.frame = -1; }
+  rig.ctx.key = rig.ctx.key.replace(/\|bx-?\d+$/, '') + '|bx' + bx;
+  worker.style.left = `calc(50% + ${bx * PX}px)`; sc.style.setProperty('--worker-x', `calc(50% + ${bx * PX}px)`);
+  rig.contactStage = [bx + contact[0], contact[1] - 32];
+  if (rig.fx) { rig.fx.style.left = `calc(50% + ${(bx + contact[0]) * PX}px)`; rig.fx.style.bottom = ((spec.ground || GROUND) * PX + (32 - contact[1]) * PX) + 'px'; }
+};
+/* draw frame i (and the right posture of the body) */
+const show = (rig, t) => {
+  const { spec, ctx } = rig, still = calm(), tt = still ? (spec.rest || 0) : t, i = frameOf(tt);
+  const wipeUrl = rig.wipeUrl || (rig.wipeUrl = {}), pos = postureAt(spec, i / FRAMES);
+  if (pos !== rig.posture) { rig.posture = pos; rig.worker.dataset.posture = pos; const base = Q.heroFrameUrl(S().look, null, pos); if (rig.body.getAttribute('src') !== base) rig.body.setAttribute('src', base); }
+  const wu = wipeUrl[pos] || (wipeUrl[pos] = Q.heroFrameUrl(S().look, 'wipe', pos));
+  let wipe = rig.body.getAttribute('src') === wu;
+  /* a wipe that a late timer let run on past its window is cut short before the next strike (personality.js puts
+     the plain figure back on its next tick) */
+  const W = spec.wipe; if (wipe && (!W || still || t < W[0] - .03 || t > W[1] + .08)) { rig.body.setAttribute('src', Q.heroFrameUrl(S().look, null, pos)); wipe = false; }
+  if (i === rig.frame && wipe === rig.wipe) return i;
+  const f = drawFrame(spec, ctx, i, wipe); rig.frame = i; rig.wipe = wipe; rig.worker.dataset.frame = i;
+  for (const [el, src] of [[rig.back, f.back], [rig.front, f.front]]) { const x = el.getContext('2d'); x.clearRect(0, 0, RW, RH); x.drawImage(src, 0, 0); }
+  return i;
+};
+/* effects at the contact point: chips, sparks, sawdust, ripples; the target gives a little */
+const FX = { chips: ['#d8b878', '#a8845a', '#7a5236'], sparks: ['#fff0b0', '#f8c050', '#f08030'], dust: ['#e8d0a0', '#d8b878'], ripple: ['#d8eef4'], splash: ['#d8eef4', '#a8d0e0', '#ffffff'], glint: ['#fff3cf', '#e6b84a'], flare: ['#f8d060', '#f08030'], flash: ['#fff3cf', '#c8b0ff'] };
+const burst = (rig, kind) => {
+  if (calm() || !rig.fx || !rig.fx.isConnected || !FX[kind]) return;
+  const cols = FX[kind], n = kind === 'ripple' ? 2 : 5, up = kind === 'dust' || kind === 'chips' ? 1 : -1;
+  for (let i = 0; i < n; i++) { const s = document.createElement('i'); s.style.background = cols[i % cols.length]; if (kind === 'ripple' || kind === 'splash') s.classList.add('wide');
+    rig.fx.appendChild(s); const dx = (i - n / 2) * (kind === 'sparks' ? 4 : 3) * (kind === 'ripple' ? 3 : 1), dy = kind === 'ripple' ? 0 : -(6 + (i % 3) * 5);
+    try { s.animate([{ transform: 'translate(0,0)', opacity: 1 }, { transform: `translate(${dx}px,${dy}px)`, opacity: .9, offset: .35 }, { transform: `translate(${dx * 1.6}px,${dy + 18 * (up > 0 ? 1 : .4)}px)`, opacity: 0 }], { duration: 420 + i * 40, easing: 'cubic-bezier(.2,.7,.4,1)' }).finished.then(() => s.remove(), () => s.remove()); } catch (e) { s.remove(); } }
+  const tgt = rig.sc.querySelector(rig.spec.station ? '.work-station' : '.scene-target');
+  if (tgt && (kind === 'chips' || kind === 'sparks' || kind === 'dust')) try { tgt.animate([{ translate: '0 0' }, { translate: '2px 0' }, { translate: '-1px 0' }, { translate: '0 0' }], { duration: 160, composite: 'add' }); } catch (e) { /* older browsers: no give */ }
+};
+/* the heat in the piece fades through the action and comes back with the next one (forge) */
+const heat = (rig, k) => { const h = rig.sc.querySelector('.work-heat'); if (h) h.style.opacity = calm() ? .5 : (1 - k * .85).toFixed(3); };
+
+/* a tool's drawn length in hero px (1 px is about 5.3 cm): what tests/skill-realism.cjs holds to real sizes */
+const toolLength = name => { const g = layer(Spr(RW, RH)); TOOL[name](g, [0, 0], 0, IRON); let a = RW, b = -1;
+  for (let y = 0; y < RH; y++) for (let x = 0; x < RW; x++) if (g.spr.px[y * RW + x]) { a = Math.min(a, x); b = Math.max(b, x); } return b - a + 1; };
+Q.workRig = {
+  TOOLS: Object.keys(TOOL), toolLength, STATIONS: Object.keys(STATION),
+  SPEC, FRAMES, RW, RH, OX, OY, PX, specFor, specKey, poseAt, drawFrame, contactOf, pieceScale, stationCanvas,
+  mount, show, burst, heat, ctxFor, calm, frameOf,
+  /* for personality.js: the current cycle and when a brow wipe fits (never over a strike) */
+  beatNow: () => { const r = Q.workRig.live; if (!r || !r.spec.wipe) return null; return { beat: r.beat, key: r.cycleKey, phase: r.t, wipe: r.spec.wipe }; },
+  wipeOk: () => { const r = Q.workRig.live; if (!r) return true; const W = r.spec.wipe; return !!W && r.t >= W[0] - .03 && r.t <= W[1] + .08; },
+  live: null
+};
+/* redraws replace the stage: the clock (strike_sync.js) remounts on the next frame */
+})();
+
+</script>
+<script>
+/* Idlewick: the sound lands when the swing lands (20 Nov 2026, owner feedback), now for every skill's real motion
+   (skill realism, 27 Nov 2026; docs/skill-realism.md).
+   One clock for the work scene. Each activity has a work spec (js/work_rig.js): beat work (chopping, mining, smithing,
+   sawing, stitching...) repeats a whole number of swings per action, in step with the action's own clock; action work
+   (fishing, thieving, hunting, capture, alchemy) plays one cycle per action. Every frame this works out where in the
+   cycle we are, has the rig draw that frame, and then plays each of the cycle's sounds as the frame it belongs to
+   appears: the axe's thunk on the frame the bit meets the notch, the float's plop as it lands and the splash as the
+   rod strikes, the rasp of the push stroke and the lighter pull of the saw. A sound that marks the action's own end
+   (the coin chink of a lifted purse, the alchemy flash) replaces the once-per-task sound, so nothing doubles up.
+   Presentation only: action timing and rewards are untouched. Elapsed time drives everything, so refresh rate and
+   frame drops change nothing; calm and reduced motion keep the sounds and hold the ready pose. */
+(() => {
+const DQ = window.DQ, D = DQ.data, UI = DQ.ui;
+const R = () => DQ.workRig;
 /* the working stage inside #view (what '#view .activity-stage.working' finds), from a live list the browser keeps
    current, so a frame never searches the whole page (27 Nov 2026: that search was the biggest per-frame cost in a fight) */
 let viewEl = null, stages = null;
 const findStage = () => { const v = document.getElementById('view'); if (v !== viewEl) { viewEl = v; stages = v ? v.getElementsByClassName('activity-stage') : null; }
   if (stages) for (const s of stages) if (s.classList.contains('working')) return s; return null; };
+/* the cycle: beat work divides the action into whole swings of about spec.beatMs; action work is one cycle */
+DQ.workCycle = (act, spec, now = Date.now()) => {
+  const dur = act.dur, beats = spec.mode === 'action' ? 1 : Math.max(1, Math.round(dur / (spec.beatMs || 1200))), beat = dur / beats;
+  const elapsed = Math.max(0, (now - act.t0) % dur); return { beat, beats, elapsed, t: (elapsed % beat) / beat, cycle: Math.floor(elapsed / beat) };
+};
+/* the sound each kind of work used to play once per finished task, kept quiet while its strike sound runs */
+const TASK_SOUND = { wood: 'wood', mine: 'mine', fish: 'fish', thieve: 'thieve', alch: 'cast' };
+let lastStage = null;
 const loop = () => {
-  const act = DQ.act, name = soundOf(act), stage = name && findStage();
-  if (!name || !stage || document.hidden || !act.dur) { DQ.strikeLive = null; stageEl = null; return; }
-  const dur = act.dur, swings = Math.max(1, Math.round(dur / 1200)), beat = dur / swings;
-  const elapsed = Math.max(0, (Date.now() - act.t0) % dur);
-  if (stage !== stageEl || Math.abs(beat - beatSet) > 1 || act !== lastAct) {
-    /* one swing per beat, phase-locked to the action's start, so the last swing ends as the action completes */
-    stageEl = stage; beatSet = beat; lastAct = act;
-    stage.style.setProperty('--work-beat', Math.round(beat) + 'ms');
-    stage.querySelectorAll('.scene-worker,.action-tool,.work-atmosphere i').forEach(el => { el.style.animationDuration = Math.round(beat) + 'ms'; el.style.animationDelay = -Math.round(elapsed % beat) + 'ms'; });
-    lastStrike = Math.floor(elapsed / beat - IMPACT);
+  const act = DQ.act, rig = R(), stage = act && findStage();
+  const spec = rig && act && act.dur && rig.specFor(act);
+  if (!spec || !stage || document.hidden) { DQ.strikeLive = null; if (rig) rig.live = null; lastStage = null; return; }
+  let r = stage._rig;
+  if (!r || r.act !== act || !r.worker.isConnected || !r.sc.isConnected) { r = rig.mount(stage, act, spec); if (!r) { DQ.strikeLive = null; rig.live = null; return; } r.last = {}; }
+  const c = DQ.workCycle(act, spec);
+  /* (the engine re-bases act.t0 on every tick, so a new action shows as elapsed time starting again, never as a new t0:
+     each strike counter falls back to -1 and the next swing plays) */
+  if (stage !== lastStage || Math.abs(c.beat - (r.beat || 0)) > 1) {
+    /* the body's lean (CSS) runs one loop per cycle, phase-locked to the action's start */
+    lastStage = stage; r.beat = c.beat;
+    stage.style.setProperty('--work-beat', Math.round(c.beat) + 'ms');
+    r.worker.style.animationDuration = Math.round(c.beat) + 'ms'; r.worker.style.animationDelay = -Math.round(c.elapsed % c.beat) + 'ms';
+    /* a fresh action: the strikes already behind us this cycle stay played */
+    r.last = {}; for (const [j, b] of (spec.beats || []).entries()) r.last[j] = Math.floor(c.elapsed / c.beat - b.at);
   }
-  DQ.strikeLive = name;
-  const strike = Math.floor(elapsed / beat - IMPACT);
-  if (strike !== lastStrike) { if (strike >= 0) DQ.sfxStrike && DQ.sfxStrike(name); lastStrike = strike; } /* -1 is the wind-up before the first swing lands */
+  if (rig.freeze != null) c.t = rig.freeze; /* tests and screenshots: hold one moment of the cycle */
+  /* swings counted as they pass (a new cycle, or the elapsed time starting again with the next action) */
+  if (c.cycle !== r.cyc || c.elapsed + 1 < (r.prevEl || 0)) r.swing = (r.swing || 0) + 1; r.cyc = c.cycle; r.prevEl = c.elapsed;
+  r.t = c.t; r.cycleKey = r.swing; rig.live = r;
+  /* the strikes this frame crosses; on a slow frame that skipped past one, the strike frame itself is shown with its
+     sound (never a sound over the follow-through) */
+  const hits = []; (spec.beats || []).forEach((b, j) => { const n = Math.floor(c.elapsed / c.beat - b.at); if (n !== r.last[j]) { if (n >= 0) hits.push(b); r.last[j] = n; } });
+  const frame = rig.show(r, hits.length && rig.freeze == null ? hits[hits.length - 1].at : c.t);
+  if (spec.heat) rig.heat(r, c.elapsed / act.dur);
+  /* each sound plays as its own frame appears (the frame is already on screen: show() ran first) */
+  DQ.strikeLive = (spec.beats || []).some(b => b.sfx) ? (TASK_SOUND[act.kind] || (spec.beats.find(b => b.replaces) || {}).replaces || spec.beats[0].sfx) : null;
+  for (const b of hits) { r.lastStrike = { sfx: b.sfx, frame, want: rig.frameOf(b.at), at: performance.now() }; if (b.sfx && DQ.sfxStrike) DQ.sfxStrike(b.sfx); if (b.fx) rig.burst(r, b.fx); }
 };
 DQ.frame.add(loop); /* the shared animation clock (util.js) */
 })();
@@ -28776,13 +29369,17 @@ const FIDGETS = {
   pack: { seq: [[0, 'pack'], [1700, null]], move: [{ translate: '0 0' }, { translate: '-1px 2px', offset: .18 }, { translate: '-1px 2px', offset: .85 }, { translate: '0 0' }], ms: 1700 }
 };
 let lastFidget = '';
-const strikeBeat = () => { const a = Q.act; if (!a || !a.dur || !Q.strikeLive) return null; const beat = a.dur / Math.max(1, Math.round(a.dur / 1200)), t = Math.max(0, Date.now() - a.t0); return { beat, key: a.t0 + ':' + Math.floor(t / beat), phase: (t % beat) / beat }; };
+/* the work cycle from the work rig (js/work_rig.js, js/strike_sync.js): its beat, phase and the part of it a wipe may
+   fill (after the strike, before the next wind-up; each skill's own window). No window: no wipe (a pickpocket mid-lift,
+   a hunter on the trail) */
+const strikeBeat = () => { const a = Q.act; if (!a || !a.dur) return null; const w = Q.workRig && Q.workRig.beatNow && Q.workRig.beatNow(); if (w) return w;
+  if (!Q.strikeLive) return null; const beat = a.dur / Math.max(1, Math.round(a.dur / 1200)), t = Math.max(0, Date.now() - a.t0); return { beat, key: a.t0 + ':' + Math.floor(t / beat), phase: (t % beat) / beat, wipe: P.WIPE }; };
 
 function heroTick(now, idle, due) {
   const fidget = idle >= P.IDLE_MS && now >= P.nextFidget;
   let fidgeted = false;
   for (const el of heroEls()) {
-    const work = !!el.closest('.scene-worker'), base = heroBase(work), cur = el.getAttribute('src');
+    const wk = el.closest('.scene-worker'), work = wk ? (wk.dataset.posture || true) : false, base = heroBase(work), cur = el.getAttribute('src'); /* at work: the side view in the rig's posture */
     const st = stOf(el, () => ({ next: now + rand(900, P.BLINK[1]), set: null, seq: null, wipeAt: 0, nextWipe: now + rand(14000, 22000) }));
     if (st.epoch !== P.epoch) { st.epoch = P.epoch; st.next = Math.min(st.next, now + rand(P.BLINK[0], P.BLINK[1])); }
     if (cur !== base && cur !== st.set) continue; /* someone else's picture (an old look mid-redraw): leave it */
@@ -28792,9 +29389,10 @@ function heroTick(now, idle, due) {
       const b = strikeBeat();
       /* swings are counted as they pass (each action restarts its own clock, so a swing is its action's start and index) */
       if (b) { if (b.key !== st.swing) { st.swing = b.key; st.swings = (st.swings || 0) + 1; } if (!st.wipeAt) st.wipeAt = st.swings + Math.round(rand(P.WIPE_EVERY[0], P.WIPE_EVERY[1]));
-        if (st.swings >= st.wipeAt && b.phase >= P.WIPE[0] && b.phase < P.WIPE[1] - .05) { play(st, [[0, 'wipe'], [Math.round((P.WIPE[1] - b.phase) * b.beat), null]], now, 'wipe'); st.wipeAt = st.swings + Math.round(rand(P.WIPE_EVERY[0], P.WIPE_EVERY[1])); P.log.push({ wipe: now, phase: b.phase, swing: st.swings }); if (P.log.length > 40) P.log.shift(); }
-        else due((b.phase < P.WIPE[0] ? (P.WIPE[0] - b.phase) : (1 + P.WIPE[0] - b.phase)) * b.beat + 4); }
-      else if (Q.act && now >= st.nextWipe) { play(st, [[0, 'wipe'], [650, null]], now, 'wipe'); st.nextWipe = now + rand(14000, 22000); }
+        const W = b.wipe || P.WIPE;
+        if (st.swings >= st.wipeAt && b.phase >= W[0] && b.phase < W[1] - .05) { play(st, [[0, 'wipe'], [Math.round((W[1] - b.phase) * b.beat), null]], now, 'wipe'); st.wipeAt = st.swings + Math.round(rand(P.WIPE_EVERY[0], P.WIPE_EVERY[1])); P.log.push({ wipe: now, phase: b.phase, swing: st.swings }); if (P.log.length > 40) P.log.shift(); }
+        else due((b.phase < W[0] ? (W[0] - b.phase) : (1 + W[0] - b.phase)) * b.beat + 4); }
+      else if (Q.act && !(Q.workRig && Q.workRig.live) && now >= st.nextWipe) { play(st, [[0, 'wipe'], [650, null]], now, 'wipe'); st.nextWipe = now + rand(14000, 22000); }
       else if (Q.act) due(st.nextWipe - now);
     }
     if (!work && fidget && el.matches('.fig-img') && !st.seq) {
@@ -28805,6 +29403,7 @@ function heroTick(now, idle, due) {
     if (st.seq) {
       const t = now - st.t0; let frame = null, next = Infinity;
       for (const [at, f] of st.seq) { if (at <= t) frame = f; else { next = at; break; } }
+      if (frame === 'wipe' && work && Q.workRig && Q.workRig.wipeOk && !Q.workRig.wipeOk()) { frame = null; next = Infinity; } /* a late timer: never into the next strike */
       show(el, st, frame ? heroUrl(frame, work) : base);
       if (next === Infinity) st.seq = null; else due(next - t);
     }

@@ -60,13 +60,17 @@ const FIDGETS = {
   pack: { seq: [[0, 'pack'], [1700, null]], move: [{ translate: '0 0' }, { translate: '-1px 2px', offset: .18 }, { translate: '-1px 2px', offset: .85 }, { translate: '0 0' }], ms: 1700 }
 };
 let lastFidget = '';
-const strikeBeat = () => { const a = Q.act; if (!a || !a.dur || !Q.strikeLive) return null; const beat = a.dur / Math.max(1, Math.round(a.dur / 1200)), t = Math.max(0, Date.now() - a.t0); return { beat, key: a.t0 + ':' + Math.floor(t / beat), phase: (t % beat) / beat }; };
+/* the work cycle from the work rig (js/work_rig.js, js/strike_sync.js): its beat, phase and the part of it a wipe may
+   fill (after the strike, before the next wind-up; each skill's own window). No window: no wipe (a pickpocket mid-lift,
+   a hunter on the trail) */
+const strikeBeat = () => { const a = Q.act; if (!a || !a.dur) return null; const w = Q.workRig && Q.workRig.beatNow && Q.workRig.beatNow(); if (w) return w;
+  if (!Q.strikeLive) return null; const beat = a.dur / Math.max(1, Math.round(a.dur / 1200)), t = Math.max(0, Date.now() - a.t0); return { beat, key: a.t0 + ':' + Math.floor(t / beat), phase: (t % beat) / beat, wipe: P.WIPE }; };
 
 function heroTick(now, idle, due) {
   const fidget = idle >= P.IDLE_MS && now >= P.nextFidget;
   let fidgeted = false;
   for (const el of heroEls()) {
-    const work = !!el.closest('.scene-worker'), base = heroBase(work), cur = el.getAttribute('src');
+    const wk = el.closest('.scene-worker'), work = wk ? (wk.dataset.posture || true) : false, base = heroBase(work), cur = el.getAttribute('src'); /* at work: the side view in the rig's posture */
     const st = stOf(el, () => ({ next: now + rand(900, P.BLINK[1]), set: null, seq: null, wipeAt: 0, nextWipe: now + rand(14000, 22000) }));
     if (st.epoch !== P.epoch) { st.epoch = P.epoch; st.next = Math.min(st.next, now + rand(P.BLINK[0], P.BLINK[1])); }
     if (cur !== base && cur !== st.set) continue; /* someone else's picture (an old look mid-redraw): leave it */
@@ -76,9 +80,10 @@ function heroTick(now, idle, due) {
       const b = strikeBeat();
       /* swings are counted as they pass (each action restarts its own clock, so a swing is its action's start and index) */
       if (b) { if (b.key !== st.swing) { st.swing = b.key; st.swings = (st.swings || 0) + 1; } if (!st.wipeAt) st.wipeAt = st.swings + Math.round(rand(P.WIPE_EVERY[0], P.WIPE_EVERY[1]));
-        if (st.swings >= st.wipeAt && b.phase >= P.WIPE[0] && b.phase < P.WIPE[1] - .05) { play(st, [[0, 'wipe'], [Math.round((P.WIPE[1] - b.phase) * b.beat), null]], now, 'wipe'); st.wipeAt = st.swings + Math.round(rand(P.WIPE_EVERY[0], P.WIPE_EVERY[1])); P.log.push({ wipe: now, phase: b.phase, swing: st.swings }); if (P.log.length > 40) P.log.shift(); }
-        else due((b.phase < P.WIPE[0] ? (P.WIPE[0] - b.phase) : (1 + P.WIPE[0] - b.phase)) * b.beat + 4); }
-      else if (Q.act && now >= st.nextWipe) { play(st, [[0, 'wipe'], [650, null]], now, 'wipe'); st.nextWipe = now + rand(14000, 22000); }
+        const W = b.wipe || P.WIPE;
+        if (st.swings >= st.wipeAt && b.phase >= W[0] && b.phase < W[1] - .05) { play(st, [[0, 'wipe'], [Math.round((W[1] - b.phase) * b.beat), null]], now, 'wipe'); st.wipeAt = st.swings + Math.round(rand(P.WIPE_EVERY[0], P.WIPE_EVERY[1])); P.log.push({ wipe: now, phase: b.phase, swing: st.swings }); if (P.log.length > 40) P.log.shift(); }
+        else due((b.phase < W[0] ? (W[0] - b.phase) : (1 + W[0] - b.phase)) * b.beat + 4); }
+      else if (Q.act && !(Q.workRig && Q.workRig.live) && now >= st.nextWipe) { play(st, [[0, 'wipe'], [650, null]], now, 'wipe'); st.nextWipe = now + rand(14000, 22000); }
       else if (Q.act) due(st.nextWipe - now);
     }
     if (!work && fidget && el.matches('.fig-img') && !st.seq) {
@@ -89,6 +94,7 @@ function heroTick(now, idle, due) {
     if (st.seq) {
       const t = now - st.t0; let frame = null, next = Infinity;
       for (const [at, f] of st.seq) { if (at <= t) frame = f; else { next = at; break; } }
+      if (frame === 'wipe' && work && Q.workRig && Q.workRig.wipeOk && !Q.workRig.wipeOk()) { frame = null; next = Infinity; } /* a late timer: never into the next strike */
       show(el, st, frame ? heroUrl(frame, work) : base);
       if (next === Infinity) st.seq = null; else due(next - t);
     }

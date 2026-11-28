@@ -349,7 +349,8 @@ function districtFor(town, kind, key, o = {}) {
       const brick = '#8a4a3a'; f(brick, 148, 50, 48, 34); for (let y = 52; y < 84; y += 4) { f(mix(brick, '#000000', .3), 148, y, 48, 1); for (let q = 148 + (y % 8 ? 3 : 0); q < 196; q += 6) f(mix(brick, '#000000', .3), q, y, 1, 4); }
       f('#2a1a14', 154, 54, 36, 8); f(DPAL.fire, 156, 56, 32, 5); f(DPAL.flame, 160, 57, 22, 2); ell('rgba(255,160,80,.25)', 172, 54, 26, 10);
       for (let y = 22; y < 50; y++) { const w = Math.round(14 + (y - 22) * 1.1); f(DPAL.stoneDk, 172 - w, y, w * 2, 1); } f(DPAL.stoneLt, 156, 22, 32, 1);
-      f(DPAL.woodDk, 54, 84, 12, 8); f(DPAL.wood, 54, 84, 12, 1); f(DPAL.iron, 48, 77, 24, 4); f(DPAL.ironLt, 48, 77, 24, 1); for (let j = 0; j < 4; j++) f(DPAL.iron, 44 + j, 78 + j * .3, 4 - j, 1); f(DPAL.iron, 55, 81, 10, 3);
+      /* no anvil painted here: the work rig stands the real one in front of the hero at their own scale (js/work_rig.js) */
+      f(DPAL.woodDk, 30, 80, 10, 12); f(DPAL.wood, 30, 80, 10, 1); f('#3a4a5a', 31, 81, 8, 2);
       f(DPAL.woodDk, 204, 76, 14, 18); f(DPAL.wood, 204, 76, 14, 1); f('#3a4a5a', 205, 77, 12, 2); f(DPAL.iron, 204, 82, 14, 1); f(DPAL.iron, 204, 89, 14, 1);
       f(DPAL.woodDk, 18, 34, 34, 2); for (const tx of [22, 30, 38, 46]) { f(DPAL.iron, tx, 36, 1, 10); f(DPAL.ironLt, tx - 1, 46, 3, 2); }
     } else if (key === 'carpentry') {

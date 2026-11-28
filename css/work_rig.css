@@ -1,0 +1,54 @@
+/* Idlewick: the work rig (js/work_rig.js; skill realism, owner 27 Nov 2026; docs/skill-realism.md).
+   The hero stands side-on at the job: the far arm behind the body, the side-view body (whose frames js/personality.js
+   swaps for blinks and the brow wipe), the tool and near arm in front, all at the hero's 3x. The station (anvil,
+   trestles, tripod...) is drawn at the same scale on the ground line, with the piece being made on it. Frames step;
+   the body's lean below is continuous (transform only), one loop per swing, timed by js/strike_sync.js. Nothing moves
+   under Reduce effects or the device's reduced-motion setting. */
+.activity-scene.rigged .scene-worker{position:absolute;width:72px;height:96px;transform-origin:50% 100%;animation-name:none;animation-timing-function:linear;animation-iteration-count:infinite;z-index:3}
+.activity-scene.rigged .scene-worker .rig-body{position:absolute;left:0;bottom:0;width:72px;height:96px;animation:lw-breathe 3s ease-in-out infinite}
+.activity-scene.rigged .scene-worker .rig-body img{position:absolute;left:0;bottom:0;width:72px;height:96px;animation:none;z-index:1}
+.activity-scene.rigged .rig-back,.activity-scene.rigged .rig-front{position:absolute;bottom:0;image-rendering:pixelated;pointer-events:none;max-width:none}
+.activity-scene.rigged .rig-back{z-index:0}
+.activity-scene.rigged .rig-front{z-index:2}
+.activity-scene.rigged .work-station{position:absolute;image-rendering:pixelated;pointer-events:none;z-index:1;max-width:none}
+.activity-scene.rigged .scene-target.on-station{position:absolute;margin:0;transform:translateX(-50%);z-index:2;animation:none!important;filter:drop-shadow(0 3px 0 #21362d40)}
+.activity-scene.rigged .scene-target.on-station .activity-item-art{margin:0}
+.activity-scene.rigged .scene-target.rig-hidden{visibility:hidden}
+.activity-scene.rigged .scene-pet{left:max(0px,calc(var(--worker-x,12%) - 58px))}
+.work-fx{position:absolute;width:0;height:0;z-index:4;pointer-events:none}
+.work-fx i{position:absolute;left:-1px;top:-1px;width:3px;height:3px}
+.work-fx i.wide{left:-4px;width:9px}
+/* the forge heat: a glow on the piece that cools through the action (opacity only) */
+.work-heat{position:absolute;inset:10% 5%;background:radial-gradient(closest-side,#ffb048cc,#f0603000);mix-blend-mode:screen;pointer-events:none}
+
+/* the lean of each kind of work: the weight shifts forward and back, the feet never leave the ground line */
+.activity-scene.rigged .scene-worker.lean-chop{animation-name:lean-chop}
+.activity-scene.rigged .scene-worker.lean-hammer{animation-name:lean-hammer}
+.activity-scene.rigged .scene-worker.lean-pump{animation-name:lean-pump}
+.activity-scene.rigged .scene-worker.lean-saw{animation-name:lean-saw}
+.activity-scene.rigged .scene-worker.lean-stir{animation-name:lean-stir}
+.activity-scene.rigged .scene-worker.lean-tap{animation-name:lean-tap}
+.activity-scene.rigged .scene-worker.lean-sight{animation-name:lean-sight}
+.activity-scene.rigged .scene-worker.lean-cast{animation-name:lean-cast}
+.activity-scene.rigged .scene-worker.lean-sidle{animation-name:lean-sidle}
+.activity-scene.rigged .scene-worker.lean-pull{animation-name:lean-pull}
+/* axe, pick, sword: rise into the backswing, drop the weight through the strike, settle */
+@keyframes lean-chop{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}28%{transform:translate(-3px,0);animation-timing-function:ease-in}40%{transform:translate(3px,0);animation-timing-function:ease-out}55%{transform:translate(1px,0)}}
+@keyframes lean-hammer{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}26%{transform:translate(-1px,0);animation-timing-function:ease-in}40%{transform:translate(1px,0);animation-timing-function:ease-out}55%{transform:translate(0,0)}}
+@keyframes lean-pump{0%,100%{transform:translate(0,0);animation-timing-function:ease-in}40%{transform:translate(2px,0);animation-timing-function:ease-in-out}50%{transform:translate(2px,0)}}
+@keyframes lean-saw{0%,12%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}45%,60%{transform:translate(3px,0);animation-timing-function:ease-in-out}}
+@keyframes lean-stir{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}50%{transform:translate(1px,0);animation-timing-function:ease-in-out}}
+@keyframes lean-tap{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}28%{transform:translate(-1px,0);animation-timing-function:ease-in}40%{transform:translate(1px,0);animation-timing-function:ease-out}}
+@keyframes lean-sight{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}15%,45%{transform:translate(2px,0);animation-timing-function:ease-in-out}60%,80%{transform:translate(1px,0);animation-timing-function:ease-in-out}}
+@keyframes lean-cast{0%,100%{transform:translate(0,0);animation-timing-function:ease-out}12%{transform:translate(-3px,0);animation-timing-function:ease-in}22%{transform:translate(3px,0);animation-timing-function:ease-out}34%,76%{transform:translate(0,0);animation-timing-function:ease-in}80%{transform:translate(-2px,0);animation-timing-function:ease-out}}
+@keyframes lean-sidle{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}30%,62%{transform:translate(3px,0);animation-timing-function:ease-in-out}}
+@keyframes lean-pull{0%,100%{transform:translate(0,0);animation-timing-function:ease-in-out}50%{transform:translate(-2px,0);animation-timing-function:ease-in-out}}
+
+html.calm .activity-scene.rigged .scene-worker,html.calm .activity-scene.rigged .rig-body,html.calm .work-fx i{animation:none!important}
+@media (prefers-reduced-motion:reduce){.activity-scene.rigged .scene-worker,.activity-scene.rigged .rig-body,.work-fx i{animation:none!important}}
+
+/* the target's picture sits on the ground line itself: it was an inline image on its text baseline, standing a few
+   pixels above the hero's feet (skill realism audit, 27 Nov 2026) */
+.activity-scene .scene-target > span{display:flex;align-items:flex-end}
+/* the hunter keeps their distance for the strike: the old hero's step-in is the rig's thrust now */
+.activity-scene.hunt.rigged[data-step="2"] .scene-worker{translate:none}

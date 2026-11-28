@@ -938,13 +938,6 @@ button.linkish{display:inline-flex;align-items:center}
 #view .plots .plot .ptime{display:none}
 #view .plots .plot .plot-act{margin-top:auto}
 
-/* Smithing scene: anvil on the ground in front of the hero, the piece on the anvil, the hammer in hand */
-.activity-scene.skill-smithing{position:relative}
-.activity-scene.skill-smithing .smith-anvil{position:absolute;left:calc(12% + 66px);bottom:12px;width:64px;height:64px;z-index:1;pointer-events:none}
-.activity-scene.skill-smithing .smith-anvil img{width:64px;height:64px;image-rendering:pixelated}
-.activity-scene.skill-smithing .scene-target{position:absolute;left:calc(12% + 66px);bottom:58px;width:64px;margin:0;z-index:2;animation:none!important;filter:none}
-.activity-scene.skill-smithing .scene-target img{width:48px;height:48px}
-
 /* Townsfolk walking over the Home and Village town scenes (js/town_walkers.js): same box and crop as the picture */
 canvas.town-walkers{position:absolute;pointer-events:none;image-rendering:pixelated;margin:0;display:block;z-index:1}
 /* living towns (js/town_life.js): smoke, weather and animals under the light, the hour's light multiplied over the

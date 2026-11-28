@@ -294,3 +294,6 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 27 Nov 2026 (owner): "the number of traps I'm using when hunting isn't changing", then chose "Wear out". Replaces
   "that tier's trap kept in the pack": a hunt's trap breaks 1 hunt in 60 to 1 in 120 (about one every 7-10 minutes of hunting; the "1 in 8" first
   offered would have broken ~75 traps an hour, as hunts take 5-9 s).
+- 27 Nov 2026 (owner): "work on some of the realism. The sizes of things in comparison to each other, the animations,
+  where the character holds things when using them in skills." Replaces the front-facing working hero with a floating
+  tool icon at 12% of the scene: the side-on work rig, real tool sizes, the tool meeting the target, sounds per frame.

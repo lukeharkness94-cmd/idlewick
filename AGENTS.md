@@ -74,7 +74,12 @@ dated line to the history file.
   Town life (follow my clock / always daytime, weather). Under Reduce effects nothing moves; the hour's light stays.
 - **Activity backdrops**: each activity shows a close-up district (`districtFor`, 240 × 100) at 3× with the 3× hero
   (72 × 96) and target on one ground line; the 17 skill workplaces are in skill_backdrops.js. Any new activity kind or
-  recipe skill needs a district. The page backdrop (`js/backdrop.js`) is Starlit hills or Twilight forest; combat shows
+  recipe skill needs a district. **Skill realism** (owner, 27 Nov; `js/work_rig.js`, docs/skill-realism.md): at work
+  the hero stands side-on facing the job and the rig draws their arms and the tool in the right hand(s) (right-handed:
+  dominant hand behind the body), tools at real size for a 1.7 m hero (1 px ≈ 5.3 cm), working heights at the
+  figure's joints (anvil at the knuckles, trestle and table at the belt), placed so the tool meets the target's edge;
+  the motion follows the real phases and every work sound plays on its own frame (`js/strike_sync.js`). A new
+  activity needs a work spec there (`tests/skill-realism.cjs`). The page backdrop (`js/backdrop.js`) is Starlit hills or Twilight forest; combat shows
   the area's own scene (two per region, keyed like `saltmere:1`); a new area needs a recipe there.
 - **Hearthside Journal** (owner, 18 Nov) is the whole game's look: light parchment and Hearthside lettering by default
   (local Cinzel + Alegreya Sans), dark theme available; `css/hearthside.css` is the shared presentation layer (extend it,

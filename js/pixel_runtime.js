@@ -69,10 +69,16 @@ const heroOpts = (look, extra = {}) => {
 };
 const heroUrl = (look, extra) => A.heroUrl(heroOpts(look, extra));
 Q.heroFigureUrl = look => heroUrl(look);
-Q.heroWorkFigureUrl = look => heroUrl(look, { shield: null, weapon: null });
+/* at work the hero turns side-on to the job, armless: js/work_rig.js draws the arms and the tool (skill realism, 27 Nov
+   2026). posture: stand (default), crouch, kneel or sit */
+const sideUrl = (look, extra = {}) => { const o = heroOpts(look, { shield: null, weapon: null }), p = extra.posture && extra.posture !== 'stand' ? extra.posture : null;
+  const k = { face: o.face, skin: o.skin, hair: o.hair, tunic: o.tunic, helm: o.helm, body: o.body, legs: o.legs, cape: o.cape }; if (p) k.posture = p; if (extra.expr) k.expr = extra.expr; return A.heroSideUrl(k); };
+Q.heroWorkFigureUrl = (look, posture) => sideUrl(look, { posture });
+/* the colours the work rig dresses the arms in: sleeves of the body armour (or the tunic) and the skin */
+Q.heroRigLook = look => { const o = heroOpts(look); return { skin: o.skin, sleeve: o.body ? o.body.col : o.tunic, sleeveType: o.body ? o.body.type : 'cloth' }; };
 /* the same figure with an idle-life expression (blink, yawn, stretch, pack, wipe; js/personality.js); no frame is the
-   plain figure, so the frame and the figure share one cached drawing */
-Q.heroFrameUrl = (look, frame, work) => heroUrl(look, Object.assign(work ? { shield: null, weapon: null } : {}, frame ? { expr: frame } : {}));
+   plain figure, so the frame and the figure share one cached drawing. work: true or a posture name for the side view */
+Q.heroFrameUrl = (look, frame, work) => work ? sideUrl(look, { posture: typeof work === 'string' ? work : null, expr: frame || null }) : heroUrl(look, frame ? { expr: frame } : {});
 Q.heroCanvas = (look, scale = 1) => { const c = document.createElement('canvas'); c.width = 48 * scale; c.height = 64 * scale; const x = c.getContext('2d'); x.imageSmoothingEnabled = false; const im = new Image(); im.src = heroUrl(look); x.drawImage(im, 0, 0, c.width, c.height); return c; };
 Q.heroBustUrl = look => { const k = 'bust:' + JSON.stringify(heroOpts(look)); return A.url(k, () => { const full = A.hero(heroOpts(look)), s = A.Spr(16, 16); for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const p = full.px[y * 24 + x + 4]; if (p) s.px[y * 16 + x] = p; } return s; }); };
 Q.heroUrl = Q.heroBustUrl;
