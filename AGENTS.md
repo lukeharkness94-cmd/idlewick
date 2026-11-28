@@ -97,12 +97,12 @@ dated line to the history file.
 - **One theme: dark** (owner, 28 Nov: "I only want the dark theme"). There is no light theme, theme setting, picker or
   shortcut; `DQ.applyTheme` always sets `data-theme="dark"` and drops an old save's choice. Don't add theme variants.
 - **Hearthside Journal** (owner, 18 Nov) is the whole game's look, now dark and pixel-framed; `css/hearthside.css` is the shared presentation layer (extend it, don't add per-page skins).
-  Lettering (owner, 28 Nov): the default is pixel lettering, Silkscreen headings and Pixelify Sans for everything else
-  on desktop; on phones only labels are pixel and sentences keep Alegreya Sans; Classic (Cinzel + Alegreya Sans),
-  Storybook, Adventurer and Original stay in Settings. Labels take the capital pixel face Silkscreen (owner, 28 Nov:
+  Lettering (owner, 28 Nov): the default is pixel lettering, Silkscreen labels and Tiny5 sentences on desktop; on phones only labels are pixel and sentences keep Alegreya Sans; Terminal (Silkscreen + VT323), Classic
+  (Cinzel + Alegreya Sans), Storybook, Adventurer and Original stay in Settings. Labels take the capital pixel face Silkscreen (owner, 28 Nov:
   "go with the capital pixelated font on more places too"): buttons, menus, tabs, the rail, card and quest names,
-  numbers, tags and badges (`--f-ui`, `--f-mono`; 14px buttons and names, 13px small labels); sentences stay Pixelify
-  Sans (desktop) or Alegreya Sans (phones). The rail is 220px on desktop so Silkscreen names show whole. A quest ready
+  numbers, tags and badges (`--f-ui`, `--f-mono`; 14px buttons and names, 13px small labels); sentences are Tiny5 on
+  desktop (owner, 28 Nov: "B or E"; Terminal in Settings uses VT323, scaled 128% in fonts.css) and Alegreya Sans on
+  phones. The rail is 220px on desktop so Silkscreen names show whole. A quest ready
   to hand in carries a wax seal. Use the `--f-display/--f-body/--f-ui/--f-mono` variables, never a hard-coded family.
   Type: 16.5px body, 16px buttons, 14px meta; nothing visible under 13px in the design.
 - **Pixel frames** (owner, 28 Nov, chosen from the owner's reference GUI over the 26-27 Nov "no lines" rule): panels are dark

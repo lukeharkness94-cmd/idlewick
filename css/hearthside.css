@@ -1,10 +1,12 @@
 /* Hearthside Journal: one material language and clear action hierarchy across the existing game. */
 :root{--ground:#18251f;--panel:#23352b;--panel2:#2c4034;--line:#425a4a;--line2:#61745f;--ink:#f1ebdf;--mute:#c0cbbb;--brass:#d7b16a;--brass-hi:#f4d69e;--brass-lo:#946638;--good:#8ac8a3;--bad:#f29286;--warn:#e8c27d;--hs-action-ink:#211b12;--hs-paper-shadow:rgba(0,0,0,.13);--backdrop-wash:rgba(24,37,31,.94)}
-:root.type-hearthside{--f-display:'Silkscreen','Pixelify Sans',monospace;--f-body:'Pixelify Sans','Alegreya Sans',system-ui,sans-serif;--f-ui:'Pixelify Sans','Alegreya Sans',system-ui,sans-serif;--f-mono:'Pixelify Sans','Alegreya Sans',monospace}
+:root.type-hearthside{--f-display:'Silkscreen','Tiny5',monospace;--f-body:'Tiny5','Alegreya Sans',system-ui,sans-serif;--f-ui:'Silkscreen','Tiny5',monospace;--f-mono:'Silkscreen','Tiny5',monospace}
+/* Terminal: the same pixel layout with VT323 for sentences (owner, 28 Nov 2026: "B or E") */
+:root.type-terminal{--f-body:'VT323','Alegreya Sans',system-ui,sans-serif}
 /* phones: pixel lettering for labels only; sentences in a book face (owner, 28 Nov 2026) */
 @media (max-width:860px){:root.type-hearthside:not(.type-classic){--f-body:'Alegreya Sans',system-ui,sans-serif}}
 :root.type-classic{--f-display:'Cinzel','Alegreya SC',Georgia,serif;--f-body:'Alegreya Sans',system-ui,sans-serif;--f-ui:'Alegreya Sans',system-ui,sans-serif;--f-mono:'Alegreya Sans',system-ui,sans-serif}
-.type-sample-hearthside b{font-family:'Cinzel',serif}.type-sample-hearthside span{font-family:'Alegreya Sans',sans-serif}
+.type-sample-hearthside b,.type-sample-terminal b{font-family:'Silkscreen',monospace}.type-sample-hearthside span{font-family:'Tiny5',sans-serif}.type-sample-terminal span{font-family:'VT323',monospace}.type-sample-classic b{font-family:'Cinzel',serif}.type-sample-classic span{font-family:'Alegreya Sans',sans-serif}
 :root.type-hearthside body{font-size:18px;font-weight:400}
 :root.type-hearthside :is(button,input,textarea){font-weight:500;font-variant-numeric:lining-nums tabular-nums}
 :root.type-hearthside :is(h1,h2,h3){font-weight:500;letter-spacing:.015em}
@@ -1217,8 +1219,8 @@ html[data-theme="dark"] body{background-color:var(--ground)}
 @media(min-width:861px){#app{grid-template-columns:220px minmax(0,1fr)}}
 /* the capital pixel face on everything that is a label (owner, 28 Nov 2026: "go with the capital pixelated font on more
    places too"): buttons, menus, tabs, the rail, card and quest names, numbers, tags and badges; sentences stay in
-   Pixelify Sans (desktop) or Alegreya Sans (phones) so long text still reads */
-:root.type-hearthside:not(.type-classic){--f-ui:'Silkscreen','Pixelify Sans',monospace;--f-mono:'Silkscreen','Pixelify Sans',monospace}
+   Tiny5 or VT323 (desktop) or Alegreya Sans (phones) so long text still reads */
+:root.type-hearthside:not(.type-classic){--f-ui:'Silkscreen','Tiny5',monospace;--f-mono:'Silkscreen','Tiny5',monospace}
 :root.type-hearthside:not(.type-classic) :is(.illustrated-card>b,.qrow b,.h-name>b,#nowcard b,.tag,.chipx,.state,.notice-badge,.lvchip,.k,.phead>small,.phead small:not(.dim),.est-count,.rw,.req-chip,.need-tile b,.eq small,.cw-area h3,.area-card b,.dk-h,.estate-fields h3,.estate-pasture h3,.activity-caption small,.mast-line,.stat,.gt b){
   font-family:var(--f-ui)!important;font-weight:400;letter-spacing:.03em}
 :root.type-hearthside:not(.type-classic) :is(.btn,button,.tnav,.tab,.stab,.dk-n,.nav){font-weight:400!important;letter-spacing:.03em}

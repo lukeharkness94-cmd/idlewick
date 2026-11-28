@@ -72,3 +72,6 @@
 @font-face { font-family: 'Alegreya'; font-style: normal; font-weight: 400 900; font-display: swap; src: url(./Alegreya.woff2) format('woff2'); }
 @font-face { font-family: 'Alegreya'; font-style: italic; font-weight: 400 900; font-display: swap; src: url(./Alegreya-Italic.woff2) format('woff2'); }
 @font-face { font-family: 'MedievalSharp'; font-style: normal; font-weight: 400; font-display: swap; src: url(./MedievalSharp.woff2) format('woff2'); }
+/* Tiny5 and VT323 (SIL Open Font License, via Fontsource): sentence text beside the Silkscreen labels (owner, 28 Nov 2026) */
+@font-face { font-family: 'Tiny5'; font-style: normal; font-weight: 400; font-display: swap; src: url(./Tiny5.woff2) format('woff2'); }
+@font-face { font-family: 'VT323'; font-style: normal; font-weight: 400; font-display: swap; size-adjust: 128%; src: url(./VT323.woff2) format('woff2'); }
