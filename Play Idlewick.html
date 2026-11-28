@@ -13265,7 +13265,10 @@ function sceneFor(town, stages = {}, extras = {}) {
       if (sq === 'brazier') { f('#ff8a2a', sqc[0] - 5, sqc[1] - 25, 10, 6); f('#fff0a0', sqc[0] - 2, sqc[1] - 24, 4, 3); META.lamps.push([sqc[0], sqc[1] - 23, '#ff9a3a']); } else if (sq === 'shrine') { f('#d8a840', sqc[0] - 3, sqc[1] - 26, 6, 6); f('#fff0b0', sqc[0] - 1, sqc[1] - 25, 2, 2); META.lamps.push([sqc[0], sqc[1] - 23, '#ffd890']); } else { f('#141018', sqc[0] - 4, sqc[1] - 26, 6, 7); f(col, sqc[0] - 3, sqc[1] - 25, 4, 5); } });
     else put(sqc[1] + 8, () => { shadow(sqc[0], sqc[1] + 6, 16, 4); f('#2a2a34', sqc[0] - 14, sqc[1] - 6, 28, 12); f('#7a7a86', sqc[0] - 13, sqc[1] - 5, 26, 10); f('#244a6a', sqc[0] - 11, sqc[1] - 4, 22, 6); f('#4a8ab0', sqc[0] - 9, sqc[1] - 3, 10, 1); f('#2a2a34', sqc[0] - 2, sqc[1] - 16, 4, 12); f('#9a9aa4', sqc[0] - 1, sqc[1] - 15, 2, 10); f('#9ad0f0', sqc[0] - 3, sqc[1] - 18, 6, 2); }); }
   /* ---- 8 restoration sites: a worked plot each, the site at its stage; hidden relic sites are just grass ---- */
-  for (const { id, X, Y } of sites) { const pj = D.PROJECTS[id], sg = stages[id] || 0; if (pj.relic && sg < 4) continue;
+  for (const { id, X, Y } of sites) { const pj = D.PROJECTS[id], sg = stages[id] || 0;
+    /* a relic's plot waits as a little garden with a bench until the relic is brought home (nothing names it) */
+    if (pj.relic && sg < 4) { put(Y + 30, () => { shadow(X + 16, Y + 28, 14, 3, .25); f('#2a1c14', X + 3, Y + 21, 26, 9); f('#4a3220', X + 4, Y + 22, 24, 7); for (let q = 0; q < 6; q++) { f('#2e4a2a', X + 5 + q * 4, Y + 22, 3, 3); f(pick(['#c86a8a', '#d8c060', '#e8e0f0', '#8aa8e8'], () => hash2(q, X)), X + 6 + q * 4, Y + 22, 1, 1); }
+      f('#1a1008', X + 6, Y + 12, 20, 6); f('#6e4a2c', X + 7, Y + 12, 18, 3); f('#8a6040', X + 7, Y + 12, 18, 1); f('#3e2818', X + 8, Y + 15, 2, 3); f('#3e2818', X + 22, Y + 15, 2, 3); }); continue; }
     put(Y + 32, () => { shadow(X + 16, Y + 30, 15, 3.5, sg >= 4 ? .3 : .45); const sp = stagePiece(pj.art || id, sg); blit(memo(`sitec:${pj.art || id}:${sg}`, () => sp.canvas()), X, Y);
       if (sg >= 4 && /forge|smith|smelter|kiln|hearth|inn|library|archive|scriptorium|refuge|hall/.test(pj.art || id)) META.windows.push([X + 7, Y + 24, T.glow, 4, 3]);
       if (sg > 0 && sg < 4) drawFolk(x, X - 6, Y + 32, folkLook(seeded(id + ':builder')), 0, 1);
@@ -30293,7 +30296,9 @@ UI.render = (...a) => { const r = render0(...a); try { Q.townLifeScan(); } catch
    Reduce effects and prefers-reduced-motion they hold still and the room keeps its light. tests/hearth.cjs.
    The room fills up as you play (owner, 27 Nov 2026): boss trophies over the fire, named weapons on a rack, museum
    pieces on a shelf, a basket per beast and letters on the desk (js/hearth_letters.js), each with its own hotspot.
-   tests/hearth-life.cjs. */
+   tests/hearth-life.cjs.
+   28 Nov 2026 (the darker pixel rebuild): the room keeps its layout, hotspots and whole-number scale, redrawn in the
+   darker house palette with an outline and a bevel round every piece, and its window looks onto the top-down town. */
 (() => {
 const Q = window.DQ, D = Q.data, UI = Q.ui, A = Q.pixelArt, S = () => Q.S, esc = Q.esc, ico = Q.ico;
 if (!A || !A.townPainter) return;
@@ -30316,6 +30321,8 @@ const SPOTS = {
 /* where letters wait: on the desk, right of the inkpot (js/hearth_letters.js) */
 const LETTER = { x: 274, y: 137, w: 22, h: 16 };
 const FIRE = { x: 72, y: 128, w: 56, h: 44 }, HERO = { x: 140, y: 172 }, PET = { x: 96, y: 216 };
+/* the part of the top-down town (js/town_scene.js) the window looks onto: homes across the lower street */
+const WINDOW_VIEW = [132, 178];
 /* a beast's own sprite where it has one, else the creature it came from (the same choice as DQ.petSprite) */
 const petArt = id => { const p = D.PET[id]; if (!p || !A.creatureUrl) return null; const k = String(A.hasCreature && A.hasCreature(p.id) ? p.id : p.mon || p.id).replace(/^wild_/, ''); return A.hasCreature && !A.hasCreature(k) ? null : A.creatureUrl(k); };
 
@@ -30363,7 +30370,7 @@ UI.DO.hearthgo = a => { const [k, ...r] = String(a || '').split(':'), id = r.joi
 const head = img => { const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; const g = c.getContext('2d'); g.drawImage(img, 0, 0);
   const d = g.getImageData(0, 0, c.width, c.height).data; let x0 = c.width, x1 = -1, y0 = c.height; for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) if (d[(y * c.width + x) * 4 + 3] > 40) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); }
   return x1 < 0 ? null : { c, sx: Math.max(0, Math.min(c.width - 16, Math.round((x0 + x1) / 2) - 8)), sy: y0 }; };
-const drawKeep = async (x, P, list) => { const { f, ell } = P, wood = '#8a5e3a', woodDk = '#5e3e24', woodLt = '#a87a4e', brass = '#c8a050';
+const drawKeep = async (x, P, list) => { const { f, ell } = P, wood = '#6a4630', woodDk = '#3e2818', woodLt = '#8a6040', brass = '#c8a050';
   /* the rack and the shelf under the rafters, drawn whenever they hold something */
   if (list.some(e => e.row === 'rack')) { f(woodDk, 106, -6, 86, 4); f(woodLt, 106, -6, 86, 1); for (const [sx] of ROWS.rack.slots) { f('#3a2a1a', sx + 3, -9, 2, 3); f('#3a2a1a', sx + 11, -9, 2, 3); } }
   if (list.some(e => e.row === 'shelf')) { f(woodDk, 12, -5, 82, 3); f(woodLt, 12, -5, 82, 1); f(woodDk, 16, -2, 2, 5); f(woodDk, 88, -2, 2, 5); }
@@ -30396,66 +30403,70 @@ const drawKeep = async (x, P, list) => { const { f, ell } = P, wood = '#8a5e3a',
 const load = src => new Promise(r => { if (!src) return r(null); const im = new Image(); im.onload = () => r(im); im.onerror = () => r(null); im.src = src; });
 const room = async (town, light, weather, season, petId, keep = [], letters = 0) => {
   const c = document.createElement('canvas'); c.width = RW; c.height = RH; const x = c.getContext('2d'), P = A.townPainter(x, RW, RH), { f, ell } = P;
-  const plaster = '#d8c6a0', beam = '#5a3e26', beamLt = '#7a5636', stone = '#8a8278', stoneDk = '#615a52', wood = '#8a5e3a', woodDk = '#5e3e24', woodLt = '#a87a4e';
+  /* the darker house palette (28 Nov 2026): warm lights, cool shadows, and an outline round every piece of furniture */
+  const plaster = '#6e5a44', beam = '#3a2618', beamLt = '#5a3e28', stone = '#5a5660', stoneDk = '#3a3640', stoneLt = '#7a7682', wood = '#6a4630', woodDk = '#3e2818', woodLt = '#8a6040', INK = '#120a08';
+  const lit = c2 => mix(c2, '#fff2c8', .28), shade = c2 => mix(c2, '#1a1838', .34);
+  /* a piece with its outline and a bevel: lit along the top and left, shaded along the bottom and right */
+  const box = (X, Y, w, h, col, o = {}) => { if (!o.noRim) f(INK, X - 1, Y - 1, w + 2, h + 2); f(col, X, Y, w, h); f(lit(col), X, Y, w, 1); f(lit(col), X, Y, 1, h); f(shade(col), X, Y + h - 1, w, 1); f(shade(col), X + w - 1, Y, 1, h); };
   /* the upper wall and the rafters, with a lantern on a chain */
-  f(mix(plaster, '#5a3e26', .18), 0, 0, RW, OY); for (const bx of [0, 96, 192, 288]) { f(beam, bx, 0, 10, OY); f(beamLt, bx, 0, 2, OY); } f(beam, 0, 6, RW, 6); f(beamLt, 0, 6, RW, 1);
-  f('#3a3030', 250, 12, 1, 22); f('#3a3030', 245, 34, 11, 2); f('#f6d880', 247, 36, 7, 8); f('#3a3030', 246, 36, 1, 8); f('#3a3030', 254, 36, 1, 8); f('#3a3030', 245, 44, 11, 2);
+  f(mix(plaster, '#1a1838', .3), 0, 0, RW, OY); for (const bx of [0, 96, 192, 288]) box(bx, 0, 10, OY, beam); box(-1, 6, RW + 2, 6, beam);
+  f(INK, 250, 12, 1, 22); box(245, 34, 11, 2, '#2a2228'); f('#f6c860', 247, 36, 7, 8); f('#fff0c0', 248, 37, 2, 2); f(INK, 246, 36, 1, 8); f(INK, 254, 36, 1, 8); box(245, 44, 11, 2, '#2a2228');
   x.save(); x.translate(0, OY);
   /* wall: plaster between timber, a ceiling beam, a skirting board */
-  f(plaster, 0, 0, RW, 176); for (let i = 0; i < 260; i++) f(mix(plaster, i % 2 ? '#ffffff' : '#7a5a3a', .12), (i * 97) % RW, (i * 53) % 172, 2, 1);
-  f(beam, 0, 0, RW, 12); f(beamLt, 0, 0, RW, 2); f(mix(beam, '#000000', .3), 0, 11, RW, 1);
-  for (const bx of [0, 48, 148, 200, 304]) { f(beam, bx, 12, 8, 164); f(beamLt, bx, 12, 2, 164); }
-  f(woodDk, 0, 172, RW, 4); f(woodLt, 0, 172, RW, 1);
+  f(plaster, 0, 0, RW, 176); for (let i = 0; i < 320; i++) f(mix(plaster, i % 2 ? '#fff2c8' : '#1a1838', .14), (i * 97) % RW, (i * 53) % 172, 2, 1);
+  box(-1, 0, RW + 2, 12, beam); f(mix(beam, '#000000', .3), 0, 12, RW, 2);
+  for (const bx of [0, 48, 148, 200, 304]) { box(bx, 14, 8, 158, beam); f('rgba(10,8,20,.18)', bx + 8, 14, 3, 158); }
+  box(-1, 172, RW + 2, 4, woodDk);
   /* floor: planks catching the firelight */
-  for (let y = 176, k = 0; y < RH; y += 8, k++) { f(k % 2 ? wood : mix(wood, '#000000', .08), 0, y, RW, 8); f(woodDk, 0, y + 7, RW, 1); for (let q = (k * 37) % 60; q < RW; q += 60 + (k % 3) * 10) f(woodDk, q, y, 1, 7); }
+  for (let y = 176, k = 0; y < RH; y += 8, k++) { f(k % 2 ? '#4e3222' : '#462c1e', 0, y, RW, 8); f(INK, 0, y + 7, RW, 1); f(mix('#4e3222', '#fff2c8', .14), 0, y, RW, 1); for (let q = (k * 37) % 60; q < RW; q += 60 + (k % 3) * 10) { f(INK, q, y, 1, 7); f(mix('#4e3222', '#fff2c8', .2), q + 1, y + 1, 1, 6); } }
   /* the window onto the town: the scene's own pixels, in the hour's light and weather */
   const W = SPOTS.window, scene = await load(Q.sceneUrl(town));
-  f(beam, W.x - 4, W.y - 4, W.w + 8, W.h + 8); f(beamLt, W.x - 4, W.y - 4, W.w + 8, 1);
-  if (scene) x.drawImage(scene, 272, 112, W.w, W.h, W.x, W.y, W.w, W.h); else f('#9cc8e8', W.x, W.y, W.w, W.h);
-  if (light) { x.save(); x.globalCompositeOperation = 'multiply'; x.fillStyle = `rgb(${light.tint.join(',')})`; x.fillRect(W.x, W.y, W.w, W.h); x.restore();
-    if (light.dark > .5) for (let i = 0; i < 14; i++) f(`rgba(255,250,232,${(light.dark - .5) * 1.6})`, W.x + (i * 41) % W.w, W.y + (i * 13) % 20, 1, 1); }
+  box(W.x - 4, W.y - 4, W.w + 8, W.h + 8, woodDk);
+  if (scene) x.drawImage(scene, WINDOW_VIEW[0], WINDOW_VIEW[1], W.w, W.h, W.x, W.y, W.w, W.h); else f('#2a3a4a', W.x, W.y, W.w, W.h);
+  if (light) { x.save(); x.globalCompositeOperation = 'multiply'; x.fillStyle = `rgb(${light.tint.join(',')})`; x.fillRect(W.x, W.y, W.w, W.h); x.restore(); }
   if (weather === 'rain') for (let i = 0; i < 26; i++) f('rgba(210,224,244,.6)', W.x + (i * 29) % W.w, W.y + (i * 17) % (W.h - 3), 1, 3);
-  if (weather === 'snow' || season === 'winter') { for (let i = 0; i < 22; i++) f('rgba(255,255,255,.85)', W.x + (i * 23) % W.w, W.y + (i * 31) % W.h, 1, 1); f('#f4f8fc', W.x, W.y + W.h - 3, W.w, 3); }
-  f(beam, W.x + W.w / 2 - 1, W.y, 3, W.h); f(beam, W.x, W.y + W.h / 2 - 1, W.w, 3);
-  f('#b8483a', W.x - 10, W.y - 6, 9, W.h + 14); f('#8a2e26', W.x - 4, W.y - 6, 3, W.h + 14); f('#b8483a', W.x + W.w + 1, W.y - 6, 9, W.h + 14); f('#8a2e26', W.x + W.w + 1, W.y - 6, 3, W.h + 14);
-  f(woodLt, W.x - 6, W.y + W.h + 2, W.w + 12, 4); f(woodDk, W.x - 6, W.y + W.h + 6, W.w + 12, 1);
-  /* fireplace: a stone surround, the mantel, the hearth stone */
-  f(stone, 52, 70, 96, 106); for (let y = 72; y < 174; y += 6) for (let q = 52 + ((y / 6) % 2) * 6; q < 146; q += 12) { f(mix(stone, '#ffffff', .12), q, y, 11, 1); f(stoneDk, q + 11, y, 1, 6); f(stoneDk, q, y + 5, 12, 1); }
-  f(stoneDk, 54, 14, 92, 56); for (let y = 16; y < 70; y += 6) for (let q = 54 + ((y / 6) % 2) * 6; q < 144; q += 12) f(mix(stoneDk, '#000000', .2), q + 11, y, 1, 6);
-  f('#2a1a14', FIRE.x, FIRE.y, FIRE.w, FIRE.h); f('#1a100c', FIRE.x + 4, FIRE.y + 4, FIRE.w - 8, FIRE.h - 8);
-  f(woodDk, 46, 98, 108, 8); f(woodLt, 46, 98, 108, 2); f(mix(woodDk, '#000000', .3), 46, 105, 108, 1);
-  f('#6a6a74', 44, 172, 112, 6); f('#8a8a94', 44, 172, 112, 1);
-  f('#4a2e1e', FIRE.x + 8, FIRE.y + FIRE.h - 8, 40, 5); f('#6a4228', FIRE.x + 12, FIRE.y + FIRE.h - 12, 32, 5);
+  if (weather === 'snow' || season === 'winter') { for (let i = 0; i < 22; i++) f('rgba(255,255,255,.85)', W.x + (i * 23) % W.w, W.y + (i * 31) % W.h, 1, 1); f('#c8d4e8', W.x, W.y + W.h - 3, W.w, 3); }
+  f('rgba(200,220,255,.10)', W.x + 4, W.y + 2, 10, W.h - 4); /* a cold glint on the glass */
+  box(W.x + W.w / 2 - 1, W.y, 3, W.h, woodDk, { noRim: true }); box(W.x, W.y + W.h / 2 - 1, W.w, 3, woodDk, { noRim: true });
+  for (const cx of [W.x - 10, W.x + W.w + 1]) { box(cx, W.y - 6, 9, W.h + 14, '#7a2a26'); for (let q = 2; q < 9; q += 3) f(mix('#7a2a26', '#1a1838', .4), cx + q, W.y - 5, 1, W.h + 12); }
+  box(W.x - 6, W.y + W.h + 2, W.w + 12, 4, woodLt);
+  /* fireplace: a stone surround, the chimney breast, the mantel, the hearth stone */
+  box(52, 70, 96, 106, stone); for (let y = 72; y < 174; y += 6) for (let q = 52 + ((y / 6) % 2) * 6; q < 146; q += 12) { f(stoneLt, q + 1, y, 10, 1); f(stoneDk, q + 11, y, 1, 6); f(stoneDk, q, y + 5, 12, 1); }
+  box(54, 14, 92, 56, stoneDk); for (let y = 16; y < 70; y += 6) for (let q = 54 + ((y / 6) % 2) * 6; q < 144; q += 12) { f(mix(stoneDk, '#000000', .3), q + 11, y, 1, 6); f(mix(stoneDk, '#fff2c8', .1), q + 1, y, 9, 1); }
+  f(INK, FIRE.x - 1, FIRE.y - 1, FIRE.w + 2, FIRE.h + 1); f('#1c120e', FIRE.x, FIRE.y, FIRE.w, FIRE.h); f('#120a08', FIRE.x + 4, FIRE.y + 4, FIRE.w - 8, FIRE.h - 8);
+  box(46, 98, 108, 8, woodDk); f(mix(woodDk, '#000000', .3), 46, 106, 108, 1);
+  box(44, 172, 112, 6, '#4e4e5a');
+  box(FIRE.x + 8, FIRE.y + FIRE.h - 8, 40, 5, '#3e2418'); box(FIRE.x + 12, FIRE.y + FIRE.h - 12, 32, 5, '#5a3622');
   /* on the mantel: a candle, a jar, a little clock; the season's own touch */
-  f('#f0ead8', 60, 88, 4, 10); f('#e8b048', 61, 85, 2, 3); f('#6a8aa8', 120, 90, 8, 8); f('#9ab8d0', 121, 90, 2, 4); f('#c8a050', 96, 88, 10, 10); f('#f4ecd8', 98, 90, 6, 6); f('#3a2414', 100, 92, 1, 3); f('#3a2414', 101, 93, 2, 1);
-  if (season === 'winter') { for (let q = 48; q < 152; q += 4) { f('#2f6a3a', q, 96, 4, 3); if (q % 12 === 0) f('#c8382e', q + 1, 97, 2, 2); } }
-  if (season === 'autumn') { ell('#d8782a', 36, 170, 7, 5); ell('#e8923a', 34, 168, 3, 2); f('#5a7a3a', 36, 164, 1, 2); ell('#c8a040', 156, 171, 5, 4); f('#5a7a3a', 156, 166, 1, 2); }
-  if (season === 'spring' || season === 'summer') { f('#6a8aa8', 280, 136, 6, 8); for (const [dx, col] of [[-2, '#e0607a'], [3, '#f0d060'], [7, '#f4f0f4'], [1, season === 'summer' ? '#f0a030' : '#a07ae0']]) { f('#5a8a4a', 282 + dx / 2, 130, 1, 6); f(col, 280 + dx, 127, 3, 3); } }
+  box(60, 88, 4, 10, '#e0d8c4'); f('#e8b048', 61, 85, 2, 3); box(120, 90, 8, 8, '#4a6a88'); f('#8ab0d0', 121, 90, 2, 4); box(96, 88, 10, 10, '#b08a40'); f('#e8e0cc', 98, 90, 6, 6); f(INK, 100, 92, 1, 3); f(INK, 101, 93, 2, 1);
+  if (season === 'winter') { for (let q = 48; q < 152; q += 4) { f('#1e4a2a', q, 96, 4, 3); f('#2f6a3a', q, 96, 3, 2); if (q % 12 === 0) f('#c8382e', q + 1, 97, 2, 2); } }
+  if (season === 'autumn') { ell(INK, 36, 170, 8, 6); ell('#c06a26', 36, 170, 7, 5); ell('#e8923a', 34, 168, 3, 2); f('#4a6a34', 36, 164, 1, 2); ell(INK, 156, 171, 6, 5); ell('#b08a36', 156, 171, 5, 4); f('#4a6a34', 156, 166, 1, 2); }
+  if (season === 'spring' || season === 'summer') { box(280, 136, 6, 8, '#4a6a88'); for (const [dx, col] of [[-2, '#e0607a'], [3, '#f0d060'], [7, '#f4f0f4'], [1, season === 'summer' ? '#f0a030' : '#a07ae0']]) { f('#4a7a3a', 282 + dx / 2, 130, 1, 6); f(INK, 279 + dx, 126, 5, 5); f(col, 280 + dx, 127, 3, 3); } }
   /* map on the wall, rolled at the edges */
-  const M = SPOTS.map; f('#e8d8b0', M.x + 2, M.y + 2, M.w - 4, M.h - 4); f('#c8b088', M.x, M.y, 3, M.h); f('#c8b088', M.x + M.w - 3, M.y, 3, M.h);
-  f('#8ab06a', M.x + 6, M.y + 8, 14, 10); f('#6aa8d8', M.x + 22, M.y + 6, 10, 20); f('#8a909a', M.x + 8, M.y + 20, 8, 8); f('#b8483a', M.x + 12, M.y + 12, 2, 2); f('#8a6a42', M.x + 14, M.y + 14, 10, 1);
+  const M = SPOTS.map; box(M.x + 2, M.y + 2, M.w - 4, M.h - 4, '#c8b48a'); box(M.x, M.y, 3, M.h, '#a08860'); box(M.x + M.w - 3, M.y, 3, M.h, '#a08860');
+  f('#5a8a4a', M.x + 6, M.y + 8, 14, 10); f('#3e78a8', M.x + 22, M.y + 6, 10, 20); f('#6a6e7a', M.x + 8, M.y + 20, 8, 8); f('#b8382e', M.x + 12, M.y + 12, 2, 2); f('#6a4a2c', M.x + 14, M.y + 14, 10, 1);
   /* bookshelf */
-  const B = SPOTS.shelf; f(woodDk, B.x, B.y, B.w, B.h); f(wood, B.x + 2, B.y + 2, B.w - 4, B.h - 4);
-  const books = ['#7a3a2a', '#3a5a7a', '#5a7a3a', '#8a6a2a', '#5a3a6a', '#2a4a4a', '#9a4a3a'];
-  for (let s = 0; s < 4; s++) { const sy = B.y + 6 + s * 27; f(woodDk, B.x + 2, sy + 22, B.w - 4, 3); for (let q = B.x + 4, k = s; q < B.x + B.w - 6; k++) { const bw = 3 + (k % 3), bh = 14 + ((k * 5) % 7); f(books[k % books.length], q, sy + 22 - bh, bw, bh); f(mix(books[k % books.length], '#ffffff', .25), q, sy + 22 - bh, 1, bh); q += bw + 1; } }
+  const B = SPOTS.shelf; box(B.x, B.y, B.w, B.h, woodDk); f(mix(woodDk, '#000000', .35), B.x + 2, B.y + 2, B.w - 4, B.h - 4);
+  const books = ['#7a2e24', '#2e4a6a', '#3e6a34', '#8a6a2a', '#4e305e', '#2a4a4a', '#9a4a30'];
+  for (let s = 0; s < 4; s++) { const sy = B.y + 6 + s * 27; box(B.x + 2, sy + 22, B.w - 4, 3, wood, { noRim: true }); for (let q = B.x + 4, k = s; q < B.x + B.w - 6; k++) { const bw = 3 + (k % 3), bh = 14 + ((k * 5) % 7), col = books[k % books.length]; f(INK, q - 1, sy + 21 - bh, bw + 1, bh + 1); f(col, q, sy + 22 - bh, bw - 1, bh); f(lit(col), q, sy + 22 - bh, 1, bh); f('#d8b050', q, sy + 25 - bh, bw - 1, 1); q += bw + 1; } }
   /* notice board with pins (the goal note itself is a card laid over it) */
-  const N = SPOTS.board; f(woodDk, N.x, N.y, N.w, N.h); f('#b08a5a', N.x + 3, N.y + 3, N.w - 6, N.h - 6); for (let i = 0; i < 40; i++) f('#9a764a', N.x + 4 + (i * 13) % (N.w - 8), N.y + 4 + (i * 7) % (N.h - 8), 1, 1);
-  f('#f4ecd8', N.x + 6, N.y + 40, 14, 12); f('#e8dcb8', N.x + 26, N.y + 44, 12, 10); f('#c8382e', N.x + 12, N.y + 40, 1, 1); f('#3a6ac8', N.x + 31, N.y + 44, 1, 1);
+  const N = SPOTS.board; box(N.x, N.y, N.w, N.h, woodDk); f('#8a6a44', N.x + 3, N.y + 3, N.w - 6, N.h - 6); for (let i = 0; i < 40; i++) f('#6e5236', N.x + 4 + (i * 13) % (N.w - 8), N.y + 4 + (i * 7) % (N.h - 8), 1, 1);
+  box(N.x + 6, N.y + 40, 14, 12, '#d8ccb0'); box(N.x + 26, N.y + 44, 12, 10, '#c8b890'); f('#c8382e', N.x + 12, N.y + 40, 1, 1); f('#3a6ac8', N.x + 31, N.y + 44, 1, 1);
   /* desk under the window: candle, inkpot and quill, an open book */
-  const K = SPOTS.desk; f(woodDk, K.x, K.y + 4, K.w, 5); f(woodLt, K.x, K.y + 4, K.w, 1); f(woodDk, K.x + 4, K.y + 9, 4, 28); f(woodDk, K.x + K.w - 8, K.y + 9, 4, 28);
-  f('#f4ecd8', K.x + 30, K.y - 2, 22, 6); f('#d8ccb0', K.x + 41, K.y - 2, 1, 6); f('#2a2a3a', K.x + 60, K.y, 5, 4); f('#f4f4f4', K.x + 63, K.y - 8, 1, 8); f('#f0ead8', K.x + 10, K.y - 8, 4, 12);
+  const K = SPOTS.desk; box(K.x, K.y + 4, K.w, 5, wood); box(K.x + 4, K.y + 9, 4, 28, woodDk); box(K.x + K.w - 8, K.y + 9, 4, 28, woodDk);
+  box(K.x + 30, K.y - 2, 22, 6, '#e0d6bc'); f('#b0a488', K.x + 41, K.y - 2, 1, 6); box(K.x + 60, K.y, 5, 4, '#2a2a3a'); f('#e8e8e8', K.x + 63, K.y - 8, 1, 8); box(K.x + 10, K.y - 8, 4, 12, '#e0d8c4');
   /* chest */
-  const C = SPOTS.chest; f(woodDk, C.x, C.y + 6, C.w, C.h - 6); f(wood, C.x + 2, C.y + 8, C.w - 4, C.h - 10); f(woodDk, C.x - 1, C.y, C.w + 2, 8); f(woodLt, C.x, C.y + 1, C.w, 2); f('#c8a050', C.x + C.w / 2 - 2, C.y + 8, 4, 5); f('#8a6a2a', C.x + 4, C.y, 3, C.h); f('#8a6a2a', C.x + C.w - 7, C.y, 3, C.h);
+  const C2 = SPOTS.chest; box(C2.x, C2.y + 6, C2.w, C2.h - 6, wood); box(C2.x - 1, C2.y, C2.w + 2, 8, woodLt); f('#c8a050', C2.x + C2.w / 2 - 2, C2.y + 8, 4, 5); f('#f0d080', C2.x + C2.w / 2 - 2, C2.y + 8, 2, 1); for (const bx of [C2.x + 4, C2.x + C2.w - 7]) { f('#5a5e6a', bx, C2.y, 3, C2.h); f('#8a8e9a', bx, C2.y, 1, C2.h); }
   /* rug in front of the fire */
-  ell('#8a2e26', 100, 214, 62, 14); ell('#b8483a', 100, 214, 56, 11); ell('#d8a050', 100, 214, 44, 7); ell('#b8483a', 100, 214, 38, 5);
+  ell(INK, 100, 214, 63, 15); ell('#5a2420', 100, 214, 62, 14); ell('#8a3430', 100, 214, 56, 11); ell('#b8843a', 100, 214, 44, 7); ell('#8a3430', 100, 214, 38, 5); for (let q = 44; q < 158; q += 6) f('#d8b060', q, 214 + Math.round(Math.sin(q) * 1), 2, 1);
   /* the hero by the fire, the companion (or the house cat) asleep on the rug */
   const hero = await load(Q.heroFigureUrl && Q.heroFigureUrl(S().look)); if (hero) x.drawImage(hero, HERO.x, HERO.y - 32, 24, 32);
   const pet = await load(petId ? petArt(petId) : null);
   if (pet) x.drawImage(pet, PET.x, PET.y - 32 + 6, 32, 32);
-  else { const cat = '#7a7480'; ell(cat, PET.x + 14, PET.y - 4, 9, 4); f(cat, PET.x + 4, PET.y - 9, 6, 5); f(cat, PET.x + 4, PET.y - 11, 2, 2); f(cat, PET.x + 8, PET.y - 11, 2, 2); f(mix(cat, '#000000', .3), PET.x + 18, PET.y - 3, 8, 2); }
+  else { const cat = '#6a6470'; ell(INK, PET.x + 14, PET.y - 4, 10, 5); f(INK, PET.x + 3, PET.y - 12, 8, 7); ell(cat, PET.x + 14, PET.y - 4, 9, 4); f(cat, PET.x + 4, PET.y - 9, 6, 5); f(cat, PET.x + 4, PET.y - 11, 2, 2); f(cat, PET.x + 8, PET.y - 11, 2, 2); f(lit(cat), PET.x + 9, PET.y - 7, 6, 1); f(mix(cat, '#000000', .3), PET.x + 18, PET.y - 3, 8, 2); }
   /* what you have gathered over time, and any letters waiting on the desk (envelopes with a red seal, a little stacked) */
   await drawKeep(x, P, keep);
-  for (let i = 0; i < Math.min(3, letters); i++) { const ex = LETTER.x + 2 + i * 2, ey = LETTER.y + 5 - i * 2; f('#c8b890', ex, ey, 13, 8); f('#f4ecd8', ex, ey, 12, 7); f('#d8ccb0', ex, ey, 6, 1); f('#d8ccb0', ex + 6, ey, 6, 1); f('#d8ccb0', ex + 1, ey + 1, 1, 1); f('#d8ccb0', ex + 10, ey + 1, 1, 1); f('#d8ccb0', ex + 2, ey + 2, 1, 1); f('#d8ccb0', ex + 9, ey + 2, 1, 1); f('#c8382e', ex + 5, ey + 2, 3, 3); f('#e86050', ex + 5, ey + 2, 1, 1); }
+  for (let i = 0; i < Math.min(3, letters); i++) { const ex = LETTER.x + 2 + i * 2, ey = LETTER.y + 5 - i * 2; f(INK, ex - 1, ey - 1, 14, 10); f('#c8b890', ex, ey, 13, 8); f('#e8dcc0', ex, ey, 12, 7); f('#b8ac90', ex, ey, 6, 1); f('#b8ac90', ex + 6, ey, 6, 1); f('#b8ac90', ex + 1, ey + 1, 1, 1); f('#b8ac90', ex + 10, ey + 1, 1, 1); f('#b8ac90', ex + 2, ey + 2, 1, 1); f('#b8ac90', ex + 9, ey + 2, 1, 1); f('#b8302a', ex + 5, ey + 2, 3, 3); f('#e86050', ex + 5, ey + 2, 1, 1); }
   x.restore(); return c.toDataURL();
 };
 

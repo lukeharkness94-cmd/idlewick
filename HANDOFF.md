@@ -22,6 +22,20 @@ The equipped copy is stored separately from inventory. Equipping consumes exactl
 
 Shop prices use `UI.money(amount)`: a small visible coin and formatted amount, with an accessible currency label. Do not restore "8 coins each" prose on cards. Buy/sell totals show quantity and the coin amount; rare offers and inventory selling use the same visual treatment. Locked/owned rare cards retain their visible prices.
 
+## Towns from above (28 Nov 2026, Claude Code, the pixel rebuild)
+- Owner chose top-down (three-quarter) towns, darker, in the outlined pixel style of the approved example; work and
+  combat scenes stay side-on. `js/town_scene.js` (loaded after towns.js) now owns `A.sceneFor`, `A.siteLayout` and
+  `A.stagePiece` (story.js's restoration card uses it), plus its own small material engine (`A.townPx`), the chibi
+  townsfolk (`A.townFolk`), buildings (`A.townBuilding`), trees, boats and the restoration sites drawn top-down (45
+  kinds, ruined / scaffolded stages / restored). `js/towns.js` keeps only the side-on districts and their STYLE.
+- Layout every town shares: streets on rows 150-172 and 232-254 (walkers' feet 162/244), lanes at x 100 and 522, the
+  square at 266,174 (108 × 56; the well or cistern stands there), homes in three rows (bases 146, 228, 300), the
+  back of the town above row 1 and the front below 304 in each town's own character. Site slots are `SLOTS`/`PREF`.
+- `A.sceneMeta[town]` now also has window sizes, `yards`, `pens`, `water`, `sea`, `lava`, the lighthouse `beam` and
+  `topdown: true`; town_life uses them (no sky stars in a top-down town; the Hollow keeps its motes) and darkens night
+  less (the base is painted at dusk). Hearth: same layout and hotspots in the darker palette with outlines; its window
+  shows the town at `WINDOW_VIEW`.
+
 ## Farm work scene (28 Nov 2026, Claude Code)
 - Owner: "worth looking at farming work scenes. Though only do it if it doesn't look awful." `js/farm_scene.js` puts
   the farm district (towns.js `districtFor` 'farm') at the top of the Farming page's right-hand column, with the first

@@ -315,3 +315,8 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 28 Nov 2026 (owner): "Ok, worth looking at farming work scenes. Though only do it if it doesn't look awful". Replaces
   "Farming has no work scene" (it runs on timers): the Farming page shows the farm with the hero hoeing between the real
   crops while anything grows; the strip of farm scenery above the fields is gone on desktop. Phones unchanged.
+- 28 Nov 2026 (owner, the pixel rebuild): "I only want the dark theme ... completely rebuild the game using these
+  suggestions"; the owner chose towns seen from above (three-quarter view) and work and combat scenes side-on. Replaces
+  "Towns to one scale" (side-on 640 × 360 towns with a sky, hills and two roads): towns are top-down at dusk in the
+  outlined style (js/town_scene.js), townsfolk ~12px chibis, landmarks two to three homes tall; the hearth room keeps
+  its layout in the darker palette.
