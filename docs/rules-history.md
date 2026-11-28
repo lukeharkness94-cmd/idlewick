@@ -294,3 +294,7 @@ Read HANDOFF.md for current product decisions and architecture before changing t
 - 27 Nov 2026 (owner): "the number of traps I'm using when hunting isn't changing", then chose "Wear out". Replaces
   "that tier's trap kept in the pack": a hunt's trap breaks 1 hunt in 60 to 1 in 120 (about one every 7-10 minutes of hunting; the "1 in 8" first
   offered would have broken ~75 traps an hour, as hunts take 5-9 s).
+- 27 Nov 2026 (owner): "Let's do all 15" (subtle polish, items 8-10). Adds to the Home and towns rules: the hearth fills
+  up from the save (boss trophies, named-weapon rack, museum shelf, a basket per beast) and quest givers leave letters
+  on its desk (none in the first 20 minutes, at most one per 45-90 minutes of play, three waiting, kept in the Journal);
+  met givers walk their town, and a finished restoration draws a cheering crowd for about a minute.
